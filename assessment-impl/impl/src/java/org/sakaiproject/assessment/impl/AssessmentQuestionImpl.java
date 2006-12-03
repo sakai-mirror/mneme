@@ -1,0 +1,523 @@
+/**********************************************************************************
+ * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2006 The Sakai Foundation.
+ * 
+ * Licensed under the Educational Community License, Version 1.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.opensource.org/licenses/ecl1.php
+ * 
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ *
+ **********************************************************************************/
+
+package org.sakaiproject.assessment.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.sakaiproject.assessment.api.AssessmentAnswer;
+import org.sakaiproject.assessment.api.AssessmentQuestion;
+import org.sakaiproject.assessment.api.AssessmentSection;
+import org.sakaiproject.assessment.api.Ordering;
+import org.sakaiproject.assessment.api.QuestionPart;
+import org.sakaiproject.assessment.api.QuestionType;
+
+public class AssessmentQuestionImpl implements AssessmentQuestion
+{
+	/** Ordering logic within the assessment. */
+	public class MyAssessmentOrdering implements Ordering<AssessmentQuestion>
+	{
+		protected AssessmentQuestionImpl question = null;
+
+		MyAssessmentOrdering(AssessmentQuestionImpl question)
+		{
+			this.question = question;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Boolean getIsFirst()
+		{
+			if (question.getSectionOrdering().getIsFirst())
+			{
+				if (question.getSection().getAssessment() == null) return true;
+
+				return question.getSection().getOrdering().getIsFirst();
+			}
+
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Boolean getIsLast()
+		{
+			if (question.getSectionOrdering().getIsLast())
+			{
+				if (question.getSection().getAssessment() == null) return true;
+
+				return question.getSection().getOrdering().getIsLast();
+			}
+
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public AssessmentQuestion getNext()
+		{
+			AssessmentQuestion next = question.getSectionOrdering().getNext();
+			if (next == null)
+			{
+				// go to next section, if any
+				AssessmentSection nextPart = question.getSection().getOrdering().getNext();
+				if (nextPart != null)
+				{
+					next = nextPart.getFirstQuestion();
+				}
+			}
+
+			return next;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Integer getPosition()
+		{
+			// within the section
+			Integer sectionOrdering = question.getSectionOrdering().getPosition();
+
+			if (question.getSection() == null) return sectionOrdering;
+			if (question.getSection().getAssessment() == null) return sectionOrdering;
+
+			// count the questions in each section before this section
+			int count = 0;
+			for (AssessmentSection section : question.getSection().getAssessment().getSections())
+			{
+				if (section == question.getSection()) break;
+				count += section.getNumQuestions();
+			}
+
+			return new Integer(count + sectionOrdering.intValue());
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public AssessmentQuestion getPrevious()
+		{
+			AssessmentQuestion prev = question.getSectionOrdering().getPrevious();
+			if (prev == null)
+			{
+				// go to prev section, if any
+				AssessmentSection prevPart = question.getSection().getOrdering().getPrevious();
+				if (prevPart != null)
+				{
+					prev = prevPart.getLastQuestion();
+				}
+			}
+
+			return prev;
+		}
+	}
+
+	/** Ordering logic within the section. */
+	public class MySectionOrdering implements Ordering<AssessmentQuestion>
+	{
+		protected AssessmentQuestionImpl question = null;
+
+		MySectionOrdering(AssessmentQuestionImpl question)
+		{
+			this.question = question;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Boolean getIsFirst()
+		{
+			if (question.getSection() == null) return true;
+
+			if (question.equals(question.getSection().getQuestions().get(0))) return true;
+
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Boolean getIsLast()
+		{
+			if (question.getSection() == null) return true;
+
+			if (question.equals(question.getSection().getQuestions().get(question.getSection().getQuestions().size() - 1)))
+				return true;
+
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public AssessmentQuestion getNext()
+		{
+			if (question.getSection() == null) return null;
+
+			int index = question.getSection().getQuestions().indexOf(question);
+			if (index == question.getSection().getQuestions().size() - 1) return null;
+
+			return question.getSection().getQuestions().get(index + 1);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Integer getPosition()
+		{
+			if (question.getSection() == null) return new Integer(1);
+
+			int index = question.getSection().getQuestions().indexOf(question);
+
+			return new Integer(index + 1);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public AssessmentQuestion getPrevious()
+		{
+			if (question.getSection() == null) return null;
+
+			int index = question.getSection().getQuestions().indexOf(question);
+			if (index == 0) return null;
+
+			return question.getSection().getQuestions().get(index - 1);
+		}
+	}
+
+	protected transient MyAssessmentOrdering assessmentOrdering = new MyAssessmentOrdering(this);
+
+	protected Boolean caseSensitive = null;
+
+	protected String id = null;
+
+	protected String instructions = null;
+
+	protected Boolean mutuallyExclusive = null;
+
+	protected List<QuestionPartImpl> parts = new ArrayList<QuestionPartImpl>();
+
+	protected Boolean requireRationale = null;
+
+	protected Float score = null;
+
+	/** The back pointer to the section */
+	protected transient AssessmentSectionImpl section = null;
+
+	protected transient MySectionOrdering sectionOrdering = new MySectionOrdering(this);
+
+	protected QuestionType type = null;
+
+	/**
+	 * Construct
+	 */
+	public AssessmentQuestionImpl()
+	{
+	}
+
+	/**
+	 * Construct as a deep copy of another
+	 */
+	public AssessmentQuestionImpl(AssessmentQuestionImpl other)
+	{
+		setCaseSensitive(other.getCaseSensitive());
+		initId(other.getId());
+		setInstructions(other.getInstructions());
+		setMutuallyExclusive(other.getMutuallyExclusive());
+		setParts(other.getParts());
+		setRequireRationale(other.getRequireRationale());
+		setScore(other.getScore());
+		this.section = other.section;
+		setType(other.getType());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int compareTo(Object obj)
+	{
+		if (!(obj instanceof AssessmentQuestion)) throw new ClassCastException();
+
+		// if the object are the same, say so
+		if (obj == this) return 0;
+
+		// TODO: how to compare? position?
+		int compare = getSectionOrdering().getPosition().compareTo(((AssessmentQuestion) obj).getSectionOrdering().getPosition());
+
+		return compare;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean equals(Object obj)
+	{
+		if (!(obj instanceof AssessmentQuestion)) return false;
+		if (this == obj) return true;
+		return ((AssessmentQuestion) obj).getId().equals(getId());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentAnswer getAnswer(String answerId)
+	{
+		for (QuestionPartImpl part : this.parts)
+		{
+			AssessmentAnswer answer = part.getAnswer(answerId);
+			if (answer != null) return answer;
+		}
+
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Ordering<AssessmentQuestion> getAssessmentOrdering()
+	{
+		return this.assessmentOrdering;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getCaseSensitive()
+	{
+		if (this.caseSensitive == null) return Boolean.FALSE;
+		return this.caseSensitive;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getId()
+	{
+		return this.id;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getInstructions()
+	{
+		return this.instructions;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getMutuallyExclusive()
+	{
+		if (this.mutuallyExclusive == null) return Boolean.FALSE;
+		return this.mutuallyExclusive;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public QuestionPart getPart()
+	{
+		return this.parts.get(0);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public QuestionPart getPart(String partId)
+	{
+		for (QuestionPartImpl part : this.parts)
+		{
+			if (part.getId().equals(partId)) return part;
+		}
+
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<? extends QuestionPart> getParts()
+	{
+		return this.parts;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getRequireRationale()
+	{
+		return this.requireRationale;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getScore()
+	{
+		return this.score;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentSection getSection()
+	{
+		return this.section;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Ordering<AssessmentQuestion> getSectionOrdering()
+	{
+		return this.sectionOrdering;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public QuestionType getType()
+	{
+		return this.type;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int hashCode()
+	{
+		return getId().hashCode();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setCaseSensitive(Boolean value)
+	{
+		this.caseSensitive = value;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setInstructions(String instructions)
+	{
+		this.instructions = instructions;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setMutuallyExclusive(Boolean value)
+	{
+		this.mutuallyExclusive = value;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setParts(List<? extends QuestionPart> parts)
+	{
+		this.parts.clear();
+
+		if (parts == null)
+		{
+			return;
+		}
+
+		// deep copy
+		for (QuestionPart part : parts)
+		{
+			QuestionPartImpl copy = new QuestionPartImpl((QuestionPartImpl) part);
+			this.parts.add(copy);
+			copy.initQuestion(this);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setRequireRationale(Boolean setting)
+	{
+		this.requireRationale = setting;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setScore(Float score)
+	{
+		this.score = score;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setType(QuestionType type)
+	{
+		this.type = type;
+	}
+
+	/**
+	 * Establish the id.
+	 * 
+	 * @param id
+	 *        The question id.
+	 */
+	protected void initId(String id)
+	{
+		this.id = id;
+	}
+
+	/**
+	 * Initialize the parts.
+	 * 
+	 * @param parts
+	 *        The parts - these are taken exactly, not deep copied.
+	 */
+	protected void initParts(List<QuestionPartImpl> parts)
+	{
+		this.parts = parts;
+
+		// set the back link
+		for (QuestionPartImpl part : this.parts)
+		{
+			part.initQuestion(this);
+		}
+	}
+
+	/**
+	 * Establish the link to the containing section.
+	 * 
+	 * @param section
+	 *        The containing section.
+	 */
+	protected void initSection(AssessmentSectionImpl section)
+	{
+		this.section = section;
+	}
+}

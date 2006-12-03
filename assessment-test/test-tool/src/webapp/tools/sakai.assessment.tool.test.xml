@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<registration>
+
+	<tool
+			id="sakai.assessment.tool.test"
+			title="Assessment Test"
+			description="Assessment Test"
+	>
+
+	</tool>
+
+</registration>

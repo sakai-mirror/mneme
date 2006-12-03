@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<registration>
+
+	<tool
+			id="sakai.assessment.tool.delivery"
+			title="Assessment Delivery"
+			description="Assessment Delivery"
+	>
+
+		<category name="sakai.course" />
+		<category name="sakai.project" />
+
+	</tool>
+
+</registration>
