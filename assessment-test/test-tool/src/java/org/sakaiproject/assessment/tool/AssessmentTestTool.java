@@ -266,19 +266,19 @@ public class AssessmentTestTool extends HttpServlet
 	 */
 	protected void generate()
 	{
-		// "Vivie" numbers
-		// final int contextsWithAssessments = 500;
-		// final int assessmentsPerContext = 25;
-		// final int submissionsPerStudent = 2;
-		// final int contextStudents = 50;
-		// final int itemsPerAssessment = 10;
+		 // "Vivie" numbers
+		 final int contextsWithAssessments = 500;
+		 final int assessmentsPerContext = 25;
+		 final int submissionsPerStudent = 2;
+		 final int contextStudents = 50;
+		 final int itemsPerAssessment = 10;
 
-		// small
-		final int contextsWithAssessments = 2;
-		final int assessmentsPerContext = 2;
-		final int submissionsPerStudent = 2;
-		final int contextStudents = 2;
-		final int itemsPerAssessment = 2;
+//		// small
+//		final int contextsWithAssessments = 2;
+//		final int assessmentsPerContext = 2;
+//		final int submissionsPerStudent = 2;
+//		final int contextStudents = 2;
+//		final int itemsPerAssessment = 2;
 
 		// the real context
 		String context = toolManager.getCurrentPlacement().getContext();

@@ -501,6 +501,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 			// redirect to the next destination
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
 		}
 		catch (AssessmentClosedException e)
 		{

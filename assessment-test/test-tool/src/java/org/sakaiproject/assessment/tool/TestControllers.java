@@ -47,12 +47,13 @@ public class TestControllers
 				.add(
 					ui.newSection()
 						.add(
-							ui.newSection()
-								.add(
-									ui.newSubmission()
-										.setTitle("home-generate")
-										.setStyle(Submission.Style.button))
-								));
+							ui.newText()
+								.setText("home-generate"))
+						.add(
+							ui.newSubmission()
+								.setTitle("home-generate")
+								.setStyle(Submission.Style.button))
+					);
 
 	}
 }
