@@ -56,18 +56,18 @@ public interface Submission
 	Float getAnswersAutoScore();
 
 	/**
-	 * Access the total score of the submission - the total of the auto scores from the answers and the evaluation manual scores from the answers and overall.
-	 * 
-	 * @return The total score of the submission.
-	 */
-	Float getTotalScore();
-
-	/**
 	 * Access the assessment that this is a submission to.
 	 * 
 	 * @return The assessment this is a submission to.
 	 */
 	Assessment getAssessment();
+
+	/**
+	 * Access the confirmation string for this submission.
+	 * 
+	 * @return The confirmation string for this submission.
+	 */
+	String getConfirmation();
 
 	/**
 	 * Access the time taken to make this submission, in seconds, based on the start and lastest submission dates.
@@ -110,6 +110,13 @@ public interface Submission
 	 * @return the submission date for this submission, or null if there is none.
 	 */
 	Time getSubmittedDate();
+
+	/**
+	 * Access the total score of the submission - the total of the auto scores from the answers and the evaluation manual scores from the answers and overall.
+	 * 
+	 * @return The total score of the submission.
+	 */
+	Float getTotalScore();
 
 	/**
 	 * Access the user who made this submission.

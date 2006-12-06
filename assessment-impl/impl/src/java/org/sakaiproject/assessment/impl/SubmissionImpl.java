@@ -201,6 +201,23 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getConfirmation()
+	{
+		StringBuffer rv = new StringBuffer();
+		rv.append(this.id);
+		rv.append('_');
+		rv.append(this.assessmentId);
+		rv.append('_');
+		rv.append(this.userId);
+		rv.append('_');
+		rv.append(this.submittedDate.toString());
+
+		return rv.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Long getElapsedTime()
 	{
 		// read the basic info if this property has not yet been set
@@ -578,7 +595,7 @@ public class SubmissionImpl implements Submission
 		submittedDateStatus = PropertyStatus.inited;
 		userIdStatus = PropertyStatus.inited;
 	}
-	
+
 	/**
 	 * Set my main properties to exactly match the main properties of this other
 	 * 

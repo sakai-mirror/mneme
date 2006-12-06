@@ -480,6 +480,77 @@ public class DeliveryControllers
 								.setDestination(ui.newDestination().setDestination("/list"))));
 	}
 
+	/**
+	 * The exit interface needs the following entities in the context:
+	 * submission - the completed submission
+	 * remainingSubmissions - Integer count of remaining submissions allowed to the current user for the selected assessment
+	 */
+	public static Controller constructExit(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("exit-title", ui.newTextPropertyReference().setEntityReference("assessment").setPropertyReference("title"))
+				.setHeader("exit-header")
+				.add(
+					ui.newSection()
+						.setTitle("exit-section-title", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("assessment.title"))
+						.add(
+							ui.newEntityDisplay()
+								.setEntityReference(ui.newPropertyReference().setEntityReference("submission"))
+								.setTitle("exit-display-instructions")
+								.addRow(
+									ui.newPropertyRow()
+										.setTitle("exit-display-contextTitle")
+										.setProperty(
+											ui.newContextInfoPropertyReference()
+												.setSelector(ContextInfoPropertyReference.Selector.title)
+												.setPropertyReference("assessment.context")))
+								.addRow(
+									ui.newPropertyRow()
+										.setTitle("exit-display-createdBy")
+										.setProperty(
+											ui.newUserInfoPropertyReference()
+												.setSelector(UserInfoPropertyReference.Selector.displayName)
+												.setPropertyReference("assessment.createdBy")))
+								.addRow(
+									ui.newPropertyRow()
+										.setTitle("exit-display-title")
+										.setProperty(
+											ui.newTextPropertyReference()
+												.setPropertyReference("assessment.title")))
+								.addRow(
+									ui.newPropertyRow()
+										.setTitle("exit-display-numSubmissionsRemaining")
+										.setProperty(
+											ui.newTextPropertyReference()
+												.setPropertyReference("assessment.numSubmissionsAllowed")
+												.setFormat("exit-submissions-remaining")
+												//.setMissingValues("-1")
+												.setMissingText("unlimited")
+												.addProperty(
+														ui.newTextPropertyReference()
+															.setEntityReference("remainingSubmissions"))))
+								.addRow(
+									ui.newPropertyRow()
+										.setTitle("exit-display-confirmation")
+										.setProperty(
+											ui.newPropertyReference()
+												.setPropertyReference("confirmation")))
+								.addRow(
+									ui.newPropertyRow()
+										.setTitle("exit-display-submitted")
+										.setProperty(
+											ui.newDatePropertyReference()
+												.setPropertyReference("submittedDate"))))
+						.add(
+							ui.newSection()
+								.add(
+									ui.newNavigation()
+										.setTitle("return")
+										.setStyle(Navigation.Style.button)
+										.setDestination(ui.newDestination().setDestination("/list")))));
+	}
+
 	public static class SubmissionScoreDecision implements DecisionDelegate
 	{
 		/**

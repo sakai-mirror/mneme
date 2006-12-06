@@ -87,6 +87,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** The enter interface. */
 	protected Controller uiEnter = null;
 
+	/** The exit interface. */
+	protected Controller uiExit = null;
+
 	/** The list interface. */
 	protected Controller uiList = null;
 
@@ -135,6 +138,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		uiList = DeliveryControllers.constructList(ui);
 		uiEnter = DeliveryControllers.constructEnter(ui);
 		uiQuestion = DeliveryControllers.constructQuestion(ui);
+		uiExit = DeliveryControllers.constructExit(ui);
 
 		M_log.info("init()");
 	}
@@ -212,7 +216,15 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case exit:
 			{
-				errorGet(req, res, context);
+				// we need a single parameter (sid)
+				if (parts.length != 3)
+				{
+					errorGet(req, res, context);
+				}
+				else
+				{
+					exitGet(req, res, parts[2], context);
+				}
 				break;
 			}
 			case error:
@@ -300,20 +312,29 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        The selected assessment id.
 	 * @param context
 	 *        UiContext.
-	 * @param out
-	 *        Output writer.
 	 */
 	protected void enterGet(HttpServletRequest req, HttpServletResponse res, String assessmentId, Context context)
 	{
-		// collect information: the selected assessment (id the request)
-		context.put("assessment", assessmentService.idAssessment(assessmentId));
+		Assessment assessment = assessmentService.idAssessment(assessmentId);
+		if (assessment != null)
+		{
+			// security check (submissions count / allowed check)
+			if (assessmentService.allowSubmit(assessmentId, null))
+			{
+				// collect information: the selected assessment (id the request)
+				context.put("assessment", assessmentService.idAssessment(assessmentId));
+	
+				// for this assessment, we need to know how many completed submission the current use has already made
+				Integer count = assessmentService.countRemainingSubmissions(assessmentId, null);
+				context.put("remainingSubmissions", count);
+	
+				// render
+				ui.render(uiEnter, context);
+				return;
+			}
+		}
 
-		// for this assessment, we need to know how many completed submission the current use has already made
-		Integer count = assessmentService.countRemainingSubmissions(assessmentId, null);
-		context.put("remainingSubmissions", count);
-
-		// render
-		ui.render(uiEnter, context);
+		errorGet(req, res, context);
 	}
 
 	/**
@@ -392,6 +413,42 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 */
 	protected void errorGet(HttpServletRequest req, HttpServletResponse res, Context context)
 	{
+		throw new RuntimeException("tool error");
+	}
+
+	/**
+	 * Get the UI for the exit destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submissionId
+	 *        The completed submission id.
+	 * @param context
+	 *        UiContext.
+	 */
+	protected void exitGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
+	{
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission != null)
+		{
+			// make sure this is a completed submission
+			if ((submission.getIsComplete() != null) && (submission.getIsComplete().booleanValue()))
+			{
+				context.put("submission", submission);
+
+				// for this assessment, we need to know how many completed submission the current use has already made
+				Integer count = assessmentService.countRemainingSubmissions(submission.getAssessment().getId(), null);
+				context.put("remainingSubmissions", count);
+
+				// render
+				ui.render(uiExit, context);
+				return;
+			}
+		}
+
+		errorGet(req, res, context);
 	}
 
 	/**
@@ -441,18 +498,32 @@ public class AssessmentDeliveryTool extends HttpServlet
 	{
 		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
-		context.put("submission", submission);
+		if (submission != null)
+		{
+			// TODO: security check (user matches submission user)
+			// TODO: check that the assessment is open
+			context.put("submission", submission);
 
-		// collect the question
-		AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
-		context.put("question", question);
+			// collect the question
+			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+			if (question != null)
+			{
+				context.put("question", question);
 
-		// find the answer (or have one created) for this submission / question
-		SubmissionAnswer answer = submission.getAnswer(question);
-		context.put("answer", answer);
+				// find the answer (or have one created) for this submission / question
+				SubmissionAnswer answer = submission.getAnswer(question);
+				if (answer != null)
+				{
+					context.put("answer", answer);
 
-		// render
-		ui.render(uiQuestion, context);
+					// render
+					ui.render(uiQuestion, context);
+					return;
+				}
+			}
+		}
+
+		errorGet(req, res, context);
 	}
 
 	/**
@@ -480,37 +551,46 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// find the answer (or have one created) for this submission / question
 		Submission submission = assessmentService.idSubmission(submissionId);
-		AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
-		SubmissionAnswer answer = submission.getAnswer(question);
-		context.put("answer", answer);
+		if (submission != null)
+		{
+			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+			if (question != null)
+			{
+				SubmissionAnswer answer = submission.getAnswer(question);
+				if (answer != null)
+				{
+					context.put("answer", answer);
 
-		// read form
-		String destination = ui.decode(req, context);
+					// read form
+					String destination = ui.decode(req, context);
 
-		// if we are going to exit, we must complete the submission
-		boolean complete = false;
-		if (destination.startsWith("/exit"))
-		{
-			complete = true;
-		}
+					// if we are going to exit, we must complete the submission
+					boolean complete = false;
+					if (destination.startsWith("/exit"))
+					{
+						complete = true;
+					}
 
-		// submit the user's answer
-		try
-		{
-			assessmentService.submitAnswer(answer, complete);
+					// submit the user's answer
+					try
+					{
+						assessmentService.submitAnswer(answer, complete);
 
-			// redirect to the next destination
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-			return;
-		}
-		catch (AssessmentClosedException e)
-		{
-		}
-		catch (SubmissionCompletedException e)
-		{
-		}
-		catch (AssessmentPermissionException e)
-		{
+						// redirect to the next destination
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+						return;
+					}
+					catch (AssessmentClosedException e)
+					{
+					}
+					catch (SubmissionCompletedException e)
+					{
+					}
+					catch (AssessmentPermissionException e)
+					{
+					}
+				}
+			}
 		}
 
 		// redirect to error

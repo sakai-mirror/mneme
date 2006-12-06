@@ -3,7 +3,7 @@
 <registration>
 
 	<tool
-			id="sakai.assessment.tool.delivery"
+			id="sakai.assessment.delivery"
 			title="Assessment Delivery"
 			description="Assessment Delivery"
 	>

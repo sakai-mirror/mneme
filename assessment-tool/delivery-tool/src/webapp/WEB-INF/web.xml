@@ -12,14 +12,14 @@
 
     <filter-mapping>
         <filter-name>sakai.request</filter-name>
-        <servlet-name>sakai.assessment.tool.delivery</servlet-name>
+        <servlet-name>sakai.assessment.delivery</servlet-name>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
 
     <servlet>
-        <servlet-name>sakai.assessment.tool.delivery</servlet-name>
+        <servlet-name>sakai.assessment.delivery</servlet-name>
         <servlet-class>org.sakaiproject.assessment.tool.AssessmentDeliveryTool</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>

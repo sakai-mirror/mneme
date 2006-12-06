@@ -3,7 +3,7 @@
 <registration>
 
 	<tool
-			id="sakai.assessment.tool.test"
+			id="sakai.assessment.test"
 			title="Assessment Test"
 			description="Assessment Test"
 	>

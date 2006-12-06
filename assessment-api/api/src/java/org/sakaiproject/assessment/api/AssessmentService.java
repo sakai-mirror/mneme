@@ -268,6 +268,19 @@ public interface AssessmentService
 			AssessmentCompletedException;
 
 	/**
+	 * Check if the current user is allowed to submit to the assessment.<br />
+	 * If the user has a submission in progress, this returns true.<br .>
+	 * Otherwise, the assessment must be open, the use must have submit permission, and not yet submitted the max.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @param userId
+	 *        The user taking the assessment (if null, the current user is used).
+	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
+	 */
+	Boolean allowSubmit(String assessmentId, String userId);
+
+	/**
 	 * Start an end-user in taking an assessment. If there is an incomplete submission already, re-enter that, else create a new one.
 	 * 
 	 * @param assessment

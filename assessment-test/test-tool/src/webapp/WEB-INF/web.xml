@@ -19,7 +19,7 @@
     </filter-mapping>
 
     <servlet>
-        <servlet-name>sakai.assessment.tool.test</servlet-name>
+        <servlet-name>sakai.assessment.test</servlet-name>
         <servlet-class>org.sakaiproject.assessment.tool.AssessmentTestTool</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>

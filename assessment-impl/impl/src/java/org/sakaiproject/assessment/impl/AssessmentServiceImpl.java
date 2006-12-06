@@ -1251,7 +1251,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// we need the assessment's dates, and late handling policy, and the # submissions allowed
 		// we need the user's count of completed submissions to this assessment
-		// we need to know if the user has submit permissions at all
+		// TODO: we need to know if the user has submit permissions at all
 
 		String statement = "SELECT PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING, COUNT(AG.PUBLISHEDASSESSMENTID)"
 				+ " FROM SAM_PUBLISHEDACCESSCONTROL_T PAC"
@@ -1695,7 +1695,8 @@ public class AssessmentServiceImpl implements AssessmentService
 	public Boolean allowAddAssessment(String context)
 	{
 		// check permission - cuser must have PUBLISH_PERMISSION in the context
-		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, context, getAssessmentReference(""));
+		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, context,
+				getAssessmentReference(""));
 
 		return Boolean.valueOf(ok);
 	}
@@ -1724,7 +1725,8 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (a.getCreatedBy() == null) a.setCreatedBy(userId);
 
 		// check permission - created by user must have PUBLISH_PERMISSION in the context of the assessment
-		secure(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+		secure(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, assessment.getContext(),
+				getAssessmentReference(assessment.getId()));
 
 		// persist - all in one transaction
 		Connection connection = null;
@@ -2322,12 +2324,13 @@ public class AssessmentServiceImpl implements AssessmentService
 			}
 
 			connection.commit();
-			
+
 			// event track it
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(ASSESSMENT_PUBLISH, getSubmissionReference(assessment.getId()), true));
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(ASSESSMENT_PUBLISH, getSubmissionReference(assessment
+					.getId()), true));
 
 			// cache a copy
-			cacheAssessment(new AssessmentImpl((AssessmentImpl) assessment));	
+			cacheAssessment(new AssessmentImpl((AssessmentImpl) assessment));
 		}
 		catch (Exception e)
 		{
@@ -2612,8 +2615,55 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Submission enterSubmission(Assessment a, String userId) throws AssessmentPermissionException,
-			AssessmentClosedException, AssessmentCompletedException
+	public Boolean allowSubmit(String assessmentId, String userId)
+	{
+		// if null, get the current user id
+		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
+
+		Boolean rv = Boolean.FALSE;
+		if (assessmentId != null)
+		{
+			Assessment assessment = idAssessment(assessmentId);
+			if (assessment != null)
+			{
+				// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
+				if (checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, assessment.getContext(),
+						getAssessmentReference(assessment.getId())))
+				{
+					// check that the assessment is currently open for submission
+					// if there is an in-progress submission, but it's too late now... this would catch it
+					if (isAssessmentOpen(assessment, m_timeService.newTime()))
+					{
+						// see if the user has a submission in progress
+						Submission submission = getSubmissionInProgress(assessment, userId);
+						if (submission != null)
+						{
+							rv = Boolean.TRUE;
+						}
+
+						// if not, can we make one? Check if there are remaining submissions for this user
+						// (also checks that the assessment is open)
+						else
+						{
+							Integer count = countRemainingSubmissions(assessment.getId(), userId);
+							if ((count != null) && (count.intValue() > 0))
+							{
+								rv = Boolean.TRUE;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Submission enterSubmission(Assessment a, String userId) throws AssessmentPermissionException, AssessmentClosedException,
+			AssessmentCompletedException
 	{
 		if (a == null) return null;
 
@@ -2636,23 +2686,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (!isAssessmentOpen(assessment, asOf)) throw new AssessmentClosedException();
 
 		// see if we have one already
-		String statement = "SELECT AG.ASSESSMENTGRADINGID" + " FROM SAM_ASSESSMENTGRADING_T AG"
-				+ " WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.AGENTID = ? AND AG.FORGRADE = "
-				+ m_sqlService.getBooleanConstant(false);
-		// TODO: order by id asc so we always use the lowest (oldest) if there are ever two open?
-		Object[] fields = new Object[2];
-		fields[0] = assessment.getId();
-		fields[1] = userId;
-		List results = m_sqlService.dbRead(statement, fields, null);
-		if (results.size() > 0)
+		Submission submission = getSubmissionInProgress(assessment, userId);
+		if (submission != null)
 		{
-			// we have one
-			if (results.size() > 1)
-				M_log.warn("enterSubmission: multiple incomplete submissions: " + results.size() + " aid: " + assessment.getId()
-						+ " userId: " + userId);
-
-			Submission submission = idSubmission((String) results.get(0));
-
 			// event track it (not a modify event)
 			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_REENTER, getSubmissionReference(submission.getId()),
 					false));
@@ -2669,8 +2705,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// TODO: it is possible to make too many submissions for the assessment.
 		// If this method is entered concurrently for the same user and assessment, the previous count check might fail.
-
-		Submission submission = newSubmission(assessment);
+		submission = newSubmission(assessment);
 		submission.setUserId(userId);
 		submission.setStatus(new Integer(0));
 		submission.setIsComplete(Boolean.FALSE);
@@ -3350,5 +3385,39 @@ public class AssessmentServiceImpl implements AssessmentService
 				&& ((a.getAllowLateSubmit() == null) || (!a.getAllowLateSubmit().booleanValue()))) return false;
 
 		return true;
+	}
+
+	/**
+	 * Check if the user has an open submission to this assessment, and return it if found.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param userId
+	 *        The user id.
+	 * @return The open submission for this user to this assessment, if found, or null if not.
+	 */
+	protected Submission getSubmissionInProgress(Assessment assessment, String userId)
+	{
+		Submission rv = null;
+
+		// see if we have one already
+		String statement = "SELECT AG.ASSESSMENTGRADINGID" + " FROM SAM_ASSESSMENTGRADING_T AG"
+				+ " WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.AGENTID = ? AND AG.FORGRADE = "
+				+ m_sqlService.getBooleanConstant(false);
+		// TODO: order by id asc so we always use the lowest (oldest) if there are ever two open?
+		Object[] fields = new Object[2];
+		fields[0] = assessment.getId();
+		fields[1] = userId;
+		List results = m_sqlService.dbRead(statement, fields, null);
+		if (results.size() > 0)
+		{
+			// we have one
+			if (results.size() > 1)
+				M_log.warn("getSubmissionInProgress: multiple incomplete submissions: " + results.size() + " aid: " + assessment.getId()
+						+ " userId: " + userId);
+			rv = idSubmission((String) results.get(0));
+		}
+
+		return rv;
 	}
 }
