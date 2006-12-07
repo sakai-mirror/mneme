@@ -105,11 +105,11 @@ public interface AssessmentQuestion
 	Boolean getRequireRationale();
 
 	/**
-	 * Access the score that a correct answer to this question contributes to the assessment.
+	 * Access the points that a correct answer to this question contributes to the assessment.
 	 * 
-	 * @return The question's score.
+	 * @return The question's points if correct.
 	 */
-	Float getScore();
+	Float getPoints();
 
 	/**
 	 * Access the back pointer to the section.

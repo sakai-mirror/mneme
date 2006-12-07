@@ -96,6 +96,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** The question interface. */
 	protected Controller uiQuestion = null;
 
+	/** The table of contents interface. */
+	protected Controller uiToc = null;
+
 	/**
 	 * Shutdown the servlet.
 	 */
@@ -139,6 +142,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		uiEnter = DeliveryControllers.constructEnter(ui);
 		uiQuestion = DeliveryControllers.constructQuestion(ui);
 		uiExit = DeliveryControllers.constructExit(ui);
+		uiToc = DeliveryControllers.constructToc(ui);
 
 		M_log.info("init()");
 	}
@@ -198,7 +202,15 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case toc:
 			{
-				errorGet(req, res, context);
+				// we need a single parameter (sid)
+				if (parts.length != 3)
+				{
+					errorGet(req, res, context);
+				}
+				else
+				{
+					tocGet(req, res, parts[2], context);
+				}
 				break;
 			}
 			case question:
@@ -292,6 +304,19 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				break;
 			}
+			case toc:
+			{
+				// we need a single parameter (sid)
+				if (parts.length != 3)
+				{
+					redirectError(req, res);
+				}
+				else
+				{
+					tocPost(req, res, context, parts[2]);
+				}
+				break;
+			}
 			default:
 			{
 				// redirect to error
@@ -323,11 +348,11 @@ public class AssessmentDeliveryTool extends HttpServlet
 			{
 				// collect information: the selected assessment (id the request)
 				context.put("assessment", assessmentService.idAssessment(assessmentId));
-	
+
 				// for this assessment, we need to know how many completed submission the current use has already made
 				Integer count = assessmentService.countRemainingSubmissions(assessmentId, null);
 				context.put("remainingSubmissions", count);
-	
+
 				// render
 				ui.render(uiEnter, context);
 				return;
@@ -346,8 +371,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Servlet response.
 	 * @param context
 	 *        The UiContext.
-	 * @param expected
-	 *        true if this post was expected, false if not.
+	 * @param assessmentId
+	 *        the selected assessment id.
 	 */
 	protected void enterPost(HttpServletRequest req, HttpServletResponse res, Context context, String assessmentId)
 			throws IOException
@@ -608,5 +633,83 @@ public class AssessmentDeliveryTool extends HttpServlet
 	{
 		String error = Web.returnUrl(req, "/" + Destinations.error);
 		res.sendRedirect(res.encodeRedirectURL(error));
+	}
+
+	/**
+	 * Get the UI for the toc destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submissionId
+	 *        The selected submission id.
+	 * @param context
+	 *        UiContext.
+	 */
+	protected void tocGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
+	{
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission != null)
+		{
+			// TODO: security check (user matches submission user) user may submit
+			// TODO: check that the assessment is open, submission is open
+			if (/* assessmentService.allowSubmit(assessmentId, null) */true)
+			{
+				// collect information: the selected assessment (id the request)
+				context.put("submission", submission);
+
+				// render
+				ui.render(uiToc, context);
+				return;
+			}
+		}
+
+		errorGet(req, res, context);
+	}
+
+	/**
+	 * Read the input for the toc destination, process, and redirect to the next destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param context
+	 *        The UiContext.
+	 * @param submissionId
+	 *        the selected submission id.
+	 */
+	protected void tocPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
+			throws IOException
+	{
+		// TODO: check expected
+
+		// the post is for "submit for grading".
+
+		// read form: for now, nothing to read
+		String destination = ui.decode(req, context);
+
+		Submission submission = assessmentService.idSubmission(submissionId);
+		try
+		{
+			assessmentService.completeSubmission(submission);
+
+			// if no exception, it worked! redirect
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+		catch (AssessmentClosedException e)
+		{
+		}
+		catch (SubmissionCompletedException e)
+		{
+		}
+		catch (AssessmentPermissionException e)
+		{
+		}
+
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
 	}
 }

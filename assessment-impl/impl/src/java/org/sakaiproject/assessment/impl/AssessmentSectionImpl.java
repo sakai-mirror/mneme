@@ -271,7 +271,7 @@ public class AssessmentSectionImpl implements AssessmentSection
 		float total = 0;
 		for (AssessmentQuestion question : this.questions)
 		{
-			total += question.getScore();
+			total += question.getPoints();
 		}
 
 		return new Float(total);

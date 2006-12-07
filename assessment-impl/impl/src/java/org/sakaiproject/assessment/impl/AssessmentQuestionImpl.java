@@ -249,7 +249,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 		setMutuallyExclusive(other.getMutuallyExclusive());
 		setParts(other.getParts());
 		setRequireRationale(other.getRequireRationale());
-		setScore(other.getScore());
+		setScore(other.getPoints());
 		this.section = other.section;
 		setType(other.getType());
 	}
@@ -376,7 +376,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public Float getScore()
+	public Float getPoints()
 	{
 		return this.score;
 	}

@@ -2189,7 +2189,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					fields[0] = section.getId();
 					fields[1] = question.getSectionOrdering().getPosition();
 					fields[2] = question.getType().getDbEncoding();
-					fields[3] = question.getScore();
+					fields[3] = question.getPoints();
 					fields[4] = question.getRequireRationale();
 					fields[5] = new Integer(1);
 					fields[6] = userId;
@@ -2251,7 +2251,7 @@ public class AssessmentServiceImpl implements AssessmentService
 							fields[3] = answer.getPosition();
 							fields[4] = answer.getLabel();
 							fields[5] = answer.getIsCorrect();
-							fields[6] = question.getScore();
+							fields[6] = question.getPoints();
 
 							if (answerId != null)
 							{
@@ -3060,7 +3060,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		{
 			// score the entry.
 			float score = 0;
-			if (question.getScore() > 0)
+			if (question.getPoints() > 0)
 			{
 				// trueFalse scoring
 				if (question.getType() == QuestionType.trueFalse)
@@ -3071,7 +3071,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					{
 						if (questionAnswer.getIsCorrect())
 						{
-							score = question.getScore();
+							score = question.getPoints();
 						}
 					}
 				}
@@ -3085,7 +3085,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					{
 						if (questionAnswer.getIsCorrect())
 						{
-							score = question.getScore();
+							score = question.getPoints();
 						}
 					}
 				}
@@ -3101,7 +3101,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 					if (numCorrectAnswers > 0)
 					{
-						correctScore = question.getScore() / numCorrectAnswers;
+						correctScore = question.getPoints() / numCorrectAnswers;
 						incorrectScore = -1 * correctScore;
 					}
 
@@ -3129,7 +3129,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 					if (numCorrectAnswers > 0)
 					{
-						correctScore = question.getScore() / numCorrectAnswers;
+						correctScore = question.getPoints() / numCorrectAnswers;
 					}
 
 					AssessmentAnswer questionAnswer = entry.getAssessmentAnswer();
@@ -3153,7 +3153,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 					if (numCorrectAnswers > 0)
 					{
-						correctScore = question.getScore() / numCorrectAnswers;
+						correctScore = question.getPoints() / numCorrectAnswers;
 					}
 
 					AssessmentAnswer questionAnswer = entry.getAssessmentAnswer();
@@ -3175,7 +3175,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 					if (numParts > 0)
 					{
-						correctScore = question.getScore() / numParts;
+						correctScore = question.getPoints() / numParts;
 					}
 
 					// if the entry's position within the entries matches its answer's position within the answers, it is correct

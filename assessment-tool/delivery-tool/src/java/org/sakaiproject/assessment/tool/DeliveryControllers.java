@@ -276,7 +276,7 @@ public class DeliveryControllers
 								.setTitle("question-question-title",
 									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("sectionOrdering.position"),
 									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("section.numQuestions"),
-									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("score")
+									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("points")
 									)
 								.add(
 									ui.newText()
@@ -549,6 +549,85 @@ public class DeliveryControllers
 										.setTitle("return")
 										.setStyle(Navigation.Style.button)
 										.setDestination(ui.newDestination().setDestination("/list")))));
+	}
+
+	/**
+	 * The toc interface needs the following entities in the context:
+	 * submission - the completed submission
+	 */
+	public static Controller constructToc(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("toc-title")
+				.setHeader("toc-header", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("assessment.title"))
+				.add(
+					ui.newSection()
+						.setTitle("toc-section-title",
+							ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("assessment.totalPoints"))
+						.add(
+							ui.newInstructions()
+								.setText("toc-section-alert"))
+						.add(
+							ui.newSection()
+								.add(
+									ui.newInstructions()
+										.setText("toc-key-placeholder"))
+								.add(
+									ui.newSection()
+										.setEntityReference(
+											ui.newPropertyReference()
+												.setEntityReference("submission")
+												.setPropertyReference("assessment.sections"))
+										// focus is on AssessmentSection
+										.add(
+											ui.newEntityList()
+												.setEntityReference(ui.newPropertyReference().setPropertyReference("questions"))
+												.setTitle("toc-questions-title",
+													// Part{0} - {1} - {2}/{3} Answered Questions, {4}/{5} Points
+													ui.newPropertyReference().setPropertyReference("ordering.position"),
+													ui.newPropertyReference().setPropertyReference("title"),
+													// TODO: how manu questions answers in the submission in this section?
+													ui.newPropertyReference().setPropertyReference("ordering.position"),
+													ui.newPropertyReference().setPropertyReference("numQuestions"),
+													// TODO: submission score in this section
+													ui.newPropertyReference().setPropertyReference("ordering.position"),
+													ui.newPropertyReference().setPropertyReference("totalPoints"))
+												// focus is on AssessmentQuestion
+												.addColumn(
+													ui.newPropertyColumn()
+														.setProperty("toc-question-entry",
+															// {num}. {title or instructions} ({score}/{total points})
+															ui.newPropertyReference().setPropertyReference("sectionOrdering.position"),
+															// TODO: some q types use q.instructions
+															ui.newTextPropertyReference().setPropertyReference("part.title"),
+															// TODO: submission score for this q
+															ui.newTextPropertyReference().setPropertyReference("sectionOrdering.position"),
+															ui.newTextPropertyReference().setPropertyReference("points"))
+														.setEntityNavigation(
+															ui.newEntityNavigation()
+																// destination is /question/sid/aqid
+																.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
+																	ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
+																	ui.newTextPropertyReference().setPropertyReference("id"))))
+														)
+										)
+									)
+							)
+					)
+				.add(
+					ui.newSection()
+						.add(
+							ui.newSubmission()
+								.setTitle("toc-save-submit")
+								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)
+								.setDestination(ui.newDestination().setDestination("/exit/{0}",
+									ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"))))
+						.add(
+							ui.newNavigation()
+								.setTitle("toc-save-exit")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/list"))));
 	}
 
 	public static class SubmissionScoreDecision implements DecisionDelegate
