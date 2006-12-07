@@ -2646,7 +2646,7 @@ public class AssessmentServiceImpl implements AssessmentService
 						else
 						{
 							Integer count = countRemainingSubmissions(assessment.getId(), userId);
-							if ((count != null) && (count.intValue() > 0))
+							if ((count != null) && (count.intValue() != 0))
 							{
 								rv = Boolean.TRUE;
 							}
