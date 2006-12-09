@@ -512,8 +512,8 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		String statement = "SELECT P.TITLE, AD.AGENTID, PAC.DUEDATE, PAC.FEEDBACKDATE, PE.SCORINGTYPE, P.STATUS,"
 				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, P.CREATEDBY,"
-				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.TIMELIMIT, PAC.AUTOSUBMIT, PAC.STARTDATE, PAC.RETRACTDATE, PAC.LATEHANDLING"
-				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
+				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.TIMELIMIT, PAC.AUTOSUBMIT, PAC.STARTDATE, PAC.RETRACTDATE, PAC.LATEHANDLING,"
+				+ " PF.SHOWSTUDENTQUESTIONSCORE" + " FROM SAM_PUBLISHEDASSESSMENT_T P"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
@@ -557,7 +557,6 @@ public class AssessmentServiceImpl implements AssessmentService
 					int submissionsAllowed = result.getInt(12);
 					int timeLimit = result.getInt(13);
 					int autoSubmit = result.getInt(14);
-					int allowLateSubmit = result.getInt(15);
 
 					ts = result.getTimestamp(15, m_sqlService.getCal());
 					Time releaseDate = null;
@@ -572,6 +571,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					{
 						retractDate = m_timeService.newTime(ts.getTime());
 					}
+					int allowLateSubmit = result.getInt(17);
+					boolean showStudentQuestionScore = result.getBoolean(18);
 
 					// pack it into the assessment
 					assessment.initAutoSubmit((autoSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
@@ -590,6 +591,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					assessment.initReleaseDate(releaseDate);
 					assessment.initRetractDate(retractDate);
 					assessment.initAllowLateSubmit((allowLateSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
+					assessment.initFeedbackShowQuestionScore(Boolean.valueOf(showStudentQuestionScore));
 
 					return assessment;
 				}
@@ -1895,18 +1897,22 @@ public class AssessmentServiceImpl implements AssessmentService
 					+ " SHOWSELECTIONLEVELFEEDBACK, SHOWGRADERCOMMENTS, SHOWSTATISTICS, ASSESSMENTID)"
 					+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			fields = new Object[13];
-			fields[0] = new Integer(1);
+			fields[0] = assessment.getFeedbackDelivery() == null ? new Integer(1) : assessment.getFeedbackDelivery().dbEncoding();
 			fields[1] = new Integer(1);
 			fields[2] = new Integer(1);
 			fields[3] = new Integer(1);
 			fields[4] = new Integer(1);
 			fields[5] = new Integer(1);
-			fields[6] = new Integer(1);
-			fields[7] = new Integer(1);
+			fields[6] = ((assessment.getFeedbackShowScore() == null) || (!assessment.getFeedbackShowScore().booleanValue())) ? new Integer(
+					0)
+					: new Integer(1);
+			fields[7] = ((assessment.getFeedbackShowQuestionScore() == null) || (!assessment.getFeedbackShowQuestionScore()
+					.booleanValue())) ? new Integer(0) : new Integer(1);
 			fields[8] = new Integer(1);
 			fields[9] = new Integer(1);
 			fields[10] = new Integer(1);
-			fields[11] = new Integer(1);
+			fields[11] = ((assessment.getFeedbackShowStatistics() == null) || (!assessment.getFeedbackShowStatistics()
+					.booleanValue())) ? new Integer(0) : new Integer(1);
 			fields[12] = id;
 			m_sqlService.dbWrite(connection, statement, fields);
 
@@ -3413,8 +3419,8 @@ public class AssessmentServiceImpl implements AssessmentService
 		{
 			// we have one
 			if (results.size() > 1)
-				M_log.warn("getSubmissionInProgress: multiple incomplete submissions: " + results.size() + " aid: " + assessment.getId()
-						+ " userId: " + userId);
+				M_log.warn("getSubmissionInProgress: multiple incomplete submissions: " + results.size() + " aid: "
+						+ assessment.getId() + " userId: " + userId);
 			rv = idSubmission((String) results.get(0));
 		}
 

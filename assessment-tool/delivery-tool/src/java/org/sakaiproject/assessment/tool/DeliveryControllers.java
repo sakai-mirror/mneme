@@ -22,10 +22,13 @@
 package org.sakaiproject.assessment.tool;
 
 import org.sakaiproject.assessment.api.Assessment;
+import org.sakaiproject.assessment.api.AssessmentQuestion;
+import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.MultipleSubmissionSelectionPolicy;
 import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.Submission;
+import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.sludge.api.Context;
 import org.sakaiproject.sludge.api.ContextInfoPropertyReference;
 import org.sakaiproject.sludge.api.Controller;
@@ -584,26 +587,21 @@ public class DeliveryControllers
 											ui.newEntityList()
 												.setEntityReference(ui.newPropertyReference().setPropertyReference("questions"))
 												.setTitle("toc-questions-title",
-													// Part{0} - {1} - {2}/{3} Answered Questions, {4}/{5} Points
+													// Part{0} - {1} - {2}/{3} Answered Questions, {4} Points
 													ui.newPropertyReference().setPropertyReference("ordering.position"),
 													ui.newPropertyReference().setPropertyReference("title"),
-													// TODO: how manu questions answers in the submission in this section?
-													ui.newPropertyReference().setPropertyReference("ordering.position"),
+													ui.newPropertyReference().setFormatDelegate(new QuestionsAnswered()),
 													ui.newPropertyReference().setPropertyReference("numQuestions"),
-													// TODO: submission score in this section
-													ui.newPropertyReference().setPropertyReference("ordering.position"),
-													ui.newPropertyReference().setPropertyReference("totalPoints"))
+													ui.newPropertyReference().setFormatDelegate(new SectionScore()))
 												// focus is on AssessmentQuestion
 												.addColumn(
 													ui.newPropertyColumn()
 														.setProperty("toc-question-entry",
-															// {num}. {title or instructions} ({score}/{total points})
+															// {num}. {title or instructions} ({points})
 															ui.newPropertyReference().setPropertyReference("sectionOrdering.position"),
 															// TODO: some q types use q.instructions
 															ui.newTextPropertyReference().setPropertyReference("part.title"),
-															// TODO: submission score for this q
-															ui.newTextPropertyReference().setPropertyReference("sectionOrdering.position"),
-															ui.newTextPropertyReference().setPropertyReference("points"))
+															ui.newPropertyReference().setFormatDelegate(new QuestionScore()))
 														.setEntityNavigation(
 															ui.newEntityNavigation()
 																// destination is /question/sid/aqid
@@ -860,6 +858,167 @@ public class DeliveryControllers
 			if (release != null) return release.toStringLocalFull();
 
 			return context.getMessages().getString("unknown");
+		}
+	}
+
+	/**
+	 * From a value which is an AssessmentSection, 'format' this into a value<br />
+	 * that is the number of SubmissionAnswers in the "submission" that are to questions in this section.
+	 */
+	public static class QuestionsAnswered implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{
+			if (value == null) return null;
+			if (!(value instanceof AssessmentSection)) return value.toString();
+			
+			Object o = context.get("submission");
+			if (!(o instanceof Submission)) return value.toString();
+			Submission submission = (Submission) o;
+
+			AssessmentSection section = (AssessmentSection) value;
+			
+			// count the questions answered
+			int count = 0;
+
+			// find the section's answers to AssessmentQuestions that are in this section.
+			for (SubmissionAnswer answer : submission.getAnswers())
+			{
+				if (answer.getQuestion().getSection().equals(section))
+				{
+					count++;
+				}
+			}
+
+			return Integer.toString(count);
+		}
+	}
+
+	/**
+	 * From a value which is an AssessmentSection, 'format' this into a value<br />
+	 * that is the sum of score of SubmissionAnswers in the "submission" that are to questions in this section<br />
+	 * (only if feedback is propert in this case) followed by the total points of all questions in this section.
+	 */
+	public static class SectionScore implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{
+			if (value == null) return null;
+			if (!(value instanceof AssessmentSection)) return value.toString();
+			AssessmentSection section = (AssessmentSection) value;
+			
+			Object o = context.get("submission");
+			if (!(o instanceof Submission)) return value.toString();
+			Submission submission = (Submission) o;
+			
+			Assessment assessment = submission.getAssessment();
+			if (assessment == null) return value.toString();
+
+			// use the {}/{} format if doing feedback, or just {} if not.
+			StringBuffer rv = new StringBuffer();
+
+			// if we are doing feedback just now
+			FeedbackDelivery delivery = submission.getAssessment().getFeedbackDelivery();
+			Time feedbackDate = assessment.getFeedbackDate();
+			if (	(delivery == FeedbackDelivery.IMMEDIATE)
+				||	(		(delivery == FeedbackDelivery.BY_DATE)
+						&&	((feedbackDate == null) || (!(feedbackDate.after(TimeService.newTime()))))
+					)
+				)
+			{
+				// if we are doing score feedback
+				if (assessment.getFeedbackShowScore().booleanValue())
+				{
+					// add the sum of auto-scores for any answered question in this section
+					float score = 0;
+
+					// find the section's answers to AssessmentQuestions that are in this section.
+					for (SubmissionAnswer answer : submission.getAnswers())
+					{
+						if (answer.getQuestion().getSection().equals(section))
+						{
+							score += answer.getAutoScore().floatValue();
+						}
+					}
+
+					rv.append(Float.toString(score));
+					rv.append('/');
+				}
+			}
+			
+			// add the total possible points for the section
+			rv.append(section.getTotalPoints().toString());
+			
+			return rv.toString();
+		}
+	}
+
+	/**
+	 * From a value which is an AssessmentQuestion, 'format' this into a value<br />
+	 * that is the score of the SubmissionAnswer in the "submission" that is to this question<br />
+	 * (only if feedback is propert in this case) followed by the total points of the question.
+	 */
+	public static class QuestionScore implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{
+			if (value == null) return null;
+			if (!(value instanceof AssessmentQuestion)) return value.toString();
+			AssessmentQuestion question = (AssessmentQuestion) value;
+			
+			Object o = context.get("submission");
+			if (!(o instanceof Submission)) return value.toString();
+			Submission submission = (Submission) o;
+			
+			Assessment assessment = submission.getAssessment();
+			if (assessment == null) return value.toString();
+
+			// use the {}/{} format if doing feedback, or just {} if not.
+			StringBuffer rv = new StringBuffer();
+
+			// if we are doing feedback just now
+			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
+			Time feedbackDate = assessment.getFeedbackDate();
+			if (	(delivery == FeedbackDelivery.IMMEDIATE)
+				||	(		(delivery == FeedbackDelivery.BY_DATE)
+						&&	((feedbackDate == null) || (!(feedbackDate.after(TimeService.newTime()))))
+					)
+				)
+			{
+				// if we are doing question score feedback
+				if (assessment.getFeedbackShowQuestionScore().booleanValue())
+				{
+					// the auto-scores for this answered question
+					float score = 0;
+
+					// find the section answer to this question (don't create it!)
+					for (SubmissionAnswer answer : submission.getAnswers())
+					{
+						if (answer.getQuestion().equals(question))
+						{
+							score = answer.getAutoScore().floatValue();
+							break;
+						}
+					}
+
+					rv.append(Float.toString(score));
+					rv.append('/');
+				}
+			}
+			
+			// add the possible points for the question
+			rv.append(question.getPoints().toString());
+			
+			return rv.toString();
 		}
 	}
 }

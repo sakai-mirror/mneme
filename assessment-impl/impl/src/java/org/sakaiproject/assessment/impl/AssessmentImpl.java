@@ -78,6 +78,10 @@ public class AssessmentImpl implements Assessment
 
 	protected PropertyStatus feedbackDeliveryStatus = PropertyStatus.unset;
 
+	protected Boolean feedbackShowQuestionScore = null;
+
+	protected PropertyStatus feedbackShowQuestionScoreStatus = PropertyStatus.unset;
+
 	protected Boolean feedbackShowScore = null;
 
 	protected PropertyStatus feedbackShowScoreStatus = PropertyStatus.unset;
@@ -247,6 +251,20 @@ public class AssessmentImpl implements Assessment
 		return this.feedbackDelivery;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getFeedbackShowQuestionScore()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.feedbackShowQuestionScoreStatus == PropertyStatus.unset) readMain();
+
+		return this.feedbackShowQuestionScore;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getFeedbackShowScore()
 	{
 		// read the basic info if this property has not yet been set
@@ -255,6 +273,9 @@ public class AssessmentImpl implements Assessment
 		return this.feedbackShowScore;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getFeedbackShowStatistics()
 	{
 		// read the basic info if this property has not yet been set
@@ -507,6 +528,15 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setFeedbackShowQuestionScore(Boolean value)
+	{
+		this.feedbackShowQuestionScore = value;
+		this.feedbackShowQuestionScoreStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setFeedbackShowScore(Boolean value)
 	{
 		this.feedbackShowScore = value;
@@ -687,6 +717,18 @@ public class AssessmentImpl implements Assessment
 	{
 		this.feedbackDelivery = delivery;
 		this.feedbackDeliveryStatus = PropertyStatus.inited;
+	}
+
+	/**
+	 * Initialize the feedback show question score property.
+	 * 
+	 * @param value
+	 *        The feedback show question score property.
+	 */
+	protected void initFeedbackShowQuestionScore(Boolean value)
+	{
+		this.feedbackShowQuestionScore = value;
+		this.feedbackShowQuestionScoreStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -884,6 +926,7 @@ public class AssessmentImpl implements Assessment
 		this.dueDateStatus = PropertyStatus.inited;
 		this.feedbackDateStatus = PropertyStatus.inited;
 		this.feedbackDeliveryStatus = PropertyStatus.inited;
+		this.feedbackShowQuestionScoreStatus = PropertyStatus.inited;
 		this.feedbackShowScoreStatus = PropertyStatus.inited;
 		this.feedbackShowStatisticsStatus = PropertyStatus.inited;
 		this.idStatus = PropertyStatus.inited;
@@ -923,6 +966,8 @@ public class AssessmentImpl implements Assessment
 		this.feedbackDateStatus = other.feedbackDateStatus;
 		this.feedbackDelivery = other.feedbackDelivery;
 		this.feedbackDeliveryStatus = other.feedbackDeliveryStatus;
+		this.feedbackShowQuestionScore = other.feedbackShowQuestionScore;
+		this.feedbackShowQuestionScoreStatus = other.feedbackShowQuestionScoreStatus;
 		this.feedbackShowScore = other.feedbackShowScore;
 		this.feedbackShowScoreStatus = other.feedbackShowScoreStatus;
 		this.feedbackShowStatistics = other.feedbackShowStatistics;
