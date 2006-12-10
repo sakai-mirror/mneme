@@ -159,6 +159,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 */
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException
 	{
+		// handle static resource requests
+		if (ui.dispatchResource(req, res, getServletContext())) return;
+
 		Context context = ui.prepareGet(req, res, messages, Destinations.list.toString());
 
 		// split up the tool destination: 0 parts means must "/", otherwise parts[0] = "", parts[1] = the first part, etc.

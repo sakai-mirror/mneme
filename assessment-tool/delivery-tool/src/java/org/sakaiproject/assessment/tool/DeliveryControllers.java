@@ -595,6 +595,9 @@ public class DeliveryControllers
 													ui.newPropertyReference().setFormatDelegate(new SectionScore()))
 												// focus is on AssessmentQuestion
 												.addColumn(
+													ui.newHtmlPropertyColumn()
+														.setProperty(null, ui.newPropertyReference().setFormatDelegate(new FormatQuestionDecoration())))
+												.addColumn(
 													ui.newPropertyColumn()
 														.setProperty("toc-question-entry",
 															// {num}. {title or instructions} ({points})
@@ -608,6 +611,14 @@ public class DeliveryControllers
 																.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
 																	ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
 																	ui.newTextPropertyReference().setPropertyReference("id"))))
+//														.addFootnote(
+//															ui.newFootnote()
+//																.setText("toc-key-mark-for-review")
+//																.setCriteria(ui.newDecision().setDelegate(new MarkForReviewDecision())))
+//														.addFootnote(
+//															ui.newFootnote()
+//																.setText("toc-key-unanswered")
+//																.setCriteria(ui.newDecision().setDelegate(new UnansweredDecision())))
 														)
 										)
 									)
@@ -652,11 +663,9 @@ public class DeliveryControllers
 			// if we are doing feedback just now
 			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
 			Time feedbackDate = assessment.getFeedbackDate();
-			if (	(delivery == FeedbackDelivery.IMMEDIATE)
-				||	(		(delivery == FeedbackDelivery.BY_DATE)
-						&&	((feedbackDate == null) || (!(feedbackDate.after(TimeService.newTime()))))
-					)
-				)
+			if ((delivery == FeedbackDelivery.IMMEDIATE)
+					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+							.newTime()))))))
 			{
 				// if we are doing score feedback
 				if (assessment.getFeedbackShowScore().booleanValue())
@@ -665,7 +674,7 @@ public class DeliveryControllers
 					return true;
 				}
 			}
-			
+
 			return false;
 		}
 	}
@@ -694,11 +703,9 @@ public class DeliveryControllers
 			// if we are doing feedback just now
 			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
 			Time feedbackDate = assessment.getFeedbackDate();
-			if (	(delivery == FeedbackDelivery.IMMEDIATE)
-				||	(		(delivery == FeedbackDelivery.BY_DATE)
-						&&	((feedbackDate == null) || (!(feedbackDate.after(TimeService.newTime()))))
-					)
-				)
+			if ((delivery == FeedbackDelivery.IMMEDIATE)
+					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+							.newTime()))))))
 			{
 				// if we are doing statistics feedback
 				if (assessment.getFeedbackShowStatistics().booleanValue())
@@ -707,7 +714,7 @@ public class DeliveryControllers
 					return true;
 				}
 			}
-			
+
 			return false;
 		}
 	}
@@ -736,15 +743,13 @@ public class DeliveryControllers
 			// if we are doing feedback just now
 			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
 			Time feedbackDate = assessment.getFeedbackDate();
-			if (	(delivery == FeedbackDelivery.IMMEDIATE)
-				||	(		(delivery == FeedbackDelivery.BY_DATE)
-						&&	((feedbackDate == null) || (!(feedbackDate.after(TimeService.newTime()))))
-					)
-				)
+			if ((delivery == FeedbackDelivery.IMMEDIATE)
+					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+							.newTime()))))))
 			{
 				return true;
 			}
-			
+
 			return false;
 		}
 	}
@@ -847,7 +852,7 @@ public class DeliveryControllers
 		{
 			if (value == null) return null;
 			if (!(value instanceof FeedbackDelivery)) return value.toString();
-			
+
 			FeedbackDelivery delivery = (FeedbackDelivery) value;
 
 			if (delivery == FeedbackDelivery.IMMEDIATE) return context.getMessages().getString("immediate");
@@ -874,13 +879,13 @@ public class DeliveryControllers
 		{
 			if (value == null) return null;
 			if (!(value instanceof AssessmentSection)) return value.toString();
-			
+
 			Object o = context.get("submission");
 			if (!(o instanceof Submission)) return value.toString();
 			Submission submission = (Submission) o;
 
 			AssessmentSection section = (AssessmentSection) value;
-			
+
 			// count the questions answered
 			int count = 0;
 
@@ -912,11 +917,11 @@ public class DeliveryControllers
 			if (value == null) return null;
 			if (!(value instanceof AssessmentSection)) return value.toString();
 			AssessmentSection section = (AssessmentSection) value;
-			
+
 			Object o = context.get("submission");
 			if (!(o instanceof Submission)) return value.toString();
 			Submission submission = (Submission) o;
-			
+
 			Assessment assessment = submission.getAssessment();
 			if (assessment == null) return value.toString();
 
@@ -926,11 +931,9 @@ public class DeliveryControllers
 			// if we are doing feedback just now
 			FeedbackDelivery delivery = submission.getAssessment().getFeedbackDelivery();
 			Time feedbackDate = assessment.getFeedbackDate();
-			if (	(delivery == FeedbackDelivery.IMMEDIATE)
-				||	(		(delivery == FeedbackDelivery.BY_DATE)
-						&&	((feedbackDate == null) || (!(feedbackDate.after(TimeService.newTime()))))
-					)
-				)
+			if ((delivery == FeedbackDelivery.IMMEDIATE)
+					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+							.newTime()))))))
 			{
 				// if we are doing score feedback
 				if (assessment.getFeedbackShowScore().booleanValue())
@@ -951,10 +954,10 @@ public class DeliveryControllers
 					rv.append('/');
 				}
 			}
-			
+
 			// add the total possible points for the section
 			rv.append(section.getTotalPoints().toString());
-			
+
 			return rv.toString();
 		}
 	}
@@ -974,11 +977,11 @@ public class DeliveryControllers
 			if (value == null) return null;
 			if (!(value instanceof AssessmentQuestion)) return value.toString();
 			AssessmentQuestion question = (AssessmentQuestion) value;
-			
+
 			Object o = context.get("submission");
 			if (!(o instanceof Submission)) return value.toString();
 			Submission submission = (Submission) o;
-			
+
 			Assessment assessment = submission.getAssessment();
 			if (assessment == null) return value.toString();
 
@@ -988,11 +991,9 @@ public class DeliveryControllers
 			// if we are doing feedback just now
 			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
 			Time feedbackDate = assessment.getFeedbackDate();
-			if (	(delivery == FeedbackDelivery.IMMEDIATE)
-				||	(		(delivery == FeedbackDelivery.BY_DATE)
-						&&	((feedbackDate == null) || (!(feedbackDate.after(TimeService.newTime()))))
-					)
-				)
+			if ((delivery == FeedbackDelivery.IMMEDIATE)
+					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+							.newTime()))))))
 			{
 				// if we are doing question score feedback
 				if (assessment.getFeedbackShowQuestionScore().booleanValue())
@@ -1014,11 +1015,131 @@ public class DeliveryControllers
 					rv.append('/');
 				}
 			}
-			
+
 			// add the possible points for the question
 			rv.append(question.getPoints().toString());
-			
+
 			return rv.toString();
+		}
+	}
+
+//	/**
+//	 * From a value which is an AssessmentQuestion, decide if the SubmissionAnswer in the "submission"<br />
+//	 * that is to this question has mark for review set.<br />
+//	 */
+//	public static class MarkForReviewDecision implements DecisionDelegate
+//	{
+//		/**
+//		 * {@inheritDoc}
+//		 */
+//		public boolean decide(Decision decision, Context context, Object focus)
+//		{
+//			if (focus == null) return false;
+//			if (!(focus instanceof AssessmentQuestion)) return false;
+//			AssessmentQuestion question = (AssessmentQuestion) focus;
+//
+//			Object o = context.get("submission");
+//			if (!(o instanceof Submission)) return false;
+//			Submission submission = (Submission) o;
+//
+//			Assessment assessment = submission.getAssessment();
+//			if (assessment == null) return false;
+//
+//			// search for our answer without creating it
+//			for (SubmissionAnswer answer : submission.getAnswers())
+//			{
+//				if (answer.getQuestion().equals(question))
+//				{
+//					return answer.getMarkedForReview().booleanValue();
+//				}
+//			}
+//
+//			return false;
+//		}
+//	}
+//
+//	/**
+//	 * From a value which is an AssessmentQuestion, decide if there is a SubmissionAnswer in the "submission"<br />
+//	 * that is to this question.<br />
+//	 */
+//	public static class UnansweredDecision implements DecisionDelegate
+//	{
+//		/**
+//		 * {@inheritDoc}
+//		 */
+//		public boolean decide(Decision decision, Context context, Object focus)
+//		{
+//			if (focus == null) return true;
+//			if (!(focus instanceof AssessmentQuestion)) return true;
+//			AssessmentQuestion question = (AssessmentQuestion) focus;
+//
+//			Object o = context.get("submission");
+//			if (!(o instanceof Submission)) return true;
+//			Submission submission = (Submission) o;
+//
+//			Assessment assessment = submission.getAssessment();
+//			if (assessment == null) return false;
+//
+//			// search for our answer without creating it
+//			for (SubmissionAnswer answer : submission.getAnswers())
+//			{
+//				if (answer.getQuestion().equals(question))
+//				{
+//					return false;
+//				}
+//			}
+//
+//			return true;
+//		}
+//	}
+
+	/**
+	 * From a value which is an AssessmentQuestion, 'format' this into the html for the icons<br />
+	 * for 'unanswerd' or 'mark for review' for the related submission question.
+	 */
+	public static class FormatQuestionDecoration implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{
+			if (value == null) return null;
+			if (!(value instanceof AssessmentQuestion)) return value.toString();
+			AssessmentQuestion question = (AssessmentQuestion) value;
+
+			Object o = context.get("submission");
+			if (!(o instanceof Submission)) return value.toString();
+			Submission submission = (Submission) o;
+
+			Assessment assessment = submission.getAssessment();
+			if (assessment == null) return value.toString();
+
+			// search for our answer without creating it, and if found check the mark for review setting
+			boolean found = false;
+			boolean markForReview = false;
+			for (SubmissionAnswer answer : submission.getAnswers())
+			{
+				if (answer.getQuestion().equals(question))
+				{
+					found = true;
+					markForReview = answer.getMarkedForReview().booleanValue();
+				}
+			}
+
+			// if not found, use the unanswered icon
+			if (!found)
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/unanswered.gif\" alt=\"" + context.getMessages().getString("toc-alt-unanswered") + "\" />";
+			}
+
+			// if found, and if mark for review, use that icon
+			else if (markForReview)
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/markedforreview.gif\" alt=\"" + context.getMessages().getString("toc-alt-mark-for-review") + "\" />";
+			}
+
+			return null;
 		}
 	}
 }
