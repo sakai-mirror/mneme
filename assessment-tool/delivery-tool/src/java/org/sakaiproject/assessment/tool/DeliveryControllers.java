@@ -574,8 +574,10 @@ public class DeliveryControllers
 						.add(
 							ui.newSection()
 								.add(
-									ui.newInstructions()
-										.setText("toc-key-placeholder"))
+									ui.newIconKey()
+										.setTitle("toc-key-title")
+										.addIcon("/icons/unanswered.gif", ui.newMessage().setMessage("toc-key-unanswered"))
+										.addIcon("/icons/markedforreview.gif", ui.newMessage().setMessage("toc-key-mark-for-review")))
 								.add(
 									ui.newSection()
 										.setEntityReference(
@@ -1130,13 +1132,13 @@ public class DeliveryControllers
 			// if not found, use the unanswered icon
 			if (!found)
 			{
-				return "<img src=\"" + context.get("sakai.return.url") + "/icons/unanswered.gif\" alt=\"" + context.getMessages().getString("toc-alt-unanswered") + "\" />";
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/unanswered.gif\" alt=\"" + context.getMessages().getString("toc-key-unanswered") + "\" />";
 			}
 
 			// if found, and if mark for review, use that icon
 			else if (markForReview)
 			{
-				return "<img src=\"" + context.get("sakai.return.url") + "/icons/markedforreview.gif\" alt=\"" + context.getMessages().getString("toc-alt-mark-for-review") + "\" />";
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/markedforreview.gif\" alt=\"" + context.getMessages().getString("toc-key-mark-for-review") + "\" />";
 			}
 
 			return null;
