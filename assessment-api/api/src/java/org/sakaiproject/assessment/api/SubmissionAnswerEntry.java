@@ -57,6 +57,12 @@ public interface SubmissionAnswerEntry
 	Float getAutoScore();
 
 	/**
+	 * Check if the answer is correct.
+	 * @return TRUE if correct, FALSE if not correct.
+	 */
+	Boolean getIsCorrect();
+
+	/**
 	 * Access the back pointer to the submission answer.
 	 * 
 	 * @return The back pointer to the submission answer.

@@ -84,11 +84,18 @@ public interface Assessment
 	FeedbackDelivery getFeedbackDelivery();
 
 	/**
-	 * Access the "show score" feedback setting; controls if we should show the score to the assessment taker as part of feedback.
+	 * Access the "show correct answer" feedback setting; controls if we should show the correct answer to the assessment taker as part of feedback.
 	 * 
-	 * @return TRUE if we should show the assessment score as part of feedback, FALSE if not.
+	 * @return TRUE if we should show the correct answer as part of feedback, FALSE if not.
 	 */
-	Boolean getFeedbackShowScore();
+	Boolean getFeedbackShowCorrectAnswer();
+
+	/**
+	 * Access the "show question" feedback setting; controls if we should show the question feedback to the assessment taker as part of feedback.
+	 * 
+	 * @return TRUE if we should show the question feedback as part of feedback, FALSE if not.
+	 */
+	Boolean getFeedbackShowQuestionFeedback();
 
 	/**
 	 * Access the "show question score" feedback setting; controls if we should show the individual question scores to the assessment taker as part of feedback.
@@ -96,6 +103,13 @@ public interface Assessment
 	 * @return TRUE if we should show the individual question scores as part of feedback, FALSE if not.
 	 */
 	Boolean getFeedbackShowQuestionScore();
+
+	/**
+	 * Access the "show score" feedback setting; controls if we should show the score to the assessment taker as part of feedback.
+	 * 
+	 * @return TRUE if we should show the assessment score as part of feedback, FALSE if not.
+	 */
+	Boolean getFeedbackShowScore();
 
 	/**
 	 * Access the "show statistics" feedback setting; controls if we should show statistics as part of feedback.
@@ -261,12 +275,20 @@ public interface Assessment
 	void setFeedbackDelivery(FeedbackDelivery delivery);
 
 	/**
-	 * Set the "show score" feedback setting.
+	 * Set the "show correct answer" feedback setting.
 	 * 
 	 * @param value
-	 *        The assessment's "show score" feedback setting.
+	 *        The assessment's "show correct answer" feedback setting.
 	 */
-	void setFeedbackShowScore(Boolean value);
+	void setFeedbackShowCorrectAnswer(Boolean value);
+
+	/**
+	 * Set the "show question" feedback setting.
+	 * 
+	 * @param value
+	 *        The assessment's "show question" feedback setting.
+	 */
+	void setFeedbackShowQuestionFeedback(Boolean value);
 
 	/**
 	 * Set the "show question score" feedback setting.
@@ -275,6 +297,14 @@ public interface Assessment
 	 *        The assessment's "show question score" feedback setting.
 	 */
 	void setFeedbackShowQuestionScore(Boolean value);
+
+	/**
+	 * Set the "show score" feedback setting.
+	 * 
+	 * @param value
+	 *        The assessment's "show score" feedback setting.
+	 */
+	void setFeedbackShowScore(Boolean value);
 
 	/**
 	 * Set the "show statistics" feedback setting.

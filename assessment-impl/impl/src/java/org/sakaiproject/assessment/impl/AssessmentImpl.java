@@ -78,6 +78,14 @@ public class AssessmentImpl implements Assessment
 
 	protected PropertyStatus feedbackDeliveryStatus = PropertyStatus.unset;
 
+	protected Boolean feedbackShowCorrectAnswer = null;
+
+	protected PropertyStatus feedbackShowCorrectAnswerStatus = PropertyStatus.unset;
+
+	protected Boolean feedbackShowQuestionFeedback = null;
+
+	protected PropertyStatus feedbackShowQuestionFeedbackStatus = PropertyStatus.unset;
+
 	protected Boolean feedbackShowQuestionScore = null;
 
 	protected PropertyStatus feedbackShowQuestionScoreStatus = PropertyStatus.unset;
@@ -249,6 +257,28 @@ public class AssessmentImpl implements Assessment
 		if (this.feedbackDeliveryStatus == PropertyStatus.unset) readMain();
 
 		return this.feedbackDelivery;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getFeedbackShowCorrectAnswer()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.feedbackShowCorrectAnswerStatus == PropertyStatus.unset) readMain();
+
+		return this.feedbackShowCorrectAnswer;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getFeedbackShowQuestionFeedback()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.feedbackShowQuestionFeedbackStatus == PropertyStatus.unset) readMain();
+
+		return this.feedbackShowQuestionFeedback;
 	}
 
 	/**
@@ -528,6 +558,24 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setFeedbackShowCorrectAnswer(Boolean value)
+	{
+		this.feedbackShowCorrectAnswer = value;
+		this.feedbackShowCorrectAnswerStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setFeedbackShowQuestionFeedback(Boolean value)
+	{
+		this.feedbackShowQuestionFeedback = value;
+		this.feedbackShowQuestionFeedbackStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setFeedbackShowQuestionScore(Boolean value)
 	{
 		this.feedbackShowQuestionScore = value;
@@ -717,6 +765,30 @@ public class AssessmentImpl implements Assessment
 	{
 		this.feedbackDelivery = delivery;
 		this.feedbackDeliveryStatus = PropertyStatus.inited;
+	}
+
+	/**
+	 * Initialize the feedback show correct answer property.
+	 * 
+	 * @param value
+	 *        The feedback show correct answer property.
+	 */
+	protected void initFeedbackShowCorrectAnswer(Boolean value)
+	{
+		this.feedbackShowCorrectAnswer = value;
+		this.feedbackShowCorrectAnswerStatus = PropertyStatus.inited;
+	}
+
+	/**
+	 * Initialize the feedback show question feedbac property.
+	 * 
+	 * @param value
+	 *        The feedback show question feedback property.
+	 */
+	protected void initFeedbackShowQuestionFeedback(Boolean value)
+	{
+		this.feedbackShowQuestionFeedback = value;
+		this.feedbackShowQuestionFeedbackStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -926,6 +998,8 @@ public class AssessmentImpl implements Assessment
 		this.dueDateStatus = PropertyStatus.inited;
 		this.feedbackDateStatus = PropertyStatus.inited;
 		this.feedbackDeliveryStatus = PropertyStatus.inited;
+		this.feedbackShowCorrectAnswerStatus = PropertyStatus.inited;
+		this.feedbackShowQuestionFeedbackStatus = PropertyStatus.inited;
 		this.feedbackShowQuestionScoreStatus = PropertyStatus.inited;
 		this.feedbackShowScoreStatus = PropertyStatus.inited;
 		this.feedbackShowStatisticsStatus = PropertyStatus.inited;
@@ -966,6 +1040,10 @@ public class AssessmentImpl implements Assessment
 		this.feedbackDateStatus = other.feedbackDateStatus;
 		this.feedbackDelivery = other.feedbackDelivery;
 		this.feedbackDeliveryStatus = other.feedbackDeliveryStatus;
+		this.feedbackShowCorrectAnswer = other.feedbackShowCorrectAnswer;
+		this.feedbackShowCorrectAnswerStatus = other.feedbackShowCorrectAnswerStatus;
+		this.feedbackShowQuestionFeedback = other.feedbackShowQuestionFeedback;
+		this.feedbackShowQuestionFeedbackStatus = other.feedbackShowQuestionFeedbackStatus;
 		this.feedbackShowQuestionScore = other.feedbackShowQuestionScore;
 		this.feedbackShowQuestionScoreStatus = other.feedbackShowQuestionScoreStatus;
 		this.feedbackShowScore = other.feedbackShowScore;

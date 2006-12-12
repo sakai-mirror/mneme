@@ -40,6 +40,13 @@ public interface AssessmentQuestion
 	AssessmentAnswer getAnswer(String answerId);
 
 	/**
+	 * Get the correct answer(s) formatted into an answer key.
+	 * 
+	 * @return The answer key.
+	 */
+	String getAnswerKey();
+
+	/**
 	 * Access the ordering information about this question relative to the entire assessment.
 	 * 
 	 * @return The ordering information about this question relative to the entire assessment.
@@ -98,18 +105,18 @@ public interface AssessmentQuestion
 	List<? extends QuestionPart> getParts();
 
 	/**
-	 * Access the require rationale setting for this question - if TRUE, the end-user can enter a rational with the answer.
-	 * 
-	 * @return The requuire rational setting for this question.
-	 */
-	Boolean getRequireRationale();
-
-	/**
 	 * Access the points that a correct answer to this question contributes to the assessment.
 	 * 
 	 * @return The question's points if correct.
 	 */
 	Float getPoints();
+
+	/**
+	 * Access the require rationale setting for this question - if TRUE, the end-user can enter a rational with the answer.
+	 * 
+	 * @return The requuire rational setting for this question.
+	 */
+	Boolean getRequireRationale();
 
 	/**
 	 * Access the back pointer to the section.
@@ -124,6 +131,13 @@ public interface AssessmentQuestion
 	 * @return The ordering information relative to the section.
 	 */
 	Ordering<AssessmentQuestion> getSectionOrdering();
+
+	/**
+	 * Access the question's display title - either the instructions or the single part's title, depending on type.
+	 * 
+	 * @return The question's display title.
+	 */
+	String getTitle();
 
 	/**
 	 * Access the type for this question.

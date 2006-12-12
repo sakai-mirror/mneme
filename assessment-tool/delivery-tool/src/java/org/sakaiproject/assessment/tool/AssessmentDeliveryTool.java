@@ -218,14 +218,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case question:
 			{
-				// we need two parameters (sid/qid)
-				if (parts.length != 4)
+				// we need two parameters (sid/qid) and an optional third (/feedback)
+				if ((parts.length != 4) && (parts.length != 5))
 				{
 					errorGet(req, res, context);
 				}
 				else
 				{
-					questionGet(req, res, parts[2], parts[3], context);
+					questionGet(req, res, parts[2], parts[3], (parts.length == 5) ? parts[4] : null, context);
 				}
 				break;
 			}
@@ -296,8 +296,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case question:
 			{
-				// we need two parameters (sid/qid)
-				if (parts.length != 4)
+				// we need two parameters (sid/qid), and tolerate but ignore a third (/feedback)
+				if ((parts.length != 4) && (parts.length != 5))
 				{
 					redirectError(req, res);
 				}
@@ -516,14 +516,22 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        The selected submission id.
 	 * @param questionId
 	 *        The current question id.
+	 * @param feedback
+	 *        The feedback parameter which could indicate (if it is "feedback") that the user wants feedback
 	 * @param context
 	 *        UiContext.
 	 * @param out
 	 *        Output writer.
 	 */
 	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId,
-			Context context)
+			String feedback, Context context)
 	{
+		// check on feedback
+		if ("feedback".equalsIgnoreCase(feedback))
+		{
+			context.put("feedback", Boolean.TRUE);
+		}
+
 		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)

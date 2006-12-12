@@ -22,6 +22,7 @@
 package org.sakaiproject.assessment.tool;
 
 import org.sakaiproject.assessment.api.Assessment;
+import org.sakaiproject.assessment.api.AssessmentAnswer;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.FeedbackDelivery;
@@ -40,6 +41,7 @@ import org.sakaiproject.sludge.api.UiService;
 import org.sakaiproject.sludge.api.UserInfoPropertyReference;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.cover.TimeService;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * Assessment delivery tool controllers.
@@ -246,6 +248,7 @@ public class DeliveryControllers
 	 * The question interface needs the following entities in the context:
 	 * submission - the selected Submission object
 	 * question - the current question
+	 * feedback - a non-null value to indicate that we should show feedback
 	 * 
 	 * When decoding a response, we need in the context:
 	 * answer - a collection to get the answer id(s) selected.
@@ -258,16 +261,24 @@ public class DeliveryControllers
 				.setHeader("question-header", ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.title"))
 				.add(
 					ui.newSection()
-						.add(ui.newSubmission()
-							.setTitle("question-link-feedback")
-							.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)	// TODO link, feedback in destination
-							.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
-								ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
-								ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("id"))))
-						.add(ui.newSubmission()
-							.setTitle("question-link-toc")
-							.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)	// TODO link
-							.setDestination(ui.newDestination().setDestination("/toc/{0}", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id")))))
+						.add(
+							ui.newSubmission()
+								.setTitle("question-link-feedback")
+								.setEnabled(
+									ui.newDecision()
+										.setProperty(
+											ui.newPropertyReference()
+												.setEntityReference("submission"))
+										.setDelegate(new ShowFeedbackChoiceDecision()))
+								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}/feedback",
+									ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
+									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("id"))))
+						.add(
+							ui.newSubmission()
+								.setTitle("question-link-toc")
+								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)	// TODO link
+								.setDestination(ui.newDestination().setDestination("/toc/{0}", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id")))))
 				.add(
 					ui.newSection()
 						.setTitle("question-section-title",
@@ -320,6 +331,10 @@ public class DeliveryControllers
 														.setEntityReference("question")
 														.setPropertyReference("type")))
 										.setEntityReference(ui.newPropertyReference().setEntityReference("question").setPropertyReference("part.answers"))
+										.addColumn(
+											ui.newHtmlPropertyColumn()
+												.setProperty(null, ui.newPropertyReference().setFormatDelegate(new FormatAnswerCorrectFeedback()))
+												.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")), null))
 										.addColumn(
 												ui.newSelectionColumn()
 													.setSingleSelectDecision(
@@ -374,13 +389,24 @@ public class DeliveryControllers
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.fillIn.toString(), QuestionType.numeric.toString())
 												.setProperty(
-													ui.newBooleanPropertyReference()
+													ui.newPropertyReference()
 														.setEntityReference("question")
 														.setPropertyReference("type")))
 										.setProperty(
 											ui.newPropertyReference()
 												.setEntityReference("answer")
-												.setPropertyReference("entryAnswerTexts")))
+												.setPropertyReference("entryAnswerTexts"))
+										.setCorrectMarker(
+											ui.newPropertyReference()
+												.setEntityReference("answer")
+												.setPropertyReference("entryCorrects"),
+											"/icons/correct.gif",
+											"question-correct",
+											ui.newDecision()
+												.setDelegate(new CorrectAnswerFeedbackDecision())
+												.setProperty(
+													ui.newPropertyReference()
+													.setEntityReference("question"))))
 								.add(
 									ui.newMatch()
 										.setEnabled(
@@ -394,6 +420,17 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setEntityReference("answer")
 												.setPropertyReference("entryAnswerIds"))
+										.setCorrectMarker(
+											ui.newPropertyReference()
+												.setEntityReference("answer")
+												.setPropertyReference("entryCorrects"),
+											"/icons/correct.gif",
+											"question-correct",
+											ui.newDecision()
+												.setDelegate(new CorrectAnswerFeedbackDecision())
+												.setProperty(
+													ui.newPropertyReference()
+													.setEntityReference("question")))
 										.setSelectText("question-select")
 										.setParts(
 											ui.newPropertyReference()
@@ -433,7 +470,11 @@ public class DeliveryControllers
 										.setProperty(
 											ui.newPropertyReference()
 												.setEntityReference("answer")
-												.setPropertyReference("markedForReview")))))
+												.setPropertyReference("markedForReview")))
+								.add(
+									ui.newText()
+										.setEnabled(ui.newDecision().setDelegate(new AnswerKeyDecision()).setProperty(ui.newPropertyReference().setEntityReference("question")))
+										.setText("question-answer-key", ui.newPropertyReference().setEntityReference("question").setPropertyReference("answerKey")))))
 				.add(
 					ui.newSection()
 						.add(
@@ -604,8 +645,7 @@ public class DeliveryControllers
 														.setProperty("toc-question-entry",
 															// {num}. {title or instructions} ({points})
 															ui.newPropertyReference().setPropertyReference("sectionOrdering.position"),
-															// TODO: some q types use q.instructions
-															ui.newTextPropertyReference().setPropertyReference("part.title"),
+															ui.newTextPropertyReference().setPropertyReference("title"),
 															ui.newPropertyReference().setFormatDelegate(new QuestionScore()))
 														.setEntityNavigation(
 															ui.newEntityNavigation()
@@ -613,14 +653,6 @@ public class DeliveryControllers
 																.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
 																	ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
 																	ui.newTextPropertyReference().setPropertyReference("id"))))
-//														.addFootnote(
-//															ui.newFootnote()
-//																.setText("toc-key-mark-for-review")
-//																.setCriteria(ui.newDecision().setDelegate(new MarkForReviewDecision())))
-//														.addFootnote(
-//															ui.newFootnote()
-//																.setText("toc-key-unanswered")
-//																.setCriteria(ui.newDecision().setDelegate(new UnansweredDecision())))
 														)
 										)
 									)
@@ -644,13 +676,7 @@ public class DeliveryControllers
 	public static class SubmissionScoreDecision implements DecisionDelegate
 	{
 		/**
-		 * Make the decision:
-		 * 
-		 * @param context
-		 *        The UiContext.
-		 * @param entity
-		 *        The entity to get the selector value from.
-		 * @return True if the entity has the selector and it evaluates to a boolean TRUE value, false if not.
+		 * {@inheritDoc}
 		 */
 		public boolean decide(Decision decision, Context context, Object focus)
 		{
@@ -684,13 +710,7 @@ public class DeliveryControllers
 	public static class ShowStatisticsDecision implements DecisionDelegate
 	{
 		/**
-		 * Make the decision:
-		 * 
-		 * @param context
-		 *        The UiContext.
-		 * @param entity
-		 *        The entity to get the selector value from.
-		 * @return True if the entity has the selector and it evaluates to a boolean TRUE value, false if not.
+		 * {@inheritDoc}
 		 */
 		public boolean decide(Decision decision, Context context, Object focus)
 		{
@@ -721,16 +741,49 @@ public class DeliveryControllers
 		}
 	}
 
+	/**
+	 * if we are doing feedback just now, and we have show correct answer
+	 */
+	public static class ShowFeedbackChoiceDecision implements DecisionDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean decide(Decision decision, Context context, Object focus)
+		{
+			// reference is the submission
+			if (decision.getProperty() == null) return false;
+			Object o = decision.getProperty().readObject(context, focus);
+			if (o == null) return false;
+			if (!(o instanceof Submission)) return false;
+
+			Submission submission = (Submission) o;
+			Assessment assessment = submission.getAssessment();
+			if (assessment == null) return false;
+
+			// if we are doing feedback just now
+			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
+			Time feedbackDate = assessment.getFeedbackDate();
+			// TODO: move this to service
+			if ((delivery == FeedbackDelivery.IMMEDIATE)
+					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+							.newTime()))))))
+			{
+				// if we are doing correct answer feedback
+				if ((assessment.getFeedbackShowCorrectAnswer().booleanValue()) || (assessment.getFeedbackShowQuestionFeedback().booleanValue()))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+	}
+
 	public static class ReviewDecision implements DecisionDelegate
 	{
 		/**
-		 * Make the decision:
-		 * 
-		 * @param context
-		 *        The UiContext.
-		 * @param entity
-		 *        The entity to get the selector value from.
-		 * @return True if the entity has the selector and it evaluates to a boolean TRUE value, false if not.
+		 * {@inheritDoc}
 		 */
 		public boolean decide(Decision decision, Context context, Object focus)
 		{
@@ -759,13 +812,7 @@ public class DeliveryControllers
 	public static class FeedbackDateDecision implements DecisionDelegate
 	{
 		/**
-		 * Make the decision:
-		 * 
-		 * @param context
-		 *        The UiContext.
-		 * @param entity
-		 *        The entity to get the selector value from.
-		 * @return True if the entity has the selector and it evaluates to a boolean TRUE value, false if not.
+		 * {@inheritDoc}
 		 */
 		public boolean decide(Decision decision, Context context, Object focus)
 		{
@@ -786,13 +833,7 @@ public class DeliveryControllers
 	public static class HighestGradeFootnoteDecision implements DecisionDelegate
 	{
 		/**
-		 * Make the decision:
-		 * 
-		 * @param context
-		 *        The UiContext.
-		 * @param entity
-		 *        The entity to get the selector value from.
-		 * @return True if the entity has the selector and it evaluates to a boolean TRUE value, false if not.
+		 * {@inheritDoc}
 		 */
 		public boolean decide(Decision decision, Context context, Object focus)
 		{
@@ -817,13 +858,7 @@ public class DeliveryControllers
 	public static class LatestSubmissionFootnoteDecision implements DecisionDelegate
 	{
 		/**
-		 * Make the decision:
-		 * 
-		 * @param context
-		 *        The UiContext.
-		 * @param entity
-		 *        The entity to get the selector value from.
-		 * @return True if the entity has the selector and it evaluates to a boolean TRUE value, false if not.
+		 * {@inheritDoc}
 		 */
 		public boolean decide(Decision decision, Context context, Object focus)
 		{
@@ -1025,76 +1060,6 @@ public class DeliveryControllers
 		}
 	}
 
-//	/**
-//	 * From a value which is an AssessmentQuestion, decide if the SubmissionAnswer in the "submission"<br />
-//	 * that is to this question has mark for review set.<br />
-//	 */
-//	public static class MarkForReviewDecision implements DecisionDelegate
-//	{
-//		/**
-//		 * {@inheritDoc}
-//		 */
-//		public boolean decide(Decision decision, Context context, Object focus)
-//		{
-//			if (focus == null) return false;
-//			if (!(focus instanceof AssessmentQuestion)) return false;
-//			AssessmentQuestion question = (AssessmentQuestion) focus;
-//
-//			Object o = context.get("submission");
-//			if (!(o instanceof Submission)) return false;
-//			Submission submission = (Submission) o;
-//
-//			Assessment assessment = submission.getAssessment();
-//			if (assessment == null) return false;
-//
-//			// search for our answer without creating it
-//			for (SubmissionAnswer answer : submission.getAnswers())
-//			{
-//				if (answer.getQuestion().equals(question))
-//				{
-//					return answer.getMarkedForReview().booleanValue();
-//				}
-//			}
-//
-//			return false;
-//		}
-//	}
-//
-//	/**
-//	 * From a value which is an AssessmentQuestion, decide if there is a SubmissionAnswer in the "submission"<br />
-//	 * that is to this question.<br />
-//	 */
-//	public static class UnansweredDecision implements DecisionDelegate
-//	{
-//		/**
-//		 * {@inheritDoc}
-//		 */
-//		public boolean decide(Decision decision, Context context, Object focus)
-//		{
-//			if (focus == null) return true;
-//			if (!(focus instanceof AssessmentQuestion)) return true;
-//			AssessmentQuestion question = (AssessmentQuestion) focus;
-//
-//			Object o = context.get("submission");
-//			if (!(o instanceof Submission)) return true;
-//			Submission submission = (Submission) o;
-//
-//			Assessment assessment = submission.getAssessment();
-//			if (assessment == null) return false;
-//
-//			// search for our answer without creating it
-//			for (SubmissionAnswer answer : submission.getAnswers())
-//			{
-//				if (answer.getQuestion().equals(question))
-//				{
-//					return false;
-//				}
-//			}
-//
-//			return true;
-//		}
-//	}
-
 	/**
 	 * From a value which is an AssessmentQuestion, 'format' this into the html for the icons<br />
 	 * for 'unanswerd' or 'mark for review' for the related submission question.
@@ -1142,6 +1107,156 @@ public class DeliveryControllers
 			}
 
 			return null;
+		}
+	}
+	
+	/**
+	 * From a value which is an AssessmentAnswer, 'format' this into the html for the icon if it is selected, correct, and if we are doing feedback.
+	 */
+	public static class FormatAnswerCorrectFeedback implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object focus)
+		{
+			if (focus == null) return null;
+			if (!(focus instanceof AssessmentAnswer)) return null;
+			AssessmentAnswer answer = (AssessmentAnswer) focus;
+
+			// the question this is an answer to
+			AssessmentQuestion question = answer.getPart().getQuestion();
+			if (question == null) return null;
+
+			Object o = context.get("submission");
+			if (!(o instanceof Submission)) return null;
+			Submission submission = (Submission) o;
+
+			Assessment assessment = submission.getAssessment();
+			if (assessment == null) return null;
+
+			// if we are doing feedback just now
+			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
+			Time feedbackDate = assessment.getFeedbackDate();
+			if ((delivery == FeedbackDelivery.IMMEDIATE)
+					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+							.newTime()))))))
+			{
+				// if we are doing currect answer feedback
+				if (assessment.getFeedbackShowCorrectAnswer().booleanValue())
+				{
+					// search for our answer without creating it, and if found check if it is this QuestionAnswer
+					for (SubmissionAnswer subAnswer : submission.getAnswers())
+					{
+						// is this submission answer the answer to our assessment question answer's question?
+						if (subAnswer.getQuestion().equals(question))
+						{
+							// is the submission answer selected this answer?
+							if (StringUtil.contains(subAnswer.getEntryAnswerIds(), answer.getId()))
+							{
+								// is this a correct answer
+								if (answer.getIsCorrect().booleanValue())
+								{
+									return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.gif\" alt=\""
+											+ context.getMessages().getString("toc-alt-correct-answer") + "\" />";
+								}
+							}
+						}
+					}
+				}
+			}
+
+			return null;
+		}
+	}
+
+	/**
+	 * If we are doing feedback, and doing correct answer feedback, and this question has an answer key
+	 */
+	public static class AnswerKeyDecision implements DecisionDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean decide(Decision decision, Context context, Object focus)
+		{
+			// see if we have a "feedback" set in context
+			if (context.get("feedback") == null) return false;
+
+			// property reference is to a question
+			if (decision.getProperty() == null) return false;
+			Object o = decision.getProperty().readObject(context, focus);
+			if (o == null) return false;
+			if (!(o instanceof AssessmentQuestion)) return false;
+
+			AssessmentQuestion question = (AssessmentQuestion) o;
+
+			// only for match, multi, multi correct, true/false, fillin, numeric
+			if (!((question.getType() == QuestionType.fillIn) || (question.getType() == QuestionType.matching)
+					|| (question.getType() == QuestionType.multipleChoice) || (question.getType() == QuestionType.multipleCorrect)
+					|| (question.getType() == QuestionType.numeric) || (question.getType() == QuestionType.trueFalse)))
+				return false;
+
+			Assessment assessment = question.getSection().getAssessment();
+			if (assessment == null) return false;
+
+			// if we are doing feedback just now
+			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
+			Time feedbackDate = assessment.getFeedbackDate();
+			if ((delivery == FeedbackDelivery.IMMEDIATE)
+					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+							.newTime()))))))
+			{
+				// if we are doing correct answer feedback
+				if ((assessment.getFeedbackShowCorrectAnswer().booleanValue()))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+	}
+
+	/**
+	 * If we are doing feedback, and doing correct answer feedback
+	 */
+	public static class CorrectAnswerFeedbackDecision implements DecisionDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean decide(Decision decision, Context context, Object focus)
+		{
+			// see if we have a "feedback" set in context
+			if (context.get("feedback") == null) return false;
+
+			// property reference is to a question
+			if (decision.getProperty() == null) return false;
+			Object o = decision.getProperty().readObject(context, focus);
+			if (o == null) return false;
+			if (!(o instanceof AssessmentQuestion)) return false;
+
+			AssessmentQuestion question = (AssessmentQuestion) o;
+
+			Assessment assessment = question.getSection().getAssessment();
+			if (assessment == null) return false;
+
+			// if we are doing feedback just now
+			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
+			Time feedbackDate = assessment.getFeedbackDate();
+			if ((delivery == FeedbackDelivery.IMMEDIATE)
+					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+							.newTime()))))))
+			{
+				// if we are doing correct answer feedback
+				if ((assessment.getFeedbackShowCorrectAnswer().booleanValue()))
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 	}
 }

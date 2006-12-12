@@ -180,6 +180,22 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean[] getEntryCorrects()
+	{
+		// one for each entry
+		Boolean[] rv = new Boolean[this.entries.size()];
+		int pos = 0;
+		for (SubmissionAnswerEntryImpl entry : this.entries)
+		{
+			rv[pos++] = entry.getIsCorrect();
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getMarkedForReview()
 	{
 		return this.markedForReview;
@@ -275,12 +291,9 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			needed--;
 		}
 
-		// find each answerId in the entries, or add it
-		// , and collect them in answerId order
+		// find each answerId in the entries, or add it, and collect them in answerId order
 		if (answerIds != null)
 		{
-			// SubmissionAnswerEntryImpl[] entries = new SubmissionAnswerEntryImpl[answerIds.length];
-			// int i = 0;
 			for (String aid : answerIds)
 			{
 				boolean found = false;
@@ -289,7 +302,6 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 					if ((entry.answerId != null) && (entry.answerId.equals(aid)))
 					{
 						found = true;
-						// entries[i++] = entry;
 						break;
 					}
 				}
@@ -301,16 +313,8 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 					entry.answerId = aid;
 					entry.initAutoScore(null);
 					this.entries.add(entry);
-					// entries[i++] = entry;
 				}
 			}
-
-			// // put them in order into our entries
-			// this.entries.clear();
-			// for (SubmissionAnswerEntryImpl entry : entries)
-			// {
-			// this.entries.add(entry);
-			// }
 		}
 	}
 

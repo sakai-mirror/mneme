@@ -52,13 +52,6 @@ public interface SubmissionAnswer
 	 */
 	List<? extends SubmissionAnswerEntry> getEntries();
 
-	// /**
-	// * Access the single entry for single-entry type questions (such as true/false, multiple choice).
-	// *
-	// * @return The single entry for single-entry type questions.
-	// */
-	// SubmissionAnswerEntry getEntry();
-
 	/**
 	 * Access the assessment question answer ids that are currently in the entries as an array.
 	 * 
@@ -79,6 +72,13 @@ public interface SubmissionAnswer
 	 * @return The assessment question answer texts that are currently in the entries as an array.
 	 */
 	String[] getEntryAnswerTexts();
+
+	/**
+	 * Access the correctness of each of the entry - TRUE if correct, FALSE if not, null if not answered.
+	 * 
+	 * @return The correctness of each of the entry - TRUE if correct, FALSE if not, null if not answered.
+	 */
+	Boolean[] getEntryCorrects();
 
 	/**
 	 * Access the "mark for review" setting for this answer.

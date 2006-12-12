@@ -21,9 +21,14 @@
 
 package org.sakaiproject.assessment.impl;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.AssessmentAnswer;
+import org.sakaiproject.assessment.api.AssessmentQuestion;
+import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.assessment.api.SubmissionAnswerEntry;
 
@@ -129,6 +134,49 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsCorrect()
+	{
+		AssessmentAnswer questionAnswer = getAssessmentAnswer();
+		if (questionAnswer != null)
+		{
+			AssessmentQuestion question = questionAnswer.getPart().getQuestion();
+
+			// fill-in special check
+			if (question.getType() == QuestionType.fillIn)
+			{
+				if ((questionAnswer.getText() != null) && (getAnswerText() != null))
+				{
+					if (isFillInAnswerCorrect(getAnswerText(), questionAnswer.getText(), question.getCaseSensitive().booleanValue()))
+					{
+						return Boolean.TRUE;
+					}
+				}
+			}
+
+			// numeric special check
+			else if (question.getType() == QuestionType.numeric)
+			{
+				if ((questionAnswer.getText() != null) && (getAnswerText() != null))
+				{
+					if (isNumericAnswerCorrect(getAnswerText(), questionAnswer.getText()))
+					{
+						return Boolean.TRUE;
+					}
+				}
+			}
+
+			else if (questionAnswer.getIsCorrect())
+			{
+				return Boolean.TRUE;
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public SubmissionAnswer getSubmissionAnswer()
 	{
 		return this.submissionAnswer;
@@ -159,7 +207,7 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 	public void setAssessmentAnswer(AssessmentAnswer answer)
 	{
 		this.answerId = null;
-		
+
 		if (answer != null)
 		{
 			this.answerId = answer.getId();
@@ -221,5 +269,106 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 	protected void initId(String id)
 	{
 		this.id = id;
+	}
+
+	/**
+	 * Figure out if a fill-in answer is correct.
+	 * 
+	 * @param answer
+	 *        The given answer.
+	 * @param correct
+	 *        The correct answer pattern (with option bars and wild cards).
+	 * @param caseSensitive
+	 *        if we should be case sensitive.
+	 * @return true if the answer is correct, false if not
+	 */
+	protected boolean isFillInAnswerCorrect(String answer, String correct, boolean caseSensitive)
+	{
+		// get the set of valid answers from the correct answer pattern (each one may have wild cards)
+		String[] valid = correct.split("\\|");
+		for (String test : valid)
+		{
+			// prepare the test as a regex, quoting all non-wildcards, changing the wildcard "*" into a regex ".+"
+			StringBuffer regex = new StringBuffer();
+			String[] parts = test.replaceAll("\\*", "|*|").split("\\|");
+			for (String part : parts)
+			{
+				if ("*".equals(part))
+				{
+					regex.append(".+");
+				}
+				else
+				{
+					regex.append(Pattern.quote(part));
+				}
+			}
+			Pattern p = Pattern.compile(regex.toString(), ((!caseSensitive) ? Pattern.CASE_INSENSITIVE : 0));
+
+			// test
+			Matcher m = p.matcher(answer);
+			boolean result = m.matches();
+
+			if (result) return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Figure out if a fill-in numeric answer is correct.
+	 * 
+	 * @param answer
+	 *        The given answer.
+	 * @param correct
+	 *        The correct answer pattern (with option bars).
+	 * @return true if the answer is correct, false if not
+	 */
+	protected boolean isNumericAnswerCorrect(String answer, String correct)
+	{
+		try
+		{
+			// allow dot or comma for decimal point
+			answer = answer.replace(',', '.');
+			correct = correct.replace(',', '.');
+
+			// answer needs to become a float (allow dot or comma for decimal point)
+			float answerValue = Float.parseFloat(answer);
+
+			// form the range of correct answers
+			Float[] range = new Float[2];
+
+			// if there's a bar in the correct pattern, split and use the first two as the range
+			if (correct.indexOf("|") != -1)
+			{
+				String[] parts = correct.split("\\|");
+				range[0] = Float.parseFloat(parts[0]);
+				range[1] = Float.parseFloat(parts[1]);
+
+				// make sure [0] <= [1]
+				if (range[0].floatValue() > range[1].floatValue())
+				{
+					Float hold = range[0];
+					range[0] = range[1];
+					range[1] = hold;
+				}
+			}
+
+			// otherwise use the single value for both sides of the range
+			else
+			{
+				range[0] = range[1] = Float.parseFloat(correct);
+			}
+
+			// test
+			if ((answerValue >= range[0].floatValue()) && (answerValue <= range[1].floatValue()))
+			{
+				return true;
+			}
+		}
+		catch (NumberFormatException e)
+		{
+		}
+
+		return false;
 	}
 }

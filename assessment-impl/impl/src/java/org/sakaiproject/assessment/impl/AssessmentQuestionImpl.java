@@ -297,6 +297,94 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getAnswerKey()
+	{
+		// fill-in, numeric, true/false
+		if ((this.type == QuestionType.fillIn) || (this.type == QuestionType.numeric) || (this.type == QuestionType.trueFalse))
+		{
+			// concat the various answer texts
+			StringBuffer rv = new StringBuffer();
+
+			// get each part's correct answer
+			for (QuestionPart part : this.parts)
+			{
+				List<AssessmentAnswer> correct = part.getCorrectAnswers();
+				if (correct != null)
+				{
+					for (AssessmentAnswer answer : correct)
+					{
+						rv.append(answer.getText() + ", ");
+					}
+				}
+			}
+
+			// remove the last two characters (the trailing ", "
+			rv.setLength(rv.length()-2);
+
+			return rv.toString();
+		}
+
+		// match
+		if (this.type == QuestionType.matching)
+		{
+			// form the matches: the position:label
+			StringBuffer rv = new StringBuffer();
+
+			// get each part's correct answer label
+			int pos = 1;
+			for (QuestionPart part : this.parts)
+			{
+				rv.append(Integer.toString(pos++));
+				rv.append(':');
+
+				List<AssessmentAnswer> correct = part.getCorrectAnswers();
+				if (correct != null)
+				{
+					for (AssessmentAnswer answer : correct)
+					{
+						rv.append(answer.getLabel());
+					}
+				}
+				rv.append(", ");
+			}
+
+			// remove the last two characters (the trailing ", "
+			rv.setLength(rv.length()-2);
+
+			return rv.toString();
+		}
+
+		// multi choice
+		if ((this.type == QuestionType.multipleChoice) || (this.type == QuestionType.multipleCorrect))
+		{
+			// concat the various answer labels
+			StringBuffer rv = new StringBuffer();
+
+			// get each part's correct answer
+			for (QuestionPart part : this.parts)
+			{
+				List<AssessmentAnswer> correct = part.getCorrectAnswers();
+				if (correct != null)
+				{
+					for (AssessmentAnswer answer : correct)
+					{
+						rv.append(answer.getLabel() + ", ");
+					}
+				}
+			}
+
+			// remove the last two characters (the trailing ", "
+			rv.setLength(rv.length()-2);
+
+			return rv.toString();
+		}
+
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Ordering<AssessmentQuestion> getAssessmentOrdering()
 	{
 		return this.assessmentOrdering;
@@ -368,17 +456,17 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getRequireRationale()
+	public Float getPoints()
 	{
-		return this.requireRationale;
+		return this.score;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Float getPoints()
+	public Boolean getRequireRationale()
 	{
-		return this.score;
+		return this.requireRationale;
 	}
 
 	/**
@@ -395,6 +483,38 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	public Ordering<AssessmentQuestion> getSectionOrdering()
 	{
 		return this.sectionOrdering;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getTitle()
+	{
+		// matching type uses instructions, all others use single part's title
+		// fill-in and numeric replace {} with ____
+		if (getType() == QuestionType.matching)
+		{
+			return getInstructions();
+		}
+
+		// otherwise we use the single part's title
+		QuestionPart part = getPart();
+		if (part != null)
+		{
+			String title = part.getTitle();
+			if (title != null)
+			{
+				// numeric and matching's replacement
+				if ((getType() == QuestionType.fillIn) || (getType() == QuestionType.numeric))
+				{
+					title = title.replaceAll("\\{\\}", "____");
+				}
+			}
+
+			return title;
+		}
+
+		return null;
 	}
 
 	/**

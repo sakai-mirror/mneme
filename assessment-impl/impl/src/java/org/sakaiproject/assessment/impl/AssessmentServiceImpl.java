@@ -513,7 +513,8 @@ public class AssessmentServiceImpl implements AssessmentService
 		String statement = "SELECT P.TITLE, AD.AGENTID, PAC.DUEDATE, PAC.FEEDBACKDATE, PE.SCORINGTYPE, P.STATUS,"
 				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, P.CREATEDBY,"
 				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.TIMELIMIT, PAC.AUTOSUBMIT, PAC.STARTDATE, PAC.RETRACTDATE, PAC.LATEHANDLING,"
-				+ " PF.SHOWSTUDENTQUESTIONSCORE" + " FROM SAM_PUBLISHEDASSESSMENT_T P"
+				+ " PF.SHOWSTUDENTQUESTIONSCORE, PF.SHOWCORRECTRESPONSE, PF.SHOWQUESTIONLEVELFEEDBACK"
+				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
@@ -573,6 +574,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					}
 					int allowLateSubmit = result.getInt(17);
 					boolean showStudentQuestionScore = result.getBoolean(18);
+					boolean showCorrectAnswer = result.getBoolean(19);
+					boolean showQuestionFeedback = result.getBoolean(20);
 
 					// pack it into the assessment
 					assessment.initAutoSubmit((autoSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
@@ -592,6 +595,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					assessment.initRetractDate(retractDate);
 					assessment.initAllowLateSubmit((allowLateSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
 					assessment.initFeedbackShowQuestionScore(Boolean.valueOf(showStudentQuestionScore));
+					assessment.initFeedbackShowCorrectAnswer(Boolean.valueOf(showCorrectAnswer));
+					assessment.initFeedbackShowQuestionFeedback(Boolean.valueOf(showQuestionFeedback));
 
 					return assessment;
 				}
@@ -1902,13 +1907,15 @@ public class AssessmentServiceImpl implements AssessmentService
 			fields[2] = new Integer(1);
 			fields[3] = new Integer(1);
 			fields[4] = new Integer(1);
-			fields[5] = new Integer(1);
+			fields[5] = ((assessment.getFeedbackShowCorrectAnswer() == null) || (!assessment.getFeedbackShowCorrectAnswer()
+					.booleanValue())) ? new Integer(0) : new Integer(1);
 			fields[6] = ((assessment.getFeedbackShowScore() == null) || (!assessment.getFeedbackShowScore().booleanValue())) ? new Integer(
 					0)
 					: new Integer(1);
 			fields[7] = ((assessment.getFeedbackShowQuestionScore() == null) || (!assessment.getFeedbackShowQuestionScore()
 					.booleanValue())) ? new Integer(0) : new Integer(1);
-			fields[8] = new Integer(1);
+			fields[8] = ((assessment.getFeedbackShowQuestionFeedback() == null) || (!assessment.getFeedbackShowQuestionFeedback()
+					.booleanValue())) ? new Integer(0) : new Integer(1);
 			fields[9] = new Integer(1);
 			fields[10] = new Integer(1);
 			fields[11] = ((assessment.getFeedbackShowStatistics() == null) || (!assessment.getFeedbackShowStatistics()
@@ -3072,13 +3079,9 @@ public class AssessmentServiceImpl implements AssessmentService
 				if (question.getType() == QuestionType.trueFalse)
 				{
 					// question score if correct, 0 if not
-					AssessmentAnswer questionAnswer = entry.getAssessmentAnswer();
-					if (questionAnswer != null)
+					if (entry.getIsCorrect().booleanValue())
 					{
-						if (questionAnswer.getIsCorrect())
-						{
-							score = question.getPoints();
-						}
+						score = question.getPoints();
 					}
 				}
 
@@ -3086,13 +3089,9 @@ public class AssessmentServiceImpl implements AssessmentService
 				else if (question.getType() == QuestionType.multipleChoice)
 				{
 					// question score if correct, 0 if not
-					AssessmentAnswer questionAnswer = entry.getAssessmentAnswer();
-					if (questionAnswer != null)
+					if (entry.getIsCorrect().booleanValue())
 					{
-						if (questionAnswer.getIsCorrect())
-						{
-							score = question.getPoints();
-						}
+						score = question.getPoints();
 					}
 				}
 
@@ -3111,17 +3110,13 @@ public class AssessmentServiceImpl implements AssessmentService
 						incorrectScore = -1 * correctScore;
 					}
 
-					AssessmentAnswer questionAnswer = entry.getAssessmentAnswer();
-					if (questionAnswer != null)
+					if (entry.getIsCorrect().booleanValue())
 					{
-						if (questionAnswer.getIsCorrect())
-						{
-							score = correctScore;
-						}
-						else
-						{
-							score = incorrectScore;
-						}
+						score = correctScore;
+					}
+					else
+					{
+						score = incorrectScore;
 					}
 				}
 
@@ -3138,14 +3133,9 @@ public class AssessmentServiceImpl implements AssessmentService
 						correctScore = question.getPoints() / numCorrectAnswers;
 					}
 
-					AssessmentAnswer questionAnswer = entry.getAssessmentAnswer();
-					if ((questionAnswer != null) && (questionAnswer.getText() != null) && (entry.getAnswerText() != null))
+					if (entry.getIsCorrect().booleanValue())
 					{
-						if (isFillInAnswerCorrect(entry.getAnswerText(), questionAnswer.getText(), question.getCaseSensitive()
-								.booleanValue()))
-						{
-							score = correctScore;
-						}
+						score = correctScore;
 					}
 				}
 
@@ -3162,13 +3152,9 @@ public class AssessmentServiceImpl implements AssessmentService
 						correctScore = question.getPoints() / numCorrectAnswers;
 					}
 
-					AssessmentAnswer questionAnswer = entry.getAssessmentAnswer();
-					if ((questionAnswer != null) && (questionAnswer.getText() != null) && (entry.getAnswerText() != null))
+					if (entry.getIsCorrect().booleanValue())
 					{
-						if (isNumericAnswerCorrect(entry.getAnswerText(), questionAnswer.getText()))
-						{
-							score = correctScore;
-						}
+						score = correctScore;
 					}
 				}
 
@@ -3184,14 +3170,9 @@ public class AssessmentServiceImpl implements AssessmentService
 						correctScore = question.getPoints() / numParts;
 					}
 
-					// if the entry's position within the entries matches its answer's position within the answers, it is correct
-					AssessmentAnswer questionAnswer = entry.getAssessmentAnswer();
-					if (questionAnswer != null)
+					if (entry.getIsCorrect().booleanValue())
 					{
-						if (questionAnswer.getIsCorrect().booleanValue())
-						{
-							score = correctScore;
-						}
+						score = correctScore;
 					}
 				}
 			}
@@ -3266,107 +3247,6 @@ public class AssessmentServiceImpl implements AssessmentService
 				}
 			}
 		}
-	}
-
-	/**
-	 * Figure out if a fill-in answer is correct.
-	 * 
-	 * @param answer
-	 *        The given answer.
-	 * @param correct
-	 *        The correct answer pattern (with option bars and wild cards).
-	 * @param caseSensitive
-	 *        if we should be case sensitive.
-	 * @return true if the answer is correct, false if not
-	 */
-	protected boolean isFillInAnswerCorrect(String answer, String correct, boolean caseSensitive)
-	{
-		// get the set of valid answers from the correct answer pattern (each one may have wild cards)
-		String[] valid = correct.split("\\|");
-		for (String test : valid)
-		{
-			// prepare the test as a regex, quoting all non-wildcards, changing the wildcard "*" into a regex ".+"
-			StringBuffer regex = new StringBuffer();
-			String[] parts = test.replaceAll("\\*", "|*|").split("\\|");
-			for (String part : parts)
-			{
-				if ("*".equals(part))
-				{
-					regex.append(".+");
-				}
-				else
-				{
-					regex.append(Pattern.quote(part));
-				}
-			}
-			Pattern p = Pattern.compile(regex.toString(), ((!caseSensitive) ? Pattern.CASE_INSENSITIVE : 0));
-
-			// test
-			Matcher m = p.matcher(answer);
-			boolean result = m.matches();
-
-			if (result) return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Figure out if a fill-in numeric answer is correct.
-	 * 
-	 * @param answer
-	 *        The given answer.
-	 * @param correct
-	 *        The correct answer pattern (with option bars).
-	 * @return true if the answer is correct, false if not
-	 */
-	protected boolean isNumericAnswerCorrect(String answer, String correct)
-	{
-		try
-		{
-			// allow dot or comma for decimal point
-			answer = answer.replace(',', '.');
-			correct = correct.replace(',', '.');
-
-			// answer needs to become a float (allow dot or comma for decimal point)
-			float answerValue = Float.parseFloat(answer);
-
-			// form the range of correct answers
-			Float[] range = new Float[2];
-
-			// if there's a bar in the correct pattern, split and use the first two as the range
-			if (correct.indexOf("|") != -1)
-			{
-				String[] parts = correct.split("\\|");
-				range[0] = Float.parseFloat(parts[0]);
-				range[1] = Float.parseFloat(parts[1]);
-
-				// make sure [0] <= [1]
-				if (range[0].floatValue() > range[1].floatValue())
-				{
-					Float hold = range[0];
-					range[0] = range[1];
-					range[1] = hold;
-				}
-			}
-
-			// otherwise use the single value for both sides of the range
-			else
-			{
-				range[0] = range[1] = Float.parseFloat(correct);
-			}
-
-			// test
-			if ((answerValue >= range[0].floatValue()) && (answerValue <= range[1].floatValue()))
-			{
-				return true;
-			}
-		}
-		catch (NumberFormatException e)
-		{
-		}
-
-		return false;
 	}
 
 	/**
