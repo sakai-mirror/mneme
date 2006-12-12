@@ -525,7 +525,8 @@ public class AssessmentTestTool extends HttpServlet
 
 			answer.setSubmittedDate(timeService.newTime());
 
-			SubmissionAnswerEntry entry = assessmentService.newEntry(answer);
+			// setQuestion establised an entry per question part, which is one for us.
+			SubmissionAnswerEntry entry = answer.getEntries().get(0);
 
 			// pick the answer (assume true/false and two possible answers)
 			if (Math.random() > 0.5)

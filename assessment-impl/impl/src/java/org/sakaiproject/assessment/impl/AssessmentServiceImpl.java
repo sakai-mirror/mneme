@@ -29,8 +29,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1070,11 +1068,13 @@ public class AssessmentServiceImpl implements AssessmentService
 		// mark the submission as inited for the answers, so the methods we are about to call don't try to re-read the answers
 		submission.answersStatus = SubmissionImpl.PropertyStatus.inited;
 
-		// read the answers
-		String statement = "SELECT I.ITEMGRADINGID, I.SUBMITTEDDATE, I.PUBLISHEDANSWERID, I.RATIONALE, I.ANSWERTEXT, I.REVIEW, I.PUBLISHEDITEMID, I.AUTOSCORE"
+		// read the answers.
+		// The PUBLISHEDITEMTEXTID points to a question part, and we want to read the entiries in question part sequence order,
+		// so we join to the SAM_PUBLISHEDITEMTEXT_T (i.e. question parts) table and order by the sequence there
+		String statement = "SELECT I.ITEMGRADINGID, I.SUBMITTEDDATE, I.PUBLISHEDANSWERID, I.RATIONALE, I.ANSWERTEXT, I.REVIEW, I.PUBLISHEDITEMID, I.AUTOSCORE, I.PUBLISHEDITEMTEXTID"
 				+ " FROM SAM_ITEMGRADING_T I"
-				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWER_T A ON I.PUBLISHEDANSWERID = A.ANSWERID"
-				+ " WHERE ASSESSMENTGRADINGID = ?" + " ORDER BY A.SEQUENCE ASC";
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMTEXT_T PIT ON I.PUBLISHEDITEMTEXTID = PIT.ITEMTEXTID"
+				+ " WHERE I.ASSESSMENTGRADINGID = ?" + " ORDER BY PIT.SEQUENCE ASC";
 		Object[] fields = new Object[1];
 		fields[0] = submission.getId();
 
@@ -1099,6 +1099,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					boolean markedForReview = result.getBoolean(6);
 					String questionId = result.getString(7);
 					float autoScore = result.getFloat(8);
+					String questionPartId = result.getString(9);
 
 					// do we have the answer to this question yet?
 					SubmissionAnswerImpl answer = submission.findAnswer(questionId);
@@ -1118,7 +1119,8 @@ public class AssessmentServiceImpl implements AssessmentService
 
 					// add an entry to the answer
 					SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
-					entry.setAssessmentAnswerId(answerId);
+					entry.initQuestionPartId(questionPartId);
+					entry.initAssessmentAnswerId(answerId);
 					entry.setAnswerText(answerText);
 					entry.initId(id);
 					entry.initAutoScore(new Float(autoScore));
@@ -2412,18 +2414,6 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public SubmissionAnswerEntry newEntry(SubmissionAnswer answer)
-	{
-		SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
-		entry.initAnswer((SubmissionAnswerImpl) answer);
-		((SubmissionAnswerImpl) answer).entries.add(entry);
-
-		return entry;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void addSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException,
 			AssessmentCompletedException
 	{
@@ -2551,7 +2541,7 @@ public class AssessmentServiceImpl implements AssessmentService
 							.getQuestion().getPart().getId();
 					fields[3] = s.getUserId();
 					fields[4] = answer.getSubmittedDate();
-					fields[5] = entry.getAssessmentAnswerId();
+					fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
 					fields[6] = answer.getRationale();
 					fields[7] = entry.getAnswerText();
 					fields[8] = entry.getAutoScore();
@@ -2802,12 +2792,10 @@ public class AssessmentServiceImpl implements AssessmentService
 					Object[] fields = new Object[(answerId == null) ? 10 : 11];
 					fields[0] = answer.getSubmission().getId();
 					fields[1] = answer.getQuestion().getId();
-					// if the entry's assessment answer is null, use the single part id
-					fields[2] = (entry.getAssessmentAnswer() != null) ? entry.getAssessmentAnswer().getPart().getId() : answer
-							.getQuestion().getPart().getId();
+					fields[2] = entry.getQuestionPart().getId();
 					fields[3] = answer.getSubmission().getUserId();
 					fields[4] = answer.getSubmittedDate();
-					fields[5] = entry.getAssessmentAnswerId();
+					fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
 					fields[6] = answer.getRationale();
 					fields[7] = entry.getAnswerText();
 					fields[8] = entry.getAutoScore();
@@ -2847,10 +2835,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					// TODO: for added security, add to WHERE: AND ASSESSMENTGRADINGID = ?answer.getSubmissionId() AND PUBLISHEDITEMID = ?answer.getQuestionId() -ggolden
 					Object[] fields = new Object[7];
 					fields[0] = answer.getSubmittedDate();
-					fields[1] = entry.getAssessmentAnswerId();
-					// if the entry's assessment answer is null, use the single part id
-					fields[2] = (entry.getAssessmentAnswer() != null) ? entry.getAssessmentAnswer().getPart().getId() : answer
-							.getQuestion().getPart().getId();
+					fields[1] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
+					fields[2] = entry.getQuestionPart().getId();
 					fields[3] = answer.getRationale();
 					fields[4] = entry.getAnswerText();
 					fields[5] = entry.getAutoScore();
@@ -2864,24 +2850,24 @@ public class AssessmentServiceImpl implements AssessmentService
 				}
 			}
 
-			// for any entries unused that have an id, delete them
-			for (SubmissionAnswerEntryImpl entry : ((SubmissionAnswerImpl) answer).unusedEntries)
-			{
-				if (entry.getId() != null)
-				{
-					String statement = "DELETE FROM SAM_ITEMGRADING_T WHERE ITEMGRADINGID = ?";
-					Object[] fields = new Object[1];
-					fields[0] = entry.getId();
-					if (!m_sqlService.dbWrite(connection, statement, fields))
-					{
-						// TODO: better exception
-						throw new Exception("submitAnswer: dbWrite Failed");
-					}
-				}
-			}
-
-			// clear the unused now we have deleted what we must
-			((SubmissionAnswerImpl) answer).unusedEntries.clear();
+//			// for any entries unused that have an id, delete them
+//			for (SubmissionAnswerEntryImpl entry : ((SubmissionAnswerImpl) answer).unusedEntries)
+//			{
+//				if (entry.getId() != null)
+//				{
+//					String statement = "DELETE FROM SAM_ITEMGRADING_T WHERE ITEMGRADINGID = ?";
+//					Object[] fields = new Object[1];
+//					fields[0] = entry.getId();
+//					if (!m_sqlService.dbWrite(connection, statement, fields))
+//					{
+//						// TODO: better exception
+//						throw new Exception("submitAnswer: dbWrite Failed");
+//					}
+//				}
+//			}
+//
+//			// clear the unused now we have deleted what we must
+//			((SubmissionAnswerImpl) answer).unusedEntries.clear();
 
 			// if complete, update the STATUS to 1 and the FORGRADE to TRUE... always update the date
 			// Note: for Samigo compat., we need to update the scores in the SAM_ASSESSMENTGRADING_T based on the sums of the item scores

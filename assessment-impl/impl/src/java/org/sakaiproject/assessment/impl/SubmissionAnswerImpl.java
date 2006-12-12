@@ -22,13 +22,12 @@
 package org.sakaiproject.assessment.impl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.sakaiproject.assessment.api.AssessmentAnswer;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
+import org.sakaiproject.assessment.api.QuestionPart;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.assessment.api.SubmissionAnswerEntry;
@@ -40,6 +39,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(SubmissionAnswerImpl.class);
 
+	/** Entries are ordered to match the assessment question part order, and there's one entry per part. */
 	protected List<SubmissionAnswerEntryImpl> entries = new ArrayList<SubmissionAnswerEntryImpl>();
 
 	protected Boolean markedForReview = Boolean.FALSE;
@@ -54,9 +54,6 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 
 	protected Time submittedDate = null;
 
-	/** These entries are allocated but not currently in use. */
-	protected List<SubmissionAnswerEntryImpl> unusedEntries = new ArrayList<SubmissionAnswerEntryImpl>();
-
 	/**
 	 * Construct
 	 */
@@ -69,13 +66,12 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public SubmissionAnswerImpl(SubmissionAnswerImpl other)
 	{
+		this.submission = other.submission;
+		questionId = other.questionId;
 		setEntries(other.getEntries());
 		setMarkedForReview(other.getMarkedForReview());
-		questionId = other.questionId;
 		setRationale(other.getRationale());
-		this.submission = other.submission;
 		setSubmittedDate(other.getSubmittedDate());
-		initUnusedEntries(other.unusedEntries);
 	}
 
 	/**
@@ -104,8 +100,8 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	{
 		if (!(obj instanceof SubmissionAnswer)) return false;
 		if (this == obj) return true;
-		if (this.submission != ((SubmissionAnswerImpl) obj).submission) return false;
-		if (this.questionId != ((SubmissionAnswerImpl) obj).questionId) return false;
+		if (!this.submission.getId().equals(((SubmissionAnswerImpl) obj).submission.getId())) return false;
+		if (!this.questionId.equals(((SubmissionAnswerImpl) obj).questionId)) return false;
 		return true;
 	}
 
@@ -133,7 +129,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public String[] getEntryAnswerIds()
 	{
-		// one for each entry
+		// one for each entry, in order
 		String[] rv = new String[this.entries.size()];
 		int pos = 0;
 		for (SubmissionAnswerEntryImpl entry : this.entries)
@@ -149,14 +145,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public String getEntryAnswerText()
 	{
-		// make sure we have (at least) a singe entry
-		if (this.entries.isEmpty())
-		{
-			// add one
-			SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
-			entry.initAnswer(this);
-			this.entries.add(entry);
-		}
+		if (this.entries.size() < 1) return null;
 
 		return this.entries.get(0).getAnswerText();
 	}
@@ -166,7 +155,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public String[] getEntryAnswerTexts()
 	{
-		// one for each entry
+		// one for each entry, in order
 		String[] rv = new String[this.entries.size()];
 		int pos = 0;
 		for (SubmissionAnswerEntryImpl entry : this.entries)
@@ -182,7 +171,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public Boolean[] getEntryCorrects()
 	{
-		// one for each entry
+		// one for each entry, in order
 		Boolean[] rv = new Boolean[this.entries.size()];
 		int pos = 0;
 		for (SubmissionAnswerEntryImpl entry : this.entries)
@@ -256,6 +245,25 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			this.entries.add(copy);
 			copy.initAnswer(this);
 		}
+
+		// assure that the new entries align with out question's parts
+		if (this.entries.size() != this.getQuestion().getParts().size())
+		{
+			M_log.warn("setEntries: entries do not align with question parts: num entries: " + this.entries.size()
+					+ " num question parts: " + this.getQuestion().getParts().size());
+			throw new RuntimeException();
+		}
+		for (int i = 0; i < this.entries.size(); i++)
+		{
+			SubmissionAnswerEntryImpl entry = this.entries.get(i);
+			QuestionPart part = this.getQuestion().getParts().get(i);
+			if (!entry.getQuestionPart().equals(part))
+			{
+				M_log.warn("setEntries: entries do not align with question parts: entry id: " + entry.getId() + " part id: "
+						+ part.getId());
+				throw new RuntimeException();
+			}
+		}
 	}
 
 	/**
@@ -263,58 +271,46 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public void setEntryAnswerIds(String... answerIds)
 	{
-		// move to unused any entry that is not in the answerIds
-		for (Iterator i = this.entries.iterator(); i.hasNext();)
+		// the ids size must match our entries size
+		if ((answerIds != null) && (answerIds.length != this.entries.size()))
 		{
-			SubmissionAnswerEntryImpl entry = (SubmissionAnswerEntryImpl) i.next();
-
-			if (!StringUtil.contains(answerIds, entry.answerId))
-			{
-				this.unusedEntries.add(entry);
-				entry.setAssessmentAnswerId(null);
-				entry.setAnswerText(null);
-				entry.initAutoScore(null);
-				i.remove();
-			}
+			M_log.warn("setEntryAnswerIds: provided array does not match the entries");
+			throw new RuntimeException();
 		}
 
-		int answerIdsLength = 0;
-		if (answerIds != null) answerIdsLength = answerIds.length;
-
-		// increase the entry count if needed
-		int needed = answerIdsLength - (this.entries.size() + this.unusedEntries.size());
-		while (needed > 0)
+		// set each answer id into the position-corresponding entry
+		int i = 0;
+		for (SubmissionAnswerEntryImpl entry : this.entries)
 		{
-			SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
-			entry.initAnswer(this);
-			this.unusedEntries.add(entry);
-			needed--;
-		}
+			// treat an empty string as a missing id
+			String aid = (answerIds == null) ? null : StringUtil.trimToNull(answerIds[i++]);
 
-		// find each answerId in the entries, or add it, and collect them in answerId order
-		if (answerIds != null)
-		{
-			for (String aid : answerIds)
+			// if not null, the answer id must be to our assessment question, and it must be in our question part
+			if (aid != null)
 			{
-				boolean found = false;
-				for (SubmissionAnswerEntryImpl entry : this.entries)
+				if (this.getQuestion().getAnswer(aid) == null)
 				{
-					if ((entry.answerId != null) && (entry.answerId.equals(aid)))
-					{
-						found = true;
-						break;
-					}
+					M_log.warn("setEntryAnswerIds: provided answerId not to our assessment question: answerId: " + aid
+							+ " questionId: " + this.getQuestion().getId());
+					throw new RuntimeException();
 				}
 
-				// add if needed (we made sure there is room in unused for this)
-				if (!found)
+				if (!(this.getQuestion().getAnswer(aid).getPart().getId().equals(entry.getQuestionPart().getId())))
 				{
-					SubmissionAnswerEntryImpl entry = this.unusedEntries.remove(this.unusedEntries.size() - 1);
-					entry.answerId = aid;
-					entry.initAutoScore(null);
-					this.entries.add(entry);
+					M_log.warn("setEntryAnswerIds: provided answerId not to our assessment question part: answerId: "
+							+ aid + " partId: " + entry.getQuestionPart().getId());
+					throw new RuntimeException();
 				}
 			}
+
+			// store the new answer id
+			entry.initAssessmentAnswerId(aid);
+
+			// clear the auto score
+			entry.initAutoScore(null);
+
+			// clear any text
+			entry.setAnswerText(null);
 		}
 	}
 
@@ -323,13 +319,11 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public void setEntryAnswerText(String answerText)
 	{
-		// make sure we have (at least) a singe entry
-		if (this.entries.isEmpty())
+		// assure that we have only a single entry
+		if (this.entries.size() != 1)
 		{
-			// add one
-			SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
-			entry.initAnswer(this);
-			this.entries.add(entry);
+			M_log.warn("setEntryAnswerText: number of entries does not match 1: " + this.entries.size());
+			throw new RuntimeException();
 		}
 
 		this.entries.get(0).setAnswerText(answerText);
@@ -340,50 +334,24 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public void setEntryAnswerTexts(String... answerTexts)
 	{
-		// Note: this works with single part questions
-
-		// adjust the entries so that there is one for each question answer, pointing at that answer
-
-		// TODO: assume that we are either empty or correct already
-		AssessmentQuestion question = this.getQuestion();
-		if (this.entries.isEmpty())
+		// the texts size must match our entries size
+		if ((answerTexts != null) || (answerTexts.length != this.entries.size()))
 		{
-			// create the entries
-			for (AssessmentAnswer questionAnswer : question.getPart().getAnswers())
-			{
-				SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
-				entry.initAnswer(this);
-				entry.setAssessmentAnswer(questionAnswer);
-				this.entries.add(entry);
-			}
-		}
-		else
-		{
-			// check
-			for (int i = 0; i < this.entries.size(); i++)
-			{
-				if (!question.getPart().getAnswers().get(i).equals(this.entries.get(i).getAssessmentAnswer()))
-				{
-					M_log.warn("setEntryAnswerTexts: existing entries don't match question answers");
-					break;
-				}
-			}
+			M_log.warn("setEntryAnswerTexts: provided array does not match the entries");
+			throw new RuntimeException();
 		}
 
-		// apply the answerTexts to the answers in order
+		// set each answer text into the position-corresponding entry
 		int i = 0;
 		for (SubmissionAnswerEntryImpl entry : this.entries)
 		{
-			if ((answerTexts != null) && (answerTexts.length > i))
-			{
-				entry.setAnswerText(answerTexts[i]);
-			}
-			else
-			{
-				M_log.warn("setEntryAnswerTexts: ran out of values to set: " + i);
-				entry.setAnswerText(null);
-			}
-			i++;
+			String answerText = (answerTexts == null) ? null : StringUtil.trimToNull(answerTexts[i++]);
+
+			// store the new answer text
+			entry.setAnswerText(answerText);
+
+			// clear the auto score
+			entry.initAutoScore(null);
 		}
 	}
 
@@ -400,7 +368,25 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public void setQuestion(AssessmentQuestion question)
 	{
-		this.questionId = question.getId();
+		if (!question.getId().equals(this.questionId))
+		{
+			this.questionId = question.getId();
+
+			// align the entries with this question's parts, all unanswered
+			this.entries.clear();
+
+			if (question != null)
+			{
+				for (QuestionPart part : question.getParts())
+				{
+					// make an entry for this part
+					SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
+					entry.initQuestionPartId(part.getId());
+					entry.initAnswer(this);
+					this.entries.add(entry);
+				}
+			}
+		}
 	}
 
 	/**
@@ -480,22 +466,5 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	protected void initSubmission(SubmissionImpl submission)
 	{
 		this.submission = submission;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void initUnusedEntries(List<? extends SubmissionAnswerEntry> entries)
-	{
-		this.unusedEntries.clear();
-		if (entries == null) return;
-
-		// deep copy
-		for (SubmissionAnswerEntry entry : entries)
-		{
-			SubmissionAnswerEntryImpl copy = new SubmissionAnswerEntryImpl((SubmissionAnswerEntryImpl) entry);
-			this.unusedEntries.add(copy);
-			copy.initAnswer(this);
-		}
 	}
 }

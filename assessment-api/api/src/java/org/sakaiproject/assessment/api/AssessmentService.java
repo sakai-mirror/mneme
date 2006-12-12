@@ -245,14 +245,6 @@ public interface AssessmentService
 	SubmissionAnswer newSubmissionAnswer(Submission submission);
 
 	/**
-	 * Creaet a new Entry object for this submission answer
-	 * 
-	 * @param SubmissionAnswer
-	 * @return
-	 */
-	SubmissionAnswerEntry newEntry(SubmissionAnswer answer);
-
-	/**
 	 * Create a new persistent submission from the given information.
 	 * 
 	 * @param submission

@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.AssessmentAnswer;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
+import org.sakaiproject.assessment.api.QuestionPart;
 import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.assessment.api.SubmissionAnswerEntry;
@@ -40,7 +41,6 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(SubmissionAnswerEntryImpl.class);
 
-	/** Don't store the assessment answer here. */
 	protected String answerId = null;
 
 	protected String answerText = null;
@@ -49,6 +49,8 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 
 	/** To hold Samigo's db id. */
 	protected String id = null;
+
+	protected String questionPartId = null;
 
 	/** Back pointer to our submission answer. */
 	protected transient SubmissionAnswerImpl submissionAnswer = null;
@@ -69,6 +71,7 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 		answerText = other.answerText;
 		autoScore = other.autoScore;
 		id = other.id;
+		questionPartId = other.questionPartId;
 		submissionAnswer = other.submissionAnswer;
 	}
 
@@ -80,6 +83,7 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 		if (!(obj instanceof SubmissionAnswerEntry)) throw new ClassCastException();
 
 		// no natrual comparison?
+		// TODO: something based on the question part and the part's ordering -ggolden
 		return 0;
 	}
 
@@ -90,8 +94,9 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 	{
 		if (!(obj instanceof SubmissionAnswerEntry)) return false;
 		if (this == obj) return true;
-		if (((SubmissionAnswerEntryImpl) obj).submissionAnswer != this.submissionAnswer) return false;
-		if (((SubmissionAnswerEntryImpl) obj).answerId != this.answerId) return false;
+		// TODO: exact same answer, or same by id? also, is answerId part of this? -ggolden
+		if (!((SubmissionAnswerEntryImpl) obj).submissionAnswer.getSubmission().getId().equals(this.submissionAnswer.getSubmission().getId())) return false;
+		if (!(((SubmissionAnswerEntryImpl) obj).questionPartId.equals(this.questionPartId))) return false;
 		return true;
 	}
 
@@ -111,14 +116,6 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 		if (this.answerId == null) return null;
 
 		return this.submissionAnswer.getQuestion().getAnswer(this.answerId);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getAssessmentAnswerId()
-	{
-		return this.answerId;
 	}
 
 	/**
@@ -177,6 +174,16 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 	/**
 	 * {@inheritDoc}
 	 */
+	public QuestionPart getQuestionPart()
+	{
+		if (this.questionPartId == null) return null;
+
+		return this.submissionAnswer.getQuestion().getPart(this.questionPartId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public SubmissionAnswer getSubmissionAnswer()
 	{
 		return this.submissionAnswer;
@@ -220,12 +227,14 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setAssessmentAnswerId(String answerId)
+	public void setQuestionPart(QuestionPart part)
 	{
-		this.answerId = answerId;
+		this.questionPartId = null;
 
-		// clear the auto score
-		this.autoScore = null;
+		if (part != null)
+		{
+			this.questionPartId = part.getId();
+		}
 	}
 
 	/**
@@ -250,6 +259,20 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 	}
 
 	/**
+	 * Establish the answer from an id.
+	 * 
+	 * @param answerId
+	 *        The id to the question answer selected for this entry.
+	 */
+	protected void initAssessmentAnswerId(String answerId)
+	{
+		this.answerId = answerId;
+
+		// clear the auto score
+		this.autoScore = null;
+	}
+
+	/**
 	 * Establish the auto score.
 	 * 
 	 * @param autoScore
@@ -269,6 +292,17 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 	protected void initId(String id)
 	{
 		this.id = id;
+	}
+
+	/**
+	 * Establish the question part by id.
+	 * 
+	 * @param partId
+	 *        the quesiton part id.
+	 */
+	protected void initQuestionPartId(String partId)
+	{
+		this.questionPartId = partId;
 	}
 
 	/**

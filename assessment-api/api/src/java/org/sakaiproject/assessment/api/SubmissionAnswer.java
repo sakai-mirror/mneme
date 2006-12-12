@@ -46,14 +46,14 @@ public interface SubmissionAnswer
 	Float getAutoScore();
 
 	/**
-	 * Access the one or more entries that make up this answer.
+	 * Access the one or more entries that make up this answer.  There needs to be an entry for each part of the assessment question.
 	 * 
 	 * @return The one or more entries that make up this answer.
 	 */
 	List<? extends SubmissionAnswerEntry> getEntries();
 
 	/**
-	 * Access the assessment question answer ids that are currently in the entries as an array.
+	 * Access the assessment question answer ids that are currently in the entries as an array, in entry (question part) order, one per entry (per question part).
 	 * 
 	 * @return The assessment question answer ids that are currently in the entries as an array.
 	 */
@@ -67,14 +67,14 @@ public interface SubmissionAnswer
 	String getEntryAnswerText();
 
 	/**
-	 * Access assessment question answer texts that are currently in the entries as an array.
+	 * Access assessment question answer texts that are currently in the entries as an array, in entry (question part) order, one per entry (per question part).
 	 * 
 	 * @return The assessment question answer texts that are currently in the entries as an array.
 	 */
 	String[] getEntryAnswerTexts();
 
 	/**
-	 * Access the correctness of each of the entry - TRUE if correct, FALSE if not, null if not answered.
+	 * Access the correctness of each of the entry - TRUE if correct, FALSE if not, null if not answered, in entry (question part) order, one per entry (per question part).
 	 * 
 	 * @return The correctness of each of the entry - TRUE if correct, FALSE if not, null if not answered.
 	 */
@@ -124,10 +124,10 @@ public interface SubmissionAnswer
 	void setEntries(List<? extends SubmissionAnswerEntry> entries);
 
 	/**
-	 * Adjust the set of answer entries so that they cover exactly these answer ids - any others are removed, new ones added if needed.
+	 * Set these answer ids, ordered by question part, as the new answer ids for our entries.  There must be an id for each entry (and for each question part) in order.
 	 * 
 	 * @param answerIds
-	 *        zero, one or more assessment question answer ids.
+	 *        The ordered set of assessment question answer ids for our entries.  If null, all entry ids will be cleared.
 	 */
 	void setEntryAnswerIds(String... answerIds);
 
@@ -140,10 +140,10 @@ public interface SubmissionAnswer
 	void setEntryAnswerText(String answerText);
 
 	/**
-	 * Adjust the set of answer entries so that they cover exactly these answer texts - any others are removed, new ones added if needed.
+	 * Set these answer texts, ordered by question part, as the new answer texts for our entries.  There must be an text for each entry (and for each question part) in order.
 	 * 
 	 * @param answerTexts
-	 *        zero, one or more assessment question answer texts.
+	 *        The ordered set of answer texts for our entries.  If null, all entry texts will be cleared
 	 */
 	void setEntryAnswerTexts(String... answerTexts);
 

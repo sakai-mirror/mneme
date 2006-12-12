@@ -43,13 +43,6 @@ public interface SubmissionAnswerEntry
 	AssessmentAnswer getAssessmentAnswer();
 
 	/**
-	 * Access the assessment question answer id that was choosen for this submission answer entry.
-	 * 
-	 * @return The entry's assessment question answer id.
-	 */
-	String getAssessmentAnswerId();
-
-	/**
 	 * Access the entry's automatic scoring value.
 	 * 
 	 * @return The entry's auto-score.
@@ -58,9 +51,17 @@ public interface SubmissionAnswerEntry
 
 	/**
 	 * Check if the answer is correct.
+	 * 
 	 * @return TRUE if correct, FALSE if not correct.
 	 */
 	Boolean getIsCorrect();
+
+	/**
+	 * Access the question part (of the assessment question this submission is to) of this entry.
+	 * 
+	 * @return The question part (of the assessment question this submission is to) of this entry.
+	 */
+	QuestionPart getQuestionPart();
 
 	/**
 	 * Access the back pointer to the submission answer.
@@ -86,10 +87,10 @@ public interface SubmissionAnswerEntry
 	void setAssessmentAnswer(AssessmentAnswer answer);
 
 	/**
-	 * Set the assessment question answer id that was choosen for this answer entry.
+	 * Set the question part (of the assessment question this submission is to) of this entry.
 	 * 
-	 * @param answerId
-	 *        The assessment question answer id that was choosen for this answer entry.
+	 * @param part
+	 *        The question part (of the assessment question this submission is to) of this entry.
 	 */
-	void setAssessmentAnswerId(String answerId);
+	void setQuestionPart(QuestionPart part);
 }
