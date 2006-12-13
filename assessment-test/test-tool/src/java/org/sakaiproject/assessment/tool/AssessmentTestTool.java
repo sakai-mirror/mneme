@@ -520,8 +520,7 @@ public class AssessmentTestTool extends HttpServlet
 		List items = new Vector();
 		for (AssessmentQuestion question : assessment.getFirstSection().getQuestions())
 		{
-			SubmissionAnswer answer = assessmentService.newSubmissionAnswer(s);
-			answer.setQuestion(question);
+			SubmissionAnswer answer = assessmentService.newSubmissionAnswer(s, question);
 
 			answer.setSubmittedDate(timeService.newTime());
 

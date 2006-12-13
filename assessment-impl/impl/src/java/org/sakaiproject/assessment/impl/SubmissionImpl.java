@@ -150,8 +150,10 @@ public class SubmissionImpl implements Submission
 		// not found, add one
 		answer = new SubmissionAnswerImpl();
 		answer.initSubmission(this);
-		answer.setQuestion(question);
 		this.answers.add(answer);
+
+		answer.initQuestion(question);
+
 		this.answersStatus = PropertyStatus.modified;
 
 		return answer;

@@ -236,13 +236,15 @@ public interface AssessmentService
 	Submission newSubmission(Assessment assessment);
 
 	/**
-	 * Create a new Answer object for this submission.
+	 * Create a new Answer object for this submission, that answers this question.
 	 * 
 	 * @param submission
 	 *        The submission.
+	 * @param question
+	 *        The assessment question that this answers.
 	 * @return a new submission answer.
 	 */
-	SubmissionAnswer newSubmissionAnswer(Submission submission);
+	SubmissionAnswer newSubmissionAnswer(Submission submission, AssessmentQuestion question);
 
 	/**
 	 * Create a new persistent submission from the given information.

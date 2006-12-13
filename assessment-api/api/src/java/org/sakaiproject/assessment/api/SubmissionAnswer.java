@@ -116,14 +116,6 @@ public interface SubmissionAnswer
 	Time getSubmittedDate();
 
 	/**
-	 * Set the entry list with the entries for this answer.
-	 * 
-	 * @param entries
-	 *        The entry list with the entries for this answer
-	 */
-	void setEntries(List<? extends SubmissionAnswerEntry> entries);
-
-	/**
 	 * Set these answer ids, ordered by question part, as the new answer ids for our entries.  There must be an id for each entry (and for each question part) in order.
 	 * 
 	 * @param answerIds
@@ -154,14 +146,6 @@ public interface SubmissionAnswer
 	 *        The answer's "mark for review" setting; TRUE if the user has marked this answer for review, FALSE if not.
 	 */
 	void setMarkedForReview(Boolean forReview);
-
-	/**
-	 * Set the assessment question that this is an answer to.
-	 * 
-	 * @param question
-	 *        The assessment question.
-	 */
-	void setQuestion(AssessmentQuestion question);
 
 	/**
 	 * Set the rationale text, if any, provided as part of this answer.

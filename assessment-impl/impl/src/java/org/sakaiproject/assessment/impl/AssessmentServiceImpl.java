@@ -47,7 +47,6 @@ import org.sakaiproject.assessment.api.QuestionPart;
 import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
-import org.sakaiproject.assessment.api.SubmissionAnswerEntry;
 import org.sakaiproject.assessment.api.SubmissionCompletedException;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.db.api.SqlReader;
@@ -1137,6 +1136,12 @@ public class AssessmentServiceImpl implements AssessmentService
 				}
 			}
 		});
+
+		// verify the answers
+		for (SubmissionAnswerImpl answer : submission.answers)
+		{
+			answer.verifyEntries();
+		}
 
 		// update the cache if cached
 		SubmissionImpl cached = getCachedSubmission(submission.getId());
@@ -2402,11 +2407,13 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public SubmissionAnswer newSubmissionAnswer(Submission submission)
+	public SubmissionAnswer newSubmissionAnswer(Submission submission, AssessmentQuestion question)
 	{
 		SubmissionAnswerImpl answer = new SubmissionAnswerImpl();
 		answer.initSubmission((SubmissionImpl) submission);
 		((SubmissionImpl) submission).answers.add(answer);
+
+		answer.initQuestion(question);
 
 		return answer;
 	}
@@ -2850,24 +2857,24 @@ public class AssessmentServiceImpl implements AssessmentService
 				}
 			}
 
-//			// for any entries unused that have an id, delete them
-//			for (SubmissionAnswerEntryImpl entry : ((SubmissionAnswerImpl) answer).unusedEntries)
-//			{
-//				if (entry.getId() != null)
-//				{
-//					String statement = "DELETE FROM SAM_ITEMGRADING_T WHERE ITEMGRADINGID = ?";
-//					Object[] fields = new Object[1];
-//					fields[0] = entry.getId();
-//					if (!m_sqlService.dbWrite(connection, statement, fields))
-//					{
-//						// TODO: better exception
-//						throw new Exception("submitAnswer: dbWrite Failed");
-//					}
-//				}
-//			}
-//
-//			// clear the unused now we have deleted what we must
-//			((SubmissionAnswerImpl) answer).unusedEntries.clear();
+			// for any entries unused that have an id, delete them
+			for (SubmissionAnswerEntryImpl entry : ((SubmissionAnswerImpl) answer).recycle)
+			{
+				if (entry.getId() != null)
+				{
+					String statement = "DELETE FROM SAM_ITEMGRADING_T WHERE ITEMGRADINGID = ?";
+					Object[] fields = new Object[1];
+					fields[0] = entry.getId();
+					if (!m_sqlService.dbWrite(connection, statement, fields))
+					{
+						// TODO: better exception
+						throw new Exception("submitAnswer: dbWrite Failed");
+					}
+				}
+			}
+
+			// clear the unused now we have deleted what we must
+			((SubmissionAnswerImpl) answer).recycle.clear();
 
 			// if complete, update the STATUS to 1 and the FORGRADE to TRUE... always update the date
 			// Note: for Samigo compat., we need to update the scores in the SAM_ASSESSMENTGRADING_T based on the sums of the item scores

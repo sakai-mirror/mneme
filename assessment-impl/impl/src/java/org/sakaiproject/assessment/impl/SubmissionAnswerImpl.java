@@ -26,8 +26,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sakaiproject.assessment.api.AssessmentAnswer;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.QuestionPart;
+import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.assessment.api.SubmissionAnswerEntry;
@@ -49,6 +51,9 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 
 	protected String rationale = null;
 
+	/** Entries to delete (or reuse). */
+	protected List<SubmissionAnswerEntryImpl> recycle = new ArrayList<SubmissionAnswerEntryImpl>();
+
 	/** back pointer to the submission this answer is part of. */
 	protected transient SubmissionImpl submission = null;
 
@@ -68,10 +73,11 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	{
 		this.submission = other.submission;
 		questionId = other.questionId;
-		setEntries(other.getEntries());
+		initEntries(other.getEntries());
 		setMarkedForReview(other.getMarkedForReview());
 		setRationale(other.getRationale());
 		setSubmittedDate(other.getSubmittedDate());
+		initRecycle(other.recycle);
 	}
 
 	/**
@@ -233,50 +239,19 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setEntries(List<? extends SubmissionAnswerEntry> entries)
-	{
-		this.entries.clear();
-		if (entries == null) return;
-
-		// deep copy
-		for (SubmissionAnswerEntry entry : entries)
-		{
-			SubmissionAnswerEntryImpl copy = new SubmissionAnswerEntryImpl((SubmissionAnswerEntryImpl) entry);
-			this.entries.add(copy);
-			copy.initAnswer(this);
-		}
-
-		// assure that the new entries align with out question's parts
-		if (this.entries.size() != this.getQuestion().getParts().size())
-		{
-			M_log.warn("setEntries: entries do not align with question parts: num entries: " + this.entries.size()
-					+ " num question parts: " + this.getQuestion().getParts().size());
-			throw new RuntimeException();
-		}
-		for (int i = 0; i < this.entries.size(); i++)
-		{
-			SubmissionAnswerEntryImpl entry = this.entries.get(i);
-			QuestionPart part = this.getQuestion().getParts().get(i);
-			if (!entry.getQuestionPart().equals(part))
-			{
-				M_log.warn("setEntries: entries do not align with question parts: entry id: " + entry.getId() + " part id: "
-						+ part.getId());
-				throw new RuntimeException();
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void setEntryAnswerIds(String... answerIds)
 	{
+		// possibly adjust, if the question type allows variable number of entries, to the size of answerIds
+		resizeEntries(answerIds);
+
 		// the ids size must match our entries size
 		if ((answerIds != null) && (answerIds.length != this.entries.size()))
 		{
 			M_log.warn("setEntryAnswerIds: provided array does not match the entries");
 			throw new RuntimeException();
 		}
+
+		AssessmentQuestion question = this.getQuestion();
 
 		// set each answer id into the position-corresponding entry
 		int i = 0;
@@ -288,17 +263,17 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			// if not null, the answer id must be to our assessment question, and it must be in our question part
 			if (aid != null)
 			{
-				if (this.getQuestion().getAnswer(aid) == null)
+				if (question.getAnswer(aid) == null)
 				{
 					M_log.warn("setEntryAnswerIds: provided answerId not to our assessment question: answerId: " + aid
-							+ " questionId: " + this.getQuestion().getId());
+							+ " questionId: " + question.getId());
 					throw new RuntimeException();
 				}
 
-				if (!(this.getQuestion().getAnswer(aid).getPart().getId().equals(entry.getQuestionPart().getId())))
+				if (!(question.getAnswer(aid).getPart().getId().equals(entry.getQuestionPart().getId())))
 				{
-					M_log.warn("setEntryAnswerIds: provided answerId not to our assessment question part: answerId: "
-							+ aid + " partId: " + entry.getQuestionPart().getId());
+					M_log.warn("setEntryAnswerIds: provided answerId not to our assessment question part: answerId: " + aid
+							+ " partId: " + entry.getQuestionPart().getId());
 					throw new RuntimeException();
 				}
 			}
@@ -312,6 +287,9 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			// clear any text
 			entry.setAnswerText(null);
 		}
+
+		// make sure all is well
+		verifyEntries();
 	}
 
 	/**
@@ -335,7 +313,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	public void setEntryAnswerTexts(String... answerTexts)
 	{
 		// the texts size must match our entries size
-		if ((answerTexts != null) || (answerTexts.length != this.entries.size()))
+		if ((answerTexts != null) && (answerTexts.length != this.entries.size()))
 		{
 			M_log.warn("setEntryAnswerTexts: provided array does not match the entries");
 			throw new RuntimeException();
@@ -366,32 +344,6 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setQuestion(AssessmentQuestion question)
-	{
-		if (!question.getId().equals(this.questionId))
-		{
-			this.questionId = question.getId();
-
-			// align the entries with this question's parts, all unanswered
-			this.entries.clear();
-
-			if (question != null)
-			{
-				for (QuestionPart part : question.getParts())
-				{
-					// make an entry for this part
-					SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
-					entry.initQuestionPartId(part.getId());
-					entry.initAnswer(this);
-					this.entries.add(entry);
-				}
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void setRationale(String rationale)
 	{
 		this.rationale = rationale;
@@ -403,6 +355,67 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	public void setSubmittedDate(Time submitted)
 	{
 		this.submittedDate = submitted;
+	}
+
+	/**
+	 * Align the entries to match the question type and structure.
+	 */
+	protected void alignEntries()
+	{
+		// assure we have no entries already
+		if (!this.entries.isEmpty())
+		{
+			M_log.warn("alignEntries: entries not null");
+			throw new RuntimeException();
+		}
+
+		// assure we have a question
+		AssessmentQuestion question = getQuestion();
+
+		if (question == null)
+		{
+			M_log.warn("alignEntries: no question");
+			throw new RuntimeException();
+		}
+
+		// fillin and numeric need an entry per assessment question (single part) answer, with answer ids set (answer text null)
+		if ((question.getType() == QuestionType.fillIn) || (question.getType() == QuestionType.numeric))
+		{
+			for (AssessmentAnswer answer : question.getPart().getAnswers())
+			{
+				// make an entry for this question answer (of the single part), setting the question answer id, leaving the text null
+				SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
+				entry.initQuestionPartId(question.getPart().getId());
+				entry.initAssessmentAnswerId(answer.getId());
+
+				entry.initAnswer(this);
+				this.entries.add(entry);
+			}
+		}
+
+		// matching needs an entry per assessment question part
+		else if (question.getType() == QuestionType.matching)
+		{
+			for (QuestionPart part : question.getParts())
+			{
+				// make an entry for this part, leaving the answer id and text null
+				SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
+				entry.initQuestionPartId(part.getId());
+
+				entry.initAnswer(this);
+				this.entries.add(entry);
+			}
+		}
+
+		// all others need a single entry for the single part - multi-correct might expand this
+		else
+		{
+			SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
+			entry.initQuestionPartId(question.getPart().getId());
+
+			entry.initAnswer(this);
+			this.entries.add(entry);
+		}
 	}
 
 	/**
@@ -431,19 +444,46 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	}
 
 	/**
-	 * Establish the entries. No copy.
+	 * Establish the entries as a deep copy of another - only if we do not have any entries to begin with.
 	 * 
 	 * @param entries
-	 *        The new list of entries to use.
+	 *        the entries to deep copy.
 	 */
-	protected void initEntries(List<SubmissionAnswerEntryImpl> entries)
+	protected void initEntries(List<? extends SubmissionAnswerEntry> entries)
 	{
-		this.entries = entries;
-
-		for (SubmissionAnswerEntryImpl entry : this.entries)
+		// assure that we have no entries
+		if (!this.entries.isEmpty())
 		{
-			entry.initAnswer(this);
+			M_log.warn("initEntries: entries already exist");
+			throw new RuntimeException();
 		}
+
+		if (entries == null) return;
+
+		// deep copy
+		for (SubmissionAnswerEntry entry : entries)
+		{
+			SubmissionAnswerEntryImpl copy = new SubmissionAnswerEntryImpl((SubmissionAnswerEntryImpl) entry);
+			this.entries.add(copy);
+			copy.initAnswer(this);
+		}
+	}
+
+	/**
+	 * Init the assessment question that this is an answer to, and align the entries to match.
+	 * 
+	 * @param question
+	 *        The assessment question.
+	 */
+	protected void initQuestion(AssessmentQuestion question)
+	{
+		this.questionId = question.getId();
+
+		// align the entries with this question
+		alignEntries();
+
+		// make sure all is well
+		verifyEntries();
 	}
 
 	/**
@@ -455,6 +495,27 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	protected void initQuestionId(String questionId)
 	{
 		this.questionId = questionId;
+
+		// do NOT align the entries...
+	}
+
+	/**
+	 * Deep copy a set of entries into our recycle
+	 * 
+	 * @param entries
+	 *        The set of entries to copy.
+	 */
+	protected void initRecycle(List<? extends SubmissionAnswerEntry> entries)
+	{
+		if (entries == null) return;
+
+		// deep copy, adding to our recycle
+		for (SubmissionAnswerEntry entry : entries)
+		{
+			SubmissionAnswerEntryImpl copy = new SubmissionAnswerEntryImpl((SubmissionAnswerEntryImpl) entry);
+			this.recycle.add(copy);
+			copy.initAnswer(this);
+		}
 	}
 
 	/**
@@ -466,5 +527,161 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	protected void initSubmission(SubmissionImpl submission)
 	{
 		this.submission = submission;
+	}
+
+	/**
+	 * Adjust the entries for question types that are variable to match this number of entries
+	 * 
+	 * @param answerIds
+	 *        the set of answer ids to size to.
+	 */
+	protected void resizeEntries(String[] answerIds)
+	{
+		AssessmentQuestion question = getQuestion();
+
+		// expand or contract for multi-correct...
+		if (question.getType() == QuestionType.multipleCorrect)
+		{
+			// count the answers provided = minimum of one
+			int count = 0;
+			if (answerIds != null) count = answerIds.length;
+			if (count < 1) count = 1;
+			int excess = this.entries.size() - count;
+
+			// if we have too few, pull out of the recycle or create new
+			while (excess < 0)
+			{
+				SubmissionAnswerEntryImpl entry = null;
+
+				if (this.recycle.size() > 0)
+				{
+					entry = this.recycle.remove(this.recycle.size() - 1);
+				}
+				else
+				{
+					entry = new SubmissionAnswerEntryImpl();
+				}
+
+				// set to this question part, clear the rest (preserve the id if it was set)
+				entry.initQuestionPartId(question.getPart().getId());
+				entry.setAnswerText(null);
+				entry.setAssessmentAnswer(null);
+
+				entry.initAnswer(this);
+				this.entries.add(entry);
+
+				excess++;
+			}
+
+			// if we have too many send a few to the recycle
+			while (excess > 0)
+			{
+				this.recycle.add(this.entries.remove(this.entries.size() - 1));
+
+				excess--;
+			}
+		}
+	}
+
+	/**
+	 * Check that the entries are properly aligned to our question type and structure
+	 */
+	protected void verifyEntries()
+	{
+		// assure we have a question
+		AssessmentQuestion question = getQuestion();
+
+		if (question == null)
+		{
+			M_log.warn("alignEntries: no question");
+			throw new RuntimeException();
+		}
+
+		// fillin and numeric need an entry per assessment question (single part) answer, with answer ids set
+		if ((question.getType() == QuestionType.fillIn) || (question.getType() == QuestionType.numeric))
+		{
+			if (this.entries.size() != question.getPart().getAnswers().size())
+			{
+				M_log.warn("verifyEntries: fillin/numeric: num answers: " + question.getPart().getAnswers().size()
+						+ " doesn't match num entries: " + this.entries.size() + " submission: " + this.getSubmission().getId()
+						+ " question: " + question.getId());
+				throw new RuntimeException();
+			}
+			for (int i = 0; i < this.entries.size(); i++)
+			{
+				// check that the entry is to the part and answer
+				SubmissionAnswerEntryImpl entry = this.entries.get(i);
+				AssessmentAnswer answer = question.getPart().getAnswers().get(i);
+				if (!entry.questionPartId.equals(question.getPart().getId()))
+				{
+					M_log.warn("verifyEntries: fillin/numeric: entry / answer part not aligned: entry part: "
+							+ entry.questionPartId + " question single part: " + question.getPart().getId() + " submission: "
+							+ this.getSubmission().getId() + " question: " + question.getId());
+					throw new RuntimeException();
+				}
+
+				if (!entry.answerId.equals(answer.getId()))
+				{
+					M_log.warn("verifyEntries: fillin/numeric: entry / answer answer id not aligned: entry answer id: "
+							+ entry.answerId + " answer id: " + answer.getId() + " submission: " + this.getSubmission().getId()
+							+ " question: " + question.getId());
+					throw new RuntimeException();
+				}
+			}
+		}
+
+		// matching needs an entry per assessment question part
+		else if (question.getType() == QuestionType.matching)
+		{
+			if (this.entries.size() != question.getParts().size())
+			{
+				M_log.warn("verifyEntries: matching: num parts: " + question.getParts().size() + " doesn't match num entries: "
+						+ this.entries.size() + " submission: " + this.getSubmission().getId() + " question: " + question.getId());
+				throw new RuntimeException();
+			}
+			for (int i = 0; i < this.entries.size(); i++)
+			{
+				// check that the entry is to the part
+				SubmissionAnswerEntryImpl entry = this.entries.get(i);
+				QuestionPart part = question.getParts().get(i);
+				if (!entry.questionPartId.equals(part.getId()))
+				{
+					M_log.warn("verifyEntries: matching: entry / question part not aligned: entry part: " + entry.questionPartId
+							+ " question part: " + part.getId() + " submission: " + this.getSubmission().getId() + " question: "
+							+ question.getId());
+					throw new RuntimeException();
+				}
+			}
+		}
+
+		// all others need a single entry for the single part - multi-correct might expand this
+		else
+		{
+			if (this.entries.size() < 1)
+			{
+				M_log.warn("verifyEntries: (other): no entries: " + " submission: " + this.getSubmission().getId() + " question: "
+						+ this.getQuestion().getId());
+				throw new RuntimeException();
+			}
+
+			if ((this.entries.size() > 1) && (question.getType() != QuestionType.multipleCorrect))
+			{
+				M_log.warn("verifyEntries: (other): too many entries: " + this.entries.size() + " submission: "
+						+ this.getSubmission().getId() + " question: " + this.getQuestion().getId());
+				throw new RuntimeException();
+			}
+
+			// each entry needs to be to the single part
+			for (SubmissionAnswerEntryImpl entry : this.entries)
+			{
+				if (!entry.questionPartId.equals(question.getPart().getId()))
+				{
+					M_log.warn("verifyEntries: (other): entry part: " + entry.questionPartId + " doesn't match question part: "
+							+ question.getPart().getId() + " submission: " + this.getSubmission().getId() + " question: "
+							+ this.getQuestion().getId());
+					throw new RuntimeException();
+				}
+			}
+		}
 	}
 }
