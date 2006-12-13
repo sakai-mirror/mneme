@@ -675,11 +675,15 @@ public class AssessmentServiceImpl implements AssessmentService
 		assessment.sectionsStatus = AssessmentImpl.PropertyStatus.inited;
 
 		// get the questions
-		statement = "SELECT PI.ITEMID, PI.HASRATIONALE, PI.SCORE, PI.INSTRUCTION, PI.TYPEID, PI.SECTIONID, MCS.ENTRY, MME.ENTRY"
+		statement = "SELECT PI.ITEMID, PI.HASRATIONALE, PI.SCORE, PI.INSTRUCTION, PI.TYPEID, PI.SECTIONID, MCS.ENTRY, MME.ENTRY,"
+				+ " PF1.TEXT, PF2.TEXT, PF3.TEXT"
 				+ " FROM SAM_PUBLISHEDITEM_T PI"
 				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON PI.SECTIONID = PS.SECTIONID AND PS.ASSESSMENTID = ?"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MCS ON PI.ITEMID = MCS.ITEMID AND MCS.LABEL = 'CASE_SENSITIVE'"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MME ON PI.ITEMID = MME.ITEMID AND MME.LABEL = 'MUTUALLY_EXCLUSIVE'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF1 ON PI.ITEMID = PF1.ITEMID AND PF1.TYPEID = 'Correct Feedback'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF2 ON PI.ITEMID = PF2.ITEMID AND PF2.TYPEID = 'General Feedback'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF3 ON PI.ITEMID = PF3.ITEMID AND PF3.TYPEID = 'InCorrect Feedback'"
 				+ " ORDER BY PI.SEQUENCE ASC";
 		fields = new Object[1];
 		fields[0] = assessment.id;
@@ -698,6 +702,9 @@ public class AssessmentServiceImpl implements AssessmentService
 					String sectionId = result.getString(6);
 					String caseSensitive = result.getString(7);
 					String mutuallyExclusive = result.getString(8);
+					String correctFeedback = result.getString(9);
+					String generalFeedback = result.getString(10);
+					String incorrectFeedback = result.getString(11);
 
 					// pack it into an assessment question
 					AssessmentQuestionImpl question = new AssessmentQuestionImpl();
@@ -708,6 +715,9 @@ public class AssessmentServiceImpl implements AssessmentService
 					question.setType(QuestionType.valueOf(type));
 					question.setCaseSensitive(caseSensitive == null ? null : Boolean.parseBoolean(caseSensitive));
 					question.setMutuallyExclusive(mutuallyExclusive == null ? null : Boolean.parseBoolean(mutuallyExclusive));
+					question.setFeedbackCorrect(correctFeedback);
+					question.setFeedbackGeneral(generalFeedback);
+					question.setFeedbackIncorrect(incorrectFeedback);
 
 					// add the question to the appropriate section (sectionId)
 					AssessmentSectionImpl section = (AssessmentSectionImpl) assessment.getSection(sectionId);
@@ -779,9 +789,14 @@ public class AssessmentServiceImpl implements AssessmentService
 		});
 
 		// get the answers
-		statement = "SELECT PA.ANSWERID, PA.ITEMID, PA.TEXT, PA.ISCORRECT, PA.LABEL, PA.ITEMTEXTID"
-				+ " FROM SAM_PUBLISHEDANSWER_T PA" + " INNER JOIN SAM_PUBLISHEDITEM_T PI ON PA.ITEMID = PI.ITEMID"
+		statement = "SELECT PA.ANSWERID, PA.ITEMID, PA.TEXT, PA.ISCORRECT, PA.LABEL, PA.ITEMTEXTID,"
+				+ " PF1.TEXT, PF2.TEXT, PF3.TEXT"
+				+ " FROM SAM_PUBLISHEDANSWER_T PA"
+				+ " INNER JOIN SAM_PUBLISHEDITEM_T PI ON PA.ITEMID = PI.ITEMID"
 				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON PI.SECTIONID = PS.SECTIONID AND PS.ASSESSMENTID = ?"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWERFEEDBACK_T PF1 ON PA.ANSWERID = PF1.ANSWERID AND PF1.TYPEID = 'Correct Feedback'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWERFEEDBACK_T PF2 ON PA.ANSWERID = PF2.ANSWERID AND PF2.TYPEID = 'General Feedback'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWERFEEDBACK_T PF3 ON PA.ANSWERID = PF3.ANSWERID AND PF3.TYPEID = 'InCorrect Feedback'"
 				+ " ORDER BY PA.SEQUENCE ASC";
 		fields = new Object[1];
 		fields[0] = assessment.id;
@@ -798,6 +813,9 @@ public class AssessmentServiceImpl implements AssessmentService
 					boolean isCorrect = result.getBoolean(4);
 					String label = result.getString(5);
 					String partId = result.getString(6);
+					String correctFeedback = result.getString(7);
+					String generalFeedback = result.getString(8);
+					String incorrectFeedback = result.getString(9);
 
 					// find the question
 					AssessmentQuestionImpl question = (AssessmentQuestionImpl) assessment.getQuestion(questionId);
@@ -823,6 +841,9 @@ public class AssessmentServiceImpl implements AssessmentService
 							answer.setIsCorrect(Boolean.valueOf(isCorrect));
 							answer.setText(text);
 							answer.setLabel(label);
+							answer.setFeedbackCorrect(correctFeedback);
+							answer.setFeedbackGeneral(generalFeedback);
+							answer.setFeedbackIncorrect(incorrectFeedback);
 
 							// add to the part's answers
 							answer.initPart(part);
@@ -3078,7 +3099,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					}
 				}
 
-				// multipleChoice scoreing
+				// multipleChoice scoring
 				else if (question.getType() == QuestionType.multipleChoice)
 				{
 					// question score if correct, 0 if not
@@ -3240,6 +3261,106 @@ public class AssessmentServiceImpl implements AssessmentService
 				}
 			}
 		}
+	}
+
+	/**
+	 * Check a submission answer for complete correctness
+	 * 
+	 * @param answer
+	 *        The answer to score.
+	 * @return true if the answer is completely correct, false if not.
+	 */
+	protected boolean checkAnswer(SubmissionAnswerImpl answer)
+	{
+		AssessmentQuestion question = answer.getQuestion();
+
+		// trueFalse / multipleChoice - one entry to check
+		if ((question.getType() == QuestionType.trueFalse) || (question.getType() == QuestionType.multipleChoice))
+		{
+			if (answer.entries.get(0).getIsCorrect().booleanValue())
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+		// multipleAnswer - only the correct choices should be selected
+		else if (question.getType() == QuestionType.multipleCorrect)
+		{
+			// these correct answers must be selected
+			List<AssessmentAnswer> correct = question.getPart().getCorrectAnswers();
+
+			for (SubmissionAnswerEntryImpl entry : answer.entries)
+			{
+				if (correct.contains(entry.getAssessmentAnswer()))
+				{
+					correct.remove(entry.getAssessmentAnswer());
+				}
+
+				// otherwise we found an incorrect entry
+				else
+				{
+					return false;
+				}
+			}
+
+			// if we have an entry for each correct, this is correct
+			if (correct.isEmpty()) return true;
+
+			return false;
+		}
+
+		// fillIn / numeric / matching - all entries must be correct
+		else if ((question.getType() == QuestionType.fillIn) || (question.getType() == QuestionType.numeric)
+				|| (question.getType() == QuestionType.matching))
+		{
+			for (SubmissionAnswerEntryImpl entry : answer.entries)
+			{
+				if (!entry.getIsCorrect().booleanValue())
+				{
+					return false;
+				}
+			}
+
+			// mutually exclusive check
+			if ((question.getType() == QuestionType.fillIn) && (question.getMutuallyExclusive().booleanValue()))
+			{
+				// check all but the last entry, looking down the list for a match
+				// if this answer matches any following answer, and their question text also matches, this answer gets zero'ed out
+				for (int i = 0; i < answer.entries.size() - 1; i++)
+				{
+					SubmissionAnswerEntryImpl entry = answer.entries.get(i);
+
+					// this is the question text that must match some entry-down-below's question text
+					String entryQuestionText = entry.getAssessmentAnswer().getText();
+
+					// look down the list
+					for (int j = i + 1; j < answer.entries.size(); j++)
+					{
+						// compare to this entry
+						SubmissionAnswerEntryImpl compareEntry = answer.entries.get(j);
+
+						// they need to be the same (i.e. !different) based on our case sensitive (the method takes ignore case, so we reverse)
+						if (!StringUtil.different(entry.getAnswerText(), compareEntry.getAnswerText(), !question.getCaseSensitive()
+								.booleanValue()))
+						{
+							// we will check against this other question's text, exactly
+							String compareEntryQuestionText = compareEntry.getAssessmentAnswer().getText();
+							if (entryQuestionText.equals(compareEntryQuestionText))
+							{
+								// we have a later match, so this is not correct
+								return false;
+							}
+						}
+					}
+				}
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

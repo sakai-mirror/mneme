@@ -249,6 +249,7 @@ public class DeliveryControllers
 	 * submission - the selected Submission object
 	 * question - the current question
 	 * feedback - a non-null value to indicate that we should show feedback
+	 * answer - the SubmissionAnswer in the submission to this question.
 	 * 
 	 * When decoding a response, we need in the context:
 	 * answer - a collection to get the answer id(s) selected.
@@ -474,7 +475,12 @@ public class DeliveryControllers
 								.add(
 									ui.newText()
 										.setEnabled(ui.newDecision().setDelegate(new AnswerKeyDecision()).setProperty(ui.newPropertyReference().setEntityReference("question")))
-										.setText("question-answer-key", ui.newPropertyReference().setEntityReference("question").setPropertyReference("answerKey")))))
+										.setText("question-answer-key", ui.newPropertyReference().setEntityReference("question").setPropertyReference("answerKey")))
+								.add(
+									ui.newText()
+										.setEnabled(ui.newDecision().setDelegate(new QuestionFeedbackDecision()).setProperty(ui.newPropertyReference().setEntityReference("question")))
+										.setText("question-feedback", ui.newPropertyReference().setEntityReference("answer").setPropertyReference("questionFeedback")))
+						))
 				.add(
 					ui.newSection()
 						.add(
@@ -1251,6 +1257,48 @@ public class DeliveryControllers
 			{
 				// if we are doing correct answer feedback
 				if ((assessment.getFeedbackShowCorrectAnswer().booleanValue()))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+	}
+	
+	/**
+	 * If we are doing feedback, and doing question feedback
+	 */
+	public static class QuestionFeedbackDecision implements DecisionDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean decide(Decision decision, Context context, Object focus)
+		{
+			// see if we have a "feedback" set in context
+			if (context.get("feedback") == null) return false;
+
+			// property reference is to a question
+			if (decision.getProperty() == null) return false;
+			Object o = decision.getProperty().readObject(context, focus);
+			if (o == null) return false;
+			if (!(o instanceof AssessmentQuestion)) return false;
+
+			AssessmentQuestion question = (AssessmentQuestion) o;
+
+			Assessment assessment = question.getSection().getAssessment();
+			if (assessment == null) return false;
+
+			// if we are doing feedback just now
+			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
+			Time feedbackDate = assessment.getFeedbackDate();
+			if ((delivery == FeedbackDelivery.IMMEDIATE)
+					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+							.newTime()))))))
+			{
+				// if we are doing question feedback
+				if ((assessment.getFeedbackShowQuestionFeedback().booleanValue()))
 				{
 					return true;
 				}

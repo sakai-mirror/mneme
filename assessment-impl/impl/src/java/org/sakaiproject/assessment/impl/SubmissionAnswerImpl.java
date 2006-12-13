@@ -207,6 +207,28 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getQuestionFeedback()
+	{
+		AssessmentQuestion question = this.getQuestion();
+
+		// for survey and essay, use the general feedback
+		if ((question.getType() == QuestionType.survey) || (question.getType() == QuestionType.essay))
+		{
+			return question.getFeedbackGeneral();
+		}
+
+		// otherwise check and use the correct or incorrect
+		else if (this.submission.service.checkAnswer(this))
+		{
+			return question.getFeedbackCorrect();
+		}
+
+		return question.getFeedbackIncorrect();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getRationale()
 	{
 		return this.rationale;

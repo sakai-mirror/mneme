@@ -26,6 +26,12 @@ import org.sakaiproject.assessment.api.QuestionPart;
 
 public class AssessmentAnswerImpl implements AssessmentAnswer
 {
+	protected String feedbackCorrect = null;
+
+	protected String feedbackGeneral = null;
+
+	protected String feedbackIncorrect = null;
+
 	protected String id = null;
 
 	protected Boolean isCorrect = null;
@@ -49,6 +55,9 @@ public class AssessmentAnswerImpl implements AssessmentAnswer
 	 */
 	public AssessmentAnswerImpl(AssessmentAnswerImpl other)
 	{
+		setFeedbackCorrect(other.getFeedbackCorrect());
+		setFeedbackGeneral(other.getFeedbackGeneral());
+		setFeedbackIncorrect(other.getFeedbackIncorrect());
 		initId(other.getId());
 		setIsCorrect(other.getIsCorrect());
 		setLabel(other.getLabel());
@@ -80,6 +89,30 @@ public class AssessmentAnswerImpl implements AssessmentAnswer
 		if (!(obj instanceof AssessmentAnswer)) return false;
 		if (this == obj) return true;
 		return ((AssessmentAnswer) obj).getId().equals(getId());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFeedbackCorrect()
+	{
+		return this.feedbackCorrect;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFeedbackGeneral()
+	{
+		return this.feedbackGeneral;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFeedbackIncorrect()
+	{
+		return this.feedbackIncorrect;
 	}
 
 	/**
@@ -138,6 +171,30 @@ public class AssessmentAnswerImpl implements AssessmentAnswer
 	public int hashCode()
 	{
 		return getId().hashCode();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setFeedbackCorrect(String feedback)
+	{
+		this.feedbackCorrect = feedback;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setFeedbackGeneral(String feedback)
+	{
+		this.feedbackGeneral = feedback;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setFeedbackIncorrect(String feedback)
+	{
+		this.feedbackIncorrect = feedback;
 	}
 
 	/**

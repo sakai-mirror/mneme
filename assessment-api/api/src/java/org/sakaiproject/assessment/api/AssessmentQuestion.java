@@ -61,6 +61,27 @@ public interface AssessmentQuestion
 	Boolean getCaseSensitive();
 
 	/**
+	 * Access the correct feedback string.
+	 * 
+	 * @return The correct feedback string, if defined, of null if not.
+	 */
+	String getFeedbackCorrect();
+
+	/**
+	 * Access the general feedback string.
+	 * 
+	 * @return The general feedback string, if defined, of null if not.
+	 */
+	String getFeedbackGeneral();
+
+	/**
+	 * Access the incorrect feedback string.
+	 * 
+	 * @return The incorrect feedback string, if defined, of null if not.
+	 */
+	String getFeedbackIncorrect();
+
+	/**
 	 * Access the id of this assessment question.
 	 * 
 	 * @return The assessment's id.
@@ -153,6 +174,30 @@ public interface AssessmentQuestion
 	 *        The case sensitive setting for the question, or null if it does not apply.
 	 */
 	void setCaseSensitive(Boolean value);
+
+	/**
+	 * Set the correct feedback string.
+	 * 
+	 * @param feedback
+	 *        The correct feedback string.
+	 */
+	void setFeedbackCorrect(String feedback);
+
+	/**
+	 * Set the general feedback string.
+	 * 
+	 * @param feedback
+	 *        The general feedback string.
+	 */
+	void setFeedbackGeneral(String feedback);
+
+	/**
+	 * Set the incorrect feedback string.
+	 * 
+	 * @param feedback
+	 *        The incorrect feedback string.
+	 */
+	void setFeedbackIncorrect(String feedback);
 
 	/**
 	 * Set the question's display instructions.

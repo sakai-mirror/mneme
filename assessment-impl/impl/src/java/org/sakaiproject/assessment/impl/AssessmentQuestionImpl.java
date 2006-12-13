@@ -212,6 +212,12 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 
 	protected Boolean caseSensitive = null;
 
+	protected String feedbackCorrect = null;
+
+	protected String feedbackGeneral = null;
+
+	protected String feedbackIncorrect = null;
+
 	protected String id = null;
 
 	protected String instructions = null;
@@ -244,6 +250,9 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	public AssessmentQuestionImpl(AssessmentQuestionImpl other)
 	{
 		setCaseSensitive(other.getCaseSensitive());
+		setFeedbackCorrect(other.getFeedbackCorrect());
+		setFeedbackGeneral(other.getFeedbackGeneral());
+		setFeedbackIncorrect(other.getFeedbackIncorrect());
 		initId(other.getId());
 		setInstructions(other.getInstructions());
 		setMutuallyExclusive(other.getMutuallyExclusive());
@@ -319,7 +328,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 			}
 
 			// remove the last two characters (the trailing ", "
-			rv.setLength(rv.length()-2);
+			rv.setLength(rv.length() - 2);
 
 			return rv.toString();
 		}
@@ -349,7 +358,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 			}
 
 			// remove the last two characters (the trailing ", "
-			rv.setLength(rv.length()-2);
+			rv.setLength(rv.length() - 2);
 
 			return rv.toString();
 		}
@@ -374,7 +383,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 			}
 
 			// remove the last two characters (the trailing ", "
-			rv.setLength(rv.length()-2);
+			rv.setLength(rv.length() - 2);
 
 			return rv.toString();
 		}
@@ -397,6 +406,30 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	{
 		if (this.caseSensitive == null) return Boolean.FALSE;
 		return this.caseSensitive;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFeedbackCorrect()
+	{
+		return this.feedbackCorrect;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFeedbackGeneral()
+	{
+		return this.feedbackGeneral;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFeedbackIncorrect()
+	{
+		return this.feedbackIncorrect;
 	}
 
 	/**
@@ -539,6 +572,30 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	public void setCaseSensitive(Boolean value)
 	{
 		this.caseSensitive = value;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setFeedbackCorrect(String feedback)
+	{
+		this.feedbackCorrect = feedback;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setFeedbackGeneral(String feedback)
+	{
+		this.feedbackGeneral = feedback;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setFeedbackIncorrect(String feedback)
+	{
+		this.feedbackIncorrect = feedback;
 	}
 
 	/**

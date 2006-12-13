@@ -46,7 +46,7 @@ public interface SubmissionAnswer
 	Float getAutoScore();
 
 	/**
-	 * Access the one or more entries that make up this answer.  There needs to be an entry for each part of the assessment question.
+	 * Access the one or more entries that make up this answer. There needs to be an entry for each part of the assessment question.
 	 * 
 	 * @return The one or more entries that make up this answer.
 	 */
@@ -95,6 +95,13 @@ public interface SubmissionAnswer
 	AssessmentQuestion getQuestion();
 
 	/**
+	 * Access the appropriate assessment question level feedback for this answer, depending on the correctness of the answer.
+	 * 
+	 * @return The appropriate assessment question level feedback for this answer, depending on the correctness of the answer.
+	 */
+	String getQuestionFeedback();
+
+	/**
 	 * Access the rationale text, if any, provided as part of this answer.
 	 * 
 	 * @return The answer's rationale text, or null if there is none.
@@ -116,10 +123,10 @@ public interface SubmissionAnswer
 	Time getSubmittedDate();
 
 	/**
-	 * Set these answer ids, ordered by question part, as the new answer ids for our entries.  There must be an id for each entry (and for each question part) in order.
+	 * Set these answer ids, ordered by question part, as the new answer ids for our entries. There must be an id for each entry (and for each question part) in order.
 	 * 
 	 * @param answerIds
-	 *        The ordered set of assessment question answer ids for our entries.  If null, all entry ids will be cleared.
+	 *        The ordered set of assessment question answer ids for our entries. If null, all entry ids will be cleared.
 	 */
 	void setEntryAnswerIds(String... answerIds);
 
@@ -132,10 +139,10 @@ public interface SubmissionAnswer
 	void setEntryAnswerText(String answerText);
 
 	/**
-	 * Set these answer texts, ordered by question part, as the new answer texts for our entries.  There must be an text for each entry (and for each question part) in order.
+	 * Set these answer texts, ordered by question part, as the new answer texts for our entries. There must be an text for each entry (and for each question part) in order.
 	 * 
 	 * @param answerTexts
-	 *        The ordered set of answer texts for our entries.  If null, all entry texts will be cleared
+	 *        The ordered set of answer texts for our entries. If null, all entry texts will be cleared
 	 */
 	void setEntryAnswerTexts(String... answerTexts);
 
