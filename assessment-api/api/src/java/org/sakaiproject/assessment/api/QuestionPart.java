@@ -31,6 +31,13 @@ import java.util.List;
 public interface QuestionPart
 {
 	/**
+	 * Access the single answer.
+	 * 
+	 * @return The single answer.
+	 */
+	AssessmentAnswer getAnswer();
+
+	/**
 	 * Access an answer, by id.
 	 * 
 	 * @param answerId

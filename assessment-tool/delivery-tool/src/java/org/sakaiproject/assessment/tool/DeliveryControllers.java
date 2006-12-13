@@ -109,14 +109,16 @@ public class DeliveryControllers
 										.setEntityNavigation(
 											ui.newEntityNavigation()
 												.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newTextPropertyReference().setPropertyReference("id")))
-												.setEnabled(ui.newDecision().setDelegate(new ReviewDecision())))
+												.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setPropertyReference("assessment.feedbackNow"))))
 										.setSortable(Boolean.TRUE)
 										.addNavigation(
 											ui.newNavigation()
 												.setTitle("list-review-statistics")
 												.setStyle(Navigation.Style.link)
 												.setDestination(ui.newDestination().setDestination("/statistics/{0}", ui.newPropertyReference().setPropertyReference("id")))
-												.setEnabled(ui.newDecision().setDelegate(new ShowStatisticsDecision()))))
+												.setEnabled(
+													ui.newDecision().setProperty(ui.newPropertyReference().setPropertyReference("assessment.feedbackNow")),
+													ui.newDecision().setProperty(ui.newPropertyReference().setPropertyReference("assessment.feedbackShowStatistics")))))
 								.addColumn(
 									ui.newPropertyColumn()
 										.setTitle("list-review-feedbackDate")
@@ -265,16 +267,16 @@ public class DeliveryControllers
 						.add(
 							ui.newSubmission()
 								.setTitle("question-link-feedback")
-								.setEnabled(
-									ui.newDecision()
-										.setProperty(
-											ui.newPropertyReference()
-												.setEntityReference("submission"))
-										.setDelegate(new ShowFeedbackChoiceDecision()))
 								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}/feedback",
 									ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
-									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("id"))))
+									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("id")))
+								.setEnabled(
+										ui.newDecision()
+											.setProperty(
+												ui.newPropertyReference()
+													.setEntityReference("submission"))
+											.setDelegate(new ShowFeedbackChoiceDecision())))
 						.add(
 							ui.newSubmission()
 								.setTitle("question-link-toc")
@@ -295,42 +297,31 @@ public class DeliveryControllers
 									)
 								.add(
 									ui.newText()
+										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("instructions"))
 										.setEnabled(
-											ui.newCompareDecision()
-												.setEqualsConstant(
-													QuestionType.matching.toString())
-												.setProperty(
-													ui.newBooleanPropertyReference()
-														.setEntityReference("question")
-														.setPropertyReference("type")))
-										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("instructions")))
+												ui.newCompareDecision()
+													.setEqualsConstant(
+														QuestionType.matching.toString())
+													.setProperty(
+														ui.newBooleanPropertyReference()
+															.setEntityReference("question")
+															.setPropertyReference("type"))))
 								.add(
 									ui.newText()
+										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("part.title"))
 										.setEnabled(
-											ui.newCompareDecision()
-												.setEqualsConstant(
-													QuestionType.fillIn.toString(),
-													QuestionType.numeric.toString(),
-													QuestionType.matching.toString())
-												.setProperty(
-													ui.newBooleanPropertyReference()
-														.setEntityReference("question")
-														.setPropertyReference("type"))
-												.setReversed(true))
-										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("part.title")))
+												ui.newCompareDecision()
+													.setEqualsConstant(
+														QuestionType.fillIn.toString(),
+														QuestionType.numeric.toString(),
+														QuestionType.matching.toString())
+													.setProperty(
+														ui.newBooleanPropertyReference()
+															.setEntityReference("question")
+															.setPropertyReference("type"))
+													.setReversed(true)))
 								.add(
 									ui.newEntityList()
-										.setEnabled(
-											ui.newCompareDecision()
-												.setEqualsConstant(
-													QuestionType.multipleChoice.toString(),
-													QuestionType.multipleCorrect.toString(),
-													QuestionType.survey.toString(),
-													QuestionType.trueFalse.toString())
-												.setProperty(
-													ui.newBooleanPropertyReference()
-														.setEntityReference("question")
-														.setPropertyReference("type")))
 										.setEntityReference(ui.newPropertyReference().setEntityReference("question").setPropertyReference("part.answers"))
 										.addColumn(
 											ui.newHtmlPropertyColumn()
@@ -368,31 +359,35 @@ public class DeliveryControllers
 												ui.newPropertyColumn()
 													.setProperty(
 														ui.newTextPropertyReference()
-															.setPropertyReference("text"))))
+															.setPropertyReference("text")))
+										.setEnabled(
+												ui.newCompareDecision()
+													.setEqualsConstant(
+														QuestionType.multipleChoice.toString(),
+														QuestionType.multipleCorrect.toString(),
+														QuestionType.survey.toString(),
+														QuestionType.trueFalse.toString())
+													.setProperty(
+														ui.newBooleanPropertyReference()
+															.setEntityReference("question")
+															.setPropertyReference("type"))))
 								.add(
 									ui.newTextEdit()
 										.setTitle("question-text")
-										.setEnabled(
-											ui.newCompareDecision()
-												.setEqualsConstant(QuestionType.essay.toString())
-												.setProperty(
-													ui.newBooleanPropertyReference()
-														.setEntityReference("question")
-														.setPropertyReference("type")))
 										.setProperty(
 											ui.newPropertyReference()
 												.setEntityReference("answer")
-												.setPropertyReference("entryAnswerText")))
+												.setPropertyReference("entryAnswerText"))
+										.setEnabled(
+												ui.newCompareDecision()
+													.setEqualsConstant(QuestionType.essay.toString())
+													.setProperty(
+														ui.newBooleanPropertyReference()
+															.setEntityReference("question")
+															.setPropertyReference("type"))))
 								.add(
 									ui.newFillIn()
 										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("part.title"))
-										.setEnabled(
-											ui.newCompareDecision()
-												.setEqualsConstant(QuestionType.fillIn.toString(), QuestionType.numeric.toString())
-												.setProperty(
-													ui.newPropertyReference()
-														.setEntityReference("question")
-														.setPropertyReference("type")))
 										.setProperty(
 											ui.newPropertyReference()
 												.setEntityReference("answer")
@@ -403,20 +398,18 @@ public class DeliveryControllers
 												.setPropertyReference("entryCorrects"),
 											"/icons/correct.gif",
 											"question-correct",
-											ui.newDecision()
-												.setDelegate(new CorrectAnswerFeedbackDecision())
-												.setProperty(
-													ui.newPropertyReference()
-													.setEntityReference("question"))))
+											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowCorrectAnswer")))
+										.setEnabled(
+												ui.newCompareDecision()
+													.setEqualsConstant(QuestionType.fillIn.toString(), QuestionType.numeric.toString())
+													.setProperty(
+														ui.newPropertyReference()
+															.setEntityReference("question")
+															.setPropertyReference("type"))))
 								.add(
 									ui.newMatch()
-										.setEnabled(
-											ui.newCompareDecision()
-												.setEqualsConstant(QuestionType.matching.toString())
-												.setProperty(
-													ui.newBooleanPropertyReference()
-														.setEntityReference("question")
-														.setPropertyReference("type")))
 										.setProperty(
 											ui.newPropertyReference()
 												.setEntityReference("answer")
@@ -427,11 +420,9 @@ public class DeliveryControllers
 												.setPropertyReference("entryCorrects"),
 											"/icons/correct.gif",
 											"question-correct",
-											ui.newDecision()
-												.setDelegate(new CorrectAnswerFeedbackDecision())
-												.setProperty(
-													ui.newPropertyReference()
-													.setEntityReference("question")))
+											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowCorrectAnswer")))
 										.setSelectText("question-select")
 										.setParts(
 											ui.newPropertyReference()
@@ -451,20 +442,27 @@ public class DeliveryControllers
 												.setPropertyReference("text"))
 										.setChoiceLabel(
 											ui.newPropertyReference()
-												.setPropertyReference("label")))
+												.setPropertyReference("label"))
+										.setEnabled(
+												ui.newCompareDecision()
+													.setEqualsConstant(QuestionType.matching.toString())
+													.setProperty(
+														ui.newBooleanPropertyReference()
+															.setEntityReference("question")
+															.setPropertyReference("type"))))
 								.add(
 									ui.newTextEdit()
 										.setTitle("question-rationale")
-										.setEnabled(
-											ui.newDecision()
-												.setProperty(
-													ui.newBooleanPropertyReference()
-													.setEntityReference("question")
-													.setPropertyReference("requireRationale")))
 										.setProperty(
 											ui.newPropertyReference()
 												.setEntityReference("answer")
-												.setPropertyReference("rationale")))
+												.setPropertyReference("rationale"))
+										.setEnabled(
+												ui.newDecision()
+													.setProperty(
+														ui.newBooleanPropertyReference()
+														.setEntityReference("question")
+														.setPropertyReference("requireRationale"))))
 								.add(
 									ui.newSelection()
 										.setTitle("question-mark-review")
@@ -474,55 +472,78 @@ public class DeliveryControllers
 												.setPropertyReference("markedForReview")))
 								.add(
 									ui.newText()
-										.setEnabled(ui.newDecision().setDelegate(new AnswerKeyDecision()).setProperty(ui.newPropertyReference().setEntityReference("question")))
-										.setText("question-answer-key", ui.newPropertyReference().setEntityReference("question").setPropertyReference("answerKey")))
+										.setText("question-answer-key", ui.newPropertyReference().setEntityReference("question").setPropertyReference("answerKey"))
+										.setEnabled(
+												ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
+												ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
+												ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowCorrectAnswer")),
+												ui.newCompareDecision()
+													.setEqualsConstant(
+														QuestionType.fillIn.toString(),
+														QuestionType.matching.toString(),
+														QuestionType.multipleChoice.toString(),
+														QuestionType.multipleCorrect.toString(),
+														QuestionType.numeric.toString(),
+														QuestionType.trueFalse.toString())
+													.setProperty(ui.newBooleanPropertyReference().setEntityReference("question").setPropertyReference("type"))))
 								.add(
 									ui.newText()
-										.setEnabled(ui.newDecision().setDelegate(new QuestionFeedbackDecision()).setProperty(ui.newPropertyReference().setEntityReference("question")))
-										.setText("question-feedback", ui.newPropertyReference().setEntityReference("answer").setPropertyReference("questionFeedback")))
-						))
+										.setText("question-feedback", ui.newPropertyReference().setEntityReference("answer").setPropertyReference("questionFeedback"))
+										.setEnabled(
+												ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
+												ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
+												ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowQuestionFeedback"))))
+								.add(
+									ui.newText()
+										.setText("question-model-answer", ui.newPropertyReference().setEntityReference("question").setPropertyReference("part.answer.text"))
+										.setEnabled(
+											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowQuestionFeedback")),
+											ui.newCompareDecision()
+												.setEqualsConstant(QuestionType.essay.toString())
+												.setProperty(ui.newBooleanPropertyReference().setEntityReference("question").setPropertyReference("type"))))))
 				.add(
 					ui.newSection()
 						.add(
 							ui.newSubmission()
 								.setTitle("question-save-continue")
 								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)
-								.setEnabled(
-									ui.newDecision()
-										.setReversed(true)
-										.setProperty(
-											ui.newBooleanPropertyReference()
-												.setEntityReference("question")
-												.setPropertyReference("assessmentOrdering.isLast")))
 								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
 										ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
-										ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("assessmentOrdering.next.id"))))
+										ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("assessmentOrdering.next.id")))
+								.setEnabled(
+										ui.newDecision()
+											.setReversed(true)
+											.setProperty(
+												ui.newBooleanPropertyReference()
+													.setEntityReference("question")
+													.setPropertyReference("assessmentOrdering.isLast"))))
 						.add(
 							ui.newSubmission()
 								.setTitle("question-save-submit")
 								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)
+								.setDestination(ui.newDestination().setDestination("/exit/{0}",ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id")))
 								.setEnabled(
-									ui.newDecision()
-										// TODO: what's the criteria for this?
-										.setProperty(
-											ui.newBooleanPropertyReference()
-												.setEntityReference("question")
-												.setPropertyReference("assessmentOrdering.isLast")))
-								.setDestination(ui.newDestination().setDestination("/exit/{0}",ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"))))
+										ui.newDecision()
+											.setProperty(
+												ui.newBooleanPropertyReference()
+													.setEntityReference("question")
+													.setPropertyReference("assessmentOrdering.isLast"))))
 						.add(
 							ui.newSubmission()
 								.setTitle("quesiton-save-prev")
 								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)
-								.setEnabled(
-									ui.newDecision()
-										.setReversed(true)
-										.setProperty(
-											ui.newBooleanPropertyReference()
-												.setEntityReference("question")
-												.setPropertyReference("assessmentOrdering.isFirst")))
 								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
 									ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
-									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("assessmentOrdering.previous.id"))))	
+									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("assessmentOrdering.previous.id")))
+								.setEnabled(
+										ui.newDecision()
+											.setReversed(true)
+											.setProperty(
+												ui.newBooleanPropertyReference()
+													.setEntityReference("question")
+													.setPropertyReference("assessmentOrdering.isFirst"))))	
 						.add(
 							ui.newSubmission()
 								.setTitle("quesiton-save-exit")
@@ -679,6 +700,7 @@ public class DeliveryControllers
 								.setDestination(ui.newDestination().setDestination("/list"))));
 	}
 
+	// TODO: sludge column included take ... and this goes away
 	public static class SubmissionScoreDecision implements DecisionDelegate
 	{
 		/**
@@ -713,40 +735,7 @@ public class DeliveryControllers
 		}
 	}
 
-	public static class ShowStatisticsDecision implements DecisionDelegate
-	{
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean decide(Decision decision, Context context, Object focus)
-		{
-			// focus is the submission
-			if (focus == null) return false;
-			if (!(focus instanceof Submission)) return false;
-
-			Submission submission = (Submission) focus;
-			Assessment assessment = submission.getAssessment();
-			if (assessment == null) return false;
-
-			// if we are doing feedback just now
-			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
-			Time feedbackDate = assessment.getFeedbackDate();
-			if ((delivery == FeedbackDelivery.IMMEDIATE)
-					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
-							.newTime()))))))
-			{
-				// if we are doing statistics feedback
-				if (assessment.getFeedbackShowStatistics().booleanValue())
-				{
-					// show the score
-					return true;
-				}
-			}
-
-			return false;
-		}
-	}
-
+	// TODO: if we do OR in sludge enabled, this goes away
 	/**
 	 * if we are doing feedback just now, and we have show correct answer
 	 */
@@ -768,47 +757,13 @@ public class DeliveryControllers
 			if (assessment == null) return false;
 
 			// if we are doing feedback just now
-			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
-			Time feedbackDate = assessment.getFeedbackDate();
-			// TODO: move this to service
-			if ((delivery == FeedbackDelivery.IMMEDIATE)
-					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
-							.newTime()))))))
+			if (assessment.getFeedbackNow().booleanValue())
 			{
-				// if we are doing correct answer feedback
+				// if we are doing correct answer feedback or question level feedback
 				if ((assessment.getFeedbackShowCorrectAnswer().booleanValue()) || (assessment.getFeedbackShowQuestionFeedback().booleanValue()))
 				{
 					return true;
 				}
-			}
-
-			return false;
-		}
-	}
-
-	public static class ReviewDecision implements DecisionDelegate
-	{
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean decide(Decision decision, Context context, Object focus)
-		{
-			// focus is the submission
-			if (focus == null) return false;
-			if (!(focus instanceof Submission)) return false;
-
-			Submission submission = (Submission) focus;
-			Assessment assessment = submission.getAssessment();
-			if (assessment == null) return false;
-
-			// if we are doing feedback just now
-			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
-			Time feedbackDate = assessment.getFeedbackDate();
-			if ((delivery == FeedbackDelivery.IMMEDIATE)
-					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
-							.newTime()))))))
-			{
-				return true;
 			}
 
 			return false;
@@ -876,7 +831,7 @@ public class DeliveryControllers
 			Assessment assessment = submission.getAssessment();
 			if (assessment == null) return false;
 
-			// if multiple submission are allowed, and if we choose the highest score for grading
+			// if multiple submission are allowed, and if we choose the lastest submission for grading
 			Integer numAllowed = assessment.getNumSubmissionsAllowed();
 			if (((numAllowed == null) || (numAllowed.intValue() > 1))
 					&& (assessment.getMultipleSubmissionSelectionPolicy() == MultipleSubmissionSelectionPolicy.USE_LATEST))
@@ -972,11 +927,7 @@ public class DeliveryControllers
 			StringBuffer rv = new StringBuffer();
 
 			// if we are doing feedback just now
-			FeedbackDelivery delivery = submission.getAssessment().getFeedbackDelivery();
-			Time feedbackDate = assessment.getFeedbackDate();
-			if ((delivery == FeedbackDelivery.IMMEDIATE)
-					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
-							.newTime()))))))
+			if (assessment.getFeedbackNow())
 			{
 				// if we are doing score feedback
 				if (assessment.getFeedbackShowScore().booleanValue())
@@ -1032,11 +983,7 @@ public class DeliveryControllers
 			StringBuffer rv = new StringBuffer();
 
 			// if we are doing feedback just now
-			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
-			Time feedbackDate = assessment.getFeedbackDate();
-			if ((delivery == FeedbackDelivery.IMMEDIATE)
-					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
-							.newTime()))))))
+			if (assessment.getFeedbackNow())
 			{
 				// if we are doing question score feedback
 				if (assessment.getFeedbackShowQuestionScore().booleanValue())
@@ -1142,11 +1089,7 @@ public class DeliveryControllers
 			if (assessment == null) return null;
 
 			// if we are doing feedback just now
-			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
-			Time feedbackDate = assessment.getFeedbackDate();
-			if ((delivery == FeedbackDelivery.IMMEDIATE)
-					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
-							.newTime()))))))
+			if (assessment.getFeedbackNow())
 			{
 				// if we are doing currect answer feedback
 				if (assessment.getFeedbackShowCorrectAnswer().booleanValue())
@@ -1173,138 +1116,6 @@ public class DeliveryControllers
 			}
 
 			return null;
-		}
-	}
-
-	/**
-	 * If we are doing feedback, and doing correct answer feedback, and this question has an answer key
-	 */
-	public static class AnswerKeyDecision implements DecisionDelegate
-	{
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean decide(Decision decision, Context context, Object focus)
-		{
-			// see if we have a "feedback" set in context
-			if (context.get("feedback") == null) return false;
-
-			// property reference is to a question
-			if (decision.getProperty() == null) return false;
-			Object o = decision.getProperty().readObject(context, focus);
-			if (o == null) return false;
-			if (!(o instanceof AssessmentQuestion)) return false;
-
-			AssessmentQuestion question = (AssessmentQuestion) o;
-
-			// only for match, multi, multi correct, true/false, fillin, numeric
-			if (!((question.getType() == QuestionType.fillIn) || (question.getType() == QuestionType.matching)
-					|| (question.getType() == QuestionType.multipleChoice) || (question.getType() == QuestionType.multipleCorrect)
-					|| (question.getType() == QuestionType.numeric) || (question.getType() == QuestionType.trueFalse)))
-				return false;
-
-			Assessment assessment = question.getSection().getAssessment();
-			if (assessment == null) return false;
-
-			// if we are doing feedback just now
-			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
-			Time feedbackDate = assessment.getFeedbackDate();
-			if ((delivery == FeedbackDelivery.IMMEDIATE)
-					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
-							.newTime()))))))
-			{
-				// if we are doing correct answer feedback
-				if ((assessment.getFeedbackShowCorrectAnswer().booleanValue()))
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
-	}
-
-	/**
-	 * If we are doing feedback, and doing correct answer feedback
-	 */
-	public static class CorrectAnswerFeedbackDecision implements DecisionDelegate
-	{
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean decide(Decision decision, Context context, Object focus)
-		{
-			// see if we have a "feedback" set in context
-			if (context.get("feedback") == null) return false;
-
-			// property reference is to a question
-			if (decision.getProperty() == null) return false;
-			Object o = decision.getProperty().readObject(context, focus);
-			if (o == null) return false;
-			if (!(o instanceof AssessmentQuestion)) return false;
-
-			AssessmentQuestion question = (AssessmentQuestion) o;
-
-			Assessment assessment = question.getSection().getAssessment();
-			if (assessment == null) return false;
-
-			// if we are doing feedback just now
-			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
-			Time feedbackDate = assessment.getFeedbackDate();
-			if ((delivery == FeedbackDelivery.IMMEDIATE)
-					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
-							.newTime()))))))
-			{
-				// if we are doing correct answer feedback
-				if ((assessment.getFeedbackShowCorrectAnswer().booleanValue()))
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
-	}
-	
-	/**
-	 * If we are doing feedback, and doing question feedback
-	 */
-	public static class QuestionFeedbackDecision implements DecisionDelegate
-	{
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean decide(Decision decision, Context context, Object focus)
-		{
-			// see if we have a "feedback" set in context
-			if (context.get("feedback") == null) return false;
-
-			// property reference is to a question
-			if (decision.getProperty() == null) return false;
-			Object o = decision.getProperty().readObject(context, focus);
-			if (o == null) return false;
-			if (!(o instanceof AssessmentQuestion)) return false;
-
-			AssessmentQuestion question = (AssessmentQuestion) o;
-
-			Assessment assessment = question.getSection().getAssessment();
-			if (assessment == null) return false;
-
-			// if we are doing feedback just now
-			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
-			Time feedbackDate = assessment.getFeedbackDate();
-			if ((delivery == FeedbackDelivery.IMMEDIATE)
-					|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
-							.newTime()))))))
-			{
-				// if we are doing question feedback
-				if ((assessment.getFeedbackShowQuestionFeedback().booleanValue()))
-				{
-					return true;
-				}
-			}
-
-			return false;
 		}
 	}
 }

@@ -24,12 +24,17 @@ package org.sakaiproject.assessment.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.AssessmentAnswer;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.QuestionPart;
 
 public class QuestionPartImpl implements QuestionPart
 {
+	/** Our logger. */
+	private static Log M_log = LogFactory.getLog(QuestionPartImpl.class);;
+
 	protected List<AssessmentAnswerImpl> answers = new ArrayList<AssessmentAnswerImpl>();
 
 	protected String id = null;
@@ -81,6 +86,19 @@ public class QuestionPartImpl implements QuestionPart
 		if (!(obj instanceof QuestionPart)) return false;
 		if (this == obj) return true;
 		return ((QuestionPart) obj).getId().equals(getId());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentAnswer getAnswer()
+	{
+		if (this.answers.size() != 1)
+		{
+			M_log.warn("getAnswer: to a multi-answer question");
+		}
+
+		return this.answers.get(0);
 	}
 
 	/**

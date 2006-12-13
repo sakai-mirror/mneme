@@ -33,6 +33,7 @@ import org.sakaiproject.assessment.api.AssessmentStatus;
 import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.MultipleSubmissionSelectionPolicy;
 import org.sakaiproject.time.api.Time;
+import org.sakaiproject.time.cover.TimeService;
 
 /**
  * <p>
@@ -154,6 +155,23 @@ public class AssessmentImpl implements Assessment
 	{
 		this.setMain(other);
 		this.setSections(other);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getFeedbackNow()
+	{
+		FeedbackDelivery delivery = getFeedbackDelivery();
+		Time feedbackDate = getFeedbackDate();
+		if ((delivery == FeedbackDelivery.IMMEDIATE)
+				|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+						.newTime()))))))
+		{
+			return Boolean.TRUE;
+		}
+
+		return Boolean.FALSE;
 	}
 
 	/**

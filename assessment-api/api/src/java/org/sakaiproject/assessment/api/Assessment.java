@@ -84,6 +84,13 @@ public interface Assessment
 	FeedbackDelivery getFeedbackDelivery();
 
 	/**
+	 * Check if feedback is eanbled right now for this assessment, considering when now is and all the feedback settings.
+	 * 
+	 * @return TRUE if feedback is enabled right now, FALSE if not.
+	 */
+	Boolean getFeedbackNow();
+
+	/**
 	 * Access the "show correct answer" feedback setting; controls if we should show the correct answer to the assessment taker as part of feedback.
 	 * 
 	 * @return TRUE if we should show the correct answer as part of feedback, FALSE if not.
