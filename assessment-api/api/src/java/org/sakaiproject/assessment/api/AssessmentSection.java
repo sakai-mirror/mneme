@@ -45,7 +45,7 @@ public interface AssessmentSection
 	String getDescription();
 
 	/**
-	 * Access the first question.
+	 * Access the first question.  The order will be in a random order (if enabled) based on the current user.
 	 * 
 	 * @return The first question, or null if there are none.
 	 */
@@ -59,7 +59,7 @@ public interface AssessmentSection
 	String getId();
 
 	/**
-	 * Access the last question.
+	 * Access the last question.  The order will be in a random order (if enabled) based on the current user.
 	 * 
 	 * @return The last question, or null if there are none.
 	 */
@@ -89,11 +89,25 @@ public interface AssessmentSection
 	AssessmentQuestion getQuestion(String questionId);
 
 	/**
-	 * Access the questions.
+	 * Access the questions. The order will be in a random order (if enabled) based on the current user.
 	 * 
-	 * @return The questions.
+	 * @return The questions. The order will be in a random order (if enabled) based on the current user.
 	 */
 	List<? extends AssessmentQuestion> getQuestions();
+
+	/**
+	 * Access the questions. The order will be in authored order.
+	 * 
+	 * @return The questions. The order will be in authored order.
+	 */
+	List<? extends AssessmentQuestion> getQuestionsAsAuthored();
+
+	/**
+	 * Access the random question ordering setting; if true, questions are to be presented in random order withing the section.
+	 * 
+	 * @return The random question ordering setting.
+	 */
+	Boolean getRandomQuestionOrder();
 
 	/**
 	 * Access the title.
@@ -124,6 +138,14 @@ public interface AssessmentSection
 	 *        The questions.
 	 */
 	void setQuestions(List<? extends AssessmentQuestion> questions);
+
+	/**
+	 * Set the random ordering setting.
+	 * 
+	 * @param setting
+	 *        The random ordering setting.
+	 */
+	void setRandomQuestionOrder(Boolean setting);
 
 	/**
 	 * Set the title.

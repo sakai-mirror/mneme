@@ -151,7 +151,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 		{
 			if (question.getSection() == null) return true;
 
-			if (question.equals(question.getSection().getQuestions().get(0))) return true;
+			if (question.equals(question.getSection().getFirstQuestion())) return true;
 
 			return false;
 		}
@@ -163,8 +163,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 		{
 			if (question.getSection() == null) return true;
 
-			if (question.equals(question.getSection().getQuestions().get(question.getSection().getQuestions().size() - 1)))
-				return true;
+			if (question.equals(question.getSection().getLastQuestion())) return true;
 
 			return false;
 		}
@@ -176,10 +175,11 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 		{
 			if (question.getSection() == null) return null;
 
-			int index = question.getSection().getQuestions().indexOf(question);
-			if (index == question.getSection().getQuestions().size() - 1) return null;
+			List<? extends AssessmentQuestion> questions = question.getSection().getQuestions();
+			int index = questions.indexOf(question);
+			if (index == questions.size() - 1) return null;
 
-			return question.getSection().getQuestions().get(index + 1);
+			return questions.get(index + 1);
 		}
 
 		/**
@@ -201,10 +201,11 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 		{
 			if (question.getSection() == null) return null;
 
-			int index = question.getSection().getQuestions().indexOf(question);
+			List<? extends AssessmentQuestion> questions = question.getSection().getQuestions();
+			int index = questions.indexOf(question);
 			if (index == 0) return null;
 
-			return question.getSection().getQuestions().get(index - 1);
+			return questions.get(index - 1);
 		}
 	}
 

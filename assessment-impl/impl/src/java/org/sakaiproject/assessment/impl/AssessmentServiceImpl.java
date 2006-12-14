@@ -640,7 +640,10 @@ public class AssessmentServiceImpl implements AssessmentService
 		}
 
 		// get the sections
-		String statement = "SELECT P.SECTIONID, P.TITLE, P.DESCRIPTION FROM SAM_PUBLISHEDSECTION_T P WHERE P.ASSESSMENTID = ? ORDER BY P.SEQUENCE ASC";
+		String statement = "SELECT P.SECTIONID, P.TITLE, P.DESCRIPTION, SMD1.ENTRY "
+			+ " FROM SAM_PUBLISHEDSECTION_T P"
+			+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD1 ON P.SECTIONID = SMD1.SECTIONID AND SMD1.LABEL = 'QUESTIONS_ORDERING'"
+			+ " WHERE P.ASSESSMENTID = ? ORDER BY P.SEQUENCE ASC";
 		Object[] fields = new Object[1];
 		fields[0] = assessment.getId();
 
@@ -653,12 +656,14 @@ public class AssessmentServiceImpl implements AssessmentService
 					String sectionId = result.getString(1);
 					String title = result.getString(2);
 					String description = result.getString(3);
+					int questionOrdering = result.getInt(4);
 
 					// pack it into an assessment section
 					AssessmentSectionImpl section = new AssessmentSectionImpl();
 					section.initId(sectionId);
 					section.setTitle(title);
 					section.setDescription(description);
+					section.setRandomQuestionOrder((questionOrdering == 2) ? Boolean.TRUE : Boolean.FALSE);
 
 					// put the section into the assessment
 					section.initAssement(assessment);
@@ -1852,10 +1857,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 				// ID for SAM_PUBLISHEDSECTIONMETADATA_T
 				// Note: Samigo as of 2.3 has a bug - using the same sequence as for the ID of SAM_PUBLISHEDASSESSMENT_T -ggolden
-				// SAM_PUBLISHEDSECTIONMETADATA_ID_S ? Oracle does not like this..
 				Long xid = m_sqlService.getNextSequence("SAM_PUBLISHEDASSESSMENT_ID_S", connection);
-
-				// TODO: are these constants, or do these need modeling?
 
 				statement = "INSERT INTO SAM_PUBLISHEDSECTIONMETADATA_T (SECTIONID, LABEL, ENTRY"
 						+ ((xid == null) ? "" : ", PUBLISHEDSECTIONMETADATAID") + ") values (?, ?, ?" + ((xid == null) ? "" : ",?")
@@ -1863,13 +1865,14 @@ public class AssessmentServiceImpl implements AssessmentService
 				fields = new Object[(xid == null) ? 3 : 4];
 				fields[0] = sectionId;
 				fields[1] = "AUTHOR_TYPE";
+				// TODO: this is the draw from pool (value is 2) / authored question (value is 1) - authored for now
 				fields[2] = "1";
 				if (xid != null) fields[3] = xid;
 				m_sqlService.dbWrite(connection, statement, fields);
 
 				xid = m_sqlService.getNextSequence("SAM_PUBLISHEDASSESSMENT_ID_S", connection);
 				fields[1] = "QUESTIONS_ORDERING";
-				fields[2] = "1";
+				fields[2] = ((section.getRandomQuestionOrder() == null) || (!section.getRandomQuestionOrder().booleanValue())) ? "1" : "2";
 				if (xid != null) fields[3] = xid;
 				m_sqlService.dbWrite(connection, statement, fields);
 			}

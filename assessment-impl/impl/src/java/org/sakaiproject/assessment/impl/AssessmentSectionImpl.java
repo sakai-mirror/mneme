@@ -22,7 +22,9 @@
 package org.sakaiproject.assessment.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -125,6 +127,11 @@ public class AssessmentSectionImpl implements AssessmentSection
 
 	protected List<AssessmentQuestionImpl> questions = new ArrayList<AssessmentQuestionImpl>();
 
+	/** Set to true once we are randomized. */
+	protected transient boolean randomized = false;
+
+	protected Boolean randomQuestionOrdering = null;
+
 	protected String title = null;
 
 	/**
@@ -142,6 +149,7 @@ public class AssessmentSectionImpl implements AssessmentSection
 		this.assessment = other.assessment;
 		this.description = other.description;
 		this.id = other.id;
+		this.randomQuestionOrdering = other.randomQuestionOrdering;
 		this.title = other.title;
 		setQuestions(other.questions);
 	}
@@ -195,7 +203,8 @@ public class AssessmentSectionImpl implements AssessmentSection
 	{
 		if (this.questions.isEmpty()) return null;
 
-		return this.questions.get(0);
+		// based on the possibly random order
+		return getQuestions().get(0);
 	}
 
 	/**
@@ -213,7 +222,8 @@ public class AssessmentSectionImpl implements AssessmentSection
 	{
 		if (this.questions.isEmpty()) return null;
 
-		return this.questions.get(this.questions.size() - 1);
+		// based on the possibly random order
+		return getQuestions().get(this.questions.size() - 1);
 	}
 
 	/**
@@ -252,7 +262,36 @@ public class AssessmentSectionImpl implements AssessmentSection
 	 */
 	public List<? extends AssessmentQuestion> getQuestions()
 	{
+		// copy the questions
+		List<AssessmentQuestionImpl> rv = new ArrayList<AssessmentQuestionImpl>(this.questions);
+
+		// randomize if needed
+		if ((this.randomQuestionOrdering != null) && (this.randomQuestionOrdering.booleanValue()))
+		{
+			// set the seed based on the current user id
+			long seed = this.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode();
+
+			// mix up the questions
+			Collections.shuffle(rv, new Random(seed));
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<? extends AssessmentQuestion> getQuestionsAsAuthored()
+	{
 		return this.questions;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getRandomQuestionOrder()
+	{
+		return this.getRandomQuestionOrder();
 	}
 
 	/**
@@ -310,6 +349,14 @@ public class AssessmentSectionImpl implements AssessmentSection
 
 			this.questions.add(copy);
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setRandomQuestionOrder(Boolean setting)
+	{
+		this.randomQuestionOrdering = setting;
 	}
 
 	/**
