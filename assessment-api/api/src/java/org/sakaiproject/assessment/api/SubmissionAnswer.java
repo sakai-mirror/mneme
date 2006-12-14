@@ -39,6 +39,14 @@ public interface SubmissionAnswer
 	void autoScore();
 
 	/**
+	 * Get an array of the assessment answer feedback strings for each entry, from that entry's selected assessment answer<br />
+	 * correct or incorrect depending on the correctness of the answer.
+	 * 
+	 * @return The appropriate feedback strings for each entry.
+	 */
+	String[] getAnswerFeedbacks();
+
+	/**
 	 * Access the answer's automatic scoring value - the sum of the auto scores of the entries.
 	 * 
 	 * @return The answer's auto-score.

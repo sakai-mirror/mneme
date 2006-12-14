@@ -360,6 +360,12 @@ public class DeliveryControllers
 													.setProperty(
 														ui.newTextPropertyReference()
 															.setPropertyReference("text")))
+										.addColumn(
+												ui.newPropertyColumn()
+													.setProperty(
+														ui.newTextPropertyReference()
+															.setPropertyReference("feedbackGeneral"))
+													.setIncluded(ui.newDecision().setDelegate(new AnswerFeedbackDecision()), null))
 										.setEnabled(
 												ui.newCompareDecision()
 													.setEqualsConstant(
@@ -423,6 +429,14 @@ public class DeliveryControllers
 											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowCorrectAnswer")))
+										.setFeedback(
+											ui.newPropertyReference()
+												.setEntityReference("answer")
+												.setPropertyReference("answerFeedbacks"),
+											"question-match-answer-feedback",
+											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowAnswerFeedback")))
 										.setSelectText("question-select")
 										.setParts(
 											ui.newPropertyReference()
@@ -838,6 +852,43 @@ public class DeliveryControllers
 				return true;
 
 			return false;
+		}
+	}
+	
+	/**
+	 * if we want feedback, are doing feedback, are doing answer feedback, and the question is multi choice or multi correct, and this answer is the one selected...
+	 */
+	public static class AnswerFeedbackDecision implements DecisionDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean decide(Decision decision, Context context, Object focus)
+		{
+			if (context.get("feedback") == null) return false;
+
+			// focus is the AssessmentAnswer
+			if (focus == null) return false;
+			if (!(focus instanceof AssessmentAnswer)) return false;
+
+			AssessmentAnswer answer = (AssessmentAnswer) focus;
+			AssessmentQuestion question = answer.getPart().getQuestion();
+			Assessment assessment = question.getSection().getAssessment();
+
+			if (!assessment.getFeedbackNow()) return false;
+			if (!assessment.getFeedbackShowAnswerFeedback()) return false;
+
+			if (!((question.getType() == QuestionType.multipleChoice) || (question.getType() == QuestionType.multipleCorrect)))
+				return false;
+
+			// for multipleChoice, this must be the answer selected by the entry of the submission answer
+			if (question.getType() == QuestionType.multipleChoice)
+			{
+				SubmissionAnswer submissionAnswer = (SubmissionAnswer) context.get("answer");
+				if (!StringUtil.contains(submissionAnswer.getEntryAnswerIds(), answer.getId())) return false;
+			}
+
+			return true;
 		}
 	}
 

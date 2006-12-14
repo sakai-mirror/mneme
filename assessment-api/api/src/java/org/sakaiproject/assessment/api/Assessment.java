@@ -91,6 +91,13 @@ public interface Assessment
 	Boolean getFeedbackNow();
 
 	/**
+	 * Access the answer level feedback setting; controls if we should show the answer level feedback to the assessment taker as part of feedback.
+	 * 
+	 * @return TRUE if we should show the answer level feedback as part of feedback, FALSE if not.
+	 */
+	Boolean getFeedbackShowAnswerFeedback();
+
+	/**
 	 * Access the "show correct answer" feedback setting; controls if we should show the correct answer to the assessment taker as part of feedback.
 	 * 
 	 * @return TRUE if we should show the correct answer as part of feedback, FALSE if not.
@@ -98,9 +105,9 @@ public interface Assessment
 	Boolean getFeedbackShowCorrectAnswer();
 
 	/**
-	 * Access the "show question" feedback setting; controls if we should show the question feedback to the assessment taker as part of feedback.
+	 * Access the question level feedback setting; controls if we should show the question level feedback to the assessment taker as part of feedback.
 	 * 
-	 * @return TRUE if we should show the question feedback as part of feedback, FALSE if not.
+	 * @return TRUE if we should show the question level feedback as part of feedback, FALSE if not.
 	 */
 	Boolean getFeedbackShowQuestionFeedback();
 
@@ -282,6 +289,14 @@ public interface Assessment
 	void setFeedbackDelivery(FeedbackDelivery delivery);
 
 	/**
+	 * Set the answer level feedback setting.
+	 * 
+	 * @param value
+	 *        The assessment's answer level feedback setting.
+	 */
+	void setFeedbackShowAnswerFeedback(Boolean value);
+
+	/**
 	 * Set the "show correct answer" feedback setting.
 	 * 
 	 * @param value
@@ -290,10 +305,10 @@ public interface Assessment
 	void setFeedbackShowCorrectAnswer(Boolean value);
 
 	/**
-	 * Set the "show question" feedback setting.
+	 * Set the question level feedback setting.
 	 * 
 	 * @param value
-	 *        The assessment's "show question" feedback setting.
+	 *        The assessment's question level feedback setting.
 	 */
 	void setFeedbackShowQuestionFeedback(Boolean value);
 

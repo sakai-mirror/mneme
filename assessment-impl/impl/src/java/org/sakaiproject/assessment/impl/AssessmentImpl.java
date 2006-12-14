@@ -79,6 +79,10 @@ public class AssessmentImpl implements Assessment
 
 	protected PropertyStatus feedbackDeliveryStatus = PropertyStatus.unset;
 
+	protected Boolean feedbackShowAnswerFeedback = null;
+
+	protected PropertyStatus feedbackShowAnswerFeedbackStatus = PropertyStatus.unset;
+
 	protected Boolean feedbackShowCorrectAnswer = null;
 
 	protected PropertyStatus feedbackShowCorrectAnswerStatus = PropertyStatus.unset;
@@ -155,23 +159,6 @@ public class AssessmentImpl implements Assessment
 	{
 		this.setMain(other);
 		this.setSections(other);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getFeedbackNow()
-	{
-		FeedbackDelivery delivery = getFeedbackDelivery();
-		Time feedbackDate = getFeedbackDate();
-		if ((delivery == FeedbackDelivery.IMMEDIATE)
-				|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
-						.newTime()))))))
-		{
-			return Boolean.TRUE;
-		}
-
-		return Boolean.FALSE;
 	}
 
 	/**
@@ -275,6 +262,34 @@ public class AssessmentImpl implements Assessment
 		if (this.feedbackDeliveryStatus == PropertyStatus.unset) readMain();
 
 		return this.feedbackDelivery;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getFeedbackNow()
+	{
+		FeedbackDelivery delivery = getFeedbackDelivery();
+		Time feedbackDate = getFeedbackDate();
+		if ((delivery == FeedbackDelivery.IMMEDIATE)
+				|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+						.newTime()))))))
+		{
+			return Boolean.TRUE;
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getFeedbackShowAnswerFeedback()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.feedbackShowAnswerFeedbackStatus == PropertyStatus.unset) readMain();
+
+		return this.feedbackShowAnswerFeedback;
 	}
 
 	/**
@@ -576,6 +591,15 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setFeedbackShowAnswerFeedback(Boolean value)
+	{
+		this.feedbackShowAnswerFeedback = value;
+		this.feedbackShowAnswerFeedbackStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setFeedbackShowCorrectAnswer(Boolean value)
 	{
 		this.feedbackShowCorrectAnswer = value;
@@ -786,6 +810,18 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Initialize the feedback show answer feedback property.
+	 * 
+	 * @param value
+	 *        The feedback show answer feedback property.
+	 */
+	protected void initFeedbackShowAnswerFeedback(Boolean value)
+	{
+		this.feedbackShowAnswerFeedback = value;
+		this.feedbackShowAnswerFeedbackStatus = PropertyStatus.inited;
+	}
+
+	/**
 	 * Initialize the feedback show correct answer property.
 	 * 
 	 * @param value
@@ -798,7 +834,7 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
-	 * Initialize the feedback show question feedbac property.
+	 * Initialize the feedback show question feedback property.
 	 * 
 	 * @param value
 	 *        The feedback show question feedback property.
@@ -1016,6 +1052,7 @@ public class AssessmentImpl implements Assessment
 		this.dueDateStatus = PropertyStatus.inited;
 		this.feedbackDateStatus = PropertyStatus.inited;
 		this.feedbackDeliveryStatus = PropertyStatus.inited;
+		this.feedbackShowAnswerFeedbackStatus = PropertyStatus.inited;
 		this.feedbackShowCorrectAnswerStatus = PropertyStatus.inited;
 		this.feedbackShowQuestionFeedbackStatus = PropertyStatus.inited;
 		this.feedbackShowQuestionScoreStatus = PropertyStatus.inited;
@@ -1058,6 +1095,8 @@ public class AssessmentImpl implements Assessment
 		this.feedbackDateStatus = other.feedbackDateStatus;
 		this.feedbackDelivery = other.feedbackDelivery;
 		this.feedbackDeliveryStatus = other.feedbackDeliveryStatus;
+		this.feedbackShowAnswerFeedback = other.feedbackShowAnswerFeedback;
+		this.feedbackShowAnswerFeedbackStatus = other.feedbackShowAnswerFeedbackStatus;
 		this.feedbackShowCorrectAnswer = other.feedbackShowCorrectAnswer;
 		this.feedbackShowCorrectAnswerStatus = other.feedbackShowCorrectAnswerStatus;
 		this.feedbackShowQuestionFeedback = other.feedbackShowQuestionFeedback;

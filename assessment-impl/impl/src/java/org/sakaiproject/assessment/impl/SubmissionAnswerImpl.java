@@ -114,6 +114,33 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public String[] getAnswerFeedbacks()
+	{
+		String[] rv = new String[this.entries.size()];
+		int i = 0;
+		for (SubmissionAnswerEntry entry : this.entries)
+		{
+			AssessmentAnswer answer = entry.getAssessmentAnswer();
+			if (answer == null)
+			{
+				rv[i++] = null;
+			}
+			else if (answer.getIsCorrect())
+			{
+				rv[i++] = answer.getFeedbackCorrect();
+			}
+			else
+			{
+				rv[i++] = answer.getFeedbackIncorrect();
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Float getAutoScore()
 	{
 		autoScore();

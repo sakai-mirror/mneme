@@ -510,7 +510,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		String statement = "SELECT P.TITLE, AD.AGENTID, PAC.DUEDATE, PAC.FEEDBACKDATE, PE.SCORINGTYPE, P.STATUS,"
 				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, P.CREATEDBY,"
 				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.TIMELIMIT, PAC.AUTOSUBMIT, PAC.STARTDATE, PAC.RETRACTDATE, PAC.LATEHANDLING,"
-				+ " PF.SHOWSTUDENTQUESTIONSCORE, PF.SHOWCORRECTRESPONSE, PF.SHOWQUESTIONLEVELFEEDBACK"
+				+ " PF.SHOWSTUDENTQUESTIONSCORE, PF.SHOWCORRECTRESPONSE, PF.SHOWQUESTIONLEVELFEEDBACK, PF.SHOWSELECTIONLEVELFEEDBACK"
 				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID"
@@ -573,6 +573,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					boolean showStudentQuestionScore = result.getBoolean(18);
 					boolean showCorrectAnswer = result.getBoolean(19);
 					boolean showQuestionFeedback = result.getBoolean(20);
+					boolean showAnswerFeedback = result.getBoolean(21);
 
 					// pack it into the assessment
 					assessment.initAutoSubmit((autoSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
@@ -594,6 +595,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					assessment.initFeedbackShowQuestionScore(Boolean.valueOf(showStudentQuestionScore));
 					assessment.initFeedbackShowCorrectAnswer(Boolean.valueOf(showCorrectAnswer));
 					assessment.initFeedbackShowQuestionFeedback(Boolean.valueOf(showQuestionFeedback));
+					assessment.initFeedbackShowAnswerFeedback(Boolean.valueOf(showAnswerFeedback));
 
 					return assessment;
 				}
@@ -1944,7 +1946,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					.booleanValue())) ? new Integer(0) : new Integer(1);
 			fields[8] = ((assessment.getFeedbackShowQuestionFeedback() == null) || (!assessment.getFeedbackShowQuestionFeedback()
 					.booleanValue())) ? new Integer(0) : new Integer(1);
-			fields[9] = new Integer(1);
+			fields[9] = ((assessment.getFeedbackShowAnswerFeedback() == null) || (!assessment.getFeedbackShowAnswerFeedback()
+					.booleanValue())) ? new Integer(0) : new Integer(1);
 			fields[10] = new Integer(1);
 			fields[11] = ((assessment.getFeedbackShowStatistics() == null) || (!assessment.getFeedbackShowStatistics()
 					.booleanValue())) ? new Integer(0) : new Integer(1);
