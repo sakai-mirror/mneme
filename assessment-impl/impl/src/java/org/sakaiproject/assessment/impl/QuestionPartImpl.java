@@ -22,7 +22,9 @@
 package org.sakaiproject.assessment.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,7 +58,7 @@ public class QuestionPartImpl implements QuestionPart
 	 */
 	public QuestionPartImpl(QuestionPartImpl other)
 	{
-		setAnswers(other.getAnswers());
+		setAnswers(other.answers);
 		initId(other.getId());
 		this.question = other.question;
 		setTitle(other.getTitle());
@@ -117,9 +119,30 @@ public class QuestionPartImpl implements QuestionPart
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<? extends AssessmentAnswer> getAnswers()
+	public List<? extends AssessmentAnswer> getAnswersAsAuthored()
 	{
 		return this.answers;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<? extends AssessmentAnswer> getAnswers()
+	{
+		// copy the questions
+		List<AssessmentAnswerImpl> rv = new ArrayList<AssessmentAnswerImpl>(this.answers);
+
+		// randomize if needed
+		if ((this.question.getRandomAnswerOrder() != null) && (this.question.getRandomAnswerOrder().booleanValue()))
+		{
+			// set the seed based on the current user id
+			long seed = this.question.section.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode();
+
+			// mix up the questions
+			Collections.shuffle(rv, new Random(seed));
+		}
+
+		return rv;
 	}
 
 	/**

@@ -47,11 +47,18 @@ public interface QuestionPart
 	AssessmentAnswer getAnswer(String answerId);
 
 	/**
-	 * Access answers.
+	 * Access answers.  Order is randomized for presentation if the question is so set.
 	 * 
-	 * @return The answers.
+	 * @return The answers. Order wis randomized for presentation if the question is so set.
 	 */
 	List<? extends AssessmentAnswer> getAnswers();
+
+	/**
+	 * Access answers.  Order is as authored.
+	 * 
+	 * @return The answers.  Order is as authored.
+	 */
+	List<? extends AssessmentAnswer> getAnswersAsAuthored();
 
 	/**
 	 * Access the correct answers.

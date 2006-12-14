@@ -127,9 +127,6 @@ public class AssessmentSectionImpl implements AssessmentSection
 
 	protected List<AssessmentQuestionImpl> questions = new ArrayList<AssessmentQuestionImpl>();
 
-	/** Set to true once we are randomized. */
-	protected transient boolean randomized = false;
-
 	protected Boolean randomQuestionOrdering = null;
 
 	protected String title = null;

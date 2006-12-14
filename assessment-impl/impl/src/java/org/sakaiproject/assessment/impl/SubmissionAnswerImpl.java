@@ -430,7 +430,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		// fillin and numeric need an entry per assessment question (single part) answer, with answer ids set (answer text null)
 		if ((question.getType() == QuestionType.fillIn) || (question.getType() == QuestionType.numeric))
 		{
-			for (AssessmentAnswer answer : question.getPart().getAnswers())
+			for (AssessmentAnswer answer : question.getPart().getAnswersAsAuthored())
 			{
 				// make an entry for this question answer (of the single part), setting the question answer id, leaving the text null
 				SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
@@ -649,9 +649,9 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		// fillin and numeric need an entry per assessment question (single part) answer, with answer ids set
 		if ((question.getType() == QuestionType.fillIn) || (question.getType() == QuestionType.numeric))
 		{
-			if (this.entries.size() != question.getPart().getAnswers().size())
+			if (this.entries.size() != question.getPart().getAnswersAsAuthored().size())
 			{
-				M_log.warn("verifyEntries: fillin/numeric: num answers: " + question.getPart().getAnswers().size()
+				M_log.warn("verifyEntries: fillin/numeric: num answers: " + question.getPart().getAnswersAsAuthored().size()
 						+ " doesn't match num entries: " + this.entries.size() + " submission: " + this.getSubmission().getId()
 						+ " question: " + question.getId());
 				throw new RuntimeException();
@@ -660,7 +660,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			{
 				// check that the entry is to the part and answer
 				SubmissionAnswerEntryImpl entry = this.entries.get(i);
-				AssessmentAnswer answer = question.getPart().getAnswers().get(i);
+				AssessmentAnswer answer = question.getPart().getAnswersAsAuthored().get(i);
 				if (!entry.questionPartId.equals(question.getPart().getId()))
 				{
 					M_log.warn("verifyEntries: fillin/numeric: entry / answer part not aligned: entry part: "

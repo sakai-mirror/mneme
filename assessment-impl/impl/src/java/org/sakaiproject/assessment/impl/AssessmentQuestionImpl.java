@@ -227,6 +227,8 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 
 	protected List<QuestionPartImpl> parts = new ArrayList<QuestionPartImpl>();
 
+	protected Boolean randomAnswerOrdering = null;
+
 	protected Boolean requireRationale = null;
 
 	protected Float score = null;
@@ -258,6 +260,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 		setInstructions(other.getInstructions());
 		setMutuallyExclusive(other.getMutuallyExclusive());
 		setParts(other.getParts());
+		setRandomAnswerOrder(other.getRandomAnswerOrder());
 		setRequireRationale(other.getRequireRationale());
 		setScore(other.getPoints());
 		this.section = other.section;
@@ -498,6 +501,14 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getRandomAnswerOrder()
+	{
+		return this.randomAnswerOrdering;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getRequireRationale()
 	{
 		return this.requireRationale;
@@ -634,6 +645,14 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 			this.parts.add(copy);
 			copy.initQuestion(this);
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setRandomAnswerOrder(Boolean setting)
+	{
+		this.randomAnswerOrdering = setting;
 	}
 
 	/**

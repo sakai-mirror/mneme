@@ -682,12 +682,13 @@ public class AssessmentServiceImpl implements AssessmentService
 		assessment.sectionsStatus = AssessmentImpl.PropertyStatus.inited;
 
 		// get the questions
-		statement = "SELECT PI.ITEMID, PI.HASRATIONALE, PI.SCORE, PI.INSTRUCTION, PI.TYPEID, PI.SECTIONID, MCS.ENTRY, MME.ENTRY,"
+		statement = "SELECT PI.ITEMID, PI.HASRATIONALE, PI.SCORE, PI.INSTRUCTION, PI.TYPEID, PI.SECTIONID, MCS.ENTRY, MME.ENTRY, MMR.ENTRY,"
 				+ " PF1.TEXT, PF2.TEXT, PF3.TEXT"
 				+ " FROM SAM_PUBLISHEDITEM_T PI"
 				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON PI.SECTIONID = PS.SECTIONID AND PS.ASSESSMENTID = ?"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MCS ON PI.ITEMID = MCS.ITEMID AND MCS.LABEL = 'CASE_SENSITIVE'"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MME ON PI.ITEMID = MME.ITEMID AND MME.LABEL = 'MUTUALLY_EXCLUSIVE'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MMR ON PI.ITEMID = MMR.ITEMID AND MMR.LABEL = 'RANDOMIZE'"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF1 ON PI.ITEMID = PF1.ITEMID AND PF1.TYPEID = 'Correct Feedback'"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF2 ON PI.ITEMID = PF2.ITEMID AND PF2.TYPEID = 'General Feedback'"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF3 ON PI.ITEMID = PF3.ITEMID AND PF3.TYPEID = 'InCorrect Feedback'"
@@ -709,9 +710,10 @@ public class AssessmentServiceImpl implements AssessmentService
 					String sectionId = result.getString(6);
 					String caseSensitive = result.getString(7);
 					String mutuallyExclusive = result.getString(8);
-					String correctFeedback = result.getString(9);
-					String generalFeedback = result.getString(10);
-					String incorrectFeedback = result.getString(11);
+					String randomize = result.getString(9);
+					String correctFeedback = result.getString(10);
+					String generalFeedback = result.getString(11);
+					String incorrectFeedback = result.getString(12);
 
 					// pack it into an assessment question
 					AssessmentQuestionImpl question = new AssessmentQuestionImpl();
@@ -725,6 +727,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					question.setFeedbackCorrect(correctFeedback);
 					question.setFeedbackGeneral(generalFeedback);
 					question.setFeedbackIncorrect(incorrectFeedback);
+					question.setRandomAnswerOrder(((randomize != null) && randomize.equals("true")) ? Boolean.TRUE : Boolean.FALSE);
 
 					// add the question to the appropriate section (sectionId)
 					AssessmentSectionImpl section = (AssessmentSectionImpl) assessment.getSection(sectionId);
@@ -2284,7 +2287,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 						// answers - from each part
 						int i = 0;
-						for (AssessmentAnswer answer : part.getAnswers())
+						for (AssessmentAnswer answer : part.getAnswersAsAuthored())
 						{
 							Long answerId = m_sqlService.getNextSequence("SAM_PUBANSWER_ID_S", connection);
 							statement = "INSERT INTO SAM_PUBLISHEDANSWER_T"
@@ -2358,7 +2361,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
 					fields[1] = "RANDOMIZE";
-					fields[2] = "false";
+					fields[2] = ((question.getRandomAnswerOrder() != null) && question.getRandomAnswerOrder().booleanValue()) ? "true" : "false";
 					if (xid != null) fields[3] = xid;
 					m_sqlService.dbWrite(connection, statement, fields);
 

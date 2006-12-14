@@ -133,6 +133,13 @@ public interface AssessmentQuestion
 	Float getPoints();
 
 	/**
+	 * Access the random answer ordering setting; if true, answer are to be presented in random order withing the question.
+	 * 
+	 * @return The random answer ordering setting.
+	 */
+	Boolean getRandomAnswerOrder();
+
+	/**
 	 * Access the require rationale setting for this question - if TRUE, the end-user can enter a rational with the answer.
 	 * 
 	 * @return The requuire rational setting for this question.
@@ -222,6 +229,14 @@ public interface AssessmentQuestion
 	 *        The parts.
 	 */
 	void setParts(List<? extends QuestionPart> parts);
+
+	/**
+	 * Set the random answer ordering setting.
+	 * 
+	 * @param setting
+	 *        The random answer ordering setting.
+	 */
+	void setRandomAnswerOrder(Boolean setting);
 
 	/**
 	 * Set the require rationale setting for this question - if TRUE, the end-user can enter a rational with the answer.

@@ -518,7 +518,7 @@ public class AssessmentTestTool extends HttpServlet
 
 		// Answer each question (of the first section)
 		List items = new Vector();
-		for (AssessmentQuestion question : assessment.getFirstSection().getQuestions())
+		for (AssessmentQuestion question : assessment.getFirstSection().getQuestionsAsAuthored())
 		{
 			SubmissionAnswer answer = assessmentService.newSubmissionAnswer(s, question);
 
