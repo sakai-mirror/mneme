@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.AssessmentAnswer;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.QuestionPart;
+import org.sakaiproject.assessment.api.QuestionType;
 
 public class QuestionPartImpl implements QuestionPart
 {
@@ -129,20 +130,33 @@ public class QuestionPartImpl implements QuestionPart
 	 */
 	public List<? extends AssessmentAnswer> getAnswers()
 	{
-		// copy the questions
-		List<AssessmentAnswerImpl> rv = new ArrayList<AssessmentAnswerImpl>(this.answers);
-
-		// randomize if needed
-		if ((this.question.getRandomAnswerOrder() != null) && (this.question.getRandomAnswerOrder().booleanValue()))
+		// randomize if needed (by authored setting, or if it's for a matching type question)
+		if (((this.question.getRandomAnswerOrder() != null) && (this.question.getRandomAnswerOrder().booleanValue()))
+				|| (this.question.getType() == QuestionType.matching))
 		{
+			// deep copy the answers
+			List<AssessmentAnswerImpl> rv = new ArrayList<AssessmentAnswerImpl>(this.answers.size());
+			for (AssessmentAnswerImpl answer : this.answers)
+			{
+				rv.add(new AssessmentAnswerImpl(answer));
+			}
+
 			// set the seed based on the current user id
 			long seed = this.question.section.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode();
 
-			// mix up the questions
+			// mix up the answers
 			Collections.shuffle(rv, new Random(seed));
+
+			// but... we want the lables to remain in their initial ordering
+			for (int i = 0; i < this.answers.size(); i++)
+			{
+				rv.get(i).setLabel(this.answers.get(i).getLabel());
+			}
+
+			return rv;
 		}
 
-		return rv;
+		return this.answers;
 	}
 
 	/**

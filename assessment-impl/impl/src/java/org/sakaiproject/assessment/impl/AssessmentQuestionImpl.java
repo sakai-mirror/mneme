@@ -312,87 +312,15 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	 */
 	public String getAnswerKey()
 	{
-		// fill-in, numeric, true/false
-		if ((this.type == QuestionType.fillIn) || (this.type == QuestionType.numeric) || (this.type == QuestionType.trueFalse))
-		{
-			// concat the various answer texts
-			StringBuffer rv = new StringBuffer();
+		return getAnswerKey(false);
+	}
 
-			// get each part's correct answer
-			for (QuestionPart part : this.parts)
-			{
-				List<AssessmentAnswer> correct = part.getCorrectAnswers();
-				if (correct != null)
-				{
-					for (AssessmentAnswer answer : correct)
-					{
-						rv.append(answer.getText() + ", ");
-					}
-				}
-			}
-
-			// remove the last two characters (the trailing ", "
-			rv.setLength(rv.length() - 2);
-
-			return rv.toString();
-		}
-
-		// match
-		if (this.type == QuestionType.matching)
-		{
-			// form the matches: the position:label
-			StringBuffer rv = new StringBuffer();
-
-			// get each part's correct answer label
-			int pos = 1;
-			for (QuestionPart part : this.parts)
-			{
-				rv.append(Integer.toString(pos++));
-				rv.append(':');
-
-				List<AssessmentAnswer> correct = part.getCorrectAnswers();
-				if (correct != null)
-				{
-					for (AssessmentAnswer answer : correct)
-					{
-						rv.append(answer.getLabel());
-					}
-				}
-				rv.append(", ");
-			}
-
-			// remove the last two characters (the trailing ", "
-			rv.setLength(rv.length() - 2);
-
-			return rv.toString();
-		}
-
-		// multi choice
-		if ((this.type == QuestionType.multipleChoice) || (this.type == QuestionType.multipleCorrect))
-		{
-			// concat the various answer labels
-			StringBuffer rv = new StringBuffer();
-
-			// get each part's correct answer
-			for (QuestionPart part : this.parts)
-			{
-				List<AssessmentAnswer> correct = part.getCorrectAnswers();
-				if (correct != null)
-				{
-					for (AssessmentAnswer answer : correct)
-					{
-						rv.append(answer.getLabel() + ", ");
-					}
-				}
-			}
-
-			// remove the last two characters (the trailing ", "
-			rv.setLength(rv.length() - 2);
-
-			return rv.toString();
-		}
-
-		return null;
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getAnswerKeyAsAuthored()
+	{
+		return getAnswerKey(true);
 	}
 
 	/**
@@ -677,6 +605,100 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	public void setType(QuestionType type)
 	{
 		this.type = type;
+	}
+
+	/**
+	 * Get the answer key, either in the current user's answer presentation order, or as authored.
+	 * 
+	 * @param asAuthored
+	 *        if true, use the authored answer order, else use the current user's presentation order.
+	 * @return The answer key.
+	 */
+	protected String getAnswerKey(boolean asAuthored)
+	{
+		// fill-in, numeric, true/false
+		if ((this.type == QuestionType.fillIn) || (this.type == QuestionType.numeric) || (this.type == QuestionType.trueFalse))
+		{
+			// concat the various answer texts
+			StringBuffer rv = new StringBuffer();
+
+			// get each part's correct answer
+			for (QuestionPart part : this.parts)
+			{
+				List<AssessmentAnswer> correct = part.getCorrectAnswers();
+				if (correct != null)
+				{
+					for (AssessmentAnswer answer : correct)
+					{
+						rv.append(answer.getText() + ", ");
+					}
+				}
+			}
+
+			// remove the last two characters (the trailing ", ")
+			rv.setLength(rv.length() - 2);
+
+			return rv.toString();
+		}
+
+		// match (be concerned about asAuthored)
+		if (this.type == QuestionType.matching)
+		{
+			// form the matches: the position:label
+			StringBuffer rv = new StringBuffer();
+
+			// get each part's correct answer label
+			int pos = 1;
+			for (QuestionPart part : this.parts)
+			{
+				rv.append(Integer.toString(pos++));
+				rv.append(':');
+
+				// as authored, or as displayed to the current user (possibly randomized for the user)
+				List<? extends AssessmentAnswer> answers = asAuthored ? part.getAnswersAsAuthored() : part.getAnswers();
+				for (AssessmentAnswer answer : answers)
+				{
+					if (answer.getIsCorrect().booleanValue())
+					{
+						rv.append(answer.getLabel());
+					}
+				}
+				rv.append(", ");
+			}
+
+			// remove the last two characters (the trailing ", "
+			rv.setLength(rv.length() - 2);
+
+			return rv.toString();
+		}
+
+		// multi choice (be concerned about asAuthored)
+		if ((this.type == QuestionType.multipleChoice) || (this.type == QuestionType.multipleCorrect))
+		{
+			// concat the various answer labels
+			StringBuffer rv = new StringBuffer();
+
+			// get each part's correct answer
+			for (QuestionPart part : this.parts)
+			{
+				// as authored, or as displayed to the current user (possibly randomized for the user)
+				List<? extends AssessmentAnswer> answers = asAuthored ? part.getAnswersAsAuthored() : part.getAnswers();
+				for (AssessmentAnswer answer : answers)
+				{
+					if (answer.getIsCorrect().booleanValue())
+					{
+						rv.append(answer.getLabel() + ", ");
+					}
+				}
+			}
+
+			// remove the last two characters (the trailing ", "
+			rv.setLength(rv.length() - 2);
+
+			return rv.toString();
+		}
+
+		return null;
 	}
 
 	/**

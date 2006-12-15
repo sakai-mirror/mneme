@@ -40,11 +40,18 @@ public interface AssessmentQuestion
 	AssessmentAnswer getAnswer(String answerId);
 
 	/**
-	 * Get the correct answer(s) formatted into an answer key.
+	 * Get the correct answer(s) formatted into an answer key, considering the possibly user-randomized answer order for the question.
 	 * 
 	 * @return The answer key.
 	 */
 	String getAnswerKey();
+
+	/**
+	 * Get the correct answer(s) formatted into an answer key, using the as-authored answer order.
+	 * 
+	 * @return The answer key.
+	 */
+	String getAnswerKeyAsAuthored();
 
 	/**
 	 * Access the ordering information about this question relative to the entire assessment.
