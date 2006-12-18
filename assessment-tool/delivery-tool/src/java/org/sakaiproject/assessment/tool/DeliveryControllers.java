@@ -234,13 +234,15 @@ public class DeliveryControllers
 												.setFormatDelegate(new FeedbackPropertyReference())
 												.setPropertyReference("feedbackDelivery"))))
 						.add(
-							ui.newSection()
-								.add(
-									ui.newSubmission()
-										.setTitle("enter-beginAssessment")
-										.setStyle(org.sakaiproject.sludge.api.Submission.Style.button))
+							ui.newButtonBar()
 								.add(
 									ui.newNavigation()
+										.setSubmit()
+										.setTitle("enter-beginAssessment")
+										.setStyle(Navigation.Style.button))
+								.add(
+									ui.newNavigation()
+										.setDefault()
 										.setTitle("cancel")
 										.setStyle(Navigation.Style.button)
 										.setDestination(ui.newDestination().setDestination("/list")))));
@@ -263,11 +265,12 @@ public class DeliveryControllers
 				.setTitle("question-title", ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.title"))
 				.setHeader("question-header", ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.title"))
 				.add(
-					ui.newSection()
+					ui.newToolBar()
 						.add(
-							ui.newSubmission()
+							ui.newNavigation()
+								.setSubmit()
 								.setTitle("question-link-feedback")
-								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)
+								.setStyle(Navigation.Style.link)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}/feedback",
 									ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
 									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("id")))
@@ -278,9 +281,10 @@ public class DeliveryControllers
 													.setEntityReference("submission"))
 											.setDelegate(new ShowFeedbackChoiceDecision())))
 						.add(
-							ui.newSubmission()
+							ui.newNavigation()
+								.setSubmit()
 								.setTitle("question-link-toc")
-								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)	// TODO link
+								.setStyle(Navigation.Style.link)
 								.setDestination(ui.newDestination().setDestination("/toc/{0}", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id")))))
 				.add(
 					ui.newSection()
@@ -518,11 +522,13 @@ public class DeliveryControllers
 												.setEqualsConstant(QuestionType.essay.toString())
 												.setProperty(ui.newBooleanPropertyReference().setEntityReference("question").setPropertyReference("type"))))))
 				.add(
-					ui.newSection()
+					ui.newButtonBar()
 						.add(
-							ui.newSubmission()
+							ui.newNavigation()
+								.setDefault()
+								.setSubmit()
 								.setTitle("question-save-continue")
-								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)
+								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
 										ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
 										ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("assessmentOrdering.next.id")))
@@ -534,9 +540,11 @@ public class DeliveryControllers
 													.setEntityReference("question")
 													.setPropertyReference("assessmentOrdering.isLast"))))
 						.add(
-							ui.newSubmission()
+							ui.newNavigation()
+								.setDefault()
+								.setSubmit()
 								.setTitle("question-save-submit")
-								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)
+								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/exit/{0}",ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id")))
 								.setEnabled(
 										ui.newDecision()
@@ -545,9 +553,10 @@ public class DeliveryControllers
 													.setEntityReference("question")
 													.setPropertyReference("assessmentOrdering.isLast"))))
 						.add(
-							ui.newSubmission()
+							ui.newNavigation()
+								.setSubmit()
 								.setTitle("quesiton-save-prev")
-								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)
+								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
 									ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
 									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("assessmentOrdering.previous.id")))
@@ -559,9 +568,10 @@ public class DeliveryControllers
 													.setEntityReference("question")
 													.setPropertyReference("assessmentOrdering.isFirst"))))	
 						.add(
-							ui.newSubmission()
+							ui.newNavigation()
+								.setSubmit()
 								.setTitle("quesiton-save-exit")
-								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)
+								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/list"))));
 	}
 
@@ -628,9 +638,10 @@ public class DeliveryControllers
 											ui.newDatePropertyReference()
 												.setPropertyReference("submittedDate"))))
 						.add(
-							ui.newSection()
+							ui.newButtonBar()
 								.add(
 									ui.newNavigation()
+										.setDefault()
 										.setTitle("return")
 										.setStyle(Navigation.Style.button)
 										.setDestination(ui.newDestination().setDestination("/list")))));
@@ -700,15 +711,17 @@ public class DeliveryControllers
 							)
 					)
 				.add(
-					ui.newSection()
+					ui.newButtonBar()
 						.add(
-							ui.newSubmission()
+							ui.newNavigation()
+								.setSubmit()
 								.setTitle("toc-save-submit")
-								.setStyle(org.sakaiproject.sludge.api.Submission.Style.button)
+								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/exit/{0}",
 									ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"))))
 						.add(
 							ui.newNavigation()
+								.setDefault()
 								.setTitle("toc-save-exit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/list"))));

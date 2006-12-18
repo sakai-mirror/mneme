@@ -22,7 +22,7 @@
 package org.sakaiproject.assessment.tool;
 
 import org.sakaiproject.sludge.api.Controller;
-import org.sakaiproject.sludge.api.Submission;
+import org.sakaiproject.sludge.api.Navigation;
 import org.sakaiproject.sludge.api.UiService;
 
 /**
@@ -50,9 +50,11 @@ public class TestControllers
 							ui.newText()
 								.setText("home-generate"))
 						.add(
-							ui.newSubmission()
+							ui.newNavigation()
+								.setSubmit()
+								.setDefault()
 								.setTitle("home-generate")
-								.setStyle(Submission.Style.button))
+								.setStyle(Navigation.Style.button))
 					);
 
 	}
