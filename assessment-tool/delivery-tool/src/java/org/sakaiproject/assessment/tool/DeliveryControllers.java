@@ -35,6 +35,7 @@ import org.sakaiproject.sludge.api.ContextInfoPropertyReference;
 import org.sakaiproject.sludge.api.Controller;
 import org.sakaiproject.sludge.api.Decision;
 import org.sakaiproject.sludge.api.DecisionDelegate;
+import org.sakaiproject.sludge.api.EntityList;
 import org.sakaiproject.sludge.api.FormatDelegate;
 import org.sakaiproject.sludge.api.Navigation;
 import org.sakaiproject.sludge.api.UiService;
@@ -66,6 +67,7 @@ public class DeliveryControllers
 						.setTitle("list-take-section-title")
 						.add(
 							ui.newEntityList()
+								.setStyle(EntityList.Style.flat)
 								.setEntityReference(ui.newPropertyReference().setEntityReference("assessments"))
 								.setTitle("list-take-instructions")
 								.setEmptyTitle("list-take-empty")
@@ -97,6 +99,7 @@ public class DeliveryControllers
 						.setTitle("list-review-section-title")
 						.add(
 							ui.newEntityList()
+								.setStyle(EntityList.Style.flat)
 								.setEntityReference(ui.newPropertyReference().setEntityReference("submissions"))
 								.setTitle("list-review-instructions")
 								.setEmptyTitle("list-review-empty")
@@ -326,6 +329,7 @@ public class DeliveryControllers
 													.setReversed(true)))
 								.add(
 									ui.newEntityList()
+										.setStyle(EntityList.Style.form)
 										.setEntityReference(ui.newPropertyReference().setEntityReference("question").setPropertyReference("part.answers"))
 										.addColumn(
 											ui.newHtmlPropertyColumn()
@@ -348,17 +352,10 @@ public class DeliveryControllers
 													.setProperty(
 														ui.newPropertyReference()
 															.setEntityReference("answer")
-															.setPropertyReference("entryAnswerIds")))
-										.addColumn(
-												ui.newPropertyColumn()
-												.setProperty("question-label",
-													ui.newTextPropertyReference()
-														.setPropertyReference("label"))
-												.setIncluded(
-													ui.newHasValueDecision()
-														.setProperty(
-															ui.newPropertyReference()
-																.setPropertyReference("label")), null))
+															.setPropertyReference("entryAnswerIds"))
+													.setLabel("question-label",
+														ui.newTextPropertyReference()
+															.setPropertyReference("label")))
 										.addColumn(
 												ui.newPropertyColumn()
 													.setProperty(
@@ -680,6 +677,7 @@ public class DeliveryControllers
 										// focus is on AssessmentSection
 										.add(
 											ui.newEntityList()
+												.setStyle(EntityList.Style.form)
 												.setEntityReference(ui.newPropertyReference().setPropertyReference("questions"))
 												.setTitle("toc-questions-title",
 													// Part{0} - {1} - {2}/{3} Answered Questions, {4} Points
