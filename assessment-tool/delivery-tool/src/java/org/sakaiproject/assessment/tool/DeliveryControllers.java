@@ -735,7 +735,7 @@ public class DeliveryControllers
 													ui.newPropertyColumn()
 														.setProperty("toc-question-entry",
 															// {num}. {title or instructions} ({points})
-															ui.newPropertyReference().setPropertyReference("sectionOrdering.position"),
+															ui.newPropertyReference().setFormatDelegate(new FormatQuestionNumber()),
 															ui.newTextPropertyReference().setPropertyReference("title"),
 															ui.newPropertyReference().setFormatDelegate(new QuestionScore()))
 														.setEntityNavigation(
@@ -1282,6 +1282,35 @@ public class DeliveryControllers
 			args[2] = question.getPoints();
 
 			return context.getMessages().getFormattedMessage("question-question-title", args);
+		}
+	}
+
+	/**
+	 * Focus is the question - format the number as either per section of per assessment.
+	 */
+	public static class FormatQuestionNumber implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{
+			if (value == null) return null;
+			if (!(value instanceof AssessmentQuestion)) return null;
+
+			AssessmentQuestion question = (AssessmentQuestion) value;
+			Boolean continuous = question.getSection().getAssessment().getContinuousNumbering();
+
+			Integer num = null;
+			if ((continuous != null) && (continuous.booleanValue()))
+			{
+				num = question.getAssessmentOrdering().getPosition();
+			}
+			else
+			{
+				num = question.getSectionOrdering().getPosition();
+			}
+			return num.toString();
 		}
 	}
 }
