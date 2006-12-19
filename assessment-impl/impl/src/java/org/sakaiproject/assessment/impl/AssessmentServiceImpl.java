@@ -510,8 +510,8 @@ public class AssessmentServiceImpl implements AssessmentService
 		String statement = "SELECT P.TITLE, AD.AGENTID, PAC.DUEDATE, PAC.FEEDBACKDATE, PE.SCORINGTYPE, P.STATUS,"
 				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, P.CREATEDBY,"
 				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.TIMELIMIT, PAC.AUTOSUBMIT, PAC.STARTDATE, PAC.RETRACTDATE, PAC.LATEHANDLING,"
-				+ " PF.SHOWSTUDENTQUESTIONSCORE, PF.SHOWCORRECTRESPONSE, PF.SHOWQUESTIONLEVELFEEDBACK, PF.SHOWSELECTIONLEVELFEEDBACK"
-				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
+				+ " PF.SHOWSTUDENTQUESTIONSCORE, PF.SHOWCORRECTRESPONSE, PF.SHOWQUESTIONLEVELFEEDBACK, PF.SHOWSELECTIONLEVELFEEDBACK,"
+				+ " PAC.ITEMNAVIGATION, PAC.ITEMNUMBERING" + " FROM SAM_PUBLISHEDASSESSMENT_T P"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
@@ -574,6 +574,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					boolean showCorrectAnswer = result.getBoolean(19);
 					boolean showQuestionFeedback = result.getBoolean(20);
 					boolean showAnswerFeedback = result.getBoolean(21);
+					int randomAccess = result.getInt(22);
+					int continuousNumbering = result.getInt(23);
 
 					// pack it into the assessment
 					assessment.initAutoSubmit((autoSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
@@ -596,6 +598,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					assessment.initFeedbackShowCorrectAnswer(Boolean.valueOf(showCorrectAnswer));
 					assessment.initFeedbackShowQuestionFeedback(Boolean.valueOf(showQuestionFeedback));
 					assessment.initFeedbackShowAnswerFeedback(Boolean.valueOf(showAnswerFeedback));
+					assessment.initRandomAccess(Boolean.valueOf(randomAccess == 2));
+					assessment.initContinuousNumbering(Boolean.valueOf(continuousNumbering == 1));
 
 					return assessment;
 				}
@@ -641,9 +645,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// get the sections
 		String statement = "SELECT P.SECTIONID, P.TITLE, P.DESCRIPTION, SMD1.ENTRY "
-			+ " FROM SAM_PUBLISHEDSECTION_T P"
-			+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD1 ON P.SECTIONID = SMD1.SECTIONID AND SMD1.LABEL = 'QUESTIONS_ORDERING'"
-			+ " WHERE P.ASSESSMENTID = ? ORDER BY P.SEQUENCE ASC";
+				+ " FROM SAM_PUBLISHEDSECTION_T P"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD1 ON P.SECTIONID = SMD1.SECTIONID AND SMD1.LABEL = 'QUESTIONS_ORDERING'"
+				+ " WHERE P.ASSESSMENTID = ? ORDER BY P.SEQUENCE ASC";
 		Object[] fields = new Object[1];
 		fields[0] = assessment.getId();
 
@@ -1875,7 +1879,8 @@ public class AssessmentServiceImpl implements AssessmentService
 
 				xid = m_sqlService.getNextSequence("SAM_PUBLISHEDASSESSMENT_ID_S", connection);
 				fields[1] = "QUESTIONS_ORDERING";
-				fields[2] = ((section.getRandomQuestionOrder() == null) || (!section.getRandomQuestionOrder().booleanValue())) ? "1" : "2";
+				fields[2] = ((section.getRandomQuestionOrder() == null) || (!section.getRandomQuestionOrder().booleanValue())) ? "1"
+						: "2";
 				if (xid != null) fields[3] = xid;
 				m_sqlService.dbWrite(connection, statement, fields);
 			}
@@ -1904,8 +1909,11 @@ public class AssessmentServiceImpl implements AssessmentService
 			fields[12] = assessment.getFeedbackDate();
 			fields[13] = assessment.getRetractDate();
 			fields[14] = new Integer(1);
-			fields[15] = new Integer(2);
-			fields[16] = new Integer(1);
+			fields[15] = ((assessment.getRandomAccess() != null) && assessment.getRandomAccess().booleanValue()) ? new Integer(2)
+					: new Integer(1);
+			fields[16] = ((assessment.getContinuousNumbering() != null) && assessment.getContinuousNumbering().booleanValue()) ? new Integer(
+					1)
+					: new Integer(2);
 			fields[17] = "";
 			fields[18] = a.getContext() + " site";
 			fields[19] = "";
@@ -2361,7 +2369,8 @@ public class AssessmentServiceImpl implements AssessmentService
 
 					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
 					fields[1] = "RANDOMIZE";
-					fields[2] = ((question.getRandomAnswerOrder() != null) && question.getRandomAnswerOrder().booleanValue()) ? "true" : "false";
+					fields[2] = ((question.getRandomAnswerOrder() != null) && question.getRandomAnswerOrder().booleanValue()) ? "true"
+							: "false";
 					if (xid != null) fields[3] = xid;
 					m_sqlService.dbWrite(connection, statement, fields);
 

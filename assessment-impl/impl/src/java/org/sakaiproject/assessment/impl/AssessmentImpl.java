@@ -63,6 +63,10 @@ public class AssessmentImpl implements Assessment
 
 	protected PropertyStatus contextStatus = PropertyStatus.unset;
 
+	protected Boolean continuousNumbering = null;
+
+	protected PropertyStatus continuousNumberingStatus = PropertyStatus.unset;
+
 	protected String createdBy = null;
 
 	protected PropertyStatus createdByStatus = PropertyStatus.unset;
@@ -117,6 +121,10 @@ public class AssessmentImpl implements Assessment
 	protected Integer numSubmissions = null;
 
 	protected PropertyStatus numSubmissionsStatus = PropertyStatus.unset;
+
+	protected Boolean randomAccess = null;
+
+	protected PropertyStatus randomAccessStatus = PropertyStatus.unset;
 
 	protected Time releaseDate = null;
 
@@ -218,6 +226,17 @@ public class AssessmentImpl implements Assessment
 		if (this.contextStatus == PropertyStatus.unset) readMain();
 
 		return this.context;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getContinuousNumbering()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.continuousNumberingStatus == PropertyStatus.unset) readMain();
+
+		return this.continuousNumbering;
 	}
 
 	/**
@@ -382,6 +401,23 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Integer getNumQuestions()
+	{
+		// read the section info if this property has not yet been set
+		if (this.sectionsStatus == PropertyStatus.unset) readSections();
+
+		int count = 0;
+		for (AssessmentSection section : this.sections)
+		{
+			count += section.getNumQuestions();
+		}
+
+		return count;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer getNumSections()
 	{
 		// read the section info if this property has not yet been set
@@ -417,6 +453,17 @@ public class AssessmentImpl implements Assessment
 		}
 
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getRandomAccess()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.randomAccessStatus == PropertyStatus.unset) readMain();
+
+		return this.randomAccess;
 	}
 
 	/**
@@ -555,6 +602,15 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setContinuousNumbering(Boolean setting)
+	{
+		this.continuousNumbering = setting;
+		this.continuousNumberingStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setCreatedBy(String userId)
 	{
 		createdBy = userId;
@@ -663,6 +719,15 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setRandomAccess(Boolean setting)
+	{
+		this.randomAccess = setting;
+		this.randomAccessStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setReleaseDate(Time date)
 	{
 		this.releaseDate = date;
@@ -759,6 +824,18 @@ public class AssessmentImpl implements Assessment
 	{
 		this.context = context;
 		this.contextStatus = PropertyStatus.inited;
+	}
+
+	/**
+	 * Initialize the continuous numbering property.
+	 * 
+	 * @param value
+	 *        The continuous numbering property.
+	 */
+	protected void initContinuousNumbering(Boolean value)
+	{
+		this.continuousNumbering = value;
+		this.continuousNumberingStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -918,6 +995,18 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Initialize the random access property.
+	 * 
+	 * @param value
+	 *        The random access property.
+	 */
+	protected void initRandomAccess(Boolean value)
+	{
+		this.randomAccess = value;
+		this.randomAccessStatus = PropertyStatus.inited;
+	}
+
+	/**
 	 * Initialize the release date property.
 	 * 
 	 * @param date
@@ -1048,6 +1137,7 @@ public class AssessmentImpl implements Assessment
 		this.allowLateSubmitStatus = PropertyStatus.inited;
 		this.autoSubmitStatus = PropertyStatus.inited;
 		this.contextStatus = PropertyStatus.inited;
+		this.continuousNumberingStatus = PropertyStatus.inited;
 		this.createdByStatus = PropertyStatus.inited;
 		this.dueDateStatus = PropertyStatus.inited;
 		this.feedbackDateStatus = PropertyStatus.inited;
@@ -1061,6 +1151,7 @@ public class AssessmentImpl implements Assessment
 		this.idStatus = PropertyStatus.inited;
 		this.mssPolicyStatus = PropertyStatus.inited;
 		this.numSubmissionsStatus = PropertyStatus.inited;
+		this.randomAccessStatus = PropertyStatus.inited;
 		this.releaseDateStatus = PropertyStatus.inited;
 		this.retractDateStatus = PropertyStatus.inited;
 		this.statusStatus = PropertyStatus.inited;
@@ -1087,6 +1178,8 @@ public class AssessmentImpl implements Assessment
 		this.autoSubmitStatus = other.autoSubmitStatus;
 		this.context = other.context;
 		this.contextStatus = other.createdByStatus;
+		this.continuousNumbering = other.continuousNumbering;
+		this.continuousNumberingStatus = other.continuousNumberingStatus;
 		this.createdBy = other.createdBy;
 		this.createdByStatus = other.createdByStatus;
 		this.dueDate = other.dueDate;
@@ -1113,6 +1206,8 @@ public class AssessmentImpl implements Assessment
 		this.mssPolicyStatus = other.mssPolicyStatus;
 		this.numSubmissions = other.numSubmissions;
 		this.numSubmissionsStatus = other.numSubmissionsStatus;
+		this.randomAccess = other.randomAccess;
+		this.randomAccessStatus = other.randomAccessStatus;
 		this.releaseDate = other.releaseDate;
 		this.releaseDateStatus = other.releaseDateStatus;
 		this.retractDate = other.retractDate;

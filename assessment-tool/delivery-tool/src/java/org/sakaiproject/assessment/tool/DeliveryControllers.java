@@ -278,17 +278,23 @@ public class DeliveryControllers
 									ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
 									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("id")))
 								.setEnabled(
-										ui.newDecision()
-											.setProperty(
-												ui.newPropertyReference()
-													.setEntityReference("submission"))
-											.setDelegate(new ShowFeedbackChoiceDecision())))
+									ui.newDecision()
+										.setProperty(
+											ui.newPropertyReference()
+												.setEntityReference("submission"))
+										.setDelegate(new ShowFeedbackChoiceDecision())))
 						.add(
 							ui.newNavigation()
 								.setSubmit()
 								.setTitle("question-link-toc")
 								.setStyle(Navigation.Style.link)
-								.setDestination(ui.newDestination().setDestination("/toc/{0}", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id")))))
+								.setDestination(ui.newDestination().setDestination("/toc/{0}", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id")))
+								.setEnabled(
+									ui.newDecision()
+										.setProperty(
+											ui.newPropertyReference()
+												.setEntityReference("question")
+												.setPropertyReference("section.assessment.randomAccess")))))
 				.add(
 					ui.newSection()
 						.setTitle("question-section-title",
@@ -297,11 +303,7 @@ public class DeliveryControllers
 							ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("section.title"))
 						.add(
 							ui.newSection()
-								.setTitle("question-question-title",
-									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("sectionOrdering.position"),
-									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("section.numQuestions"),
-									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("points")
-									)
+								.setTitle(null,ui.newTextPropertyReference().setEntityReference("question").setFormatDelegate(new FormatQuestionTitle()))
 								.add(
 									ui.newText()
 										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("instructions"))
@@ -558,12 +560,17 @@ public class DeliveryControllers
 									ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
 									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("assessmentOrdering.previous.id")))
 								.setEnabled(
-										ui.newDecision()
-											.setReversed(true)
-											.setProperty(
-												ui.newBooleanPropertyReference()
-													.setEntityReference("question")
-													.setPropertyReference("assessmentOrdering.isFirst"))))	
+									ui.newDecision()
+										.setReversed(true)
+										.setProperty(
+											ui.newBooleanPropertyReference()
+												.setEntityReference("question")
+												.setPropertyReference("assessmentOrdering.isFirst")),
+									ui.newDecision()
+										.setProperty(
+											ui.newPropertyReference()
+												.setEntityReference("question")
+												.setPropertyReference("section.assessment.randomAccess"))))	
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -785,7 +792,8 @@ public class DeliveryControllers
 			if (assessment.getFeedbackNow().booleanValue())
 			{
 				// if we are doing correct answer feedback or question level feedback
-				if ((assessment.getFeedbackShowCorrectAnswer().booleanValue()) || (assessment.getFeedbackShowQuestionFeedback().booleanValue()))
+				if ((assessment.getFeedbackShowCorrectAnswer().booleanValue())
+						|| (assessment.getFeedbackShowQuestionFeedback().booleanValue()))
 				{
 					return true;
 				}
@@ -865,7 +873,7 @@ public class DeliveryControllers
 			return false;
 		}
 	}
-	
+
 	/**
 	 * if we want feedback, are doing feedback, are doing answer feedback, and the question is multi choice or multi correct, and this answer is the one selected...
 	 */
@@ -1112,19 +1120,21 @@ public class DeliveryControllers
 			// if not found, use the unanswered icon
 			if (!found)
 			{
-				return "<img src=\"" + context.get("sakai.return.url") + "/icons/unanswered.gif\" alt=\"" + context.getMessages().getString("toc-key-unanswered") + "\" />";
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/unanswered.gif\" alt=\""
+						+ context.getMessages().getString("toc-key-unanswered") + "\" />";
 			}
 
 			// if found, and if mark for review, use that icon
 			else if (markForReview)
 			{
-				return "<img src=\"" + context.get("sakai.return.url") + "/icons/markedforreview.gif\" alt=\"" + context.getMessages().getString("toc-key-mark-for-review") + "\" />";
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/markedforreview.gif\" alt=\""
+						+ context.getMessages().getString("toc-key-mark-for-review") + "\" />";
 			}
 
 			return null;
 		}
 	}
-	
+
 	/**
 	 * From a value which is an AssessmentAnswer, 'format' this into the html for the icon if it is selected, correct, and if we are doing feedback.
 	 */
@@ -1178,6 +1188,39 @@ public class DeliveryControllers
 			}
 
 			return null;
+		}
+	}
+
+	/**
+	 * Focus is the question - format the title, using either section or assessment based numbering.
+	 */
+	public static class FormatQuestionTitle implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{
+			if (value == null) return null;
+			if (!(value instanceof AssessmentQuestion)) return null;
+
+			AssessmentQuestion question = (AssessmentQuestion) value;
+			Boolean continuous = question.getSection().getAssessment().getContinuousNumbering();
+
+			Object[] args = new Object[3];
+			if ((continuous != null) && (continuous.booleanValue()))
+			{
+				args[0] = question.getAssessmentOrdering().getPosition();
+				args[1] = question.getSection().getAssessment().getNumQuestions();
+			}
+			else
+			{
+				args[0] = question.getSectionOrdering().getPosition();
+				args[1] = question.getSection().getNumQuestions();
+			}
+			args[2] = question.getPoints();
+
+			return context.getMessages().getFormattedMessage("question-question-title", args);
 		}
 	}
 }

@@ -56,6 +56,13 @@ public interface Assessment
 	String getContext();
 
 	/**
+	 * Access the continuous numbering flag that controlls the numbering of questions across section boundaries.
+	 * 
+	 * @return TRUE if numbering is continuous across the section boundaries, FALSE if numbering resets for each section.
+	 */
+	Boolean getContinuousNumbering();
+
+	/**
 	 * Access the creating user's id.
 	 * 
 	 * @return The creating users id.
@@ -154,6 +161,13 @@ public interface Assessment
 	MultipleSubmissionSelectionPolicy getMultipleSubmissionSelectionPolicy();
 
 	/**
+	 * Access the count of questions in all sections.
+	 * 
+	 * @return The count of questions in all sections.
+	 */
+	Integer getNumQuestions();
+
+	/**
 	 * Access the count of sections.
 	 * 
 	 * @return The count of sections.
@@ -175,6 +189,13 @@ public interface Assessment
 	 * @return the question, or null if not found.
 	 */
 	AssessmentQuestion getQuestion(String questionId);
+
+	/**
+	 * Access the random access flag that controlls an assessment taker's random or linear access to the questions of the assessment.
+	 * 
+	 * @return TRUE if random question access is supported, FALSE if only linear question access is supported.
+	 */
+	Boolean getRandomAccess();
 
 	/**
 	 * Access the release date. Only after this date (if defined) is the assessment open for submission.
@@ -255,6 +276,14 @@ public interface Assessment
 	 *        The assessment's context string.
 	 */
 	void setContext(String context);
+
+	/**
+	 * Set the continuous numbering flag that controlls the numbering of questions across section boundaries.
+	 * 
+	 * @param setting
+	 *        TRUE if numbering is continuous across the section boundaries, FALSE if numbering resets for each section.
+	 */
+	void setContinuousNumbering(Boolean setting);
 
 	/**
 	 * Set the creating uesr's id.
@@ -351,6 +380,14 @@ public interface Assessment
 	 *        The number of submissions allowed, or null to make it unlimited.
 	 */
 	void setNumSubmissionsAllowed(Integer count);
+
+	/**
+	 * Set the random access flag that controlls an assessment taker's random or linear access to the questions of the assessment.
+	 * 
+	 * @param setting
+	 *        TRUE if random question access is supported, FALSE if only linear question access is supported.
+	 */
+	void setRandomAccess(Boolean setting);
 
 	/**
 	 * Set the release date. Only after this date (if defined) is the assessment open for submission.
