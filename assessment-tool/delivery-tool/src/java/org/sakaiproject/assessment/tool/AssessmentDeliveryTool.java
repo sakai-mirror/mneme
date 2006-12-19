@@ -60,7 +60,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		enter, error, exit, list, question, review, toc
+		enter, error, exit, list, question, review, submit, toc
 	}
 
 	/** Our log (commons). */
@@ -95,6 +95,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 	/** The question interface. */
 	protected Controller uiQuestion = null;
+
+	/** The sbmit interface. */
+	protected Controller uiSubmit = null;
 
 	/** The table of contents interface. */
 	protected Controller uiToc = null;
@@ -143,6 +146,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		uiQuestion = DeliveryControllers.constructQuestion(ui);
 		uiExit = DeliveryControllers.constructExit(ui);
 		uiToc = DeliveryControllers.constructToc(ui);
+		uiSubmit = DeliveryControllers.constructSubmit(ui);
 
 		M_log.info("init()");
 	}
@@ -226,6 +230,19 @@ public class AssessmentDeliveryTool extends HttpServlet
 				else
 				{
 					questionGet(req, res, parts[2], parts[3], (parts.length == 5) ? parts[4] : null, context);
+				}
+				break;
+			}
+			case submit:
+			{
+				// we need one parameter (sid)
+				if (parts.length != 3)
+				{
+					errorGet(req, res, context);
+				}
+				else
+				{
+					submitGet(req, res, parts[2], context);
 				}
 				break;
 			}
@@ -320,6 +337,19 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				break;
 			}
+			case submit:
+			{
+				// we need a single parameter (sid)
+				if (parts.length != 3)
+				{
+					redirectError(req, res);
+				}
+				else
+				{
+					submitPost(req, res, context, parts[2]);
+				}
+				break;
+			}
 			default:
 			{
 				// redirect to error
@@ -385,42 +415,69 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// read form: for now, nothing to read
 		String destination = ui.decode(req, context);
 
-		// process: enter the assessment for this user, find the submission id and first question id from the first part
+		// process: enter the assessment for this user, find the submission id and starting question
 		Assessment assessment = assessmentService.idAssessment(assessmentId);
-		try
+		if (assessment != null)
 		{
-			Submission submission = assessmentService.enterSubmission(assessment, null);
-			if (submission != null)
+			try
 			{
-				if (assessment != null)
+				Submission submission = assessmentService.enterSubmission(assessment, null);
+				if (submission != null)
 				{
-					AssessmentSection part = assessment.getFirstSection();
-					if (part != null)
+					String questionId = null;
+
+					// for linear assessments, start at the first unseen question
+					if (!assessment.getRandomAccess())
 					{
-						AssessmentQuestion question = part.getFirstQuestion();
+						AssessmentQuestion question = submission.getFirstUnseenQuestion();
 						if (question != null)
 						{
-							String questionId = question.getId();
-
-							// next destination: first question of submission
-							destination = "/" + Destinations.question + "/" + submission.getId() + "/" + questionId;
-
-							// redirect
+							questionId = question.getId();
+						}
+						
+						// otherwise send the user to the submit view
+						else
+						{
+							destination = "/" + Destinations.submit + "/" + submission.getId();
 							res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 							return;
 						}
 					}
+
+					// for random access, start at the first question of the first part
+					else
+					{
+						AssessmentSection part = assessment.getFirstSection();
+						if (part != null)
+						{
+							AssessmentQuestion question = part.getFirstQuestion();
+							if (question != null)
+							{
+								questionId = question.getId();
+							}
+						}
+					}
+
+					if (questionId != null)
+					{
+						// next destination: first question of submission
+						destination = "/" + Destinations.question + "/" + submission.getId() + "/" + questionId;
+
+						// redirect
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+						return;
+					}
 				}
 			}
-		}
-		catch (AssessmentClosedException e)
-		{
-		}
-		catch (AssessmentCompletedException e)
-		{
-		}
-		catch (AssessmentPermissionException e)
-		{
+			catch (AssessmentClosedException e)
+			{
+			}
+			catch (AssessmentCompletedException e)
+			{
+			}
+			catch (AssessmentPermissionException e)
+			{
+			}
 		}
 
 		// redirect to error
@@ -544,6 +601,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
 			if (question != null)
 			{
+				// if the assessment is linear and this question has been seen already, we don't allow entry
+				if ((!question.getSection().getAssessment().getRandomAccess()) && submission.getSeenQuestion(question))
+				{
+					// TODO: better error reporting!
+					errorGet(req, res, context);
+					return;
+				}
+
 				context.put("question", question);
 
 				// find the answer (or have one created) for this submission / question
@@ -589,9 +654,19 @@ public class AssessmentDeliveryTool extends HttpServlet
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)
 		{
+			// TODO: security check (user matches submission user)
+			// TODO: check that the assessment is open
 			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
 			if (question != null)
 			{
+				// if the assessment is linear and this question has been seen already, we don't allow entry
+				if ((!question.getSection().getAssessment().getRandomAccess()) && submission.getSeenQuestion(question))
+				{
+					// TODO: better error reporting!
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					return;
+				}
+
 				SubmissionAnswer answer = submission.getAnswer(question);
 				if (answer != null)
 				{
@@ -644,6 +719,89 @@ public class AssessmentDeliveryTool extends HttpServlet
 	{
 		String error = Web.returnUrl(req, "/" + Destinations.error);
 		res.sendRedirect(res.encodeRedirectURL(error));
+	}
+
+	/**
+	 * Get the UI for the submit destination
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submisssionId
+	 *        The selected submission id.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void submitGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
+	{
+		// collect the submission
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission != null)
+		{
+			// TODO: security check (user matches submission user)
+			// TODO: check that the assessment is open
+			context.put("submission", submission);
+
+			Assessment assessment = submission.getAssessment();
+			if (assessment != null)
+			{
+				context.put("assessment", assessment);
+
+				// render
+				ui.render(uiSubmit, context);
+				return;
+			}
+		}
+
+		errorGet(req, res, context);
+	}
+
+	/**
+	 * Read the input for the submit destination, process, and redirect to the next destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param context
+	 *        The UiContext.
+	 * @param submissionId
+	 *        the selected submission id.
+	 */
+	protected void submitPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
+			throws IOException
+	{
+		// TODO: check expected
+
+		// the post is for "submit for grading".
+
+		// read form: for now, nothing to read
+		String destination = ui.decode(req, context);
+
+		Submission submission = assessmentService.idSubmission(submissionId);
+		try
+		{
+			assessmentService.completeSubmission(submission);
+
+			// if no exception, it worked! redirect
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+		catch (AssessmentClosedException e)
+		{
+		}
+		catch (SubmissionCompletedException e)
+		{
+		}
+		catch (AssessmentPermissionException e)
+		{
+		}
+
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
 	}
 
 	/**

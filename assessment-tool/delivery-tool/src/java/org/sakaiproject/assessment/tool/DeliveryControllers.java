@@ -328,7 +328,7 @@ public class DeliveryControllers
 														ui.newBooleanPropertyReference()
 															.setEntityReference("question")
 															.setPropertyReference("type"))
-													.setReversed(true)))
+													.setReversed()))
 								.add(
 									ui.newEntityList()
 										.setStyle(EntityList.Style.form)
@@ -343,7 +343,7 @@ public class DeliveryControllers
 														ui.newCompareDecision()
 															.setEqualsConstant(
 																QuestionType.multipleCorrect.toString())
-															.setReversed(true)
+															.setReversed()
 															.setProperty(
 																ui.newBooleanPropertyReference()
 																	.setEntityReference("question")
@@ -486,7 +486,13 @@ public class DeliveryControllers
 										.setProperty(
 											ui.newPropertyReference()
 												.setEntityReference("answer")
-												.setPropertyReference("markedForReview")))
+												.setPropertyReference("markedForReview"))
+										.setEnabled(
+												ui.newDecision()
+													.setProperty(
+														ui.newBooleanPropertyReference()
+														.setEntityReference("question")
+														.setPropertyReference("section.assessment.randomAccess"))))
 								.add(
 									ui.newText()
 										.setText("question-answer-key", ui.newPropertyReference().setEntityReference("question").setPropertyReference("answerKey"))
@@ -533,7 +539,7 @@ public class DeliveryControllers
 										ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("assessmentOrdering.next.id")))
 								.setEnabled(
 										ui.newDecision()
-											.setReversed(true)
+											.setReversed()
 											.setProperty(
 												ui.newBooleanPropertyReference()
 													.setEntityReference("question")
@@ -546,11 +552,11 @@ public class DeliveryControllers
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/exit/{0}",ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id")))
 								.setEnabled(
-										ui.newDecision()
-											.setProperty(
-												ui.newBooleanPropertyReference()
-													.setEntityReference("question")
-													.setPropertyReference("assessmentOrdering.isLast"))))
+									ui.newDecision()
+										.setProperty(
+											ui.newBooleanPropertyReference()
+												.setEntityReference("question")
+												.setPropertyReference("assessmentOrdering.isLast"))))
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -561,7 +567,7 @@ public class DeliveryControllers
 									ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("assessmentOrdering.previous.id")))
 								.setEnabled(
 									ui.newDecision()
-										.setReversed(true)
+										.setReversed()
 										.setProperty(
 											ui.newBooleanPropertyReference()
 												.setEntityReference("question")
@@ -576,7 +582,35 @@ public class DeliveryControllers
 								.setSubmit()
 								.setTitle("quesiton-save-exit")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/list"))));
+								.setDestination(ui.newDestination().setDestination("/list"))
+								.setEnabled(
+									ui.newDecision()
+										.setDelegate(new SaveExitDecision())
+										.setProperty(
+											ui.newPropertyReference()
+												.setEntityReference("question")))));
+	}
+
+	/**
+	 * The submit interface needs the following entities in the context:
+	 * assessment - the selected assessment object
+	 * submission - the selected Submission object
+	 */
+	public static Controller constructSubmit(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("submit-title", ui.newTextPropertyReference().setEntityReference("assessment").setPropertyReference("title"))
+				.setHeader("submit-header")
+				.add(
+					ui.newButtonBar()
+						.add(
+							ui.newNavigation()
+								.setDefault()
+								.setSubmit()
+								.setTitle("submit-save-submit")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/exit/{0}",ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id")))));
 	}
 
 	/**
@@ -911,6 +945,32 @@ public class DeliveryControllers
 		}
 	}
 
+	/**
+	 * focus is the assessment question: if this is the last question and we are linear, we don't show save-exit, otherwise we do
+	 */
+	public static class SaveExitDecision implements DecisionDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean decide(Decision decision, Context context, Object focus)
+		{
+			// property reference is the AssessmentQuestion
+			if (decision.getProperty() == null) return false;
+			Object o = decision.getProperty().readObject(context, focus);
+			if (o == null) return false;
+			if (!(o instanceof AssessmentQuestion)) return false;
+
+			AssessmentQuestion question = (AssessmentQuestion) o;
+			if ((question.getAssessmentOrdering().getIsLast().booleanValue()) && (!question.getSection().getAssessment().getRandomAccess().booleanValue()))
+			{
+				return false;
+			}
+
+			return true;
+		}
+	}
+
 	public static class FeedbackPropertyReference implements FormatDelegate
 	{
 		/**
@@ -1105,30 +1165,31 @@ public class DeliveryControllers
 			Assessment assessment = submission.getAssessment();
 			if (assessment == null) return value.toString();
 
-			// search for our answer without creating it, and if found check the mark for review setting
-			boolean found = false;
+			// search for our answer without creating it, and if found check the answered and mark for review setting
+			boolean answered = false;
 			boolean markForReview = false;
 			for (SubmissionAnswer answer : submission.getAnswers())
 			{
 				if (answer.getQuestion().equals(question))
 				{
-					found = true;
+					answered = answer.getIsAnswered();
 					markForReview = answer.getMarkedForReview().booleanValue();
+					break;
 				}
 			}
 
-			// if not found, use the unanswered icon
-			if (!found)
-			{
-				return "<img src=\"" + context.get("sakai.return.url") + "/icons/unanswered.gif\" alt=\""
-						+ context.getMessages().getString("toc-key-unanswered") + "\" />";
-			}
-
-			// if found, and if mark for review, use that icon
-			else if (markForReview)
+			// if mark for review, use that icon
+			if (markForReview)
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/markedforreview.gif\" alt=\""
 						+ context.getMessages().getString("toc-key-mark-for-review") + "\" />";
+			}
+
+			// otherwise if not found, or not answered, use the unanswered icon
+			else if (!answered)
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/unanswered.gif\" alt=\""
+						+ context.getMessages().getString("toc-key-unanswered") + "\" />";
 			}
 
 			return null;

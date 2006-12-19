@@ -218,6 +218,42 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsAnswered()
+	{
+		QuestionType type = getQuestion().getType();
+
+		// fill in, numeric, essay, needs some text in an entry
+		if ((type == QuestionType.essay) || (type == QuestionType.fillIn) || (type == QuestionType.numeric))
+		{
+			if (this.entries.size() == 0) return false;
+			for (SubmissionAnswerEntryImpl entry : this.entries)
+			{
+				if ((entry.answerText != null) && (entry.answerText.length() > 0))
+				{
+					return true;
+				}
+			}
+		}
+
+		// matching, t/f, survey, multi choice and multi correct need at least one entry with a question answer id
+		else
+		{
+			if (this.entries.size() == 0) return false;
+			for (SubmissionAnswerEntryImpl entry : this.entries)
+			{
+				if ((entry.answerId != null) && (entry.answerId.length() > 0))
+				{
+					return true;
+				}
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getMarkedForReview()
 	{
 		return this.markedForReview;

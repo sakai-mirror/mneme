@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.Assessment;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
+import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.time.api.Time;
@@ -133,14 +134,12 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
-	 * Find (or create) the answer for this question.
-	 * 
-	 * @param assessmentQuestionId
-	 *        The question id.
-	 * @return The answer for this question.
+	 * {@inheritDoc}
 	 */
 	public SubmissionAnswer getAnswer(AssessmentQuestion question)
 	{
+		if (question == null) return null;
+
 		// read the answers if needed
 		if (this.answersStatus == PropertyStatus.unset) readAnswers();
 
@@ -233,6 +232,27 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public AssessmentQuestion getFirstUnseenQuestion()
+	{
+		Assessment assessment = getAssessment();
+
+		for (AssessmentSection section : assessment.getSections())
+		{
+			for (AssessmentQuestion question : section.getQuestions())
+			{
+				if (!getSeenQuestion(question))
+				{
+					return question;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getId()
 	{
 		return this.id;
@@ -247,6 +267,19 @@ public class SubmissionImpl implements Submission
 		if (this.isCompleteStatus == PropertyStatus.unset) readMain();
 
 		return this.isComplete;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getSeenQuestion(AssessmentQuestion question)
+	{
+		if (question == null) return false;
+
+		// read the answers if needed
+		if (this.answersStatus == PropertyStatus.unset) readAnswers();
+
+		return findAnswer(question.getId()) != null;
 	}
 
 	/**
@@ -399,6 +432,7 @@ public class SubmissionImpl implements Submission
 				return answer;
 			}
 		}
+
 		return null;
 	}
 

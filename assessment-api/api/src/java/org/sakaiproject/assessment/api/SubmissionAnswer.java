@@ -89,6 +89,13 @@ public interface SubmissionAnswer
 	Boolean[] getEntryCorrects();
 
 	/**
+	 * Check if the question is answered; if the user has made the answer entries. Answers that have only "mark for review" or a rational are not considered answered.
+	 * 
+	 * @return TRUE if the question is considered to be answered, FALSE if not.
+	 */
+	Boolean getIsAnswered();
+
+	/**
 	 * Access the "mark for review" setting for this answer.
 	 * 
 	 * @return The answer's "mark for review" setting; TRUE if the user has marked this answer for review, FALSE if not.

@@ -77,6 +77,13 @@ public interface Submission
 	Long getElapsedTime();
 
 	/**
+	 * Find the first assessment question that has not been seen yet in this submission.
+	 * 
+	 * @return The first unseen assessment question, or null if they have all been seen.
+	 */
+	AssessmentQuestion getFirstUnseenQuestion();
+
+	/**
 	 * Access the id of this submission.
 	 * 
 	 * @return The submission's id.
@@ -89,6 +96,15 @@ public interface Submission
 	 * @return TRUE if the submission is complete, FALSE if still in progress.
 	 */
 	Boolean getIsComplete();
+
+	/**
+	 * Check if this question has ever been seen in this submission - answered or not.
+	 * 
+	 * @param question
+	 *        The assessment question
+	 * @return TRUE if the question has ever been seen, false if not.
+	 */
+	Boolean getSeenQuestion(AssessmentQuestion question);
 
 	/**
 	 * Access the start date for this submission.
