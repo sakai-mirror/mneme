@@ -825,7 +825,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					String questionId = result.getString(2);
 					String text = result.getString(3);
 					boolean isCorrect = result.getBoolean(4);
-					String label = result.getString(5);
+					// samigo puts out a blank (not null) label for cases where there should be no label (t/f)
+					String label = StringUtil.trimToNull(result.getString(5));
 					String partId = result.getString(6);
 					String correctFeedback = result.getString(7);
 					String generalFeedback = result.getString(8);
