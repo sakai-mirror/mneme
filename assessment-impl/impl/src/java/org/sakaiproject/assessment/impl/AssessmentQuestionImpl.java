@@ -290,6 +290,8 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	{
 		if (!(obj instanceof AssessmentQuestion)) return false;
 		if (this == obj) return true;
+		if (this.getId() == null) return false;
+		if (((AssessmentQuestion) obj).getId() == null) return false;
 		return ((AssessmentQuestion) obj).getId().equals(getId());
 	}
 

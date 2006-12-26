@@ -31,6 +31,7 @@ import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
+import org.sakaiproject.assessment.api.SubmissionEvaluation;
 import org.sakaiproject.time.api.Time;
 
 /**
@@ -130,6 +131,8 @@ public class SubmissionImpl implements Submission
 	{
 		if (!(obj instanceof Submission)) return false;
 		if (this == obj) return true;
+		if (this.getId() == null) return false;
+		if (((Submission) obj).getId() == null) return false;
 		return ((Submission) obj).getId().equals(getId());
 	}
 

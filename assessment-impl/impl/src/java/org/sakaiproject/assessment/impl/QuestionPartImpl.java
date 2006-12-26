@@ -88,6 +88,8 @@ public class QuestionPartImpl implements QuestionPart
 	{
 		if (!(obj instanceof QuestionPart)) return false;
 		if (this == obj) return true;
+		if (this.getId() == null) return false;
+		if (((QuestionPart) obj).getId() == null) return false;
 		return ((QuestionPart) obj).getId().equals(getId());
 	}
 
@@ -141,8 +143,8 @@ public class QuestionPartImpl implements QuestionPart
 				rv.add(new AssessmentAnswerImpl(answer));
 			}
 
-			// set the seed based on the current user id
-			long seed = this.question.section.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode();
+			// set the seed based on the current user id and the part id
+			long seed = this.question.section.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode() + this.id.hashCode();
 
 			// mix up the answers
 			Collections.shuffle(rv, new Random(seed));

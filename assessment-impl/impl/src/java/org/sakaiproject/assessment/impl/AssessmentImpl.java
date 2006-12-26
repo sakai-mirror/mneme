@@ -27,6 +27,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.Assessment;
+import org.sakaiproject.assessment.api.AssessmentAnswer;
 import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentStatus;
@@ -192,6 +193,8 @@ public class AssessmentImpl implements Assessment
 	{
 		if (!(obj instanceof Assessment)) return false;
 		if (this == obj) return true;
+		if (this.getId() == null) return false;
+		if (((Assessment) obj).getId() == null) return false;
 		return ((Assessment) obj).getId().equals(getId());
 	}
 

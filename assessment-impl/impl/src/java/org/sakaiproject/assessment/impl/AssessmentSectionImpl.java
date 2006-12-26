@@ -174,6 +174,8 @@ public class AssessmentSectionImpl implements AssessmentSection
 	{
 		if (!(obj instanceof AssessmentSection)) return false;
 		if (this == obj) return true;
+		if (this.getId() == null) return false;
+		if (((AssessmentSection) obj).getId() == null) return false;
 		return ((AssessmentSection) obj).getId().equals(getId());
 	}
 
@@ -265,8 +267,8 @@ public class AssessmentSectionImpl implements AssessmentSection
 		// randomize if needed
 		if ((this.randomQuestionOrdering != null) && (this.randomQuestionOrdering.booleanValue()))
 		{
-			// set the seed based on the current user id
-			long seed = this.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode();
+			// set the seed based on the current user id and the section id
+			long seed = this.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode() + this.id.hashCode();
 
 			// mix up the questions
 			Collections.shuffle(rv, new Random(seed));
@@ -288,7 +290,7 @@ public class AssessmentSectionImpl implements AssessmentSection
 	 */
 	public Boolean getRandomQuestionOrder()
 	{
-		return this.getRandomQuestionOrder();
+		return this.randomQuestionOrdering;
 	}
 
 	/**

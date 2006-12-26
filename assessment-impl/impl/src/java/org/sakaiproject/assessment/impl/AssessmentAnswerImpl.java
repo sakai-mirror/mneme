@@ -21,6 +21,8 @@
 
 package org.sakaiproject.assessment.impl;
 
+import java.util.List;
+
 import org.sakaiproject.assessment.api.AssessmentAnswer;
 import org.sakaiproject.assessment.api.QuestionPart;
 
@@ -88,6 +90,8 @@ public class AssessmentAnswerImpl implements AssessmentAnswer
 	{
 		if (!(obj instanceof AssessmentAnswer)) return false;
 		if (this == obj) return true;
+		if (this.getId() == null) return false;
+		if (((AssessmentAnswer) obj).getId() == null) return false;
 		return ((AssessmentAnswer) obj).getId().equals(getId());
 	}
 
@@ -152,7 +156,8 @@ public class AssessmentAnswerImpl implements AssessmentAnswer
 	 */
 	public Integer getPosition()
 	{
-		int index = this.part.getAnswers().indexOf(this);
+		List<? extends AssessmentAnswer> answers = this.part.getAnswers();
+		int index = answers.indexOf(this);
 
 		return new Integer(index + 1);
 	}

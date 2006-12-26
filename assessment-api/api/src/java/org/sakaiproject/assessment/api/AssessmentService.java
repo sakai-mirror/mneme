@@ -224,6 +224,15 @@ public interface AssessmentService
 	 */
 	void addAssessment(Assessment a) throws AssessmentPermissionException;
 
+	/**
+	 * Count the published assessments in the context - all of them!
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return The count of published assessments in the context.
+	 */
+	Integer countAssessments(String context);
+
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Submission Support
 	 *********************************************************************************************************************************************************************************************************************************************************/

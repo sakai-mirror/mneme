@@ -33,9 +33,6 @@ public class TestControllers
 	// Note: do not allow an automatic formatter to format this file! -ggolden
 
 	/**
-	 * The enter interface needs the following entities in the context:
-	 * assessment - the selected Assessment object
-	 * remainingSubmissions - Integer count of remaining submissions allowed to the current user for the selected assessment
 	 */
 	public static Controller constructHome(UiService ui)
 	{
@@ -52,10 +49,8 @@ public class TestControllers
 						.add(
 							ui.newNavigation()
 								.setSubmit()
-								.setDefault()
 								.setTitle("home-generate")
 								.setStyle(Navigation.Style.button))
-					);
-
+						);
 	}
 }

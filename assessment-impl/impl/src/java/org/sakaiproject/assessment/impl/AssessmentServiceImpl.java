@@ -1827,6 +1827,7 @@ public class AssessmentServiceImpl implements AssessmentService
 			a.initId(id.toString());
 
 			// each section
+			int sectionPosition = 1;
 			for (AssessmentSectionImpl section : a.sections)
 			{
 				// ID column? For non sequence db vendors, it is defaulted
@@ -1839,7 +1840,7 @@ public class AssessmentServiceImpl implements AssessmentService
 				fields = new Object[(sectionId == null) ? 11 : 12];
 				fields[0] = id;
 				fields[1] = null;
-				fields[2] = section.getOrdering().getPosition();
+				fields[2] = new Integer(sectionPosition++);
 				fields[3] = section.getTitle(); // TODO: "Default"?
 				fields[4] = section.getDescription();
 				fields[5] = new Integer(21); // TODO: type?
@@ -2236,6 +2237,7 @@ public class AssessmentServiceImpl implements AssessmentService
 			// questions - from each section
 			for (AssessmentSectionImpl section : a.sections)
 			{
+				int questionPosition = 1;
 				for (AssessmentQuestionImpl question : section.questions)
 				{
 					// write the question
@@ -2246,7 +2248,7 @@ public class AssessmentServiceImpl implements AssessmentService
 							+ ((questionId == null) ? "" : ",?") + ")";
 					fields = new Object[(questionId == null) ? 11 : 12];
 					fields[0] = section.getId();
-					fields[1] = question.getSectionOrdering().getPosition();
+					fields[1] = new Integer(questionPosition++);
 					fields[2] = question.getType().getDbEncoding();
 					fields[3] = question.getPoints();
 					fields[4] = question.getRequireRationale();
@@ -2295,7 +2297,7 @@ public class AssessmentServiceImpl implements AssessmentService
 						((QuestionPartImpl) part).initId(partId.toString());
 
 						// answers - from each part
-						int i = 0;
+						int answerPosition = 1;
 						for (AssessmentAnswer answer : part.getAnswersAsAuthored())
 						{
 							Long answerId = m_sqlService.getNextSequence("SAM_PUBANSWER_ID_S", connection);
@@ -2307,7 +2309,7 @@ public class AssessmentServiceImpl implements AssessmentService
 							fields[0] = partId;
 							fields[1] = questionId;
 							fields[2] = answer.getText();
-							fields[3] = answer.getPosition();
+							fields[3] = new Integer(answerPosition++);
 							fields[4] = answer.getLabel();
 							fields[5] = answer.getIsCorrect();
 							fields[6] = question.getPoints();
@@ -2325,25 +2327,94 @@ public class AssessmentServiceImpl implements AssessmentService
 							// we really need that id
 							if (answerId == null) throw new Exception("failed to insert answer");
 							((AssessmentAnswerImpl) answer).initId(answerId.toString());
+
+							// answer feedback
+							if (answer.getFeedbackIncorrect() != null)
+							{
+								xid = m_sqlService.getNextSequence("SAM_PUBANSWERFEEDBACK_ID_S", connection);
+								statement = "INSERT INTO SAM_PUBLISHEDANSWERFEEDBACK_T (ANSWERID, TYPEID, TEXT"
+										+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?"
+										+ ((xid == null) ? "" : ",?") + ")";
+								fields = new Object[(xid == null) ? 3 : 4];
+								fields[0] = answerId;
+								fields[1] = "InCorrect Feedback";
+								fields[2] = answer.getFeedbackIncorrect();
+								if (xid != null) fields[3] = xid;
+								m_sqlService.dbWrite(connection, statement, fields);
+							}
+
+							if (answer.getFeedbackCorrect() != null)
+							{
+								xid = m_sqlService.getNextSequence("SAM_PUBANSWERFEEDBACK_ID_S", connection);
+								statement = "INSERT INTO SAM_PUBLISHEDANSWERFEEDBACK_T (ANSWERID, TYPEID, TEXT"
+										+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?"
+										+ ((xid == null) ? "" : ",?") + ")";
+								fields = new Object[(xid == null) ? 3 : 4];
+								fields[0] = answerId;
+								fields[1] = "Correct Feedback";
+								fields[2] = answer.getFeedbackCorrect();
+								if (xid != null) fields[3] = xid;
+								m_sqlService.dbWrite(connection, statement, fields);
+							}
+
+							if (answer.getFeedbackGeneral() != null)
+							{
+								xid = m_sqlService.getNextSequence("SAM_PUBANSWERFEEDBACK_ID_S", connection);
+								statement = "INSERT INTO SAM_PUBLISHEDANSWERFEEDBACK_T (ANSWERID, TYPEID, TEXT"
+										+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?"
+										+ ((xid == null) ? "" : ",?") + ")";
+								fields = new Object[(xid == null) ? 3 : 4];
+								fields[0] = answerId;
+								fields[1] = "General Feedback";
+								fields[2] = answer.getFeedbackGeneral();
+								if (xid != null) fields[3] = xid;
+								m_sqlService.dbWrite(connection, statement, fields);
+							}
 						}
 					}
 
 					// question feedback
-					xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", connection);
-					statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT"
-							+ ((xid == null) ? "" : ", ITEMFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
-					fields = new Object[(xid == null) ? 3 : 4];
-					fields[0] = questionId;
-					fields[1] = "InCorrect Feedback";
-					fields[2] = "Incorrect Answer Feedback";
-					if (xid != null) fields[3] = xid;
-					m_sqlService.dbWrite(connection, statement, fields);
+					if (question.getFeedbackIncorrect() != null)
+					{
+						xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", connection);
+						statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT"
+								+ ((xid == null) ? "" : ", ITEMFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?")
+								+ ")";
+						fields = new Object[(xid == null) ? 3 : 4];
+						fields[0] = questionId;
+						fields[1] = "InCorrect Feedback";
+						fields[2] = question.getFeedbackIncorrect();
+						if (xid != null) fields[3] = xid;
+						m_sqlService.dbWrite(connection, statement, fields);
+					}
 
-					xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", connection);
-					fields[1] = "Correct Feedback";
-					fields[2] = "Correct Answer Feedback";
-					if (xid != null) fields[3] = xid;
-					m_sqlService.dbWrite(connection, statement, fields);
+					if (question.getFeedbackCorrect() != null)
+					{
+						xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", connection);
+						statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT"
+								+ ((xid == null) ? "" : ", ITEMFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?")
+								+ ")";
+						fields = new Object[(xid == null) ? 3 : 4];
+						fields[0] = questionId;
+						fields[1] = "Correct Feedback";
+						fields[2] = question.getFeedbackCorrect();
+						if (xid != null) fields[3] = xid;
+						m_sqlService.dbWrite(connection, statement, fields);
+					}
+
+					if (question.getFeedbackGeneral() != null)
+					{
+						xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", connection);
+						statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT"
+								+ ((xid == null) ? "" : ", ITEMFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?")
+								+ ")";
+						fields = new Object[(xid == null) ? 3 : 4];
+						fields[0] = questionId;
+						fields[1] = "General Feedback";
+						fields[2] = question.getFeedbackGeneral();
+						if (xid != null) fields[3] = xid;
+						m_sqlService.dbWrite(connection, statement, fields);
+					}
 
 					// question metadata
 					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
@@ -2358,13 +2429,14 @@ public class AssessmentServiceImpl implements AssessmentService
 
 					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
 					fields[1] = "MUTUALLY_EXCLUSIVE";
-					fields[2] = "false";
+					fields[2] = ((question.getMutuallyExclusive() != null) && question.getMutuallyExclusive().booleanValue()) ? "true"
+							: "false";
 					if (xid != null) fields[3] = xid;
 					m_sqlService.dbWrite(connection, statement, fields);
 
 					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
 					fields[1] = "PARTID";
-					fields[2] = "1";
+					fields[2] = "1"; // TODO: ???
 					if (xid != null) fields[3] = xid;
 					m_sqlService.dbWrite(connection, statement, fields);
 
@@ -2377,7 +2449,8 @@ public class AssessmentServiceImpl implements AssessmentService
 
 					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
 					fields[1] = "CASE_SENSITIVE";
-					fields[2] = "false";
+					fields[2] = ((question.getCaseSensitive() != null) && question.getCaseSensitive().booleanValue()) ? "true"
+							: "false";
 					if (xid != null) fields[3] = xid;
 					m_sqlService.dbWrite(connection, statement, fields);
 				}
@@ -2425,6 +2498,26 @@ public class AssessmentServiceImpl implements AssessmentService
 				m_sqlService.returnConnection(connection);
 			}
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countAssessments(String context)
+	{
+		String statement = "SELECT COUNT(P.ID) FROM SAM_PUBLISHEDASSESSMENT_T P"
+				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?";
+
+		Object[] fields = new Object[2];
+		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
+		fields[1] = context;
+		List results = m_sqlService.dbRead(statement, fields, null);
+		if (results.size() > 0)
+		{
+			return new Integer((String) results.get(0));
+		}
+
+		return new Integer(0);
 	}
 
 	/**********************************************************************************************************************************************************************************************************************************************************

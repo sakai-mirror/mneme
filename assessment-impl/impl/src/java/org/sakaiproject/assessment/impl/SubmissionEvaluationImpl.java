@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sakaiproject.assessment.api.Assessment;
+import org.sakaiproject.assessment.api.QuestionPart;
 import org.sakaiproject.assessment.api.SubmissionAnswerEvaluation;
 import org.sakaiproject.assessment.api.SubmissionEvaluation;
 
@@ -79,6 +80,8 @@ public class SubmissionEvaluationImpl implements SubmissionEvaluation
 	public boolean equals(Object obj)
 	{
 		if (!(obj instanceof SubmissionEvaluation)) return false;
+		if (this.getId() == null) return false;
+		if (((SubmissionEvaluation) obj).getId() == null) return false;
 		if (((SubmissionEvaluation) obj).getId() != this.getId()) return false;
 		return true;
 	}

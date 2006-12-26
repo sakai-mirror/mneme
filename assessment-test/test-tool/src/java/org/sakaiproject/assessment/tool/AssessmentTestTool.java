@@ -45,6 +45,7 @@ import org.sakaiproject.assessment.api.AssessmentPermissionException;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentService;
+import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.MultipleSubmissionSelectionPolicy;
 import org.sakaiproject.assessment.api.QuestionPart;
 import org.sakaiproject.assessment.api.QuestionType;
@@ -73,6 +74,20 @@ import org.sakaiproject.util.Web;
  */
 public class AssessmentTestTool extends HttpServlet
 {
+	// "Vivie" numbers
+	// final int contextsWithAssessments = 500;
+	// final int assessmentsPerContext = 25;
+	// final int submissionsPerStudent = 2;
+	// final int contextStudents = 50;
+	// final int itemsPerAssessment = 10;
+
+	// // small
+	// final int contextsWithAssessments = 2;
+	// final int assessmentsPerContext = 2;
+	// final int submissionsPerStudent = 2;
+	// final int contextStudents = 2;
+	// final int itemsPerAssessment = 2;
+
 	/** Our tool destinations. */
 	enum Destinations
 	{
@@ -264,22 +279,9 @@ public class AssessmentTestTool extends HttpServlet
 	/**
 	 * Generate some assessments and submissions
 	 */
-	protected void generate()
+	protected void generate(int contextsWithAssessments, int assessmentsPerContext, int submissionsPerStudent, int contextStudents,
+			int itemsPerAssessment)
 	{
-		 // "Vivie" numbers
-		 final int contextsWithAssessments = 500;
-		 final int assessmentsPerContext = 25;
-		 final int submissionsPerStudent = 2;
-		 final int contextStudents = 50;
-		 final int itemsPerAssessment = 10;
-
-//		// small
-//		final int contextsWithAssessments = 2;
-//		final int assessmentsPerContext = 2;
-//		final int submissionsPerStudent = 2;
-//		final int contextStudents = 2;
-//		final int itemsPerAssessment = 2;
-
 		// the real context
 		String context = toolManager.getCurrentPlacement().getContext();
 
@@ -312,7 +314,8 @@ public class AssessmentTestTool extends HttpServlet
 				for (int assessmentCount = 1; assessmentCount <= assessmentsPerContext; assessmentCount++)
 				{
 					// generate the assessment
-					Assessment a = generateAssessment(randomContext, assessmentCount, itemsPerAssessment);
+					String title = context + " assessment " + assessmentCount;
+					Assessment a = generateAssessment(randomContext, title, itemsPerAssessment);
 
 					// save the assessment
 					try
@@ -375,11 +378,15 @@ public class AssessmentTestTool extends HttpServlet
 			// collect the assessment ids generated
 			assessments = new ArrayList<Assessment>();
 
+			// how many assessments do we have already?
+			int currentCount = assessmentService.countAssessments(context);
+
 			// make a bunch of assessments for the current context
-			for (int assessmentCount = 1; assessmentCount <= assessmentsPerContext; assessmentCount++)
+			for (int assessmentCount = 0; assessmentCount < assessmentsPerContext; assessmentCount++)
 			{
 				// generate the assessment
-				Assessment a = generateAssessment(context, assessmentCount, itemsPerAssessment);
+				String title = context + " assessment " + (currentCount + assessmentCount);
+				Assessment a = generateAssessment(context, title, itemsPerAssessment);
 
 				try
 				{
@@ -439,7 +446,7 @@ public class AssessmentTestTool extends HttpServlet
 		{
 			// restore the correct session user
 			sakaiSession.setUserId(curUserId);
-			
+
 			// clear the advisor
 			securityService.popAdvisor();
 		}
@@ -456,14 +463,25 @@ public class AssessmentTestTool extends HttpServlet
 	 *        With this number of items.
 	 * @return The assessment.
 	 */
-	protected Assessment generateAssessment(String context, int count, int numQuestions)
+	protected Assessment generateAssessment(String context, String title, int numQuestions)
 	{
 		// Assessment -- Section -- Question -- Part -- Answer
 
 		Assessment a = assessmentService.newAssessment();
 		a.setContext(context);
-		a.setTitle(context + " assessment " + count);
+		a.setTitle(title);
 		a.setMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED);
+		a.setAllowLateSubmit(Boolean.TRUE);
+		a.setContinuousNumbering(Boolean.TRUE);
+		a.setFeedbackDelivery(FeedbackDelivery.IMMEDIATE);
+		a.setFeedbackShowAnswerFeedback(Boolean.TRUE);
+		a.setFeedbackShowCorrectAnswer(Boolean.TRUE);
+		a.setFeedbackShowQuestionFeedback(Boolean.TRUE);
+		a.setFeedbackShowQuestionScore(Boolean.TRUE);
+		a.setFeedbackShowScore(Boolean.TRUE);
+		a.setFeedbackShowStatistics(Boolean.TRUE);
+		a.setNumSubmissionsAllowed(null);
+		a.setRandomAccess(Boolean.TRUE);
 
 		// add a section
 		AssessmentSection s = assessmentService.newSection(a);
@@ -472,29 +490,199 @@ public class AssessmentTestTool extends HttpServlet
 		// add questions
 		for (int i = 1; i <= numQuestions; i++)
 		{
-			AssessmentQuestion question = assessmentService.newQuestion(s);
+			AssessmentQuestion question = generateTrueFalse(s, true, 10, "question " + i, "correct!", "incorect :-(");
 
-			question.setRequireRationale(Boolean.TRUE);
-			question.setScore(new Float(10));
-			question.setType(QuestionType.trueFalse);
+			i++;
+			String[] answers =
+			{
+					"a", "b", "c", "d"
+			};
+			String[] feedbacks =
+			{
+					"aaa", "bbb", "ccc", "ddd"
+			};
+			generateMultipleChoice(s, true, 10, "question " + i, "yes!", "well, not quite", answers, 0, feedbacks, true);
 
-			// a part
-			QuestionPart part = assessmentService.newQuestionPart(question);
-			part.setTitle("question");
+			i++;
+			Boolean[] corrects =
+			{
+					Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE
+			};
+			generateMultipleCorrect(s, true, 10, "question " + i, "got it!", "try again", answers, corrects, feedbacks, true);
 
-			// answers
-			AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
-			answer.setIsCorrect(Boolean.TRUE);
-			answer.setText("true");
-			answer.setLabel("A");
-
-			answer = assessmentService.newAssessmentAnswer(part);
-			answer.setIsCorrect(Boolean.FALSE);
-			answer.setText("false");
-			answer.setLabel("B");
+			i++;
+			generateSurvey(s, "question " + i, "thanks.");
+			
+			i++;
+			generateEssay(s, "question " + i, 10, "feedback", "model");
 		}
 
 		return a;
+	}
+
+	/**
+	 * Generate a true/false question.
+	 * 
+	 * @return The true/false question.
+	 */
+	protected AssessmentQuestion generateTrueFalse(AssessmentSection section, boolean requireRational, float points, String title,
+			String correctFeedback, String incorrectFeedback)
+	{
+		AssessmentQuestion question = assessmentService.newQuestion(section);
+
+		question.setType(QuestionType.trueFalse);
+		question.setRequireRationale(Boolean.valueOf(requireRational));
+		question.setScore(new Float(points));
+		question.setFeedbackCorrect(correctFeedback);
+		question.setFeedbackIncorrect(incorrectFeedback);
+
+		// one part
+		QuestionPart part = assessmentService.newQuestionPart(question);
+		part.setTitle(title);
+
+		// answers
+		AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
+		answer.setIsCorrect(Boolean.TRUE);
+		answer.setText("true");
+
+		answer = assessmentService.newAssessmentAnswer(part);
+		answer.setIsCorrect(Boolean.FALSE);
+		answer.setText("false");
+
+		return question;
+	}
+
+	/**
+	 * Generate a multiple choice question.
+	 * 
+	 * @return The multiple choice question.
+	 */
+	protected AssessmentQuestion generateMultipleChoice(AssessmentSection section, boolean requireRational, float points,
+			String title, String correctFeedback, String incorrectFeedback, String[] answers, int correctAnswerIndex,
+			String[] feedbacks, boolean randomize)
+	{
+		AssessmentQuestion question = assessmentService.newQuestion(section);
+
+		question.setType(QuestionType.multipleChoice);
+		question.setRequireRationale(Boolean.valueOf(requireRational));
+		question.setScore(new Float(points));
+		question.setFeedbackCorrect(correctFeedback);
+		question.setFeedbackIncorrect(incorrectFeedback);
+		question.setRandomAnswerOrder(Boolean.valueOf(randomize));
+
+		// one part
+		QuestionPart part = assessmentService.newQuestionPart(question);
+		part.setTitle(title);
+
+		String[] labels =
+		{
+				"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"
+		};
+
+		// answers
+		for (int i = 0; i < answers.length; i++)
+		{
+			AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
+			answer.setIsCorrect(i == correctAnswerIndex);
+			answer.setText(answers[i]);
+			answer.setFeedbackGeneral(feedbacks[i]);
+			answer.setLabel(labels[i]);
+		}
+
+		return question;
+	}
+
+	/**
+	 * Generate a survey question.
+	 * 
+	 * @return The survey question.
+	 */
+	protected AssessmentQuestion generateSurvey(AssessmentSection section, String title, String feedback)
+	{
+		AssessmentQuestion question = assessmentService.newQuestion(section);
+
+		question.setType(QuestionType.survey);
+		question.setRequireRationale(Boolean.FALSE);
+		question.setScore(new Float(0));
+		question.setFeedbackGeneral(feedback);
+
+		// one part
+		QuestionPart part = assessmentService.newQuestionPart(question);
+		part.setTitle(title);
+
+		// answers
+		for (int i = 1; i <= 5; i++)
+		{
+			AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
+			answer.setText(Integer.toString(i));
+		}
+
+		return question;
+	}
+
+	/**
+	 * Generate an essay question.
+	 * 
+	 * @return The essay question.
+	 */
+	protected AssessmentQuestion generateEssay(AssessmentSection section, String title, float points, String feedback, String modelAnswer)
+	{
+		AssessmentQuestion question = assessmentService.newQuestion(section);
+
+		question.setType(QuestionType.essay);
+		question.setRequireRationale(Boolean.FALSE);
+		question.setScore(new Float(points));
+		question.setFeedbackGeneral(feedback);
+
+		// one part
+		QuestionPart part = assessmentService.newQuestionPart(question);
+		part.setTitle(title);
+
+		// answer
+		AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
+		answer.setText(modelAnswer);
+
+		return question;
+	}
+
+	/**
+	 * Generate a multiple choice / multiple correct question.
+	 * 
+	 * @return The multiple choice / multiple correct question.
+	 */
+	protected AssessmentQuestion generateMultipleCorrect(AssessmentSection section, boolean requireRational, float points,
+			String title, String correctFeedback, String incorrectFeedback, String[] answers, Boolean[] corrects,
+			String[] feedbacks, boolean randomize)
+	{
+		AssessmentQuestion question = assessmentService.newQuestion(section);
+
+		question.setType(QuestionType.multipleCorrect);
+		question.setRequireRationale(Boolean.valueOf(requireRational));
+		question.setScore(new Float(points));
+		question.setFeedbackCorrect(correctFeedback);
+		question.setFeedbackIncorrect(incorrectFeedback);
+		question.setRandomAnswerOrder(Boolean.valueOf(randomize));
+
+		// one part
+		QuestionPart part = assessmentService.newQuestionPart(question);
+		part.setTitle(title);
+
+		String[] labels =
+		{
+				"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"
+		};
+
+		// answers
+		for (int i = 0; i < answers.length; i++)
+		{
+			AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
+			answer.setIsCorrect(corrects[i]);
+			answer.setText(answers[i]);
+			answer.setFeedbackGeneral(feedbacks[i]);
+			answer.setLabel(labels[i]);
+		}
+
+		return question;
 	}
 
 	/**
@@ -595,8 +783,21 @@ public class AssessmentTestTool extends HttpServlet
 		// read form: for now, nothing to read
 		String destination = ui.decode(req, context);
 
-		// generate
-		generate();
+		// generate (one)
+		// "Vivie" numbers
+		// final int contextsWithAssessments = 500;
+		// final int assessmentsPerContext = 25;
+		// final int submissionsPerStudent = 2;
+		// final int contextStudents = 50;
+		// final int itemsPerAssessment = 10;
+
+		// // small
+		// final int contextsWithAssessments = 2;
+		// final int assessmentsPerContext = 2;
+		// final int submissionsPerStudent = 2;
+		// final int contextStudents = 2;
+		// final int itemsPerAssessment = 2;
+		generate(0, 1, 0, 50, 10);
 
 		// redirect to home
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/home")));
