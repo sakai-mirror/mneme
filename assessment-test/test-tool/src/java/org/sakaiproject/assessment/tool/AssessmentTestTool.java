@@ -106,6 +106,13 @@ public class AssessmentTestTool extends HttpServlet
 	/** Our self-injected id manager reference. */
 	protected IdManager idManager = null;;
 
+	/** Lables used for answers. */
+	protected String[] labels =
+	{
+			"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X",
+			"Y", "Z"
+	};
+
 	/** Our self-injected security service reference. */
 	protected SecurityService securityService = null;
 
@@ -536,6 +543,26 @@ public class AssessmentTestTool extends HttpServlet
 				"9"
 			};
 			generateNumeric(s, "3*3={}", 10, "Oui!", "Non :-(", parts2);
+
+			i++;
+			if (i > numQuestions) break;
+			String[] choices =
+			{
+					"choice one", "choice two", "choice three", "choice four"
+			};
+			String[] matches =
+			{
+					"match one", "match two", "match three", "match four"
+			};
+			String[] corrects2 =
+			{
+					"correct one", "correct two", "correct three", "correct four"
+			};
+			String[] incorrects2 =
+			{
+					"incorrect one", "incorrect two", "incorrect three", "incorrect four"
+			};
+			generateMatch(s, 10, "match these", "correct", "incorrect", choices, matches, corrects2, incorrects2);
 		}
 
 		return a;
@@ -595,6 +622,48 @@ public class AssessmentTestTool extends HttpServlet
 			AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
 			answer.setIsCorrect(Boolean.TRUE);
 			answer.setText(answers[i]);
+		}
+
+		return question;
+	}
+
+	/**
+	 * Generate a multiple choice question.
+	 * 
+	 * @return The multiple choice question.
+	 */
+	protected AssessmentQuestion generateMatch(AssessmentSection section, float points, String title, String correctFeedback,
+			String incorrectFeedback, String[] choices, String[] matches, String[] corrects, String[] incorrects)
+	{
+		AssessmentQuestion question = assessmentService.newQuestion(section);
+
+		question.setType(QuestionType.matching);
+		question.setScore(new Float(points));
+		question.setFeedbackCorrect(correctFeedback);
+		question.setFeedbackIncorrect(incorrectFeedback);
+		question.setInstructions(title);
+
+		String[] labels =
+		{
+				"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"
+		};
+
+		// one part for each choice
+		for (int c = 0; c < choices.length; c++)
+		{
+			QuestionPart part = assessmentService.newQuestionPart(question);
+			part.setTitle(choices[c]);
+
+			// an answer in each part for each match - correct if the sequence matches the part sequence
+			for (int m = 0; m < matches.length; m++)
+			{
+				AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
+				answer.setIsCorrect(m == c);
+				answer.setText(matches[m]);
+				answer.setFeedbackCorrect(corrects[m]);
+				answer.setFeedbackIncorrect(incorrects[m]);
+				answer.setLabel(labels[m]);
+			}
 		}
 
 		return question;
