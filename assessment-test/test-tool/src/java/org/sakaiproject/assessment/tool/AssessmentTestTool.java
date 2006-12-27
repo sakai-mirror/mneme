@@ -106,6 +106,9 @@ public class AssessmentTestTool extends HttpServlet
 	/** Our self-injected id manager reference. */
 	protected IdManager idManager = null;;
 
+	/** Our self-injected security service reference. */
+	protected SecurityService securityService = null;
+
 	/** Our self-injected session manager reference. */
 	protected SessionManager sessionManager = null;
 
@@ -117,9 +120,6 @@ public class AssessmentTestTool extends HttpServlet
 
 	/** Our self-injected tool manager reference. */
 	protected ToolManager toolManager = null;
-
-	/** Our self-injected security service reference. */
-	protected SecurityService securityService = null;
 
 	/** Our self-injected ui service reference. */
 	protected UiService ui = null;
@@ -493,6 +493,8 @@ public class AssessmentTestTool extends HttpServlet
 			AssessmentQuestion question = generateTrueFalse(s, true, 10, "question " + i, "correct!", "incorect :-(");
 
 			i++;
+			if (i > numQuestions) break;
+
 			String[] answers =
 			{
 					"a", "b", "c", "d"
@@ -504,6 +506,7 @@ public class AssessmentTestTool extends HttpServlet
 			generateMultipleChoice(s, true, 10, "question " + i, "yes!", "well, not quite", answers, 0, feedbacks, true);
 
 			i++;
+			if (i > numQuestions) break;
 			Boolean[] corrects =
 			{
 					Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE
@@ -511,43 +514,88 @@ public class AssessmentTestTool extends HttpServlet
 			generateMultipleCorrect(s, true, 10, "question " + i, "got it!", "try again", answers, corrects, feedbacks, true);
 
 			i++;
+			if (i > numQuestions) break;
 			generateSurvey(s, "question " + i, "thanks.");
-			
+
 			i++;
+			if (i > numQuestions) break;
 			generateEssay(s, "question " + i, 10, "feedback", "model");
+
+			i++;
+			if (i > numQuestions) break;
+			String[] parts =
+			{
+					"red", "blue"
+			};
+			generateFillIn(s, "roses are {}, violets are {}", 10, "that is correct", "that is not correct", parts, false, false);
+
+			i++;
+			if (i > numQuestions) break;
+			String[] parts2 =
+			{
+				"9"
+			};
+			generateNumeric(s, "3*3={}", 10, "Oui!", "Non :-(", parts2);
 		}
 
 		return a;
 	}
 
 	/**
-	 * Generate a true/false question.
+	 * Generate an essay question.
 	 * 
-	 * @return The true/false question.
+	 * @return The essay question.
 	 */
-	protected AssessmentQuestion generateTrueFalse(AssessmentSection section, boolean requireRational, float points, String title,
-			String correctFeedback, String incorrectFeedback)
+	protected AssessmentQuestion generateEssay(AssessmentSection section, String title, float points, String feedback,
+			String modelAnswer)
 	{
 		AssessmentQuestion question = assessmentService.newQuestion(section);
 
-		question.setType(QuestionType.trueFalse);
-		question.setRequireRationale(Boolean.valueOf(requireRational));
+		question.setType(QuestionType.essay);
+		question.setRequireRationale(Boolean.FALSE);
+		question.setScore(new Float(points));
+		question.setFeedbackGeneral(feedback);
+
+		// one part
+		QuestionPart part = assessmentService.newQuestionPart(question);
+		part.setTitle(title);
+
+		// answer
+		AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
+		answer.setText(modelAnswer);
+
+		return question;
+	}
+
+	/**
+	 * Generate a fill-in question
+	 * 
+	 * @return The fill-in question.
+	 */
+	protected AssessmentQuestion generateFillIn(AssessmentSection section, String title, float points, String correctFeedback,
+			String incorrectFeedback, String[] answers, boolean mutuallyExclusive, boolean caseSensitive)
+	{
+		AssessmentQuestion question = assessmentService.newQuestion(section);
+
+		question.setType(QuestionType.fillIn);
+		question.setRequireRationale(Boolean.FALSE);
 		question.setScore(new Float(points));
 		question.setFeedbackCorrect(correctFeedback);
 		question.setFeedbackIncorrect(incorrectFeedback);
+		question.setMutuallyExclusive(Boolean.valueOf(mutuallyExclusive));
+		question.setCaseSensitive(Boolean.valueOf(caseSensitive));
 
 		// one part
 		QuestionPart part = assessmentService.newQuestionPart(question);
 		part.setTitle(title);
 
 		// answers
-		AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
-		answer.setIsCorrect(Boolean.TRUE);
-		answer.setText("true");
-
-		answer = assessmentService.newAssessmentAnswer(part);
-		answer.setIsCorrect(Boolean.FALSE);
-		answer.setText("false");
+		for (int i = 0; i < answers.length; i++)
+		{
+			AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
+			answer.setIsCorrect(Boolean.TRUE);
+			answer.setText(answers[i]);
+		}
 
 		return question;
 	}
@@ -593,59 +641,6 @@ public class AssessmentTestTool extends HttpServlet
 	}
 
 	/**
-	 * Generate a survey question.
-	 * 
-	 * @return The survey question.
-	 */
-	protected AssessmentQuestion generateSurvey(AssessmentSection section, String title, String feedback)
-	{
-		AssessmentQuestion question = assessmentService.newQuestion(section);
-
-		question.setType(QuestionType.survey);
-		question.setRequireRationale(Boolean.FALSE);
-		question.setScore(new Float(0));
-		question.setFeedbackGeneral(feedback);
-
-		// one part
-		QuestionPart part = assessmentService.newQuestionPart(question);
-		part.setTitle(title);
-
-		// answers
-		for (int i = 1; i <= 5; i++)
-		{
-			AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
-			answer.setText(Integer.toString(i));
-		}
-
-		return question;
-	}
-
-	/**
-	 * Generate an essay question.
-	 * 
-	 * @return The essay question.
-	 */
-	protected AssessmentQuestion generateEssay(AssessmentSection section, String title, float points, String feedback, String modelAnswer)
-	{
-		AssessmentQuestion question = assessmentService.newQuestion(section);
-
-		question.setType(QuestionType.essay);
-		question.setRequireRationale(Boolean.FALSE);
-		question.setScore(new Float(points));
-		question.setFeedbackGeneral(feedback);
-
-		// one part
-		QuestionPart part = assessmentService.newQuestionPart(question);
-		part.setTitle(title);
-
-		// answer
-		AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
-		answer.setText(modelAnswer);
-
-		return question;
-	}
-
-	/**
 	 * Generate a multiple choice / multiple correct question.
 	 * 
 	 * @return The multiple choice / multiple correct question.
@@ -680,6 +675,37 @@ public class AssessmentTestTool extends HttpServlet
 			answer.setText(answers[i]);
 			answer.setFeedbackGeneral(feedbacks[i]);
 			answer.setLabel(labels[i]);
+		}
+
+		return question;
+	}
+
+	/**
+	 * Generate a numeric fill-in question
+	 * 
+	 * @return The numeric fill-in question.
+	 */
+	protected AssessmentQuestion generateNumeric(AssessmentSection section, String title, float points, String correctFeedback,
+			String incorrectFeedback, String[] answers)
+	{
+		AssessmentQuestion question = assessmentService.newQuestion(section);
+
+		question.setType(QuestionType.numeric);
+		question.setRequireRationale(Boolean.FALSE);
+		question.setScore(new Float(points));
+		question.setFeedbackCorrect(correctFeedback);
+		question.setFeedbackIncorrect(incorrectFeedback);
+
+		// one part
+		QuestionPart part = assessmentService.newQuestionPart(question);
+		part.setTitle(title);
+
+		// answers
+		for (int i = 0; i < answers.length; i++)
+		{
+			AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
+			answer.setIsCorrect(Boolean.TRUE);
+			answer.setText(answers[i]);
 		}
 
 		return question;
@@ -738,6 +764,66 @@ public class AssessmentTestTool extends HttpServlet
 		}
 
 		return s;
+	}
+
+	/**
+	 * Generate a survey question.
+	 * 
+	 * @return The survey question.
+	 */
+	protected AssessmentQuestion generateSurvey(AssessmentSection section, String title, String feedback)
+	{
+		AssessmentQuestion question = assessmentService.newQuestion(section);
+
+		question.setType(QuestionType.survey);
+		question.setRequireRationale(Boolean.FALSE);
+		question.setScore(new Float(0));
+		question.setFeedbackGeneral(feedback);
+
+		// one part
+		QuestionPart part = assessmentService.newQuestionPart(question);
+		part.setTitle(title);
+
+		// answers
+		for (int i = 1; i <= 5; i++)
+		{
+			AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
+			answer.setText(Integer.toString(i));
+		}
+
+		return question;
+	}
+
+	/**
+	 * Generate a true/false question.
+	 * 
+	 * @return The true/false question.
+	 */
+	protected AssessmentQuestion generateTrueFalse(AssessmentSection section, boolean requireRational, float points, String title,
+			String correctFeedback, String incorrectFeedback)
+	{
+		AssessmentQuestion question = assessmentService.newQuestion(section);
+
+		question.setType(QuestionType.trueFalse);
+		question.setRequireRationale(Boolean.valueOf(requireRational));
+		question.setScore(new Float(points));
+		question.setFeedbackCorrect(correctFeedback);
+		question.setFeedbackIncorrect(incorrectFeedback);
+
+		// one part
+		QuestionPart part = assessmentService.newQuestionPart(question);
+		part.setTitle(title);
+
+		// answers
+		AssessmentAnswer answer = assessmentService.newAssessmentAnswer(part);
+		answer.setIsCorrect(Boolean.TRUE);
+		answer.setText("true");
+
+		answer = assessmentService.newAssessmentAnswer(part);
+		answer.setIsCorrect(Boolean.FALSE);
+		answer.setText("false");
+
+		return question;
 	}
 
 	/**

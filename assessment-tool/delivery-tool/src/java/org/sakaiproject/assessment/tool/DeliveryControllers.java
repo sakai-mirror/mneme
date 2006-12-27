@@ -1017,10 +1017,10 @@ public class DeliveryControllers
 			// count the questions answered
 			int count = 0;
 
-			// find the section's answers to AssessmentQuestions that are in this section.
+			// find the section's answers to AssessmentQuestions that are in this section and are considered answered.
 			for (SubmissionAnswer answer : submission.getAnswers())
 			{
-				if (answer.getQuestion().getSection().equals(section))
+				if (answer.getQuestion().getSection().equals(section) && answer.getIsAnswered().booleanValue())
 				{
 					count++;
 				}
