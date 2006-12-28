@@ -47,10 +47,30 @@ public class TestControllers
 							ui.newText()
 								.setText("home-generate"))
 						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setTitle("home-generate")
-								.setStyle(Navigation.Style.button))
-						);
+							ui.newTextEdit()
+								.setProperty(ui.newPropertyReference().setEntityReference("specs").setPropertyReference("contextsWithAssessments"))
+								.setTitle("home-contextsWithAssessments"))
+						.add(
+							ui.newTextEdit()
+								.setProperty(ui.newPropertyReference().setEntityReference("specs").setPropertyReference("assessmentsPerContext"))
+								.setTitle("home-assessmentsPerContext"))
+						.add(
+							ui.newTextEdit()
+								.setProperty(ui.newPropertyReference().setEntityReference("specs").setPropertyReference("submissionsPerStudent"))
+								.setTitle("home-submissionsPerStudent"))
+						.add(
+							ui.newTextEdit()
+								.setProperty(ui.newPropertyReference().setEntityReference("specs").setPropertyReference("contextStudents"))
+								.setTitle("home-contextStudents"))
+						.add(
+							ui.newTextEdit()
+								.setProperty(ui.newPropertyReference().setEntityReference("specs").setPropertyReference("itemsPerAssessment"))
+								.setTitle("home-itemsPerAssessment")))
+				.add(
+					ui.newButtonBar()
+						.add(ui.newNavigation()
+							.setSubmit()
+							.setTitle("home-generate")
+							.setStyle(Navigation.Style.button)));
 	}
 }

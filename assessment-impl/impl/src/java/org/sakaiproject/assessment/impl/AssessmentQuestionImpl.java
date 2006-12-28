@@ -660,7 +660,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				List<? extends AssessmentAnswer> answers = asAuthored ? part.getAnswersAsAuthored() : part.getAnswers();
 				for (AssessmentAnswer answer : answers)
 				{
-					if (answer.getIsCorrect().booleanValue())
+					if ((answer.getIsCorrect() != null) && answer.getIsCorrect().booleanValue())
 					{
 						rv.append(answer.getLabel());
 					}
@@ -687,7 +687,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				List<? extends AssessmentAnswer> answers = asAuthored ? part.getAnswersAsAuthored() : part.getAnswers();
 				for (AssessmentAnswer answer : answers)
 				{
-					if (answer.getIsCorrect().booleanValue())
+					if ((answer.getIsCorrect() != null) && answer.getIsCorrect().booleanValue())
 					{
 						rv.append(answer.getLabel() + ", ");
 					}

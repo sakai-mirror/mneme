@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -51,7 +50,6 @@ import org.sakaiproject.assessment.api.QuestionPart;
 import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
-import org.sakaiproject.assessment.api.SubmissionAnswerEntry;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.cover.ComponentManager;
@@ -62,6 +60,7 @@ import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.sludge.api.Context;
 import org.sakaiproject.sludge.api.Controller;
 import org.sakaiproject.sludge.api.UiService;
+import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
@@ -88,6 +87,69 @@ public class AssessmentTestTool extends HttpServlet
 	// final int contextStudents = 2;
 	// final int itemsPerAssessment = 2;
 
+	public class Specs
+	{
+		protected int assessmentsPerContext = 0;
+
+		protected int contextStudents = 0;
+
+		protected int contextsWithAssessments = 0;
+
+		protected int itemsPerAssessment = 0;
+
+		protected int submissionsPerStudent = 0;
+
+		public Integer getAssessmentsPerContext()
+		{
+			return assessmentsPerContext;
+		}
+
+		public Integer getContextStudents()
+		{
+			return contextStudents;
+		}
+
+		public Integer getContextsWithAssessments()
+		{
+			return contextsWithAssessments;
+		}
+
+		public Integer getItemsPerAssessment()
+		{
+			return itemsPerAssessment;
+		}
+
+		public Integer getSubmissionsPerStudent()
+		{
+			return submissionsPerStudent;
+		}
+
+		public void setAssessmentsPerContext(Integer value)
+		{
+			assessmentsPerContext = value;
+		}
+
+		public void setContextStudents(Integer value)
+		{
+			contextStudents = value;
+		}
+
+		public void setContextsWithAssessments(Integer value)
+		{
+			contextsWithAssessments = value;
+		}
+
+		public void setItemsPerAssessment(Integer value)
+		{
+			itemsPerAssessment = value;
+		}
+
+		public void setSubmissionsPerStudent(Integer value)
+		{
+			submissionsPerStudent = value;
+		}
+	}
+
 	/** Our tool destinations. */
 	enum Destinations
 	{
@@ -101,10 +163,10 @@ public class AssessmentTestTool extends HttpServlet
 	protected static ResourceLoader messages = new ResourceLoader("assessment-test-tool");
 
 	/** Our self-injected assessment service reference. */
-	protected AssessmentService assessmentService = null;
+	protected AssessmentService assessmentService = null;;
 
 	/** Our self-injected id manager reference. */
-	protected IdManager idManager = null;;
+	protected IdManager idManager = null;
 
 	/** Lables used for answers. */
 	protected String[] labels =
@@ -127,6 +189,9 @@ public class AssessmentTestTool extends HttpServlet
 
 	/** Our self-injected tool manager reference. */
 	protected ToolManager toolManager = null;
+
+	/** Our self-injected thread local manager reference. */
+	protected ThreadLocalManager threadLocalManager = null;
 
 	/** Our self-injected ui service reference. */
 	protected UiService ui = null;
@@ -174,6 +239,7 @@ public class AssessmentTestTool extends HttpServlet
 		idManager = (IdManager) ComponentManager.get(IdManager.class);
 		ui = (UiService) ComponentManager.get(UiService.class);
 		securityService = (SecurityService) ComponentManager.get(SecurityService.class);
+		threadLocalManager = (ThreadLocalManager) ComponentManager.get(ThreadLocalManager.class);
 
 		uiHome = TestControllers.constructHome(ui);
 
@@ -286,9 +352,11 @@ public class AssessmentTestTool extends HttpServlet
 	/**
 	 * Generate some assessments and submissions
 	 */
-	protected void generate(int contextsWithAssessments, int assessmentsPerContext, int submissionsPerStudent, int contextStudents,
-			int itemsPerAssessment)
+	protected void generate(Specs specs)
 	{
+		// suppress event trackin events for better performance
+		threadLocalManager.set("sakai.event.suppress", Boolean.TRUE);
+
 		// the real context
 		String context = toolManager.getCurrentPlacement().getContext();
 
@@ -314,15 +382,15 @@ public class AssessmentTestTool extends HttpServlet
 			Collection<Assessment> assessments = new ArrayList<Assessment>();
 
 			// make assessments for a bunch of other contexts (with randomly generated contexts)
-			for (int contextCount = 0; contextCount < contextsWithAssessments; contextCount++)
+			for (int contextCount = 0; contextCount < specs.contextsWithAssessments; contextCount++)
 			{
 				String randomContext = idManager.createUuid();
 
-				for (int assessmentCount = 1; assessmentCount <= assessmentsPerContext; assessmentCount++)
+				for (int assessmentCount = 1; assessmentCount <= specs.assessmentsPerContext; assessmentCount++)
 				{
 					// generate the assessment
-					String title = context + " assessment " + assessmentCount;
-					Assessment a = generateAssessment(randomContext, title, itemsPerAssessment);
+					String title = randomContext + " assessment " + assessmentCount;
+					Assessment a = generateAssessment(randomContext, title, specs.itemsPerAssessment);
 
 					// save the assessment
 					try
@@ -340,11 +408,11 @@ public class AssessmentTestTool extends HttpServlet
 			}
 
 			// submit a few for each user for these other assessments
-			for (int studentCount = 0; studentCount < contextStudents; studentCount++)
+			for (int studentCount = 0; studentCount < specs.contextStudents; studentCount++)
 			{
 				String userId = "user" + studentCount;
 
-				for (int submissionCount = 0; submissionCount < submissionsPerStudent; submissionCount++)
+				for (int submissionCount = 0; submissionCount < specs.submissionsPerStudent; submissionCount++)
 				{
 					for (Iterator iAssessments = assessments.iterator(); iAssessments.hasNext();)
 					{
@@ -389,11 +457,11 @@ public class AssessmentTestTool extends HttpServlet
 			int currentCount = assessmentService.countAssessments(context);
 
 			// make a bunch of assessments for the current context
-			for (int assessmentCount = 0; assessmentCount < assessmentsPerContext; assessmentCount++)
+			for (int assessmentCount = 0; assessmentCount < specs.assessmentsPerContext; assessmentCount++)
 			{
 				// generate the assessment
 				String title = context + " assessment " + (currentCount + assessmentCount);
-				Assessment a = generateAssessment(context, title, itemsPerAssessment);
+				Assessment a = generateAssessment(context, title, specs.itemsPerAssessment);
 
 				try
 				{
@@ -414,7 +482,7 @@ public class AssessmentTestTool extends HttpServlet
 			{
 				String userId = (String) userIterator.next();
 
-				for (int submissionCount = 0; submissionCount < submissionsPerStudent; submissionCount++)
+				for (int submissionCount = 0; submissionCount < specs.submissionsPerStudent; submissionCount++)
 				{
 					for (Iterator iAssessments = assessments.iterator(); iAssessments.hasNext();)
 					{
@@ -799,35 +867,167 @@ public class AssessmentTestTool extends HttpServlet
 		s.setStatus(new Integer(1));
 		s.setIsComplete(Boolean.TRUE);
 
-		// Answer each question (of the first section)
-		List items = new Vector();
-		for (AssessmentQuestion question : assessment.getFirstSection().getQuestionsAsAuthored())
+		// answer each question
+		for (AssessmentSection section : assessment.getSections())
 		{
-			SubmissionAnswer answer = assessmentService.newSubmissionAnswer(s, question);
-
-			answer.setSubmittedDate(timeService.newTime());
-
-			// setQuestion establised an entry per question part, which is one for us.
-			SubmissionAnswerEntry entry = answer.getEntries().get(0);
-
-			// pick the answer (assume true/false and two possible answers)
-			if (Math.random() > 0.5)
+			for (AssessmentQuestion question : section.getQuestionsAsAuthored())
 			{
-				// pick a correct answer
-				List<AssessmentAnswer> correctAnswers = question.getPart().getCorrectAnswers();
-				if ((correctAnswers != null) && (correctAnswers.size() > 0))
+				SubmissionAnswer answer = assessmentService.newSubmissionAnswer(s, question);
+
+				answer.setSubmittedDate(timeService.newTime());
+
+				if (question.getType() == QuestionType.essay)
 				{
-					entry.setAssessmentAnswer(correctAnswers.get(0));
+					answer.setEntryAnswerText("this is the response");
 				}
-			}
 
-			// pick an incorrect answer
-			else
-			{
-				List<AssessmentAnswer> incorrectAnswers = question.getPart().getIncorrectAnswers();
-				if ((incorrectAnswers != null) && (incorrectAnswers.size() > 0))
+				else if ((question.getType() == QuestionType.fillIn) || (question.getType() == QuestionType.numeric))
 				{
-					entry.setAssessmentAnswer(incorrectAnswers.get(0));
+					// how many answers
+					List<? extends AssessmentAnswer> answers = question.getPart().getAnswers();
+					if ((answers != null) && (answers.size() > 0))
+					{
+						String[] answerTexts = new String[answers.size()];
+
+						// pick the answer
+						if (Math.random() > 0.5)
+						{
+							for (int i = 0; i < answerTexts.length; i++)
+							{
+								answerTexts[i] = answers.get(i).getText();
+							}
+						}
+
+						else
+						{
+							for (int i = 0; i < answerTexts.length; i++)
+							{
+								answerTexts[i] = "no";
+							}
+						}
+						answer.setEntryAnswerTexts(answerTexts);
+					}
+				}
+
+				else if (question.getType() == QuestionType.matching)
+				{
+					// how many answers
+					List<? extends QuestionPart> parts = question.getParts();
+					if ((parts != null) && (parts.size() > 0))
+					{
+						String[] answerIds = new String[parts.size()];
+						for (int i = 0; i < answerIds.length; i++)
+						{
+							if (Math.random() > 0.5)
+							{
+								// pick the part's correct answer
+								List<AssessmentAnswer> correctAnswers = parts.get(i).getCorrectAnswers();
+								if ((correctAnswers != null) && (correctAnswers.size() > 0))
+								{
+									answerIds[i] = correctAnswers.get(0).getId();
+								}
+							}
+
+							else
+							{
+								// pick the part's incorrect answer
+								List<AssessmentAnswer> incorrectAnswers = parts.get(i).getIncorrectAnswers();
+								if ((incorrectAnswers != null) && (incorrectAnswers.size() > 0))
+								{
+									answerIds[i] = incorrectAnswers.get(0).getId();
+								}
+							}
+						}
+
+						answer.setEntryAnswerIds(answerIds);
+					}
+				}
+
+				else if (question.getType() == QuestionType.multipleChoice)
+				{
+					// pick the answer
+					if (Math.random() > 0.5)
+					{
+						// pick a correct answer
+						List<AssessmentAnswer> correctAnswers = question.getPart().getCorrectAnswers();
+						if ((correctAnswers != null) && (correctAnswers.size() > 0))
+						{
+							answer.setEntryAnswerIds(correctAnswers.get(0).getId());
+						}
+					}
+
+					// pick an incorrect answer
+					else
+					{
+						List<AssessmentAnswer> incorrectAnswers = question.getPart().getIncorrectAnswers();
+						if ((incorrectAnswers != null) && (incorrectAnswers.size() > 0))
+						{
+							answer.setEntryAnswerIds(incorrectAnswers.get(0).getId());
+						}
+					}
+				}
+
+				else if (question.getType() == QuestionType.multipleCorrect)
+				{
+					// pick the answer
+					if (Math.random() > 0.5)
+					{
+						// pick all the correct answers
+						List<AssessmentAnswer> correctAnswers = question.getPart().getCorrectAnswers();
+						if ((correctAnswers != null) && (correctAnswers.size() > 0))
+						{
+							String[] answerIds = new String[correctAnswers.size()];
+							for (int i = 0; i < answerIds.length; i++)
+							{
+								answerIds[i] = correctAnswers.get(i).getId();
+							}
+							answer.setEntryAnswerIds(answerIds);
+						}
+					}
+
+					// pick an incorrect answer
+					else
+					{
+						List<AssessmentAnswer> incorrectAnswers = question.getPart().getIncorrectAnswers();
+						if ((incorrectAnswers != null) && (incorrectAnswers.size() > 0))
+						{
+							answer.setEntryAnswerIds(incorrectAnswers.get(0).getId());
+						}
+					}
+				}
+
+				else if (question.getType() == QuestionType.survey)
+				{
+					// just pick an answer
+					List<? extends AssessmentAnswer> answers = question.getPart().getAnswers();
+					if ((answers != null) && (answers.size() > 0))
+					{
+						answer.setEntryAnswerIds(answers.get(0).getId());
+					}
+				}
+
+				else if (question.getType() == QuestionType.trueFalse)
+				{
+					// pick the answer (assume true/false and two possible answers)
+					if (Math.random() > 0.5)
+					{
+						// pick a correct answer
+						List<AssessmentAnswer> correctAnswers = question.getPart().getCorrectAnswers();
+						if ((correctAnswers != null) && (correctAnswers.size() > 0))
+						{
+							answer.setEntryAnswerIds(correctAnswers.get(0).getId());
+						}
+					}
+
+					// pick an incorrect answer
+					else
+					{
+						List<AssessmentAnswer> incorrectAnswers = question.getPart().getIncorrectAnswers();
+						if ((incorrectAnswers != null) && (incorrectAnswers.size() > 0))
+						{
+							answer.setEntryAnswerIds(incorrectAnswers.get(0).getId());
+						}
+					}
 				}
 			}
 		}
@@ -911,6 +1111,8 @@ public class AssessmentTestTool extends HttpServlet
 	 */
 	protected void homeGet(HttpServletRequest req, HttpServletResponse res, Context context)
 	{
+		context.put("specs", new Specs());
+
 		// render
 		ui.render(uiHome, context);
 	}
@@ -935,7 +1137,9 @@ public class AssessmentTestTool extends HttpServlet
 			return;
 		}
 
-		// read form: for now, nothing to read
+		// read form
+		Specs specs = new Specs();
+		context.put("specs", specs);
 		String destination = ui.decode(req, context);
 
 		// generate (one)
@@ -952,7 +1156,7 @@ public class AssessmentTestTool extends HttpServlet
 		// final int submissionsPerStudent = 2;
 		// final int contextStudents = 2;
 		// final int itemsPerAssessment = 2;
-		generate(0, 1, 0, 50, 10);
+		generate(specs);
 
 		// redirect to home
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/home")));

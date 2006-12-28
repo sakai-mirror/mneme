@@ -162,7 +162,7 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 				}
 			}
 
-			else if (questionAnswer.getIsCorrect())
+			else if ((questionAnswer.getIsCorrect() != null) && questionAnswer.getIsCorrect().booleanValue())
 			{
 				return Boolean.TRUE;
 			}

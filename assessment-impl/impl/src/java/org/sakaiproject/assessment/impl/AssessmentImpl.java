@@ -27,9 +27,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.Assessment;
-import org.sakaiproject.assessment.api.AssessmentAnswer;
-import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
+import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentStatus;
 import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.MultipleSubmissionSelectionPolicy;
@@ -1157,6 +1156,7 @@ public class AssessmentImpl implements Assessment
 		this.randomAccessStatus = PropertyStatus.inited;
 		this.releaseDateStatus = PropertyStatus.inited;
 		this.retractDateStatus = PropertyStatus.inited;
+		this.sectionsStatus = PropertyStatus.inited;
 		this.statusStatus = PropertyStatus.inited;
 		this.timeLimitStatus = PropertyStatus.inited;
 		this.titleStatus = PropertyStatus.inited;

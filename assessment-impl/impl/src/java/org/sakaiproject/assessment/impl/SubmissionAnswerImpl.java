@@ -125,7 +125,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			{
 				rv[i++] = null;
 			}
-			else if (answer.getIsCorrect())
+			else if ((answer.getIsCorrect() != null) && answer.getIsCorrect().booleanValue())
 			{
 				rv[i++] = answer.getFeedbackCorrect();
 			}

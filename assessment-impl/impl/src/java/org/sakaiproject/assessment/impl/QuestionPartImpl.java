@@ -169,7 +169,7 @@ public class QuestionPartImpl implements QuestionPart
 		List<AssessmentAnswer> rv = new ArrayList<AssessmentAnswer>();
 		for (AssessmentAnswer answer : this.answers)
 		{
-			if (answer.getIsCorrect().booleanValue())
+			if ((answer.getIsCorrect() != null) && answer.getIsCorrect().booleanValue())
 			{
 				rv.add(answer);
 			}
@@ -196,7 +196,7 @@ public class QuestionPartImpl implements QuestionPart
 		List<AssessmentAnswer> rv = new ArrayList<AssessmentAnswer>();
 		for (AssessmentAnswer answer : this.answers)
 		{
-			if (!answer.getIsCorrect().booleanValue())
+			if ((answer.getIsCorrect() != null) && (!answer.getIsCorrect().booleanValue()))
 			{
 				rv.add(answer);
 			}

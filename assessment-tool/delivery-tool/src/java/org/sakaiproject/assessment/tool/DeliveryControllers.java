@@ -1237,7 +1237,7 @@ public class DeliveryControllers
 							if (StringUtil.contains(subAnswer.getEntryAnswerIds(), answer.getId()))
 							{
 								// is this a correct answer
-								if (answer.getIsCorrect().booleanValue())
+								if ((answer.getIsCorrect() != null) && answer.getIsCorrect().booleanValue())
 								{
 									return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.gif\" alt=\""
 											+ context.getMessages().getString("toc-alt-correct-answer") + "\" />";

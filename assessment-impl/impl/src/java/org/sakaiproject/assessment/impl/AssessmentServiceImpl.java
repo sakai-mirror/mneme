@@ -1771,8 +1771,8 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// establish defaults
 		// TODO: check context, others? check that the createdby is the current user?
-		if (a.getStatus() == null) a.setStatus(AssessmentStatus.ACTIVE);
-		if (a.getCreatedBy() == null) a.setCreatedBy(userId);
+		if (a.getStatus() == null) a.initStatus(AssessmentStatus.ACTIVE);
+		if (a.getCreatedBy() == null) a.initCreatedBy(userId);
 
 		// check permission - created by user must have PUBLISH_PERMISSION in the context of the assessment
 		secure(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, assessment.getContext(),
@@ -2459,8 +2459,11 @@ public class AssessmentServiceImpl implements AssessmentService
 			connection.commit();
 
 			// event track it
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(ASSESSMENT_PUBLISH, getSubmissionReference(assessment
-					.getId()), true));
+			if (m_threadLocalManager.get("sakai.event.suppress") == null)
+			{
+				m_eventTrackingService.post(m_eventTrackingService.newEvent(ASSESSMENT_PUBLISH, getAssessmentReference(assessment
+						.getId()), true));
+			}
 
 			// cache a copy
 			cacheAssessment(new AssessmentImpl((AssessmentImpl) assessment));
@@ -2586,7 +2589,11 @@ public class AssessmentServiceImpl implements AssessmentService
 		addSubmission(submission, null);
 
 		// event track it
-		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ADD, getSubmissionReference(submission.getId()), true));
+		if (m_threadLocalManager.get("sakai.event.suppress") == null)
+		{
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ADD, getSubmissionReference(submission.getId()),
+					true));
+		}
 	}
 
 	/**
