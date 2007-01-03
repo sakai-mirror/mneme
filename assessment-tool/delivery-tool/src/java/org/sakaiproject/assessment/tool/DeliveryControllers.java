@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -410,9 +410,34 @@ public class DeliveryControllers
 											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowCorrectAnswer")))
+										.setWidth(20)
 										.setEnabled(
 												ui.newCompareDecision()
-													.setEqualsConstant(QuestionType.fillIn.toString(), QuestionType.numeric.toString())
+													.setEqualsConstant(QuestionType.fillIn.toString())
+													.setProperty(
+														ui.newPropertyReference()
+															.setEntityReference("question")
+															.setPropertyReference("type"))))
+								.add(
+									ui.newFillIn()
+										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("part.title"))
+										.setProperty(
+											ui.newPropertyReference()
+												.setEntityReference("answer")
+												.setPropertyReference("entryAnswerTexts"))
+										.setCorrectMarker(
+											ui.newPropertyReference()
+												.setEntityReference("answer")
+												.setPropertyReference("entryCorrects"),
+											"/icons/correct.gif",
+											"question-correct",
+											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowCorrectAnswer")))
+										.setWidth(10)
+										.setEnabled(
+												ui.newCompareDecision()
+													.setEqualsConstant(QuestionType.numeric.toString())
 													.setProperty(
 														ui.newPropertyReference()
 															.setEntityReference("question")
