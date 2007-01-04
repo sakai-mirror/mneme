@@ -21,7 +21,7 @@
 
 package org.sakaiproject.assessment.api;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * <p>
@@ -121,6 +121,14 @@ public interface AssessmentService
 	Integer countRemainingSubmissions(String assessmentId, String userId);
 
 	/**
+	 * Sort options for getAvailableAssessments()
+	 */
+	enum GetAvailableAssessmentsSort
+	{
+		title_a, title_d, dueDate_a, dueDate_d
+	}
+
+	/**
 	 * Find the assessments that are available for taking in this context by this user. Consider:
 	 * <ul>
 	 * <li>published assessments</li>
@@ -136,9 +144,16 @@ public interface AssessmentService
 	 *        The context to use.
 	 * @param userId
 	 *        The user id - if null, use the current user.
-	 * @return A collection <Assessment> of the assessments that qualify, or an empty collection if none do.
+	 * @param sort
+	 *        The sort for the return List (title_a if null).
+	 * @return A List<Assessment> of the assessments that qualify, sorted, or an empty collection if none do.
 	 */
-	Collection<Assessment> getAvailableAssessments(String context, String userId);
+	List<Assessment> getAvailableAssessments(String context, String userId, GetAvailableAssessmentsSort sort);
+
+	enum GetOfficialSubmissionsSort
+	{
+		title_a, title_d, feedbackDate_a, feedbackDate_d, score_a, score_d, time_a, time_d, submittedDate_a, submittedDate_d
+	}
 
 	/**
 	 * Find the submissions to assignments in this context made by this user. Consider:
@@ -153,9 +168,11 @@ public interface AssessmentService
 	 *        The context to use.
 	 * @param userId
 	 *        The user id - if null, use the current user.
-	 * @return A collection <Submission> of the submissions that are the offical submissions for assessments in the context by this user.
+	 * @param sort
+	 *        The sort for the return list (title_a if null).
+	 * @return A List<Submission> of the submissions that are the offical submissions for assessments in the context by this user, sorted.
 	 */
-	Collection<Submission> getOfficialSubmissions(String context, String userId);
+	List<Submission> getOfficialSubmissions(String context, String userId, GetOfficialSubmissionsSort sort);
 
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Authoring Support

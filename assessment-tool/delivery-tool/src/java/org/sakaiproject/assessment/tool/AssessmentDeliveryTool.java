@@ -22,7 +22,7 @@
 package org.sakaiproject.assessment.tool;
 
 import java.io.IOException;
-import java.util.Collection;
+import java.util.List;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -186,7 +186,13 @@ public class AssessmentDeliveryTool extends HttpServlet
 		{
 			case list:
 			{
-				listGet(req, res, context);
+				// optional sort parameter
+				String sort = null;
+				if (parts.length == 3)
+				{
+					sort = parts[2];
+				}
+				listGet(req, res, sort, context);
 				break;
 			}
 			case review:
@@ -434,7 +440,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 						{
 							questionId = question.getId();
 						}
-						
+
 						// otherwise send the user to the submit view
 						else
 						{
@@ -543,19 +549,120 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Servlet request.
 	 * @param res
 	 *        Servlet response.
+	 * @param sort
+	 *        The sort parameter.
 	 * @param context
 	 *        UiContext.
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void listGet(HttpServletRequest req, HttpServletResponse res, Context context)
+	protected void listGet(HttpServletRequest req, HttpServletResponse res, String sort, Context context)
 	{
+		// SORT: 0|1 A|D 0|1|2|3|4 A|D - 4 chars, the first two for the assessment list, the second two for the submissions list
+		if ((sort != null) && (sort.length() != 4))
+		{
+			errorGet(req, res, context);
+			return;
+		}
+
+		AssessmentService.GetAvailableAssessmentsSort assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.title_a;
+		if (sort != null)
+		{
+			context.put("assessment_sort_choice", sort.charAt(0));
+			context.put("assessment_sort_ad", sort.charAt(1));
+
+			if ((sort.charAt(0) == '0') && (sort.charAt(1) == 'A'))
+			{
+				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.title_a;
+			}
+			else if ((sort.charAt(0) == '0') && (sort.charAt(1) == 'D'))
+			{
+				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.title_d;
+			}
+			else if ((sort.charAt(0) == '1') && (sort.charAt(1) == 'A'))
+			{
+				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.dueDate_a;
+			}
+			else if ((sort.charAt(0) == '1') && (sort.charAt(1) == 'D'))
+			{
+				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.dueDate_d;
+			}
+			else
+			{
+				errorGet(req, res, context);
+				return;
+			}
+		}
+
+		AssessmentService.GetOfficialSubmissionsSort submissionsSort = AssessmentService.GetOfficialSubmissionsSort.title_a;
+		if (sort != null)
+		{
+			context.put("submission_sort_choice", sort.charAt(2));
+			context.put("submission_sort_ad", sort.charAt(3));
+
+			if ((sort.charAt(2) == '0') && (sort.charAt(3) == 'A'))
+			{
+				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.title_a;
+			}
+			else if ((sort.charAt(2) == '0') && (sort.charAt(3) == 'D'))
+			{
+				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.title_d;
+			}
+			else if ((sort.charAt(2) == '1') && (sort.charAt(3) == 'A'))
+			{
+				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.feedbackDate_a;
+			}
+			else if ((sort.charAt(2) == '1') && (sort.charAt(3) == 'D'))
+			{
+				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.feedbackDate_d;
+			}
+			else if ((sort.charAt(2) == '2') && (sort.charAt(3) == 'A'))
+			{
+				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.score_a;
+			}
+			else if ((sort.charAt(2) == '2') && (sort.charAt(3) == 'D'))
+			{
+				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.score_d;
+			}
+			else if ((sort.charAt(2) == '3') && (sort.charAt(3) == 'A'))
+			{
+				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.time_a;
+			}
+			else if ((sort.charAt(2) == '3') && (sort.charAt(3) == 'D'))
+			{
+				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.time_d;
+			}
+			else if ((sort.charAt(2) == '4') && (sort.charAt(3) == 'A'))
+			{
+				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.submittedDate_a;
+			}
+			else if ((sort.charAt(2) == '4') && (sort.charAt(3) == 'D'))
+			{
+				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.submittedDate_d;
+			}
+			else
+			{
+				errorGet(req, res, context);
+				return;
+			}
+		}
+
+		if (sort == null)
+		{
+			context.put("assessment_sort_choice", '0');
+			context.put("assessment_sort_ad", 'A');
+			context.put("submission_sort_choice", '0');
+			context.put("submission_sort_ad", 'A');			
+		}
+
 		// collect information: assessments
-		Collection assessments = assessmentService.getAvailableAssessments(toolManager.getCurrentPlacement().getContext(), null);
+		List assessments = assessmentService.getAvailableAssessments(toolManager.getCurrentPlacement().getContext(), null,
+				assessmentsSort);
 		context.put("assessments", assessments);
 
 		// submissions
-		Collection submissions = assessmentService.getOfficialSubmissions(toolManager.getCurrentPlacement().getContext(), null);
+		List submissions = assessmentService.getOfficialSubmissions(toolManager.getCurrentPlacement().getContext(), null,
+				submissionsSort);
 		context.put("submissions", submissions);
 
 		// render

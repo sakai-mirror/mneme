@@ -77,10 +77,24 @@ public class DeliveryControllers
 										.setProperty(
 											ui.newTextPropertyReference()
 												.setPropertyReference("title"))
-										.setSortable(Boolean.TRUE)
 										.setEntityNavigation(
-												ui.newEntityNavigation()
-													.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newTextPropertyReference().setPropertyReference("id")))))
+											ui.newEntityNavigation()
+												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newTextPropertyReference().setPropertyReference("id"))))
+										.setSorting(
+											ui.newCompareDecision().setEqualsConstant("0").setProperty(ui.newPropertyReference().setEntityReference("assessment_sort_choice")),
+											ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setEntityReference("assessment_sort_ad")))
+										.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
+										.setSortDestination(
+											ui.newDestination() /* a */
+												.setDestination(
+													"/list/0A{0}{1}",
+													ui.newTextPropertyReference().setEntityReference("submission_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("submission_sort_ad")),
+											ui.newDestination() /* d */
+												.setDestination(
+													"/list/0D{0}{1}",
+													ui.newTextPropertyReference().setEntityReference("submission_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("submission_sort_ad"))))
 								.addColumn(
 									ui.newPropertyColumn()
 										.setTitle("list-take-dueDate")
@@ -88,12 +102,26 @@ public class DeliveryControllers
 											ui.newDatePropertyReference()
 												.setPropertyReference("dueDate")
 												.setMissingText("na"))
-										.setSortable(Boolean.TRUE)
 										.setAlert(
 											ui.newPastDateDecision()
 												.setProperty(
 													ui.newDatePropertyReference()
-														.setPropertyReference("dueDate"))))))
+														.setPropertyReference("dueDate")))
+										.setSorting(
+											ui.newCompareDecision().setEqualsConstant("1").setProperty(ui.newPropertyReference().setEntityReference("assessment_sort_choice")),
+											ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setEntityReference("assessment_sort_ad")))
+										.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
+										.setSortDestination(
+											ui.newDestination() /* a */
+												.setDestination(
+													"/list/1A{0}{1}",
+													ui.newTextPropertyReference().setEntityReference("submission_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("submission_sort_ad")),
+											ui.newDestination() /* d */
+												.setDestination(
+													"/list/1D{0}{1}",
+													ui.newTextPropertyReference().setEntityReference("submission_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("submission_sort_ad"))))))
 				.add(
 					ui.newSection()
 						.setTitle("list-review-section-title")
@@ -113,7 +141,6 @@ public class DeliveryControllers
 											ui.newEntityNavigation()
 												.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newTextPropertyReference().setPropertyReference("id")))
 												.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setPropertyReference("assessment.feedbackNow"))))
-										.setSortable(Boolean.TRUE)
 										.addNavigation(
 											ui.newNavigation()
 												.setTitle("list-review-statistics")
@@ -121,7 +148,22 @@ public class DeliveryControllers
 												.setDestination(ui.newDestination().setDestination("/statistics/{0}", ui.newPropertyReference().setPropertyReference("id")))
 												.setEnabled(
 													ui.newDecision().setProperty(ui.newPropertyReference().setPropertyReference("assessment.feedbackNow")),
-													ui.newDecision().setProperty(ui.newPropertyReference().setPropertyReference("assessment.feedbackShowStatistics")))))
+													ui.newDecision().setProperty(ui.newPropertyReference().setPropertyReference("assessment.feedbackShowStatistics"))))
+										.setSorting(
+											ui.newCompareDecision().setEqualsConstant("0").setProperty(ui.newPropertyReference().setEntityReference("submission_sort_choice")),
+											ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setEntityReference("submission_sort_ad")))
+										.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
+										.setSortDestination(
+											ui.newDestination() /* a */
+												.setDestination(
+													"/list/{0}{1}0A",
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_ad")),
+											ui.newDestination() /* d */
+												.setDestination(
+													"/list/{0}{1}0D",
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_ad"))))
 								.addColumn(
 									ui.newPropertyColumn()
 										.setTitle("list-review-feedbackDate")
@@ -129,24 +171,52 @@ public class DeliveryControllers
 											ui.newDatePropertyReference()
 												.setPropertyReference("assessment.feedbackDate")
 												.setMissingText("immediate"))
-										.setSortable(Boolean.TRUE)
-										.setIncluded(ui.newDecision().setDelegate(new FeedbackDateDecision()), "na"))
+										.setIncluded(ui.newDecision().setDelegate(new FeedbackDateDecision()), "na")
+										.setSorting(
+												ui.newCompareDecision().setEqualsConstant("1").setProperty(ui.newPropertyReference().setEntityReference("submission_sort_choice")),
+												ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setEntityReference("submission_sort_ad")))
+										.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
+										.setSortDestination(
+											ui.newDestination() /* a */
+												.setDestination(
+													"/list/{0}{1}1A",
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_ad")),
+											ui.newDestination() /* d */
+												.setDestination(
+													"/list/{0}{1}1D",
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_ad"))))
 								.addColumn(
 									ui.newPropertyColumn()
 										.setTitle("list-review-score")
 										.setProperty(
 											ui.newTextPropertyReference()
 												.setPropertyReference("totalScore"))
-										.setSortable(Boolean.TRUE)
 										.setIncluded(ui.newDecision().setDelegate(new SubmissionScoreDecision()), "na")
 										.addFootnote(
-												ui.newFootnote()
-													.setText("list-review-footnote-highest")
-													.setCriteria(ui.newDecision().setDelegate(new HighestGradeFootnoteDecision())))
+											ui.newFootnote()
+												.setText("list-review-footnote-highest")
+												.setCriteria(ui.newDecision().setDelegate(new HighestGradeFootnoteDecision())))
 										.addFootnote(
-												ui.newFootnote()
-													.setText("list-review-footnote-latest")
-													.setCriteria(ui.newDecision().setDelegate(new LatestSubmissionFootnoteDecision()))))
+											ui.newFootnote()
+												.setText("list-review-footnote-latest")
+												.setCriteria(ui.newDecision().setDelegate(new LatestSubmissionFootnoteDecision())))
+										.setSorting(
+												ui.newCompareDecision().setEqualsConstant("2").setProperty(ui.newPropertyReference().setEntityReference("submission_sort_choice")),
+												ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setEntityReference("submission_sort_ad")))
+										.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
+										.setSortDestination(
+											ui.newDestination() /* a */
+												.setDestination(
+													"/list/{0}{1}2A",
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_ad")),
+											ui.newDestination() /* d */
+												.setDestination(
+													"/list/{0}{1}2D",
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_ad"))))
 								.addColumn(
 									ui.newPropertyColumn()
 										.setTitle("list-review-time")
@@ -154,7 +224,21 @@ public class DeliveryControllers
 											ui.newDurationPropertyReference()
 												.setPropertyReference("elapsedTime")
 												.setMissingText("na"))
-										.setSortable(Boolean.TRUE))
+										.setSorting(
+												ui.newCompareDecision().setEqualsConstant("3").setProperty(ui.newPropertyReference().setEntityReference("submission_sort_choice")),
+												ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setEntityReference("submission_sort_ad")))
+										.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
+										.setSortDestination(
+											ui.newDestination() /* a */
+												.setDestination(
+													"/list/{0}{1}3A",
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_ad")),
+											ui.newDestination() /* d */
+												.setDestination(
+													"/list/{0}{1}3D",
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_ad"))))
 								.addColumn(
 									ui.newPropertyColumn()
 										.setTitle("list-review-submittedDue")
@@ -162,7 +246,21 @@ public class DeliveryControllers
 											ui.newDatePropertyReference()
 												.setPropertyReference("submittedDate")
 												.setMissingText("na"))
-										.setSortable(Boolean.TRUE))));
+										.setSorting(
+												ui.newCompareDecision().setEqualsConstant("4").setProperty(ui.newPropertyReference().setEntityReference("submission_sort_choice")),
+												ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setEntityReference("submission_sort_ad")))
+										.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
+										.setSortDestination(
+											ui.newDestination() /* a */
+												.setDestination(
+													"/list/{0}{1}4A",
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_ad")),
+											ui.newDestination() /* d */
+												.setDestination(
+													"/list/{0}{1}4D",
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_choice"),
+													ui.newTextPropertyReference().setEntityReference("assessment_sort_ad"))))));
 	}
 
 	/**
@@ -308,27 +406,27 @@ public class DeliveryControllers
 									ui.newText()
 										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("instructions"))
 										.setEnabled(
-												ui.newCompareDecision()
-													.setEqualsConstant(
-														QuestionType.matching.toString())
-													.setProperty(
-														ui.newBooleanPropertyReference()
-															.setEntityReference("question")
-															.setPropertyReference("type"))))
+											ui.newCompareDecision()
+												.setEqualsConstant(
+													QuestionType.matching.toString())
+												.setProperty(
+													ui.newPropertyReference()
+														.setEntityReference("question")
+														.setPropertyReference("type"))))
 								.add(
 									ui.newText()
 										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("part.title"))
 										.setEnabled(
-												ui.newCompareDecision()
-													.setEqualsConstant(
-														QuestionType.fillIn.toString(),
-														QuestionType.numeric.toString(),
-														QuestionType.matching.toString())
-													.setProperty(
-														ui.newBooleanPropertyReference()
-															.setEntityReference("question")
-															.setPropertyReference("type"))
-													.setReversed()))
+											ui.newCompareDecision()
+												.setEqualsConstant(
+													QuestionType.fillIn.toString(),
+													QuestionType.numeric.toString(),
+													QuestionType.matching.toString())
+												.setProperty(
+													ui.newPropertyReference()
+														.setEntityReference("question")
+														.setPropertyReference("type"))
+												.setReversed()))
 								.add(
 									ui.newEntityList()
 										.setStyle(EntityList.Style.form)
@@ -338,48 +436,48 @@ public class DeliveryControllers
 												.setProperty(null, ui.newPropertyReference().setFormatDelegate(new FormatAnswerCorrectFeedback()))
 												.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")), null))
 										.addColumn(
-												ui.newSelectionColumn()
-													.setSingleSelectDecision(
-														ui.newCompareDecision()
-															.setEqualsConstant(
-																QuestionType.multipleCorrect.toString())
-															.setReversed()
-															.setProperty(
-																ui.newBooleanPropertyReference()
-																	.setEntityReference("question")
-																	.setPropertyReference("type")))
-													.setValueProperty(
-														ui.newTextPropertyReference()
-															.setPropertyReference("id"))
-													.setProperty(
-														ui.newPropertyReference()
-															.setEntityReference("answer")
-															.setPropertyReference("entryAnswerIds"))
-													.setLabel("question-label",
-														ui.newTextPropertyReference()
-															.setPropertyReference("label")))
+											ui.newSelectionColumn()
+												.setSingleSelectDecision(
+													ui.newCompareDecision()
+														.setEqualsConstant(
+															QuestionType.multipleCorrect.toString())
+														.setReversed()
+														.setProperty(
+															ui.newPropertyReference()
+																.setEntityReference("question")
+																.setPropertyReference("type")))
+												.setValueProperty(
+													ui.newTextPropertyReference()
+														.setPropertyReference("id"))
+												.setProperty(
+													ui.newPropertyReference()
+														.setEntityReference("answer")
+														.setPropertyReference("entryAnswerIds"))
+												.setLabel("question-label",
+													ui.newTextPropertyReference()
+														.setPropertyReference("label")))
 										.addColumn(
-												ui.newPropertyColumn()
-													.setProperty(
-														ui.newTextPropertyReference()
-															.setPropertyReference("text")))
+											ui.newPropertyColumn()
+												.setProperty(
+													ui.newTextPropertyReference()
+														.setPropertyReference("text")))
 										.addColumn(
-												ui.newPropertyColumn()
-													.setProperty(
-														ui.newTextPropertyReference()
-															.setPropertyReference("feedbackGeneral"))
-													.setIncluded(ui.newDecision().setDelegate(new AnswerFeedbackDecision()), null))
+											ui.newPropertyColumn()
+												.setProperty(
+													ui.newTextPropertyReference()
+														.setPropertyReference("feedbackGeneral"))
+												.setIncluded(ui.newDecision().setDelegate(new AnswerFeedbackDecision()), null))
 										.setEnabled(
-												ui.newCompareDecision()
-													.setEqualsConstant(
-														QuestionType.multipleChoice.toString(),
-														QuestionType.multipleCorrect.toString(),
-														QuestionType.survey.toString(),
-														QuestionType.trueFalse.toString())
-													.setProperty(
-														ui.newBooleanPropertyReference()
-															.setEntityReference("question")
-															.setPropertyReference("type"))))
+											ui.newCompareDecision()
+												.setEqualsConstant(
+													QuestionType.multipleChoice.toString(),
+													QuestionType.multipleCorrect.toString(),
+													QuestionType.survey.toString(),
+													QuestionType.trueFalse.toString())
+												.setProperty(
+													ui.newPropertyReference()
+														.setEntityReference("question")
+														.setPropertyReference("type"))))
 								.add(
 									ui.newTextEdit()
 										.setTitle("question-text")
@@ -388,12 +486,12 @@ public class DeliveryControllers
 												.setEntityReference("answer")
 												.setPropertyReference("entryAnswerText"))
 										.setEnabled(
-												ui.newCompareDecision()
-													.setEqualsConstant(QuestionType.essay.toString())
-													.setProperty(
-														ui.newBooleanPropertyReference()
-															.setEntityReference("question")
-															.setPropertyReference("type"))))
+											ui.newCompareDecision()
+												.setEqualsConstant(QuestionType.essay.toString())
+												.setProperty(
+													ui.newPropertyReference()
+														.setEntityReference("question")
+														.setPropertyReference("type"))))
 								.add(
 									ui.newFillIn()
 										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("part.title"))
@@ -412,12 +510,12 @@ public class DeliveryControllers
 											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowCorrectAnswer")))
 										.setWidth(20)
 										.setEnabled(
-												ui.newCompareDecision()
-													.setEqualsConstant(QuestionType.fillIn.toString())
-													.setProperty(
-														ui.newPropertyReference()
-															.setEntityReference("question")
-															.setPropertyReference("type"))))
+											ui.newCompareDecision()
+												.setEqualsConstant(QuestionType.fillIn.toString())
+												.setProperty(
+													ui.newPropertyReference()
+														.setEntityReference("question")
+														.setPropertyReference("type"))))
 								.add(
 									ui.newFillIn()
 										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("part.title"))
@@ -436,12 +534,12 @@ public class DeliveryControllers
 											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowCorrectAnswer")))
 										.setWidth(10)
 										.setEnabled(
-												ui.newCompareDecision()
-													.setEqualsConstant(QuestionType.numeric.toString())
-													.setProperty(
-														ui.newPropertyReference()
-															.setEntityReference("question")
-															.setPropertyReference("type"))))
+											ui.newCompareDecision()
+												.setEqualsConstant(QuestionType.numeric.toString())
+												.setProperty(
+													ui.newPropertyReference()
+														.setEntityReference("question")
+														.setPropertyReference("type"))))
 								.add(
 									ui.newMatch()
 										.setProperty(
@@ -486,12 +584,12 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setPropertyReference("label"))
 										.setEnabled(
-												ui.newCompareDecision()
-													.setEqualsConstant(QuestionType.matching.toString())
-													.setProperty(
-														ui.newBooleanPropertyReference()
-															.setEntityReference("question")
-															.setPropertyReference("type"))))
+											ui.newCompareDecision()
+												.setEqualsConstant(QuestionType.matching.toString())
+												.setProperty(
+													ui.newPropertyReference()
+														.setEntityReference("question")
+														.setPropertyReference("type"))))
 								.add(
 									ui.newTextEdit()
 										.setTitle("question-rationale")
@@ -500,11 +598,11 @@ public class DeliveryControllers
 												.setEntityReference("answer")
 												.setPropertyReference("rationale"))
 										.setEnabled(
-												ui.newDecision()
-													.setProperty(
-														ui.newBooleanPropertyReference()
-														.setEntityReference("question")
-														.setPropertyReference("requireRationale"))))
+											ui.newDecision()
+												.setProperty(
+													ui.newBooleanPropertyReference()
+													.setEntityReference("question")
+													.setPropertyReference("requireRationale"))))
 								.add(
 									ui.newSelection()
 										.setTitle("question-mark-review")
@@ -513,34 +611,34 @@ public class DeliveryControllers
 												.setEntityReference("answer")
 												.setPropertyReference("markedForReview"))
 										.setEnabled(
-												ui.newDecision()
-													.setProperty(
-														ui.newBooleanPropertyReference()
-														.setEntityReference("question")
-														.setPropertyReference("section.assessment.randomAccess"))))
+											ui.newDecision()
+												.setProperty(
+													ui.newBooleanPropertyReference()
+													.setEntityReference("question")
+													.setPropertyReference("section.assessment.randomAccess"))))
 								.add(
 									ui.newText()
 										.setText("question-answer-key", ui.newPropertyReference().setEntityReference("question").setPropertyReference("answerKey"))
 										.setEnabled(
-												ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
-												ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
-												ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowCorrectAnswer")),
-												ui.newCompareDecision()
-													.setEqualsConstant(
-														QuestionType.fillIn.toString(),
-														QuestionType.matching.toString(),
-														QuestionType.multipleChoice.toString(),
-														QuestionType.multipleCorrect.toString(),
-														QuestionType.numeric.toString(),
-														QuestionType.trueFalse.toString())
-													.setProperty(ui.newBooleanPropertyReference().setEntityReference("question").setPropertyReference("type"))))
+											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowCorrectAnswer")),
+											ui.newCompareDecision()
+												.setEqualsConstant(
+													QuestionType.fillIn.toString(),
+													QuestionType.matching.toString(),
+													QuestionType.multipleChoice.toString(),
+													QuestionType.multipleCorrect.toString(),
+													QuestionType.numeric.toString(),
+													QuestionType.trueFalse.toString())
+												.setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("type"))))
 								.add(
 									ui.newText()
 										.setText("question-feedback", ui.newPropertyReference().setEntityReference("answer").setPropertyReference("questionFeedback"))
 										.setEnabled(
-												ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
-												ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
-												ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowQuestionFeedback"))))
+											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowQuestionFeedback"))))
 								.add(
 									ui.newText()
 										.setText("question-model-answer", ui.newPropertyReference().setEntityReference("question").setPropertyReference("part.answer.text"))
@@ -550,7 +648,7 @@ public class DeliveryControllers
 											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowQuestionFeedback")),
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.essay.toString())
-												.setProperty(ui.newBooleanPropertyReference().setEntityReference("question").setPropertyReference("type"))))))
+												.setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("type"))))))
 				.add(
 					ui.newButtonBar()
 						.add(
@@ -563,12 +661,12 @@ public class DeliveryControllers
 										ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
 										ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("assessmentOrdering.next.id")))
 								.setEnabled(
-										ui.newDecision()
-											.setReversed()
-											.setProperty(
-												ui.newBooleanPropertyReference()
-													.setEntityReference("question")
-													.setPropertyReference("assessmentOrdering.isLast"))))
+									ui.newDecision()
+										.setReversed()
+										.setProperty(
+											ui.newBooleanPropertyReference()
+												.setEntityReference("question")
+												.setPropertyReference("assessmentOrdering.isLast"))))
 						.add(
 							ui.newNavigation()
 								.setDefault()
@@ -768,12 +866,7 @@ public class DeliveryControllers
 																// destination is /question/sid/aqid
 																.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
 																	ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
-																	ui.newTextPropertyReference().setPropertyReference("id"))))
-														)
-										)
-									)
-							)
-					)
+																	ui.newTextPropertyReference().setPropertyReference("id")))))))))
 				.add(
 					ui.newButtonBar()
 						.add(

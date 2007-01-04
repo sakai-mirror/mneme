@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -357,15 +357,15 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
-	 * Id each of the assessments in the id collection
+	 * Id each of the assessments in the id list
 	 * 
 	 * @param ids
 	 *        The collection of assessment ids.
-	 * @return A collection if id'ed assessments, one for each id.
+	 * @return A list of id'ed assessments, one for each id.
 	 */
-	protected Collection<Assessment> idAssessments(Collection<String> ids)
+	protected List<Assessment> idAssessments(List<String> ids)
 	{
-		Collection<Assessment> rv = new ArrayList<Assessment>(ids.size());
+		List<Assessment> rv = new ArrayList<Assessment>(ids.size());
 		for (String id : ids)
 		{
 			rv.add(idAssessment(id));
@@ -935,15 +935,15 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
-	 * Id each of the submission in the id collection
+	 * Id each of the submission in the id list
 	 * 
 	 * @param ids
 	 *        The collection of submission ids.
 	 * @return A collection if id'ed submission, one for each id.
 	 */
-	protected Collection<Submission> idSubmissions(Collection<String> ids)
+	protected List<Submission> idSubmissions(List<String> ids)
 	{
-		Collection<Submission> rv = new ArrayList<Submission>(ids.size());
+		List<Submission> rv = new ArrayList<Submission>(ids.size());
 		for (String id : ids)
 		{
 			rv.add(idSubmission(id));
@@ -1381,7 +1381,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Collection<Assessment> getAvailableAssessments(final String context, String userId)
+	public List<Assessment> getAvailableAssessments(final String context, String userId, GetAvailableAssessmentsSort sort)
 	{
 		// if null, get the current user id
 		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
@@ -1420,6 +1420,42 @@ public class AssessmentServiceImpl implements AssessmentService
 		// Note: extra info
 		// anticipating that we need the title and duedate (etc) for each assessment, we get it here and cache it so we can return it later in the thread
 
+		// figure sort sql
+		String sortSql = null;
+		if (sort == null)
+		{
+			sortSql = "X.TITLE ASC";
+		}
+		else
+		{
+			switch (sort)
+			{
+				case title_a:
+				{
+					sortSql = "X.TITLE ASC";
+					break;
+				}
+
+				case title_d:
+				{
+					sortSql = "X.TITLE DESC";
+					break;
+				}
+
+				case dueDate_a:
+				{
+					sortSql = "X.DUEDATE DESC";
+					break;
+				}
+
+				case dueDate_d:
+				{
+					sortSql = "X.DUEDATE DESC";
+					break;
+				}
+			}
+		}
+
 		String statement = "SELECT X.ID, X.TITLE, X.DUEDATE FROM ("
 				+ " SELECT P.ID ID, COUNT(AG.PUBLISHEDASSESSMENTID) SUBMITTED, PAC.SUBMISSIONSALLOWED ALLOWED, P.TITLE TITLE, PAC.DUEDATE DUEDATE"
 				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
@@ -1428,7 +1464,7 @@ public class AssessmentServiceImpl implements AssessmentService
 				+ "      P.ID = PAC.ASSESSMENTID AND (PAC.STARTDATE IS NULL OR ? >= PAC.STARTDATE) AND (PAC.RETRACTDATE IS NULL OR ? < PAC.RETRACTDATE) AND (PAC.DUEDATE IS NULL OR ? < PAC.DUEDATE OR PAC.LATEHANDLING = 1)"
 				+ " LEFT OUTER JOIN SAM_ASSESSMENTGRADING_T AG ON P.ID = AG.PUBLISHEDASSESSMENTID AND AG.AGENTID = ? AND AG.FORGRADE = "
 				+ m_sqlService.getBooleanConstant(true) + " GROUP BY P.ID, PAC.SUBMISSIONSALLOWED, P.TITLE, PAC.DUEDATE" + " ) X"
-				+ " WHERE (X.ALLOWED IS NULL OR X.SUBMITTED < X.ALLOWED)";
+				+ " WHERE (X.ALLOWED IS NULL OR X.SUBMITTED < X.ALLOWED)" + " ORDER BY " + sortSql;
 
 		Object[] fields = new Object[6];
 		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
@@ -1489,7 +1525,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Collection<Submission> getOfficialSubmissions(final String context, String userId)
+	public List<Submission> getOfficialSubmissions(final String context, String userId, GetOfficialSubmissionsSort sort)
 	{
 		// if null, get the current user id
 		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
@@ -1518,6 +1554,77 @@ public class AssessmentServiceImpl implements AssessmentService
 		// Note: complete v.s. in progress submissions
 		// the FORGRADE boolean is set when the submission is complete, false while it is in progress - these don't count.
 
+		// figure sort
+		String sortSql = null;
+		if (sort == null)
+		{
+			sortSql = "P.TITLE ASC";
+		}
+		else
+		{
+			switch (sort)
+			{
+				case title_a:
+				{
+					sortSql = "P.TITLE ASC";
+					break;
+				}
+
+				case title_d:
+				{
+					sortSql = "P.TITLE DESC";
+					break;
+				}
+				case feedbackDate_a:
+				{
+					sortSql = "PAC.FEEDBACKDATE ASC";
+					break;
+				}
+
+				case feedbackDate_d:
+				{
+					sortSql = "PAC.FEEDBACKDATE DESC";
+					break;
+				}
+
+				case score_a:
+				{
+					sortSql = "AG.FINALSCORE ASC";
+					break;
+				}
+
+				case score_d:
+				{
+					sortSql = "AG.FINALSCORE DESC";
+					break;
+				}
+				case time_a:
+				{
+					// TODO:
+					sortSql = "AG.SUBMITTEDDATE-AG.ATTEMPTDATE ASC";
+					break;
+				}
+
+				case time_d:
+				{
+					// TODO:
+					sortSql = "AG.SUBMITTEDDATE-AG.ATTEMPTDATE DESC";
+					break;
+				}
+				case submittedDate_a:
+				{
+					sortSql = "AG.SUBMITTEDDATE ASC";
+					break;
+				}
+
+				case submittedDate_d:
+				{
+					sortSql = "AG.SUBMITTEDDATE DESC";
+					break;
+				}
+			}
+		}
+
 		String statement = "SELECT AG.ASSESSMENTGRADINGID, AG.PUBLISHEDASSESSMENTID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
 				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE,"
 				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, AG.FORGRADE,"
@@ -1528,8 +1635,7 @@ public class AssessmentServiceImpl implements AssessmentService
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON AG.PUBLISHEDASSESSMENTID = PAC.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON AG.PUBLISHEDASSESSMENTID = PF.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON AG.PUBLISHEDASSESSMENTID = PE.ASSESSMENTID"
-				+ " WHERE AG.AGENTID = ? AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(true)
-				+ " ORDER BY AG.SUBMITTEDDATE ASC";
+				+ " WHERE AG.AGENTID = ? AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(true) + " ORDER BY " + sortSql;
 
 		Object[] fields = new Object[3];
 		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
@@ -1622,7 +1728,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		});
 
 		// pick the one official from this many-list for each assessment
-		Collection<String> ids = new ArrayList<String>();
+		List<String> ids = new ArrayList<String>();
 
 		while (all.size() > 0)
 		{
