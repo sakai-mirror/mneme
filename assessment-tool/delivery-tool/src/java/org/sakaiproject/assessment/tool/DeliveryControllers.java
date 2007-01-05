@@ -276,11 +276,13 @@ public class DeliveryControllers
 				.setHeader("enter-header")
 				.add(
 					ui.newSection()
+						.setTitle("enter-display-instructions", ui.newPropertyReference().setEntityReference("assessment").setPropertyReference("title"))
+						.add(
+							ui.newHtml()
+								.setText(null, ui.newPropertyReference().setEntityReference("assessment").setPropertyReference("description")))
 						.add(
 							ui.newEntityDisplay()
 								.setEntityReference(ui.newPropertyReference().setEntityReference("assessment"))
-								.setTitle("enter-display-instructions", ui.newTextPropertyReference().setEntityReference("assessment").setPropertyReference("title"))
-								// TODO: need Description/Intro row ???
 								.addRow(
 									ui.newPropertyRow()
 										.setTitle("enter-display-contextTitle")
@@ -400,10 +402,13 @@ public class DeliveryControllers
 							ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.numSections"),
 							ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("section.title"))
 						.add(
+							ui.newHtml()
+								.setText(null, ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.description")))
+						.add(
 							ui.newSection()
 								.setTitle(null,ui.newTextPropertyReference().setEntityReference("question").setFormatDelegate(new FormatQuestionTitle()))
 								.add(
-									ui.newText()
+									ui.newHtml()
 										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("instructions"))
 										.setEnabled(
 											ui.newCompareDecision()
@@ -414,7 +419,7 @@ public class DeliveryControllers
 														.setEntityReference("question")
 														.setPropertyReference("type"))))
 								.add(
-									ui.newText()
+									ui.newHtml()
 										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("part.title"))
 										.setEnabled(
 											ui.newCompareDecision()
@@ -457,12 +462,12 @@ public class DeliveryControllers
 													ui.newTextPropertyReference()
 														.setPropertyReference("label")))
 										.addColumn(
-											ui.newPropertyColumn()
+											ui.newHtmlPropertyColumn()
 												.setProperty(
 													ui.newTextPropertyReference()
 														.setPropertyReference("text")))
 										.addColumn(
-											ui.newPropertyColumn()
+											ui.newHtmlPropertyColumn()
 												.setProperty(
 													ui.newTextPropertyReference()
 														.setPropertyReference("feedbackGeneral"))
@@ -633,14 +638,14 @@ public class DeliveryControllers
 													QuestionType.trueFalse.toString())
 												.setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("type"))))
 								.add(
-									ui.newText()
+									ui.newHtml()
 										.setText("question-feedback", ui.newPropertyReference().setEntityReference("answer").setPropertyReference("questionFeedback"))
 										.setEnabled(
 											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.assessment.feedbackShowQuestionFeedback"))))
 								.add(
-									ui.newText()
+									ui.newHtml()
 										.setText("question-model-answer", ui.newPropertyReference().setEntityReference("question").setPropertyReference("part.answer.text"))
 										.setEnabled(
 											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("feedback")),
@@ -859,7 +864,10 @@ public class DeliveryControllers
 														.setProperty("toc-question-entry",
 															// {num}. {title or instructions} ({points})
 															ui.newPropertyReference().setFormatDelegate(new FormatQuestionNumber()),
-															ui.newTextPropertyReference().setPropertyReference("title"),
+															ui.newTextPropertyReference()
+																.setMaxLength(60)
+																.setStripHtml()
+																.setPropertyReference("title"),
 															ui.newPropertyReference().setFormatDelegate(new QuestionScore()))
 														.setEntityNavigation(
 															ui.newEntityNavigation()

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -68,6 +68,13 @@ public interface Assessment
 	 * @return The creating users id.
 	 */
 	String getCreatedBy();
+
+	/**
+	 * Access the description of this assessment.
+	 * 
+	 * @return The assessment's description.
+	 */
+	String getDescription();
 
 	/**
 	 * Access the due date. Submissions after this date are considered late, if they are accepted at all.
@@ -292,6 +299,14 @@ public interface Assessment
 	 *        The creating user's id.
 	 */
 	void setCreatedBy(String userId);
+
+	/**
+	 * Set the description of this assessment.
+	 * 
+	 * @param title
+	 *        The assessment's description.
+	 */
+	void setDescription(String description);
 
 	/**
 	 * Set the due date.

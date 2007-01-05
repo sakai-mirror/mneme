@@ -511,7 +511,7 @@ public class AssessmentServiceImpl implements AssessmentService
 				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, P.CREATEDBY,"
 				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.TIMELIMIT, PAC.AUTOSUBMIT, PAC.STARTDATE, PAC.RETRACTDATE, PAC.LATEHANDLING,"
 				+ " PF.SHOWSTUDENTQUESTIONSCORE, PF.SHOWCORRECTRESPONSE, PF.SHOWQUESTIONLEVELFEEDBACK, PF.SHOWSELECTIONLEVELFEEDBACK,"
-				+ " PAC.ITEMNAVIGATION, PAC.ITEMNUMBERING" + " FROM SAM_PUBLISHEDASSESSMENT_T P"
+				+ " PAC.ITEMNAVIGATION, PAC.ITEMNUMBERING, P.DESCRIPTION" + " FROM SAM_PUBLISHEDASSESSMENT_T P"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
@@ -576,6 +576,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					boolean showAnswerFeedback = result.getBoolean(21);
 					int randomAccess = result.getInt(22);
 					int continuousNumbering = result.getInt(23);
+					String description = result.getString(24);
 
 					// pack it into the assessment
 					assessment.initAutoSubmit((autoSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
@@ -600,6 +601,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					assessment.initFeedbackShowAnswerFeedback(Boolean.valueOf(showAnswerFeedback));
 					assessment.initRandomAccess(Boolean.valueOf(randomAccess == 2));
 					assessment.initContinuousNumbering(Boolean.valueOf(continuousNumbering == 1));
+					assessment.initDescription(description);
 
 					return assessment;
 				}
@@ -1898,27 +1900,28 @@ public class AssessmentServiceImpl implements AssessmentService
 
 			// Note: ID column is set to autoincrement... by using the special JDBC feature in dbInsert, we get the value just allocated
 			String statement = "INSERT INTO SAM_PUBLISHEDASSESSMENT_T"
-					+ " (TITLE, ASSESSMENTID, DESCRIPTION, COMMENTS, TYPEID, INSTRUCTORNOTIFICATION, TESTEENOTIFICATION, MULTIPARTALLOWED,"
+					+ " (TITLE, DESCRIPTION, ASSESSMENTID, DESCRIPTION, COMMENTS, TYPEID, INSTRUCTORNOTIFICATION, TESTEENOTIFICATION, MULTIPARTALLOWED,"
 					+ " STATUS, CREATEDBY, CREATEDDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE" + ((id == null) ? "" : ", ID") + ")"
-					+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?") + ")";
-			Object fields[] = new Object[(id == null) ? 13 : 14];
+					+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?") + ")";
+			Object fields[] = new Object[(id == null) ? 14 : 15];
 			fields[0] = a.getTitle();
-			fields[1] = ""; // TODO: reference to the base (not published) assessment... a.getId();
-			fields[2] = ""; // TODO: description
-			fields[3] = ""; // TODO: comments
-			fields[4] = new Integer(62); // TODO: type id
-			fields[5] = new Integer(1); // TODO: instructor notification
-			fields[6] = new Integer(1); // TODO: test notification
-			fields[7] = new Integer(1); // TODO: multipart allowed
-			fields[8] = a.getStatus().dbEncoding();
-			fields[9] = a.getCreatedBy();
-			fields[10] = now; // TODO: from a
-			fields[11] = a.getCreatedBy(); // TODO: modifiedBy
-			fields[12] = now; // TODO: from a
+			fields[1] = a.getDescription();
+			fields[2] = ""; // TODO: reference to the base (not published) assessment... a.getId();
+			fields[3] = ""; // TODO: description
+			fields[4] = ""; // TODO: comments
+			fields[5] = new Integer(62); // TODO: type id
+			fields[6] = new Integer(1); // TODO: instructor notification
+			fields[7] = new Integer(1); // TODO: test notification
+			fields[8] = new Integer(1); // TODO: multipart allowed
+			fields[9] = a.getStatus().dbEncoding();
+			fields[10] = a.getCreatedBy();
+			fields[11] = now; // TODO: from a
+			fields[12] = a.getCreatedBy(); // TODO: modifiedBy
+			fields[13] = now; // TODO: from a
 
 			if (id != null)
 			{
-				fields[13] = id;
+				fields[14] = id;
 				m_sqlService.dbWrite(connection, statement, fields);
 			}
 			else

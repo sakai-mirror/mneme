@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006,2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -70,6 +70,10 @@ public class AssessmentImpl implements Assessment
 	protected String createdBy = null;
 
 	protected PropertyStatus createdByStatus = PropertyStatus.unset;
+
+	protected String description = null;
+
+	protected PropertyStatus descriptionStatus = PropertyStatus.unset;
 
 	protected Time dueDate = null;
 
@@ -145,7 +149,7 @@ public class AssessmentImpl implements Assessment
 	protected PropertyStatus statusStatus = PropertyStatus.unset;
 
 	protected Integer timeLimit = null;
-
+	
 	protected PropertyStatus timeLimitStatus = PropertyStatus.unset;
 
 	protected String title = null;
@@ -250,6 +254,17 @@ public class AssessmentImpl implements Assessment
 		if (this.createdByStatus == PropertyStatus.unset) readMain();
 
 		return createdBy;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDescription()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.descriptionStatus == PropertyStatus.unset) readMain();
+
+		return this.description;
 	}
 
 	/**
@@ -622,6 +637,15 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setDescription(String description)
+	{
+		this.description = description;
+		this.descriptionStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setDueDate(Time dueDate)
 	{
 		this.dueDate = dueDate;
@@ -850,6 +874,18 @@ public class AssessmentImpl implements Assessment
 	{
 		createdBy = userId;
 		this.createdByStatus = PropertyStatus.inited;
+	}
+
+	/**
+	 * Initialize the description property.
+	 * 
+	 * @param description
+	 *        The description property.
+	 */
+	protected void initDescription(String description)
+	{
+		this.description = description;
+		this.descriptionStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -1141,6 +1177,7 @@ public class AssessmentImpl implements Assessment
 		this.contextStatus = PropertyStatus.inited;
 		this.continuousNumberingStatus = PropertyStatus.inited;
 		this.createdByStatus = PropertyStatus.inited;
+		this.descriptionStatus = PropertyStatus.inited;
 		this.dueDateStatus = PropertyStatus.inited;
 		this.feedbackDateStatus = PropertyStatus.inited;
 		this.feedbackDeliveryStatus = PropertyStatus.inited;
@@ -1185,6 +1222,8 @@ public class AssessmentImpl implements Assessment
 		this.continuousNumberingStatus = other.continuousNumberingStatus;
 		this.createdBy = other.createdBy;
 		this.createdByStatus = other.createdByStatus;
+		this.description = other.description;
+		this.descriptionStatus = other.descriptionStatus;
 		this.dueDate = other.dueDate;
 		this.dueDateStatus = other.dueDateStatus;
 		this.feedbackDate = other.feedbackDate;
