@@ -858,7 +858,8 @@ public class DeliveryControllers
 												// focus is on AssessmentQuestion
 												.addColumn(
 													ui.newHtmlPropertyColumn()
-														.setProperty(null, ui.newPropertyReference().setFormatDelegate(new FormatQuestionDecoration())))
+														.setProperty(null, ui.newPropertyReference().setFormatDelegate(new FormatQuestionDecoration()))
+														.setWidth(16))
 												.addColumn(
 													ui.newPropertyColumn()
 														.setProperty("toc-question-entry",
