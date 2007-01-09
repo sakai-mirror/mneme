@@ -51,6 +51,8 @@ import org.sakaiproject.assessment.api.SubmissionCompletedException;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.entity.cover.EntityManager;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.id.cover.IdManager;
 import org.sakaiproject.memory.api.Cache;
@@ -883,6 +885,67 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (cached != null)
 		{
 			cached.setSections(assessment);
+		}
+	}
+
+	/**
+	 * Read the attachments of the assessment
+	 * 
+	 * @param assessment
+	 *        The assessment impl with the id set to fill in.
+	 */
+	protected void readAssessmentAttachments(final AssessmentImpl assessment)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("readAssessmentAttachments: " + assessment.getId());
+
+		if (assessment.getId() == null)
+		{
+			M_log.warn("readAssessmentAttachments: attempt to read with no id set");
+			return;
+		}
+
+		// collect the attachments
+		final List<Reference> attachments = new ArrayList<Reference>();
+
+		// get the attachments
+		String statement = "SELECT A.RESOURCEID"
+				+ " FROM SAM_PUBLISHEDATTACHMENT_T A"
+				+ " WHERE A.ASSESSMENTID = ?";
+		Object[] fields = new Object[1];
+		fields[0] = assessment.getId();
+
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String refStr = result.getString(1);
+					
+					// assume a content ref
+					refStr = "/content" + refStr;
+
+					// make a reference
+					Reference ref = EntityManager.newReference(refStr);
+					attachments.add(ref);
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessmentAttachments: " + e);
+					return null;
+				}
+			}
+		});
+
+		// set these into the assessment
+		assessment.initAttachments(attachments);
+
+		// update the cache if cached
+		AssessmentImpl cached = getCachedAssessment(assessment.getId());
+		if (cached != null)
+		{
+			cached.setAttachments(assessment);
 		}
 	}
 
@@ -2564,6 +2627,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					m_sqlService.dbWrite(connection, statement, fields);
 				}
 			}
+			
+			// TODO: assessment attachments into SAM_PUBLISHEDATTACHMENT_T setting ATTACHMENTID, ATTACHMENTTYPE=1, RESOURCEID from the attachment ref id, ASSESSMENTID
 
 			connection.commit();
 

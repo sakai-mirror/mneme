@@ -281,6 +281,11 @@ public class DeliveryControllers
 							ui.newHtml()
 								.setText(null, ui.newPropertyReference().setEntityReference("assessment").setPropertyReference("description")))
 						.add(
+							ui.newAttachments()
+								.setTitle("enter-attachments")
+								.setAttachments(ui.newPropertyReference().setEntityReference("assessment").setPropertyReference("attachments"))
+								.setEnabled(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("assessment").setPropertyReference("attachments"))))
+						.add(
 							ui.newEntityDisplay()
 								.setEntityReference(ui.newPropertyReference().setEntityReference("assessment"))
 								.addRow(

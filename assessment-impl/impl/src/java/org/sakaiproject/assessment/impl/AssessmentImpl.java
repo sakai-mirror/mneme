@@ -32,6 +32,8 @@ import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentStatus;
 import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.MultipleSubmissionSelectionPolicy;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.entity.cover.EntityManager;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.cover.TimeService;
 
@@ -54,6 +56,10 @@ public class AssessmentImpl implements Assessment
 	protected Boolean allowLateSubmit = null;
 
 	protected PropertyStatus allowLateSubmitStatus = PropertyStatus.unset;
+
+	protected List<Reference> attachments = new ArrayList<Reference>();
+
+	protected PropertyStatus attachmentsStatus = PropertyStatus.unset;
 
 	protected Boolean autoSubmit = null;
 
@@ -149,7 +155,7 @@ public class AssessmentImpl implements Assessment
 	protected PropertyStatus statusStatus = PropertyStatus.unset;
 
 	protected Integer timeLimit = null;
-	
+
 	protected PropertyStatus timeLimitStatus = PropertyStatus.unset;
 
 	protected String title = null;
@@ -170,6 +176,7 @@ public class AssessmentImpl implements Assessment
 	protected AssessmentImpl(AssessmentImpl other)
 	{
 		this.setMain(other);
+		this.setAttachments(other);
 		this.setSections(other);
 	}
 
@@ -210,6 +217,17 @@ public class AssessmentImpl implements Assessment
 		if (this.allowLateSubmitStatus == PropertyStatus.unset) readMain();
 
 		return this.allowLateSubmit;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Reference> getAttachments()
+	{
+		// read the attachments if this property has not yet been set
+		if (this.attachmentsStatus == PropertyStatus.unset) readAttachments();
+
+		return this.attachments;
 	}
 
 	/**
@@ -601,6 +619,24 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setAttachments(List<Reference> attachments)
+	{
+		this.attachments.clear();
+		this.attachmentsStatus = PropertyStatus.modified;
+		if (attachments == null) return;
+
+		// deep copy
+		this.attachments = new ArrayList<Reference>(attachments.size());
+		for (Reference ref : attachments)
+		{
+			Reference copy = EntityManager.newReference(ref);
+			this.attachments.add(copy);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setAutoSubmit(Boolean value)
 	{
 		this.autoSubmit = value;
@@ -826,6 +862,18 @@ public class AssessmentImpl implements Assessment
 	{
 		this.allowLateSubmit = value;
 		this.allowLateSubmitStatus = PropertyStatus.inited;
+	}
+
+	/**
+	 * Initialize the attachments.
+	 * 
+	 * @param attachments
+	 *        The attachments - these are taken exactly, not deep copied.
+	 */
+	protected void initAttachments(List<Reference> attachments)
+	{
+		this.attachments = attachments;
+		this.attachmentsStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -1144,6 +1192,17 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Read the attachments info into this assessment.
+	 */
+	protected void readAttachments()
+	{
+		// if our id is not set, we are new, and there's nothing to read
+		if (this.id == null) return;
+
+		service.readAssessmentAttachments(this);
+	}
+
+	/**
 	 * Read the main info into this assessment.
 	 */
 	protected void readMain()
@@ -1167,12 +1226,26 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Set my attachments to exactly match the attachments of this other
+	 * 
+	 * @param other
+	 *        The other assessment to set my parts to match.
+	 */
+	protected void setAttachments(AssessmentImpl other)
+	{
+		// deep copy the attachments, preserve the status
+		setAttachments(other.attachments);
+		this.attachmentsStatus = other.attachmentsStatus;
+	}
+
+	/**
 	 * Set all the flags to inited.
 	 */
 	protected void setInited()
 	{
 		this.mainStatus = PropertyStatus.inited;
 		this.allowLateSubmitStatus = PropertyStatus.inited;
+		this.attachmentsStatus = PropertyStatus.inited;
 		this.autoSubmitStatus = PropertyStatus.inited;
 		this.contextStatus = PropertyStatus.inited;
 		this.continuousNumberingStatus = PropertyStatus.inited;
@@ -1270,7 +1343,7 @@ public class AssessmentImpl implements Assessment
 	 */
 	protected void setSections(AssessmentImpl other)
 	{
-		// deep copy the questions, preserve the status
+		// deep copy the sections, preserve the status
 		setSections(other.sections);
 		this.sectionsStatus = other.sectionsStatus;
 	}

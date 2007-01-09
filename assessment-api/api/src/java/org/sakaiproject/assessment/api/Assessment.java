@@ -23,6 +23,7 @@ package org.sakaiproject.assessment.api;
 
 import java.util.List;
 
+import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.time.api.Time;
 
 /**
@@ -40,6 +41,13 @@ public interface Assessment
 	 * @return TRUE if submissions are allowed after the due date, FALSE if not.
 	 */
 	Boolean getAllowLateSubmit();
+
+	/**
+	 * Access the attachment list for the assessment.
+	 * 
+	 * @return The List of Reference objects that are the attachments for the assessment, or an empty list if there are no attachments.
+	 */
+	List<Reference> getAttachments();
 
 	/**
 	 * Access the auto-submit (when time limit is expired) for this assessment.
@@ -267,6 +275,14 @@ public interface Assessment
 	 *        TRUE if submissions are allowed after the due date, FALSE if not.
 	 */
 	void setAllowLateSubmit(Boolean value);
+
+	/**
+	 * Set the attachments to (a deep copy of) this list of attachments.
+	 * 
+	 * @param attachments
+	 *        The attachments.
+	 */
+	void setAttachments(List<Reference> attachments);
 
 	/**
 	 * Set the auto-submit (when time limit is expired) for this assessment.
