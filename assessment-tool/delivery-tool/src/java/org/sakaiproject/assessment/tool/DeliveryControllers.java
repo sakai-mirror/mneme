@@ -512,6 +512,27 @@ public class DeliveryControllers
 														.setEntityReference("question")
 														.setPropertyReference("type"))))
 								.add(
+									ui.newFileUpload()
+										.setEnabled(
+											ui.newCompareDecision()
+												.setEqualsConstant(QuestionType.fileUpload.toString())
+												.setProperty(
+													ui.newPropertyReference()
+														.setEntityReference("question")
+														.setPropertyReference("type"))))
+								.add(
+									ui.newAttachments()
+										.setTitle("enter-attachments")
+										.setAttachments(ui.newPropertyReference().setEntityReference("answer").setPropertyReference("entryAnswerAttachments"))
+										.setRaw()
+										.setEnabled(
+											ui.newCompareDecision()
+												.setEqualsConstant(QuestionType.fileUpload.toString())
+												.setProperty(
+													ui.newPropertyReference()
+														.setEntityReference("question")
+														.setPropertyReference("type"))))
+								.add(
 									ui.newFillIn()
 										.setText(null, ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("part.title"))
 										.setProperty(

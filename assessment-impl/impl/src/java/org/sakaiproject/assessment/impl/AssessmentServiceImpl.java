@@ -1323,6 +1323,75 @@ public class AssessmentServiceImpl implements AssessmentService
 			}
 		});
 
+		// read the uploaded attachments for the answers, and fill out the entries to hold their refs
+		statement = "SELECT M.MEDIAID, I.PUBLISHEDITEMID" + " FROM SAM_MEDIA_T M"
+				+ " INNER JOIN SAM_ITEMGRADING_T I ON M.ITEMGRADINGID = I.ITEMGRADINGID" + " WHERE I.ASSESSMENTGRADINGID = ?"
+				+ " ORDER BY M.CREATEDDATE ASC";
+		fields = new Object[1];
+		fields[0] = submission.getId();
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String mediaId = result.getString(1);
+					String questionId = result.getString(2);
+
+					// we should already have an answer
+					SubmissionAnswerImpl answer = submission.findAnswer(questionId);
+					if (answer != null)
+					{
+						// we should have at least one entry
+						SubmissionAnswerEntryImpl entry = answer.entries.get(0);
+						if (entry != null)
+						{
+							// use this if the answer text is not a reference
+							SubmissionAnswerEntryImpl newEntry = null;
+							if ((entry.getAnswerText() == null) || (!entry.getAnswerText().startsWith("/")))
+							{
+								newEntry = entry;
+							}
+
+							// otherwise make a new entry
+							else
+							{
+								newEntry = new SubmissionAnswerEntryImpl(entry);
+								newEntry.setAssessmentAnswer(null);
+								newEntry.setAnswerText(null);
+								newEntry.initId(null);
+								newEntry.initAnswer(answer);
+								newEntry.initAutoScore(new Float(0));
+								answer.entries.add(newEntry);
+							}
+
+							// TODO: set the reference to the attachment into the answer text
+							String refStr = "/assessment/submission/media/" + mediaId;
+							newEntry.setAnswerText(refStr);
+						}
+
+						else
+						{
+							M_log.warn("readSubmissionAnswers: missing entry for answer to question for attachment: questionId: "
+									+ questionId + " mediaId: " + mediaId);
+						}
+					}
+					else
+					{
+						M_log.warn("readSubmissionAnswers: missing answer to question for attachment: questionId: " + questionId
+								+ " mediaId: " + mediaId);
+					}
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readSubmissionAnswers: " + e);
+					return null;
+				}
+			}
+		});
+
 		// verify the answers
 		for (SubmissionAnswerImpl answer : submission.answers)
 		{

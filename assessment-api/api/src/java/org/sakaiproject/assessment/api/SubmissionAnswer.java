@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -23,6 +23,7 @@ package org.sakaiproject.assessment.api;
 
 import java.util.List;
 
+import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.time.api.Time;
 
 /**
@@ -61,11 +62,18 @@ public interface SubmissionAnswer
 	List<? extends SubmissionAnswerEntry> getEntries();
 
 	/**
-	 * Access the assessment question answer ids that are currently in the entries as an array, in entry (question part) order, one per entry (per question part).
+	 * Access assessment question answer texts that are currently in the entries as a List of attachment References.
 	 * 
-	 * @return The assessment question answer ids that are currently in the entries as an array.
+	 * @return The assessment question answer texts that are currently in the entries a List array of attachment References.
 	 */
-	String[] getEntryAnswerIds();
+	List<Reference> getEntryAnswerAttachments();
+
+	/**
+	 * Access the assessment question answer ids that are currently in the entries as a List, in entry (question part) order, one per entry (per question part).
+	 * 
+	 * @return The assessment question answer ids that are currently in the entries as a List.
+	 */
+	List<String> getEntryAnswerIds();
 
 	/**
 	 * Access the answer text for a single-entry type question.
@@ -75,18 +83,18 @@ public interface SubmissionAnswer
 	String getEntryAnswerText();
 
 	/**
-	 * Access assessment question answer texts that are currently in the entries as an array, in entry (question part) order, one per entry (per question part).
+	 * Access assessment question answer texts that are currently in the entries as a Listy, in entry (question part) order, one per entry (per question part).
 	 * 
-	 * @return The assessment question answer texts that are currently in the entries as an array.
+	 * @return The assessment question answer texts that are currently in the entries as a List.
 	 */
-	String[] getEntryAnswerTexts();
+	List<String> getEntryAnswerTexts();
 
 	/**
 	 * Access the correctness of each of the entry - TRUE if correct, FALSE if not, null if not answered, in entry (question part) order, one per entry (per question part).
 	 * 
 	 * @return The correctness of each of the entry - TRUE if correct, FALSE if not, null if not answered.
 	 */
-	Boolean[] getEntryCorrects();
+	List<Boolean> getEntryCorrects();
 
 	/**
 	 * Check if the question is answered; if the user has made the answer entries. Answers that have only "mark for review" or a rational are not considered answered.

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -33,6 +33,8 @@ import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.assessment.api.SubmissionAnswerEntry;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.entity.cover.EntityManager;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.util.StringUtil;
 
@@ -160,14 +162,28 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getEntryAnswerIds()
+	public List<Reference> getEntryAnswerAttachments()
+	{
+		List<String> answers = getEntryAnswerTexts();
+		List<Reference> rv = new ArrayList<Reference>(answers.size());
+		for (String answer : answers)
+		{
+			rv.add(EntityManager.newReference(answer));
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<String> getEntryAnswerIds()
 	{
 		// one for each entry, in order
-		String[] rv = new String[this.entries.size()];
-		int pos = 0;
+		List<String> rv = new ArrayList<String>(this.entries.size());
 		for (SubmissionAnswerEntryImpl entry : this.entries)
 		{
-			rv[pos++] = entry.answerId;
+			rv.add(entry.answerId);
 		}
 
 		return rv;
@@ -186,14 +202,13 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getEntryAnswerTexts()
+	public List<String> getEntryAnswerTexts()
 	{
 		// one for each entry, in order
-		String[] rv = new String[this.entries.size()];
-		int pos = 0;
+		List<String> rv = new ArrayList<String>(this.entries.size());
 		for (SubmissionAnswerEntryImpl entry : this.entries)
 		{
-			rv[pos++] = entry.getAnswerText();
+			rv.add(entry.getAnswerText());
 		}
 
 		return rv;
@@ -202,14 +217,13 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean[] getEntryCorrects()
+	public List<Boolean> getEntryCorrects()
 	{
 		// one for each entry, in order
-		Boolean[] rv = new Boolean[this.entries.size()];
-		int pos = 0;
+		List<Boolean> rv = new ArrayList<Boolean>(this.entries.size());
 		for (SubmissionAnswerEntryImpl entry : this.entries)
 		{
-			rv[pos++] = entry.getIsCorrect();
+			rv.add(entry.getIsCorrect());
 		}
 
 		return rv;
@@ -327,7 +341,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	public void setEntryAnswerIds(String... answerIds)
 	{
 		// possibly adjust, if the question type allows variable number of entries, to the size of answerIds
-		resizeEntries(answerIds);
+		resizeEntries((answerIds == null) ? 0 : answerIds.length);
 
 		// the ids size must match our entries size
 		if ((answerIds != null) && (answerIds.length != this.entries.size()))
@@ -397,6 +411,9 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public void setEntryAnswerTexts(String... answerTexts)
 	{
+		// possibly adjust, if the question type allows variable number of entries, to the size of answerIds
+		resizeEntries((answerTexts == null) ? 0 : answerTexts.length);
+
 		// the texts size must match our entries size
 		if ((answerTexts != null) && (answerTexts.length != this.entries.size()))
 		{
@@ -620,18 +637,16 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 * @param answerIds
 	 *        the set of answer ids to size to.
 	 */
-	protected void resizeEntries(String[] answerIds)
+	protected void resizeEntries(int size)
 	{
 		AssessmentQuestion question = getQuestion();
 
-		// expand or contract for multi-correct...
-		if (question.getType() == QuestionType.multipleCorrect)
+		// expand or contract for multi-correct and file upload
+		if ((question.getType() == QuestionType.multipleCorrect) || (question.getType() == QuestionType.fileUpload))
 		{
 			// count the answers provided = minimum of one
-			int count = 0;
-			if (answerIds != null) count = answerIds.length;
-			if (count < 1) count = 1;
-			int excess = this.entries.size() - count;
+			if (size < 1) size = 1;
+			int excess = this.entries.size() - size;
 
 			// if we have too few, pull out of the recycle or create new
 			while (excess < 0)
@@ -739,7 +754,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			}
 		}
 
-		// all others need a single entry for the single part - multi-correct might expand this
+		// all others need a single entry for the single part - multi-correct and file upload might expand this
 		else
 		{
 			if (this.entries.size() < 1)
@@ -749,7 +764,8 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 				throw new RuntimeException();
 			}
 
-			if ((this.entries.size() > 1) && (question.getType() != QuestionType.multipleCorrect))
+			if ((this.entries.size() > 1)
+					&& ((question.getType() != QuestionType.multipleCorrect) && (question.getType() != QuestionType.fileUpload)))
 			{
 				M_log.warn("verifyEntries: (other): too many entries: " + this.entries.size() + " submission: "
 						+ this.getSubmission().getId() + " question: " + this.getQuestion().getId());
