@@ -632,7 +632,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
-	 * Read the sections and questions of the assessment (not the main)
+	 * Read the sections and questions of the assessment (not the main) and their attachments
 	 * 
 	 * @param assessment
 	 *        The assessment impl with the id set to fill in.
@@ -880,6 +880,93 @@ public class AssessmentServiceImpl implements AssessmentService
 			}
 		});
 
+		// read the attachments for all sections (join with the sections table to be able to select for the entire assessment)
+		statement = "SELECT A.RESOURCEID, A.SECTIONID" + " FROM SAM_PUBLISHEDATTACHMENT_T A"
+				+ " INNER JOIN SAM_PUBLISHEDSECTION_T S ON A.SECTIONID = S.SECTIONID" + " WHERE S.ASSESSMENTID = ?";
+		fields = new Object[1];
+		fields[0] = assessment.getId();
+
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String refStr = result.getString(1);
+					String sectionId = result.getString(2);
+
+					// assume a content ref
+					refStr = "/content" + refStr;
+
+					// make a reference
+					Reference ref = EntityManager.newReference(refStr);
+
+					// find the section
+					AssessmentSectionImpl section = (AssessmentSectionImpl) assessment.getSection(sectionId);
+					if (section != null)
+					{
+						// add it to the section's attachments
+						section.initAddAttachment(ref);
+					}
+					else
+					{
+						M_log.warn("readAssessmentSections: missing section to add attachment: sectionId: " + sectionId + " ref: "
+								+ refStr);
+					}
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessmentAttachments: " + e);
+					return null;
+				}
+			}
+		});
+
+		// read the attachments for all questions (join with the items table and sections table to be able to select for the entire assessment)
+		statement = "SELECT A.RESOURCEID, A.ITEMID" + " FROM SAM_PUBLISHEDATTACHMENT_T A"
+				+ " INNER JOIN SAM_PUBLISHEDITEM_T Q ON A.ITEMID = Q.ITEMID"
+				+ " INNER JOIN SAM_PUBLISHEDSECTION_T S ON Q.SECTIONID = S.SECTIONID" + " WHERE S.ASSESSMENTID = ?";
+		fields = new Object[1];
+		fields[0] = assessment.getId();
+
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String refStr = result.getString(1);
+					String questionId = result.getString(2);
+
+					// assume a content ref
+					refStr = "/content" + refStr;
+
+					// make a reference
+					Reference ref = EntityManager.newReference(refStr);
+
+					// find the question
+					AssessmentQuestionImpl question = (AssessmentQuestionImpl) assessment.getQuestion(questionId);
+					if (question != null)
+					{
+						// add it to the question's attachments
+						question.initAddAttachment(ref);
+					}
+					else
+					{
+						M_log.warn("readAssessmentSections: missing question to add attachment: questionId: " + questionId
+								+ " ref: " + refStr);
+					}
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessmentAttachments: " + e);
+					return null;
+				}
+			}
+		});
+
 		// update the cache if cached
 		AssessmentImpl cached = getCachedAssessment(assessment.getId());
 		if (cached != null)
@@ -908,9 +995,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		final List<Reference> attachments = new ArrayList<Reference>();
 
 		// get the attachments
-		String statement = "SELECT A.RESOURCEID"
-				+ " FROM SAM_PUBLISHEDATTACHMENT_T A"
-				+ " WHERE A.ASSESSMENTID = ?";
+		String statement = "SELECT A.RESOURCEID" + " FROM SAM_PUBLISHEDATTACHMENT_T A" + " WHERE A.ASSESSMENTID = ?";
 		Object[] fields = new Object[1];
 		fields[0] = assessment.getId();
 
@@ -921,7 +1006,7 @@ public class AssessmentServiceImpl implements AssessmentService
 				try
 				{
 					String refStr = result.getString(1);
-					
+
 					// assume a content ref
 					refStr = "/content" + refStr;
 
@@ -2627,7 +2712,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					m_sqlService.dbWrite(connection, statement, fields);
 				}
 			}
-			
+
 			// TODO: assessment attachments into SAM_PUBLISHEDATTACHMENT_T setting ATTACHMENTID, ATTACHMENTTYPE=1, RESOURCEID from the attachment ref id, ASSESSMENTID
 
 			connection.commit();

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -29,9 +29,11 @@ import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.Assessment;
-import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
+import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.Ordering;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.entity.cover.EntityManager;
 
 /**
  * <p>
@@ -119,6 +121,8 @@ public class AssessmentSectionImpl implements AssessmentSection
 	/** The back pointer to the assessment. */
 	protected transient AssessmentImpl assessment = null;;
 
+	protected List<Reference> attachments = new ArrayList<Reference>();
+
 	protected String description = null;
 
 	protected String id = null;
@@ -144,6 +148,7 @@ public class AssessmentSectionImpl implements AssessmentSection
 	protected AssessmentSectionImpl(AssessmentSectionImpl other)
 	{
 		this.assessment = other.assessment;
+		setAttachments(other.attachments);
 		this.description = other.description;
 		this.id = other.id;
 		this.randomQuestionOrdering = other.randomQuestionOrdering;
@@ -185,6 +190,14 @@ public class AssessmentSectionImpl implements AssessmentSection
 	public Assessment getAssessment()
 	{
 		return this.assessment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Reference> getAttachments()
+	{
+		return this.attachments;
 	}
 
 	/**
@@ -326,6 +339,23 @@ public class AssessmentSectionImpl implements AssessmentSection
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setAttachments(List<Reference> attachments)
+	{
+		this.attachments.clear();
+		if (attachments == null) return;
+
+		// deep copy
+		this.attachments = new ArrayList<Reference>(attachments.size());
+		for (Reference ref : attachments)
+		{
+			Reference copy = EntityManager.newReference(ref);
+			this.attachments.add(copy);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setDescription(String description)
 	{
 		this.description = description;
@@ -364,6 +394,17 @@ public class AssessmentSectionImpl implements AssessmentSection
 	public void setTitle(String title)
 	{
 		this.title = title;
+	}
+
+	/**
+	 * Take another attachment to init the attachments.
+	 * 
+	 * @param attachment
+	 *        The reference to add to the attachments.
+	 */
+	protected void initAddAttachment(Reference attachment)
+	{
+		this.attachments.add(attachment);
 	}
 
 	/**

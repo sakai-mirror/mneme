@@ -410,6 +410,11 @@ public class DeliveryControllers
 							ui.newHtml()
 								.setText(null, ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.description")))
 						.add(
+							ui.newAttachments()
+								.setTitle("enter-attachments")
+								.setAttachments(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.attachments"))
+								.setEnabled(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("section.attachments"))))
+						.add(
 							ui.newSection()
 								.setTitle(null,ui.newTextPropertyReference().setEntityReference("question").setFormatDelegate(new FormatQuestionTitle()))
 								.add(
@@ -437,6 +442,10 @@ public class DeliveryControllers
 														.setEntityReference("question")
 														.setPropertyReference("type"))
 												.setReversed()))
+								.add(
+									ui.newAttachments()
+										.setAttachments(ui.newPropertyReference().setEntityReference("question").setPropertyReference("attachments"))
+										.setEnabled(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setEntityReference("question").setPropertyReference("attachments"))))
 								.add(
 									ui.newEntityList()
 										.setStyle(EntityList.Style.form)

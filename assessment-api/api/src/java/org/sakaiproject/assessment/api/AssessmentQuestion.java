@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -22,6 +22,8 @@
 package org.sakaiproject.assessment.api;
 
 import java.util.List;
+
+import org.sakaiproject.entity.api.Reference;
 
 /**
  * <p>
@@ -59,6 +61,13 @@ public interface AssessmentQuestion
 	 * @return The ordering information about this question relative to the entire assessment.
 	 */
 	Ordering<AssessmentQuestion> getAssessmentOrdering();
+
+	/**
+	 * Access the attachment list for the assessment.
+	 * 
+	 * @return The List of Reference objects that are the attachments for the assessment, or an empty list if there are no attachments.
+	 */
+	List<Reference> getAttachments();
 
 	/**
 	 * Access the case sensitive setting for the question (applies to the fill-in question types for scoring).
@@ -180,6 +189,14 @@ public interface AssessmentQuestion
 	 * @return The question's type.
 	 */
 	QuestionType getType();
+
+	/**
+	 * Set the attachments to (a deep copy of) this list of attachments.
+	 * 
+	 * @param attachments
+	 *        The attachments.
+	 */
+	void setAttachments(List<Reference> attachments);
 
 	/**
 	 * Set the case sensitive setting for the question (applies to the fill-in question types for scoring)

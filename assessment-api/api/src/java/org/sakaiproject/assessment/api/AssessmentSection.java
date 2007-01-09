@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -23,6 +23,8 @@ package org.sakaiproject.assessment.api;
 
 import java.util.List;
 
+import org.sakaiproject.entity.api.Reference;
+
 /**
  * <p>
  * AssessmentSection is one section of an assessment; the section contains multiple questions.
@@ -38,6 +40,13 @@ public interface AssessmentSection
 	Assessment getAssessment();
 
 	/**
+	 * Access the attachment list for the section.
+	 * 
+	 * @return The List of Reference objects that are the attachments for the section, or an empty list if there are no attachments.
+	 */
+	List<Reference> getAttachments();
+
+	/**
 	 * Access the description.
 	 * 
 	 * @return The description.
@@ -45,7 +54,7 @@ public interface AssessmentSection
 	String getDescription();
 
 	/**
-	 * Access the first question.  The order will be in a random order (if enabled) based on the current user.
+	 * Access the first question. The order will be in a random order (if enabled) based on the current user.
 	 * 
 	 * @return The first question, or null if there are none.
 	 */
@@ -59,7 +68,7 @@ public interface AssessmentSection
 	String getId();
 
 	/**
-	 * Access the last question.  The order will be in a random order (if enabled) based on the current user.
+	 * Access the last question. The order will be in a random order (if enabled) based on the current user.
 	 * 
 	 * @return The last question, or null if there are none.
 	 */
@@ -122,6 +131,14 @@ public interface AssessmentSection
 	 * @return The sum of all possible points for all questions in the section.
 	 */
 	Float getTotalPoints();
+
+	/**
+	 * Set the attachments to (a deep copy of) this list of attachments.
+	 * 
+	 * @param attachments
+	 *        The attachments.
+	 */
+	void setAttachments(List<Reference> attachments);
 
 	/**
 	 * Set the description.

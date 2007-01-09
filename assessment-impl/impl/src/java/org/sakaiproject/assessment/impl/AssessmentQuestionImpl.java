@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -30,6 +30,8 @@ import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.Ordering;
 import org.sakaiproject.assessment.api.QuestionPart;
 import org.sakaiproject.assessment.api.QuestionType;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.entity.cover.EntityManager;
 
 public class AssessmentQuestionImpl implements AssessmentQuestion
 {
@@ -211,6 +213,8 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 
 	protected transient MyAssessmentOrdering assessmentOrdering = new MyAssessmentOrdering(this);
 
+	protected List<Reference> attachments = new ArrayList<Reference>();
+
 	protected Boolean caseSensitive = null;
 
 	protected String feedbackCorrect = null;
@@ -252,6 +256,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	 */
 	public AssessmentQuestionImpl(AssessmentQuestionImpl other)
 	{
+		setAttachments(other.attachments);
 		setCaseSensitive(other.getCaseSensitive());
 		setFeedbackCorrect(other.getFeedbackCorrect());
 		setFeedbackGeneral(other.getFeedbackGeneral());
@@ -331,6 +336,14 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	public Ordering<AssessmentQuestion> getAssessmentOrdering()
 	{
 		return this.assessmentOrdering;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Reference> getAttachments()
+	{
+		return this.attachments;
 	}
 
 	/**
@@ -506,6 +519,23 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	public int hashCode()
 	{
 		return getId().hashCode();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setAttachments(List<Reference> attachments)
+	{
+		this.attachments.clear();
+		if (attachments == null) return;
+
+		// deep copy
+		this.attachments = new ArrayList<Reference>(attachments.size());
+		for (Reference ref : attachments)
+		{
+			Reference copy = EntityManager.newReference(ref);
+			this.attachments.add(copy);
+		}
 	}
 
 	/**
@@ -701,6 +731,17 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 		}
 
 		return null;
+	}
+
+	/**
+	 * Take another attachment to init the attachments.
+	 * 
+	 * @param attachment
+	 *        The reference to add to the attachments.
+	 */
+	protected void initAddAttachment(Reference attachment)
+	{
+		this.attachments.add(attachment);
 	}
 
 	/**
