@@ -34,6 +34,12 @@
 
 		<dependency>
 			<groupId>sakaiproject</groupId>
+			<artifactId>sakai-component-api</artifactId>
+			<version>${sakai.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>sakaiproject</groupId>
 			<artifactId>sakai-db-api</artifactId>
 			<version>${sakai.version}</version>
 		</dependency>
@@ -41,6 +47,12 @@
 		<dependency>
 			<groupId>sakaiproject</groupId>
 			<artifactId>sakai-entity-api</artifactId>
+			<version>${sakai.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>sakaiproject</groupId>
+			<artifactId>sakai-entity-util</artifactId>
 			<version>${sakai.version}</version>
 		</dependency>
 
@@ -84,6 +96,12 @@
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.0.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>servletapi</groupId>
+			<artifactId>servletapi</artifactId>
+			<version>2.4</version>
 		</dependency>
 
 	</dependencies>

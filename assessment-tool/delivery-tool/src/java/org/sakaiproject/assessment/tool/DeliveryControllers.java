@@ -524,7 +524,7 @@ public class DeliveryControllers
 									ui.newAttachments()
 										.setTitle("enter-attachments")
 										.setAttachments(ui.newPropertyReference().setEntityReference("answer").setPropertyReference("entryAnswerAttachments"))
-										.setRaw()
+										// .setRaw()
 										.setEnabled(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.fileUpload.toString())

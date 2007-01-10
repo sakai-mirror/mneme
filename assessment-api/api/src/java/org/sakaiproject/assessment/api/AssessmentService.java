@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -35,6 +35,12 @@ public interface AssessmentService
 
 	/** This string starts the references to resources in this service. */
 	static final String REFERENCE_ROOT = "/assessment";
+
+	/** The sub-type for assessment in references (/assessment/assessment/...) */
+	static final String ASSESSMENT_TYPE = "assessment";
+
+	/** The sub-type for submissions in references (/assessment/submission/...) */
+	static final String SUBMISSION_TYPE = "submission";
 
 	/** The security function used to check if users can submit to an assessment. */
 	static final String SUBMIT_PERMISSION = "assessment.takeAssessment";

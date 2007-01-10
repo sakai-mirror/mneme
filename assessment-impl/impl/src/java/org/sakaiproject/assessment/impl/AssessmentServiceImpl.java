@@ -41,6 +41,7 @@ import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentService;
 import org.sakaiproject.assessment.api.AssessmentStatus;
+import org.sakaiproject.assessment.api.AttachmentService;
 import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.MultipleSubmissionSelectionPolicy;
 import org.sakaiproject.assessment.api.QuestionPart;
@@ -51,8 +52,8 @@ import org.sakaiproject.assessment.api.SubmissionCompletedException;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
+import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.Reference;
-import org.sakaiproject.entity.cover.EntityManager;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.id.cover.IdManager;
 import org.sakaiproject.memory.api.Cache;
@@ -234,6 +235,34 @@ public class AssessmentServiceImpl implements AssessmentService
 		m_eventTrackingService = service;
 	}
 
+	/** Dependency: EntityManager */
+	protected EntityManager m_entityManager = null;
+
+	/**
+	 * Dependency: EntityManager.
+	 * 
+	 * @param service
+	 *        The EntityManager.
+	 */
+	public void setEntityManager(EntityManager service)
+	{
+		m_entityManager = service;
+	}
+
+	/** Dependency: AttachmentService */
+	protected AttachmentService m_attachmentService = null;
+
+	/**
+	 * Dependency: AttachmentService.
+	 * 
+	 * @param service
+	 *        The AttachmentService.
+	 */
+	public void setAttachmentService(AttachmentService service)
+	{
+		m_attachmentService = service;
+	}
+
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Configuration
 	 *********************************************************************************************************************************************************************************************************************************************************/
@@ -321,7 +350,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	 */
 	protected String getAssessmentReference(String assessmentId)
 	{
-		String ref = "/assessment/" + assessmentId;
+		String ref = REFERENCE_ROOT + "/" + ASSESSMENT_TYPE + "/" + assessmentId;
 		return ref;
 	}
 
@@ -899,7 +928,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					refStr = "/content" + refStr;
 
 					// make a reference
-					Reference ref = EntityManager.newReference(refStr);
+					Reference ref = m_entityManager.newReference(refStr);
 
 					// find the section
 					AssessmentSectionImpl section = (AssessmentSectionImpl) assessment.getSection(sectionId);
@@ -943,7 +972,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					refStr = "/content" + refStr;
 
 					// make a reference
-					Reference ref = EntityManager.newReference(refStr);
+					Reference ref = m_entityManager.newReference(refStr);
 
 					// find the question
 					AssessmentQuestionImpl question = (AssessmentQuestionImpl) assessment.getQuestion(questionId);
@@ -1011,7 +1040,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					refStr = "/content" + refStr;
 
 					// make a reference
-					Reference ref = EntityManager.newReference(refStr);
+					Reference ref = m_entityManager.newReference(refStr);
 					attachments.add(ref);
 					return null;
 				}
@@ -1043,11 +1072,11 @@ public class AssessmentServiceImpl implements AssessmentService
 	 * 
 	 * @param submissionId
 	 *        the submission id.
-	 * @return the submission reference for this assessment id.
+	 * @return the submission reference for this submission id.
 	 */
 	protected String getSubmissionReference(String submissionId)
 	{
-		String ref = "/submission/" + submissionId;
+		String ref = REFERENCE_ROOT + "/" + SUBMISSION_TYPE + "/" + submissionId;
 		return ref;
 	}
 
@@ -1365,8 +1394,8 @@ public class AssessmentServiceImpl implements AssessmentService
 								answer.entries.add(newEntry);
 							}
 
-							// TODO: set the reference to the attachment into the answer text
-							String refStr = "/assessment/submission/media/" + mediaId;
+							// set the reference to the attachment into the answer text
+							String refStr = m_attachmentService.getAttachmentReference(mediaId);
 							newEntry.setAnswerText(refStr);
 						}
 
