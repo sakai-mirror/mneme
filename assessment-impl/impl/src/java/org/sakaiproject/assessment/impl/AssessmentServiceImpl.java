@@ -1326,6 +1326,7 @@ public class AssessmentServiceImpl implements AssessmentService
 						answer.setRationale(rationale);
 						answer.setMarkedForReview(Boolean.valueOf(markedForReview));
 						answer.setSubmittedDate(submittedDate);
+						answer.id = id;
 
 						answer.initSubmission(submission);
 						submission.answers.add(answer);
@@ -3279,8 +3280,24 @@ public class AssessmentServiceImpl implements AssessmentService
 			wasCommit = connection.getAutoCommit();
 			connection.setAutoCommit(false);
 
+			// unwrap file upload attachments from multiple entries to just one
+			// TODO: do this when save submission also
+			List<SubmissionAnswerEntryImpl> entries = ((SubmissionAnswerImpl) answer).entries;
+			if (answer.getQuestion().getType() == QuestionType.fileUpload)
+			{
+				SubmissionAnswerEntryImpl sample = entries.get(0);
+				entries = new ArrayList<SubmissionAnswerEntryImpl>(1);
+				SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl(sample);
+				entry.setAnswerText(null);
+				entry.setAssessmentAnswer(null);
+
+				// set the entry id to the id we saved in the answer
+				entry.id = ((SubmissionAnswerImpl) answer).id;
+				entries.add(entry);
+			}
+
 			// create submission answer record(s) if needed
-			for (SubmissionAnswerEntryImpl entry : ((SubmissionAnswerImpl) answer).entries)
+			for (SubmissionAnswerEntryImpl entry : entries)
 			{
 				if (entry.getId() == null)
 				{
@@ -3327,6 +3344,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					// set the id into the answer
 					if (answerId == null) throw new Exception("failed to insert submission answer");
 					entry.initId(answerId.toString());
+					if (((SubmissionAnswerImpl) answer).id == null) ((SubmissionAnswerImpl) answer).id = answerId.toString();
 				}
 
 				// otherwise update the submission answer record

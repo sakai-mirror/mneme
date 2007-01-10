@@ -362,6 +362,7 @@ public class DeliveryControllers
 	 * question - the current question
 	 * feedback - a non-null value to indicate that we should show feedback
 	 * answer - the SubmissionAnswer in the submission to this question.
+	 * upload - someone to take a file upload.
 	 * 
 	 * When decoding a response, we need in the context:
 	 * answer - a collection to get the answer id(s) selected.
@@ -513,6 +514,9 @@ public class DeliveryControllers
 														.setPropertyReference("type"))))
 								.add(
 									ui.newFileUpload()
+										.setTitle("question-upload-title")
+										.setUpload("quesiton-upload-upload")
+										.setProperty(ui.newPropertyReference().setEntityReference("upload").setPropertyReference("file"))
 										.setEnabled(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.fileUpload.toString())
@@ -522,9 +526,9 @@ public class DeliveryControllers
 														.setPropertyReference("type"))))
 								.add(
 									ui.newAttachments()
-										.setTitle("enter-attachments")
 										.setAttachments(ui.newPropertyReference().setEntityReference("answer").setPropertyReference("entryAnswerAttachments"))
-										// .setRaw()
+										.setSize(false)
+										.setTimestamp(true)
 										.setEnabled(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.fileUpload.toString())

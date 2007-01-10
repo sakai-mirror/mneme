@@ -46,6 +46,9 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/** Entries are ordered to match the assessment question part order, and there's one entry per part. */
 	protected List<SubmissionAnswerEntryImpl> entries = new ArrayList<SubmissionAnswerEntryImpl>();
 
+	/** This is the samigo database (itemgrading) id of the first entry for the answer */
+	protected transient String id = null;
+
 	protected Boolean markedForReview = Boolean.FALSE;
 
 	/** Don't store the assessment question here. */
@@ -80,6 +83,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		setRationale(other.getRationale());
 		setSubmittedDate(other.getSubmittedDate());
 		initRecycle(other.recycle);
+		id = other.id;
 	}
 
 	/**

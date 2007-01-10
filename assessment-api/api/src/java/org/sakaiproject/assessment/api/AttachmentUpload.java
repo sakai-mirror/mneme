@@ -21,34 +21,20 @@
 
 package org.sakaiproject.assessment.api;
 
+import org.apache.commons.fileupload.FileItem;
+
 /**
  * <p>
- * AttachmentService ...
+ * AttachmentUpload...
  * </p>
  */
-public interface AttachmentService
+public interface AttachmentUpload
 {
-	/** The type string for this application: should not change over time as it may be stored in various parts of persistent entities. */
-	static final String APPLICATION_ID = "sakai:attachment";
-
-	/** This string starts the references to resources in this service. */
-	static final String REFERENCE_ROOT = "/attachment";
-
 	/**
-	 * Form a attachment reference for this attachment id.
+	 * Set the uploaded file.
 	 * 
-	 * @param attachmentId
-	 *        the attachment id.
-	 * @return the attachment reference for this attachment id.
+	 * @param file
+	 *        The commons file upload file item.
 	 */
-	String getAttachmentReference(String attachmentId);
-
-	/**
-	 * Create a new file upload receiving object.
-	 * 
-	 * @param answer
-	 *        The submision answer that gets the upload.
-	 * @return a new AttachmentUpload instance.
-	 */
-	AttachmentUpload newUpload(SubmissionAnswer answer);
+	void setFile(FileItem file);
 }

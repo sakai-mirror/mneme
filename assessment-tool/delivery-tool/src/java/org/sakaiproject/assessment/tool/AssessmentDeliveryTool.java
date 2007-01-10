@@ -39,6 +39,7 @@ import org.sakaiproject.assessment.api.AssessmentPermissionException;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentService;
+import org.sakaiproject.assessment.api.AttachmentService;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.assessment.api.SubmissionCompletedException;
@@ -71,6 +72,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 	/** Our self-injected assessment service reference. */
 	protected AssessmentService assessmentService = null;
+	
+	/** Our self-injected attachment service reference. */
+	protected AttachmentService attachmentService = null;
 
 	/** Our self-injected session manager reference. */
 	protected SessionManager sessionManager = null;;
@@ -137,6 +141,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		sessionManager = (SessionManager) ComponentManager.get(SessionManager.class);
 		toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
 		assessmentService = (AssessmentService) ComponentManager.get(AssessmentService.class);
+		attachmentService = (AttachmentService) ComponentManager.get(AttachmentService.class);
 		timeService = (TimeService) ComponentManager.get(TimeService.class);
 		ui = (UiService) ComponentManager.get(UiService.class);
 
@@ -652,7 +657,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			context.put("assessment_sort_choice", '0');
 			context.put("assessment_sort_ad", 'A');
 			context.put("submission_sort_choice", '0');
-			context.put("submission_sort_ad", 'A');			
+			context.put("submission_sort_ad", 'A');
 		}
 
 		// collect information: assessments
@@ -779,6 +784,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 				{
 					context.put("answer", answer);
 
+					// leave "upload" out for now so it's not decoded yet... until after the answer (which may be new) is submitted and has an id
+
 					// read form
 					String destination = ui.decode(req, context);
 
@@ -793,6 +800,10 @@ public class AssessmentDeliveryTool extends HttpServlet
 					try
 					{
 						assessmentService.submitAnswer(answer, complete);
+
+						// now setup to decode any file uploads that came in
+						context.put("upload", attachmentService.newUpload(answer));
+						ui.decode(req, context);
 
 						// redirect to the next destination
 						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));

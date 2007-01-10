@@ -38,6 +38,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.Attachment;
 import org.sakaiproject.assessment.api.AttachmentService;
+import org.sakaiproject.assessment.api.AttachmentUpload;
+import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.db.api.SqlReader;
@@ -413,6 +415,59 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
+	 * Add a new attachment, returning the id
+	 * 
+	 * @param a
+	 *        The attachment data
+	 * @param body
+	 *        The attachment body bytes.
+	 * @return The new attachment id.
+	 */
+	protected String putAttachment(Attachment a, InputStream body, String answerId)
+	{
+		// ID column? For non sequence db vendors, it is defaulted
+		Long id = m_sqlService.getNextSequence("SAM_MEDIA_ID_S", null);
+
+		String statement = "INSERT INTO SAM_MEDIA_T"
+				+ " (FILESIZE, MIMETYPE, FILENAME, CREATEDDATE, LASTMODIFIEDDATE, ISLINK, ISHTMLINLINE, DESCRIPTION, CREATEDBY, LASTMODIFIEDBY, STATUS, ITEMGRADINGID"
+				+ ((id == null) ? "" : " ,MEDIAID") + " ,MEDIA)" + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?")
+				+ ",?)";
+		Object[] fields = new Object[(id == null) ? 12 : 13];
+		fields[0] = a.getLength();
+		fields[1] = a.getType();
+		fields[2] = a.getName();
+		fields[3] = a.getTimestamp() != null ? a.getTimestamp() : m_timeService.newTime();
+		fields[4] = fields[3];
+		fields[5] = new Integer(0);
+		fields[6] = new Integer(0);
+		fields[7] = "description";
+		fields[8] = m_sessionManager.getCurrentSessionUserId();
+		fields[9] = fields[8];
+		fields[10] = new Integer(1);
+		fields[11] = answerId;
+
+		if (id != null)
+		{
+			fields[12] = id;
+			m_sqlService.dbInsert(null, statement, fields, null, body, a.getLength().intValue());
+		}
+		else
+		{
+			id = m_sqlService.dbInsert(null, statement, fields, "MEDIAID", body, a.getLength().intValue());
+		}
+
+		return id.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AttachmentUpload newUpload(SubmissionAnswer answer)
+	{
+		return new AttachmentUploadImpl(this, answer);
+	}
+
+	/**
 	 * Read the attachment's body from the database.
 	 * 
 	 * @param attachment
@@ -507,6 +562,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		edit.addProperty(ResourceProperties.PROP_CONTENT_TYPE, a.getType());
 		edit.addProperty("DAV:displayname", a.getName());
 		edit.addProperty(ResourceProperties.PROP_CONTENT_LENGTH, a.getLength().toString());
+		edit.addProperty(ResourceProperties.PROP_MODIFIED_DATE, a.getTimestamp().toString());
 
 		return edit;
 	}
