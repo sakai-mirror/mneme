@@ -21,6 +21,8 @@
 
 package org.sakaiproject.assessment.api;
 
+import org.sakaiproject.entity.api.Reference;
+
 /**
  * <p>
  * AttachmentService ...
@@ -31,11 +33,23 @@ public interface AttachmentService
 	/** The type string for this application: should not change over time as it may be stored in various parts of persistent entities. */
 	static final String APPLICATION_ID = "sakai:attachment";
 
+	/** Event tracking attachment reading. */
+	static final String ATTACHMENT_READ = "attachment.read";
+
+	/** Event tracking attachment deleting. */
+	static final String ATTACHMENT_DELETE = "attachment.delete";
+
 	/** This string starts the references to resources in this service. */
 	static final String REFERENCE_ROOT = "/attachment";
 
-	/** Event tracking attachment reading. */
-	static final String ATTACHMENT_READ = "attachment.read";
+	/**
+	 * Read the attachment from storage (just the meta-data, not the body)
+	 * 
+	 * @param attachment
+	 *        The attachment Reference.
+	 * @return The Attachment (meta data only, no body), or null if not found.
+	 */
+	Attachment getAttachment(Reference attachment);
 
 	/**
 	 * Form a attachment reference for this attachment id.
@@ -56,4 +70,12 @@ public interface AttachmentService
 	 * @return a new AttachmentUpload instance.
 	 */
 	AttachmentUpload newUpload(SubmissionAnswer answer);
+
+	/**
+	 * Remove this attachment
+	 * 
+	 * @param attachment
+	 *        The attachment Reference.
+	 */
+	void removeAttachment(Reference attachment);
 }

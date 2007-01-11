@@ -42,7 +42,6 @@ import org.sakaiproject.assessment.api.AttachmentService;
 import org.sakaiproject.assessment.api.AttachmentUpload;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
-import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
@@ -82,67 +81,45 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(AttachmentServiceImpl.class);
 
-	/** A cache of attachments. */
-	protected Cache m_cache = null;
+	/** The chunk size used when streaming (100k). */
+	protected static final int STREAM_BUFFER_SIZE = 102400;
 
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Abstractions, etc.
 	 *********************************************************************************************************************************************************************************************************************************************************/
 
-	/**
-	 * Check the cache for the attachment. Use the short-term cache if enabled, else use the thread-local cache.
-	 * 
-	 * @param id
-	 *        The attachment id.
-	 * @return The actual attachment object cached, or null if not.
-	 */
-	protected AttachmentImpl getCachedAttachment(Reference reference)
-	{
-		String ref = getAttachmentReference(reference.getContainer(), reference.getId());
+	/** stream content requests if true, read all into memory and send if false. */
+	protected static final boolean STREAM_CONTENT = true;
 
-		// if we are short-term caching
-		if (m_cache != null)
-		{
-			// if it is in there
-			if (m_cache.containsKey(ref))
-			{
-				return (AttachmentImpl) m_cache.get(ref);
-			}
-		}
+	/** Dependency: AssessmentService: Note: dependent on the impl... */
+	protected AssessmentServiceImpl m_assessmentService = null;
 
-		// otherwise check the thread-local cache
-		else
-		{
-			return (AttachmentImpl) m_threadLocalManager.get(ref);
-		}
+	/** A cache of attachments. */
+	protected Cache m_cache = null;
 
-		return null;
-	}
+	/** The # seconds between cache cleaning runs. */
+	protected int m_cacheCleanerSeconds = 0;
 
-	/**
-	 * Cache this attachment. Use the short-term cache if enable, else use the thread-local cache.
-	 * 
-	 * @param attachment
-	 *        The attachment to cache.
-	 */
-	protected void cacheAttachment(Reference reference, AttachmentImpl attachment)
-	{
-		if (attachment == null) return;
+	/** The # seconds to cache assessment reads. 0 disables the cache. */
+	protected int m_cacheSeconds = 0;
 
-		String ref = getAttachmentReference(reference.getContainer(), reference.getId());
+	/** Dependency: EntityManager */
+	protected EntityManager m_entityManager = null;
 
-		// if we are short-term caching
-		if (m_cache != null)
-		{
-			m_cache.put(ref, attachment, m_cacheSeconds);
-		}
+	/** Dependency: EventTrackingService */
+	protected EventTrackingService m_eventTrackingService = null;
 
-		// else thread-local cache
-		else
-		{
-			m_threadLocalManager.set(ref, attachment);
-		}
-	}
+	/** Dependency: MemoryService */
+	protected MemoryService m_memoryService = null;
+
+	/** Dependency: ServerConfigurationService. */
+	protected ServerConfigurationService m_serverConfigurationService = null;
+
+	/** Dependency: SessionManager */
+	protected SessionManager m_sessionManager = null;
+
+	/** Dependency: SqlService */
+	protected SqlService m_sqlService = null;
 
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Dependencies
@@ -150,200 +127,15 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 
 	protected ThreadLocalManager m_threadLocalManager = null;
 
-	/**
-	 * Dependency: ThreadLocalManager.
-	 * 
-	 * @param service
-	 *        The ThreadLocalManager.
-	 */
-	public void setThreadLocalManager(ThreadLocalManager service)
-	{
-		m_threadLocalManager = service;
-	}
-
 	protected TimeService m_timeService = null;
 
 	/**
-	 * Dependency: TimeService.
-	 * 
-	 * @param service
-	 *        The TimeService.
+	 * {@inheritDoc}
 	 */
-	public void setTimeService(TimeService service)
+	public String archive(String siteId, Document doc, Stack stack, String archivePath, List attachments)
 	{
-		m_timeService = service;
-	}
-
-	/** Dependency: SqlService */
-	protected SqlService m_sqlService = null;
-
-	/**
-	 * Dependency: SqlService.
-	 * 
-	 * @param service
-	 *        The SqlService.
-	 */
-	public void setSqlService(SqlService service)
-	{
-		m_sqlService = service;
-	}
-
-	/** Dependency: SessionManager */
-	protected SessionManager m_sessionManager = null;
-
-	/**
-	 * Dependency: SessionManager.
-	 * 
-	 * @param service
-	 *        The SessionManager.
-	 */
-	public void setSessionManager(SessionManager service)
-	{
-		m_sessionManager = service;
-	}
-
-	/** Dependency: MemoryService */
-	protected MemoryService m_memoryService = null;
-
-	/**
-	 * Dependency: MemoryService.
-	 * 
-	 * @param service
-	 *        The MemoryService.
-	 */
-	public void setMemoryService(MemoryService service)
-	{
-		m_memoryService = service;
-	}
-
-	/** Dependency: SecurityService */
-	protected SecurityService m_securityService = null;
-
-	/**
-	 * Dependency: SecurityService.
-	 * 
-	 * @param service
-	 *        The SecurityService.
-	 */
-	public void setSecurityService(SecurityService service)
-	{
-		m_securityService = service;
-	}
-
-	/** Dependency: EventTrackingService */
-	protected EventTrackingService m_eventTrackingService = null;
-
-	/**
-	 * Dependency: EventTrackingService.
-	 * 
-	 * @param service
-	 *        The EventTrackingService.
-	 */
-	public void setEventTrackingService(EventTrackingService service)
-	{
-		m_eventTrackingService = service;
-	}
-
-	/** Dependency: EntityManager */
-	protected EntityManager m_entityManager = null;
-
-	/**
-	 * Dependency: EntityManager.
-	 * 
-	 * @param service
-	 *        The EntityManager.
-	 */
-	public void setEntityManager(EntityManager service)
-	{
-		m_entityManager = service;
-	}
-
-	/** Dependency: ServerConfigurationService. */
-	protected ServerConfigurationService m_serverConfigurationService = null;
-
-	/**
-	 * Dependency: ServerConfigurationService.
-	 * 
-	 * @param service
-	 *        The ServerConfigurationService.
-	 */
-	public void setServerConfigurationService(ServerConfigurationService service)
-	{
-		m_serverConfigurationService = service;
-	}
-
-	/**********************************************************************************************************************************************************************************************************************************************************
-	 * Configuration
-	 *********************************************************************************************************************************************************************************************************************************************************/
-
-	/** The # seconds to cache assessment reads. 0 disables the cache. */
-	protected int m_cacheSeconds = 0;
-
-	/**
-	 * Set the # minutes to cache.
-	 * 
-	 * @param time
-	 *        The # minutes to cache a get (as an integer string).
-	 */
-	public void setCacheMinutes(String time)
-	{
-		m_cacheSeconds = Integer.parseInt(time) * 60;
-	}
-
-	/** The # seconds between cache cleaning runs. */
-	protected int m_cacheCleanerSeconds = 0;
-
-	/**
-	 * Set the # minutes between cache cleanings.
-	 * 
-	 * @param time
-	 *        The # minutes between cache cleanings. (as an integer string).
-	 */
-	public void setCacheCleanerMinutes(String time)
-	{
-		m_cacheCleanerSeconds = Integer.parseInt(time) * 60;
-	}
-
-	/** Dependency: AssessmentService: Note: dependent on the impl... */
-	protected AssessmentServiceImpl m_assessmentService = null;
-
-	/**
-	 * Dependency: AssessmentService.
-	 * 
-	 * @param service
-	 *        The AssessmentService.
-	 */
-	public void setAssessmentService(AssessmentService service)
-	{
-		m_assessmentService = (AssessmentServiceImpl) service;
-	}
-
-	/**********************************************************************************************************************************************************************************************************************************************************
-	 * Init and Destroy
-	 *********************************************************************************************************************************************************************************************************************************************************/
-
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		try
-		{
-			// register as an entity producer
-			m_entityManager.registerEntityProducer(this, REFERENCE_ROOT);
-
-			// <= 0 indicates no caching desired
-			if ((m_cacheSeconds > 0) && (m_cacheCleanerSeconds > 0))
-			{
-				m_cache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAttachmentReference(null, null));
-			}
-
-			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60);
-		}
-		catch (Throwable t)
-		{
-			M_log.warn("init(): ", t);
-		}
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**
@@ -354,27 +146,10 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		M_log.info("destroy()");
 	}
 
-	/**********************************************************************************************************************************************************************************************************************************************************
-	 * AttachmentService
-	 *********************************************************************************************************************************************************************************************************************************************************/
-
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getAttachmentReference(String container, String id)
-	{
-		String ref = REFERENCE_ROOT + ((container == null) ? "" : ("/" + container + ((id == null) ? "" : ("/" + id))));
-		return ref;
-	}
-
-	/**
-	 * Read the attachment from storage (just the meta-data, not the body)
-	 * 
-	 * @param attachmentId
-	 *        The attachment Id.
-	 * @return The Attachment (meta data only, no body), or null if not found.
-	 */
-	protected Attachment getAttachment(final Reference attachmentRef)
+	public Attachment getAttachment(final Reference attachmentRef)
 	{
 		AttachmentImpl rv = null;
 
@@ -431,112 +206,12 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
-	 * Add a new attachment, returning the id
-	 * 
-	 * @param a
-	 *        The attachment data
-	 * @param body
-	 *        The attachment body bytes.
-	 * @return The new attachment id.
-	 */
-	protected String putAttachment(Attachment a, InputStream body, String answerId)
-	{
-		// ID column? For non sequence db vendors, it is defaulted
-		Long id = m_sqlService.getNextSequence("SAM_MEDIA_ID_S", null);
-
-		String statement = "INSERT INTO SAM_MEDIA_T"
-				+ " (FILESIZE, MIMETYPE, FILENAME, CREATEDDATE, LASTMODIFIEDDATE, ISLINK, ISHTMLINLINE, DESCRIPTION, CREATEDBY, LASTMODIFIEDBY, STATUS, ITEMGRADINGID"
-				+ ((id == null) ? "" : " ,MEDIAID") + " ,MEDIA)" + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?")
-				+ ",?)";
-		Object[] fields = new Object[(id == null) ? 12 : 13];
-		fields[0] = a.getLength();
-		fields[1] = a.getType();
-		fields[2] = a.getName();
-		fields[3] = a.getTimestamp() != null ? a.getTimestamp() : m_timeService.newTime();
-		fields[4] = fields[3];
-		fields[5] = new Integer(0);
-		fields[6] = new Integer(0);
-		fields[7] = "description";
-		fields[8] = m_sessionManager.getCurrentSessionUserId();
-		fields[9] = fields[8];
-		fields[10] = new Integer(1);
-		fields[11] = answerId;
-
-		if (id != null)
-		{
-			fields[12] = id;
-			m_sqlService.dbInsert(null, statement, fields, null, body, a.getLength().intValue());
-		}
-		else
-		{
-			id = m_sqlService.dbInsert(null, statement, fields, "MEDIAID", body, a.getLength().intValue());
-		}
-
-		return id.toString();
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
-	public AttachmentUpload newUpload(SubmissionAnswer answer)
+	public String getAttachmentReference(String container, String id)
 	{
-		return new AttachmentUploadImpl(this, answer);
-	}
-
-	/**
-	 * Read the attachment's body from the database.
-	 * 
-	 * @param attachment
-	 *        The attachment meta data.
-	 * @return The attachment's body content as a byte array.
-	 */
-	protected byte[] getAttachmentBody(Attachment attachment)
-	{
-		// get the resource from the db
-		String sql = "SELECT M.MEDIA" + " FROM SAM_MEDIA_T M " + " WHERE M.MEDIAID = ?";
-
-		Object[] fields = new Object[1];
-		fields[0] = attachment.getId();
-
-		// create the body to read into
-		byte[] body = new byte[attachment.getLength().intValue()];
-		m_sqlService.dbReadBinary(sql, fields, body);
-
-		return body;
-	}
-
-	/**
-	 * Stream the attachment's body from the database.
-	 * 
-	 * @param attachment
-	 *        The attachment meta data.
-	 * @return The attachment's body content in an input stream.
-	 */
-	protected InputStream streamAttachmentBody(Attachment attachment) throws ServerOverloadException
-	{
-		// get the resource from the db
-		String sql = "SELECT M.MEDIA" + " FROM SAM_MEDIA_T M " + " WHERE M.MEDIAID = ?";
-
-		Object[] fields = new Object[1];
-		fields[0] = attachment.getId();
-
-		// get the stream, set expectations that this could be big
-		InputStream in = m_sqlService.dbReadBinary(sql, fields, true);
-
-		return in;
-	}
-
-	/**********************************************************************************************************************************************************************************************************************************************************
-	 * EntityProducer
-	 *********************************************************************************************************************************************************************************************************************************************************/
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String archive(String siteId, Document doc, Stack stack, String archivePath, List attachments)
-	{
-		// TODO Auto-generated method stub
-		return null;
+		String ref = REFERENCE_ROOT + ((container == null) ? "" : ("/" + container + ((id == null) ? "" : ("/" + id))));
+		return ref;
 	}
 
 	/**
@@ -556,6 +231,10 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	/**********************************************************************************************************************************************************************************************************************************************************
+	 * Configuration
+	 *********************************************************************************************************************************************************************************************************************************************************/
 
 	/**
 	 * {@inheritDoc}
@@ -590,12 +269,6 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	{
 		return m_serverConfigurationService.getAccessUrl() + ref.getReference();
 	}
-
-	/** stream content requests if true, read all into memory and send if false. */
-	protected static final boolean STREAM_CONTENT = true;
-
-	/** The chunk size used when streaming (100k). */
-	protected static final int STREAM_BUFFER_SIZE = 102400;
 
 	/**
 	 * {@inheritDoc}
@@ -813,6 +486,34 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		try
+		{
+			// register as an entity producer
+			m_entityManager.registerEntityProducer(this, REFERENCE_ROOT);
+
+			// <= 0 indicates no caching desired
+			if ((m_cacheSeconds > 0) && (m_cacheCleanerSeconds > 0))
+			{
+				m_cache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAttachmentReference(null, null));
+			}
+
+			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60);
+		}
+		catch (Throwable t)
+		{
+			M_log.warn("init(): ", t);
+		}
+	}
+
+	/**********************************************************************************************************************************************************************************************************************************************************
+	 * Init and Destroy
+	 *********************************************************************************************************************************************************************************************************************************************************/
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public String merge(String siteId, Element root, String archivePath, String fromSiteId, Map attachmentNames, Map userIdTrans,
@@ -821,6 +522,18 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AttachmentUpload newUpload(SubmissionAnswer answer)
+	{
+		return new AttachmentUploadImpl(this, answer);
+	}
+
+	/**********************************************************************************************************************************************************************************************************************************************************
+	 * AttachmentService
+	 *********************************************************************************************************************************************************************************************************************************************************/
 
 	/**
 	 * {@inheritDoc}
@@ -851,9 +564,292 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/**
 	 * {@inheritDoc}
 	 */
+	public void removeAttachment(Reference attachment)
+	{
+		String statement = "DELETE FROM SAM_MEDIA_T WHERE MEDIAID = ?";
+		Object[] fields = new Object[1];
+		fields[0] = attachment.getId();
+
+		m_sqlService.dbWrite(statement, fields);
+
+		// generate an event
+		m_eventTrackingService.post(m_eventTrackingService.newEvent(ATTACHMENT_DELETE, attachment.getReference(), true));
+	}
+
+	/**
+	 * Dependency: AssessmentService.
+	 * 
+	 * @param service
+	 *        The AssessmentService.
+	 */
+	public void setAssessmentService(AssessmentService service)
+	{
+		m_assessmentService = (AssessmentServiceImpl) service;
+	}
+
+	/**
+	 * Set the # minutes between cache cleanings.
+	 * 
+	 * @param time
+	 *        The # minutes between cache cleanings. (as an integer string).
+	 */
+	public void setCacheCleanerMinutes(String time)
+	{
+		m_cacheCleanerSeconds = Integer.parseInt(time) * 60;
+	}
+
+	/**
+	 * Set the # minutes to cache.
+	 * 
+	 * @param time
+	 *        The # minutes to cache a get (as an integer string).
+	 */
+	public void setCacheMinutes(String time)
+	{
+		m_cacheSeconds = Integer.parseInt(time) * 60;
+	}
+
+	/**
+	 * Dependency: EntityManager.
+	 * 
+	 * @param service
+	 *        The EntityManager.
+	 */
+	public void setEntityManager(EntityManager service)
+	{
+		m_entityManager = service;
+	}
+
+	/**
+	 * Dependency: EventTrackingService.
+	 * 
+	 * @param service
+	 *        The EventTrackingService.
+	 */
+	public void setEventTrackingService(EventTrackingService service)
+	{
+		m_eventTrackingService = service;
+	}
+
+	/**********************************************************************************************************************************************************************************************************************************************************
+	 * EntityProducer
+	 *********************************************************************************************************************************************************************************************************************************************************/
+
+	/**
+	 * Dependency: MemoryService.
+	 * 
+	 * @param service
+	 *        The MemoryService.
+	 */
+	public void setMemoryService(MemoryService service)
+	{
+		m_memoryService = service;
+	}
+
+	/**
+	 * Dependency: ServerConfigurationService.
+	 * 
+	 * @param service
+	 *        The ServerConfigurationService.
+	 */
+	public void setServerConfigurationService(ServerConfigurationService service)
+	{
+		m_serverConfigurationService = service;
+	}
+
+	/**
+	 * Dependency: SessionManager.
+	 * 
+	 * @param service
+	 *        The SessionManager.
+	 */
+	public void setSessionManager(SessionManager service)
+	{
+		m_sessionManager = service;
+	}
+
+	/**
+	 * Dependency: SqlService.
+	 * 
+	 * @param service
+	 *        The SqlService.
+	 */
+	public void setSqlService(SqlService service)
+	{
+		m_sqlService = service;
+	}
+
+	/**
+	 * Dependency: ThreadLocalManager.
+	 * 
+	 * @param service
+	 *        The ThreadLocalManager.
+	 */
+	public void setThreadLocalManager(ThreadLocalManager service)
+	{
+		m_threadLocalManager = service;
+	}
+
+	/**
+	 * Dependency: TimeService.
+	 * 
+	 * @param service
+	 *        The TimeService.
+	 */
+	public void setTimeService(TimeService service)
+	{
+		m_timeService = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean willArchiveMerge()
 	{
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	/**
+	 * Cache this attachment. Use the short-term cache if enable, else use the thread-local cache.
+	 * 
+	 * @param attachment
+	 *        The attachment to cache.
+	 */
+	protected void cacheAttachment(Reference reference, AttachmentImpl attachment)
+	{
+		if (attachment == null) return;
+
+		String ref = getAttachmentReference(reference.getContainer(), reference.getId());
+
+		// if we are short-term caching
+		if (m_cache != null)
+		{
+			m_cache.put(ref, attachment, m_cacheSeconds);
+		}
+
+		// else thread-local cache
+		else
+		{
+			m_threadLocalManager.set(ref, attachment);
+		}
+	}
+
+	/**
+	 * Read the attachment's body from the database.
+	 * 
+	 * @param attachment
+	 *        The attachment meta data.
+	 * @return The attachment's body content as a byte array.
+	 */
+	protected byte[] getAttachmentBody(Attachment attachment)
+	{
+		// get the resource from the db
+		String sql = "SELECT M.MEDIA" + " FROM SAM_MEDIA_T M " + " WHERE M.MEDIAID = ?";
+
+		Object[] fields = new Object[1];
+		fields[0] = attachment.getId();
+
+		// create the body to read into
+		byte[] body = new byte[attachment.getLength().intValue()];
+		m_sqlService.dbReadBinary(sql, fields, body);
+
+		return body;
+	}
+
+	/**
+	 * Check the cache for the attachment. Use the short-term cache if enabled, else use the thread-local cache.
+	 * 
+	 * @param id
+	 *        The attachment id.
+	 * @return The actual attachment object cached, or null if not.
+	 */
+	protected AttachmentImpl getCachedAttachment(Reference reference)
+	{
+		String ref = getAttachmentReference(reference.getContainer(), reference.getId());
+
+		// if we are short-term caching
+		if (m_cache != null)
+		{
+			// if it is in there
+			if (m_cache.containsKey(ref))
+			{
+				return (AttachmentImpl) m_cache.get(ref);
+			}
+		}
+
+		// otherwise check the thread-local cache
+		else
+		{
+			return (AttachmentImpl) m_threadLocalManager.get(ref);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Add a new attachment, returning the id
+	 * 
+	 * @param a
+	 *        The attachment data
+	 * @param body
+	 *        The attachment body bytes.
+	 * @return The new attachment id.
+	 */
+	protected String putAttachment(Attachment a, InputStream body, String answerId)
+	{
+		// ID column? For non sequence db vendors, it is defaulted
+		Long id = m_sqlService.getNextSequence("SAM_MEDIA_ID_S", null);
+
+		String statement = "INSERT INTO SAM_MEDIA_T"
+				+ " (FILESIZE, MIMETYPE, FILENAME, CREATEDDATE, LASTMODIFIEDDATE, ISLINK, ISHTMLINLINE, DESCRIPTION, CREATEDBY, LASTMODIFIEDBY, STATUS, ITEMGRADINGID"
+				+ ((id == null) ? "" : " ,MEDIAID") + " ,MEDIA)" + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?")
+				+ ",?)";
+		Object[] fields = new Object[(id == null) ? 12 : 13];
+		fields[0] = a.getLength();
+		fields[1] = a.getType();
+		fields[2] = a.getName();
+		fields[3] = a.getTimestamp() != null ? a.getTimestamp() : m_timeService.newTime();
+		fields[4] = fields[3];
+		fields[5] = new Integer(0);
+		fields[6] = new Integer(0);
+		fields[7] = "description";
+		fields[8] = m_sessionManager.getCurrentSessionUserId();
+		fields[9] = fields[8];
+		fields[10] = new Integer(1);
+		fields[11] = answerId;
+
+		if (id != null)
+		{
+			fields[12] = id;
+			m_sqlService.dbInsert(null, statement, fields, null, body, a.getLength().intValue());
+		}
+		else
+		{
+			id = m_sqlService.dbInsert(null, statement, fields, "MEDIAID", body, a.getLength().intValue());
+		}
+
+		return id.toString();
+	}
+
+	/**
+	 * Stream the attachment's body from the database.
+	 * 
+	 * @param attachment
+	 *        The attachment meta data.
+	 * @return The attachment's body content in an input stream.
+	 */
+	protected InputStream streamAttachmentBody(Attachment attachment) throws ServerOverloadException
+	{
+		// get the resource from the db
+		String sql = "SELECT M.MEDIA" + " FROM SAM_MEDIA_T M " + " WHERE M.MEDIAID = ?";
+
+		Object[] fields = new Object[1];
+		fields[0] = attachment.getId();
+
+		// get the stream, set expectations that this could be big
+		InputStream in = m_sqlService.dbReadBinary(sql, fields, true);
+
+		return in;
 	}
 }

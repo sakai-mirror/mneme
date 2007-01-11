@@ -22,6 +22,7 @@
 package org.sakaiproject.assessment.tool;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletConfig;
@@ -44,6 +45,8 @@ import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.assessment.api.SubmissionCompletedException;
 import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.entity.api.EntityManager;
+import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.sludge.api.Context;
 import org.sakaiproject.sludge.api.Controller;
 import org.sakaiproject.sludge.api.UiService;
@@ -51,6 +54,7 @@ import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.ResourceLoader;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -84,6 +88,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 	/** Our self-injected tool manager reference. */
 	protected ToolManager toolManager = null;
+
+	/** Our self-injected entity manager reference. */
+	protected EntityManager entityManager = null;
 
 	/** Our self-injected ui service reference. */
 	protected UiService ui = null;
@@ -147,6 +154,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		attachmentService = (AttachmentService) ComponentManager.get(AttachmentService.class);
 		timeService = (TimeService) ComponentManager.get(TimeService.class);
 		ui = (UiService) ComponentManager.get(UiService.class);
+		entityManager = (EntityManager) ComponentManager.get(EntityManager.class);
 
 		// make the uis
 		uiList = DeliveryControllers.constructList(ui);
@@ -276,14 +284,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case remove:
 			{
-				// we need three parameters (sid/qid/ref)
-				if (parts.length != 5)
+				// we need three parameters (sid/qid/ref), but ref is really all the rest
+				if (parts.length < 5)
 				{
 					errorGet(req, res, context);
 				}
 				else
 				{
-					removeGet(req, res, parts[2], parts[3], parts[4], context);
+					removeGet(req, res, parts[2], parts[3], "/" + StringUtil.unsplit(parts, 4, parts.length - 4, "/"), context);
 				}
 				break;
 			}
@@ -354,14 +362,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case remove:
 			{
-				// we need three parameters (sid/qid/attachment ref)
-				if (parts.length != 5)
+				// we need three parameters (sid/qid/ref), but ref is really all the rest
+				if (parts.length < 5)
 				{
-					redirectError(req, res);
+					errorGet(req, res, context);
 				}
 				else
 				{
-					removePost(req, res, context, parts[2], parts[3], parts[4]);
+					removePost(req, res, parts[2], parts[3], "/" + StringUtil.unsplit(parts, 4, parts.length - 4, "/"), context);
 				}
 				break;
 			}
@@ -880,12 +888,10 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        The selected submission id.
 	 * @param questionId
 	 *        The current question id.
-	 * @param feedback
-	 *        The feedback parameter which could indicate (if it is "feedback") that the user wants feedback
+	 * @param reference
+	 *        The attachment (to remove) reference
 	 * @param context
 	 *        UiContext.
-	 * @param out
-	 *        Output writer.
 	 */
 	protected void removeGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId,
 			String reference, Context context)
@@ -904,18 +910,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 			{
 				context.put("question", question);
 
-				// find the answer (or have one created) for this submission / question
-				SubmissionAnswer answer = submission.getAnswer(question);
-				if (answer != null)
-				{
-					context.put("answer", answer);
+				Reference ref = entityManager.newReference(reference);
+				List<Reference> attachment = new ArrayList<Reference>(1);
+				attachment.add(ref);
+				context.put("attachment", attachment);
 
-					// TODO: something with the reference...
-
-					// render
-					ui.render(uiRemove, context);
-					return;
-				}
+				// render
+				ui.render(uiRemove, context);
+				return;
 			}
 		}
 
@@ -929,52 +931,55 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Servlet request.
 	 * @param res
 	 *        Servlet response.
-	 * @param context
-	 *        The UiContext
 	 * @param submisssionId
 	 *        The selected submission id.
 	 * @param questionId
 	 *        The current question id.
-	 * @param expected
-	 *        true if this post was expected, false if not.
+	 * @param reference
+	 *        The attachment (to remove) reference
+	 * @param context
+	 *        UiContext.
 	 */
-	protected void removePost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId,
-			String questionId, String reference) throws IOException
+	protected void removePost(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId,
+			String reference, Context context) throws IOException
 	{
 		// TODO: deal with unexpected
 
-		// setup receiving context
+		// read the form
+		String destination = ui.decode(req, context);
 
-		// find the answer (or have one created) for this submission / question
+		// remove the referenced attachment from the answer
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)
 		{
-			// TODO: security check (user matches submission user)
-			// TODO: check that the assessment is open
 			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
 			if (question != null)
 			{
-				// if the assessment is linear and this question has been seen already, we don't allow entry
-				if ((!question.getSection().getAssessment().getRandomAccess()) && submission.getSeenQuestion(question))
-				{
-					// TODO: better error reporting!
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-					return;
-				}
-
 				SubmissionAnswer answer = submission.getAnswer(question);
 				if (answer != null)
 				{
-					// TODO: looking for confirmation to remove the reference...
+					// remove this one
+					answer.removeAnswerText(reference);
+					attachmentService.removeAttachment(entityManager.newReference(reference));
 
-					// read form
-					String destination = ui.decode(req, context);
+					// submit the user's answer
+					try
+					{
+						assessmentService.submitAnswer(answer, false);
 
-					// TODO: did we get it?  do the remove, remove the attachment, modify the answer...
-					
-					// redirect to the next destination
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-					return;
+						// redirect to the next destination
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+						return;
+					}
+					catch (AssessmentClosedException e)
+					{
+					}
+					catch (SubmissionCompletedException e)
+					{
+					}
+					catch (AssessmentPermissionException e)
+					{
+					}
 				}
 			}
 		}

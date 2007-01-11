@@ -534,10 +534,10 @@ public class DeliveryControllers
 												.setTitle("question-upload-remove")
 												.setStyle(Navigation.Style.link)
 												.setSubmit()
-												.setDestination(ui.newDestination().setDestination("/remove/{0}/{1}/{2}",
+												.setDestination(ui.newDestination().setDestination("/remove/{0}/{1}{2}",
 														ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
 														ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("id"),
-														ui.newTextPropertyReference().setPropertyReference("id"))))
+														ui.newTextPropertyReference().setPropertyReference("reference"))))
 										.setEnabled(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.fileUpload.toString())
@@ -944,13 +944,45 @@ public class DeliveryControllers
 	/**
 	 * The remove interface needs the following entities in the context:
 	 * submission - the submission being taken
+	 * question - the current quesiton
+	 * attachment - List containing he attachment selected for removal
 	 */
 	public static Controller constructRemove(UiService ui)
 	{
 		return
 			ui.newInterface()
 				.setTitle("remove-title")
-				.setHeader("remove-header", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("assessment.title"));
+				.setHeader("remove-header", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("assessment.title"))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newText()
+								.setText("remove-confirm")
+								// .setAlert()
+							)
+						.add(
+							ui.newAttachments()
+								.setAttachments(ui.newPropertyReference().setEntityReference("attachment"))
+								.setSize(false)
+								.setTimestamp(true))
+						.add(
+							ui.newButtonBar()
+								.add(
+									ui.newNavigation()
+										.setDefault()
+										.setSubmit()
+										.setTitle("remove")
+										.setStyle(Navigation.Style.button)
+										.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
+											ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
+											ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("id"))))
+								.add(
+									ui.newNavigation()
+										.setTitle("cancel")
+										.setStyle(Navigation.Style.button)
+										.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
+											ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
+											ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("id"))))));
 	}
 
 	// TODO: sludge column included take ... and this goes away

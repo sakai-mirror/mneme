@@ -342,6 +342,37 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public void removeAnswerText(String answerText)
+	{
+		if (answerText == null) return;
+
+		// find the entry
+		for (SubmissionAnswerEntryImpl entry : this.entries)
+		{
+			if (answerText.equals(entry.answerText))
+			{
+				// if this is the only one, clear this
+				if (this.entries.size() == 1)
+				{
+					entry.answerText = null;
+				}
+				
+				// otherwise remove it
+				else
+				{
+					this.entries.remove(entry);
+				}
+
+				verifyEntries();
+
+				break;
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setEntryAnswerIds(String... answerIds)
 	{
 		// possibly adjust, if the question type allows variable number of entries, to the size of answerIds

@@ -146,6 +146,14 @@ public interface SubmissionAnswer
 	Time getSubmittedDate();
 
 	/**
+	 * Remove the entry that has this answer text.
+	 * 
+	 * @param answerText
+	 *        The answer text value to remove.
+	 */
+	void removeAnswerText(String answerText);
+
+	/**
 	 * Set these answer ids, ordered by question part, as the new answer ids for our entries. There must be an id for each entry (and for each question part) in order.
 	 * 
 	 * @param answerIds
