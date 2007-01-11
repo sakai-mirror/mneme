@@ -34,14 +34,19 @@ public interface AttachmentService
 	/** This string starts the references to resources in this service. */
 	static final String REFERENCE_ROOT = "/attachment";
 
+	/** Event tracking attachment reading. */
+	static final String ATTACHMENT_READ = "attachment.read";
+
 	/**
 	 * Form a attachment reference for this attachment id.
 	 * 
-	 * @param attachmentId
+	 * @param container
+	 *        The id of the attachment's container.
+	 * @param id
 	 *        the attachment id.
 	 * @return the attachment reference for this attachment id.
 	 */
-	String getAttachmentReference(String attachmentId);
+	String getAttachmentReference(String container, String id);
 
 	/**
 	 * Create a new file upload receiving object.

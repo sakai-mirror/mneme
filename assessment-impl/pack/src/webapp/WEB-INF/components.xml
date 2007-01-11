@@ -38,6 +38,7 @@
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
 		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
 		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
+		<property name="assessmentService"><ref bean="org.sakaiproject.assessment.api.AssessmentService"/></property>
 
  		<property name="cacheMinutes"><value>5</value></property>
  		<property name="cacheCleanerMinutes"><value>15</value></property>

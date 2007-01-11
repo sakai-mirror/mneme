@@ -77,7 +77,7 @@ public class AttachmentUploadImpl implements AttachmentUpload
 			entry.initId(null);
 			entry.initAutoScore(new Float(0));
 
-			String refStr = this.service.getAttachmentReference(id);
+			String refStr = this.service.getAttachmentReference(answer.getSubmission().getId(), id);
 			entry.setAnswerText(refStr);
 
 			entry.initAnswer(answer);

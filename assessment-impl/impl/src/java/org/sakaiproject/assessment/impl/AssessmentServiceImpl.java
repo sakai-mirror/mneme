@@ -1396,7 +1396,7 @@ public class AssessmentServiceImpl implements AssessmentService
 							}
 
 							// set the reference to the attachment into the answer text
-							String refStr = m_attachmentService.getAttachmentReference(mediaId);
+							String refStr = m_attachmentService.getAttachmentReference(submission.getId(), mediaId);
 							newEntry.setAnswerText(refStr);
 						}
 

@@ -45,7 +45,7 @@ public interface AssessmentService
 	/** The security function used to check if users can submit to an assessment. */
 	static final String SUBMIT_PERMISSION = "assessment.takeAssessment";
 
-	/** The security function used to check if users can submit to an assessment. */
+	/** The security function used to check if users can publish an assessment. */
 	static final String PUBLISH_PERMISSION = "assessment.createAssessment";
 
 	/** Event tracking event for publishing an assessment. */
@@ -298,8 +298,8 @@ public interface AssessmentService
 	 * If the user has a submission in progress, this returns true.<br .>
 	 * Otherwise, the assessment must be open, the use must have submit permission, and not yet submitted the max.
 	 * 
-	 * @param context
-	 *        The context.
+	 * @param assessmentId
+	 *        The assessment id.
 	 * @param userId
 	 *        The user taking the assessment (if null, the current user is used).
 	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.

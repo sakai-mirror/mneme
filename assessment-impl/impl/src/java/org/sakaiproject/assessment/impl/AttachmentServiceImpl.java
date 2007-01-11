@@ -36,9 +36,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sakaiproject.assessment.api.AssessmentService;
 import org.sakaiproject.assessment.api.Attachment;
 import org.sakaiproject.assessment.api.AttachmentService;
 import org.sakaiproject.assessment.api.AttachmentUpload;
+import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -94,9 +96,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 *        The attachment id.
 	 * @return The actual attachment object cached, or null if not.
 	 */
-	protected AttachmentImpl getCachedAttachment(String id)
+	protected AttachmentImpl getCachedAttachment(Reference reference)
 	{
-		String ref = getAttachmentReference(id);
+		String ref = getAttachmentReference(reference.getContainer(), reference.getId());
 
 		// if we are short-term caching
 		if (m_cache != null)
@@ -123,11 +125,11 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 * @param attachment
 	 *        The attachment to cache.
 	 */
-	protected void cacheAttachment(AttachmentImpl attachment)
+	protected void cacheAttachment(Reference reference, AttachmentImpl attachment)
 	{
 		if (attachment == null) return;
 
-		String ref = getAttachmentReference(attachment.getId());
+		String ref = getAttachmentReference(reference.getContainer(), reference.getId());
 
 		// if we are short-term caching
 		if (m_cache != null)
@@ -302,6 +304,20 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		m_cacheCleanerSeconds = Integer.parseInt(time) * 60;
 	}
 
+	/** Dependency: AssessmentService: Note: dependent on the impl... */
+	protected AssessmentServiceImpl m_assessmentService = null;
+
+	/**
+	 * Dependency: AssessmentService.
+	 * 
+	 * @param service
+	 *        The AssessmentService.
+	 */
+	public void setAssessmentService(AssessmentService service)
+	{
+		m_assessmentService = (AssessmentServiceImpl) service;
+	}
+
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Init and Destroy
 	 *********************************************************************************************************************************************************************************************************************************************************/
@@ -319,7 +335,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			// <= 0 indicates no caching desired
 			if ((m_cacheSeconds > 0) && (m_cacheCleanerSeconds > 0))
 			{
-				m_cache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAttachmentReference(""));
+				m_cache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAttachmentReference(null, null));
 			}
 
 			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60);
@@ -345,9 +361,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getAttachmentReference(String attachmentId)
+	public String getAttachmentReference(String container, String id)
 	{
-		String ref = REFERENCE_ROOT + "/" + attachmentId;
+		String ref = REFERENCE_ROOT + ((container == null) ? "" : ("/" + container + ((id == null) ? "" : ("/" + id))));
 		return ref;
 	}
 
@@ -358,19 +374,19 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 *        The attachment Id.
 	 * @return The Attachment (meta data only, no body), or null if not found.
 	 */
-	protected Attachment getAttachment(final String attachmentId)
+	protected Attachment getAttachment(final Reference attachmentRef)
 	{
 		AttachmentImpl rv = null;
 
 		// check the cache
-		rv = getCachedAttachment(attachmentId);
+		rv = getCachedAttachment(attachmentRef);
 		if (rv != null) return rv;
 
 		// read the attachment from the samigo media table
 		String statement = "SELECT M.FILESIZE, M.MIMETYPE, M.FILENAME, M.LASTMODIFIEDDATE" + " FROM SAM_MEDIA_T M"
 				+ " WHERE M.MEDIAID = ?";
 		Object[] fields = new Object[1];
-		fields[0] = attachmentId;
+		fields[0] = attachmentRef.getId();
 		List found = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -388,7 +404,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 						timestamp = m_timeService.newTime(ts.getTime());
 					}
 
-					return new AttachmentImpl(attachmentId, new Long(contentLength), name, timestamp, contentType);
+					return new AttachmentImpl(attachmentRef.getId(), new Long(contentLength), name, timestamp, contentType);
 				}
 				catch (SQLException e)
 				{
@@ -402,14 +418,14 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		{
 			if (found.size() > 1)
 			{
-				M_log.warn("getAttachment: more than one found: " + attachmentId);
+				M_log.warn("getAttachment: more than one found: " + attachmentRef.getId());
 			}
 
 			rv = (AttachmentImpl) found.get(0);
 		}
 
 		// cache if found
-		cacheAttachment(rv);
+		cacheAttachment(attachmentRef, rv);
 
 		return rv;
 	}
@@ -556,7 +572,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	public ResourceProperties getEntityResourceProperties(Reference ref)
 	{
 		ResourcePropertiesEdit edit = new BaseResourcePropertiesEdit();
-		Attachment a = getAttachment(ref.getId());
+		Attachment a = getAttachment(ref);
 
 		edit.addProperty(ResourceProperties.PROP_IS_COLLECTION, "false");
 		edit.addProperty(ResourceProperties.PROP_CONTENT_TYPE, a.getType());
@@ -592,11 +608,30 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 					Collection copyrightAcceptedRefs) throws EntityPermissionException, EntityNotDefinedException,
 					EntityAccessOverloadException, EntityCopyrightException
 			{
-				// TODO: permission
-				// if not.. throw new EntityPermissionException(SessionManager.getCurrentSessionUserId(), AUTH_RESOURCE_READ, ref.getReference());
+				// get the submission (the refrence container) for security checks
+				Submission submission = m_assessmentService.idSubmission(ref.getContainer());
+				if (submission == null)
+				{
+					throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), ATTACHMENT_READ, ref
+							.getReference());
+				}
+
+				// if the user is the submission user, pass security...
+				if (!submission.getUserId().equals(m_sessionManager.getCurrentSessionUserId()))
+				{
+					// user must have review or grading permission
+					// TODO: for now, we use PUBLISH_PERMISSION... refine this
+					if (!m_assessmentService.checkSecurity(m_sessionManager.getCurrentSessionUserId(),
+							AssessmentService.PUBLISH_PERMISSION, submission.getAssessment().getContext(), m_assessmentService
+									.getAssessmentReference(submission.getAssessment().getId())))
+					{
+						throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), ATTACHMENT_READ, ref
+								.getReference());
+					}
+				}
 
 				// get the attachment
-				Attachment a = getAttachment(ref.getId());
+				Attachment a = getAttachment(ref);
 				if (a == null)
 				{
 					throw new EntityNotDefinedException(ref.getReference());
@@ -794,16 +829,18 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	{
 		if (reference.startsWith(REFERENCE_ROOT))
 		{
-			// we will get null, attachment, id
+			// we will get null, attachment, submission id, attachment id
 			String id = null;
+			String container = null;
 			String[] parts = StringUtil.split(reference, Entity.SEPARATOR);
 
-			if (parts.length > 2)
+			if (parts.length > 3)
 			{
-				id = parts[2];
+				container = parts[2];
+				id = parts[3];
 			}
 
-			ref.set(APPLICATION_ID, null, id, null, null);
+			ref.set(APPLICATION_ID, null, id, container, null);
 
 			return true;
 		}
