@@ -529,6 +529,15 @@ public class DeliveryControllers
 										.setAttachments(ui.newPropertyReference().setEntityReference("answer").setPropertyReference("entryAnswerAttachments"))
 										.setSize(false)
 										.setTimestamp(true)
+										.addNavigation(
+											ui.newNavigation()
+												.setTitle("question-upload-remove")
+												.setStyle(Navigation.Style.link)
+												.setSubmit()
+												.setDestination(ui.newDestination().setDestination("/remove/{0}/{1}/{2}",
+														ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
+														ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("id"),
+														ui.newTextPropertyReference().setPropertyReference("id"))))
 										.setEnabled(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.fileUpload.toString())
@@ -930,6 +939,18 @@ public class DeliveryControllers
 								.setTitle("toc-save-exit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/list"))));
+	}
+
+	/**
+	 * The remove interface needs the following entities in the context:
+	 * submission - the submission being taken
+	 */
+	public static Controller constructRemove(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("remove-title")
+				.setHeader("remove-header", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("assessment.title"));
 	}
 
 	// TODO: sludge column included take ... and this goes away

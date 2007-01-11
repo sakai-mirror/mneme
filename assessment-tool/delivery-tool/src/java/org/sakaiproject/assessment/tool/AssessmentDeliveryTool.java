@@ -61,7 +61,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		enter, error, exit, list, question, review, submit, toc
+		enter, error, exit, list, question, remove, review, submit, toc
 	}
 
 	/** Our log (commons). */
@@ -72,7 +72,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 	/** Our self-injected assessment service reference. */
 	protected AssessmentService assessmentService = null;
-	
+
 	/** Our self-injected attachment service reference. */
 	protected AttachmentService attachmentService = null;
 
@@ -99,6 +99,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 	/** The question interface. */
 	protected Controller uiQuestion = null;
+
+	/** The remove interface. */
+	protected Controller uiRemove = null;
 
 	/** The sbmit interface. */
 	protected Controller uiSubmit = null;
@@ -152,6 +155,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		uiExit = DeliveryControllers.constructExit(ui);
 		uiToc = DeliveryControllers.constructToc(ui);
 		uiSubmit = DeliveryControllers.constructSubmit(ui);
+		uiRemove = DeliveryControllers.constructRemove(ui);
 
 		M_log.info("init()");
 	}
@@ -270,6 +274,19 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				break;
 			}
+			case remove:
+			{
+				// we need three parameters (sid/qid/ref)
+				if (parts.length != 5)
+				{
+					errorGet(req, res, context);
+				}
+				else
+				{
+					removeGet(req, res, parts[2], parts[3], parts[4], context);
+				}
+				break;
+			}
 			case error:
 			{
 				errorGet(req, res, context);
@@ -332,6 +349,19 @@ public class AssessmentDeliveryTool extends HttpServlet
 				else
 				{
 					questionPost(req, res, context, parts[2], parts[3]);
+				}
+				break;
+			}
+			case remove:
+			{
+				// we need three parameters (sid/qid/attachment ref)
+				if (parts.length != 5)
+				{
+					redirectError(req, res);
+				}
+				else
+				{
+					removePost(req, res, context, parts[2], parts[3], parts[4]);
 				}
 				break;
 			}
@@ -740,7 +770,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	}
 
 	/**
-	 * Read the input for the enter destination, process, and redirect to the next destination.
+	 * Read the input for the question destination, process, and redirect to the next destination.
 	 * 
 	 * @param req
 	 *        Servlet request.
@@ -837,6 +867,120 @@ public class AssessmentDeliveryTool extends HttpServlet
 	{
 		String error = Web.returnUrl(req, "/" + Destinations.error);
 		res.sendRedirect(res.encodeRedirectURL(error));
+	}
+
+	/**
+	 * Get the UI for the remove destination
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submisssionId
+	 *        The selected submission id.
+	 * @param questionId
+	 *        The current question id.
+	 * @param feedback
+	 *        The feedback parameter which could indicate (if it is "feedback") that the user wants feedback
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void removeGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId,
+			String reference, Context context)
+	{
+		// collect the submission
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission != null)
+		{
+			// TODO: security check (user matches submission user)
+			// TODO: check that the assessment is open
+			context.put("submission", submission);
+
+			// collect the question
+			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+			if (question != null)
+			{
+				context.put("question", question);
+
+				// find the answer (or have one created) for this submission / question
+				SubmissionAnswer answer = submission.getAnswer(question);
+				if (answer != null)
+				{
+					context.put("answer", answer);
+
+					// TODO: something with the reference...
+
+					// render
+					ui.render(uiRemove, context);
+					return;
+				}
+			}
+		}
+
+		errorGet(req, res, context);
+	}
+
+	/**
+	 * Read the input for the remove destination, process, and redirect to the next destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param context
+	 *        The UiContext
+	 * @param submisssionId
+	 *        The selected submission id.
+	 * @param questionId
+	 *        The current question id.
+	 * @param expected
+	 *        true if this post was expected, false if not.
+	 */
+	protected void removePost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId,
+			String questionId, String reference) throws IOException
+	{
+		// TODO: deal with unexpected
+
+		// setup receiving context
+
+		// find the answer (or have one created) for this submission / question
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission != null)
+		{
+			// TODO: security check (user matches submission user)
+			// TODO: check that the assessment is open
+			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+			if (question != null)
+			{
+				// if the assessment is linear and this question has been seen already, we don't allow entry
+				if ((!question.getSection().getAssessment().getRandomAccess()) && submission.getSeenQuestion(question))
+				{
+					// TODO: better error reporting!
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					return;
+				}
+
+				SubmissionAnswer answer = submission.getAnswer(question);
+				if (answer != null)
+				{
+					// TODO: looking for confirmation to remove the reference...
+
+					// read form
+					String destination = ui.decode(req, context);
+
+					// TODO: did we get it?  do the remove, remove the attachment, modify the answer...
+					
+					// redirect to the next destination
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+					return;
+				}
+			}
+		}
+
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
 	}
 
 	/**
