@@ -746,6 +746,18 @@ public class AssessmentDeliveryTool extends HttpServlet
 			// TODO: security check (user matches submission user)
 			// TODO: check that the assessment is open
 			context.put("submission", submission);
+			context.put("assessment", submission.getAssessment());
+
+//			List<Qa> qa = new ArrayList<Qa>();
+//			for (AssessmentSection section : submission.getAssessment().getSections())
+//			{
+//				for (AssessmentQuestion question : section.getQuestions())
+//				{
+//					SubmissionAnswer answer = submission.getAnswer(question);
+//					qa.add(new Qa(question, answer));
+//				}
+//			}
+//			context.put("qa", qa);
 
 			// collect the question
 			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
@@ -775,6 +787,29 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 
 		errorGet(req, res, context);
+	}
+
+	public class Qa
+	{
+		protected AssessmentQuestion q = null;
+
+		protected SubmissionAnswer a = null;
+
+		public Qa(AssessmentQuestion question, SubmissionAnswer answer)
+		{
+			this.q = question;
+			this.a = answer;
+		}
+
+		public AssessmentQuestion getQuestion()
+		{
+			return this.q;
+		}
+
+		public SubmissionAnswer getAnswer()
+		{
+			return this.a;
+		}
 	}
 
 	/**
