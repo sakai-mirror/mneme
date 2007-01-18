@@ -214,7 +214,15 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case review:
 			{
-				errorGet(req, res, context);
+				// we need a single parameter (sid)
+				if (parts.length != 3)
+				{
+					errorGet(req, res, context);
+				}
+				else
+				{
+					reviewGet(req, res, parts[2], context);
+				}
 				break;
 			}
 			case enter:
@@ -739,6 +747,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 			context.put("feedback", Boolean.TRUE);
 		}
 
+		// not in review mode
+		context.put("review", Boolean.FALSE);
+
 		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)
@@ -748,16 +759,25 @@ public class AssessmentDeliveryTool extends HttpServlet
 			context.put("submission", submission);
 			context.put("assessment", submission.getAssessment());
 
-//			List<Qa> qa = new ArrayList<Qa>();
-//			for (AssessmentSection section : submission.getAssessment().getSections())
-//			{
-//				for (AssessmentQuestion question : section.getQuestions())
-//				{
-//					SubmissionAnswer answer = submission.getAnswer(question);
-//					qa.add(new Qa(question, answer));
-//				}
-//			}
-//			context.put("qa", qa);
+			// how many questions are we asking on this page?
+			List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
+
+			// TODO: the whole shebang?
+			if (false)
+			{
+				for (AssessmentSection section : submission.getAssessment().getSections())
+				{
+					for (AssessmentQuestion question : section.getQuestions())
+					{
+						SubmissionAnswer answer = submission.getAnswer(question);
+						answers.add(answer);
+					}
+				}
+			}
+
+			// TODO: or just one part?
+
+			// or just one question
 
 			// collect the question
 			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
@@ -771,19 +791,70 @@ public class AssessmentDeliveryTool extends HttpServlet
 					return;
 				}
 
-				context.put("question", question);
-
 				// find the answer (or have one created) for this submission / question
 				SubmissionAnswer answer = submission.getAnswer(question);
 				if (answer != null)
 				{
-					context.put("answer", answer);
+					// for just one question
+					answers.add(answer);
+
+					context.put("answers", answers);
 
 					// render
 					ui.render(uiQuestion, context);
 					return;
 				}
 			}
+		}
+
+		errorGet(req, res, context);
+	}
+
+	/**
+	 * Get the UI for the review destination
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submisssionId
+	 *        The selected submission id.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void reviewGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
+	{
+		// yes feedback, and we are in review
+		context.put("feedback", Boolean.TRUE);
+		context.put("review", Boolean.TRUE);
+
+		// collect the submission
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission != null)
+		{
+			// TODO: security check (user matches submission user)
+			// TODO: check that the submission is closed
+			context.put("submission", submission);
+			context.put("assessment", submission.getAssessment());
+
+			// collect all the answers for review
+			List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
+			for (AssessmentSection section : submission.getAssessment().getSections())
+			{
+				for (AssessmentQuestion question : section.getQuestions())
+				{
+					SubmissionAnswer answer = submission.getAnswer(question);
+					answers.add(answer);
+				}
+			}
+
+			context.put("answers", answers);
+
+			// render using the question interface
+			ui.render(uiQuestion, context);
+			return;
 		}
 
 		errorGet(req, res, context);
@@ -839,6 +910,17 @@ public class AssessmentDeliveryTool extends HttpServlet
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)
 		{
+			List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
+			for (AssessmentSection section : submission.getAssessment().getSections())
+			{
+				for (AssessmentQuestion question : section.getQuestions())
+				{
+					SubmissionAnswer answer = submission.getAnswer(question);
+					answers.add(answer);
+				}
+			}
+			context.put("answers", answers);
+
 			// TODO: security check (user matches submission user)
 			// TODO: check that the assessment is open
 			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
