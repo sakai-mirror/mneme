@@ -757,7 +757,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 			// TODO: security check (user matches submission user)
 			// TODO: check that the assessment is open
 			context.put("submission", submission);
-			context.put("assessment", submission.getAssessment());
 
 			// how many questions are we asking on this page?
 			List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
@@ -797,6 +796,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				{
 					// for just one question
 					answers.add(answer);
+					context.put("answer1", answer);
 
 					context.put("answers", answers);
 
@@ -911,15 +911,21 @@ public class AssessmentDeliveryTool extends HttpServlet
 		if (submission != null)
 		{
 			List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
-			for (AssessmentSection section : submission.getAssessment().getSections())
+			
+			// TODO: for the entire assessment
+			if (false)
 			{
-				for (AssessmentQuestion question : section.getQuestions())
+				for (AssessmentSection section : submission.getAssessment().getSections())
 				{
-					SubmissionAnswer answer = submission.getAnswer(question);
-					answers.add(answer);
+					for (AssessmentQuestion question : section.getQuestions())
+					{
+						SubmissionAnswer answer = submission.getAnswer(question);
+						answers.add(answer);
+					}
 				}
 			}
-			context.put("answers", answers);
+
+			// TODO: or for one section
 
 			// TODO: security check (user matches submission user)
 			// TODO: check that the assessment is open
@@ -937,7 +943,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 				SubmissionAnswer answer = submission.getAnswer(question);
 				if (answer != null)
 				{
-					context.put("answer", answer);
+					//context.put("answer", answer);
+					answers.add(answer);
+					context.put("answers", answers);
 
 					// leave "upload" out for now so it's not decoded yet... until after the answer (which may be new) is submitted and has an id
 
