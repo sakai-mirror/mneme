@@ -27,6 +27,7 @@ import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.MultipleSubmissionSelectionPolicy;
+import org.sakaiproject.assessment.api.QuestionPresentation;
 import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
@@ -355,20 +356,20 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setFormatDelegate(new FeedbackPropertyReference())
 												.setEntityReference("assessment")
-												.setPropertyReference("feedbackDelivery"))))
-						.add(
-							ui.newButtonBar()
-								.add(
-									ui.newNavigation()
-										.setSubmit()
-										.setTitle("enter-beginAssessment")
-										.setStyle(Navigation.Style.button))
-								.add(
-									ui.newNavigation()
-										.setDefault()
-										.setTitle("cancel")
-										.setStyle(Navigation.Style.button)
-										.setDestination(ui.newDestination().setDestination("/list")))));
+												.setPropertyReference("feedbackDelivery")))))
+					.add(
+						ui.newButtonBar()
+							.add(
+								ui.newNavigation()
+									.setSubmit()
+									.setTitle("enter-beginAssessment")
+									.setStyle(Navigation.Style.button))
+							.add(
+								ui.newNavigation()
+									.setDefault()
+									.setTitle("cancel")
+									.setStyle(Navigation.Style.button)
+									.setDestination(ui.newDestination().setDestination("/list"))));
 	}
 
 	/**
@@ -376,8 +377,10 @@ public class DeliveryControllers
 	 * submission - the selected Submission object
 	 * feedback - a non-null value to indicate that we should show feedback
 	 * answers - collection of answers that are the questions to include
-	 * answer1 - for a single question page, the single answer from answers
+	 * question - for a single question page, the single question
+	 * section - for a single section page, the single section
 	 * review - set if we are in review mode
+	 * questionSelector - the current question selector string
 	 * 
 	 * When decoding a response, we need in the context:
 	 * answers - a collection to get the answer id(s) selected.
@@ -398,7 +401,7 @@ public class DeliveryControllers
 								.setStyle(Navigation.Style.link)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}/feedback",
 									ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
-									ui.newTextPropertyReference().setReference("answer1.question.id")))
+									ui.newTextPropertyReference().setReference("questionSelector")))
 								.setEnabled(
 									ui.newDecision()
 										.setProperty(
@@ -459,13 +462,14 @@ public class DeliveryControllers
 							ui.newTextPropertyReference().setReference("answer.question.section.ordering.position"),
 							ui.newTextPropertyReference().setReference("answer.question.section.assessment.numSections"),
 							ui.newTextPropertyReference().setReference("answer.question.section.title"))
+						.setAnchor("question-anchor", ui.newPropertyReference().setReference("answer.question.id"))
 						.setTitleEnabled(
 							ui.newOrDecision()
 								.setOptions(
 									ui.newHasValueDecision()
 										.setProperty(
 											ui.newPropertyReference()
-												.setReference("answer1")),
+												.setReference("question")),
 									ui.newDecision()
 										.setProperty(
 											ui.newPropertyReference()
@@ -565,6 +569,7 @@ public class DeliveryControllers
 									ui.newTextEdit()
 										.setTitle("question-text")
 										.setReadOnly(ui.newPropertyReference().setReference("review"))
+										.setSize(20, 80)
 										.setProperty(
 											ui.newPropertyReference()
 												.setEntityReference("answer")
@@ -719,6 +724,7 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setEntityReference("answer")
 												.setPropertyReference("rationale"))
+										.setSize(5, 40)
 										.setEnabled(
 											ui.newDecision()
 												.setProperty(
@@ -792,15 +798,32 @@ public class DeliveryControllers
 								.setSubmit()
 								.setTitle("question-save-continue")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
+								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
 									ui.newTextPropertyReference().setReference("submission.id"),
-									ui.newTextPropertyReference().setReference("answer1.question.assessmentOrdering.next.id")))
+									ui.newTextPropertyReference().setReference("question.assessmentOrdering.next.id")))
 								.setEnabled(
+									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
 									ui.newDecision()
 										.setReversed()
 										.setProperty(
 											ui.newBooleanPropertyReference()
-												.setReference("answer1.question.assessmentOrdering.isLast"))))
+												.setReference("question.assessmentOrdering.isLast"))))
+						.add(
+							ui.newNavigation()
+								.setDefault()
+								.setSubmit()
+								.setTitle("question-save-continue")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
+									ui.newTextPropertyReference().setReference("submission.id"),
+									ui.newTextPropertyReference().setReference("section.ordering.next.id")))
+								.setEnabled(
+									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
+									ui.newDecision()
+										.setReversed()
+										.setProperty(
+											ui.newBooleanPropertyReference()
+												.setReference("section.ordering.isLast"))))
 						.add(
 							ui.newNavigation()
 								.setDefault()
@@ -809,28 +832,58 @@ public class DeliveryControllers
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/exit/{0}",ui.newTextPropertyReference().setReference("submission.id")))
 								.setEnabled(
-									ui.newDecision()
-										.setProperty(
-											ui.newBooleanPropertyReference()
-												.setReference("answer1.question.assessmentOrdering.isLast"))))
+									ui.newOrDecision()
+										.setOptions(
+											ui.newAndDecision()
+												.setRequirements(
+													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
+													ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("question.assessmentOrdering.isLast"))),
+											ui.newAndDecision()
+												.setRequirements(
+													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
+													ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isLast"))),
+											ui.newAndDecision()
+												.setRequirements(
+													ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
+													ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section"))))))
 						.add(
 							ui.newNavigation()
 								.setSubmit()
 								.setTitle("quesiton-save-prev")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
+								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
 									ui.newTextPropertyReference().setReference("submission.id"),
-									ui.newTextPropertyReference().setReference("answer1.question.assessmentOrdering.previous.id")))
+									ui.newTextPropertyReference().setReference("question.assessmentOrdering.previous.id")))
 								.setEnabled(
+									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
 									ui.newDecision()
 										.setReversed()
 										.setProperty(
 											ui.newBooleanPropertyReference()
-												.setReference("answer1.question.assessmentOrdering.isFirst")),
+												.setReference("question.assessmentOrdering.isFirst")),
 									ui.newDecision()
 										.setProperty(
 											ui.newPropertyReference()
-												.setReference("answer1.question.section.assessment.randomAccess"))))	
+												.setReference("submission.assessment.randomAccess"))))	
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setTitle("quesiton-save-prev")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
+									ui.newTextPropertyReference().setReference("submission.id"),
+									ui.newTextPropertyReference().setReference("section.ordering.previous.id")))
+								.setEnabled(
+									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
+									ui.newDecision()
+										.setReversed()
+										.setProperty(
+											ui.newBooleanPropertyReference()
+												.setReference("section.ordering.isFirst")),
+									ui.newDecision()
+										.setProperty(
+											ui.newPropertyReference()
+												.setReference("submission.assessment.randomAccess"))))	
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -839,10 +892,7 @@ public class DeliveryControllers
 								.setDestination(ui.newDestination().setDestination("/list"))
 								.setEnabled(
 									ui.newDecision()
-										.setDelegate(new SaveExitDecision())
-										.setProperty(
-											ui.newPropertyReference()
-												.setReference("answer1.question"))))
+										.setDelegate(new SaveExitDecision())))
 						.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()));
 	}
 
@@ -927,14 +977,14 @@ public class DeliveryControllers
 										.setTitle("exit-display-confirmation")
 										.setProperty(
 											ui.newPropertyReference()
-												.setEntityReference("sub")
+												.setEntityReference("submission")
 												.setPropertyReference("confirmation")))
 								.addRow(
 									ui.newPropertyRow()
 										.setTitle("exit-display-submitted")
 										.setProperty(
 											ui.newDatePropertyReference()
-												.setEntityReference("sub")
+												.setEntityReference("submission")
 												.setPropertyReference("submittedDate"))))
 						.add(
 							ui.newButtonBar()
@@ -964,49 +1014,92 @@ public class DeliveryControllers
 							ui.newInstructions()
 								.setText("toc-section-alert"))
 						.add(
-							ui.newSection()
-								.add(
-									ui.newIconKey()
-										.setTitle("toc-key-title")
-										.addIcon("/icons/unanswered.gif", ui.newMessage().setMessage("toc-key-unanswered"))
-										.addIcon("/icons/markedforreview.gif", ui.newMessage().setMessage("toc-key-mark-for-review")))
-								.add(
-									ui.newSection()
-										.setIterator(
-											ui.newPropertyReference()
-												.setReference("submission.assessment.sections"), "section")
-										.add(
-											ui.newEntityList()
-												.setStyle(EntityList.Style.form)
-												.setIterator(
-													ui.newPropertyReference().setReference("section.questions"), "question")
-												.setTitle("toc-questions-title",
-													// Part{0} - {1} - {2}/{3} Answered Questions, {4} Points
-													ui.newPropertyReference().setReference("section.ordering.position"),
-													ui.newPropertyReference().setReference("section.title"),
-													ui.newPropertyReference().setFormatDelegate(new QuestionsAnswered()),
-													ui.newPropertyReference().setReference("section.numQuestions"),
-													ui.newPropertyReference().setFormatDelegate(new SectionScore()))
-												.addColumn(
-													ui.newHtmlPropertyColumn()
-														.setProperty(null, ui.newPropertyReference().setFormatDelegate(new FormatQuestionDecoration()))
-														.setWidth(16))
-												.addColumn(
-													ui.newPropertyColumn()
-														.setProperty("toc-question-entry",
-															// {num}. {title or instructions} ({points})
-															ui.newPropertyReference().setFormatDelegate(new FormatQuestionNumber()),
-															ui.newTextPropertyReference()
-																.setMaxLength(60)
-																.setStripHtml()
-																.setReference("question.title"),
-															ui.newPropertyReference().setFormatDelegate(new QuestionScore()))
-														.setEntityNavigation(
-															ui.newEntityNavigation()
-																// destination is /question/sid/aqid
-																.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
-																	ui.newTextPropertyReference().setReference("submission.id"),
-																	ui.newTextPropertyReference().setReference("question.id")))))))))
+							ui.newIconKey()
+								.setTitle("toc-key-title")
+								.addIcon("/icons/unanswered.gif", ui.newMessage().setMessage("toc-key-unanswered"))
+								.addIcon("/icons/markedforreview.gif", ui.newMessage().setMessage("toc-key-mark-for-review"))))
+				.add(
+					ui.newSection()
+						.setIterator(
+							ui.newPropertyReference()
+								.setReference("submission.assessment.sections"), "section")
+						.add(
+							ui.newEntityList()
+								.setStyle(EntityList.Style.form)
+								.setIterator(
+									ui.newPropertyReference().setReference("section.questions"), "question")
+								.setTitle("toc-questions-title",
+									// Part{0} - {1} - {2}/{3} Answered Questions, {4} Points
+									ui.newPropertyReference().setReference("section.ordering.position"),
+									ui.newPropertyReference().setReference("section.title"),
+									ui.newPropertyReference().setFormatDelegate(new QuestionsAnswered()),
+									ui.newPropertyReference().setReference("section.numQuestions"),
+									ui.newPropertyReference().setFormatDelegate(new SectionScore()))
+								.addColumn(
+									ui.newHtmlPropertyColumn()
+										.setProperty(null, ui.newPropertyReference().setFormatDelegate(new FormatQuestionDecoration()))
+										.setWidth(16))
+								.addColumn(
+									ui.newPropertyColumn()
+										.setProperty("toc-question-entry",
+											// {num}. {title or instructions} ({points})
+											ui.newPropertyReference().setFormatDelegate(new FormatQuestionNumber()),
+											ui.newTextPropertyReference()
+												.setMaxLength(60)
+												.setStripHtml()
+												.setReference("question.title"),
+											ui.newPropertyReference().setFormatDelegate(new QuestionScore()))
+										.setEntityNavigation(
+											ui.newEntityNavigation()
+												// destination is /question/sid/q questionId
+												.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
+													ui.newTextPropertyReference().setReference("submission.id"),
+													ui.newTextPropertyReference().setReference("question.id"))))
+										.setEnabled(
+											ui.newCompareDecision()
+												.setEqualsConstant(QuestionPresentation.BY_QUESTION.toString())
+												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
+								.addColumn(
+									ui.newPropertyColumn()
+										.setProperty("toc-question-entry",
+											// {num}. {title or instructions} ({points})
+											ui.newPropertyReference().setFormatDelegate(new FormatQuestionNumber()),
+											ui.newTextPropertyReference()
+												.setMaxLength(60)
+												.setStripHtml()
+												.setReference("question.title"),
+											ui.newPropertyReference().setFormatDelegate(new QuestionScore()))
+										.setEntityNavigation(
+											ui.newEntityNavigation()
+												// destination is /question/sid/s sectionId
+												.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}#{2}",
+													ui.newTextPropertyReference().setReference("submission.id"),
+													ui.newTextPropertyReference().setReference("question.section.id"),
+													ui.newTextPropertyReference().setReference("question.id"))))
+										.setEnabled(
+											ui.newCompareDecision()
+												.setEqualsConstant(QuestionPresentation.BY_SECTION.toString())
+												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
+								.addColumn(
+									ui.newPropertyColumn()
+										.setProperty("toc-question-entry",
+											// {num}. {title or instructions} ({points})
+											ui.newPropertyReference().setFormatDelegate(new FormatQuestionNumber()),
+											ui.newTextPropertyReference()
+												.setMaxLength(60)
+												.setStripHtml()
+												.setReference("question.title"),
+											ui.newPropertyReference().setFormatDelegate(new QuestionScore()))
+										.setEntityNavigation(
+											ui.newEntityNavigation()
+												// destination is /question/sid/a
+												.setDestination(ui.newDestination().setDestination("/question/{0}/a#{1}",
+													ui.newTextPropertyReference().setReference("submission.id"),
+													ui.newTextPropertyReference().setReference("question.id"))))
+										.setEnabled(
+											ui.newCompareDecision()
+												.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
+												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))))
 				.add(
 					ui.newButtonBar()
 						.add(
@@ -1248,7 +1341,7 @@ public class DeliveryControllers
 	}
 
 	/**
-	 * focus is the assessment question: if this is the last question and we are linear, we don't show save-exit, otherwise we do
+	 * decide about the save-exit button for the question interface
 	 */
 	public static class SaveExitDecision implements DecisionDelegate
 	{
@@ -1257,18 +1350,38 @@ public class DeliveryControllers
 		 */
 		public boolean decide(Decision decision, Context context, Object focus)
 		{
-			// property reference is the AssessmentQuestion
-			if (decision.getProperty() == null) return false;
-			Object o = decision.getProperty().readObject(context, focus);
-			if (o == null) return false;
-			if (!(o instanceof AssessmentQuestion)) return false;
-
-			AssessmentQuestion question = (AssessmentQuestion) o;
-			if ((question.getAssessmentOrdering().getIsLast().booleanValue()) && (!question.getSection().getAssessment().getRandomAccess().booleanValue()))
+			// get question from context - if it's there, and it's the last, and we are linear (not random), block
+			// if no question, get section from context - if it's there and it's the last, and we are linear (not randon), block
+			// otherwise put in the button
+			// TODO: proper section and assessment handling re: linear? -ggolden
+			Object o = context.get("question");
+			if ((o != null) && (o instanceof AssessmentQuestion))
 			{
-				return false;
+				AssessmentQuestion question = (AssessmentQuestion) o;
+				if ((question.getAssessmentOrdering().getIsLast().booleanValue())
+						&& (!question.getSection().getAssessment().getRandomAccess().booleanValue()))
+				{
+					return false;
+				}
+
+				return true;
 			}
 
+			// not question, try section
+			o = context.get("section");
+			if ((o != null) && (o instanceof AssessmentSection))
+			{
+				AssessmentSection section = (AssessmentSection) o;
+				if ((section.getOrdering().getIsLast().booleanValue())
+						&& (!section.getAssessment().getRandomAccess().booleanValue()))
+				{
+					return false;
+				}
+
+				return true;
+			}
+
+			// neither question or section, assume assessment
 			return true;
 		}
 	}

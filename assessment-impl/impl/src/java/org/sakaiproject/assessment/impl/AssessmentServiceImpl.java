@@ -45,6 +45,7 @@ import org.sakaiproject.assessment.api.AttachmentService;
 import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.MultipleSubmissionSelectionPolicy;
 import org.sakaiproject.assessment.api.QuestionPart;
+import org.sakaiproject.assessment.api.QuestionPresentation;
 import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
@@ -80,9 +81,9 @@ public class AssessmentServiceImpl implements AssessmentService
 	/** A cache of submissions. */
 	protected Cache m_submissionCache = null;
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Abstractions, etc.
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	/**
 	 * Check the security for this user doing this function withing this context.
@@ -104,7 +105,8 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// check for the user / function / context-as-site-authz
 
-		// form the azGroups for a context-as-implemented-by-site (Note the *lack* of direct dependency on Site, i.e. we stole the code!)
+		// form the azGroups for a context-as-implemented-by-site (Note the *lack* of direct dependency on Site, i.e. we stole the
+		// code!)
 		Collection azGroups = new Vector(2);
 		azGroups.add("/site/" + context);
 		azGroups.add("!site.helper");
@@ -135,9 +137,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		}
 	}
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Dependencies
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	protected ThreadLocalManager m_threadLocalManager = null;
 
@@ -263,9 +265,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		m_attachmentService = service;
 	}
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Configuration
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	/** The # seconds to cache assessment reads. 0 disables the cache. */
 	protected int m_cacheSeconds = 0;
@@ -295,9 +297,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		m_cacheCleanerSeconds = Integer.parseInt(time) * 60;
 	}
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Init and Destroy
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	/**
 	 * Final initialization, once all dependencies are set.
@@ -331,15 +333,18 @@ public class AssessmentServiceImpl implements AssessmentService
 		M_log.info("destroy()");
 	}
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * AssessmentService implementation
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Assessment Access
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
-	/** TODO: Note: assessments ids are (for now) assumed to be published - the Samigo 1 data model does not have a unique assessment id across published and non-published. */
+	/**
+	 * TODO: Note: assessments ids are (for now) assumed to be published - the Samigo 1 data model does not have a unique assessment
+	 * id across published and non-published.
+	 */
 
 	/**
 	 * Form an assessment reference for this assessment id.
@@ -371,7 +376,8 @@ public class AssessmentServiceImpl implements AssessmentService
 			return new AssessmentImpl(assessment);
 		}
 
-		// TODO: perhaps don't check, just set the id... then we need to support objects that have id set but are known to be bad... -ggolden
+		// TODO: perhaps don't check, just set the id... then we need to support objects that have id set but are known to be bad...
+		// -ggolden
 		// check that it exists
 		if (!checkAssessment(id)) return null;
 
@@ -542,7 +548,8 @@ public class AssessmentServiceImpl implements AssessmentService
 				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, P.CREATEDBY,"
 				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.TIMELIMIT, PAC.AUTOSUBMIT, PAC.STARTDATE, PAC.RETRACTDATE, PAC.LATEHANDLING,"
 				+ " PF.SHOWSTUDENTQUESTIONSCORE, PF.SHOWCORRECTRESPONSE, PF.SHOWQUESTIONLEVELFEEDBACK, PF.SHOWSELECTIONLEVELFEEDBACK,"
-				+ " PAC.ITEMNAVIGATION, PAC.ITEMNUMBERING, P.DESCRIPTION" + " FROM SAM_PUBLISHEDASSESSMENT_T P"
+				+ " PAC.ITEMNAVIGATION, PAC.ITEMNUMBERING, P.DESCRIPTION, PAC.ASSESSMENTFORMAT"
+				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
@@ -608,6 +615,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					int randomAccess = result.getInt(22);
 					int continuousNumbering = result.getInt(23);
 					String description = result.getString(24);
+					QuestionPresentation presentation = QuestionPresentation.parse(result.getInt(25));
 
 					// pack it into the assessment
 					assessment.initAutoSubmit((autoSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
@@ -633,6 +641,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					assessment.initRandomAccess(Boolean.valueOf(randomAccess == 2));
 					assessment.initContinuousNumbering(Boolean.valueOf(continuousNumbering == 1));
 					assessment.initDescription(description);
+					assessment.initQuestionPresentation(presentation);
 
 					return assessment;
 				}
@@ -952,7 +961,8 @@ public class AssessmentServiceImpl implements AssessmentService
 			}
 		});
 
-		// read the attachments for all questions (join with the items table and sections table to be able to select for the entire assessment)
+		// read the attachments for all questions (join with the items table and sections table to be able to select for the entire
+		// assessment)
 		statement = "SELECT A.RESOURCEID, A.ITEMID" + " FROM SAM_PUBLISHEDATTACHMENT_T A"
 				+ " INNER JOIN SAM_PUBLISHEDITEM_T Q ON A.ITEMID = Q.ITEMID"
 				+ " INNER JOIN SAM_PUBLISHEDSECTION_T S ON Q.SECTIONID = S.SECTIONID" + " WHERE S.ASSESSMENTID = ?";
@@ -1063,9 +1073,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		}
 	}
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Submission Access
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	/**
 	 * Form a submission reference for this submission id.
@@ -1531,9 +1541,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		return !results.isEmpty();
 	}
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Delivery Support
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	/**
 	 * {@inheritDoc}
@@ -1643,31 +1653,39 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// Notes: "in context"
 		// SAM_ASSESSMENTBASE_T has the defined assessments (ID)
-		// SAM_PUBLISHEDASSESSMENT_T has the main published assessment info, referring back to the SAM_ASSESSMENTBASE_T table's entry with (ASSESSMENTID)
-		// SAM_AUTHZDATA_T maps permissions (FUNCTIONID = TAKE_PUBLISHED_ASSESSMENT) for sites (AGENTID) to assessments by published assessment id (QUALIFIERID)
-		// SAM_AUTHZDATA_T QUALIFIERID can be either base assessment or published assessment; the FUNCTIONID for published are a separate set than from base (EDIT_ASSESSMENT)
+		// SAM_PUBLISHEDASSESSMENT_T has the main published assessment info, referring back to the SAM_ASSESSMENTBASE_T table's
+		// entry with (ASSESSMENTID)
+		// SAM_AUTHZDATA_T maps permissions (FUNCTIONID = TAKE_PUBLISHED_ASSESSMENT) for sites (AGENTID) to assessments by published
+		// assessment id (QUALIFIERID)
+		// SAM_AUTHZDATA_T QUALIFIERID can be either base assessment or published assessment; the FUNCTIONID for published are a
+		// separate set than from base (EDIT_ASSESSMENT)
 
 		// Notes: released and not yet retracted
-		// SAM_PUBLISHEDACCESSCONTROL_T joins with the SAM_PUBLISHEDASSESSMENT_T (ASSESSMENTID) to define the active period (STARTDATE) and (RETRACTDATE)
+		// SAM_PUBLISHEDACCESSCONTROL_T joins with the SAM_PUBLISHEDASSESSMENT_T (ASSESSMENTID) to define the active period
+		// (STARTDATE) and (RETRACTDATE)
 		// either may be null
 		// we want now to be >= startdate and < retractdate (edges?)
 
 		// Note: due date and last policy
-		// SAM_PUBLISHEDACCESSCONTROL_T joins with the SAM_PUBLISHEDASSESSMENT_T (ASSESSMENTID) to define the due date (DUEDATE) - may be null
+		// SAM_PUBLISHEDACCESSCONTROL_T joins with the SAM_PUBLISHEDASSESSMENT_T (ASSESSMENTID) to define the due date (DUEDATE) -
+		// may be null
 		// and (LATEHANDLING) is 1 to allow late submissions, 2 to not allow late submissions
 
 		// Note: join with submissions
 		// SAM_ASSESSMENTGRADING_T joins in on PUBLISHEDASSESSMENTID to the SAM_PUBLISHEDASSESSMENT_T table for each submission
-		// A left outer join gives us a record for each assessment, even with no submissions, and multiple records, one for each submission.
+		// A left outer join gives us a record for each assessment, even with no submissions, and multiple records, one for each
+		// submission.
 		// The GROUP BY lets us get a count of submissions and collapses the records down to one per assessment
 		// We need the inner select so we can compute the counts, then filter out those that have reached their submit limit
-		// Counting the AG.PUBLISHEDASSESSMENTID column gives us an accurate count of how many submissions - if there are none, this will end up null and give a 0 count.
+		// Counting the AG.PUBLISHEDASSESSMENTID column gives us an accurate count of how many submissions - if there are none, this
+		// will end up null and give a 0 count.
 
 		// Note: number of submissions allowed
 		// SAM_PUBLISHEDACCESSCONTROL_T SUBMISSIONSALLOWED is null for unlimited, or has a count
 
 		// Note: extra info
-		// anticipating that we need the title and duedate (etc) for each assessment, we get it here and cache it so we can return it later in the thread
+		// anticipating that we need the title and duedate (etc) for each assessment, we get it here and cache it so we can return
+		// it later in the thread
 
 		// figure sort sql
 		String sortSql = null;
@@ -1786,7 +1804,8 @@ public class AssessmentServiceImpl implements AssessmentService
 		// the user id is in the AGENTID column, the assessment is in the PUBLISHEDASSESSMENTID column
 
 		// Notes: "in context"
-		// SAM_AUTHZDATA_T maps permissions (FUNCTIONID = TAKE_PUBLISHED_ASSESSMENT) for sites (AGENTID) to assessments by published assessment id (QUALIFIERID)
+		// SAM_AUTHZDATA_T maps permissions (FUNCTIONID = TAKE_PUBLISHED_ASSESSMENT) for sites (AGENTID) to assessments by published
+		// assessment id (QUALIFIERID)
 
 		// Notes: official submission
 		// Of many submissions, either the latest or the highest graded is used
@@ -1794,11 +1813,15 @@ public class AssessmentServiceImpl implements AssessmentService
 		// (as known by MultipleSubmissionSelectionPolicy)
 
 		// Note: finding the max totalScore
-		// joining the grading table (left outer) to itself, mathing on the published assessment, where the left totalScore < right totalScore, then selecting the
-		// records where the right id is null will pick those grading records that are the maximum totalScore for each assessment... (http://www.artfulsoftware.com/queries.php#7)
-		// When joining, we have to make sure we specify the full criteria against the grading table to avoid stray records slipping into the join
+		// joining the grading table (left outer) to itself, mathing on the published assessment, where the left totalScore < right
+		// totalScore, then selecting the
+		// records where the right id is null will pick those grading records that are the maximum totalScore for each assessment...
+		// (http://www.artfulsoftware.com/queries.php#7)
+		// When joining, we have to make sure we specify the full criteria against the grading table to avoid stray records slipping
+		// into the join
 		// (we might need to add the context criteria too, which is another join?)
-		// But, since each assessment might have a seperate criteria, and the selection criteria is rather complex, here we get all the submissions and do our own filtering
+		// But, since each assessment might have a seperate criteria, and the selection criteria is rather complex, here we get all
+		// the submissions and do our own filtering
 
 		// Note: complete v.s. in progress submissions
 		// the FORGRADE boolean is set when the submission is complete, false while it is in progress - these don't count.
@@ -2001,7 +2024,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					// see if this wins over the best so far
 					if (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED)
 					{
-						// for totalScore, if the winner so far is smaller or equal to the new, use the new (the later one for a tie is the later submission based on our sort)
+						// for totalScore, if the winner so far is smaller or equal to the new, use the new (the later one for a tie
+						// is the later submission based on our sort)
 						if (((Float) value).floatValue() <= ((SubmissionImpl) idSubmission(candidateId)).getTotalScore()
 								.floatValue())
 						{
@@ -2031,9 +2055,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		return idSubmissions(ids);
 	}
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Authoring Support
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	/**
 	 * {@inheritDoc}
@@ -2145,7 +2169,8 @@ public class AssessmentServiceImpl implements AssessmentService
 			// ID column? For non sequence db vendors, it is defaulted
 			Long id = m_sqlService.getNextSequence("SAM_PUBLISHEDASSESSMENT_ID_S", connection);
 
-			// Note: ID column is set to autoincrement... by using the special JDBC feature in dbInsert, we get the value just allocated
+			// Note: ID column is set to autoincrement... by using the special JDBC feature in dbInsert, we get the value just
+			// allocated
 			String statement = "INSERT INTO SAM_PUBLISHEDASSESSMENT_T"
 					+ " (TITLE, DESCRIPTION, ASSESSMENTID, DESCRIPTION, COMMENTS, TYPEID, INSTRUCTORNOTIFICATION, TESTEENOTIFICATION, MULTIPARTALLOWED,"
 					+ " STATUS, CREATEDBY, CREATEDDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE" + ((id == null) ? "" : ", ID") + ")"
@@ -2253,7 +2278,8 @@ public class AssessmentServiceImpl implements AssessmentService
 			fields[0] = new Integer(1);
 			fields[1] = null;
 			fields[2] = new Integer(1);
-			fields[3] = new Integer(1);
+			fields[3] = ((assessment.getQuestionPresentation() != null) ? assessment.getQuestionPresentation().dbEncoding()
+					: new Integer(1));
 			fields[4] = null;
 			fields[5] = new Integer(0);
 			fields[6] = new Integer(0);
@@ -2812,7 +2838,8 @@ public class AssessmentServiceImpl implements AssessmentService
 				}
 			}
 
-			// TODO: assessment attachments into SAM_PUBLISHEDATTACHMENT_T setting ATTACHMENTID, ATTACHMENTTYPE=1, RESOURCEID from the attachment ref id, ASSESSMENTID
+			// TODO: assessment attachments into SAM_PUBLISHEDATTACHMENT_T setting ATTACHMENTID, ATTACHMENTTYPE=1, RESOURCEID from
+			// the attachment ref id, ASSESSMENTID
 
 			connection.commit();
 
@@ -2881,9 +2908,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		return new Integer(0);
 	}
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Submission Support
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	/**
 	 * {@inheritDoc}
@@ -2991,7 +3018,8 @@ public class AssessmentServiceImpl implements AssessmentService
 			// ID column? For non sequence db vendors, it is defaulted
 			Long id = m_sqlService.getNextSequence("SAM_ASSESSMENTGRADING_ID_S", connection);
 
-			// Note: ASSESSMENTGRADINGID column is set to autoincrement... by using the special JDBC feature in dbInsert, we get the value just allocated
+			// Note: ASSESSMENTGRADINGID column is set to autoincrement... by using the special JDBC feature in dbInsert, we get the
+			// value just allocated
 			String statement = "INSERT INTO SAM_ASSESSMENTGRADING_T"
 					+ " (PUBLISHEDASSESSMENTID, AGENTID, SUBMITTEDDATE, ISLATE, FORGRADE, TOTALAUTOSCORE,"
 					+ " TOTALOVERRIDESCORE, FINALSCORE, STATUS, ATTEMPTDATE, TIMEELAPSED"
@@ -3236,7 +3264,8 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		// TODO: one transaction, or separate ones?
 
-		// trust only the answer information passed in, and the submission id it points to - get fresh and trusted additional information
+		// trust only the answer information passed in, and the submission id it points to - get fresh and trusted additional
+		// information
 		Submission submission = idSubmission(answer.getSubmission().getId());
 		Assessment assessment = submission.getAssessment();
 
@@ -3259,7 +3288,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					getAssessmentReference(assessment.getId()));
 		}
 
-		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment (use the assessment as ref, not submission)
+		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment (use the assessment as ref, not
+		// submission)
 		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
 
 		// check that the assessment is currently open for submission
@@ -3308,7 +3338,9 @@ public class AssessmentServiceImpl implements AssessmentService
 							+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
 							+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW"
 							+ ((answerId == null) ? "" : ", ITEMGRADINGID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,"
-							+ m_sqlService.getBooleanConstant(answer.getMarkedForReview()) // TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
+							+ m_sqlService.getBooleanConstant(answer.getMarkedForReview()) // TODO: it would be nice if our ? /
+																							// Boolean worked with bit fields
+																							// -ggolden
 							+ ((answerId == null) ? "" : ",?") + ")";
 					Object[] fields = new Object[(answerId == null) ? 10 : 11];
 					fields[0] = answer.getSubmission().getId();
@@ -3352,9 +3384,13 @@ public class AssessmentServiceImpl implements AssessmentService
 				{
 					String statement = "UPDATE SAM_ITEMGRADING_T"
 							+ " SET SUBMITTEDDATE = ?, PUBLISHEDANSWERID = ?, PUBLISHEDITEMTEXTID = ?, RATIONALE = ?, ANSWERTEXT = ?, AUTOSCORE = ?,"
-							+ " REVIEW = " + m_sqlService.getBooleanConstant(answer.getMarkedForReview()) // TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
+							+ " REVIEW = " + m_sqlService.getBooleanConstant(answer.getMarkedForReview()) // TODO: it would be
+																											// nice if our ? /
+																											// Boolean worked with
+																											// bit fields -ggolden
 							+ " WHERE ITEMGRADINGID = ?";
-					// TODO: for added security, add to WHERE: AND ASSESSMENTGRADINGID = ?answer.getSubmissionId() AND PUBLISHEDITEMID = ?answer.getQuestionId() -ggolden
+					// TODO: for added security, add to WHERE: AND ASSESSMENTGRADINGID = ?answer.getSubmissionId() AND
+					// PUBLISHEDITEMID = ?answer.getQuestionId() -ggolden
 					Object[] fields = new Object[7];
 					fields[0] = answer.getSubmittedDate();
 					fields[1] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
@@ -3392,7 +3428,8 @@ public class AssessmentServiceImpl implements AssessmentService
 			((SubmissionAnswerImpl) answer).recycle.clear();
 
 			// if complete, update the STATUS to 1 and the FORGRADE to TRUE... always update the date
-			// Note: for Samigo compat., we need to update the scores in the SAM_ASSESSMENTGRADING_T based on the sums of the item scores
+			// Note: for Samigo compat., we need to update the scores in the SAM_ASSESSMENTGRADING_T based on the sums of the item
+			// scores
 			String statement = "UPDATE SAM_ASSESSMENTGRADING_T"
 					+ " SET SUBMITTEDDATE = ?,"
 					+ " TOTALAUTOSCORE = (SELECT SUM(AUTOSCORE)+SUM(OVERRIDESCORE) FROM SAM_ITEMGRADING_T WHERE ASSESSMENTGRADINGID = ?),"
@@ -3488,7 +3525,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					getAssessmentReference(assessment.getId()));
 		}
 
-		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment (use the assessment as ref, not submission)
+		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment (use the assessment as ref, not
+		// submission)
 		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
 
 		// check that the assessment is currently open for submission
@@ -3736,7 +3774,8 @@ public class AssessmentServiceImpl implements AssessmentService
 						// compare to this entry
 						SubmissionAnswerEntryImpl compareEntry = answer.entries.get(j);
 
-						// they need to be the same (i.e. !different) based on our case sensitive (the method takes ignore case, so we reverse)
+						// they need to be the same (i.e. !different) based on our case sensitive (the method takes ignore case, so
+						// we reverse)
 						if (!StringUtil.different(entry.getAnswerText(), compareEntry.getAnswerText(), !question.getCaseSensitive()
 								.booleanValue()))
 						{
@@ -3835,7 +3874,8 @@ public class AssessmentServiceImpl implements AssessmentService
 						// compare to this entry
 						SubmissionAnswerEntryImpl compareEntry = answer.entries.get(j);
 
-						// they need to be the same (i.e. !different) based on our case sensitive (the method takes ignore case, so we reverse)
+						// they need to be the same (i.e. !different) based on our case sensitive (the method takes ignore case, so
+						// we reverse)
 						if (!StringUtil.different(entry.getAnswerText(), compareEntry.getAnswerText(), !question.getCaseSensitive()
 								.booleanValue()))
 						{

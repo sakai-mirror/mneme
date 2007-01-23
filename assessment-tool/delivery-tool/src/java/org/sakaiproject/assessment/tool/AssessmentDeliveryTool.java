@@ -41,6 +41,7 @@ import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentService;
 import org.sakaiproject.assessment.api.AttachmentService;
+import org.sakaiproject.assessment.api.QuestionPresentation;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.assessment.api.SubmissionCompletedException;
@@ -253,7 +254,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case question:
 			{
-				// we need two parameters (sid/qid) and an optional third (/feedback)
+				// we need two parameters (sid/quesiton selector) and an optional third (/feedback)
 				if ((parts.length != 4) && (parts.length != 5))
 				{
 					errorGet(req, res, context);
@@ -474,67 +475,107 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// process: enter the assessment for this user, find the submission id and starting question
 		Assessment assessment = assessmentService.idAssessment(assessmentId);
-		if (assessment != null)
+		if (assessment == null)
 		{
-			try
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
+
+		Submission submission = null;
+		try
+		{
+			submission = assessmentService.enterSubmission(assessment, null);
+		}
+		catch (AssessmentClosedException e)
+		{
+		}
+		catch (AssessmentCompletedException e)
+		{
+		}
+		catch (AssessmentPermissionException e)
+		{
+		}
+
+		if (submission == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
+
+		// question, section or all?
+		QuestionPresentation presentation = assessment.getQuestionPresentation();
+
+		// for by quesion
+		if ((presentation == null) || (presentation == QuestionPresentation.BY_QUESTION))
+		{
+			String questionId = null;
+
+			// for linear assessments, start at the first unseen question
+			if (!assessment.getRandomAccess())
 			{
-				Submission submission = assessmentService.enterSubmission(assessment, null);
-				if (submission != null)
+				AssessmentQuestion question = submission.getFirstUnseenQuestion();
+				if (question != null)
 				{
-					String questionId = null;
+					questionId = question.getId();
+				}
 
-					// for linear assessments, start at the first unseen question
-					if (!assessment.getRandomAccess())
+				// otherwise send the user to the submit view
+				else
+				{
+					destination = "/" + Destinations.submit + "/" + submission.getId();
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+					return;
+				}
+			}
+
+			// for random access, start at the first question of the first part
+			else
+			{
+				AssessmentSection part = assessment.getFirstSection();
+				if (part != null)
+				{
+					AssessmentQuestion question = part.getFirstQuestion();
+					if (question != null)
 					{
-						AssessmentQuestion question = submission.getFirstUnseenQuestion();
-						if (question != null)
-						{
-							questionId = question.getId();
-						}
-
-						// otherwise send the user to the submit view
-						else
-						{
-							destination = "/" + Destinations.submit + "/" + submission.getId();
-							res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-							return;
-						}
-					}
-
-					// for random access, start at the first question of the first part
-					else
-					{
-						AssessmentSection part = assessment.getFirstSection();
-						if (part != null)
-						{
-							AssessmentQuestion question = part.getFirstQuestion();
-							if (question != null)
-							{
-								questionId = question.getId();
-							}
-						}
-					}
-
-					if (questionId != null)
-					{
-						// next destination: first question of submission
-						destination = "/" + Destinations.question + "/" + submission.getId() + "/" + questionId;
-
-						// redirect
-						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-						return;
+						questionId = question.getId();
 					}
 				}
 			}
-			catch (AssessmentClosedException e)
+
+			if (questionId != null)
 			{
+				// next destination: first question of submission
+				destination = "/" + Destinations.question + "/" + submission.getId() + "/q" + questionId;
+
+				// redirect
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
 			}
-			catch (AssessmentCompletedException e)
+		}
+
+		// for by section
+		else if (presentation == QuestionPresentation.BY_SECTION)
+		{
+			AssessmentSection section = assessment.getFirstSection();
+			if (section != null)
 			{
+				destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + section.getId();
+
+				// redirect
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
 			}
-			catch (AssessmentPermissionException e)
-			{
-			}
+		}
+		// for all
+		else if (presentation == QuestionPresentation.BY_ASSESSMENT)
+		{
+			destination = "/" + Destinations.question + "/" + submission.getId() + "/a";
+
+			// redirect
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
 		}
 
 		// redirect to error
@@ -721,25 +762,25 @@ public class AssessmentDeliveryTool extends HttpServlet
 	}
 
 	/**
-	 * Get the UI for the quesiton destination
+	 * Setup the context for question get and post
 	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
 	 * @param submisssionId
 	 *        The selected submission id.
-	 * @param questionId
-	 *        The current question id.
+	 * @param questionSelector
+	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections
+	 *        worth, and a picks them all.
 	 * @param feedback
 	 *        The feedback parameter which could indicate (if it is "feedback") that the user wants feedback
 	 * @param context
 	 *        UiContext.
+	 * @param answers
+	 *        A list to fill in with the answers for this page.
 	 * @param out
 	 *        Output writer.
+	 * @return true if all was well, false if there was an error
 	 */
-	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId,
-			String feedback, Context context)
+	protected boolean questionSetup(String submissionId, String questionSelector, String feedback, Context context,
+			List<SubmissionAnswer> answers)
 	{
 		// check on feedback
 		if ("feedback".equalsIgnoreCase(feedback))
@@ -750,7 +791,10 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// not in review mode
 		context.put("review", Boolean.FALSE);
 
-		// collect the submission
+		// put in the selector
+		context.put("questionSelector", questionSelector);
+
+		// get the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)
 		{
@@ -758,12 +802,52 @@ public class AssessmentDeliveryTool extends HttpServlet
 			// TODO: check that the assessment is open
 			context.put("submission", submission);
 
-			// how many questions are we asking on this page?
-			List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
-
-			// TODO: the whole shebang?
-			if (false)
+			// for requests for a single question
+			if (questionSelector.startsWith("q"))
 			{
+				String questionId = questionSelector.substring(1);
+				AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+				if (question == null)
+				{
+					return false;
+				}
+
+				// find the answer (or have one created) for this submission / question
+				SubmissionAnswer answer = submission.getAnswer(question);
+				if (answer != null)
+				{
+					answers.add(answer);
+				}
+
+				// tell the UI that we are doing single question
+				context.put("question", question);
+			}
+
+			// for requests for a section
+			else if (questionSelector.startsWith("s"))
+			{
+				String sectionId = questionSelector.substring(1);
+				AssessmentSection section = submission.getAssessment().getSection(sectionId);
+				if (section == null)
+				{
+					return false;
+				}
+
+				// get all the answers for this section
+				for (AssessmentQuestion question : section.getQuestions())
+				{
+					SubmissionAnswer answer = submission.getAnswer(question);
+					answers.add(answer);
+				}
+
+				// tell the UI that we are doing single section
+				context.put("section", section);
+			}
+
+			// for requests for the entire assessment
+			else if (questionSelector.startsWith("a"))
+			{
+				// get all the answers to all the questions in all sections
 				for (AssessmentSection section : submission.getAssessment().getSections())
 				{
 					for (AssessmentQuestion question : section.getQuestions())
@@ -774,40 +858,68 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 			}
 
-			// TODO: or just one part?
-
-			// or just one question
-
-			// collect the question
-			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
-			if (question != null)
+			else
 			{
-				// if the assessment is linear and this question has been seen already, we don't allow entry
-				if ((!question.getSection().getAssessment().getRandomAccess()) && submission.getSeenQuestion(question))
-				{
-					// TODO: better error reporting!
-					errorGet(req, res, context);
-					return;
-				}
-
-				// find the answer (or have one created) for this submission / question
-				SubmissionAnswer answer = submission.getAnswer(question);
-				if (answer != null)
-				{
-					// for just one question
-					answers.add(answer);
-					context.put("answer1", answer);
-
-					context.put("answers", answers);
-
-					// render
-					ui.render(uiQuestion, context);
-					return;
-				}
+				return false;
 			}
+
+			context.put("answers", answers);
+			return true;
 		}
 
-		errorGet(req, res, context);
+		// // if the assessment is linear and this question has been seen already, we don't allow entry
+		// if ((!question.getSection().getAssessment().getRandomAccess()) && submission.getSeenQuestion(question))
+		// {
+		// // TODO: better error reporting!
+		// errorGet(req, res, context);
+		// return;
+		// }
+
+		return false;
+	}
+
+	/**
+	 * Get the UI for the quesiton destination
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submisssionId
+	 *        The selected submission id.
+	 * @param questionSelector
+	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections
+	 *        worth, and a picks them all.
+	 * @param feedback
+	 *        The feedback parameter which could indicate (if it is "feedback") that the user wants feedback
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionSelector,
+			String feedback, Context context)
+	{
+		// collect the questions (actually their answers) to put on the page
+		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
+
+		if (!questionSetup(submissionId, questionSelector, feedback, context, answers))
+		{
+			errorGet(req, res, context);
+			return;
+		}
+
+		// render
+		ui.render(uiQuestion, context);
+		return;
+
+		// // if the assessment is linear and this question has been seen already, we don't allow entry
+		// if ((!question.getSection().getAssessment().getRandomAccess()) && submission.getSeenQuestion(question))
+		// {
+		// // TODO: better error reporting!
+		// errorGet(req, res, context);
+		// return;
+		// }
 	}
 
 	/**
@@ -894,99 +1006,74 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        The UiContext
 	 * @param submisssionId
 	 *        The selected submission id.
-	 * @param questionId
-	 *        The current question id.
+	 * @param questionSelector
+	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections
 	 * @param expected
 	 *        true if this post was expected, false if not.
 	 */
 	protected void questionPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId,
-			String questionId) throws IOException
+			String questionSelector) throws IOException
 	{
 		// TODO: deal with unexpected
 
-		// setup receiving context
+		// collect the questions (actually their answers) to put on the page
+		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
 
-		// find the answer (or have one created) for this submission / question
-		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission != null)
+		// setup receiving context
+		if (!questionSetup(submissionId, questionSelector, "", context, answers))
 		{
-			List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
-			
-			// TODO: for the entire assessment
-			if (false)
+			errorGet(req, res, context);
+			return;
+		}
+
+		// leave "upload" out for now so it's not decoded yet... until after the answer (which may be new) is submitted
+		// and has an id
+
+		// read form
+		String destination = ui.decode(req, context);
+
+		// for each answer we put out, submit it
+		for (SubmissionAnswer answer : answers)
+		{
+			// if we are going to exit, we must complete the submission (last answer only)
+			boolean complete = false;
+			if (destination.startsWith("/exit") && answer.equals(answers.get(answers.size() - 1)))
 			{
-				for (AssessmentSection section : submission.getAssessment().getSections())
-				{
-					for (AssessmentQuestion question : section.getQuestions())
-					{
-						SubmissionAnswer answer = submission.getAnswer(question);
-						answers.add(answer);
-					}
-				}
+				complete = true;
 			}
 
-			// TODO: or for one section
-
-			// TODO: security check (user matches submission user)
-			// TODO: check that the assessment is open
-			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
-			if (question != null)
+			// submit the user's answer
+			try
 			{
-				// if the assessment is linear and this question has been seen already, we don't allow entry
-				if ((!question.getSection().getAssessment().getRandomAccess()) && submission.getSeenQuestion(question))
-				{
-					// TODO: better error reporting!
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-					return;
-				}
-
-				SubmissionAnswer answer = submission.getAnswer(question);
-				if (answer != null)
-				{
-					//context.put("answer", answer);
-					answers.add(answer);
-					context.put("answers", answers);
-
-					// leave "upload" out for now so it's not decoded yet... until after the answer (which may be new) is submitted and has an id
-
-					// read form
-					String destination = ui.decode(req, context);
-
-					// if we are going to exit, we must complete the submission
-					boolean complete = false;
-					if (destination.startsWith("/exit"))
-					{
-						complete = true;
-					}
-
-					// submit the user's answer
-					try
-					{
-						assessmentService.submitAnswer(answer, complete);
-
-						// now setup to decode any file uploads that came in
-						context.put("upload", attachmentService.newUpload(answer));
-						ui.decode(req, context);
-
-						// redirect to the next destination
-						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-						return;
-					}
-					catch (AssessmentClosedException e)
-					{
-					}
-					catch (SubmissionCompletedException e)
-					{
-					}
-					catch (AssessmentPermissionException e)
-					{
-					}
-				}
+				assessmentService.submitAnswer(answer, complete);
+			}
+			catch (AssessmentClosedException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+				return;
+			}
+			catch (SubmissionCompletedException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+				return;
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+				return;
 			}
 		}
 
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		// now setup to decode any file uploads that came in
+		// context.put("upload", attachmentService.newUpload(answer));
+		// ui.decode(req, context);
+
+		// redirect to the next destination
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+		return;
 	}
 
 	/**

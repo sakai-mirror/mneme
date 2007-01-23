@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006,2007 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -32,6 +32,7 @@ import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentStatus;
 import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.MultipleSubmissionSelectionPolicy;
+import org.sakaiproject.assessment.api.QuestionPresentation;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.cover.EntityManager;
 import org.sakaiproject.time.api.Time;
@@ -131,6 +132,10 @@ public class AssessmentImpl implements Assessment
 	protected Integer numSubmissions = null;
 
 	protected PropertyStatus numSubmissionsStatus = PropertyStatus.unset;
+
+	protected QuestionPresentation questionPresentation = null;
+
+	protected PropertyStatus questionPresentationStatus = PropertyStatus.unset;
 
 	protected Boolean randomAccess = null;
 
@@ -493,6 +498,17 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public QuestionPresentation getQuestionPresentation()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.questionPresentationStatus == PropertyStatus.unset) readMain();
+
+		return this.questionPresentation;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getRandomAccess()
 	{
 		// read the basic info if this property has not yet been set
@@ -776,6 +792,15 @@ public class AssessmentImpl implements Assessment
 	{
 		this.numSubmissions = count;
 		this.numSubmissionsStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setQuestionPresentation(QuestionPresentation value)
+	{
+		this.questionPresentation = value;
+		this.questionPresentationStatus = PropertyStatus.modified;
 	}
 
 	/**
@@ -1081,6 +1106,18 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Initialize the question presentation setting.
+	 * 
+	 * @param value
+	 *        The question presentation setting.
+	 */
+	protected void initQuestionPresentation(QuestionPresentation value)
+	{
+		this.questionPresentation = value;
+		this.questionPresentationStatus = PropertyStatus.inited;
+	}
+
+	/**
 	 * Initialize the random access property.
 	 * 
 	 * @param value
@@ -1270,6 +1307,7 @@ public class AssessmentImpl implements Assessment
 		this.statusStatus = PropertyStatus.inited;
 		this.timeLimitStatus = PropertyStatus.inited;
 		this.titleStatus = PropertyStatus.inited;
+		this.questionPresentationStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -1333,6 +1371,8 @@ public class AssessmentImpl implements Assessment
 		this.timeLimitStatus = other.timeLimitStatus;
 		this.title = other.title;
 		this.titleStatus = other.titleStatus;
+		this.questionPresentation = other.questionPresentation;
+		this.questionPresentationStatus = other.questionPresentationStatus;
 	}
 
 	/**
