@@ -862,39 +862,35 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// read form
 		String destination = ui.decode(req, context);
 
-		// for each answer we put out, submit it
-		for (SubmissionAnswer answer : answers)
+		// if we are going to exit, we must complete the submission (last answer only)
+		boolean complete = false;
+		if (destination.startsWith("/exit"))
 		{
-			// if we are going to exit, we must complete the submission (last answer only)
-			boolean complete = false;
-			if (destination.startsWith("/exit") && answer.equals(answers.get(answers.size() - 1)))
-			{
-				complete = true;
-			}
+			complete = true;
+		}
 
-			// submit the user's answer
-			try
-			{
-				assessmentService.submitAnswer(answer, complete);
-			}
-			catch (AssessmentClosedException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-				return;
-			}
-			catch (SubmissionCompletedException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-				return;
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-				return;
-			}
+		// submit all answers
+		try
+		{
+			assessmentService.submitAnswers(answers, complete);
+		}
+		catch (AssessmentClosedException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
+		catch (SubmissionCompletedException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
+		catch (AssessmentPermissionException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
 		}
 
 		// redirect to the next destination

@@ -2102,11 +2102,24 @@ public class AssessmentServiceImpl implements AssessmentService
 	public void submitAnswer(SubmissionAnswer answer, Boolean completSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException
 	{
+		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>(1);
+		answers.add(answer);
+		submitAnswers(answers, completSubmission);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void submitAnswers(List<SubmissionAnswer> answers, Boolean completSubmission) throws AssessmentPermissionException,
+			AssessmentClosedException, SubmissionCompletedException
+	{
+		if ((answers == null) || (answers.size() == 0)) return;
+
 		// TODO: one transaction, or separate ones?
 
 		// trust only the answer information passed in, and the submission id it points to - get fresh and trusted additional
 		// information
-		Submission submission = idSubmission(answer.getSubmission().getId());
+		Submission submission = idSubmission(answers.get(0).getSubmission().getId());
 		Assessment assessment = submission.getAssessment();
 
 		// make sure this is an incomplete submission
@@ -2136,11 +2149,14 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (!isAssessmentOpen(assessment, asOf)) throw new AssessmentClosedException();
 
 		// update the submission parameter for the caller
-		answer.setSubmittedDate(asOf);
-		answer.getSubmission().setSubmittedDate(asOf);
+		submission.setSubmittedDate(asOf);
+		for (SubmissionAnswer answer : answers)
+		{
+			answer.setSubmittedDate(asOf);
 
-		// auto-score
-		answer.autoScore();
+			// auto-score
+			answer.autoScore();
+		}
 
 		Connection connection = null;
 		boolean wasCommit = true;
@@ -2150,120 +2166,122 @@ public class AssessmentServiceImpl implements AssessmentService
 			wasCommit = connection.getAutoCommit();
 			connection.setAutoCommit(false);
 
-			// unwrap file upload attachments from multiple entries to just one
-			// TODO: do this when save submission also
-			List<SubmissionAnswerEntryImpl> entries = ((SubmissionAnswerImpl) answer).entries;
-			if (answer.getQuestion().getType() == QuestionType.fileUpload)
+			for (SubmissionAnswer answer : answers)
 			{
-				SubmissionAnswerEntryImpl sample = entries.get(0);
-				entries = new ArrayList<SubmissionAnswerEntryImpl>(1);
-				SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl(sample);
-				entry.setAnswerText(null);
-				entry.setAssessmentAnswer(null);
-
-				// set the entry id to the id we saved in the answer
-				entry.id = ((SubmissionAnswerImpl) answer).id;
-				entries.add(entry);
-			}
-
-			// create submission answer record(s) if needed
-			for (SubmissionAnswerEntryImpl entry : entries)
-			{
-				if (entry.getId() == null)
+				// unwrap file upload attachments from multiple entries to just one
+				// TODO: do this when save submission also
+				List<SubmissionAnswerEntryImpl> entries = ((SubmissionAnswerImpl) answer).entries;
+				if (answer.getQuestion().getType() == QuestionType.fileUpload)
 				{
-					Long answerId = m_sqlService.getNextSequence("SAM_ITEMGRADING_ID_S", connection);
+					SubmissionAnswerEntryImpl sample = entries.get(0);
+					entries = new ArrayList<SubmissionAnswerEntryImpl>(1);
+					SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl(sample);
+					entry.setAnswerText(null);
+					entry.setAssessmentAnswer(null);
 
-					// this will score the answer based on values in the database
-					String statement = "INSERT INTO SAM_ITEMGRADING_T"
-							+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
-							+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW"
-							+ ((answerId == null) ? "" : ", ITEMGRADINGID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,"
-							+ m_sqlService.getBooleanConstant(answer.getMarkedForReview()) // TODO: it would be nice if our ? /
-							// Boolean worked with bit fields
-							// -ggolden
-							+ ((answerId == null) ? "" : ",?") + ")";
-					Object[] fields = new Object[(answerId == null) ? 10 : 11];
-					fields[0] = answer.getSubmission().getId();
-					fields[1] = answer.getQuestion().getId();
-					fields[2] = entry.getQuestionPart().getId();
-					fields[3] = answer.getSubmission().getUserId();
-					fields[4] = answer.getSubmittedDate();
-					fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
-					fields[6] = answer.getRationale();
-					fields[7] = entry.getAnswerText();
-					fields[8] = entry.getAutoScore();
-					fields[9] = new Float(0);
+					// set the entry id to the id we saved in the answer
+					entry.id = ((SubmissionAnswerImpl) answer).id;
+					entries.add(entry);
+				}
 
-					if (answerId != null)
+				// create submission answer record(s) if needed
+				for (SubmissionAnswerEntryImpl entry : entries)
+				{
+					if (entry.getId() == null)
 					{
-						fields[10] = answerId;
+						Long answerId = m_sqlService.getNextSequence("SAM_ITEMGRADING_ID_S", connection);
+
+						// this will score the answer based on values in the database
+						String statement = "INSERT INTO SAM_ITEMGRADING_T"
+								+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
+								+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW"
+								+ ((answerId == null) ? "" : ", ITEMGRADINGID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,"
+								+ m_sqlService.getBooleanConstant(answer.getMarkedForReview())
+								// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
+								+ ((answerId == null) ? "" : ",?") + ")";
+						Object[] fields = new Object[(answerId == null) ? 10 : 11];
+						fields[0] = answer.getSubmission().getId();
+						fields[1] = answer.getQuestion().getId();
+						fields[2] = entry.getQuestionPart().getId();
+						fields[3] = answer.getSubmission().getUserId();
+						fields[4] = answer.getSubmittedDate();
+						fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
+						fields[6] = answer.getRationale();
+						fields[7] = entry.getAnswerText();
+						fields[8] = entry.getAutoScore();
+						fields[9] = new Float(0);
+
+						if (answerId != null)
+						{
+							fields[10] = answerId;
+							if (!m_sqlService.dbWrite(connection, statement, fields))
+							{
+								// TODO: better exception
+								throw new Exception("submitAnswer: dbWrite Failed");
+							}
+						}
+						else
+						{
+							answerId = m_sqlService.dbInsert(connection, statement, fields, "ITEMGRADINGID");
+							if (answerId == null)
+							{
+								// TODO: better exception
+								throw new Exception("submitAnswers: dbInsert Failed");
+							}
+						}
+
+						// set the id into the answer
+						if (answerId == null) throw new Exception("failed to insert submission answer");
+						entry.initId(answerId.toString());
+						if (((SubmissionAnswerImpl) answer).id == null) ((SubmissionAnswerImpl) answer).id = answerId.toString();
+					}
+
+					// otherwise update the submission answer record
+					else
+					{
+						String statement = "UPDATE SAM_ITEMGRADING_T"
+								+ " SET SUBMITTEDDATE = ?, PUBLISHEDANSWERID = ?, PUBLISHEDITEMTEXTID = ?, RATIONALE = ?, ANSWERTEXT = ?, AUTOSCORE = ?,"
+								+ " REVIEW = " + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
+								// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
+								+ " WHERE ITEMGRADINGID = ?";
+						// TODO: for added security, add to WHERE: AND ASSESSMENTGRADINGID = ?answer.getSubmissionId() AND
+						// PUBLISHEDITEMID = ?answer.getQuestionId() -ggolden
+						Object[] fields = new Object[7];
+						fields[0] = answer.getSubmittedDate();
+						fields[1] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
+						fields[2] = entry.getQuestionPart().getId();
+						fields[3] = answer.getRationale();
+						fields[4] = entry.getAnswerText();
+						fields[5] = entry.getAutoScore();
+						fields[6] = entry.getId();
+
 						if (!m_sqlService.dbWrite(connection, statement, fields))
 						{
 							// TODO: better exception
-							throw new Exception("submitAnswer: dbWrite Failed");
+							throw new Exception("submitAnswers: dbWrite Failed");
 						}
 					}
-					else
+				}
+
+				// for any entries unused that have an id, delete them
+				for (SubmissionAnswerEntryImpl entry : ((SubmissionAnswerImpl) answer).recycle)
+				{
+					if (entry.getId() != null)
 					{
-						answerId = m_sqlService.dbInsert(connection, statement, fields, "ITEMGRADINGID");
-						if (answerId == null)
+						String statement = "DELETE FROM SAM_ITEMGRADING_T WHERE ITEMGRADINGID = ?";
+						Object[] fields = new Object[1];
+						fields[0] = entry.getId();
+						if (!m_sqlService.dbWrite(connection, statement, fields))
 						{
 							// TODO: better exception
-							throw new Exception("submitAnswer: dbInsert Failed");
+							throw new Exception("submitAnswers: dbWrite Failed");
 						}
 					}
-
-					// set the id into the answer
-					if (answerId == null) throw new Exception("failed to insert submission answer");
-					entry.initId(answerId.toString());
-					if (((SubmissionAnswerImpl) answer).id == null) ((SubmissionAnswerImpl) answer).id = answerId.toString();
 				}
 
-				// otherwise update the submission answer record
-				else
-				{
-					String statement = "UPDATE SAM_ITEMGRADING_T"
-							+ " SET SUBMITTEDDATE = ?, PUBLISHEDANSWERID = ?, PUBLISHEDITEMTEXTID = ?, RATIONALE = ?, ANSWERTEXT = ?, AUTOSCORE = ?,"
-							+ " REVIEW = " + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
-							// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
-							+ " WHERE ITEMGRADINGID = ?";
-					// TODO: for added security, add to WHERE: AND ASSESSMENTGRADINGID = ?answer.getSubmissionId() AND
-					// PUBLISHEDITEMID = ?answer.getQuestionId() -ggolden
-					Object[] fields = new Object[7];
-					fields[0] = answer.getSubmittedDate();
-					fields[1] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
-					fields[2] = entry.getQuestionPart().getId();
-					fields[3] = answer.getRationale();
-					fields[4] = entry.getAnswerText();
-					fields[5] = entry.getAutoScore();
-					fields[6] = entry.getId();
-
-					if (!m_sqlService.dbWrite(connection, statement, fields))
-					{
-						// TODO: better exception
-						throw new Exception("submitAnswer: dbWrite Failed");
-					}
-				}
+				// clear the unused now we have deleted what we must
+				((SubmissionAnswerImpl) answer).recycle.clear();
 			}
-
-			// for any entries unused that have an id, delete them
-			for (SubmissionAnswerEntryImpl entry : ((SubmissionAnswerImpl) answer).recycle)
-			{
-				if (entry.getId() != null)
-				{
-					String statement = "DELETE FROM SAM_ITEMGRADING_T WHERE ITEMGRADINGID = ?";
-					Object[] fields = new Object[1];
-					fields[0] = entry.getId();
-					if (!m_sqlService.dbWrite(connection, statement, fields))
-					{
-						// TODO: better exception
-						throw new Exception("submitAnswer: dbWrite Failed");
-					}
-				}
-			}
-
-			// clear the unused now we have deleted what we must
-			((SubmissionAnswerImpl) answer).recycle.clear();
 
 			// if complete, update the STATUS to 1 and the FORGRADE to TRUE... always update the date
 			// Note: for Samigo compat., we need to update the scores in the SAM_ASSESSMENTGRADING_T based on the sums of the item
@@ -2276,13 +2294,13 @@ public class AssessmentServiceImpl implements AssessmentService
 							.getBooleanConstant(true))
 							: "") + " WHERE ASSESSMENTGRADINGID = ?";
 			Object[] fields = new Object[3];
-			fields[0] = answer.getSubmission().getSubmittedDate();
-			fields[1] = answer.getSubmission().getId();
-			fields[2] = answer.getSubmission().getId();
+			fields[0] = submission.getSubmittedDate();
+			fields[1] = submission.getId();
+			fields[2] = submission.getId();
 			if (!m_sqlService.dbWrite(connection, statement, fields))
 			{
 				// TODO: better exception
-				throw new Exception("submitAnswer: dbWrite Failed");
+				throw new Exception("submitAnswers: dbWrite Failed");
 			}
 
 			// commit
@@ -2309,10 +2327,10 @@ public class AssessmentServiceImpl implements AssessmentService
 				}
 				catch (Exception ee)
 				{
-					M_log.warn("submitAnswer: rollback: " + ee);
+					M_log.warn("submitAnswers: rollback: " + ee);
 				}
 			}
-			M_log.warn("submitAnswer: " + e);
+			M_log.warn("submitAnswers: " + e);
 		}
 		finally
 		{
@@ -2325,7 +2343,7 @@ public class AssessmentServiceImpl implements AssessmentService
 				}
 				catch (Exception e)
 				{
-					M_log.warn("submitAnswer, while setting auto commit: " + e);
+					M_log.warn("submitAnswers, while setting auto commit: " + e);
 				}
 
 				// return the connetion

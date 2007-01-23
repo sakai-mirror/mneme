@@ -244,8 +244,9 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	{
 		QuestionType type = getQuestion().getType();
 
-		// fill in, numeric, essay, needs some text in an entry
-		if ((type == QuestionType.essay) || (type == QuestionType.fillIn) || (type == QuestionType.numeric))
+		// fill in, numeric, essay, upload, needs some text in an entry
+		if ((type == QuestionType.essay) || (type == QuestionType.fillIn) || (type == QuestionType.numeric)
+				|| (type == QuestionType.fileUpload))
 		{
 			if (this.entries.size() == 0) return false;
 			for (SubmissionAnswerEntryImpl entry : this.entries)
@@ -360,7 +361,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 				{
 					entry.answerText = null;
 				}
-				
+
 				// otherwise remove it
 				else
 				{
@@ -509,7 +510,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			String type = file.getContentType();
 			InputStream body = file.getInputStream();
 			long size = file.getSize();
-			
+
 			// detect no file selected
 			if ((name == null) || (type == null) || (body == null) || (size == 0)) return;
 
@@ -519,7 +520,8 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			}
 
 			Attachment a = new AttachmentImpl(null, size, name, null, type);
-			String id = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService)).putAttachment(a, body, this.id);
+			String id = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService))
+					.putAttachment(a, body, this.id);
 
 			// add an entry to the answer with this attachment
 			SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
@@ -530,7 +532,8 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			entry.submissionAnswer = this;
 			entry.questionPartId = this.getQuestion().getPart().getId();
 
-			String refStr = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService)).getAttachmentReference(getSubmission().getId(), id);
+			String refStr = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService))
+					.getAttachmentReference(getSubmission().getId(), id);
 			entry.setAnswerText(refStr);
 
 			entry.initAnswer(this);
@@ -568,7 +571,8 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		{
 			for (AssessmentAnswer answer : question.getPart().getAnswersAsAuthored())
 			{
-				// make an entry for this question answer (of the single part), setting the question answer id, leaving the text null
+				// make an entry for this question answer (of the single part), setting the question answer id, leaving the text
+				// null
 				SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
 				entry.initQuestionPartId(question.getPart().getId());
 				entry.initAssessmentAnswerId(answer.getId());

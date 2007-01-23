@@ -343,6 +343,23 @@ public interface AssessmentService
 			AssessmentClosedException, SubmissionCompletedException;
 
 	/**
+	 * Enter or update a set of answers to questions of an incomplete submission to an assessment. Auto grade. Updated realated info (such as the submission's score).<br />
+	 * Complete the submission if indicated.
+	 * 
+	 * @param answers
+	 *        The List of SubmissionAnswerAnswer containing the submitters answer information to questions
+	 * @param completeSubmission
+	 *        if TRUE, the submission will be marked complete and submitted for grading
+	 * @throws AssessmentPermissionException
+	 *         if the user does not have permission to submit to this assessment.
+	 * @throws AssessmentClosedException
+	 *         if assessment is not currently open for submission.
+	 * @throws SubmissionCompletedException
+	 *         if the submission is already completed.
+	 */
+	void submitAnswers(List<SubmissionAnswer> answers, Boolean completeSubmission) throws AssessmentPermissionException,
+			AssessmentClosedException, SubmissionCompletedException;
+	/**
 	 * Complete this submission. Use this instead of submitAnswer() when there's no answer information to also update.
 	 * 
 	 * @param submission
