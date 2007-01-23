@@ -503,12 +503,6 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public void setUploadFile(FileItem file)
 	{
-		if (this.id == null)
-		{
-			M_log.warn("setUploadFile: null SubmissionAnswer.id");
-			return;
-		}
-
 		try
 		{
 			String name = file.getName();
@@ -519,16 +513,22 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			// detect no file selected
 			if ((name == null) || (type == null) || (body == null) || (size == 0)) return;
 
+			if (this.id == null)
+			{
+				((SubmissionImpl) this.getSubmission()).service.reserveAnswer(this);
+			}
+
 			Attachment a = new AttachmentImpl(null, size, name, null, type);
 			String id = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService)).putAttachment(a, body, this.id);
 
 			// add an entry to the answer with this attachment
-			SubmissionAnswerEntryImpl sample = this.entries.get(0);
-			SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl(sample);
+			SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
 			entry.setAssessmentAnswer(null);
 			entry.setAnswerText(null);
 			entry.initId(null);
 			entry.initAutoScore(new Float(0));
+			entry.submissionAnswer = this;
+			entry.questionPartId = this.getQuestion().getPart().getId();
 
 			String refStr = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService)).getAttachmentReference(getSubmission().getId(), id);
 			entry.setAnswerText(refStr);

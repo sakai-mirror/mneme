@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -63,6 +63,29 @@ import org.sakaiproject.util.Web;
  */
 public class AssessmentDeliveryTool extends HttpServlet
 {
+	public class Qa
+	{
+		protected SubmissionAnswer a = null;
+
+		protected AssessmentQuestion q = null;
+
+		public Qa(AssessmentQuestion question, SubmissionAnswer answer)
+		{
+			this.q = question;
+			this.a = answer;
+		}
+
+		public SubmissionAnswer getAnswer()
+		{
+			return this.a;
+		}
+
+		public AssessmentQuestion getQuestion()
+		{
+			return this.q;
+		}
+	}
+
 	/** Our tool destinations. */
 	enum Destinations
 	{
@@ -79,19 +102,19 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected AssessmentService assessmentService = null;
 
 	/** Our self-injected attachment service reference. */
-	protected AttachmentService attachmentService = null;
+	protected AttachmentService attachmentService = null;;
+
+	/** Our self-injected entity manager reference. */
+	protected EntityManager entityManager = null;
 
 	/** Our self-injected session manager reference. */
-	protected SessionManager sessionManager = null;;
+	protected SessionManager sessionManager = null;
 
 	/** Our self-injected time service reference. */
 	protected TimeService timeService = null;
 
 	/** Our self-injected tool manager reference. */
 	protected ToolManager toolManager = null;
-
-	/** Our self-injected entity manager reference. */
-	protected EntityManager entityManager = null;
 
 	/** Our self-injected ui service reference. */
 	protected UiService ui = null;
@@ -762,6 +785,124 @@ public class AssessmentDeliveryTool extends HttpServlet
 	}
 
 	/**
+	 * Get the UI for the quesiton destination
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submisssionId
+	 *        The selected submission id.
+	 * @param questionSelector
+	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections
+	 *        worth, and a picks them all.
+	 * @param feedback
+	 *        The feedback parameter which could indicate (if it is "feedback") that the user wants feedback
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionSelector,
+			String feedback, Context context)
+	{
+		// collect the questions (actually their answers) to put on the page
+		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
+
+		if (!questionSetup(submissionId, questionSelector, feedback, context, answers))
+		{
+			errorGet(req, res, context);
+			return;
+		}
+
+		// render
+		ui.render(uiQuestion, context);
+		return;
+
+		// // if the assessment is linear and this question has been seen already, we don't allow entry
+		// if ((!question.getSection().getAssessment().getRandomAccess()) && submission.getSeenQuestion(question))
+		// {
+		// // TODO: better error reporting!
+		// errorGet(req, res, context);
+		// return;
+		// }
+	}
+
+	/**
+	 * Read the input for the question destination, process, and redirect to the next destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param context
+	 *        The UiContext
+	 * @param submisssionId
+	 *        The selected submission id.
+	 * @param questionSelector
+	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections
+	 * @param expected
+	 *        true if this post was expected, false if not.
+	 */
+	protected void questionPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId,
+			String questionSelector) throws IOException
+	{
+		// TODO: deal with unexpected
+
+		// collect the questions (actually their answers) to put on the page
+		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
+
+		// setup receiving context
+		if (!questionSetup(submissionId, questionSelector, "", context, answers))
+		{
+			errorGet(req, res, context);
+			return;
+		}
+
+		// read form
+		String destination = ui.decode(req, context);
+
+		// for each answer we put out, submit it
+		for (SubmissionAnswer answer : answers)
+		{
+			// if we are going to exit, we must complete the submission (last answer only)
+			boolean complete = false;
+			if (destination.startsWith("/exit") && answer.equals(answers.get(answers.size() - 1)))
+			{
+				complete = true;
+			}
+
+			// submit the user's answer
+			try
+			{
+				assessmentService.submitAnswer(answer, complete);
+			}
+			catch (AssessmentClosedException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+				return;
+			}
+			catch (SubmissionCompletedException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+				return;
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+				return;
+			}
+		}
+
+		// redirect to the next destination
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+		return;
+	}
+
+	/**
 	 * Setup the context for question get and post
 	 * 
 	 * @param submisssionId
@@ -876,213 +1017,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// }
 
 		return false;
-	}
-
-	/**
-	 * Get the UI for the quesiton destination
-	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
-	 * @param submisssionId
-	 *        The selected submission id.
-	 * @param questionSelector
-	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections
-	 *        worth, and a picks them all.
-	 * @param feedback
-	 *        The feedback parameter which could indicate (if it is "feedback") that the user wants feedback
-	 * @param context
-	 *        UiContext.
-	 * @param out
-	 *        Output writer.
-	 */
-	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionSelector,
-			String feedback, Context context)
-	{
-		// collect the questions (actually their answers) to put on the page
-		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
-
-		if (!questionSetup(submissionId, questionSelector, feedback, context, answers))
-		{
-			errorGet(req, res, context);
-			return;
-		}
-
-		// render
-		ui.render(uiQuestion, context);
-		return;
-
-		// // if the assessment is linear and this question has been seen already, we don't allow entry
-		// if ((!question.getSection().getAssessment().getRandomAccess()) && submission.getSeenQuestion(question))
-		// {
-		// // TODO: better error reporting!
-		// errorGet(req, res, context);
-		// return;
-		// }
-	}
-
-	/**
-	 * Get the UI for the review destination
-	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
-	 * @param submisssionId
-	 *        The selected submission id.
-	 * @param context
-	 *        UiContext.
-	 * @param out
-	 *        Output writer.
-	 */
-	protected void reviewGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
-	{
-		// yes feedback, and we are in review
-		context.put("feedback", Boolean.TRUE);
-		context.put("review", Boolean.TRUE);
-
-		// collect the submission
-		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission != null)
-		{
-			// TODO: security check (user matches submission user)
-			// TODO: check that the submission is closed
-			context.put("submission", submission);
-			context.put("assessment", submission.getAssessment());
-
-			// collect all the answers for review
-			List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
-			for (AssessmentSection section : submission.getAssessment().getSections())
-			{
-				for (AssessmentQuestion question : section.getQuestions())
-				{
-					SubmissionAnswer answer = submission.getAnswer(question);
-					answers.add(answer);
-				}
-			}
-
-			context.put("answers", answers);
-
-			// render using the question interface
-			ui.render(uiQuestion, context);
-			return;
-		}
-
-		errorGet(req, res, context);
-	}
-
-	public class Qa
-	{
-		protected AssessmentQuestion q = null;
-
-		protected SubmissionAnswer a = null;
-
-		public Qa(AssessmentQuestion question, SubmissionAnswer answer)
-		{
-			this.q = question;
-			this.a = answer;
-		}
-
-		public AssessmentQuestion getQuestion()
-		{
-			return this.q;
-		}
-
-		public SubmissionAnswer getAnswer()
-		{
-			return this.a;
-		}
-	}
-
-	/**
-	 * Read the input for the question destination, process, and redirect to the next destination.
-	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
-	 * @param context
-	 *        The UiContext
-	 * @param submisssionId
-	 *        The selected submission id.
-	 * @param questionSelector
-	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections
-	 * @param expected
-	 *        true if this post was expected, false if not.
-	 */
-	protected void questionPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId,
-			String questionSelector) throws IOException
-	{
-		// TODO: deal with unexpected
-
-		// collect the questions (actually their answers) to put on the page
-		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
-
-		// setup receiving context
-		if (!questionSetup(submissionId, questionSelector, "", context, answers))
-		{
-			errorGet(req, res, context);
-			return;
-		}
-
-		// read form
-		String destination = ui.decode(req, context);
-
-		// for each answer we put out, submit it
-		for (SubmissionAnswer answer : answers)
-		{
-			// if we are going to exit, we must complete the submission (last answer only)
-			boolean complete = false;
-			if (destination.startsWith("/exit") && answer.equals(answers.get(answers.size() - 1)))
-			{
-				complete = true;
-			}
-
-			// submit the user's answer
-			try
-			{
-				assessmentService.submitAnswer(answer, complete);
-			}
-			catch (AssessmentClosedException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-				return;
-			}
-			catch (SubmissionCompletedException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-				return;
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-				return;
-			}
-		}
-
-		// // now setup to decode any file uploads that came in - we do this now, after the answers are committed, so make sure that
-		// // there are answer ids.
-		// List<AttachmentUpload> uploads = new ArrayList<AttachmentUpload>(answers.size());
-		// for (SubmissionAnswer answer : answers)
-		// {
-		// // create a file upload for each answer... to match the order of the answers
-		// uploads.add(attachmentService.newUpload(answer));
-		// }
-		//
-		// // we put this in the context as "answers", because that's how it's encoded
-		// // Note: we count on the fact that a SubmissionAnswer, normally found in answers, has no setFile() method... so the
-		// initial
-		// // decoding skips the files. -ggolden
-		// context.put("answers", uploads);
-		// ui.decode(req, context);
-
-		// redirect to the next destination
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-		return;
 	}
 
 	/**
@@ -1207,6 +1141,56 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// redirect to error
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+	}
+
+	/**
+	 * Get the UI for the review destination
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submisssionId
+	 *        The selected submission id.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void reviewGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
+	{
+		// yes feedback, and we are in review
+		context.put("feedback", Boolean.TRUE);
+		context.put("review", Boolean.TRUE);
+
+		// collect the submission
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission != null)
+		{
+			// TODO: security check (user matches submission user)
+			// TODO: check that the submission is closed
+			context.put("submission", submission);
+			context.put("assessment", submission.getAssessment());
+
+			// collect all the answers for review
+			List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
+			for (AssessmentSection section : submission.getAssessment().getSections())
+			{
+				for (AssessmentQuestion question : section.getQuestions())
+				{
+					SubmissionAnswer answer = submission.getAnswer(question);
+					answers.add(answer);
+				}
+			}
+
+			context.put("answers", answers);
+
+			// render using the question interface
+			ui.render(uiQuestion, context);
+			return;
+		}
+
+		errorGet(req, res, context);
 	}
 
 	/**

@@ -63,15 +63,6 @@ public interface AttachmentService
 	String getAttachmentReference(String container, String id);
 
 	/**
-	 * Create a new file upload receiving object.
-	 * 
-	 * @param answer
-	 *        The submision answer that gets the upload.
-	 * @return a new AttachmentUpload instance.
-	 */
-	AttachmentUpload newUpload(SubmissionAnswer answer);
-
-	/**
 	 * Remove this attachment
 	 * 
 	 * @param attachment

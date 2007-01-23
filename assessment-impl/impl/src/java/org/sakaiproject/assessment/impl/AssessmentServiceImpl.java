@@ -78,64 +78,39 @@ public class AssessmentServiceImpl implements AssessmentService
 	/** A cache of assessments. */
 	protected Cache m_assessmentCache = null;
 
-	/** A cache of submissions. */
-	protected Cache m_submissionCache = null;
+	/** Dependency: AttachmentService */
+	protected AttachmentService m_attachmentService = null;
 
 	/*******************************************************************************************************************************
 	 * Abstractions, etc.
 	 ******************************************************************************************************************************/
 
-	/**
-	 * Check the security for this user doing this function withing this context.
-	 * 
-	 * @param userId
-	 *        the user id.
-	 * @param function
-	 *        the function.
-	 * @param context
-	 *        The context.
-	 * @param ref
-	 *        The entity reference.
-	 * @return true if the user has permission, false if not.
-	 */
-	protected boolean checkSecurity(String userId, String function, String context, String ref)
-	{
-		// check for super user
-		if (m_securityService.isSuperUser(userId)) return true;
+	/** The # seconds between cache cleaning runs. */
+	protected int m_cacheCleanerSeconds = 0;
 
-		// check for the user / function / context-as-site-authz
+	/** The # seconds to cache assessment reads. 0 disables the cache. */
+	protected int m_cacheSeconds = 0;
 
-		// form the azGroups for a context-as-implemented-by-site (Note the *lack* of direct dependency on Site, i.e. we stole the
-		// code!)
-		Collection azGroups = new Vector(2);
-		azGroups.add("/site/" + context);
-		azGroups.add("!site.helper");
+	/** Dependency: EntityManager */
+	protected EntityManager m_entityManager = null;
 
-		boolean rv = m_securityService.unlock(userId, function, ref, azGroups);
-		return rv;
-	}
+	/** Dependency: EventTrackingService */
+	protected EventTrackingService m_eventTrackingService = null;
 
-	/**
-	 * Check security and throw if not satisfied
-	 * 
-	 * @param userId
-	 *        the user id.
-	 * @param function
-	 *        the function.
-	 * @param context
-	 *        The context.
-	 * @param ref
-	 *        The entity reference.
-	 * @throws AssessmentPermissionException
-	 *         if security is not satisfied.
-	 */
-	protected void secure(String userId, String function, String context, String ref) throws AssessmentPermissionException
-	{
-		if (!checkSecurity(userId, function, context, ref))
-		{
-			throw new AssessmentPermissionException(userId, function, context);
-		}
-	}
+	/** Dependency: MemoryService */
+	protected MemoryService m_memoryService = null;
+
+	/** Dependency: SecurityService */
+	protected SecurityService m_securityService = null;
+
+	/** Dependency: SessionManager */
+	protected SessionManager m_sessionManager = null;
+
+	/** Dependency: SqlService */
+	protected SqlService m_sqlService = null;
+
+	/** A cache of submissions. */
+	protected Cache m_submissionCache = null;
 
 	/*******************************************************************************************************************************
 	 * Dependencies
@@ -143,1992 +118,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 	protected ThreadLocalManager m_threadLocalManager = null;
 
-	/**
-	 * Dependency: ThreadLocalManager.
-	 * 
-	 * @param service
-	 *        The ThreadLocalManager.
-	 */
-	public void setThreadLocalManager(ThreadLocalManager service)
-	{
-		m_threadLocalManager = service;
-	}
-
 	protected TimeService m_timeService = null;
-
-	/**
-	 * Dependency: TimeService.
-	 * 
-	 * @param service
-	 *        The TimeService.
-	 */
-	public void setTimeService(TimeService service)
-	{
-		m_timeService = service;
-	}
-
-	/** Dependency: SqlService */
-	protected SqlService m_sqlService = null;
-
-	/**
-	 * Dependency: SqlService.
-	 * 
-	 * @param service
-	 *        The SqlService.
-	 */
-	public void setSqlService(SqlService service)
-	{
-		m_sqlService = service;
-	}
-
-	/** Dependency: SessionManager */
-	protected SessionManager m_sessionManager = null;
-
-	/**
-	 * Dependency: SessionManager.
-	 * 
-	 * @param service
-	 *        The SessionManager.
-	 */
-	public void setSessionManager(SessionManager service)
-	{
-		m_sessionManager = service;
-	}
-
-	/** Dependency: MemoryService */
-	protected MemoryService m_memoryService = null;
-
-	/**
-	 * Dependency: MemoryService.
-	 * 
-	 * @param service
-	 *        The MemoryService.
-	 */
-	public void setMemoryService(MemoryService service)
-	{
-		m_memoryService = service;
-	}
-
-	/** Dependency: SecurityService */
-	protected SecurityService m_securityService = null;
-
-	/**
-	 * Dependency: SecurityService.
-	 * 
-	 * @param service
-	 *        The SecurityService.
-	 */
-	public void setSecurityService(SecurityService service)
-	{
-		m_securityService = service;
-	}
-
-	/** Dependency: EventTrackingService */
-	protected EventTrackingService m_eventTrackingService = null;
-
-	/**
-	 * Dependency: EventTrackingService.
-	 * 
-	 * @param service
-	 *        The EventTrackingService.
-	 */
-	public void setEventTrackingService(EventTrackingService service)
-	{
-		m_eventTrackingService = service;
-	}
-
-	/** Dependency: EntityManager */
-	protected EntityManager m_entityManager = null;
-
-	/**
-	 * Dependency: EntityManager.
-	 * 
-	 * @param service
-	 *        The EntityManager.
-	 */
-	public void setEntityManager(EntityManager service)
-	{
-		m_entityManager = service;
-	}
-
-	/** Dependency: AttachmentService */
-	protected AttachmentService m_attachmentService = null;
-
-	/**
-	 * Dependency: AttachmentService.
-	 * 
-	 * @param service
-	 *        The AttachmentService.
-	 */
-	public void setAttachmentService(AttachmentService service)
-	{
-		m_attachmentService = service;
-	}
-
-	/*******************************************************************************************************************************
-	 * Configuration
-	 ******************************************************************************************************************************/
-
-	/** The # seconds to cache assessment reads. 0 disables the cache. */
-	protected int m_cacheSeconds = 0;
-
-	/**
-	 * Set the # minutes to cache.
-	 * 
-	 * @param time
-	 *        The # minutes to cache a get (as an integer string).
-	 */
-	public void setCacheMinutes(String time)
-	{
-		m_cacheSeconds = Integer.parseInt(time) * 60;
-	}
-
-	/** The # seconds between cache cleaning runs. */
-	protected int m_cacheCleanerSeconds = 0;
-
-	/**
-	 * Set the # minutes between cache cleanings.
-	 * 
-	 * @param time
-	 *        The # minutes between cache cleanings. (as an integer string).
-	 */
-	public void setCacheCleanerMinutes(String time)
-	{
-		m_cacheCleanerSeconds = Integer.parseInt(time) * 60;
-	}
-
-	/*******************************************************************************************************************************
-	 * Init and Destroy
-	 ******************************************************************************************************************************/
-
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		try
-		{
-			// <= 0 indicates no caching desired
-			if ((m_cacheSeconds > 0) && (m_cacheCleanerSeconds > 0))
-			{
-				// assessment and submissions caches, automatiaclly checking for expiration as configured mins, expire on events...
-				m_assessmentCache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAssessmentReference(""));
-
-				m_submissionCache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getSubmissionReference(""));
-			}
-
-			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60);
-		}
-		catch (Throwable t)
-		{
-			M_log.warn("init(): ", t);
-		}
-	}
-
-	/**
-	 * Returns to uninitialized state.
-	 */
-	public void destroy()
-	{
-		M_log.info("destroy()");
-	}
-
-	/*******************************************************************************************************************************
-	 * AssessmentService implementation
-	 ******************************************************************************************************************************/
-
-	/*******************************************************************************************************************************
-	 * Assessment Access
-	 ******************************************************************************************************************************/
-
-	/**
-	 * TODO: Note: assessments ids are (for now) assumed to be published - the Samigo 1 data model does not have a unique assessment
-	 * id across published and non-published.
-	 */
-
-	/**
-	 * Form an assessment reference for this assessment id.
-	 * 
-	 * @param assessmentId
-	 *        the assessment id.
-	 * @return the assessment reference for this assessment id.
-	 */
-	protected String getAssessmentReference(String assessmentId)
-	{
-		String ref = REFERENCE_ROOT + "/" + ASSESSMENT_TYPE + "/" + assessmentId;
-		return ref;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Assessment idAssessment(String id)
-	{
-		if (M_log.isDebugEnabled()) M_log.debug("idAssessment: " + id);
-
-		if (id == null) return null;
-
-		// cached?
-		AssessmentImpl assessment = getCachedAssessment(id);
-		if (assessment != null)
-		{
-			// return a copy
-			return new AssessmentImpl(assessment);
-		}
-
-		// TODO: perhaps don't check, just set the id... then we need to support objects that have id set but are known to be bad...
-		// -ggolden
-		// check that it exists
-		if (!checkAssessment(id)) return null;
-
-		if (M_log.isDebugEnabled()) M_log.debug("idAssessment: creating: " + id);
-
-		// setup a new assessment with only the id
-		assessment = new AssessmentImpl(this);
-		assessment.initId(id);
-
-		// cache a copy
-		cacheAssessment(new AssessmentImpl(assessment));
-
-		return assessment;
-	}
-
-	/**
-	 * Id each of the assessments in the id list
-	 * 
-	 * @param ids
-	 *        The collection of assessment ids.
-	 * @return A list of id'ed assessments, one for each id.
-	 */
-	protected List<Assessment> idAssessments(List<String> ids)
-	{
-		List<Assessment> rv = new ArrayList<Assessment>(ids.size());
-		for (String id : ids)
-		{
-			rv.add(idAssessment(id));
-		}
-
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Assessment getAssessment(final String id)
-	{
-		// TODO: should the main and question reads be in a single transaction? -ggolden
-
-		if (M_log.isDebugEnabled()) M_log.debug("getAssessment: " + id);
-
-		if (id == null) return null;
-
-		// cached?
-		AssessmentImpl cached = getCachedAssessment(id);
-		AssessmentImpl assessment = cached;
-
-		// if not cached, get started with an identification
-		if (assessment == null)
-		{
-			assessment = new AssessmentImpl(this);
-			assessment.initId(id);
-		}
-
-		// if we need to, read the main info
-		if (!assessment.isMainInited())
-		{
-			boolean found = readAssessmentMain(assessment);
-			if (!found) return null;
-		}
-
-		// if we need to, read the sections
-		if (!assessment.isSectionsInited())
-		{
-			readAssessmentSections(assessment);
-		}
-
-		// if it was not already cached, cache it, otherwise, we already updated the actual cached object
-		if (cached == null)
-		{
-			// it was not cached, so we need to cache it
-			cacheAssessment(assessment);
-		}
-
-		// return a copy so we don't return the cache
-		return new AssessmentImpl(assessment);
-	}
-
-	/**
-	 * Check the cache for the assessment. Use the short-term cache if enabled, else use the thread-local cache.
-	 * 
-	 * @param id
-	 *        The assessment id.
-	 * @return The actual assessment object cached, or null if not.
-	 */
-	protected AssessmentImpl getCachedAssessment(String id)
-	{
-		String ref = getAssessmentReference(id);
-
-		// if we are short-term caching
-		if (m_assessmentCache != null)
-		{
-			// if it is in there
-			if (m_assessmentCache.containsKey(ref))
-			{
-				return (AssessmentImpl) m_assessmentCache.get(ref);
-			}
-		}
-
-		// otherwise check the thread-local cache
-		else
-		{
-			return (AssessmentImpl) m_threadLocalManager.get(ref);
-		}
-
-		return null;
-	}
-
-	/**
-	 * Cache this assessment. Use the short-term cache if enable, else use the thread-local cache.
-	 * 
-	 * @param assessment
-	 *        The assessment to cache.
-	 */
-	protected void cacheAssessment(AssessmentImpl assessment)
-	{
-		String ref = getAssessmentReference(assessment.getId());
-
-		// if we are short-term caching
-		if (m_assessmentCache != null)
-		{
-			m_assessmentCache.put(ref, assessment, m_cacheSeconds);
-		}
-
-		// else thread-local cache
-		else
-		{
-			m_threadLocalManager.set(ref, assessment);
-		}
-	}
-
-	/**
-	 * Check if an assessment is defined.
-	 * 
-	 * @param id
-	 *        The assessment id to check.
-	 */
-	protected boolean checkAssessment(String id)
-	{
-		if (M_log.isDebugEnabled()) M_log.debug("checkAssessment: " + id);
-
-		String statement = "SELECT P.ID FROM SAM_PUBLISHEDASSESSMENT_T P WHERE P.ID = ?";
-		Object[] fields = new Object[1];
-		fields[0] = id;
-
-		List results = m_sqlService.dbRead(statement, fields, null);
-		return !results.isEmpty();
-	}
-
-	/**
-	 * Read the main parts of the assessment (not the questions)
-	 * 
-	 * @param assessment
-	 *        The assessment impl with the id set to fill in.
-	 * @return true if we read, false if we could not find the assessment.
-	 */
-	protected boolean readAssessmentMain(final AssessmentImpl assessment)
-	{
-		if (M_log.isDebugEnabled()) M_log.debug("readAssessmentMain: " + assessment.getId());
-		if (assessment.getId() == null)
-		{
-			M_log.warn("readAssessmentMain: attempt to read with no id set");
-			return false;
-		}
-
-		String statement = "SELECT P.TITLE, AD.AGENTID, PAC.DUEDATE, PAC.FEEDBACKDATE, PE.SCORINGTYPE, P.STATUS,"
-				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, P.CREATEDBY,"
-				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.TIMELIMIT, PAC.AUTOSUBMIT, PAC.STARTDATE, PAC.RETRACTDATE, PAC.LATEHANDLING,"
-				+ " PF.SHOWSTUDENTQUESTIONSCORE, PF.SHOWCORRECTRESPONSE, PF.SHOWQUESTIONLEVELFEEDBACK, PF.SHOWSELECTIONLEVELFEEDBACK,"
-				+ " PAC.ITEMNAVIGATION, PAC.ITEMNUMBERING, P.DESCRIPTION, PAC.ASSESSMENTFORMAT"
-				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
-				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ?"
-				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID"
-				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
-				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON P.ID = PE.ASSESSMENTID" + " WHERE P.ID = ?";
-		Object[] fields = new Object[2];
-		fields[0] = "VIEW_PUBLISHED_ASSESSMENT";
-		fields[1] = assessment.getId();
-
-		List results = m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String title = result.getString(1);
-					String context = result.getString(2);
-
-					java.sql.Timestamp ts = result.getTimestamp(3, m_sqlService.getCal());
-					Time dueDate = null;
-					if (ts != null)
-					{
-						dueDate = m_timeService.newTime(ts.getTime());
-					}
-
-					ts = result.getTimestamp(4, m_sqlService.getCal());
-					Time feedbackDate = null;
-					if (ts != null)
-					{
-						feedbackDate = m_timeService.newTime(ts.getTime());
-					}
-
-					MultipleSubmissionSelectionPolicy mssPolicy = MultipleSubmissionSelectionPolicy.parse(result.getInt(5));
-
-					AssessmentStatus status = AssessmentStatus.parse(result.getInt(6));
-
-					FeedbackDelivery delivery = FeedbackDelivery.parse(result.getInt(7));
-					boolean showStudentScore = result.getBoolean(8);
-					boolean showStatistics = result.getBoolean(9);
-					String createdBy = result.getString(10);
-					boolean unlimitedSubmissions = result.getBoolean(11);
-					int submissionsAllowed = result.getInt(12);
-					int timeLimit = result.getInt(13);
-					int autoSubmit = result.getInt(14);
-
-					ts = result.getTimestamp(15, m_sqlService.getCal());
-					Time releaseDate = null;
-					if (ts != null)
-					{
-						releaseDate = m_timeService.newTime(ts.getTime());
-					}
-
-					ts = result.getTimestamp(16, m_sqlService.getCal());
-					Time retractDate = null;
-					if (ts != null)
-					{
-						retractDate = m_timeService.newTime(ts.getTime());
-					}
-					int allowLateSubmit = result.getInt(17);
-					boolean showStudentQuestionScore = result.getBoolean(18);
-					boolean showCorrectAnswer = result.getBoolean(19);
-					boolean showQuestionFeedback = result.getBoolean(20);
-					boolean showAnswerFeedback = result.getBoolean(21);
-					int randomAccess = result.getInt(22);
-					int continuousNumbering = result.getInt(23);
-					String description = result.getString(24);
-					QuestionPresentation presentation = QuestionPresentation.parse(result.getInt(25));
-
-					// pack it into the assessment
-					assessment.initAutoSubmit((autoSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
-					assessment.initContext(context);
-					assessment.initCreatedBy(createdBy);
-					assessment.initDueDate(dueDate);
-					assessment.initFeedbackDate(feedbackDate);
-					assessment.initFeedbackDelivery(delivery);
-					assessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
-					assessment.initFeedbackShowScore(Boolean.valueOf(showStudentScore));
-					assessment.initMultipleSubmissionSelectionPolicy(mssPolicy);
-					assessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
-					assessment.initStatus(status);
-					assessment.initTimeLimit(timeLimit == 0 ? null : new Integer(timeLimit));
-					assessment.initTitle(title);
-					assessment.initReleaseDate(releaseDate);
-					assessment.initRetractDate(retractDate);
-					assessment.initAllowLateSubmit((allowLateSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
-					assessment.initFeedbackShowQuestionScore(Boolean.valueOf(showStudentQuestionScore));
-					assessment.initFeedbackShowCorrectAnswer(Boolean.valueOf(showCorrectAnswer));
-					assessment.initFeedbackShowQuestionFeedback(Boolean.valueOf(showQuestionFeedback));
-					assessment.initFeedbackShowAnswerFeedback(Boolean.valueOf(showAnswerFeedback));
-					assessment.initRandomAccess(Boolean.valueOf(randomAccess == 2));
-					assessment.initContinuousNumbering(Boolean.valueOf(continuousNumbering == 1));
-					assessment.initDescription(description);
-					assessment.initQuestionPresentation(presentation);
-
-					return assessment;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("readAssessmentMain: " + e);
-					return null;
-				}
-			}
-		});
-
-		if (!results.isEmpty())
-		{
-			// update the cache if cached
-			AssessmentImpl cached = getCachedAssessment(assessment.getId());
-			if (cached != null)
-			{
-				cached.setMain(assessment);
-			}
-
-			return true;
-		}
-
-		// we didn't find it
-		return false;
-	}
-
-	/**
-	 * Read the sections and questions of the assessment (not the main) and their attachments
-	 * 
-	 * @param assessment
-	 *        The assessment impl with the id set to fill in.
-	 */
-	protected void readAssessmentSections(final AssessmentImpl assessment)
-	{
-		if (M_log.isDebugEnabled()) M_log.debug("readAssessmentSections: " + assessment.getId());
-
-		if (assessment.getId() == null)
-		{
-			M_log.warn("readAssessmentSections: attempt to read with no id set");
-			return;
-		}
-
-		// get the sections
-		String statement = "SELECT P.SECTIONID, P.TITLE, P.DESCRIPTION, SMD1.ENTRY "
-				+ " FROM SAM_PUBLISHEDSECTION_T P"
-				+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD1 ON P.SECTIONID = SMD1.SECTIONID AND SMD1.LABEL = 'QUESTIONS_ORDERING'"
-				+ " WHERE P.ASSESSMENTID = ? ORDER BY P.SEQUENCE ASC";
-		Object[] fields = new Object[1];
-		fields[0] = assessment.getId();
-
-		m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String sectionId = result.getString(1);
-					String title = result.getString(2);
-					String description = result.getString(3);
-					int questionOrdering = result.getInt(4);
-
-					// pack it into an assessment section
-					AssessmentSectionImpl section = new AssessmentSectionImpl();
-					section.initId(sectionId);
-					section.setTitle(title);
-					section.setDescription(description);
-					section.setRandomQuestionOrder((questionOrdering == 2) ? Boolean.TRUE : Boolean.FALSE);
-
-					// put the section into the assessment
-					section.initAssement(assessment);
-					assessment.sections.add(section);
-					return null;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("readAssessmentSections: " + e);
-					return null;
-				}
-			}
-		});
-
-		// mark the assessment as sections inited
-		assessment.sectionsStatus = AssessmentImpl.PropertyStatus.inited;
-
-		// get the questions
-		statement = "SELECT PI.ITEMID, PI.HASRATIONALE, PI.SCORE, PI.INSTRUCTION, PI.TYPEID, PI.SECTIONID, MCS.ENTRY, MME.ENTRY, MMR.ENTRY,"
-				+ " PF1.TEXT, PF2.TEXT, PF3.TEXT"
-				+ " FROM SAM_PUBLISHEDITEM_T PI"
-				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON PI.SECTIONID = PS.SECTIONID AND PS.ASSESSMENTID = ?"
-				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MCS ON PI.ITEMID = MCS.ITEMID AND MCS.LABEL = 'CASE_SENSITIVE'"
-				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MME ON PI.ITEMID = MME.ITEMID AND MME.LABEL = 'MUTUALLY_EXCLUSIVE'"
-				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MMR ON PI.ITEMID = MMR.ITEMID AND MMR.LABEL = 'RANDOMIZE'"
-				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF1 ON PI.ITEMID = PF1.ITEMID AND PF1.TYPEID = 'Correct Feedback'"
-				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF2 ON PI.ITEMID = PF2.ITEMID AND PF2.TYPEID = 'General Feedback'"
-				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF3 ON PI.ITEMID = PF3.ITEMID AND PF3.TYPEID = 'InCorrect Feedback'"
-				+ " ORDER BY PI.SEQUENCE ASC";
-		fields = new Object[1];
-		fields[0] = assessment.id;
-
-		m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String questionId = result.getString(1);
-					boolean hasRationale = result.getBoolean(2);
-					float score = result.getFloat(3);
-					String instructions = StringUtil.trimToNull(result.getString(4));
-					int type = result.getInt(5);
-					String sectionId = result.getString(6);
-					String caseSensitive = result.getString(7);
-					String mutuallyExclusive = result.getString(8);
-					String randomize = result.getString(9);
-					String correctFeedback = result.getString(10);
-					String generalFeedback = result.getString(11);
-					String incorrectFeedback = result.getString(12);
-
-					// pack it into an assessment question
-					AssessmentQuestionImpl question = new AssessmentQuestionImpl();
-					question.initId(questionId);
-					question.setRequireRationale(Boolean.valueOf(hasRationale));
-					question.setScore(new Float(score));
-					question.setInstructions(instructions);
-					question.setType(QuestionType.valueOf(type));
-					question.setCaseSensitive(caseSensitive == null ? null : Boolean.parseBoolean(caseSensitive));
-					question.setMutuallyExclusive(mutuallyExclusive == null ? null : Boolean.parseBoolean(mutuallyExclusive));
-					question.setFeedbackCorrect(correctFeedback);
-					question.setFeedbackGeneral(generalFeedback);
-					question.setFeedbackIncorrect(incorrectFeedback);
-					question.setRandomAnswerOrder(((randomize != null) && randomize.equals("true")) ? Boolean.TRUE : Boolean.FALSE);
-
-					// add the question to the appropriate section (sectionId)
-					AssessmentSectionImpl section = (AssessmentSectionImpl) assessment.getSection(sectionId);
-					if (section == null)
-					{
-						M_log.warn("readAssessmentParts: missing section to store question: section id: " + sectionId
-								+ " questionId: " + questionId);
-					}
-					else
-					{
-						question.initSection(section);
-						section.questions.add(question);
-					}
-
-					return null;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("readAssessmentSections: " + e);
-					return null;
-				}
-			}
-		});
-
-		// read the question parts (from Sam's item text table)
-		statement = "SELECT PIT.ITEMTEXTID, PIT.ITEMID, PIT.TEXT" + " FROM SAM_PUBLISHEDITEMTEXT_T PIT"
-				+ " INNER JOIN SAM_PUBLISHEDITEM_T PI ON PIT.ITEMID = PI.ITEMID"
-				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON PI.SECTIONID = PS.SECTIONID AND PS.ASSESSMENTID = ?"
-				+ " ORDER BY PIT.ITEMID ASC, PIT.SEQUENCE ASC";
-		fields = new Object[1];
-		fields[0] = assessment.id;
-
-		m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String partId = result.getString(1);
-					String questionId = result.getString(2);
-					String title = result.getString(3);
-
-					// pack into a question part
-					QuestionPartImpl part = new QuestionPartImpl();
-					part.initId(partId);
-					part.setTitle(title);
-
-					// add the part to the appropriate question (questionId)
-					AssessmentQuestionImpl question = (AssessmentQuestionImpl) assessment.getQuestion(questionId);
-					if (question == null)
-					{
-						M_log.warn("readAssessmentSections: missing question to store text: question id: " + questionId
-								+ " textId: " + partId);
-					}
-					else
-					{
-						part.initQuestion(question);
-						question.parts.add(part);
-					}
-
-					return null;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("readAssessmentSections: " + e);
-					return null;
-				}
-			}
-		});
-
-		// get the answers
-		statement = "SELECT PA.ANSWERID, PA.ITEMID, PA.TEXT, PA.ISCORRECT, PA.LABEL, PA.ITEMTEXTID,"
-				+ " PF1.TEXT, PF2.TEXT, PF3.TEXT"
-				+ " FROM SAM_PUBLISHEDANSWER_T PA"
-				+ " INNER JOIN SAM_PUBLISHEDITEM_T PI ON PA.ITEMID = PI.ITEMID"
-				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON PI.SECTIONID = PS.SECTIONID AND PS.ASSESSMENTID = ?"
-				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWERFEEDBACK_T PF1 ON PA.ANSWERID = PF1.ANSWERID AND PF1.TYPEID = 'Correct Feedback'"
-				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWERFEEDBACK_T PF2 ON PA.ANSWERID = PF2.ANSWERID AND PF2.TYPEID = 'General Feedback'"
-				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWERFEEDBACK_T PF3 ON PA.ANSWERID = PF3.ANSWERID AND PF3.TYPEID = 'InCorrect Feedback'"
-				+ " ORDER BY PA.SEQUENCE ASC";
-		fields = new Object[1];
-		fields[0] = assessment.id;
-
-		m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String answerId = result.getString(1);
-					String questionId = result.getString(2);
-					String text = result.getString(3);
-					boolean isCorrect = result.getBoolean(4);
-					// samigo puts out a blank (not null) label for cases where there should be no label (t/f)
-					String label = StringUtil.trimToNull(result.getString(5));
-					String partId = result.getString(6);
-					String correctFeedback = result.getString(7);
-					String generalFeedback = result.getString(8);
-					String incorrectFeedback = result.getString(9);
-
-					// find the question
-					AssessmentQuestionImpl question = (AssessmentQuestionImpl) assessment.getQuestion(questionId);
-					if (question == null)
-					{
-						M_log.warn("readAssessmentSections: missing question to store answer: question id: " + questionId
-								+ " answerId: " + answerId);
-					}
-					else
-					{
-						// find the part
-						QuestionPartImpl part = (QuestionPartImpl) question.getPart(partId);
-						if (part == null)
-						{
-							M_log.warn("readAssessmentSections: missing question part to store answer: question id: " + questionId
-									+ " partId: " + partId + " answerId: " + answerId);
-						}
-						else
-						{
-							// pack it into an assessment answer
-							AssessmentAnswerImpl answer = new AssessmentAnswerImpl();
-							answer.initId(answerId);
-							answer.setIsCorrect(Boolean.valueOf(isCorrect));
-							answer.setText(text);
-							answer.setLabel(label);
-							answer.setFeedbackCorrect(correctFeedback);
-							answer.setFeedbackGeneral(generalFeedback);
-							answer.setFeedbackIncorrect(incorrectFeedback);
-
-							// add to the part's answers
-							answer.initPart(part);
-							part.answers.add(answer);
-						}
-					}
-
-					return null;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("readAssessmentSections: " + e);
-					return null;
-				}
-			}
-		});
-
-		// read the attachments for all sections (join with the sections table to be able to select for the entire assessment)
-		statement = "SELECT A.RESOURCEID, A.SECTIONID" + " FROM SAM_PUBLISHEDATTACHMENT_T A"
-				+ " INNER JOIN SAM_PUBLISHEDSECTION_T S ON A.SECTIONID = S.SECTIONID" + " WHERE S.ASSESSMENTID = ?";
-		fields = new Object[1];
-		fields[0] = assessment.getId();
-
-		m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String refStr = result.getString(1);
-					String sectionId = result.getString(2);
-
-					// assume a content ref
-					refStr = "/content" + refStr;
-
-					// make a reference
-					Reference ref = m_entityManager.newReference(refStr);
-
-					// find the section
-					AssessmentSectionImpl section = (AssessmentSectionImpl) assessment.getSection(sectionId);
-					if (section != null)
-					{
-						// add it to the section's attachments
-						section.initAddAttachment(ref);
-					}
-					else
-					{
-						M_log.warn("readAssessmentSections: missing section to add attachment: sectionId: " + sectionId + " ref: "
-								+ refStr);
-					}
-					return null;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("readAssessmentAttachments: " + e);
-					return null;
-				}
-			}
-		});
-
-		// read the attachments for all questions (join with the items table and sections table to be able to select for the entire
-		// assessment)
-		statement = "SELECT A.RESOURCEID, A.ITEMID" + " FROM SAM_PUBLISHEDATTACHMENT_T A"
-				+ " INNER JOIN SAM_PUBLISHEDITEM_T Q ON A.ITEMID = Q.ITEMID"
-				+ " INNER JOIN SAM_PUBLISHEDSECTION_T S ON Q.SECTIONID = S.SECTIONID" + " WHERE S.ASSESSMENTID = ?";
-		fields = new Object[1];
-		fields[0] = assessment.getId();
-
-		m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String refStr = result.getString(1);
-					String questionId = result.getString(2);
-
-					// assume a content ref
-					refStr = "/content" + refStr;
-
-					// make a reference
-					Reference ref = m_entityManager.newReference(refStr);
-
-					// find the question
-					AssessmentQuestionImpl question = (AssessmentQuestionImpl) assessment.getQuestion(questionId);
-					if (question != null)
-					{
-						// add it to the question's attachments
-						question.initAddAttachment(ref);
-					}
-					else
-					{
-						M_log.warn("readAssessmentSections: missing question to add attachment: questionId: " + questionId
-								+ " ref: " + refStr);
-					}
-					return null;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("readAssessmentAttachments: " + e);
-					return null;
-				}
-			}
-		});
-
-		// update the cache if cached
-		AssessmentImpl cached = getCachedAssessment(assessment.getId());
-		if (cached != null)
-		{
-			cached.setSections(assessment);
-		}
-	}
-
-	/**
-	 * Read the attachments of the assessment
-	 * 
-	 * @param assessment
-	 *        The assessment impl with the id set to fill in.
-	 */
-	protected void readAssessmentAttachments(final AssessmentImpl assessment)
-	{
-		if (M_log.isDebugEnabled()) M_log.debug("readAssessmentAttachments: " + assessment.getId());
-
-		if (assessment.getId() == null)
-		{
-			M_log.warn("readAssessmentAttachments: attempt to read with no id set");
-			return;
-		}
-
-		// collect the attachments
-		final List<Reference> attachments = new ArrayList<Reference>();
-
-		// get the attachments
-		String statement = "SELECT A.RESOURCEID" + " FROM SAM_PUBLISHEDATTACHMENT_T A" + " WHERE A.ASSESSMENTID = ?";
-		Object[] fields = new Object[1];
-		fields[0] = assessment.getId();
-
-		m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String refStr = result.getString(1);
-
-					// assume a content ref
-					refStr = "/content" + refStr;
-
-					// make a reference
-					Reference ref = m_entityManager.newReference(refStr);
-					attachments.add(ref);
-					return null;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("readAssessmentAttachments: " + e);
-					return null;
-				}
-			}
-		});
-
-		// set these into the assessment
-		assessment.initAttachments(attachments);
-
-		// update the cache if cached
-		AssessmentImpl cached = getCachedAssessment(assessment.getId());
-		if (cached != null)
-		{
-			cached.setAttachments(assessment);
-		}
-	}
-
-	/*******************************************************************************************************************************
-	 * Submission Access
-	 ******************************************************************************************************************************/
-
-	/**
-	 * Form a submission reference for this submission id.
-	 * 
-	 * @param submissionId
-	 *        the submission id.
-	 * @return the submission reference for this submission id.
-	 */
-	protected String getSubmissionReference(String submissionId)
-	{
-		String ref = REFERENCE_ROOT + "/" + SUBMISSION_TYPE + "/" + submissionId;
-		return ref;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Submission idSubmission(String id)
-	{
-		if (M_log.isDebugEnabled()) M_log.debug("idSubmission: " + id);
-
-		if (id == null) return null;
-
-		// cached?
-		SubmissionImpl submission = getCachedSubmission(id);
-		if (submission != null)
-		{
-			// return a copy
-			return new SubmissionImpl(submission);
-		}
-
-		// TODO: perhaps don't check... (see idAssessment) -ggolden
-		// check that it exists
-		if (!checkSubmission(id)) return null;
-
-		if (M_log.isDebugEnabled()) M_log.debug("idSubmission: creating: " + id);
-
-		// setup a new assessment with only the id
-		submission = new SubmissionImpl(this);
-		submission.initId(id);
-
-		// cache a copy
-		cacheSubmission(new SubmissionImpl(submission));
-
-		return submission;
-	}
-
-	/**
-	 * Id each of the submission in the id list
-	 * 
-	 * @param ids
-	 *        The collection of submission ids.
-	 * @return A collection if id'ed submission, one for each id.
-	 */
-	protected List<Submission> idSubmissions(List<String> ids)
-	{
-		List<Submission> rv = new ArrayList<Submission>(ids.size());
-		for (String id : ids)
-		{
-			rv.add(idSubmission(id));
-		}
-
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Submission getSubmission(final String id)
-	{
-		// TODO: should the main and answers reads be done in a single transaction? -ggolden
-
-		if (M_log.isDebugEnabled()) M_log.debug("getSubmission: " + id);
-
-		if (id == null) return null;
-
-		// cached?
-		SubmissionImpl cached = getCachedSubmission(id);
-		SubmissionImpl submission = cached;
-
-		// if not cached, get started with an identification
-		if (submission == null)
-		{
-			submission = new SubmissionImpl(this);
-			submission.initId(id);
-		}
-
-		// if we need to, read the main info
-		if (!submission.isMainInited())
-		{
-			boolean found = readSubmissionMain(submission);
-			if (!found) return null;
-		}
-
-		// if we need to, read the answers
-		if (!submission.isAnswersInited())
-		{
-			readSubmissionAnswers(submission);
-		}
-
-		// if it was not already cached, cache it, otherwise, we already updated the actual cached object
-		if (cached == null)
-		{
-			// it was not cached, so we need to cache it
-			cacheSubmission(submission);
-		}
-
-		// return a copy so we don't return the cache
-		return new SubmissionImpl(submission);
-	}
-
-	/**
-	 * Read the main parts of the submission (not the answers)
-	 * 
-	 * @param submission
-	 *        The submission impl with the id set to fill in.
-	 * @return true if we read, false if we could not find the submission.
-	 */
-	protected boolean readSubmissionMain(final SubmissionImpl submission)
-	{
-		if (M_log.isDebugEnabled()) M_log.debug("readSubmissionMain: " + submission.getId());
-
-		if (submission.getId() == null)
-		{
-			M_log.warn("readSubmissionMain: attempt to read with no id set");
-			return false;
-		}
-
-		String statement = "SELECT AG.PUBLISHEDASSESSMENTID, AG.TOTALOVERRIDESCORE, AG.SUBMITTEDDATE, AG.AGENTID, AG.FORGRADE, AG.ATTEMPTDATE, AG.STATUS"
-				+ " FROM SAM_ASSESSMENTGRADING_T AG" + " WHERE AG.ASSESSMENTGRADINGID = ?";
-		Object[] fields = new Object[1];
-		fields[0] = submission.getId();
-
-		List results = m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String aid = result.getString(1);
-					float manualScore = result.getFloat(2);
-
-					java.sql.Timestamp ts = result.getTimestamp(3, m_sqlService.getCal());
-					Time submittedDate = null;
-					if (ts != null)
-					{
-						submittedDate = m_timeService.newTime(ts.getTime());
-					}
-
-					String userId = result.getString(4);
-					boolean complete = result.getBoolean(5);
-
-					ts = result.getTimestamp(6, m_sqlService.getCal());
-					Time startDate = null;
-					if (ts != null)
-					{
-						startDate = m_timeService.newTime(ts.getTime());
-					}
-
-					int status = result.getInt(7);
-
-					// pack it into a submission
-					submission.initAssessmentId(aid);
-					submission.initIsComplete(Boolean.valueOf(complete));
-					submission.initStartDate(startDate);
-					submission.initStatus(new Integer(status));
-					submission.initSubmittedDate(submittedDate);
-					submission.initUserId(userId);
-
-					// TODO: the manual score, and the coment (not yet in the SELECT list) can form the evaluation for this...
-
-					return submission;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("getSubmission: " + e);
-					return null;
-				}
-			}
-		});
-
-		if (!results.isEmpty())
-		{
-			// update the cache if cached
-			SubmissionImpl cached = getCachedSubmission(submission.getId());
-			if (cached != null)
-			{
-				cached.setMain(submission);
-			}
-
-			return true;
-		}
-
-		// we didn't find it
-		return false;
-	}
-
-	/**
-	 * Read the answers of the submission (not the main)
-	 * 
-	 * @param submission
-	 *        The submission impl with the id set to fill in.
-	 */
-	protected void readSubmissionAnswers(final SubmissionImpl submission)
-	{
-		if (M_log.isDebugEnabled()) M_log.debug("readSubmissionAnswers: " + submission.getId());
-
-		if (submission.getId() == null)
-		{
-			M_log.warn("readSubmissionAnswers: attempt to read with no id set");
-			return;
-		}
-
-		// mark the submission as inited for the answers, so the methods we are about to call don't try to re-read the answers
-		submission.answersStatus = SubmissionImpl.PropertyStatus.inited;
-
-		// read the answers.
-		// The PUBLISHEDITEMTEXTID points to a question part, and we want to read the entiries in question part sequence order,
-		// so we join to the SAM_PUBLISHEDITEMTEXT_T (i.e. question parts) table and order by the sequence there
-		String statement = "SELECT I.ITEMGRADINGID, I.SUBMITTEDDATE, I.PUBLISHEDANSWERID, I.RATIONALE, I.ANSWERTEXT, I.REVIEW, I.PUBLISHEDITEMID, I.AUTOSCORE, I.PUBLISHEDITEMTEXTID"
-				+ " FROM SAM_ITEMGRADING_T I"
-				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMTEXT_T PIT ON I.PUBLISHEDITEMTEXTID = PIT.ITEMTEXTID"
-				+ " WHERE I.ASSESSMENTGRADINGID = ?" + " ORDER BY PIT.SEQUENCE ASC";
-		Object[] fields = new Object[1];
-		fields[0] = submission.getId();
-
-		m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String id = result.getString(1);
-
-					java.sql.Timestamp ts = result.getTimestamp(2, m_sqlService.getCal());
-					Time submittedDate = null;
-					if (ts != null)
-					{
-						submittedDate = m_timeService.newTime(ts.getTime());
-					}
-
-					String answerId = result.getString(3);
-					String rationale = result.getString(4);
-					String answerText = result.getString(5);
-					boolean markedForReview = result.getBoolean(6);
-					String questionId = result.getString(7);
-					float autoScore = result.getFloat(8);
-					String questionPartId = result.getString(9);
-
-					// do we have the answer to this question yet?
-					SubmissionAnswerImpl answer = submission.findAnswer(questionId);
-
-					// if not, make one and save it in the submission
-					if (answer == null)
-					{
-						answer = new SubmissionAnswerImpl();
-						answer.initQuestionId(questionId);
-						answer.setRationale(rationale);
-						answer.setMarkedForReview(Boolean.valueOf(markedForReview));
-						answer.setSubmittedDate(submittedDate);
-						answer.id = id;
-
-						answer.initSubmission(submission);
-						submission.answers.add(answer);
-					}
-
-					// add an entry to the answer
-					SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
-					entry.initQuestionPartId(questionPartId);
-					entry.initAssessmentAnswerId(answerId);
-					entry.setAnswerText(answerText);
-					entry.initId(id);
-					entry.initAutoScore(new Float(autoScore));
-
-					entry.initAnswer(answer);
-					answer.entries.add(entry);
-
-					return null;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("readSubmissionAnswers: " + e);
-					return null;
-				}
-			}
-		});
-
-		// read the uploaded attachments for the answers, and fill out the entries to hold their refs
-		statement = "SELECT M.MEDIAID, I.PUBLISHEDITEMID" + " FROM SAM_MEDIA_T M"
-				+ " INNER JOIN SAM_ITEMGRADING_T I ON M.ITEMGRADINGID = I.ITEMGRADINGID" + " WHERE I.ASSESSMENTGRADINGID = ?"
-				+ " ORDER BY M.CREATEDDATE ASC";
-		fields = new Object[1];
-		fields[0] = submission.getId();
-		m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String mediaId = result.getString(1);
-					String questionId = result.getString(2);
-
-					// we should already have an answer
-					SubmissionAnswerImpl answer = submission.findAnswer(questionId);
-					if (answer != null)
-					{
-						// we should have at least one entry
-						SubmissionAnswerEntryImpl entry = answer.entries.get(0);
-						if (entry != null)
-						{
-							// use this if the answer text is not a reference
-							SubmissionAnswerEntryImpl newEntry = null;
-							if ((entry.getAnswerText() == null) || (!entry.getAnswerText().startsWith("/")))
-							{
-								newEntry = entry;
-							}
-
-							// otherwise make a new entry
-							else
-							{
-								newEntry = new SubmissionAnswerEntryImpl(entry);
-								newEntry.setAssessmentAnswer(null);
-								newEntry.setAnswerText(null);
-								newEntry.initId(null);
-								newEntry.initAnswer(answer);
-								newEntry.initAutoScore(new Float(0));
-								answer.entries.add(newEntry);
-							}
-
-							// set the reference to the attachment into the answer text
-							String refStr = m_attachmentService.getAttachmentReference(submission.getId(), mediaId);
-							newEntry.setAnswerText(refStr);
-						}
-
-						else
-						{
-							M_log.warn("readSubmissionAnswers: missing entry for answer to question for attachment: questionId: "
-									+ questionId + " mediaId: " + mediaId);
-						}
-					}
-					else
-					{
-						M_log.warn("readSubmissionAnswers: missing answer to question for attachment: questionId: " + questionId
-								+ " mediaId: " + mediaId);
-					}
-
-					return null;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("readSubmissionAnswers: " + e);
-					return null;
-				}
-			}
-		});
-
-		// verify the answers
-		for (SubmissionAnswerImpl answer : submission.answers)
-		{
-			answer.verifyEntries();
-		}
-
-		// update the cache if cached
-		SubmissionImpl cached = getCachedSubmission(submission.getId());
-		if (cached != null)
-		{
-			cached.setAnswers(submission);
-		}
-	}
-
-	/**
-	 * Check the cache for the submission. Use the short-term cache if enabled, else use the thread-local cache.
-	 * 
-	 * @param id
-	 *        The submission id.
-	 * @return The actual submission object cached, or null if not.
-	 */
-	protected SubmissionImpl getCachedSubmission(String id)
-	{
-		String ref = getSubmissionReference(id);
-
-		// if we are short-term caching
-		if (m_submissionCache != null)
-		{
-			// if it is in there
-			if (m_submissionCache.containsKey(ref))
-			{
-				return (SubmissionImpl) m_submissionCache.get(ref);
-			}
-		}
-
-		// otherwise check the thread-local cache
-		else
-		{
-			return (SubmissionImpl) m_threadLocalManager.get(ref);
-		}
-
-		return null;
-	}
-
-	/**
-	 * Cache this submission. Use the short-term cache if enable, else use the thread-local cache.
-	 * 
-	 * @param submission
-	 *        The submission to cache.
-	 */
-	protected void cacheSubmission(SubmissionImpl submission)
-	{
-		String ref = getSubmissionReference(submission.getId());
-
-		// if we are short-term caching
-		if (m_submissionCache != null)
-		{
-			m_submissionCache.put(ref, submission, m_cacheSeconds);
-		}
-
-		// else thread-local cache
-		else
-		{
-			m_threadLocalManager.set(ref, submission);
-		}
-	}
-
-	/**
-	 * Clear this submission from the cache.
-	 * 
-	 * @param id
-	 *        The submission id.
-	 */
-	protected void unCacheSubmission(String id)
-	{
-		String ref = getSubmissionReference(id);
-
-		// if we are short-term caching
-		if (m_submissionCache != null)
-		{
-			// Note: the cache will clear when the event is processed...
-			// m_submissionCache.remove(ref);
-		}
-
-		// else thread-local cache
-		else
-		{
-			m_threadLocalManager.set(ref, null);
-		}
-	}
-
-	/**
-	 * Check if a submission is defined
-	 * 
-	 * @param id
-	 *        The submission id to check.
-	 */
-	protected boolean checkSubmission(String id)
-	{
-		if (M_log.isDebugEnabled()) M_log.debug("checkSubmission: " + id);
-
-		String statement = "SELECT AG.ASSESSMENTGRADINGID FROM SAM_ASSESSMENTGRADING_T AG WHERE AG.ASSESSMENTGRADINGID = ?";
-		Object[] fields = new Object[1];
-		fields[0] = id;
-
-		List results = m_sqlService.dbRead(statement, fields, null);
-		return !results.isEmpty();
-	}
-
-	/*******************************************************************************************************************************
-	 * Delivery Support
-	 ******************************************************************************************************************************/
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Integer countRemainingSubmissions(String assessmentId, String userId)
-	{
-		// if null, get the current user id
-		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
-
-		final Time asOf = m_timeService.newTime();
-
-		if (M_log.isDebugEnabled())
-			M_log.debug("countRemainingSubmissions: assessment: " + assessmentId + " userId: " + userId + " asOf: " + asOf);
-
-		// we need the assessment's dates, and late handling policy, and the # submissions allowed
-		// we need the user's count of completed submissions to this assessment
-		// TODO: we need to know if the user has submit permissions at all
-
-		String statement = "SELECT PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING, COUNT(AG.PUBLISHEDASSESSMENTID)"
-				+ " FROM SAM_PUBLISHEDACCESSCONTROL_T PAC"
-				+ " LEFT OUTER JOIN SAM_ASSESSMENTGRADING_T AG ON AG.PUBLISHEDASSESSMENTID = ? AND AG.AGENTID = ? AND AG.FORGRADE = "
-				+ m_sqlService.getBooleanConstant(true)
-				+ " WHERE PAC.ASSESSMENTID = ?"
-				+ " GROUP BY AG.PUBLISHEDASSESSMENTID, PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING";
-
-		Object[] fields = new Object[3];
-		fields[0] = assessmentId;
-		fields[1] = userId;
-		fields[2] = assessmentId;
-
-		List rv = m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					boolean unlimitedSubmissions = result.getBoolean(1);
-
-					int submissionsAllowed = result.getInt(2);
-
-					java.sql.Timestamp ts = result.getTimestamp(3, m_sqlService.getCal());
-					Time startDate = null;
-					if (ts != null)
-					{
-						startDate = m_timeService.newTime(ts.getTime());
-					}
-
-					ts = result.getTimestamp(4, m_sqlService.getCal());
-					Time dueDate = null;
-					if (ts != null)
-					{
-						dueDate = m_timeService.newTime(ts.getTime());
-					}
-
-					ts = result.getTimestamp(5, m_sqlService.getCal());
-					Time retractDate = null;
-					if (ts != null)
-					{
-						retractDate = m_timeService.newTime(ts.getTime());
-					}
-
-					int lateHandling = result.getInt(6);
-
-					int submissionsMade = result.getInt(7);
-
-					// if before start date, or after retract date, we are done
-					if ((startDate != null) && asOf.before(startDate)) return new Integer(0);
-					if ((retractDate != null) && asOf.after(retractDate)) return new Integer(0);
-
-					// if after due date and we are not taking late submissions, we are done
-					if ((dueDate != null) && (lateHandling != 1) && asOf.after(dueDate)) return new Integer(0);
-
-					// if unlimited, return a -1
-					if (unlimitedSubmissions) return new Integer(-1);
-
-					// return the difference between the number taken already and the max
-					int left = submissionsAllowed - submissionsMade;
-
-					if (left <= 0) return new Integer(0);
-
-					return new Integer(left);
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("getAssessmentDueDate: " + e);
-					return null;
-				}
-			}
-		});
-
-		return (rv.size() == 0) ? null : (Integer) rv.get(0);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public List<Assessment> getAvailableAssessments(final String context, String userId, GetAvailableAssessmentsSort sort)
-	{
-		// if null, get the current user id
-		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
-
-		// the current time
-		Time asOf = m_timeService.newTime();
-
-		if (M_log.isDebugEnabled())
-			M_log.debug("getAvailableAssessmentsIds: context: " + context + " userId: " + userId + " asOf: " + asOf);
-
-		// Notes: "in context"
-		// SAM_ASSESSMENTBASE_T has the defined assessments (ID)
-		// SAM_PUBLISHEDASSESSMENT_T has the main published assessment info, referring back to the SAM_ASSESSMENTBASE_T table's
-		// entry with (ASSESSMENTID)
-		// SAM_AUTHZDATA_T maps permissions (FUNCTIONID = TAKE_PUBLISHED_ASSESSMENT) for sites (AGENTID) to assessments by published
-		// assessment id (QUALIFIERID)
-		// SAM_AUTHZDATA_T QUALIFIERID can be either base assessment or published assessment; the FUNCTIONID for published are a
-		// separate set than from base (EDIT_ASSESSMENT)
-
-		// Notes: released and not yet retracted
-		// SAM_PUBLISHEDACCESSCONTROL_T joins with the SAM_PUBLISHEDASSESSMENT_T (ASSESSMENTID) to define the active period
-		// (STARTDATE) and (RETRACTDATE)
-		// either may be null
-		// we want now to be >= startdate and < retractdate (edges?)
-
-		// Note: due date and last policy
-		// SAM_PUBLISHEDACCESSCONTROL_T joins with the SAM_PUBLISHEDASSESSMENT_T (ASSESSMENTID) to define the due date (DUEDATE) -
-		// may be null
-		// and (LATEHANDLING) is 1 to allow late submissions, 2 to not allow late submissions
-
-		// Note: join with submissions
-		// SAM_ASSESSMENTGRADING_T joins in on PUBLISHEDASSESSMENTID to the SAM_PUBLISHEDASSESSMENT_T table for each submission
-		// A left outer join gives us a record for each assessment, even with no submissions, and multiple records, one for each
-		// submission.
-		// The GROUP BY lets us get a count of submissions and collapses the records down to one per assessment
-		// We need the inner select so we can compute the counts, then filter out those that have reached their submit limit
-		// Counting the AG.PUBLISHEDASSESSMENTID column gives us an accurate count of how many submissions - if there are none, this
-		// will end up null and give a 0 count.
-
-		// Note: number of submissions allowed
-		// SAM_PUBLISHEDACCESSCONTROL_T SUBMISSIONSALLOWED is null for unlimited, or has a count
-
-		// Note: extra info
-		// anticipating that we need the title and duedate (etc) for each assessment, we get it here and cache it so we can return
-		// it later in the thread
-
-		// figure sort sql
-		String sortSql = null;
-		if (sort == null)
-		{
-			sortSql = "X.TITLE ASC";
-		}
-		else
-		{
-			switch (sort)
-			{
-				case title_a:
-				{
-					sortSql = "X.TITLE ASC";
-					break;
-				}
-
-				case title_d:
-				{
-					sortSql = "X.TITLE DESC";
-					break;
-				}
-
-				case dueDate_a:
-				{
-					sortSql = "X.DUEDATE DESC";
-					break;
-				}
-
-				case dueDate_d:
-				{
-					sortSql = "X.DUEDATE DESC";
-					break;
-				}
-			}
-		}
-
-		String statement = "SELECT X.ID, X.TITLE, X.DUEDATE FROM ("
-				+ " SELECT P.ID ID, COUNT(AG.PUBLISHEDASSESSMENTID) SUBMITTED, PAC.SUBMISSIONSALLOWED ALLOWED, P.TITLE TITLE, PAC.DUEDATE DUEDATE"
-				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
-				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?"
-				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON"
-				+ "      P.ID = PAC.ASSESSMENTID AND (PAC.STARTDATE IS NULL OR ? >= PAC.STARTDATE) AND (PAC.RETRACTDATE IS NULL OR ? < PAC.RETRACTDATE) AND (PAC.DUEDATE IS NULL OR ? < PAC.DUEDATE OR PAC.LATEHANDLING = 1)"
-				+ " LEFT OUTER JOIN SAM_ASSESSMENTGRADING_T AG ON P.ID = AG.PUBLISHEDASSESSMENTID AND AG.AGENTID = ? AND AG.FORGRADE = "
-				+ m_sqlService.getBooleanConstant(true) + " GROUP BY P.ID, PAC.SUBMISSIONSALLOWED, P.TITLE, PAC.DUEDATE" + " ) X"
-				+ " WHERE (X.ALLOWED IS NULL OR X.SUBMITTED < X.ALLOWED)" + " ORDER BY " + sortSql;
-
-		Object[] fields = new Object[6];
-		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
-		fields[1] = context;
-		fields[2] = asOf;
-		fields[3] = asOf;
-		fields[4] = asOf;
-		fields[5] = userId;
-
-		final AssessmentServiceImpl service = this;
-		final List<String> ids = new ArrayList<String>();
-		List rv = m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String assessmentId = result.getString(1);
-					String title = result.getString(2);
-
-					java.sql.Timestamp ts = result.getTimestamp(3, m_sqlService.getCal());
-					Time dueDate = null;
-					if (ts != null)
-					{
-						dueDate = m_timeService.newTime(ts.getTime());
-					}
-
-					// create or update these properties in the assessment cache
-					AssessmentImpl cached = getCachedAssessment(assessmentId);
-					if (cached == null)
-					{
-						// cache an empty one
-						cached = new AssessmentImpl(service);
-						cached.initId(assessmentId);
-						cached.initContext(context);
-						cacheAssessment(cached);
-					}
-					cached.initTitle(title);
-					cached.initDueDate(dueDate);
-
-					// record the id
-					ids.add(assessmentId);
-
-					return null;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("getAvailableAssessmentsIds: " + e);
-					return null;
-				}
-			}
-		});
-
-		// id each of the returned assessment ids
-		return idAssessments(ids);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public List<Submission> getOfficialSubmissions(final String context, String userId, GetOfficialSubmissionsSort sort)
-	{
-		// if null, get the current user id
-		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
-
-		if (M_log.isDebugEnabled()) M_log.debug("getOfficialSubmissionsIds: context: " + context + " userId: " + userId);
-
-		// Note: submissions
-		// SAM_ASSESSMENTGRADING_T lists submissions to assessments
-		// the user id is in the AGENTID column, the assessment is in the PUBLISHEDASSESSMENTID column
-
-		// Notes: "in context"
-		// SAM_AUTHZDATA_T maps permissions (FUNCTIONID = TAKE_PUBLISHED_ASSESSMENT) for sites (AGENTID) to assessments by published
-		// assessment id (QUALIFIERID)
-
-		// Notes: official submission
-		// Of many submissions, either the latest or the highest graded is used
-		// SAM_PUBLISHEDEVALUATION_T, joined in by the published assessment id, has the SCORINGTYPE column, 1=highest, 2=latest
-		// (as known by MultipleSubmissionSelectionPolicy)
-
-		// Note: finding the max totalScore
-		// joining the grading table (left outer) to itself, mathing on the published assessment, where the left totalScore < right
-		// totalScore, then selecting the
-		// records where the right id is null will pick those grading records that are the maximum totalScore for each assessment...
-		// (http://www.artfulsoftware.com/queries.php#7)
-		// When joining, we have to make sure we specify the full criteria against the grading table to avoid stray records slipping
-		// into the join
-		// (we might need to add the context criteria too, which is another join?)
-		// But, since each assessment might have a seperate criteria, and the selection criteria is rather complex, here we get all
-		// the submissions and do our own filtering
-
-		// Note: complete v.s. in progress submissions
-		// the FORGRADE boolean is set when the submission is complete, false while it is in progress - these don't count.
-
-		// figure sort
-		String sortSql = null;
-		if (sort == null)
-		{
-			sortSql = "P.TITLE ASC";
-		}
-		else
-		{
-			switch (sort)
-			{
-				case title_a:
-				{
-					sortSql = "P.TITLE ASC";
-					break;
-				}
-
-				case title_d:
-				{
-					sortSql = "P.TITLE DESC";
-					break;
-				}
-				case feedbackDate_a:
-				{
-					sortSql = "PAC.FEEDBACKDATE ASC";
-					break;
-				}
-
-				case feedbackDate_d:
-				{
-					sortSql = "PAC.FEEDBACKDATE DESC";
-					break;
-				}
-
-				case score_a:
-				{
-					sortSql = "AG.FINALSCORE ASC";
-					break;
-				}
-
-				case score_d:
-				{
-					sortSql = "AG.FINALSCORE DESC";
-					break;
-				}
-				case time_a:
-				{
-					// TODO:
-					sortSql = "AG.SUBMITTEDDATE-AG.ATTEMPTDATE ASC";
-					break;
-				}
-
-				case time_d:
-				{
-					// TODO:
-					sortSql = "AG.SUBMITTEDDATE-AG.ATTEMPTDATE DESC";
-					break;
-				}
-				case submittedDate_a:
-				{
-					sortSql = "AG.SUBMITTEDDATE ASC";
-					break;
-				}
-
-				case submittedDate_d:
-				{
-					sortSql = "AG.SUBMITTEDDATE DESC";
-					break;
-				}
-			}
-		}
-
-		String statement = "SELECT AG.ASSESSMENTGRADINGID, AG.PUBLISHEDASSESSMENTID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
-				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE,"
-				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, AG.FORGRADE,"
-				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED"
-				+ " FROM SAM_ASSESSMENTGRADING_T AG"
-				+ " INNER JOIN SAM_AUTHZDATA_T AD ON AG.PUBLISHEDASSESSMENTID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?"
-				+ " INNER JOIN SAM_PUBLISHEDASSESSMENT_T P ON AG.PUBLISHEDASSESSMENTID = P.ID"
-				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON AG.PUBLISHEDASSESSMENTID = PAC.ASSESSMENTID"
-				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON AG.PUBLISHEDASSESSMENTID = PF.ASSESSMENTID"
-				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON AG.PUBLISHEDASSESSMENTID = PE.ASSESSMENTID"
-				+ " WHERE AG.AGENTID = ? AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(true) + " ORDER BY " + sortSql;
-
-		Object[] fields = new Object[3];
-		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
-		fields[1] = context;
-		fields[2] = userId;
-
-		final AssessmentServiceImpl service = this;
-		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String submissionId = result.getString(1);
-					String publishedAssessmentId = result.getString(2);
-					String title = result.getString(3);
-					float score = result.getFloat(4);
-
-					java.sql.Timestamp ts = result.getTimestamp(5, m_sqlService.getCal());
-					Time attemptDate = null;
-					if (ts != null)
-					{
-						attemptDate = m_timeService.newTime(ts.getTime());
-					}
-
-					ts = result.getTimestamp(6, m_sqlService.getCal());
-					Time feedbackDate = null;
-					if (ts != null)
-					{
-						feedbackDate = m_timeService.newTime(ts.getTime());
-					}
-
-					ts = result.getTimestamp(7, m_sqlService.getCal());
-					Time submittedDate = null;
-					if (ts != null)
-					{
-						submittedDate = m_timeService.newTime(ts.getTime());
-					}
-
-					int mssPolicy = result.getInt(8);
-					FeedbackDelivery feedbackDelivery = FeedbackDelivery.parse(result.getInt(9));
-					boolean showScore = result.getBoolean(10);
-					boolean showStatistics = result.getBoolean(11);
-					boolean complete = result.getBoolean(12);
-					boolean unlimitedSubmissions = result.getBoolean(13);
-					int submissionsAllowed = result.getInt(14);
-
-					// create or update these properties in the submission cache
-					SubmissionImpl cachedSubmission = getCachedSubmission(submissionId);
-					if (cachedSubmission == null)
-					{
-						// cache an empty one
-						cachedSubmission = new SubmissionImpl(service);
-						cachedSubmission.initId(submissionId);
-						cacheSubmission(cachedSubmission);
-					}
-					cachedSubmission.initAssessmentId(publishedAssessmentId);
-					cachedSubmission.initTotalScore(score);
-					cachedSubmission.initStartDate(attemptDate);
-					cachedSubmission.initSubmittedDate(submittedDate);
-					cachedSubmission.initIsComplete(Boolean.valueOf(complete));
-
-					// create or update these properties in the assessment cache
-					AssessmentImpl cachedAssessment = getCachedAssessment(publishedAssessmentId);
-					if (cachedAssessment == null)
-					{
-						// cache an empty one
-						cachedAssessment = new AssessmentImpl(service);
-						cachedAssessment.initId(publishedAssessmentId);
-						cachedAssessment.initContext(context);
-						cacheAssessment(cachedAssessment);
-					}
-					cachedAssessment.initTitle(title);
-					cachedAssessment.initFeedbackDate(feedbackDate);
-					cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
-					cachedAssessment.initFeedbackDelivery(feedbackDelivery);
-					cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
-					cachedAssessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
-					cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
-
-					// return the id
-					return submissionId;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("getAssessmentDueDate: " + e);
-					return null;
-				}
-			}
-		});
-
-		// pick the one official from this many-list for each assessment
-		List<String> ids = new ArrayList<String>();
-
-		while (all.size() > 0)
-		{
-			// take the first one out
-			String sid = (String) all.remove(0);
-			String aid = idSubmission(sid).getAssessment().getId();
-			MultipleSubmissionSelectionPolicy policy = idAssessment(aid).getMultipleSubmissionSelectionPolicy();
-			Object value = (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED) ? (Object) (((SubmissionImpl) idSubmission(sid))
-					.getTotalScore())
-					: (Object) idSubmission(sid).getSubmittedDate();
-
-			// remove all others with this one's assessment id - keeping the one that will be best
-			for (Iterator i = all.iterator(); i.hasNext();)
-			{
-				String candidateId = (String) i.next();
-				if (idSubmission(candidateId).getAssessment().getId().equals(aid))
-				{
-					// take this one out
-					i.remove();
-
-					// see if this wins over the best so far
-					if (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED)
-					{
-						// for totalScore, if the winner so far is smaller or equal to the new, use the new (the later one for a tie
-						// is the later submission based on our sort)
-						if (((Float) value).floatValue() <= ((SubmissionImpl) idSubmission(candidateId)).getTotalScore()
-								.floatValue())
-						{
-							// switch to this one
-							value = ((SubmissionImpl) idSubmission(candidateId)).getTotalScore();
-							sid = candidateId;
-						}
-					}
-					else
-					{
-						// for submission, use the latest one
-						if (((Time) value).before(idSubmission(candidateId).getSubmittedDate()))
-						{
-							// switch to this one
-							value = idSubmission(candidateId).getSubmittedDate();
-							sid = candidateId;
-						}
-					}
-				}
-			}
-
-			// keep the winner
-			ids.add(sid);
-		}
-
-		// id the selected submissions
-		return idSubmissions(ids);
-	}
-
-	/*******************************************************************************************************************************
-	 * Authoring Support
-	 ******************************************************************************************************************************/
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Assessment newAssessment()
-	{
-		AssessmentImpl assessment = new AssessmentImpl(this);
-		assessment.setInited();
-
-		return assessment;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public AssessmentSection newSection(Assessment assessment)
-	{
-		AssessmentSectionImpl section = new AssessmentSectionImpl();
-		section.initAssement((AssessmentImpl) assessment);
-		((AssessmentImpl) assessment).sections.add(section);
-
-		return section;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public AssessmentQuestion newQuestion(AssessmentSection section)
-	{
-		AssessmentQuestionImpl question = new AssessmentQuestionImpl();
-		question.initSection((AssessmentSectionImpl) section);
-		((AssessmentSectionImpl) section).questions.add(question);
-
-		return question;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public QuestionPart newQuestionPart(AssessmentQuestion question)
-	{
-		QuestionPartImpl part = new QuestionPartImpl();
-		part.initQuestion((AssessmentQuestionImpl) question);
-		((AssessmentQuestionImpl) question).parts.add(part);
-
-		return part;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public AssessmentAnswer newAssessmentAnswer(QuestionPart part)
-	{
-		AssessmentAnswerImpl answer = new AssessmentAnswerImpl();
-		answer.initPart((QuestionPartImpl) part);
-		((QuestionPartImpl) part).answers.add(answer);
-
-		return answer;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean allowAddAssessment(String context)
-	{
-		// check permission - cuser must have PUBLISH_PERMISSION in the context
-		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, context,
-				getAssessmentReference(""));
-
-		return Boolean.valueOf(ok);
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -2891,57 +881,6 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countAssessments(String context)
-	{
-		String statement = "SELECT COUNT(P.ID) FROM SAM_PUBLISHEDASSESSMENT_T P"
-				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?";
-
-		Object[] fields = new Object[2];
-		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
-		fields[1] = context;
-		List results = m_sqlService.dbRead(statement, fields, null);
-		if (results.size() > 0)
-		{
-			return new Integer((String) results.get(0));
-		}
-
-		return new Integer(0);
-	}
-
-	/*******************************************************************************************************************************
-	 * Submission Support
-	 ******************************************************************************************************************************/
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Submission newSubmission(Assessment assessment)
-	{
-		SubmissionImpl submission = new SubmissionImpl(this);
-		submission.setInited();
-
-		submission.setAssessment(assessment);
-
-		return submission;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public SubmissionAnswer newSubmissionAnswer(Submission submission, AssessmentQuestion question)
-	{
-		SubmissionAnswerImpl answer = new SubmissionAnswerImpl();
-		answer.initSubmission((SubmissionImpl) submission);
-		((SubmissionImpl) submission).answers.add(answer);
-
-		answer.initQuestion(question);
-
-		return answer;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void addSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException,
 			AssessmentCompletedException
 	{
@@ -2980,6 +919,1427 @@ public class AssessmentServiceImpl implements AssessmentService
 					true));
 		}
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean allowAddAssessment(String context)
+	{
+		// check permission - cuser must have PUBLISH_PERMISSION in the context
+		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, context,
+				getAssessmentReference(""));
+
+		return Boolean.valueOf(ok);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean allowSubmit(String assessmentId, String userId)
+	{
+		// if null, get the current user id
+		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
+
+		Boolean rv = Boolean.FALSE;
+		if (assessmentId != null)
+		{
+			Assessment assessment = idAssessment(assessmentId);
+			if (assessment != null)
+			{
+				// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
+				if (checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, assessment.getContext(),
+						getAssessmentReference(assessment.getId())))
+				{
+					// check that the assessment is currently open for submission
+					// if there is an in-progress submission, but it's too late now... this would catch it
+					if (isAssessmentOpen(assessment, m_timeService.newTime()))
+					{
+						// see if the user has a submission in progress
+						Submission submission = getSubmissionInProgress(assessment, userId);
+						if (submission != null)
+						{
+							rv = Boolean.TRUE;
+						}
+
+						// if not, can we make one? Check if there are remaining submissions for this user
+						// (also checks that the assessment is open)
+						else
+						{
+							Integer count = countRemainingSubmissions(assessment.getId(), userId);
+							if ((count != null) && (count.intValue() != 0))
+							{
+								rv = Boolean.TRUE;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void completeSubmission(Submission s) throws AssessmentPermissionException, AssessmentClosedException,
+			SubmissionCompletedException
+	{
+		// trust only the submission id passed in - get fresh and trusted additional information
+		Submission submission = idSubmission(s.getId());
+		Assessment assessment = submission.getAssessment();
+
+		// the current time
+		Time asOf = m_timeService.newTime();
+
+		// make sure this is an incomplete submission
+		if ((submission.getIsComplete() == null) || (submission.getIsComplete().booleanValue()))
+		{
+			throw new SubmissionCompletedException();
+		}
+
+		// check that the current user is the submission user
+		if (!submission.getUserId().equals(m_sessionManager.getCurrentSessionUserId()))
+		{
+			throw new AssessmentPermissionException(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION,
+					getAssessmentReference(assessment.getId()));
+		}
+
+		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment (use the assessment as ref, not
+		// submission)
+		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+
+		// check that the assessment is currently open for submission
+		if (!isAssessmentOpen(assessment, asOf)) throw new AssessmentClosedException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("completeSubmission: submission: " + submission.getId());
+
+		Connection connection = null;
+		boolean wasCommit = true;
+		try
+		{
+			connection = m_sqlService.borrowConnection();
+			wasCommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+
+			String statement = "UPDATE SAM_ASSESSMENTGRADING_T" + " SET SUBMITTEDDATE = ?, STATUS = 1, FORGRADE = "
+					+ m_sqlService.getBooleanConstant(true) + " WHERE ASSESSMENTGRADINGID = ?";
+			Object fields[] = new Object[2];
+			fields[0] = asOf;
+			fields[1] = submission.getId();
+			if (!m_sqlService.dbWrite(connection, statement, fields))
+			{
+				throw new Exception("completeSubmission: dbWrite Failed");
+			}
+
+			// commit
+			connection.commit();
+
+			// update the submission parameter for the caller
+			s.setSubmittedDate(asOf);
+			s.setStatus(new Integer(1));
+			s.setIsComplete(Boolean.TRUE);
+
+			// event track it
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE,
+					getSubmissionReference(submission.getId()), true));
+		}
+		catch (Exception e)
+		{
+			if (connection != null)
+			{
+				try
+				{
+					connection.rollback();
+				}
+				catch (Exception ee)
+				{
+					M_log.warn("completeSubmission: rollback: " + ee);
+				}
+			}
+			M_log.warn("completeSubmission: " + e);
+		}
+		finally
+		{
+			if (connection != null)
+			{
+				// restore autocommit, if it was not false
+				try
+				{
+					if (wasCommit) connection.setAutoCommit(wasCommit);
+				}
+				catch (Exception e)
+				{
+					M_log.warn("completeSubmission, while setting auto commit: " + e);
+				}
+
+				// return the connetion
+				m_sqlService.returnConnection(connection);
+			}
+		}
+
+		// the submission is altered by this - clear the cache (or update?)
+		unCacheSubmission(submission.getId());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countAssessments(String context)
+	{
+		String statement = "SELECT COUNT(P.ID) FROM SAM_PUBLISHEDASSESSMENT_T P"
+				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?";
+
+		Object[] fields = new Object[2];
+		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
+		fields[1] = context;
+		List results = m_sqlService.dbRead(statement, fields, null);
+		if (results.size() > 0)
+		{
+			return new Integer((String) results.get(0));
+		}
+
+		return new Integer(0);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countRemainingSubmissions(String assessmentId, String userId)
+	{
+		// if null, get the current user id
+		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
+
+		final Time asOf = m_timeService.newTime();
+
+		if (M_log.isDebugEnabled())
+			M_log.debug("countRemainingSubmissions: assessment: " + assessmentId + " userId: " + userId + " asOf: " + asOf);
+
+		// we need the assessment's dates, and late handling policy, and the # submissions allowed
+		// we need the user's count of completed submissions to this assessment
+		// TODO: we need to know if the user has submit permissions at all
+
+		String statement = "SELECT PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING, COUNT(AG.PUBLISHEDASSESSMENTID)"
+				+ " FROM SAM_PUBLISHEDACCESSCONTROL_T PAC"
+				+ " LEFT OUTER JOIN SAM_ASSESSMENTGRADING_T AG ON AG.PUBLISHEDASSESSMENTID = ? AND AG.AGENTID = ? AND AG.FORGRADE = "
+				+ m_sqlService.getBooleanConstant(true)
+				+ " WHERE PAC.ASSESSMENTID = ?"
+				+ " GROUP BY AG.PUBLISHEDASSESSMENTID, PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING";
+
+		Object[] fields = new Object[3];
+		fields[0] = assessmentId;
+		fields[1] = userId;
+		fields[2] = assessmentId;
+
+		List rv = m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					boolean unlimitedSubmissions = result.getBoolean(1);
+
+					int submissionsAllowed = result.getInt(2);
+
+					java.sql.Timestamp ts = result.getTimestamp(3, m_sqlService.getCal());
+					Time startDate = null;
+					if (ts != null)
+					{
+						startDate = m_timeService.newTime(ts.getTime());
+					}
+
+					ts = result.getTimestamp(4, m_sqlService.getCal());
+					Time dueDate = null;
+					if (ts != null)
+					{
+						dueDate = m_timeService.newTime(ts.getTime());
+					}
+
+					ts = result.getTimestamp(5, m_sqlService.getCal());
+					Time retractDate = null;
+					if (ts != null)
+					{
+						retractDate = m_timeService.newTime(ts.getTime());
+					}
+
+					int lateHandling = result.getInt(6);
+
+					int submissionsMade = result.getInt(7);
+
+					// if before start date, or after retract date, we are done
+					if ((startDate != null) && asOf.before(startDate)) return new Integer(0);
+					if ((retractDate != null) && asOf.after(retractDate)) return new Integer(0);
+
+					// if after due date and we are not taking late submissions, we are done
+					if ((dueDate != null) && (lateHandling != 1) && asOf.after(dueDate)) return new Integer(0);
+
+					// if unlimited, return a -1
+					if (unlimitedSubmissions) return new Integer(-1);
+
+					// return the difference between the number taken already and the max
+					int left = submissionsAllowed - submissionsMade;
+
+					if (left <= 0) return new Integer(0);
+
+					return new Integer(left);
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getAssessmentDueDate: " + e);
+					return null;
+				}
+			}
+		});
+
+		return (rv.size() == 0) ? null : (Integer) rv.get(0);
+	}
+
+	/**
+	 * Returns to uninitialized state.
+	 */
+	public void destroy()
+	{
+		M_log.info("destroy()");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Submission enterSubmission(Assessment a, String userId) throws AssessmentPermissionException, AssessmentClosedException,
+			AssessmentCompletedException
+	{
+		if (a == null) return null;
+
+		// trust only the id of the assessment passed in - get fresh and trusted additional information
+		Assessment assessment = idAssessment(a.getId());
+
+		// if null, get the current user id
+		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
+
+		// the current time
+		Time asOf = m_timeService.newTime();
+
+		if (M_log.isDebugEnabled())
+			M_log.debug("enterSubmission: assessment: " + assessment.getId() + " user: " + userId + " asOf: " + asOf);
+
+		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
+		secure(userId, SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+
+		// check that the assessment is currently open for submission
+		if (!isAssessmentOpen(assessment, asOf)) throw new AssessmentClosedException();
+
+		// see if we have one already
+		Submission submission = getSubmissionInProgress(assessment, userId);
+		if (submission != null)
+		{
+			// event track it (not a modify event)
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_REENTER, getSubmissionReference(submission.getId()),
+					false));
+
+			return submission;
+		}
+
+		// if not, can we make one? Check if there are remaining submissions for this user
+		Integer count = countRemainingSubmissions(assessment.getId(), userId);
+		if ((count == null) || (count.intValue() == 0))
+		{
+			throw new AssessmentCompletedException();
+		}
+
+		// TODO: it is possible to make too many submissions for the assessment.
+		// If this method is entered concurrently for the same user and assessment, the previous count check might fail.
+		submission = newSubmission(assessment);
+		submission.setUserId(userId);
+		submission.setStatus(new Integer(0));
+		submission.setIsComplete(Boolean.FALSE);
+		submission.setStartDate(asOf);
+
+		addSubmission(submission, null);
+
+		// event track it
+		m_eventTrackingService
+				.post(m_eventTrackingService.newEvent(SUBMIT_ENTER, getSubmissionReference(submission.getId()), true));
+
+		return submission;
+	}
+
+	/*******************************************************************************************************************************
+	 * Configuration
+	 ******************************************************************************************************************************/
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Assessment getAssessment(final String id)
+	{
+		// TODO: should the main and question reads be in a single transaction? -ggolden
+
+		if (M_log.isDebugEnabled()) M_log.debug("getAssessment: " + id);
+
+		if (id == null) return null;
+
+		// cached?
+		AssessmentImpl cached = getCachedAssessment(id);
+		AssessmentImpl assessment = cached;
+
+		// if not cached, get started with an identification
+		if (assessment == null)
+		{
+			assessment = new AssessmentImpl(this);
+			assessment.initId(id);
+		}
+
+		// if we need to, read the main info
+		if (!assessment.isMainInited())
+		{
+			boolean found = readAssessmentMain(assessment);
+			if (!found) return null;
+		}
+
+		// if we need to, read the sections
+		if (!assessment.isSectionsInited())
+		{
+			readAssessmentSections(assessment);
+		}
+
+		// if it was not already cached, cache it, otherwise, we already updated the actual cached object
+		if (cached == null)
+		{
+			// it was not cached, so we need to cache it
+			cacheAssessment(assessment);
+		}
+
+		// return a copy so we don't return the cache
+		return new AssessmentImpl(assessment);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Assessment> getAvailableAssessments(final String context, String userId, GetAvailableAssessmentsSort sort)
+	{
+		// if null, get the current user id
+		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
+
+		// the current time
+		Time asOf = m_timeService.newTime();
+
+		if (M_log.isDebugEnabled())
+			M_log.debug("getAvailableAssessmentsIds: context: " + context + " userId: " + userId + " asOf: " + asOf);
+
+		// Notes: "in context"
+		// SAM_ASSESSMENTBASE_T has the defined assessments (ID)
+		// SAM_PUBLISHEDASSESSMENT_T has the main published assessment info, referring back to the SAM_ASSESSMENTBASE_T table's
+		// entry with (ASSESSMENTID)
+		// SAM_AUTHZDATA_T maps permissions (FUNCTIONID = TAKE_PUBLISHED_ASSESSMENT) for sites (AGENTID) to assessments by published
+		// assessment id (QUALIFIERID)
+		// SAM_AUTHZDATA_T QUALIFIERID can be either base assessment or published assessment; the FUNCTIONID for published are a
+		// separate set than from base (EDIT_ASSESSMENT)
+
+		// Notes: released and not yet retracted
+		// SAM_PUBLISHEDACCESSCONTROL_T joins with the SAM_PUBLISHEDASSESSMENT_T (ASSESSMENTID) to define the active period
+		// (STARTDATE) and (RETRACTDATE)
+		// either may be null
+		// we want now to be >= startdate and < retractdate (edges?)
+
+		// Note: due date and last policy
+		// SAM_PUBLISHEDACCESSCONTROL_T joins with the SAM_PUBLISHEDASSESSMENT_T (ASSESSMENTID) to define the due date (DUEDATE) -
+		// may be null
+		// and (LATEHANDLING) is 1 to allow late submissions, 2 to not allow late submissions
+
+		// Note: join with submissions
+		// SAM_ASSESSMENTGRADING_T joins in on PUBLISHEDASSESSMENTID to the SAM_PUBLISHEDASSESSMENT_T table for each submission
+		// A left outer join gives us a record for each assessment, even with no submissions, and multiple records, one for each
+		// submission.
+		// The GROUP BY lets us get a count of submissions and collapses the records down to one per assessment
+		// We need the inner select so we can compute the counts, then filter out those that have reached their submit limit
+		// Counting the AG.PUBLISHEDASSESSMENTID column gives us an accurate count of how many submissions - if there are none, this
+		// will end up null and give a 0 count.
+
+		// Note: number of submissions allowed
+		// SAM_PUBLISHEDACCESSCONTROL_T SUBMISSIONSALLOWED is null for unlimited, or has a count
+
+		// Note: extra info
+		// anticipating that we need the title and duedate (etc) for each assessment, we get it here and cache it so we can return
+		// it later in the thread
+
+		// figure sort sql
+		String sortSql = null;
+		if (sort == null)
+		{
+			sortSql = "X.TITLE ASC";
+		}
+		else
+		{
+			switch (sort)
+			{
+				case title_a:
+				{
+					sortSql = "X.TITLE ASC";
+					break;
+				}
+
+				case title_d:
+				{
+					sortSql = "X.TITLE DESC";
+					break;
+				}
+
+				case dueDate_a:
+				{
+					sortSql = "X.DUEDATE DESC";
+					break;
+				}
+
+				case dueDate_d:
+				{
+					sortSql = "X.DUEDATE DESC";
+					break;
+				}
+			}
+		}
+
+		String statement = "SELECT X.ID, X.TITLE, X.DUEDATE FROM ("
+				+ " SELECT P.ID ID, COUNT(AG.PUBLISHEDASSESSMENTID) SUBMITTED, PAC.SUBMISSIONSALLOWED ALLOWED, P.TITLE TITLE, PAC.DUEDATE DUEDATE"
+				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
+				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?"
+				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON"
+				+ "      P.ID = PAC.ASSESSMENTID AND (PAC.STARTDATE IS NULL OR ? >= PAC.STARTDATE) AND (PAC.RETRACTDATE IS NULL OR ? < PAC.RETRACTDATE) AND (PAC.DUEDATE IS NULL OR ? < PAC.DUEDATE OR PAC.LATEHANDLING = 1)"
+				+ " LEFT OUTER JOIN SAM_ASSESSMENTGRADING_T AG ON P.ID = AG.PUBLISHEDASSESSMENTID AND AG.AGENTID = ? AND AG.FORGRADE = "
+				+ m_sqlService.getBooleanConstant(true) + " GROUP BY P.ID, PAC.SUBMISSIONSALLOWED, P.TITLE, PAC.DUEDATE" + " ) X"
+				+ " WHERE (X.ALLOWED IS NULL OR X.SUBMITTED < X.ALLOWED)" + " ORDER BY " + sortSql;
+
+		Object[] fields = new Object[6];
+		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
+		fields[1] = context;
+		fields[2] = asOf;
+		fields[3] = asOf;
+		fields[4] = asOf;
+		fields[5] = userId;
+
+		final AssessmentServiceImpl service = this;
+		final List<String> ids = new ArrayList<String>();
+		List rv = m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String assessmentId = result.getString(1);
+					String title = result.getString(2);
+
+					java.sql.Timestamp ts = result.getTimestamp(3, m_sqlService.getCal());
+					Time dueDate = null;
+					if (ts != null)
+					{
+						dueDate = m_timeService.newTime(ts.getTime());
+					}
+
+					// create or update these properties in the assessment cache
+					AssessmentImpl cached = getCachedAssessment(assessmentId);
+					if (cached == null)
+					{
+						// cache an empty one
+						cached = new AssessmentImpl(service);
+						cached.initId(assessmentId);
+						cached.initContext(context);
+						cacheAssessment(cached);
+					}
+					cached.initTitle(title);
+					cached.initDueDate(dueDate);
+
+					// record the id
+					ids.add(assessmentId);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getAvailableAssessmentsIds: " + e);
+					return null;
+				}
+			}
+		});
+
+		// id each of the returned assessment ids
+		return idAssessments(ids);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Submission> getOfficialSubmissions(final String context, String userId, GetOfficialSubmissionsSort sort)
+	{
+		// if null, get the current user id
+		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getOfficialSubmissionsIds: context: " + context + " userId: " + userId);
+
+		// Note: submissions
+		// SAM_ASSESSMENTGRADING_T lists submissions to assessments
+		// the user id is in the AGENTID column, the assessment is in the PUBLISHEDASSESSMENTID column
+
+		// Notes: "in context"
+		// SAM_AUTHZDATA_T maps permissions (FUNCTIONID = TAKE_PUBLISHED_ASSESSMENT) for sites (AGENTID) to assessments by published
+		// assessment id (QUALIFIERID)
+
+		// Notes: official submission
+		// Of many submissions, either the latest or the highest graded is used
+		// SAM_PUBLISHEDEVALUATION_T, joined in by the published assessment id, has the SCORINGTYPE column, 1=highest, 2=latest
+		// (as known by MultipleSubmissionSelectionPolicy)
+
+		// Note: finding the max totalScore
+		// joining the grading table (left outer) to itself, mathing on the published assessment, where the left totalScore < right
+		// totalScore, then selecting the
+		// records where the right id is null will pick those grading records that are the maximum totalScore for each assessment...
+		// (http://www.artfulsoftware.com/queries.php#7)
+		// When joining, we have to make sure we specify the full criteria against the grading table to avoid stray records slipping
+		// into the join
+		// (we might need to add the context criteria too, which is another join?)
+		// But, since each assessment might have a seperate criteria, and the selection criteria is rather complex, here we get all
+		// the submissions and do our own filtering
+
+		// Note: complete v.s. in progress submissions
+		// the FORGRADE boolean is set when the submission is complete, false while it is in progress - these don't count.
+
+		// figure sort
+		String sortSql = null;
+		if (sort == null)
+		{
+			sortSql = "P.TITLE ASC";
+		}
+		else
+		{
+			switch (sort)
+			{
+				case title_a:
+				{
+					sortSql = "P.TITLE ASC";
+					break;
+				}
+
+				case title_d:
+				{
+					sortSql = "P.TITLE DESC";
+					break;
+				}
+				case feedbackDate_a:
+				{
+					sortSql = "PAC.FEEDBACKDATE ASC";
+					break;
+				}
+
+				case feedbackDate_d:
+				{
+					sortSql = "PAC.FEEDBACKDATE DESC";
+					break;
+				}
+
+				case score_a:
+				{
+					sortSql = "AG.FINALSCORE ASC";
+					break;
+				}
+
+				case score_d:
+				{
+					sortSql = "AG.FINALSCORE DESC";
+					break;
+				}
+				case time_a:
+				{
+					// TODO:
+					sortSql = "AG.SUBMITTEDDATE-AG.ATTEMPTDATE ASC";
+					break;
+				}
+
+				case time_d:
+				{
+					// TODO:
+					sortSql = "AG.SUBMITTEDDATE-AG.ATTEMPTDATE DESC";
+					break;
+				}
+				case submittedDate_a:
+				{
+					sortSql = "AG.SUBMITTEDDATE ASC";
+					break;
+				}
+
+				case submittedDate_d:
+				{
+					sortSql = "AG.SUBMITTEDDATE DESC";
+					break;
+				}
+			}
+		}
+
+		String statement = "SELECT AG.ASSESSMENTGRADINGID, AG.PUBLISHEDASSESSMENTID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
+				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE,"
+				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, AG.FORGRADE,"
+				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED"
+				+ " FROM SAM_ASSESSMENTGRADING_T AG"
+				+ " INNER JOIN SAM_AUTHZDATA_T AD ON AG.PUBLISHEDASSESSMENTID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?"
+				+ " INNER JOIN SAM_PUBLISHEDASSESSMENT_T P ON AG.PUBLISHEDASSESSMENTID = P.ID"
+				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON AG.PUBLISHEDASSESSMENTID = PAC.ASSESSMENTID"
+				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON AG.PUBLISHEDASSESSMENTID = PF.ASSESSMENTID"
+				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON AG.PUBLISHEDASSESSMENTID = PE.ASSESSMENTID"
+				+ " WHERE AG.AGENTID = ? AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(true) + " ORDER BY " + sortSql;
+
+		Object[] fields = new Object[3];
+		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
+		fields[1] = context;
+		fields[2] = userId;
+
+		final AssessmentServiceImpl service = this;
+		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String submissionId = result.getString(1);
+					String publishedAssessmentId = result.getString(2);
+					String title = result.getString(3);
+					float score = result.getFloat(4);
+
+					java.sql.Timestamp ts = result.getTimestamp(5, m_sqlService.getCal());
+					Time attemptDate = null;
+					if (ts != null)
+					{
+						attemptDate = m_timeService.newTime(ts.getTime());
+					}
+
+					ts = result.getTimestamp(6, m_sqlService.getCal());
+					Time feedbackDate = null;
+					if (ts != null)
+					{
+						feedbackDate = m_timeService.newTime(ts.getTime());
+					}
+
+					ts = result.getTimestamp(7, m_sqlService.getCal());
+					Time submittedDate = null;
+					if (ts != null)
+					{
+						submittedDate = m_timeService.newTime(ts.getTime());
+					}
+
+					int mssPolicy = result.getInt(8);
+					FeedbackDelivery feedbackDelivery = FeedbackDelivery.parse(result.getInt(9));
+					boolean showScore = result.getBoolean(10);
+					boolean showStatistics = result.getBoolean(11);
+					boolean complete = result.getBoolean(12);
+					boolean unlimitedSubmissions = result.getBoolean(13);
+					int submissionsAllowed = result.getInt(14);
+
+					// create or update these properties in the submission cache
+					SubmissionImpl cachedSubmission = getCachedSubmission(submissionId);
+					if (cachedSubmission == null)
+					{
+						// cache an empty one
+						cachedSubmission = new SubmissionImpl(service);
+						cachedSubmission.initId(submissionId);
+						cacheSubmission(cachedSubmission);
+					}
+					cachedSubmission.initAssessmentId(publishedAssessmentId);
+					cachedSubmission.initTotalScore(score);
+					cachedSubmission.initStartDate(attemptDate);
+					cachedSubmission.initSubmittedDate(submittedDate);
+					cachedSubmission.initIsComplete(Boolean.valueOf(complete));
+
+					// create or update these properties in the assessment cache
+					AssessmentImpl cachedAssessment = getCachedAssessment(publishedAssessmentId);
+					if (cachedAssessment == null)
+					{
+						// cache an empty one
+						cachedAssessment = new AssessmentImpl(service);
+						cachedAssessment.initId(publishedAssessmentId);
+						cachedAssessment.initContext(context);
+						cacheAssessment(cachedAssessment);
+					}
+					cachedAssessment.initTitle(title);
+					cachedAssessment.initFeedbackDate(feedbackDate);
+					cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
+					cachedAssessment.initFeedbackDelivery(feedbackDelivery);
+					cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
+					cachedAssessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
+					cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
+
+					// return the id
+					return submissionId;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getAssessmentDueDate: " + e);
+					return null;
+				}
+			}
+		});
+
+		// pick the one official from this many-list for each assessment
+		List<String> ids = new ArrayList<String>();
+
+		while (all.size() > 0)
+		{
+			// take the first one out
+			String sid = (String) all.remove(0);
+			String aid = idSubmission(sid).getAssessment().getId();
+			MultipleSubmissionSelectionPolicy policy = idAssessment(aid).getMultipleSubmissionSelectionPolicy();
+			Object value = (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED) ? (Object) (((SubmissionImpl) idSubmission(sid))
+					.getTotalScore())
+					: (Object) idSubmission(sid).getSubmittedDate();
+
+			// remove all others with this one's assessment id - keeping the one that will be best
+			for (Iterator i = all.iterator(); i.hasNext();)
+			{
+				String candidateId = (String) i.next();
+				if (idSubmission(candidateId).getAssessment().getId().equals(aid))
+				{
+					// take this one out
+					i.remove();
+
+					// see if this wins over the best so far
+					if (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED)
+					{
+						// for totalScore, if the winner so far is smaller or equal to the new, use the new (the later one for a tie
+						// is the later submission based on our sort)
+						if (((Float) value).floatValue() <= ((SubmissionImpl) idSubmission(candidateId)).getTotalScore()
+								.floatValue())
+						{
+							// switch to this one
+							value = ((SubmissionImpl) idSubmission(candidateId)).getTotalScore();
+							sid = candidateId;
+						}
+					}
+					else
+					{
+						// for submission, use the latest one
+						if (((Time) value).before(idSubmission(candidateId).getSubmittedDate()))
+						{
+							// switch to this one
+							value = idSubmission(candidateId).getSubmittedDate();
+							sid = candidateId;
+						}
+					}
+				}
+			}
+
+			// keep the winner
+			ids.add(sid);
+		}
+
+		// id the selected submissions
+		return idSubmissions(ids);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Submission getSubmission(final String id)
+	{
+		// TODO: should the main and answers reads be done in a single transaction? -ggolden
+
+		if (M_log.isDebugEnabled()) M_log.debug("getSubmission: " + id);
+
+		if (id == null) return null;
+
+		// cached?
+		SubmissionImpl cached = getCachedSubmission(id);
+		SubmissionImpl submission = cached;
+
+		// if not cached, get started with an identification
+		if (submission == null)
+		{
+			submission = new SubmissionImpl(this);
+			submission.initId(id);
+		}
+
+		// if we need to, read the main info
+		if (!submission.isMainInited())
+		{
+			boolean found = readSubmissionMain(submission);
+			if (!found) return null;
+		}
+
+		// if we need to, read the answers
+		if (!submission.isAnswersInited())
+		{
+			readSubmissionAnswers(submission);
+		}
+
+		// if it was not already cached, cache it, otherwise, we already updated the actual cached object
+		if (cached == null)
+		{
+			// it was not cached, so we need to cache it
+			cacheSubmission(submission);
+		}
+
+		// return a copy so we don't return the cache
+		return new SubmissionImpl(submission);
+	}
+
+	/*******************************************************************************************************************************
+	 * Init and Destroy
+	 ******************************************************************************************************************************/
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Assessment idAssessment(String id)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("idAssessment: " + id);
+
+		if (id == null) return null;
+
+		// cached?
+		AssessmentImpl assessment = getCachedAssessment(id);
+		if (assessment != null)
+		{
+			// return a copy
+			return new AssessmentImpl(assessment);
+		}
+
+		// TODO: perhaps don't check, just set the id... then we need to support objects that have id set but are known to be bad...
+		// -ggolden
+		// check that it exists
+		if (!checkAssessment(id)) return null;
+
+		if (M_log.isDebugEnabled()) M_log.debug("idAssessment: creating: " + id);
+
+		// setup a new assessment with only the id
+		assessment = new AssessmentImpl(this);
+		assessment.initId(id);
+
+		// cache a copy
+		cacheAssessment(new AssessmentImpl(assessment));
+
+		return assessment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Submission idSubmission(String id)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("idSubmission: " + id);
+
+		if (id == null) return null;
+
+		// cached?
+		SubmissionImpl submission = getCachedSubmission(id);
+		if (submission != null)
+		{
+			// return a copy
+			return new SubmissionImpl(submission);
+		}
+
+		// TODO: perhaps don't check... (see idAssessment) -ggolden
+		// check that it exists
+		if (!checkSubmission(id)) return null;
+
+		if (M_log.isDebugEnabled()) M_log.debug("idSubmission: creating: " + id);
+
+		// setup a new assessment with only the id
+		submission = new SubmissionImpl(this);
+		submission.initId(id);
+
+		// cache a copy
+		cacheSubmission(new SubmissionImpl(submission));
+
+		return submission;
+	}
+
+	/*******************************************************************************************************************************
+	 * AssessmentService implementation
+	 ******************************************************************************************************************************/
+
+	/*******************************************************************************************************************************
+	 * Assessment Access
+	 ******************************************************************************************************************************/
+
+	/**
+	 * TODO: Note: assessments ids are (for now) assumed to be published - the Samigo 1 data model does not have a unique assessment
+	 * id across published and non-published.
+	 */
+
+	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		try
+		{
+			// <= 0 indicates no caching desired
+			if ((m_cacheSeconds > 0) && (m_cacheCleanerSeconds > 0))
+			{
+				// assessment and submissions caches, automatiaclly checking for expiration as configured mins, expire on events...
+				m_assessmentCache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAssessmentReference(""));
+
+				m_submissionCache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getSubmissionReference(""));
+			}
+
+			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60);
+		}
+		catch (Throwable t)
+		{
+			M_log.warn("init(): ", t);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Assessment newAssessment()
+	{
+		AssessmentImpl assessment = new AssessmentImpl(this);
+		assessment.setInited();
+
+		return assessment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentAnswer newAssessmentAnswer(QuestionPart part)
+	{
+		AssessmentAnswerImpl answer = new AssessmentAnswerImpl();
+		answer.initPart((QuestionPartImpl) part);
+		((QuestionPartImpl) part).answers.add(answer);
+
+		return answer;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentQuestion newQuestion(AssessmentSection section)
+	{
+		AssessmentQuestionImpl question = new AssessmentQuestionImpl();
+		question.initSection((AssessmentSectionImpl) section);
+		((AssessmentSectionImpl) section).questions.add(question);
+
+		return question;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public QuestionPart newQuestionPart(AssessmentQuestion question)
+	{
+		QuestionPartImpl part = new QuestionPartImpl();
+		part.initQuestion((AssessmentQuestionImpl) question);
+		((AssessmentQuestionImpl) question).parts.add(part);
+
+		return part;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentSection newSection(Assessment assessment)
+	{
+		AssessmentSectionImpl section = new AssessmentSectionImpl();
+		section.initAssement((AssessmentImpl) assessment);
+		((AssessmentImpl) assessment).sections.add(section);
+
+		return section;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Submission newSubmission(Assessment assessment)
+	{
+		SubmissionImpl submission = new SubmissionImpl(this);
+		submission.setInited();
+
+		submission.setAssessment(assessment);
+
+		return submission;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public SubmissionAnswer newSubmissionAnswer(Submission submission, AssessmentQuestion question)
+	{
+		SubmissionAnswerImpl answer = new SubmissionAnswerImpl();
+		answer.initSubmission((SubmissionImpl) submission);
+		((SubmissionImpl) submission).answers.add(answer);
+
+		answer.initQuestion(question);
+
+		return answer;
+	}
+
+	/**
+	 * Dependency: AttachmentService.
+	 * 
+	 * @param service
+	 *        The AttachmentService.
+	 */
+	public void setAttachmentService(AttachmentService service)
+	{
+		m_attachmentService = service;
+	}
+
+	/**
+	 * Set the # minutes between cache cleanings.
+	 * 
+	 * @param time
+	 *        The # minutes between cache cleanings. (as an integer string).
+	 */
+	public void setCacheCleanerMinutes(String time)
+	{
+		m_cacheCleanerSeconds = Integer.parseInt(time) * 60;
+	}
+
+	/*******************************************************************************************************************************
+	 * Submission Access
+	 ******************************************************************************************************************************/
+
+	/**
+	 * Set the # minutes to cache.
+	 * 
+	 * @param time
+	 *        The # minutes to cache a get (as an integer string).
+	 */
+	public void setCacheMinutes(String time)
+	{
+		m_cacheSeconds = Integer.parseInt(time) * 60;
+	}
+
+	/**
+	 * Dependency: EntityManager.
+	 * 
+	 * @param service
+	 *        The EntityManager.
+	 */
+	public void setEntityManager(EntityManager service)
+	{
+		m_entityManager = service;
+	}
+
+	/**
+	 * Dependency: EventTrackingService.
+	 * 
+	 * @param service
+	 *        The EventTrackingService.
+	 */
+	public void setEventTrackingService(EventTrackingService service)
+	{
+		m_eventTrackingService = service;
+	}
+
+	/**
+	 * Dependency: MemoryService.
+	 * 
+	 * @param service
+	 *        The MemoryService.
+	 */
+	public void setMemoryService(MemoryService service)
+	{
+		m_memoryService = service;
+	}
+
+	/**
+	 * Dependency: SecurityService.
+	 * 
+	 * @param service
+	 *        The SecurityService.
+	 */
+	public void setSecurityService(SecurityService service)
+	{
+		m_securityService = service;
+	}
+
+	/**
+	 * Dependency: SessionManager.
+	 * 
+	 * @param service
+	 *        The SessionManager.
+	 */
+	public void setSessionManager(SessionManager service)
+	{
+		m_sessionManager = service;
+	}
+
+	/**
+	 * Dependency: SqlService.
+	 * 
+	 * @param service
+	 *        The SqlService.
+	 */
+	public void setSqlService(SqlService service)
+	{
+		m_sqlService = service;
+	}
+
+	/**
+	 * Dependency: ThreadLocalManager.
+	 * 
+	 * @param service
+	 *        The ThreadLocalManager.
+	 */
+	public void setThreadLocalManager(ThreadLocalManager service)
+	{
+		m_threadLocalManager = service;
+	}
+
+	/**
+	 * Dependency: TimeService.
+	 * 
+	 * @param service
+	 *        The TimeService.
+	 */
+	public void setTimeService(TimeService service)
+	{
+		m_timeService = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void submitAnswer(SubmissionAnswer answer, Boolean completSubmission) throws AssessmentPermissionException,
+			AssessmentClosedException, SubmissionCompletedException
+	{
+		// TODO: one transaction, or separate ones?
+
+		// trust only the answer information passed in, and the submission id it points to - get fresh and trusted additional
+		// information
+		Submission submission = idSubmission(answer.getSubmission().getId());
+		Assessment assessment = submission.getAssessment();
+
+		// make sure this is an incomplete submission
+		if ((submission.getIsComplete() == null) || (submission.getIsComplete().booleanValue()))
+		{
+			throw new SubmissionCompletedException();
+		}
+
+		Time asOf = m_timeService.newTime();
+
+		if (M_log.isDebugEnabled())
+			M_log.debug("submitAnswer: submission: " + submission.getId() + " complete?: " + Boolean.toString(completSubmission)
+					+ " asOf: " + asOf);
+
+		// check that the current user is the submission user
+		if (!submission.getUserId().equals(m_sessionManager.getCurrentSessionUserId()))
+		{
+			throw new AssessmentPermissionException(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION,
+					getAssessmentReference(assessment.getId()));
+		}
+
+		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment (use the assessment as ref, not
+		// submission)
+		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+
+		// check that the assessment is currently open for submission
+		if (!isAssessmentOpen(assessment, asOf)) throw new AssessmentClosedException();
+
+		// update the submission parameter for the caller
+		answer.setSubmittedDate(asOf);
+		answer.getSubmission().setSubmittedDate(asOf);
+
+		// auto-score
+		answer.autoScore();
+
+		Connection connection = null;
+		boolean wasCommit = true;
+		try
+		{
+			connection = m_sqlService.borrowConnection();
+			wasCommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+
+			// unwrap file upload attachments from multiple entries to just one
+			// TODO: do this when save submission also
+			List<SubmissionAnswerEntryImpl> entries = ((SubmissionAnswerImpl) answer).entries;
+			if (answer.getQuestion().getType() == QuestionType.fileUpload)
+			{
+				SubmissionAnswerEntryImpl sample = entries.get(0);
+				entries = new ArrayList<SubmissionAnswerEntryImpl>(1);
+				SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl(sample);
+				entry.setAnswerText(null);
+				entry.setAssessmentAnswer(null);
+
+				// set the entry id to the id we saved in the answer
+				entry.id = ((SubmissionAnswerImpl) answer).id;
+				entries.add(entry);
+			}
+
+			// create submission answer record(s) if needed
+			for (SubmissionAnswerEntryImpl entry : entries)
+			{
+				if (entry.getId() == null)
+				{
+					Long answerId = m_sqlService.getNextSequence("SAM_ITEMGRADING_ID_S", connection);
+
+					// this will score the answer based on values in the database
+					String statement = "INSERT INTO SAM_ITEMGRADING_T"
+							+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
+							+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW"
+							+ ((answerId == null) ? "" : ", ITEMGRADINGID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,"
+							+ m_sqlService.getBooleanConstant(answer.getMarkedForReview()) // TODO: it would be nice if our ? /
+							// Boolean worked with bit fields
+							// -ggolden
+							+ ((answerId == null) ? "" : ",?") + ")";
+					Object[] fields = new Object[(answerId == null) ? 10 : 11];
+					fields[0] = answer.getSubmission().getId();
+					fields[1] = answer.getQuestion().getId();
+					fields[2] = entry.getQuestionPart().getId();
+					fields[3] = answer.getSubmission().getUserId();
+					fields[4] = answer.getSubmittedDate();
+					fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
+					fields[6] = answer.getRationale();
+					fields[7] = entry.getAnswerText();
+					fields[8] = entry.getAutoScore();
+					fields[9] = new Float(0);
+
+					if (answerId != null)
+					{
+						fields[10] = answerId;
+						if (!m_sqlService.dbWrite(connection, statement, fields))
+						{
+							// TODO: better exception
+							throw new Exception("submitAnswer: dbWrite Failed");
+						}
+					}
+					else
+					{
+						answerId = m_sqlService.dbInsert(connection, statement, fields, "ITEMGRADINGID");
+						if (answerId == null)
+						{
+							// TODO: better exception
+							throw new Exception("submitAnswer: dbInsert Failed");
+						}
+					}
+
+					// set the id into the answer
+					if (answerId == null) throw new Exception("failed to insert submission answer");
+					entry.initId(answerId.toString());
+					if (((SubmissionAnswerImpl) answer).id == null) ((SubmissionAnswerImpl) answer).id = answerId.toString();
+				}
+
+				// otherwise update the submission answer record
+				else
+				{
+					String statement = "UPDATE SAM_ITEMGRADING_T"
+							+ " SET SUBMITTEDDATE = ?, PUBLISHEDANSWERID = ?, PUBLISHEDITEMTEXTID = ?, RATIONALE = ?, ANSWERTEXT = ?, AUTOSCORE = ?,"
+							+ " REVIEW = " + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
+							// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
+							+ " WHERE ITEMGRADINGID = ?";
+					// TODO: for added security, add to WHERE: AND ASSESSMENTGRADINGID = ?answer.getSubmissionId() AND
+					// PUBLISHEDITEMID = ?answer.getQuestionId() -ggolden
+					Object[] fields = new Object[7];
+					fields[0] = answer.getSubmittedDate();
+					fields[1] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
+					fields[2] = entry.getQuestionPart().getId();
+					fields[3] = answer.getRationale();
+					fields[4] = entry.getAnswerText();
+					fields[5] = entry.getAutoScore();
+					fields[6] = entry.getId();
+
+					if (!m_sqlService.dbWrite(connection, statement, fields))
+					{
+						// TODO: better exception
+						throw new Exception("submitAnswer: dbWrite Failed");
+					}
+				}
+			}
+
+			// for any entries unused that have an id, delete them
+			for (SubmissionAnswerEntryImpl entry : ((SubmissionAnswerImpl) answer).recycle)
+			{
+				if (entry.getId() != null)
+				{
+					String statement = "DELETE FROM SAM_ITEMGRADING_T WHERE ITEMGRADINGID = ?";
+					Object[] fields = new Object[1];
+					fields[0] = entry.getId();
+					if (!m_sqlService.dbWrite(connection, statement, fields))
+					{
+						// TODO: better exception
+						throw new Exception("submitAnswer: dbWrite Failed");
+					}
+				}
+			}
+
+			// clear the unused now we have deleted what we must
+			((SubmissionAnswerImpl) answer).recycle.clear();
+
+			// if complete, update the STATUS to 1 and the FORGRADE to TRUE... always update the date
+			// Note: for Samigo compat., we need to update the scores in the SAM_ASSESSMENTGRADING_T based on the sums of the item
+			// scores
+			String statement = "UPDATE SAM_ASSESSMENTGRADING_T"
+					+ " SET SUBMITTEDDATE = ?,"
+					+ " TOTALAUTOSCORE = (SELECT SUM(AUTOSCORE)+SUM(OVERRIDESCORE) FROM SAM_ITEMGRADING_T WHERE ASSESSMENTGRADINGID = ?),"
+					+ " FINALSCORE = TOTALAUTOSCORE+TOTALOVERRIDESCORE"
+					+ (((completSubmission != null) && completSubmission.booleanValue()) ? (" ,STATUS = 1, FORGRADE = " + m_sqlService
+							.getBooleanConstant(true))
+							: "") + " WHERE ASSESSMENTGRADINGID = ?";
+			Object[] fields = new Object[3];
+			fields[0] = answer.getSubmission().getSubmittedDate();
+			fields[1] = answer.getSubmission().getId();
+			fields[2] = answer.getSubmission().getId();
+			if (!m_sqlService.dbWrite(connection, statement, fields))
+			{
+				// TODO: better exception
+				throw new Exception("submitAnswer: dbWrite Failed");
+			}
+
+			// commit
+			connection.commit();
+
+			// event track it
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(submission.getId()),
+					true));
+
+			// track if we are complete
+			if ((completSubmission != null) && completSubmission.booleanValue())
+			{
+				m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission
+						.getId()), true));
+			}
+		}
+		catch (Exception e)
+		{
+			if (connection != null)
+			{
+				try
+				{
+					connection.rollback();
+				}
+				catch (Exception ee)
+				{
+					M_log.warn("submitAnswer: rollback: " + ee);
+				}
+			}
+			M_log.warn("submitAnswer: " + e);
+		}
+		finally
+		{
+			if (connection != null)
+			{
+				// restore autocommit, if it was not false
+				try
+				{
+					if (wasCommit) connection.setAutoCommit(wasCommit);
+				}
+				catch (Exception e)
+				{
+					M_log.warn("submitAnswer, while setting auto commit: " + e);
+				}
+
+				// return the connetion
+				m_sqlService.returnConnection(connection);
+			}
+		}
+
+		// the submission is altered by this - clear the cache (or update)
+		unCacheSubmission(submission.getId());
+	}
+
+	/*******************************************************************************************************************************
+	 * Delivery Support
+	 ******************************************************************************************************************************/
 
 	/**
 	 * Add a submission, possibly using an established connection / transaction
@@ -3149,159 +2509,1218 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Cache this assessment. Use the short-term cache if enable, else use the thread-local cache.
+	 * 
+	 * @param assessment
+	 *        The assessment to cache.
 	 */
-	public Boolean allowSubmit(String assessmentId, String userId)
+	protected void cacheAssessment(AssessmentImpl assessment)
 	{
-		// if null, get the current user id
-		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
+		String ref = getAssessmentReference(assessment.getId());
 
-		Boolean rv = Boolean.FALSE;
-		if (assessmentId != null)
+		// if we are short-term caching
+		if (m_assessmentCache != null)
 		{
-			Assessment assessment = idAssessment(assessmentId);
-			if (assessment != null)
-			{
-				// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-				if (checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, assessment.getContext(),
-						getAssessmentReference(assessment.getId())))
-				{
-					// check that the assessment is currently open for submission
-					// if there is an in-progress submission, but it's too late now... this would catch it
-					if (isAssessmentOpen(assessment, m_timeService.newTime()))
-					{
-						// see if the user has a submission in progress
-						Submission submission = getSubmissionInProgress(assessment, userId);
-						if (submission != null)
-						{
-							rv = Boolean.TRUE;
-						}
+			m_assessmentCache.put(ref, assessment, m_cacheSeconds);
+		}
 
-						// if not, can we make one? Check if there are remaining submissions for this user
-						// (also checks that the assessment is open)
-						else
+		// else thread-local cache
+		else
+		{
+			m_threadLocalManager.set(ref, assessment);
+		}
+	}
+
+	/**
+	 * Cache this submission. Use the short-term cache if enable, else use the thread-local cache.
+	 * 
+	 * @param submission
+	 *        The submission to cache.
+	 */
+	protected void cacheSubmission(SubmissionImpl submission)
+	{
+		String ref = getSubmissionReference(submission.getId());
+
+		// if we are short-term caching
+		if (m_submissionCache != null)
+		{
+			m_submissionCache.put(ref, submission, m_cacheSeconds);
+		}
+
+		// else thread-local cache
+		else
+		{
+			m_threadLocalManager.set(ref, submission);
+		}
+	}
+
+	/*******************************************************************************************************************************
+	 * Authoring Support
+	 ******************************************************************************************************************************/
+
+	/**
+	 * Check a submission answer for complete correctness
+	 * 
+	 * @param answer
+	 *        The answer to score.
+	 * @return true if the answer is completely correct, false if not.
+	 */
+	protected boolean checkAnswer(SubmissionAnswerImpl answer)
+	{
+		AssessmentQuestion question = answer.getQuestion();
+
+		// trueFalse / multipleChoice - one entry to check
+		if ((question.getType() == QuestionType.trueFalse) || (question.getType() == QuestionType.multipleChoice))
+		{
+			if (answer.entries.get(0).getIsCorrect().booleanValue())
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+		// multipleAnswer - only the correct choices should be selected
+		else if (question.getType() == QuestionType.multipleCorrect)
+		{
+			// these correct answers must be selected
+			List<AssessmentAnswer> correct = question.getPart().getCorrectAnswers();
+
+			for (SubmissionAnswerEntryImpl entry : answer.entries)
+			{
+				if (correct.contains(entry.getAssessmentAnswer()))
+				{
+					correct.remove(entry.getAssessmentAnswer());
+				}
+
+				// otherwise we found an incorrect entry
+				else
+				{
+					return false;
+				}
+			}
+
+			// if we have an entry for each correct, this is correct
+			if (correct.isEmpty()) return true;
+
+			return false;
+		}
+
+		// fillIn / numeric / matching - all entries must be correct
+		else if ((question.getType() == QuestionType.fillIn) || (question.getType() == QuestionType.numeric)
+				|| (question.getType() == QuestionType.matching))
+		{
+			for (SubmissionAnswerEntryImpl entry : answer.entries)
+			{
+				if (!entry.getIsCorrect().booleanValue())
+				{
+					return false;
+				}
+			}
+
+			// mutually exclusive check
+			if ((question.getType() == QuestionType.fillIn) && (question.getMutuallyExclusive().booleanValue()))
+			{
+				// check all but the last entry, looking down the list for a match
+				// if this answer matches any following answer, and their question text also matches, this answer gets zero'ed out
+				for (int i = 0; i < answer.entries.size() - 1; i++)
+				{
+					SubmissionAnswerEntryImpl entry = answer.entries.get(i);
+
+					// this is the question text that must match some entry-down-below's question text
+					String entryQuestionText = entry.getAssessmentAnswer().getText();
+
+					// look down the list
+					for (int j = i + 1; j < answer.entries.size(); j++)
+					{
+						// compare to this entry
+						SubmissionAnswerEntryImpl compareEntry = answer.entries.get(j);
+
+						// they need to be the same (i.e. !different) based on our case sensitive (the method takes ignore case, so
+						// we reverse)
+						if (!StringUtil.different(entry.getAnswerText(), compareEntry.getAnswerText(), !question.getCaseSensitive()
+								.booleanValue()))
 						{
-							Integer count = countRemainingSubmissions(assessment.getId(), userId);
-							if ((count != null) && (count.intValue() != 0))
+							// we will check against this other question's text, exactly
+							String compareEntryQuestionText = compareEntry.getAssessmentAnswer().getText();
+							if (entryQuestionText.equals(compareEntryQuestionText))
 							{
-								rv = Boolean.TRUE;
+								// we have a later match, so this is not correct
+								return false;
 							}
 						}
 					}
 				}
 			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if an assessment is defined.
+	 * 
+	 * @param id
+	 *        The assessment id to check.
+	 */
+	protected boolean checkAssessment(String id)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("checkAssessment: " + id);
+
+		String statement = "SELECT P.ID FROM SAM_PUBLISHEDASSESSMENT_T P WHERE P.ID = ?";
+		Object[] fields = new Object[1];
+		fields[0] = id;
+
+		List results = m_sqlService.dbRead(statement, fields, null);
+		return !results.isEmpty();
+	}
+
+	/**
+	 * Check the security for this user doing this function withing this context.
+	 * 
+	 * @param userId
+	 *        the user id.
+	 * @param function
+	 *        the function.
+	 * @param context
+	 *        The context.
+	 * @param ref
+	 *        The entity reference.
+	 * @return true if the user has permission, false if not.
+	 */
+	protected boolean checkSecurity(String userId, String function, String context, String ref)
+	{
+		// check for super user
+		if (m_securityService.isSuperUser(userId)) return true;
+
+		// check for the user / function / context-as-site-authz
+
+		// form the azGroups for a context-as-implemented-by-site (Note the *lack* of direct dependency on Site, i.e. we stole the
+		// code!)
+		Collection azGroups = new Vector(2);
+		azGroups.add("/site/" + context);
+		azGroups.add("!site.helper");
+
+		boolean rv = m_securityService.unlock(userId, function, ref, azGroups);
+		return rv;
+	}
+
+	/**
+	 * Check if a submission is defined
+	 * 
+	 * @param id
+	 *        The submission id to check.
+	 */
+	protected boolean checkSubmission(String id)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("checkSubmission: " + id);
+
+		String statement = "SELECT AG.ASSESSMENTGRADINGID FROM SAM_ASSESSMENTGRADING_T AG WHERE AG.ASSESSMENTGRADINGID = ?";
+		Object[] fields = new Object[1];
+		fields[0] = id;
+
+		List results = m_sqlService.dbRead(statement, fields, null);
+		return !results.isEmpty();
+	}
+
+	/**
+	 * Form an assessment reference for this assessment id.
+	 * 
+	 * @param assessmentId
+	 *        the assessment id.
+	 * @return the assessment reference for this assessment id.
+	 */
+	protected String getAssessmentReference(String assessmentId)
+	{
+		String ref = REFERENCE_ROOT + "/" + ASSESSMENT_TYPE + "/" + assessmentId;
+		return ref;
+	}
+
+	/**
+	 * Check the cache for the assessment. Use the short-term cache if enabled, else use the thread-local cache.
+	 * 
+	 * @param id
+	 *        The assessment id.
+	 * @return The actual assessment object cached, or null if not.
+	 */
+	protected AssessmentImpl getCachedAssessment(String id)
+	{
+		String ref = getAssessmentReference(id);
+
+		// if we are short-term caching
+		if (m_assessmentCache != null)
+		{
+			// if it is in there
+			if (m_assessmentCache.containsKey(ref))
+			{
+				return (AssessmentImpl) m_assessmentCache.get(ref);
+			}
+		}
+
+		// otherwise check the thread-local cache
+		else
+		{
+			return (AssessmentImpl) m_threadLocalManager.get(ref);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Check the cache for the submission. Use the short-term cache if enabled, else use the thread-local cache.
+	 * 
+	 * @param id
+	 *        The submission id.
+	 * @return The actual submission object cached, or null if not.
+	 */
+	protected SubmissionImpl getCachedSubmission(String id)
+	{
+		String ref = getSubmissionReference(id);
+
+		// if we are short-term caching
+		if (m_submissionCache != null)
+		{
+			// if it is in there
+			if (m_submissionCache.containsKey(ref))
+			{
+				return (SubmissionImpl) m_submissionCache.get(ref);
+			}
+		}
+
+		// otherwise check the thread-local cache
+		else
+		{
+			return (SubmissionImpl) m_threadLocalManager.get(ref);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Check if the user has an open submission to this assessment, and return it if found.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param userId
+	 *        The user id.
+	 * @return The open submission for this user to this assessment, if found, or null if not.
+	 */
+	protected Submission getSubmissionInProgress(Assessment assessment, String userId)
+	{
+		Submission rv = null;
+
+		// see if we have one already
+		String statement = "SELECT AG.ASSESSMENTGRADINGID" + " FROM SAM_ASSESSMENTGRADING_T AG"
+				+ " WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.AGENTID = ? AND AG.FORGRADE = "
+				+ m_sqlService.getBooleanConstant(false);
+		// TODO: order by id asc so we always use the lowest (oldest) if there are ever two open?
+		Object[] fields = new Object[2];
+		fields[0] = assessment.getId();
+		fields[1] = userId;
+		List results = m_sqlService.dbRead(statement, fields, null);
+		if (results.size() > 0)
+		{
+			// we have one
+			if (results.size() > 1)
+				M_log.warn("getSubmissionInProgress: multiple incomplete submissions: " + results.size() + " aid: "
+						+ assessment.getId() + " userId: " + userId);
+			rv = idSubmission((String) results.get(0));
+		}
+
+		return rv;
+	}
+
+	/*******************************************************************************************************************************
+	 * Submission Support
+	 ******************************************************************************************************************************/
+
+	/**
+	 * Form a submission reference for this submission id.
+	 * 
+	 * @param submissionId
+	 *        the submission id.
+	 * @return the submission reference for this submission id.
+	 */
+	protected String getSubmissionReference(String submissionId)
+	{
+		String ref = REFERENCE_ROOT + "/" + SUBMISSION_TYPE + "/" + submissionId;
+		return ref;
+	}
+
+	/**
+	 * Id each of the assessments in the id list
+	 * 
+	 * @param ids
+	 *        The collection of assessment ids.
+	 * @return A list of id'ed assessments, one for each id.
+	 */
+	protected List<Assessment> idAssessments(List<String> ids)
+	{
+		List<Assessment> rv = new ArrayList<Assessment>(ids.size());
+		for (String id : ids)
+		{
+			rv.add(idAssessment(id));
 		}
 
 		return rv;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Id each of the submission in the id list
+	 * 
+	 * @param ids
+	 *        The collection of submission ids.
+	 * @return A collection if id'ed submission, one for each id.
 	 */
-	public Submission enterSubmission(Assessment a, String userId) throws AssessmentPermissionException, AssessmentClosedException,
-			AssessmentCompletedException
+	protected List<Submission> idSubmissions(List<String> ids)
 	{
-		if (a == null) return null;
-
-		// trust only the id of the assessment passed in - get fresh and trusted additional information
-		Assessment assessment = idAssessment(a.getId());
-
-		// if null, get the current user id
-		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
-
-		// the current time
-		Time asOf = m_timeService.newTime();
-
-		if (M_log.isDebugEnabled())
-			M_log.debug("enterSubmission: assessment: " + assessment.getId() + " user: " + userId + " asOf: " + asOf);
-
-		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-		secure(userId, SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
-
-		// check that the assessment is currently open for submission
-		if (!isAssessmentOpen(assessment, asOf)) throw new AssessmentClosedException();
-
-		// see if we have one already
-		Submission submission = getSubmissionInProgress(assessment, userId);
-		if (submission != null)
+		List<Submission> rv = new ArrayList<Submission>(ids.size());
+		for (String id : ids)
 		{
-			// event track it (not a modify event)
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_REENTER, getSubmissionReference(submission.getId()),
-					false));
-
-			return submission;
+			rv.add(idSubmission(id));
 		}
 
-		// if not, can we make one? Check if there are remaining submissions for this user
-		Integer count = countRemainingSubmissions(assessment.getId(), userId);
-		if ((count == null) || (count.intValue() == 0))
-		{
-			throw new AssessmentCompletedException();
-		}
-
-		// TODO: it is possible to make too many submissions for the assessment.
-		// If this method is entered concurrently for the same user and assessment, the previous count check might fail.
-		submission = newSubmission(assessment);
-		submission.setUserId(userId);
-		submission.setStatus(new Integer(0));
-		submission.setIsComplete(Boolean.FALSE);
-		submission.setStartDate(asOf);
-
-		addSubmission(submission, null);
-
-		// event track it
-		m_eventTrackingService
-				.post(m_eventTrackingService.newEvent(SUBMIT_ENTER, getSubmissionReference(submission.getId()), true));
-
-		return submission;
+		return rv;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Check if this assessment is open for submission.
+	 * 
+	 * @param a
+	 *        The assessment.
+	 * @param asOf
+	 *        The time to check.
+	 * @return
 	 */
-	public void submitAnswer(SubmissionAnswer answer, Boolean completSubmission) throws AssessmentPermissionException,
-			AssessmentClosedException, SubmissionCompletedException
+	protected boolean isAssessmentOpen(Assessment a, Time asOf)
 	{
-		// TODO: one transaction, or separate ones?
+		// if we have a release date and we are not there yet
+		if ((a.getReleaseDate() != null) && (asOf.before(a.getReleaseDate()))) return false;
 
-		// trust only the answer information passed in, and the submission id it points to - get fresh and trusted additional
-		// information
-		Submission submission = idSubmission(answer.getSubmission().getId());
-		Assessment assessment = submission.getAssessment();
+		// if we have a retract date and we are past it
+		if ((a.getRetractDate() != null) && (!asOf.before(a.getRetractDate()))) return false;
 
-		// make sure this is an incomplete submission
-		if ((submission.getIsComplete() == null) || (submission.getIsComplete().booleanValue()))
+		// if we have a due date, are past it, and not accepting late submissions
+		if ((a.getDueDate() != null) && (!asOf.before(a.getDueDate()))
+				&& ((a.getAllowLateSubmit() == null) || (!a.getAllowLateSubmit().booleanValue()))) return false;
+
+		return true;
+	}
+
+	/**
+	 * Read the attachments of the assessment
+	 * 
+	 * @param assessment
+	 *        The assessment impl with the id set to fill in.
+	 */
+	protected void readAssessmentAttachments(final AssessmentImpl assessment)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("readAssessmentAttachments: " + assessment.getId());
+
+		if (assessment.getId() == null)
 		{
-			throw new SubmissionCompletedException();
+			M_log.warn("readAssessmentAttachments: attempt to read with no id set");
+			return;
 		}
 
-		Time asOf = m_timeService.newTime();
+		// collect the attachments
+		final List<Reference> attachments = new ArrayList<Reference>();
 
-		if (M_log.isDebugEnabled())
-			M_log.debug("submitAnswer: submission: " + submission.getId() + " complete?: " + Boolean.toString(completSubmission)
-					+ " asOf: " + asOf);
+		// get the attachments
+		String statement = "SELECT A.RESOURCEID" + " FROM SAM_PUBLISHEDATTACHMENT_T A" + " WHERE A.ASSESSMENTID = ?";
+		Object[] fields = new Object[1];
+		fields[0] = assessment.getId();
 
-		// check that the current user is the submission user
-		if (!submission.getUserId().equals(m_sessionManager.getCurrentSessionUserId()))
+		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
-			throw new AssessmentPermissionException(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION,
-					getAssessmentReference(assessment.getId()));
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String refStr = result.getString(1);
+
+					// assume a content ref
+					refStr = "/content" + refStr;
+
+					// make a reference
+					Reference ref = m_entityManager.newReference(refStr);
+					attachments.add(ref);
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessmentAttachments: " + e);
+					return null;
+				}
+			}
+		});
+
+		// set these into the assessment
+		assessment.initAttachments(attachments);
+
+		// update the cache if cached
+		AssessmentImpl cached = getCachedAssessment(assessment.getId());
+		if (cached != null)
+		{
+			cached.setAttachments(assessment);
+		}
+	}
+
+	/**
+	 * Read the main parts of the assessment (not the questions)
+	 * 
+	 * @param assessment
+	 *        The assessment impl with the id set to fill in.
+	 * @return true if we read, false if we could not find the assessment.
+	 */
+	protected boolean readAssessmentMain(final AssessmentImpl assessment)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("readAssessmentMain: " + assessment.getId());
+		if (assessment.getId() == null)
+		{
+			M_log.warn("readAssessmentMain: attempt to read with no id set");
+			return false;
 		}
 
-		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment (use the assessment as ref, not
-		// submission)
-		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+		String statement = "SELECT P.TITLE, AD.AGENTID, PAC.DUEDATE, PAC.FEEDBACKDATE, PE.SCORINGTYPE, P.STATUS,"
+				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, P.CREATEDBY,"
+				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.TIMELIMIT, PAC.AUTOSUBMIT, PAC.STARTDATE, PAC.RETRACTDATE, PAC.LATEHANDLING,"
+				+ " PF.SHOWSTUDENTQUESTIONSCORE, PF.SHOWCORRECTRESPONSE, PF.SHOWQUESTIONLEVELFEEDBACK, PF.SHOWSELECTIONLEVELFEEDBACK,"
+				+ " PAC.ITEMNAVIGATION, PAC.ITEMNUMBERING, P.DESCRIPTION, PAC.ASSESSMENTFORMAT"
+				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
+				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ?"
+				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID"
+				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
+				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON P.ID = PE.ASSESSMENTID" + " WHERE P.ID = ?";
+		Object[] fields = new Object[2];
+		fields[0] = "VIEW_PUBLISHED_ASSESSMENT";
+		fields[1] = assessment.getId();
 
-		// check that the assessment is currently open for submission
-		if (!isAssessmentOpen(assessment, asOf)) throw new AssessmentClosedException();
+		List results = m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String title = result.getString(1);
+					String context = result.getString(2);
 
-		// update the submission parameter for the caller
-		answer.setSubmittedDate(asOf);
-		answer.getSubmission().setSubmittedDate(asOf);
+					java.sql.Timestamp ts = result.getTimestamp(3, m_sqlService.getCal());
+					Time dueDate = null;
+					if (ts != null)
+					{
+						dueDate = m_timeService.newTime(ts.getTime());
+					}
 
-		// auto-score
-		answer.autoScore();
+					ts = result.getTimestamp(4, m_sqlService.getCal());
+					Time feedbackDate = null;
+					if (ts != null)
+					{
+						feedbackDate = m_timeService.newTime(ts.getTime());
+					}
 
+					MultipleSubmissionSelectionPolicy mssPolicy = MultipleSubmissionSelectionPolicy.parse(result.getInt(5));
+
+					AssessmentStatus status = AssessmentStatus.parse(result.getInt(6));
+
+					FeedbackDelivery delivery = FeedbackDelivery.parse(result.getInt(7));
+					boolean showStudentScore = result.getBoolean(8);
+					boolean showStatistics = result.getBoolean(9);
+					String createdBy = result.getString(10);
+					boolean unlimitedSubmissions = result.getBoolean(11);
+					int submissionsAllowed = result.getInt(12);
+					int timeLimit = result.getInt(13);
+					int autoSubmit = result.getInt(14);
+
+					ts = result.getTimestamp(15, m_sqlService.getCal());
+					Time releaseDate = null;
+					if (ts != null)
+					{
+						releaseDate = m_timeService.newTime(ts.getTime());
+					}
+
+					ts = result.getTimestamp(16, m_sqlService.getCal());
+					Time retractDate = null;
+					if (ts != null)
+					{
+						retractDate = m_timeService.newTime(ts.getTime());
+					}
+					int allowLateSubmit = result.getInt(17);
+					boolean showStudentQuestionScore = result.getBoolean(18);
+					boolean showCorrectAnswer = result.getBoolean(19);
+					boolean showQuestionFeedback = result.getBoolean(20);
+					boolean showAnswerFeedback = result.getBoolean(21);
+					int randomAccess = result.getInt(22);
+					int continuousNumbering = result.getInt(23);
+					String description = result.getString(24);
+					QuestionPresentation presentation = QuestionPresentation.parse(result.getInt(25));
+
+					// pack it into the assessment
+					assessment.initAutoSubmit((autoSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
+					assessment.initContext(context);
+					assessment.initCreatedBy(createdBy);
+					assessment.initDueDate(dueDate);
+					assessment.initFeedbackDate(feedbackDate);
+					assessment.initFeedbackDelivery(delivery);
+					assessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
+					assessment.initFeedbackShowScore(Boolean.valueOf(showStudentScore));
+					assessment.initMultipleSubmissionSelectionPolicy(mssPolicy);
+					assessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
+					assessment.initStatus(status);
+					assessment.initTimeLimit(timeLimit == 0 ? null : new Integer(timeLimit));
+					assessment.initTitle(title);
+					assessment.initReleaseDate(releaseDate);
+					assessment.initRetractDate(retractDate);
+					assessment.initAllowLateSubmit((allowLateSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
+					assessment.initFeedbackShowQuestionScore(Boolean.valueOf(showStudentQuestionScore));
+					assessment.initFeedbackShowCorrectAnswer(Boolean.valueOf(showCorrectAnswer));
+					assessment.initFeedbackShowQuestionFeedback(Boolean.valueOf(showQuestionFeedback));
+					assessment.initFeedbackShowAnswerFeedback(Boolean.valueOf(showAnswerFeedback));
+					assessment.initRandomAccess(Boolean.valueOf(randomAccess == 2));
+					assessment.initContinuousNumbering(Boolean.valueOf(continuousNumbering == 1));
+					assessment.initDescription(description);
+					assessment.initQuestionPresentation(presentation);
+
+					return assessment;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessmentMain: " + e);
+					return null;
+				}
+			}
+		});
+
+		if (!results.isEmpty())
+		{
+			// update the cache if cached
+			AssessmentImpl cached = getCachedAssessment(assessment.getId());
+			if (cached != null)
+			{
+				cached.setMain(assessment);
+			}
+
+			return true;
+		}
+
+		// we didn't find it
+		return false;
+	}
+
+	/**
+	 * Read the sections and questions of the assessment (not the main) and their attachments
+	 * 
+	 * @param assessment
+	 *        The assessment impl with the id set to fill in.
+	 */
+	protected void readAssessmentSections(final AssessmentImpl assessment)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("readAssessmentSections: " + assessment.getId());
+
+		if (assessment.getId() == null)
+		{
+			M_log.warn("readAssessmentSections: attempt to read with no id set");
+			return;
+		}
+
+		// get the sections
+		String statement = "SELECT P.SECTIONID, P.TITLE, P.DESCRIPTION, SMD1.ENTRY "
+				+ " FROM SAM_PUBLISHEDSECTION_T P"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD1 ON P.SECTIONID = SMD1.SECTIONID AND SMD1.LABEL = 'QUESTIONS_ORDERING'"
+				+ " WHERE P.ASSESSMENTID = ? ORDER BY P.SEQUENCE ASC";
+		Object[] fields = new Object[1];
+		fields[0] = assessment.getId();
+
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String sectionId = result.getString(1);
+					String title = result.getString(2);
+					String description = result.getString(3);
+					int questionOrdering = result.getInt(4);
+
+					// pack it into an assessment section
+					AssessmentSectionImpl section = new AssessmentSectionImpl();
+					section.initId(sectionId);
+					section.setTitle(title);
+					section.setDescription(description);
+					section.setRandomQuestionOrder((questionOrdering == 2) ? Boolean.TRUE : Boolean.FALSE);
+
+					// put the section into the assessment
+					section.initAssement(assessment);
+					assessment.sections.add(section);
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessmentSections: " + e);
+					return null;
+				}
+			}
+		});
+
+		// mark the assessment as sections inited
+		assessment.sectionsStatus = AssessmentImpl.PropertyStatus.inited;
+
+		// get the questions
+		statement = "SELECT PI.ITEMID, PI.HASRATIONALE, PI.SCORE, PI.INSTRUCTION, PI.TYPEID, PI.SECTIONID, MCS.ENTRY, MME.ENTRY, MMR.ENTRY,"
+				+ " PF1.TEXT, PF2.TEXT, PF3.TEXT"
+				+ " FROM SAM_PUBLISHEDITEM_T PI"
+				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON PI.SECTIONID = PS.SECTIONID AND PS.ASSESSMENTID = ?"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MCS ON PI.ITEMID = MCS.ITEMID AND MCS.LABEL = 'CASE_SENSITIVE'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MME ON PI.ITEMID = MME.ITEMID AND MME.LABEL = 'MUTUALLY_EXCLUSIVE'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MMR ON PI.ITEMID = MMR.ITEMID AND MMR.LABEL = 'RANDOMIZE'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF1 ON PI.ITEMID = PF1.ITEMID AND PF1.TYPEID = 'Correct Feedback'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF2 ON PI.ITEMID = PF2.ITEMID AND PF2.TYPEID = 'General Feedback'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF3 ON PI.ITEMID = PF3.ITEMID AND PF3.TYPEID = 'InCorrect Feedback'"
+				+ " ORDER BY PI.SEQUENCE ASC";
+		fields = new Object[1];
+		fields[0] = assessment.id;
+
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String questionId = result.getString(1);
+					boolean hasRationale = result.getBoolean(2);
+					float score = result.getFloat(3);
+					String instructions = StringUtil.trimToNull(result.getString(4));
+					int type = result.getInt(5);
+					String sectionId = result.getString(6);
+					String caseSensitive = result.getString(7);
+					String mutuallyExclusive = result.getString(8);
+					String randomize = result.getString(9);
+					String correctFeedback = result.getString(10);
+					String generalFeedback = result.getString(11);
+					String incorrectFeedback = result.getString(12);
+
+					// pack it into an assessment question
+					AssessmentQuestionImpl question = new AssessmentQuestionImpl();
+					question.initId(questionId);
+					question.setRequireRationale(Boolean.valueOf(hasRationale));
+					question.setScore(new Float(score));
+					question.setInstructions(instructions);
+					question.setType(QuestionType.valueOf(type));
+					question.setCaseSensitive(caseSensitive == null ? null : Boolean.parseBoolean(caseSensitive));
+					question.setMutuallyExclusive(mutuallyExclusive == null ? null : Boolean.parseBoolean(mutuallyExclusive));
+					question.setFeedbackCorrect(correctFeedback);
+					question.setFeedbackGeneral(generalFeedback);
+					question.setFeedbackIncorrect(incorrectFeedback);
+					question.setRandomAnswerOrder(((randomize != null) && randomize.equals("true")) ? Boolean.TRUE : Boolean.FALSE);
+
+					// add the question to the appropriate section (sectionId)
+					AssessmentSectionImpl section = (AssessmentSectionImpl) assessment.getSection(sectionId);
+					if (section == null)
+					{
+						M_log.warn("readAssessmentParts: missing section to store question: section id: " + sectionId
+								+ " questionId: " + questionId);
+					}
+					else
+					{
+						question.initSection(section);
+						section.questions.add(question);
+					}
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessmentSections: " + e);
+					return null;
+				}
+			}
+		});
+
+		// read the question parts (from Sam's item text table)
+		statement = "SELECT PIT.ITEMTEXTID, PIT.ITEMID, PIT.TEXT" + " FROM SAM_PUBLISHEDITEMTEXT_T PIT"
+				+ " INNER JOIN SAM_PUBLISHEDITEM_T PI ON PIT.ITEMID = PI.ITEMID"
+				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON PI.SECTIONID = PS.SECTIONID AND PS.ASSESSMENTID = ?"
+				+ " ORDER BY PIT.ITEMID ASC, PIT.SEQUENCE ASC";
+		fields = new Object[1];
+		fields[0] = assessment.id;
+
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String partId = result.getString(1);
+					String questionId = result.getString(2);
+					String title = result.getString(3);
+
+					// pack into a question part
+					QuestionPartImpl part = new QuestionPartImpl();
+					part.initId(partId);
+					part.setTitle(title);
+
+					// add the part to the appropriate question (questionId)
+					AssessmentQuestionImpl question = (AssessmentQuestionImpl) assessment.getQuestion(questionId);
+					if (question == null)
+					{
+						M_log.warn("readAssessmentSections: missing question to store text: question id: " + questionId
+								+ " textId: " + partId);
+					}
+					else
+					{
+						part.initQuestion(question);
+						question.parts.add(part);
+					}
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessmentSections: " + e);
+					return null;
+				}
+			}
+		});
+
+		// get the answers
+		statement = "SELECT PA.ANSWERID, PA.ITEMID, PA.TEXT, PA.ISCORRECT, PA.LABEL, PA.ITEMTEXTID,"
+				+ " PF1.TEXT, PF2.TEXT, PF3.TEXT"
+				+ " FROM SAM_PUBLISHEDANSWER_T PA"
+				+ " INNER JOIN SAM_PUBLISHEDITEM_T PI ON PA.ITEMID = PI.ITEMID"
+				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON PI.SECTIONID = PS.SECTIONID AND PS.ASSESSMENTID = ?"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWERFEEDBACK_T PF1 ON PA.ANSWERID = PF1.ANSWERID AND PF1.TYPEID = 'Correct Feedback'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWERFEEDBACK_T PF2 ON PA.ANSWERID = PF2.ANSWERID AND PF2.TYPEID = 'General Feedback'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWERFEEDBACK_T PF3 ON PA.ANSWERID = PF3.ANSWERID AND PF3.TYPEID = 'InCorrect Feedback'"
+				+ " ORDER BY PA.SEQUENCE ASC";
+		fields = new Object[1];
+		fields[0] = assessment.id;
+
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String answerId = result.getString(1);
+					String questionId = result.getString(2);
+					String text = result.getString(3);
+					boolean isCorrect = result.getBoolean(4);
+					// samigo puts out a blank (not null) label for cases where there should be no label (t/f)
+					String label = StringUtil.trimToNull(result.getString(5));
+					String partId = result.getString(6);
+					String correctFeedback = result.getString(7);
+					String generalFeedback = result.getString(8);
+					String incorrectFeedback = result.getString(9);
+
+					// find the question
+					AssessmentQuestionImpl question = (AssessmentQuestionImpl) assessment.getQuestion(questionId);
+					if (question == null)
+					{
+						M_log.warn("readAssessmentSections: missing question to store answer: question id: " + questionId
+								+ " answerId: " + answerId);
+					}
+					else
+					{
+						// find the part
+						QuestionPartImpl part = (QuestionPartImpl) question.getPart(partId);
+						if (part == null)
+						{
+							M_log.warn("readAssessmentSections: missing question part to store answer: question id: " + questionId
+									+ " partId: " + partId + " answerId: " + answerId);
+						}
+						else
+						{
+							// pack it into an assessment answer
+							AssessmentAnswerImpl answer = new AssessmentAnswerImpl();
+							answer.initId(answerId);
+							answer.setIsCorrect(Boolean.valueOf(isCorrect));
+							answer.setText(text);
+							answer.setLabel(label);
+							answer.setFeedbackCorrect(correctFeedback);
+							answer.setFeedbackGeneral(generalFeedback);
+							answer.setFeedbackIncorrect(incorrectFeedback);
+
+							// add to the part's answers
+							answer.initPart(part);
+							part.answers.add(answer);
+						}
+					}
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessmentSections: " + e);
+					return null;
+				}
+			}
+		});
+
+		// read the attachments for all sections (join with the sections table to be able to select for the entire assessment)
+		statement = "SELECT A.RESOURCEID, A.SECTIONID" + " FROM SAM_PUBLISHEDATTACHMENT_T A"
+				+ " INNER JOIN SAM_PUBLISHEDSECTION_T S ON A.SECTIONID = S.SECTIONID" + " WHERE S.ASSESSMENTID = ?";
+		fields = new Object[1];
+		fields[0] = assessment.getId();
+
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String refStr = result.getString(1);
+					String sectionId = result.getString(2);
+
+					// assume a content ref
+					refStr = "/content" + refStr;
+
+					// make a reference
+					Reference ref = m_entityManager.newReference(refStr);
+
+					// find the section
+					AssessmentSectionImpl section = (AssessmentSectionImpl) assessment.getSection(sectionId);
+					if (section != null)
+					{
+						// add it to the section's attachments
+						section.initAddAttachment(ref);
+					}
+					else
+					{
+						M_log.warn("readAssessmentSections: missing section to add attachment: sectionId: " + sectionId + " ref: "
+								+ refStr);
+					}
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessmentAttachments: " + e);
+					return null;
+				}
+			}
+		});
+
+		// read the attachments for all questions (join with the items table and sections table to be able to select for the entire
+		// assessment)
+		statement = "SELECT A.RESOURCEID, A.ITEMID" + " FROM SAM_PUBLISHEDATTACHMENT_T A"
+				+ " INNER JOIN SAM_PUBLISHEDITEM_T Q ON A.ITEMID = Q.ITEMID"
+				+ " INNER JOIN SAM_PUBLISHEDSECTION_T S ON Q.SECTIONID = S.SECTIONID" + " WHERE S.ASSESSMENTID = ?";
+		fields = new Object[1];
+		fields[0] = assessment.getId();
+
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String refStr = result.getString(1);
+					String questionId = result.getString(2);
+
+					// assume a content ref
+					refStr = "/content" + refStr;
+
+					// make a reference
+					Reference ref = m_entityManager.newReference(refStr);
+
+					// find the question
+					AssessmentQuestionImpl question = (AssessmentQuestionImpl) assessment.getQuestion(questionId);
+					if (question != null)
+					{
+						// add it to the question's attachments
+						question.initAddAttachment(ref);
+					}
+					else
+					{
+						M_log.warn("readAssessmentSections: missing question to add attachment: questionId: " + questionId
+								+ " ref: " + refStr);
+					}
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessmentAttachments: " + e);
+					return null;
+				}
+			}
+		});
+
+		// update the cache if cached
+		AssessmentImpl cached = getCachedAssessment(assessment.getId());
+		if (cached != null)
+		{
+			cached.setSections(assessment);
+		}
+	}
+
+	/**
+	 * Read the answers of the submission (not the main)
+	 * 
+	 * @param submission
+	 *        The submission impl with the id set to fill in.
+	 */
+	protected void readSubmissionAnswers(final SubmissionImpl submission)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("readSubmissionAnswers: " + submission.getId());
+
+		if (submission.getId() == null)
+		{
+			M_log.warn("readSubmissionAnswers: attempt to read with no id set");
+			return;
+		}
+
+		// mark the submission as inited for the answers, so the methods we are about to call don't try to re-read the answers
+		submission.answersStatus = SubmissionImpl.PropertyStatus.inited;
+
+		// read the answers.
+		// The PUBLISHEDITEMTEXTID points to a question part, and we want to read the entiries in question part sequence order,
+		// so we join to the SAM_PUBLISHEDITEMTEXT_T (i.e. question parts) table and order by the sequence there
+		String statement = "SELECT I.ITEMGRADINGID, I.SUBMITTEDDATE, I.PUBLISHEDANSWERID, I.RATIONALE, I.ANSWERTEXT, I.REVIEW, I.PUBLISHEDITEMID, I.AUTOSCORE, I.PUBLISHEDITEMTEXTID"
+				+ " FROM SAM_ITEMGRADING_T I"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMTEXT_T PIT ON I.PUBLISHEDITEMTEXTID = PIT.ITEMTEXTID"
+				+ " WHERE I.ASSESSMENTGRADINGID = ?" + " ORDER BY PIT.SEQUENCE ASC";
+		Object[] fields = new Object[1];
+		fields[0] = submission.getId();
+
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String id = result.getString(1);
+
+					java.sql.Timestamp ts = result.getTimestamp(2, m_sqlService.getCal());
+					Time submittedDate = null;
+					if (ts != null)
+					{
+						submittedDate = m_timeService.newTime(ts.getTime());
+					}
+
+					String answerId = result.getString(3);
+					String rationale = result.getString(4);
+					String answerText = result.getString(5);
+					boolean markedForReview = result.getBoolean(6);
+					String questionId = result.getString(7);
+					float autoScore = result.getFloat(8);
+					String questionPartId = result.getString(9);
+
+					// do we have the answer to this question yet?
+					SubmissionAnswerImpl answer = submission.findAnswer(questionId);
+
+					// if not, make one and save it in the submission
+					if (answer == null)
+					{
+						answer = new SubmissionAnswerImpl();
+						answer.initQuestionId(questionId);
+						answer.setRationale(rationale);
+						answer.setMarkedForReview(Boolean.valueOf(markedForReview));
+						answer.setSubmittedDate(submittedDate);
+						answer.id = id;
+
+						answer.initSubmission(submission);
+						submission.answers.add(answer);
+					}
+
+					// add an entry to the answer
+					SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
+					entry.initQuestionPartId(questionPartId);
+					entry.initAssessmentAnswerId(answerId);
+					entry.setAnswerText(answerText);
+					entry.initId(id);
+					entry.initAutoScore(new Float(autoScore));
+
+					entry.initAnswer(answer);
+					answer.entries.add(entry);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readSubmissionAnswers: " + e);
+					return null;
+				}
+			}
+		});
+
+		// read the uploaded attachments for the answers, and fill out the entries to hold their refs
+		statement = "SELECT M.MEDIAID, I.PUBLISHEDITEMID" + " FROM SAM_MEDIA_T M"
+				+ " INNER JOIN SAM_ITEMGRADING_T I ON M.ITEMGRADINGID = I.ITEMGRADINGID" + " WHERE I.ASSESSMENTGRADINGID = ?"
+				+ " ORDER BY M.CREATEDDATE ASC";
+		fields = new Object[1];
+		fields[0] = submission.getId();
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String mediaId = result.getString(1);
+					String questionId = result.getString(2);
+
+					// we should already have an answer
+					SubmissionAnswerImpl answer = submission.findAnswer(questionId);
+					if (answer != null)
+					{
+						// we should have at least one entry
+						SubmissionAnswerEntryImpl entry = answer.entries.get(0);
+						if (entry != null)
+						{
+							// use this if the answer text is not a reference
+							SubmissionAnswerEntryImpl newEntry = null;
+							if ((entry.getAnswerText() == null) || (!entry.getAnswerText().startsWith("/")))
+							{
+								newEntry = entry;
+							}
+
+							// otherwise make a new entry
+							else
+							{
+								newEntry = new SubmissionAnswerEntryImpl(entry);
+								newEntry.setAssessmentAnswer(null);
+								newEntry.setAnswerText(null);
+								newEntry.initId(null);
+								newEntry.initAnswer(answer);
+								newEntry.initAutoScore(new Float(0));
+								answer.entries.add(newEntry);
+							}
+
+							// set the reference to the attachment into the answer text
+							String refStr = m_attachmentService.getAttachmentReference(submission.getId(), mediaId);
+							newEntry.setAnswerText(refStr);
+						}
+
+						else
+						{
+							M_log.warn("readSubmissionAnswers: missing entry for answer to question for attachment: questionId: "
+									+ questionId + " mediaId: " + mediaId);
+						}
+					}
+					else
+					{
+						M_log.warn("readSubmissionAnswers: missing answer to question for attachment: questionId: " + questionId
+								+ " mediaId: " + mediaId);
+					}
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readSubmissionAnswers: " + e);
+					return null;
+				}
+			}
+		});
+
+		// verify the answers
+		for (SubmissionAnswerImpl answer : submission.answers)
+		{
+			answer.verifyEntries();
+		}
+
+		// update the cache if cached
+		SubmissionImpl cached = getCachedSubmission(submission.getId());
+		if (cached != null)
+		{
+			cached.setAnswers(submission);
+		}
+	}
+
+	/**
+	 * Read the main parts of the submission (not the answers)
+	 * 
+	 * @param submission
+	 *        The submission impl with the id set to fill in.
+	 * @return true if we read, false if we could not find the submission.
+	 */
+	protected boolean readSubmissionMain(final SubmissionImpl submission)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("readSubmissionMain: " + submission.getId());
+
+		if (submission.getId() == null)
+		{
+			M_log.warn("readSubmissionMain: attempt to read with no id set");
+			return false;
+		}
+
+		String statement = "SELECT AG.PUBLISHEDASSESSMENTID, AG.TOTALOVERRIDESCORE, AG.SUBMITTEDDATE, AG.AGENTID, AG.FORGRADE, AG.ATTEMPTDATE, AG.STATUS"
+				+ " FROM SAM_ASSESSMENTGRADING_T AG" + " WHERE AG.ASSESSMENTGRADINGID = ?";
+		Object[] fields = new Object[1];
+		fields[0] = submission.getId();
+
+		List results = m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String aid = result.getString(1);
+					float manualScore = result.getFloat(2);
+
+					java.sql.Timestamp ts = result.getTimestamp(3, m_sqlService.getCal());
+					Time submittedDate = null;
+					if (ts != null)
+					{
+						submittedDate = m_timeService.newTime(ts.getTime());
+					}
+
+					String userId = result.getString(4);
+					boolean complete = result.getBoolean(5);
+
+					ts = result.getTimestamp(6, m_sqlService.getCal());
+					Time startDate = null;
+					if (ts != null)
+					{
+						startDate = m_timeService.newTime(ts.getTime());
+					}
+
+					int status = result.getInt(7);
+
+					// pack it into a submission
+					submission.initAssessmentId(aid);
+					submission.initIsComplete(Boolean.valueOf(complete));
+					submission.initStartDate(startDate);
+					submission.initStatus(new Integer(status));
+					submission.initSubmittedDate(submittedDate);
+					submission.initUserId(userId);
+
+					// TODO: the manual score, and the coment (not yet in the SELECT list) can form the evaluation for this...
+
+					return submission;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getSubmission: " + e);
+					return null;
+				}
+			}
+		});
+
+		if (!results.isEmpty())
+		{
+			// update the cache if cached
+			SubmissionImpl cached = getCachedSubmission(submission.getId());
+			if (cached != null)
+			{
+				cached.setMain(submission);
+			}
+
+			return true;
+		}
+
+		// we didn't find it
+		return false;
+	}
+
+	/**
+	 * Add a single entry to the answer to reserve an id for this answer.
+	 * 
+	 * @param answer
+	 *        The submission answer.
+	 */
+	protected void reserveAnswer(SubmissionAnswerImpl answer)
+	{
 		Connection connection = null;
 		boolean wasCommit = true;
 		try
@@ -3310,156 +3729,57 @@ public class AssessmentServiceImpl implements AssessmentService
 			wasCommit = connection.getAutoCommit();
 			connection.setAutoCommit(false);
 
-			// unwrap file upload attachments from multiple entries to just one
-			// TODO: do this when save submission also
-			List<SubmissionAnswerEntryImpl> entries = ((SubmissionAnswerImpl) answer).entries;
-			if (answer.getQuestion().getType() == QuestionType.fileUpload)
-			{
-				SubmissionAnswerEntryImpl sample = entries.get(0);
-				entries = new ArrayList<SubmissionAnswerEntryImpl>(1);
-				SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl(sample);
-				entry.setAnswerText(null);
-				entry.setAssessmentAnswer(null);
+			Long answerId = m_sqlService.getNextSequence("SAM_ITEMGRADING_ID_S", connection);
 
-				// set the entry id to the id we saved in the answer
-				entry.id = ((SubmissionAnswerImpl) answer).id;
-				entries.add(entry);
-			}
+			// this will score the answer based on values in the database
+			String statement = "INSERT INTO SAM_ITEMGRADING_T"
+					+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
+					+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW" + ((answerId == null) ? "" : ", ITEMGRADINGID")
+					+ ")" + " VALUES (?,?,?,?,?,?,?,?,?,?," + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
+					// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
+					+ ((answerId == null) ? "" : ",?") + ")";
+			Object[] fields = new Object[(answerId == null) ? 10 : 11];
+			fields[0] = answer.getSubmission().getId();
+			fields[1] = answer.getQuestion().getId();
+			answer.getQuestion().getPart().getId();
+			fields[2] = answer.getQuestion().getPart().getId();
+			fields[3] = answer.getSubmission().getUserId();
+			fields[4] = answer.getSubmittedDate();
+			fields[5] = null;
+			fields[6] = answer.getRationale();
+			fields[7] = null;
+			fields[8] = new Float(0);
+			fields[9] = new Float(0);
 
-			// create submission answer record(s) if needed
-			for (SubmissionAnswerEntryImpl entry : entries)
+			if (answerId != null)
 			{
-				if (entry.getId() == null)
+				fields[10] = answerId;
+				if (!m_sqlService.dbWrite(connection, statement, fields))
 				{
-					Long answerId = m_sqlService.getNextSequence("SAM_ITEMGRADING_ID_S", connection);
-
-					// this will score the answer based on values in the database
-					String statement = "INSERT INTO SAM_ITEMGRADING_T"
-							+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
-							+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW"
-							+ ((answerId == null) ? "" : ", ITEMGRADINGID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,"
-							+ m_sqlService.getBooleanConstant(answer.getMarkedForReview()) // TODO: it would be nice if our ? /
-																							// Boolean worked with bit fields
-																							// -ggolden
-							+ ((answerId == null) ? "" : ",?") + ")";
-					Object[] fields = new Object[(answerId == null) ? 10 : 11];
-					fields[0] = answer.getSubmission().getId();
-					fields[1] = answer.getQuestion().getId();
-					fields[2] = entry.getQuestionPart().getId();
-					fields[3] = answer.getSubmission().getUserId();
-					fields[4] = answer.getSubmittedDate();
-					fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
-					fields[6] = answer.getRationale();
-					fields[7] = entry.getAnswerText();
-					fields[8] = entry.getAutoScore();
-					fields[9] = new Float(0);
-
-					if (answerId != null)
-					{
-						fields[10] = answerId;
-						if (!m_sqlService.dbWrite(connection, statement, fields))
-						{
-							// TODO: better exception
-							throw new Exception("submitAnswer: dbWrite Failed");
-						}
-					}
-					else
-					{
-						answerId = m_sqlService.dbInsert(connection, statement, fields, "ITEMGRADINGID");
-						if (answerId == null)
-						{
-							// TODO: better exception
-							throw new Exception("submitAnswer: dbInsert Failed");
-						}
-					}
-
-					// set the id into the answer
-					if (answerId == null) throw new Exception("failed to insert submission answer");
-					entry.initId(answerId.toString());
-					if (((SubmissionAnswerImpl) answer).id == null) ((SubmissionAnswerImpl) answer).id = answerId.toString();
+					// TODO: better exception
+					throw new Exception("reserveAnswer: dbWrite Failed");
 				}
-
-				// otherwise update the submission answer record
-				else
+			}
+			else
+			{
+				answerId = m_sqlService.dbInsert(connection, statement, fields, "ITEMGRADINGID");
+				if (answerId == null)
 				{
-					String statement = "UPDATE SAM_ITEMGRADING_T"
-							+ " SET SUBMITTEDDATE = ?, PUBLISHEDANSWERID = ?, PUBLISHEDITEMTEXTID = ?, RATIONALE = ?, ANSWERTEXT = ?, AUTOSCORE = ?,"
-							+ " REVIEW = " + m_sqlService.getBooleanConstant(answer.getMarkedForReview()) // TODO: it would be
-																											// nice if our ? /
-																											// Boolean worked with
-																											// bit fields -ggolden
-							+ " WHERE ITEMGRADINGID = ?";
-					// TODO: for added security, add to WHERE: AND ASSESSMENTGRADINGID = ?answer.getSubmissionId() AND
-					// PUBLISHEDITEMID = ?answer.getQuestionId() -ggolden
-					Object[] fields = new Object[7];
-					fields[0] = answer.getSubmittedDate();
-					fields[1] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
-					fields[2] = entry.getQuestionPart().getId();
-					fields[3] = answer.getRationale();
-					fields[4] = entry.getAnswerText();
-					fields[5] = entry.getAutoScore();
-					fields[6] = entry.getId();
-
-					if (!m_sqlService.dbWrite(connection, statement, fields))
-					{
-						// TODO: better exception
-						throw new Exception("submitAnswer: dbWrite Failed");
-					}
+					// TODO: better exception
+					throw new Exception("reserveAnswer: dbInsert Failed");
 				}
 			}
 
-			// for any entries unused that have an id, delete them
-			for (SubmissionAnswerEntryImpl entry : ((SubmissionAnswerImpl) answer).recycle)
-			{
-				if (entry.getId() != null)
-				{
-					String statement = "DELETE FROM SAM_ITEMGRADING_T WHERE ITEMGRADINGID = ?";
-					Object[] fields = new Object[1];
-					fields[0] = entry.getId();
-					if (!m_sqlService.dbWrite(connection, statement, fields))
-					{
-						// TODO: better exception
-						throw new Exception("submitAnswer: dbWrite Failed");
-					}
-				}
-			}
-
-			// clear the unused now we have deleted what we must
-			((SubmissionAnswerImpl) answer).recycle.clear();
-
-			// if complete, update the STATUS to 1 and the FORGRADE to TRUE... always update the date
-			// Note: for Samigo compat., we need to update the scores in the SAM_ASSESSMENTGRADING_T based on the sums of the item
-			// scores
-			String statement = "UPDATE SAM_ASSESSMENTGRADING_T"
-					+ " SET SUBMITTEDDATE = ?,"
-					+ " TOTALAUTOSCORE = (SELECT SUM(AUTOSCORE)+SUM(OVERRIDESCORE) FROM SAM_ITEMGRADING_T WHERE ASSESSMENTGRADINGID = ?),"
-					+ " FINALSCORE = TOTALAUTOSCORE+TOTALOVERRIDESCORE"
-					+ (((completSubmission != null) && completSubmission.booleanValue()) ? (" ,STATUS = 1, FORGRADE = " + m_sqlService
-							.getBooleanConstant(true))
-							: "") + " WHERE ASSESSMENTGRADINGID = ?";
-			Object[] fields = new Object[3];
-			fields[0] = answer.getSubmission().getSubmittedDate();
-			fields[1] = answer.getSubmission().getId();
-			fields[2] = answer.getSubmission().getId();
-			if (!m_sqlService.dbWrite(connection, statement, fields))
-			{
-				// TODO: better exception
-				throw new Exception("submitAnswer: dbWrite Failed");
-			}
+			// set the id into the answer
+			if (answerId == null) throw new Exception("failed to insert submission answer");
+			answer.id = answerId.toString();
 
 			// commit
 			connection.commit();
 
 			// event track it
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(submission.getId()),
-					true));
-
-			// track if we are complete
-			if ((completSubmission != null) && completSubmission.booleanValue())
-			{
-				m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission
-						.getId()), true));
-			}
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(answer
+					.getSubmission().getId()), true));
 		}
 		catch (Exception e)
 		{
@@ -3496,110 +3816,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		}
 
 		// the submission is altered by this - clear the cache (or update)
-		unCacheSubmission(submission.getId());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void completeSubmission(Submission s) throws AssessmentPermissionException, AssessmentClosedException,
-			SubmissionCompletedException
-	{
-		// trust only the submission id passed in - get fresh and trusted additional information
-		Submission submission = idSubmission(s.getId());
-		Assessment assessment = submission.getAssessment();
-
-		// the current time
-		Time asOf = m_timeService.newTime();
-
-		// make sure this is an incomplete submission
-		if ((submission.getIsComplete() == null) || (submission.getIsComplete().booleanValue()))
-		{
-			throw new SubmissionCompletedException();
-		}
-
-		// check that the current user is the submission user
-		if (!submission.getUserId().equals(m_sessionManager.getCurrentSessionUserId()))
-		{
-			throw new AssessmentPermissionException(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION,
-					getAssessmentReference(assessment.getId()));
-		}
-
-		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment (use the assessment as ref, not
-		// submission)
-		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
-
-		// check that the assessment is currently open for submission
-		if (!isAssessmentOpen(assessment, asOf)) throw new AssessmentClosedException();
-
-		if (M_log.isDebugEnabled()) M_log.debug("completeSubmission: submission: " + submission.getId());
-
-		Connection connection = null;
-		boolean wasCommit = true;
-		try
-		{
-			connection = m_sqlService.borrowConnection();
-			wasCommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
-
-			String statement = "UPDATE SAM_ASSESSMENTGRADING_T" + " SET SUBMITTEDDATE = ?, STATUS = 1, FORGRADE = "
-					+ m_sqlService.getBooleanConstant(true) + " WHERE ASSESSMENTGRADINGID = ?";
-			Object fields[] = new Object[2];
-			fields[0] = asOf;
-			fields[1] = submission.getId();
-			if (!m_sqlService.dbWrite(connection, statement, fields))
-			{
-				throw new Exception("completeSubmission: dbWrite Failed");
-			}
-
-			// commit
-			connection.commit();
-
-			// update the submission parameter for the caller
-			s.setSubmittedDate(asOf);
-			s.setStatus(new Integer(1));
-			s.setIsComplete(Boolean.TRUE);
-
-			// event track it
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE,
-					getSubmissionReference(submission.getId()), true));
-		}
-		catch (Exception e)
-		{
-			if (connection != null)
-			{
-				try
-				{
-					connection.rollback();
-				}
-				catch (Exception ee)
-				{
-					M_log.warn("completeSubmission: rollback: " + ee);
-				}
-			}
-			M_log.warn("completeSubmission: " + e);
-		}
-		finally
-		{
-			if (connection != null)
-			{
-				// restore autocommit, if it was not false
-				try
-				{
-					if (wasCommit) connection.setAutoCommit(wasCommit);
-				}
-				catch (Exception e)
-				{
-					M_log.warn("completeSubmission, while setting auto commit: " + e);
-				}
-
-				// return the connetion
-				m_sqlService.returnConnection(connection);
-			}
-		}
-
-		// the submission is altered by this - clear the cache (or update?)
-		unCacheSubmission(submission.getId());
+		unCacheSubmission(answer.getSubmission().getId());
 	}
 
 	/**
@@ -3797,161 +4014,48 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
-	 * Check a submission answer for complete correctness
+	 * Check security and throw if not satisfied
 	 * 
-	 * @param answer
-	 *        The answer to score.
-	 * @return true if the answer is completely correct, false if not.
-	 */
-	protected boolean checkAnswer(SubmissionAnswerImpl answer)
-	{
-		AssessmentQuestion question = answer.getQuestion();
-
-		// trueFalse / multipleChoice - one entry to check
-		if ((question.getType() == QuestionType.trueFalse) || (question.getType() == QuestionType.multipleChoice))
-		{
-			if (answer.entries.get(0).getIsCorrect().booleanValue())
-			{
-				return true;
-			}
-
-			return false;
-		}
-
-		// multipleAnswer - only the correct choices should be selected
-		else if (question.getType() == QuestionType.multipleCorrect)
-		{
-			// these correct answers must be selected
-			List<AssessmentAnswer> correct = question.getPart().getCorrectAnswers();
-
-			for (SubmissionAnswerEntryImpl entry : answer.entries)
-			{
-				if (correct.contains(entry.getAssessmentAnswer()))
-				{
-					correct.remove(entry.getAssessmentAnswer());
-				}
-
-				// otherwise we found an incorrect entry
-				else
-				{
-					return false;
-				}
-			}
-
-			// if we have an entry for each correct, this is correct
-			if (correct.isEmpty()) return true;
-
-			return false;
-		}
-
-		// fillIn / numeric / matching - all entries must be correct
-		else if ((question.getType() == QuestionType.fillIn) || (question.getType() == QuestionType.numeric)
-				|| (question.getType() == QuestionType.matching))
-		{
-			for (SubmissionAnswerEntryImpl entry : answer.entries)
-			{
-				if (!entry.getIsCorrect().booleanValue())
-				{
-					return false;
-				}
-			}
-
-			// mutually exclusive check
-			if ((question.getType() == QuestionType.fillIn) && (question.getMutuallyExclusive().booleanValue()))
-			{
-				// check all but the last entry, looking down the list for a match
-				// if this answer matches any following answer, and their question text also matches, this answer gets zero'ed out
-				for (int i = 0; i < answer.entries.size() - 1; i++)
-				{
-					SubmissionAnswerEntryImpl entry = answer.entries.get(i);
-
-					// this is the question text that must match some entry-down-below's question text
-					String entryQuestionText = entry.getAssessmentAnswer().getText();
-
-					// look down the list
-					for (int j = i + 1; j < answer.entries.size(); j++)
-					{
-						// compare to this entry
-						SubmissionAnswerEntryImpl compareEntry = answer.entries.get(j);
-
-						// they need to be the same (i.e. !different) based on our case sensitive (the method takes ignore case, so
-						// we reverse)
-						if (!StringUtil.different(entry.getAnswerText(), compareEntry.getAnswerText(), !question.getCaseSensitive()
-								.booleanValue()))
-						{
-							// we will check against this other question's text, exactly
-							String compareEntryQuestionText = compareEntry.getAssessmentAnswer().getText();
-							if (entryQuestionText.equals(compareEntryQuestionText))
-							{
-								// we have a later match, so this is not correct
-								return false;
-							}
-						}
-					}
-				}
-			}
-
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Check if this assessment is open for submission.
-	 * 
-	 * @param a
-	 *        The assessment.
-	 * @param asOf
-	 *        The time to check.
-	 * @return
-	 */
-	protected boolean isAssessmentOpen(Assessment a, Time asOf)
-	{
-		// if we have a release date and we are not there yet
-		if ((a.getReleaseDate() != null) && (asOf.before(a.getReleaseDate()))) return false;
-
-		// if we have a retract date and we are past it
-		if ((a.getRetractDate() != null) && (!asOf.before(a.getRetractDate()))) return false;
-
-		// if we have a due date, are past it, and not accepting late submissions
-		if ((a.getDueDate() != null) && (!asOf.before(a.getDueDate()))
-				&& ((a.getAllowLateSubmit() == null) || (!a.getAllowLateSubmit().booleanValue()))) return false;
-
-		return true;
-	}
-
-	/**
-	 * Check if the user has an open submission to this assessment, and return it if found.
-	 * 
-	 * @param assessment
-	 *        The assessment.
 	 * @param userId
-	 *        The user id.
-	 * @return The open submission for this user to this assessment, if found, or null if not.
+	 *        the user id.
+	 * @param function
+	 *        the function.
+	 * @param context
+	 *        The context.
+	 * @param ref
+	 *        The entity reference.
+	 * @throws AssessmentPermissionException
+	 *         if security is not satisfied.
 	 */
-	protected Submission getSubmissionInProgress(Assessment assessment, String userId)
+	protected void secure(String userId, String function, String context, String ref) throws AssessmentPermissionException
 	{
-		Submission rv = null;
-
-		// see if we have one already
-		String statement = "SELECT AG.ASSESSMENTGRADINGID" + " FROM SAM_ASSESSMENTGRADING_T AG"
-				+ " WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.AGENTID = ? AND AG.FORGRADE = "
-				+ m_sqlService.getBooleanConstant(false);
-		// TODO: order by id asc so we always use the lowest (oldest) if there are ever two open?
-		Object[] fields = new Object[2];
-		fields[0] = assessment.getId();
-		fields[1] = userId;
-		List results = m_sqlService.dbRead(statement, fields, null);
-		if (results.size() > 0)
+		if (!checkSecurity(userId, function, context, ref))
 		{
-			// we have one
-			if (results.size() > 1)
-				M_log.warn("getSubmissionInProgress: multiple incomplete submissions: " + results.size() + " aid: "
-						+ assessment.getId() + " userId: " + userId);
-			rv = idSubmission((String) results.get(0));
+			throw new AssessmentPermissionException(userId, function, context);
+		}
+	}
+
+	/**
+	 * Clear this submission from the cache.
+	 * 
+	 * @param id
+	 *        The submission id.
+	 */
+	protected void unCacheSubmission(String id)
+	{
+		String ref = getSubmissionReference(id);
+
+		// if we are short-term caching
+		if (m_submissionCache != null)
+		{
+			// Note: the cache will clear when the event is processed...
+			// m_submissionCache.remove(ref);
 		}
 
-		return rv;
+		// else thread-local cache
+		else
+		{
+			m_threadLocalManager.set(ref, null);
+		}
 	}
 }

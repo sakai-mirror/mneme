@@ -39,7 +39,6 @@ import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.AssessmentService;
 import org.sakaiproject.assessment.api.Attachment;
 import org.sakaiproject.assessment.api.AttachmentService;
-import org.sakaiproject.assessment.api.AttachmentUpload;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -521,14 +520,6 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	{
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public AttachmentUpload newUpload(SubmissionAnswer answer)
-	{
-		return new AttachmentUploadImpl(this, answer);
 	}
 
 	/**********************************************************************************************************************************************************************************************************************************************************
