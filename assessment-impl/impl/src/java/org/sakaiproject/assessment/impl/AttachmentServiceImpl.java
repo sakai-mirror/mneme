@@ -251,6 +251,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	{
 		ResourcePropertiesEdit edit = new BaseResourcePropertiesEdit();
 		Attachment a = getAttachment(ref);
+		if (a == null) return null;
 
 		edit.addProperty(ResourceProperties.PROP_IS_COLLECTION, "false");
 		edit.addProperty(ResourceProperties.PROP_CONTENT_TYPE, a.getType());

@@ -491,7 +491,13 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void enterPost(HttpServletRequest req, HttpServletResponse res, Context context, String assessmentId)
 			throws IOException
 	{
-		// TODO: check expected
+		// check expected
+		if (!context.getPostExpected())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
 
 		// read form: for now, nothing to read
 		String destination = ui.decode(req, context);
@@ -809,7 +815,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// collect the questions (actually their answers) to put on the page
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
 
-		if (!questionSetup(submissionId, questionSelector, feedback, context, answers))
+		if (!questionSetup(submissionId, questionSelector, feedback, context, answers, true))
 		{
 			errorGet(req, res, context);
 			return;
@@ -818,14 +824,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// render
 		ui.render(uiQuestion, context);
 		return;
-
-		// // if the assessment is linear and this question has been seen already, we don't allow entry
-		// if ((!question.getSection().getAssessment().getRandomAccess()) && submission.getSeenQuestion(question))
-		// {
-		// // TODO: better error reporting!
-		// errorGet(req, res, context);
-		// return;
-		// }
 	}
 
 	/**
@@ -847,13 +845,18 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void questionPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId,
 			String questionSelector) throws IOException
 	{
-		// TODO: deal with unexpected
+		if (!context.getPostExpected())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
 
 		// collect the questions (actually their answers) to put on the page
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
 
 		// setup receiving context
-		if (!questionSetup(submissionId, questionSelector, "", context, answers))
+		if (!questionSetup(submissionId, questionSelector, "", context, answers, false))
 		{
 			errorGet(req, res, context);
 			return;
@@ -917,7 +920,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @return true if all was well, false if there was an error
 	 */
 	protected boolean questionSetup(String submissionId, String questionSelector, String feedback, Context context,
-			List<SubmissionAnswer> answers)
+			List<SubmissionAnswer> answers, boolean linearCheck)
 	{
 		// check on feedback
 		if ("feedback".equalsIgnoreCase(feedback))
@@ -947,6 +950,16 @@ public class AssessmentDeliveryTool extends HttpServlet
 				if (question == null)
 				{
 					return false;
+				}
+
+				if (linearCheck)
+				{
+					// if the assessment is linear and this question has been seen already, we don't allow entry
+					if (!question.getSection().getAssessment().getRandomAccess() && submission.getSeenQuestion(question))
+					{
+						// TODO: better error reporting!
+						return false;
+					}
 				}
 
 				// find the answer (or have one created) for this submission / question
@@ -1094,7 +1107,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void removePost(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId,
 			String reference, Context context) throws IOException
 	{
-		// TODO: deal with unexpected
+		if (!context.getPostExpected())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
 
 		// read the form
 		String destination = ui.decode(req, context);
@@ -1242,7 +1260,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void submitPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
 			throws IOException
 	{
-		// TODO: check expected
+		if (!context.getPostExpected())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
 
 		// the post is for "submit for grading".
 
@@ -1320,7 +1343,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void tocPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
 			throws IOException
 	{
-		// TODO: check expected
+		if (!context.getPostExpected())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
 
 		// the post is for "submit for grading".
 
