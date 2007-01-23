@@ -1026,9 +1026,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		// leave "upload" out for now so it's not decoded yet... until after the answer (which may be new) is submitted
-		// and has an id
-
 		// read form
 		String destination = ui.decode(req, context);
 
@@ -1067,8 +1064,20 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 		}
 
-		// now setup to decode any file uploads that came in
-		// context.put("upload", attachmentService.newUpload(answer));
+		// // now setup to decode any file uploads that came in - we do this now, after the answers are committed, so make sure that
+		// // there are answer ids.
+		// List<AttachmentUpload> uploads = new ArrayList<AttachmentUpload>(answers.size());
+		// for (SubmissionAnswer answer : answers)
+		// {
+		// // create a file upload for each answer... to match the order of the answers
+		// uploads.add(attachmentService.newUpload(answer));
+		// }
+		//
+		// // we put this in the context as "answers", because that's how it's encoded
+		// // Note: we count on the fact that a SubmissionAnswer, normally found in answers, has no setFile() method... so the
+		// initial
+		// // decoding skips the files. -ggolden
+		// context.put("answers", uploads);
 		// ui.decode(req, context);
 
 		// redirect to the next destination

@@ -384,7 +384,6 @@ public class DeliveryControllers
 	 * 
 	 * When decoding a response, we need in the context:
 	 * answers - a collection to get the answer id(s) selected.
-	 * upload - someone to take a file upload.
 	 */
 	public static Controller constructQuestion(UiService ui)
 	{
@@ -584,7 +583,7 @@ public class DeliveryControllers
 									ui.newFileUpload()
 										.setTitle("question-upload-title")
 										.setUpload("quesiton-upload-upload")
-										.setProperty(ui.newPropertyReference().setEntityReference("upload").setPropertyReference("file"))
+										.setProperty(ui.newPropertyReference().setReference("answer.uploadFile"))
 										.setReadOnly(ui.newPropertyReference().setReference("review"))
 										.setEnabled(
 											ui.newCompareDecision()
@@ -606,8 +605,8 @@ public class DeliveryControllers
 												.setDestination(ui.newDestination().setDestination("/remove/{0}/{1}{2}",
 													ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
 													ui.newTextPropertyReference().setReference("answer.question.id"),
-													ui.newTextPropertyReference().setEntityReference("attachment").setPropertyReference("reference")))
-												.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setPropertyReference("review")).setReversed()))
+													ui.newTextPropertyReference().setReference("attachment.reference")))
+												.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()))
 										.setEnabled(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.fileUpload.toString())
@@ -1140,25 +1139,78 @@ public class DeliveryControllers
 							ui.newAttachments()
 								.setAttachments(ui.newPropertyReference().setEntityReference("attachment"), null)
 								.setSize(false)
-								.setTimestamp(true))
+								.setTimestamp(true)))
+				.add(
+					ui.newButtonBar()
 						.add(
-							ui.newButtonBar()
-								.add(
-									ui.newNavigation()
-										.setDefault()
-										.setSubmit()
-										.setTitle("remove")
-										.setStyle(Navigation.Style.button)
-										.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
-											ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
-											ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("id"))))
-								.add(
-									ui.newNavigation()
-										.setTitle("cancel")
-										.setStyle(Navigation.Style.button)
-										.setDestination(ui.newDestination().setDestination("/question/{0}/{1}",
-											ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id"),
-											ui.newTextPropertyReference().setEntityReference("question").setPropertyReference("id"))))));
+							ui.newNavigation()
+								.setDefault()
+								.setSubmit()
+								.setTitle("remove")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
+									ui.newPropertyReference().setReference("submission.id"),
+									ui.newPropertyReference().setReference("question.id"))))
+						.add(
+							ui.newNavigation()
+								.setTitle("cancel")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
+									ui.newPropertyReference().setReference("submission.id"),
+									ui.newPropertyReference().setReference("question.id"))))
+						.setEnabled(
+								ui.newCompareDecision()
+									.setEqualsConstant(QuestionPresentation.BY_QUESTION.toString())
+									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))	
+				.add(
+					ui.newButtonBar()
+						.add(
+							ui.newNavigation()
+								.setDefault()
+								.setSubmit()
+								.setTitle("remove")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}#{2}",
+									ui.newPropertyReference().setReference("submission.id"),
+									ui.newPropertyReference().setReference("question.section.id"),
+									ui.newPropertyReference().setReference("question.id"))))
+						.add(
+							ui.newNavigation()
+								.setTitle("cancel")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}#{2}",
+									ui.newPropertyReference().setReference("submission.id"),
+									ui.newPropertyReference().setReference("question.section.id"),
+									ui.newPropertyReference().setReference("question.id"))))
+						.setEnabled(
+								ui.newCompareDecision()
+									.setEqualsConstant(QuestionPresentation.BY_SECTION.toString())
+									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))		
+				.add(
+					ui.newButtonBar()
+						.add(
+							ui.newNavigation()
+								.setDefault()
+								.setSubmit()
+								.setTitle("remove")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/a#{1}",
+									ui.newPropertyReference().setReference("submission.id"),
+									ui.newPropertyReference().setReference("question.id"))))
+						.add(
+							ui.newNavigation()
+								.setTitle("cancel")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/a#{1}",
+									ui.newPropertyReference().setReference("submission.id"),
+									ui.newPropertyReference().setReference("question.id"))))
+						.setEnabled(
+								ui.newCompareDecision()
+									.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
+									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
+
+									
+									;
 	}
 
 	// TODO: sludge column included take ... and this goes away

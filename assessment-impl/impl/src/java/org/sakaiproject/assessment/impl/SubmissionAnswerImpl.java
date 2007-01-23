@@ -21,13 +21,17 @@
 
 package org.sakaiproject.assessment.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.AssessmentAnswer;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
+import org.sakaiproject.assessment.api.Attachment;
 import org.sakaiproject.assessment.api.QuestionPart;
 import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.Submission;
@@ -492,6 +496,50 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	public void setSubmittedDate(Time submitted)
 	{
 		this.submittedDate = submitted;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setUploadFile(FileItem file)
+	{
+		if (this.id == null)
+		{
+			M_log.warn("setUploadFile: null SubmissionAnswer.id");
+			return;
+		}
+
+		try
+		{
+			String name = file.getName();
+			String type = file.getContentType();
+			InputStream body = file.getInputStream();
+			long size = file.getSize();
+			
+			// detect no file selected
+			if ((name == null) || (type == null) || (body == null) || (size == 0)) return;
+
+			Attachment a = new AttachmentImpl(null, size, name, null, type);
+			String id = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService)).putAttachment(a, body, this.id);
+
+			// add an entry to the answer with this attachment
+			SubmissionAnswerEntryImpl sample = this.entries.get(0);
+			SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl(sample);
+			entry.setAssessmentAnswer(null);
+			entry.setAnswerText(null);
+			entry.initId(null);
+			entry.initAutoScore(new Float(0));
+
+			String refStr = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService)).getAttachmentReference(getSubmission().getId(), id);
+			entry.setAnswerText(refStr);
+
+			entry.initAnswer(this);
+			this.entries.add(entry);
+		}
+		catch (IOException e)
+		{
+			M_log.warn("setUploadFile: " + e);
+		}
 	}
 
 	/**
