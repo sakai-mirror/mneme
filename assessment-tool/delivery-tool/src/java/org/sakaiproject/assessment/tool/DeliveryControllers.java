@@ -897,15 +897,16 @@ public class DeliveryControllers
 
 	/**
 	 * The submit interface needs the following entities in the context:
-	 * assessment - the selected assessment object
 	 * submission - the selected Submission object
 	 */
 	public static Controller constructSubmit(UiService ui)
 	{
 		return
 			ui.newInterface()
-				.setTitle("submit-title", ui.newTextPropertyReference().setEntityReference("assessment").setPropertyReference("title"))
-				.setHeader("submit-header")
+				.setTitle("submit-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.setHeader("submit-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.add(
+					ui.newAlert().setText("submit-alert"))
 				.add(
 					ui.newButtonBar()
 						.add(
@@ -914,7 +915,7 @@ public class DeliveryControllers
 								.setSubmit()
 								.setTitle("submit-save-submit")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/exit/{0}",ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("id")))));
+								.setDestination(ui.newDestination().setDestination("/exit/{0}",ui.newTextPropertyReference().setReference("submission.id")))));
 	}
 
 	/**

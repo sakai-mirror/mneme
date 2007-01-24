@@ -1271,15 +1271,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 			// TODO: check that the assessment is open
 			context.put("submission", submission);
 
-			Assessment assessment = submission.getAssessment();
-			if (assessment != null)
-			{
-				context.put("assessment", assessment);
-
-				// render
-				ui.render(uiSubmit, context);
-				return;
-			}
+			// render
+			ui.render(uiSubmit, context);
+			return;
 		}
 
 		// redirect to error
