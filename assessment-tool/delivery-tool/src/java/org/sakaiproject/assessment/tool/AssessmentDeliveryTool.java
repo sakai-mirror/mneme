@@ -63,29 +63,6 @@ import org.sakaiproject.util.Web;
  */
 public class AssessmentDeliveryTool extends HttpServlet
 {
-	public class Qa
-	{
-		protected SubmissionAnswer a = null;
-
-		protected AssessmentQuestion q = null;
-
-		public Qa(AssessmentQuestion question, SubmissionAnswer answer)
-		{
-			this.q = question;
-			this.a = answer;
-		}
-
-		public SubmissionAnswer getAnswer()
-		{
-			return this.a;
-		}
-
-		public AssessmentQuestion getQuestion()
-		{
-			return this.q;
-		}
-	}
-
 	/** Our tool destinations. */
 	enum Destinations
 	{
@@ -241,7 +218,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// we need a single parameter (sid)
 				if (parts.length != 3)
 				{
-					errorGet(req, res, context);
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					return;
 				}
 				else
 				{
@@ -254,7 +233,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// we need a single parameter (aid)
 				if (parts.length != 3)
 				{
-					errorGet(req, res, context);
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					return;
 				}
 				else
 				{
@@ -267,7 +248,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// we need a single parameter (sid)
 				if (parts.length != 3)
 				{
-					errorGet(req, res, context);
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					return;
 				}
 				else
 				{
@@ -280,7 +263,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// we need two parameters (sid/quesiton selector) and an optional third (/feedback)
 				if ((parts.length != 4) && (parts.length != 5))
 				{
-					errorGet(req, res, context);
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					return;
 				}
 				else
 				{
@@ -293,7 +278,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// we need one parameter (sid)
 				if (parts.length != 3)
 				{
-					errorGet(req, res, context);
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					return;
 				}
 				else
 				{
@@ -306,7 +293,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// we need a single parameter (sid)
 				if (parts.length != 3)
 				{
-					errorGet(req, res, context);
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					return;
 				}
 				else
 				{
@@ -319,7 +308,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// we need three parameters (sid/qid/ref), but ref is really all the rest
 				if (parts.length < 5)
 				{
-					errorGet(req, res, context);
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					return;
 				}
 				else
 				{
@@ -397,7 +388,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// we need three parameters (sid/qid/ref), but ref is really all the rest
 				if (parts.length < 5)
 				{
-					errorGet(req, res, context);
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					return;
 				}
 				else
 				{
@@ -453,6 +446,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        UiContext.
 	 */
 	protected void enterGet(HttpServletRequest req, HttpServletResponse res, String assessmentId, Context context)
+			throws IOException
 	{
 		Assessment assessment = assessmentService.idAssessment(assessmentId);
 		if (assessment != null)
@@ -473,7 +467,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 		}
 
-		errorGet(req, res, context);
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		return;
 	}
 
 	/**
@@ -641,6 +637,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        UiContext.
 	 */
 	protected void exitGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
+			throws IOException
 	{
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)
@@ -660,7 +657,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 		}
 
-		errorGet(req, res, context);
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		return;
 	}
 
 	/**
@@ -677,12 +676,13 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void listGet(HttpServletRequest req, HttpServletResponse res, String sort, Context context)
+	protected void listGet(HttpServletRequest req, HttpServletResponse res, String sort, Context context) throws IOException
 	{
 		// SORT: 0|1 A|D 0|1|2|3|4 A|D - 4 chars, the first two for the assessment list, the second two for the submissions list
 		if ((sort != null) && (sort.length() != 4))
 		{
-			errorGet(req, res, context);
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
 			return;
 		}
 
@@ -710,7 +710,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			else
 			{
-				errorGet(req, res, context);
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
 				return;
 			}
 		}
@@ -763,7 +764,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			else
 			{
-				errorGet(req, res, context);
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
 				return;
 			}
 		}
@@ -810,14 +812,15 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Output writer.
 	 */
 	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionSelector,
-			String feedback, Context context)
+			String feedback, Context context) throws IOException
 	{
 		// collect the questions (actually their answers) to put on the page
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
 
 		if (!questionSetup(submissionId, questionSelector, feedback, context, answers, true))
 		{
-			errorGet(req, res, context);
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
 			return;
 		}
 
@@ -858,7 +861,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// setup receiving context
 		if (!questionSetup(submissionId, questionSelector, "", context, answers, false))
 		{
-			errorGet(req, res, context);
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
 			return;
 		}
 
@@ -954,11 +958,41 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 				if (linearCheck)
 				{
+					// Ok, this stupid feature. Linear. Where we need to keep any question seen from being re-seen.
+					// But, we need to allow feedback, fileupload Upload and Remove to work, which all involve re-entry
+					// So...
+					// if we were just at the question destination, with or without "/feedback", allow re-entry, with or without
+					// "/feedback". This lets Upload work, and lets Feedback work.
+
 					// if the assessment is linear and this question has been seen already, we don't allow entry
+					// unless... we we directly in the question destination (w or wo feedback) and we are now in feedback
 					if (!question.getSection().getAssessment().getRandomAccess() && submission.getSeenQuestion(question))
 					{
-						// TODO: better error reporting!
-						return false;
+						// adjust to remove feedback
+						String curDestinationAdjusted = context.getDestination();
+						if (curDestinationAdjusted.endsWith("/feedback"))
+							curDestinationAdjusted = curDestinationAdjusted.substring(0, curDestinationAdjusted.length()
+									- "/feedback".length());
+
+						String prevDestinationAdjusted = context.getPreviousDestination();
+						if ((prevDestinationAdjusted != null) && (prevDestinationAdjusted.endsWith("/feedback")))
+						{
+							prevDestinationAdjusted = prevDestinationAdjusted.substring(0, prevDestinationAdjusted.length()
+									- "/feedback".length());
+						}
+
+						// if previous (w or wo /feedback) is the same as current (w or wo /feedback), ok, otherwise...
+						if (!curDestinationAdjusted.equals(prevDestinationAdjusted))
+						{
+							// if we were just at a upload remove for this submission / question, allow re-entry
+							String removeWouldBeStartingWith = "/remove/" + submissionId + "/" + questionSelector.substring(1);
+
+							if (!prevDestinationAdjusted.startsWith(removeWouldBeStartingWith))
+							{
+								// TODO: better error reporting!
+								return false;
+							}
+						}
 					}
 				}
 
@@ -1058,7 +1092,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        UiContext.
 	 */
 	protected void removeGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId,
-			String reference, Context context)
+			String reference, Context context) throws IOException
 	{
 		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
@@ -1085,7 +1119,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 		}
 
-		errorGet(req, res, context);
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		return;
 	}
 
 	/**
@@ -1172,6 +1208,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Output writer.
 	 */
 	protected void reviewGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
+			throws IOException
 	{
 		// yes feedback, and we are in review
 		context.put("feedback", Boolean.TRUE);
@@ -1204,7 +1241,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		errorGet(req, res, context);
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		return;
 	}
 
 	/**
@@ -1222,6 +1261,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Output writer.
 	 */
 	protected void submitGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
+			throws IOException
 	{
 		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
@@ -1242,7 +1282,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 		}
 
-		errorGet(req, res, context);
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		return;
 	}
 
 	/**
@@ -1307,7 +1349,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param context
 	 *        UiContext.
 	 */
-	protected void tocGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
+	protected void tocGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context) throws IOException
 	{
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)
@@ -1325,7 +1367,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 		}
 
-		errorGet(req, res, context);
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		return;
 	}
 
 	/**

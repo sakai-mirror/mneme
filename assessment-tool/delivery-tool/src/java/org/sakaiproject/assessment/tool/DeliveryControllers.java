@@ -926,11 +926,11 @@ public class DeliveryControllers
 	{
 		return
 			ui.newInterface()
-				.setTitle("exit-title", ui.newTextPropertyReference().setEntityReference("assessment").setPropertyReference("title"))
+				.setTitle("exit-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.setHeader("exit-header")
 				.add(
 					ui.newSection()
-						.setTitle("exit-section-title", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("assessment.title"))
+						.setTitle("exit-section-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 						.add(
 							ui.newEntityDisplay()
 								.setEntityReference(ui.newPropertyReference().setEntityReference("submission"))
