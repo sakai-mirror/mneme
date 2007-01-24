@@ -1131,10 +1131,8 @@ public class DeliveryControllers
 				.add(
 					ui.newSection()
 						.add(
-							ui.newText()
-								.setText("remove-confirm")
-								// .setAlert()
-							)
+							ui.newAlert()
+								.setText("remove-confirm"))
 						.add(
 							ui.newAttachments()
 								.setAttachments(ui.newPropertyReference().setEntityReference("attachment"), null)
