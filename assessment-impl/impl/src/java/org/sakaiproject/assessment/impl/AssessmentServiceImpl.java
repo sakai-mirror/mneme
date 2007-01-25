@@ -709,9 +709,10 @@ public class AssessmentServiceImpl implements AssessmentService
 		}
 
 		// get the sections
-		String statement = "SELECT P.SECTIONID, P.TITLE, P.DESCRIPTION, SMD1.ENTRY "
+		String statement = "SELECT P.SECTIONID, P.TITLE, P.DESCRIPTION, SMD1.ENTRY, SMD2.ENTRY "
 				+ " FROM SAM_PUBLISHEDSECTION_T P"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD1 ON P.SECTIONID = SMD1.SECTIONID AND SMD1.LABEL = 'QUESTIONS_ORDERING'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD2 ON P.SECTIONID = SMD2.SECTIONID AND SMD2.LABEL = 'NUM_QUESTIONS_DRAWN'"
 				+ " WHERE P.ASSESSMENTID = ? ORDER BY P.SEQUENCE ASC";
 		Object[] fields = new Object[1];
 		fields[0] = assessment.getId();
@@ -726,6 +727,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					String title = result.getString(2);
 					String description = result.getString(3);
 					int questionOrdering = result.getInt(4);
+					int numQuestionsDrawn = result.getInt(5);
 
 					// pack it into an assessment section
 					AssessmentSectionImpl section = new AssessmentSectionImpl();
@@ -733,6 +735,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					section.setTitle(title);
 					section.setDescription(description);
 					section.setRandomQuestionOrder((questionOrdering == 2) ? Boolean.TRUE : Boolean.FALSE);
+					section.setQuestionLimit(numQuestionsDrawn > 0 ? new Integer(numQuestionsDrawn) : null);
 
 					// put the section into the assessment
 					section.initAssement(assessment);

@@ -98,6 +98,13 @@ public interface AssessmentSection
 	AssessmentQuestion getQuestion(String questionId);
 
 	/**
+	 * Access the question limit setting; if not null, only this numer of questions are to be made part of each assessment.
+	 * 
+	 * @return The question limit setting.
+	 */
+	Integer getQuestionLimit();
+
+	/**
 	 * Access the questions. The order will be in a random order (if enabled) based on the current user.
 	 * 
 	 * @return The questions. The order will be in a random order (if enabled) based on the current user.
@@ -147,6 +154,14 @@ public interface AssessmentSection
 	 *        The description.
 	 */
 	void setDescription(String description);
+
+	/**
+	 * Set the question limit setting; if not null, only this numer of questions are to be made part of each assessment.
+	 * 
+	 * @param setting
+	 *        The question limit setting.
+	 */
+	void setQuestionLimit(Integer setting);
 
 	/**
 	 * Set the questions to (a deep copy of) this list of questions.

@@ -129,6 +129,8 @@ public class AssessmentSectionImpl implements AssessmentSection
 
 	protected MyOrdering ordering = new MyOrdering(this);
 
+	protected Integer questionLimit = null;
+
 	protected List<AssessmentQuestionImpl> questions = new ArrayList<AssessmentQuestionImpl>();
 
 	protected Boolean randomQuestionOrdering = null;
@@ -152,6 +154,7 @@ public class AssessmentSectionImpl implements AssessmentSection
 		this.description = other.description;
 		this.id = other.id;
 		this.randomQuestionOrdering = other.randomQuestionOrdering;
+		this.questionLimit = other.questionLimit;
 		this.title = other.title;
 		setQuestions(other.questions);
 	}
@@ -235,7 +238,8 @@ public class AssessmentSectionImpl implements AssessmentSection
 		if (this.questions.isEmpty()) return null;
 
 		// based on the possibly random order
-		return getQuestions().get(this.questions.size() - 1);
+		List<? extends AssessmentQuestion> questions = getQuestions();
+		return questions.get(questions.size() - 1);
 	}
 
 	/**
@@ -243,6 +247,12 @@ public class AssessmentSectionImpl implements AssessmentSection
 	 */
 	public Integer getNumQuestions()
 	{
+		// if we are limiting, return the effective number of questions
+		if ((this.questionLimit != null) && (this.questionLimit.intValue() < this.questions.size()))
+		{
+			return this.questionLimit;
+		}
+
 		return this.questions.size();
 	}
 
@@ -272,6 +282,14 @@ public class AssessmentSectionImpl implements AssessmentSection
 	/**
 	 * {@inheritDoc}
 	 */
+	public Integer getQuestionLimit()
+	{
+		return this.questionLimit;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<? extends AssessmentQuestion> getQuestions()
 	{
 		// copy the questions
@@ -285,6 +303,12 @@ public class AssessmentSectionImpl implements AssessmentSection
 
 			// mix up the questions
 			Collections.shuffle(rv, new Random(seed));
+		}
+
+		// if we have a limit set, limit to just that number
+		if ((this.questionLimit != null) && (this.questionLimit.intValue() < rv.size()))
+		{
+			rv = rv.subList(0, this.questionLimit.intValue());
 		}
 
 		return rv;
@@ -319,8 +343,11 @@ public class AssessmentSectionImpl implements AssessmentSection
 	 */
 	public Float getTotalPoints()
 	{
+		// base this on getQuestions, so it picks the subset (if any) based on random and limit
+		List<? extends AssessmentQuestion> questions = getQuestions();
+
 		float total = 0;
-		for (AssessmentQuestion question : this.questions)
+		for (AssessmentQuestion question : questions)
 		{
 			total += question.getPoints();
 		}
@@ -359,6 +386,14 @@ public class AssessmentSectionImpl implements AssessmentSection
 	public void setDescription(String description)
 	{
 		this.description = description;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setQuestionLimit(Integer setting)
+	{
+		this.questionLimit = setting;
 	}
 
 	/**
