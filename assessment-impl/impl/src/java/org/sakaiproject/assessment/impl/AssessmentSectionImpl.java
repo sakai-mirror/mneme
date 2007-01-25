@@ -298,8 +298,8 @@ public class AssessmentSectionImpl implements AssessmentSection
 		// randomize if needed
 		if ((this.randomQuestionOrdering != null) && (this.randomQuestionOrdering.booleanValue()))
 		{
-			// set the seed based on the current user id and the section id
-			long seed = this.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode() + this.id.hashCode();
+			// set the seed based on the current user id
+			long seed = this.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode();
 
 			// mix up the questions
 			Collections.shuffle(rv, new Random(seed));

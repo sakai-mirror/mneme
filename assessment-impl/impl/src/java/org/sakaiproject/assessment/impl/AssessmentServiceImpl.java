@@ -728,6 +728,9 @@ public class AssessmentServiceImpl implements AssessmentService
 					String description = result.getString(3);
 					int questionOrdering = result.getInt(4);
 					int numQuestionsDrawn = result.getInt(5);
+					
+					// adjust the questionOrdering - if we are doing draw from pool limit, we should also randomize
+					if (numQuestionsDrawn != 0) questionOrdering = 2;
 
 					// pack it into an assessment section
 					AssessmentSectionImpl section = new AssessmentSectionImpl();
