@@ -167,6 +167,13 @@ public interface Assessment
 	AssessmentSection getFirstSection();
 
 	/**
+	 * Access the gradebook integration flag; is TRUE, the assessment's grades are placed into the Gradebook.
+	 * 
+	 * @return TRUE if the assessment's grades are to be placed into the Gradebook, FALSE if not.
+	 */
+	Boolean getGradebookIntegration();
+
+	/**
 	 * Access the id of this assessment.
 	 * 
 	 * @return The assessment's id.
@@ -411,6 +418,14 @@ public interface Assessment
 	 *        The assessment's "show statistics" feedback setting.
 	 */
 	void setFeedbackShowStatistics(Boolean value);
+
+	/**
+	 * Set the gradebook integration flag; is TRUE, the assessment's grades are placed into the Gradebook.
+	 * 
+	 * @param value
+	 *        TRUE if the assessment's grades are to be placed into the Gradebook, FALSE if not.
+	 */
+	void setGradebookIntegration(Boolean value);
 
 	/**
 	 * Set the choice for which of multiple submissions should be the official graded one; either the lastest submission, or the

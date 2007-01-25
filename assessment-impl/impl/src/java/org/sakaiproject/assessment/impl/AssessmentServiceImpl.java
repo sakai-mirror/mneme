@@ -59,6 +59,9 @@ import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.id.cover.IdManager;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
+import org.sakaiproject.service.gradebook.shared.AssessmentNotFoundException;
+import org.sakaiproject.service.gradebook.shared.GradebookNotFoundException;
+import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.api.TimeService;
@@ -150,6 +153,10 @@ public class AssessmentServiceImpl implements AssessmentService
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService m_eventTrackingService = null;
 
+	/** Dependency: GradebookExternalAssessmentService */
+	// protected GradebookExternalAssessmentService m_gradebookService = null;
+	protected GradebookService m_gradebookService = null;
+
 	/** Dependency: MemoryService */
 	protected MemoryService m_memoryService = null;
 
@@ -199,6 +206,18 @@ public class AssessmentServiceImpl implements AssessmentService
 	public void setEventTrackingService(EventTrackingService service)
 	{
 		m_eventTrackingService = service;
+	}
+
+	/**
+	 * Dependency: GradebookService.
+	 * 
+	 * @param service
+	 *        The GradebookService.
+	 */
+	public void setGradebookService(GradebookService service)
+	{
+		// GradebookExternalAssessmentService
+		m_gradebookService = service;
 	}
 
 	/**
@@ -550,7 +569,7 @@ public class AssessmentServiceImpl implements AssessmentService
 				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, P.CREATEDBY,"
 				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.TIMELIMIT, PAC.AUTOSUBMIT, PAC.STARTDATE, PAC.RETRACTDATE, PAC.LATEHANDLING,"
 				+ " PF.SHOWSTUDENTQUESTIONSCORE, PF.SHOWCORRECTRESPONSE, PF.SHOWQUESTIONLEVELFEEDBACK, PF.SHOWSELECTIONLEVELFEEDBACK,"
-				+ " PAC.ITEMNAVIGATION, PAC.ITEMNUMBERING, P.DESCRIPTION, PAC.ASSESSMENTFORMAT"
+				+ " PAC.ITEMNAVIGATION, PAC.ITEMNUMBERING, P.DESCRIPTION, PAC.ASSESSMENTFORMAT, PE.TOGRADEBOOK"
 				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID"
@@ -618,6 +637,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					int continuousNumbering = result.getInt(23);
 					String description = result.getString(24);
 					QuestionPresentation presentation = QuestionPresentation.parse(result.getInt(25));
+					int toGradebook = result.getInt(26);
 
 					// pack it into the assessment
 					assessment.initAutoSubmit((autoSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
@@ -644,6 +664,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					assessment.initContinuousNumbering(Boolean.valueOf(continuousNumbering == 1));
 					assessment.initDescription(description);
 					assessment.initQuestionPresentation(presentation);
+					assessment.initGradebookIntegration(Boolean.valueOf(toGradebook == 1));
 
 					return assessment;
 				}
@@ -2321,7 +2342,8 @@ public class AssessmentServiceImpl implements AssessmentService
 			fields[5] = null;
 			fields[6] = new Integer(2); // 1-anon, 2-students id visible
 			fields[7] = null;
-			fields[8] = new Integer(1); // 1-to gradebook
+			fields[8] = ((a.getGradebookIntegration() != null) && (a.gradebookIntegeration.booleanValue())) ? new Integer(1)
+					: new Integer(2); // 1-to gradebook, 2-not
 			fields[9] = id;
 			m_sqlService.dbWrite(connection, statement, fields);
 
@@ -3467,6 +3489,63 @@ public class AssessmentServiceImpl implements AssessmentService
 
 			// commit
 			connection.commit();
+
+			// if complete and the assessment is integrated into the Gradebook, record the grade
+			if ((completSubmission != null) && completSubmission.booleanValue() && (assessment.getGradebookIntegration() != null)
+					&& assessment.getGradebookIntegration().booleanValue())
+			{
+				// is there a gradebook? - we could just not care here, save all those GB db calls, and let it throw later
+				// but that forces us to do our single read for score -ggolden
+				if (true /* m_gradebookService.isGradebookDefined(assessment.getContext()) */)
+				{
+					// read the final score
+					statement = "SELECT FINALSCORE FROM SAM_ASSESSMENTGRADING_T WHERE ASSESSMENTGRADINGID = ?";
+					fields = new Object[1];
+					fields[0] = submission.getId();
+					final List<String> scores = new ArrayList<String>(1);
+					m_sqlService.dbRead(statement, fields, new SqlReader()
+					{
+						public Object readSqlResultRecord(ResultSet result)
+						{
+							try
+							{
+								String score = result.getString(1);
+								scores.add(score);
+								return null;
+							}
+							catch (SQLException e)
+							{
+								M_log.warn("submitAnswers: " + e);
+								return null;
+							}
+						}
+					});
+
+					if (scores.size() == 1)
+					{
+						Double points = Double.valueOf(scores.get(0));
+
+						// post it
+						try
+						{
+							// Note: the proper non-deprecated method (same method but of the GradebookExternalAssessmentService
+							// service does not currently work (no commit) -ggolden
+							m_gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(),
+									submission.getUserId(), points);
+						}
+						catch (GradebookNotFoundException e)
+						{
+							// if there's no gradebook for this context, oh well...
+							M_log.warn("submitAnswers: (no gradebook for context): " + e);
+						}
+						catch (AssessmentNotFoundException e)
+						{
+							// if the assessment has not been registered in gb, this is a problem
+							M_log.warn("submitAnswers: (assessment has not been registered in context's gb): " + e);
+						}
+					}
+				}
+			}
 
 			// event track it
 			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(submission.getId()),

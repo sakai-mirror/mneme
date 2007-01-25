@@ -118,6 +118,10 @@ public class AssessmentImpl implements Assessment
 
 	protected PropertyStatus feedbackShowStatisticsStatus = PropertyStatus.unset;
 
+	protected Boolean gradebookIntegeration = null;
+
+	protected PropertyStatus gradebookIntegerationStatus = PropertyStatus.unset;
+
 	protected String id = null;
 
 	protected PropertyStatus idStatus = PropertyStatus.unset;
@@ -164,7 +168,7 @@ public class AssessmentImpl implements Assessment
 	protected PropertyStatus timeLimitStatus = PropertyStatus.unset;
 
 	protected String title = null;
-
+	
 	protected PropertyStatus titleStatus = PropertyStatus.unset;
 
 	/**
@@ -417,6 +421,17 @@ public class AssessmentImpl implements Assessment
 		if (this.sections.isEmpty()) return null;
 
 		return this.sections.get(0);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getGradebookIntegration()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.gradebookIntegerationStatus == PropertyStatus.unset) readMain();
+
+		return this.gradebookIntegeration;
 	}
 
 	/**
@@ -779,6 +794,15 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setGradebookIntegration(Boolean value)
+	{
+		this.gradebookIntegeration = value;
+		this.gradebookIntegerationStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy policy)
 	{
 		this.mssPolicy = policy;
@@ -1070,6 +1094,18 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Initialize the gradebook integration property.
+	 * 
+	 * @param value
+	 *        The gradebook integration value.
+	 */
+	protected void initGradebookIntegration(Boolean value)
+	{
+		this.gradebookIntegeration = value;
+		this.gradebookIntegerationStatus = PropertyStatus.inited;
+	}
+
+	/**
 	 * Initialize the id property.
 	 * 
 	 * @param id
@@ -1297,6 +1333,7 @@ public class AssessmentImpl implements Assessment
 		this.feedbackShowQuestionScoreStatus = PropertyStatus.inited;
 		this.feedbackShowScoreStatus = PropertyStatus.inited;
 		this.feedbackShowStatisticsStatus = PropertyStatus.inited;
+		this.gradebookIntegerationStatus = PropertyStatus.inited;
 		this.idStatus = PropertyStatus.inited;
 		this.mssPolicyStatus = PropertyStatus.inited;
 		this.numSubmissionsStatus = PropertyStatus.inited;
@@ -1353,6 +1390,8 @@ public class AssessmentImpl implements Assessment
 		this.feedbackShowScoreStatus = other.feedbackShowScoreStatus;
 		this.feedbackShowStatistics = other.feedbackShowStatistics;
 		this.feedbackShowStatisticsStatus = other.feedbackShowStatisticsStatus;
+		this.gradebookIntegeration = other.gradebookIntegeration;
+		this.gradebookIntegerationStatus = other.gradebookIntegerationStatus;
 		this.id = other.id;
 		this.idStatus = other.idStatus;
 		this.mssPolicy = other.mssPolicy;

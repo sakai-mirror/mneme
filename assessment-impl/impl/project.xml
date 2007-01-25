@@ -64,6 +64,12 @@
 
 		<dependency>
 			<groupId>sakaiproject</groupId>
+			<artifactId>sakai-gradebook-service-api</artifactId>
+			<version>${sakai.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>sakaiproject</groupId>
 			<artifactId>sakai-memory-api</artifactId>
 			<version>${sakai.version}</version>
 		</dependency>
