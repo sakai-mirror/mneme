@@ -320,17 +320,19 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public Long getTimeTillExpires()
+	public Long getDurationTillExpires()
 	{
 		// read the basic info if this property has not yet been set
-		if ((this.submittedDateStatus == PropertyStatus.unset) || (this.startDateStatus == PropertyStatus.unset)) readMain();
-
-		if ((submittedDate == null) || (startDate == null)) return null;
+		if (this.startDateStatus == PropertyStatus.unset) readMain();
 
 		Long limit = getAssessment().getTimeLimit();
 		if (limit == null) return null;
 
-		long tillExpires = limit.longValue() - (submittedDate.getTime() - startDate.getTime());
+		// if we have not yet started, we have the full time limit duration
+		if (startDate == null) return limit;
+
+		// if we have started, the clock is running - compute how long from NOW the end is
+		long tillExpires = (startDate.getTime() + limit.longValue()) - this.service.m_timeService.newTime().getTime();
 		if (tillExpires <= 0) return new Long(0);
 
 		return new Long(tillExpires);

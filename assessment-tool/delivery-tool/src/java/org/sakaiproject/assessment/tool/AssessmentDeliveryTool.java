@@ -1153,6 +1153,35 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// read the form
 		String destination = ui.decode(req, context);
 
+		// if we are going to exit, we must cancel the remove and submit (timer expired)
+		if (destination.startsWith("/exit"))
+		{
+			Submission submission = assessmentService.idSubmission(submissionId);
+			try
+			{
+				assessmentService.completeSubmission(submission);
+
+				// if no exception, it worked! redirect
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
+			catch (AssessmentClosedException e)
+			{
+			}
+			catch (SubmissionCompletedException e)
+			{
+			}
+			catch (AssessmentPermissionException e)
+			{
+			}
+
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
+
+		// not a submit, so it's a remove
+
 		// remove the referenced attachment from the answer
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)

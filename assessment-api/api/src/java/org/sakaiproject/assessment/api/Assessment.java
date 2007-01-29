@@ -93,6 +93,14 @@ public interface Assessment
 	Time getDueDate();
 
 	/**
+	 * Access the number of ms from now that the due date on this assessment will be reached.
+	 * 
+	 * @return The number of ms from now that the due date on this assessment will be reached, 0 if it has already been reached, or
+	 *         null if it has no due date.
+	 */
+	Long getDurationTillDue();
+
+	/**
 	 * Access the feedback date; the date on which feedback is made available.
 	 * 
 	 * @return The assessment's feedback date, or null there is no feedback date.

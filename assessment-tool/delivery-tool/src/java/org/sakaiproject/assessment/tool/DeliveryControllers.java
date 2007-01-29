@@ -330,6 +330,16 @@ public class DeliveryControllers
 												.setMissingText("no-time-limit")))
 								.addRow(
 									ui.newPropertyRow()
+										.setTitle("enter-display-autoSubmit")
+										.setProperty(
+											ui.newBooleanPropertyReference()
+												.setText("enabled", "disabled")
+												.setEntityReference("assessment")
+												.setPropertyReference("autoSubmit")
+												.setMissingText("unknown"))
+										.setEnabled(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.timeLimit"))))
+								.addRow(
+									ui.newPropertyRow()
 										.setTitle("enter-display-numSubmissionsAllowed")
 										.setProperty(
 											ui.newTextPropertyReference()
@@ -340,15 +350,6 @@ public class DeliveryControllers
 												.addProperty(
 													ui.newTextPropertyReference()
 														.setEntityReference("remainingSubmissions"))))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("enter-display-autoSubmit")
-										.setProperty(
-											ui.newBooleanPropertyReference()
-												.setText("enabled", "disabled")
-												.setEntityReference("assessment")
-												.setPropertyReference("autoSubmit")
-												.setMissingText("unknown")))
 								.addRow(
 									ui.newPropertyRow()
 										.setTitle("enter-display-feedback")
@@ -456,7 +457,9 @@ public class DeliveryControllers
 				.add(
 					ui.newCountdownTimer()
 						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
-						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.timeTillExpires"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
+						.setExpireDestination(
+							ui.newDestination().setDestination("/exit/{0}", ui.newTextPropertyReference().setReference("submission.id")))
 						.setEnabled(
 							ui.newDecision()
 								.setReversed()
@@ -917,6 +920,19 @@ public class DeliveryControllers
 				.setTitle("submit-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.setHeader("submit-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.add(
+					ui.newCountdownTimer()
+						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
+						.setExpireDestination(
+							ui.newDestination().setDestination("/exit/{0}", ui.newTextPropertyReference().setReference("submission.id")))
+						.setEnabled(
+							ui.newDecision()
+								.setReversed()
+								.setProperty(
+									ui.newPropertyReference()
+										.setReference("review")),
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
+				.add(
 					ui.newAlert().setText("submit-alert"))
 				.add(
 					ui.newButtonBar()
@@ -1017,6 +1033,19 @@ public class DeliveryControllers
 			ui.newInterface()
 				.setTitle("toc-title")
 				.setHeader("toc-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.add(
+					ui.newCountdownTimer()
+						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
+						.setExpireDestination(
+							ui.newDestination().setDestination("/exit/{0}", ui.newTextPropertyReference().setReference("submission.id")))
+						.setEnabled(
+							ui.newDecision()
+								.setReversed()
+								.setProperty(
+									ui.newPropertyReference()
+										.setReference("review")),
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
 				.add(
 					ui.newSection()
 						.setTitle("toc-section-title",
@@ -1140,6 +1169,19 @@ public class DeliveryControllers
 			ui.newInterface()
 				.setTitle("remove-title")
 				.setHeader("remove-header", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("assessment.title"))
+				.add(
+					ui.newCountdownTimer()
+						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
+						.setExpireDestination(
+							ui.newDestination().setDestination("/exit/{0}", ui.newTextPropertyReference().setReference("submission.id")))
+						.setEnabled(
+							ui.newDecision()
+								.setReversed()
+								.setProperty(
+									ui.newPropertyReference()
+										.setReference("review")),
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
 				.add(
 					ui.newSection()
 						.add(

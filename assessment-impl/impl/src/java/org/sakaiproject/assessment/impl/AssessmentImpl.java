@@ -36,7 +36,6 @@ import org.sakaiproject.assessment.api.QuestionPresentation;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.cover.EntityManager;
 import org.sakaiproject.time.api.Time;
-import org.sakaiproject.time.cover.TimeService;
 
 /**
  * <p>
@@ -168,7 +167,7 @@ public class AssessmentImpl implements Assessment
 	protected PropertyStatus timeLimitStatus = PropertyStatus.unset;
 
 	protected String title = null;
-	
+
 	protected PropertyStatus titleStatus = PropertyStatus.unset;
 
 	/**
@@ -308,6 +307,24 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Long getDurationTillDue()
+	{
+		Time dueDate = getDueDate();
+		//Boolean allowLate = getAllowLateSubmit();
+
+		// if no due date
+		if (dueDate == null) return null;
+
+		// if we have started, the clock is running - compute how long from NOW the end is
+		long tillDue = dueDate.getTime() - this.service.m_timeService.newTime().getTime();
+		if (tillDue <= 0) return new Long(0);
+
+		return new Long(tillDue);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Time getFeedbackDate()
 	{
 		// read the basic info if this property has not yet been set
@@ -335,7 +352,7 @@ public class AssessmentImpl implements Assessment
 		FeedbackDelivery delivery = getFeedbackDelivery();
 		Time feedbackDate = getFeedbackDate();
 		if ((delivery == FeedbackDelivery.IMMEDIATE)
-				|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(TimeService
+				|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(this.service.m_timeService
 						.newTime()))))))
 		{
 			return Boolean.TRUE;

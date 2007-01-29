@@ -70,6 +70,14 @@ public interface Submission
 	String getConfirmation();
 
 	/**
+	 * Access the number of ms from now that the time limit on this submission will be up.
+	 * 
+	 * @return The number of ms from now that the time limit on this submission will be up, 0 if it has already expired, or null if
+	 *         it is not timed.
+	 */
+	Long getDurationTillExpires();
+
+	/**
 	 * Access the time taken to make this submission, in seconds, based on the start and lastest submission dates.
 	 * 
 	 * @return The time taken to make this submission, in seconds (or null if it was not timed or not available).
@@ -126,14 +134,6 @@ public interface Submission
 	 * @return the submission date for this submission, or null if there is none.
 	 */
 	Time getSubmittedDate();
-
-	/**
-	 * Access the number of ms from now that the time limit on this submission will be up.
-	 * 
-	 * @return The number of ms from now that the time limit on this submission will be up, 0 if it has already expired, or null if
-	 *         it is not timed.
-	 */
-	Long getTimeTillExpires();
 
 	/**
 	 * Access the total score of the submission - the total of the auto scores from the answers and the evaluation manual scores
