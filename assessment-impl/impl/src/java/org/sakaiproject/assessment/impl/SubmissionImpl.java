@@ -29,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.Assessment;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
-import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.time.api.Time;
@@ -316,6 +315,25 @@ public class SubmissionImpl implements Submission
 		if (this.submittedDateStatus == PropertyStatus.unset) readMain();
 
 		return this.submittedDate;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Long getTimeTillExpires()
+	{
+		// read the basic info if this property has not yet been set
+		if ((this.submittedDateStatus == PropertyStatus.unset) || (this.startDateStatus == PropertyStatus.unset)) readMain();
+
+		if ((submittedDate == null) || (startDate == null)) return null;
+
+		Long limit = getAssessment().getTimeLimit();
+		if (limit == null) return null;
+
+		long tillExpires = limit.longValue() - (submittedDate.getTime() - startDate.getTime());
+		if (tillExpires <= 0) return new Long(0);
+
+		return new Long(tillExpires);
 	}
 
 	/**

@@ -271,11 +271,11 @@ public interface Assessment
 	AssessmentStatus getStatus();
 
 	/**
-	 * Access the time limit for taking the assessment (seconds).
+	 * Access the time limit for taking the assessment (ms).
 	 * 
 	 * @return The assessment's time limit, or null for umlimited.
 	 */
-	Integer getTimeLimit();
+	Long getTimeLimit();
 
 	/**
 	 * Access the title of this assessment.
@@ -499,7 +499,7 @@ public interface Assessment
 	 * @param limit
 	 *        The time limit for the assessment, or null for unlimited.
 	 */
-	void setTimeLimit(Integer limit);
+	void setTimeLimit(Long limit);
 
 	/**
 	 * Set the title of this assessment.

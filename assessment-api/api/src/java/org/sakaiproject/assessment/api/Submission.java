@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -128,7 +128,16 @@ public interface Submission
 	Time getSubmittedDate();
 
 	/**
-	 * Access the total score of the submission - the total of the auto scores from the answers and the evaluation manual scores from the answers and overall.
+	 * Access the number of ms from now that the time limit on this submission will be up.
+	 * 
+	 * @return The number of ms from now that the time limit on this submission will be up, 0 if it has already expired, or null if
+	 *         it is not timed.
+	 */
+	Long getTimeTillExpires();
+
+	/**
+	 * Access the total score of the submission - the total of the auto scores from the answers and the evaluation manual scores
+	 * from the answers and overall.
 	 * 
 	 * @return The total score of the submission.
 	 */

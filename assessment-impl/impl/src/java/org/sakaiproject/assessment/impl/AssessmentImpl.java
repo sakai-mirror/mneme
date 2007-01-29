@@ -163,7 +163,7 @@ public class AssessmentImpl implements Assessment
 
 	protected PropertyStatus statusStatus = PropertyStatus.unset;
 
-	protected Integer timeLimit = null;
+	protected Long timeLimit = null;
 
 	protected PropertyStatus timeLimitStatus = PropertyStatus.unset;
 
@@ -592,7 +592,7 @@ public class AssessmentImpl implements Assessment
 		return this.status;
 	}
 
-	public Integer getTimeLimit()
+	public Long getTimeLimit()
 	{
 		// read the basic info if this property has not yet been set
 		if (this.timeLimitStatus == PropertyStatus.unset) readMain();
@@ -886,7 +886,7 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setTimeLimit(Integer limit)
+	public void setTimeLimit(Long limit)
 	{
 		this.timeLimit = limit;
 		this.timeLimitStatus = PropertyStatus.modified;
@@ -1226,7 +1226,7 @@ public class AssessmentImpl implements Assessment
 	 * @param limit
 	 *        The time limit property.
 	 */
-	protected void initTimeLimit(Integer limit)
+	protected void initTimeLimit(Long limit)
 	{
 		this.timeLimit = limit;
 		this.timeLimitStatus = PropertyStatus.inited;

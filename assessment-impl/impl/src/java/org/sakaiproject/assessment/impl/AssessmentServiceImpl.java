@@ -612,7 +612,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					String createdBy = result.getString(10);
 					boolean unlimitedSubmissions = result.getBoolean(11);
 					int submissionsAllowed = result.getInt(12);
-					int timeLimit = result.getInt(13);
+					long timeLimit = result.getLong(13);
 					int autoSubmit = result.getInt(14);
 
 					ts = result.getTimestamp(15, m_sqlService.getCal());
@@ -651,7 +651,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					assessment.initMultipleSubmissionSelectionPolicy(mssPolicy);
 					assessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
 					assessment.initStatus(status);
-					assessment.initTimeLimit(timeLimit == 0 ? null : new Integer(timeLimit));
+					assessment.initTimeLimit(timeLimit == 0 ? null : new Long(timeLimit * 1000));
 					assessment.initTitle(title);
 					assessment.initReleaseDate(releaseDate);
 					assessment.initRetractDate(retractDate);

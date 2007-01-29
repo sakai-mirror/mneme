@@ -454,6 +454,17 @@ public class DeliveryControllers
 									ui.newPropertyReference()
 										.setReference("review"))))
 				.add(
+					ui.newCountdownTimer()
+						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.timeTillExpires"))
+						.setEnabled(
+							ui.newDecision()
+								.setReversed()
+								.setProperty(
+									ui.newPropertyReference()
+										.setReference("review")),
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
+				.add(
 					ui.newSection()
 						.setIterator(
 							ui.newPropertyReference().setEntityReference("answers"), "answer")
