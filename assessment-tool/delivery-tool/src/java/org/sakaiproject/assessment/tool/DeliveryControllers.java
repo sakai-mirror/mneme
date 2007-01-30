@@ -456,6 +456,10 @@ public class DeliveryControllers
 										.setReference("review"))))
 				.add(
 					ui.newCountdownTimer()
+						.setHideMessage("timer-hide")
+						.setShowMessage("timer-show")
+						.setDurationMessage("timer-duration")
+						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
 						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
 						.setExpireDestination(
@@ -921,6 +925,10 @@ public class DeliveryControllers
 				.setHeader("submit-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.add(
 					ui.newCountdownTimer()
+						.setHideMessage("timer-hide")
+						.setShowMessage("timer-show")
+						.setDurationMessage("timer-duration")
+						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
 						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
 						.setExpireDestination(
@@ -1035,6 +1043,10 @@ public class DeliveryControllers
 				.setHeader("toc-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.add(
 					ui.newCountdownTimer()
+						.setHideMessage("timer-hide")
+						.setShowMessage("timer-show")
+						.setDurationMessage("timer-duration")
+						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
 						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
 						.setExpireDestination(
@@ -1171,6 +1183,10 @@ public class DeliveryControllers
 				.setHeader("remove-header", ui.newTextPropertyReference().setEntityReference("submission").setPropertyReference("assessment.title"))
 				.add(
 					ui.newCountdownTimer()
+						.setHideMessage("timer-hide")
+						.setShowMessage("timer-show")
+						.setDurationMessage("timer-duration")
+						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
 						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
 						.setExpireDestination(
