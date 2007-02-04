@@ -472,13 +472,32 @@ public class DeliveryControllers
 										.setReference("review")),
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
 				.add(
+					// TODO: really, we just want another section title here...
+					ui.newSection()
+						.setTitle("question-total-score", ui.newTextPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore(true)))
+						.setTitleEnabled(
+							ui.newOrDecision()
+								.setOptions(
+									ui.newHasValueDecision()
+										.setProperty(
+											ui.newPropertyReference()
+												.setReference("question")),
+									ui.newDecision()
+										.setProperty(
+											ui.newPropertyReference()
+												.setReference("answer.question.assessmentOrdering.isFirst"))))
+									// TODO: check this shows ONCE for by-assessment and by-section
+					)
+				
+				.add(
 					ui.newSection()
 						.setIterator(
 							ui.newPropertyReference().setEntityReference("answers"), "answer")
 						.setTitle("question-section-title",
 							ui.newTextPropertyReference().setReference("answer.question.section.ordering.position"),
 							ui.newTextPropertyReference().setReference("answer.question.section.assessment.numSections"),
-							ui.newTextPropertyReference().setReference("answer.question.section.title"))
+							ui.newTextPropertyReference().setReference("answer.question.section.title"),
+							ui.newPropertyReference().setReference("answer.question.section").setFormatDelegate(new SectionScore(true)))
 						.setAnchor("question-anchor", ui.newPropertyReference().setReference("answer.question.id"))
 						.setTitleEnabled(
 							ui.newOrDecision()
@@ -1061,7 +1080,7 @@ public class DeliveryControllers
 				.add(
 					ui.newSection()
 						.setTitle("toc-section-title",
-							ui.newTextPropertyReference().setReference("submission.assessment.totalPoints"))
+							ui.newTextPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore(false)))
 						.add(
 							ui.newInstructions()
 								.setText("toc-section-alert"))
@@ -1086,7 +1105,7 @@ public class DeliveryControllers
 									ui.newPropertyReference().setReference("section.title"),
 									ui.newPropertyReference().setFormatDelegate(new QuestionsAnswered()),
 									ui.newPropertyReference().setReference("section.numQuestions"),
-									ui.newPropertyReference().setFormatDelegate(new SectionScore()))
+									ui.newPropertyReference().setReference("section").setFormatDelegate(new SectionScore(false)))
 								.addColumn(
 									ui.newHtmlPropertyColumn()
 										.setProperty(null, ui.newPropertyReference().setFormatDelegate(new FormatQuestionDecoration()))
@@ -1100,7 +1119,7 @@ public class DeliveryControllers
 												.setMaxLength(60)
 												.setStripHtml()
 												.setReference("question.title"),
-											ui.newPropertyReference().setFormatDelegate(new QuestionScore()))
+											ui.newPropertyReference().setFormatDelegate(new QuestionScore(false)))
 										.setEntityNavigation(
 											ui.newEntityNavigation()
 												// destination is /question/sid/q questionId
@@ -1120,7 +1139,7 @@ public class DeliveryControllers
 												.setMaxLength(60)
 												.setStripHtml()
 												.setReference("question.title"),
-											ui.newPropertyReference().setFormatDelegate(new QuestionScore()))
+											ui.newPropertyReference().setFormatDelegate(new QuestionScore(false)))
 										.setEntityNavigation(
 											ui.newEntityNavigation()
 												// destination is /question/sid/s sectionId
@@ -1141,7 +1160,7 @@ public class DeliveryControllers
 												.setMaxLength(60)
 												.setStripHtml()
 												.setReference("question.title"),
-											ui.newPropertyReference().setFormatDelegate(new QuestionScore()))
+											ui.newPropertyReference().setFormatDelegate(new QuestionScore(false)))
 										.setEntityNavigation(
 											ui.newEntityNavigation()
 												// destination is /question/sid/a
@@ -1275,10 +1294,39 @@ public class DeliveryControllers
 						.setEnabled(
 								ui.newCompareDecision()
 									.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
-									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
+									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))));
+	}
 
-									
-									;
+	/**
+	 * The stats interface needs the following entities in the context:
+	 * stats - the AssessmentStatistics to display
+	 */
+	public static Controller constructStats(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("stats-title", ui.newTextPropertyReference().setReference("stats.assessment.title"))
+				.setHeader("stats-header", ui.newTextPropertyReference().setReference("stats.assessment.title"))
+				.add(
+					ui.newNavigationBar()
+						.setReturn(
+							ui.newNavigation()
+								.setTitle("stats-link-return")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/list")))
+						//.setPrev(ui.newNavigation().setTitle("review-link-prev").setStyle(Navigation.Style.button).setReadOnly(ui.newConstantPropertyReference().setValue("true")))
+						//.setNext(ui.newNavigation().setTitle("review-link-next").setStyle(Navigation.Style.button).setReadOnly(ui.newConstantPropertyReference().setValue("true")))
+						)
+				.add(
+					ui.newSection()
+						.setIterator(ui.newPropertyReference().setReference("stats.scoreDistribution"), "score")
+						.add(ui.newEntityDisplay().setEntityReference(ui.newPropertyReference().setReference("score"))
+							.addRow(ui.newPropertyRow().setProperty(ui.newPropertyReference().setPropertyReference("score.value")))
+							.addRow(ui.newPropertyRow().setProperty(ui.newPropertyReference().setPropertyReference("score.count")))
+						)
+				)
+					
+						;
 	}
 
 	// TODO: sludge column included take ... and this goes away
@@ -1572,6 +1620,14 @@ public class DeliveryControllers
 	 */
 	public static class SectionScore implements FormatDelegate
 	{
+		/** If set, we need the "review" context variable set to show the score. */
+		protected boolean needReview = false;
+
+		public SectionScore(boolean needReview)
+		{
+			this.needReview = needReview;
+		}
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -1591,8 +1647,10 @@ public class DeliveryControllers
 			// use the {}/{} format if doing feedback, or just {} if not.
 			StringBuffer rv = new StringBuffer();
 
-			// if we are doing feedback just now
-			if (assessment.getFeedbackNow())
+			Boolean review = (Boolean) context.get("review");
+
+			// if we are doing feedback just now, and if we are needing review and it's set
+			if (assessment.getFeedbackNow() && (!this.needReview || ((review != null) && review.booleanValue())))
 			{
 				// if we are doing score feedback
 				if (assessment.getFeedbackShowScore().booleanValue())
@@ -1622,12 +1680,73 @@ public class DeliveryControllers
 	}
 
 	/**
+	 * From a value which is an Submission, 'format' this into a value<br />
+	 * that is the total score of the submission, if feedback is set, followed by the total points of the submission.
+	 */
+	public static class SubmissionScore implements FormatDelegate
+	{
+		/** If set, we need the "review" context variable set to show the score. */
+		protected boolean needReview = false;
+
+		public SubmissionScore(boolean needReview)
+		{
+			this.needReview = needReview;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{
+			if (value == null) return null;
+			if (!(value instanceof Submission)) return value.toString();
+			Submission submission = (Submission) value;
+
+			Assessment assessment = submission.getAssessment();
+			if (assessment == null) return value.toString();
+
+			// use the {}/{} format if doing feedback, or just {} if not.
+			StringBuffer rv = new StringBuffer();
+
+			Boolean review = (Boolean) context.get("review");
+
+			// if we are doing feedback just now, and if we are needing review and it's set
+			if (assessment.getFeedbackNow() && (!this.needReview || ((review != null) && review.booleanValue())))
+			{
+				// if we are doing score feedback
+				if (assessment.getFeedbackShowScore().booleanValue())
+				{
+					// the score
+					// TODO: this does not include manual scores...
+					Float score = submission.getAnswersAutoScore();
+
+					rv.append(score.toString());
+					rv.append('/');
+				}
+			}
+
+			// add the total possible points for the assessment
+			rv.append(submission.getAssessment().getTotalPoints().toString());
+
+			return rv.toString();
+		}
+	}
+
+	/**
 	 * From a value which is an AssessmentQuestion, 'format' this into a value<br />
 	 * that is the score of the SubmissionAnswer in the "submission" that is to this question<br />
 	 * (only if feedback is propert in this case) followed by the total points of the question.
 	 */
 	public static class QuestionScore implements FormatDelegate
 	{
+		/** If set, we need the "review" context variable set to show the score. */
+		protected boolean needReview = false;
+
+		public QuestionScore(boolean needReview)
+		{
+			this.needReview = needReview;
+		}
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -1647,8 +1766,10 @@ public class DeliveryControllers
 			// use the {}/{} format if doing feedback, or just {} if not.
 			StringBuffer rv = new StringBuffer();
 
-			// if we are doing feedback just now
-			if (assessment.getFeedbackNow())
+			Boolean review = (Boolean) context.get("review");
+
+			// if we are doing feedback just now, and if we are needing review and it's set
+			if (assessment.getFeedbackNow() && (!this.needReview || ((review != null) && review.booleanValue())))
 			{
 				// if we are doing question score feedback
 				if (assessment.getFeedbackShowQuestionScore().booleanValue())
@@ -1814,7 +1935,10 @@ public class DeliveryControllers
 				args[0] = question.getSectionOrdering().getPosition();
 				args[1] = question.getSection().getNumQuestions();
 			}
-			args[2] = question.getPoints();
+
+			// use the QuestionScore formater to get the points with possible score
+			QuestionScore qs = new QuestionScore(true);
+			args[2] = qs.format(context, value);
 
 			return context.getMessages().getFormattedMessage("question-question-title", args);
 		}
