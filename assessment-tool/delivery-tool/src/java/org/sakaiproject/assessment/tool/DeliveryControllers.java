@@ -475,20 +475,7 @@ public class DeliveryControllers
 					// TODO: really, we just want another section title here...
 					ui.newSection()
 						.setTitle("question-total-score", ui.newTextPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore(true)))
-						.setTitleEnabled(
-							ui.newOrDecision()
-								.setOptions(
-									ui.newHasValueDecision()
-										.setProperty(
-											ui.newPropertyReference()
-												.setReference("question")),
-									ui.newDecision()
-										.setProperty(
-											ui.newPropertyReference()
-												.setReference("answer.question.assessmentOrdering.isFirst"))))
-									// TODO: check this shows ONCE for by-assessment and by-section
-					)
-				
+						.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
 				.add(
 					ui.newSection()
 						.setIterator(
@@ -1655,7 +1642,7 @@ public class DeliveryControllers
 				// if we are doing score feedback
 				if (assessment.getFeedbackShowScore().booleanValue())
 				{
-					// add the sum of auto-scores for any answered question in this section
+					// add the sum of scores for any answered question in this section
 					float score = 0;
 
 					// find the section's answers to AssessmentQuestions that are in this section.
@@ -1663,7 +1650,7 @@ public class DeliveryControllers
 					{
 						if (answer.getQuestion().getSection().equals(section))
 						{
-							score += answer.getAutoScore().floatValue();
+							score += answer.getTotalScore().floatValue();
 						}
 					}
 
@@ -1716,9 +1703,8 @@ public class DeliveryControllers
 				// if we are doing score feedback
 				if (assessment.getFeedbackShowScore().booleanValue())
 				{
-					// the score
-					// TODO: this does not include manual scores...
-					Float score = submission.getAnswersAutoScore();
+					// the total score
+					Float score = submission.getTotalScore();
 
 					rv.append(score.toString());
 					rv.append('/');
@@ -1782,7 +1768,7 @@ public class DeliveryControllers
 					{
 						if (answer.getQuestion().equals(question))
 						{
-							score = answer.getAutoScore().floatValue();
+							score = answer.getTotalScore().floatValue();
 							break;
 						}
 					}

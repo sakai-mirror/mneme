@@ -101,6 +101,20 @@ public interface SubmissionAnswer
 	List<Boolean> getEntryCorrects();
 
 	/**
+	 * Access the evaluation comment for the answer.
+	 * 
+	 * @return The evaluation comment for the answer, or null if there is none.
+	 */
+	String getEvalComment();
+
+	/**
+	 * Access the evaluation score for the answer. This is combined with the auto score for the answer's total score.
+	 * 
+	 * @return The evaluation score for the answer, or null if there is none.
+	 */
+	Float getEvalScore();
+
+	/**
 	 * Check if the question is answered; if the user has made the answer entries. Answers that have only "mark for review" or a
 	 * rational are not considered answered.
 	 * 
@@ -149,6 +163,13 @@ public interface SubmissionAnswer
 	 * @return The answer's submitted date.
 	 */
 	Time getSubmittedDate();
+
+	/**
+	 * Access the total score of the answer - the total of the auto score and the evaluation score.
+	 * 
+	 * @return The total score of the answer.
+	 */
+	Float getTotalScore();
 
 	/**
 	 * Remove the entry that has this answer text.

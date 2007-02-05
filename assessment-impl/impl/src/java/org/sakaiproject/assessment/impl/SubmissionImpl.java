@@ -58,6 +58,10 @@ public class SubmissionImpl implements Submission
 
 	protected PropertyStatus assessmentIdStatus = PropertyStatus.unset;
 
+	protected String evalComments = null;
+
+	protected Float evalScore = null;
+
 	protected String id = null;
 
 	protected PropertyStatus idStatus = PropertyStatus.unset;
@@ -221,6 +225,27 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Long getDurationTillExpires()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.startDateStatus == PropertyStatus.unset) readMain();
+
+		Long limit = getAssessment().getTimeLimit();
+		if (limit == null) return null;
+
+		// if we have not yet started, we have the full time limit duration
+		if (startDate == null) return limit;
+
+		// if we have started, the clock is running - compute how long from NOW the end is
+		long tillExpires = (startDate.getTime() + limit.longValue()) - this.service.m_timeService.newTime().getTime();
+		if (tillExpires <= 0) return new Long(0);
+
+		return new Long(tillExpires);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Long getElapsedTime()
 	{
 		// read the basic info if this property has not yet been set
@@ -229,6 +254,22 @@ public class SubmissionImpl implements Submission
 		if ((submittedDate == null) || (startDate == null)) return null;
 
 		return new Long((submittedDate.getTime() - startDate.getTime()) / 1000);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getEvalComment()
+	{
+		return this.evalComments;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getEvalScore()
+	{
+		return this.evalScore;
 	}
 
 	/**
@@ -320,31 +361,31 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public Long getDurationTillExpires()
-	{
-		// read the basic info if this property has not yet been set
-		if (this.startDateStatus == PropertyStatus.unset) readMain();
-
-		Long limit = getAssessment().getTimeLimit();
-		if (limit == null) return null;
-
-		// if we have not yet started, we have the full time limit duration
-		if (startDate == null) return limit;
-
-		// if we have started, the clock is running - compute how long from NOW the end is
-		long tillExpires = (startDate.getTime() + limit.longValue()) - this.service.m_timeService.newTime().getTime();
-		if (tillExpires <= 0) return new Long(0);
-
-		return new Long(tillExpires);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Float getTotalScore()
 	{
-		// TODO: compute, against the evaluation, etc...
-		return this.totalScore;
+		// if our special "total score" is set, use this, otherwise we compute
+		if (this.totalScore != null) return this.totalScore;
+
+		// read the basic info if this property has not yet been set
+		if (this.mainStatus == PropertyStatus.unset) readMain();
+
+		// read the answers info if this property has not yet been set
+		if (this.answersStatus == PropertyStatus.unset) readAnswers();
+
+		// add the answer auto scores, the answer evaluations, (these are combined into the answer total scores) and the overall evaluation
+		float total = 0;
+		
+		for (SubmissionAnswer answer : answers)
+		{
+			total += answer.getTotalScore();
+		}
+		
+		if (this.evalScore != null)
+		{
+			total += this.evalScore.floatValue();
+		}
+
+		return new Float(total);
 	}
 
 	/**
@@ -500,6 +541,28 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
+	 * Initialize the evaluation comments
+	 * 
+	 * @param comments
+	 *        The evaluation comments.
+	 */
+	protected void initEvalComments(String comments)
+	{
+		this.evalComments = comments;
+	}
+
+	/**
+	 * Initialize the evaluation score.
+	 * 
+	 * @param score
+	 *        The evaluation score.
+	 */
+	protected void initEvalScore(Float score)
+	{
+		this.evalScore = score;
+	}
+
+	/**
 	 * Initialize the id property.
 	 * 
 	 * @param id
@@ -522,7 +585,7 @@ public class SubmissionImpl implements Submission
 		this.isComplete = complete;
 		this.isCompleteStatus = PropertyStatus.inited;
 	}
-
+	
 	/**
 	 * Initialize the start date property.
 	 * 
@@ -678,8 +741,11 @@ public class SubmissionImpl implements Submission
 		this.statusStatus = other.statusStatus;
 		this.submittedDate = other.submittedDate;
 		this.submittedDateStatus = other.submittedDateStatus;
-		this.totalScore = other.totalScore;
 		this.userId = other.userId;
 		this.userIdStatus = other.userIdStatus;
+		this.evalComments = other.evalComments;
+		this.evalScore = other.evalScore;
+		
+		this.totalScore = other.totalScore;
 	}
 }

@@ -50,6 +50,10 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/** Entries are ordered to match the assessment question part order, and there's one entry per part. */
 	protected List<SubmissionAnswerEntryImpl> entries = new ArrayList<SubmissionAnswerEntryImpl>();
 
+	protected String evalComments = null;
+
+	protected Float evalScore = null;
+
 	/** This is the samigo database (itemgrading) id of the first entry for the answer */
 	protected transient String id = null;
 
@@ -87,7 +91,9 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		setRationale(other.getRationale());
 		setSubmittedDate(other.getSubmittedDate());
 		initRecycle(other.recycle);
-		id = other.id;
+		this.id = other.id;
+		this.evalComments = other.evalComments;
+		this.evalScore = other.evalScore;
 	}
 
 	/**
@@ -240,6 +246,22 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getEvalComment()
+	{
+		return this.evalComments;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getEvalScore()
+	{
+		return this.evalScore;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsAnswered()
 	{
 		QuestionType type = getQuestion().getType();
@@ -334,6 +356,23 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	public Time getSubmittedDate()
 	{
 		return this.submittedDate;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getTotalScore()
+	{
+		autoScore();
+
+		float score = countAutoScore();
+
+		if (this.evalScore != null)
+		{
+			score += this.evalScore.floatValue();
+		}
+
+		return new Float(score);
 	}
 
 	/**
@@ -656,6 +695,28 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			this.entries.add(copy);
 			copy.initAnswer(this);
 		}
+	}
+
+	/**
+	 * Establish the evaluation comments.
+	 * 
+	 * @param comments
+	 *        The evaluation comments.
+	 */
+	protected void initEvalComments(String comments)
+	{
+		this.evalComments = comments;
+	}
+
+	/**
+	 * Establish the evaluation score.
+	 * 
+	 * @param score
+	 *        The evaluation score.
+	 */
+	protected void initEvalScore(Float score)
+	{
+		this.evalScore = score;
 	}
 
 	/**

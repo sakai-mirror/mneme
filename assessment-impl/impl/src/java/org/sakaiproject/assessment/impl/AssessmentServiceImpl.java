@@ -728,7 +728,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					String description = result.getString(3);
 					int questionOrdering = result.getInt(4);
 					int numQuestionsDrawn = result.getInt(5);
-					
+
 					// adjust the questionOrdering - if we are doing draw from pool limit, we should also randomize
 					if (numQuestionsDrawn != 0) questionOrdering = 2;
 
@@ -1233,7 +1233,7 @@ public class AssessmentServiceImpl implements AssessmentService
 			return false;
 		}
 
-		String statement = "SELECT AG.PUBLISHEDASSESSMENTID, AG.TOTALOVERRIDESCORE, AG.SUBMITTEDDATE, AG.AGENTID, AG.FORGRADE, AG.ATTEMPTDATE, AG.STATUS"
+		String statement = "SELECT AG.PUBLISHEDASSESSMENTID, AG.TOTALOVERRIDESCORE, AG.SUBMITTEDDATE, AG.AGENTID, AG.FORGRADE, AG.ATTEMPTDATE, AG.STATUS, AG.COMMENTS"
 				+ " FROM SAM_ASSESSMENTGRADING_T AG" + " WHERE AG.ASSESSMENTGRADINGID = ?";
 		Object[] fields = new Object[1];
 		fields[0] = submission.getId();
@@ -1265,6 +1265,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					}
 
 					int status = result.getInt(7);
+					String comments = result.getString(8);
 
 					// pack it into a submission
 					submission.initAssessmentId(aid);
@@ -1273,8 +1274,8 @@ public class AssessmentServiceImpl implements AssessmentService
 					submission.initStatus(new Integer(status));
 					submission.initSubmittedDate(submittedDate);
 					submission.initUserId(userId);
-
-					// TODO: the manual score, and the coment (not yet in the SELECT list) can form the evaluation for this...
+					submission.initEvalScore(new Float(manualScore));
+					submission.initEvalComments(comments);
 
 					return submission;
 				}
@@ -1324,7 +1325,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		// read the answers.
 		// The PUBLISHEDITEMTEXTID points to a question part, and we want to read the entiries in question part sequence order,
 		// so we join to the SAM_PUBLISHEDITEMTEXT_T (i.e. question parts) table and order by the sequence there
-		String statement = "SELECT I.ITEMGRADINGID, I.SUBMITTEDDATE, I.PUBLISHEDANSWERID, I.RATIONALE, I.ANSWERTEXT, I.REVIEW, I.PUBLISHEDITEMID, I.AUTOSCORE, I.PUBLISHEDITEMTEXTID"
+		String statement = "SELECT I.ITEMGRADINGID, I.SUBMITTEDDATE, I.PUBLISHEDANSWERID, I.RATIONALE, I.ANSWERTEXT, I.REVIEW, I.PUBLISHEDITEMID, I.AUTOSCORE, I.PUBLISHEDITEMTEXTID, I.COMMENTS"
 				+ " FROM SAM_ITEMGRADING_T I"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMTEXT_T PIT ON I.PUBLISHEDITEMTEXTID = PIT.ITEMTEXTID"
 				+ " WHERE I.ASSESSMENTGRADINGID = ?" + " ORDER BY PIT.SEQUENCE ASC";
@@ -1353,6 +1354,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					String questionId = result.getString(7);
 					float autoScore = result.getFloat(8);
 					String questionPartId = result.getString(9);
+					String comments = result.getString(10);
 
 					// do we have the answer to this question yet?
 					SubmissionAnswerImpl answer = submission.findAnswer(questionId);
@@ -1365,6 +1367,7 @@ public class AssessmentServiceImpl implements AssessmentService
 						answer.setRationale(rationale);
 						answer.setMarkedForReview(Boolean.valueOf(markedForReview));
 						answer.setSubmittedDate(submittedDate);
+						answer.initEvalComments(comments);
 						answer.id = id;
 
 						answer.initSubmission(submission);
@@ -1391,6 +1394,23 @@ public class AssessmentServiceImpl implements AssessmentService
 				}
 			}
 		});
+
+		// TODO: deduce the answer eval scores - the difference between the set auto score and the computed auto score
+		for (SubmissionAnswerImpl answer : submission.answers)
+		{
+			// see what we read in from the db
+			float dbScore = answer.countAutoScore();
+
+			// do the auto-score, setting the proper auto score
+			scoreAnswer(answer);
+
+			// see what we have different, that's the eval score
+			float newScore = answer.countAutoScore();
+			if (newScore != dbScore)
+			{
+				answer.initEvalScore(new Float(dbScore - newScore));
+			}
+		}
 
 		// read the uploaded attachments for the answers, and fill out the entries to hold their refs
 		statement = "SELECT M.MEDIAID, I.PUBLISHEDITEMID" + " FROM SAM_MEDIA_T M"

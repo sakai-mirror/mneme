@@ -85,6 +85,21 @@ public interface Submission
 	Long getElapsedTime();
 
 	/**
+	 * Access the evaluation comment for the overall submission.
+	 * 
+	 * @return The evaluation comment for the overall submission, or null if there is none.
+	 */
+	String getEvalComment();
+
+	/**
+	 * Access the evaluation score for the overall submission. This is combined with the auto scores and the answer evaluation
+	 * scores for the total score.
+	 * 
+	 * @return The evaluation score for the overall submission, or null if there is none.
+	 */
+	Float getEvalScore();
+
+	/**
 	 * Find the first assessment question that has not been seen yet in this submission.
 	 * 
 	 * @return The first unseen assessment question, or null if they have all been seen.
@@ -136,8 +151,8 @@ public interface Submission
 	Time getSubmittedDate();
 
 	/**
-	 * Access the total score of the submission - the total of the auto scores from the answers and the evaluation manual scores
-	 * from the answers and overall.
+	 * Access the total score of the submission - the total of the auto scores from the answers and the evaluation scores from the
+	 * answers and overall.
 	 * 
 	 * @return The total score of the submission.
 	 */
