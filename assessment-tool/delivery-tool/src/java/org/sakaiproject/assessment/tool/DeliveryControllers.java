@@ -472,9 +472,14 @@ public class DeliveryControllers
 										.setReference("review")),
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
 				.add(
-					// TODO: really, we just want another section title here...
 					ui.newSection()
 						.setTitle("question-total-score", ui.newTextPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore(true)))
+						.add(
+							ui.newBarChart()
+								.setData(ui.newPropertyReference().setReference("pcts"))
+								.setWidth(206)
+								.setHeight(103)
+								.setMarkIndex(ui.newPropertyReference().setReference("mark")))
 						.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
 				.add(
 					ui.newSection()

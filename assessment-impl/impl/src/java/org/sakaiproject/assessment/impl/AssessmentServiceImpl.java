@@ -2104,6 +2104,43 @@ public class AssessmentServiceImpl implements AssessmentService
 		return idSubmissions(ids);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Float> getAssessmentScores(String assessmentId)
+	{
+		final List<Float> rv = new ArrayList<Float>();
+
+		String statement = "SELECT AG.FINALSCORE" + " FROM SAM_ASSESSMENTGRADING_T AG"
+				+ " WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(true)
+				+ " ORDER BY AG.FINALSCORE";
+
+		Object[] fields = new Object[1];
+		fields[0] = assessmentId;
+
+		final AssessmentServiceImpl service = this;
+		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					float score = result.getFloat(1);
+					rv.add(new Float(score));
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getAssessmentScores: " + e);
+					return null;
+				}
+			}
+		});
+
+		return rv;
+	}
+
 	/*******************************************************************************************************************************
 	 * Authoring Support
 	 ******************************************************************************************************************************/

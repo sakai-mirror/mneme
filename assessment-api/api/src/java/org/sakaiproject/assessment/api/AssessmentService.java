@@ -30,7 +30,10 @@ import java.util.List;
  */
 public interface AssessmentService
 {
-	/** The type string for this application: should not change over time as it may be stored in various parts of persistent entities. */
+	/**
+	 * The type string for this application: should not change over time as it may be stored in various parts of persistent
+	 * entities.
+	 */
 	static final String APPLICATION_ID = "sakai:assessment";
 
 	/** This string starts the references to resources in this service. */
@@ -66,9 +69,9 @@ public interface AssessmentService
 	/** Event tracking event for completing a submission. */
 	static final String SUBMIT_COMPLETE = "submission.complete";
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Assessment Access
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	/**
 	 * Access an assessment by id. Assures that the full assessment information is populated. TODO: security
@@ -88,9 +91,9 @@ public interface AssessmentService
 	 */
 	Assessment idAssessment(String id);
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Submission Access
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	/**
 	 * Access a submission by id. TODO: security
@@ -110,19 +113,21 @@ public interface AssessmentService
 	 */
 	Submission idSubmission(String id);
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Delivery Support
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	/**
 	 * Check how many additional submissions are allowed to this assessment by this user.<br />
-	 * If the user has no permission to submit, has submitted the maximum, or the assessment is closed for submissions as of this time, return 0.
+	 * If the user has no permission to submit, has submitted the maximum, or the assessment is closed for submissions as of this
+	 * time, return 0.
 	 * 
 	 * @param assessmentId
 	 *        The assessment id.
 	 * @param userId
 	 *        The user id.
-	 * @return The count of remaining submissions allowed for this user to this assessment, -1 if it is unlimited, or null if we cannot find the assessment.
+	 * @return The count of remaining submissions allowed for this user to this assessment, -1 if it is unlimited, or null if we
+	 *         cannot find the assessment.
 	 */
 	Integer countRemainingSubmissions(String assessmentId, String userId);
 
@@ -142,7 +147,8 @@ public interface AssessmentService
 	 * <li>assessments this user has permission to take</li>
 	 * <li>assessments that are released as of the time specified and not yet retracted</li>
 	 * <li>assessments that, based on the due date and late submission policy, still can be submitted to</li>
-	 * <li>assessments that, based on their re-submit policy and count, and this user's count of submissions, can be submitted to again by this user</li>
+	 * <li>assessments that, based on their re-submit policy and count, and this user's count of submissions, can be submitted to
+	 * again by this user</li>
 	 * <li>(assessments that accept late submissions and are past due date that the use has submitted to already are not included)</li>
 	 * </ul>
 	 * 
@@ -167,7 +173,8 @@ public interface AssessmentService
 	 * <li>published assessments</li>
 	 * <li>assessments in this context</li>
 	 * <li>assessments this user can submit to and have submitted to</li>
-	 * <li>the one (of many for this user) submission that will be the official (graded) (depending on the assessment settings, and submission time and score)</li>
+	 * <li>the one (of many for this user) submission that will be the official (graded) (depending on the assessment settings, and
+	 * submission time and score)</li>
 	 * </ul>
 	 * 
 	 * @param context
@@ -176,13 +183,23 @@ public interface AssessmentService
 	 *        The user id - if null, use the current user.
 	 * @param sort
 	 *        The sort for the return list (title_a if null).
-	 * @return A List<Submission> of the submissions that are the offical submissions for assessments in the context by this user, sorted.
+	 * @return A List<Submission> of the submissions that are the offical submissions for assessments in the context by this user,
+	 *         sorted.
 	 */
 	List<Submission> getOfficialSubmissions(String context, String userId, GetOfficialSubmissionsSort sort);
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/**
+	 * Get the total scores for all completed submissions to this assessment.
+	 * 
+	 * @param assessmentId
+	 *        The assessment id.
+	 * @return A List containing all the scores for completed submissions to this assessment, or an empty list if there are none.
+	 */
+	List<Float> getAssessmentScores(String assessmentId);
+
+	/*******************************************************************************************************************************
 	 * Authoring Support
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	/**
 	 * Check if the current user is allowed to add an assessment in this context.
@@ -256,9 +273,9 @@ public interface AssessmentService
 	 */
 	Integer countAssessments(String context);
 
-	/**********************************************************************************************************************************************************************************************************************************************************
+	/*******************************************************************************************************************************
 	 * Submission Support
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	 ******************************************************************************************************************************/
 
 	/**
 	 * Create a new Submission object for this assessment.
@@ -307,7 +324,8 @@ public interface AssessmentService
 	Boolean allowSubmit(String assessmentId, String userId);
 
 	/**
-	 * Start an end-user in taking an assessment. If there is an incomplete submission already, re-enter that, else create a new one.
+	 * Start an end-user in taking an assessment. If there is an incomplete submission already, re-enter that, else create a new
+	 * one.
 	 * 
 	 * @param assessment
 	 *        The published assessment to submit to.
@@ -325,7 +343,8 @@ public interface AssessmentService
 			AssessmentClosedException, AssessmentCompletedException;
 
 	/**
-	 * Enter or update an answer to a question of an incomplete submission to an assessment. Auto grade. Updated realated info (such as the submission's score).<br />
+	 * Enter or update an answer to a question of an incomplete submission to an assessment. Auto grade. Updated realated info (such
+	 * as the submission's score).<br />
 	 * Complete the submission if indicated.
 	 * 
 	 * @param answer
@@ -343,7 +362,8 @@ public interface AssessmentService
 			AssessmentClosedException, SubmissionCompletedException;
 
 	/**
-	 * Enter or update a set of answers to questions of an incomplete submission to an assessment. Auto grade. Updated realated info (such as the submission's score).<br />
+	 * Enter or update a set of answers to questions of an incomplete submission to an assessment. Auto grade. Updated realated info
+	 * (such as the submission's score).<br />
 	 * Complete the submission if indicated.
 	 * 
 	 * @param answers
@@ -359,6 +379,7 @@ public interface AssessmentService
 	 */
 	void submitAnswers(List<SubmissionAnswer> answers, Boolean completeSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException;
+
 	/**
 	 * Complete this submission. Use this instead of submitAnswer() when there's no answer information to also update.
 	 * 
