@@ -475,11 +475,12 @@ public class DeliveryControllers
 					ui.newSection()
 						.setTitle("question-total-score", ui.newTextPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore(true)))
 						.add(
-							ui.newBarChart()
-								.setData(ui.newPropertyReference().setReference("pcts"))
+							ui.newDistributionChart()
+								.setData(ui.newPropertyReference().setReference("scores"))
 								.setWidth(206)
 								.setHeight(103)
-								.setMarkIndex(ui.newPropertyReference().setReference("mark")))
+								.setMark(ui.newPropertyReference().setReference("submission.totalScore"))
+								.setMax(ui.newPropertyReference().setReference("submission.assessment.totalPoints")))
 						.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
 				.add(
 					ui.newSection()

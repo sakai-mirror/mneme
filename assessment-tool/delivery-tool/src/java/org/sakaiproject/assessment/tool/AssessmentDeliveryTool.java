@@ -1263,45 +1263,11 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 			}
 			
+			context.put("answers", answers);
+
 			// collect all the scores for this assessment
 			List<Float> scores = assessmentService.getAssessmentScores(submission.getAssessment().getId());
-
-			// convert to %
-			// TODO: better done elsewhere -ggolden
-			float total = submission.getAssessment().getTotalPoints().floatValue();
-			List<Float> pcts = new ArrayList<Float>(102);
-			for (int i = 0; i < 101; i++)
-			{
-				pcts.add(new Float(0));
-			}
-			pcts.add(new Float(scores.size()));
-			
-			for (Float score : scores)
-			{
-				// convert to pct
-				int index = (int) ((100f * score.floatValue()) / total);
-				if (index < 0)
-				{
-					index = 0;
-				}
-				if (index > 100)
-				{
-					index = 100;
-				}
-				int count = pcts.get(index).intValue();
-				count++;
-				pcts.set(index, new Float(count));
-			}
-
-			// mark this one's score
-			int markIndex = (int) ((100f * submission.getTotalScore()) / total);
-			if (markIndex < 0) markIndex = 0;
-			if (markIndex > 100) markIndex = 100;
-
-			context.put("pcts", pcts);
-			context.put("mark", new Integer(markIndex));
-
-			context.put("answers", answers);
+			context.put("scores", scores);
 
 			// render using the question interface
 			ui.render(uiQuestion, context);
