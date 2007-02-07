@@ -476,7 +476,7 @@ public class DeliveryControllers
 						.setTitle("question-total-score", ui.newTextPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore(true)))
 						.add(
 							ui.newDistributionChart()
-								.setData(ui.newPropertyReference().setReference("scores"))
+								.setData(ui.newPropertyReference().setReference("submission.assessment.scores"))
 								.setWidth(206)
 								.setHeight(103)
 								.setMark(ui.newPropertyReference().setReference("submission.totalScore"))

@@ -1265,10 +1265,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 			
 			context.put("answers", answers);
 
-			// collect all the scores for this assessment
-			List<Float> scores = assessmentService.getAssessmentScores(submission.getAssessment().getId());
-			context.put("scores", scores);
-
 			// render using the question interface
 			ui.render(uiQuestion, context);
 			return;

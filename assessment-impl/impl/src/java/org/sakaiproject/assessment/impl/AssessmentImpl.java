@@ -310,7 +310,7 @@ public class AssessmentImpl implements Assessment
 	public Long getDurationTillDue()
 	{
 		Time dueDate = getDueDate();
-		//Boolean allowLate = getAllowLateSubmit();
+		// Boolean allowLate = getAllowLateSubmit();
 
 		// if no due date
 		if (dueDate == null) return null;
@@ -352,8 +352,8 @@ public class AssessmentImpl implements Assessment
 		FeedbackDelivery delivery = getFeedbackDelivery();
 		Time feedbackDate = getFeedbackDate();
 		if ((delivery == FeedbackDelivery.IMMEDIATE)
-				|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(this.service.m_timeService
-						.newTime()))))))
+				|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate
+						.after(this.service.m_timeService.newTime()))))))
 		{
 			return Boolean.TRUE;
 		}
@@ -569,6 +569,14 @@ public class AssessmentImpl implements Assessment
 		if (this.retractDateStatus == PropertyStatus.unset) readMain();
 
 		return this.retractDate;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Float> getScores()
+	{
+		return service.getAssessmentScores(this.id);
 	}
 
 	/**

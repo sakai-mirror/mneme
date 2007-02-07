@@ -258,6 +258,15 @@ public interface Assessment
 	Time getRetractDate();
 
 	/**
+	 * Get the total scores for all completed submissions to this assessment.
+	 * 
+	 * @param assessmentId
+	 *        The assessment id.
+	 * @return A List containing all the scores for completed submissions to this assessment, or an empty list if there are none.
+	 */
+	List<Float> getScores();
+
+	/**
 	 * Access one of the sections, by id.
 	 * 
 	 * @param sectionId
