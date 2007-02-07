@@ -48,23 +48,23 @@ public class TestControllers
 								.setText("home-generate"))
 						.add(
 							ui.newTextEdit()
-								.setProperty(ui.newPropertyReference().setEntityReference("specs").setPropertyReference("contextsWithAssessments"))
+								.setProperty(ui.newPropertyReference().setReference("specs.contextsWithAssessments"))
 								.setTitle("home-contextsWithAssessments"))
 						.add(
 							ui.newTextEdit()
-								.setProperty(ui.newPropertyReference().setEntityReference("specs").setPropertyReference("assessmentsPerContext"))
+								.setProperty(ui.newPropertyReference().setReference("specs.assessmentsPerContext"))
 								.setTitle("home-assessmentsPerContext"))
 						.add(
 							ui.newTextEdit()
-								.setProperty(ui.newPropertyReference().setEntityReference("specs").setPropertyReference("submissionsPerStudent"))
+								.setProperty(ui.newPropertyReference().setReference("specs.submissionsPerStudent"))
 								.setTitle("home-submissionsPerStudent"))
 						.add(
 							ui.newTextEdit()
-								.setProperty(ui.newPropertyReference().setEntityReference("specs").setPropertyReference("contextStudents"))
+								.setProperty(ui.newPropertyReference().setReference("specs.contextStudents"))
 								.setTitle("home-contextStudents"))
 						.add(
 							ui.newTextEdit()
-								.setProperty(ui.newPropertyReference().setEntityReference("specs").setPropertyReference("itemsPerAssessment"))
+								.setProperty(ui.newPropertyReference().setReference("specs.itemsPerAssessment"))
 								.setTitle("home-itemsPerAssessment")))
 				.add(
 					ui.newButtonBar()

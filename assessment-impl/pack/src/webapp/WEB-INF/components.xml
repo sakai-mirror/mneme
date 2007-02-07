@@ -21,6 +21,7 @@
 		<!-- <property name="gradebookService"><ref bean="org_sakaiproject_service_gradebook_GradebookExternalAssessmentService"/></property> -->
 		<property name="gradebookService"><ref bean="org.sakaiproject.service.gradebook.GradebookService"/></property>
 
+ 		<property name="autoDdl"><value>${auto.ddl}</value></property>
  		<property name="cacheMinutes"><value>5</value></property>
  		<property name="cacheCleanerMinutes"><value>15</value></property>
 	</bean>

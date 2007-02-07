@@ -318,6 +318,20 @@ public class AssessmentServiceImpl implements AssessmentService
 		m_cacheSeconds = Integer.parseInt(time) * 60;
 	}
 
+	/** Configuration: to run the ddl on init or not. */
+	protected boolean m_autoDdl = false;
+
+	/**
+	 * Configuration: to run the ddl on init or not.
+	 * 
+	 * @param value
+	 *        the auto ddl value.
+	 */
+	public void setAutoDdl(String value)
+	{
+		m_autoDdl = new Boolean(value).booleanValue();
+	}
+
 	/*******************************************************************************************************************************
 	 * Init and Destroy
 	 ******************************************************************************************************************************/
@@ -337,6 +351,12 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		try
 		{
+			// if we are auto-creating our schema, check and create
+			if (m_autoDdl)
+			{
+				m_sqlService.ddl(this.getClass().getClassLoader(), "sakai_assessment");
+			}
+
 			// <= 0 indicates no caching desired
 			if ((m_cacheSeconds > 0) && (m_cacheCleanerSeconds > 0))
 			{
