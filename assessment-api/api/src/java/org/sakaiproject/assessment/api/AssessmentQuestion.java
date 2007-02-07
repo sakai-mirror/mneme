@@ -42,7 +42,8 @@ public interface AssessmentQuestion
 	AssessmentAnswer getAnswer(String answerId);
 
 	/**
-	 * Get the correct answer(s) formatted into an answer key, considering the possibly user-randomized answer order for the question.
+	 * Get the correct answer(s) formatted into an answer key, considering the possibly user-randomized answer order for the
+	 * question.
 	 * 
 	 * @return The answer key.
 	 */
@@ -65,7 +66,8 @@ public interface AssessmentQuestion
 	/**
 	 * Access the attachment list for the assessment.
 	 * 
-	 * @return The List of Reference objects that are the attachments for the assessment, or an empty list if there are no attachments.
+	 * @return The List of Reference objects that are the attachments for the assessment, or an empty list if there are no
+	 *         attachments.
 	 */
 	List<Reference> getAttachments();
 
@@ -161,6 +163,14 @@ public interface AssessmentQuestion
 	 * @return The requuire rational setting for this question.
 	 */
 	Boolean getRequireRationale();
+
+	/**
+	 * Get the total scores for this question from all completed submissions to the question's assessment.
+	 * 
+	 * @return A List containing all the scores for this question from all completed submissions to the question's assessment, or an
+	 *         empty list if there are none.
+	 */
+	List<Float> getScores();
 
 	/**
 	 * Access the back pointer to the section.

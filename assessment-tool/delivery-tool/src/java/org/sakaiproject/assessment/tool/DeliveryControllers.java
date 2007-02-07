@@ -503,6 +503,7 @@ public class DeliveryControllers
 										.setProperty(
 											ui.newPropertyReference()
 												.setReference("answer.question.sectionOrdering.isFirst"))))
+
 						.add(
 							ui.newHtml()
 								.setText(null, ui.newPropertyReference().setReference("answer.question.section.description")))
@@ -514,6 +515,14 @@ public class DeliveryControllers
 						.add(
 							ui.newSection()
 								.setTitle(null,ui.newTextPropertyReference().setReference("answer.question").setFormatDelegate(new FormatQuestionTitle()))
+								.add(
+									ui.newDistributionChart()
+										.setData(ui.newPropertyReference().setReference("answer.question.scores"))
+										.setWidth(206)
+										.setHeight(103)
+										.setMark(ui.newPropertyReference().setReference("answer.totalScore"))
+										.setMax(ui.newPropertyReference().setReference("answer.question.points"))
+										.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
 								.add(
 									ui.newHtml()
 										.setText(null, ui.newTextPropertyReference().setReference("answer.question.instructions"))

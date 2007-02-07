@@ -2141,6 +2141,44 @@ public class AssessmentServiceImpl implements AssessmentService
 		return rv;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Float> getQuestionScores(String questionId)
+	{
+		final List<Float> rv = new ArrayList<Float>();
+
+		String statement = "SELECT SUM(IG.AUTOSCORE+IG.OVERRIDESCORE) AS SCORE" + " FROM SAM_ITEMGRADING_T IG"
+				+ " INNER JOIN SAM_ASSESSMENTGRADING_T AG ON IG.ASSESSMENTGRADINGID = AG.ASSESSMENTGRADINGID"
+				+ " WHERE IG.PUBLISHEDITEMID = ? AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(true)
+				+ " GROUP BY IG.ASSESSMENTGRADINGID" + " ORDER BY SCORE";
+
+		Object[] fields = new Object[1];
+		fields[0] = questionId;
+
+		final AssessmentServiceImpl service = this;
+		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					float score = result.getFloat(1);
+					rv.add(new Float(score));
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getQuestionScores: " + e);
+					return null;
+				}
+			}
+		});
+
+		return rv;
+	}
+
 	/*******************************************************************************************************************************
 	 * Authoring Support
 	 ******************************************************************************************************************************/

@@ -460,6 +460,14 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<Float> getScores()
+	{
+		return this.section.assessment.service.getQuestionScores(this.id);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public AssessmentSection getSection()
 	{
 		return this.section;

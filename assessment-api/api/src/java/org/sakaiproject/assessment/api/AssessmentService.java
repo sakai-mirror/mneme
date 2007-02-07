@@ -197,6 +197,15 @@ public interface AssessmentService
 	 */
 	List<Float> getAssessmentScores(String assessmentId);
 
+	/**
+	 * Get the total scores for this question from all completed submissions to the question's assessment.
+	 * 
+	 * @param questionId
+	 *        The question id.
+	 * @return A List containing all the scores for this question from all completed submissions to the question's assessment, or an empty list if there are none.
+	 */
+	List<Float> getQuestionScores(String questionId);
+
 	/*******************************************************************************************************************************
 	 * Authoring Support
 	 ******************************************************************************************************************************/
