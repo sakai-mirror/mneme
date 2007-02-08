@@ -805,60 +805,9 @@ public class DeliveryControllers
 					ui.newButtonBar()
 						.add(
 							ui.newNavigation()
-								.setSubmit()
-								.setTitle("quesiton-save-prev")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
-									ui.newTextPropertyReference().setReference("submission.id"),
-									ui.newTextPropertyReference().setReference("question.assessmentOrdering.previous.id")))
-								.setIncluded(
-									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
-									ui.newDecision()
-										.setReversed()
-										.setProperty(
-											ui.newBooleanPropertyReference()
-												.setReference("question.assessmentOrdering.isFirst")),
-									ui.newDecision()
-										.setProperty(
-											ui.newPropertyReference()
-												.setReference("submission.assessment.randomAccess"))))	
-						.add(
-							ui.newNavigation()
 								.setDefault()
 								.setSubmit()
-								.setTitle("question-save-continue")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
-									ui.newTextPropertyReference().setReference("submission.id"),
-									ui.newTextPropertyReference().setReference("question.assessmentOrdering.next.id")))
-								.setIncluded(
-									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
-									ui.newDecision()
-										.setReversed()
-										.setProperty(
-											ui.newBooleanPropertyReference()
-												.setReference("question.assessmentOrdering.isLast"))))
-						.add(
-							ui.newNavigation()
-								.setDefault()
-								.setSubmit()
-								.setTitle("question-save-continue")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
-									ui.newTextPropertyReference().setReference("submission.id"),
-									ui.newTextPropertyReference().setReference("section.ordering.next.id")))
-								.setIncluded(
-									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
-									ui.newDecision()
-										.setReversed()
-										.setProperty(
-											ui.newBooleanPropertyReference()
-												.setReference("section.ordering.isLast"))))
-						.add(
-							ui.newNavigation()
-								.setDefault()
-								.setSubmit()
-								.setTitle("question-save-submit")
+								.setTitle("question-submit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/exit/{0}",ui.newTextPropertyReference().setReference("submission.id")))
 								.setIncluded(
@@ -879,18 +828,19 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setSubmit()
-								.setTitle("quesiton-save-prev")
+								.setRight()
+								.setTitle("question-prev")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
+								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
 									ui.newTextPropertyReference().setReference("submission.id"),
-									ui.newTextPropertyReference().setReference("section.ordering.previous.id")))
-								.setIncluded(
-									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
+									ui.newTextPropertyReference().setReference("question.assessmentOrdering.previous.id")))
+								.setDisabled(
 									ui.newDecision()
-										.setReversed()
 										.setProperty(
 											ui.newBooleanPropertyReference()
-												.setReference("section.ordering.isFirst")),
+												.setReference("question.assessmentOrdering.isFirst")))
+								.setIncluded(
+									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
 									ui.newDecision()
 										.setProperty(
 											ui.newPropertyReference()
@@ -898,12 +848,67 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setSubmit()
-								.setTitle("quesiton-save-exit")
+								.setRight()
+								.setTitle("question-prev-section")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
+									ui.newTextPropertyReference().setReference("submission.id"),
+									ui.newTextPropertyReference().setReference("section.ordering.previous.id")))
+								.setDisabled(
+									ui.newDecision()
+										.setProperty(
+											ui.newBooleanPropertyReference()
+												.setReference("section.ordering.isFirst")))
+								.setIncluded(
+									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
+									ui.newDecision()
+										.setProperty(
+											ui.newPropertyReference()
+												.setReference("submission.assessment.randomAccess"))))	
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setRight()
+								.setTitle("question-exit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/list"))
-								.setIncluded(
+								/*.setIncluded(
 									ui.newDecision()
-										.setDelegate(new SaveExitDecision())))
+										.setDelegate(new SaveExitDecision()))*/)
+						.add(
+							ui.newNavigation()
+								.setDefault()
+								.setRight()
+								.setSubmit()
+								.setTitle("question-next")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
+									ui.newTextPropertyReference().setReference("submission.id"),
+									ui.newTextPropertyReference().setReference("question.assessmentOrdering.next.id")))
+								.setDisabled(
+									ui.newDecision()
+										.setProperty(
+											ui.newBooleanPropertyReference()
+												.setReference("question.assessmentOrdering.isLast")))
+								.setIncluded(
+									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question"))))
+						.add(
+							ui.newNavigation()
+								.setDefault()
+								.setRight()
+								.setSubmit()
+								.setTitle("question-next-section")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
+									ui.newTextPropertyReference().setReference("submission.id"),
+									ui.newTextPropertyReference().setReference("section.ordering.next.id")))
+								.setDisabled(
+									ui.newDecision()
+										.setProperty(
+											ui.newBooleanPropertyReference()
+												.setReference("section.ordering.isLast")))
+								.setIncluded(
+									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section"))))
 						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()));
 	}
 
@@ -1458,6 +1463,7 @@ public class DeliveryControllers
 
 	/**
 	 * decide about the save-exit button for the question interface
+	 * @deprecated
 	 */
 	public static class SaveExitDecision implements DecisionDelegate
 	{
