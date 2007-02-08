@@ -606,6 +606,7 @@ public class DeliveryControllers
 								.add(
 									ui.newFileUpload()
 										.setTitle("question-upload-title")
+										.setTitleEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed())
 										.setUpload("quesiton-upload-upload")
 										.setProperty(ui.newPropertyReference().setReference("answer.uploadFile"))
 										.setReadOnly(ui.newPropertyReference().setReference("review"))
@@ -749,10 +750,10 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setReference("answer.markedForReview"))
 										.setEnabled(
-											ui.newDecision()
-												.setProperty(
-													ui.newBooleanPropertyReference()
-													.setReference("answer.question.section.assessment.randomAccess"))))
+											ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("answer.question.section.assessment.randomAccess")),
+											ui.newOrDecision().setOptions(
+												ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed(),
+												ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.markedForReview")))))
 								.add(
 									ui.newText()
 										.setText("question-answer-key", ui.newPropertyReference().setReference("answer.question.answerKey"))
