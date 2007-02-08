@@ -141,13 +141,13 @@ public class DeliveryControllers
 										.setEntityNavigation(
 											ui.newEntityNavigation()
 												.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newTextPropertyReference().setReference("submission.id")))
-												.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackNow"))))
+												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackNow"))))
 										.addNavigation(
 											ui.newNavigation()
 												.setTitle("list-review-statistics")
 												.setStyle(Navigation.Style.link)
 												.setDestination(ui.newDestination().setDestination("/statistics/{0}", ui.newPropertyReference().setReference("submission.id")))
-												.setEnabled(
+												.setIncluded(
 													ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackNow")),
 													ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackShowStatistics"))))
 										.setSorting(
@@ -285,7 +285,7 @@ public class DeliveryControllers
 							ui.newAttachments()
 								.setTitle("enter-attachments")
 								.setAttachments(ui.newPropertyReference().setReference("assessment.attachments"), null)
-								.setEnabled(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.attachments"))))
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.attachments"))))
 						.add(
 							ui.newEntityDisplay()
 								.setEntityReference(ui.newPropertyReference().setReference("assessment"))
@@ -324,7 +324,7 @@ public class DeliveryControllers
 												.setText("enabled", "disabled")
 												.setReference("assessment.autoSubmit")
 												.setMissingText("unknown"))
-										.setEnabled(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.timeLimit"))))
+										.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.timeLimit"))))
 								.addRow(
 									ui.newPropertyRow()
 										.setTitle("enter-display-numSubmissionsAllowed")
@@ -388,7 +388,7 @@ public class DeliveryControllers
 								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}/feedback",
 									ui.newTextPropertyReference().setReference("submission.id"),
 									ui.newTextPropertyReference().setReference("questionSelector")))
-								.setEnabled(
+								.setIncluded(
 									ui.newDecision()
 										.setProperty(
 											ui.newPropertyReference()
@@ -405,7 +405,7 @@ public class DeliveryControllers
 								.setTitle("question-link-toc")
 								.setStyle(Navigation.Style.link)
 								.setDestination(ui.newDestination().setDestination("/toc/{0}", ui.newTextPropertyReference().setReference("submission.id")))
-								.setEnabled(
+								.setIncluded(
 									ui.newDecision()
 										.setProperty(
 											ui.newPropertyReference()
@@ -420,12 +420,12 @@ public class DeliveryControllers
 								.setTitle("review-link-return")
 								.setStyle(Navigation.Style.link)
 								.setDestination(ui.newDestination().setDestination("/list"))
-								.setEnabled(
+								.setIncluded(
 									ui.newDecision()
 										.setProperty(
 											ui.newPropertyReference()
 												.setReference("review"))))
-						.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()))
+						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()))
 				.add(
 					ui.newNavigationBar()
 						.setReturn(
@@ -435,7 +435,7 @@ public class DeliveryControllers
 								.setDestination(ui.newDestination().setDestination("/list")))
 						//.setPrev(ui.newNavigation().setTitle("review-link-prev").setStyle(Navigation.Style.button).setReadOnly(ui.newConstantPropertyReference().setValue("true")))
 						//.setNext(ui.newNavigation().setTitle("review-link-next").setStyle(Navigation.Style.button).setReadOnly(ui.newConstantPropertyReference().setValue("true")))
-						.setEnabled(
+						.setIncluded(
 							ui.newDecision()
 								.setProperty(
 									ui.newPropertyReference()
@@ -450,7 +450,7 @@ public class DeliveryControllers
 						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
 						.setExpireDestination(
 							ui.newDestination().setDestination("/exit/{0}", ui.newTextPropertyReference().setReference("submission.id")))
-						.setEnabled(
+						.setIncluded(
 							ui.newDecision()
 								.setReversed()
 								.setProperty(
@@ -467,7 +467,7 @@ public class DeliveryControllers
 								.setHeight(103)
 								.setMark(ui.newPropertyReference().setReference("submission.totalScore"))
 								.setMax(ui.newPropertyReference().setReference("submission.assessment.totalPoints")))
-						.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
+						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
 				.add(
 					ui.newSection()
 						.setIterator(
@@ -478,7 +478,7 @@ public class DeliveryControllers
 							ui.newTextPropertyReference().setReference("answer.question.section.title"),
 							ui.newPropertyReference().setReference("answer.question.section").setFormatDelegate(new SectionScore(true)))
 						.setAnchor("question-anchor", ui.newPropertyReference().setReference("answer.question.id"))
-						.setTitleEnabled(
+						.setTitleIncluded(
 							ui.newAndDecision()
 								.setRequirements(
 									ui.newOrDecision()
@@ -502,7 +502,7 @@ public class DeliveryControllers
 							ui.newAttachments()
 								.setTitle("enter-attachments")
 								.setAttachments(ui.newPropertyReference().setReference("answer.question.section.attachments"), null)
-								.setEnabled(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.attachments"))))
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.attachments"))))
 						.add(
 							ui.newSection()
 								.setTitle(null,ui.newTextPropertyReference().setReference("answer.question").setFormatDelegate(new FormatQuestionTitle()))
@@ -513,11 +513,11 @@ public class DeliveryControllers
 										.setHeight(103)
 										.setMark(ui.newPropertyReference().setReference("answer.totalScore"))
 										.setMax(ui.newPropertyReference().setReference("answer.question.points"))
-										.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
+										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
 								.add(
 									ui.newHtml()
 										.setText(null, ui.newTextPropertyReference().setReference("answer.question.instructions"))
-										.setEnabled(
+										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(
 													QuestionType.matching.toString())
@@ -526,7 +526,7 @@ public class DeliveryControllers
 								.add(
 									ui.newHtml()
 										.setText(null, ui.newTextPropertyReference().setReference("answer.question.part.title"))
-										.setEnabled(
+										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(
 													QuestionType.fillIn.toString(),
@@ -538,7 +538,7 @@ public class DeliveryControllers
 								.add(
 									ui.newAttachments()
 										.setAttachments(ui.newPropertyReference().setReference("answer.question.attachments"), null)
-										.setEnabled(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.question.attachments"))))
+										.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.question.attachments"))))
 								.add(
 									ui.newEntityList()
 										.setStyle(EntityList.Style.form)
@@ -579,7 +579,7 @@ public class DeliveryControllers
 													ui.newTextPropertyReference()
 														.setReference("qanswer.feedbackGeneral"))
 												.setIncluded(ui.newDecision().setDelegate(new AnswerFeedbackDecision()), null))
-										.setEnabled(
+										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(
 													QuestionType.multipleChoice.toString(),
@@ -597,7 +597,7 @@ public class DeliveryControllers
 										.setProperty(
 											ui.newPropertyReference()
 												.setReference("answer.entryAnswerText"))
-										.setEnabled(
+										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.essay.toString())
 												.setProperty(
@@ -606,11 +606,11 @@ public class DeliveryControllers
 								.add(
 									ui.newFileUpload()
 										.setTitle("question-upload-title")
-										.setTitleEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed())
+										.setTitleIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed())
 										.setUpload("quesiton-upload-upload")
 										.setProperty(ui.newPropertyReference().setReference("answer.uploadFile"))
 										.setReadOnly(ui.newPropertyReference().setReference("review"))
-										.setEnabled(
+										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.fileUpload.toString())
 												.setProperty(
@@ -631,8 +631,8 @@ public class DeliveryControllers
 													ui.newTextPropertyReference().setReference("submission.id"),
 													ui.newTextPropertyReference().setReference("answer.question.id"),
 													ui.newTextPropertyReference().setReference("attachment.reference")))
-												.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()))
-										.setEnabled(
+												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()))
+										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.fileUpload.toString())
 												.setProperty(
@@ -654,7 +654,7 @@ public class DeliveryControllers
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackShowCorrectAnswer")))
 										.setWidth(20)
-										.setEnabled(
+										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.fillIn.toString())
 												.setProperty(
@@ -676,7 +676,7 @@ public class DeliveryControllers
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackShowCorrectAnswer")))
 										.setWidth(10)
-										.setEnabled(
+										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.numeric.toString())
 												.setProperty(
@@ -722,7 +722,7 @@ public class DeliveryControllers
 										.setChoiceLabel(
 											ui.newPropertyReference()
 												.setReference("choice.label"))
-										.setEnabled(
+										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.matching.toString())
 												.setProperty(
@@ -737,7 +737,7 @@ public class DeliveryControllers
 												.setReference("answer.rationale"))
 										.setSize(5, 40)
 										.setRequired("question-rationale-required-alert")
-										.setEnabled(
+										.setIncluded(
 											ui.newDecision()
 												.setProperty(
 													ui.newBooleanPropertyReference()
@@ -749,7 +749,7 @@ public class DeliveryControllers
 										.setProperty(
 											ui.newPropertyReference()
 												.setReference("answer.markedForReview"))
-										.setEnabled(
+										.setIncluded(
 											ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("answer.question.section.assessment.randomAccess")),
 											ui.newOrDecision().setOptions(
 												ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed(),
@@ -757,7 +757,7 @@ public class DeliveryControllers
 								.add(
 									ui.newText()
 										.setText("question-answer-key", ui.newPropertyReference().setReference("answer.question.answerKey"))
-										.setEnabled(
+										.setIncluded(
 											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("feedback")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackShowCorrectAnswer")),
@@ -773,14 +773,14 @@ public class DeliveryControllers
 								.add(
 									ui.newHtml()
 										.setText("question-feedback", ui.newPropertyReference().setReference("answer.questionFeedback"))
-										.setEnabled(
+										.setIncluded(
 											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("feedback")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackShowQuestionFeedback"))))
 								.add(
 									ui.newHtml()
 										.setText("question-model-answer", ui.newPropertyReference().setReference("answer.question.part.answer.text"))
-										.setEnabled(
+										.setIncluded(
 											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("feedback")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackShowQuestionFeedback")),
@@ -796,13 +796,32 @@ public class DeliveryControllers
 								.setDestination(ui.newDestination().setDestination("/list")))
 						//.setPrev(ui.newNavigation().setTitle("review-link-prev").setStyle(Navigation.Style.button).setReadOnly(ui.newConstantPropertyReference().setValue("true")))
 						//.setNext(ui.newNavigation().setTitle("review-link-next").setStyle(Navigation.Style.button).setReadOnly(ui.newConstantPropertyReference().setValue("true")))
-						.setEnabled(
+						.setIncluded(
 							ui.newDecision()
 								.setProperty(
 									ui.newPropertyReference()
 										.setReference("review"))))
 				.add(
 					ui.newButtonBar()
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setTitle("quesiton-save-prev")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
+									ui.newTextPropertyReference().setReference("submission.id"),
+									ui.newTextPropertyReference().setReference("question.assessmentOrdering.previous.id")))
+								.setIncluded(
+									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
+									ui.newDecision()
+										.setReversed()
+										.setProperty(
+											ui.newBooleanPropertyReference()
+												.setReference("question.assessmentOrdering.isFirst")),
+									ui.newDecision()
+										.setProperty(
+											ui.newPropertyReference()
+												.setReference("submission.assessment.randomAccess"))))	
 						.add(
 							ui.newNavigation()
 								.setDefault()
@@ -812,7 +831,7 @@ public class DeliveryControllers
 								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
 									ui.newTextPropertyReference().setReference("submission.id"),
 									ui.newTextPropertyReference().setReference("question.assessmentOrdering.next.id")))
-								.setEnabled(
+								.setIncluded(
 									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
 									ui.newDecision()
 										.setReversed()
@@ -828,7 +847,7 @@ public class DeliveryControllers
 								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
 									ui.newTextPropertyReference().setReference("submission.id"),
 									ui.newTextPropertyReference().setReference("section.ordering.next.id")))
-								.setEnabled(
+								.setIncluded(
 									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
 									ui.newDecision()
 										.setReversed()
@@ -842,7 +861,7 @@ public class DeliveryControllers
 								.setTitle("question-save-submit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/exit/{0}",ui.newTextPropertyReference().setReference("submission.id")))
-								.setEnabled(
+								.setIncluded(
 									ui.newOrDecision()
 										.setOptions(
 											ui.newAndDecision()
@@ -862,29 +881,10 @@ public class DeliveryControllers
 								.setSubmit()
 								.setTitle("quesiton-save-prev")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
-									ui.newTextPropertyReference().setReference("submission.id"),
-									ui.newTextPropertyReference().setReference("question.assessmentOrdering.previous.id")))
-								.setEnabled(
-									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
-									ui.newDecision()
-										.setReversed()
-										.setProperty(
-											ui.newBooleanPropertyReference()
-												.setReference("question.assessmentOrdering.isFirst")),
-									ui.newDecision()
-										.setProperty(
-											ui.newPropertyReference()
-												.setReference("submission.assessment.randomAccess"))))	
-						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setTitle("quesiton-save-prev")
-								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
 									ui.newTextPropertyReference().setReference("submission.id"),
 									ui.newTextPropertyReference().setReference("section.ordering.previous.id")))
-								.setEnabled(
+								.setIncluded(
 									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
 									ui.newDecision()
 										.setReversed()
@@ -901,10 +901,10 @@ public class DeliveryControllers
 								.setTitle("quesiton-save-exit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/list"))
-								.setEnabled(
+								.setIncluded(
 									ui.newDecision()
 										.setDelegate(new SaveExitDecision())))
-						.setEnabled(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()));
+						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()));
 	}
 
 	/**
@@ -927,7 +927,7 @@ public class DeliveryControllers
 						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
 						.setExpireDestination(
 							ui.newDestination().setDestination("/exit/{0}", ui.newTextPropertyReference().setReference("submission.id")))
-						.setEnabled(
+						.setIncluded(
 							ui.newDecision()
 								.setReversed()
 								.setProperty(
@@ -1039,7 +1039,7 @@ public class DeliveryControllers
 						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
 						.setExpireDestination(
 							ui.newDestination().setDestination("/exit/{0}", ui.newTextPropertyReference().setReference("submission.id")))
-						.setEnabled(
+						.setIncluded(
 							ui.newDecision()
 								.setReversed()
 								.setProperty(
@@ -1074,7 +1074,7 @@ public class DeliveryControllers
 									ui.newPropertyReference().setFormatDelegate(new QuestionsAnswered()),
 									ui.newPropertyReference().setReference("section.numQuestions"),
 									ui.newPropertyReference().setReference("section").setFormatDelegate(new SectionScore(false)))
-								.setTitleEnabled(
+								.setTitleIncluded(
 									ui.newCompareDecision()
 										.setEqualsConstant("Default")
 										.setReversed()
@@ -1099,7 +1099,7 @@ public class DeliveryControllers
 												.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
 													ui.newTextPropertyReference().setReference("submission.id"),
 													ui.newTextPropertyReference().setReference("question.id"))))
-										.setEnabled(
+										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionPresentation.BY_QUESTION.toString())
 												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
@@ -1120,7 +1120,7 @@ public class DeliveryControllers
 													ui.newTextPropertyReference().setReference("submission.id"),
 													ui.newTextPropertyReference().setReference("question.section.id"),
 													ui.newTextPropertyReference().setReference("question.id"))))
-										.setEnabled(
+										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionPresentation.BY_SECTION.toString())
 												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
@@ -1140,7 +1140,7 @@ public class DeliveryControllers
 												.setDestination(ui.newDestination().setDestination("/question/{0}/a#{1}",
 													ui.newTextPropertyReference().setReference("submission.id"),
 													ui.newTextPropertyReference().setReference("question.id"))))
-										.setEnabled(
+										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
 												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))))
@@ -1190,7 +1190,7 @@ public class DeliveryControllers
 						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
 						.setExpireDestination(
 							ui.newDestination().setDestination("/exit/{0}", ui.newTextPropertyReference().setReference("submission.id")))
-						.setEnabled(
+						.setIncluded(
 							ui.newDecision()
 								.setReversed()
 								.setProperty(
@@ -1225,7 +1225,7 @@ public class DeliveryControllers
 								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
 									ui.newPropertyReference().setReference("submission.id"),
 									ui.newPropertyReference().setReference("question.id"))))
-						.setEnabled(
+						.setIncluded(
 								ui.newCompareDecision()
 									.setEqualsConstant(QuestionPresentation.BY_QUESTION.toString())
 									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))	
@@ -1249,7 +1249,7 @@ public class DeliveryControllers
 									ui.newPropertyReference().setReference("submission.id"),
 									ui.newPropertyReference().setReference("question.section.id"),
 									ui.newPropertyReference().setReference("question.id"))))
-						.setEnabled(
+						.setIncluded(
 								ui.newCompareDecision()
 									.setEqualsConstant(QuestionPresentation.BY_SECTION.toString())
 									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))		
@@ -1271,7 +1271,7 @@ public class DeliveryControllers
 								.setDestination(ui.newDestination().setDestination("/question/{0}/a#{1}",
 									ui.newPropertyReference().setReference("submission.id"),
 									ui.newPropertyReference().setReference("question.id"))))
-						.setEnabled(
+						.setIncluded(
 								ui.newCompareDecision()
 									.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
 									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))));
