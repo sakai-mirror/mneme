@@ -802,11 +802,12 @@ public class DeliveryControllers
 									ui.newPropertyReference()
 										.setReference("review"))))
 				.add(
-					ui.newButtonBar()
+					ui.newNavigationBar()
 						.add(
 							ui.newNavigation()
 								.setDefault()
 								.setSubmit()
+								.setLeft()
 								.setTitle("question-submit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/exit/{0}",ui.newTextPropertyReference().setReference("submission.id")))
@@ -828,7 +829,6 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setSubmit()
-								.setRight()
 								.setTitle("question-prev")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
@@ -848,7 +848,6 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setSubmit()
-								.setRight()
 								.setTitle("question-prev-section")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
@@ -868,7 +867,6 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setSubmit()
-								.setRight()
 								.setTitle("question-exit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/list"))
@@ -878,7 +876,6 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setDefault()
-								.setRight()
 								.setSubmit()
 								.setTitle("question-next")
 								.setStyle(Navigation.Style.button)
@@ -895,7 +892,6 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setDefault()
-								.setRight()
 								.setSubmit()
 								.setTitle("question-next-section")
 								.setStyle(Navigation.Style.button)
