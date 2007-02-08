@@ -427,7 +427,7 @@ public class DeliveryControllers
 												.setReference("review"))))
 						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()))
 				.add(
-					ui.newNavigationBar()
+					ui.newItemNavBar()
 						.setReturn(
 							ui.newNavigation()
 								.setTitle("review-link-return")
@@ -788,7 +788,7 @@ public class DeliveryControllers
 												.setEqualsConstant(QuestionType.essay.toString())
 												.setProperty(ui.newPropertyReference().setReference("answer.question.type"))))))
 				.add(
-					ui.newNavigationBar()
+					ui.newItemNavBar()
 						.setReturn(
 							ui.newNavigation()
 								.setTitle("review-link-return")
