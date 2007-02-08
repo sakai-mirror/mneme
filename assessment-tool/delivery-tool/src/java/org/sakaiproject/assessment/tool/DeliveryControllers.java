@@ -382,6 +382,7 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setSubmit()
+								.setNoValidation()
 								.setTitle("question-link-feedback")
 								.setStyle(Navigation.Style.link)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}/feedback",
@@ -734,6 +735,7 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setReference("answer.rationale"))
 										.setSize(5, 40)
+										.setRequired("question-rationale-required-alert")
 										.setEnabled(
 											ui.newDecision()
 												.setProperty(
