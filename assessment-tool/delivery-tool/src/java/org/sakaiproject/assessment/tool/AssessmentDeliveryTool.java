@@ -707,39 +707,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void exitPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
 			throws IOException
 	{
-		if (!context.getPostExpected())
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-			return;
-		}
-
-		// the post is for "submit for grading".
-
-		// read form: for now, nothing to read
-		String destination = ui.decode(req, context);
-
-		Submission submission = assessmentService.idSubmission(submissionId);
-		try
-		{
-			assessmentService.completeSubmission(submission);
-
-			// if no exception, it worked! redirect
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-			return;
-		}
-		catch (AssessmentClosedException e)
-		{
-		}
-		catch (SubmissionCompletedException e)
-		{
-		}
-		catch (AssessmentPermissionException e)
-		{
-		}
-
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		// this post is from the timer, and completes the submission
+		submissionCompletePost(req, res, context, submissionId);
 	}
 
 	/**
@@ -960,29 +929,23 @@ public class AssessmentDeliveryTool extends HttpServlet
 		try
 		{
 			assessmentService.submitAnswers(answers, complete);
+
+			// redirect to the next destination
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
 		}
 		catch (AssessmentClosedException e)
 		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-			return;
 		}
 		catch (SubmissionCompletedException e)
 		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-			return;
 		}
 		catch (AssessmentPermissionException e)
 		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-			return;
 		}
 
-		// redirect to the next destination
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-		return;
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
 	}
 
 	/**
@@ -1356,6 +1319,62 @@ public class AssessmentDeliveryTool extends HttpServlet
 	}
 
 	/**
+	 * Handle the many cases of a post that completes the submission
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param context
+	 *        The UiContext.
+	 * @param submissionId
+	 *        the selected submission id.
+	 */
+	protected void submissionCompletePost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
+			throws IOException
+	{
+		if (!context.getPostExpected())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
+
+		// read form
+		String destination = ui.decode(req, context);
+
+		// we need to be headed to submitted...
+		if (!destination.startsWith("/submitted"))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
+
+		Submission submission = assessmentService.idSubmission(submissionId);
+		try
+		{
+			assessmentService.completeSubmission(submission);
+
+			// if no exception, it worked! redirect
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+		catch (AssessmentClosedException e)
+		{
+		}
+		catch (SubmissionCompletedException e)
+		{
+		}
+		catch (AssessmentPermissionException e)
+		{
+		}
+
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+	}
+
+	/**
 	 * Get the UI for the submit destination
 	 * 
 	 * @param req
@@ -1405,39 +1424,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void submitPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
 			throws IOException
 	{
-		if (!context.getPostExpected())
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-			return;
-		}
-
-		// the post is for "submit for grading".
-
-		// read form: for now, nothing to read
-		String destination = ui.decode(req, context);
-
-		Submission submission = assessmentService.idSubmission(submissionId);
-		try
-		{
-			assessmentService.completeSubmission(submission);
-
-			// if no exception, it worked! redirect
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-			return;
-		}
-		catch (AssessmentClosedException e)
-		{
-		}
-		catch (SubmissionCompletedException e)
-		{
-		}
-		catch (AssessmentPermissionException e)
-		{
-		}
-
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		// this post is from the timer, or the "submit" button, and completes the submission
+		submissionCompletePost(req, res, context, submissionId);
 	}
 
 	/**
@@ -1528,38 +1516,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void tocPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
 			throws IOException
 	{
-		if (!context.getPostExpected())
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-			return;
-		}
-
-		// the post is for "submit for grading".
-
-		// read form: for now, nothing to read
-		String destination = ui.decode(req, context);
-
-		Submission submission = assessmentService.idSubmission(submissionId);
-		try
-		{
-			assessmentService.completeSubmission(submission);
-
-			// if no exception, it worked! redirect
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-			return;
-		}
-		catch (AssessmentClosedException e)
-		{
-		}
-		catch (SubmissionCompletedException e)
-		{
-		}
-		catch (AssessmentPermissionException e)
-		{
-		}
-
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		// this post is from the timer, and completes the submission
+		submissionCompletePost(req, res, context, submissionId);
 	}
 }
