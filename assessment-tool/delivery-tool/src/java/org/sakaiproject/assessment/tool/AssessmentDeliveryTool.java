@@ -66,7 +66,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		enter, error, exit, list, question, remove, review, submit, toc
+		enter, error, exit, list, question, remove, review, submit, submitted, toc
 	}
 
 	/** Our log (commons). */
@@ -113,6 +113,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 	/** The sbmit interface. */
 	protected Controller uiSubmit = null;
+
+	/** The submitted interface. */
+	protected Controller uiSubmitted = null;
 
 	/** The table of contents interface. */
 	protected Controller uiToc = null;
@@ -161,10 +164,11 @@ public class AssessmentDeliveryTool extends HttpServlet
 		uiList = DeliveryControllers.constructList(ui);
 		uiEnter = DeliveryControllers.constructEnter(ui);
 		uiQuestion = DeliveryControllers.constructQuestion(ui);
-		uiExit = DeliveryControllers.constructExit(ui);
+		uiSubmitted = DeliveryControllers.constructSubmitted(ui);
 		uiToc = DeliveryControllers.constructToc(ui);
 		uiSubmit = DeliveryControllers.constructSubmit(ui);
 		uiRemove = DeliveryControllers.constructRemove(ui);
+		uiExit = DeliveryControllers.constructExit(ui);
 
 		M_log.info("init()");
 	}
@@ -243,6 +247,21 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				break;
 			}
+			case exit:
+			{
+				// we need a single parameter (sid)
+				if (parts.length != 3)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					return;
+				}
+				else
+				{
+					exitGet(req, res, parts[2], context);
+				}
+				break;
+			}
 			case toc:
 			{
 				// we need a single parameter (sid)
@@ -288,7 +307,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				break;
 			}
-			case exit:
+			case submitted:
 			{
 				// we need a single parameter (sid)
 				if (parts.length != 3)
@@ -299,7 +318,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				else
 				{
-					exitGet(req, res, parts[2], context);
+					submittedGet(req, res, parts[2], context);
 				}
 				break;
 			}
@@ -421,6 +440,19 @@ public class AssessmentDeliveryTool extends HttpServlet
 				else
 				{
 					submitPost(req, res, context, parts[2]);
+				}
+				break;
+			}
+			case exit:
+			{
+				// we need a single parameter (sid)
+				if (parts.length != 3)
+				{
+					redirectError(req, res);
+				}
+				else
+				{
+					exitPost(req, res, context, parts[2]);
 				}
 				break;
 			}
@@ -632,7 +664,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param res
 	 *        Servlet response.
 	 * @param submissionId
-	 *        The completed submission id.
+	 *        The selected submission id.
 	 * @param context
 	 *        UiContext.
 	 */
@@ -642,14 +674,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)
 		{
-			// make sure this is a completed submission
-			if ((submission.getIsComplete() != null) && (submission.getIsComplete().booleanValue()))
+			// TODO: security check (user matches submission user) user may submit
+			// TODO: check that the assessment is open, submission is open
+			if (/* assessmentService.allowSubmit(assessmentId, null) */true)
 			{
+				// collect information: the selected assessment (id the request)
 				context.put("submission", submission);
-
-				// for this assessment, we need to know how many completed submission the current use has already made
-				Integer count = assessmentService.countRemainingSubmissions(submission.getAssessment().getId(), null);
-				context.put("remainingSubmissions", count);
 
 				// render
 				ui.render(uiExit, context);
@@ -660,6 +690,56 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// redirect to error
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
 		return;
+	}
+
+	/**
+	 * Read the input for the exit destination, process, and redirect to the next destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param context
+	 *        The UiContext
+	 * @param submisssionId
+	 *        The selected submission id.
+	 */
+	protected void exitPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
+			throws IOException
+	{
+		if (!context.getPostExpected())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			return;
+		}
+
+		// the post is for "submit for grading".
+
+		// read form: for now, nothing to read
+		String destination = ui.decode(req, context);
+
+		Submission submission = assessmentService.idSubmission(submissionId);
+		try
+		{
+			assessmentService.completeSubmission(submission);
+
+			// if no exception, it worked! redirect
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+		catch (AssessmentClosedException e)
+		{
+		}
+		catch (SubmissionCompletedException e)
+		{
+		}
+		catch (AssessmentPermissionException e)
+		{
+		}
+
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
 	}
 
 	/**
@@ -869,9 +949,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// read form
 		String destination = ui.decode(req, context);
 
-		// if we are going to exit, we must complete the submission (last answer only)
+		// if we are going to submitted, we must complete the submission (last answer only)
 		boolean complete = false;
-		if (destination.startsWith("/exit"))
+		if (destination.startsWith("/submitted"))
 		{
 			complete = true;
 		}
@@ -1154,7 +1234,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		String destination = ui.decode(req, context);
 
 		// if we are going to exit, we must cancel the remove and submit (timer expired)
-		if (destination.startsWith("/exit"))
+		if (destination.startsWith("/submitted"))
 		{
 			Submission submission = assessmentService.idSubmission(submissionId);
 			try
@@ -1262,7 +1342,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 					answers.add(answer);
 				}
 			}
-			
+
 			context.put("answers", answers);
 
 			// render using the question interface
@@ -1358,6 +1438,44 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// redirect to error
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+	}
+
+	/**
+	 * Get the UI for the submitted destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submissionId
+	 *        The completed submission id.
+	 * @param context
+	 *        UiContext.
+	 */
+	protected void submittedGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
+			throws IOException
+	{
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission != null)
+		{
+			// make sure this is a completed submission
+			if ((submission.getIsComplete() != null) && (submission.getIsComplete().booleanValue()))
+			{
+				context.put("submission", submission);
+
+				// for this assessment, we need to know how many completed submission the current use has already made
+				Integer count = assessmentService.countRemainingSubmissions(submission.getAssessment().getId(), null);
+				context.put("remainingSubmissions", count);
+
+				// render
+				ui.render(uiSubmitted, context);
+				return;
+			}
+		}
+
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		return;
 	}
 
 	/**
