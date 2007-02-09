@@ -3404,18 +3404,18 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void submitAnswer(SubmissionAnswer answer, Boolean completSubmission) throws AssessmentPermissionException,
+	public void submitAnswer(SubmissionAnswer answer, Boolean completeAnswer, Boolean completSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException
 	{
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>(1);
 		answers.add(answer);
-		submitAnswers(answers, completSubmission);
+		submitAnswers(answers, completeAnswer, completSubmission);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void submitAnswers(List<SubmissionAnswer> answers, Boolean completSubmission) throws AssessmentPermissionException,
+	public void submitAnswers(List<SubmissionAnswer> answers, Boolean completeAnswers, Boolean completSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException
 	{
 		if ((answers == null) || (answers.size() == 0)) return;
@@ -3457,7 +3457,11 @@ public class AssessmentServiceImpl implements AssessmentService
 		submission.setSubmittedDate(asOf);
 		for (SubmissionAnswer answer : answers)
 		{
-			answer.setSubmittedDate(asOf);
+			// mark a submitted date only if the answer is complete
+			if ((completeAnswers != null) && (completeAnswers.booleanValue()))
+			{
+				answer.setSubmittedDate(asOf);
+			}
 
 			// auto-score
 			answer.autoScore();

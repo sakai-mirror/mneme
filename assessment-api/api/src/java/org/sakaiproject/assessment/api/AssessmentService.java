@@ -202,7 +202,8 @@ public interface AssessmentService
 	 * 
 	 * @param questionId
 	 *        The question id.
-	 * @return A List containing all the scores for this question from all completed submissions to the question's assessment, or an empty list if there are none.
+	 * @return A List containing all the scores for this question from all completed submissions to the question's assessment, or an
+	 *         empty list if there are none.
 	 */
 	List<Float> getQuestionScores(String questionId);
 
@@ -358,6 +359,8 @@ public interface AssessmentService
 	 * 
 	 * @param answer
 	 *        The SubmissionAnswerAnswer containing the submitters answer information to a question
+	 * @param completeAnswer
+	 *        if TRUE, the answer is considerd answered and will be marked so.
 	 * @param completeSubmission
 	 *        if TRUE, the submission will be marked complete and submitted for grading
 	 * @throws AssessmentPermissionException
@@ -367,8 +370,8 @@ public interface AssessmentService
 	 * @throws SubmissionCompletedException
 	 *         if the submission is already completed.
 	 */
-	void submitAnswer(SubmissionAnswer answer, Boolean completeSubmission) throws AssessmentPermissionException,
-			AssessmentClosedException, SubmissionCompletedException;
+	void submitAnswer(SubmissionAnswer answer, Boolean completeAnswer, Boolean completeSubmission)
+			throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException;
 
 	/**
 	 * Enter or update a set of answers to questions of an incomplete submission to an assessment. Auto grade. Updated realated info
@@ -377,6 +380,8 @@ public interface AssessmentService
 	 * 
 	 * @param answers
 	 *        The List of SubmissionAnswerAnswer containing the submitters answer information to questions
+	 * @param completeAnswers
+	 *        if TRUE, the answers are considerd answered and will be marked so.
 	 * @param completeSubmission
 	 *        if TRUE, the submission will be marked complete and submitted for grading
 	 * @throws AssessmentPermissionException
@@ -386,8 +391,8 @@ public interface AssessmentService
 	 * @throws SubmissionCompletedException
 	 *         if the submission is already completed.
 	 */
-	void submitAnswers(List<SubmissionAnswer> answers, Boolean completeSubmission) throws AssessmentPermissionException,
-			AssessmentClosedException, SubmissionCompletedException;
+	void submitAnswers(List<SubmissionAnswer> answers, Boolean completeAnswers, Boolean completeSubmission)
+			throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException;
 
 	/**
 	 * Complete this submission. Use this instead of submitAnswer() when there's no answer information to also update.

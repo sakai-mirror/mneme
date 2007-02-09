@@ -275,7 +275,7 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public AssessmentQuestion getFirstUnseenQuestion()
+	public AssessmentQuestion getFirstIncompleteQuestion()
 	{
 		Assessment assessment = getAssessment();
 
@@ -283,7 +283,7 @@ public class SubmissionImpl implements Submission
 		{
 			for (AssessmentQuestion question : section.getQuestions())
 			{
-				if (!getSeenQuestion(question))
+				if (getIsIncompleteQuestion(question))
 				{
 					return question;
 				}
@@ -315,14 +315,20 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getSeenQuestion(AssessmentQuestion question)
+	public Boolean getIsIncompleteQuestion(AssessmentQuestion question)
 	{
 		if (question == null) return false;
 
-		// read the answers if needed
+		// read the answers info if this property has not yet been set
 		if (this.answersStatus == PropertyStatus.unset) readAnswers();
 
-		return findAnswer(question.getId()) != null;
+		SubmissionAnswerImpl answer = findAnswer(question.getId());
+		if ((answer == null) || (answer.getSubmittedDate() == null))
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

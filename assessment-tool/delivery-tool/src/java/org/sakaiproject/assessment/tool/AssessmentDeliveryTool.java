@@ -569,10 +569,10 @@ public class AssessmentDeliveryTool extends HttpServlet
 		{
 			String questionId = null;
 
-			// for linear assessments, start at the first unseen question
+			// for linear assessments, start at the first incomplete question
 			if (!assessment.getRandomAccess())
 			{
-				AssessmentQuestion question = submission.getFirstUnseenQuestion();
+				AssessmentQuestion question = submission.getFirstIncompleteQuestion();
 				if (question != null)
 				{
 					questionId = question.getId();
@@ -918,17 +918,17 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// read form
 		String destination = ui.decode(req, context);
 
-		// if we are going to submitted, we must complete the submission (last answer only)
-		boolean complete = false;
-		if (destination.startsWith("/submitted"))
-		{
-			complete = true;
-		}
+		// if we are going to submitted, we must complete the submission
+		Boolean complete = Boolean.valueOf(destination.startsWith("/submitted"));
+
+		// unless we are going to exit, remove, or feedback, or this very same question, mark the answers as complete
+		Boolean answersComplete = Boolean.valueOf(!(destination.startsWith("/exit") || destination.startsWith("/remove")
+				|| destination.endsWith("/feedback") || context.getPreviousDestination().equals(destination)));
 
 		// submit all answers
 		try
 		{
-			assessmentService.submitAnswers(answers, complete);
+			assessmentService.submitAnswers(answers, answersComplete, complete);
 
 			// redirect to the next destination
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
@@ -1008,8 +1008,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 					// "/feedback". This lets Upload work, and lets Feedback work.
 
 					// if the assessment is linear and this question has been seen already, we don't allow entry
-					// unless... we we directly in the question destination (w or wo feedback) and we are now in feedback
-					if (!question.getSection().getAssessment().getRandomAccess() && submission.getSeenQuestion(question))
+					// unless... we were directly in the question destination (w or wo feedback) and we are now in feedback
+					if (!question.getSection().getAssessment().getRandomAccess() && !submission.getIsIncompleteQuestion(question))
 					{
 						// adjust to remove feedback
 						String curDestinationAdjusted = context.getDestination();
@@ -1093,14 +1093,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 			context.put("answers", answers);
 			return true;
 		}
-
-		// // if the assessment is linear and this question has been seen already, we don't allow entry
-		// if ((!question.getSection().getAssessment().getRandomAccess()) && submission.getSeenQuestion(question))
-		// {
-		// // TODO: better error reporting!
-		// errorGet(req, res, context);
-		// return;
-		// }
 
 		return false;
 	}
@@ -1242,7 +1234,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 					// submit the user's answer
 					try
 					{
-						assessmentService.submitAnswer(answer, false);
+						assessmentService.submitAnswer(answer, Boolean.FALSE, Boolean.FALSE);
 
 						// redirect to the next destination
 						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));

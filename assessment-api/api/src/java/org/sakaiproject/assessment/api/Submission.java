@@ -100,11 +100,11 @@ public interface Submission
 	Float getEvalScore();
 
 	/**
-	 * Find the first assessment question that has not been seen yet in this submission.
+	 * Find the first assessment question that has not been marked as complete.
 	 * 
-	 * @return The first unseen assessment question, or null if they have all been seen.
+	 * @return The first incomplete assessment question, or null if they have all been completed.
 	 */
-	AssessmentQuestion getFirstUnseenQuestion();
+	AssessmentQuestion getFirstIncompleteQuestion();
 
 	/**
 	 * Access the id of this submission.
@@ -121,13 +121,13 @@ public interface Submission
 	Boolean getIsComplete();
 
 	/**
-	 * Check if this question has ever been seen in this submission - answered or not.
+	 * Check if this question has an incomplete answer.
 	 * 
 	 * @param question
 	 *        The assessment question
-	 * @return TRUE if the question has ever been seen, false if not.
+	 * @return TRUE if the question has ever an incomplete answer, false if not.
 	 */
-	Boolean getSeenQuestion(AssessmentQuestion question);
+	Boolean getIsIncompleteQuestion(AssessmentQuestion question);
 
 	/**
 	 * Access the start date for this submission.
