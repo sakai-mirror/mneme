@@ -1031,7 +1031,10 @@ public class DeliveryControllers
 							ui.newNavigation()
 								.setTitle("submit-enter")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newTextPropertyReference().setReference("submission.assessment.id")))))
+								.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newTextPropertyReference().setReference("submission.assessment.id")))
+								.setIncluded(
+									ui.newDecision()
+										.setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
 				.add(
 					ui.newCountdownTimer()
 						//.setHideMessage("timer-hide")
@@ -1058,7 +1061,10 @@ public class DeliveryControllers
 							ui.newPropertyReference().setReference("submission.assessment.title"),
 							ui.newPropertyReference().setReference("submission.assessment").setFormatDelegate(new QuestionsAnswered()),
 							ui.newPropertyReference().setReference("submission.assessment.numQuestions"),
-							ui.newPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore(false))))
+							ui.newPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore(false)))
+						.setIncluded(
+								ui.newDecision()
+									.setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
 				.add(
 					ui.newSection()
 						.setIterator(
@@ -1145,7 +1151,10 @@ public class DeliveryControllers
 										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
-												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))))
+												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))))
+						.setIncluded(
+								ui.newDecision()
+									.setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
 				.add(
 					ui.newSection()
 						.add(
@@ -1154,7 +1163,10 @@ public class DeliveryControllers
 								.addIcon("/icons/unanswered.gif", ui.newMessage().setMessage("toc-key-unanswered"))
 								.addIcon("/icons/markedforreview.gif", ui.newMessage().setMessage("toc-key-mark-for-review")))
 						.add(
-								ui.newAlert().setText("submit-alert")))
+								ui.newAlert().setText("submit-alert"))
+					.setIncluded(
+							ui.newDecision()
+								.setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
 				.add(
 					ui.newNavigationBar()
 						.add(
@@ -1175,7 +1187,10 @@ public class DeliveryControllers
 							ui.newNavigation()
 								.setTitle("submit-enter")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newTextPropertyReference().setReference("submission.assessment.id")))));
+								.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newTextPropertyReference().setReference("submission.assessment.id")))
+							.setIncluded(
+									ui.newDecision()
+										.setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))));
 	}
 
 	/**
