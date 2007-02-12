@@ -432,6 +432,8 @@ public class DeliveryControllers
 										.setReference("review"))))
 				.add(
 					ui.newNavigationBar()
+						.setTitle("question-linear")
+						.setTitleIncluded(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -439,21 +441,22 @@ public class DeliveryControllers
 								.setTitle("question-submit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/submit/{0}",ui.newTextPropertyReference().setReference("submission.id")))
-								.setIncluded(
-									ui.newOrDecision()
-										.setOptions(
-											ui.newAndDecision()
-												.setRequirements(
-													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
-													ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("question.assessmentOrdering.isLast"))),
-											ui.newAndDecision()
-												.setRequirements(
-													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
-													ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isLast"))),
-											ui.newAndDecision()
-												.setRequirements(
-													ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
-													ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section"))))))
+//								.setIncluded(
+//									ui.newOrDecision()
+//										.setOptions(
+//											ui.newAndDecision()
+//												.setRequirements(
+//													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
+//													ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("question.assessmentOrdering.isLast"))),
+//											ui.newAndDecision()
+//												.setRequirements(
+//													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
+//													ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isLast"))),
+//											ui.newAndDecision()
+//												.setRequirements(
+//													ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
+//													ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section")))))
+							)
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -897,6 +900,8 @@ public class DeliveryControllers
 										.setReference("review"))))
 				.add(
 					ui.newNavigationBar()
+						.setTitle("question-linear")
+						.setTitleIncluded(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -904,21 +909,22 @@ public class DeliveryControllers
 								.setTitle("question-submit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/submit/{0}",ui.newTextPropertyReference().setReference("submission.id")))
-								.setIncluded(
-									ui.newOrDecision()
-										.setOptions(
-											ui.newAndDecision()
-												.setRequirements(
-													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
-													ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("question.assessmentOrdering.isLast"))),
-											ui.newAndDecision()
-												.setRequirements(
-													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
-													ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isLast"))),
-											ui.newAndDecision()
-												.setRequirements(
-													ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
-													ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section"))))))
+//								.setIncluded(
+//									ui.newOrDecision()
+//										.setOptions(
+//											ui.newAndDecision()
+//												.setRequirements(
+//													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
+//													ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("question.assessmentOrdering.isLast"))),
+//											ui.newAndDecision()
+//												.setRequirements(
+//													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
+//													ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isLast"))),
+//											ui.newAndDecision()
+//												.setRequirements(
+//													ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
+//													ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section")))))
+							)
 						.add(
 							ui.newNavigation()
 								.setSubmit()
