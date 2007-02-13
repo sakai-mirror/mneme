@@ -182,7 +182,10 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		List<Reference> rv = new ArrayList<Reference>(answers.size());
 		for (String answer : answers)
 		{
-			rv.add(EntityManager.newReference(answer));
+			if (answer != null)
+			{
+				rv.add(EntityManager.newReference(answer));
+			}
 		}
 
 		return rv;

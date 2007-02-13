@@ -382,7 +382,6 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setSubmit()
-								.setNoValidation()
 								.setTitle("question-link-feedback")
 								.setStyle(Navigation.Style.link)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/{1}/feedback",
@@ -438,6 +437,7 @@ public class DeliveryControllers
 							ui.newNavigation()
 								.setSubmit()
 								.setLeft()
+								.setValidation(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
 								.setTitle("question-submit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/submit/{0}",ui.newTextPropertyReference().setReference("submission.id")))
@@ -508,6 +508,7 @@ public class DeliveryControllers
 							ui.newNavigation()
 								.setDefault()
 								.setSubmit()
+								.setValidation(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
 								.setTitle("question-next")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
@@ -662,6 +663,9 @@ public class DeliveryControllers
 												.setProperty(
 													ui.newPropertyReference()
 														.setReference("answer.entryAnswerIds"))
+												.setOnEmptyAlert(
+													ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
+													"question-select-on-empty-alert")
 												.setLabel("question-label",
 													ui.newTextPropertyReference()
 														.setReference("qanswer.label")))
@@ -689,6 +693,9 @@ public class DeliveryControllers
 								.add(
 									ui.newTextEdit()
 										.setTitle("question-text")
+										.setOnEmptyAlert(
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
+											"question-essay-on-empty-alert")
 										.setReadOnly(ui.newPropertyReference().setReference("review"))
 										.setSize(20, 80)
 										.setProperty(
@@ -702,6 +709,11 @@ public class DeliveryControllers
 														.setReference("answer.question.type"))))
 								.add(
 									ui.newFileUpload()
+										.setOnEmptyAlert(
+											ui.newAndDecision().setRequirements(
+												ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
+												ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("answer.entryAnswerAttachments"))),
+											"question-upload-on-empty-alert")
 										.setTitle("question-upload-title")
 										.setTitleIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed())
 										.setUpload("quesiton-upload-upload")
@@ -737,6 +749,9 @@ public class DeliveryControllers
 														.setReference("answer.question.type"))))
 								.add(
 									ui.newFillIn()
+										.setOnEmptyAlert(
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
+											"question-fillin-on-empty-alert")
 										.setText(null, ui.newTextPropertyReference().setReference("answer.question.part.title"))
 										.setReadOnly(ui.newPropertyReference().setReference("review"))
 										.setProperty(
@@ -759,6 +774,9 @@ public class DeliveryControllers
 														.setReference("answer.question.type"))))
 								.add(
 									ui.newFillIn()
+										.setOnEmptyAlert(
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
+											"question-fillin-on-empty-alert")
 										.setText(null, ui.newTextPropertyReference().setReference("answer.question.part.title"))
 										.setReadOnly(ui.newPropertyReference().setReference("review"))
 										.setProperty(
@@ -781,6 +799,9 @@ public class DeliveryControllers
 														.setReference("answer.question.type"))))
 								.add(
 									ui.newMatch()
+										.setOnEmptyAlert(
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
+											"question-match-on-empty-alert")
 										.setReadOnly(ui.newPropertyReference().setReference("review"))
 										.setProperty(
 											ui.newPropertyReference()
@@ -833,7 +854,9 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setReference("answer.rationale"))
 										.setSize(5, 40)
-										.setRequired("question-rationale-required-alert")
+										.setOnEmptyAlert(
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
+											"question-rationale-on-empty-alert")
 										.setIncluded(
 											ui.newDecision()
 												.setProperty(
@@ -906,6 +929,7 @@ public class DeliveryControllers
 							ui.newNavigation()
 								.setSubmit()
 								.setLeft()
+								.setValidation(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
 								.setTitle("question-submit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/submit/{0}",ui.newTextPropertyReference().setReference("submission.id")))
@@ -976,6 +1000,7 @@ public class DeliveryControllers
 							ui.newNavigation()
 								.setDefault()
 								.setSubmit()
+								.setValidation(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
 								.setTitle("question-next")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
