@@ -3404,8 +3404,8 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void submitAnswer(SubmissionAnswer answer, Boolean completeAnswer, Boolean completSubmission) throws AssessmentPermissionException,
-			AssessmentClosedException, SubmissionCompletedException
+	public void submitAnswer(SubmissionAnswer answer, Boolean completeAnswer, Boolean completSubmission)
+			throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException
 	{
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>(1);
 		answers.add(answer);
@@ -3415,8 +3415,8 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void submitAnswers(List<SubmissionAnswer> answers, Boolean completeAnswers, Boolean completSubmission) throws AssessmentPermissionException,
-			AssessmentClosedException, SubmissionCompletedException
+	public void submitAnswers(List<SubmissionAnswer> answers, Boolean completeAnswers, Boolean completSubmission)
+			throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException
 	{
 		if ((answers == null) || (answers.size() == 0)) return;
 
@@ -3426,6 +3426,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		// information
 		Submission submission = idSubmission(answers.get(0).getSubmission().getId());
 		Assessment assessment = submission.getAssessment();
+
+		// a submission from the cache to update and re-cache
+		SubmissionImpl recache = null;
 
 		// make sure this is an incomplete submission
 		if ((submission.getIsComplete() == null) || (submission.getIsComplete().booleanValue()))
@@ -3672,6 +3675,9 @@ public class AssessmentServiceImpl implements AssessmentService
 				}
 			}
 
+			// collect the cached submission, before the event clears it
+			recache = getCachedSubmission(submission.getId());
+
 			// event track it
 			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(submission.getId()),
 					true));
@@ -3689,6 +3695,7 @@ public class AssessmentServiceImpl implements AssessmentService
 			{
 				try
 				{
+					recache = null;
 					connection.rollback();
 				}
 				catch (Exception ee)
@@ -3719,6 +3726,37 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// the submission is altered by this - clear the cache (or update)
 		unCacheSubmission(submission.getId());
+
+		// recache
+		if (recache != null)
+		{
+			// if the cached submission has had its answers read, we will update them
+			if (recache.isAnswersInited())
+			{
+				for (SubmissionAnswer answer : answers)
+				{
+					// This new answer for it's question id should replace an existing on in the submission, or, be added to the
+					// answers
+					SubmissionAnswerImpl old = recache.findAnswer(answer.getQuestion().getId());
+					if (old != null)
+					{
+						recache.answers.remove(old);
+					}
+					recache.answers.add((SubmissionAnswerImpl) answer);
+				}
+			}
+
+			recache.initSubmittedDate(asOf);
+
+			if ((completSubmission != null) && (completSubmission.booleanValue()))
+			{
+				recache.initStatus(new Integer(1));
+				recache.initIsComplete(Boolean.TRUE);
+			}
+
+			// cache a copy
+			cacheSubmission(new SubmissionImpl(recache));
+		}
 	}
 
 	/**
@@ -3729,6 +3767,9 @@ public class AssessmentServiceImpl implements AssessmentService
 	 */
 	protected void reserveAnswer(SubmissionAnswerImpl answer)
 	{
+		// a submission from the cache to update and re-cache
+		SubmissionImpl recache = null;
+
 		Connection connection = null;
 		boolean wasCommit = true;
 		try
@@ -3785,6 +3826,9 @@ public class AssessmentServiceImpl implements AssessmentService
 			// commit
 			connection.commit();
 
+			// collect the cached submission, before the event clears it
+			recache = getCachedSubmission(answer.getSubmission().getId());
+
 			// event track it
 			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(answer
 					.getSubmission().getId()), true));
@@ -3795,6 +3839,7 @@ public class AssessmentServiceImpl implements AssessmentService
 			{
 				try
 				{
+					recache = null;
 					connection.rollback();
 				}
 				catch (Exception ee)
@@ -3825,6 +3870,25 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// the submission is altered by this - clear the cache (or update)
 		unCacheSubmission(answer.getSubmission().getId());
+
+		// recache
+		if (recache != null)
+		{
+			// if the cached submission has had its answers read, we will update it and re-cache
+			if (recache.isAnswersInited())
+			{
+				// This new answer for it's question id should replace an existing on in the submission, or, be added to the answers
+				SubmissionAnswerImpl old = recache.findAnswer(answer.getQuestion().getId());
+				if (old != null)
+				{
+					recache.answers.remove(old);
+				}
+				recache.answers.add(answer);
+			}
+
+			// cache a copy
+			cacheSubmission(new SubmissionImpl(recache));
+		}
 	}
 
 	/**
@@ -3862,6 +3926,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		if (M_log.isDebugEnabled()) M_log.debug("completeSubmission: submission: " + submission.getId());
 
+		// submission from cache to update and re-cache
+		SubmissionImpl recache = null;
+
 		Connection connection = null;
 		boolean wasCommit = true;
 		try
@@ -3888,6 +3955,9 @@ public class AssessmentServiceImpl implements AssessmentService
 			s.setStatus(new Integer(1));
 			s.setIsComplete(Boolean.TRUE);
 
+			// collect the cached submission, before the event clears it
+			recache = getCachedSubmission(s.getId());
+
 			// event track it
 			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE,
 					getSubmissionReference(submission.getId()), true));
@@ -3898,6 +3968,7 @@ public class AssessmentServiceImpl implements AssessmentService
 			{
 				try
 				{
+					recache = null;
 					connection.rollback();
 				}
 				catch (Exception ee)
@@ -3928,6 +3999,17 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// the submission is altered by this - clear the cache (or update?)
 		unCacheSubmission(submission.getId());
+
+		// recache
+		if (recache != null)
+		{
+			recache.initSubmittedDate(asOf);
+			recache.initStatus(new Integer(1));
+			recache.initIsComplete(Boolean.TRUE);
+
+			// cache a copy
+			cacheSubmission(new SubmissionImpl(recache));
+		}
 	}
 
 	/**
