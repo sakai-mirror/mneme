@@ -114,6 +114,16 @@ public interface Submission
 	String getId();
 
 	/**
+	 * Check if all the questions (except perhaps one) have an answer that is fully answered, not marked for review, complete with
+	 * rationale if included.
+	 * 
+	 * @param questionsToSkip
+	 *        A List of question not to check, or null or empty to check them all.
+	 * @return TRUE if the asssessment's questions are all answered, FALSE if not.
+	 */
+	Boolean getIsAnswered(List<AssessmentQuestion> questionsToSkip);
+
+	/**
 	 * Access the complete flag for the submission.
 	 * 
 	 * @return TRUE if the submission is complete, FALSE if still in progress.

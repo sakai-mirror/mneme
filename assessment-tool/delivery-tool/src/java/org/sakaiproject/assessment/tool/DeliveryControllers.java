@@ -367,6 +367,7 @@ public class DeliveryControllers
 	 * section - for a single section page, the single section
 	 * review - set if we are in review mode
 	 * questionSelector - the current question selector string
+	 * finishReady - if finish is allowed to submit
 	 * 
 	 * When decoding a response, we need in the context:
 	 * answers - a collection to get the answer id(s) selected.
@@ -401,23 +402,36 @@ public class DeliveryControllers
 										.setReference("review"))))
 				.add(
 					ui.newNavigationBar()
-						.setTitle("question-linear")
-						.setTitleIncluded(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))
 						.add(
 							ui.newNavigation()
 								.setSubmit()
 								.setLeft()
-								.setTitle("question-return")
+								.setTitle("finish-exam")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/final_review/{0}",ui.newTextPropertyReference().setReference("submission.id")))
+								.setIncluded(
+									ui.newAndDecision().setRequirements(
+										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("finishReady")),
+										ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
+								.setTitle("finish-exam")
+								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))
+								.setIncluded(
+									ui.newOrDecision().setOptions(
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("finishReady")),
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
+								.setTitle("save-exit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/list")))
-						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setLeft()
-								.setValidation(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
-								.setTitle("question-final-review")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/final_review/{0}",ui.newTextPropertyReference().setReference("submission.id"))))
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -468,6 +482,17 @@ public class DeliveryControllers
 							ui.newNavigation()
 								.setSubmit()
 								.setLeft()
+								.setTitle("prev")
+								.setStyle(Navigation.Style.button)
+								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setIncluded(
+									ui.newAndDecision().setRequirements(
+										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
+										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section")))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
 								.setTitle("question-toc")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/toc/{0}", ui.newTextPropertyReference().setReference("submission.id")))
@@ -482,7 +507,7 @@ public class DeliveryControllers
 								.setDefault()
 								.setSubmit()
 								.setLeft()
-								.setValidation(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setValidation(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))
 								.setTitle("question-next")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
@@ -512,6 +537,17 @@ public class DeliveryControllers
 												.setReference("section.ordering.isLast")))
 								.setIncluded(
 									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section"))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
+								.setTitle("next")
+								.setStyle(Navigation.Style.button)
+								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setIncluded(
+									ui.newAndDecision().setRequirements(
+										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
+										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section")))))
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -944,23 +980,32 @@ public class DeliveryControllers
 										.setReference("review"))))
 				.add(
 					ui.newNavigationBar()
-						.setTitle("question-linear")
-						.setTitleIncluded(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))
 						.add(
 							ui.newNavigation()
 								.setSubmit()
 								.setLeft()
-								.setTitle("question-return")
+								.setTitle("finish-exam")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/final_review/{0}",ui.newTextPropertyReference().setReference("submission.id")))
+								.setIncluded(
+									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("finishReady"))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
+								.setTitle("finish-exam")
+								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))
+								.setIncluded(
+									ui.newDecision().setProperty(ui.newPropertyReference().setReference("finishReady"))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
+								.setTitle("save-exit")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/list")))
-						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setLeft()
-								.setValidation(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
-								.setTitle("question-final-review")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/final_review/{0}",ui.newTextPropertyReference().setReference("submission.id"))))
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -1011,6 +1056,17 @@ public class DeliveryControllers
 							ui.newNavigation()
 								.setSubmit()
 								.setLeft()
+								.setTitle("prev")
+								.setStyle(Navigation.Style.button)
+								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setIncluded(
+									ui.newAndDecision().setRequirements(
+										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
+										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section")))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
 								.setTitle("question-toc")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/toc/{0}", ui.newTextPropertyReference().setReference("submission.id")))
@@ -1025,7 +1081,7 @@ public class DeliveryControllers
 								.setDefault()
 								.setSubmit()
 								.setLeft()
-								.setValidation(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setValidation(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))
 								.setTitle("question-next")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
@@ -1058,6 +1114,17 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setSubmit()
+								.setLeft()
+								.setTitle("next")
+								.setStyle(Navigation.Style.button)
+								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setIncluded(
+									ui.newAndDecision().setRequirements(
+										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
+										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section")))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
 								.setRight()
 								.setTitle("question-link-feedback")
 								.setStyle(Navigation.Style.link)
@@ -1079,32 +1146,105 @@ public class DeliveryControllers
 	}
 
 	/**
-	 * The final review interface needs the following entities in the context:
-	 * submission - the selected Submission object
+	 * The exit interface needs the following entities in the context:
+	 * submission - the completed submission
+	 * remainingSubmissions - Integer count of remaining submissions allowed to the current user for the selected assessment
 	 */
-	public static Controller constructFinalReview(UiService ui)
+	public static Controller constructSubmitted(UiService ui)
 	{
 		return
 			ui.newInterface()
-				.setTitle("final-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
-				.setHeader("final-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.setTitle("submitted-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.setHeader("submitted-header")
+				.add(
+					ui.newSection()
+						.setTitle("submitted-section-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+						.add(
+							ui.newEntityDisplay()
+								.setEntityReference(ui.newPropertyReference().setReference("submission"))
+								.setTitle("submitted-display-instructions")
+								.addRow(
+									ui.newPropertyRow()
+										.setTitle("submitted-display-contextTitle")
+										.setProperty(
+											ui.newContextInfoPropertyReference()
+												.setSelector(ContextInfoPropertyReference.Selector.title)
+												.setReference("submission.assessment.context")))
+								.addRow(
+									ui.newPropertyRow()
+										.setTitle("submitted-display-createdBy")
+										.setProperty(
+											ui.newUserInfoPropertyReference()
+												.setSelector(UserInfoPropertyReference.Selector.displayName)
+												.setReference("submission.assessment.createdBy")))
+								.addRow(
+									ui.newPropertyRow()
+										.setTitle("submitted-display-title")
+										.setProperty(
+											ui.newTextPropertyReference()
+												.setReference("submission.assessment.title")))
+								.addRow(
+									ui.newPropertyRow()
+										.setTitle("submitted-display-numSubmissionsRemaining")
+										.setProperty(
+											ui.newTextPropertyReference()
+												.setReference("submission.assessment.numSubmissionsAllowed")
+												.setFormat("submitted-submissions-remaining")
+												//.setMissingValues("-1")
+												.setMissingText("unlimited")
+												.addProperty(
+														ui.newTextPropertyReference()
+															.setReference("remainingSubmissions"))))
+								.addRow(
+									ui.newPropertyRow()
+										.setTitle("submitted-display-confirmation")
+										.setProperty(
+											ui.newPropertyReference()
+												.setReference("submission.confirmation")))
+								.addRow(
+									ui.newPropertyRow()
+										.setTitle("submitted-display-submitted")
+										.setProperty(
+											ui.newDatePropertyReference()
+												.setReference("submission.submittedDate"))))
+						.add(
+							ui.newButtonBar()
+								.add(
+									ui.newNavigation()
+										.setDefault()
+										.setTitle("return")
+										.setStyle(Navigation.Style.button)
+										.setDestination(ui.newDestination().setDestination("/list")))));
+	}
+
+	/**
+	 * The toc interface needs the following entities in the context:
+	 * submission - the completed submission
+	 * finalReview - if we are in final review mode
+	 */
+	public static Controller constructToc(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("toc-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.setHeader("toc-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.add(
 					ui.newNavigationBar()
 						.add(
 							ui.newNavigation()
-								.setTitle("final-return")
-								.setDefault()
+								.setTitle("finish-exam")
 								.setLeft()
+								.setSubmit()
+								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/list")))
+								.setDestination(ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id"))))
 						.add(
 							ui.newNavigation()
 								.setDefault()
-								.setSubmit()
 								.setLeft()
-								.setTitle("final-hand-in")
+								.setTitle("save-exit")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))))
+								.setDestination(ui.newDestination().setDestination("/list"))))
 				.add(
 					ui.newCountdownTimer()
 						//.setHideMessage("timer-hide")
@@ -1123,7 +1263,9 @@ public class DeliveryControllers
 										.setReference("review")),
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
 				.add(
-					ui.newInstructions().setText("final-instructions"))
+					ui.newInstructions()
+						.setText("final-instructions")
+						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("finalReview"))))
 				.add(
 					ui.newSection()
 						.setTitle("toc-section-title",
@@ -1132,9 +1274,7 @@ public class DeliveryControllers
 							ui.newPropertyReference().setReference("submission.assessment").setFormatDelegate(new QuestionsAnswered()),
 							ui.newPropertyReference().setReference("submission.assessment.numQuestions"),
 							ui.newPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore(false)))
-						.setIncluded(
-								ui.newDecision()
-									.setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
+					.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
 				.add(
 					ui.newSection()
 						.setIterator(
@@ -1222,269 +1362,33 @@ public class DeliveryControllers
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
 												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))))
-						.setIncluded(
-								ui.newDecision()
-									.setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
+					.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
 				.add(
 					ui.newSection()
 						.add(
 							ui.newIconKey()
 								.setTitle("toc-key-title")
 								.addIcon("/icons/unanswered.gif", ui.newMessage().setMessage("toc-key-unanswered"))
-								.addIcon("/icons/markedforreview.gif", ui.newMessage().setMessage("toc-key-mark-for-review")))
-						.setIncluded(
-								ui.newDecision()
-									.setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
+								.addIcon("/icons/markedforreview.gif", ui.newMessage().setMessage("toc-key-mark-for-review"))
+								.addIcon("/icons/correct.gif", ui.newMessage().setMessage("toc-key-rationale"))
+							.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
 				.add(
 					ui.newNavigationBar()
 						.add(
 							ui.newNavigation()
-								.setTitle("final-return")
-								.setDefault()
+								.setTitle("finish-exam")
 								.setLeft()
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/list")))
-						.add(
-							ui.newNavigation()
-								.setDefault()
 								.setSubmit()
-								.setLeft()
-								.setTitle("final-hand-in")
+								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))));
-	}
-
-	/**
-	 * The exit interface needs the following entities in the context:
-	 * submission - the completed submission
-	 * remainingSubmissions - Integer count of remaining submissions allowed to the current user for the selected assessment
-	 */
-	public static Controller constructSubmitted(UiService ui)
-	{
-		return
-			ui.newInterface()
-				.setTitle("submitted-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
-				.setHeader("submitted-header")
-				.add(
-					ui.newSection()
-						.setTitle("submitted-section-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
-						.add(
-							ui.newEntityDisplay()
-								.setEntityReference(ui.newPropertyReference().setReference("submission"))
-								.setTitle("submitted-display-instructions")
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("submitted-display-contextTitle")
-										.setProperty(
-											ui.newContextInfoPropertyReference()
-												.setSelector(ContextInfoPropertyReference.Selector.title)
-												.setReference("submission.assessment.context")))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("submitted-display-createdBy")
-										.setProperty(
-											ui.newUserInfoPropertyReference()
-												.setSelector(UserInfoPropertyReference.Selector.displayName)
-												.setReference("submission.assessment.createdBy")))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("submitted-display-title")
-										.setProperty(
-											ui.newTextPropertyReference()
-												.setReference("submission.assessment.title")))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("submitted-display-numSubmissionsRemaining")
-										.setProperty(
-											ui.newTextPropertyReference()
-												.setReference("submission.assessment.numSubmissionsAllowed")
-												.setFormat("submitted-submissions-remaining")
-												//.setMissingValues("-1")
-												.setMissingText("unlimited")
-												.addProperty(
-														ui.newTextPropertyReference()
-															.setReference("remainingSubmissions"))))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("submitted-display-confirmation")
-										.setProperty(
-											ui.newPropertyReference()
-												.setReference("submission.confirmation")))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("submitted-display-submitted")
-										.setProperty(
-											ui.newDatePropertyReference()
-												.setReference("submission.submittedDate"))))
-						.add(
-							ui.newButtonBar()
-								.add(
-									ui.newNavigation()
-										.setDefault()
-										.setTitle("return")
-										.setStyle(Navigation.Style.button)
-										.setDestination(ui.newDestination().setDestination("/list")))));
-	}
-
-	/**
-	 * The toc interface needs the following entities in the context:
-	 * submission - the completed submission
-	 */
-	public static Controller constructToc(UiService ui)
-	{
-		return
-			ui.newInterface()
-				.setTitle("toc-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
-				.setHeader("toc-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
-				.add(
-					ui.newNavigationBar()
+								.setDestination(ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id"))))
 						.add(
 							ui.newNavigation()
 								.setDefault()
 								.setLeft()
-								.setTitle("toc-return")
+								.setTitle("save-exit")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/list")))
-						.add(
-							ui.newNavigation()
-								.setTitle("toc-final-review")
-								.setLeft()
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/final_review/{0}", ui.newTextPropertyReference().setReference("submission.id")))))
-				.add(
-					ui.newCountdownTimer()
-						//.setHideMessage("timer-hide")
-						//.setShowMessage("timer-show")
-						.setDurationMessage("timer-duration")
-						.setRemainingMessage("timer-remaining")
-						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
-						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
-						.setExpireDestination(
-							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
-						.setIncluded(
-							ui.newDecision()
-								.setReversed()
-								.setProperty(
-									ui.newPropertyReference()
-										.setReference("review")),
-							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
-				.add(
-					ui.newSection()
-						.setTitle("toc-section-title",
-							// {0} - {1}/{2} Answered Questions, {3} Points
-							ui.newPropertyReference().setReference("submission.assessment.title"),
-							ui.newPropertyReference().setReference("submission.assessment").setFormatDelegate(new QuestionsAnswered()),
-							ui.newPropertyReference().setReference("submission.assessment.numQuestions"),
-							ui.newPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore(false))))
-				.add(
-					ui.newSection()
-						.setIterator(
-							ui.newPropertyReference()
-								.setReference("submission.assessment.sections"), "section")
-						.add(
-							ui.newEntityList()
-								.setStyle(EntityList.Style.form)
-								.setIterator(
-									ui.newPropertyReference().setReference("section.questions"), "question")
-								.setTitle("toc-questions-title",
-									// Part{0} - {1} - {2}/{3} Answered Questions, {4} Points
-									ui.newPropertyReference().setReference("section.ordering.position"),
-									ui.newPropertyReference().setReference("section.title"),
-									ui.newPropertyReference().setFormatDelegate(new QuestionsAnswered()),
-									ui.newPropertyReference().setReference("section.numQuestions"),
-									ui.newPropertyReference().setReference("section").setFormatDelegate(new SectionScore(false)))
-								.setTitleIncluded(
-									ui.newCompareDecision()
-										.setEqualsConstant("Default")
-										.setReversed()
-										.setProperty(ui.newPropertyReference().setReference("section.title")))
-								.addColumn(
-									ui.newHtmlPropertyColumn()
-										.setProperty(null, ui.newPropertyReference().setFormatDelegate(new FormatQuestionDecoration()))
-										.setWidth(16))
-								.addColumn(
-									ui.newPropertyColumn()
-										.setProperty("toc-question-entry",
-											// {num}. {title or instructions} ({points})
-											ui.newPropertyReference().setFormatDelegate(new FormatQuestionNumber()),
-											ui.newTextPropertyReference()
-												.setMaxLength(60)
-												.setStripHtml()
-												.setReference("question.title"),
-											ui.newPropertyReference().setFormatDelegate(new QuestionScore(false)))
-										.setEntityNavigation(
-											ui.newEntityNavigation()
-												// destination is /question/sid/q questionId
-												.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
-													ui.newTextPropertyReference().setReference("submission.id"),
-													ui.newTextPropertyReference().setReference("question.id"))))
-										.setIncluded(
-											ui.newCompareDecision()
-												.setEqualsConstant(QuestionPresentation.BY_QUESTION.toString())
-												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
-								.addColumn(
-									ui.newPropertyColumn()
-										.setProperty("toc-question-entry",
-											// {num}. {title or instructions} ({points})
-											ui.newPropertyReference().setFormatDelegate(new FormatQuestionNumber()),
-											ui.newTextPropertyReference()
-												.setMaxLength(60)
-												.setStripHtml()
-												.setReference("question.title"),
-											ui.newPropertyReference().setFormatDelegate(new QuestionScore(false)))
-										.setEntityNavigation(
-											ui.newEntityNavigation()
-												// destination is /question/sid/s sectionId
-												.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}#{2}",
-													ui.newTextPropertyReference().setReference("submission.id"),
-													ui.newTextPropertyReference().setReference("question.section.id"),
-													ui.newTextPropertyReference().setReference("question.id"))))
-										.setIncluded(
-											ui.newCompareDecision()
-												.setEqualsConstant(QuestionPresentation.BY_SECTION.toString())
-												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
-								.addColumn(
-									ui.newPropertyColumn()
-										.setProperty("toc-question-entry",
-											// {num}. {title or instructions} ({points})
-											ui.newPropertyReference().setFormatDelegate(new FormatQuestionNumber()),
-											ui.newTextPropertyReference()
-												.setMaxLength(60)
-												.setStripHtml()
-												.setReference("question.title"),
-											ui.newPropertyReference().setFormatDelegate(new QuestionScore(false)))
-										.setEntityNavigation(
-											ui.newEntityNavigation()
-												// destination is /question/sid/a
-												.setDestination(ui.newDestination().setDestination("/question/{0}/a#{1}",
-													ui.newTextPropertyReference().setReference("submission.id"),
-													ui.newTextPropertyReference().setReference("question.id"))))
-										.setIncluded(
-											ui.newCompareDecision()
-												.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
-												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))))
-				.add(
-					ui.newSection()
-						.add(
-							ui.newIconKey()
-								.setTitle("toc-key-title")
-								.addIcon("/icons/unanswered.gif", ui.newMessage().setMessage("toc-key-unanswered"))
-								.addIcon("/icons/markedforreview.gif", ui.newMessage().setMessage("toc-key-mark-for-review"))))
-				.add(
-					ui.newNavigationBar()
-						.add(
-							ui.newNavigation()
-								.setDefault()
-								.setLeft()
-								.setTitle("toc-return")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/list")))
-						.add(
-							ui.newNavigation()
-								.setTitle("toc-final-review")
-								.setLeft()
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/final_review/{0}", ui.newTextPropertyReference().setReference("submission.id")))));
+								.setDestination(ui.newDestination().setDestination("/list"))));
 	}
 
 	/**
@@ -1775,53 +1679,6 @@ public class DeliveryControllers
 		}
 	}
 
-	/**
-	 * decide about the save-exit button for the question interface
-	 * @deprecated
-	 */
-	public static class SaveExitDecision implements DecisionDelegate
-	{
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean decide(Decision decision, Context context, Object focus)
-		{
-			// get question from context - if it's there, and it's the last, and we are linear (not random), block
-			// if no question, get section from context - if it's there and it's the last, and we are linear (not randon), block
-			// otherwise put in the button
-			// TODO: proper section and assessment handling re: linear? -ggolden
-			Object o = context.get("question");
-			if ((o != null) && (o instanceof AssessmentQuestion))
-			{
-				AssessmentQuestion question = (AssessmentQuestion) o;
-				if ((question.getAssessmentOrdering().getIsLast().booleanValue())
-						&& (!question.getSection().getAssessment().getRandomAccess().booleanValue()))
-				{
-					return false;
-				}
-
-				return true;
-			}
-
-			// not question, try section
-			o = context.get("section");
-			if ((o != null) && (o instanceof AssessmentSection))
-			{
-				AssessmentSection section = (AssessmentSection) o;
-				if ((section.getOrdering().getIsLast().booleanValue())
-						&& (!section.getAssessment().getRandomAccess().booleanValue()))
-				{
-					return false;
-				}
-
-				return true;
-			}
-
-			// neither question or section, assume assessment
-			return true;
-		}
-	}
-
 	public static class FeedbackPropertyReference implements FormatDelegate
 	{
 		/**
@@ -2095,12 +1952,15 @@ public class DeliveryControllers
 			// search for our answer without creating it, and if found check the answered and mark for review setting
 			boolean answered = false;
 			boolean markForReview = false;
+			boolean missingRationale = false;
 			for (SubmissionAnswer answer : submission.getAnswers())
 			{
 				if (answer.getQuestion().equals(question))
 				{
 					answered = answer.getIsAnswered();
 					markForReview = answer.getMarkedForReview().booleanValue();
+					missingRationale = ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue()) && (StringUtil
+							.trimToNull(answer.getRationale()) == null));
 					break;
 				}
 			}
@@ -2117,6 +1977,14 @@ public class DeliveryControllers
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/unanswered.gif\" alt=\""
 						+ context.getMessages().getString("toc-key-unanswered") + "\" />";
+			}
+
+			// otherwise, if rationale is needed and not present, use the no-rationale icon
+			else if (missingRationale)
+			{
+				// TOOD: icon!
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.gif\" alt=\""
+						+ context.getMessages().getString("toc-key-rationale") + "\" />";
 			}
 
 			return null;

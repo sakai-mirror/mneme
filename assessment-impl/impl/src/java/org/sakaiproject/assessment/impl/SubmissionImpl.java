@@ -32,6 +32,7 @@ import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.time.api.Time;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * <p>
@@ -309,6 +310,37 @@ public class SubmissionImpl implements Submission
 	public String getId()
 	{
 		return this.id;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsAnswered(List<AssessmentQuestion> questionsToSkip)
+	{
+		// read the answers info if this property has not yet been set
+		if (this.answersStatus == PropertyStatus.unset) readAnswers();
+
+		Assessment a = getAssessment();
+
+		// for each section / question, make sure we have an answer, and if there's rationale, make sure it's entered
+		for (AssessmentSection section : a.getSections())
+		{
+			for (AssessmentQuestion question : section.getQuestionsAsAuthored())
+			{
+				// we may be asked to skip checking this question
+				if ((questionsToSkip != null) && (questionsToSkip.contains(question))) continue;
+
+				SubmissionAnswerImpl answer = this.findAnswer(question.getId());
+				if (answer == null) return Boolean.FALSE;
+				if (answer.getSubmittedDate() == null) return Boolean.FALSE;
+				if (!answer.getIsAnswered()) return Boolean.FALSE;
+				if ((answer.getMarkedForReview() != null && (answer.getMarkedForReview().booleanValue()))) return Boolean.FALSE;
+				if ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue())
+						&& (StringUtil.trimToNull(answer.getRationale()) == null)) return Boolean.FALSE;
+			}
+		}
+
+		return Boolean.TRUE;
 	}
 
 	/**
