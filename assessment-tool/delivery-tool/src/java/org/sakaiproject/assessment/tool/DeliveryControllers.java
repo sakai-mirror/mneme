@@ -561,8 +561,9 @@ public class DeliveryControllers
 						.add(
 							ui.newDistributionChart()
 								.setData(ui.newPropertyReference().setReference("submission.assessment.scores"))
-								.setWidth(50)
-								.setHeight(20)
+								.setWidth(44)
+								.setHeight(22)
+								.setClump(5)
 								.setMark(ui.newPropertyReference().setReference("submission.totalScore"))
 								.setMax(ui.newPropertyReference().setReference("submission.assessment.totalPoints")))
 						.add(
@@ -614,8 +615,9 @@ public class DeliveryControllers
 								.add(
 									ui.newDistributionChart()
 										.setData(ui.newPropertyReference().setReference("answer.question.scores"))
-										.setWidth(50)
-										.setHeight(20)
+										.setWidth(44)
+										.setHeight(22)
+										.setClump(5)
 										.setMark(ui.newPropertyReference().setReference("answer.totalScore"))
 										.setMax(ui.newPropertyReference().setReference("answer.question.points"))
 										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
