@@ -142,14 +142,14 @@ public class DeliveryControllers
 											ui.newEntityNavigation()
 												.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newTextPropertyReference().setReference("submission.id")))
 												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackNow"))))
-										.addNavigation(
-											ui.newNavigation()
-												.setTitle("list-review-statistics")
-												.setStyle(Navigation.Style.link)
-												.setDestination(ui.newDestination().setDestination("/statistics/{0}", ui.newPropertyReference().setReference("submission.id")))
-												.setIncluded(
-													ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackNow")),
-													ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackShowStatistics"))))
+//										.addNavigation(
+//											ui.newNavigation()
+//												.setTitle("list-review-statistics")
+//												.setStyle(Navigation.Style.link)
+//												.setDestination(ui.newDestination().setDestination("/statistics/{0}", ui.newPropertyReference().setReference("submission.id")))
+//												.setIncluded(
+//													ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackNow")),
+//													ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackShowStatistics"))))
 										.setSorting(
 											ui.newCompareDecision().setEqualsConstant("0").setProperty(ui.newPropertyReference().setReference("submission_sort_choice")),
 											ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setReference("submission_sort_ad")))
@@ -561,10 +561,17 @@ public class DeliveryControllers
 						.add(
 							ui.newDistributionChart()
 								.setData(ui.newPropertyReference().setReference("submission.assessment.scores"))
-								.setWidth(206)
-								.setHeight(103)
+								.setWidth(50)
+								.setHeight(20)
 								.setMark(ui.newPropertyReference().setReference("submission.totalScore"))
 								.setMax(ui.newPropertyReference().setReference("submission.assessment.totalPoints")))
+						.add(
+							ui.newSection()
+								.setTitle("question-eval-overall-comment-title")
+								.add(
+									ui.newEvaluation()
+										.setText("question-eval-overall-comment", ui.newTextPropertyReference().setReference("submission.evalComment")))
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.evalComment"))))
 						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
 				.add(
 					ui.newSection()
@@ -607,11 +614,20 @@ public class DeliveryControllers
 								.add(
 									ui.newDistributionChart()
 										.setData(ui.newPropertyReference().setReference("answer.question.scores"))
-										.setWidth(206)
-										.setHeight(103)
+										.setWidth(50)
+										.setHeight(20)
 										.setMark(ui.newPropertyReference().setReference("answer.totalScore"))
 										.setMax(ui.newPropertyReference().setReference("answer.question.points"))
 										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
+								.add(
+									ui.newSection()
+										.setTitle("question-eval-question-comment-title")
+										.add(
+											ui.newEvaluation()
+												.setText("question-eval-question-comment", ui.newTextPropertyReference().setReference("answer.evalComment")))
+										.setIncluded(
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
+											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.evalComment"))))
 								.add(
 									ui.newHtml()
 										.setText(null, ui.newTextPropertyReference().setReference("answer.question.instructions"))

@@ -182,6 +182,22 @@ public interface Submission
 	void setAssessment(Assessment assessment);
 
 	/**
+	 * Set the evaluation comment.
+	 * 
+	 * @param comment
+	 *        The evaluation comment.
+	 */
+	void setEvalComment(String comment);
+
+	/**
+	 * Set the evaluation score.
+	 * 
+	 * @param score
+	 *        The evaluation score.
+	 */
+	void setEvalScore(Float score);
+
+	/**
 	 * Set the complete flag for the submission.
 	 * 
 	 * @param complete
@@ -220,4 +236,5 @@ public interface Submission
 	 *        The user id who made this submission.
 	 */
 	void setUserId(String userId);
+
 }

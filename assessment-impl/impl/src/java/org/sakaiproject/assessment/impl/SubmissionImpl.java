@@ -58,9 +58,13 @@ public class SubmissionImpl implements Submission
 
 	protected PropertyStatus assessmentIdStatus = PropertyStatus.unset;
 
-	protected String evalComments = null;
+	protected String evalComment = null;
+
+	protected PropertyStatus evalCommentStatus = PropertyStatus.unset;
 
 	protected Float evalScore = null;
+
+	protected PropertyStatus evalScoreStatus = PropertyStatus.unset;
 
 	protected String id = null;
 
@@ -261,7 +265,10 @@ public class SubmissionImpl implements Submission
 	 */
 	public String getEvalComment()
 	{
-		return this.evalComments;
+		// read the basic info if this property has not yet been set
+		if (this.evalCommentStatus == PropertyStatus.unset) readMain();
+
+		return this.evalComment;
 	}
 
 	/**
@@ -269,6 +276,9 @@ public class SubmissionImpl implements Submission
 	 */
 	public Float getEvalScore()
 	{
+		// read the basic info if this property has not yet been set
+		if (this.evalScoreStatus == PropertyStatus.unset) readMain();
+
 		return this.evalScore;
 	}
 
@@ -378,14 +388,15 @@ public class SubmissionImpl implements Submission
 		// read the answers info if this property has not yet been set
 		if (this.answersStatus == PropertyStatus.unset) readAnswers();
 
-		// add the answer auto scores, the answer evaluations, (these are combined into the answer total scores) and the overall evaluation
+		// add the answer auto scores, the answer evaluations, (these are combined into the answer total scores) and the overall
+		// evaluation
 		float total = 0;
-		
+
 		for (SubmissionAnswer answer : answers)
 		{
 			total += answer.getTotalScore();
 		}
-		
+
 		if (this.evalScore != null)
 		{
 			total += this.evalScore.floatValue();
@@ -438,6 +449,24 @@ public class SubmissionImpl implements Submission
 	{
 		this.assessmentId = assessment.getId();
 		this.assessmentIdStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setEvalComment(String comment)
+	{
+		this.evalComment = comment;
+		this.evalCommentStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setEvalScore(Float score)
+	{
+		this.evalScore = score;
+		this.evalScoreStatus = PropertyStatus.modified;
 	}
 
 	/**
@@ -549,12 +578,13 @@ public class SubmissionImpl implements Submission
 	/**
 	 * Initialize the evaluation comments
 	 * 
-	 * @param comments
-	 *        The evaluation comments.
+	 * @param comment
+	 *        The evaluation comment.
 	 */
-	protected void initEvalComments(String comments)
+	protected void initEvalComment(String comment)
 	{
-		this.evalComments = comments;
+		this.evalComment = comment;
+		this.evalCommentStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -566,6 +596,7 @@ public class SubmissionImpl implements Submission
 	protected void initEvalScore(Float score)
 	{
 		this.evalScore = score;
+		this.evalScoreStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -591,7 +622,7 @@ public class SubmissionImpl implements Submission
 		this.isComplete = complete;
 		this.isCompleteStatus = PropertyStatus.inited;
 	}
-	
+
 	/**
 	 * Initialize the start date property.
 	 * 
@@ -713,15 +744,17 @@ public class SubmissionImpl implements Submission
 	 */
 	protected void setInited()
 	{
-		answersStatus = PropertyStatus.inited;
-		assessmentIdStatus = PropertyStatus.inited;
-		idStatus = PropertyStatus.inited;
-		isCompleteStatus = PropertyStatus.inited;
-		mainStatus = PropertyStatus.inited;
-		startDateStatus = PropertyStatus.inited;
-		statusStatus = PropertyStatus.inited;
-		submittedDateStatus = PropertyStatus.inited;
-		userIdStatus = PropertyStatus.inited;
+		this.answersStatus = PropertyStatus.inited;
+		this.assessmentIdStatus = PropertyStatus.inited;
+		this.evalCommentStatus = PropertyStatus.inited;
+		this.evalScoreStatus = PropertyStatus.inited;
+		this.idStatus = PropertyStatus.inited;
+		this.isCompleteStatus = PropertyStatus.inited;
+		this.mainStatus = PropertyStatus.inited;
+		this.startDateStatus = PropertyStatus.inited;
+		this.statusStatus = PropertyStatus.inited;
+		this.submittedDateStatus = PropertyStatus.inited;
+		this.userIdStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -737,6 +770,10 @@ public class SubmissionImpl implements Submission
 
 		this.assessmentId = other.assessmentId;
 		this.assessmentIdStatus = other.assessmentIdStatus;
+		this.evalComment = other.evalComment;
+		this.evalCommentStatus = other.evalCommentStatus;
+		this.evalScore = other.evalScore;
+		this.evalScoreStatus = other.evalScoreStatus;
 		this.id = other.id;
 		this.idStatus = other.idStatus;
 		this.isComplete = other.isComplete;
@@ -749,9 +786,7 @@ public class SubmissionImpl implements Submission
 		this.submittedDateStatus = other.submittedDateStatus;
 		this.userId = other.userId;
 		this.userIdStatus = other.userIdStatus;
-		this.evalComments = other.evalComments;
-		this.evalScore = other.evalScore;
-		
+
 		this.totalScore = other.totalScore;
 	}
 }

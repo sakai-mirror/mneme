@@ -1295,7 +1295,7 @@ public class AssessmentServiceImpl implements AssessmentService
 					submission.initSubmittedDate(submittedDate);
 					submission.initUserId(userId);
 					submission.initEvalScore(new Float(manualScore));
-					submission.initEvalComments(comments);
+					submission.initEvalComment(StringUtil.trimToNull(comments));
 
 					return submission;
 				}
@@ -1387,7 +1387,7 @@ public class AssessmentServiceImpl implements AssessmentService
 						answer.setRationale(rationale);
 						answer.setMarkedForReview(Boolean.valueOf(markedForReview));
 						answer.setSubmittedDate(submittedDate);
-						answer.initEvalComments(comments);
+						answer.initEvalComments(StringUtil.trimToNull(comments));
 						answer.id = id;
 
 						answer.initSubmission(submission);
