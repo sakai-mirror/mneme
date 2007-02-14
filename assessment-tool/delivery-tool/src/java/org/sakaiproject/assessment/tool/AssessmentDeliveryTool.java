@@ -66,7 +66,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		enter, error, exit, list, question, remove, review, submit, submitted, toc
+		enter, error, review, final_review, list, question, remove, submitted, toc
 	}
 
 	/** Our log (commons). */
@@ -99,8 +99,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** The enter interface. */
 	protected Controller uiEnter = null;
 
-	/** The exit interface. */
-	protected Controller uiExit = null;
+	/** The final review interface. */
+	protected Controller uiFinalReview = null;
 
 	/** The list interface. */
 	protected Controller uiList = null;
@@ -110,9 +110,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 	/** The remove interface. */
 	protected Controller uiRemove = null;
-
-	/** The sbmit interface. */
-	protected Controller uiSubmit = null;
 
 	/** The submitted interface. */
 	protected Controller uiSubmitted = null;
@@ -166,9 +163,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 		uiQuestion = DeliveryControllers.constructQuestion(ui);
 		uiSubmitted = DeliveryControllers.constructSubmitted(ui);
 		uiToc = DeliveryControllers.constructToc(ui);
-		uiSubmit = DeliveryControllers.constructSubmit(ui);
+		uiFinalReview = DeliveryControllers.constructFinalReview(ui);
 		uiRemove = DeliveryControllers.constructRemove(ui);
-		uiExit = DeliveryControllers.constructExit(ui);
 
 		M_log.info("init()");
 	}
@@ -247,21 +243,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				break;
 			}
-			case exit:
-			{
-				// we need a single parameter (sid)
-				if (parts.length != 3)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-					return;
-				}
-				else
-				{
-					exitGet(req, res, parts[2], context);
-				}
-				break;
-			}
 			case toc:
 			{
 				// we need a single parameter (sid)
@@ -292,7 +273,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				break;
 			}
-			case submit:
+			case final_review:
 			{
 				// we need one parameter (sid)
 				if (parts.length != 3)
@@ -303,7 +284,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				else
 				{
-					submitGet(req, res, parts[2], context);
+					finalReviewGet(req, res, parts[2], context);
 				}
 				break;
 			}
@@ -417,7 +398,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				break;
 			}
-			case toc:
+			case final_review:
 			{
 				// we need a single parameter (sid)
 				if (parts.length != 3)
@@ -426,33 +407,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				else
 				{
-					tocPost(req, res, context, parts[2]);
-				}
-				break;
-			}
-			case submit:
-			{
-				// we need a single parameter (sid)
-				if (parts.length != 3)
-				{
-					redirectError(req, res);
-				}
-				else
-				{
-					submitPost(req, res, context, parts[2]);
-				}
-				break;
-			}
-			case exit:
-			{
-				// we need a single parameter (sid)
-				if (parts.length != 3)
-				{
-					redirectError(req, res);
-				}
-				else
-				{
-					exitPost(req, res, context, parts[2]);
+					finalReviewPost(req, res, context, parts[2]);
 				}
 				break;
 			}
@@ -581,7 +536,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// otherwise send the user to the submit view
 				else
 				{
-					destination = "/" + Destinations.submit + "/" + submission.getId();
+					destination = "/" + Destinations.final_review + "/" + submission.getId();
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 					return;
 				}
@@ -657,34 +612,51 @@ public class AssessmentDeliveryTool extends HttpServlet
 	}
 
 	/**
-	 * Get the UI for the exit destination.
+	 * Get the UI for the review destination
 	 * 
 	 * @param req
 	 *        Servlet request.
 	 * @param res
 	 *        Servlet response.
-	 * @param submissionId
+	 * @param submisssionId
 	 *        The selected submission id.
 	 * @param context
 	 *        UiContext.
+	 * @param out
+	 *        Output writer.
 	 */
-	protected void exitGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
+	protected void reviewGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
 			throws IOException
 	{
+		// yes feedback, and we are in review
+		context.put("feedback", Boolean.TRUE);
+		context.put("review", Boolean.TRUE);
+
+		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)
 		{
-			// TODO: security check (user matches submission user) user may submit
-			// TODO: check that the assessment is open, submission is open
-			if (/* assessmentService.allowSubmit(assessmentId, null) */true)
-			{
-				// collect information: the selected assessment (id the request)
-				context.put("submission", submission);
+			// TODO: security check (user matches submission user)
+			// TODO: check that the submission is closed
+			context.put("submission", submission);
+			context.put("assessment", submission.getAssessment());
 
-				// render
-				ui.render(uiExit, context);
-				return;
+			// collect all the answers for review
+			List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
+			for (AssessmentSection section : submission.getAssessment().getSections())
+			{
+				for (AssessmentQuestion question : section.getQuestions())
+				{
+					SubmissionAnswer answer = submission.getAnswer(question);
+					answers.add(answer);
+				}
 			}
+
+			context.put("answers", answers);
+
+			// render using the question interface
+			ui.render(uiQuestion, context);
+			return;
 		}
 
 		// redirect to error
@@ -693,21 +665,56 @@ public class AssessmentDeliveryTool extends HttpServlet
 	}
 
 	/**
-	 * Read the input for the exit destination, process, and redirect to the next destination.
+	 * Get the UI for the final review destination
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submisssionId
+	 *        The selected submission id.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void finalReviewGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
+			throws IOException
+	{
+		// collect the submission
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission != null)
+		{
+			// TODO: security check (user matches submission user)
+			// TODO: check that the assessment is open
+			context.put("submission", submission);
+
+			// render
+			ui.render(uiFinalReview, context);
+			return;
+		}
+
+		// redirect to error
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		return;
+	}
+
+	/**
+	 * Read the input for the final review destination, process, and redirect to the next destination.
 	 * 
 	 * @param req
 	 *        Servlet request.
 	 * @param res
 	 *        Servlet response.
 	 * @param context
-	 *        The UiContext
-	 * @param submisssionId
-	 *        The selected submission id.
+	 *        The UiContext.
+	 * @param submissionId
+	 *        the selected submission id.
 	 */
-	protected void exitPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
+	protected void finalReviewPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
 			throws IOException
 	{
-		// this post is from the timer, and completes the submission
+		// this post is from the timer, or the "submit" button, and completes the submission
 		submissionCompletePost(req, res, context, submissionId);
 	}
 
@@ -1258,59 +1265,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 	}
 
 	/**
-	 * Get the UI for the review destination
-	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
-	 * @param submisssionId
-	 *        The selected submission id.
-	 * @param context
-	 *        UiContext.
-	 * @param out
-	 *        Output writer.
-	 */
-	protected void reviewGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
-			throws IOException
-	{
-		// yes feedback, and we are in review
-		context.put("feedback", Boolean.TRUE);
-		context.put("review", Boolean.TRUE);
-
-		// collect the submission
-		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission != null)
-		{
-			// TODO: security check (user matches submission user)
-			// TODO: check that the submission is closed
-			context.put("submission", submission);
-			context.put("assessment", submission.getAssessment());
-
-			// collect all the answers for review
-			List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
-			for (AssessmentSection section : submission.getAssessment().getSections())
-			{
-				for (AssessmentQuestion question : section.getQuestions())
-				{
-					SubmissionAnswer answer = submission.getAnswer(question);
-					answers.add(answer);
-				}
-			}
-
-			context.put("answers", answers);
-
-			// render using the question interface
-			ui.render(uiQuestion, context);
-			return;
-		}
-
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-		return;
-	}
-
-	/**
 	 * Handle the many cases of a post that completes the submission
 	 * 
 	 * @param req
@@ -1364,60 +1318,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// redirect to error
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-	}
-
-	/**
-	 * Get the UI for the submit destination
-	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
-	 * @param submisssionId
-	 *        The selected submission id.
-	 * @param context
-	 *        UiContext.
-	 * @param out
-	 *        Output writer.
-	 */
-	protected void submitGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
-			throws IOException
-	{
-		// collect the submission
-		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission != null)
-		{
-			// TODO: security check (user matches submission user)
-			// TODO: check that the assessment is open
-			context.put("submission", submission);
-
-			// render
-			ui.render(uiSubmit, context);
-			return;
-		}
-
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-		return;
-	}
-
-	/**
-	 * Read the input for the submit destination, process, and redirect to the next destination.
-	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
-	 * @param context
-	 *        The UiContext.
-	 * @param submissionId
-	 *        the selected submission id.
-	 */
-	protected void submitPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
-			throws IOException
-	{
-		// this post is from the timer, or the "submit" button, and completes the submission
-		submissionCompletePost(req, res, context, submissionId);
 	}
 
 	/**
@@ -1491,24 +1391,5 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// redirect to error
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
 		return;
-	}
-
-	/**
-	 * Read the input for the toc destination, process, and redirect to the next destination.
-	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
-	 * @param context
-	 *        The UiContext.
-	 * @param submissionId
-	 *        the selected submission id.
-	 */
-	protected void tocPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
-			throws IOException
-	{
-		// this post is from the timer, and completes the submission
-		submissionCompletePost(req, res, context, submissionId);
 	}
 }
