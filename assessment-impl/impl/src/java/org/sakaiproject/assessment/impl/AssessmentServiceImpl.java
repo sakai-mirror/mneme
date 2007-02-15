@@ -60,8 +60,8 @@ import org.sakaiproject.id.cover.IdManager;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.service.gradebook.shared.AssessmentNotFoundException;
+import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
 import org.sakaiproject.service.gradebook.shared.GradebookNotFoundException;
-import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.api.TimeService;
@@ -154,8 +154,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	protected EventTrackingService m_eventTrackingService = null;
 
 	/** Dependency: GradebookExternalAssessmentService */
-	// protected GradebookExternalAssessmentService m_gradebookService = null;
-	protected GradebookService m_gradebookService = null;
+	protected GradebookExternalAssessmentService m_gradebookService = null;
 
 	/** Dependency: MemoryService */
 	protected MemoryService m_memoryService = null;
@@ -214,9 +213,8 @@ public class AssessmentServiceImpl implements AssessmentService
 	 * @param service
 	 *        The GradebookService.
 	 */
-	public void setGradebookService(GradebookService service)
+	public void setGradebookService(GradebookExternalAssessmentService service)
 	{
-		// GradebookExternalAssessmentService
 		m_gradebookService = service;
 	}
 
@@ -3656,8 +3654,6 @@ public class AssessmentServiceImpl implements AssessmentService
 						// post it
 						try
 						{
-							// Note: the proper non-deprecated method (same method but of the GradebookExternalAssessmentService
-							// service does not currently work (no commit) -ggolden
 							m_gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(),
 									submission.getUserId(), points);
 						}
