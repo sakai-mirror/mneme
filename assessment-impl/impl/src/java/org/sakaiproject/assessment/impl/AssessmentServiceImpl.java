@@ -3341,6 +3341,73 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean allowCompleteSubmission(String submissionId, String userId)
+	{
+		Boolean rv = Boolean.FALSE;
+
+		// if null, get the current user id
+		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
+
+		Submission s = idSubmission(submissionId);
+		if (s != null)
+		{
+			// make sure the user is this submission's user
+			if (s.getUserId().equals(userId))
+			{
+				// make sure the submission is incomplete
+				if ((s.getIsComplete() == null) || (!s.getIsComplete().booleanValue()))
+				{
+					Assessment assessment = s.getAssessment();
+					if (assessment != null)
+					{
+						// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
+						if (checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, assessment.getContext(),
+								getAssessmentReference(assessment.getId())))
+						{
+							// check that the assessment is currently open for submission
+							if (isAssessmentOpen(assessment, m_timeService.newTime()))
+							{
+								rv = Boolean.TRUE;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean allowReviewSubmission(String submissionId, String userId)
+	{
+		Boolean rv = Boolean.FALSE;
+
+		// if null, get the current user id
+		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
+
+		Submission s = idSubmission(submissionId);
+		if (s != null)
+		{
+			// make sure the user is this submission's user
+			if (s.getUserId().equals(userId))
+			{
+				// make sure the submission is complete
+				if ((s.getIsComplete() != null) && (s.getIsComplete().booleanValue()))
+				{
+					rv = Boolean.TRUE;
+				}
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Submission enterSubmission(Assessment a, String userId) throws AssessmentPermissionException, AssessmentClosedException,
 			AssessmentCompletedException
 	{

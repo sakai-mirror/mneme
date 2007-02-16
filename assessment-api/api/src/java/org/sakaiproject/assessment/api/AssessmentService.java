@@ -322,8 +322,8 @@ public interface AssessmentService
 
 	/**
 	 * Check if the current user is allowed to submit to the assessment.<br />
-	 * If the user has a submission in progress, this returns true.<br .>
-	 * Otherwise, the assessment must be open, the use must have submit permission, and not yet submitted the max.
+	 * If the user has a submission in progress, this returns true.<br />
+	 * Otherwise, the assessment must be open, the user must have submit permission, and not yet submitted the max.
 	 * 
 	 * @param assessmentId
 	 *        The assessment id.
@@ -332,6 +332,32 @@ public interface AssessmentService
 	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
 	 */
 	Boolean allowSubmit(String assessmentId, String userId);
+
+	/**
+	 * Check if the current user is allowed to work on or complete this submission.<br />
+	 * The user must match the submission user.<br />
+	 * The submission must be incomplete, the assessment must be open, the user must have submit permission.
+	 * 
+	 * @param submissionId
+	 *        The submission id.
+	 * @param userId
+	 *        The user taking the assessment (if null, the current user is used).
+	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
+	 */
+	Boolean allowCompleteSubmission(String submissionId, String userId);
+
+	/**
+	 * Check if the current user is allowed to review this submission.<br />
+	 * The user must match the submission user.<br />
+	 * The submission must be complete.
+	 * 
+	 * @param submissionId
+	 *        The submission id.
+	 * @param userId
+	 *        The user taking the assessment (if null, the current user is used).
+	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
+	 */
+	Boolean allowReviewSubmission(String submissionId, String userId);
 
 	/**
 	 * Start an end-user in taking an assessment. If there is an incomplete submission already, re-enter that, else create a new

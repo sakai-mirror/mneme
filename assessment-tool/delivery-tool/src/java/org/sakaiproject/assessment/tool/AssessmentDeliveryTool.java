@@ -69,6 +69,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 		enter, error, final_review, list, question, remove, review, submitted, toc
 	}
 
+	/** Our errors. */
+	enum Errors
+	{
+		invalid, invalidpost, unauthorized, unexpected, unknown
+	}
+
 	/** Our log (commons). */
 	private static Log M_log = LogFactory.getLog(AssessmentDeliveryTool.class);
 
@@ -98,6 +104,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 	/** The enter interface. */
 	protected Controller uiEnter = null;
+
+	/** The error interface. */
+	protected Controller uiError = null;
 
 	/** The list interface. */
 	protected Controller uiList = null;
@@ -161,6 +170,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		uiSubmitted = DeliveryControllers.constructSubmitted(ui);
 		uiToc = DeliveryControllers.constructToc(ui);
 		uiRemove = DeliveryControllers.constructRemove(ui);
+		uiError = DeliveryControllers.constructError(ui);
 
 		M_log.info("init()");
 	}
@@ -193,7 +203,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 		catch (IllegalArgumentException e)
 		{
-			// not a know destination
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
 		}
 
 		switch (destination)
@@ -215,7 +227,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				if (parts.length != 3)
 				{
 					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
 				}
 				else
@@ -230,7 +242,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				if (parts.length != 3)
 				{
 					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
 				}
 				else
@@ -245,7 +257,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				if (parts.length != 3)
 				{
 					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
 				}
 				else
@@ -260,7 +272,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				if ((parts.length != 4) && (parts.length != 5))
 				{
 					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
 				}
 				else
@@ -275,7 +287,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				if (parts.length != 3)
 				{
 					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
 				}
 				else
@@ -290,7 +302,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				if (parts.length != 3)
 				{
 					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
 				}
 				else
@@ -305,7 +317,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				if (parts.length < 5)
 				{
 					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
 				}
 				else
@@ -316,7 +328,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case error:
 			{
-				errorGet(req, res, context);
+				// we would like a single parameter (sid)
+				String error = null;
+				if (parts.length >= 3)
+				{
+					error = parts[2];
+				}
+
+				errorGet(req, res, error, context);
 				break;
 			}
 		}
@@ -348,7 +367,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 		catch (IllegalArgumentException e)
 		{
-			// not a know destination
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalidpost)));
+			return;
 		}
 
 		switch (destination)
@@ -358,7 +378,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// we need a single parameter (aid)
 				if (parts.length != 3)
 				{
-					redirectError(req, res);
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalidpost)));
+					return;
 				}
 				else
 				{
@@ -371,7 +392,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// we need two parameters (sid/qid), and tolerate but ignore a third (/feedback)
 				if ((parts.length != 4) && (parts.length != 5))
 				{
-					redirectError(req, res);
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalidpost)));
+					return;
 				}
 				else
 				{
@@ -385,7 +407,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				if (parts.length < 5)
 				{
 					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalidpost)));
 					return;
 				}
 				else
@@ -399,7 +421,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// we need a single parameter (sid)
 				if (parts.length != 3)
 				{
-					redirectError(req, res);
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalidpost)));
+					return;
 				}
 				else
 				{
@@ -412,7 +435,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 				// we need a single parameter (sid)
 				if (parts.length != 3)
 				{
-					redirectError(req, res);
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalidpost)));
+					return;
 				}
 				else
 				{
@@ -422,9 +446,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			default:
 			{
-				// redirect to error
-				redirectError(req, res);
-				break;
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalidpost)));
+				return;
 			}
 		}
 	}
@@ -448,12 +471,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 		if (assessment != null)
 		{
 			// security check (submissions count / allowed check)
-			if (assessmentService.allowSubmit(assessmentId, null))
+			if (assessmentService.allowSubmit(assessmentId, null).booleanValue())
 			{
 				// collect information: the selected assessment (id the request)
 				context.put("assessment", assessmentService.idAssessment(assessmentId));
 
-				// for this assessment, we need to know how many completed submission the current use has already made
+				// for this assessment, we need to know how many completed submissions the current use has already made
 				Integer count = assessmentService.countRemainingSubmissions(assessmentId, null);
 				context.put("remainingSubmissions", count);
 
@@ -461,10 +484,17 @@ public class AssessmentDeliveryTool extends HttpServlet
 				ui.render(uiEnter, context);
 				return;
 			}
+
+			else
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
 		}
 
 		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 		return;
 	}
 
@@ -487,7 +517,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		if (!context.getPostExpected())
 		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
 			return;
 		}
 
@@ -499,7 +529,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		if (assessment == null)
 		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
 
@@ -521,63 +551,15 @@ public class AssessmentDeliveryTool extends HttpServlet
 		if (submission == null)
 		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
 		// question, section or all?
 		QuestionPresentation presentation = assessment.getQuestionPresentation();
 
-		// for by quesion
-		if ((presentation == null) || (presentation == QuestionPresentation.BY_QUESTION))
-		{
-			String questionId = null;
-
-			// for linear assessments, start at the first incomplete question
-			if (!assessment.getRandomAccess())
-			{
-				AssessmentQuestion question = submission.getFirstIncompleteQuestion();
-				if (question != null)
-				{
-					questionId = question.getId();
-				}
-
-				// otherwise send the user to the submit view
-				else
-				{
-					destination = "/" + Destinations.final_review + "/" + submission.getId();
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-					return;
-				}
-			}
-
-			// for random access, start at the first question of the first part
-			else
-			{
-				AssessmentSection part = assessment.getFirstSection();
-				if (part != null)
-				{
-					AssessmentQuestion question = part.getFirstQuestion();
-					if (question != null)
-					{
-						questionId = question.getId();
-					}
-				}
-			}
-
-			if (questionId != null)
-			{
-				// next destination: first question of submission
-				destination = "/" + Destinations.question + "/" + submission.getId() + "/q" + questionId;
-
-				// redirect
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-		}
-
 		// for by section
-		else if (presentation == QuestionPresentation.BY_SECTION)
+		if ((presentation != null) && (presentation == QuestionPresentation.BY_SECTION))
 		{
 			AssessmentSection section = assessment.getFirstSection();
 			if (section != null)
@@ -590,7 +572,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 		}
 		// for all
-		else if (presentation == QuestionPresentation.BY_ASSESSMENT)
+		else if ((presentation != null) && (presentation == QuestionPresentation.BY_ASSESSMENT))
 		{
 			destination = "/" + Destinations.question + "/" + submission.getId() + "/a";
 
@@ -599,8 +581,54 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		// otherwise by quesion
+		String questionId = null;
+
+		// for linear assessments, start at the first incomplete question
+		if (!assessment.getRandomAccess())
+		{
+			AssessmentQuestion question = submission.getFirstIncompleteQuestion();
+			if (question != null)
+			{
+				questionId = question.getId();
+			}
+
+			// otherwise send the user to the submit view
+			else
+			{
+				destination = "/" + Destinations.final_review + "/" + submission.getId();
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
+		}
+
+		// for random access, start at the first question of the first part
+		else
+		{
+			AssessmentSection part = assessment.getFirstSection();
+			if (part != null)
+			{
+				AssessmentQuestion question = part.getFirstQuestion();
+				if (question != null)
+				{
+					questionId = question.getId();
+				}
+			}
+		}
+
+		if (questionId != null)
+		{
+			// next destination: first question of submission
+			destination = "/" + Destinations.question + "/" + submission.getId() + "/q" + questionId;
+
+			// redirect
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+
+		// we are here because there are no questions!
+		destination = "/" + Destinations.final_review + "/" + submission.getId();
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
@@ -615,9 +643,51 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void errorGet(HttpServletRequest req, HttpServletResponse res, Context context)
+	protected void errorGet(HttpServletRequest req, HttpServletResponse res, String errorCode, Context context)
 	{
-		throw new RuntimeException("tool error");
+		// which error?
+		Errors error = Errors.unknown;
+		if (errorCode != null)
+		{
+			try
+			{
+				error = Errors.valueOf(errorCode);
+			}
+			catch (IllegalArgumentException e)
+			{
+			}
+		}
+
+		switch (error)
+		{
+			case invalid:
+			{
+				context.put("invalidUrl", context.getPreviousDestination());
+				break;
+			}
+
+			case invalidpost:
+			{
+				context.put("invalidPost", Boolean.TRUE);
+				break;
+			}
+
+			case unauthorized:
+			{
+				context.put("unauthorized", Boolean.TRUE);
+				break;
+			}
+
+			case unexpected:
+			{
+				context.put("unexpected", Boolean.TRUE);
+				break;
+			}
+		}
+
+		// render
+		ui.render(uiError, context);
+		return;
 	}
 
 	/**
@@ -641,19 +711,26 @@ public class AssessmentDeliveryTool extends HttpServlet
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)
 		{
-			// TODO: security check (user matches submission user)
-			// TODO: check that the assessment is open
-			context.put("submission", submission);
+			if (assessmentService.allowCompleteSubmission(submissionId, null).booleanValue())
+			{
+				context.put("submission", submission);
 
-			context.put("finalReview", Boolean.TRUE);
+				context.put("finalReview", Boolean.TRUE);
 
-			// render
-			ui.render(uiToc, context);
-			return;
+				// render
+				ui.render(uiToc, context);
+				return;
+			}
+			else
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
 		}
 
 		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 		return;
 	}
 
@@ -696,7 +773,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		if ((sort != null) && (sort.length() != 4))
 		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
 
@@ -725,7 +802,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			else
 			{
 				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 				return;
 			}
 		}
@@ -779,7 +856,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			else
 			{
 				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 				return;
 			}
 		}
@@ -831,10 +908,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// collect the questions (actually their answers) to put on the page
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
 
-		if (!questionSetup(submissionId, questionSelector, feedback, context, answers, true))
+		Errors err = questionSetup(submissionId, questionSelector, feedback, context, answers, true);
+
+		if (err != null)
 		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + err)));
 			return;
 		}
 
@@ -865,7 +944,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		if (!context.getPostExpected())
 		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
 			return;
 		}
 
@@ -873,10 +952,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
 
 		// setup receiving context
-		if (!questionSetup(submissionId, questionSelector, "", context, answers, false))
+		Errors err = questionSetup(submissionId, questionSelector, "", context, answers, false);
+		if (Errors.invalid == err) err = Errors.invalidpost;
+		if (err != null)
 		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + err)));
 			return;
 		}
 
@@ -886,8 +967,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// if we are going to submitted, we must complete the submission
 		Boolean complete = Boolean.valueOf(destination.startsWith("/submitted"));
 
-		// unless we are going to exit, remove, or feedback, or this very same question, mark the answers as complete
-		Boolean answersComplete = Boolean.valueOf(!(destination.startsWith("/exit") || destination.startsWith("/remove")
+		// unless we are going to list, remove, or feedback, or this very same question, mark the answers as complete
+		Boolean answersComplete = Boolean.valueOf(!(destination.startsWith("/list") || destination.startsWith("/remove")
 				|| destination.endsWith("/feedback") || context.getPreviousDestination().equals(destination)));
 
 		// submit all answers
@@ -910,7 +991,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 
 		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 	}
 
 	/**
@@ -929,9 +1010,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        A list to fill in with the answers for this page.
 	 * @param out
 	 *        Output writer.
-	 * @return true if all was well, false if there was an error
+	 * @return null if all went well, else an Errors to indicate what went wrong.
 	 */
-	protected boolean questionSetup(String submissionId, String questionSelector, String feedback, Context context,
+	protected Errors questionSetup(String submissionId, String questionSelector, String feedback, Context context,
 			List<SubmissionAnswer> answers, boolean linearCheck)
 	{
 		// check on feedback
@@ -948,143 +1029,127 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// get the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission != null)
+		if (submission == null)
 		{
-			// TODO: security check (user matches submission user)
-			// TODO: check that the assessment is open
-			context.put("submission", submission);
+			return Errors.invalid;
+		}
 
-			// for requests for a single question
-			if (questionSelector.startsWith("q"))
+		if (!assessmentService.allowCompleteSubmission(submissionId, null).booleanValue())
+		{
+			return Errors.unauthorized;
+		}
+
+		context.put("submission", submission);
+
+		// for requests for a single question
+		if (questionSelector.startsWith("q"))
+		{
+			String questionId = questionSelector.substring(1);
+			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+			if (question == null)
 			{
-				String questionId = questionSelector.substring(1);
-				AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
-				if (question == null)
+				return Errors.invalid;
+			}
+
+			List<AssessmentQuestion> questions = new ArrayList<AssessmentQuestion>(1);
+			questions.add(question);
+			context.put("finishReady", submission.getIsAnswered(questions));
+
+			if (linearCheck)
+			{
+				// Ok, this stupid feature. Linear. Where we need to keep any question seen from being re-seen.
+				// But, we need to allow feedback, fileupload Upload and Remove to work, which all involve re-entry
+				// So...
+				// if we were just at the question destination, with or without "/feedback", allow re-entry, with or without
+				// "/feedback". This lets Upload work, and lets Feedback work.
+
+				// if the assessment is linear and this question has been seen already, we don't allow entry
+				// unless... we were directly in the question destination (w or wo feedback) and we are now in feedback
+				if (!question.getSection().getAssessment().getRandomAccess() && !submission.getIsIncompleteQuestion(question))
 				{
-					return false;
-				}
+					// adjust to remove feedback
+					String curDestinationAdjusted = context.getDestination();
+					if (curDestinationAdjusted.endsWith("/feedback"))
+						curDestinationAdjusted = curDestinationAdjusted.substring(0, curDestinationAdjusted.length()
+								- "/feedback".length());
 
-				List<AssessmentQuestion> questions = new ArrayList<AssessmentQuestion>(1);
-				questions.add(question);
-				context.put("finishReady", submission.getIsAnswered(questions));
-
-				if (linearCheck)
-				{
-					// Ok, this stupid feature. Linear. Where we need to keep any question seen from being re-seen.
-					// But, we need to allow feedback, fileupload Upload and Remove to work, which all involve re-entry
-					// So...
-					// if we were just at the question destination, with or without "/feedback", allow re-entry, with or without
-					// "/feedback". This lets Upload work, and lets Feedback work.
-
-					// if the assessment is linear and this question has been seen already, we don't allow entry
-					// unless... we were directly in the question destination (w or wo feedback) and we are now in feedback
-					if (!question.getSection().getAssessment().getRandomAccess() && !submission.getIsIncompleteQuestion(question))
+					String prevDestinationAdjusted = context.getPreviousDestination();
+					if ((prevDestinationAdjusted != null) && (prevDestinationAdjusted.endsWith("/feedback")))
 					{
-						// adjust to remove feedback
-						String curDestinationAdjusted = context.getDestination();
-						if (curDestinationAdjusted.endsWith("/feedback"))
-							curDestinationAdjusted = curDestinationAdjusted.substring(0, curDestinationAdjusted.length()
-									- "/feedback".length());
+						prevDestinationAdjusted = prevDestinationAdjusted.substring(0, prevDestinationAdjusted.length()
+								- "/feedback".length());
+					}
 
-						String prevDestinationAdjusted = context.getPreviousDestination();
-						if ((prevDestinationAdjusted != null) && (prevDestinationAdjusted.endsWith("/feedback")))
+					// if previous (w or wo /feedback) is the same as current (w or wo /feedback), ok, otherwise...
+					if (!curDestinationAdjusted.equals(prevDestinationAdjusted))
+					{
+						// if we were just at a upload remove for this submission / question, allow re-entry
+						String removeWouldBeStartingWith = "/remove/" + submissionId + "/" + questionSelector.substring(1);
+
+						if (!prevDestinationAdjusted.startsWith(removeWouldBeStartingWith))
 						{
-							prevDestinationAdjusted = prevDestinationAdjusted.substring(0, prevDestinationAdjusted.length()
-									- "/feedback".length());
-						}
-
-						// if previous (w or wo /feedback) is the same as current (w or wo /feedback), ok, otherwise...
-						if (!curDestinationAdjusted.equals(prevDestinationAdjusted))
-						{
-							// if we were just at a upload remove for this submission / question, allow re-entry
-							String removeWouldBeStartingWith = "/remove/" + submissionId + "/" + questionSelector.substring(1);
-
-							if (!prevDestinationAdjusted.startsWith(removeWouldBeStartingWith))
-							{
-								// TODO: better error reporting!
-								return false;
-							}
+							return Errors.unauthorized;
 						}
 					}
 				}
-
-				// find the answer (or have one created) for this submission / question
-				SubmissionAnswer answer = submission.getAnswer(question);
-				if (answer != null)
-				{
-					answers.add(answer);
-				}
-
-				// tell the UI that we are doing single question
-				context.put("question", question);
 			}
 
-			// for requests for a section
-			else if (questionSelector.startsWith("s"))
+			// find the answer (or have one created) for this submission / question
+			SubmissionAnswer answer = submission.getAnswer(question);
+			if (answer != null)
 			{
-				String sectionId = questionSelector.substring(1);
-				AssessmentSection section = submission.getAssessment().getSection(sectionId);
-				if (section == null)
-				{
-					return false;
-				}
+				answers.add(answer);
+			}
 
-				// get all the answers for this section
-				List<AssessmentQuestion> questions = new ArrayList<AssessmentQuestion>();
+			// tell the UI that we are doing single question
+			context.put("question", question);
+		}
+
+		// for requests for a section
+		else if (questionSelector.startsWith("s"))
+		{
+			String sectionId = questionSelector.substring(1);
+			AssessmentSection section = submission.getAssessment().getSection(sectionId);
+			if (section == null)
+			{
+				return Errors.invalid;
+			}
+
+			// get all the answers for this section
+			List<AssessmentQuestion> questions = new ArrayList<AssessmentQuestion>();
+			for (AssessmentQuestion question : section.getQuestions())
+			{
+				SubmissionAnswer answer = submission.getAnswer(question);
+				answers.add(answer);
+				questions.add(question);
+			}
+
+			context.put("finishReady", submission.getIsAnswered(questions));
+
+			// tell the UI that we are doing single section
+			context.put("section", section);
+		}
+
+		// for requests for the entire assessment
+		else if (questionSelector.startsWith("a"))
+		{
+			// get all the answers to all the questions in all sections
+			List<AssessmentQuestion> questions = new ArrayList<AssessmentQuestion>();
+			for (AssessmentSection section : submission.getAssessment().getSections())
+			{
 				for (AssessmentQuestion question : section.getQuestions())
 				{
 					SubmissionAnswer answer = submission.getAnswer(question);
 					answers.add(answer);
 					questions.add(question);
 				}
-
-				context.put("finishReady", submission.getIsAnswered(questions));
-
-				// tell the UI that we are doing single section
-				context.put("section", section);
 			}
 
-			// for requests for the entire assessment
-			else if (questionSelector.startsWith("a"))
-			{
-				// get all the answers to all the questions in all sections
-				List<AssessmentQuestion> questions = new ArrayList<AssessmentQuestion>();
-				for (AssessmentSection section : submission.getAssessment().getSections())
-				{
-					for (AssessmentQuestion question : section.getQuestions())
-					{
-						SubmissionAnswer answer = submission.getAnswer(question);
-						answers.add(answer);
-						questions.add(question);
-					}
-				}
-
-				context.put("finishReady", submission.getIsAnswered(questions));
-			}
-
-			else
-			{
-				return false;
-			}
-
-			context.put("answers", answers);
-			return true;
+			context.put("finishReady", submission.getIsAnswered(questions));
 		}
 
-		return false;
-	}
-
-	/**
-	 * Send a redirect to the error destination.
-	 * 
-	 * @param req
-	 * @param res
-	 * @throws IOException
-	 */
-	protected void redirectError(HttpServletRequest req, HttpServletResponse res) throws IOException
-	{
-		String error = Web.returnUrl(req, "/" + Destinations.error);
-		res.sendRedirect(res.encodeRedirectURL(error));
+		context.put("answers", answers);
+		return null;
 	}
 
 	/**
@@ -1108,32 +1173,40 @@ public class AssessmentDeliveryTool extends HttpServlet
 	{
 		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission != null)
+		if (submission == null)
 		{
-			// TODO: security check (user matches submission user)
-			// TODO: check that the assessment is open
-			context.put("submission", submission);
-
-			// collect the question
-			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
-			if (question != null)
-			{
-				context.put("question", question);
-
-				Reference ref = entityManager.newReference(reference);
-				List<Reference> attachment = new ArrayList<Reference>(1);
-				attachment.add(ref);
-				context.put("attachment", attachment);
-
-				// render
-				ui.render(uiRemove, context);
-				return;
-			}
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
 		}
 
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-		return;
+		if (!assessmentService.allowCompleteSubmission(submissionId, null).booleanValue())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		context.put("submission", submission);
+
+		// collect the question
+		AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+		if (question == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		context.put("question", question);
+
+		Reference ref = entityManager.newReference(reference);
+		List<Reference> attachment = new ArrayList<Reference>(1);
+		attachment.add(ref);
+		context.put("attachment", attachment);
+
+		// render
+		ui.render(uiRemove, context);
 	}
 
 	/**
@@ -1158,7 +1231,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 		if (!context.getPostExpected())
 		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
+			return;
+		}
+
+		if (!assessmentService.allowCompleteSubmission(submissionId, null).booleanValue())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
@@ -1188,7 +1268,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
@@ -1196,42 +1276,54 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// remove the referenced attachment from the answer
 		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission != null)
+		if (submission == null)
 		{
-			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
-			if (question != null)
-			{
-				SubmissionAnswer answer = submission.getAnswer(question);
-				if (answer != null)
-				{
-					// remove this one
-					answer.removeAnswerText(reference);
-					attachmentService.removeAttachment(entityManager.newReference(reference));
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
 
-					// submit the user's answer
-					try
-					{
-						assessmentService.submitAnswer(answer, Boolean.FALSE, Boolean.FALSE);
+		AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+		if (question == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
 
-						// redirect to the next destination
-						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-						return;
-					}
-					catch (AssessmentClosedException e)
-					{
-					}
-					catch (SubmissionCompletedException e)
-					{
-					}
-					catch (AssessmentPermissionException e)
-					{
-					}
-				}
-			}
+		SubmissionAnswer answer = submission.getAnswer(question);
+		if (answer == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		// remove this one
+		answer.removeAnswerText(reference);
+		attachmentService.removeAttachment(entityManager.newReference(reference));
+
+		// submit the user's answer
+		try
+		{
+			assessmentService.submitAnswer(answer, Boolean.FALSE, Boolean.FALSE);
+
+			// redirect to the next destination
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+		catch (AssessmentClosedException e)
+		{
+		}
+		catch (SubmissionCompletedException e)
+		{
+		}
+		catch (AssessmentPermissionException e)
+		{
 		}
 
 		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 	}
 
 	/**
@@ -1257,34 +1349,38 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission != null)
+		if (submission == null)
 		{
-			// TODO: security check (user matches submission user)
-			// TODO: check that the submission is closed
-			context.put("submission", submission);
-			context.put("assessment", submission.getAssessment());
-
-			// collect all the answers for review
-			List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
-			for (AssessmentSection section : submission.getAssessment().getSections())
-			{
-				for (AssessmentQuestion question : section.getQuestions())
-				{
-					SubmissionAnswer answer = submission.getAnswer(question);
-					answers.add(answer);
-				}
-			}
-
-			context.put("answers", answers);
-
-			// render using the question interface
-			ui.render(uiQuestion, context);
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
 
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
-		return;
+		if (!assessmentService.allowReviewSubmission(submissionId, null).booleanValue())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		context.put("submission", submission);
+		context.put("assessment", submission.getAssessment());
+
+		// collect all the answers for review
+		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
+		for (AssessmentSection section : submission.getAssessment().getSections())
+		{
+			for (AssessmentQuestion question : section.getQuestions())
+			{
+				SubmissionAnswer answer = submission.getAnswer(question);
+				answers.add(answer);
+			}
+		}
+
+		context.put("answers", answers);
+
+		// render using the question interface
+		ui.render(uiQuestion, context);
 	}
 
 	/**
@@ -1305,7 +1401,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		if (!context.getPostExpected())
 		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
 			return;
 		}
 
@@ -1316,7 +1412,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		if (!destination.startsWith("/submitted"))
 		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalidpost)));
 			return;
 		}
 
@@ -1340,7 +1436,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 
 		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 	}
 
 	/**
@@ -1374,10 +1470,17 @@ public class AssessmentDeliveryTool extends HttpServlet
 				ui.render(uiSubmitted, context);
 				return;
 			}
+
+			else
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
 		}
 
 		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 		return;
 	}
 
@@ -1396,25 +1499,27 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void tocGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context) throws IOException
 	{
 		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission != null)
+		if (submission == null)
 		{
-			// TODO: security check (user matches submission user) user may submit
-			// TODO: check that the assessment is open, submission is open
-			if (/* assessmentService.allowSubmit(assessmentId, null) */true)
-			{
-				// collect information: the selected assessment (id the request)
-				context.put("submission", submission);
-				
-				context.put("finalReview", Boolean.FALSE);
-
-				// render
-				ui.render(uiToc, context);
-				return;
-			}
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
 		}
 
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error")));
+		if (!assessmentService.allowCompleteSubmission(submissionId, null).booleanValue())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		// collect information: the selected assessment (id the request)
+		context.put("submission", submission);
+
+		context.put("finalReview", Boolean.FALSE);
+
+		// render
+		ui.render(uiToc, context);
 		return;
 	}
 

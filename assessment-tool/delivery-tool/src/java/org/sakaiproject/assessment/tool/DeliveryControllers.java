@@ -1581,6 +1581,50 @@ public class DeliveryControllers
 									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))));
 	}
 
+	/**
+	 * The enter interface needs the following entities in the context:
+	 * invalidUrl - indicates that we had an invalid URL, and what it was
+	 * inavlidPost - if set, indicates that we had a post.
+	 * unauthorized - if set, indicates that we had an unauthorized request.
+	 */
+	public static Controller constructError(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("error-title")
+				.setHeader("error-header")
+				.add(
+					ui.newSection()
+						.add(
+							ui.newAlert().setText("error-invalid-url-alert",ui.newPropertyReference().setReference("invalidUrl")))
+						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("invalidUrl"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newAlert().setText("error-invalid-post"))
+						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("invalidPost"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newAlert().setText("error-unauthorized"))
+						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("unauthorized"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newAlert().setText("error-unexpected"))
+						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("unexpected"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions().setText("error-recovery"))
+						.add(
+							ui.newNavigation()
+								.setDestination(ui.newDestination().setDestination("/list"))
+								.setDefault()
+								.setStyle(Navigation.Style.button)
+								.setTitle("return")));
+	}
+
 	// TODO: sludge column included take ... and this goes away
 	public static class SubmissionScoreDecision implements DecisionDelegate
 	{
