@@ -585,7 +585,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		String questionId = null;
 
 		// for linear assessments, start at the first incomplete question
-		if (!assessment.getRandomAccess())
+		if (!assessment.getRandomAccess().booleanValue())
 		{
 			AssessmentQuestion question = submission.getFirstIncompleteQuestion();
 			if (question != null)
@@ -593,7 +593,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 				questionId = question.getId();
 			}
 
-			// otherwise send the user to the submit view
+			// otherwise send the user to the toc/final review view
+			// Note: this is unlikely, since there's no way to mark the last question as complete without a "finish" -ggolden
 			else
 			{
 				destination = "/" + Destinations.final_review + "/" + submission.getId();
@@ -1055,43 +1056,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 			questions.add(question);
 			context.put("finishReady", submission.getIsAnswered(questions));
 
-			if (linearCheck)
+			// if we need to do our linear assessment check, and this is a linear assessment,
+			// we will reject if the question has been marked as 'complete'
+			if (linearCheck && !question.getSection().getAssessment().getRandomAccess().booleanValue()
+					&& submission.getIsCompleteQuestion(question).booleanValue())
 			{
-				// Ok, this stupid feature. Linear. Where we need to keep any question seen from being re-seen.
-				// But, we need to allow feedback, fileupload Upload and Remove to work, which all involve re-entry
-				// So...
-				// if we were just at the question destination, with or without "/feedback", allow re-entry, with or without
-				// "/feedback". This lets Upload work, and lets Feedback work.
-
-				// if the assessment is linear and this question has been seen already, we don't allow entry
-				// unless... we were directly in the question destination (w or wo feedback) and we are now in feedback
-				if (!question.getSection().getAssessment().getRandomAccess() && !submission.getIsIncompleteQuestion(question))
-				{
-					// adjust to remove feedback
-					String curDestinationAdjusted = context.getDestination();
-					if (curDestinationAdjusted.endsWith("/feedback"))
-						curDestinationAdjusted = curDestinationAdjusted.substring(0, curDestinationAdjusted.length()
-								- "/feedback".length());
-
-					String prevDestinationAdjusted = context.getPreviousDestination();
-					if ((prevDestinationAdjusted != null) && (prevDestinationAdjusted.endsWith("/feedback")))
-					{
-						prevDestinationAdjusted = prevDestinationAdjusted.substring(0, prevDestinationAdjusted.length()
-								- "/feedback".length());
-					}
-
-					// if previous (w or wo /feedback) is the same as current (w or wo /feedback), ok, otherwise...
-					if (!curDestinationAdjusted.equals(prevDestinationAdjusted))
-					{
-						// if we were just at a upload remove for this submission / question, allow re-entry
-						String removeWouldBeStartingWith = "/remove/" + submissionId + "/" + questionSelector.substring(1);
-
-						if (!prevDestinationAdjusted.startsWith(removeWouldBeStartingWith))
-						{
-							return Errors.unauthorized;
-						}
-					}
-				}
+				return Errors.unauthorized;
 			}
 
 			// find the answer (or have one created) for this submission / question
@@ -1195,6 +1165,15 @@ public class AssessmentDeliveryTool extends HttpServlet
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		// if this is a linear assessment, we will reject if the question has been marked as 'complete'
+		if (!submission.getAssessment().getRandomAccess().booleanValue()
+				&& submission.getIsCompleteQuestion(question).booleanValue())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 

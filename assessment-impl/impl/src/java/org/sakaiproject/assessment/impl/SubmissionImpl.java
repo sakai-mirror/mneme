@@ -294,7 +294,7 @@ public class SubmissionImpl implements Submission
 		{
 			for (AssessmentQuestion question : section.getQuestions())
 			{
-				if (getIsIncompleteQuestion(question))
+				if (!getIsCompleteQuestion(question).booleanValue())
 				{
 					return question;
 				}
@@ -357,7 +357,7 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsIncompleteQuestion(AssessmentQuestion question)
+	public Boolean getIsCompleteQuestion(AssessmentQuestion question)
 	{
 		if (question == null) return false;
 
@@ -365,7 +365,7 @@ public class SubmissionImpl implements Submission
 		if (this.answersStatus == PropertyStatus.unset) readAnswers();
 
 		SubmissionAnswerImpl answer = findAnswer(question.getId());
-		if ((answer == null) || (answer.getSubmittedDate() == null))
+		if ((answer != null) && (answer.getSubmittedDate() != null))
 		{
 			return true;
 		}

@@ -634,6 +634,7 @@ public class DeliveryControllers
 								.setTitle("question-eval-overall-comment-title")
 								.add(
 									ui.newEvaluation()
+										.setIcon("/icons/note.png")
 										.setText("question-eval-overall-comment", ui.newTextPropertyReference().setReference("submission.evalComment")))
 								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.evalComment"))))
 						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
@@ -689,6 +690,7 @@ public class DeliveryControllers
 										.setTitle("question-eval-question-comment-title")
 										.add(
 											ui.newEvaluation()
+												.setIcon("/icons/note.png")
 												.setText("question-eval-question-comment", ui.newTextPropertyReference().setReference("answer.evalComment")))
 										.setIncluded(
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),

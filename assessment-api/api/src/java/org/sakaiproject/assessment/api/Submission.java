@@ -131,13 +131,13 @@ public interface Submission
 	Boolean getIsComplete();
 
 	/**
-	 * Check if this question has an incomplete answer.
+	 * Check if this the answer to this question has been marked "complete" - this is not "fully answered" as in getIsAnswered().
 	 * 
 	 * @param question
 	 *        The assessment question
-	 * @return TRUE if the question has ever an incomplete answer, false if not.
+	 * @return TRUE if the question has been marked "complete", FALSE if not.
 	 */
-	Boolean getIsIncompleteQuestion(AssessmentQuestion question);
+	Boolean getIsCompleteQuestion(AssessmentQuestion question);
 
 	/**
 	 * Access the start date for this submission.
