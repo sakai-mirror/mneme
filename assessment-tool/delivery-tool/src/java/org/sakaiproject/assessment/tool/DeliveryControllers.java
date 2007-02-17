@@ -1588,6 +1588,7 @@ public class DeliveryControllers
 	 * invalidUrl - indicates that we had an invalid URL, and what it was
 	 * inavlidPost - if set, indicates that we had a post.
 	 * unauthorized - if set, indicates that we had an unauthorized request.
+	 * testUrl if we have another re-entry point, in the test in progress.
 	 */
 	public static Controller constructError(UiService ui)
 	{
@@ -1615,6 +1616,17 @@ public class DeliveryControllers
 						.add(
 							ui.newAlert().setText("error-unexpected"))
 						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("unexpected"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions().setText("error-recovery-test"))
+						.add(
+							ui.newNavigation()
+								.setDestination(ui.newDestination().setDestination("{0}", ui.newPropertyReference().setReference("testUrl")))
+								.setDefault()
+								.setStyle(Navigation.Style.button)
+								.setTitle("enter"))
+						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("testUrl"))))
 				.add(
 					ui.newSection()
 						.add(

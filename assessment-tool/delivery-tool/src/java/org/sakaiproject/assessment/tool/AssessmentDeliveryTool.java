@@ -72,7 +72,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our errors. */
 	enum Errors
 	{
-		invalid, invalidpost, unauthorized, unexpected, unknown
+		invalid, invalidpost, unauthorized, unexpected, linear, unknown
 	}
 
 	/** Our log (commons). */
@@ -328,14 +328,20 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case error:
 			{
-				// we would like a single parameter (sid)
+				// we would like a single parameter (error code), and perhaps one more
 				String error = null;
+				String param = null;
 				if (parts.length >= 3)
 				{
 					error = parts[2];
+
+					if (parts.length >= 4)
+					{
+						param = parts[3];
+					}
 				}
 
-				errorGet(req, res, error, context);
+				errorGet(req, res, error, param, context);
 				break;
 			}
 		}
@@ -571,6 +577,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				return;
 			}
 		}
+
 		// for all
 		else if ((presentation != null) && (presentation == QuestionPresentation.BY_ASSESSMENT))
 		{
@@ -639,12 +646,16 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Servlet request.
 	 * @param res
 	 *        Servlet response.
+	 * @param errorCode
+	 *        The error code string.
+	 * @param param
+	 *        The extra parameter.
 	 * @param context
 	 *        UiContext.
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void errorGet(HttpServletRequest req, HttpServletResponse res, String errorCode, Context context)
+	protected void errorGet(HttpServletRequest req, HttpServletResponse res, String errorCode, String param, Context context)
 	{
 		// which error?
 		Errors error = Errors.unknown;
@@ -682,6 +693,28 @@ public class AssessmentDeliveryTool extends HttpServlet
 			case unexpected:
 			{
 				context.put("unexpected", Boolean.TRUE);
+				break;
+			}
+
+			case linear:
+			{
+				context.put("unauthorized", Boolean.TRUE);
+
+				if (param != null)
+				{
+					// treat the param as a submission id
+					Submission s = assessmentService.idSubmission(param);
+					if (s != null)
+					{
+						AssessmentQuestion question = s.getFirstIncompleteQuestion();
+						if (question != null)
+						{
+							// next destination: first question of submission
+							String destination = "/" + Destinations.question + "/" + s.getId() + "/q" + question.getId();
+							context.put("testUrl", destination);
+						}
+					}
+				}
 				break;
 			}
 		}
@@ -914,7 +947,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		if (err != null)
 		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + err)));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + err + "/" + submissionId)));
 			return;
 		}
 
@@ -1061,7 +1094,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			if (linearCheck && !question.getSection().getAssessment().getRandomAccess().booleanValue()
 					&& submission.getIsCompleteQuestion(question).booleanValue())
 			{
-				return Errors.unauthorized;
+				return Errors.linear;
 			}
 
 			// find the answer (or have one created) for this submission / question
@@ -1173,7 +1206,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				&& submission.getIsCompleteQuestion(question).booleanValue())
 		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.linear + "/" + submissionId)));
 			return;
 		}
 
