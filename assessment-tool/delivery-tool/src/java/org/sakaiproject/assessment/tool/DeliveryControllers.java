@@ -277,6 +277,13 @@ public class DeliveryControllers
 				.setHeader("enter-header")
 				.add(
 					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("linear-instructions")
+								.setIncluded(
+									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("assessment.randomAccess")))))
+				.add(
+					ui.newSection()
 						.setTitle("enter-display-instructions", ui.newPropertyReference().setReference("assessment.title"))
 						.add(
 							ui.newHtml()
@@ -379,6 +386,13 @@ public class DeliveryControllers
 				.setTitle("question-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.setHeader("question-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("linear-instructions")
+								.setIncluded(
+									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
+				.add(
 					ui.newItemNavBar()
 						.setReturn(
 							ui.newNavigation()
@@ -402,47 +416,6 @@ public class DeliveryControllers
 										.setReference("review"))))
 				.add(
 					ui.newNavigationBar()
-						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setLeft()
-								.setAccessKey("finish-exam-access")
-								.setDescription("finish-exam-description")
-								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
-								.setTitle("finish-exam")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/final_review/{0}",ui.newTextPropertyReference().setReference("submission.id")))
-								.setIncluded(
-									ui.newAndDecision().setRequirements(
-										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("finishReady")),
-										ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
-						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setLeft()
-								.setTitle("finish-exam")
-								.setAccessKey("finish-exam-access")
-								.setDescription("finish-exam-description")
-								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
-								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))
-								.setIncluded(
-									ui.newOrDecision().setOptions(
-											ui.newDecision().setProperty(ui.newPropertyReference().setReference("finishReady")),
-											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
-						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setLeft()
-								.setIcon("/icons/exit.gif",Navigation.IconStyle.left)
-								.setTitle("save-exit")
-								.setDescription("save-exit-description")
-								.setAccessKey("save-exit-access")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/list")))
-						.add(
-							ui.newDivider())
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -580,6 +553,47 @@ public class DeliveryControllers
 									ui.newAndDecision().setRequirements(
 										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
 										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section")))))
+						.add(
+							ui.newDivider())
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
+								.setAccessKey("finish-exam-access")
+								.setDescription("finish-exam-description")
+								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
+								.setTitle("finish-exam")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/final_review/{0}",ui.newTextPropertyReference().setReference("submission.id")))
+								.setIncluded(
+									ui.newAndDecision().setRequirements(
+										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("finishReady")),
+										ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
+								.setTitle("finish-exam")
+								.setAccessKey("finish-exam-access")
+								.setDescription("finish-exam-description")
+								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
+								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))
+								.setIncluded(
+									ui.newOrDecision().setOptions(
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("finishReady")),
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
+								.setIcon("/icons/exit.gif",Navigation.IconStyle.left)
+								.setTitle("save-exit")
+								.setDescription("save-exit-description")
+								.setAccessKey("save-exit-access")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/list")))
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -937,9 +951,9 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setReference("answer.rationale"))
 										.setSize(5, 40)
-										.setOnEmptyAlert(
-											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
-											"question-rationale-on-empty-alert")
+//										.setOnEmptyAlert(
+//											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
+//											"question-rationale-on-empty-alert")
 										.setIncluded(
 											ui.newDecision()
 												.setProperty(
@@ -1014,47 +1028,6 @@ public class DeliveryControllers
 										.setReference("review"))))
 				.add(
 					ui.newNavigationBar()
-						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setLeft()
-								.setAccessKey("finish-exam-access")
-								.setDescription("finish-exam-description")
-								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
-								.setTitle("finish-exam")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/final_review/{0}",ui.newTextPropertyReference().setReference("submission.id")))
-								.setIncluded(
-									ui.newAndDecision().setRequirements(
-										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("finishReady")),
-										ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
-						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setLeft()
-								.setTitle("finish-exam")
-								.setAccessKey("finish-exam-access")
-								.setDescription("finish-exam-description")
-								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
-								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))
-								.setIncluded(
-									ui.newOrDecision().setOptions(
-											ui.newDecision().setProperty(ui.newPropertyReference().setReference("finishReady")),
-											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
-						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setLeft()
-								.setIcon("/icons/exit.gif",Navigation.IconStyle.left)
-								.setTitle("save-exit")
-								.setDescription("save-exit-description")
-								.setAccessKey("save-exit-access")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/list")))
-						.add(
-							ui.newDivider())
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -1193,6 +1166,47 @@ public class DeliveryControllers
 										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
 										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section")))))
 						.add(
+							ui.newDivider())
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
+								.setAccessKey("finish-exam-access")
+								.setDescription("finish-exam-description")
+								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
+								.setTitle("finish-exam")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/final_review/{0}",ui.newTextPropertyReference().setReference("submission.id")))
+								.setIncluded(
+									ui.newAndDecision().setRequirements(
+										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("finishReady")),
+										ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
+								.setTitle("finish-exam")
+								.setAccessKey("finish-exam-access")
+								.setDescription("finish-exam-description")
+								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
+								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))
+								.setIncluded(
+									ui.newOrDecision().setOptions(
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("finishReady")),
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setLeft()
+								.setIcon("/icons/exit.gif",Navigation.IconStyle.left)
+								.setTitle("save-exit")
+								.setDescription("save-exit-description")
+								.setAccessKey("save-exit-access")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/list")))
+						.add(
 							ui.newNavigation()
 								.setSubmit()
 								.setRight()
@@ -1212,8 +1226,7 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setReference("review"))
 											.setReversed()))
-						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()))
-;
+						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()));
 	}
 
 	/**
@@ -1340,7 +1353,7 @@ public class DeliveryControllers
 										.setReference("review")),
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
 				.add(
-					ui.newInstructions()
+					ui.newAlert()
 						.setText("final-instructions")
 						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("finalReview"))))
 				.add(
@@ -2068,7 +2081,7 @@ public class DeliveryControllers
 
 	/**
 	 * From a value which is an AssessmentQuestion, 'format' this into the html for the icons<br />
-	 * for 'unanswerd' or 'mark for review' for the related submission question.
+	 * for 'unanswerd' or 'mark for review' or 'rationale empty' for the related submission question.
 	 */
 	public static class FormatQuestionDecoration implements FormatDelegate
 	{
@@ -2104,21 +2117,21 @@ public class DeliveryControllers
 				}
 			}
 
-			// if mark for review, use that icon
-			if (markForReview)
-			{
-				return "<img src=\"" + context.get("sakai.return.url") + "/icons/markedforreview.png\" alt=\""
-						+ context.getMessages().getString("toc-key-mark-for-review") + "\" />";
-			}
-
-			// otherwise if not found, or not answered, use the unanswered icon
-			else if (!answered)
+			// if not found, or not answered, use the unanswered icon
+			if (!answered)
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/unanswered.png\" alt=\""
 						+ context.getMessages().getString("toc-key-unanswered") + "\" />";
 			}
 
-			// otherwise, if rationale is needed and not present, use the no-rationale icon
+			// if mark for review, use that icon
+			else if (markForReview)
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/markedforreview.png\" alt=\""
+						+ context.getMessages().getString("toc-key-mark-for-review") + "\" />";
+			}
+
+			// if rationale is needed and not present, use the no-rationale icon
 			else if (missingRationale)
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/missingrationale.png\" alt=\""
