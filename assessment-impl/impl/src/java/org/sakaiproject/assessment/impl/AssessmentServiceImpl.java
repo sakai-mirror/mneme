@@ -51,6 +51,7 @@ import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.assessment.api.SubmissionCompletedException;
 import org.sakaiproject.authz.api.SecurityService;
+import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.entity.api.EntityManager;
@@ -73,7 +74,7 @@ import org.sakaiproject.util.StringUtil;
  * AssessmentServiceImpl is ...
  * </p>
  */
-public class AssessmentServiceImpl implements AssessmentService
+public class AssessmentServiceImpl implements AssessmentService, Runnable
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(AssessmentServiceImpl.class);
@@ -330,6 +331,20 @@ public class AssessmentServiceImpl implements AssessmentService
 		m_autoDdl = new Boolean(value).booleanValue();
 	}
 
+	/** How long to wait (ms) between checks for timed-out submission in the db. */
+	protected long m_timeoutCheckMs = 1000L * 300L;
+
+	/**
+	 * Set the # seconds to wait between db checks for timed-out submissions.
+	 * 
+	 * @param time
+	 *        The # seconds to wait between db checks for timed-out submissions.
+	 */
+	public void setTimeoutCheckSeconds(String time)
+	{
+		m_timeoutCheckMs = Integer.parseInt(time) * 1000L;
+	}
+
 	/*******************************************************************************************************************************
 	 * Init and Destroy
 	 ******************************************************************************************************************************/
@@ -339,6 +354,9 @@ public class AssessmentServiceImpl implements AssessmentService
 	 */
 	public void destroy()
 	{
+		// stop the checking thread
+		stop();
+
 		M_log.info("destroy()");
 	}
 
@@ -363,6 +381,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 				m_submissionCache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getSubmissionReference(""));
 			}
+
+			// start the checking thread
+			start();
 
 			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60);
 		}
@@ -4426,5 +4447,174 @@ public class AssessmentServiceImpl implements AssessmentService
 		}
 
 		return rv;
+	}
+
+	/*******************************************************************************************************************************
+	 * Runnable - checking thread
+	 ******************************************************************************************************************************/
+
+	/** The checker thread. */
+	protected Thread m_thread = null;
+
+	/** The thread quit flag. */
+	protected boolean m_threadStop = false;
+
+	/**
+	 * Start the clean and report thread.
+	 */
+	protected void start()
+	{
+		m_threadStop = false;
+
+		m_thread = new Thread(this, getClass().getName());
+		m_thread.start();
+	}
+
+	/**
+	 * Stop the clean and report thread.
+	 */
+	protected void stop()
+	{
+		if (m_thread == null) return;
+
+		// signal the thread to stop
+		m_threadStop = true;
+
+		// wake up the thread
+		m_thread.interrupt();
+
+		m_thread = null;
+	}
+
+	/**
+	 * Run the event checking thread.
+	 */
+	public void run()
+	{
+		// since we might be running while the component manager is still being created and populated, such as at server startup,
+		// wait here for a complete component manager
+		ComponentManager.waitTillConfigured();
+
+		// loop till told to stop
+		while ((!m_threadStop) && (!Thread.currentThread().isInterrupted()))
+		{
+			try
+			{
+				// get a list of submission ids that are open, timed, and well expired
+				List<String> ids = getTimedOutSubmissions(1 * 60 * 1000);
+
+				// for each one, close it if it is still open
+				for (String sid : ids)
+				{
+					completeTheSubmission(sid);
+				}
+			}
+			catch (Throwable e)
+			{
+				M_log.warn("run: will continue: ", e);
+			}
+
+			// take a small nap
+			try
+			{
+				Thread.sleep(m_timeoutCheckMs);
+			}
+			catch (Exception ignore)
+			{
+			}
+		}
+	}
+
+	/**
+	 * Find the submissions that are open, timed, and well expired.
+	 * 
+	 * @param well
+	 *        The number of ms past the time limit that the submission's elapsed time must be to qualify
+	 * @return A List of the submission ids that are open, timed, and well expired.
+	 */
+	protected List<String> getTimedOutSubmissions(final long well)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("getTimedOutSubmissions");
+
+		final Time asOf = m_timeService.newTime();
+
+		String statement = "SELECT AG.ASSESSMENTGRADINGID, AG.ATTEMPTDATE, PAC.TIMELIMIT" + " FROM SAM_ASSESSMENTGRADING_T AG"
+				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON AG.PUBLISHEDASSESSMENTID = PAC.ASSESSMENTID"
+				+ " WHERE PAC.TIMELIMIT > 0 AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(false);
+
+		Object[] fields = new Object[0];
+
+		final AssessmentServiceImpl service = this;
+		final List<String> rv = new ArrayList<String>();
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String submissionId = result.getString(1);
+
+					java.sql.Timestamp ts = result.getTimestamp(2, m_sqlService.getCal());
+					Time attemptDate = null;
+					if (ts != null)
+					{
+						attemptDate = m_timeService.newTime(ts.getTime());
+					}
+
+					// convert to ms from seconds
+					long timeLimit = result.getLong(3) * 1000;
+
+					// if the elapsed time since their start is well past the time limit
+					if ((attemptDate != null) && ((asOf.getTime() - attemptDate.getTime()) > (timeLimit + well)))
+					{
+						rv.add(submissionId);
+					}
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getAssessmentDueDate: " + e);
+					return null;
+				}
+			}
+		});
+
+		return rv;
+	}
+
+	/**
+	 * Mark the submission as complete as of now.
+	 * 
+	 * @param sid
+	 *        The submission id.
+	 * @return true if it was successful, false if not.
+	 */
+	protected boolean completeTheSubmission(String sid)
+	{
+		// the current time
+		Time asOf = m_timeService.newTime();
+
+		if (M_log.isDebugEnabled()) M_log.debug("completeTheSubmission: submission: " + sid);
+
+		String statement = "UPDATE SAM_ASSESSMENTGRADING_T" + " SET SUBMITTEDDATE = ?, STATUS = 1, FORGRADE = "
+				+ m_sqlService.getBooleanConstant(true) + " WHERE ASSESSMENTGRADINGID = ? AND FORGRADE = "
+				+ m_sqlService.getBooleanConstant(false);
+		Object fields[] = new Object[2];
+		fields[0] = asOf;
+		fields[1] = sid;
+		if (!m_sqlService.dbWrite(null, statement, fields))
+		{
+			// it didn't work!
+			return false;
+		}
+
+		// event track it
+		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(sid), true));
+
+		// the submission is altered by this - clear the cache
+		unCacheSubmission(sid);
+
+		return true;
 	}
 }

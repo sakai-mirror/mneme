@@ -23,6 +23,7 @@
  		<property name="autoDdl"><value>${auto.ddl}</value></property>
  		<property name="cacheMinutes"><value>5</value></property>
  		<property name="cacheCleanerMinutes"><value>15</value></property>
+		<property name="timeoutCheckSeconds"><value>300</value></property>
 	</bean>
 
 	<bean id="org.sakaiproject.assessment.api.AttachmentService"
