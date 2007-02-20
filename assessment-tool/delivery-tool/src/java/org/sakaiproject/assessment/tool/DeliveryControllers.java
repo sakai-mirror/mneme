@@ -273,7 +273,6 @@ public class DeliveryControllers
 	{
 		return
 			ui.newInterface()
-				.setFancy()
 				.setTitle("enter-title", ui.newTextPropertyReference().setReference("assessment.title"))
 				.setHeader("enter-header")
 				.add(
@@ -353,7 +352,6 @@ public class DeliveryControllers
 												.setReference("assessment.feedbackDelivery")))))
 					.add(
 						ui.newNavigationBar()
-							.setBottom()
 							.add(
 								ui.newNavigation()
 									.setSubmit()
@@ -370,7 +368,8 @@ public class DeliveryControllers
 									.setAccessKey("cancel-access")
 									.setDescription("cancel-description")
 									.setStyle(Navigation.Style.button)
-									.setDestination(ui.newDestination().setDestination("/list"))));
+									.setDestination(ui.newDestination().setDestination("/list")))
+							.setId("nav"));
 	}
 
 	/**
@@ -391,9 +390,9 @@ public class DeliveryControllers
 	{
 		return
 			ui.newInterface()
-				.setFancy()
 				.setTitle("question-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.setHeader("question-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newSection()
 						.add(
@@ -791,9 +790,9 @@ public class DeliveryControllers
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.essay.toString())
 												.setProperty(ui.newPropertyReference().setReference("answer.question.type"))))))
+				.add(ui.newSection())// TODO: a few em padder
 				.add(
 					ui.newNavigationBar()
-						.setBottom()
 						.add(
 							ui.newNavigation()
 								.setTitle("prev")
@@ -807,7 +806,7 @@ public class DeliveryControllers
 								.setTitle("return")
 								.setAccessKey("return-access")
 								.setDescription("return-description")
-								.setIcon("/icons/return.gif",Navigation.IconStyle.left)
+								.setIcon("/icons/return.png",Navigation.IconStyle.left)
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/list")))
 						.add(
@@ -822,10 +821,10 @@ public class DeliveryControllers
 							ui.newDecision()
 								.setProperty(
 									ui.newPropertyReference()
-										.setReference("review"))))
+										.setReference("review")))
+						.setId("nav"))
 				.add(
 					ui.newNavigationBar()
-						.setBottom()
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -961,6 +960,15 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setSubmit()
+								.setIcon("/icons/exit.gif",Navigation.IconStyle.left)
+								.setTitle("save-exit")
+								.setDescription("save-exit-description")
+								.setAccessKey("save-exit-access")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/list")))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
 								.setAccessKey("finish-exam-access")
 								.setDescription("finish-exam-description")
 								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
@@ -988,15 +996,6 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setSubmit()
-								.setIcon("/icons/exit.gif",Navigation.IconStyle.left)
-								.setTitle("save-exit")
-								.setDescription("save-exit-description")
-								.setAccessKey("save-exit-access")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/list")))
-						.add(
-							ui.newNavigation()
-								.setSubmit()
 								.setRight()
 								.setTitle("question-link-feedback")
 								.setStyle(Navigation.Style.link)
@@ -1014,7 +1013,8 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setReference("review"))
 											.setReversed()))
-						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed()));
+						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed())
+						.setId("nav"));
 	}
 
 	/**
@@ -1026,7 +1026,6 @@ public class DeliveryControllers
 	{
 		return
 			ui.newInterface()
-				.setFancy()
 				.setTitle("submitted-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.setHeader("submitted-header")
 				.add(
@@ -1082,16 +1081,16 @@ public class DeliveryControllers
 												.setReference("submission.submittedDate")))))
 				.add(
 					ui.newNavigationBar()
-						.setBottom()
 						.add(
 							ui.newNavigation()
 								.setDefault()
 								.setTitle("return")
 								.setAccessKey("return-access")
 								.setDescription("return-description")
-								.setIcon("/icons/return.gif",Navigation.IconStyle.left)
+								.setIcon("/icons/return.png",Navigation.IconStyle.left)
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/list"))));
+								.setDestination(ui.newDestination().setDestination("/list")))
+						.setId("nav"));
 	}
 
 	/**
@@ -1103,9 +1102,9 @@ public class DeliveryControllers
 	{
 		return
 			ui.newInterface()
-				.setFancy()
 				.setTitle("toc-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.setHeader("toc-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newCountdownTimer()
 						//.setHideMessage("timer-hide")
@@ -1235,7 +1234,15 @@ public class DeliveryControllers
 							.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
 				.add(
 					ui.newNavigationBar()
-						.setBottom()
+						.add(
+							ui.newNavigation()
+								.setDefault()
+								.setIcon("/icons/exit.gif",Navigation.IconStyle.left)
+								.setTitle("save-exit")
+								.setDescription("save-exit-description")
+								.setAccessKey("save-exit-access")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/list")))
 						.add(
 							ui.newNavigation()
 								.setTitle("finish-exam")
@@ -1246,15 +1253,7 @@ public class DeliveryControllers
 								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id"))))
-						.add(
-							ui.newNavigation()
-								.setDefault()
-								.setIcon("/icons/exit.gif",Navigation.IconStyle.left)
-								.setTitle("save-exit")
-								.setDescription("save-exit-description")
-								.setAccessKey("save-exit-access")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/list"))));
+						.setId("nav"));
 	}
 
 	/**
@@ -1267,7 +1266,6 @@ public class DeliveryControllers
 	{
 		return
 			ui.newInterface()
-				.setFancy()
 				.setTitle("remove-title")
 				.setHeader("remove-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.add(
@@ -1299,7 +1297,6 @@ public class DeliveryControllers
 								.setTimestamp(true)))
 				.add(
 					ui.newNavigationBar()
-						.setBottom()
 						.add(
 							ui.newNavigation()
 								.setDefault()
@@ -1325,10 +1322,10 @@ public class DeliveryControllers
 						.setIncluded(
 								ui.newCompareDecision()
 									.setEqualsConstant(QuestionPresentation.BY_QUESTION.toString())
-									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))	
+									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
+						.setId("nav"))	
 				.add(
 					ui.newNavigationBar()
-						.setBottom()
 						.add(
 							ui.newNavigation()
 								.setDefault()
@@ -1356,10 +1353,10 @@ public class DeliveryControllers
 						.setIncluded(
 								ui.newCompareDecision()
 									.setEqualsConstant(QuestionPresentation.BY_SECTION.toString())
-									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))		
+									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
+						.setId("nav"))		
 				.add(
 					ui.newNavigationBar()
-						.setBottom()
 						.add(
 							ui.newNavigation()
 								.setDefault()
@@ -1385,7 +1382,8 @@ public class DeliveryControllers
 						.setIncluded(
 								ui.newCompareDecision()
 									.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
-									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))));
+									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
+						.setId("nav"));
 	}
 
 	/**
