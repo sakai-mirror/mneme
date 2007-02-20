@@ -790,7 +790,7 @@ public class DeliveryControllers
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.essay.toString())
 												.setProperty(ui.newPropertyReference().setReference("answer.question.type"))))))
-				.add(ui.newSection())// TODO: a few em padder
+				.add(ui.newGap())
 				.add(
 					ui.newNavigationBar()
 						.add(
