@@ -1148,26 +1148,26 @@ public class DeliveryControllers
 					.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
 				.add(
 					ui.newSection()
-						.setIterator(
-							ui.newPropertyReference()
-								.setReference("submission.assessment.sections"), "section")
 						.add(
 							ui.newEntityList()
 								.setStyle(EntityList.Style.form)
 								.setIterator(
-									ui.newPropertyReference().setReference("section.questions"), "question")
-								.setTitle("toc-questions-title",
+									ui.newPropertyReference().setReference("submission.assessment.questions"), "question")
+								.addHeading(
+									ui.newAndDecision()
+										.setRequirements(
+											ui.newCompareDecision()
+												.setEqualsConstant("Default")
+												.setReversed()
+												.setProperty(ui.newPropertyReference().setReference("question.section.title")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("question.sectionOrdering.isFirst"))),
+									"toc-questions-title",
 									// Part{0} - {1} - {2}/{3} Answered Questions, {4} Points
-									ui.newPropertyReference().setReference("section.ordering.position"),
-									ui.newPropertyReference().setReference("section.title"),
+									ui.newPropertyReference().setReference("question.section.ordering.position"),
+									ui.newPropertyReference().setReference("question.section.title"),
 									ui.newPropertyReference().setFormatDelegate(new QuestionsAnswered()),
-									ui.newPropertyReference().setReference("section.numQuestions"),
-									ui.newPropertyReference().setReference("section").setFormatDelegate(new SectionScore(false)))
-								.setTitleIncluded(
-									ui.newCompareDecision()
-										.setEqualsConstant("Default")
-										.setReversed()
-										.setProperty(ui.newPropertyReference().setReference("section.title")))
+									ui.newPropertyReference().setReference("question.section.numQuestions"),
+									ui.newPropertyReference().setReference("question.section").setFormatDelegate(new SectionScore(false)))
 								.addColumn(
 									ui.newPropertyColumn()
 										.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatQuestionDecoration()))

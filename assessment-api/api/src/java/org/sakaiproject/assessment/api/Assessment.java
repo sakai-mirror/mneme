@@ -236,6 +236,13 @@ public interface Assessment
 	QuestionPresentation getQuestionPresentation();
 
 	/**
+	 * Access the questions across all sections. The order will be in section order, and in each section, random order (if enabled) based on the current user.
+	 * 
+	 * @return The questions across all sections. The order will be in section order, and in each section, random order (if enabled) based on the current user.
+	 */
+	List<? extends AssessmentQuestion> getQuestions();
+
+	/**
 	 * Access the random access flag that controlls an assessment taker's random or linear access to the questions of the
 	 * assessment.
 	 * 
@@ -300,22 +307,6 @@ public interface Assessment
 	 * @return The URL to provide when submitted.
 	 */
 	String getSubmitUrl();
-
-	/**
-	 * Set the rich-text / html message to display when submitted.
-	 * 
-	 * @param message
-	 *        The rich-text / html message to display when submitted.
-	 */
-	void setSubmitMessage(String message);
-
-	/**
-	 * Set the URL to provide when submitted.
-	 * 
-	 * @param url
-	 *        The URL to provide when submitted.
-	 */
-	void setSubmitUrl(String url);
 
 	/**
 	 * Access the time limit for taking the assessment (ms).
@@ -539,6 +530,22 @@ public interface Assessment
 	 *        The assessment's lifecycle/type status.
 	 */
 	void setStatus(AssessmentStatus status);
+
+	/**
+	 * Set the rich-text / html message to display when submitted.
+	 * 
+	 * @param message
+	 *        The rich-text / html message to display when submitted.
+	 */
+	void setSubmitMessage(String message);
+
+	/**
+	 * Set the URL to provide when submitted.
+	 * 
+	 * @param url
+	 *        The URL to provide when submitted.
+	 */
+	void setSubmitUrl(String url);
 
 	/**
 	 * Set the time limit for taking the assessment (seconds).

@@ -549,6 +549,24 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<? extends AssessmentQuestion> getQuestions()
+	{
+		// read the section info if this property has not yet been set
+		if (this.sectionsStatus == PropertyStatus.unset) readSections();
+
+		List<AssessmentQuestion> rv = new ArrayList<AssessmentQuestion>();
+
+		for (AssessmentSection s : this.sections)
+		{
+			rv.addAll(s.getQuestions());
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getRandomAccess()
 	{
 		// read the basic info if this property has not yet been set
