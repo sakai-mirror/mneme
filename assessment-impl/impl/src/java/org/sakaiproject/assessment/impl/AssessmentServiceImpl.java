@@ -2148,6 +2148,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 */
 	public List<Float> getAssessmentScores(String assessmentId)
 	{
+		// TODO: Warning - this query is showing serious performance problems (Oracle)
+
 		final List<Float> rv = new ArrayList<Float>();
 
 		String statement = "SELECT AG.FINALSCORE" + " FROM SAM_ASSESSMENTGRADING_T AG"
@@ -2185,6 +2187,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 */
 	public List<Float> getQuestionScores(String questionId)
 	{
+		// TODO: Warning - this query is showing serious performance problems (Oracle)
 		final List<Float> rv = new ArrayList<Float>();
 
 		String statement = "SELECT SUM(IG.AUTOSCORE+IG.OVERRIDESCORE) AS SCORE" + " FROM SAM_ITEMGRADING_T IG"

@@ -421,14 +421,14 @@ public class DeliveryControllers
 				.add(
 					ui.newSection()
 						.setTitle("question-total-score", ui.newTextPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore(true)))
-						.add(
-							ui.newDistributionChart()
-								.setData(ui.newPropertyReference().setReference("submission.assessment.scores"))
-								.setWidth(44)
-								.setHeight(22)
-								.setClump(5)
-								.setMark(ui.newPropertyReference().setReference("submission.totalScore"))
-								.setMax(ui.newPropertyReference().setReference("submission.assessment.totalPoints")))
+//						.add(
+//							ui.newDistributionChart()
+//								.setData(ui.newPropertyReference().setReference("submission.assessment.scores"))
+//								.setWidth(44)
+//								.setHeight(22)
+//								.setClump(5)
+//								.setMark(ui.newPropertyReference().setReference("submission.totalScore"))
+//								.setMax(ui.newPropertyReference().setReference("submission.assessment.totalPoints")))
 						.add(
 							ui.newSection()
 								.setTitle("question-eval-overall-comment-title")
@@ -476,15 +476,15 @@ public class DeliveryControllers
 						.add(
 							ui.newSection()
 								.setTitle(null,ui.newTextPropertyReference().setReference("answer.question").setFormatDelegate(new FormatQuestionTitle()))
-								.add(
-									ui.newDistributionChart()
-										.setData(ui.newPropertyReference().setReference("answer.question.scores"))
-										.setWidth(44)
-										.setHeight(22)
-										.setClump(5)
-										.setMark(ui.newPropertyReference().setReference("answer.totalScore"))
-										.setMax(ui.newPropertyReference().setReference("answer.question.points"))
-										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
+//								.add(
+//									ui.newDistributionChart()
+//										.setData(ui.newPropertyReference().setReference("answer.question.scores"))
+//										.setWidth(44)
+//										.setHeight(22)
+//										.setClump(5)
+//										.setMark(ui.newPropertyReference().setReference("answer.totalScore"))
+//										.setMax(ui.newPropertyReference().setReference("answer.question.points"))
+//										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
 								.add(
 									ui.newSection()
 										.setTitle("question-eval-question-comment-title")
