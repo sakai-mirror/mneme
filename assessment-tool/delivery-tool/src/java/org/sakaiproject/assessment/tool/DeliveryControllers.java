@@ -286,8 +286,8 @@ public class DeliveryControllers
 					ui.newSection()
 						.setTitle("enter-display-instructions", ui.newPropertyReference().setReference("assessment.title"))
 						.add(
-							ui.newHtml()
-								.setText(null, ui.newPropertyReference().setReference("assessment.description")))
+							ui.newText()
+								.setText(null, ui.newHtmlPropertyReference().setReference("assessment.description")))
 						.add(
 							ui.newAttachments()
 								.setTitle("enter-attachments")
@@ -466,8 +466,8 @@ public class DeliveryControllers
 										.setReversed()
 										.setProperty(ui.newPropertyReference().setReference("answer.question.section.title"))))
 						.add(
-							ui.newHtml()
-								.setText(null, ui.newPropertyReference().setReference("answer.question.section.description")))
+							ui.newText()
+								.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.section.description")))
 						.add(
 							ui.newAttachments()
 								.setTitle("enter-attachments")
@@ -496,8 +496,8 @@ public class DeliveryControllers
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
 											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.evalComment"))))
 								.add(
-									ui.newHtml()
-										.setText(null, ui.newTextPropertyReference().setReference("answer.question.instructions"))
+									ui.newText()
+										.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.instructions"))
 										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(
@@ -505,8 +505,8 @@ public class DeliveryControllers
 												.setProperty(
 													ui.newPropertyReference().setReference("answer.question.type"))))
 								.add(
-									ui.newHtml()
-										.setText(null, ui.newTextPropertyReference().setReference("answer.question.part.title"))
+									ui.newText()
+										.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.part.title"))
 										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(
@@ -526,8 +526,8 @@ public class DeliveryControllers
 										.setIterator(
 											ui.newPropertyReference().setReference("answer.question.part.answers"), "qanswer")
 										.addColumn(
-											ui.newHtmlPropertyColumn()
-												.setProperty(null, ui.newPropertyReference().setFormatDelegate(new FormatAnswerCorrectFeedback()))
+											ui.newPropertyColumn()
+												.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatAnswerCorrectFeedback()))
 												.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("feedback")), null))
 										.addColumn(
 											ui.newSelectionColumn()
@@ -553,14 +553,14 @@ public class DeliveryControllers
 													ui.newTextPropertyReference()
 														.setReference("qanswer.label")))
 										.addColumn(
-											ui.newHtmlPropertyColumn()
+											ui.newPropertyColumn()
 												.setProperty(
-													ui.newTextPropertyReference()
+													ui.newHtmlPropertyReference()
 														.setReference("qanswer.text")))
 										.addColumn(
-											ui.newHtmlPropertyColumn()
+											ui.newPropertyColumn()
 												.setProperty(
-													ui.newTextPropertyReference()
+													ui.newHtmlPropertyReference()
 														.setReference("qanswer.feedbackGeneral"))
 												.setIncluded(ui.newDecision().setDelegate(new AnswerFeedbackDecision()), null))
 										.setIncluded(
@@ -758,8 +758,8 @@ public class DeliveryControllers
 												ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed(),
 												ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.markedForReview")))))
 								.add(
-									ui.newHtml()
-										.setText("question-answer-key", ui.newPropertyReference().setReference("answer.question.answerKey"))
+									ui.newText()
+										.setText("question-answer-key", ui.newHtmlPropertyReference().setReference("answer.question.answerKey"))
 										.setIncluded(
 											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("feedback")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
@@ -774,15 +774,15 @@ public class DeliveryControllers
 													QuestionType.trueFalse.toString())
 												.setProperty(ui.newPropertyReference().setReference("answer.question.type"))))
 								.add(
-									ui.newHtml()
-										.setText("question-feedback", ui.newPropertyReference().setReference("answer.questionFeedback"))
+									ui.newText()
+										.setText("question-feedback", ui.newHtmlPropertyReference().setReference("answer.questionFeedback"))
 										.setIncluded(
 											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("feedback")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackShowQuestionFeedback"))))
 								.add(
-									ui.newHtml()
-										.setText("question-model-answer", ui.newPropertyReference().setReference("answer.question.part.answer.text"))
+									ui.newText()
+										.setText("question-model-answer", ui.newHtmlPropertyReference().setReference("answer.question.part.answer.text"))
 										.setIncluded(
 											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("feedback")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
@@ -1031,10 +1031,14 @@ public class DeliveryControllers
 				.add(
 					ui.newSection()
 						.setTitle("submitted-section-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+						.add(ui.newInstructions().setText("submitted-display-instructions"))
+						.add(
+							ui.newInstructions()
+								.setText("submitted-display-message", ui.newPropertyReference().setReference("submission.assessment.submitMessage"))
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.submitMessage"))))
 						.add(
 							ui.newEntityDisplay()
 								.setEntityReference(ui.newPropertyReference().setReference("submission"))
-								.setTitle("submitted-display-instructions")
 								.addRow(
 									ui.newPropertyRow()
 										.setTitle("submitted-display-contextTitle")
@@ -1071,14 +1075,21 @@ public class DeliveryControllers
 									ui.newPropertyRow()
 										.setTitle("submitted-display-confirmation")
 										.setProperty(
-											ui.newPropertyReference()
+											ui.newTextPropertyReference()
 												.setReference("submission.confirmation")))
 								.addRow(
 									ui.newPropertyRow()
 										.setTitle("submitted-display-submitted")
 										.setProperty(
 											ui.newDatePropertyReference()
-												.setReference("submission.submittedDate")))))
+												.setReference("submission.submittedDate")))
+								.addRow(
+										ui.newPropertyRow()
+											.setTitle("submitted-final-url")
+											.setProperty(
+												ui.newUrlPropertyReference()
+													.setReference("submission.assessment.submitUrl"))
+											.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.submitUrl"))))))
 				.add(
 					ui.newNavigationBar()
 						.add(
@@ -1158,8 +1169,8 @@ public class DeliveryControllers
 										.setReversed()
 										.setProperty(ui.newPropertyReference().setReference("section.title")))
 								.addColumn(
-									ui.newHtmlPropertyColumn()
-										.setProperty(null, ui.newPropertyReference().setFormatDelegate(new FormatQuestionDecoration()))
+									ui.newPropertyColumn()
+										.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatQuestionDecoration()))
 										.setWidth(16))
 								.addColumn(
 									ui.newPropertyColumn()

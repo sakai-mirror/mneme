@@ -288,6 +288,36 @@ public interface Assessment
 	AssessmentStatus getStatus();
 
 	/**
+	 * Access the rich-text / html message to display when submitted.
+	 * 
+	 * @return The rich-text / html message to display when submitted.
+	 */
+	String getSubmitMessage();
+
+	/**
+	 * Access the URL to provide when submitted.
+	 * 
+	 * @return The URL to provide when submitted.
+	 */
+	String getSubmitUrl();
+
+	/**
+	 * Set the rich-text / html message to display when submitted.
+	 * 
+	 * @param message
+	 *        The rich-text / html message to display when submitted.
+	 */
+	void setSubmitMessage(String message);
+
+	/**
+	 * Set the URL to provide when submitted.
+	 * 
+	 * @param url
+	 *        The URL to provide when submitted.
+	 */
+	void setSubmitUrl(String url);
+
+	/**
 	 * Access the time limit for taking the assessment (ms).
 	 * 
 	 * @return The assessment's time limit, or null for umlimited.

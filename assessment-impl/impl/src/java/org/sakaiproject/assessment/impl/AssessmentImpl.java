@@ -162,6 +162,14 @@ public class AssessmentImpl implements Assessment
 
 	protected PropertyStatus statusStatus = PropertyStatus.unset;
 
+	protected String submitMessage = null;
+
+	protected PropertyStatus submitMessageStatus = PropertyStatus.unset;
+
+	protected String submitUrl = null;
+
+	protected PropertyStatus submitUrlStatus = PropertyStatus.unset;
+
 	protected Long timeLimit = null;
 
 	protected PropertyStatus timeLimitStatus = PropertyStatus.unset;
@@ -617,6 +625,28 @@ public class AssessmentImpl implements Assessment
 		return this.status;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getSubmitMessage()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.submitMessageStatus == PropertyStatus.unset) readMain();
+
+		return this.submitMessage;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getSubmitUrl()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.submitUrlStatus == PropertyStatus.unset) readMain();
+
+		return this.submitUrl;
+	}
+
 	public Long getTimeLimit()
 	{
 		// read the basic info if this property has not yet been set
@@ -906,6 +936,25 @@ public class AssessmentImpl implements Assessment
 	{
 		this.status = status;
 		this.statusStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setSubmitMessage(String message)
+	{
+		this.submitMessage = message;
+		this.submitMessageStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setSubmitUrl(String url)
+
+	{
+		this.submitUrl = url;
+		this.submitUrlStatus = PropertyStatus.modified;
 	}
 
 	/**
@@ -1246,6 +1295,30 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Initialize the submitMessage property.
+	 * 
+	 * @param message
+	 *        The submitMessage property.
+	 */
+	protected void initSubmitMessage(String message)
+	{
+		this.submitMessage = message;
+		this.submitMessageStatus = PropertyStatus.inited;
+	}
+
+	/**
+	 * Initialize the submitUrl property.
+	 * 
+	 * @param url
+	 *        The submitUrl property.
+	 */
+	protected void initSubmitUrl(String url)
+	{
+		this.submitUrl = url;
+		this.submitUrlStatus = PropertyStatus.inited;
+	}
+
+	/**
 	 * Initialize the time limit property.
 	 * 
 	 * @param limit
@@ -1367,6 +1440,8 @@ public class AssessmentImpl implements Assessment
 		this.retractDateStatus = PropertyStatus.inited;
 		this.sectionsStatus = PropertyStatus.inited;
 		this.statusStatus = PropertyStatus.inited;
+		this.submitMessageStatus = PropertyStatus.inited;
+		this.submitUrlStatus = PropertyStatus.inited;
 		this.timeLimitStatus = PropertyStatus.inited;
 		this.titleStatus = PropertyStatus.inited;
 		this.questionPresentationStatus = PropertyStatus.inited;
@@ -1431,6 +1506,10 @@ public class AssessmentImpl implements Assessment
 		this.retractDateStatus = other.retractDateStatus;
 		this.status = other.status;
 		this.statusStatus = other.statusStatus;
+		this.submitMessage = other.submitMessage;
+		this.submitMessageStatus = other.submitMessageStatus;
+		this.submitUrl = other.submitUrl;
+		this.submitUrlStatus = other.submitUrlStatus;
 		this.timeLimit = other.timeLimit;
 		this.timeLimitStatus = other.timeLimitStatus;
 		this.title = other.title;
