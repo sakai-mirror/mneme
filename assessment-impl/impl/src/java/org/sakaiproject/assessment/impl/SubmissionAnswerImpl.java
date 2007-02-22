@@ -561,9 +561,12 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 				((SubmissionImpl) this.getSubmission()).service.reserveAnswer(this);
 			}
 
-			Attachment a = new AttachmentImpl(null, size, name, null, type);
+			Attachment a = new AttachmentImpl(null, size, name, null, type, null);
 			String id = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService))
-					.putAttachment(a, body, this.id);
+					.putAttachment(a, body, this.id, getQuestion());
+			
+			// close the stream!
+			if (body != null) body.close();
 
 			// add an entry to the answer with this attachment
 			SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();

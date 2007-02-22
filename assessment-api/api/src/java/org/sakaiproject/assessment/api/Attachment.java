@@ -31,6 +31,14 @@ import org.sakaiproject.time.api.Time;
 public interface Attachment
 {
 	/**
+	 * Access the full path on the file system if the attachment body is stored in a file instead of the db.
+	 * 
+	 * @return The full path on the file system if the attachment body is stored in a file instead of the db, or null if the
+	 *         attachment body is in the db.
+	 */
+	String getFileSystemPath();
+
+	/**
 	 * Access the attachment id.
 	 * 
 	 * @return The attachment id.
@@ -64,4 +72,13 @@ public interface Attachment
 	 * @return The attachment type.
 	 */
 	String getType();
+
+	/**
+	 * Set the full path on the file system if the attachment body is stored in a file instead of the db.
+	 * 
+	 * @param path
+	 *        The full path on the file system if the attachment body is stored in a file instead of the db, or null if the
+	 *        attachment body is in the db.
+	 */
+	void setFileSystemPath(String path);
 }

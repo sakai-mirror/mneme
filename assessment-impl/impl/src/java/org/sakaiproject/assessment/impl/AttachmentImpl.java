@@ -31,6 +31,8 @@ import org.sakaiproject.time.api.Time;
  */
 public class AttachmentImpl implements Attachment
 {
+	protected String fileSystemPath = null;
+
 	protected String id = null;
 
 	protected Long length = null;
@@ -41,14 +43,24 @@ public class AttachmentImpl implements Attachment
 
 	protected String type = null;
 
-	public AttachmentImpl(String id, Long length, String name, Time timestamp, String type)
+	public AttachmentImpl(String id, Long length, String name, Time timestamp, String type, String fileSystemPath)
 	{
 		this.id = id;
 		this.length = length;
 		this.name = name;
 		this.timestamp = timestamp;
 		this.type = type;
+		this.fileSystemPath = fileSystemPath;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFileSystemPath()
+	{
+		return this.fileSystemPath;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -87,5 +99,13 @@ public class AttachmentImpl implements Attachment
 	public String getType()
 	{
 		return this.type;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setFileSystemPath(String path)
+	{
+		this.fileSystemPath = path;
 	}
 }
