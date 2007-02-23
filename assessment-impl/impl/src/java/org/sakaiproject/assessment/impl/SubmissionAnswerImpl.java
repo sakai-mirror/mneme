@@ -564,25 +564,44 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			Attachment a = new AttachmentImpl(null, size, name, null, type, null);
 			String id = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService))
 					.putAttachment(a, body, this.id, getQuestion());
-			
+
 			// close the stream!
 			if (body != null) body.close();
 
-			// add an entry to the answer with this attachment
-			SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl();
-			entry.setAssessmentAnswer(null);
-			entry.setAnswerText(null);
-			entry.initId(null);
-			entry.initAutoScore(new Float(0));
-			entry.submissionAnswer = this;
-			entry.questionPartId = this.getQuestion().getPart().getId();
+			// we should have at least one entry
+			SubmissionAnswerEntryImpl entry = this.entries.get(0);
+			if (entry != null)
+			{
+				// use this if the answer text is not a reference
+				SubmissionAnswerEntryImpl newEntry = null;
+				if ((entry.getAnswerText() == null) || (!entry.getAnswerText().startsWith("/")))
+				{
+					newEntry = entry;
+				}
 
-			String refStr = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService))
-					.getAttachmentReference(getSubmission().getId(), id);
-			entry.setAnswerText(refStr);
+				// otherwise make a new entry
+				else
+				{
+					newEntry = new SubmissionAnswerEntryImpl();
+					newEntry.setAssessmentAnswer(null);
+					newEntry.setAnswerText(null);
+					newEntry.initId(null);
+					newEntry.initAutoScore(new Float(0));
+					newEntry.submissionAnswer = this;
+					newEntry.questionPartId = this.getQuestion().getPart().getId();
+					newEntry.initAnswer(this);
+					this.entries.add(newEntry);
+				}
 
-			entry.initAnswer(this);
-			this.entries.add(entry);
+				String refStr = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService))
+						.getAttachmentReference(getSubmission().getId(), id);
+				newEntry.setAnswerText(refStr);
+			}
+
+			else
+			{
+				M_log.warn("setUploadFile: missing entry for answer: questionId: " + this.questionId);
+			}
 		}
 		catch (IOException e)
 		{

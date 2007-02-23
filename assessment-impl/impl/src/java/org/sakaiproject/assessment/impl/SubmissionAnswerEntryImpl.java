@@ -32,6 +32,7 @@ import org.sakaiproject.assessment.api.QuestionPart;
 import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.assessment.api.SubmissionAnswerEntry;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * SubmissionEntryImpl ...
@@ -92,11 +93,23 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 	 */
 	public boolean equals(Object obj)
 	{
-		if (!(obj instanceof SubmissionAnswerEntry)) return false;
+		if (!(obj instanceof SubmissionAnswerEntryImpl)) return false;
 		if (this == obj) return true;
-		// TODO: exact same answer, or same by id? also, is answerId part of this? -ggolden
-		if (!((SubmissionAnswerEntryImpl) obj).submissionAnswer.getSubmission().getId().equals(this.submissionAnswer.getSubmission().getId())) return false;
+
+		// if we have ids, we can base equals on it
+		if ((this.getId() != null) && (((SubmissionAnswerEntryImpl) obj).getId() != null))
+		{
+			return ((SubmissionAnswerEntryImpl) obj).getId().equals(getId());
+		}
+
+		// if not, we need to check values
+		// Note: the in-memory, not-on-db constructed entries for file upload with null ids needs to have all these checked.
+		if (!((SubmissionAnswerEntryImpl) obj).submissionAnswer.getSubmission().getId().equals(
+				this.submissionAnswer.getSubmission().getId())) return false;
 		if (!(((SubmissionAnswerEntryImpl) obj).questionPartId.equals(this.questionPartId))) return false;
+		if (StringUtil.different(((SubmissionAnswerEntryImpl) obj).answerText, this.answerText)) return false;
+		if (StringUtil.different(((SubmissionAnswerEntryImpl) obj).answerId, this.answerId)) return false;
+
 		return true;
 	}
 
@@ -194,7 +207,15 @@ public class SubmissionAnswerEntryImpl implements SubmissionAnswerEntry
 	 */
 	public int hashCode()
 	{
-		return (this.submissionAnswer.questionId + this.answerId).hashCode();
+		// if we have an id, we can base the hash on it
+		if (this.getId() != null)
+		{
+			return this.getId().hashCode();
+		}
+		
+		// if not, we need to check values
+		// Note: the in-memory, not-on-db constructed entries for file upload with null ids needs to have all these checked.
+		return (this.submissionAnswer.getSubmission().getId() + this.questionPartId + this.answerText + this.answerId).hashCode();
 	}
 
 	/**
