@@ -1413,7 +1413,7 @@ public class DeliveryControllers
 				.add(
 					ui.newSection()
 						.add(
-							ui.newAlert().setText("error-invalid-url-alert",ui.newPropertyReference().setReference("invalidUrl")))
+							ui.newAlert().setText("error-invalid-url-alert", ui.newPropertyReference().setReference("invalidUrl")))
 						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("invalidUrl"))))
 				.add(
 					ui.newSection()
@@ -1430,6 +1430,11 @@ public class DeliveryControllers
 						.add(
 							ui.newAlert().setText("error-unexpected"))
 						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("unexpected"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newAlert().setText("error-upload", ui.newPropertyReference().setReference("uploadMax")))
+						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("upload"))))
 				.add(
 					ui.newSection()
 						.add(

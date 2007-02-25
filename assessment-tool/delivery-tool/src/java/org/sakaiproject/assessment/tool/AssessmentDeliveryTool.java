@@ -72,7 +72,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our errors. */
 	enum Errors
 	{
-		invalid, invalidpost, unauthorized, unexpected, linear, unknown
+		invalid, invalidpost, linear, unauthorized, unexpected, unknown, upload
 	}
 
 	/** Our log (commons). */
@@ -720,6 +720,17 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				break;
 			}
+
+			case upload:
+			{
+				context.put("upload", Boolean.TRUE);
+
+				// let them re-enter where they were
+				context.put("testUrl", context.getPreviousDestination());
+				
+				// the size (megs) that was exceeded
+				context.put("uploadMax", param);
+			}
 		}
 
 		// render
@@ -1001,17 +1012,27 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// read form
 		String destination = ui.decode(req, context);
 
-		// if we are going to submitted, we must complete the submission
-		Boolean complete = Boolean.valueOf(destination.startsWith("/submitted"));
+		// check for file upload error
+		boolean uploadError = ((req.getAttribute("upload.status") != null) && (!req.getAttribute("upload.status").equals("ok")));
 
-		// unless we are going to list, remove, or feedback, or this very same question, mark the answers as complete
-		Boolean answersComplete = Boolean.valueOf(!(destination.startsWith("/list") || destination.startsWith("/remove")
+		// if we are going to submitted, we must complete the submission (unless there was an upload error)
+		Boolean complete = Boolean.valueOf((!uploadError) && destination.startsWith("/submitted"));
+
+		// unless we are going to list, remove, or feedback, or this very same question, or we have a file upload error, mark the answers as complete
+		Boolean answersComplete = Boolean.valueOf(!(uploadError || destination.startsWith("/list") || destination.startsWith("/remove")
 				|| destination.endsWith("/feedback") || context.getPreviousDestination().equals(destination)));
 
 		// submit all answers
 		try
 		{
 			assessmentService.submitAnswers(answers, answersComplete, complete);
+
+			// if there was an upload error, send to the upload error
+			if ((req.getAttribute("upload.status") != null) && (!req.getAttribute("upload.status").equals("ok")))
+			{
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.upload + "/" + req.getAttribute("upload.limit"))));
+				return;
+			}
 
 			// redirect to the next destination
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
