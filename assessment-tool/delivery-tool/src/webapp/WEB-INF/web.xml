@@ -8,7 +8,15 @@
     <filter>
         <filter-name>sakai.request</filter-name>
         <filter-class>org.sakaiproject.util.RequestFilter</filter-class>
-    </filter>
+        <init-param>
+            <param-name>upload.continueOverMax</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>upload.maxPerFile</param-name>
+            <param-value>true</param-value>
+        </init-param>
+     </filter>
 
     <filter-mapping>
         <filter-name>sakai.request</filter-name>
