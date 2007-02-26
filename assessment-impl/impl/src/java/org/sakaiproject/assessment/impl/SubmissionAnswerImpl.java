@@ -594,7 +594,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 				}
 
 				String refStr = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService))
-						.getAttachmentReference(getSubmission().getId(), id);
+						.getAttachmentReference(getSubmission().getId(), id, name);
 				newEntry.setAnswerText(refStr);
 			}
 

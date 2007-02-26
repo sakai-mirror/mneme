@@ -291,7 +291,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			// <= 0 indicates no caching desired
 			if ((m_cacheSeconds > 0) && (m_cacheCleanerSeconds > 0))
 			{
-				m_cache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAttachmentReference(null, null));
+				m_cache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAttachmentReference(null, null, null));
 			}
 
 			// check config for file system (Samigo) setting
@@ -390,9 +390,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getAttachmentReference(String container, String id)
+	public String getAttachmentReference(String container, String id, String name)
 	{
-		String ref = REFERENCE_ROOT + ((container == null) ? "" : ("/" + container + ((id == null) ? "" : ("/" + id))));
+		String ref = REFERENCE_ROOT + ((container == null) ? "" : ("/" + container + ((id == null) ? "" : ("/" + id + ((name == null) ? "" : ("/" + name))))));
 		return ref;
 	}
 
@@ -739,7 +739,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	{
 		if (reference.startsWith(REFERENCE_ROOT))
 		{
-			// we will get null, attachment, submission id, attachment id
+			// we will get null, "attachment", submission id, attachment id, name (we ignore name)
 			String id = null;
 			String container = null;
 			String[] parts = StringUtil.split(reference, Entity.SEPARATOR);
@@ -781,7 +781,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	{
 		if (attachment == null) return;
 
-		String ref = getAttachmentReference(reference.getContainer(), reference.getId());
+		String ref = reference.getReference();
 
 		// if we are short-term caching
 		if (m_cache != null)
@@ -876,7 +876,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	protected AttachmentImpl getCachedAttachment(Reference reference)
 	{
-		String ref = getAttachmentReference(reference.getContainer(), reference.getId());
+		String ref = reference.getReference();
 
 		// if we are short-term caching
 		if (m_cache != null)

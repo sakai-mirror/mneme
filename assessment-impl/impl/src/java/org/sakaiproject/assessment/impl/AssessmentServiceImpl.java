@@ -1459,7 +1459,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		}
 
 		// read the uploaded attachments for the answers, and fill out the entries to hold their refs
-		statement = "SELECT M.MEDIAID, I.PUBLISHEDITEMID" + " FROM SAM_MEDIA_T M"
+		statement = "SELECT M.MEDIAID, M.FILENAME, I.PUBLISHEDITEMID" + " FROM SAM_MEDIA_T M"
 				+ " INNER JOIN SAM_ITEMGRADING_T I ON M.ITEMGRADINGID = I.ITEMGRADINGID" + " WHERE I.ASSESSMENTGRADINGID = ?"
 				+ " ORDER BY M.CREATEDDATE ASC";
 		fields = new Object[1];
@@ -1471,7 +1471,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				try
 				{
 					String mediaId = result.getString(1);
-					String questionId = result.getString(2);
+					String name = result.getString(2);
+					String questionId = result.getString(3);
 
 					// we should already have an answer
 					SubmissionAnswerImpl answer = submission.findAnswer(questionId);
@@ -1501,7 +1502,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 							}
 
 							// set the reference to the attachment into the answer text
-							String refStr = m_attachmentService.getAttachmentReference(submission.getId(), mediaId);
+							String refStr = m_attachmentService.getAttachmentReference(submission.getId(), mediaId, name);
 							newEntry.setAnswerText(refStr);
 						}
 

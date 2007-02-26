@@ -30,7 +30,10 @@ import org.sakaiproject.entity.api.Reference;
  */
 public interface AttachmentService
 {
-	/** The type string for this application: should not change over time as it may be stored in various parts of persistent entities. */
+	/**
+	 * The type string for this application: should not change over time as it may be stored in various parts of persistent
+	 * entities.
+	 */
 	static final String APPLICATION_ID = "sakai:attachment";
 
 	/** Event tracking attachment reading. */
@@ -58,9 +61,11 @@ public interface AttachmentService
 	 *        The id of the attachment's container.
 	 * @param id
 	 *        the attachment id.
+	 * @param name
+	 *        The file name for the attachment.
 	 * @return the attachment reference for this attachment id.
 	 */
-	String getAttachmentReference(String container, String id);
+	String getAttachmentReference(String container, String id, String name);
 
 	/**
 	 * Remove this attachment

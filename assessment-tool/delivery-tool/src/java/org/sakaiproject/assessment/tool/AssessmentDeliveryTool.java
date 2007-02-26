@@ -23,7 +23,9 @@ package org.sakaiproject.assessment.tool;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -123,6 +125,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** The table of contents interface. */
 	protected Controller uiToc = null;
 
+	/** set of static resource paths. */
+	protected Set<String> resourcePaths = new HashSet<String>();
+
 	/**
 	 * Shutdown the servlet.
 	 */
@@ -155,22 +160,25 @@ public class AssessmentDeliveryTool extends HttpServlet
 		super.init(config);
 
 		// self-inject
-		sessionManager = (SessionManager) ComponentManager.get(SessionManager.class);
-		toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
-		assessmentService = (AssessmentService) ComponentManager.get(AssessmentService.class);
-		attachmentService = (AttachmentService) ComponentManager.get(AttachmentService.class);
-		timeService = (TimeService) ComponentManager.get(TimeService.class);
-		ui = (UiService) ComponentManager.get(UiService.class);
-		entityManager = (EntityManager) ComponentManager.get(EntityManager.class);
+		this.sessionManager = (SessionManager) ComponentManager.get(SessionManager.class);
+		this.toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
+		this.assessmentService = (AssessmentService) ComponentManager.get(AssessmentService.class);
+		this.attachmentService = (AttachmentService) ComponentManager.get(AttachmentService.class);
+		this.timeService = (TimeService) ComponentManager.get(TimeService.class);
+		this.ui = (UiService) ComponentManager.get(UiService.class);
+		this.entityManager = (EntityManager) ComponentManager.get(EntityManager.class);
 
 		// make the uis
-		uiList = DeliveryControllers.constructList(ui);
-		uiEnter = DeliveryControllers.constructEnter(ui);
-		uiQuestion = DeliveryControllers.constructQuestion(ui);
-		uiSubmitted = DeliveryControllers.constructSubmitted(ui);
-		uiToc = DeliveryControllers.constructToc(ui);
-		uiRemove = DeliveryControllers.constructRemove(ui);
-		uiError = DeliveryControllers.constructError(ui);
+		this.uiList = DeliveryControllers.constructList(ui);
+		this.uiEnter = DeliveryControllers.constructEnter(ui);
+		this.uiQuestion = DeliveryControllers.constructQuestion(ui);
+		this.uiSubmitted = DeliveryControllers.constructSubmitted(ui);
+		this.uiToc = DeliveryControllers.constructToc(ui);
+		this.uiRemove = DeliveryControllers.constructRemove(ui);
+		this.uiError = DeliveryControllers.constructError(ui);
+
+		// setup the resource paths
+		this.resourcePaths.add("icons");
 
 		M_log.info("init()");
 	}
@@ -188,7 +196,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException
 	{
 		// handle static resource requests
-		if (ui.dispatchResource(req, res, getServletContext())) return;
+		if (ui.dispatchResource(req, res, getServletContext(), this.resourcePaths)) return;
 
 		// handle pathless requests
 		if (ui.redirectToCurrentDestination(req, res, Destinations.list.toString())) return;
