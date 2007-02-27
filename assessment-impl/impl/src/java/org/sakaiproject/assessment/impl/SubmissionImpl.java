@@ -31,6 +31,7 @@ import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
+import org.sakaiproject.assessment.api.SubmissionExpiration;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.util.StringUtil;
 
@@ -41,6 +42,37 @@ import org.sakaiproject.util.StringUtil;
  */
 public class SubmissionImpl implements Submission
 {
+	public class MySubmissionExpiration implements SubmissionExpiration
+	{
+		protected Cause cause;
+
+		protected Long duration;
+
+		protected Long limit;
+
+		protected Time time;
+
+		public Cause getCause()
+		{
+			return this.cause;
+		}
+
+		public Long getDuration()
+		{
+			return this.duration;
+		}
+
+		public Long getLimit()
+		{
+			return this.limit;
+		}
+
+		public Time getTime()
+		{
+			return this.time;
+		}
+	}
+
 	/** Each property may be not yet set, already set from persistence, or modified since. */
 	enum PropertyStatus
 	{
@@ -230,27 +262,6 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public Long getDurationTillExpires()
-	{
-		// read the basic info if this property has not yet been set
-		if (this.startDateStatus == PropertyStatus.unset) readMain();
-
-		Long limit = getAssessment().getTimeLimit();
-		if (limit == null) return null;
-
-		// if we have not yet started, we have the full time limit duration
-		if (startDate == null) return limit;
-
-		// if we have started, the clock is running - compute how long from NOW the end is
-		long tillExpires = (startDate.getTime() + limit.longValue()) - this.service.m_timeService.newTime().getTime();
-		if (tillExpires <= 0) return new Long(0);
-
-		return new Long(tillExpires);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Long getElapsedTime()
 	{
 		// read the basic info if this property has not yet been set
@@ -281,6 +292,91 @@ public class SubmissionImpl implements Submission
 		if (this.evalScoreStatus == PropertyStatus.unset) readMain();
 
 		return this.evalScore;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public SubmissionExpiration getExpiration()
+	{
+		// check the thread cache
+		String key = "submission_" + getId() + "_expiration";
+		MySubmissionExpiration rv = (MySubmissionExpiration) this.service.m_threadLocalManager.get(key);
+		if (rv != null) return rv;
+
+		rv = new MySubmissionExpiration();
+
+		// the end might be from a time limit, or because we are near the closed date
+		long endTime = 0;
+
+		// see if the assessment has a hard due date (w/ no late submissions accepted) or a retract date
+		Time closedDate = getAssessment().getClosedDate();
+		rv.time = closedDate;
+
+		// if we have a time limit, compute the end time based on that limit
+		Long limit = getAssessment().getTimeLimit();
+		if (limit != null)
+		{
+			rv.limit = limit;
+
+			// if we have started, compute the end from the start
+			long startTime = 0;
+			Time startDate = getStartDate();
+			if (startDate != null)
+			{
+				startTime = startDate.getTime();
+			}
+
+			// if we have not started, compute the end from now
+			else
+			{
+				startTime = this.service.m_timeService.newTime().getTime();
+			}
+
+			// a full time limit duration would end here
+			endTime = startTime + limit.longValue();
+
+			// if there's a closed date on the assessment, that falls before that full duration would be, that's the end time
+			if ((closedDate != null) && (closedDate.getTime() < endTime))
+			{
+				endTime = closedDate.getTime();
+				rv.cause = SubmissionExpiration.Cause.closedDate;
+			}
+
+			else
+			{
+				rv.cause = SubmissionExpiration.Cause.timeLimit;
+			}
+		}
+
+		// if we are not timed, compute an end time based on the assessment's closed date
+		else
+		{
+			// not timed, no close date, we don't expire
+			if (closedDate == null) return null;
+
+			// the closeDate is the end time
+			endTime = closedDate.getTime();
+
+			// if this closed date is more than 2 hours from now, ignore it and say we have no expiration
+			if (endTime > this.service.m_timeService.newTime().getTime() + (2l * 60l * 60l * 1000l)) return null;
+
+			// set the limit to 2 hours
+			rv.limit = 2l * 60l * 60l * 1000l;
+
+			rv.cause = SubmissionExpiration.Cause.closedDate;
+		}
+
+		// how long from now till endTime?
+		long tillExpires = endTime - this.service.m_timeService.newTime().getTime();
+		if (tillExpires <= 0) tillExpires = 0;
+
+		rv.duration = new Long(tillExpires);
+
+		// thread cache
+		this.service.m_threadLocalManager.set(key, rv);
+
+		return rv;
 	}
 
 	/**

@@ -260,6 +260,34 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Time getClosedDate()
+	{
+		// consider the due date only if late submissions are not allowed
+		Time dueDate = null;
+		boolean allowLate = getAllowLateSubmit().booleanValue();
+		if (!allowLate)
+		{
+			dueDate = getDueDate();
+		}
+
+		// get the retract date
+		Time retractDate = getRetractDate();
+
+		// if neiter set, there's no closed date
+		if ((dueDate == null) && (retractDate == null)) return null;
+
+		// if only one is set, use that
+		if (dueDate == null) return retractDate;
+		if (retractDate == null) return dueDate;
+
+		// otherwise, use the first one
+		if (dueDate.before(retractDate)) return dueDate;
+		return retractDate;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getContext()
 	{
 		// read the basic info if this property has not yet been set

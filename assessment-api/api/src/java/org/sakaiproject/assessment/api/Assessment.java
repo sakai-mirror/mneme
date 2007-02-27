@@ -58,6 +58,14 @@ public interface Assessment
 	Boolean getAutoSubmit();
 
 	/**
+	 * Compute the submit closed date. This is the date the assignment is retracted, or the date it is due if late submissions are
+	 * not accepted, whichever is first.<br />
+	 * 
+	 * @return The computed submit close date, or null if there is none.
+	 */
+	Time getClosedDate();
+
+	/**
 	 * Access the context of this assessment.
 	 * 
 	 * @return The assessment's context string.
@@ -236,9 +244,11 @@ public interface Assessment
 	QuestionPresentation getQuestionPresentation();
 
 	/**
-	 * Access the questions across all sections. The order will be in section order, and in each section, random order (if enabled) based on the current user.
+	 * Access the questions across all sections. The order will be in section order, and in each section, random order (if enabled)
+	 * based on the current user.
 	 * 
-	 * @return The questions across all sections. The order will be in section order, and in each section, random order (if enabled) based on the current user.
+	 * @return The questions across all sections. The order will be in section order, and in each section, random order (if enabled)
+	 *         based on the current user.
 	 */
 	List<? extends AssessmentQuestion> getQuestions();
 

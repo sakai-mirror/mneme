@@ -31,6 +31,7 @@ import org.sakaiproject.assessment.api.QuestionPresentation;
 import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
+import org.sakaiproject.assessment.api.SubmissionExpiration;
 import org.sakaiproject.sludge.api.Context;
 import org.sakaiproject.sludge.api.ContextInfoPropertyReference;
 import org.sakaiproject.sludge.api.Controller;
@@ -405,19 +406,30 @@ public class DeliveryControllers
 					ui.newCountdownTimer()
 						//.setHideMessage("timer-hide")
 						//.setShowMessage("timer-show")
-						.setDurationMessage("timer-duration")
+						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
-						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
-						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
+						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
 						.setExpireDestination(
 							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
 						.setIncluded(
-							ui.newDecision()
-								.setReversed()
-								.setProperty(
-									ui.newPropertyReference()
-										.setReference("review")),
-							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
+							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")),
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
+							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
+				.add(
+					ui.newCountdownTimer()
+						//.setHideMessage("timer-hide")
+						//.setShowMessage("timer-show")
+						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
+						.setRemainingMessage("timer-remaining")
+						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
+						.setExpireDestination(
+							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
+						.setIncluded(
+							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")),
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
+							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.closedDate.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newSection()
 						.setTitle("question-total-score", ui.newTextPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore(true)))
@@ -1120,19 +1132,30 @@ public class DeliveryControllers
 					ui.newCountdownTimer()
 						//.setHideMessage("timer-hide")
 						//.setShowMessage("timer-show")
-						.setDurationMessage("timer-duration")
+						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
-						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
-						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
+						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
 						.setExpireDestination(
 							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
 						.setIncluded(
-							ui.newDecision()
-								.setReversed()
-								.setProperty(
-									ui.newPropertyReference()
-										.setReference("review")),
-							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
+							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")),
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
+							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
+				.add(
+					ui.newCountdownTimer()
+						//.setHideMessage("timer-hide")
+						//.setShowMessage("timer-show")
+						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
+						.setRemainingMessage("timer-remaining")
+						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
+						.setExpireDestination(
+							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
+						.setIncluded(
+							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")),
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
+							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.closedDate.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newAlert()
 						.setText("final-instructions")
@@ -1283,19 +1306,30 @@ public class DeliveryControllers
 					ui.newCountdownTimer()
 						//.setHideMessage("timer-hide")
 						//.setShowMessage("timer-show")
-						.setDurationMessage("timer-duration")
+						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
-						.setDuration(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))
-						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.durationTillExpires"))
+						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
 						.setExpireDestination(
 							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
 						.setIncluded(
-							ui.newDecision()
-								.setReversed()
-								.setProperty(
-									ui.newPropertyReference()
-										.setReference("review")),
-							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
+							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")),
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
+							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
+				.add(
+					ui.newCountdownTimer()
+						//.setHideMessage("timer-hide")
+						//.setShowMessage("timer-show")
+						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
+						.setRemainingMessage("timer-remaining")
+						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
+						.setExpireDestination(
+							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
+						.setIncluded(
+							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")),
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
+							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.closedDate.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newSection()
 						.add(

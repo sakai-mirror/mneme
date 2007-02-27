@@ -70,14 +70,6 @@ public interface Submission
 	String getConfirmation();
 
 	/**
-	 * Access the number of ms from now that the time limit on this submission will be up.
-	 * 
-	 * @return The number of ms from now that the time limit on this submission will be up, 0 if it has already expired, or null if
-	 *         it is not timed.
-	 */
-	Long getDurationTillExpires();
-
-	/**
 	 * Access the time taken to make this submission, in seconds, based on the start and lastest submission dates.
 	 * 
 	 * @return The time taken to make this submission, in seconds (or null if it was not timed or not available).
@@ -98,6 +90,13 @@ public interface Submission
 	 * @return The evaluation score for the overall submission, or null if there is none.
 	 */
 	Float getEvalScore();
+
+	/**
+	 * Access the expiration information for the submission.
+	 * 
+	 * @return The expiration information for the submission.
+	 */
+	SubmissionExpiration getExpiration();
 
 	/**
 	 * Find the first assessment question that has not been marked as complete.
