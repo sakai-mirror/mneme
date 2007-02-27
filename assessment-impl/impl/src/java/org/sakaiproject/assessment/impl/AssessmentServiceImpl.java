@@ -85,9 +85,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/** A cache of submissions. */
 	protected Cache m_submissionCache = null;
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Abstractions, etc.
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/**
 	 * Check the security for this user doing this function withing this context.
@@ -141,9 +141,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		}
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Dependencies
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/** Dependency: AttachmentService */
 	protected AttachmentService m_attachmentService = null;
@@ -285,9 +285,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		m_timeService = service;
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Configuration
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/** The # seconds between cache cleaning runs. */
 	protected int m_cacheCleanerSeconds = 0;
@@ -345,9 +345,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		m_timeoutCheckMs = Integer.parseInt(time) * 1000L;
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Init and Destroy
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/**
 	 * Returns to uninitialized state.
@@ -385,7 +385,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// start the checking thread
 			start();
 
-			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60);
+			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60
+					+ " timout check seconds: " + m_timeoutCheckMs / 1000);
 		}
 		catch (Throwable t)
 		{
@@ -393,17 +394,17 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		}
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * AssessmentService implementation
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Assessment Access
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/**
-	 * TODO: Note: assessments ids are (for now) assumed to be published - the Samigo 1 data model does not have a unique assessment
-	 * id across published and non-published.
+	 * TODO: Note: assessments ids are (for now) assumed to be published - the Samigo 1 data model does not have a unique assessment id across
+	 * published and non-published.
 	 */
 
 	/**
@@ -609,8 +610,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.TIMELIMIT, PAC.AUTOSUBMIT, PAC.STARTDATE, PAC.RETRACTDATE, PAC.LATEHANDLING,"
 				+ " PF.SHOWSTUDENTQUESTIONSCORE, PF.SHOWCORRECTRESPONSE, PF.SHOWQUESTIONLEVELFEEDBACK, PF.SHOWSELECTIONLEVELFEEDBACK,"
 				+ " PAC.ITEMNAVIGATION, PAC.ITEMNUMBERING, P.DESCRIPTION, PAC.ASSESSMENTFORMAT, PE.TOGRADEBOOK, PAC.SUBMISSIONMESSAGE, PAC.FINALPAGEURL"
-				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
-				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ?"
+				+ " FROM SAM_PUBLISHEDASSESSMENT_T P" + " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON P.ID = PE.ASSESSMENTID" + " WHERE P.ID = ?";
@@ -755,8 +755,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		}
 
 		// get the sections
-		String statement = "SELECT P.SECTIONID, P.TITLE, P.DESCRIPTION, SMD1.ENTRY, SMD2.ENTRY "
-				+ " FROM SAM_PUBLISHEDSECTION_T P"
+		String statement = "SELECT P.SECTIONID, P.TITLE, P.DESCRIPTION, SMD1.ENTRY, SMD2.ENTRY " + " FROM SAM_PUBLISHEDSECTION_T P"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD1 ON P.SECTIONID = SMD1.SECTIONID AND SMD1.LABEL = 'QUESTIONS_ORDERING'"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD2 ON P.SECTIONID = SMD2.SECTIONID AND SMD2.LABEL = 'NUM_QUESTIONS_DRAWN'"
 				+ " WHERE P.ASSESSMENTID = ? ORDER BY P.SEQUENCE ASC";
@@ -804,8 +803,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		// get the questions
 		statement = "SELECT PI.ITEMID, PI.HASRATIONALE, PI.SCORE, PI.INSTRUCTION, PI.TYPEID, PI.SECTIONID, MCS.ENTRY, MME.ENTRY, MMR.ENTRY,"
-				+ " PF1.TEXT, PF2.TEXT, PF3.TEXT"
-				+ " FROM SAM_PUBLISHEDITEM_T PI"
+				+ " PF1.TEXT, PF2.TEXT, PF3.TEXT" + " FROM SAM_PUBLISHEDITEM_T PI"
 				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON PI.SECTIONID = PS.SECTIONID AND PS.ASSESSMENTID = ?"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MCS ON PI.ITEMID = MCS.ITEMID AND MCS.LABEL = 'CASE_SENSITIVE'"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMMETADATA_T MME ON PI.ITEMID = MME.ITEMID AND MME.LABEL = 'MUTUALLY_EXCLUSIVE'"
@@ -854,8 +852,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					AssessmentSectionImpl section = (AssessmentSectionImpl) assessment.getSection(sectionId);
 					if (section == null)
 					{
-						M_log.warn("readAssessmentParts: missing section to store question: section id: " + sectionId
-								+ " questionId: " + questionId);
+						M_log.warn("readAssessmentParts: missing section to store question: section id: " + sectionId + " questionId: " + questionId);
 					}
 					else
 					{
@@ -900,8 +897,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					AssessmentQuestionImpl question = (AssessmentQuestionImpl) assessment.getQuestion(questionId);
 					if (question == null)
 					{
-						M_log.warn("readAssessmentSections: missing question to store text: question id: " + questionId
-								+ " textId: " + partId);
+						M_log.warn("readAssessmentSections: missing question to store text: question id: " + questionId + " textId: " + partId);
 					}
 					else
 					{
@@ -920,10 +916,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		});
 
 		// get the answers
-		statement = "SELECT PA.ANSWERID, PA.ITEMID, PA.TEXT, PA.ISCORRECT, PA.LABEL, PA.ITEMTEXTID,"
-				+ " PF1.TEXT, PF2.TEXT, PF3.TEXT"
-				+ " FROM SAM_PUBLISHEDANSWER_T PA"
-				+ " INNER JOIN SAM_PUBLISHEDITEM_T PI ON PA.ITEMID = PI.ITEMID"
+		statement = "SELECT PA.ANSWERID, PA.ITEMID, PA.TEXT, PA.ISCORRECT, PA.LABEL, PA.ITEMTEXTID," + " PF1.TEXT, PF2.TEXT, PF3.TEXT"
+				+ " FROM SAM_PUBLISHEDANSWER_T PA" + " INNER JOIN SAM_PUBLISHEDITEM_T PI ON PA.ITEMID = PI.ITEMID"
 				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON PI.SECTIONID = PS.SECTIONID AND PS.ASSESSMENTID = ?"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWERFEEDBACK_T PF1 ON PA.ANSWERID = PF1.ANSWERID AND PF1.TYPEID = 'Correct Feedback'"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWERFEEDBACK_T PF2 ON PA.ANSWERID = PF2.ANSWERID AND PF2.TYPEID = 'General Feedback'"
@@ -953,8 +947,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					AssessmentQuestionImpl question = (AssessmentQuestionImpl) assessment.getQuestion(questionId);
 					if (question == null)
 					{
-						M_log.warn("readAssessmentSections: missing question to store answer: question id: " + questionId
-								+ " answerId: " + answerId);
+						M_log.warn("readAssessmentSections: missing question to store answer: question id: " + questionId + " answerId: " + answerId);
 					}
 					else
 					{
@@ -962,8 +955,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						QuestionPartImpl part = (QuestionPartImpl) question.getPart(partId);
 						if (part == null)
 						{
-							M_log.warn("readAssessmentSections: missing question part to store answer: question id: " + questionId
-									+ " partId: " + partId + " answerId: " + answerId);
+							M_log.warn("readAssessmentSections: missing question part to store answer: question id: " + questionId + " partId: "
+									+ partId + " answerId: " + answerId);
 						}
 						else
 						{
@@ -1023,8 +1016,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					}
 					else
 					{
-						M_log.warn("readAssessmentSections: missing section to add attachment: sectionId: " + sectionId + " ref: "
-								+ refStr);
+						M_log.warn("readAssessmentSections: missing section to add attachment: sectionId: " + sectionId + " ref: " + refStr);
 					}
 					return null;
 				}
@@ -1039,8 +1031,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// read the attachments for all questions (join with the items table and sections table to be able to select for the entire
 		// assessment)
 		statement = "SELECT A.RESOURCEID, A.ITEMID" + " FROM SAM_PUBLISHEDATTACHMENT_T A"
-				+ " INNER JOIN SAM_PUBLISHEDITEM_T Q ON A.ITEMID = Q.ITEMID"
-				+ " INNER JOIN SAM_PUBLISHEDSECTION_T S ON Q.SECTIONID = S.SECTIONID" + " WHERE S.ASSESSMENTID = ?";
+				+ " INNER JOIN SAM_PUBLISHEDITEM_T Q ON A.ITEMID = Q.ITEMID" + " INNER JOIN SAM_PUBLISHEDSECTION_T S ON Q.SECTIONID = S.SECTIONID"
+				+ " WHERE S.ASSESSMENTID = ?";
 		fields = new Object[1];
 		fields[0] = assessment.getId();
 
@@ -1068,8 +1060,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					}
 					else
 					{
-						M_log.warn("readAssessmentSections: missing question to add attachment: questionId: " + questionId
-								+ " ref: " + refStr);
+						M_log.warn("readAssessmentSections: missing question to add attachment: questionId: " + questionId + " ref: " + refStr);
 					}
 					return null;
 				}
@@ -1148,9 +1139,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		}
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Submission Access
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/**
 	 * Form a submission reference for this submission id.
@@ -1508,14 +1499,14 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 						else
 						{
-							M_log.warn("readSubmissionAnswers: missing entry for answer to question for attachment: questionId: "
-									+ questionId + " mediaId: " + mediaId);
+							M_log.warn("readSubmissionAnswers: missing entry for answer to question for attachment: questionId: " + questionId
+									+ " mediaId: " + mediaId);
 						}
 					}
 					else
 					{
-						M_log.warn("readSubmissionAnswers: missing answer to question for attachment: questionId: " + questionId
-								+ " mediaId: " + mediaId);
+						M_log.warn("readSubmissionAnswers: missing answer to question for attachment: questionId: " + questionId + " mediaId: "
+								+ mediaId);
 					}
 
 					return null;
@@ -1637,9 +1628,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		return !results.isEmpty();
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Delivery Support
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/**
 	 * {@inheritDoc}
@@ -1651,8 +1642,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		final Time asOf = m_timeService.newTime();
 
-		if (M_log.isDebugEnabled())
-			M_log.debug("countRemainingSubmissions: assessment: " + assessmentId + " userId: " + userId + " asOf: " + asOf);
+		if (M_log.isDebugEnabled()) M_log.debug("countRemainingSubmissions: assessment: " + assessmentId + " userId: " + userId + " asOf: " + asOf);
 
 		// we need the assessment's dates, and late handling policy, and the # submissions allowed
 		// we need the user's count of completed submissions to this assessment
@@ -1744,8 +1734,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// the current time
 		Time asOf = m_timeService.newTime();
 
-		if (M_log.isDebugEnabled())
-			M_log.debug("getAvailableAssessmentsIds: context: " + context + " userId: " + userId + " asOf: " + asOf);
+		if (M_log.isDebugEnabled()) M_log.debug("getAvailableAssessmentsIds: context: " + context + " userId: " + userId + " asOf: " + asOf);
 
 		// Notes: "in context"
 		// SAM_ASSESSMENTBASE_T has the defined assessments (ID)
@@ -1995,8 +1984,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		String statement = "SELECT AG.ASSESSMENTGRADINGID, AG.PUBLISHEDASSESSMENTID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
 				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE,"
-				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, AG.FORGRADE,"
-				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED"
+				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, AG.FORGRADE," + " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED"
 				+ " FROM SAM_ASSESSMENTGRADING_T AG"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON AG.PUBLISHEDASSESSMENTID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDASSESSMENT_T P ON AG.PUBLISHEDASSESSMENTID = P.ID"
@@ -2105,8 +2093,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			String aid = idSubmission(sid).getAssessment().getId();
 			MultipleSubmissionSelectionPolicy policy = idAssessment(aid).getMultipleSubmissionSelectionPolicy();
 			Object value = (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED) ? (Object) (((SubmissionImpl) idSubmission(sid))
-					.getTotalScore())
-					: (Object) idSubmission(sid).getSubmittedDate();
+					.getTotalScore()) : (Object) idSubmission(sid).getSubmittedDate();
 
 			// remove all others with this one's assessment id - keeping the one that will be best
 			for (Iterator i = all.iterator(); i.hasNext();)
@@ -2122,8 +2109,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					{
 						// for totalScore, if the winner so far is smaller or equal to the new, use the new (the later one for a tie
 						// is the later submission based on our sort)
-						if (((Float) value).floatValue() <= ((SubmissionImpl) idSubmission(candidateId)).getTotalScore()
-								.floatValue())
+						if (((Float) value).floatValue() <= ((SubmissionImpl) idSubmission(candidateId)).getTotalScore().floatValue())
 						{
 							// switch to this one
 							value = ((SubmissionImpl) idSubmission(candidateId)).getTotalScore();
@@ -2160,9 +2146,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		final List<Float> rv = new ArrayList<Float>();
 
-		String statement = "SELECT AG.FINALSCORE" + " FROM SAM_ASSESSMENTGRADING_T AG"
-				+ " WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(true)
-				+ " ORDER BY AG.FINALSCORE";
+		String statement = "SELECT AG.FINALSCORE" + " FROM SAM_ASSESSMENTGRADING_T AG" + " WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.FORGRADE = "
+				+ m_sqlService.getBooleanConstant(true) + " ORDER BY AG.FINALSCORE";
 
 		Object[] fields = new Object[1];
 		fields[0] = assessmentId;
@@ -2200,8 +2185,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		String statement = "SELECT SUM(IG.AUTOSCORE+IG.OVERRIDESCORE) AS SCORE" + " FROM SAM_ITEMGRADING_T IG"
 				+ " INNER JOIN SAM_ASSESSMENTGRADING_T AG ON IG.ASSESSMENTGRADINGID = AG.ASSESSMENTGRADINGID"
-				+ " WHERE IG.PUBLISHEDITEMID = ? AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(true)
-				+ " GROUP BY IG.ASSESSMENTGRADINGID" + " ORDER BY SCORE";
+				+ " WHERE IG.PUBLISHEDITEMID = ? AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(true) + " GROUP BY IG.ASSESSMENTGRADINGID"
+				+ " ORDER BY SCORE";
 
 		Object[] fields = new Object[1];
 		fields[0] = questionId;
@@ -2229,9 +2214,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		return rv;
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Authoring Support
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/**
 	 * {@inheritDoc}
@@ -2298,8 +2283,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	public Boolean allowAddAssessment(String context)
 	{
 		// check permission - cuser must have PUBLISH_PERMISSION in the context
-		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, context,
-				getAssessmentReference(""));
+		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, context, getAssessmentReference(""));
 
 		return Boolean.valueOf(ok);
 	}
@@ -2328,8 +2312,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (a.getCreatedBy() == null) a.initCreatedBy(userId);
 
 		// check permission - created by user must have PUBLISH_PERMISSION in the context of the assessment
-		secure(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, assessment.getContext(),
-				getAssessmentReference(assessment.getId()));
+		secure(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
 
 		// persist - all in one transaction
 		Connection connection = null;
@@ -2390,8 +2373,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 				statement = "INSERT INTO SAM_PUBLISHEDSECTION_T"
 						+ " (ASSESSMENTID, DURATION, SEQUENCE, TITLE, DESCRIPTION, TYPEID, STATUS, CREATEDBY, CREATEDDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE"
-						+ ((sectionId == null) ? "" : ", SECTIONID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,?"
-						+ ((sectionId == null) ? "" : ",?") + ")";
+						+ ((sectionId == null) ? "" : ", SECTIONID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,?" + ((sectionId == null) ? "" : ",?")
+						+ ")";
 				fields = new Object[(sectionId == null) ? 11 : 12];
 				fields[0] = id;
 				fields[1] = null;
@@ -2424,8 +2407,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				Long xid = m_sqlService.getNextSequence("SAM_PUBLISHEDASSESSMENT_ID_S", connection);
 
 				statement = "INSERT INTO SAM_PUBLISHEDSECTIONMETADATA_T (SECTIONID, LABEL, ENTRY"
-						+ ((xid == null) ? "" : ", PUBLISHEDSECTIONMETADATAID") + ") values (?, ?, ?" + ((xid == null) ? "" : ",?")
-						+ ")";
+						+ ((xid == null) ? "" : ", PUBLISHEDSECTIONMETADATAID") + ") values (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
 				fields = new Object[(xid == null) ? 3 : 4];
 				fields[0] = sectionId;
 				fields[1] = "AUTHOR_TYPE";
@@ -2436,8 +2418,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 				xid = m_sqlService.getNextSequence("SAM_PUBLISHEDASSESSMENT_ID_S", connection);
 				fields[1] = "QUESTIONS_ORDERING";
-				fields[2] = ((section.getRandomQuestionOrder() == null) || (!section.getRandomQuestionOrder().booleanValue())) ? "1"
-						: "2";
+				fields[2] = ((section.getRandomQuestionOrder() == null) || (!section.getRandomQuestionOrder().booleanValue())) ? "1" : "2";
 				if (xid != null) fields[3] = xid;
 				m_sqlService.dbWrite(connection, statement, fields);
 			}
@@ -2452,25 +2433,21 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			fields[0] = new Integer(1);
 			fields[1] = null;
 			fields[2] = new Integer(1);
-			fields[3] = ((assessment.getQuestionPresentation() != null) ? assessment.getQuestionPresentation().dbEncoding()
-					: new Integer(1));
+			fields[3] = ((assessment.getQuestionPresentation() != null) ? assessment.getQuestionPresentation().dbEncoding() : new Integer(1));
 			fields[4] = null;
 			fields[5] = new Integer(0);
 			fields[6] = new Integer(0);
 			fields[7] = null;
-			fields[8] = ((assessment.getAllowLateSubmit() != null) && assessment.getAllowLateSubmit().booleanValue()) ? new Integer(
-					1)
-					: new Integer(0);
+			fields[8] = ((assessment.getAllowLateSubmit() != null) && assessment.getAllowLateSubmit().booleanValue()) ? new Integer(1) : new Integer(
+					0);
 			fields[9] = assessment.getReleaseDate();
 			fields[10] = assessment.getDueDate();
 			fields[11] = null;
 			fields[12] = assessment.getFeedbackDate();
 			fields[13] = assessment.getRetractDate();
 			fields[14] = new Integer(1);
-			fields[15] = ((assessment.getRandomAccess() != null) && assessment.getRandomAccess().booleanValue()) ? new Integer(2)
-					: new Integer(1);
-			fields[16] = ((assessment.getContinuousNumbering() != null) && assessment.getContinuousNumbering().booleanValue()) ? new Integer(
-					1)
+			fields[15] = ((assessment.getRandomAccess() != null) && assessment.getRandomAccess().booleanValue()) ? new Integer(2) : new Integer(1);
+			fields[16] = ((assessment.getContinuousNumbering() != null) && assessment.getContinuousNumbering().booleanValue()) ? new Integer(1)
 					: new Integer(2);
 			fields[17] = a.getSubmitMessage();
 			fields[18] = a.getContext() + " site";
@@ -2493,8 +2470,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			fields[5] = null;
 			fields[6] = new Integer(2); // 1-anon, 2-students id visible
 			fields[7] = null;
-			fields[8] = ((a.getGradebookIntegration() != null) && (a.gradebookIntegeration.booleanValue())) ? new Integer(1)
-					: new Integer(2); // 1-to gradebook, 2-not
+			fields[8] = ((a.getGradebookIntegration() != null) && (a.gradebookIntegeration.booleanValue())) ? new Integer(1) : new Integer(2); // 1-to
+			// gradebook,
+			// 2-not
 			fields[9] = id;
 			m_sqlService.dbWrite(connection, statement, fields);
 
@@ -2502,36 +2480,39 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			statement = "INSERT INTO SAM_PUBLISHEDFEEDBACK_T"
 					+ " (FEEDBACKDELIVERY, FEEDBACKAUTHORING, EDITCOMPONENTS, SHOWQUESTIONTEXT, SHOWSTUDENTRESPONSE,"
 					+ " SHOWCORRECTRESPONSE, SHOWSTUDENTSCORE, SHOWSTUDENTQUESTIONSCORE, SHOWQUESTIONLEVELFEEDBACK,"
-					+ " SHOWSELECTIONLEVELFEEDBACK, SHOWGRADERCOMMENTS, SHOWSTATISTICS, ASSESSMENTID)"
-					+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+					+ " SHOWSELECTIONLEVELFEEDBACK, SHOWGRADERCOMMENTS, SHOWSTATISTICS, ASSESSMENTID)" + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			fields = new Object[13];
 			fields[0] = assessment.getFeedbackDelivery() == null ? new Integer(1) : assessment.getFeedbackDelivery().dbEncoding();
 			fields[1] = new Integer(1);
 			fields[2] = new Integer(1);
 			fields[3] = new Integer(1);
 			fields[4] = new Integer(1);
-			fields[5] = ((assessment.getFeedbackShowCorrectAnswer() == null) || (!assessment.getFeedbackShowCorrectAnswer()
-					.booleanValue())) ? new Integer(0) : new Integer(1);
-			fields[6] = ((assessment.getFeedbackShowScore() == null) || (!assessment.getFeedbackShowScore().booleanValue())) ? new Integer(
+			fields[5] = ((assessment.getFeedbackShowCorrectAnswer() == null) || (!assessment.getFeedbackShowCorrectAnswer().booleanValue())) ? new Integer(
 					0)
 					: new Integer(1);
-			fields[7] = ((assessment.getFeedbackShowQuestionScore() == null) || (!assessment.getFeedbackShowQuestionScore()
-					.booleanValue())) ? new Integer(0) : new Integer(1);
-			fields[8] = ((assessment.getFeedbackShowQuestionFeedback() == null) || (!assessment.getFeedbackShowQuestionFeedback()
-					.booleanValue())) ? new Integer(0) : new Integer(1);
-			fields[9] = ((assessment.getFeedbackShowAnswerFeedback() == null) || (!assessment.getFeedbackShowAnswerFeedback()
-					.booleanValue())) ? new Integer(0) : new Integer(1);
+			fields[6] = ((assessment.getFeedbackShowScore() == null) || (!assessment.getFeedbackShowScore().booleanValue())) ? new Integer(0)
+					: new Integer(1);
+			fields[7] = ((assessment.getFeedbackShowQuestionScore() == null) || (!assessment.getFeedbackShowQuestionScore().booleanValue())) ? new Integer(
+					0)
+					: new Integer(1);
+			fields[8] = ((assessment.getFeedbackShowQuestionFeedback() == null) || (!assessment.getFeedbackShowQuestionFeedback().booleanValue())) ? new Integer(
+					0)
+					: new Integer(1);
+			fields[9] = ((assessment.getFeedbackShowAnswerFeedback() == null) || (!assessment.getFeedbackShowAnswerFeedback().booleanValue())) ? new Integer(
+					0)
+					: new Integer(1);
 			fields[10] = new Integer(1);
-			fields[11] = ((assessment.getFeedbackShowStatistics() == null) || (!assessment.getFeedbackShowStatistics()
-					.booleanValue())) ? new Integer(0) : new Integer(1);
+			fields[11] = ((assessment.getFeedbackShowStatistics() == null) || (!assessment.getFeedbackShowStatistics().booleanValue())) ? new Integer(
+					0)
+					: new Integer(1);
 			fields[12] = id;
 			m_sqlService.dbWrite(connection, statement, fields);
 
 			// ID for SAM_PUBLISHEDMETADATA_T
 			Long xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
 
-			statement = "INSERT INTO SAM_PUBLISHEDMETADATA_T (ASSESSMENTID, LABEL, ENTRY"
-					+ ((xid == null) ? "" : ", ASSESSMENTMETADATAID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+			statement = "INSERT INTO SAM_PUBLISHEDMETADATA_T (ASSESSMENTID, LABEL, ENTRY" + ((xid == null) ? "" : ", ASSESSMENTMETADATAID")
+					+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
 			fields = new Object[(xid == null) ? 3 : 4];
 			fields[0] = id;
 			fields[1] = "assessmentAuthor_isInstructorEditable";
@@ -2740,8 +2721,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// ID for SAM_PUBLISHEDSECUREDIP_T
 			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDSECUREDIP_ID_S", connection);
 
-			statement = "INSERT INTO SAM_PUBLISHEDSECUREDIP_T (ASSESSMENTID, HOSTNAME, IPADDRESS"
-					+ ((xid == null) ? "" : ", IPADDRESSID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+			statement = "INSERT INTO SAM_PUBLISHEDSECUREDIP_T (ASSESSMENTID, HOSTNAME, IPADDRESS" + ((xid == null) ? "" : ", IPADDRESSID")
+					+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
 			fields = new Object[(xid == null) ? 3 : 4];
 			fields[0] = id;
 			fields[1] = null;
@@ -2753,11 +2734,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			xid = m_sqlService.getNextSequence("SAM_AUTHZDATA_S", connection);
 
 			statement = "INSERT INTO SAM_AUTHZDATA_T (lockId, AGENTID, FUNCTIONID, QUALIFIERID, EFFECTIVEDATE, EXPIRATIONDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE, ISEXPLICIT"
-					+ ((xid == null) ? "" : ", ID")
-					+ ")"
-					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?"
-					+ ((xid == null) ? "" : ",?")
-					+ ")";
+					+ ((xid == null) ? "" : ", ID") + ")" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
 			fields = new Object[(xid == null) ? 9 : 10];
 			fields[0] = new Integer(0);
 			fields[1] = a.getContext();
@@ -2801,8 +2778,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					Long questionId = m_sqlService.getNextSequence("SAM_PUBITEM_ID_S", connection);
 					statement = "INSERT INTO SAM_PUBLISHEDITEM_T"
 							+ " (SECTIONID, SEQUENCE, TYPEID, SCORE, HASRATIONALE, STATUS, CREATEDBY, CREATEDDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE, INSTRUCTION"
-							+ ((questionId == null) ? "" : ", ITEMID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,?"
-							+ ((questionId == null) ? "" : ",?") + ")";
+							+ ((questionId == null) ? "" : ", ITEMID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,?" + ((questionId == null) ? "" : ",?")
+							+ ")";
 					fields = new Object[(questionId == null) ? 11 : 12];
 					fields[0] = section.getId();
 					fields[1] = new Integer(questionPosition++);
@@ -2835,9 +2812,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					for (QuestionPart part : question.getParts())
 					{
 						Long partId = m_sqlService.getNextSequence("SAM_PUBITEMTEXT_ID_S", connection);
-						statement = "INSERT INTO SAM_PUBLISHEDITEMTEXT_T (ITEMID, SEQUENCE, TEXT"
-								+ ((partId == null) ? "" : ", ITEMTEXTID") + ")" + " VALUES (?, ?, ?"
-								+ ((partId == null) ? "" : ",?") + ")";
+						statement = "INSERT INTO SAM_PUBLISHEDITEMTEXT_T (ITEMID, SEQUENCE, TEXT" + ((partId == null) ? "" : ", ITEMTEXTID") + ")"
+								+ " VALUES (?, ?, ?" + ((partId == null) ? "" : ",?") + ")";
 						fields = new Object[(partId == null) ? 3 : 4];
 						fields[0] = questionId;
 						fields[1] = new Integer(sequence++);
@@ -2858,10 +2834,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						for (AssessmentAnswer answer : part.getAnswersAsAuthored())
 						{
 							Long answerId = m_sqlService.getNextSequence("SAM_PUBANSWER_ID_S", connection);
-							statement = "INSERT INTO SAM_PUBLISHEDANSWER_T"
-									+ " (ITEMTEXTID, ITEMID, TEXT, SEQUENCE, LABEL, ISCORRECT, SCORE"
-									+ ((answerId == null) ? "" : ", ANSWERID") + ")" + " VALUES (?,?,?,?,?,?,?"
-									+ ((answerId == null) ? "" : ",?") + ")";
+							statement = "INSERT INTO SAM_PUBLISHEDANSWER_T" + " (ITEMTEXTID, ITEMID, TEXT, SEQUENCE, LABEL, ISCORRECT, SCORE"
+									+ ((answerId == null) ? "" : ", ANSWERID") + ")" + " VALUES (?,?,?,?,?,?,?" + ((answerId == null) ? "" : ",?")
+									+ ")";
 							fields = new Object[(answerId == null) ? 7 : 8];
 							fields[0] = partId;
 							fields[1] = questionId;
@@ -2890,8 +2865,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 							{
 								xid = m_sqlService.getNextSequence("SAM_PUBANSWERFEEDBACK_ID_S", connection);
 								statement = "INSERT INTO SAM_PUBLISHEDANSWERFEEDBACK_T (ANSWERID, TYPEID, TEXT"
-										+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?"
-										+ ((xid == null) ? "" : ",?") + ")";
+										+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
 								fields = new Object[(xid == null) ? 3 : 4];
 								fields[0] = answerId;
 								fields[1] = "InCorrect Feedback";
@@ -2904,8 +2878,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 							{
 								xid = m_sqlService.getNextSequence("SAM_PUBANSWERFEEDBACK_ID_S", connection);
 								statement = "INSERT INTO SAM_PUBLISHEDANSWERFEEDBACK_T (ANSWERID, TYPEID, TEXT"
-										+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?"
-										+ ((xid == null) ? "" : ",?") + ")";
+										+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
 								fields = new Object[(xid == null) ? 3 : 4];
 								fields[0] = answerId;
 								fields[1] = "Correct Feedback";
@@ -2918,8 +2891,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 							{
 								xid = m_sqlService.getNextSequence("SAM_PUBANSWERFEEDBACK_ID_S", connection);
 								statement = "INSERT INTO SAM_PUBLISHEDANSWERFEEDBACK_T (ANSWERID, TYPEID, TEXT"
-										+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?"
-										+ ((xid == null) ? "" : ",?") + ")";
+										+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
 								fields = new Object[(xid == null) ? 3 : 4];
 								fields[0] = answerId;
 								fields[1] = "General Feedback";
@@ -2934,9 +2906,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					if (question.getFeedbackIncorrect() != null)
 					{
 						xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", connection);
-						statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT"
-								+ ((xid == null) ? "" : ", ITEMFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?")
-								+ ")";
+						statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT" + ((xid == null) ? "" : ", ITEMFEEDBACKID")
+								+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
 						fields = new Object[(xid == null) ? 3 : 4];
 						fields[0] = questionId;
 						fields[1] = "InCorrect Feedback";
@@ -2948,9 +2919,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					if (question.getFeedbackCorrect() != null)
 					{
 						xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", connection);
-						statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT"
-								+ ((xid == null) ? "" : ", ITEMFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?")
-								+ ")";
+						statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT" + ((xid == null) ? "" : ", ITEMFEEDBACKID")
+								+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
 						fields = new Object[(xid == null) ? 3 : 4];
 						fields[0] = questionId;
 						fields[1] = "Correct Feedback";
@@ -2962,9 +2932,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					if (question.getFeedbackGeneral() != null)
 					{
 						xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", connection);
-						statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT"
-								+ ((xid == null) ? "" : ", ITEMFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?")
-								+ ")";
+						statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT" + ((xid == null) ? "" : ", ITEMFEEDBACKID")
+								+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
 						fields = new Object[(xid == null) ? 3 : 4];
 						fields[0] = questionId;
 						fields[1] = "General Feedback";
@@ -2975,8 +2944,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 					// question metadata
 					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
-					statement = "INSERT INTO SAM_PUBLISHEDITEMMETADATA_T (ITEMID, LABEL, ENTRY"
-							+ ((xid == null) ? "" : ", ITEMMETADATAID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+					statement = "INSERT INTO SAM_PUBLISHEDITEMMETADATA_T (ITEMID, LABEL, ENTRY" + ((xid == null) ? "" : ", ITEMMETADATAID")
+							+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
 					fields = new Object[(xid == null) ? 3 : 4];
 					fields[0] = questionId;
 					fields[1] = "POOLID";
@@ -2986,8 +2955,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
 					fields[1] = "MUTUALLY_EXCLUSIVE";
-					fields[2] = ((question.getMutuallyExclusive() != null) && question.getMutuallyExclusive().booleanValue()) ? "true"
-							: "false";
+					fields[2] = ((question.getMutuallyExclusive() != null) && question.getMutuallyExclusive().booleanValue()) ? "true" : "false";
 					if (xid != null) fields[3] = xid;
 					m_sqlService.dbWrite(connection, statement, fields);
 
@@ -2999,15 +2967,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
 					fields[1] = "RANDOMIZE";
-					fields[2] = ((question.getRandomAnswerOrder() != null) && question.getRandomAnswerOrder().booleanValue()) ? "true"
-							: "false";
+					fields[2] = ((question.getRandomAnswerOrder() != null) && question.getRandomAnswerOrder().booleanValue()) ? "true" : "false";
 					if (xid != null) fields[3] = xid;
 					m_sqlService.dbWrite(connection, statement, fields);
 
 					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
 					fields[1] = "CASE_SENSITIVE";
-					fields[2] = ((question.getCaseSensitive() != null) && question.getCaseSensitive().booleanValue()) ? "true"
-							: "false";
+					fields[2] = ((question.getCaseSensitive() != null) && question.getCaseSensitive().booleanValue()) ? "true" : "false";
 					if (xid != null) fields[3] = xid;
 					m_sqlService.dbWrite(connection, statement, fields);
 				}
@@ -3021,8 +2987,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// event track it
 			if (m_threadLocalManager.get("sakai.event.suppress") == null)
 			{
-				m_eventTrackingService.post(m_eventTrackingService.newEvent(ASSESSMENT_PUBLISH, getAssessmentReference(assessment
-						.getId()), true));
+				m_eventTrackingService.post(m_eventTrackingService.newEvent(ASSESSMENT_PUBLISH, getAssessmentReference(assessment.getId()), true));
 			}
 
 			// cache a copy
@@ -3083,9 +3048,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		return new Integer(0);
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Submission Support
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/**
 	 * {@inheritDoc}
@@ -3117,8 +3082,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public void addSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException,
-			AssessmentCompletedException
+	public void addSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException, AssessmentCompletedException
 	{
 		// TODO: update the date to now? That would block past / future dating for special purposes... -ggolden
 
@@ -3129,8 +3093,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// check that the current user is the submission user
 		if (!submission.getUserId().equals(m_sessionManager.getCurrentSessionUserId()))
 		{
-			throw new AssessmentPermissionException(submission.getUserId(), SUBMIT_PERMISSION, getAssessmentReference(assessment
-					.getId()));
+			throw new AssessmentPermissionException(submission.getUserId(), SUBMIT_PERMISSION, getAssessmentReference(assessment.getId()));
 		}
 
 		// check permission - submission user must have SUBMIT_PERMISSION in the context of the assessment
@@ -3151,8 +3114,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// event track it
 		if (m_threadLocalManager.get("sakai.event.suppress") == null)
 		{
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ADD, getSubmissionReference(submission.getId()),
-					true));
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ADD, getSubmissionReference(submission.getId()), true));
 		}
 	}
 
@@ -3197,9 +3159,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// value just allocated
 			String statement = "INSERT INTO SAM_ASSESSMENTGRADING_T"
 					+ " (PUBLISHEDASSESSMENTID, AGENTID, SUBMITTEDDATE, ISLATE, FORGRADE, TOTALAUTOSCORE,"
-					+ " TOTALOVERRIDESCORE, FINALSCORE, STATUS, ATTEMPTDATE, TIMEELAPSED"
-					+ ((id == null) ? "" : ", ASSESSMENTGRADINGID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,?"
-					+ ((id == null) ? "" : ",?") + ")";
+					+ " TOTALOVERRIDESCORE, FINALSCORE, STATUS, ATTEMPTDATE, TIMEELAPSED" + ((id == null) ? "" : ", ASSESSMENTGRADINGID") + ")"
+					+ " VALUES (?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?") + ")";
 			Object fields[] = new Object[(id == null) ? 11 : 12];
 			fields[0] = s.getAssessmentId();
 			fields[1] = s.getUserId();
@@ -3239,14 +3200,14 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 					statement = "INSERT INTO SAM_ITEMGRADING_T"
 							+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
-							+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE" + ((answerId == null) ? "" : ", ITEMGRADINGID")
-							+ ")" + " VALUES (?,?,?,?,?,?,?,?,?,?" + ((answerId == null) ? "" : ",?") + ")";
+							+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE" + ((answerId == null) ? "" : ", ITEMGRADINGID") + ")"
+							+ " VALUES (?,?,?,?,?,?,?,?,?,?" + ((answerId == null) ? "" : ",?") + ")";
 					fields = new Object[(answerId == null) ? 10 : 11];
 					fields[0] = answer.getSubmission().getId();
 					fields[1] = answer.getQuestionId();
 					// if the entry's assessment answer is null, use the single part id
-					fields[2] = (entry.getAssessmentAnswer() != null) ? entry.getAssessmentAnswer().getPart().getId() : answer
-							.getQuestion().getPart().getId();
+					fields[2] = (entry.getAssessmentAnswer() != null) ? entry.getAssessmentAnswer().getPart().getId() : answer.getQuestion()
+							.getPart().getId();
 					fields[3] = s.getUserId();
 					fields[4] = answer.getSubmittedDate();
 					fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
@@ -3454,8 +3415,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// the current time
 		Time asOf = m_timeService.newTime();
 
-		if (M_log.isDebugEnabled())
-			M_log.debug("enterSubmission: assessment: " + assessment.getId() + " user: " + userId + " asOf: " + asOf);
+		if (M_log.isDebugEnabled()) M_log.debug("enterSubmission: assessment: " + assessment.getId() + " user: " + userId + " asOf: " + asOf);
 
 		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
 		secure(userId, SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
@@ -3468,8 +3428,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (submission != null)
 		{
 			// event track it (not a modify event)
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_REENTER, getSubmissionReference(submission.getId()),
-					false));
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_REENTER, getSubmissionReference(submission.getId()), false));
 
 			return submission;
 		}
@@ -3492,8 +3451,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		addSubmission(submission, null);
 
 		// event track it
-		m_eventTrackingService
-				.post(m_eventTrackingService.newEvent(SUBMIT_ENTER, getSubmissionReference(submission.getId()), true));
+		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ENTER, getSubmissionReference(submission.getId()), true));
 
 		return submission;
 	}
@@ -3501,8 +3459,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public void submitAnswer(SubmissionAnswer answer, Boolean completeAnswer, Boolean completSubmission)
-			throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException
+	public void submitAnswer(SubmissionAnswer answer, Boolean completeAnswer, Boolean completSubmission) throws AssessmentPermissionException,
+			AssessmentClosedException, SubmissionCompletedException
 	{
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>(1);
 		answers.add(answer);
@@ -3536,14 +3494,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		Time asOf = m_timeService.newTime();
 
 		if (M_log.isDebugEnabled())
-			M_log.debug("submitAnswer: submission: " + submission.getId() + " complete?: " + Boolean.toString(completSubmission)
-					+ " asOf: " + asOf);
+			M_log.debug("submitAnswer: submission: " + submission.getId() + " complete?: " + Boolean.toString(completSubmission) + " asOf: " + asOf);
 
 		// check that the current user is the submission user
 		if (!submission.getUserId().equals(m_sessionManager.getCurrentSessionUserId()))
 		{
-			throw new AssessmentPermissionException(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION,
-					getAssessmentReference(assessment.getId()));
+			throw new AssessmentPermissionException(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, getAssessmentReference(assessment
+					.getId()));
 		}
 
 		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment (use the assessment as ref, not
@@ -3603,9 +3560,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						// this will score the answer based on values in the database
 						String statement = "INSERT INTO SAM_ITEMGRADING_T"
 								+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
-								+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW"
-								+ ((answerId == null) ? "" : ", ITEMGRADINGID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,"
-								+ m_sqlService.getBooleanConstant(answer.getMarkedForReview())
+								+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW" + ((answerId == null) ? "" : ", ITEMGRADINGID") + ")"
+								+ " VALUES (?,?,?,?,?,?,?,?,?,?," + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
 								// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
 								+ ((answerId == null) ? "" : ",?") + ")";
 						Object[] fields = new Object[(answerId == null) ? 10 : 11];
@@ -3700,8 +3656,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					+ " TOTALAUTOSCORE = (SELECT SUM(AUTOSCORE)+SUM(OVERRIDESCORE) FROM SAM_ITEMGRADING_T WHERE ASSESSMENTGRADINGID = ?),"
 					+ " FINALSCORE = TOTALAUTOSCORE+TOTALOVERRIDESCORE"
 					+ (((completSubmission != null) && completSubmission.booleanValue()) ? (" ,STATUS = 1, FORGRADE = " + m_sqlService
-							.getBooleanConstant(true))
-							: "") + " WHERE ASSESSMENTGRADINGID = ?";
+							.getBooleanConstant(true)) : "") + " WHERE ASSESSMENTGRADINGID = ?";
 			Object[] fields = new Object[3];
 			fields[0] = submission.getSubmittedDate();
 			fields[1] = submission.getId();
@@ -3716,72 +3671,21 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			connection.commit();
 
 			// if complete and the assessment is integrated into the Gradebook, record the grade
-			if ((completSubmission != null) && completSubmission.booleanValue() && (assessment.getGradebookIntegration() != null)
-					&& assessment.getGradebookIntegration().booleanValue())
+			if ((completSubmission != null) && completSubmission.booleanValue())
 			{
-				// is there a gradebook? - we could just not care here, save all those GB db calls, and let it throw later
-				// but that forces us to do our single read for score -ggolden
-				if (true /* m_gradebookService.isGradebookDefined(assessment.getContext()) */)
-				{
-					// read the final score
-					statement = "SELECT FINALSCORE FROM SAM_ASSESSMENTGRADING_T WHERE ASSESSMENTGRADINGID = ?";
-					fields = new Object[1];
-					fields[0] = submission.getId();
-					final List<String> scores = new ArrayList<String>(1);
-					m_sqlService.dbRead(statement, fields, new SqlReader()
-					{
-						public Object readSqlResultRecord(ResultSet result)
-						{
-							try
-							{
-								String score = result.getString(1);
-								scores.add(score);
-								return null;
-							}
-							catch (SQLException e)
-							{
-								M_log.warn("submitAnswers: " + e);
-								return null;
-							}
-						}
-					});
-
-					if (scores.size() == 1)
-					{
-						Double points = Double.valueOf(scores.get(0));
-
-						// post it
-						try
-						{
-							m_gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(),
-									submission.getUserId(), points);
-						}
-						catch (GradebookNotFoundException e)
-						{
-							// if there's no gradebook for this context, oh well...
-							M_log.warn("submitAnswers: (no gradebook for context): " + e);
-						}
-						catch (AssessmentNotFoundException e)
-						{
-							// if the assessment has not been registered in gb, this is a problem
-							M_log.warn("submitAnswers: (assessment has not been registered in context's gb): " + e);
-						}
-					}
-				}
+				this.recordInGradebook(submission);
 			}
 
 			// collect the cached submission, before the event clears it
 			recache = getCachedSubmission(submission.getId());
 
 			// event track it
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(submission.getId()),
-					true));
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(submission.getId()), true));
 
 			// track if we are complete
 			if ((completSubmission != null) && completSubmission.booleanValue())
 			{
-				m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission
-						.getId()), true));
+				m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission.getId()), true));
 			}
 		}
 		catch (Exception e)
@@ -3855,6 +3759,70 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	}
 
 	/**
+	 * Record this submission in the gradebook. Assume it has complete and ready to go.
+	 * 
+	 * @param submission
+	 *        The submission to record in the gradebook.
+	 */
+	protected void recordInGradebook(Submission submission)
+	{
+		Assessment assessment = submission.getAssessment();
+
+		// if the assessment is integrated into the Gradebook, record the grade
+		if ((assessment.getGradebookIntegration() != null) && assessment.getGradebookIntegration().booleanValue())
+		{
+			// is there a gradebook? - we could just not care here, save all those GB db calls, and let it throw later
+			// but that forces us to do our single read for score -ggolden
+			if (true /* m_gradebookService.isGradebookDefined(assessment.getContext()) */)
+			{
+				// read the final score
+				String statement = "SELECT FINALSCORE FROM SAM_ASSESSMENTGRADING_T WHERE ASSESSMENTGRADINGID = ?";
+				Object[] fields = new Object[1];
+				fields[0] = submission.getId();
+				final List<String> scores = new ArrayList<String>(1);
+				m_sqlService.dbRead(statement, fields, new SqlReader()
+				{
+					public Object readSqlResultRecord(ResultSet result)
+					{
+						try
+						{
+							String score = result.getString(1);
+							scores.add(score);
+							return null;
+						}
+						catch (SQLException e)
+						{
+							M_log.warn("submitAnswers: " + e);
+							return null;
+						}
+					}
+				});
+
+				if (scores.size() == 1)
+				{
+					Double points = Double.valueOf(scores.get(0));
+
+					// post it
+					try
+					{
+						m_gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(), submission.getUserId(), points);
+					}
+					catch (GradebookNotFoundException e)
+					{
+						// if there's no gradebook for this context, oh well...
+						M_log.warn("recordInGradebook: (no gradebook for context): " + e);
+					}
+					catch (AssessmentNotFoundException e)
+					{
+						// if the assessment has not been registered in gb, this is a problem
+						M_log.warn("recordInGradebook: (assessment has not been registered in context's gb): " + e);
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Add a single entry to the answer to reserve an id for this answer.
 	 * 
 	 * @param answer
@@ -3878,8 +3846,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// this will score the answer based on values in the database
 			String statement = "INSERT INTO SAM_ITEMGRADING_T"
 					+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
-					+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW" + ((answerId == null) ? "" : ", ITEMGRADINGID")
-					+ ")" + " VALUES (?,?,?,?,?,?,?,?,?,?," + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
+					+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW" + ((answerId == null) ? "" : ", ITEMGRADINGID") + ")"
+					+ " VALUES (?,?,?,?,?,?,?,?,?,?," + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
 					// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
 					+ ((answerId == null) ? "" : ",?") + ")";
 			Object[] fields = new Object[(answerId == null) ? 10 : 11];
@@ -3925,8 +3893,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			recache = getCachedSubmission(answer.getSubmission().getId());
 
 			// event track it
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(answer
-					.getSubmission().getId()), true));
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(answer.getSubmission().getId()), true));
 		}
 		catch (Exception e)
 		{
@@ -3989,8 +3956,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public void completeSubmission(Submission s) throws AssessmentPermissionException, AssessmentClosedException,
-			SubmissionCompletedException
+	public void completeSubmission(Submission s) throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException
 	{
 		// trust only the submission id passed in - get fresh and trusted additional information
 		Submission submission = idSubmission(s.getId());
@@ -4008,8 +3974,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// check that the current user is the submission user
 		if (!submission.getUserId().equals(m_sessionManager.getCurrentSessionUserId()))
 		{
-			throw new AssessmentPermissionException(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION,
-					getAssessmentReference(assessment.getId()));
+			throw new AssessmentPermissionException(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, getAssessmentReference(assessment
+					.getId()));
 		}
 
 		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment (use the assessment as ref, not
@@ -4045,6 +4011,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// commit
 			connection.commit();
 
+			// record in the gradebook if so configured
+			recordInGradebook(submission);
+
 			// update the submission parameter for the caller
 			s.setSubmittedDate(asOf);
 			s.setStatus(new Integer(1));
@@ -4054,8 +4023,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			recache = getCachedSubmission(s.getId());
 
 			// event track it
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE,
-					getSubmissionReference(submission.getId()), true));
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission.getId()), true));
 		}
 		catch (Exception e)
 		{
@@ -4252,8 +4220,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			if (!found)
 			{
 				// trouble: no more entries to clear, still negative
-				M_log.warn("scoreAnswers: ran out of entries to clear to get to 0 score: submissionId: "
-						+ answer.getSubmission().getId() + " questionId: " + question.getId());
+				M_log.warn("scoreAnswers: ran out of entries to clear to get to 0 score: submissionId: " + answer.getSubmission().getId()
+						+ " questionId: " + question.getId());
 				break;
 			}
 		}
@@ -4281,8 +4249,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 						// they need to be the same (i.e. !different) based on our case sensitive (the method takes ignore case, so
 						// we reverse)
-						if (!StringUtil.different(entry.getAnswerText(), compareEntry.getAnswerText(), !question.getCaseSensitive()
-								.booleanValue()))
+						if (!StringUtil.different(entry.getAnswerText(), compareEntry.getAnswerText(), !question.getCaseSensitive().booleanValue()))
 						{
 							// we will check against this other question's text, exactly
 							String compareEntryQuestionText = compareEntry.getAssessmentAnswer().getText();
@@ -4381,8 +4348,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 						// they need to be the same (i.e. !different) based on our case sensitive (the method takes ignore case, so
 						// we reverse)
-						if (!StringUtil.different(entry.getAnswerText(), compareEntry.getAnswerText(), !question.getCaseSensitive()
-								.booleanValue()))
+						if (!StringUtil.different(entry.getAnswerText(), compareEntry.getAnswerText(), !question.getCaseSensitive().booleanValue()))
 						{
 							// we will check against this other question's text, exactly
 							String compareEntryQuestionText = compareEntry.getAssessmentAnswer().getText();
@@ -4441,8 +4407,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		// see if we have one already
 		String statement = "SELECT AG.ASSESSMENTGRADINGID" + " FROM SAM_ASSESSMENTGRADING_T AG"
-				+ " WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.AGENTID = ? AND AG.FORGRADE = "
-				+ m_sqlService.getBooleanConstant(false);
+				+ " WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.AGENTID = ? AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(false);
 		// TODO: order by id asc so we always use the lowest (oldest) if there are ever two open?
 		Object[] fields = new Object[2];
 		fields[0] = assessment.getId();
@@ -4452,17 +4417,17 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		{
 			// we have one
 			if (results.size() > 1)
-				M_log.warn("getSubmissionInProgress: multiple incomplete submissions: " + results.size() + " aid: "
-						+ assessment.getId() + " userId: " + userId);
+				M_log.warn("getSubmissionInProgress: multiple incomplete submissions: " + results.size() + " aid: " + assessment.getId()
+						+ " userId: " + userId);
 			rv = idSubmission((String) results.get(0));
 		}
 
 		return rv;
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Runnable - checking thread
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/** The checker thread. */
 	protected Thread m_thread = null;
@@ -4511,7 +4476,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		{
 			try
 			{
-				// get a list of submission ids that are open, timed, and well expired
+				// get a list of submission ids that are open, timed, and well expired, or open and past a retract date or hard deadline
 				List<String> ids = getTimedOutSubmissions(1 * 60 * 1000);
 
 				// for each one, close it if it is still open
@@ -4537,7 +4502,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	}
 
 	/**
-	 * Find the submissions that are open, timed, and well expired.
+	 * Find the submissions that are open, timed, and well expired, or open and past a retract date or hard deadline
 	 * 
 	 * @param well
 	 *        The number of ms past the time limit that the submission's elapsed time must be to qualify
@@ -4549,9 +4514,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		final Time asOf = m_timeService.newTime();
 
-		String statement = "SELECT AG.ASSESSMENTGRADINGID, AG.ATTEMPTDATE, PAC.TIMELIMIT" + " FROM SAM_ASSESSMENTGRADING_T AG"
-				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON AG.PUBLISHEDASSESSMENTID = PAC.ASSESSMENTID"
-				+ " WHERE PAC.TIMELIMIT > 0 AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(false);
+		// select all the open submissions (or, just the TIMELIMIT > 0 or DUEDATE not null or RETRACTDATE not null?)
+		String statement = "SELECT AG.ASSESSMENTGRADINGID, AG.ATTEMPTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING"
+				+ " FROM SAM_ASSESSMENTGRADING_T AG" + " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON AG.PUBLISHEDASSESSMENTID = PAC.ASSESSMENTID"
+				+ " WHERE AG.FORGRADE = " + m_sqlService.getBooleanConstant(false);
 
 		Object[] fields = new Object[0];
 
@@ -4575,10 +4541,41 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					// convert to ms from seconds
 					long timeLimit = result.getLong(3) * 1000;
 
-					// if the elapsed time since their start is well past the time limit
-					if ((attemptDate != null) && ((asOf.getTime() - attemptDate.getTime()) > (timeLimit + well)))
+					ts = result.getTimestamp(4, m_sqlService.getCal());
+					Time dueDate = null;
+					if (ts != null)
+					{
+						dueDate = m_timeService.newTime(ts.getTime());
+					}
+
+					ts = result.getTimestamp(5, m_sqlService.getCal());
+					Time retractDate = null;
+					if (ts != null)
+					{
+						retractDate = m_timeService.newTime(ts.getTime());
+					}
+
+					boolean allowLate = (result.getInt(6) == 1);
+
+					// for timed, if the elapsed time since their start is well past the time limit
+					if ((timeLimit > 0) && (attemptDate != null) && ((asOf.getTime() - attemptDate.getTime()) > (timeLimit + well)))
 					{
 						rv.add(submissionId);
+						return null;
+					}
+
+					// for past retract date
+					if ((retractDate != null) && (asOf.getTime() > (retractDate.getTime() + well)))
+					{
+						rv.add(submissionId);
+						return null;
+					}
+
+					// for past hard due date
+					if ((dueDate != null) && (!allowLate) && (asOf.getTime() > (dueDate.getTime() + well)))
+					{
+						rv.add(submissionId);
+						return null;
 					}
 
 					return null;
@@ -4609,8 +4606,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (M_log.isDebugEnabled()) M_log.debug("completeTheSubmission: submission: " + sid);
 
 		String statement = "UPDATE SAM_ASSESSMENTGRADING_T" + " SET SUBMITTEDDATE = ?, STATUS = 1, FORGRADE = "
-				+ m_sqlService.getBooleanConstant(true) + " WHERE ASSESSMENTGRADINGID = ? AND FORGRADE = "
-				+ m_sqlService.getBooleanConstant(false);
+				+ m_sqlService.getBooleanConstant(true) + " WHERE ASSESSMENTGRADINGID = ? AND FORGRADE = " + m_sqlService.getBooleanConstant(false);
 		Object fields[] = new Object[2];
 		fields[0] = asOf;
 		fields[1] = sid;
@@ -4619,6 +4615,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// it didn't work!
 			return false;
 		}
+
+		// record in the gradebook if so configured
+		recordInGradebook(idSubmission(sid));
 
 		// event track it
 		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(sid), true));
