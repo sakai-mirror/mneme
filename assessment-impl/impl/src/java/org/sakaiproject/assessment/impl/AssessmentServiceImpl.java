@@ -540,13 +540,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			}
 		}
 
-		// otherwise check the thread-local cache
-		else
-		{
-			return (AssessmentImpl) m_threadLocalManager.get(ref);
-		}
-
-		return null;
+		// if not found, check the thread-local cache
+		return (AssessmentImpl) m_threadLocalManager.get(ref);
 	}
 
 	/**
@@ -1543,6 +1538,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 */
 	protected SubmissionImpl getCachedSubmission(String id)
 	{
+		// Note: untill Samigo is no longer messing with the db behind our back, so that we can't keep our cache valid,
+		// don't use anything from the cache that might have been modified by Samigo; such as completed submissions.
+		// The thread-local cache is ok to use whatever we got.
+
 		String ref = getSubmissionReference(id);
 
 		// if we are short-term caching
@@ -1551,17 +1550,20 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// if it is in there
 			if (m_submissionCache.containsKey(ref))
 			{
-				return (SubmissionImpl) m_submissionCache.get(ref);
+				SubmissionImpl s = (SubmissionImpl) m_submissionCache.get(ref);
+				if (s != null)
+				{
+					// only incomplete, please
+					if ((s.isComplete == null) || (!s.isComplete.booleanValue()))
+					{
+						return s;
+					}
+				}
 			}
 		}
 
-		// otherwise check the thread-local cache
-		else
-		{
-			return (SubmissionImpl) m_threadLocalManager.get(ref);
-		}
-
-		return null;
+		// if not found, check the thread-local cache
+		return (SubmissionImpl) m_threadLocalManager.get(ref);
 	}
 
 	/**
@@ -1574,16 +1576,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	{
 		String ref = getSubmissionReference(submission.getId());
 
+		// Note: we thread-local cache always, even if we are otherwise caching
+		m_threadLocalManager.set(ref, submission);
+
 		// if we are short-term caching
 		if (m_submissionCache != null)
 		{
 			m_submissionCache.put(ref, submission, m_cacheSeconds);
-		}
-
-		// else thread-local cache
-		else
-		{
-			m_threadLocalManager.set(ref, submission);
 		}
 	}
 
@@ -1597,18 +1596,11 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	{
 		String ref = getSubmissionReference(id);
 
-		// if we are short-term caching
-		if (m_submissionCache != null)
-		{
-			// Note: the cache will clear when the event is processed...
-			// m_submissionCache.remove(ref);
-		}
+		// Note: the cache will clear when the event is processed...
+		// if (m_submissionCache != null) m_submissionCache.remove(ref);
 
-		// else thread-local cache
-		else
-		{
-			m_threadLocalManager.set(ref, null);
-		}
+		// clear the thread-local cache
+		m_threadLocalManager.set(ref, null);
 	}
 
 	/**
@@ -2056,7 +2048,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					SubmissionImpl cachedSubmission = getCachedSubmission(submissionId);
 					if (cachedSubmission == null)
 					{
-						// cache an empty one
+						// cache an empty, but complete, one
 						cachedSubmission = new SubmissionImpl(service);
 						cachedSubmission.initId(submissionId);
 						cacheSubmission(cachedSubmission);
@@ -4641,7 +4633,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						cachedSubmission.initTotalScore(score);
 						cachedSubmission.initStartDate(attemptDate);
 						cachedSubmission.initUserId(userId);
-						cachedSubmission.initIsComplete(Boolean.TRUE);
+						cachedSubmission.initIsComplete(Boolean.FALSE);
 
 						rv.add(cachedSubmission);
 					}
