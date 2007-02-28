@@ -1641,6 +1641,11 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// if null, get the current user id
 		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
 
+		// if we have done this already this thread, use it
+		String key = "coundRemainingSubmissions_" + assessmentId + "_" + userId;
+		Integer count = (Integer) m_threadLocalManager.get(key);
+		if (count != null) return count;
+
 		final Time asOf = m_timeService.newTime();
 
 		if (M_log.isDebugEnabled()) M_log.debug("countRemainingSubmissions: assessment: " + assessmentId + " userId: " + userId + " asOf: " + asOf);
@@ -1721,7 +1726,14 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			}
 		});
 
-		return (rv.size() == 0) ? null : (Integer) rv.get(0);
+		count = (rv.size() == 0) ? null : (Integer) rv.get(0);
+
+		if (count != null)
+		{
+			m_threadLocalManager.set(key, count);
+		}
+
+		return count;
 	}
 
 	/**
@@ -3804,7 +3816,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 							}
 						}
 					});
-	
+
 					if (scores.size() == 1)
 					{
 						points = Double.valueOf(scores.get(0));
