@@ -3674,7 +3674,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// if complete and the assessment is integrated into the Gradebook, record the grade
 			if ((completSubmission != null) && completSubmission.booleanValue())
 			{
-				this.recordInGradebook(submission);
+				recordInGradebook(submission, true);
 			}
 
 			// collect the cached submission, before the event clears it
@@ -3764,8 +3764,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 * 
 	 * @param submission
 	 *        The submission to record in the gradebook.
+	 * @param refresh
+	 *        if true, get the latest score from the db, if false, use the final score from the submission.
 	 */
-	protected void recordInGradebook(Submission submission)
+	protected void recordInGradebook(Submission submission, boolean refresh)
 	{
 		Assessment assessment = submission.getAssessment();
 
@@ -3776,48 +3778,58 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// but that forces us to do our single read for score -ggolden
 			if (true /* m_gradebookService.isGradebookDefined(assessment.getContext()) */)
 			{
-				// read the final score
-				String statement = "SELECT FINALSCORE FROM SAM_ASSESSMENTGRADING_T WHERE ASSESSMENTGRADINGID = ?";
-				Object[] fields = new Object[1];
-				fields[0] = submission.getId();
-				final List<String> scores = new ArrayList<String>(1);
-				m_sqlService.dbRead(statement, fields, new SqlReader()
-				{
-					public Object readSqlResultRecord(ResultSet result)
-					{
-						try
-						{
-							String score = result.getString(1);
-							scores.add(score);
-							return null;
-						}
-						catch (SQLException e)
-						{
-							M_log.warn("submitAnswers: " + e);
-							return null;
-						}
-					}
-				});
+				Double points = null;
 
-				if (scores.size() == 1)
+				if (refresh)
 				{
-					Double points = Double.valueOf(scores.get(0));
+					// read the final score
+					String statement = "SELECT FINALSCORE FROM SAM_ASSESSMENTGRADING_T WHERE ASSESSMENTGRADINGID = ?";
+					Object[] fields = new Object[1];
+					fields[0] = submission.getId();
+					final List<String> scores = new ArrayList<String>(1);
+					m_sqlService.dbRead(statement, fields, new SqlReader()
+					{
+						public Object readSqlResultRecord(ResultSet result)
+						{
+							try
+							{
+								String score = result.getString(1);
+								scores.add(score);
+								return null;
+							}
+							catch (SQLException e)
+							{
+								M_log.warn("submitAnswers: " + e);
+								return null;
+							}
+						}
+					});
+	
+					if (scores.size() == 1)
+					{
+						points = Double.valueOf(scores.get(0));
+					}
+				}
 
-					// post it
-					try
-					{
-						m_gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(), submission.getUserId(), points);
-					}
-					catch (GradebookNotFoundException e)
-					{
-						// if there's no gradebook for this context, oh well...
-						M_log.warn("recordInGradebook: (no gradebook for context): " + e);
-					}
-					catch (AssessmentNotFoundException e)
-					{
-						// if the assessment has not been registered in gb, this is a problem
-						M_log.warn("recordInGradebook: (assessment has not been registered in context's gb): " + e);
-					}
+				else
+				{
+					points = submission.getTotalScore().doubleValue();
+				}
+
+				// post it
+				try
+				{
+					m_gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(), submission.getUserId(), points);
+				}
+				catch (GradebookNotFoundException e)
+				{
+					// if there's no gradebook for this context, oh well...
+					M_log.warn("recordInGradebook: (no gradebook for context): " + e);
+				}
+				catch (AssessmentNotFoundException e)
+				{
+					// if the assessment has not been registered in gb, this is a problem
+					M_log.warn("recordInGradebook: (assessment has not been registered in context's gb): " + e);
 				}
 			}
 		}
@@ -4013,7 +4025,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			connection.commit();
 
 			// record in the gradebook if so configured
-			recordInGradebook(submission);
+			recordInGradebook(submission, true);
 
 			// update the submission parameter for the caller
 			s.setSubmittedDate(asOf);
@@ -4478,13 +4490,11 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			try
 			{
 				// get a list of submission ids that are open, timed, and well expired, or open and past a retract date or hard deadline
-				List<String> ids = getTimedOutSubmissions(1 * 60 * 1000);
+				List<Submission> submissions = getTimedOutSubmissions(1 * 60 * 1000);
 
 				// for each one, close it if it is still open
-				for (String sid : ids)
+				for (Submission submission : submissions)
 				{
-					Submission submission = idSubmission(sid);
-
 					// we need to establish the "current" user to be the submission user
 					// so that various attributions of the complete process have the proper user
 					String user = submission.getUserId();
@@ -4527,23 +4537,24 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 * 
 	 * @param well
 	 *        The number of ms past the time limit that the submission's elapsed time must be to qualify
-	 * @return A List of the submission ids that are open, timed, and well expired.
+	 * @return A List of the submissions that are open, timed, and well expired.
 	 */
-	protected List<String> getTimedOutSubmissions(final long well)
+	protected List<Submission> getTimedOutSubmissions(final long well)
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("getTimedOutSubmissions");
 
 		final Time asOf = m_timeService.newTime();
 
 		// select all the open submissions (or, just the TIMELIMIT > 0 or DUEDATE not null or RETRACTDATE not null?)
-		String statement = "SELECT AG.ASSESSMENTGRADINGID, AG.ATTEMPTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING"
-				+ " FROM SAM_ASSESSMENTGRADING_T AG" + " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON AG.PUBLISHEDASSESSMENTID = PAC.ASSESSMENTID"
-				+ " WHERE AG.FORGRADE = " + m_sqlService.getBooleanConstant(false);
+		String statement = "SELECT AG.ASSESSMENTGRADINGID, AG.ATTEMPTDATE, AG.AGENTID, AG.FINALSCORE, AG.PUBLISHEDASSESSMENTID,"
+				+ " PAC.TIMELIMIT, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING" + " FROM SAM_ASSESSMENTGRADING_T AG"
+				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON AG.PUBLISHEDASSESSMENTID = PAC.ASSESSMENTID" + " WHERE AG.FORGRADE = "
+				+ m_sqlService.getBooleanConstant(false);
 
 		Object[] fields = new Object[0];
 
 		final AssessmentServiceImpl service = this;
-		final List<String> rv = new ArrayList<String>();
+		final List<Submission> rv = new ArrayList<Submission>();
 		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -4559,51 +4570,74 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						attemptDate = m_timeService.newTime(ts.getTime());
 					}
 
-					// convert to ms from seconds
-					long timeLimit = result.getLong(3) * 1000;
+					String userId = result.getString(3);
+					float score = result.getFloat(4);
+					String publishedAssessmentId = result.getString(5);
 
-					ts = result.getTimestamp(4, m_sqlService.getCal());
+					// convert to ms from seconds
+					long timeLimit = result.getLong(6) * 1000;
+
+					ts = result.getTimestamp(7, m_sqlService.getCal());
 					Time dueDate = null;
 					if (ts != null)
 					{
 						dueDate = m_timeService.newTime(ts.getTime());
 					}
 
-					ts = result.getTimestamp(5, m_sqlService.getCal());
+					ts = result.getTimestamp(8, m_sqlService.getCal());
 					Time retractDate = null;
 					if (ts != null)
 					{
 						retractDate = m_timeService.newTime(ts.getTime());
 					}
 
-					boolean allowLate = (result.getInt(6) == 1);
+					boolean allowLate = (result.getInt(9) == 1);
+
+					// see if we want this one
+					boolean selected = false;
 
 					// for timed, if the elapsed time since their start is well past the time limit
 					if ((timeLimit > 0) && (attemptDate != null) && ((asOf.getTime() - attemptDate.getTime()) > (timeLimit + well)))
 					{
-						rv.add(submissionId);
-						return null;
+						selected = true;
 					}
 
 					// for past retract date
 					if ((retractDate != null) && (asOf.getTime() > (retractDate.getTime() + well)))
 					{
-						rv.add(submissionId);
-						return null;
+						selected = true;
 					}
 
 					// for past hard due date
 					if ((dueDate != null) && (!allowLate) && (asOf.getTime() > (dueDate.getTime() + well)))
 					{
-						rv.add(submissionId);
-						return null;
+						selected = true;
 					}
 
+					if (selected)
+					{
+						// create or update these properties in the submission cache
+						SubmissionImpl cachedSubmission = getCachedSubmission(submissionId);
+						if (cachedSubmission == null)
+						{
+							// cache an empty one
+							cachedSubmission = new SubmissionImpl(service);
+							cachedSubmission.initId(submissionId);
+							cacheSubmission(cachedSubmission);
+						}
+						cachedSubmission.initAssessmentId(publishedAssessmentId);
+						cachedSubmission.initTotalScore(score);
+						cachedSubmission.initStartDate(attemptDate);
+						cachedSubmission.initUserId(userId);
+						cachedSubmission.initIsComplete(Boolean.TRUE);
+
+						rv.add(cachedSubmission);
+					}
 					return null;
 				}
 				catch (SQLException e)
 				{
-					M_log.warn("getAssessmentDueDate: " + e);
+					M_log.warn("getTimedOutSubmissions: " + e);
 					return null;
 				}
 			}
@@ -4637,8 +4671,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			return false;
 		}
 
-		// record in the gradebook if so configured
-		recordInGradebook(submission);
+		// record in the gradebook if so configured, using data only from the submission, no db refresh
+		recordInGradebook(submission, false);
 
 		// event track it
 		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission.getId()), true));
