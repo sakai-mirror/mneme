@@ -66,6 +66,7 @@ import org.sakaiproject.service.gradebook.shared.GradebookNotFoundException;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.api.TimeService;
+import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.util.StringUtil;
 
@@ -4482,12 +4483,32 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				// for each one, close it if it is still open
 				for (String sid : ids)
 				{
-					completeTheSubmission(sid);
+					Submission submission = idSubmission(sid);
+
+					// we need to establish the "current" user to be the submission user
+					// so that various attributions of the complete process have the proper user
+					String user = submission.getUserId();
+					Session s = m_sessionManager.getCurrentSession();
+					if (s != null)
+					{
+						s.setUserId(user);
+					}
+					else
+					{
+						M_log.warn("run - no SessionManager.getCurrentSession, cannot set to user");
+					}
+
+					completeTheSubmission(submission);
 				}
 			}
 			catch (Throwable e)
 			{
 				M_log.warn("run: will continue: ", e);
+			}
+			finally
+			{
+				// clear out any current current bindings
+				m_threadLocalManager.clear();
 			}
 
 			// take a small nap
@@ -4594,22 +4615,22 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * Mark the submission as complete as of now.
 	 * 
-	 * @param sid
-	 *        The submission id.
+	 * @param submission
+	 *        The submission.
 	 * @return true if it was successful, false if not.
 	 */
-	protected boolean completeTheSubmission(String sid)
+	protected boolean completeTheSubmission(Submission submission)
 	{
 		// the current time
 		Time asOf = m_timeService.newTime();
 
-		if (M_log.isDebugEnabled()) M_log.debug("completeTheSubmission: submission: " + sid);
+		if (M_log.isDebugEnabled()) M_log.debug("completeTheSubmission: submission: " + submission.getId());
 
 		String statement = "UPDATE SAM_ASSESSMENTGRADING_T" + " SET SUBMITTEDDATE = ?, STATUS = 1, FORGRADE = "
 				+ m_sqlService.getBooleanConstant(true) + " WHERE ASSESSMENTGRADINGID = ? AND FORGRADE = " + m_sqlService.getBooleanConstant(false);
 		Object fields[] = new Object[2];
 		fields[0] = asOf;
-		fields[1] = sid;
+		fields[1] = submission.getId();
 		if (!m_sqlService.dbWrite(null, statement, fields))
 		{
 			// it didn't work!
@@ -4617,13 +4638,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		}
 
 		// record in the gradebook if so configured
-		recordInGradebook(idSubmission(sid));
+		recordInGradebook(submission);
 
 		// event track it
-		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(sid), true));
+		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission.getId()), true));
 
 		// the submission is altered by this - clear the cache
-		unCacheSubmission(sid);
+		unCacheSubmission(submission.getId());
 
 		return true;
 	}
