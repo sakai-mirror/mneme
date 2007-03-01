@@ -269,7 +269,7 @@ public class SubmissionImpl implements Submission
 
 		if ((submittedDate == null) || (startDate == null)) return null;
 
-		return new Long((submittedDate.getTime() - startDate.getTime()) / 1000);
+		return new Long(submittedDate.getTime() - startDate.getTime());
 	}
 
 	/**

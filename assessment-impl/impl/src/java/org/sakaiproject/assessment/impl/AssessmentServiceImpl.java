@@ -3178,7 +3178,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			fields[7] = fields[5]; // TODO: from evaluation, the total score, auto plus manual...
 			fields[8] = s.getStatus();
 			fields[9] = s.getStartDate();
-			fields[10] = s.getElapsedTime();
+			fields[10] = (s.getElapsedTime() == null) ? null : (s.getElapsedTime() / 1000);
 
 			if (id != null)
 			{

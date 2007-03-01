@@ -70,9 +70,9 @@ public interface Submission
 	String getConfirmation();
 
 	/**
-	 * Access the time taken to make this submission, in seconds, based on the start and lastest submission dates.
+	 * Access the time taken to make this submission, in ms, based on the start and lastest submission dates.
 	 * 
-	 * @return The time taken to make this submission, in seconds (or null if it was not timed or not available).
+	 * @return The time taken to make this submission, in ms (or null if it was not timed or not available).
 	 */
 	Long getElapsedTime();
 
