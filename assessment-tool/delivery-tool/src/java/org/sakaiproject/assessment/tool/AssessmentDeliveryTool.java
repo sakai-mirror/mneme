@@ -68,7 +68,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		enter, error, final_review, list, question, remove, review, submitted, toc
+		enter, error, final_review, list, list2, question, remove, review, submitted, toc
 	}
 
 	/** Our errors. */
@@ -112,6 +112,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 	/** The list interface. */
 	protected Controller uiList = null;
+
+	/** The list2 interface. */
+	protected Controller uiList2 = null;
 
 	/** The question interface. */
 	protected Controller uiQuestion = null;
@@ -176,6 +179,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		this.uiToc = DeliveryControllers.constructToc(ui);
 		this.uiRemove = DeliveryControllers.constructRemove(ui);
 		this.uiError = DeliveryControllers.constructError(ui);
+		this.uiList2 = DeliveryControllers.constructList2(ui);
 
 		// setup the resource paths
 		this.resourcePaths.add("icons");
@@ -230,6 +234,17 @@ public class AssessmentDeliveryTool extends HttpServlet
 					sort = parts[2];
 				}
 				listGet(req, res, sort, context);
+				break;
+			}
+			case list2:
+			{
+				// optional sort parameter
+				String sort = null;
+				if (parts.length == 3)
+				{
+					sort = parts[2];
+				}
+				list2Get(req, res, sort, context);
 				break;
 			}
 			case review:
@@ -821,6 +836,10 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 */
 	protected void listGet(HttpServletRequest req, HttpServletResponse res, String sort, Context context) throws IOException
 	{
+		// TODO: test
+		assessmentService.getUserContextSubmissions(toolManager.getCurrentPlacement().getContext(), null);
+		// TODO: test
+
 		// SORT: 0|1 A|D 0|1|2|3|4 A|D - 4 chars, the first two for the assessment list, the second two for the submissions list
 		if ((sort != null) && (sort.length() != 4))
 		{
@@ -931,6 +950,30 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// render
 		ui.render(uiList, context);
+	}
+
+	/**
+	 * Get the UI for the list 2  destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param sort
+	 *        The sort parameter.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void list2Get(HttpServletRequest req, HttpServletResponse res, String sort, Context context) throws IOException
+	{
+		// collect information: submissions / assessments
+		List submissions = assessmentService.getUserContextSubmissions(toolManager.getCurrentPlacement().getContext(), null);
+		context.put("submissions", submissions);
+
+		// render
+		ui.render(uiList2, context);
 	}
 
 	/**

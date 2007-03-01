@@ -185,6 +185,25 @@ public interface AssessmentService
 	List<Submission> getOfficialSubmissions(String context, String userId, GetOfficialSubmissionsSort sort);
 
 	/**
+	 * TODO:
+	 * Find the submissions to assignments in this context made by this user. Consider:
+	 * <ul>
+	 * <li>published assessments</li>
+	 * <li>assessments in this context</li>
+	 * <li>assessments this user can submit to and have submitted to</li>
+	 * <li>the one (of many for this user) submission that will be the official (graded) (depending on the assessment settings, and submission time
+	 * and score)</li>
+	 * </ul>
+	 * 
+	 * @param context
+	 *        The context to use.
+	 * @param userId
+	 *        The user id - if null, use the current user.
+	 * @return A List<Submission> of the submissions that are the offical submissions for assessments in the context by this user, sorted.
+	 */
+	List<Submission> getUserContextSubmissions(String context, String userId);
+
+	/**
 	 * Get the total scores for all completed submissions to this assessment.
 	 * 
 	 * @param assessment

@@ -2149,6 +2149,204 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<Submission> getUserContextSubmissions(final String context, String userId)
+	{
+		// if null, get the current user id
+		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
+		final String fUserId = userId;
+
+		// the current time
+		Time asOf = m_timeService.newTime();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getOfficialSubmissionsIds: context: " + context + " userId: " + userId);
+
+		String statement = "SELECT AG.ASSESSMENTGRADINGID, P.ID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
+				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE, PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, AG.FORGRADE,"
+				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING"
+				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
+				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?"
+				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID AND (PAC.RETRACTDATE IS NULL OR ? < PAC.RETRACTDATE)"
+				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
+				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON P.ID = PE.ASSESSMENTID"
+				+ " LEFT OUTER JOIN SAM_ASSESSMENTGRADING_T AG ON P.ID = AG.PUBLISHEDASSESSMENTID AND AG.AGENTID = ?";
+
+		Object[] fields = new Object[4];
+		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
+		fields[1] = context;
+		fields[2] = asOf;
+		fields[3] = userId;
+
+		final AssessmentServiceImpl service = this;
+		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String submissionId = result.getString(1);
+					String publishedAssessmentId = result.getString(2);
+					String title = result.getString(3);
+					float score = result.getFloat(4);
+
+					java.sql.Timestamp ts = result.getTimestamp(5, m_sqlService.getCal());
+					Time attemptDate = null;
+					if (ts != null)
+					{
+						attemptDate = m_timeService.newTime(ts.getTime());
+					}
+
+					ts = result.getTimestamp(6, m_sqlService.getCal());
+					Time feedbackDate = null;
+					if (ts != null)
+					{
+						feedbackDate = m_timeService.newTime(ts.getTime());
+					}
+
+					ts = result.getTimestamp(7, m_sqlService.getCal());
+					Time submittedDate = null;
+					if (ts != null)
+					{
+						submittedDate = m_timeService.newTime(ts.getTime());
+					}
+
+					int mssPolicy = result.getInt(8);
+					FeedbackDelivery feedbackDelivery = FeedbackDelivery.parse(result.getInt(9));
+					boolean showScore = result.getBoolean(10);
+					boolean showStatistics = result.getBoolean(11);
+					boolean complete = result.getBoolean(12);
+					boolean unlimitedSubmissions = result.getBoolean(13);
+					int submissionsAllowed = result.getInt(14);
+
+					ts = result.getTimestamp(15, m_sqlService.getCal());
+					Time releaseDate = null;
+					if (ts != null)
+					{
+						releaseDate = m_timeService.newTime(ts.getTime());
+					}
+
+					long timeLimit = result.getLong(16);
+
+					ts = result.getTimestamp(17, m_sqlService.getCal());
+					Time dueDate = null;
+					if (ts != null)
+					{
+						dueDate = m_timeService.newTime(ts.getTime());
+					}
+
+					int allowLateSubmit = result.getInt(18);
+
+					// for the non-submissions, create an non-null id
+					if (submissionId == null)
+					{
+						submissionId = publishedAssessmentId + fUserId;
+					}
+
+					// create or update these properties in the submission cache
+					SubmissionImpl cachedSubmission = getCachedSubmission(submissionId);
+					if (cachedSubmission == null)
+					{
+						// cache an empty, but complete, one
+						cachedSubmission = new SubmissionImpl(service);
+						cachedSubmission.initId(submissionId);
+						cacheSubmission(cachedSubmission);
+					}
+					cachedSubmission.initAssessmentId(publishedAssessmentId);
+					cachedSubmission.initTotalScore(score);
+					cachedSubmission.initStartDate(attemptDate);
+					cachedSubmission.initSubmittedDate(submittedDate);
+					cachedSubmission.initIsComplete(Boolean.valueOf(complete));
+
+					// create or update these properties in the assessment cache
+					AssessmentImpl cachedAssessment = getCachedAssessment(publishedAssessmentId);
+					if (cachedAssessment == null)
+					{
+						// cache an empty one
+						cachedAssessment = new AssessmentImpl(service);
+						cachedAssessment.initId(publishedAssessmentId);
+						cachedAssessment.initContext(context);
+						cacheAssessment(cachedAssessment);
+					}
+					cachedAssessment.initTitle(title);
+					cachedAssessment.initFeedbackDate(feedbackDate);
+					cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
+					cachedAssessment.initFeedbackDelivery(feedbackDelivery);
+					cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
+					cachedAssessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
+					cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
+					cachedAssessment.initReleaseDate(releaseDate);
+					cachedAssessment.initTimeLimit(timeLimit == 0 ? null : new Long(timeLimit * 1000));
+					cachedAssessment.initDueDate(dueDate);
+					cachedAssessment.initAllowLateSubmit((allowLateSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
+
+					// return the id
+					return cachedSubmission;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getAssessmentDueDate: " + e);
+					return null;
+				}
+			}
+		});
+
+		// pick the one official from this many-list for each assessment
+		List<Submission> official = new ArrayList<Submission>();
+
+		while (all.size() > 0)
+		{
+			// take the first one out
+			Submission submission = (Submission) all.remove(0);
+			// String aid = submission.getAssessment().getId();
+			// MultipleSubmissionSelectionPolicy policy = idAssessment(aid).getMultipleSubmissionSelectionPolicy();
+			// Object value = (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED) ? (Object) (((SubmissionImpl)
+			// submission).getTotalScore())
+			// : (Object) submission.getSubmittedDate();
+			//
+			// // remove all others with this one's assessment id - keeping the one that will be best
+			// for (Iterator i = all.iterator(); i.hasNext();)
+			// {
+			// Submission candidateSub = (Submission) i.next();
+			// if (candidateSub.getAssessment().getId().equals(aid))
+			// {
+			// // take this one out
+			// i.remove();
+			//
+			// // see if this wins over the best so far
+			// if (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED)
+			// {
+			// // for totalScore, if the winner so far is smaller or equal to the new, use the new (the later one for a tie
+			// // is the later submission based on our sort)
+			// if (((Float) value).floatValue() <= ((SubmissionImpl) candidateSub).getTotalScore().floatValue())
+			// {
+			// // switch to this one
+			// value = ((SubmissionImpl) candidateSub).getTotalScore();
+			// submission = candidateSub;
+			// }
+			// }
+			// else
+			// {
+			// // use the latest one
+			// if (((Time) value).before(candidateSub.getSubmittedDate()))
+			// {
+			// // switch to this one
+			// value = candidateSub.getSubmittedDate();
+			// submission = candidateSub;
+			// }
+			// }
+			// }
+			// }
+
+			// keep the winner
+			official.add(submission);
+		}
+
+		// id the selected submissions
+		return official;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Float> getAssessmentScores(Assessment assessment)
 	{
 		// TODO: Warning - this query is showing serious performance problems (Oracle)

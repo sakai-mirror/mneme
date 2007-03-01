@@ -55,6 +55,96 @@ public class DeliveryControllers
 
 	/**
 	 * The list interface needs the following entities in the context:
+	 * submissions - a list of submissions that the current user has submitted
+	 */
+	public static Controller constructList2(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("list-title")
+				.setHeader("list-header")
+				.add(
+					ui.newSection()
+						.setTitle("list-section-title")
+						.add(
+							ui.newEntityList()
+								.setStyle(EntityList.Style.flat)
+								.setIterator(ui.newPropertyReference().setReference("submissions"), "submission")
+								//.setTitle("list-take-instructions")
+								//.setEmptyTitle("list-take-empty")
+								.addColumn(
+									ui.newPropertyColumn()
+										.setTitle("list-title")
+										.setProperty(
+											ui.newTextPropertyReference()
+												.setReference("submission.assessment.title"))
+//										.setEntityNavigation(
+//											ui.newEntityNavigation()
+//												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newTextPropertyReference().setReference("assessment.id"))))
+//										.setSorting(
+//											ui.newCompareDecision().setEqualsConstant("0").setProperty(ui.newPropertyReference().setReference("assessment_sort_choice")),
+//											ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setReference("assessment_sort_ad")))
+//										.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
+//										.setSortDestination(
+//											ui.newDestination() /* a */
+//												.setDestination(
+//													"/list/0A{0}{1}",
+//													ui.newTextPropertyReference().setReference("submission_sort_choice"),
+//													ui.newTextPropertyReference().setReference("submission_sort_ad")),
+//											ui.newDestination() /* d */
+//												.setDestination(
+//													"/list/0D{0}{1}",
+//													ui.newTextPropertyReference().setReference("submission_sort_choice"),
+//													ui.newTextPropertyReference().setReference("submission_sort_ad")))
+									)
+								.addColumn(
+									ui.newPropertyColumn()
+										.setTitle("list-open")
+										.setProperty(
+											ui.newDatePropertyReference()
+												.setReference("submission.assessment.releaseDate")
+												.setMissingText("dash")))
+								.addColumn(
+									ui.newPropertyColumn()
+										.setTitle("list-due")
+										.setProperty(
+											ui.newDatePropertyReference()
+												.setReference("submission.assessment.dueDate")
+												.setMissingText("dash")))
+								.addColumn(
+									ui.newPropertyColumn()
+										.setTitle("list-feedback")
+										.setProperty(
+											ui.newDatePropertyReference()
+												.setReference("submission.assessment.feedbackDate")
+												.setMissingText("immediate"))
+										.setIncluded(ui.newDecision().setDelegate(new FeedbackDateDecision()), "dash"))
+								.addColumn(
+									ui.newPropertyColumn()
+										.setTitle("list-tries")
+										.setProperty(ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed"))
+										.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed")), "unlimited"))
+								.addColumn(
+									ui.newPropertyColumn()
+										.setTitle("list-finished")
+										.setProperty(
+											ui.newDatePropertyReference()
+												.setReference("submission.submittedDate")
+												.setMissingText("dash"))
+										.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.submittedDate")), "dash"))
+								.addColumn(
+									ui.newPropertyColumn()
+										.setTitle("list-score")
+										.setProperty(ui.newPropertyReference().setReference("submission.totalScore"))
+										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash"))
+							
+										
+												
+					));
+	}
+
+	/**
+	 * The list interface needs the following entities in the context:
 	 * assessments - a List of assessments that the current user can question
 	 * submissions - a list of submissions that the current user has submitted
 	 */
