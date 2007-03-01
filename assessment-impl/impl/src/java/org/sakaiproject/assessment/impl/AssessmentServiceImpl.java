@@ -1628,19 +1628,20 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countRemainingSubmissions(String assessmentId, String userId)
+	public Integer countRemainingSubmissions(Assessment assessment, String userId)
 	{
 		// if null, get the current user id
 		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
 
 		// if we have done this already this thread, use it
-		String key = "coundRemainingSubmissions_" + assessmentId + "_" + userId;
+		String key = "coundRemainingSubmissions_" + assessment.getId() + "_" + userId;
 		Integer count = (Integer) m_threadLocalManager.get(key);
 		if (count != null) return count;
 
 		final Time asOf = m_timeService.newTime();
 
-		if (M_log.isDebugEnabled()) M_log.debug("countRemainingSubmissions: assessment: " + assessmentId + " userId: " + userId + " asOf: " + asOf);
+		if (M_log.isDebugEnabled())
+			M_log.debug("countRemainingSubmissions: assessment: " + assessment.getId() + " userId: " + userId + " asOf: " + asOf);
 
 		// we need the assessment's dates, and late handling policy, and the # submissions allowed
 		// we need the user's count of completed submissions to this assessment
@@ -1654,9 +1655,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " GROUP BY AG.PUBLISHEDASSESSMENTID, PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING";
 
 		Object[] fields = new Object[3];
-		fields[0] = assessmentId;
+		fields[0] = assessment.getId();
 		fields[1] = userId;
-		fields[2] = assessmentId;
+		fields[2] = assessment.getId();
 
 		List rv = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -2145,7 +2146,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Float> getAssessmentScores(String assessmentId)
+	public List<Float> getAssessmentScores(Assessment assessment)
 	{
 		// TODO: Warning - this query is showing serious performance problems (Oracle)
 
@@ -2155,7 +2156,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ m_sqlService.getBooleanConstant(true) + " ORDER BY AG.FINALSCORE";
 
 		Object[] fields = new Object[1];
-		fields[0] = assessmentId;
+		fields[0] = assessment.getId();
 
 		final AssessmentServiceImpl service = this;
 		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
@@ -3108,7 +3109,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (!isAssessmentOpen(assessment, submission.getSubmittedDate())) throw new AssessmentClosedException();
 
 		// if not, can we make one? Check if there are remaining submissions for this user
-		Integer count = countRemainingSubmissions(assessment.getId(), submission.getUserId());
+		Integer count = countRemainingSubmissions(assessment, submission.getUserId());
 		if ((count == null) || (count.intValue() == 0))
 		{
 			throw new AssessmentCompletedException();
@@ -3292,41 +3293,37 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowSubmit(String assessmentId, String userId)
+	public Boolean allowSubmit(Assessment assessment, String userId)
 	{
 		// if null, get the current user id
 		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
 
 		Boolean rv = Boolean.FALSE;
-		if (assessmentId != null)
+		if (assessment != null)
 		{
-			Assessment assessment = idAssessment(assessmentId);
-			if (assessment != null)
+			// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
+			if (checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, assessment.getContext(),
+					getAssessmentReference(assessment.getId())))
 			{
-				// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-				if (checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, assessment.getContext(),
-						getAssessmentReference(assessment.getId())))
+				// check that the assessment is currently open for submission
+				// if there is an in-progress submission, but it's too late now... this would catch it
+				if (isAssessmentOpen(assessment, m_timeService.newTime()))
 				{
-					// check that the assessment is currently open for submission
-					// if there is an in-progress submission, but it's too late now... this would catch it
-					if (isAssessmentOpen(assessment, m_timeService.newTime()))
+					// see if the user has a submission in progress
+					Submission submission = getSubmissionInProgress(assessment, userId);
+					if (submission != null)
 					{
-						// see if the user has a submission in progress
-						Submission submission = getSubmissionInProgress(assessment, userId);
-						if (submission != null)
+						rv = Boolean.TRUE;
+					}
+
+					// if not, can we make one? Check if there are remaining submissions for this user
+					// (also checks that the assessment is open)
+					else
+					{
+						Integer count = countRemainingSubmissions(assessment, userId);
+						if ((count != null) && (count.intValue() != 0))
 						{
 							rv = Boolean.TRUE;
-						}
-
-						// if not, can we make one? Check if there are remaining submissions for this user
-						// (also checks that the assessment is open)
-						else
-						{
-							Integer count = countRemainingSubmissions(assessment.getId(), userId);
-							if ((count != null) && (count.intValue() != 0))
-							{
-								rv = Boolean.TRUE;
-							}
 						}
 					}
 				}
@@ -3339,23 +3336,22 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowCompleteSubmission(String submissionId, String userId)
+	public Boolean allowCompleteSubmission(Submission submission, String userId)
 	{
 		Boolean rv = Boolean.FALSE;
 
 		// if null, get the current user id
 		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
 
-		Submission s = idSubmission(submissionId);
-		if (s != null)
+		if (submission != null)
 		{
 			// make sure the user is this submission's user
-			if (s.getUserId().equals(userId))
+			if (submission.getUserId().equals(userId))
 			{
 				// make sure the submission is incomplete
-				if ((s.getIsComplete() == null) || (!s.getIsComplete().booleanValue()))
+				if ((submission.getIsComplete() == null) || (!submission.getIsComplete().booleanValue()))
 				{
-					Assessment assessment = s.getAssessment();
+					Assessment assessment = submission.getAssessment();
 					if (assessment != null)
 					{
 						// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
@@ -3379,21 +3375,20 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowReviewSubmission(String submissionId, String userId)
+	public Boolean allowReviewSubmission(Submission submission, String userId)
 	{
 		Boolean rv = Boolean.FALSE;
 
 		// if null, get the current user id
 		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
 
-		Submission s = idSubmission(submissionId);
-		if (s != null)
+		if (submission != null)
 		{
 			// make sure the user is this submission's user
-			if (s.getUserId().equals(userId))
+			if (submission.getUserId().equals(userId))
 			{
 				// make sure the submission is complete
-				if ((s.getIsComplete() != null) && (s.getIsComplete().booleanValue()))
+				if ((submission.getIsComplete() != null) && (submission.getIsComplete().booleanValue()))
 				{
 					rv = Boolean.TRUE;
 				}
@@ -3439,7 +3434,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		}
 
 		// if not, can we make one? Check if there are remaining submissions for this user
-		Integer count = countRemainingSubmissions(assessment.getId(), userId);
+		Integer count = countRemainingSubmissions(assessment, userId);
 		if ((count == null) || (count.intValue() == 0))
 		{
 			throw new AssessmentCompletedException();

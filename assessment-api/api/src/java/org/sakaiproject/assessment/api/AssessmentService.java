@@ -122,14 +122,14 @@ public interface AssessmentService
 	 * If the user has no permission to submit, has submitted the maximum, or the assessment is closed for submissions as of this
 	 * time, return 0.
 	 * 
-	 * @param assessmentId
-	 *        The assessment id.
+	 * @param assessment
+	 *        The assessment.
 	 * @param userId
 	 *        The user id.
 	 * @return The count of remaining submissions allowed for this user to this assessment, -1 if it is unlimited, or null if we
 	 *         cannot find the assessment.
 	 */
-	Integer countRemainingSubmissions(String assessmentId, String userId);
+	Integer countRemainingSubmissions(Assessment assessment, String userId);
 
 	/**
 	 * Sort options for getAvailableAssessments()
@@ -191,11 +191,11 @@ public interface AssessmentService
 	/**
 	 * Get the total scores for all completed submissions to this assessment.
 	 * 
-	 * @param assessmentId
-	 *        The assessment id.
+	 * @param assessment
+	 *        The assessment.
 	 * @return A List containing all the scores for completed submissions to this assessment, or an empty list if there are none.
 	 */
-	List<Float> getAssessmentScores(String assessmentId);
+	List<Float> getAssessmentScores(Assessment assessment);
 
 	/**
 	 * Get the total scores for this question from all completed submissions to the question's assessment.
@@ -325,39 +325,39 @@ public interface AssessmentService
 	 * If the user has a submission in progress, this returns true.<br />
 	 * Otherwise, the assessment must be open, the user must have submit permission, and not yet submitted the max.
 	 * 
-	 * @param assessmentId
-	 *        The assessment id.
+	 * @param assessment
+	 *        The assessment.
 	 * @param userId
 	 *        The user taking the assessment (if null, the current user is used).
 	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
 	 */
-	Boolean allowSubmit(String assessmentId, String userId);
+	Boolean allowSubmit(Assessment assessment, String userId);
 
 	/**
 	 * Check if the current user is allowed to work on or complete this submission.<br />
 	 * The user must match the submission user.<br />
 	 * The submission must be incomplete, the assessment must be open, the user must have submit permission.
 	 * 
-	 * @param submissionId
-	 *        The submission id.
+	 * @param submission
+	 *        The submission.
 	 * @param userId
 	 *        The user taking the assessment (if null, the current user is used).
 	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
 	 */
-	Boolean allowCompleteSubmission(String submissionId, String userId);
+	Boolean allowCompleteSubmission(Submission submission, String userId);
 
 	/**
 	 * Check if the current user is allowed to review this submission.<br />
 	 * The user must match the submission user.<br />
 	 * The submission must be complete.
 	 * 
-	 * @param submissionId
-	 *        The submission id.
+	 * @param submission
+	 *        The submission.
 	 * @param userId
 	 *        The user taking the assessment (if null, the current user is used).
 	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
 	 */
-	Boolean allowReviewSubmission(String submissionId, String userId);
+	Boolean allowReviewSubmission(Submission submission, String userId);
 
 	/**
 	 * Start an end-user in taking an assessment. If there is an incomplete submission already, re-enter that, else create a new

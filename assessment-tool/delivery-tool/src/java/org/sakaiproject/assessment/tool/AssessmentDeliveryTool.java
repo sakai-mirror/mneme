@@ -481,20 +481,19 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param context
 	 *        UiContext.
 	 */
-	protected void enterGet(HttpServletRequest req, HttpServletResponse res, String assessmentId, Context context)
-			throws IOException
+	protected void enterGet(HttpServletRequest req, HttpServletResponse res, String assessmentId, Context context) throws IOException
 	{
 		Assessment assessment = assessmentService.idAssessment(assessmentId);
 		if (assessment != null)
 		{
 			// security check (submissions count / allowed check)
-			if (assessmentService.allowSubmit(assessmentId, null).booleanValue())
+			if (assessmentService.allowSubmit(assessment, null).booleanValue())
 			{
 				// collect information: the selected assessment (id the request)
-				context.put("assessment", assessmentService.idAssessment(assessmentId));
+				context.put("assessment", assessment);
 
 				// for this assessment, we need to know how many completed submissions the current use has already made
-				Integer count = assessmentService.countRemainingSubmissions(assessmentId, null);
+				Integer count = assessmentService.countRemainingSubmissions(assessment, null);
 				context.put("remainingSubmissions", count);
 
 				// render
@@ -527,8 +526,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param assessmentId
 	 *        the selected assessment id.
 	 */
-	protected void enterPost(HttpServletRequest req, HttpServletResponse res, Context context, String assessmentId)
-			throws IOException
+	protected void enterPost(HttpServletRequest req, HttpServletResponse res, Context context, String assessmentId) throws IOException
 	{
 		// check expected
 		if (!context.getPostExpected())
@@ -735,7 +733,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 				// let them re-enter where they were
 				context.put("testUrl", context.getPreviousDestination());
-				
+
 				// the size (megs) that was exceeded
 				context.put("uploadMax", param);
 			}
@@ -760,14 +758,13 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void finalReviewGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
-			throws IOException
+	protected void finalReviewGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context) throws IOException
 	{
 		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)
 		{
-			if (assessmentService.allowCompleteSubmission(submissionId, null).booleanValue())
+			if (assessmentService.allowCompleteSubmission(submission, null).booleanValue())
 			{
 				context.put("submission", submission);
 
@@ -802,8 +799,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param submissionId
 	 *        the selected submission id.
 	 */
-	protected void finalReviewPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
-			throws IOException
+	protected void finalReviewPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId) throws IOException
 	{
 		// this post is from the timer, or the "submit" button, and completes the submission
 		submissionCompletePost(req, res, context, submissionId);
@@ -926,13 +922,11 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 
 		// collect information: assessments
-		List assessments = assessmentService.getAvailableAssessments(toolManager.getCurrentPlacement().getContext(), null,
-				assessmentsSort);
+		List assessments = assessmentService.getAvailableAssessments(toolManager.getCurrentPlacement().getContext(), null, assessmentsSort);
 		context.put("assessments", assessments);
 
 		// submissions
-		List submissions = assessmentService.getOfficialSubmissions(toolManager.getCurrentPlacement().getContext(), null,
-				submissionsSort);
+		List submissions = assessmentService.getOfficialSubmissions(toolManager.getCurrentPlacement().getContext(), null, submissionsSort);
 		context.put("submissions", submissions);
 
 		// render
@@ -949,8 +943,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param submisssionId
 	 *        The selected submission id.
 	 * @param questionSelector
-	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections
-	 *        worth, and a picks them all.
+	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections worth, and a
+	 *        picks them all.
 	 * @param feedback
 	 *        The feedback parameter which could indicate (if it is "feedback") that the user wants feedback
 	 * @param context
@@ -958,8 +952,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionSelector,
-			String feedback, Context context) throws IOException
+	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionSelector, String feedback,
+			Context context) throws IOException
 	{
 		// collect the questions (actually their answers) to put on the page
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
@@ -994,8 +988,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param expected
 	 *        true if this post was expected, false if not.
 	 */
-	protected void questionPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId,
-			String questionSelector) throws IOException
+	protected void questionPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId, String questionSelector)
+			throws IOException
 	{
 		if (!context.getPostExpected())
 		{
@@ -1066,8 +1060,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param submisssionId
 	 *        The selected submission id.
 	 * @param questionSelector
-	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections
-	 *        worth, and a picks them all.
+	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections worth, and a
+	 *        picks them all.
 	 * @param feedback
 	 *        The feedback parameter which could indicate (if it is "feedback") that the user wants feedback
 	 * @param context
@@ -1078,8 +1072,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Output writer.
 	 * @return null if all went well, else an Errors to indicate what went wrong.
 	 */
-	protected Errors questionSetup(String submissionId, String questionSelector, String feedback, Context context,
-			List<SubmissionAnswer> answers, boolean linearCheck)
+	protected Errors questionSetup(String submissionId, String questionSelector, String feedback, Context context, List<SubmissionAnswer> answers,
+			boolean linearCheck)
 	{
 		// check on feedback
 		if ("feedback".equalsIgnoreCase(feedback))
@@ -1100,7 +1094,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return Errors.invalid;
 		}
 
-		if (!assessmentService.allowCompleteSubmission(submissionId, null).booleanValue())
+		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
 		{
 			return Errors.unauthorized;
 		}
@@ -1203,8 +1197,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param context
 	 *        UiContext.
 	 */
-	protected void removeGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId,
-			String reference, Context context) throws IOException
+	protected void removeGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId, String reference,
+			Context context) throws IOException
 	{
 		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
@@ -1215,7 +1209,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		if (!assessmentService.allowCompleteSubmission(submissionId, null).booleanValue())
+		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -1234,8 +1228,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 
 		// if this is a linear assessment, we will reject if the question has been marked as 'complete'
-		if (!submission.getAssessment().getRandomAccess().booleanValue()
-				&& submission.getIsCompleteQuestion(question).booleanValue())
+		if (!submission.getAssessment().getRandomAccess().booleanValue() && submission.getIsCompleteQuestion(question).booleanValue())
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.linear + "/" + submissionId)));
@@ -1269,8 +1262,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param context
 	 *        UiContext.
 	 */
-	protected void removePost(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId,
-			String reference, Context context) throws IOException
+	protected void removePost(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId, String reference,
+			Context context) throws IOException
 	{
 		if (!context.getPostExpected())
 		{
@@ -1279,7 +1272,15 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		if (!assessmentService.allowCompleteSubmission(submissionId, null).booleanValue())
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -1292,7 +1293,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// if we are going to exit, we must cancel the remove and submit (timer expired)
 		if (destination.startsWith("/submitted"))
 		{
-			Submission submission = assessmentService.idSubmission(submissionId);
 			try
 			{
 				assessmentService.completeSubmission(submission);
@@ -1319,13 +1319,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// not a submit, so it's a remove
 
 		// remove the referenced attachment from the answer
-		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
 
 		AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
 		if (question == null)
@@ -1384,8 +1377,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void reviewGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
-			throws IOException
+	protected void reviewGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context) throws IOException
 	{
 		// yes feedback, and we are in review
 		context.put("feedback", Boolean.TRUE);
@@ -1400,7 +1392,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		if (!assessmentService.allowReviewSubmission(submissionId, null).booleanValue())
+		if (!assessmentService.allowReviewSubmission(submission, null).booleanValue())
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -1408,7 +1400,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 
 		context.put("submission", submission);
-		context.put("assessment", submission.getAssessment());
 
 		// collect all the answers for review
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
@@ -1439,8 +1430,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param submissionId
 	 *        the selected submission id.
 	 */
-	protected void submissionCompletePost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
-			throws IOException
+	protected void submissionCompletePost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId) throws IOException
 	{
 		if (!context.getPostExpected())
 		{
@@ -1495,8 +1485,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param context
 	 *        UiContext.
 	 */
-	protected void submittedGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context)
-			throws IOException
+	protected void submittedGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context) throws IOException
 	{
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission != null)
@@ -1507,7 +1496,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				context.put("submission", submission);
 
 				// for this assessment, we need to know how many completed submission the current use has already made
-				Integer count = assessmentService.countRemainingSubmissions(submission.getAssessment().getId(), null);
+				Integer count = assessmentService.countRemainingSubmissions(submission.getAssessment(), null);
 				context.put("remainingSubmissions", count);
 
 				// render
@@ -1550,7 +1539,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		if (!assessmentService.allowCompleteSubmission(submissionId, null).booleanValue())
+		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -1579,8 +1568,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param submissionId
 	 *        the selected submission id.
 	 */
-	protected void tocPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId)
-			throws IOException
+	protected void tocPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId) throws IOException
 	{
 		// this post is from the timer, or the "submit" button, and completes the submission
 		submissionCompletePost(req, res, context, submissionId);

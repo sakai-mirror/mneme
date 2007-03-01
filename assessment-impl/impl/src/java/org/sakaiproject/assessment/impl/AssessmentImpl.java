@@ -630,7 +630,7 @@ public class AssessmentImpl implements Assessment
 	 */
 	public List<Float> getScores()
 	{
-		return service.getAssessmentScores(this.id);
+		return service.getAssessmentScores(this);
 	}
 
 	/**
