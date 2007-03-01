@@ -446,7 +446,7 @@ public class DeliveryControllers
 								.setTitle("question-eval-overall-comment-title")
 								.add(
 									ui.newEvaluation()
-										.setIcon("/icons/note.png")
+										.setIcon("/icons/note.png", "comments")
 										.setText("question-eval-overall-comment", ui.newTextPropertyReference().setReference("submission.evalComment")))
 								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.evalComment"))))
 						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
@@ -497,16 +497,6 @@ public class DeliveryControllers
 //										.setMark(ui.newPropertyReference().setReference("answer.totalScore"))
 //										.setMax(ui.newPropertyReference().setReference("answer.question.points"))
 //										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
-								.add(
-									ui.newSection()
-										.setTitle("question-eval-question-comment-title")
-										.add(
-											ui.newEvaluation()
-												.setIcon("/icons/note.png")
-												.setText("question-eval-question-comment", ui.newTextPropertyReference().setReference("answer.evalComment")))
-										.setIncluded(
-											ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
-											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.evalComment"))))
 								.add(
 									ui.newText()
 										.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.instructions"))
@@ -801,7 +791,16 @@ public class DeliveryControllers
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackShowQuestionFeedback")),
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.essay.toString())
-												.setProperty(ui.newPropertyReference().setReference("answer.question.type"))))))
+												.setProperty(ui.newPropertyReference().setReference("answer.question.type"))))
+								.add(
+									ui.newSection()
+										.add(
+											ui.newEvaluation()
+												.setIcon("/icons/note.png", "comments")
+												.setText("question-eval-question-comment", ui.newTextPropertyReference().setReference("answer.evalComment")))
+										.setIncluded(
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
+											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.evalComment"))))))
 				.add(ui.newGap())
 				.add(
 					ui.newNavigationBar()
