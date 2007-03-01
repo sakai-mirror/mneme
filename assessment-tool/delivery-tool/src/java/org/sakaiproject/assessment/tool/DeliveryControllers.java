@@ -1048,6 +1048,10 @@ public class DeliveryControllers
 								.setText("submitted-display-message", ui.newPropertyReference().setReference("submission.assessment.submitMessage"))
 								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.submitMessage"))))
 						.add(
+							ui.newInstructions()
+								.setText("submitted-final-url", ui.newUrlPropertyReference().setReference("submission.assessment.submitUrl"))
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.submitUrl"))))
+						.add(
 							ui.newEntityDisplay()
 								.setEntityReference(ui.newPropertyReference().setReference("submission"))
 								.addRow(
@@ -1093,14 +1097,7 @@ public class DeliveryControllers
 										.setTitle("submitted-display-submitted")
 										.setProperty(
 											ui.newDatePropertyReference()
-												.setReference("submission.submittedDate")))
-								.addRow(
-										ui.newPropertyRow()
-											.setTitle("submitted-final-url")
-											.setProperty(
-												ui.newUrlPropertyReference()
-													.setReference("submission.assessment.submitUrl"))
-											.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.submitUrl"))))))
+												.setReference("submission.submittedDate")))))
 				.add(
 					ui.newNavigationBar()
 						.add(
