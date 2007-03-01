@@ -86,6 +86,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/** A cache of submissions. */
 	protected Cache m_submissionCache = null;
 
+	/** The number of ms we allow answers and completions of submissions after hard deadlines. */
+	protected final long GRACE = 2 * 60 * 1000;
+
 	/*************************************************************************************************************************************************
 	 * Abstractions, etc.
 	 ************************************************************************************************************************************************/
@@ -3106,7 +3109,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
 
 		// check that the assessment is currently open for submission
-		if (!isAssessmentOpen(assessment, submission.getSubmittedDate())) throw new AssessmentClosedException();
+		if (!isAssessmentOpen(assessment, submission.getSubmittedDate(), 0)) throw new AssessmentClosedException();
 
 		// if not, can we make one? Check if there are remaining submissions for this user
 		Integer count = countRemainingSubmissions(assessment, submission.getUserId());
@@ -3307,7 +3310,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			{
 				// check that the assessment is currently open for submission
 				// if there is an in-progress submission, but it's too late now... this would catch it
-				if (isAssessmentOpen(assessment, m_timeService.newTime()))
+				if (isAssessmentOpen(assessment, m_timeService.newTime(), 0))
 				{
 					// see if the user has a submission in progress
 					Submission submission = getSubmissionInProgress(assessment, userId);
@@ -3359,7 +3362,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 								getAssessmentReference(assessment.getId())))
 						{
 							// check that the assessment is currently open for submission
-							if (isAssessmentOpen(assessment, m_timeService.newTime()))
+							if (isAssessmentOpen(assessment, m_timeService.newTime(), GRACE))
 							{
 								rv = Boolean.TRUE;
 							}
@@ -3421,7 +3424,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		secure(userId, SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
 
 		// check that the assessment is currently open for submission
-		if (!isAssessmentOpen(assessment, asOf)) throw new AssessmentClosedException();
+		if (!isAssessmentOpen(assessment, asOf, 0)) throw new AssessmentClosedException();
 
 		// see if we have one already
 		Submission submission = getSubmissionInProgress(assessment, userId);
@@ -3508,7 +3511,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
 
 		// check that the assessment is currently open for submission
-		if (!isAssessmentOpen(assessment, asOf)) throw new AssessmentClosedException();
+		// Note: we accept answers up to GRACE ms after any hard deadlilne
+		if (!isAssessmentOpen(assessment, asOf, GRACE)) throw new AssessmentClosedException();
 
 		// update the submission parameter for the caller
 		submission.setSubmittedDate(asOf);
@@ -3995,7 +3999,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
 
 		// check that the assessment is currently open for submission
-		if (!isAssessmentOpen(assessment, asOf)) throw new AssessmentClosedException();
+		if (!isAssessmentOpen(assessment, asOf, GRACE)) throw new AssessmentClosedException();
 
 		if (M_log.isDebugEnabled()) M_log.debug("completeSubmission: submission: " + submission.getId());
 
@@ -4387,18 +4391,20 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 *        The assessment.
 	 * @param asOf
 	 *        The time to check.
+	 * @param grace
+	 *        #ms grace period to allow past hard deadlines.
 	 * @return
 	 */
-	protected boolean isAssessmentOpen(Assessment a, Time asOf)
+	protected boolean isAssessmentOpen(Assessment a, Time asOf, long grace)
 	{
 		// if we have a release date and we are not there yet
 		if ((a.getReleaseDate() != null) && (asOf.before(a.getReleaseDate()))) return false;
 
-		// if we have a retract date and we are past it
-		if ((a.getRetractDate() != null) && (!asOf.before(a.getRetractDate()))) return false;
+		// if we have a retract date and we are past it, considering grace
+		if ((a.getRetractDate() != null) && (asOf.getTime() > (a.getRetractDate().getTime() + grace))) return false;
 
 		// if we have a due date, are past it, and not accepting late submissions
-		if ((a.getDueDate() != null) && (!asOf.before(a.getDueDate()))
+		if ((a.getDueDate() != null) && (asOf.getTime() > (a.getDueDate().getTime() + grace))
 				&& ((a.getAllowLateSubmit() == null) || (!a.getAllowLateSubmit().booleanValue()))) return false;
 
 		return true;
@@ -4488,8 +4494,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		{
 			try
 			{
-				// get a list of submission ids that are open, timed, and well expired, or open and past a retract date or hard deadline
-				List<Submission> submissions = getTimedOutSubmissions(1 * 60 * 1000);
+				// get a list of submission ids that are open, timed, and well expired considering double our grace period, or open and past a retract
+				// date or hard deadline
+				List<Submission> submissions = getTimedOutSubmissions(2 * GRACE);
 
 				// for each one, close it if it is still open
 				for (Submission submission : submissions)
@@ -4538,7 +4545,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 *        The number of ms past the time limit that the submission's elapsed time must be to qualify
 	 * @return A List of the submissions that are open, timed, and well expired.
 	 */
-	protected List<Submission> getTimedOutSubmissions(final long well)
+	protected List<Submission> getTimedOutSubmissions(final long grace)
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("getTimedOutSubmissions");
 
@@ -4596,19 +4603,19 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					boolean selected = false;
 
 					// for timed, if the elapsed time since their start is well past the time limit
-					if ((timeLimit > 0) && (attemptDate != null) && ((asOf.getTime() - attemptDate.getTime()) > (timeLimit + well)))
+					if ((timeLimit > 0) && (attemptDate != null) && ((asOf.getTime() - attemptDate.getTime()) > (timeLimit + grace)))
 					{
 						selected = true;
 					}
 
 					// for past retract date
-					if ((retractDate != null) && (asOf.getTime() > (retractDate.getTime() + well)))
+					if ((retractDate != null) && (asOf.getTime() > (retractDate.getTime() + grace)))
 					{
 						selected = true;
 					}
 
 					// for past hard due date
-					if ((dueDate != null) && (!allowLate) && (asOf.getTime() > (dueDate.getTime() + well)))
+					if ((dueDate != null) && (!allowLate) && (asOf.getTime() > (dueDate.getTime() + grace)))
 					{
 						selected = true;
 					}
