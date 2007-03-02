@@ -3499,21 +3499,31 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// if null, get the current user id
 		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
 
+		if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: assessment: " + ((assessment == null) ? "null" : assessment.getId()) + " user: " + userId);
+
 		Boolean rv = Boolean.FALSE;
 		if (assessment != null)
 		{
+			if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: 1) assessment not null: assessment: " + ((assessment == null) ? "null" : assessment.getId()) + " user: " + userId);
+
 			// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
 			if (checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, assessment.getContext(),
 					getAssessmentReference(assessment.getId())))
 			{
+				if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: 2) security passes: assessment: " + ((assessment == null) ? "null" : assessment.getId()) + " user: " + userId);
+
 				// check that the assessment is currently open for submission
 				// if there is an in-progress submission, but it's too late now... this would catch it
 				if (isAssessmentOpen(assessment, m_timeService.newTime(), 0))
 				{
+					if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: 3) assessment is open: assessment: " + ((assessment == null) ? "null" : assessment.getId()) + " user: " + userId);
+
 					// see if the user has a submission in progress
 					Submission submission = getSubmissionInProgress(assessment, userId);
 					if (submission != null)
 					{
+						if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: 4) found submission in progress: assessment: " + ((assessment == null) ? "null" : assessment.getId()) + " user: " + userId);
+
 						rv = Boolean.TRUE;
 					}
 
@@ -3524,12 +3534,16 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						Integer count = countRemainingSubmissions(assessment, userId);
 						if ((count != null) && (count.intValue() != 0))
 						{
+							if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: 5) new submission allowed: assessment: " + ((assessment == null) ? "null" : assessment.getId()) + " user: " + userId);
+
 							rv = Boolean.TRUE;
 						}
 					}
 				}
 			}
 		}
+
+		if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: returning: " + rv + " assessment: " + ((assessment == null) ? "null" : assessment.getId()) + " user: " + userId);
 
 		return rv;
 	}
