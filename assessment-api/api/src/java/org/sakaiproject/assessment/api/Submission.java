@@ -84,8 +84,8 @@ public interface Submission
 	String getEvalComment();
 
 	/**
-	 * Access the evaluation score for the overall submission. This is combined with the auto scores and the answer evaluation
-	 * scores for the total score.
+	 * Access the evaluation score for the overall submission. This is combined with the auto scores and the answer evaluation scores for the total
+	 * score.
 	 * 
 	 * @return The evaluation score for the overall submission, or null if there is none.
 	 */
@@ -113,8 +113,8 @@ public interface Submission
 	String getId();
 
 	/**
-	 * Check if all the questions (except perhaps one) have an answer that is fully answered, not marked for review, complete with
-	 * rationale if included.
+	 * Check if all the questions (except perhaps one) have an answer that is fully answered, not marked for review, complete with rationale if
+	 * included.
 	 * 
 	 * @param questionsToSkip
 	 *        A List of question not to check, or null or empty to check them all.
@@ -139,6 +139,13 @@ public interface Submission
 	Boolean getIsCompleteQuestion(AssessmentQuestion question);
 
 	/**
+	 * Get the total count of submissions, including this one, to this same assignment from the same user. May not be known
+	 * 
+	 * @return The total count of submissions to the assignment by the user, or NULL if not known.
+	 */
+	Integer getSiblingCount();
+
+	/**
 	 * Access the start date for this submission.
 	 * 
 	 * @return the start date for this submission, or null if there is none.
@@ -160,8 +167,8 @@ public interface Submission
 	Time getSubmittedDate();
 
 	/**
-	 * Access the total score of the submission - the total of the auto scores from the answers and the evaluation scores from the
-	 * answers and overall.
+	 * Access the total score of the submission - the total of the auto scores from the answers and the evaluation scores from the answers and
+	 * overall.
 	 * 
 	 * @return The total score of the submission.
 	 */

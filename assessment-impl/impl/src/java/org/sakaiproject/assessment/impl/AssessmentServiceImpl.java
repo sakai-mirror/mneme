@@ -2289,52 +2289,72 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			}
 		});
 
-		// pick the one official from this many-list for each assessment
+		// pick one for each assessment - the one in progress, or the official complete one
 		List<Submission> official = new ArrayList<Submission>();
 
 		while (all.size() > 0)
 		{
 			// take the first one out
 			Submission submission = (Submission) all.remove(0);
-			// String aid = submission.getAssessment().getId();
-			// MultipleSubmissionSelectionPolicy policy = idAssessment(aid).getMultipleSubmissionSelectionPolicy();
-			// Object value = (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED) ? (Object) (((SubmissionImpl)
-			// submission).getTotalScore())
-			// : (Object) submission.getSubmittedDate();
-			//
-			// // remove all others with this one's assessment id - keeping the one that will be best
-			// for (Iterator i = all.iterator(); i.hasNext();)
-			// {
-			// Submission candidateSub = (Submission) i.next();
-			// if (candidateSub.getAssessment().getId().equals(aid))
-			// {
-			// // take this one out
-			// i.remove();
-			//
-			// // see if this wins over the best so far
-			// if (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED)
-			// {
-			// // for totalScore, if the winner so far is smaller or equal to the new, use the new (the later one for a tie
-			// // is the later submission based on our sort)
-			// if (((Float) value).floatValue() <= ((SubmissionImpl) candidateSub).getTotalScore().floatValue())
-			// {
-			// // switch to this one
-			// value = ((SubmissionImpl) candidateSub).getTotalScore();
-			// submission = candidateSub;
-			// }
-			// }
-			// else
-			// {
-			// // use the latest one
-			// if (((Time) value).before(candidateSub.getSubmittedDate()))
-			// {
-			// // switch to this one
-			// value = candidateSub.getSubmittedDate();
-			// submission = candidateSub;
-			// }
-			// }
-			// }
-			// }
+
+			// set it's sibling count to 1 (itself), or 0 if it's not really there
+			int count = 0;
+			if (submission.getStartDate() != null)
+			{
+				count = 1;
+			}
+			((SubmissionImpl) submission).initSiblingCount(new Integer(count));
+
+			String aid = submission.getAssessment().getId();
+			MultipleSubmissionSelectionPolicy policy = idAssessment(aid).getMultipleSubmissionSelectionPolicy();
+			Object value = (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED) ? (Object) (((SubmissionImpl) submission).getTotalScore())
+					: (Object) submission.getSubmittedDate();
+
+			// remove all others with this one's assessment id - keeping the one that will be best
+			for (Iterator i = all.iterator(); i.hasNext();)
+			{
+				SubmissionImpl candidateSub = (SubmissionImpl) i.next();
+				if (candidateSub.getAssessment().getId().equals(aid))
+				{
+					// take this one out
+					i.remove();
+
+					// if this one is in progress, it wins
+					if ((candidateSub.getIsComplete() == null) || (!candidateSub.getIsComplete()))
+					{
+						// transfer sibling count
+						candidateSub.initSiblingCount(new Integer(submission.getSiblingCount().intValue() + 1));
+						submission = candidateSub;
+					}
+					
+					// see if this wins over the best so far
+					else if (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED)
+					{
+						// for totalScore, if the winner so far is smaller or equal to the new, use the new (the later one for a tie
+						// is the later submission based on our sort)
+						if (((Float) value).floatValue() <= ((SubmissionImpl) candidateSub).getTotalScore().floatValue())
+						{
+							// switch to this one
+							value = ((SubmissionImpl) candidateSub).getTotalScore();
+
+							candidateSub.initSiblingCount(new Integer(submission.getSiblingCount().intValue() + 1));
+							submission = candidateSub;
+						}
+					}
+					else
+					{
+						// use the latest one
+						if (((Time) value).before(candidateSub.getSubmittedDate()))
+						{
+							// switch to this one
+							value = candidateSub.getSubmittedDate();
+
+							candidateSub.initSiblingCount(new Integer(submission.getSiblingCount().intValue() + 1));
+							submission = candidateSub;
+						}
+					}
+				}
+			}
 
 			// keep the winner
 			official.add(submission);
@@ -3499,7 +3519,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// if null, get the current user id
 		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
 
-		if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: assessment: " + ((assessment == null) ? "null" : assessment.getId()) + " user: " + userId);
+		if (M_log.isDebugEnabled())
+			M_log.debug("allowSubmit: assessment: " + ((assessment == null) ? "null" : assessment.getId()) + " user: " + userId);
 
 		Boolean rv = Boolean.FALSE;
 		if (assessment != null)

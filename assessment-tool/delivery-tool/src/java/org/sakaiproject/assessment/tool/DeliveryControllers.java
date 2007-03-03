@@ -74,10 +74,14 @@ public class DeliveryControllers
 								//.setEmptyTitle("list-take-empty")
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-title")
-										.setProperty(
-											ui.newTextPropertyReference()
-												.setReference("submission.assessment.title"))
+										.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatListDecoration()))
+										.setTitle("list-status-title")
+										.setCentered()
+										.setWidthEm(10))
+								.addColumn(
+									ui.newPropertyColumn()
+										.setProperty(ui.newTextPropertyReference().setReference("submission.assessment.title"))
+										.setTitle("list-header-title")
 //										.setEntityNavigation(
 //											ui.newEntityNavigation()
 //												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newTextPropertyReference().setReference("assessment.id"))))
@@ -99,47 +103,61 @@ public class DeliveryControllers
 									)
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-open")
 										.setProperty(
-											ui.newDatePropertyReference()
+											ui.newDatePropertyReference().setTwoLine()
 												.setReference("submission.assessment.releaseDate")
-												.setMissingText("dash")))
+												.setMissingText("dash"))
+										.setTitle("list-header-open")
+										.setCentered())
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-due")
 										.setProperty(
-											ui.newDatePropertyReference()
+											ui.newDatePropertyReference().setTwoLine()
 												.setReference("submission.assessment.dueDate")
-												.setMissingText("dash")))
+												.setMissingText("dash"))
+										.setTitle("list-header-due")
+										.setCentered())
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-feedback")
 										.setProperty(
-											ui.newDatePropertyReference()
+											ui.newDurationPropertyReference().setConcise()
+												.setReference("submission.assessment.timeLimit")
+												.setMissingText("dash"))
+										.setTitle("list-header-limit")
+										.setCentered())
+								.addColumn(
+									ui.newPropertyColumn()
+										.setProperty(
+											ui.newDatePropertyReference().setTwoLine()
 												.setReference("submission.assessment.feedbackDate")
 												.setMissingText("immediate"))
-										.setIncluded(ui.newDecision().setDelegate(new FeedbackDateDecision()), "dash"))
+										.setTitle("list-header-feedback")
+										.setEntityIncluded(ui.newDecision().setDelegate(new FeedbackDateDecision()), "dash")
+										.setCentered())
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-tries")
-										.setProperty(ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed"))
-										.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed")), "unlimited"))
-								.addColumn(
-									ui.newPropertyColumn()
-										.setTitle("list-finished")
 										.setProperty(
-											ui.newDatePropertyReference()
+											"list-format-tries",
+											ui.newPropertyReference().setReference("submission.siblingCount"),
+											ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed"))
+										.setTitle("list-header-tries")
+										.setCentered()
+										.setEntityIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed")), "unlimited"))
+								.addColumn(
+									ui.newPropertyColumn()
+										.setProperty(
+											ui.newDatePropertyReference().setTwoLine()
 												.setReference("submission.submittedDate")
 												.setMissingText("dash"))
-										.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.submittedDate")), "dash"))
+										.setTitle("list-header-finished")
+										.setCentered()
+										.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash"))
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-score")
 										.setProperty(ui.newPropertyReference().setReference("submission.totalScore"))
-										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash"))
-							
-										
-												
+										.setTitle("list-header-score")
+										.setCentered()
+										.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash"))
 					));
 	}
 
@@ -165,10 +183,10 @@ public class DeliveryControllers
 								.setEmptyTitle("list-take-empty")
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-take-title")
 										.setProperty(
 											ui.newTextPropertyReference()
 												.setReference("assessment.title"))
+										.setTitle("list-take-title")
 										.setEntityNavigation(
 											ui.newEntityNavigation()
 												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newTextPropertyReference().setReference("assessment.id"))))
@@ -189,11 +207,11 @@ public class DeliveryControllers
 													ui.newTextPropertyReference().setReference("submission_sort_ad"))))
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-take-dueDate")
 										.setProperty(
 											ui.newDatePropertyReference()
 												.setReference("assessment.dueDate")
 												.setMissingText("na"))
+										.setTitle("list-take-dueDate")
 										.setAlert(
 											ui.newPastDateDecision()
 												.setProperty(
@@ -225,10 +243,10 @@ public class DeliveryControllers
 								.setEmptyTitle("list-review-empty")
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-review-title")
 										.setProperty(
 											ui.newTextPropertyReference()
 												.setReference("submission.assessment.title"))
+										.setTitle("list-review-title")
 										.setEntityNavigation(
 											ui.newEntityNavigation()
 												.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newTextPropertyReference().setReference("submission.id")))
@@ -258,12 +276,12 @@ public class DeliveryControllers
 													ui.newTextPropertyReference().setReference("assessment_sort_ad"))))
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-review-feedbackDate")
 										.setProperty(
 											ui.newDatePropertyReference()
 												.setReference("submission.assessment.feedbackDate")
 												.setMissingText("immediate"))
-										.setIncluded(ui.newDecision().setDelegate(new FeedbackDateDecision()), "na")
+										.setTitle("list-review-feedbackDate")
+										.setEntityIncluded(ui.newDecision().setDelegate(new FeedbackDateDecision()), "na")
 										.setSorting(
 												ui.newCompareDecision().setEqualsConstant("1").setProperty(ui.newPropertyReference().setReference("submission_sort_choice")),
 												ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setReference("submission_sort_ad")))
@@ -281,11 +299,11 @@ public class DeliveryControllers
 													ui.newTextPropertyReference().setReference("assessment_sort_ad"))))
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-review-score")
 										.setProperty(
 											ui.newTextPropertyReference()
 											 	.setReference("submission.totalScore"))
-										.setIncluded(ui.newDecision().setDelegate(new SubmissionScoreDecision()), "na")
+										.setTitle("list-review-score")
+										.setEntityIncluded(ui.newDecision().setDelegate(new SubmissionScoreDecision()), "na")
 										.addFootnote(
 											ui.newFootnote()
 												.setText("list-review-footnote-highest")
@@ -311,11 +329,11 @@ public class DeliveryControllers
 													ui.newTextPropertyReference().setReference("assessment_sort_ad"))))
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-review-time")
 										.setProperty(
 											ui.newDurationPropertyReference()
 												.setReference("submission.elapsedTime")
 												.setMissingText("na"))
+										.setTitle("list-review-time")
 										.setSorting(
 												ui.newCompareDecision().setEqualsConstant("3").setProperty(ui.newPropertyReference().setReference("submission_sort_choice")),
 												ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setReference("submission_sort_ad")))
@@ -333,11 +351,11 @@ public class DeliveryControllers
 													ui.newTextPropertyReference().setReference("assessment_sort_ad"))))
 								.addColumn(
 									ui.newPropertyColumn()
-										.setTitle("list-review-submittedDue")
 										.setProperty(
 											ui.newDatePropertyReference()
 												.setReference("submission.submittedDate")
 												.setMissingText("na"))
+										.setTitle("list-review-submittedDue")
 										.setSorting(
 												ui.newCompareDecision().setEqualsConstant("4").setProperty(ui.newPropertyReference().setReference("submission_sort_choice")),
 												ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setReference("submission_sort_ad")))
@@ -620,7 +638,7 @@ public class DeliveryControllers
 										.addColumn(
 											ui.newPropertyColumn()
 												.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatAnswerCorrectFeedback()))
-												.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("feedback")), null))
+												.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("feedback"))))
 										.addColumn(
 											ui.newSelectionColumn()
 												.setReadOnly(ui.newPropertyReference().setReference("review"))
@@ -654,7 +672,7 @@ public class DeliveryControllers
 												.setProperty(
 													ui.newHtmlPropertyReference()
 														.setReference("qanswer.feedbackGeneral"))
-												.setIncluded(ui.newDecision().setDelegate(new AnswerFeedbackDecision()), null))
+												.setIncluded(ui.newDecision().setDelegate(new AnswerFeedbackDecision())))
 										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(
@@ -2186,6 +2204,93 @@ public class DeliveryControllers
 				num = question.getSectionOrdering().getPosition();
 			}
 			return num.toString();
+		}
+	}
+
+	/**
+	 * From a value which is a submission, 'format' this into the html for the icon decoration for the list interface.
+	 */
+	public static class FormatListDecoration implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{
+			Object o = context.get("submission");
+			if (!(o instanceof Submission)) return value.toString();
+			Submission submission = (Submission) o;
+
+			Assessment assessment = submission.getAssessment();
+			if (assessment == null) return value.toString();
+
+			Time now = TimeService.newTime();
+
+			// if not open yet...
+			if ((assessment.getReleaseDate() != null) && now.before(assessment.getReleaseDate()))
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/future.gif\" alt=\""
+						+ context.getMessages().getString("list-key-future") + "\" /><br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("list-key-future") + "</span>";
+			}
+
+			// overdue?
+			boolean overdue = (assessment.getDueDate() != null) && now.after(assessment.getDueDate())
+					&& ((assessment.getAllowLateSubmit() == null) || (!assessment.getAllowLateSubmit().booleanValue()));
+
+			// todo (not overdue)
+			if ((submission.getStartDate() == null) && !overdue)
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/begin.gif\" alt=\""
+						+ context.getMessages().getString("list-key-todo") + "\" /><br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("list-key-todo") + "</span>";
+			}
+
+			// if in progress...
+			if (((submission.getIsComplete() == null) || (!submission.getIsComplete())) && (submission.getStartDate() != null))
+			{
+				// if timed, add an alert
+				if (assessment.getTimeLimit() != null)
+				{
+					return "<img src=\"" + context.get("sakai.return.url") + "/icons/exit.gif\" alt=\""
+							+ context.getMessages().getString("list-key-inprogress") + "\" />" + "<img src=\"" + context.get("sakai.return.url")
+							+ "/icons/warning.gif\" alt=\"" + context.getMessages().getString("list-key-urgent") + "\" />"
+							+ "<br /><span style=\"font-size:smaller\">" + context.getMessages().getString("list-key-inprogress-urgent") + "</span>";
+				}
+
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/exit.gif\" alt=\""
+						+ context.getMessages().getString("list-key-inprogress") + "\" /><br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("list-key-inprogress") + "</span>";
+			}
+
+			// completed
+			if ((submission.getIsComplete() != null) && (submission.getIsComplete()))
+			{
+				// if there are fewer sibs than allowed, add the todo image as well
+				if (!overdue
+						&& ((assessment.getNumSubmissionsAllowed() == null) || (submission.getSiblingCount().intValue() < assessment
+								.getNumSubmissionsAllowed().intValue())))
+				{
+					return "<img src=\"" + context.get("sakai.return.url") + "/icons/finish.gif\" alt=\""
+							+ context.getMessages().getString("list-key-complete") + "\" />" + "<img src=\"" + context.get("sakai.return.url")
+							+ "/icons/begin.gif\" alt=\"" + context.getMessages().getString("list-key-repeat") + "\" />"
+							+ "<br /><span style=\"font-size:smaller\">" + context.getMessages().getString("list-key-complete-repeat") + "</span>";
+				}
+
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/finish.gif\" alt=\""
+						+ context.getMessages().getString("list-key-complete") + "\" /><br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("list-key-complete") + "</span>";
+			}
+
+			// overdue, not in progress, never completed
+			if (overdue)
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/cancel.gif\" alt=\""
+						+ context.getMessages().getString("list-key-overdue") + "\" /><br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("list-key-overdue") + "</span>";
+			}
+
+			return null;
 		}
 	}
 }

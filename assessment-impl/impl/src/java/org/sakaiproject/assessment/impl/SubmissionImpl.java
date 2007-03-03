@@ -112,6 +112,8 @@ public class SubmissionImpl implements Submission
 
 	protected AssessmentServiceImpl service = null;
 
+	protected Integer siblingCount = null;
+
 	protected Time startDate = null;
 
 	protected PropertyStatus startDateStatus = PropertyStatus.unset;
@@ -472,6 +474,14 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Integer getSiblingCount()
+	{
+		return this.siblingCount;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Time getStartDate()
 	{
 		// read the basic info if this property has not yet been set
@@ -749,6 +759,14 @@ public class SubmissionImpl implements Submission
 	{
 		this.isComplete = complete;
 		this.isCompleteStatus = PropertyStatus.inited;
+	}
+
+	/**
+	 * Initialize the sibling count.
+	 */
+	protected void initSiblingCount(Integer count)
+	{
+		this.siblingCount = count;
 	}
 
 	/**
