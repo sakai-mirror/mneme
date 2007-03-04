@@ -139,6 +139,36 @@ public interface Submission
 	Boolean getIsCompleteQuestion(AssessmentQuestion question);
 
 	/**
+	 * Check if the submission may be started - the user must have permission, the submission must be a placeholder, the assessment must be open.
+	 * 
+	 * @return TRUE if the submission may be started, FALSE if not.
+	 */
+	Boolean getMayBegin();
+
+	/**
+	 * Check if the submission may be started for an nth attempt - the user must have permission, the submission must be a complete, the sibling count
+	 * must be < the assessment's limit, and the assessment must be open.
+	 * 
+	 * @return TRUE if the submission may be started, FALSE if not.
+	 */
+	Boolean getMayBeginAgain();
+
+	/**
+	 * Check if the submission may be re-entered for more work - the user must be the submission user, the submission must be incomplete.
+	 * 
+	 * @return TRUE if the submission may be re-entered, FALSE if not.
+	 */
+	Boolean getMayContinue();
+
+	/**
+	 * Check if the submission may be reviewed - the user must be the submission user, and the submission must be complete and not from a retracted
+	 * assessment.
+	 * 
+	 * @return TRUE if the submission may be reviewed, FALSE if not.
+	 */
+	Boolean getMayReview();
+
+	/**
 	 * Get the total count of submissions, including this one, to this same assignment from the same user. May not be known
 	 * 
 	 * @return The total count of submissions to the assignment by the user, or NULL if not known.
@@ -252,5 +282,4 @@ public interface Submission
 	 *        The user id who made this submission.
 	 */
 	void setUserId(String userId);
-
 }

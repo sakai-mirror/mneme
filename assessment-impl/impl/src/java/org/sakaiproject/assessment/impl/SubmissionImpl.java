@@ -474,6 +474,48 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getMayBegin()
+	{
+		if (getStartDate() != null) return Boolean.FALSE;
+		return this.service.allowSubmit(getAssessment(), null);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getMayBeginAgain()
+	{
+		if ((getIsComplete() == null) || (!getIsComplete().booleanValue())) return Boolean.FALSE;
+		return this.service.allowSubmit(getAssessment(), null);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getMayContinue()
+	{
+		if (!this.service.m_sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
+		if ((this.getIsComplete() != null) && (getIsComplete().booleanValue())) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getMayReview()
+	{
+		if (!this.service.m_sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
+		if ((this.getIsComplete() == null) || (!getIsComplete().booleanValue())) return Boolean.FALSE;
+		if ((getAssessment().getRetractDate() != null) && (this.service.m_timeService.newTime().after(getAssessment().getRetractDate())))
+			return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer getSiblingCount()
 	{
 		return this.siblingCount;

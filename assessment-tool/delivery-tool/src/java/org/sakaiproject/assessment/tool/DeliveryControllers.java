@@ -100,6 +100,24 @@ public class DeliveryControllers
 //													"/list/0D{0}{1}",
 //													ui.newTextPropertyReference().setReference("submission_sort_choice"),
 //													ui.newTextPropertyReference().setReference("submission_sort_ad")))
+										.addNavigation(
+											ui.newNavigation()
+												.setTitle("list-nav-begin")
+												.setStyle(Navigation.Style.link)
+												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
+												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayBegin"))))
+										.addNavigation(
+											ui.newNavigation()
+												.setTitle("list-nav-continue")
+												.setStyle(Navigation.Style.link)
+												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
+												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayContinue"))))
+										.addNavigation(
+											ui.newNavigation()
+												.setTitle("list-nav-begin-again")
+												.setStyle(Navigation.Style.link)
+												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
+												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayBeginAgain"))))
 									)
 								.addColumn(
 									ui.newPropertyColumn()
@@ -157,8 +175,13 @@ public class DeliveryControllers
 										.setProperty(ui.newPropertyReference().setReference("submission.totalScore"))
 										.setTitle("list-header-score")
 										.setCentered()
-										.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash"))
-					));
+										.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash")
+								.addNavigation(
+									ui.newNavigation()
+										.setTitle("list-nav-review")
+										.setStyle(Navigation.Style.link)
+										.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.id")))
+										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReview")))))));
 	}
 
 	/**
