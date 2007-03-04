@@ -225,7 +225,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		switch (destination)
 		{
-			case list:
+			case list2:
 			{
 				// optional sort parameter
 				String sort = null;
@@ -236,7 +236,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				listGet(req, res, sort, context);
 				break;
 			}
-			case list2:
+			case list:
 			{
 				// optional sort parameter
 				String sort = null;

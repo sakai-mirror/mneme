@@ -136,11 +136,24 @@ public class DeliveryControllers
 										.setTitle("list-header-due")
 										.setCentered())
 								.addColumn(
-									ui.newPropertyColumn()
-										.setProperty(
-											ui.newDurationPropertyReference().setConcise()
-												.setReference("submission.assessment.timeLimit")
-												.setMissingText("dash"))
+									ui.newEntityListColumn()
+										.add(
+											ui.newCountdownTimer()
+												.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
+												.setRemainingMessage("timer-remaining")
+												.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
+												.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
+												.setIncluded(
+													ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayContinue")),
+													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
+										.add(
+											ui.newText()
+												.setText(
+													null,
+													ui.newDurationPropertyReference().setConcise()
+														.setReference("submission.assessment.timeLimit")
+														.setMissingText("dash"))
+												.setIncluded(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayContinue"))))
 										.setTitle("list-header-limit")
 										.setCentered())
 								.addColumn(

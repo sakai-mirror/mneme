@@ -476,7 +476,10 @@ public class SubmissionImpl implements Submission
 	 */
 	public Boolean getMayBegin()
 	{
+		// not yet started
 		if (getStartDate() != null) return Boolean.FALSE;
+
+		// check the full allowed
 		return this.service.allowSubmit(getAssessment(), null);
 	}
 
@@ -485,7 +488,10 @@ public class SubmissionImpl implements Submission
 	 */
 	public Boolean getMayBeginAgain()
 	{
+		// submission is complete
 		if ((getIsComplete() == null) || (!getIsComplete().booleanValue())) return Boolean.FALSE;
+
+		// check the full allow
 		return this.service.allowSubmit(getAssessment(), null);
 	}
 
@@ -494,8 +500,14 @@ public class SubmissionImpl implements Submission
 	 */
 	public Boolean getMayContinue()
 	{
+		// same user
 		if (!this.service.m_sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
+
+		// submission not complete
 		if ((this.getIsComplete() != null) && (getIsComplete().booleanValue())) return Boolean.FALSE;
+
+		// submission has been started
+		if (getStartDate() == null) return Boolean.FALSE;
 
 		return Boolean.TRUE;
 	}
@@ -505,8 +517,13 @@ public class SubmissionImpl implements Submission
 	 */
 	public Boolean getMayReview()
 	{
+		// same user
 		if (!this.service.m_sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
+
+		// submission complete
 		if ((this.getIsComplete() == null) || (!getIsComplete().booleanValue())) return Boolean.FALSE;
+
+		// not retracted
 		if ((getAssessment().getRetractDate() != null) && (this.service.m_timeService.newTime().after(getAssessment().getRetractDate())))
 			return Boolean.FALSE;
 
