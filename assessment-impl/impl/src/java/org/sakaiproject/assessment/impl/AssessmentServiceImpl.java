@@ -2328,19 +2328,28 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					// take this one out
 					i.remove();
 
+					// count as a sibling if not unstarted
+					count = 0;
+					if (candidateSub.getStartDate() != null)
+					{
+						count = 1;
+					}
+
 					// if the winner so far is in progress, it remains the winner
 					if ((submission.getIsComplete() == null) || (!submission.getIsComplete()))
 					{
+						// keep the submission we already have, add a sibling for this one we are skipping
+						((SubmissionImpl) submission).initSiblingCount(new Integer(submission.getSiblingCount().intValue() + count));
 					}
 
 					// if this one is in progress, it wins
 					else if ((candidateSub.getIsComplete() == null) || (!candidateSub.getIsComplete()))
 					{
 						// transfer sibling count
-						candidateSub.initSiblingCount(new Integer(submission.getSiblingCount().intValue() + 1));
+						candidateSub.initSiblingCount(new Integer(submission.getSiblingCount().intValue() + count));
 						submission = candidateSub;
 					}
-					
+
 					// see if this wins over the best so far
 					else if (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED)
 					{
@@ -2351,8 +2360,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 							// switch to this one
 							value = ((SubmissionImpl) candidateSub).getTotalScore();
 
-							candidateSub.initSiblingCount(new Integer(submission.getSiblingCount().intValue() + 1));
+							candidateSub.initSiblingCount(new Integer(submission.getSiblingCount().intValue() + count));
 							submission = candidateSub;
+						}
+						else
+						{
+							// keep the submission we already have, add a sibling for this one we are skipping
+							((SubmissionImpl) submission).initSiblingCount(new Integer(submission.getSiblingCount().intValue() + count));
 						}
 					}
 					else
@@ -2365,6 +2379,11 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 							candidateSub.initSiblingCount(new Integer(submission.getSiblingCount().intValue() + 1));
 							submission = candidateSub;
+						}
+						else
+						{
+							// keep the submission we already have, add a sibling for this one we are skipping
+							((SubmissionImpl) submission).initSiblingCount(new Integer(submission.getSiblingCount().intValue() + count));
 						}
 					}
 				}
