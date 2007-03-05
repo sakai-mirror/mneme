@@ -1511,7 +1511,7 @@ public class AssessmentImpl implements Assessment
 		this.autoSubmit = other.autoSubmit;
 		this.autoSubmitStatus = other.autoSubmitStatus;
 		this.context = other.context;
-		this.contextStatus = other.createdByStatus;
+		this.contextStatus = other.contextStatus;
 		this.continuousNumbering = other.continuousNumbering;
 		this.continuousNumberingStatus = other.continuousNumberingStatus;
 		this.createdBy = other.createdBy;

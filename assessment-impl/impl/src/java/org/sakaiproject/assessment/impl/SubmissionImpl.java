@@ -476,11 +476,26 @@ public class SubmissionImpl implements Submission
 	 */
 	public Boolean getMayBegin()
 	{
+		// ASSSUMPTION: this will be a submission with sibling count, and it will be:
+		// - the placeholder, if none other exist
+		// - the one in progress, if there is one
+		// - the "official" completed one, if any
+
 		// not yet started
 		if (getStartDate() != null) return Boolean.FALSE;
 
-		// check the full allowed
-		return this.service.allowSubmit(getAssessment(), null);
+		// assessment is open
+		if (!this.service.isAssessmentOpen(getAssessment(), this.service.m_timeService.newTime(), 0)) return Boolean.FALSE;
+
+		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
+		if (!this.service.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), service.SUBMIT_PERMISSION, getAssessment()
+				.getContext(), this.service.getAssessmentReference(getAssessment().getId()))) return Boolean.FALSE;
+
+		// under limit
+		if ((getAssessment().getNumSubmissionsAllowed() != null)
+				&& (this.getSiblingCount().intValue() >= getAssessment().getNumSubmissionsAllowed().intValue())) return Boolean.FALSE;
+
+		return Boolean.TRUE;
 	}
 
 	/**
@@ -488,11 +503,26 @@ public class SubmissionImpl implements Submission
 	 */
 	public Boolean getMayBeginAgain()
 	{
+		// ASSSUMPTION: this will be a submission with sibling count, and it will be:
+		// - the placeholder, if none other exist
+		// - the one in progress, if there is one
+		// - the "official" completed one, if any
+
 		// submission is complete
 		if ((getIsComplete() == null) || (!getIsComplete().booleanValue())) return Boolean.FALSE;
 
-		// check the full allow
-		return this.service.allowSubmit(getAssessment(), null);
+		// assessment is open
+		if (!this.service.isAssessmentOpen(getAssessment(), this.service.m_timeService.newTime(), 0)) return Boolean.FALSE;
+
+		// under limit
+		if ((getAssessment().getNumSubmissionsAllowed() != null)
+				&& (this.getSiblingCount().intValue() >= getAssessment().getNumSubmissionsAllowed().intValue())) return Boolean.FALSE;
+
+		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
+		if (!this.service.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), service.SUBMIT_PERMISSION, getAssessment()
+				.getContext(), this.service.getAssessmentReference(getAssessment().getId()))) return Boolean.FALSE;
+
+		return Boolean.TRUE;
 	}
 
 	/**
@@ -500,14 +530,21 @@ public class SubmissionImpl implements Submission
 	 */
 	public Boolean getMayContinue()
 	{
+		// submission has been started
+		if (getStartDate() == null) return Boolean.FALSE;
+
+		// submission not complete
+		if ((getIsComplete() != null) && (getIsComplete().booleanValue())) return Boolean.FALSE;
+
 		// same user
 		if (!this.service.m_sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
 
-		// submission not complete
-		if ((this.getIsComplete() != null) && (getIsComplete().booleanValue())) return Boolean.FALSE;
+		// assessment is open
+		if (!this.service.isAssessmentOpen(getAssessment(), this.service.m_timeService.newTime(), 0)) return Boolean.FALSE;
 
-		// submission has been started
-		if (getStartDate() == null) return Boolean.FALSE;
+		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
+		if (!this.service.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), service.SUBMIT_PERMISSION, getAssessment()
+				.getContext(), this.service.getAssessmentReference(getAssessment().getId()))) return Boolean.FALSE;
 
 		return Boolean.TRUE;
 	}
@@ -526,6 +563,8 @@ public class SubmissionImpl implements Submission
 		// not retracted
 		if ((getAssessment().getRetractDate() != null) && (this.service.m_timeService.newTime().after(getAssessment().getRetractDate())))
 			return Boolean.FALSE;
+
+		// TODO: permission?
 
 		return Boolean.TRUE;
 	}

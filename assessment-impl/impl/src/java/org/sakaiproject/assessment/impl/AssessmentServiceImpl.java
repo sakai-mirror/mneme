@@ -2158,11 +2158,11 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// the current time
 		Time asOf = m_timeService.newTime();
 
-		if (M_log.isDebugEnabled()) M_log.debug("getOfficialSubmissionsIds: context: " + context + " userId: " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("getUserContextSubmissions: context: " + context + " userId: " + userId);
 
 		String statement = "SELECT AG.ASSESSMENTGRADINGID, P.ID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
 				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE, PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, AG.FORGRADE,"
-				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING"
+				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING, PAC.RETRACTDATE"
 				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID AND (PAC.RETRACTDATE IS NULL OR ? < PAC.RETRACTDATE)"
@@ -2235,6 +2235,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 					int allowLateSubmit = result.getInt(18);
 
+					ts = result.getTimestamp(19, m_sqlService.getCal());
+					Time retractDate = null;
+					if (ts != null)
+					{
+						retractDate = m_timeService.newTime(ts.getTime());
+					}
+
 					// for the non-submissions, create an non-null id
 					if (submissionId == null)
 					{
@@ -2255,6 +2262,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					cachedSubmission.initStartDate(attemptDate);
 					cachedSubmission.initSubmittedDate(submittedDate);
 					cachedSubmission.initIsComplete(Boolean.valueOf(complete));
+					cachedSubmission.initUserId(fUserId);
 
 					// create or update these properties in the assessment cache
 					AssessmentImpl cachedAssessment = getCachedAssessment(publishedAssessmentId);
@@ -2263,9 +2271,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						// cache an empty one
 						cachedAssessment = new AssessmentImpl(service);
 						cachedAssessment.initId(publishedAssessmentId);
-						cachedAssessment.initContext(context);
 						cacheAssessment(cachedAssessment);
 					}
+					cachedAssessment.initContext(context);
 					cachedAssessment.initTitle(title);
 					cachedAssessment.initFeedbackDate(feedbackDate);
 					cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
@@ -2277,6 +2285,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					cachedAssessment.initTimeLimit(timeLimit == 0 ? null : new Long(timeLimit * 1000));
 					cachedAssessment.initDueDate(dueDate);
 					cachedAssessment.initAllowLateSubmit((allowLateSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
+					cachedAssessment.initRetractDate(retractDate);
 
 					// return the id
 					return cachedSubmission;
