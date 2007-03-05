@@ -77,7 +77,19 @@ public class DeliveryControllers
 										.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatListDecoration()))
 										.setTitle("list-status-title")
 										.setCentered()
-										.setWidthEm(10))
+										.setWidthEm(10)
+										.addEntityNavigation(
+											ui.newNavigation()
+												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
+												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayBegin"))))
+										.addEntityNavigation(
+											ui.newNavigation()
+												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
+												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayContinue"))))
+										.addEntityNavigation(
+											ui.newNavigation()
+												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
+												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayBeginAgain")))))
 								.addColumn(
 									ui.newPropertyColumn()
 										.setProperty(ui.newTextPropertyReference().setReference("submission.assessment.title"))
@@ -223,8 +235,8 @@ public class DeliveryControllers
 											ui.newTextPropertyReference()
 												.setReference("assessment.title"))
 										.setTitle("list-take-title")
-										.setEntityNavigation(
-											ui.newEntityNavigation()
+										.addEntityNavigation(
+											ui.newNavigation()
 												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newTextPropertyReference().setReference("assessment.id"))))
 										.setSorting(
 											ui.newCompareDecision().setEqualsConstant("0").setProperty(ui.newPropertyReference().setReference("assessment_sort_choice")),
@@ -283,8 +295,8 @@ public class DeliveryControllers
 											ui.newTextPropertyReference()
 												.setReference("submission.assessment.title"))
 										.setTitle("list-review-title")
-										.setEntityNavigation(
-											ui.newEntityNavigation()
+										.addEntityNavigation(
+											ui.newNavigation()
 												.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newTextPropertyReference().setReference("submission.id")))
 												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackNow"))))
 //										.addNavigation(
@@ -1345,8 +1357,8 @@ public class DeliveryControllers
 												.setStripHtml()
 												.setReference("question.title"),
 											ui.newPropertyReference().setFormatDelegate(new QuestionScore(false)))
-										.setEntityNavigation(
-											ui.newEntityNavigation()
+										.addEntityNavigation(
+											ui.newNavigation()
 												// destination is /question/sid/q questionId
 												.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
 													ui.newTextPropertyReference().setReference("submission.id"),
@@ -1365,8 +1377,8 @@ public class DeliveryControllers
 												.setStripHtml()
 												.setReference("question.title"),
 											ui.newPropertyReference().setFormatDelegate(new QuestionScore(false)))
-										.setEntityNavigation(
-											ui.newEntityNavigation()
+										.addEntityNavigation(
+											ui.newNavigation()
 												// destination is /question/sid/s sectionId
 												.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}#{2}",
 													ui.newTextPropertyReference().setReference("submission.id"),
@@ -1386,8 +1398,8 @@ public class DeliveryControllers
 												.setStripHtml()
 												.setReference("question.title"),
 											ui.newPropertyReference().setFormatDelegate(new QuestionScore(false)))
-										.setEntityNavigation(
-											ui.newEntityNavigation()
+										.addEntityNavigation(
+											ui.newNavigation()
 												// destination is /question/sid/a
 												.setDestination(ui.newDestination().setDestination("/question/{0}/a#{1}",
 													ui.newTextPropertyReference().setReference("submission.id"),

@@ -2328,8 +2328,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					// take this one out
 					i.remove();
 
+					// if the winner so far is in progress, it remains the winner
+					if ((submission.getIsComplete() == null) || (!submission.getIsComplete()))
+					{
+					}
+
 					// if this one is in progress, it wins
-					if ((candidateSub.getIsComplete() == null) || (!candidateSub.getIsComplete()))
+					else if ((candidateSub.getIsComplete() == null) || (!candidateSub.getIsComplete()))
 					{
 						// transfer sibling count
 						candidateSub.initSiblingCount(new Integer(submission.getSiblingCount().intValue() + 1));
