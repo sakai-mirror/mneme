@@ -56,6 +56,8 @@ public class DeliveryControllers
 	/**
 	 * The list interface needs the following entities in the context:
 	 * submissions - a list of submissions that the current user has submitted
+	 * sort-column - a digit indicating which column is selected for sort
+	 * sort-direction - 'a' for ascending or 'd' for descending
 	 */
 	public static Controller constructList2(UiService ui)
 	{
@@ -63,150 +65,150 @@ public class DeliveryControllers
 			ui.newInterface()
 				.setTitle("list-title")
 				.setHeader("list-header")
+				.add(ui.newInstructions().setText("list-instructions"))
 				.add(
-					ui.newSection()
-						.setTitle("list-section-title")
-						.add(
-							ui.newEntityList()
-								.setStyle(EntityList.Style.flat)
-								.setIterator(ui.newPropertyReference().setReference("submissions"), "submission")
-								//.setTitle("list-take-instructions")
-								//.setEmptyTitle("list-take-empty")
-								.addColumn(
-									ui.newPropertyColumn()
-										.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatListDecoration()))
-										.setTitle("list-status-title")
-										.setCentered()
-										.setWidthEm(10)
-										.addEntityNavigation(
-											ui.newNavigation()
-												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
-												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayBegin"))))
-										.addEntityNavigation(
-											ui.newNavigation()
-												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
-												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayContinue"))))
-										.addEntityNavigation(
-											ui.newNavigation()
-												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
-												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayBeginAgain")))))
-								.addColumn(
-									ui.newPropertyColumn()
-										.setProperty(ui.newTextPropertyReference().setReference("submission.assessment.title"))
-										.setTitle("list-header-title")
-//										.setEntityNavigation(
-//											ui.newEntityNavigation()
-//												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newTextPropertyReference().setReference("assessment.id"))))
-//										.setSorting(
-//											ui.newCompareDecision().setEqualsConstant("0").setProperty(ui.newPropertyReference().setReference("assessment_sort_choice")),
-//											ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setReference("assessment_sort_ad")))
-//										.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
-//										.setSortDestination(
-//											ui.newDestination() /* a */
-//												.setDestination(
-//													"/list/0A{0}{1}",
-//													ui.newTextPropertyReference().setReference("submission_sort_choice"),
-//													ui.newTextPropertyReference().setReference("submission_sort_ad")),
-//											ui.newDestination() /* d */
-//												.setDestination(
-//													"/list/0D{0}{1}",
-//													ui.newTextPropertyReference().setReference("submission_sort_choice"),
-//													ui.newTextPropertyReference().setReference("submission_sort_ad")))
-										.addNavigation(
-											ui.newNavigation()
-												.setTitle("list-nav-begin")
-												.setStyle(Navigation.Style.link)
-												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
-												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayBegin"))))
-										.addNavigation(
-											ui.newNavigation()
-												.setTitle("list-nav-continue")
-												.setStyle(Navigation.Style.link)
-												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
-												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayContinue"))))
-										.addNavigation(
-											ui.newNavigation()
-												.setTitle("list-nav-begin-again")
-												.setStyle(Navigation.Style.link)
-												.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
-												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayBeginAgain"))))
-									)
-								.addColumn(
-									ui.newPropertyColumn()
-										.setProperty(
-											ui.newDatePropertyReference().setTwoLine()
-												.setReference("submission.assessment.releaseDate")
-												.setMissingText("dash"))
-										.setTitle("list-header-open")
-										.setCentered())
-								.addColumn(
-									ui.newPropertyColumn()
-										.setProperty(
-											ui.newDatePropertyReference().setTwoLine()
-												.setReference("submission.assessment.dueDate")
-												.setMissingText("dash"))
-										.setTitle("list-header-due")
-										.setCentered())
-								.addColumn(
-									ui.newEntityListColumn()
-										.add(
-											ui.newCountdownTimer()
-												.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
-												.setRemainingMessage("timer-remaining")
-												.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
-												.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
-												.setIncluded(
-													ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayContinue")),
-													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
-										.add(
-											ui.newText()
-												.setText(
-													null,
-													ui.newDurationPropertyReference().setConcise()
-														.setReference("submission.assessment.timeLimit")
-														.setMissingText("dash"))
-												.setIncluded(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayContinue"))))
-										.setTitle("list-header-limit")
-										.setCentered())
-								.addColumn(
-									ui.newPropertyColumn()
-										.setProperty(
-											ui.newDatePropertyReference().setTwoLine()
-												.setReference("submission.assessment.feedbackDate")
-												.setMissingText("immediate"))
-										.setTitle("list-header-feedback")
-										.setEntityIncluded(ui.newDecision().setDelegate(new FeedbackDateDecision()), "dash")
-										.setCentered())
-								.addColumn(
-									ui.newPropertyColumn()
-										.setProperty(
-											"list-format-tries",
-											ui.newPropertyReference().setReference("submission.siblingCount"),
-											ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed"))
-										.setTitle("list-header-tries")
-										.setCentered()
-										.setEntityIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed")), "unlimited"))
-								.addColumn(
-									ui.newPropertyColumn()
-										.setProperty(
-											ui.newDatePropertyReference().setTwoLine()
-												.setReference("submission.submittedDate")
-												.setMissingText("dash"))
-										.setTitle("list-header-finished")
-										.setCentered()
-										.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash"))
-								.addColumn(
-									ui.newPropertyColumn()
-										.setProperty(ui.newPropertyReference().setReference("submission.totalScore"))
-										.setTitle("list-header-score")
-										.setCentered()
-										.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash")
+					ui.newEntityList()
+						.setStyle(EntityList.Style.flat)
+						.setIterator(ui.newPropertyReference().setReference("submissions"), "submission")
+						.setEmptyTitle("list-empty")
+						.addColumn(
+							ui.newPropertyColumn()
+								.setProperty(ui.newTextPropertyReference().setReference("submission.assessment.title"))
+								.setTitle("list-header-title")
+								.setSorting(
+									ui.newCompareDecision().setEqualsConstant("0").setProperty(ui.newPropertyReference().setReference("sort_column")),
+									ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setReference("sort_direction")))
+								.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
+								.setSortDestination(
+									ui.newDestination().setDestination("/list/0A"),
+									ui.newDestination().setDestination("/list/0D"))
 								.addNavigation(
 									ui.newNavigation()
-										.setTitle("list-nav-review")
+										.setTitle("list-nav-begin")
 										.setStyle(Navigation.Style.link)
-										.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.id")))
-										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReview")))))));
+										.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
+										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayBegin"))))
+								.addNavigation(
+									ui.newNavigation()
+										.setTitle("list-nav-continue")
+										.setStyle(Navigation.Style.link)
+										.setDestination(ui.newDestination().setDestination("/question/{0}/z", ui.newPropertyReference().setReference("submission.id")))
+										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayContinue"))))
+								.addNavigation(
+									ui.newNavigation()
+										.setTitle("list-nav-begin-again")
+										.setStyle(Navigation.Style.link)
+										.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
+										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayBeginAgain")))))
+						.addColumn(
+							ui.newPropertyColumn()
+								.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatListDecoration()))
+								.setTitle("list-status-title")
+								.setCentered()
+								.setWidthEm(10)
+								.setSorting(
+									ui.newCompareDecision().setEqualsConstant("1").setProperty(ui.newPropertyReference().setReference("sort_column")),
+									ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setReference("sort_direction")))
+								.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
+								.setSortDestination(
+									ui.newDestination().setDestination("/list/1A"),
+									ui.newDestination().setDestination("/list/1D"))
+								.addEntityNavigation(
+									ui.newNavigation()
+										.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
+										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayBegin"))))
+								.addEntityNavigation(
+									ui.newNavigation()
+										.setDestination(ui.newDestination().setDestination("/question/{0}/z", ui.newPropertyReference().setReference("submission.id")))
+										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayContinue"))))
+								.addEntityNavigation(
+									ui.newNavigation()
+										.setDestination(ui.newDestination().setDestination("/enter/{0}", ui.newPropertyReference().setReference("submission.assessment.id")))
+										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayBeginAgain")))))
+						.addColumn(
+							ui.newPropertyColumn()
+								.setProperty(
+									ui.newDatePropertyReference().setTwoLine()
+										.setReference("submission.assessment.releaseDate")
+										.setMissingText("dash"))
+								.setTitle("list-header-open")
+								.setCentered())
+						.addColumn(
+							ui.newPropertyColumn()
+								.setProperty(
+									ui.newDatePropertyReference().setTwoLine()
+										.setReference("submission.assessment.dueDate")
+										.setMissingText("dash"))
+								.setTitle("list-header-due")
+								.setSorting(
+									ui.newCompareDecision().setEqualsConstant("2").setProperty(ui.newPropertyReference().setReference("sort_column")),
+									ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setReference("sort_direction")))
+								.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
+								.setSortDestination(
+									ui.newDestination().setDestination("/list/2A"),
+									ui.newDestination().setDestination("/list/2D"))
+								.setCentered())
+						.addColumn(
+							ui.newEntityListColumn()
+								.add(
+									ui.newCountdownTimer()
+										.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
+										//.setRemainingMessage("list-timer-remaining")
+										.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
+										.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
+										.setWidth(100)
+										.setIncluded(
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayContinue")),
+											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
+								.add(
+									ui.newText()
+										.setText(
+											null,
+											ui.newDurationPropertyReference().setConcise()
+												.setReference("submission.assessment.timeLimit")
+												.setMissingText("dash"))
+										.setIncluded(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayContinue"))))
+								.setTitle("list-header-limit")
+								.setCentered())
+						.addColumn(
+							ui.newPropertyColumn()
+								.setProperty(
+									ui.newDatePropertyReference().setTwoLine()
+										.setReference("submission.assessment.feedbackDate")
+										.setMissingText("immediate"))
+								.setTitle("list-header-feedback")
+								.setEntityIncluded(ui.newDecision().setDelegate(new FeedbackDateDecision()), "dash")
+								.setCentered())
+						.addColumn(
+							ui.newPropertyColumn()
+								.setProperty(
+									"list-format-tries",
+									ui.newPropertyReference().setReference("submission.siblingCount"),
+									ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed"))
+								.setTitle("list-header-tries")
+								.setCentered()
+								.setEntityIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed")), "unlimited"))
+						.addColumn(
+							ui.newPropertyColumn()
+								.setProperty(
+									ui.newDatePropertyReference().setTwoLine()
+										.setReference("submission.submittedDate")
+										.setMissingText("dash"))
+								.setTitle("list-header-finished")
+								.setCentered()
+								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash"))
+						.addColumn(
+							ui.newPropertyColumn()
+								.setProperty(ui.newPropertyReference().setReference("submission.totalScore"))
+								.setTitle("list-header-score")
+								.setCentered()
+								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash")
+						.addNavigation(
+							ui.newNavigation()
+								.setTitle("list-nav-review")
+								.setStyle(Navigation.Style.link)
+								.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.id")))
+								.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReview"))))));
 	}
 
 	/**
@@ -433,80 +435,74 @@ public class DeliveryControllers
 				.setTitle("enter-title", ui.newTextPropertyReference().setReference("assessment.title"))
 				.setHeader("enter-header")
 				.add(
-					ui.newSection()
-						.add(
-							ui.newInstructions()
-								.setText("linear-instructions")
-								.setIncluded(
-									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("assessment.randomAccess")))))
+					ui.newInstructions()
+						.setText("linear-instructions")
+						.setIncluded(
+							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("assessment.randomAccess"))))
+				.add(ui.newInstructions().setText("enter-display-instructions"))
+				.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("assessment.description")))
 				.add(
-					ui.newSection()
-						.setTitle("enter-display-instructions", ui.newPropertyReference().setReference("assessment.title"))
-						.add(
-							ui.newText()
-								.setText(null, ui.newHtmlPropertyReference().setReference("assessment.description")))
-						.add(
-							ui.newAttachments()
-								.setTitle("enter-attachments")
-								.setAttachments(ui.newPropertyReference().setReference("assessment.attachments"), null)
-								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.attachments"))))
-						.add(
-							ui.newEntityDisplay()
-								.setEntityReference(ui.newPropertyReference().setReference("assessment"))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("enter-display-contextTitle")
-										.setProperty(
-											ui.newContextInfoPropertyReference()
-												.setSelector(ContextInfoPropertyReference.Selector.title)
-												.setReference("assessment.context")))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("enter-display-createdBy")
-										.setProperty(
-											ui.newUserInfoPropertyReference()
-												.setSelector(UserInfoPropertyReference.Selector.displayName)
-												.setReference("assessment.createdBy")))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("enter-display-title")
-										.setProperty(
+					ui.newAttachments()
+						.setTitle("enter-attachments")
+						.setAttachments(ui.newPropertyReference().setReference("assessment.attachments"), null)
+						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.attachments"))))
+				.add(
+					ui.newEntityDisplay()
+						.setEntityReference(ui.newPropertyReference().setReference("assessment"))
+						.addRow(
+							ui.newPropertyRow()
+								.setTitle("enter-display-contextTitle")
+								.setProperty(
+									ui.newContextInfoPropertyReference()
+										.setSelector(ContextInfoPropertyReference.Selector.title)
+										.setReference("assessment.context")))
+						.addRow(
+							ui.newPropertyRow()
+								.setTitle("enter-display-createdBy")
+								.setProperty(
+									ui.newUserInfoPropertyReference()
+										.setSelector(UserInfoPropertyReference.Selector.displayName)
+										.setReference("assessment.createdBy")))
+						.addRow(
+							ui.newPropertyRow()
+								.setTitle("enter-display-title")
+								.setProperty(
+									ui.newTextPropertyReference()
+										.setReference("assessment.title")))
+						.addRow(
+							ui.newPropertyRow()
+								.setTitle("enter-display-timeLimit")
+								.setProperty(
+									ui.newDurationPropertyReference()
+										.setReference("assessment.timeLimit")
+										.setMissingText("no-time-limit")))
+						.addRow(
+							ui.newPropertyRow()
+								.setTitle("enter-display-autoSubmit")
+								.setProperty(
+									ui.newBooleanPropertyReference()
+										.setText("enabled", "disabled")
+										.setReference("assessment.autoSubmit")
+										.setMissingText("unknown"))
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.timeLimit"))))
+						.addRow(
+							ui.newPropertyRow()
+								.setTitle("enter-display-numSubmissionsAllowed")
+								.setProperty(
+									ui.newTextPropertyReference()
+										.setFormat("submissions")
+										.setReference("assessment.numSubmissionsAllowed")
+										.setMissingText("unlimited")
+										.addProperty(
 											ui.newTextPropertyReference()
-												.setReference("assessment.title")))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("enter-display-timeLimit")
-										.setProperty(
-											ui.newDurationPropertyReference()
-												.setReference("assessment.timeLimit")
-												.setMissingText("no-time-limit")))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("enter-display-autoSubmit")
-										.setProperty(
-											ui.newBooleanPropertyReference()
-												.setText("enabled", "disabled")
-												.setReference("assessment.autoSubmit")
-												.setMissingText("unknown"))
-										.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.timeLimit"))))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("enter-display-numSubmissionsAllowed")
-										.setProperty(
-											ui.newTextPropertyReference()
-												.setFormat("submissions")
-												.setReference("assessment.numSubmissionsAllowed")
-												.setMissingText("unlimited")
-												.addProperty(
-													ui.newTextPropertyReference()
-														.setReference("remainingSubmissions"))))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("enter-display-feedback")
-										.setProperty(
-											ui.newPropertyReference()
-												.setFormatDelegate(new FeedbackPropertyReference())
-												.setReference("assessment.feedbackDelivery")))))
+												.setReference("remainingSubmissions"))))
+						.addRow(
+							ui.newPropertyRow()
+								.setTitle("enter-display-feedback")
+								.setProperty(
+									ui.newPropertyReference()
+										.setFormatDelegate(new FeedbackPropertyReference())
+										.setReference("assessment.feedbackDelivery"))))
 					.add(
 						ui.newNavigationBar()
 							.add(
@@ -1187,7 +1183,6 @@ public class DeliveryControllers
 	/**
 	 * The exit interface needs the following entities in the context:
 	 * submission - the completed submission
-	 * remainingSubmissions - Integer count of remaining submissions allowed to the current user for the selected assessment
 	 */
 	public static Controller constructSubmitted(UiService ui)
 	{
@@ -1196,64 +1191,13 @@ public class DeliveryControllers
 				.setTitle("submitted-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.setHeader("submitted-header")
 				.add(
-					ui.newSection()
-						.setTitle("submitted-section-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
-						.add(ui.newInstructions().setText("submitted-display-instructions"))
-						.add(
-							ui.newInstructions()
-								.setText("submitted-display-message", ui.newPropertyReference().setReference("submission.assessment.submitMessage"))
-								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.submitMessage"))))
-						.add(
-							ui.newInstructions()
-								.setText("submitted-final-url", ui.newUrlPropertyReference().setReference("submission.assessment.submitUrl"))
-								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.submitUrl"))))
-						.add(
-							ui.newEntityDisplay()
-								.setEntityReference(ui.newPropertyReference().setReference("submission"))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("submitted-display-contextTitle")
-										.setProperty(
-											ui.newContextInfoPropertyReference()
-												.setSelector(ContextInfoPropertyReference.Selector.title)
-												.setReference("submission.assessment.context")))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("submitted-display-createdBy")
-										.setProperty(
-											ui.newUserInfoPropertyReference()
-												.setSelector(UserInfoPropertyReference.Selector.displayName)
-												.setReference("submission.assessment.createdBy")))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("submitted-display-title")
-										.setProperty(
-											ui.newTextPropertyReference()
-												.setReference("submission.assessment.title")))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("submitted-display-numSubmissionsRemaining")
-										.setProperty(
-											ui.newTextPropertyReference()
-												.setReference("submission.assessment.numSubmissionsAllowed")
-												.setFormat("submitted-submissions-remaining")
-												//.setMissingValues("-1")
-												.setMissingText("unlimited")
-												.addProperty(
-														ui.newTextPropertyReference()
-															.setReference("remainingSubmissions"))))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("submitted-display-confirmation")
-										.setProperty(
-											ui.newTextPropertyReference()
-												.setReference("submission.confirmation")))
-								.addRow(
-									ui.newPropertyRow()
-										.setTitle("submitted-display-submitted")
-										.setProperty(
-											ui.newDatePropertyReference()
-												.setReference("submission.submittedDate")))))
+					ui.newText()
+						.setText("submitted-display-message", ui.newHtmlPropertyReference().setReference("submission.assessment.submitMessage"))
+						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.submitMessage"))))
+				.add(
+					ui.newInstructions()
+						.setText("submitted-final-url", ui.newUrlPropertyReference().setReference("submission.assessment.submitUrl"))
+						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.submitUrl"))))
 				.add(
 					ui.newNavigationBar()
 						.add(

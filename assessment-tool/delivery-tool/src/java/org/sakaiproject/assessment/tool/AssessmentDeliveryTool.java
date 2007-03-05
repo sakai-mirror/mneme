@@ -92,6 +92,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our self-injected entity manager reference. */
 	protected EntityManager entityManager = null;
 
+	/** set of static resource paths. */
+	protected Set<String> resourcePaths = new HashSet<String>();
+
 	/** Our self-injected session manager reference. */
 	protected SessionManager sessionManager = null;
 
@@ -127,9 +130,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 	/** The table of contents interface. */
 	protected Controller uiToc = null;
-
-	/** set of static resource paths. */
-	protected Set<String> resourcePaths = new HashSet<String>();
 
 	/**
 	 * Shutdown the servlet.
@@ -585,82 +585,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		// question, section or all?
-		QuestionPresentation presentation = assessment.getQuestionPresentation();
-
-		// for by section
-		if ((presentation != null) && (presentation == QuestionPresentation.BY_SECTION))
-		{
-			AssessmentSection section = assessment.getFirstSection();
-			if (section != null)
-			{
-				destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + section.getId();
-
-				// redirect
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-		}
-
-		// for all
-		else if ((presentation != null) && (presentation == QuestionPresentation.BY_ASSESSMENT))
-		{
-			destination = "/" + Destinations.question + "/" + submission.getId() + "/a";
-
-			// redirect
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-			return;
-		}
-
-		// otherwise by quesion
-		String questionId = null;
-
-		// for linear assessments, start at the first incomplete question
-		if (!assessment.getRandomAccess().booleanValue())
-		{
-			AssessmentQuestion question = submission.getFirstIncompleteQuestion();
-			if (question != null)
-			{
-				questionId = question.getId();
-			}
-
-			// otherwise send the user to the toc/final review view
-			// Note: this is unlikely, since there's no way to mark the last question as complete without a "finish" -ggolden
-			else
-			{
-				destination = "/" + Destinations.final_review + "/" + submission.getId();
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-		}
-
-		// for random access, start at the first question of the first part
-		else
-		{
-			AssessmentSection part = assessment.getFirstSection();
-			if (part != null)
-			{
-				AssessmentQuestion question = part.getFirstQuestion();
-				if (question != null)
-				{
-					questionId = question.getId();
-				}
-			}
-		}
-
-		if (questionId != null)
-		{
-			// next destination: first question of submission
-			destination = "/" + Destinations.question + "/" + submission.getId() + "/q" + questionId;
-
-			// redirect
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-			return;
-		}
-
-		// we are here because there are no questions!
-		destination = "/" + Destinations.final_review + "/" + submission.getId();
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+		redirectToQuestion(req, res, submission);
 	}
 
 	/**
@@ -821,6 +746,88 @@ public class AssessmentDeliveryTool extends HttpServlet
 	}
 
 	/**
+	 * Get the UI for the list 2 destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param sort
+	 *        The sort parameter.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void list2Get(HttpServletRequest req, HttpServletResponse res, String sort, Context context) throws IOException
+	{
+		// SORT: 0|1|2 A|D - 2 chars, column | direction
+		if ((sort != null) && (sort.length() != 2))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		AssessmentService.GetAvailableAssessmentsSort assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.title_a;
+		if (sort != null)
+		{
+			context.put("sort_column", sort.charAt(0));
+			context.put("sort_direction", sort.charAt(1));
+
+			// 0 is title
+			if ((sort.charAt(0) == '0') && (sort.charAt(1) == 'A'))
+			{
+				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.title_a;
+			}
+			else if ((sort.charAt(0) == '0') && (sort.charAt(1) == 'D'))
+			{
+				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.title_d;
+			}
+
+			// 1 is status
+			else if ((sort.charAt(0) == '1') && (sort.charAt(1) == 'A'))
+			{
+				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.dueDate_a;
+			}
+			else if ((sort.charAt(0) == '1') && (sort.charAt(1) == 'D'))
+			{
+				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.dueDate_d;
+			}
+
+			// 2 is due date
+			else if ((sort.charAt(0) == '2') && (sort.charAt(1) == 'A'))
+			{
+				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.dueDate_a;
+			}
+			else if ((sort.charAt(0) == '2') && (sort.charAt(1) == 'D'))
+			{
+				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.dueDate_d;
+			}
+
+			else
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+		}
+
+		if (sort == null)
+		{
+			context.put("sort_column", '2');
+			context.put("sort_direction", 'A');
+		}
+
+		// collect information: submissions / assessments
+		List submissions = assessmentService.getUserContextSubmissions(toolManager.getCurrentPlacement().getContext(), null);
+		context.put("submissions", submissions);
+
+		// render
+		ui.render(uiList2, context);
+	}
+
+	/**
 	 * Get the UI for the list destination.
 	 * 
 	 * @param req
@@ -836,10 +843,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 */
 	protected void listGet(HttpServletRequest req, HttpServletResponse res, String sort, Context context) throws IOException
 	{
-		// TODO: test
-		assessmentService.getUserContextSubmissions(toolManager.getCurrentPlacement().getContext(), null);
-		// TODO: test
-
 		// SORT: 0|1 A|D 0|1|2|3|4 A|D - 4 chars, the first two for the assessment list, the second two for the submissions list
 		if ((sort != null) && (sort.length() != 4))
 		{
@@ -953,30 +956,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 	}
 
 	/**
-	 * Get the UI for the list 2  destination.
-	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
-	 * @param sort
-	 *        The sort parameter.
-	 * @param context
-	 *        UiContext.
-	 * @param out
-	 *        Output writer.
-	 */
-	protected void list2Get(HttpServletRequest req, HttpServletResponse res, String sort, Context context) throws IOException
-	{
-		// collect information: submissions / assessments
-		List submissions = assessmentService.getUserContextSubmissions(toolManager.getCurrentPlacement().getContext(), null);
-		context.put("submissions", submissions);
-
-		// render
-		ui.render(uiList2, context);
-	}
-
-	/**
 	 * Get the UI for the quesiton destination
 	 * 
 	 * @param req
@@ -998,6 +977,21 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionSelector, String feedback,
 			Context context) throws IOException
 	{
+		// handle our 'z' selector - redirect to the appropriate question for this submission
+		if ("z".equals(questionSelector))
+		{
+			Submission submission = assessmentService.idSubmission(submissionId);
+
+			if (submission == null)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+
+			redirectToQuestion(req, res, submission);
+		}
+
 		// collect the questions (actually their answers) to put on the page
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
 
@@ -1222,6 +1216,98 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		context.put("answers", answers);
 		return null;
+	}
+
+	/**
+	 * Redirect to the appropriate question screen for this submission
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submission
+	 *        The submission.
+	 */
+	protected void redirectToQuestion(HttpServletRequest req, HttpServletResponse res, Submission submission) throws IOException
+	{
+		Assessment assessment = submission.getAssessment();
+
+		// question, section or all?
+		QuestionPresentation presentation = assessment.getQuestionPresentation();
+
+		// for by section
+		if ((presentation != null) && (presentation == QuestionPresentation.BY_SECTION))
+		{
+			AssessmentSection section = assessment.getFirstSection();
+			if (section != null)
+			{
+				String destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + section.getId();
+
+				// redirect
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
+		}
+
+		// for all
+		else if ((presentation != null) && (presentation == QuestionPresentation.BY_ASSESSMENT))
+		{
+			String destination = "/" + Destinations.question + "/" + submission.getId() + "/a";
+
+			// redirect
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+
+		// otherwise by quesion
+		String questionId = null;
+
+		// for linear assessments, start at the first incomplete question
+		if (!assessment.getRandomAccess().booleanValue())
+		{
+			AssessmentQuestion question = submission.getFirstIncompleteQuestion();
+			if (question != null)
+			{
+				questionId = question.getId();
+			}
+
+			// otherwise send the user to the toc/final review view
+			// Note: this is unlikely, since there's no way to mark the last question as complete without a "finish" -ggolden
+			else
+			{
+				String destination = "/" + Destinations.final_review + "/" + submission.getId();
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
+		}
+
+		// for random access, start at the first question of the first part
+		else
+		{
+			AssessmentSection part = assessment.getFirstSection();
+			if (part != null)
+			{
+				AssessmentQuestion question = part.getFirstQuestion();
+				if (question != null)
+				{
+					questionId = question.getId();
+				}
+			}
+		}
+
+		if (questionId != null)
+		{
+			// next destination: first question of submission
+			String destination = "/" + Destinations.question + "/" + submission.getId() + "/q" + questionId;
+
+			// redirect
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+
+		// we are here because there are no questions!
+		String destination = "/" + Destinations.final_review + "/" + submission.getId();
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
@@ -1531,33 +1617,37 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void submittedGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context) throws IOException
 	{
 		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission != null)
+		if (submission == null)
 		{
-			// make sure this is a completed submission
-			if ((submission.getIsComplete() != null) && (submission.getIsComplete().booleanValue()))
-			{
-				context.put("submission", submission);
-
-				// for this assessment, we need to know how many completed submission the current use has already made
-				Integer count = assessmentService.countRemainingSubmissions(submission.getAssessment(), null);
-				context.put("remainingSubmissions", count);
-
-				// render
-				ui.render(uiSubmitted, context);
-				return;
-			}
-
-			else
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-				return;
-			}
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
 		}
 
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-		return;
+		// make sure this is a completed submission
+		if ((submission.getIsComplete() == null) || (!submission.getIsComplete().booleanValue()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+		
+		// if we have no authored message or URL, skip right to the list view
+		if ((submission.getAssessment().getSubmitMessage() == null) && (submission.getAssessment().getSubmitUrl() == null))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/list")));
+			return;
+		}
+
+		context.put("submission", submission);
+
+		// for this assessment, we need to know how many completed submission the current use has already made
+		//Integer count = assessmentService.countRemainingSubmissions(submission.getAssessment(), null);
+		//context.put("remainingSubmissions", count);
+
+		// render
+		ui.render(uiSubmitted, context);
 	}
 
 	/**
