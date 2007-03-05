@@ -503,6 +503,7 @@ public class DeliveryControllers
 									ui.newPropertyReference()
 										.setFormatDelegate(new FeedbackPropertyReference())
 										.setReference("assessment.feedbackDelivery"))))
+					.add(ui.newGap())
 					.add(
 						ui.newNavigationBar()
 							.add(
@@ -1198,6 +1199,7 @@ public class DeliveryControllers
 					ui.newInstructions()
 						.setText("submitted-final-url", ui.newUrlPropertyReference().setReference("submission.assessment.submitUrl"))
 						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.submitUrl"))))
+				.add(ui.newGap())
 				.add(
 					ui.newNavigationBar()
 						.add(
@@ -1436,6 +1438,7 @@ public class DeliveryControllers
 								.setAttachments(ui.newPropertyReference().setReference("attachment"), null)
 								.setSize(false)
 								.setTimestamp(true)))
+				.add(ui.newGap())
 				.add(
 					ui.newNavigationBar()
 						.add(
