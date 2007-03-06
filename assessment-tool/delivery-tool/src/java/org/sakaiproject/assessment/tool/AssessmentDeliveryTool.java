@@ -992,6 +992,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 			redirectToQuestion(req, res, submission);
 		}
 
+		context.put("actionTitle", messages.getString("question-header-work"));
+
 		// collect the questions (actually their answers) to put on the page
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
 
@@ -1511,6 +1513,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// yes feedback, and we are in review
 		context.put("feedback", Boolean.TRUE);
 		context.put("review", Boolean.TRUE);
+		context.put("actionTitle", messages.getString("question-header-review"));
 
 		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);

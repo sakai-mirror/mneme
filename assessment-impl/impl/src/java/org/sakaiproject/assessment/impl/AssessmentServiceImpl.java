@@ -335,7 +335,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		m_autoDdl = new Boolean(value).booleanValue();
 	}
 
-	/** How long to wait (ms) between checks for timed-out submission in the db. */
+	/** How long to wait (ms) between checks for timed-out submission in the db. 0 disables. */
 	protected long m_timeoutCheckMs = 1000L * 300L;
 
 	/**
@@ -387,7 +387,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			}
 
 			// start the checking thread
-			start();
+			if (m_timeoutCheckMs > 0)
+			{
+				start();
+			}
 
 			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60
 					+ " timout check seconds: " + m_timeoutCheckMs / 1000);
@@ -2306,6 +2309,21 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// take the first one out
 			Submission submission = (Submission) all.remove(0);
 
+			// check if this is over time limit / deadline
+			if (submission.getIsOver(asOf, 0))
+			{
+				// complete this one
+				this.completeTheSubmission(asOf, submission);
+
+				// update what we read
+				((SubmissionImpl) submission).initStatus(new Integer(1));
+				((SubmissionImpl) submission).initIsComplete(Boolean.TRUE);
+				((SubmissionImpl) submission).initSubmittedDate(asOf);
+				
+				// recache
+				cacheSubmission((SubmissionImpl) submission);
+			}
+
 			// set it's sibling count to 1 (itself), or 0 if it's not really there
 			int count = 0;
 			if (submission.getStartDate() != null)
@@ -2327,6 +2345,21 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				{
 					// take this one out
 					i.remove();
+
+					// check if this is over time limit / deadline
+					if (candidateSub.getIsOver(asOf, 0))
+					{
+						// complete this one
+						this.completeTheSubmission(asOf, candidateSub);
+
+						// update what we read
+						candidateSub.initStatus(new Integer(1));
+						candidateSub.initIsComplete(Boolean.TRUE);
+						candidateSub.initSubmittedDate(asOf);
+						
+						// recache
+						cacheSubmission(candidateSub);
+					}
 
 					// count as a sibling if not unstarted
 					count = 0;
@@ -4768,7 +4801,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						M_log.warn("run - no SessionManager.getCurrentSession, cannot set to user");
 					}
 
-					completeTheSubmission(submission);
+					completeTheSubmission(null, submission);
 				}
 			}
 			catch (Throwable e)
@@ -4909,14 +4942,16 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * Mark the submission as complete as of now.
 	 * 
+	 * @param asOf
+	 *        The effective time of the completion.
 	 * @param submission
 	 *        The submission.
 	 * @return true if it was successful, false if not.
 	 */
-	protected boolean completeTheSubmission(Submission submission)
+	protected boolean completeTheSubmission(Time asOf, Submission submission)
 	{
-		// the current time
-		Time asOf = m_timeService.newTime();
+		// the current time if not set
+		if (asOf == null) asOf = m_timeService.newTime();
 
 		if (M_log.isDebugEnabled()) M_log.debug("completeTheSubmission: submission: " + submission.getId());
 

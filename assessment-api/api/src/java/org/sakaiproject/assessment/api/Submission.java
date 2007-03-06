@@ -139,6 +139,17 @@ public interface Submission
 	Boolean getIsCompleteQuestion(AssessmentQuestion question);
 
 	/**
+	 * Check if the submission is past its time limit, retract or hard due date.
+	 * 
+	 * @param qasOf
+	 *        The effective time of the check.
+	 * @param grace
+	 *        A grace period (in ms) to extend any hard deadline or timeout.
+	 * @return TRUE if the submission is over, FALSE if not.
+	 */
+	Boolean getIsOver(Time asOf, long grace);
+
+	/**
 	 * Check if the submission may be started - the user must have permission, the submission must be a placeholder, the assessment must be open.
 	 * 
 	 * @return TRUE if the submission may be started, FALSE if not.

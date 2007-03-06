@@ -536,6 +536,7 @@ public class DeliveryControllers
 	 * review - set if we are in review mode
 	 * questionSelector - the current question selector string
 	 * finishReady - if finish is allowed to submit
+	 * actionTitle - a string to use in the header and title indicating what's going on (working on, review)
 	 * 
 	 * When decoding a response, we need in the context:
 	 * answers - a collection to get the answer id(s) selected.
@@ -544,8 +545,14 @@ public class DeliveryControllers
 	{
 		return
 			ui.newInterface()
-				.setTitle("question-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
-				.setHeader("question-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.setTitle(
+					"question-title",
+					ui.newTextPropertyReference().setReference("actionTitle"),
+					ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.setHeader(
+					"question-header",
+					ui.newTextPropertyReference().setReference("actionTitle"),
+					ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newSection()

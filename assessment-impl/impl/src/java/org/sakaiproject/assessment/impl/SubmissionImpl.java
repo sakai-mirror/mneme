@@ -474,6 +474,39 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsOver(Time asOf, long grace)
+	{
+		// if we have not been started, we are not over
+		if (getStartDate() == null) return Boolean.FALSE;
+
+		Assessment a = getAssessment();
+
+		// for timed, if the elapsed time since their start is past the time limit (considering the grace ms)
+		if ((a.getTimeLimit() != null) && (a.getTimeLimit().intValue() > 0)
+				&& ((asOf.getTime() - getStartDate().getTime()) > (a.getTimeLimit() + grace)))
+		{
+			return Boolean.TRUE;
+		}
+
+		// for past retract date
+		if ((a.getRetractDate() != null) && (asOf.getTime() > (a.getRetractDate().getTime() + grace)))
+		{
+			return Boolean.TRUE;
+		}
+
+		// for past hard due date
+		if ((a.getDueDate() != null) && ((a.getAllowLateSubmit() == null) || (!a.getAllowLateSubmit().booleanValue()))
+				&& (asOf.getTime() > (a.getDueDate().getTime() + grace)))
+		{
+			return Boolean.TRUE;
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getMayBegin()
 	{
 		// ASSSUMPTION: this will be a submission with sibling count, and it will be:
