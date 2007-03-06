@@ -230,6 +230,13 @@ public interface Submission
 	String getUserId();
 
 	/**
+	 * Compute the 'over' date for the submission - when it would be over based on time limit, retract or hard due date.
+	 * 
+	 * @return The 'over' time for the submission, or NULL if there is none.
+	 */
+	Time getWhenOver();
+
+	/**
 	 * Set the submission's answers to (a deep copy of) this list of SubmissionAnswer.
 	 * 
 	 * @param answers

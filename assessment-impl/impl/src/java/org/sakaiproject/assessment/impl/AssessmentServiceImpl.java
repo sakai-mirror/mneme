@@ -2312,14 +2312,15 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// check if this is over time limit / deadline
 			if (submission.getIsOver(asOf, 0))
 			{
-				// complete this one
-				this.completeTheSubmission(asOf, submission);
+				// complete this one, using the exact 'over' date for the final date
+				Time over = submission.getWhenOver();
+				completeTheSubmission(over, submission);
 
 				// update what we read
 				((SubmissionImpl) submission).initStatus(new Integer(1));
 				((SubmissionImpl) submission).initIsComplete(Boolean.TRUE);
-				((SubmissionImpl) submission).initSubmittedDate(asOf);
-				
+				((SubmissionImpl) submission).initSubmittedDate(over);
+
 				// recache
 				cacheSubmission((SubmissionImpl) submission);
 			}
@@ -2349,14 +2350,15 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					// check if this is over time limit / deadline
 					if (candidateSub.getIsOver(asOf, 0))
 					{
-						// complete this one
-						this.completeTheSubmission(asOf, candidateSub);
+						// complete this one, using the exact 'over' date for the final date
+						Time over = candidateSub.getWhenOver();
+						completeTheSubmission(over, candidateSub);
 
 						// update what we read
 						candidateSub.initStatus(new Integer(1));
 						candidateSub.initIsComplete(Boolean.TRUE);
-						candidateSub.initSubmittedDate(asOf);
-						
+						candidateSub.initSubmittedDate(over);
+
 						// recache
 						cacheSubmission(candidateSub);
 					}
@@ -4801,7 +4803,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						M_log.warn("run - no SessionManager.getCurrentSession, cannot set to user");
 					}
 
-					completeTheSubmission(null, submission);
+					// complete this submission, using the exact 'over' date for the final date
+					Time over = submission.getWhenOver();
+					completeTheSubmission(over, submission);
 				}
 			}
 			catch (Throwable e)
@@ -4925,6 +4929,20 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						cachedSubmission.initIsComplete(Boolean.FALSE);
 
 						rv.add(cachedSubmission);
+
+						// create or update these properties in the assessment cache
+						AssessmentImpl cachedAssessment = getCachedAssessment(publishedAssessmentId);
+						if (cachedAssessment == null)
+						{
+							// cache an empty one
+							cachedAssessment = new AssessmentImpl(service);
+							cachedAssessment.initId(publishedAssessmentId);
+							cacheAssessment(cachedAssessment);
+						}
+						cachedAssessment.initTimeLimit(timeLimit == 0 ? null : new Long(timeLimit * 1000));
+						cachedAssessment.initDueDate(dueDate);
+						cachedAssessment.initAllowLateSubmit(Boolean.valueOf(allowLate));
+						cachedAssessment.initRetractDate(retractDate);
 					}
 					return null;
 				}

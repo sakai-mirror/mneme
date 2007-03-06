@@ -173,7 +173,8 @@ public class SubmissionImpl implements Submission
 	{
 		if (getIsOver(null, 0).booleanValue())
 		{
-			service.completeTheSubmission(null, this);
+			Time over = getWhenOver();
+			service.completeTheSubmission(over, this);
 			return Boolean.TRUE;
 		}
 
@@ -490,38 +491,13 @@ public class SubmissionImpl implements Submission
 	 */
 	public Boolean getIsOver(Time asOf, long grace)
 	{
-		// if we have not been started, we are not over
-		if (getStartDate() == null) return Boolean.FALSE;
-
-		// if we are complete, we are not over
-		if ((getIsComplete() != null) && (getIsComplete().booleanValue())) return Boolean.FALSE;
+		Time over = getWhenOver();
+		if (over == null) return Boolean.FALSE;
 
 		// set the time to now if missing
 		if (asOf == null) asOf = service.m_timeService.newTime();
 
-		Assessment a = getAssessment();
-
-		// for timed, if the elapsed time since their start is past the time limit (considering the grace ms)
-		if ((a.getTimeLimit() != null) && (a.getTimeLimit().intValue() > 0)
-				&& ((asOf.getTime() - getStartDate().getTime()) > (a.getTimeLimit() + grace)))
-		{
-			return Boolean.TRUE;
-		}
-
-		// for past retract date
-		if ((a.getRetractDate() != null) && (asOf.getTime() > (a.getRetractDate().getTime() + grace)))
-		{
-			return Boolean.TRUE;
-		}
-
-		// for past hard due date
-		if ((a.getDueDate() != null) && ((a.getAllowLateSubmit() == null) || (!a.getAllowLateSubmit().booleanValue()))
-				&& (asOf.getTime() > (a.getDueDate().getTime() + grace)))
-		{
-			return Boolean.TRUE;
-		}
-
-		return Boolean.FALSE;
+		return Boolean.valueOf(asOf.getTime() > over.getTime() + grace);
 	}
 
 	/**
@@ -703,6 +679,48 @@ public class SubmissionImpl implements Submission
 		if (this.userIdStatus == PropertyStatus.unset) readMain();
 
 		return this.userId;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Time getWhenOver()
+	{
+		// if we have not been started, we are not over
+		if (getStartDate() == null) return null;
+
+		// if we are complete, we are not over
+		if ((getIsComplete() != null) && (getIsComplete().booleanValue())) return null;
+
+		Assessment a = getAssessment();
+		Time rv = null;
+
+		// for timed
+		if ((a.getTimeLimit() != null) && (a.getTimeLimit().intValue() > 0))
+		{
+			// pick up the end time
+			rv = service.m_timeService.newTime(getStartDate().getTime() + a.getTimeLimit().longValue());
+		}
+
+		// check the retract date
+		if (a.getRetractDate() != null)
+		{
+			if ((rv == null) || (a.getRetractDate().before(rv)))
+			{
+				rv = a.getReleaseDate();
+			}
+		}
+
+		// for hard due date
+		if ((a.getDueDate() != null) && ((a.getAllowLateSubmit() == null) || (!a.getAllowLateSubmit().booleanValue())))
+		{
+			if ((rv == null) || (a.getDueDate().before(rv)))
+			{
+				rv = a.getDueDate();
+			}
+		}
+
+		return rv;
 	}
 
 	/**
