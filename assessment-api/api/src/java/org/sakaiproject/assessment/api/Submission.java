@@ -33,6 +33,13 @@ import org.sakaiproject.time.api.Time;
 public interface Submission
 {
 	/**
+	 * If the submission is "over" (as defined by getIsOver()), close it. Update the submission to reflect its changed status.
+	 * 
+	 * @return TRUE if it was over and is now closed, FALSE if not.
+	 */
+	Boolean completeIfOver();
+
+	/**
 	 * Find (or create) the answer for this question.
 	 * 
 	 * @param question

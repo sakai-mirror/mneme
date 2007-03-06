@@ -74,7 +74,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our errors. */
 	enum Errors
 	{
-		invalid, invalidpost, linear, unauthorized, unexpected, unknown, upload
+		invalid, invalidpost, linear, unauthorized, unexpected, unknown, upload, over
 	}
 
 	/** Our log (commons). */
@@ -676,6 +676,13 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 				// the size (megs) that was exceeded
 				context.put("uploadMax", param);
+				break;
+			}
+
+			case over:
+			{
+				context.put("over", Boolean.TRUE);
+				break;
 			}
 		}
 
@@ -977,19 +984,28 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionSelector, String feedback,
 			Context context) throws IOException
 	{
+		Submission submission = assessmentService.idSubmission(submissionId);
+
+		if (submission == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
 		// handle our 'z' selector - redirect to the appropriate question for this submission
 		if ("z".equals(questionSelector))
 		{
-			Submission submission = assessmentService.idSubmission(submissionId);
-
-			if (submission == null)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
-			}
-
 			redirectToQuestion(req, res, submission);
+			return;
+		}
+
+		// if the submission has past a hard deadline or ran out of time, close it and tell the user
+		if (submission.completeIfOver())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.over)));
+			return;
 		}
 
 		context.put("actionTitle", messages.getString("question-header-work"));
@@ -1634,7 +1650,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
-		
+
 		// if we have no authored message or URL, skip right to the list view
 		if ((submission.getAssessment().getSubmitMessage() == null) && (submission.getAssessment().getSubmitUrl() == null))
 		{
@@ -1646,8 +1662,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 		context.put("submission", submission);
 
 		// for this assessment, we need to know how many completed submission the current use has already made
-		//Integer count = assessmentService.countRemainingSubmissions(submission.getAssessment(), null);
-		//context.put("remainingSubmissions", count);
+		// Integer count = assessmentService.countRemainingSubmissions(submission.getAssessment(), null);
+		// context.put("remainingSubmissions", count);
 
 		// render
 		ui.render(uiSubmitted, context);

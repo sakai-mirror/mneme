@@ -169,6 +169,20 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean completeIfOver()
+	{
+		if (getIsOver(null, 0).booleanValue())
+		{
+			service.completeTheSubmission(null, this);
+			return Boolean.TRUE;
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean equals(Object obj)
 	{
 		if (!(obj instanceof Submission)) return false;
@@ -478,6 +492,12 @@ public class SubmissionImpl implements Submission
 	{
 		// if we have not been started, we are not over
 		if (getStartDate() == null) return Boolean.FALSE;
+
+		// if we are complete, we are not over
+		if ((getIsComplete() != null) && (getIsComplete().booleanValue())) return Boolean.FALSE;
+
+		// set the time to now if missing
+		if (asOf == null) asOf = service.m_timeService.newTime();
 
 		Assessment a = getAssessment();
 
