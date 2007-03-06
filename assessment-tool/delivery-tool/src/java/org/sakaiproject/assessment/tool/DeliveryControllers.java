@@ -1583,6 +1583,11 @@ public class DeliveryControllers
 				.add(
 					ui.newSection()
 						.add(
+							ui.newAlert().setText("error-closed"))
+						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("closed"))))
+				.add(
+					ui.newSection()
+						.add(
 							ui.newInstructions().setText("error-recovery-test"))
 						.add(
 							ui.newNavigation()

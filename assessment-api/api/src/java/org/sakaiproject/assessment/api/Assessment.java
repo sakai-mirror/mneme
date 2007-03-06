@@ -45,8 +45,7 @@ public interface Assessment
 	/**
 	 * Access the attachment list for the assessment.
 	 * 
-	 * @return The List of Reference objects that are the attachments for the assessment, or an empty list if there are no
-	 *         attachments.
+	 * @return The List of Reference objects that are the attachments for the assessment, or an empty list if there are no attachments.
 	 */
 	List<Reference> getAttachments();
 
@@ -58,8 +57,8 @@ public interface Assessment
 	Boolean getAutoSubmit();
 
 	/**
-	 * Compute the submit closed date. This is the date the assignment is retracted, or the date it is due if late submissions are
-	 * not accepted, whichever is first.<br />
+	 * Compute the submit closed date. This is the date the assignment is retracted, or the date it is due if late submissions are not accepted,
+	 * whichever is first.<br />
 	 * 
 	 * @return The computed submit close date, or null if there is none.
 	 */
@@ -103,8 +102,8 @@ public interface Assessment
 	/**
 	 * Access the number of ms from now that the due date on this assessment will be reached.
 	 * 
-	 * @return The number of ms from now that the due date on this assessment will be reached, 0 if it has already been reached, or
-	 *         null if it has no due date.
+	 * @return The number of ms from now that the due date on this assessment will be reached, 0 if it has already been reached, or null if it has no
+	 *         due date.
 	 */
 	Long getDurationTillDue();
 
@@ -130,32 +129,29 @@ public interface Assessment
 	Boolean getFeedbackNow();
 
 	/**
-	 * Access the answer level feedback setting; controls if we should show the answer level feedback to the assessment taker as
-	 * part of feedback.
+	 * Access the answer level feedback setting; controls if we should show the answer level feedback to the assessment taker as part of feedback.
 	 * 
 	 * @return TRUE if we should show the answer level feedback as part of feedback, FALSE if not.
 	 */
 	Boolean getFeedbackShowAnswerFeedback();
 
 	/**
-	 * Access the "show correct answer" feedback setting; controls if we should show the correct answer to the assessment taker as
-	 * part of feedback.
+	 * Access the "show correct answer" feedback setting; controls if we should show the correct answer to the assessment taker as part of feedback.
 	 * 
 	 * @return TRUE if we should show the correct answer as part of feedback, FALSE if not.
 	 */
 	Boolean getFeedbackShowCorrectAnswer();
 
 	/**
-	 * Access the question level feedback setting; controls if we should show the question level feedback to the assessment taker as
-	 * part of feedback.
+	 * Access the question level feedback setting; controls if we should show the question level feedback to the assessment taker as part of feedback.
 	 * 
 	 * @return TRUE if we should show the question level feedback as part of feedback, FALSE if not.
 	 */
 	Boolean getFeedbackShowQuestionFeedback();
 
 	/**
-	 * Access the "show question score" feedback setting; controls if we should show the individual question scores to the
-	 * assessment taker as part of feedback.
+	 * Access the "show question score" feedback setting; controls if we should show the individual question scores to the assessment taker as part of
+	 * feedback.
 	 * 
 	 * @return TRUE if we should show the individual question scores as part of feedback, FALSE if not.
 	 */
@@ -197,8 +193,15 @@ public interface Assessment
 	String getId();
 
 	/**
-	 * Access the choice for which of multiple submissions should be the official graded one; either the lastest submission, or the
-	 * highest graded one.
+	 * Check if the assessment is closed - past retract or hard deadline.
+	 * 
+	 * @return TRUE if closed, FALSE if not.
+	 */
+	Boolean getIsClosed();
+
+	/**
+	 * Access the choice for which of multiple submissions should be the official graded one; either the lastest submission, or the highest graded
+	 * one.
 	 * 
 	 * @return The assessment's MultipleSubmissionSelectionPolicy, or null if we cannot find it.
 	 */
@@ -235,26 +238,25 @@ public interface Assessment
 	AssessmentQuestion getQuestion(String questionId);
 
 	/**
-	 * Access the question presentation setting which determines how many questions (one, a section's worth or all) to put on each
-	 * page of the assessment.
+	 * Access the question presentation setting which determines how many questions (one, a section's worth or all) to put on each page of the
+	 * assessment.
 	 * 
-	 * @return The question presentation setting which determines how many questions (one, a section's worth or all) to put on each
-	 *         page of the assessment.
+	 * @return The question presentation setting which determines how many questions (one, a section's worth or all) to put on each page of the
+	 *         assessment.
 	 */
 	QuestionPresentation getQuestionPresentation();
 
 	/**
-	 * Access the questions across all sections. The order will be in section order, and in each section, random order (if enabled)
-	 * based on the current user.
+	 * Access the questions across all sections. The order will be in section order, and in each section, random order (if enabled) based on the
+	 * current user.
 	 * 
-	 * @return The questions across all sections. The order will be in section order, and in each section, random order (if enabled)
-	 *         based on the current user.
+	 * @return The questions across all sections. The order will be in section order, and in each section, random order (if enabled) based on the
+	 *         current user.
 	 */
 	List<? extends AssessmentQuestion> getQuestions();
 
 	/**
-	 * Access the random access flag that controlls an assessment taker's random or linear access to the questions of the
-	 * assessment.
+	 * Access the random access flag that controlls an assessment taker's random or linear access to the questions of the assessment.
 	 * 
 	 * @return TRUE if random question access is supported, FALSE if only linear question access is supported.
 	 */
@@ -476,8 +478,7 @@ public interface Assessment
 	void setGradebookIntegration(Boolean value);
 
 	/**
-	 * Set the choice for which of multiple submissions should be the official graded one; either the lastest submission, or the
-	 * highest graded one.
+	 * Set the choice for which of multiple submissions should be the official graded one; either the lastest submission, or the highest graded one.
 	 * 
 	 * @param policy
 	 *        The assessment's MultipleSubmissionSelectionPolicy, or null to clear the policy (to the default of USE_LATEST).
@@ -493,11 +494,11 @@ public interface Assessment
 	void setNumSubmissionsAllowed(Integer count);
 
 	/**
-	 * Set the question presentation setting which determines how many questions (one, a section's worth or all) to put on each page
-	 * of the assessment.
+	 * Set the question presentation setting which determines how many questions (one, a section's worth or all) to put on each page of the
+	 * assessment.
 	 * 
-	 * @value The question presentation setting which determines how many questions (one, a section's worth or all) to put on each
-	 *        page of the assessment.
+	 * @value The question presentation setting which determines how many questions (one, a section's worth or all) to put on each page of the
+	 *        assessment.
 	 */
 	void setQuestionPresentation(QuestionPresentation value);
 

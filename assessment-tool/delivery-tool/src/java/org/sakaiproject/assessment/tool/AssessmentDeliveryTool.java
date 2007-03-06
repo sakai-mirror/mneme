@@ -74,7 +74,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our errors. */
 	enum Errors
 	{
-		invalid, invalidpost, linear, unauthorized, unexpected, unknown, upload, over
+		invalid, invalidpost, linear, unauthorized, unexpected, unknown, upload, over, closed
 	}
 
 	/** Our log (commons). */
@@ -499,34 +499,38 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void enterGet(HttpServletRequest req, HttpServletResponse res, String assessmentId, Context context) throws IOException
 	{
 		Assessment assessment = assessmentService.idAssessment(assessmentId);
-		if (assessment != null)
+		if (assessment == null)
 		{
-			// security check (submissions count / allowed check)
-			if (assessmentService.allowSubmit(assessment, null).booleanValue())
-			{
-				// collect information: the selected assessment (id the request)
-				context.put("assessment", assessment);
-
-				// for this assessment, we need to know how many completed submissions the current use has already made
-				Integer count = assessmentService.countRemainingSubmissions(assessment, null);
-				context.put("remainingSubmissions", count);
-
-				// render
-				ui.render(uiEnter, context);
-				return;
-			}
-
-			else
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-				return;
-			}
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
 		}
 
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-		return;
+		// check for closed
+		if (assessment.getIsClosed().booleanValue())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.closed)));
+			return;
+		}
+
+		// security check (submissions count / allowed check)
+		if (!assessmentService.allowSubmit(assessment, null).booleanValue())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		// collect information: the selected assessment (id the request)
+		context.put("assessment", assessment);
+
+		// for this assessment, we need to know how many completed submissions the current use has already made
+		Integer count = assessmentService.countRemainingSubmissions(assessment, null);
+		context.put("remainingSubmissions", count);
+
+		// render
+		ui.render(uiEnter, context);
 	}
 
 	/**
@@ -682,6 +686,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 			case over:
 			{
 				context.put("over", Boolean.TRUE);
+				break;
+			}
+
+			case closed:
+			{
+				context.put("closed", Boolean.TRUE);
 				break;
 			}
 		}

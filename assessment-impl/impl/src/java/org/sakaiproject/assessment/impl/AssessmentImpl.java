@@ -388,8 +388,7 @@ public class AssessmentImpl implements Assessment
 		FeedbackDelivery delivery = getFeedbackDelivery();
 		Time feedbackDate = getFeedbackDate();
 		if ((delivery == FeedbackDelivery.IMMEDIATE)
-				|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate
-						.after(this.service.m_timeService.newTime()))))))
+				|| ((delivery == FeedbackDelivery.BY_DATE) && ((feedbackDate == null) || (!(feedbackDate.after(this.service.m_timeService.newTime()))))))
 		{
 			return Boolean.TRUE;
 		}
@@ -493,6 +492,19 @@ public class AssessmentImpl implements Assessment
 	public String getId()
 	{
 		return this.id;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsClosed()
+	{
+		Time closedDate = getClosedDate();
+		if (closedDate == null) return Boolean.FALSE;
+
+		if (service.m_timeService.newTime().after(closedDate)) return Boolean.TRUE;
+
+		return Boolean.FALSE;
 	}
 
 	/**
