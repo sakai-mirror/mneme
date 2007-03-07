@@ -184,10 +184,11 @@ public class DeliveryControllers
 								.setProperty(
 									"list-format-tries",
 									ui.newPropertyReference().setReference("submission.siblingCount"),
-									ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed"))
+									ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed").setMissingText("infinite"))
 								.setTitle("list-header-tries")
 								.setCentered()
-								.setEntityIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed")), "unlimited"))
+								//.setEntityIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed")), "unlimited")
+								)
 						.addColumn(
 							ui.newPropertyColumn()
 								.setProperty(
