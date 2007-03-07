@@ -4939,7 +4939,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 							cachedAssessment.initId(publishedAssessmentId);
 							cacheAssessment(cachedAssessment);
 						}
-						cachedAssessment.initTimeLimit(timeLimit == 0 ? null : new Long(timeLimit * 1000));
+						cachedAssessment.initTimeLimit(timeLimit == 0 ? null : new Long(timeLimit));
 						cachedAssessment.initDueDate(dueDate);
 						cachedAssessment.initAllowLateSubmit(Boolean.valueOf(allowLate));
 						cachedAssessment.initRetractDate(retractDate);
