@@ -29,10 +29,12 @@ import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.assessment.api.Assessment;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
+import org.sakaiproject.assessment.api.AssessmentSubmissionStatus;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.assessment.api.SubmissionExpiration;
 import org.sakaiproject.time.api.Time;
+import org.sakaiproject.time.cover.TimeService;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -257,6 +259,66 @@ public class SubmissionImpl implements Submission
 		if (this.assessmentIdStatus == PropertyStatus.unset) readMain();
 
 		return this.service.idAssessment(this.assessmentId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentSubmissionStatus getAssessmentSubmissionStatus()
+	{
+		Time now = TimeService.newTime();
+		Assessment assessment = getAssessment();
+
+		// if not open yet...
+		if ((assessment.getReleaseDate() != null) && now.before(assessment.getReleaseDate()))
+		{
+			return AssessmentSubmissionStatus.future;
+		}
+
+		// overdue?
+		boolean overdue = (assessment.getDueDate() != null) && now.after(assessment.getDueDate())
+				&& ((assessment.getAllowLateSubmit() == null) || (!assessment.getAllowLateSubmit().booleanValue()));
+
+		// todo (not overdue)
+		if ((getStartDate() == null) && !overdue)
+		{
+			return AssessmentSubmissionStatus.ready;
+		}
+
+		// if in progress...
+		if (((getIsComplete() == null) || (!getIsComplete().booleanValue())) && (getStartDate() != null))
+		{
+			// if timed, add an alert
+			if (assessment.getTimeLimit() != null)
+			{
+				return AssessmentSubmissionStatus.inProgressAlert;
+			}
+
+			return AssessmentSubmissionStatus.inProgress;
+		}
+
+		// completed
+		if ((getIsComplete() != null) && (getIsComplete().booleanValue()))
+		{
+			// if there are fewer sibs than allowed, add the todo image as well
+			if (!overdue
+					&& (getSiblingCount() != null)
+					&& ((assessment.getNumSubmissionsAllowed() == null) || (getSiblingCount().intValue() < assessment.getNumSubmissionsAllowed()
+							.intValue())))
+			{
+				return AssessmentSubmissionStatus.completeReady;
+			}
+
+			return AssessmentSubmissionStatus.complete;
+		}
+
+		// overdue, not in progress, never completed
+		if (overdue)
+		{
+			return AssessmentSubmissionStatus.over;
+		}
+
+		return AssessmentSubmissionStatus.other;
 	}
 
 	/**
@@ -707,7 +769,7 @@ public class SubmissionImpl implements Submission
 		{
 			if ((rv == null) || (a.getRetractDate().before(rv)))
 			{
-				rv = a.getReleaseDate();
+				rv = a.getRetractDate();
 			}
 		}
 

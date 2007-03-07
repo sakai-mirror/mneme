@@ -769,57 +769,57 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Servlet request.
 	 * @param res
 	 *        Servlet response.
-	 * @param sort
+	 * @param sortCode
 	 *        The sort parameter.
 	 * @param context
 	 *        UiContext.
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void list2Get(HttpServletRequest req, HttpServletResponse res, String sort, Context context) throws IOException
+	protected void list2Get(HttpServletRequest req, HttpServletResponse res, String sortCode, Context context) throws IOException
 	{
 		// SORT: 0|1|2 A|D - 2 chars, column | direction
-		if ((sort != null) && (sort.length() != 2))
+		if ((sortCode != null) && (sortCode.length() != 2))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
 
-		AssessmentService.GetAvailableAssessmentsSort assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.title_a;
-		if (sort != null)
+		AssessmentService.GetUserContextSubmissionsSort sort = AssessmentService.GetUserContextSubmissionsSort.title_a;
+		if (sortCode != null)
 		{
-			context.put("sort_column", sort.charAt(0));
-			context.put("sort_direction", sort.charAt(1));
+			context.put("sort_column", sortCode.charAt(0));
+			context.put("sort_direction", sortCode.charAt(1));
 
 			// 0 is title
-			if ((sort.charAt(0) == '0') && (sort.charAt(1) == 'A'))
+			if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
 			{
-				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.title_a;
+				sort = AssessmentService.GetUserContextSubmissionsSort.title_a;
 			}
-			else if ((sort.charAt(0) == '0') && (sort.charAt(1) == 'D'))
+			else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
 			{
-				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.title_d;
+				sort = AssessmentService.GetUserContextSubmissionsSort.title_d;
 			}
 
 			// 1 is status
-			else if ((sort.charAt(0) == '1') && (sort.charAt(1) == 'A'))
+			else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
 			{
-				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.dueDate_a;
+				sort = AssessmentService.GetUserContextSubmissionsSort.status_a;
 			}
-			else if ((sort.charAt(0) == '1') && (sort.charAt(1) == 'D'))
+			else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
 			{
-				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.dueDate_d;
+				sort = AssessmentService.GetUserContextSubmissionsSort.status_d;
 			}
 
 			// 2 is due date
-			else if ((sort.charAt(0) == '2') && (sort.charAt(1) == 'A'))
+			else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
 			{
-				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.dueDate_a;
+				sort = AssessmentService.GetUserContextSubmissionsSort.dueDate_a;
 			}
-			else if ((sort.charAt(0) == '2') && (sort.charAt(1) == 'D'))
+			else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
 			{
-				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.dueDate_d;
+				sort = AssessmentService.GetUserContextSubmissionsSort.dueDate_d;
 			}
 
 			else
@@ -830,14 +830,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 		}
 
-		if (sort == null)
+		if (sortCode == null)
 		{
 			context.put("sort_column", '2');
 			context.put("sort_direction", 'A');
 		}
 
 		// collect information: submissions / assessments
-		List submissions = assessmentService.getUserContextSubmissions(toolManager.getCurrentPlacement().getContext(), null);
+		List submissions = assessmentService.getUserContextSubmissions(toolManager.getCurrentPlacement().getContext(), null, sort);
 		context.put("submissions", submissions);
 
 		// render

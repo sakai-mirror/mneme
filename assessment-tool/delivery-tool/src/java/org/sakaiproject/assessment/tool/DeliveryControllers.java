@@ -25,6 +25,7 @@ import org.sakaiproject.assessment.api.Assessment;
 import org.sakaiproject.assessment.api.AssessmentAnswer;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
+import org.sakaiproject.assessment.api.AssessmentSubmissionStatus;
 import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.MultipleSubmissionSelectionPolicy;
 import org.sakaiproject.assessment.api.QuestionPresentation;
@@ -2234,36 +2235,25 @@ public class DeliveryControllers
 			if (!(o instanceof Submission)) return value.toString();
 			Submission submission = (Submission) o;
 
-			Assessment assessment = submission.getAssessment();
-			if (assessment == null) return value.toString();
+			AssessmentSubmissionStatus status = submission.getAssessmentSubmissionStatus();
 
-			Time now = TimeService.newTime();
-
-			// if not open yet...
-			if ((assessment.getReleaseDate() != null) && now.before(assessment.getReleaseDate()))
+			switch (status)
 			{
-				return "<img src=\"" + context.get("sakai.return.url") + "/icons/future.gif\" alt=\""
-						+ context.getMessages().getString("list-key-future") + "\" /><br /><span style=\"font-size:smaller\">"
-						+ context.getMessages().getString("list-key-future") + "</span>";
-			}
+				case future:
+				{
+					return "<img src=\"" + context.get("sakai.return.url") + "/icons/future.gif\" alt=\""
+							+ context.getMessages().getString("list-key-future") + "\" /><br /><span style=\"font-size:smaller\">"
+							+ context.getMessages().getString("list-key-future") + "</span>";
+				}
 
-			// overdue?
-			boolean overdue = (assessment.getDueDate() != null) && now.after(assessment.getDueDate())
-					&& ((assessment.getAllowLateSubmit() == null) || (!assessment.getAllowLateSubmit().booleanValue()));
+				case ready:
+				{
+					return "<img src=\"" + context.get("sakai.return.url") + "/icons/begin.gif\" alt=\""
+							+ context.getMessages().getString("list-key-todo") + "\" /><br /><span style=\"font-size:smaller\">"
+							+ context.getMessages().getString("list-key-todo") + "</span>";
+				}
 
-			// todo (not overdue)
-			if ((submission.getStartDate() == null) && !overdue)
-			{
-				return "<img src=\"" + context.get("sakai.return.url") + "/icons/begin.gif\" alt=\""
-						+ context.getMessages().getString("list-key-todo") + "\" /><br /><span style=\"font-size:smaller\">"
-						+ context.getMessages().getString("list-key-todo") + "</span>";
-			}
-
-			// if in progress...
-			if (((submission.getIsComplete() == null) || (!submission.getIsComplete())) && (submission.getStartDate() != null))
-			{
-				// if timed, add an alert
-				if (assessment.getTimeLimit() != null)
+				case inProgressAlert:
 				{
 					return "<img src=\"" + context.get("sakai.return.url") + "/icons/exit.gif\" alt=\""
 							+ context.getMessages().getString("list-key-inprogress") + "\" />" + "<img src=\"" + context.get("sakai.return.url")
@@ -2271,18 +2261,14 @@ public class DeliveryControllers
 							+ "<br /><span style=\"font-size:smaller\">" + context.getMessages().getString("list-key-inprogress-urgent") + "</span>";
 				}
 
-				return "<img src=\"" + context.get("sakai.return.url") + "/icons/exit.gif\" alt=\""
-						+ context.getMessages().getString("list-key-inprogress") + "\" /><br /><span style=\"font-size:smaller\">"
-						+ context.getMessages().getString("list-key-inprogress") + "</span>";
-			}
+				case inProgress:
+				{
+					return "<img src=\"" + context.get("sakai.return.url") + "/icons/exit.gif\" alt=\""
+							+ context.getMessages().getString("list-key-inprogress") + "\" /><br /><span style=\"font-size:smaller\">"
+							+ context.getMessages().getString("list-key-inprogress") + "</span>";
+				}
 
-			// completed
-			if ((submission.getIsComplete() != null) && (submission.getIsComplete()))
-			{
-				// if there are fewer sibs than allowed, add the todo image as well
-				if (!overdue
-						&& ((assessment.getNumSubmissionsAllowed() == null) || (submission.getSiblingCount().intValue() < assessment
-								.getNumSubmissionsAllowed().intValue())))
+				case completeReady:
 				{
 					return "<img src=\"" + context.get("sakai.return.url") + "/icons/finish.gif\" alt=\""
 							+ context.getMessages().getString("list-key-complete") + "\" />" + "<img src=\"" + context.get("sakai.return.url")
@@ -2290,17 +2276,18 @@ public class DeliveryControllers
 							+ "<br /><span style=\"font-size:smaller\">" + context.getMessages().getString("list-key-complete-repeat") + "</span>";
 				}
 
-				return "<img src=\"" + context.get("sakai.return.url") + "/icons/finish.gif\" alt=\""
-						+ context.getMessages().getString("list-key-complete") + "\" /><br /><span style=\"font-size:smaller\">"
-						+ context.getMessages().getString("list-key-complete") + "</span>";
-			}
-
-			// overdue, not in progress, never completed
-			if (overdue)
-			{
-				return "<img src=\"" + context.get("sakai.return.url") + "/icons/cancel.gif\" alt=\""
-						+ context.getMessages().getString("list-key-overdue") + "\" /><br /><span style=\"font-size:smaller\">"
-						+ context.getMessages().getString("list-key-overdue") + "</span>";
+				case complete:
+				{
+					return "<img src=\"" + context.get("sakai.return.url") + "/icons/finish.gif\" alt=\""
+							+ context.getMessages().getString("list-key-complete") + "\" /><br /><span style=\"font-size:smaller\">"
+							+ context.getMessages().getString("list-key-complete") + "</span>";
+				}
+				case over:
+				{
+					return "<img src=\"" + context.get("sakai.return.url") + "/icons/cancel.gif\" alt=\""
+							+ context.getMessages().getString("list-key-overdue") + "\" /><br /><span style=\"font-size:smaller\">"
+							+ context.getMessages().getString("list-key-overdue") + "</span>";
+				}
 			}
 
 			return null;

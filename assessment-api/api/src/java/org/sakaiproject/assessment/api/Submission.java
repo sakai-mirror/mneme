@@ -70,6 +70,13 @@ public interface Submission
 	Assessment getAssessment();
 
 	/**
+	 * Get the assessment submission status for a user's submission to an assessment (the submissions's user and assessment)
+	 * 
+	 * @return The assessment submission status for a user's submission to an assessment.
+	 */
+	AssessmentSubmissionStatus getAssessmentSubmissionStatus();
+
+	/**
 	 * Access the confirmation string for this submission.
 	 * 
 	 * @return The confirmation string for this submission.

@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -2152,7 +2153,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Submission> getUserContextSubmissions(final String context, String userId)
+	public List<Submission> getUserContextSubmissions(final String context, String userId, GetUserContextSubmissionsSort sort)
 	{
 		// if null, get the current user id
 		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
@@ -2163,6 +2164,54 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		if (M_log.isDebugEnabled()) M_log.debug("getUserContextSubmissions: context: " + context + " userId: " + userId);
 
+		// figure sort
+		String sortSql = null;
+		if (sort == null)
+		{
+			sortSql = "P.TITLE ASC";
+		}
+		else
+		{
+			switch (sort)
+			{
+				case title_a:
+				{
+					sortSql = "P.TITLE ASC";
+					break;
+				}
+
+				case title_d:
+				{
+					sortSql = "P.TITLE DESC";
+					break;
+				}
+
+				case dueDate_a:
+				{
+					sortSql = "PAC.DUEDATE ASC, P.TITLE ASC";
+					break;
+				}
+
+				case dueDate_d:
+				{
+					sortSql = "PAC.DUEDATE DESC, P.TITLE DESC";
+					break;
+				}
+
+				case status_a:
+				{
+					sortSql = "P.TITLE ASC";
+					break;
+				}
+
+				case status_d:
+				{
+					sortSql = "P.TITLE DESC";
+					break;
+				}
+			}
+		}
+
 		String statement = "SELECT AG.ASSESSMENTGRADINGID, P.ID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
 				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE, PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, AG.FORGRADE,"
 				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING, PAC.RETRACTDATE"
@@ -2171,7 +2220,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID AND (PAC.RETRACTDATE IS NULL OR ? < PAC.RETRACTDATE)"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON P.ID = PE.ASSESSMENTID"
-				+ " LEFT OUTER JOIN SAM_ASSESSMENTGRADING_T AG ON P.ID = AG.PUBLISHEDASSESSMENTID AND AG.AGENTID = ?";
+				+ " LEFT OUTER JOIN SAM_ASSESSMENTGRADING_T AG ON P.ID = AG.PUBLISHEDASSESSMENTID AND AG.AGENTID = ?" + " ORDER BY " + sortSql;
 
 		Object[] fields = new Object[4];
 		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
@@ -2429,7 +2478,113 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		}
 
 		// id the selected submissions
+
+		// if sorting by status, do that sort
+		if (sort == GetUserContextSubmissionsSort.status_a || sort == GetUserContextSubmissionsSort.status_d)
+		{
+			official = sortByStatus(sort, official);
+		}
+
 		return official;
+	}
+
+	/**
+	 * Sort a list of submissions by their status.
+	 * 
+	 * @param sort
+	 *        The sort (status_a or status_d)
+	 * @param submissions
+	 *        The submission list to sort.
+	 * @return The sorted list of submissions.
+	 */
+	protected List<Submission> sortByStatus(GetUserContextSubmissionsSort sort, List<Submission> submissions)
+	{
+		// the easy cases
+		if ((submissions == null) || (submissions.size() < 2)) return submissions;
+
+		List<Submission> rv = new ArrayList<Submission>();
+
+		// sort order (a) other, future, over, complete, completeReady, ready, inProgress, inProgressAlert
+		List<Submission> other = new ArrayList<Submission>();
+		List<Submission> future = new ArrayList<Submission>();
+		List<Submission> over = new ArrayList<Submission>();
+		List<Submission> complete = new ArrayList<Submission>();
+		List<Submission> completeReady = new ArrayList<Submission>();
+		List<Submission> ready = new ArrayList<Submission>();
+		List<Submission> inProgress = new ArrayList<Submission>();
+		List<Submission> inProgressAlert = new ArrayList<Submission>();
+
+		for (Submission s : submissions)
+		{
+			switch (s.getAssessmentSubmissionStatus())
+			{
+				case other:
+				{
+					other.add(s);
+					break;
+				}
+
+				case future:
+				{
+					future.add(s);
+					break;
+				}
+
+				case over:
+				{
+					over.add(s);
+					break;
+				}
+
+				case complete:
+				{
+					complete.add(s);
+					break;
+				}
+
+				case completeReady:
+				{
+					completeReady.add(s);
+					break;
+				}
+
+				case ready:
+				{
+					ready.add(s);
+					break;
+				}
+
+				case inProgress:
+				{
+					inProgress.add(s);
+					break;
+				}
+
+				case inProgressAlert:
+				{
+					inProgressAlert.add(s);
+					break;
+				}
+			}
+		}
+
+		// order ascending
+		rv.addAll(other);
+		rv.addAll(future);
+		rv.addAll(over);
+		rv.addAll(complete);
+		rv.addAll(completeReady);
+		rv.addAll(ready);
+		rv.addAll(inProgress);
+		rv.addAll(inProgressAlert);
+
+		// reverse if descending
+		if (sort == GetUserContextSubmissionsSort.status_d)
+		{
+			Collections.reverse(rv);
+		}
+
+		return rv;
 	}
 
 	/**
