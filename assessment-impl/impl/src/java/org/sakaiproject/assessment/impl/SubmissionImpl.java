@@ -258,7 +258,12 @@ public class SubmissionImpl implements Submission
 		// read the basic info if this property has not yet been set
 		if (this.assessmentIdStatus == PropertyStatus.unset) readMain();
 
-		return this.service.idAssessment(this.assessmentId);
+		AssessmentImpl assessment = (AssessmentImpl) this.service.idAssessment(this.assessmentId);
+		
+		// set the submision context
+		assessment.initSubmissionContext(this);
+
+		return assessment;
 	}
 
 	/**

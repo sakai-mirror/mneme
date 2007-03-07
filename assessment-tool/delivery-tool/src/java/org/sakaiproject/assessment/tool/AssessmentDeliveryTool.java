@@ -1011,7 +1011,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 
 		// if the submission has past a hard deadline or ran out of time, close it and tell the user
-		if (submission.completeIfOver())
+		if (submission.completeIfOver().booleanValue())
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.over)));

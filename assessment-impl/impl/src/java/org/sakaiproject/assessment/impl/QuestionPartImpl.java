@@ -144,7 +144,7 @@ public class QuestionPartImpl implements QuestionPart
 			}
 
 			// set the seed based on the current user id and the question id (question id, not part id, so that each part's answers randomize the same within the question -ggolden)
-			long seed = this.question.section.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode() + this.question.id.hashCode();
+			long seed = (this.question.section.assessment.service.m_sessionManager.getCurrentSessionUserId() + this.question.id).hashCode();
 
 			// mix up the answers
 			Collections.shuffle(rv, new Random(seed));

@@ -307,6 +307,16 @@ public interface Assessment
 	AssessmentStatus getStatus();
 
 	/**
+	 * Access the submission that is referencing this assessment (so we can answer submission specific questions like question order).
+	 * <p>
+	 * Note: this will be null unless the assessment is accessed throught Submission.getAssessment().
+	 * </p>
+	 * 
+	 * @return The submission, or null if there is none.
+	 */
+	Submission getSubmissionContext();
+
+	/**
 	 * Access the rich-text / html message to display when submitted.
 	 * 
 	 * @return The rich-text / html message to display when submitted.

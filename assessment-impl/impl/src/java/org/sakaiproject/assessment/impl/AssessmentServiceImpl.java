@@ -758,9 +758,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		}
 
 		// get the sections
-		String statement = "SELECT P.SECTIONID, P.TITLE, P.DESCRIPTION, SMD1.ENTRY, SMD2.ENTRY " + " FROM SAM_PUBLISHEDSECTION_T P"
+		String statement = "SELECT P.SECTIONID, P.TITLE, P.DESCRIPTION, SMD1.ENTRY, SMD2.ENTRY, SMD3.ENTRY " + " FROM SAM_PUBLISHEDSECTION_T P"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD1 ON P.SECTIONID = SMD1.SECTIONID AND SMD1.LABEL = 'QUESTIONS_ORDERING'"
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD2 ON P.SECTIONID = SMD2.SECTIONID AND SMD2.LABEL = 'NUM_QUESTIONS_DRAWN'"
+				+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD3 ON P.SECTIONID = SMD3.SECTIONID AND SMD3.LABEL = 'RANDOMIZATION_TYPE'"
 				+ " WHERE P.ASSESSMENTID = ? ORDER BY P.SEQUENCE ASC";
 		Object[] fields = new Object[1];
 		fields[0] = assessment.getId();
@@ -776,6 +777,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					String description = result.getString(3);
 					int questionOrdering = result.getInt(4);
 					int numQuestionsDrawn = result.getInt(5);
+					int randomizationType = result.getInt(6);
 
 					// adjust the questionOrdering - if we are doing draw from pool limit, we should also randomize
 					if (numQuestionsDrawn != 0) questionOrdering = 2;
@@ -787,6 +789,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					section.setDescription(description);
 					section.setRandomQuestionOrder((questionOrdering == 2) ? Boolean.TRUE : Boolean.FALSE);
 					section.setQuestionLimit(numQuestionsDrawn > 0 ? new Integer(numQuestionsDrawn) : null);
+					if (randomizationType != 1) section.randomizeOnlyByUser = Boolean.TRUE;
 
 					// put the section into the assessment
 					section.initAssement(assessment);

@@ -70,8 +70,7 @@ public class AssessmentSectionImpl implements AssessmentSection
 		{
 			if (section.getAssessment() == null) return true;
 
-			if (section.equals(section.getAssessment().getSections().get(section.getAssessment().getSections().size() - 1)))
-				return true;
+			if (section.equals(section.getAssessment().getSections().get(section.getAssessment().getSections().size() - 1))) return true;
 
 			return false;
 		}
@@ -133,6 +132,8 @@ public class AssessmentSectionImpl implements AssessmentSection
 
 	protected List<AssessmentQuestionImpl> questions = new ArrayList<AssessmentQuestionImpl>();
 
+	protected Boolean randomizeOnlyByUser = Boolean.FALSE;
+
 	protected Boolean randomQuestionOrdering = null;
 
 	protected String title = null;
@@ -156,6 +157,7 @@ public class AssessmentSectionImpl implements AssessmentSection
 		this.randomQuestionOrdering = other.randomQuestionOrdering;
 		this.questionLimit = other.questionLimit;
 		this.title = other.title;
+		this.randomizeOnlyByUser = other.randomizeOnlyByUser;
 		setQuestions(other.questions);
 	}
 
@@ -295,11 +297,28 @@ public class AssessmentSectionImpl implements AssessmentSection
 		// copy the questions
 		List<AssessmentQuestionImpl> rv = new ArrayList<AssessmentQuestionImpl>(this.questions);
 
-		// randomize if needed
-		if ((this.randomQuestionOrdering != null) && (this.randomQuestionOrdering.booleanValue()))
+		// randomize if needed (only if we are in a submission context)
+		if ((this.randomQuestionOrdering != null) && (this.randomQuestionOrdering.booleanValue()) && (this.assessment.getSubmissionContext() != null))
 		{
-			// set the seed based on the current user id
-			long seed = this.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode();
+			long seed = 0;
+
+			// for Samigo, we still need to support the user id-only mode
+			if (randomizeOnlyByUser.booleanValue())
+			{
+				seed = this.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode();
+			}
+
+			else
+			{
+				// set the seed based on the id of the submission context (if any),
+				// so each user's submission to any assessment has a unique ordering,
+				// and the section's id, so the randomization of questions in each section is not the same
+				// TODO: after we are done with Samigo compatibility, we can do it this way, not assuming our ids are numeric:
+				// long seed = (this.assessment.getSubmissionContext().getId() + this.id).hashCode();
+
+				// Samigo does it this way:
+				seed = Long.valueOf(this.assessment.getSubmissionContext().getId()) + Long.valueOf(this.id);
+			}
 
 			// mix up the questions
 			Collections.shuffle(rv, new Random(seed));

@@ -33,13 +33,14 @@ import org.sakaiproject.assessment.api.AssessmentStatus;
 import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.MultipleSubmissionSelectionPolicy;
 import org.sakaiproject.assessment.api.QuestionPresentation;
+import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.cover.EntityManager;
 import org.sakaiproject.time.api.Time;
 
 /**
  * <p>
- * AssessmentImpl is ...
+ * AssessmentImpl implements Assessment
  * </p>
  */
 public class AssessmentImpl implements Assessment
@@ -161,6 +162,8 @@ public class AssessmentImpl implements Assessment
 	protected AssessmentStatus status = null;
 
 	protected PropertyStatus statusStatus = PropertyStatus.unset;
+
+	protected transient Submission submissionContext = null;
 
 	protected String submitMessage = null;
 
@@ -681,6 +684,14 @@ public class AssessmentImpl implements Assessment
 		if (this.statusStatus == PropertyStatus.unset) readMain();
 
 		return this.status;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Submission getSubmissionContext()
+	{
+		return this.submissionContext;
 	}
 
 	/**
@@ -1350,6 +1361,17 @@ public class AssessmentImpl implements Assessment
 	{
 		this.status = status;
 		this.statusStatus = PropertyStatus.inited;
+	}
+
+	/**
+	 * Initialize the submission context.
+	 * 
+	 * @param submission
+	 *        The submission context.
+	 */
+	protected void initSubmissionContext(Submission submission)
+	{
+		this.submissionContext = submission;
 	}
 
 	/**
