@@ -194,6 +194,14 @@ public interface Submission
 	Boolean getMayReview();
 
 	/**
+	 * Check if the submission may be reviewed at some later point - the user must be the submission user, and the submission must be complete and not from a retracted
+	 * assessment, and the assessment must be set to eventually allow review.
+	 * 
+	 * @return TRUE if the submission may be reviewed later, FALSE if not.
+	 */
+	Boolean getMayReviewLater();
+
+	/**
 	 * Get the total count of submissions, including this one, to this same assignment from the same user. May not be known
 	 * 
 	 * @return The total count of submissions to the assignment by the user, or NULL if not known.

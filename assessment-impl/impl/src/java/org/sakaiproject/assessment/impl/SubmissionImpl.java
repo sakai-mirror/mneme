@@ -30,6 +30,7 @@ import org.sakaiproject.assessment.api.Assessment;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentSubmissionStatus;
+import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
 import org.sakaiproject.assessment.api.SubmissionExpiration;
@@ -659,6 +660,32 @@ public class SubmissionImpl implements Submission
 		// not retracted
 		if ((getAssessment().getRetractDate() != null) && (this.service.m_timeService.newTime().after(getAssessment().getRetractDate())))
 			return Boolean.FALSE;
+
+		// assessment feedback (i.e. review) enabled
+		if (!getAssessment().getFeedbackNow().booleanValue()) return Boolean.FALSE;
+
+		// TODO: permission?
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getMayReviewLater()
+	{
+		// same user
+		if (!this.service.m_sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
+
+		// submission complete
+		if ((this.getIsComplete() == null) || (!getIsComplete().booleanValue())) return Boolean.FALSE;
+
+		// not retracted
+		if ((getAssessment().getRetractDate() != null) && (this.service.m_timeService.newTime().after(getAssessment().getRetractDate())))
+			return Boolean.FALSE;
+
+		// assessment not set to no review
+		if (getAssessment().getFeedbackDelivery() == FeedbackDelivery.NONE) return Boolean.FALSE;
 
 		// TODO: permission?
 

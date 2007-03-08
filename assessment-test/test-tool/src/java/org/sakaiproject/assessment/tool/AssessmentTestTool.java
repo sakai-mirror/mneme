@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006 The Sakai Foundation.
+ * Copyright (c) 2006, 2007 The Sakai Foundation.
  * 
  * Licensed under the Educational Community License, Version 1.0 (the "License"); 
  * you may not use this file except in compliance with the License. 
@@ -169,11 +169,8 @@ public class AssessmentTestTool extends HttpServlet
 	protected IdManager idManager = null;
 
 	/** Lables used for answers. */
-	protected String[] labels =
-	{
-			"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X",
-			"Y", "Z"
-	};
+	protected String[] labels = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W",
+			"X", "Y", "Z"};
 
 	/** Our self-injected security service reference. */
 	protected SecurityService securityService = null;
@@ -553,7 +550,6 @@ public class AssessmentTestTool extends HttpServlet
 		a.setFeedbackShowCorrectAnswer(Boolean.TRUE);
 		a.setFeedbackShowQuestionFeedback(Boolean.TRUE);
 		a.setFeedbackShowQuestionScore(Boolean.TRUE);
-		a.setFeedbackShowScore(Boolean.TRUE);
 		a.setFeedbackShowStatistics(Boolean.TRUE);
 		a.setNumSubmissionsAllowed(null);
 		a.setRandomAccess(Boolean.TRUE);
@@ -570,22 +566,13 @@ public class AssessmentTestTool extends HttpServlet
 			i++;
 			if (i > numQuestions) break;
 
-			String[] answers =
-			{
-					"a", "b", "c", "d"
-			};
-			String[] feedbacks =
-			{
-					"aaa", "bbb", "ccc", "ddd"
-			};
+			String[] answers = {"a", "b", "c", "d"};
+			String[] feedbacks = {"aaa", "bbb", "ccc", "ddd"};
 			generateMultipleChoice(s, true, 10, "question " + i, "yes!", "well, not quite", answers, 0, feedbacks, true);
 
 			i++;
 			if (i > numQuestions) break;
-			Boolean[] corrects =
-			{
-					Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE
-			};
+			Boolean[] corrects = {Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE};
 			generateMultipleCorrect(s, true, 10, "question " + i, "got it!", "try again", answers, corrects, feedbacks, true);
 
 			i++;
@@ -598,38 +585,20 @@ public class AssessmentTestTool extends HttpServlet
 
 			i++;
 			if (i > numQuestions) break;
-			String[] parts =
-			{
-					"red", "blue"
-			};
+			String[] parts = {"red", "blue"};
 			generateFillIn(s, "roses are {}, violets are {}", 10, "that is correct", "that is not correct", parts, false, false);
 
 			i++;
 			if (i > numQuestions) break;
-			String[] parts2 =
-			{
-				"9"
-			};
+			String[] parts2 = {"9"};
 			generateNumeric(s, "3*3={}", 10, "Oui!", "Non :-(", parts2);
 
 			i++;
 			if (i > numQuestions) break;
-			String[] choices =
-			{
-					"choice one", "choice two", "choice three", "choice four"
-			};
-			String[] matches =
-			{
-					"match one", "match two", "match three", "match four"
-			};
-			String[] corrects2 =
-			{
-					"correct one", "correct two", "correct three", "correct four"
-			};
-			String[] incorrects2 =
-			{
-					"incorrect one", "incorrect two", "incorrect three", "incorrect four"
-			};
+			String[] choices = {"choice one", "choice two", "choice three", "choice four"};
+			String[] matches = {"match one", "match two", "match three", "match four"};
+			String[] corrects2 = {"correct one", "correct two", "correct three", "correct four"};
+			String[] incorrects2 = {"incorrect one", "incorrect two", "incorrect three", "incorrect four"};
 			generateMatch(s, 10, "match these", "correct", "incorrect", choices, matches, corrects2, incorrects2);
 		}
 
@@ -641,8 +610,7 @@ public class AssessmentTestTool extends HttpServlet
 	 * 
 	 * @return The essay question.
 	 */
-	protected AssessmentQuestion generateEssay(AssessmentSection section, String title, float points, String feedback,
-			String modelAnswer)
+	protected AssessmentQuestion generateEssay(AssessmentSection section, String title, float points, String feedback, String modelAnswer)
 	{
 		AssessmentQuestion question = assessmentService.newQuestion(section);
 
@@ -711,10 +679,7 @@ public class AssessmentTestTool extends HttpServlet
 		question.setFeedbackIncorrect(incorrectFeedback);
 		question.setInstructions(title);
 
-		String[] labels =
-		{
-				"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"
-		};
+		String[] labels = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"};
 
 		// one part for each choice
 		for (int c = 0; c < choices.length; c++)
@@ -742,9 +707,8 @@ public class AssessmentTestTool extends HttpServlet
 	 * 
 	 * @return The multiple choice question.
 	 */
-	protected AssessmentQuestion generateMultipleChoice(AssessmentSection section, boolean requireRational, float points,
-			String title, String correctFeedback, String incorrectFeedback, String[] answers, int correctAnswerIndex,
-			String[] feedbacks, boolean randomize)
+	protected AssessmentQuestion generateMultipleChoice(AssessmentSection section, boolean requireRational, float points, String title,
+			String correctFeedback, String incorrectFeedback, String[] answers, int correctAnswerIndex, String[] feedbacks, boolean randomize)
 	{
 		AssessmentQuestion question = assessmentService.newQuestion(section);
 
@@ -759,10 +723,7 @@ public class AssessmentTestTool extends HttpServlet
 		QuestionPart part = assessmentService.newQuestionPart(question);
 		part.setTitle(title);
 
-		String[] labels =
-		{
-				"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"
-		};
+		String[] labels = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"};
 
 		// answers
 		for (int i = 0; i < answers.length; i++)
@@ -782,9 +743,8 @@ public class AssessmentTestTool extends HttpServlet
 	 * 
 	 * @return The multiple choice / multiple correct question.
 	 */
-	protected AssessmentQuestion generateMultipleCorrect(AssessmentSection section, boolean requireRational, float points,
-			String title, String correctFeedback, String incorrectFeedback, String[] answers, Boolean[] corrects,
-			String[] feedbacks, boolean randomize)
+	protected AssessmentQuestion generateMultipleCorrect(AssessmentSection section, boolean requireRational, float points, String title,
+			String correctFeedback, String incorrectFeedback, String[] answers, Boolean[] corrects, String[] feedbacks, boolean randomize)
 	{
 		AssessmentQuestion question = assessmentService.newQuestion(section);
 
@@ -799,10 +759,7 @@ public class AssessmentTestTool extends HttpServlet
 		QuestionPart part = assessmentService.newQuestionPart(question);
 		part.setTitle(title);
 
-		String[] labels =
-		{
-				"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"
-		};
+		String[] labels = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"};
 
 		// answers
 		for (int i = 0; i < answers.length; i++)

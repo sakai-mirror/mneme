@@ -695,7 +695,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					assessment.initFeedbackDate(feedbackDate);
 					assessment.initFeedbackDelivery(delivery);
 					assessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
-					assessment.initFeedbackShowScore(Boolean.valueOf(showStudentScore));
+					//assessment.initFeedbackShowScore(Boolean.valueOf(showStudentScore));
 					assessment.initMultipleSubmissionSelectionPolicy(mssPolicy);
 					assessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
 					assessment.initStatus(status);
@@ -1741,10 +1741,37 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		return count;
 	}
 
+	protected enum GetAvailableAssessmentsSort
+	{
+		dueDate_a, dueDate_d, title_a, title_d
+	}
+
+	protected enum GetOfficialSubmissionsSort
+	{
+		feedbackDate_a, feedbackDate_d, score_a, score_d, submittedDate_a, submittedDate_d, time_a, time_d, title_a, title_d
+	}
+
 	/**
-	 * {@inheritDoc}
+	 * Find the assessments that are available for taking in this context by this user. Consider:
+	 * <ul>
+	 * <li>published assessments</li>
+	 * <li>assessments in this context</li>
+	 * <li>assessments this user has permission to take</li>
+	 * <li>assessments that are released as of the time specified and not yet retracted</li>
+	 * <li>assessments that, based on the due date and late submission policy, still can be submitted to</li>
+	 * <li>assessments that, based on their re-submit policy and count, and this user's count of submissions, can be submitted to again by this user</li>
+	 * <li>(assessments that accept late submissions and are past due date that the use has submitted to already are not included)</li>
+	 * </ul>
+	 * 
+	 * @param context
+	 *        The context to use.
+	 * @param userId
+	 *        The user id - if null, use the current user.
+	 * @param sort
+	 *        The sort for the return List (title_a if null).
+	 * @return A List<Assessment> of the assessments that qualify, sorted, or an empty collection if none do.
 	 */
-	public List<Assessment> getAvailableAssessments(final String context, String userId, GetAvailableAssessmentsSort sort)
+	protected List<Assessment> getAvailableAssessments(final String context, String userId, GetAvailableAssessmentsSort sort)
 	{
 		// if null, get the current user id
 		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
@@ -1893,9 +1920,24 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Find the submissions to assignments in this context made by this user. Consider:
+	 * <ul>
+	 * <li>published assessments</li>
+	 * <li>assessments in this context</li>
+	 * <li>assessments this user can submit to and have submitted to</li>
+	 * <li>the one (of many for this user) submission that will be the official (graded) (depending on the assessment settings, and submission time
+	 * and score)</li>
+	 * </ul>
+	 * 
+	 * @param context
+	 *        The context to use.
+	 * @param userId
+	 *        The user id - if null, use the current user.
+	 * @param sort
+	 *        The sort for the return list (title_a if null).
+	 * @return A List<Submission> of the submissions that are the offical submissions for assessments in the context by this user, sorted.
 	 */
-	public List<Submission> getOfficialSubmissions(final String context, String userId, GetOfficialSubmissionsSort sort)
+	protected List<Submission> getOfficialSubmissions(final String context, String userId, GetOfficialSubmissionsSort sort)
 	{
 		// if null, get the current user id
 		if (userId == null) userId = m_sessionManager.getCurrentSessionUserId();
@@ -2086,7 +2128,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					cachedAssessment.initFeedbackDate(feedbackDate);
 					cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
 					cachedAssessment.initFeedbackDelivery(feedbackDelivery);
-					cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
+					//cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
 					cachedAssessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
 					cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
 
@@ -2335,7 +2377,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					cachedAssessment.initFeedbackDate(feedbackDate);
 					cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
 					cachedAssessment.initFeedbackDelivery(feedbackDelivery);
-					cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
+					//cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
 					cachedAssessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
 					cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
 					cachedAssessment.initReleaseDate(releaseDate);
@@ -2945,8 +2987,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			fields[5] = ((assessment.getFeedbackShowCorrectAnswer() == null) || (!assessment.getFeedbackShowCorrectAnswer().booleanValue())) ? new Integer(
 					0)
 					: new Integer(1);
-			fields[6] = ((assessment.getFeedbackShowScore() == null) || (!assessment.getFeedbackShowScore().booleanValue())) ? new Integer(0)
-					: new Integer(1);
+			fields[6] = new Integer(1);
 			fields[7] = ((assessment.getFeedbackShowQuestionScore() == null) || (!assessment.getFeedbackShowQuestionScore().booleanValue())) ? new Integer(
 					0)
 					: new Integer(1);

@@ -31,18 +31,8 @@ import java.util.List;
 public interface AssessmentService
 {
 	/**
-	 * Sort options for getAvailableAssessments()
+	 * Sort options for GetUserContextSubmissions()
 	 */
-	enum GetAvailableAssessmentsSort
-	{
-		dueDate_a, dueDate_d, title_a, title_d
-	}
-
-	enum GetOfficialSubmissionsSort
-	{
-		feedbackDate_a, feedbackDate_d, score_a, score_d, submittedDate_a, submittedDate_d, time_a, time_d, title_a, title_d
-	}
-
 	enum GetUserContextSubmissionsSort
 	{
 		dueDate_a, dueDate_d, status_a, status_d, title_a, title_d
@@ -226,6 +216,25 @@ public interface AssessmentService
 	Submission enterSubmission(Assessment assessment, String userId) throws AssessmentPermissionException, AssessmentClosedException,
 			AssessmentCompletedException;
 
+	/**
+	 * Get the total scores for all completed submissions to this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return A List containing all the scores for completed submissions to this assessment, or an empty list if there are none.
+	 */
+	List<Float> getAssessmentScores(Assessment assessment);
+
+	/**
+	 * Get the total scores for this question from all completed submissions to the question's assessment.
+	 * 
+	 * @param questionId
+	 *        The question id.
+	 * @return A List containing all the scores for this question from all completed submissions to the question's assessment, or an empty list if
+	 *         there are none.
+	 */
+	List<Float> getQuestionScores(String questionId);
+
 	/*************************************************************************************************************************************************
 	 * Authoring Support
 	 ************************************************************************************************************************************************/
@@ -238,67 +247,6 @@ public interface AssessmentService
 	 * @return The assessment object, complete, or null if not found.
 	 */
 	Assessment getAssessment(String id);
-
-	/**
-	 * Get the total scores for all completed submissions to this assessment.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 * @return A List containing all the scores for completed submissions to this assessment, or an empty list if there are none.
-	 */
-	List<Float> getAssessmentScores(Assessment assessment);
-
-	/**
-	 * Find the assessments that are available for taking in this context by this user. Consider:
-	 * <ul>
-	 * <li>published assessments</li>
-	 * <li>assessments in this context</li>
-	 * <li>assessments this user has permission to take</li>
-	 * <li>assessments that are released as of the time specified and not yet retracted</li>
-	 * <li>assessments that, based on the due date and late submission policy, still can be submitted to</li>
-	 * <li>assessments that, based on their re-submit policy and count, and this user's count of submissions, can be submitted to again by this user</li>
-	 * <li>(assessments that accept late submissions and are past due date that the use has submitted to already are not included)</li>
-	 * </ul>
-	 * 
-	 * @param context
-	 *        The context to use.
-	 * @param userId
-	 *        The user id - if null, use the current user.
-	 * @param sort
-	 *        The sort for the return List (title_a if null).
-	 * @return A List<Assessment> of the assessments that qualify, sorted, or an empty collection if none do.
-	 */
-	List<Assessment> getAvailableAssessments(String context, String userId, GetAvailableAssessmentsSort sort);
-
-	/**
-	 * Find the submissions to assignments in this context made by this user. Consider:
-	 * <ul>
-	 * <li>published assessments</li>
-	 * <li>assessments in this context</li>
-	 * <li>assessments this user can submit to and have submitted to</li>
-	 * <li>the one (of many for this user) submission that will be the official (graded) (depending on the assessment settings, and submission time
-	 * and score)</li>
-	 * </ul>
-	 * 
-	 * @param context
-	 *        The context to use.
-	 * @param userId
-	 *        The user id - if null, use the current user.
-	 * @param sort
-	 *        The sort for the return list (title_a if null).
-	 * @return A List<Submission> of the submissions that are the offical submissions for assessments in the context by this user, sorted.
-	 */
-	List<Submission> getOfficialSubmissions(String context, String userId, GetOfficialSubmissionsSort sort);
-
-	/**
-	 * Get the total scores for this question from all completed submissions to the question's assessment.
-	 * 
-	 * @param questionId
-	 *        The question id.
-	 * @return A List containing all the scores for this question from all completed submissions to the question's assessment, or an empty list if
-	 *         there are none.
-	 */
-	List<Float> getQuestionScores(String questionId);
 
 	/**
 	 * Access a submission by id. TODO: security

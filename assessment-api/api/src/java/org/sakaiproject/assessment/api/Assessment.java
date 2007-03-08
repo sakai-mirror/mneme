@@ -167,13 +167,6 @@ public interface Assessment
 	Boolean getFeedbackShowQuestionScore();
 
 	/**
-	 * Access the "show score" feedback setting; controls if we should show the score to the assessment taker as part of feedback.
-	 * 
-	 * @return TRUE if we should show the assessment score as part of feedback, FALSE if not.
-	 */
-	Boolean getFeedbackShowScore();
-
-	/**
 	 * Access the "show statistics" feedback setting; controls if we should show statistics as part of feedback.
 	 * 
 	 * @return TRUE if we should show statistics as part of feedback, FALSE if not.
@@ -478,14 +471,6 @@ public interface Assessment
 	 *        The assessment's "show question score" feedback setting.
 	 */
 	void setFeedbackShowQuestionScore(Boolean value);
-
-	/**
-	 * Set the "show score" feedback setting.
-	 * 
-	 * @param value
-	 *        The assessment's "show score" feedback setting.
-	 */
-	void setFeedbackShowScore(Boolean value);
 
 	/**
 	 * Set the "show statistics" feedback setting.

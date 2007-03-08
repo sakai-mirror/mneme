@@ -110,10 +110,6 @@ public class AssessmentImpl implements Assessment
 
 	protected PropertyStatus feedbackShowQuestionScoreStatus = PropertyStatus.unset;
 
-	protected Boolean feedbackShowScore = null;
-
-	protected PropertyStatus feedbackShowScoreStatus = PropertyStatus.unset;
-
 	protected Boolean feedbackShowStatistics = null;
 
 	protected PropertyStatus feedbackShowStatisticsStatus = PropertyStatus.unset;
@@ -457,17 +453,6 @@ public class AssessmentImpl implements Assessment
 		if (this.feedbackShowQuestionScoreStatus == PropertyStatus.unset) readMain();
 
 		return this.feedbackShowQuestionScore;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getFeedbackShowScore()
-	{
-		// read the basic info if this property has not yet been set
-		if (this.feedbackShowScoreStatus == PropertyStatus.unset) readMain();
-
-		return this.feedbackShowScore;
 	}
 
 	/**
@@ -927,15 +912,6 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setFeedbackShowScore(Boolean value)
-	{
-		this.feedbackShowScore = value;
-		this.feedbackShowScoreStatus = PropertyStatus.modified;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void setFeedbackShowStatistics(Boolean value)
 	{
 		this.feedbackShowStatistics = value;
@@ -1249,18 +1225,6 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
-	 * Initialize the feedback show score property.
-	 * 
-	 * @param value
-	 *        The feedback show score property.
-	 */
-	protected void initFeedbackShowScore(Boolean value)
-	{
-		this.feedbackShowScore = value;
-		this.feedbackShowScoreStatus = PropertyStatus.inited;
-	}
-
-	/**
 	 * Initialize the feedback show statistics property.
 	 * 
 	 * @param value
@@ -1557,7 +1521,6 @@ public class AssessmentImpl implements Assessment
 		this.feedbackShowCorrectAnswerStatus = PropertyStatus.inited;
 		this.feedbackShowQuestionFeedbackStatus = PropertyStatus.inited;
 		this.feedbackShowQuestionScoreStatus = PropertyStatus.inited;
-		this.feedbackShowScoreStatus = PropertyStatus.inited;
 		this.feedbackShowStatisticsStatus = PropertyStatus.inited;
 		this.gradebookIntegerationStatus = PropertyStatus.inited;
 		this.idStatus = PropertyStatus.inited;
@@ -1615,8 +1578,6 @@ public class AssessmentImpl implements Assessment
 		this.feedbackShowQuestionFeedbackStatus = other.feedbackShowQuestionFeedbackStatus;
 		this.feedbackShowQuestionScore = other.feedbackShowQuestionScore;
 		this.feedbackShowQuestionScoreStatus = other.feedbackShowQuestionScoreStatus;
-		this.feedbackShowScore = other.feedbackShowScore;
-		this.feedbackShowScoreStatus = other.feedbackShowScoreStatus;
 		this.feedbackShowStatistics = other.feedbackShowStatistics;
 		this.feedbackShowStatisticsStatus = other.feedbackShowStatisticsStatus;
 		this.gradebookIntegeration = other.gradebookIntegeration;

@@ -117,9 +117,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** The list interface. */
 	protected Controller uiList = null;
 
-	/** The list2 interface. */
-	protected Controller uiList2 = null;
-
 	/** The question interface. */
 	protected Controller uiQuestion = null;
 
@@ -180,7 +177,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 		this.uiToc = DeliveryControllers.constructToc(ui);
 		this.uiRemove = DeliveryControllers.constructRemove(ui);
 		this.uiError = DeliveryControllers.constructError(ui);
-		this.uiList2 = DeliveryControllers.constructList2(ui);
 
 		// setup the resource paths
 		this.resourcePaths.add("icons");
@@ -226,17 +222,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		switch (destination)
 		{
-			case list2:
-			{
-				// optional sort parameter
-				String sort = null;
-				if (parts.length == 3)
-				{
-					sort = parts[2];
-				}
-				listGet(req, res, sort, context);
-				break;
-			}
 			case list:
 			{
 				// optional sort parameter
@@ -245,7 +230,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				{
 					sort = parts[2];
 				}
-				list2Get(req, res, sort, context);
+				listGet(req, res, sort, context);
 				break;
 			}
 			case review:
@@ -295,8 +280,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case question:
 			{
-				// we need two parameters (sid/quesiton selector) and an optional third (/feedback)
-				if ((parts.length != 4) && (parts.length != 5))
+				// we need two parameters (sid/quesiton selector)
+				if (parts.length != 4)
 				{
 					// redirect to error
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
@@ -304,7 +289,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				else
 				{
-					questionGet(req, res, parts[2], parts[3], (parts.length == 5) ? parts[4] : null, context);
+					questionGet(req, res, parts[2], parts[3], context);
 				}
 				break;
 			}
@@ -525,10 +510,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// collect information: the selected assessment (id the request)
 		context.put("assessment", assessment);
-
-		// for this assessment, we need to know how many completed submissions the current use has already made
-//		Integer count = assessmentService.countRemainingSubmissions(assessment, null);
-//		context.put("remainingSubmissions", count);
 
 		// render
 		ui.render(uiEnter, context);
@@ -782,7 +763,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	}
 
 	/**
-	 * Get the UI for the list 2 destination.
+	 * Get the UI for the list destination.
 	 * 
 	 * @param req
 	 *        Servlet request.
@@ -795,7 +776,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void list2Get(HttpServletRequest req, HttpServletResponse res, String sortCode, Context context) throws IOException
+	protected void listGet(HttpServletRequest req, HttpServletResponse res, String sortCode, Context context) throws IOException
 	{
 		// SORT: 0|1|2 A|D - 2 chars, column | direction
 		if ((sortCode != null) && (sortCode.length() != 2))
@@ -849,142 +830,16 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 		}
 
+		// default sort: status descending
 		if (sortCode == null)
 		{
-			context.put("sort_column", '2');
-			context.put("sort_direction", 'A');
+			context.put("sort_column", '1');
+			context.put("sort_direction", 'D');
+			sort = AssessmentService.GetUserContextSubmissionsSort.status_d;
 		}
 
 		// collect information: submissions / assessments
 		List submissions = assessmentService.getUserContextSubmissions(toolManager.getCurrentPlacement().getContext(), null, sort);
-		context.put("submissions", submissions);
-
-		// render
-		ui.render(uiList2, context);
-	}
-
-	/**
-	 * Get the UI for the list destination.
-	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
-	 * @param sort
-	 *        The sort parameter.
-	 * @param context
-	 *        UiContext.
-	 * @param out
-	 *        Output writer.
-	 */
-	protected void listGet(HttpServletRequest req, HttpServletResponse res, String sort, Context context) throws IOException
-	{
-		// SORT: 0|1 A|D 0|1|2|3|4 A|D - 4 chars, the first two for the assessment list, the second two for the submissions list
-		if ((sort != null) && (sort.length() != 4))
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
-		AssessmentService.GetAvailableAssessmentsSort assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.title_a;
-		if (sort != null)
-		{
-			context.put("assessment_sort_choice", sort.charAt(0));
-			context.put("assessment_sort_ad", sort.charAt(1));
-
-			if ((sort.charAt(0) == '0') && (sort.charAt(1) == 'A'))
-			{
-				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.title_a;
-			}
-			else if ((sort.charAt(0) == '0') && (sort.charAt(1) == 'D'))
-			{
-				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.title_d;
-			}
-			else if ((sort.charAt(0) == '1') && (sort.charAt(1) == 'A'))
-			{
-				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.dueDate_a;
-			}
-			else if ((sort.charAt(0) == '1') && (sort.charAt(1) == 'D'))
-			{
-				assessmentsSort = AssessmentService.GetAvailableAssessmentsSort.dueDate_d;
-			}
-			else
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
-			}
-		}
-
-		AssessmentService.GetOfficialSubmissionsSort submissionsSort = AssessmentService.GetOfficialSubmissionsSort.title_a;
-		if (sort != null)
-		{
-			context.put("submission_sort_choice", sort.charAt(2));
-			context.put("submission_sort_ad", sort.charAt(3));
-
-			if ((sort.charAt(2) == '0') && (sort.charAt(3) == 'A'))
-			{
-				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.title_a;
-			}
-			else if ((sort.charAt(2) == '0') && (sort.charAt(3) == 'D'))
-			{
-				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.title_d;
-			}
-			else if ((sort.charAt(2) == '1') && (sort.charAt(3) == 'A'))
-			{
-				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.feedbackDate_a;
-			}
-			else if ((sort.charAt(2) == '1') && (sort.charAt(3) == 'D'))
-			{
-				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.feedbackDate_d;
-			}
-			else if ((sort.charAt(2) == '2') && (sort.charAt(3) == 'A'))
-			{
-				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.score_a;
-			}
-			else if ((sort.charAt(2) == '2') && (sort.charAt(3) == 'D'))
-			{
-				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.score_d;
-			}
-			else if ((sort.charAt(2) == '3') && (sort.charAt(3) == 'A'))
-			{
-				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.time_a;
-			}
-			else if ((sort.charAt(2) == '3') && (sort.charAt(3) == 'D'))
-			{
-				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.time_d;
-			}
-			else if ((sort.charAt(2) == '4') && (sort.charAt(3) == 'A'))
-			{
-				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.submittedDate_a;
-			}
-			else if ((sort.charAt(2) == '4') && (sort.charAt(3) == 'D'))
-			{
-				submissionsSort = AssessmentService.GetOfficialSubmissionsSort.submittedDate_d;
-			}
-			else
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
-			}
-		}
-
-		if (sort == null)
-		{
-			context.put("assessment_sort_choice", '0');
-			context.put("assessment_sort_ad", 'A');
-			context.put("submission_sort_choice", '0');
-			context.put("submission_sort_ad", 'A');
-		}
-
-		// collect information: assessments
-		List assessments = assessmentService.getAvailableAssessments(toolManager.getCurrentPlacement().getContext(), null, assessmentsSort);
-		context.put("assessments", assessments);
-
-		// submissions
-		List submissions = assessmentService.getOfficialSubmissions(toolManager.getCurrentPlacement().getContext(), null, submissionsSort);
 		context.put("submissions", submissions);
 
 		// render
@@ -1003,14 +858,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param questionSelector
 	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections worth, and a
 	 *        picks them all.
-	 * @param feedback
-	 *        The feedback parameter which could indicate (if it is "feedback") that the user wants feedback
 	 * @param context
 	 *        UiContext.
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionSelector, String feedback,
+	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionSelector,
 			Context context) throws IOException
 	{
 		Submission submission = assessmentService.idSubmission(submissionId);
@@ -1042,7 +895,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// collect the questions (actually their answers) to put on the page
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
 
-		Errors err = questionSetup(submissionId, questionSelector, feedback, context, answers, true);
+		Errors err = questionSetup(submissionId, questionSelector, context, answers, true);
 
 		if (err != null)
 		{
@@ -1086,7 +939,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
 
 		// setup receiving context
-		Errors err = questionSetup(submissionId, questionSelector, "", context, answers, false);
+		Errors err = questionSetup(submissionId, questionSelector, context, answers, false);
 		if (Errors.invalid == err) err = Errors.invalidpost;
 		if (err != null)
 		{
@@ -1146,8 +999,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param questionSelector
 	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections worth, and a
 	 *        picks them all.
-	 * @param feedback
-	 *        The feedback parameter which could indicate (if it is "feedback") that the user wants feedback
 	 * @param context
 	 *        UiContext.
 	 * @param answers
@@ -1156,15 +1007,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Output writer.
 	 * @return null if all went well, else an Errors to indicate what went wrong.
 	 */
-	protected Errors questionSetup(String submissionId, String questionSelector, String feedback, Context context, List<SubmissionAnswer> answers,
+	protected Errors questionSetup(String submissionId, String questionSelector, Context context, List<SubmissionAnswer> answers,
 			boolean linearCheck)
 	{
-		// check on feedback
-		if ("feedback".equalsIgnoreCase(feedback))
-		{
-			context.put("feedback", Boolean.TRUE);
-		}
-
 		// not in review mode
 		context.put("review", Boolean.FALSE);
 
@@ -1556,7 +1401,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void reviewGet(HttpServletRequest req, HttpServletResponse res, String submissionId, Context context) throws IOException
 	{
 		// yes feedback, and we are in review
-		context.put("feedback", Boolean.TRUE);
 		context.put("review", Boolean.TRUE);
 		context.put("actionTitle", messages.getString("question-header-review"));
 
@@ -1689,10 +1533,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 
 		context.put("submission", submission);
-
-		// for this assessment, we need to know how many completed submission the current use has already made
-		// Integer count = assessmentService.countRemainingSubmissions(submission.getAssessment(), null);
-		// context.put("remainingSubmissions", count);
 
 		// render
 		ui.render(uiSubmitted, context);
