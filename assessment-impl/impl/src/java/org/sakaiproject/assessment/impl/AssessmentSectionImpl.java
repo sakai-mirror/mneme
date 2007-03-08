@@ -313,11 +313,7 @@ public class AssessmentSectionImpl implements AssessmentSection
 				// set the seed based on the id of the submission context (if any),
 				// so each user's submission to any assessment has a unique ordering,
 				// and the section's id, so the randomization of questions in each section is not the same
-				// TODO: after we are done with Samigo compatibility, we can do it this way, not assuming our ids are numeric:
-				// long seed = (this.assessment.getSubmissionContext().getId() + this.id).hashCode();
-
-				// Samigo does it this way:
-				seed = Long.valueOf(this.assessment.getSubmissionContext().getId()) + Long.valueOf(this.id);
+				seed = (this.assessment.getSubmissionContext().getId() + "_" + this.id).hashCode();
 			}
 
 			// mix up the questions
