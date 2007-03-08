@@ -36,6 +36,15 @@ import org.sakaiproject.time.api.Time;
 public interface Assessment
 {
 	/**
+	 * Check if the provided password (clear text) matches the defined password for the assessment.
+	 * 
+	 * @param password
+	 *        The clear text password as entered.
+	 * @return TRUE if the password is a match, false if not.
+	 */
+	Boolean checkPassword(String password);
+
+	/**
 	 * Access allow late submissions (after due date) setting for this assessment.
 	 * 
 	 * @return TRUE if submissions are allowed after the due date, FALSE if not.
@@ -227,6 +236,13 @@ public interface Assessment
 	 * @return The number of submissions allowed, or null if unlimited.
 	 */
 	Integer getNumSubmissionsAllowed();
+
+	/**
+	 * Access the defined password.
+	 * 
+	 * @return The password, or null if not defined.
+	 */
+	String getPassword();
 
 	/**
 	 * Access one of the questions, by question id.
@@ -502,6 +518,14 @@ public interface Assessment
 	 *        The number of submissions allowed, or null to make it unlimited.
 	 */
 	void setNumSubmissionsAllowed(Integer count);
+
+	/**
+	 * Set the password.
+	 * 
+	 * @param password
+	 *        The password.
+	 */
+	void setPassword(String password);
 
 	/**
 	 * Set the question presentation setting which determines how many questions (one, a section's worth or all) to put on each page of the

@@ -429,6 +429,7 @@ public class DeliveryControllers
 	 * The enter interface needs the following entities in the context:
 	 * assessment - the selected Assessment object
 	 * remainingSubmissions - Integer count of remaining submissions allowed to the current user for the selected assessment
+	 * password - an object with a "value" property to hold the entered password.
 	 */
 	public static Controller constructEnter(UiService ui)
 	{
@@ -505,6 +506,14 @@ public class DeliveryControllers
 									ui.newPropertyReference()
 										.setFormatDelegate(new FeedbackPropertyReference())
 										.setReference("assessment.feedbackDelivery"))))
+					.add(
+						ui.newSection()
+							.add(ui.newInstructions().setText("enter-pw-instructions"))
+							.add(
+								ui.newTextEdit()
+									.setProperty(ui.newPropertyReference().setReference("password.value"))
+									.setTitle("enter-password"))
+						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.password"))))
 					.add(ui.newGap())
 					.add(
 						ui.newNavigationBar()
@@ -1587,6 +1596,11 @@ public class DeliveryControllers
 						.add(
 							ui.newAlert().setText("error-closed"))
 						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("closed"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newAlert().setText("error-password"))
+						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("password"))))
 				.add(
 					ui.newSection()
 						.add(

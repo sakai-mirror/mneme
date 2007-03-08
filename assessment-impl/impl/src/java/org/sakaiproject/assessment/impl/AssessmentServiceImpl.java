@@ -612,7 +612,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, P.CREATEDBY,"
 				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.TIMELIMIT, PAC.AUTOSUBMIT, PAC.STARTDATE, PAC.RETRACTDATE, PAC.LATEHANDLING,"
 				+ " PF.SHOWSTUDENTQUESTIONSCORE, PF.SHOWCORRECTRESPONSE, PF.SHOWQUESTIONLEVELFEEDBACK, PF.SHOWSELECTIONLEVELFEEDBACK,"
-				+ " PAC.ITEMNAVIGATION, PAC.ITEMNUMBERING, P.DESCRIPTION, PAC.ASSESSMENTFORMAT, PE.TOGRADEBOOK, PAC.SUBMISSIONMESSAGE, PAC.FINALPAGEURL"
+				+ " PAC.ITEMNAVIGATION, PAC.ITEMNUMBERING, P.DESCRIPTION, PAC.ASSESSMENTFORMAT, PE.TOGRADEBOOK, PAC.SUBMISSIONMESSAGE, PAC.FINALPAGEURL, PAC.PASSWORD"
 				+ " FROM SAM_PUBLISHEDASSESSMENT_T P" + " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
@@ -682,6 +682,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					int toGradebook = result.getInt(26);
 					String submitMessage = StringUtil.trimToNull(result.getString(27));
 					String submitUrl = StringUtil.trimToNull(result.getString(28));
+					String password = StringUtil.trimToNull(result.getString(29));
 
 					// it the submitUrl is just "http://" null it
 					if ((submitUrl != null) && ("http://".equals(submitUrl))) submitUrl = null;
@@ -714,6 +715,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					assessment.initGradebookIntegration(Boolean.valueOf(toGradebook == 1));
 					assessment.initSubmitMessage(submitMessage);
 					assessment.initSubmitUrl(submitUrl);
+					assessment.initPassword(password);
 
 					return assessment;
 				}
@@ -2905,7 +2907,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			fields[17] = a.getSubmitMessage();
 			fields[18] = a.getContext() + " site";
 			fields[19] = "";
-			fields[20] = "";
+			fields[20] = a.getPassword();
 			fields[21] = a.getSubmitUrl();
 			fields[22] = id;
 			m_sqlService.dbWrite(connection, statement, fields);

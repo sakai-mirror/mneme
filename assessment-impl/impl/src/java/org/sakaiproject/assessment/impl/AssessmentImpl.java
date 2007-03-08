@@ -137,6 +137,10 @@ public class AssessmentImpl implements Assessment
 
 	protected PropertyStatus numSubmissionsStatus = PropertyStatus.unset;
 
+	protected String password = null;
+
+	protected PropertyStatus passwordStatus = PropertyStatus.unset;
+
 	protected QuestionPresentation questionPresentation = null;
 
 	protected PropertyStatus questionPresentationStatus = PropertyStatus.unset;
@@ -197,6 +201,18 @@ public class AssessmentImpl implements Assessment
 		this.setMain(other);
 		this.setAttachments(other);
 		this.setSections(other);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean checkPassword(String password)
+	{
+		String myPw = getPassword();
+		if (myPw == null) return Boolean.TRUE;
+		if (password == null) return Boolean.FALSE;
+
+		return Boolean.valueOf(password.equals(myPw));
 	}
 
 	/**
@@ -558,6 +574,17 @@ public class AssessmentImpl implements Assessment
 		if (this.numSubmissionsStatus == PropertyStatus.unset) readMain();
 
 		return this.numSubmissions;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getPassword()
+	{
+		// read the basic info if this property has not yet been set
+		if (this.passwordStatus == PropertyStatus.unset) readMain();
+
+		return this.password;
 	}
 
 	/**
@@ -945,6 +972,15 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setPassword(String password)
+	{
+		this.password = password;
+		this.passwordStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setQuestionPresentation(QuestionPresentation value)
 	{
 		this.questionPresentation = value;
@@ -1285,6 +1321,18 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Initialize the password property.
+	 * 
+	 * @param password
+	 *        The password property.
+	 */
+	protected void initPassword(String password)
+	{
+		this.password = password;
+		this.passwordStatus = PropertyStatus.inited;
+	}
+
+	/**
 	 * Initialize the question presentation setting.
 	 * 
 	 * @param value
@@ -1515,6 +1563,7 @@ public class AssessmentImpl implements Assessment
 		this.idStatus = PropertyStatus.inited;
 		this.mssPolicyStatus = PropertyStatus.inited;
 		this.numSubmissionsStatus = PropertyStatus.inited;
+		this.passwordStatus = PropertyStatus.inited;
 		this.randomAccessStatus = PropertyStatus.inited;
 		this.releaseDateStatus = PropertyStatus.inited;
 		this.retractDateStatus = PropertyStatus.inited;
@@ -1578,6 +1627,8 @@ public class AssessmentImpl implements Assessment
 		this.mssPolicyStatus = other.mssPolicyStatus;
 		this.numSubmissions = other.numSubmissions;
 		this.numSubmissionsStatus = other.numSubmissionsStatus;
+		this.password = other.password;
+		this.passwordStatus = other.passwordStatus;
 		this.randomAccess = other.randomAccess;
 		this.randomAccessStatus = other.randomAccessStatus;
 		this.releaseDate = other.releaseDate;

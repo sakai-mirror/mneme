@@ -53,6 +53,7 @@ import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.sludge.api.Context;
 import org.sakaiproject.sludge.api.Controller;
 import org.sakaiproject.sludge.api.UiService;
+import org.sakaiproject.sludge.api.Value;
 import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
@@ -74,7 +75,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our errors. */
 	enum Errors
 	{
-		invalid, invalidpost, linear, unauthorized, unexpected, unknown, upload, over, closed
+		closed, invalid, invalidpost, linear, over, password, unauthorized, unexpected, unknown, upload
 	}
 
 	/** Our log (commons). */
@@ -555,7 +556,11 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		// read form: for now, nothing to read
+		// for the password
+		Value value = ui.newValue();
+		context.put("password", value);
+
+		// read form
 		String destination = ui.decode(req, context);
 
 		// process: enter the assessment for this user, find the submission id and starting question
@@ -564,6 +569,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		// check password
+		if ((assessment.getPassword() != null) && (!assessment.checkPassword(value.getValue()).booleanValue()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.password)));
 			return;
 		}
 
@@ -692,6 +705,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 			case closed:
 			{
 				context.put("closed", Boolean.TRUE);
+				break;
+			}
+
+			case password:
+			{
+				context.put("password", Boolean.TRUE);
 				break;
 			}
 		}
