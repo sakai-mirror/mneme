@@ -527,8 +527,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 		context.put("assessment", assessment);
 
 		// for this assessment, we need to know how many completed submissions the current use has already made
-		Integer count = assessmentService.countRemainingSubmissions(assessment, null);
-		context.put("remainingSubmissions", count);
+//		Integer count = assessmentService.countRemainingSubmissions(assessment, null);
+//		context.put("remainingSubmissions", count);
 
 		// render
 		ui.render(uiEnter, context);

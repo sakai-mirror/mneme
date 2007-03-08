@@ -428,7 +428,7 @@ public class DeliveryControllers
 	/**
 	 * The enter interface needs the following entities in the context:
 	 * assessment - the selected Assessment object
-	 * remainingSubmissions - Integer count of remaining submissions allowed to the current user for the selected assessment
+	 * XX remainingSubmissions - Integer count of remaining submissions allowed to the current user for the selected assessment
 	 * password - an object with a "value" property to hold the entered password.
 	 */
 	public static Controller constructEnter(UiService ui)
@@ -436,76 +436,29 @@ public class DeliveryControllers
 		return
 			ui.newInterface()
 				.setTitle("enter-title", ui.newTextPropertyReference().setReference("assessment.title"))
-				.setHeader("enter-header")
+				.setHeader("enter-header", ui.newTextPropertyReference().setReference("assessment.title"))
 				.add(
-					ui.newInstructions()
-						.setText("linear-instructions")
+					ui.newSection()
+						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("assessment.description")))
+						.add(
+							ui.newAttachments()
+								.setTitle("enter-attachments")
+								.setAttachments(ui.newPropertyReference().setReference("assessment.attachments"), null)
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.attachments")))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("linear-instructions"))
 						.setIncluded(
 							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("assessment.randomAccess"))))
-				.add(ui.newInstructions().setText("enter-display-instructions"))
-				.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("assessment.description")))
 				.add(
-					ui.newAttachments()
-						.setTitle("enter-attachments")
-						.setAttachments(ui.newPropertyReference().setReference("assessment.attachments"), null)
-						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.attachments"))))
-				.add(
-					ui.newEntityDisplay()
-						.setEntityReference(ui.newPropertyReference().setReference("assessment"))
-						.addRow(
-							ui.newPropertyRow()
-								.setTitle("enter-display-contextTitle")
-								.setProperty(
-									ui.newContextInfoPropertyReference()
-										.setSelector(ContextInfoPropertyReference.Selector.title)
-										.setReference("assessment.context")))
-						.addRow(
-							ui.newPropertyRow()
-								.setTitle("enter-display-createdBy")
-								.setProperty(
-									ui.newUserInfoPropertyReference()
-										.setSelector(UserInfoPropertyReference.Selector.displayName)
-										.setReference("assessment.createdBy")))
-						.addRow(
-							ui.newPropertyRow()
-								.setTitle("enter-display-title")
-								.setProperty(
-									ui.newTextPropertyReference()
-										.setReference("assessment.title")))
-						.addRow(
-							ui.newPropertyRow()
-								.setTitle("enter-display-timeLimit")
-								.setProperty(
-									ui.newDurationPropertyReference()
-										.setReference("assessment.timeLimit")
-										.setMissingText("no-time-limit")))
-						.addRow(
-							ui.newPropertyRow()
-								.setTitle("enter-display-autoSubmit")
-								.setProperty(
-									ui.newBooleanPropertyReference()
-										.setText("enabled", "disabled")
-										.setReference("assessment.autoSubmit")
-										.setMissingText("unknown"))
-								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.timeLimit"))))
-						.addRow(
-							ui.newPropertyRow()
-								.setTitle("enter-display-numSubmissionsAllowed")
-								.setProperty(
-									ui.newTextPropertyReference()
-										.setFormat("submissions")
-										.setReference("assessment.numSubmissionsAllowed")
-										.setMissingText("unlimited")
-										.addProperty(
-											ui.newTextPropertyReference()
-												.setReference("remainingSubmissions"))))
-						.addRow(
-							ui.newPropertyRow()
-								.setTitle("enter-display-feedback")
-								.setProperty(
-									ui.newPropertyReference()
-										.setFormatDelegate(new FeedbackPropertyReference())
-										.setReference("assessment.feedbackDelivery"))))
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("timed-instructions"))
+						.setIncluded(
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.timeLimit"))))
 					.add(
 						ui.newSection()
 							.add(ui.newInstructions().setText("enter-pw-instructions"))
