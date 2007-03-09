@@ -2260,7 +2260,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		}
 
 		String statement = "SELECT AG.ASSESSMENTGRADINGID, P.ID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
-				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE, PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, AG.FORGRADE,"
+				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE, PF.FEEDBACKDELIVERY, AG.FORGRADE,"
 				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING, PAC.RETRACTDATE,"
 				+ " SUM(PI.SCORE)"
 				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
@@ -2317,38 +2317,36 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 					int mssPolicy = result.getInt(8);
 					FeedbackDelivery feedbackDelivery = FeedbackDelivery.parse(result.getInt(9));
-					boolean showScore = result.getBoolean(10);
-					boolean showStatistics = result.getBoolean(11);
-					boolean complete = result.getBoolean(12);
-					boolean unlimitedSubmissions = result.getBoolean(13);
-					int submissionsAllowed = result.getInt(14);
+					boolean complete = result.getBoolean(10);
+					boolean unlimitedSubmissions = result.getBoolean(11);
+					int submissionsAllowed = result.getInt(12);
 
-					ts = result.getTimestamp(15, m_sqlService.getCal());
+					ts = result.getTimestamp(13, m_sqlService.getCal());
 					Time releaseDate = null;
 					if (ts != null)
 					{
 						releaseDate = m_timeService.newTime(ts.getTime());
 					}
 
-					long timeLimit = result.getLong(16);
+					long timeLimit = result.getLong(14);
 
-					ts = result.getTimestamp(17, m_sqlService.getCal());
+					ts = result.getTimestamp(15, m_sqlService.getCal());
 					Time dueDate = null;
 					if (ts != null)
 					{
 						dueDate = m_timeService.newTime(ts.getTime());
 					}
 
-					int allowLateSubmit = result.getInt(18);
+					int allowLateSubmit = result.getInt(16);
 
-					ts = result.getTimestamp(19, m_sqlService.getCal());
+					ts = result.getTimestamp(17, m_sqlService.getCal());
 					Time retractDate = null;
 					if (ts != null)
 					{
 						retractDate = m_timeService.newTime(ts.getTime());
 					}
 					
-					float points = result.getFloat(20);
+					float points = result.getFloat(18);
 
 					// for the non-submissions, create an non-null id
 					if (submissionId == null)
@@ -2386,8 +2384,6 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					cachedAssessment.initFeedbackDate(feedbackDate);
 					cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
 					cachedAssessment.initFeedbackDelivery(feedbackDelivery);
-					//cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
-					cachedAssessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
 					cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
 					cachedAssessment.initReleaseDate(releaseDate);
 					cachedAssessment.initTimeLimit(timeLimit == 0 ? null : new Long(timeLimit * 1000));
