@@ -939,7 +939,7 @@ public class DeliveryControllers
 		return
 			ui.newInterface()
 				.setTitle("submitted-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
-				.setHeader("submitted-header")
+				.setHeader("submitted-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.add(
 					ui.newText()
 						.setText("submitted-display-message", ui.newHtmlPropertyReference().setReference("submission.assessment.submitMessage"))
@@ -959,7 +959,25 @@ public class DeliveryControllers
 								.setDescription("return-description")
 								.setIcon("/icons/return.png",Navigation.IconStyle.left)
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/list")))
+								.setDestination(ui.newDestination().setDestination("/list"))
+								.setIncluded(
+									ui.newCompareDecision()
+										.setEqualsConstant(FeedbackDelivery.IMMEDIATE.toString())
+										.setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackDelivery"))
+										.setReversed()))
+						.add(
+							ui.newNavigation()
+								.setDefault()
+								.setTitle("review")
+								.setAccessKey("return-access")
+								.setDescription("return-description")
+								.setIcon("/icons/return.png",Navigation.IconStyle.left)
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.id")))
+								.setIncluded(
+									ui.newCompareDecision()
+										.setEqualsConstant(FeedbackDelivery.IMMEDIATE.toString())
+										.setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackDelivery"))))
 						.setId("nav"));
 	}
 

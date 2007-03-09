@@ -43,6 +43,7 @@ import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentService;
 import org.sakaiproject.assessment.api.AttachmentService;
+import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.QuestionPresentation;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
@@ -1524,11 +1525,18 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		// if we have no authored message or URL, skip right to the list view
+		// if we have no authored message or URL, skip right to ...
 		if ((submission.getAssessment().getSubmitMessage() == null) && (submission.getAssessment().getSubmitUrl() == null))
 		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/list")));
+			// if the assessment is marked for immediate review, go to review, else to list
+			String dest = "/list";
+			if (submission.getAssessment().getFeedbackDelivery() == FeedbackDelivery.IMMEDIATE)
+			{
+				dest = "/review/" + submission.getId();
+			}
+
+			// redirect
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, dest)));
 			return;
 		}
 
