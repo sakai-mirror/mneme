@@ -181,6 +181,9 @@ public class AssessmentImpl implements Assessment
 
 	protected PropertyStatus titleStatus = PropertyStatus.unset;
 
+	/** The total points for all questions in all sections of the assessment (trust me!). Use if present. */
+	protected transient Float totalPoints = null;
+
 	/**
 	 * Construct
 	 */
@@ -752,6 +755,8 @@ public class AssessmentImpl implements Assessment
 	 */
 	public Float getTotalPoints()
 	{
+		if (totalPoints != null) return totalPoints;
+
 		// read the section info if this property has not yet been set
 		if (this.sectionsStatus == PropertyStatus.unset) readSections();
 
@@ -1435,6 +1440,17 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Init the total points (trust me!) property.
+	 * 
+	 * @param points
+	 *        The total points for the assessment.
+	 */
+	protected void initTotalPoints(Float points)
+	{
+		this.totalPoints = points;
+	}
+
+	/**
 	 * Check if the main info has been initialized
 	 * 
 	 * @return true if the main info has been initialized, false if not.
@@ -1549,6 +1565,7 @@ public class AssessmentImpl implements Assessment
 	{
 		this.service = other.service;
 		this.mainStatus = other.mainStatus;
+		this.totalPoints = other.totalPoints;
 
 		// direct value copies - don't trigger any reads, and don't change the status of any properties
 		// all except questions

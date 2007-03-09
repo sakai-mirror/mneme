@@ -153,8 +153,7 @@ public class DeliveryControllers
 							ui.newEntityListColumn()
 								.add(
 									ui.newCountdownTimer()
-										.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
-										//.setRemainingMessage("list-timer-remaining")
+										.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))										//.setRemainingMessage("list-timer-remaining")
 										.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
 										.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
 										.setWidth(100)
@@ -171,15 +170,6 @@ public class DeliveryControllers
 										.setIncluded(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayContinue"))))
 								.setTitle("list-header-limit")
 								.setCentered())
-//						.addColumn(
-//							ui.newPropertyColumn()
-//								.setProperty(
-//									ui.newDatePropertyReference().setTwoLine()
-//										.setReference("submission.assessment.feedbackDate")
-//										.setMissingText("immediate"))
-//								.setTitle("list-header-review")
-//								.setEntityIncluded(ui.newDecision().setDelegate(new ReviewDateDecision()), "dash")
-//								.setCentered())
 						.addColumn(
 							ui.newPropertyColumn()
 								.setProperty(
@@ -187,9 +177,7 @@ public class DeliveryControllers
 									ui.newPropertyReference().setReference("submission.siblingCount"),
 									ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed").setMissingText("infinite"))
 								.setTitle("list-header-tries")
-								.setCentered()
-								//.setEntityIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed")), "unlimited")
-								)
+								.setCentered())
 						.addColumn(
 							ui.newPropertyColumn()
 								.setProperty(
@@ -203,8 +191,8 @@ public class DeliveryControllers
 							ui.newPropertyColumn()
 								.setProperty(
 									"list-header-score-fmt",
-									ui.newPropertyReference().setReference("submission.totalScore")/*,
-									ui.newPropertyReference().setReference("submission.assessment.totalPoints")*/)
+									ui.newPropertyReference().setReference("submission.totalScore"),
+									ui.newPropertyReference().setReference("submission.assessment.totalPoints"))
 								.setTitle("list-header-score")
 								.setCentered()
 								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash")
