@@ -677,7 +677,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					boolean showAnswerFeedback = result.getBoolean(21);
 					int randomAccess = result.getInt(22);
 					int continuousNumbering = result.getInt(23);
-					String description = result.getString(24);
+					String description = StringUtil.trimToNull(result.getString(24));
 					QuestionPresentation presentation = QuestionPresentation.parse(result.getInt(25));
 					int toGradebook = result.getInt(26);
 					String submitMessage = StringUtil.trimToNull(result.getString(27));
@@ -695,7 +695,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					assessment.initFeedbackDate(feedbackDate);
 					assessment.initFeedbackDelivery(delivery);
 					assessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
-					//assessment.initFeedbackShowScore(Boolean.valueOf(showStudentScore));
+					// assessment.initFeedbackShowScore(Boolean.valueOf(showStudentScore));
 					assessment.initMultipleSubmissionSelectionPolicy(mssPolicy);
 					assessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
 					assessment.initStatus(status);
@@ -751,6 +751,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 */
 	protected void readAssessmentSections(final AssessmentImpl assessment)
 	{
+		// TODO: Transaction to assure a consistent read? -ggolden
+
 		if (M_log.isDebugEnabled()) M_log.debug("readAssessmentSections: " + assessment.getId());
 
 		if (assessment.getId() == null)
@@ -1356,6 +1358,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 */
 	protected void readSubmissionAnswers(final SubmissionImpl submission)
 	{
+		// TODO: Transaction to assure a consistent read? -ggolden
+
 		if (M_log.isDebugEnabled()) M_log.debug("readSubmissionAnswers: " + submission.getId());
 
 		if (submission.getId() == null)
@@ -2128,7 +2132,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					cachedAssessment.initFeedbackDate(feedbackDate);
 					cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
 					cachedAssessment.initFeedbackDelivery(feedbackDelivery);
-					//cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
+					// cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
 					cachedAssessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
 					cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
 
@@ -2262,8 +2266,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		String statement = "SELECT AG.ASSESSMENTGRADINGID, P.ID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
 				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE, PF.FEEDBACKDELIVERY, AG.FORGRADE,"
 				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING, PAC.RETRACTDATE,"
-				+ " SUM(PI.SCORE)"
-				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
+				+ " SUM(PI.SCORE)" + " FROM SAM_PUBLISHEDASSESSMENT_T P"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID AND (PAC.RETRACTDATE IS NULL OR ? < PAC.RETRACTDATE)"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
@@ -2345,7 +2348,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					{
 						retractDate = m_timeService.newTime(ts.getTime());
 					}
-					
+
 					float points = result.getFloat(18);
 
 					// for the non-submissions, create an non-null id
@@ -2794,10 +2797,38 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public void addAssessment(Assessment assessment) throws AssessmentPermissionException
+	public void addAssessment(final Assessment assessment) throws AssessmentPermissionException
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("addAssessment: " + assessment.getId());
 
+		// check permission - created by user must have PUBLISH_PERMISSION in the context of the assessment
+		secure(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+
+		// run our save code in a transaction that will restart on deadlock
+		// if deadlock retry fails, or any other error occurs, a runtime error will be thrown
+		m_sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				addAssessmentTx(assessment);
+			}
+		}, "addAssessment:" + assessment.getId());
+
+		// event track it
+		if (m_threadLocalManager.get("sakai.event.suppress") == null)
+		{
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(ASSESSMENT_PUBLISH, getAssessmentReference(assessment.getId()), true));
+		}
+
+		// cache a copy
+		cacheAssessment(new AssessmentImpl((AssessmentImpl) assessment));
+	}
+
+	/**
+	 * Transaction code for addAssessment.
+	 */
+	protected void addAssessmentTx(Assessment assessment)
+	{
 		// we only work with our impl
 		AssessmentImpl a = (AssessmentImpl) assessment;
 
@@ -2814,720 +2845,659 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (a.getStatus() == null) a.initStatus(AssessmentStatus.ACTIVE);
 		if (a.getCreatedBy() == null) a.initCreatedBy(userId);
 
-		// check permission - created by user must have PUBLISH_PERMISSION in the context of the assessment
-		secure(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+		// ID column? For non sequence db vendors, it is defaulted
+		Long id = m_sqlService.getNextSequence("SAM_PUBLISHEDASSESSMENT_ID_S", null);
 
-		// persist - all in one transaction
-		Connection connection = null;
-		boolean wasCommit = true;
-		try
+		// Note: ID column is set to autoincrement... by using the special JDBC feature in dbInsert, we get the value just
+		// allocated
+		String statement = "INSERT INTO SAM_PUBLISHEDASSESSMENT_T"
+				+ " (TITLE, DESCRIPTION, ASSESSMENTID, DESCRIPTION, COMMENTS, TYPEID, INSTRUCTORNOTIFICATION, TESTEENOTIFICATION, MULTIPARTALLOWED,"
+				+ " STATUS, CREATEDBY, CREATEDDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE" + ((id == null) ? "" : ", ID") + ")"
+				+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?") + ")";
+		Object fields[] = new Object[(id == null) ? 14 : 15];
+		fields[0] = a.getTitle();
+		fields[1] = a.getDescription();
+		fields[2] = ""; // TODO: reference to the base (not published) assessment... a.getId();
+		fields[3] = ""; // TODO: description
+		fields[4] = ""; // TODO: comments
+		fields[5] = new Integer(62); // TODO: type id
+		fields[6] = new Integer(1); // TODO: instructor notification
+		fields[7] = new Integer(1); // TODO: test notification
+		fields[8] = new Integer(1); // TODO: multipart allowed
+		fields[9] = a.getStatus().dbEncoding();
+		fields[10] = a.getCreatedBy();
+		fields[11] = now; // TODO: from a
+		fields[12] = a.getCreatedBy(); // TODO: modifiedBy
+		fields[13] = now; // TODO: from a
+
+		if (id != null)
 		{
-			connection = m_sqlService.borrowConnection();
-			wasCommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
+			fields[14] = id;
+			m_sqlService.dbWrite(statement, fields);
+		}
+		else
+		{
+			id = m_sqlService.dbInsert(null, statement, fields, "ID");
+		}
 
+		// we really need that id
+		if (id == null) throw new RuntimeException("failed to insert published assessment");
+
+		// update the id
+		a.initId(id.toString());
+
+		// each section
+		int sectionPosition = 1;
+		for (AssessmentSectionImpl section : a.sections)
+		{
 			// ID column? For non sequence db vendors, it is defaulted
-			Long id = m_sqlService.getNextSequence("SAM_PUBLISHEDASSESSMENT_ID_S", connection);
+			Long sectionId = m_sqlService.getNextSequence("SAM_PUBLISHEDSECTION_ID_S", null);
 
-			// Note: ID column is set to autoincrement... by using the special JDBC feature in dbInsert, we get the value just
-			// allocated
-			String statement = "INSERT INTO SAM_PUBLISHEDASSESSMENT_T"
-					+ " (TITLE, DESCRIPTION, ASSESSMENTID, DESCRIPTION, COMMENTS, TYPEID, INSTRUCTORNOTIFICATION, TESTEENOTIFICATION, MULTIPARTALLOWED,"
-					+ " STATUS, CREATEDBY, CREATEDDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE" + ((id == null) ? "" : ", ID") + ")"
-					+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?") + ")";
-			Object fields[] = new Object[(id == null) ? 14 : 15];
-			fields[0] = a.getTitle();
-			fields[1] = a.getDescription();
-			fields[2] = ""; // TODO: reference to the base (not published) assessment... a.getId();
-			fields[3] = ""; // TODO: description
-			fields[4] = ""; // TODO: comments
-			fields[5] = new Integer(62); // TODO: type id
-			fields[6] = new Integer(1); // TODO: instructor notification
-			fields[7] = new Integer(1); // TODO: test notification
-			fields[8] = new Integer(1); // TODO: multipart allowed
-			fields[9] = a.getStatus().dbEncoding();
-			fields[10] = a.getCreatedBy();
-			fields[11] = now; // TODO: from a
-			fields[12] = a.getCreatedBy(); // TODO: modifiedBy
-			fields[13] = now; // TODO: from a
+			statement = "INSERT INTO SAM_PUBLISHEDSECTION_T"
+					+ " (ASSESSMENTID, DURATION, SEQUENCE, TITLE, DESCRIPTION, TYPEID, STATUS, CREATEDBY, CREATEDDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE"
+					+ ((sectionId == null) ? "" : ", SECTIONID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,?" + ((sectionId == null) ? "" : ",?") + ")";
+			fields = new Object[(sectionId == null) ? 11 : 12];
+			fields[0] = id;
+			fields[1] = null;
+			fields[2] = new Integer(sectionPosition++);
+			fields[3] = section.getTitle(); // TODO: "Default"?
+			fields[4] = section.getDescription();
+			fields[5] = new Integer(21); // TODO: type?
+			fields[6] = new Integer(1); // TODO: status?
+			fields[7] = a.getCreatedBy();
+			fields[8] = now; // TODO: a.getCreated();
+			fields[9] = a.getCreatedBy(); // TODO: a.getModifiedBy()
+			fields[10] = now; // TODO: a.getModified();
 
-			if (id != null)
+			if (sectionId != null)
 			{
-				fields[14] = id;
-				m_sqlService.dbWrite(connection, statement, fields);
+				fields[11] = sectionId;
+				m_sqlService.dbWrite(statement, fields);
 			}
 			else
 			{
-				id = m_sqlService.dbInsert(connection, statement, fields, "ID");
+				sectionId = m_sqlService.dbInsert(null, statement, fields, "SECTIONID");
 			}
 
 			// we really need that id
-			if (id == null) throw new Exception("failed to insert published assessment");
+			if (sectionId == null) throw new RuntimeException("failed to insert section");
+			section.initId(sectionId.toString());
 
-			// update the id
-			a.initId(id.toString());
+			// ID for SAM_PUBLISHEDSECTIONMETADATA_T
+			// Note: Samigo as of 2.3 has a bug - using the same sequence as for the ID of SAM_PUBLISHEDASSESSMENT_T -ggolden
+			Long xid = m_sqlService.getNextSequence("SAM_PUBLISHEDASSESSMENT_ID_S", null);
 
-			// each section
-			int sectionPosition = 1;
-			for (AssessmentSectionImpl section : a.sections)
+			statement = "INSERT INTO SAM_PUBLISHEDSECTIONMETADATA_T (SECTIONID, LABEL, ENTRY" + ((xid == null) ? "" : ", PUBLISHEDSECTIONMETADATAID")
+					+ ") values (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+			fields = new Object[(xid == null) ? 3 : 4];
+			fields[0] = sectionId;
+			fields[1] = "AUTHOR_TYPE";
+			// TODO: this is the draw from pool (value is 2) / authored question (value is 1) - authored for now
+			fields[2] = "1";
+			if (xid != null) fields[3] = xid;
+			m_sqlService.dbWrite(statement, fields);
+
+			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDASSESSMENT_ID_S", null);
+			fields[1] = "QUESTIONS_ORDERING";
+			fields[2] = ((section.getRandomQuestionOrder() == null) || (!section.getRandomQuestionOrder().booleanValue())) ? "1" : "2";
+			if (xid != null) fields[3] = xid;
+			m_sqlService.dbWrite(statement, fields);
+		}
+
+		// Note: no id column for SAM_PUBLISHEDACCESSCONTROL_T
+		statement = "INSERT INTO SAM_PUBLISHEDACCESSCONTROL_T"
+				+ " (UNLIMITEDSUBMISSIONS, SUBMISSIONSALLOWED, SUBMISSIONSSAVED, ASSESSMENTFORMAT, BOOKMARKINGITEM, TIMELIMIT,"
+				+ " TIMEDASSESSMENT, RETRYALLOWED, LATEHANDLING, STARTDATE, DUEDATE, SCOREDATE, FEEDBACKDATE, RETRACTDATE, AUTOSUBMIT,"
+				+ " ITEMNAVIGATION, ITEMNUMBERING, SUBMISSIONMESSAGE, RELEASETO, USERNAME, PASSWORD, FINALPAGEURL, ASSESSMENTID)"
+				+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		fields = new Object[23];
+		fields[0] = new Integer(1);
+		fields[1] = null;
+		fields[2] = new Integer(1);
+		fields[3] = ((assessment.getQuestionPresentation() != null) ? assessment.getQuestionPresentation().dbEncoding() : new Integer(1));
+		fields[4] = null;
+		fields[5] = new Integer(0);
+		fields[6] = new Integer(0);
+		fields[7] = null;
+		fields[8] = ((assessment.getAllowLateSubmit() != null) && assessment.getAllowLateSubmit().booleanValue()) ? new Integer(1) : new Integer(0);
+		fields[9] = assessment.getReleaseDate();
+		fields[10] = assessment.getDueDate();
+		fields[11] = null;
+		fields[12] = assessment.getFeedbackDate();
+		fields[13] = assessment.getRetractDate();
+		fields[14] = new Integer(1);
+		fields[15] = ((assessment.getRandomAccess() != null) && assessment.getRandomAccess().booleanValue()) ? new Integer(2) : new Integer(1);
+		fields[16] = ((assessment.getContinuousNumbering() != null) && assessment.getContinuousNumbering().booleanValue()) ? new Integer(1)
+				: new Integer(2);
+		fields[17] = a.getSubmitMessage();
+		fields[18] = a.getContext() + " site";
+		fields[19] = "";
+		fields[20] = a.getPassword();
+		fields[21] = a.getSubmitUrl();
+		fields[22] = id;
+		m_sqlService.dbWrite(statement, fields);
+
+		// Note: no id column for SAM_PUBLISHEDEVALUATION_T
+		statement = "INSERT INTO SAM_PUBLISHEDEVALUATION_T"
+				+ " (EVALUATIONCOMPONENTS, SCORINGTYPE, NUMERICMODELID, FIXEDTOTALSCORE, GRADEAVAILABLE, ISSTUDENTIDPUBLIC,"
+				+ " ANONYMOUSGRADING, AUTOSCORING, TOGRADEBOOK, ASSESSMENTID)" + " VALUES (?,?,?,?,?,?,?,?,?,?)";
+		fields = new Object[10];
+		fields[0] = "";
+		fields[1] = new Integer(1);
+		fields[2] = "";
+		fields[3] = null;
+		fields[4] = null;
+		fields[5] = null;
+		fields[6] = new Integer(2); // 1-anon, 2-students id visible
+		fields[7] = null;
+		fields[8] = ((a.getGradebookIntegration() != null) && (a.gradebookIntegeration.booleanValue())) ? new Integer(1) : new Integer(2); // 1-to
+		// gradebook,
+		// 2-not
+		fields[9] = id;
+		m_sqlService.dbWrite(statement, fields);
+
+		// Note: no id column for SAM_PUBLISHEDFEEDBACK_T
+		statement = "INSERT INTO SAM_PUBLISHEDFEEDBACK_T"
+				+ " (FEEDBACKDELIVERY, FEEDBACKAUTHORING, EDITCOMPONENTS, SHOWQUESTIONTEXT, SHOWSTUDENTRESPONSE,"
+				+ " SHOWCORRECTRESPONSE, SHOWSTUDENTSCORE, SHOWSTUDENTQUESTIONSCORE, SHOWQUESTIONLEVELFEEDBACK,"
+				+ " SHOWSELECTIONLEVELFEEDBACK, SHOWGRADERCOMMENTS, SHOWSTATISTICS, ASSESSMENTID)" + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		fields = new Object[13];
+		fields[0] = assessment.getFeedbackDelivery() == null ? new Integer(1) : assessment.getFeedbackDelivery().dbEncoding();
+		fields[1] = new Integer(1);
+		fields[2] = new Integer(1);
+		fields[3] = new Integer(1);
+		fields[4] = new Integer(1);
+		fields[5] = ((assessment.getFeedbackShowCorrectAnswer() == null) || (!assessment.getFeedbackShowCorrectAnswer().booleanValue())) ? new Integer(
+				0)
+				: new Integer(1);
+		fields[6] = new Integer(1);
+		fields[7] = ((assessment.getFeedbackShowQuestionScore() == null) || (!assessment.getFeedbackShowQuestionScore().booleanValue())) ? new Integer(
+				0)
+				: new Integer(1);
+		fields[8] = ((assessment.getFeedbackShowQuestionFeedback() == null) || (!assessment.getFeedbackShowQuestionFeedback().booleanValue())) ? new Integer(
+				0)
+				: new Integer(1);
+		fields[9] = ((assessment.getFeedbackShowAnswerFeedback() == null) || (!assessment.getFeedbackShowAnswerFeedback().booleanValue())) ? new Integer(
+				0)
+				: new Integer(1);
+		fields[10] = new Integer(1);
+		fields[11] = ((assessment.getFeedbackShowStatistics() == null) || (!assessment.getFeedbackShowStatistics().booleanValue())) ? new Integer(0)
+				: new Integer(1);
+		fields[12] = id;
+		m_sqlService.dbWrite(statement, fields);
+
+		// ID for SAM_PUBLISHEDMETADATA_T
+		Long xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+
+		statement = "INSERT INTO SAM_PUBLISHEDMETADATA_T (ASSESSMENTID, LABEL, ENTRY" + ((xid == null) ? "" : ", ASSESSMENTMETADATAID")
+				+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+		fields = new Object[(xid == null) ? 3 : 4];
+		fields[0] = id;
+		fields[1] = "assessmentAuthor_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "retractDate_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "description_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "testeeIdentity_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "anonymousRelease_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "timedAssessment_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "displayNumbering_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "feedbackType_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "submissionModel_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "templateInfo_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "timedAssessmentAutoSubmit_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "releaseDate_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "releaseTo";
+		fields[2] = "SITE_MEMBERS";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "authenticatedRelease_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "hasTimeAssessment";
+		fields[2] = "false";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "displayChunking_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "metadataAssess_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "passwordRequired_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "lateHandling_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "recordedScore_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "author";
+		fields[2] = "";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "itemAccessType_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "hasMetaDataForQuestions";
+		fields[2] = "false";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "toGradebook_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "bgImage_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "dueDate_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "ipAccessType_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "finalPageURL_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "feedbackComponents_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "feedbackAuthoring_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "metadataQuestions_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "submissionMessage_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "bgColor_isInstructorEditable";
+		fields[2] = "true";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", null);
+		fields[1] = "ALIAS";
+		fields[2] = IdManager.createUuid();
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		// ID for SAM_PUBLISHEDSECUREDIP_T
+		xid = m_sqlService.getNextSequence("SAM_PUBLISHEDSECUREDIP_ID_S", null);
+
+		statement = "INSERT INTO SAM_PUBLISHEDSECUREDIP_T (ASSESSMENTID, HOSTNAME, IPADDRESS" + ((xid == null) ? "" : ", IPADDRESSID")
+				+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+		fields = new Object[(xid == null) ? 3 : 4];
+		fields[0] = id;
+		fields[1] = null;
+		fields[2] = "";
+		if (xid != null) fields[3] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		// ID for SAM_AUTHZDATA_S
+		xid = m_sqlService.getNextSequence("SAM_AUTHZDATA_S", null);
+
+		statement = "INSERT INTO SAM_AUTHZDATA_T (lockId, AGENTID, FUNCTIONID, QUALIFIERID, EFFECTIVEDATE, EXPIRATIONDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE, ISEXPLICIT"
+				+ ((xid == null) ? "" : ", ID") + ")" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+		fields = new Object[(xid == null) ? 9 : 10];
+		fields[0] = new Integer(0);
+		fields[1] = a.getContext();
+		fields[2] = "OWN_PUBLISHED_ASSESSMENT";
+		fields[3] = id;
+		fields[4] = null;
+		fields[5] = null;
+		fields[6] = "someone";
+		fields[7] = now;
+		fields[8] = null;
+		if (xid != null) fields[9] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_AUTHZDATA_S", null);
+		fields[2] = "TAKE_PUBLISHED_ASSESSMENT";
+		if (xid != null) fields[9] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_AUTHZDATA_S", null);
+		fields[2] = "VIEW_PUBLISHED_ASSESSMENT_FEEDBACK";
+		if (xid != null) fields[9] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_AUTHZDATA_S", null);
+		fields[2] = "GRADE_PUBLISHED_ASSESSMENT";
+		if (xid != null) fields[9] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		xid = m_sqlService.getNextSequence("SAM_AUTHZDATA_S", null);
+		fields[2] = "VIEW_PUBLISHED_ASSESSMENT";
+		if (xid != null) fields[9] = xid;
+		m_sqlService.dbWrite(statement, fields);
+
+		// questions - from each section
+		for (AssessmentSectionImpl section : a.sections)
+		{
+			int questionPosition = 1;
+			for (AssessmentQuestionImpl question : section.questions)
 			{
-				// ID column? For non sequence db vendors, it is defaulted
-				Long sectionId = m_sqlService.getNextSequence("SAM_PUBLISHEDSECTION_ID_S", connection);
-
-				statement = "INSERT INTO SAM_PUBLISHEDSECTION_T"
-						+ " (ASSESSMENTID, DURATION, SEQUENCE, TITLE, DESCRIPTION, TYPEID, STATUS, CREATEDBY, CREATEDDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE"
-						+ ((sectionId == null) ? "" : ", SECTIONID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,?" + ((sectionId == null) ? "" : ",?")
+				// write the question
+				Long questionId = m_sqlService.getNextSequence("SAM_PUBITEM_ID_S", null);
+				statement = "INSERT INTO SAM_PUBLISHEDITEM_T"
+						+ " (SECTIONID, SEQUENCE, TYPEID, SCORE, HASRATIONALE, STATUS, CREATEDBY, CREATEDDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE, INSTRUCTION"
+						+ ((questionId == null) ? "" : ", ITEMID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,?" + ((questionId == null) ? "" : ",?")
 						+ ")";
-				fields = new Object[(sectionId == null) ? 11 : 12];
-				fields[0] = id;
-				fields[1] = null;
-				fields[2] = new Integer(sectionPosition++);
-				fields[3] = section.getTitle(); // TODO: "Default"?
-				fields[4] = section.getDescription();
-				fields[5] = new Integer(21); // TODO: type?
-				fields[6] = new Integer(1); // TODO: status?
-				fields[7] = a.getCreatedBy();
-				fields[8] = now; // TODO: a.getCreated();
-				fields[9] = a.getCreatedBy(); // TODO: a.getModifiedBy()
-				fields[10] = now; // TODO: a.getModified();
+				fields = new Object[(questionId == null) ? 11 : 12];
+				fields[0] = section.getId();
+				fields[1] = new Integer(questionPosition++);
+				fields[2] = question.getType().getDbEncoding();
+				fields[3] = question.getPoints();
+				fields[4] = question.getRequireRationale();
+				fields[5] = new Integer(1);
+				fields[6] = userId;
+				fields[7] = now;
+				fields[8] = userId;
+				fields[9] = now;
+				fields[10] = question.getInstructions();
 
-				if (sectionId != null)
+				if (questionId != null)
 				{
-					fields[11] = sectionId;
-					m_sqlService.dbWrite(connection, statement, fields);
+					fields[11] = questionId;
+					m_sqlService.dbWrite(statement, fields);
 				}
 				else
 				{
-					sectionId = m_sqlService.dbInsert(connection, statement, fields, "SECTIONID");
+					questionId = m_sqlService.dbInsert(null, statement, fields, "ITEMID");
 				}
 
 				// we really need that id
-				if (sectionId == null) throw new Exception("failed to insert section");
-				section.initId(sectionId.toString());
+				if (questionId == null) throw new RuntimeException("failed to insert question");
+				question.initId(questionId.toString());
 
-				// ID for SAM_PUBLISHEDSECTIONMETADATA_T
-				// Note: Samigo as of 2.3 has a bug - using the same sequence as for the ID of SAM_PUBLISHEDASSESSMENT_T -ggolden
-				Long xid = m_sqlService.getNextSequence("SAM_PUBLISHEDASSESSMENT_ID_S", connection);
-
-				statement = "INSERT INTO SAM_PUBLISHEDSECTIONMETADATA_T (SECTIONID, LABEL, ENTRY"
-						+ ((xid == null) ? "" : ", PUBLISHEDSECTIONMETADATAID") + ") values (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
-				fields = new Object[(xid == null) ? 3 : 4];
-				fields[0] = sectionId;
-				fields[1] = "AUTHOR_TYPE";
-				// TODO: this is the draw from pool (value is 2) / authored question (value is 1) - authored for now
-				fields[2] = "1";
-				if (xid != null) fields[3] = xid;
-				m_sqlService.dbWrite(connection, statement, fields);
-
-				xid = m_sqlService.getNextSequence("SAM_PUBLISHEDASSESSMENT_ID_S", connection);
-				fields[1] = "QUESTIONS_ORDERING";
-				fields[2] = ((section.getRandomQuestionOrder() == null) || (!section.getRandomQuestionOrder().booleanValue())) ? "1" : "2";
-				if (xid != null) fields[3] = xid;
-				m_sqlService.dbWrite(connection, statement, fields);
-			}
-
-			// Note: no id column for SAM_PUBLISHEDACCESSCONTROL_T
-			statement = "INSERT INTO SAM_PUBLISHEDACCESSCONTROL_T"
-					+ " (UNLIMITEDSUBMISSIONS, SUBMISSIONSALLOWED, SUBMISSIONSSAVED, ASSESSMENTFORMAT, BOOKMARKINGITEM, TIMELIMIT,"
-					+ " TIMEDASSESSMENT, RETRYALLOWED, LATEHANDLING, STARTDATE, DUEDATE, SCOREDATE, FEEDBACKDATE, RETRACTDATE, AUTOSUBMIT,"
-					+ " ITEMNAVIGATION, ITEMNUMBERING, SUBMISSIONMESSAGE, RELEASETO, USERNAME, PASSWORD, FINALPAGEURL, ASSESSMENTID)"
-					+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-			fields = new Object[23];
-			fields[0] = new Integer(1);
-			fields[1] = null;
-			fields[2] = new Integer(1);
-			fields[3] = ((assessment.getQuestionPresentation() != null) ? assessment.getQuestionPresentation().dbEncoding() : new Integer(1));
-			fields[4] = null;
-			fields[5] = new Integer(0);
-			fields[6] = new Integer(0);
-			fields[7] = null;
-			fields[8] = ((assessment.getAllowLateSubmit() != null) && assessment.getAllowLateSubmit().booleanValue()) ? new Integer(1) : new Integer(
-					0);
-			fields[9] = assessment.getReleaseDate();
-			fields[10] = assessment.getDueDate();
-			fields[11] = null;
-			fields[12] = assessment.getFeedbackDate();
-			fields[13] = assessment.getRetractDate();
-			fields[14] = new Integer(1);
-			fields[15] = ((assessment.getRandomAccess() != null) && assessment.getRandomAccess().booleanValue()) ? new Integer(2) : new Integer(1);
-			fields[16] = ((assessment.getContinuousNumbering() != null) && assessment.getContinuousNumbering().booleanValue()) ? new Integer(1)
-					: new Integer(2);
-			fields[17] = a.getSubmitMessage();
-			fields[18] = a.getContext() + " site";
-			fields[19] = "";
-			fields[20] = a.getPassword();
-			fields[21] = a.getSubmitUrl();
-			fields[22] = id;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			// Note: no id column for SAM_PUBLISHEDEVALUATION_T
-			statement = "INSERT INTO SAM_PUBLISHEDEVALUATION_T"
-					+ " (EVALUATIONCOMPONENTS, SCORINGTYPE, NUMERICMODELID, FIXEDTOTALSCORE, GRADEAVAILABLE, ISSTUDENTIDPUBLIC,"
-					+ " ANONYMOUSGRADING, AUTOSCORING, TOGRADEBOOK, ASSESSMENTID)" + " VALUES (?,?,?,?,?,?,?,?,?,?)";
-			fields = new Object[10];
-			fields[0] = "";
-			fields[1] = new Integer(1);
-			fields[2] = "";
-			fields[3] = null;
-			fields[4] = null;
-			fields[5] = null;
-			fields[6] = new Integer(2); // 1-anon, 2-students id visible
-			fields[7] = null;
-			fields[8] = ((a.getGradebookIntegration() != null) && (a.gradebookIntegeration.booleanValue())) ? new Integer(1) : new Integer(2); // 1-to
-			// gradebook,
-			// 2-not
-			fields[9] = id;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			// Note: no id column for SAM_PUBLISHEDFEEDBACK_T
-			statement = "INSERT INTO SAM_PUBLISHEDFEEDBACK_T"
-					+ " (FEEDBACKDELIVERY, FEEDBACKAUTHORING, EDITCOMPONENTS, SHOWQUESTIONTEXT, SHOWSTUDENTRESPONSE,"
-					+ " SHOWCORRECTRESPONSE, SHOWSTUDENTSCORE, SHOWSTUDENTQUESTIONSCORE, SHOWQUESTIONLEVELFEEDBACK,"
-					+ " SHOWSELECTIONLEVELFEEDBACK, SHOWGRADERCOMMENTS, SHOWSTATISTICS, ASSESSMENTID)" + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-			fields = new Object[13];
-			fields[0] = assessment.getFeedbackDelivery() == null ? new Integer(1) : assessment.getFeedbackDelivery().dbEncoding();
-			fields[1] = new Integer(1);
-			fields[2] = new Integer(1);
-			fields[3] = new Integer(1);
-			fields[4] = new Integer(1);
-			fields[5] = ((assessment.getFeedbackShowCorrectAnswer() == null) || (!assessment.getFeedbackShowCorrectAnswer().booleanValue())) ? new Integer(
-					0)
-					: new Integer(1);
-			fields[6] = new Integer(1);
-			fields[7] = ((assessment.getFeedbackShowQuestionScore() == null) || (!assessment.getFeedbackShowQuestionScore().booleanValue())) ? new Integer(
-					0)
-					: new Integer(1);
-			fields[8] = ((assessment.getFeedbackShowQuestionFeedback() == null) || (!assessment.getFeedbackShowQuestionFeedback().booleanValue())) ? new Integer(
-					0)
-					: new Integer(1);
-			fields[9] = ((assessment.getFeedbackShowAnswerFeedback() == null) || (!assessment.getFeedbackShowAnswerFeedback().booleanValue())) ? new Integer(
-					0)
-					: new Integer(1);
-			fields[10] = new Integer(1);
-			fields[11] = ((assessment.getFeedbackShowStatistics() == null) || (!assessment.getFeedbackShowStatistics().booleanValue())) ? new Integer(
-					0)
-					: new Integer(1);
-			fields[12] = id;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			// ID for SAM_PUBLISHEDMETADATA_T
-			Long xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-
-			statement = "INSERT INTO SAM_PUBLISHEDMETADATA_T (ASSESSMENTID, LABEL, ENTRY" + ((xid == null) ? "" : ", ASSESSMENTMETADATAID")
-					+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
-			fields = new Object[(xid == null) ? 3 : 4];
-			fields[0] = id;
-			fields[1] = "assessmentAuthor_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "retractDate_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "description_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "testeeIdentity_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "anonymousRelease_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "timedAssessment_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "displayNumbering_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "feedbackType_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "submissionModel_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "templateInfo_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "timedAssessmentAutoSubmit_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "releaseDate_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "releaseTo";
-			fields[2] = "SITE_MEMBERS";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "authenticatedRelease_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "hasTimeAssessment";
-			fields[2] = "false";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "displayChunking_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "metadataAssess_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "passwordRequired_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "lateHandling_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "recordedScore_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "author";
-			fields[2] = "";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "itemAccessType_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "hasMetaDataForQuestions";
-			fields[2] = "false";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "toGradebook_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "bgImage_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "dueDate_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "ipAccessType_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "finalPageURL_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "feedbackComponents_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "feedbackAuthoring_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "metadataQuestions_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "submissionMessage_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "bgColor_isInstructorEditable";
-			fields[2] = "true";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDMETADATA_ID_S", connection);
-			fields[1] = "ALIAS";
-			fields[2] = IdManager.createUuid();
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			// ID for SAM_PUBLISHEDSECUREDIP_T
-			xid = m_sqlService.getNextSequence("SAM_PUBLISHEDSECUREDIP_ID_S", connection);
-
-			statement = "INSERT INTO SAM_PUBLISHEDSECUREDIP_T (ASSESSMENTID, HOSTNAME, IPADDRESS" + ((xid == null) ? "" : ", IPADDRESSID")
-					+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
-			fields = new Object[(xid == null) ? 3 : 4];
-			fields[0] = id;
-			fields[1] = null;
-			fields[2] = "";
-			if (xid != null) fields[3] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			// ID for SAM_AUTHZDATA_S
-			xid = m_sqlService.getNextSequence("SAM_AUTHZDATA_S", connection);
-
-			statement = "INSERT INTO SAM_AUTHZDATA_T (lockId, AGENTID, FUNCTIONID, QUALIFIERID, EFFECTIVEDATE, EXPIRATIONDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE, ISEXPLICIT"
-					+ ((xid == null) ? "" : ", ID") + ")" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
-			fields = new Object[(xid == null) ? 9 : 10];
-			fields[0] = new Integer(0);
-			fields[1] = a.getContext();
-			fields[2] = "OWN_PUBLISHED_ASSESSMENT";
-			fields[3] = id;
-			fields[4] = null;
-			fields[5] = null;
-			fields[6] = "someone";
-			fields[7] = now;
-			fields[8] = null;
-			if (xid != null) fields[9] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_AUTHZDATA_S", connection);
-			fields[2] = "TAKE_PUBLISHED_ASSESSMENT";
-			if (xid != null) fields[9] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_AUTHZDATA_S", connection);
-			fields[2] = "VIEW_PUBLISHED_ASSESSMENT_FEEDBACK";
-			if (xid != null) fields[9] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_AUTHZDATA_S", connection);
-			fields[2] = "GRADE_PUBLISHED_ASSESSMENT";
-			if (xid != null) fields[9] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			xid = m_sqlService.getNextSequence("SAM_AUTHZDATA_S", connection);
-			fields[2] = "VIEW_PUBLISHED_ASSESSMENT";
-			if (xid != null) fields[9] = xid;
-			m_sqlService.dbWrite(connection, statement, fields);
-
-			// questions - from each section
-			for (AssessmentSectionImpl section : a.sections)
-			{
-				int questionPosition = 1;
-				for (AssessmentQuestionImpl question : section.questions)
+				// parts (these go into the item text table)
+				int sequence = 1;
+				for (QuestionPart part : question.getParts())
 				{
-					// write the question
-					Long questionId = m_sqlService.getNextSequence("SAM_PUBITEM_ID_S", connection);
-					statement = "INSERT INTO SAM_PUBLISHEDITEM_T"
-							+ " (SECTIONID, SEQUENCE, TYPEID, SCORE, HASRATIONALE, STATUS, CREATEDBY, CREATEDDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE, INSTRUCTION"
-							+ ((questionId == null) ? "" : ", ITEMID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,?" + ((questionId == null) ? "" : ",?")
-							+ ")";
-					fields = new Object[(questionId == null) ? 11 : 12];
-					fields[0] = section.getId();
-					fields[1] = new Integer(questionPosition++);
-					fields[2] = question.getType().getDbEncoding();
-					fields[3] = question.getPoints();
-					fields[4] = question.getRequireRationale();
-					fields[5] = new Integer(1);
-					fields[6] = userId;
-					fields[7] = now;
-					fields[8] = userId;
-					fields[9] = now;
-					fields[10] = question.getInstructions();
-
-					if (questionId != null)
+					Long partId = m_sqlService.getNextSequence("SAM_PUBITEMTEXT_ID_S", null);
+					statement = "INSERT INTO SAM_PUBLISHEDITEMTEXT_T (ITEMID, SEQUENCE, TEXT" + ((partId == null) ? "" : ", ITEMTEXTID") + ")"
+							+ " VALUES (?, ?, ?" + ((partId == null) ? "" : ",?") + ")";
+					fields = new Object[(partId == null) ? 3 : 4];
+					fields[0] = questionId;
+					fields[1] = new Integer(sequence++);
+					fields[2] = part.getTitle();
+					if (partId != null)
 					{
-						fields[11] = questionId;
-						m_sqlService.dbWrite(connection, statement, fields);
+						fields[3] = partId;
+						m_sqlService.dbWrite(statement, fields);
 					}
 					else
 					{
-						questionId = m_sqlService.dbInsert(connection, statement, fields, "ITEMID");
+						partId = m_sqlService.dbInsert(null, statement, fields, "ITEMTEXTID");
 					}
+					((QuestionPartImpl) part).initId(partId.toString());
 
-					// we really need that id
-					if (questionId == null) throw new Exception("failed to insert question");
-					question.initId(questionId.toString());
-
-					// parts (these go into the item text table)
-					int sequence = 1;
-					for (QuestionPart part : question.getParts())
+					// answers - from each part
+					int answerPosition = 1;
+					for (AssessmentAnswer answer : part.getAnswersAsAuthored())
 					{
-						Long partId = m_sqlService.getNextSequence("SAM_PUBITEMTEXT_ID_S", connection);
-						statement = "INSERT INTO SAM_PUBLISHEDITEMTEXT_T (ITEMID, SEQUENCE, TEXT" + ((partId == null) ? "" : ", ITEMTEXTID") + ")"
-								+ " VALUES (?, ?, ?" + ((partId == null) ? "" : ",?") + ")";
-						fields = new Object[(partId == null) ? 3 : 4];
-						fields[0] = questionId;
-						fields[1] = new Integer(sequence++);
-						fields[2] = part.getTitle();
-						if (partId != null)
+						Long answerId = m_sqlService.getNextSequence("SAM_PUBANSWER_ID_S", null);
+						statement = "INSERT INTO SAM_PUBLISHEDANSWER_T" + " (ITEMTEXTID, ITEMID, TEXT, SEQUENCE, LABEL, ISCORRECT, SCORE"
+								+ ((answerId == null) ? "" : ", ANSWERID") + ")" + " VALUES (?,?,?,?,?,?,?" + ((answerId == null) ? "" : ",?") + ")";
+						fields = new Object[(answerId == null) ? 7 : 8];
+						fields[0] = partId;
+						fields[1] = questionId;
+						fields[2] = answer.getText();
+						fields[3] = new Integer(answerPosition++);
+						fields[4] = answer.getLabel();
+						fields[5] = answer.getIsCorrect();
+						fields[6] = question.getPoints();
+
+						if (answerId != null)
 						{
-							fields[3] = partId;
-							m_sqlService.dbWrite(connection, statement, fields);
+							fields[7] = answerId;
+							m_sqlService.dbWrite(statement, fields);
 						}
 						else
 						{
-							partId = m_sqlService.dbInsert(connection, statement, fields, "ITEMTEXTID");
+							answerId = m_sqlService.dbInsert(null, statement, fields, "ANSWERID");
 						}
-						((QuestionPartImpl) part).initId(partId.toString());
 
-						// answers - from each part
-						int answerPosition = 1;
-						for (AssessmentAnswer answer : part.getAnswersAsAuthored())
+						// we really need that id
+						if (answerId == null) throw new RuntimeException("failed to insert answer");
+						((AssessmentAnswerImpl) answer).initId(answerId.toString());
+
+						// answer feedback
+						if (answer.getFeedbackIncorrect() != null)
 						{
-							Long answerId = m_sqlService.getNextSequence("SAM_PUBANSWER_ID_S", connection);
-							statement = "INSERT INTO SAM_PUBLISHEDANSWER_T" + " (ITEMTEXTID, ITEMID, TEXT, SEQUENCE, LABEL, ISCORRECT, SCORE"
-									+ ((answerId == null) ? "" : ", ANSWERID") + ")" + " VALUES (?,?,?,?,?,?,?" + ((answerId == null) ? "" : ",?")
-									+ ")";
-							fields = new Object[(answerId == null) ? 7 : 8];
-							fields[0] = partId;
-							fields[1] = questionId;
-							fields[2] = answer.getText();
-							fields[3] = new Integer(answerPosition++);
-							fields[4] = answer.getLabel();
-							fields[5] = answer.getIsCorrect();
-							fields[6] = question.getPoints();
+							xid = m_sqlService.getNextSequence("SAM_PUBANSWERFEEDBACK_ID_S", null);
+							statement = "INSERT INTO SAM_PUBLISHEDANSWERFEEDBACK_T (ANSWERID, TYPEID, TEXT"
+									+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+							fields = new Object[(xid == null) ? 3 : 4];
+							fields[0] = answerId;
+							fields[1] = "InCorrect Feedback";
+							fields[2] = answer.getFeedbackIncorrect();
+							if (xid != null) fields[3] = xid;
+							m_sqlService.dbWrite(statement, fields);
+						}
 
-							if (answerId != null)
-							{
-								fields[7] = answerId;
-								m_sqlService.dbWrite(connection, statement, fields);
-							}
-							else
-							{
-								answerId = m_sqlService.dbInsert(connection, statement, fields, "ANSWERID");
-							}
+						if (answer.getFeedbackCorrect() != null)
+						{
+							xid = m_sqlService.getNextSequence("SAM_PUBANSWERFEEDBACK_ID_S", null);
+							statement = "INSERT INTO SAM_PUBLISHEDANSWERFEEDBACK_T (ANSWERID, TYPEID, TEXT"
+									+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+							fields = new Object[(xid == null) ? 3 : 4];
+							fields[0] = answerId;
+							fields[1] = "Correct Feedback";
+							fields[2] = answer.getFeedbackCorrect();
+							if (xid != null) fields[3] = xid;
+							m_sqlService.dbWrite(statement, fields);
+						}
 
-							// we really need that id
-							if (answerId == null) throw new Exception("failed to insert answer");
-							((AssessmentAnswerImpl) answer).initId(answerId.toString());
-
-							// answer feedback
-							if (answer.getFeedbackIncorrect() != null)
-							{
-								xid = m_sqlService.getNextSequence("SAM_PUBANSWERFEEDBACK_ID_S", connection);
-								statement = "INSERT INTO SAM_PUBLISHEDANSWERFEEDBACK_T (ANSWERID, TYPEID, TEXT"
-										+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
-								fields = new Object[(xid == null) ? 3 : 4];
-								fields[0] = answerId;
-								fields[1] = "InCorrect Feedback";
-								fields[2] = answer.getFeedbackIncorrect();
-								if (xid != null) fields[3] = xid;
-								m_sqlService.dbWrite(connection, statement, fields);
-							}
-
-							if (answer.getFeedbackCorrect() != null)
-							{
-								xid = m_sqlService.getNextSequence("SAM_PUBANSWERFEEDBACK_ID_S", connection);
-								statement = "INSERT INTO SAM_PUBLISHEDANSWERFEEDBACK_T (ANSWERID, TYPEID, TEXT"
-										+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
-								fields = new Object[(xid == null) ? 3 : 4];
-								fields[0] = answerId;
-								fields[1] = "Correct Feedback";
-								fields[2] = answer.getFeedbackCorrect();
-								if (xid != null) fields[3] = xid;
-								m_sqlService.dbWrite(connection, statement, fields);
-							}
-
-							if (answer.getFeedbackGeneral() != null)
-							{
-								xid = m_sqlService.getNextSequence("SAM_PUBANSWERFEEDBACK_ID_S", connection);
-								statement = "INSERT INTO SAM_PUBLISHEDANSWERFEEDBACK_T (ANSWERID, TYPEID, TEXT"
-										+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
-								fields = new Object[(xid == null) ? 3 : 4];
-								fields[0] = answerId;
-								fields[1] = "General Feedback";
-								fields[2] = answer.getFeedbackGeneral();
-								if (xid != null) fields[3] = xid;
-								m_sqlService.dbWrite(connection, statement, fields);
-							}
+						if (answer.getFeedbackGeneral() != null)
+						{
+							xid = m_sqlService.getNextSequence("SAM_PUBANSWERFEEDBACK_ID_S", null);
+							statement = "INSERT INTO SAM_PUBLISHEDANSWERFEEDBACK_T (ANSWERID, TYPEID, TEXT"
+									+ ((xid == null) ? "" : ", ANSWERFEEDBACKID") + ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+							fields = new Object[(xid == null) ? 3 : 4];
+							fields[0] = answerId;
+							fields[1] = "General Feedback";
+							fields[2] = answer.getFeedbackGeneral();
+							if (xid != null) fields[3] = xid;
+							m_sqlService.dbWrite(statement, fields);
 						}
 					}
+				}
 
-					// question feedback
-					if (question.getFeedbackIncorrect() != null)
-					{
-						xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", connection);
-						statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT" + ((xid == null) ? "" : ", ITEMFEEDBACKID")
-								+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
-						fields = new Object[(xid == null) ? 3 : 4];
-						fields[0] = questionId;
-						fields[1] = "InCorrect Feedback";
-						fields[2] = question.getFeedbackIncorrect();
-						if (xid != null) fields[3] = xid;
-						m_sqlService.dbWrite(connection, statement, fields);
-					}
-
-					if (question.getFeedbackCorrect() != null)
-					{
-						xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", connection);
-						statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT" + ((xid == null) ? "" : ", ITEMFEEDBACKID")
-								+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
-						fields = new Object[(xid == null) ? 3 : 4];
-						fields[0] = questionId;
-						fields[1] = "Correct Feedback";
-						fields[2] = question.getFeedbackCorrect();
-						if (xid != null) fields[3] = xid;
-						m_sqlService.dbWrite(connection, statement, fields);
-					}
-
-					if (question.getFeedbackGeneral() != null)
-					{
-						xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", connection);
-						statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT" + ((xid == null) ? "" : ", ITEMFEEDBACKID")
-								+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
-						fields = new Object[(xid == null) ? 3 : 4];
-						fields[0] = questionId;
-						fields[1] = "General Feedback";
-						fields[2] = question.getFeedbackGeneral();
-						if (xid != null) fields[3] = xid;
-						m_sqlService.dbWrite(connection, statement, fields);
-					}
-
-					// question metadata
-					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
-					statement = "INSERT INTO SAM_PUBLISHEDITEMMETADATA_T (ITEMID, LABEL, ENTRY" + ((xid == null) ? "" : ", ITEMMETADATAID")
+				// question feedback
+				if (question.getFeedbackIncorrect() != null)
+				{
+					xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", null);
+					statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT" + ((xid == null) ? "" : ", ITEMFEEDBACKID")
 							+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
 					fields = new Object[(xid == null) ? 3 : 4];
 					fields[0] = questionId;
-					fields[1] = "POOLID";
-					fields[2] = "";
+					fields[1] = "InCorrect Feedback";
+					fields[2] = question.getFeedbackIncorrect();
 					if (xid != null) fields[3] = xid;
-					m_sqlService.dbWrite(connection, statement, fields);
-
-					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
-					fields[1] = "MUTUALLY_EXCLUSIVE";
-					fields[2] = ((question.getMutuallyExclusive() != null) && question.getMutuallyExclusive().booleanValue()) ? "true" : "false";
-					if (xid != null) fields[3] = xid;
-					m_sqlService.dbWrite(connection, statement, fields);
-
-					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
-					fields[1] = "PARTID";
-					fields[2] = "1"; // TODO: ???
-					if (xid != null) fields[3] = xid;
-					m_sqlService.dbWrite(connection, statement, fields);
-
-					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
-					fields[1] = "RANDOMIZE";
-					fields[2] = ((question.getRandomAnswerOrder() != null) && question.getRandomAnswerOrder().booleanValue()) ? "true" : "false";
-					if (xid != null) fields[3] = xid;
-					m_sqlService.dbWrite(connection, statement, fields);
-
-					xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", connection);
-					fields[1] = "CASE_SENSITIVE";
-					fields[2] = ((question.getCaseSensitive() != null) && question.getCaseSensitive().booleanValue()) ? "true" : "false";
-					if (xid != null) fields[3] = xid;
-					m_sqlService.dbWrite(connection, statement, fields);
+					m_sqlService.dbWrite(statement, fields);
 				}
-			}
 
-			// TODO: assessment attachments into SAM_PUBLISHEDATTACHMENT_T setting ATTACHMENTID, ATTACHMENTTYPE=1, RESOURCEID from
-			// the attachment ref id, ASSESSMENTID
-
-			connection.commit();
-
-			// event track it
-			if (m_threadLocalManager.get("sakai.event.suppress") == null)
-			{
-				m_eventTrackingService.post(m_eventTrackingService.newEvent(ASSESSMENT_PUBLISH, getAssessmentReference(assessment.getId()), true));
-			}
-
-			// cache a copy
-			cacheAssessment(new AssessmentImpl((AssessmentImpl) assessment));
-		}
-		catch (Exception e)
-		{
-			if (connection != null)
-			{
-				try
+				if (question.getFeedbackCorrect() != null)
 				{
-					connection.rollback();
-				}
-				catch (Exception ee)
-				{
-					M_log.warn("addAssessment: rollback: " + ee);
-				}
-			}
-			M_log.warn("addAssessment: " + e);
-		}
-		finally
-		{
-			if (connection != null)
-			{
-				// restore autocommit, if it was not false
-				try
-				{
-					if (wasCommit) connection.setAutoCommit(wasCommit);
-				}
-				catch (Exception e)
-				{
-					M_log.warn("addAssessment, while setting auto commit: " + e);
+					xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", null);
+					statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT" + ((xid == null) ? "" : ", ITEMFEEDBACKID")
+							+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+					fields = new Object[(xid == null) ? 3 : 4];
+					fields[0] = questionId;
+					fields[1] = "Correct Feedback";
+					fields[2] = question.getFeedbackCorrect();
+					if (xid != null) fields[3] = xid;
+					m_sqlService.dbWrite(statement, fields);
 				}
 
-				// return the connetion
-				m_sqlService.returnConnection(connection);
+				if (question.getFeedbackGeneral() != null)
+				{
+					xid = m_sqlService.getNextSequence("SAM_PUBITEMFEEDBACK_ID_S", null);
+					statement = "INSERT INTO SAM_PUBLISHEDITEMFEEDBACK_T (ITEMID, TYPEID, TEXT" + ((xid == null) ? "" : ", ITEMFEEDBACKID")
+							+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+					fields = new Object[(xid == null) ? 3 : 4];
+					fields[0] = questionId;
+					fields[1] = "General Feedback";
+					fields[2] = question.getFeedbackGeneral();
+					if (xid != null) fields[3] = xid;
+					m_sqlService.dbWrite(statement, fields);
+				}
+
+				// question metadata
+				xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", null);
+				statement = "INSERT INTO SAM_PUBLISHEDITEMMETADATA_T (ITEMID, LABEL, ENTRY" + ((xid == null) ? "" : ", ITEMMETADATAID")
+						+ ") VALUES (?, ?, ?" + ((xid == null) ? "" : ",?") + ")";
+				fields = new Object[(xid == null) ? 3 : 4];
+				fields[0] = questionId;
+				fields[1] = "POOLID";
+				fields[2] = "";
+				if (xid != null) fields[3] = xid;
+				m_sqlService.dbWrite(statement, fields);
+
+				xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", null);
+				fields[1] = "MUTUALLY_EXCLUSIVE";
+				fields[2] = ((question.getMutuallyExclusive() != null) && question.getMutuallyExclusive().booleanValue()) ? "true" : "false";
+				if (xid != null) fields[3] = xid;
+				m_sqlService.dbWrite(statement, fields);
+
+				xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", null);
+				fields[1] = "PARTID";
+				fields[2] = "1"; // TODO: ???
+				if (xid != null) fields[3] = xid;
+				m_sqlService.dbWrite(statement, fields);
+
+				xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", null);
+				fields[1] = "RANDOMIZE";
+				fields[2] = ((question.getRandomAnswerOrder() != null) && question.getRandomAnswerOrder().booleanValue()) ? "true" : "false";
+				if (xid != null) fields[3] = xid;
+				m_sqlService.dbWrite(statement, fields);
+
+				xid = m_sqlService.getNextSequence("SAM_PUBITEMMETADATA_ID_S", null);
+				fields[1] = "CASE_SENSITIVE";
+				fields[2] = ((question.getCaseSensitive() != null) && question.getCaseSensitive().booleanValue()) ? "true" : "false";
+				if (xid != null) fields[3] = xid;
+				m_sqlService.dbWrite(statement, fields);
 			}
 		}
+
+		// TODO: assessment attachments into SAM_PUBLISHEDATTACHMENT_T setting ATTACHMENTID, ATTACHMENTTYPE=1, RESOURCEID from
+		// the attachment ref id, ASSESSMENTID
 	}
 
 	/**
@@ -3584,7 +3554,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public void addSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException, AssessmentCompletedException
+	public void addSubmission(final Submission submission) throws AssessmentPermissionException, AssessmentClosedException,
+			AssessmentCompletedException
 	{
 		// TODO: update the date to now? That would block past / future dating for special purposes... -ggolden
 
@@ -3611,7 +3582,20 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			throw new AssessmentCompletedException();
 		}
 
-		addSubmission(submission, null);
+		if (M_log.isDebugEnabled()) M_log.debug("addSubmission: " + submission.getId());
+
+		// run our save code in a transaction that will restart on deadlock
+		// if deadlock retry fails, or any other error occurs, a runtime error will be thrown
+		m_sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				addSubmissionTx(submission);
+			}
+		}, "addSubmission:" + submission.getId());
+
+		// cache a copy
+		cacheSubmission(new SubmissionImpl((SubmissionImpl) submission));
 
 		// event track it
 		if (m_threadLocalManager.get("sakai.event.suppress") == null)
@@ -3621,169 +3605,94 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	}
 
 	/**
-	 * Add a submission, possibly using an established connection / transaction
-	 * 
-	 * @param submission
-	 *        The submission.
-	 * @param conn
-	 *        The connection, or null to use a new one.
+	 * The transaction for addSubmission
 	 */
-	protected void addSubmission(Submission submission, Connection conn)
+	protected void addSubmissionTx(Submission submission)
 	{
-		if (M_log.isDebugEnabled()) M_log.debug("addSubmission: " + submission.getId());
-
 		// TODO: eval? skip it?
 
 		// we only work with our impl
 		SubmissionImpl s = (SubmissionImpl) submission;
 
-		// persist - all in one transaction
-		Connection connection = null;
-		boolean wasCommit = true;
-		try
+		// ID column? For non sequence db vendors, it is defaulted
+		Long id = m_sqlService.getNextSequence("SAM_ASSESSMENTGRADING_ID_S", null);
+
+		// Note: ASSESSMENTGRADINGID column is set to autoincrement... by using the special JDBC feature in dbInsert, we get the
+		// value just allocated
+		String statement = "INSERT INTO SAM_ASSESSMENTGRADING_T"
+				+ " (PUBLISHEDASSESSMENTID, AGENTID, SUBMITTEDDATE, ISLATE, FORGRADE, TOTALAUTOSCORE,"
+				+ " TOTALOVERRIDESCORE, FINALSCORE, STATUS, ATTEMPTDATE, TIMEELAPSED" + ((id == null) ? "" : ", ASSESSMENTGRADINGID") + ")"
+				+ " VALUES (?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?") + ")";
+		Object fields[] = new Object[(id == null) ? 11 : 12];
+		fields[0] = s.getAssessmentId();
+		fields[1] = s.getUserId();
+		fields[2] = s.getSubmittedDate();
+		fields[3] = new Integer(0); // TODO: islate
+		fields[4] = s.getIsComplete().booleanValue() ? new Integer(1) : new Integer(0);
+		fields[5] = s.getAnswersAutoScore();
+		fields[6] = new Float(0); // TODO: from evaluation, the total of all manual scores for the submission
+		fields[7] = fields[5]; // TODO: from evaluation, the total score, auto plus manual...
+		fields[8] = s.getStatus();
+		fields[9] = s.getStartDate();
+		fields[10] = (s.getElapsedTime() == null) ? null : (s.getElapsedTime() / 1000);
+
+		if (id != null)
 		{
-			// use the passed connection, or get and prep a new one
-			if (conn == null)
-			{
-				connection = m_sqlService.borrowConnection();
-				wasCommit = connection.getAutoCommit();
-				connection.setAutoCommit(false);
-			}
-			else
-			{
-				connection = conn;
-			}
-
-			// ID column? For non sequence db vendors, it is defaulted
-			Long id = m_sqlService.getNextSequence("SAM_ASSESSMENTGRADING_ID_S", connection);
-
-			// Note: ASSESSMENTGRADINGID column is set to autoincrement... by using the special JDBC feature in dbInsert, we get the
-			// value just allocated
-			String statement = "INSERT INTO SAM_ASSESSMENTGRADING_T"
-					+ " (PUBLISHEDASSESSMENTID, AGENTID, SUBMITTEDDATE, ISLATE, FORGRADE, TOTALAUTOSCORE,"
-					+ " TOTALOVERRIDESCORE, FINALSCORE, STATUS, ATTEMPTDATE, TIMEELAPSED" + ((id == null) ? "" : ", ASSESSMENTGRADINGID") + ")"
-					+ " VALUES (?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?") + ")";
-			Object fields[] = new Object[(id == null) ? 11 : 12];
-			fields[0] = s.getAssessmentId();
-			fields[1] = s.getUserId();
-			fields[2] = s.getSubmittedDate();
-			fields[3] = new Integer(0); // TODO: islate
-			fields[4] = s.getIsComplete().booleanValue() ? new Integer(1) : new Integer(0);
-			fields[5] = s.getAnswersAutoScore();
-			fields[6] = new Float(0); // TODO: from evaluation, the total of all manual scores for the submission
-			fields[7] = fields[5]; // TODO: from evaluation, the total score, auto plus manual...
-			fields[8] = s.getStatus();
-			fields[9] = s.getStartDate();
-			fields[10] = (s.getElapsedTime() == null) ? null : (s.getElapsedTime() / 1000);
-
-			if (id != null)
-			{
-				fields[11] = id;
-				m_sqlService.dbWrite(connection, statement, fields);
-			}
-			else
-			{
-				id = m_sqlService.dbInsert(connection, statement, fields, "ASSESSMENTGRADINGID");
-			}
-
-			// we really need that id
-			if (id == null) throw new Exception("failed to insert submission");
-
-			// update the id
-			s.initId(id.toString());
-
-			// answers
-			for (SubmissionAnswerImpl answer : s.answers)
-			{
-				// each answer has one or more entries
-				for (SubmissionAnswerEntryImpl entry : answer.entries)
-				{
-					Long answerId = m_sqlService.getNextSequence("SAM_ITEMGRADING_ID_S", connection);
-
-					statement = "INSERT INTO SAM_ITEMGRADING_T"
-							+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
-							+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE" + ((answerId == null) ? "" : ", ITEMGRADINGID") + ")"
-							+ " VALUES (?,?,?,?,?,?,?,?,?,?" + ((answerId == null) ? "" : ",?") + ")";
-					fields = new Object[(answerId == null) ? 10 : 11];
-					fields[0] = answer.getSubmission().getId();
-					fields[1] = answer.getQuestionId();
-					// if the entry's assessment answer is null, use the single part id
-					fields[2] = (entry.getAssessmentAnswer() != null) ? entry.getAssessmentAnswer().getPart().getId() : answer.getQuestion()
-							.getPart().getId();
-					fields[3] = s.getUserId();
-					fields[4] = answer.getSubmittedDate();
-					fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
-					fields[6] = answer.getRationale();
-					fields[7] = entry.getAnswerText();
-					fields[8] = entry.getAutoScore();
-					fields[9] = new Float(0); // TODO: manual score from evaluation for this answer (divided up over the entries)
-
-					if (answerId != null)
-					{
-						fields[10] = answerId;
-						m_sqlService.dbWrite(connection, statement, fields);
-					}
-					else
-					{
-						answerId = m_sqlService.dbInsert(connection, statement, fields, "ITEMGRADINGID");
-					}
-
-					// we really need that id
-					if (answerId == null) throw new Exception("failed to insert submission answer");
-					entry.initId(answerId.toString());
-				}
-			}
-
-			// commit only if we are using a new connection
-			if (conn == null)
-			{
-				connection.commit();
-			}
+			fields[11] = id;
+			m_sqlService.dbWrite(statement, fields);
 		}
-		catch (Exception e)
+		else
 		{
-			// rollback only if we are on a new connection
-			if (conn == null)
-			{
-				if (connection != null)
-				{
-					try
-					{
-						connection.rollback();
-					}
-					catch (Exception ee)
-					{
-						M_log.warn("addSubmission: rollback: " + ee);
-					}
-				}
-			}
-			M_log.warn("addSubmission: " + e);
-		}
-		finally
-		{
-			// cleanup and return, only of we are on a new connection
-			if (conn == null)
-			{
-				if (connection != null)
-				{
-					// restore autocommit, if it was not false
-					try
-					{
-						if (wasCommit) connection.setAutoCommit(wasCommit);
-					}
-					catch (Exception e)
-					{
-						M_log.warn("addSubmission, while setting auto commit: " + e);
-					}
-
-					// return the connetion
-					m_sqlService.returnConnection(connection);
-				}
-			}
+			id = m_sqlService.dbInsert(null, statement, fields, "ASSESSMENTGRADINGID");
 		}
 
-		// cache a copy
-		cacheSubmission(new SubmissionImpl((SubmissionImpl) submission));
+		// we really need that id
+		if (id == null) throw new RuntimeException("failed to insert submission");
+
+		// update the id
+		s.initId(id.toString());
+
+		// answers
+		for (SubmissionAnswerImpl answer : s.answers)
+		{
+			// each answer has one or more entries
+			for (SubmissionAnswerEntryImpl entry : answer.entries)
+			{
+				Long answerId = m_sqlService.getNextSequence("SAM_ITEMGRADING_ID_S", null);
+
+				statement = "INSERT INTO SAM_ITEMGRADING_T"
+						+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
+						+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE" + ((answerId == null) ? "" : ", ITEMGRADINGID") + ")"
+						+ " VALUES (?,?,?,?,?,?,?,?,?,?" + ((answerId == null) ? "" : ",?") + ")";
+				fields = new Object[(answerId == null) ? 10 : 11];
+				fields[0] = answer.getSubmission().getId();
+				fields[1] = answer.getQuestionId();
+				// if the entry's assessment answer is null, use the single part id
+				fields[2] = (entry.getAssessmentAnswer() != null) ? entry.getAssessmentAnswer().getPart().getId() : answer.getQuestion().getPart()
+						.getId();
+				fields[3] = s.getUserId();
+				fields[4] = answer.getSubmittedDate();
+				fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
+				fields[6] = answer.getRationale();
+				fields[7] = entry.getAnswerText();
+				fields[8] = entry.getAutoScore();
+				fields[9] = new Float(0); // TODO: manual score from evaluation for this answer (divided up over the entries)
+
+				if (answerId != null)
+				{
+					fields[10] = answerId;
+					m_sqlService.dbWrite(statement, fields);
+				}
+				else
+				{
+					answerId = m_sqlService.dbInsert(null, statement, fields, "ITEMGRADINGID");
+				}
+
+				// we really need that id
+				if (answerId == null) throw new RuntimeException("failed to insert submission answer");
+				entry.initId(answerId.toString());
+			}
+		}
 	}
 
 	/**
@@ -3923,13 +3832,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (!isAssessmentOpen(assessment, asOf, 0)) throw new AssessmentClosedException();
 
 		// see if we have one already
-		Submission submission = getSubmissionInProgress(assessment, userId);
-		if (submission != null)
+		Submission submissionInProgress = getSubmissionInProgress(assessment, userId);
+		if (submissionInProgress != null)
 		{
 			// event track it (not a modify event)
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_REENTER, getSubmissionReference(submission.getId()), false));
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_REENTER, getSubmissionReference(submissionInProgress.getId()), false));
 
-			return submission;
+			return submissionInProgress;
 		}
 
 		// if not, can we make one? Check if there are remaining submissions for this user
@@ -3941,13 +3850,26 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		// TODO: it is possible to make too many submissions for the assessment.
 		// If this method is entered concurrently for the same user and assessment, the previous count check might fail.
-		submission = newSubmission(assessment);
+		final Submission submission = newSubmission(assessment);
 		submission.setUserId(userId);
 		submission.setStatus(new Integer(0));
 		submission.setIsComplete(Boolean.FALSE);
 		submission.setStartDate(asOf);
 
-		addSubmission(submission, null);
+		if (M_log.isDebugEnabled()) M_log.debug("addSubmission: " + submission.getId());
+
+		// run our save code in a transaction that will restart on deadlock
+		// if deadlock retry fails, or any other error occurs, a runtime error will be thrown
+		m_sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				addSubmissionTx(submission);
+			}
+		}, "addSubmission:" + submission.getId());
+
+		// cache a copy
+		cacheSubmission(new SubmissionImpl((SubmissionImpl) submission));
 
 		// event track it
 		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ENTER, getSubmissionReference(submission.getId()), true));
@@ -3969,7 +3891,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public void submitAnswers(List<SubmissionAnswer> answers, Boolean completeAnswers, Boolean completSubmission)
+	public void submitAnswers(final List<SubmissionAnswer> answers, Boolean completeAnswers, final Boolean completSubmission)
 			throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException
 	{
 		if ((answers == null) || (answers.size() == 0)) return;
@@ -4024,203 +3946,32 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			answer.autoScore();
 		}
 
-		Connection connection = null;
-		boolean wasCommit = true;
-		try
+		// run our save code in a transaction that will restart on deadlock
+		// if deadlock retry fails, or any other error occurs, a runtime error will be thrown
+		m_sqlService.transact(new Runnable()
 		{
-			connection = m_sqlService.borrowConnection();
-			wasCommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
-
-			for (SubmissionAnswer answer : answers)
+			public void run()
 			{
-				// unwrap file upload attachments from multiple entries to just one
-				// TODO: do this when save submission also
-				List<SubmissionAnswerEntryImpl> entries = ((SubmissionAnswerImpl) answer).entries;
-				if (answer.getQuestion().getType() == QuestionType.fileUpload)
-				{
-					SubmissionAnswerEntryImpl sample = entries.get(0);
-					entries = new ArrayList<SubmissionAnswerEntryImpl>(1);
-					SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl(sample);
-					entry.setAnswerText(null);
-					entry.setAssessmentAnswer(null);
-
-					// set the entry id to the id we saved in the answer
-					entry.id = ((SubmissionAnswerImpl) answer).id;
-					entries.add(entry);
-				}
-
-				// create submission answer record(s) if needed
-				for (SubmissionAnswerEntryImpl entry : entries)
-				{
-					if (entry.getId() == null)
-					{
-						Long answerId = m_sqlService.getNextSequence("SAM_ITEMGRADING_ID_S", connection);
-
-						// this will score the answer based on values in the database
-						String statement = "INSERT INTO SAM_ITEMGRADING_T"
-								+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
-								+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW" + ((answerId == null) ? "" : ", ITEMGRADINGID") + ")"
-								+ " VALUES (?,?,?,?,?,?,?,?,?,?," + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
-								// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
-								+ ((answerId == null) ? "" : ",?") + ")";
-						Object[] fields = new Object[(answerId == null) ? 10 : 11];
-						fields[0] = answer.getSubmission().getId();
-						fields[1] = answer.getQuestion().getId();
-						fields[2] = entry.getQuestionPart().getId();
-						fields[3] = answer.getSubmission().getUserId();
-						fields[4] = answer.getSubmittedDate();
-						fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
-						fields[6] = answer.getRationale();
-						fields[7] = entry.getAnswerText();
-						fields[8] = entry.getAutoScore();
-						fields[9] = new Float(0);
-
-						if (answerId != null)
-						{
-							fields[10] = answerId;
-							if (!m_sqlService.dbWrite(connection, statement, fields))
-							{
-								// TODO: better exception
-								throw new Exception("submitAnswer: dbWrite Failed");
-							}
-						}
-						else
-						{
-							answerId = m_sqlService.dbInsert(connection, statement, fields, "ITEMGRADINGID");
-							if (answerId == null)
-							{
-								// TODO: better exception
-								throw new Exception("submitAnswers: dbInsert Failed");
-							}
-						}
-
-						// set the id into the answer
-						if (answerId == null) throw new Exception("failed to insert submission answer");
-						entry.initId(answerId.toString());
-						if (((SubmissionAnswerImpl) answer).id == null) ((SubmissionAnswerImpl) answer).id = answerId.toString();
-					}
-
-					// otherwise update the submission answer record
-					else
-					{
-						String statement = "UPDATE SAM_ITEMGRADING_T"
-								+ " SET SUBMITTEDDATE = ?, PUBLISHEDANSWERID = ?, PUBLISHEDITEMTEXTID = ?, RATIONALE = ?, ANSWERTEXT = ?, AUTOSCORE = ?,"
-								+ " REVIEW = " + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
-								// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
-								+ " WHERE ITEMGRADINGID = ?";
-						// TODO: for added security, add to WHERE: AND ASSESSMENTGRADINGID = ?answer.getSubmissionId() AND
-						// PUBLISHEDITEMID = ?answer.getQuestionId() -ggolden
-						Object[] fields = new Object[7];
-						fields[0] = answer.getSubmittedDate();
-						fields[1] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
-						fields[2] = entry.getQuestionPart().getId();
-						fields[3] = answer.getRationale();
-						fields[4] = entry.getAnswerText();
-						fields[5] = entry.getAutoScore();
-						fields[6] = entry.getId();
-
-						if (!m_sqlService.dbWrite(connection, statement, fields))
-						{
-							// TODO: better exception
-							throw new Exception("submitAnswers: dbWrite Failed");
-						}
-					}
-				}
-
-				// for any entries unused that have an id, delete them
-				for (SubmissionAnswerEntryImpl entry : ((SubmissionAnswerImpl) answer).recycle)
-				{
-					if (entry.getId() != null)
-					{
-						String statement = "DELETE FROM SAM_ITEMGRADING_T WHERE ITEMGRADINGID = ?";
-						Object[] fields = new Object[1];
-						fields[0] = entry.getId();
-						if (!m_sqlService.dbWrite(connection, statement, fields))
-						{
-							// TODO: better exception
-							throw new Exception("submitAnswers: dbWrite Failed");
-						}
-					}
-				}
-
-				// clear the unused now we have deleted what we must
-				((SubmissionAnswerImpl) answer).recycle.clear();
+				submitAnswersTx(answers, completSubmission);
 			}
+		}, "submitAnswers:" + submission.getId());
 
-			// if complete, update the STATUS to 1 and the FORGRADE to TRUE... always update the date
-			// Note: for Samigo compat., we need to update the scores in the SAM_ASSESSMENTGRADING_T based on the sums of the item
-			// scores
-			String statement = "UPDATE SAM_ASSESSMENTGRADING_T"
-					+ " SET SUBMITTEDDATE = ?,"
-					+ " TOTALAUTOSCORE = (SELECT SUM(AUTOSCORE)+SUM(OVERRIDESCORE) FROM SAM_ITEMGRADING_T WHERE ASSESSMENTGRADINGID = ?),"
-					+ " FINALSCORE = TOTALAUTOSCORE+TOTALOVERRIDESCORE"
-					+ (((completSubmission != null) && completSubmission.booleanValue()) ? (" ,STATUS = 1, FORGRADE = " + m_sqlService
-							.getBooleanConstant(true)) : "") + " WHERE ASSESSMENTGRADINGID = ?";
-			Object[] fields = new Object[3];
-			fields[0] = submission.getSubmittedDate();
-			fields[1] = submission.getId();
-			fields[2] = submission.getId();
-			if (!m_sqlService.dbWrite(connection, statement, fields))
-			{
-				// TODO: better exception
-				throw new Exception("submitAnswers: dbWrite Failed");
-			}
-
-			// commit
-			connection.commit();
-
-			// if complete and the assessment is integrated into the Gradebook, record the grade
-			if ((completSubmission != null) && completSubmission.booleanValue())
-			{
-				recordInGradebook(submission, true);
-			}
-
-			// collect the cached submission, before the event clears it
-			recache = getCachedSubmission(submission.getId());
-
-			// event track it
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(submission.getId()), true));
-
-			// track if we are complete
-			if ((completSubmission != null) && completSubmission.booleanValue())
-			{
-				m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission.getId()), true));
-			}
+		// if complete and the assessment is integrated into the Gradebook, record the grade
+		if ((completSubmission != null) && completSubmission.booleanValue())
+		{
+			recordInGradebook(submission, true);
 		}
-		catch (Exception e)
-		{
-			if (connection != null)
-			{
-				try
-				{
-					recache = null;
-					connection.rollback();
-				}
-				catch (Exception ee)
-				{
-					M_log.warn("submitAnswers: rollback: " + ee);
-				}
-			}
-			M_log.warn("submitAnswers: " + e);
-		}
-		finally
-		{
-			if (connection != null)
-			{
-				// restore autocommit, if it was not false
-				try
-				{
-					if (wasCommit) connection.setAutoCommit(wasCommit);
-				}
-				catch (Exception e)
-				{
-					M_log.warn("submitAnswers, while setting auto commit: " + e);
-				}
 
-				// return the connetion
-				m_sqlService.returnConnection(connection);
-			}
+		// collect the cached submission, before the event clears it
+		recache = getCachedSubmission(submission.getId());
+
+		// event track it
+		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(submission.getId()), true));
+
+		// track if we are complete
+		if ((completSubmission != null) && completSubmission.booleanValue())
+		{
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission.getId()), true));
 		}
 
 		// the submission is altered by this - clear the cache (or update)
@@ -4255,6 +4006,149 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 			// cache a copy
 			cacheSubmission(new SubmissionImpl(recache));
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void submitAnswersTx(List<SubmissionAnswer> answers, Boolean completSubmission)
+	{
+		for (SubmissionAnswer answer : answers)
+		{
+			// unwrap file upload attachments from multiple entries to just one
+			// TODO: do this when save submission also
+			List<SubmissionAnswerEntryImpl> entries = ((SubmissionAnswerImpl) answer).entries;
+			if (answer.getQuestion().getType() == QuestionType.fileUpload)
+			{
+				SubmissionAnswerEntryImpl sample = entries.get(0);
+				entries = new ArrayList<SubmissionAnswerEntryImpl>(1);
+				SubmissionAnswerEntryImpl entry = new SubmissionAnswerEntryImpl(sample);
+				entry.setAnswerText(null);
+				entry.setAssessmentAnswer(null);
+
+				// set the entry id to the id we saved in the answer
+				entry.id = ((SubmissionAnswerImpl) answer).id;
+				entries.add(entry);
+			}
+
+			// create submission answer record(s) if needed
+			for (SubmissionAnswerEntryImpl entry : entries)
+			{
+				if (entry.getId() == null)
+				{
+					Long answerId = m_sqlService.getNextSequence("SAM_ITEMGRADING_ID_S", null);
+
+					// this will score the answer based on values in the database
+					String statement = "INSERT INTO SAM_ITEMGRADING_T"
+							+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
+							+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW" + ((answerId == null) ? "" : ", ITEMGRADINGID") + ")"
+							+ " VALUES (?,?,?,?,?,?,?,?,?,?," + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
+							// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
+							+ ((answerId == null) ? "" : ",?") + ")";
+					Object[] fields = new Object[(answerId == null) ? 10 : 11];
+					fields[0] = answer.getSubmission().getId();
+					fields[1] = answer.getQuestion().getId();
+					fields[2] = entry.getQuestionPart().getId();
+					fields[3] = answer.getSubmission().getUserId();
+					fields[4] = answer.getSubmittedDate();
+					fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
+					fields[6] = answer.getRationale();
+					fields[7] = entry.getAnswerText();
+					fields[8] = entry.getAutoScore();
+					fields[9] = new Float(0);
+
+					if (answerId != null)
+					{
+						fields[10] = answerId;
+						if (!m_sqlService.dbWrite(statement, fields))
+						{
+							// TODO: better exception
+							throw new RuntimeException("submitAnswer: dbWrite Failed");
+						}
+					}
+					else
+					{
+						answerId = m_sqlService.dbInsert(null, statement, fields, "ITEMGRADINGID");
+						if (answerId == null)
+						{
+							// TODO: better exception
+							throw new RuntimeException("submitAnswers: dbInsert Failed");
+						}
+					}
+
+					// set the id into the answer
+					if (answerId == null) throw new RuntimeException("failed to insert submission answer");
+					entry.initId(answerId.toString());
+					if (((SubmissionAnswerImpl) answer).id == null) ((SubmissionAnswerImpl) answer).id = answerId.toString();
+				}
+
+				// otherwise update the submission answer record
+				else
+				{
+					String statement = "UPDATE SAM_ITEMGRADING_T"
+							+ " SET SUBMITTEDDATE = ?, PUBLISHEDANSWERID = ?, PUBLISHEDITEMTEXTID = ?, RATIONALE = ?, ANSWERTEXT = ?, AUTOSCORE = ?,"
+							+ " REVIEW = " + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
+							// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
+							+ " WHERE ITEMGRADINGID = ?";
+					// TODO: for added security, add to WHERE: AND ASSESSMENTGRADINGID = ?answer.getSubmissionId() AND
+					// PUBLISHEDITEMID = ?answer.getQuestionId() -ggolden
+					Object[] fields = new Object[7];
+					fields[0] = answer.getSubmittedDate();
+					fields[1] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
+					fields[2] = entry.getQuestionPart().getId();
+					fields[3] = answer.getRationale();
+					fields[4] = entry.getAnswerText();
+					fields[5] = entry.getAutoScore();
+					fields[6] = entry.getId();
+
+					if (!m_sqlService.dbWrite(statement, fields))
+					{
+						// TODO: better exception
+						throw new RuntimeException("submitAnswers: dbWrite Failed");
+					}
+				}
+			}
+
+			// for any entries unused that have an id, delete them
+			for (SubmissionAnswerEntryImpl entry : ((SubmissionAnswerImpl) answer).recycle)
+			{
+				if (entry.getId() != null)
+				{
+					String statement = "DELETE FROM SAM_ITEMGRADING_T WHERE ITEMGRADINGID = ?";
+					Object[] fields = new Object[1];
+					fields[0] = entry.getId();
+					if (!m_sqlService.dbWrite(statement, fields))
+					{
+						// TODO: better exception
+						throw new RuntimeException("submitAnswers: dbWrite Failed");
+					}
+				}
+			}
+
+			// clear the unused now we have deleted what we must
+			((SubmissionAnswerImpl) answer).recycle.clear();
+		}
+
+		Submission submission = idSubmission(answers.get(0).getSubmission().getId());
+
+		// if complete, update the STATUS to 1 and the FORGRADE to TRUE... always update the date
+		// Note: for Samigo compat., we need to update the scores in the SAM_ASSESSMENTGRADING_T based on the sums of the item
+		// scores
+		String statement = "UPDATE SAM_ASSESSMENTGRADING_T"
+				+ " SET SUBMITTEDDATE = ?,"
+				+ " TOTALAUTOSCORE = (SELECT SUM(AUTOSCORE)+SUM(OVERRIDESCORE) FROM SAM_ITEMGRADING_T WHERE ASSESSMENTGRADINGID = ?),"
+				+ " FINALSCORE = TOTALAUTOSCORE+TOTALOVERRIDESCORE"
+				+ (((completSubmission != null) && completSubmission.booleanValue()) ? (" ,STATUS = 1, FORGRADE = " + m_sqlService
+						.getBooleanConstant(true)) : "") + " WHERE ASSESSMENTGRADINGID = ?";
+		Object[] fields = new Object[3];
+		fields[0] = submission.getSubmittedDate();
+		fields[1] = submission.getId();
+		fields[2] = submission.getId();
+		if (!m_sqlService.dbWrite(statement, fields))
+		{
+			// TODO: better exception
+			throw new RuntimeException("submitAnswers: dbWrite Failed");
 		}
 	}
 
@@ -4340,107 +4234,23 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 * @param answer
 	 *        The submission answer.
 	 */
-	protected void reserveAnswer(SubmissionAnswerImpl answer)
+	protected void reserveAnswer(final SubmissionAnswerImpl answer)
 	{
-		// a submission from the cache to update and re-cache
-		SubmissionImpl recache = null;
-
-		Connection connection = null;
-		boolean wasCommit = true;
-		try
+		// run our save code in a transaction that will restart on deadlock
+		// if deadlock retry fails, or any other error occurs, a runtime error will be thrown
+		m_sqlService.transact(new Runnable()
 		{
-			connection = m_sqlService.borrowConnection();
-			wasCommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
-
-			Long answerId = m_sqlService.getNextSequence("SAM_ITEMGRADING_ID_S", connection);
-
-			// this will score the answer based on values in the database
-			String statement = "INSERT INTO SAM_ITEMGRADING_T"
-					+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
-					+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW" + ((answerId == null) ? "" : ", ITEMGRADINGID") + ")"
-					+ " VALUES (?,?,?,?,?,?,?,?,?,?," + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
-					// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
-					+ ((answerId == null) ? "" : ",?") + ")";
-			Object[] fields = new Object[(answerId == null) ? 10 : 11];
-			fields[0] = answer.getSubmission().getId();
-			fields[1] = answer.getQuestion().getId();
-			answer.getQuestion().getPart().getId();
-			fields[2] = answer.getQuestion().getPart().getId();
-			fields[3] = answer.getSubmission().getUserId();
-			fields[4] = answer.getSubmittedDate();
-			fields[5] = null;
-			fields[6] = answer.getRationale();
-			fields[7] = null;
-			fields[8] = new Float(0);
-			fields[9] = new Float(0);
-
-			if (answerId != null)
+			public void run()
 			{
-				fields[10] = answerId;
-				if (!m_sqlService.dbWrite(connection, statement, fields))
-				{
-					// TODO: better exception
-					throw new Exception("reserveAnswer: dbWrite Failed");
-				}
+				reserveAnswerTx(answer);
 			}
-			else
-			{
-				answerId = m_sqlService.dbInsert(connection, statement, fields, "ITEMGRADINGID");
-				if (answerId == null)
-				{
-					// TODO: better exception
-					throw new Exception("reserveAnswer: dbInsert Failed");
-				}
-			}
+		}, "reserveAnswer: " + answer.getSubmission().getId());
 
-			// set the id into the answer
-			if (answerId == null) throw new Exception("failed to insert submission answer");
-			answer.id = answerId.toString();
+		// collect the cached submission, before the event clears it
+		SubmissionImpl recache = getCachedSubmission(answer.getSubmission().getId());
 
-			// commit
-			connection.commit();
-
-			// collect the cached submission, before the event clears it
-			recache = getCachedSubmission(answer.getSubmission().getId());
-
-			// event track it
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(answer.getSubmission().getId()), true));
-		}
-		catch (Exception e)
-		{
-			if (connection != null)
-			{
-				try
-				{
-					recache = null;
-					connection.rollback();
-				}
-				catch (Exception ee)
-				{
-					M_log.warn("submitAnswer: rollback: " + ee);
-				}
-			}
-			M_log.warn("submitAnswer: " + e);
-		}
-		finally
-		{
-			if (connection != null)
-			{
-				// restore autocommit, if it was not false
-				try
-				{
-					if (wasCommit) connection.setAutoCommit(wasCommit);
-				}
-				catch (Exception e)
-				{
-					M_log.warn("submitAnswer, while setting auto commit: " + e);
-				}
-
-				// return the connetion
-				m_sqlService.returnConnection(connection);
-			}
-		}
+		// event track it
+		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(answer.getSubmission().getId()), true));
 
 		// the submission is altered by this - clear the cache (or update)
 		unCacheSubmission(answer.getSubmission().getId());
@@ -4463,6 +4273,60 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// cache a copy
 			cacheSubmission(new SubmissionImpl(recache));
 		}
+	}
+
+	/**
+	 * Transaction code for reserveAnswer.
+	 * 
+	 * @param answer
+	 *        The submission answer.
+	 */
+	protected void reserveAnswerTx(SubmissionAnswerImpl answer)
+	{
+		Long answerId = m_sqlService.getNextSequence("SAM_ITEMGRADING_ID_S", null);
+
+		// this will score the answer based on values in the database
+		String statement = "INSERT INTO SAM_ITEMGRADING_T"
+				+ " (ASSESSMENTGRADINGID, PUBLISHEDITEMID, PUBLISHEDITEMTEXTID, AGENTID, SUBMITTEDDATE, PUBLISHEDANSWERID,"
+				+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE, REVIEW" + ((answerId == null) ? "" : ", ITEMGRADINGID") + ")"
+				+ " VALUES (?,?,?,?,?,?,?,?,?,?," + m_sqlService.getBooleanConstant(answer.getMarkedForReview())
+				// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
+				+ ((answerId == null) ? "" : ",?") + ")";
+		Object[] fields = new Object[(answerId == null) ? 10 : 11];
+		fields[0] = answer.getSubmission().getId();
+		fields[1] = answer.getQuestion().getId();
+		answer.getQuestion().getPart().getId();
+		fields[2] = answer.getQuestion().getPart().getId();
+		fields[3] = answer.getSubmission().getUserId();
+		fields[4] = answer.getSubmittedDate();
+		fields[5] = null;
+		fields[6] = answer.getRationale();
+		fields[7] = null;
+		fields[8] = new Float(0);
+		fields[9] = new Float(0);
+
+		if (answerId != null)
+		{
+			fields[10] = answerId;
+			if (!m_sqlService.dbWrite(statement, fields))
+			{
+				// TODO: better exception
+				throw new RuntimeException("reserveAnswer: dbWrite Failed");
+			}
+		}
+		else
+		{
+			answerId = m_sqlService.dbInsert(null, statement, fields, "ITEMGRADINGID");
+			if (answerId == null)
+			{
+				// TODO: better exception
+				throw new RuntimeException("reserveAnswer: dbInsert Failed");
+			}
+		}
+
+		// set the id into the answer
+		if (answerId == null) throw new RuntimeException("failed to insert submission answer");
+		answer.id = answerId.toString();
 	}
 
 	/**

@@ -4,12 +4,12 @@
 
 	<tool
 			id="sakai.assessment.delivery"
-			title="Assessment Delivery"
-			description="Assessment Delivery"
+			title="Test Center"
+			description="Test Center"
 	>
 
-		<category name="sakai.course" />
-		<category name="sakai.project" />
+		<category name="course" />
+		<category name="project" />
 
 	</tool>
 

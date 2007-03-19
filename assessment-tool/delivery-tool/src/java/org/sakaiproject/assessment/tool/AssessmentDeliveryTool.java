@@ -509,6 +509,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
+		// see if we can skip the enter view and go right to the quesiton
+		if ((assessment.getPassword() == null) && (assessment.getDescription() == null) && (assessment.getAttachments().isEmpty())
+				&& (assessment.getRandomAccess().booleanValue()) && (assessment.getTimeLimit() == null))
+		{
+			enterSubmission(req, res, assessment);
+			return;
+		}
+
 		// collect information: the selected assessment (id the request)
 		context.put("assessment", assessment);
 
@@ -562,6 +570,22 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
+		enterSubmission(req, res, assessment);
+	}
+
+	/**
+	 * Send the user into the submission.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param assessment
+	 *        The assessment to take.
+	 * @throws IOException
+	 */
+	protected void enterSubmission(HttpServletRequest req, HttpServletResponse res, Assessment assessment) throws IOException
+	{
 		Submission submission = null;
 		try
 		{
@@ -864,8 +888,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionSelector,
-			Context context) throws IOException
+	protected void questionGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionSelector, Context context)
+			throws IOException
 	{
 		Submission submission = assessmentService.idSubmission(submissionId);
 
@@ -1008,8 +1032,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Output writer.
 	 * @return null if all went well, else an Errors to indicate what went wrong.
 	 */
-	protected Errors questionSetup(String submissionId, String questionSelector, Context context, List<SubmissionAnswer> answers,
-			boolean linearCheck)
+	protected Errors questionSetup(String submissionId, String questionSelector, Context context, List<SubmissionAnswer> answers, boolean linearCheck)
 	{
 		// not in review mode
 		context.put("review", Boolean.FALSE);

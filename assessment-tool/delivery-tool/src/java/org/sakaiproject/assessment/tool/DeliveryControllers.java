@@ -258,7 +258,7 @@ public class DeliveryControllers
 						ui.newSection()
 							.add(ui.newInstructions().setText("enter-pw-instructions"))
 							.add(
-								ui.newTextEdit()
+								ui.newPassword()
 									.setProperty(ui.newPropertyReference().setReference("password.value"))
 									.setTitle("enter-password"))
 						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.password"))))
