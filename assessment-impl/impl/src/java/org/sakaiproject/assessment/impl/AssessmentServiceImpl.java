@@ -21,7 +21,6 @@
 
 package org.sakaiproject.assessment.impl;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -442,7 +441,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (assessment != null)
 		{
 			// return a copy
-			return new AssessmentImpl(assessment);
+			synchronized (assessment)
+			{
+				return new AssessmentImpl(assessment);
+			}
 		}
 
 		// TODO: perhaps don't check, just set the id... then we need to support objects that have id set but are known to be bad...
@@ -491,39 +493,42 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		if (id == null) return null;
 
-		// cached?
+		// see what's cached
 		AssessmentImpl cached = getCachedAssessment(id);
-		AssessmentImpl assessment = cached;
 
-		// if not cached, get started with an identification
-		if (assessment == null)
-		{
-			assessment = new AssessmentImpl(this);
-			assessment.initId(id);
-		}
-
-		// if we need to, read the main info
-		if (!assessment.isMainInited())
-		{
-			boolean found = readAssessmentMain(assessment);
-			if (!found) return null;
-		}
-
-		// if we need to, read the sections
-		if (!assessment.isSectionsInited())
-		{
-			readAssessmentSections(assessment);
-		}
-
-		// if it was not already cached, cache it, otherwise, we already updated the actual cached object
+		// if not cached, cache a placeholder first
 		if (cached == null)
 		{
-			// it was not cached, so we need to cache it
-			cacheAssessment(assessment);
+			cached = new AssessmentImpl(this);
+			cached.initId(id);
+			cacheAssessment(cached);
 		}
 
-		// return a copy so we don't return the cache
-		return new AssessmentImpl(assessment);
+		// lock and update the cached
+		synchronized (cached)
+		{
+			// if we need to, read the main info
+			if (!cached.isMainInited())
+			{
+				boolean found = readAssessmentMain(cached);
+				if (!found) return null;
+			}
+
+			// if we need to, read the sections
+			if (!cached.isSectionsInited())
+			{
+				readAssessmentSections(cached);
+			}
+
+			// if we need to, read the attachments
+			if (!cached.isAttachmentsInited())
+			{
+				readAssessmentAttachments(cached);
+			}
+
+			// return a copy
+			return new AssessmentImpl(cached);
+		}
 	}
 
 	/**
@@ -733,7 +738,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			AssessmentImpl cached = getCachedAssessment(assessment.getId());
 			if (cached != null)
 			{
-				cached.setMain(assessment);
+				synchronized (cached)
+				{
+					cached.setMain(assessment);
+				}
 			}
 
 			return true;
@@ -1086,7 +1094,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		AssessmentImpl cached = getCachedAssessment(assessment.getId());
 		if (cached != null)
 		{
-			cached.setSections(assessment);
+			synchronized (cached)
+			{
+				cached.setSections(assessment);
+			}
 		}
 	}
 
@@ -1145,7 +1156,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		AssessmentImpl cached = getCachedAssessment(assessment.getId());
 		if (cached != null)
 		{
-			cached.setAttachments(assessment);
+			synchronized (cached)
+			{
+				cached.setAttachments(assessment);
+			}
 		}
 	}
 
@@ -1180,7 +1194,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (submission != null)
 		{
 			// return a copy
-			return new SubmissionImpl(submission);
+			synchronized (submission)
+			{
+				return new SubmissionImpl(submission);
+			}
 		}
 
 		// TODO: perhaps don't check... (see idAssessment) -ggolden
@@ -1230,37 +1247,33 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		// cached?
 		SubmissionImpl cached = getCachedSubmission(id);
-		SubmissionImpl submission = cached;
 
-		// if not cached, get started with an identification
-		if (submission == null)
-		{
-			submission = new SubmissionImpl(this);
-			submission.initId(id);
-		}
-
-		// if we need to, read the main info
-		if (!submission.isMainInited())
-		{
-			boolean found = readSubmissionMain(submission);
-			if (!found) return null;
-		}
-
-		// if we need to, read the answers
-		if (!submission.isAnswersInited())
-		{
-			readSubmissionAnswers(submission);
-		}
-
-		// if it was not already cached, cache it, otherwise, we already updated the actual cached object
+		// if not cached, cache a placeholder
 		if (cached == null)
 		{
-			// it was not cached, so we need to cache it
-			cacheSubmission(submission);
+			cached = new SubmissionImpl(this);
+			cached.initId(id);
+			cacheSubmission(cached);
 		}
 
-		// return a copy so we don't return the cache
-		return new SubmissionImpl(submission);
+		synchronized (cached)
+		{
+			// if we need to, read the main info
+			if (!cached.isMainInited())
+			{
+				boolean found = readSubmissionMain(cached);
+				if (!found) return null;
+			}
+
+			// if we need to, read the answers
+			if (!cached.isAnswersInited())
+			{
+				readSubmissionAnswers(cached);
+			}
+
+			// return a copy so we don't return the cache
+			return new SubmissionImpl(cached);
+		}
 	}
 
 	/**
@@ -1340,7 +1353,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			SubmissionImpl cached = getCachedSubmission(submission.getId());
 			if (cached != null)
 			{
-				cached.setMain(submission);
+				synchronized (cached)
+				{
+					cached.setMain(submission);
+				}
 			}
 
 			return true;
@@ -1541,7 +1557,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		SubmissionImpl cached = getCachedSubmission(submission.getId());
 		if (cached != null)
 		{
-			cached.setAnswers(submission);
+			synchronized (cached)
+			{
+				cached.setAnswers(submission);
+			}
 		}
 	}
 
@@ -1903,8 +1922,11 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						cached.initContext(context);
 						cacheAssessment(cached);
 					}
-					cached.initTitle(title);
-					cached.initDueDate(dueDate);
+					synchronized (cached)
+					{
+						cached.initTitle(title);
+						cached.initDueDate(dueDate);
+					}
 
 					// record the id
 					ids.add(assessmentId);
@@ -2112,11 +2134,14 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						cachedSubmission.initId(submissionId);
 						cacheSubmission(cachedSubmission);
 					}
-					cachedSubmission.initAssessmentId(publishedAssessmentId);
-					cachedSubmission.initTotalScore(score);
-					cachedSubmission.initStartDate(attemptDate);
-					cachedSubmission.initSubmittedDate(submittedDate);
-					cachedSubmission.initIsComplete(Boolean.valueOf(complete));
+					synchronized (cachedSubmission)
+					{
+						cachedSubmission.initAssessmentId(publishedAssessmentId);
+						cachedSubmission.initTotalScore(score);
+						cachedSubmission.initStartDate(attemptDate);
+						cachedSubmission.initSubmittedDate(submittedDate);
+						cachedSubmission.initIsComplete(Boolean.valueOf(complete));
+					}
 
 					// create or update these properties in the assessment cache
 					AssessmentImpl cachedAssessment = getCachedAssessment(publishedAssessmentId);
@@ -2128,13 +2153,16 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						cachedAssessment.initContext(context);
 						cacheAssessment(cachedAssessment);
 					}
-					cachedAssessment.initTitle(title);
-					cachedAssessment.initFeedbackDate(feedbackDate);
-					cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
-					cachedAssessment.initFeedbackDelivery(feedbackDelivery);
-					// cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
-					cachedAssessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
-					cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
+					synchronized (cachedAssessment)
+					{
+						cachedAssessment.initTitle(title);
+						cachedAssessment.initFeedbackDate(feedbackDate);
+						cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
+						cachedAssessment.initFeedbackDelivery(feedbackDelivery);
+						// cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
+						cachedAssessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
+						cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
+					}
 
 					// return the id
 					return submissionId;
@@ -2366,12 +2394,15 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						cachedSubmission.initId(submissionId);
 						cacheSubmission(cachedSubmission);
 					}
-					cachedSubmission.initAssessmentId(publishedAssessmentId);
-					cachedSubmission.initTotalScore(score);
-					cachedSubmission.initStartDate(attemptDate);
-					cachedSubmission.initSubmittedDate(submittedDate);
-					cachedSubmission.initIsComplete(Boolean.valueOf(complete));
-					cachedSubmission.initUserId(fUserId);
+					synchronized (cachedSubmission)
+					{
+						cachedSubmission.initAssessmentId(publishedAssessmentId);
+						cachedSubmission.initTotalScore(score);
+						cachedSubmission.initStartDate(attemptDate);
+						cachedSubmission.initSubmittedDate(submittedDate);
+						cachedSubmission.initIsComplete(Boolean.valueOf(complete));
+						cachedSubmission.initUserId(fUserId);
+					}
 
 					// create or update these properties in the assessment cache
 					AssessmentImpl cachedAssessment = getCachedAssessment(publishedAssessmentId);
@@ -2382,21 +2413,24 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						cachedAssessment.initId(publishedAssessmentId);
 						cacheAssessment(cachedAssessment);
 					}
-					cachedAssessment.initContext(context);
-					cachedAssessment.initTitle(title);
-					cachedAssessment.initFeedbackDate(feedbackDate);
-					cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
-					cachedAssessment.initFeedbackDelivery(feedbackDelivery);
-					cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
-					cachedAssessment.initReleaseDate(releaseDate);
-					cachedAssessment.initTimeLimit(timeLimit == 0 ? null : new Long(timeLimit * 1000));
-					cachedAssessment.initDueDate(dueDate);
-					cachedAssessment.initAllowLateSubmit((allowLateSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
-					cachedAssessment.initRetractDate(retractDate);
-					cachedAssessment.initTotalPoints(new Float(points));
+					synchronized (cachedAssessment)
+					{
+						cachedAssessment.initContext(context);
+						cachedAssessment.initTitle(title);
+						cachedAssessment.initFeedbackDate(feedbackDate);
+						cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
+						cachedAssessment.initFeedbackDelivery(feedbackDelivery);
+						cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
+						cachedAssessment.initReleaseDate(releaseDate);
+						cachedAssessment.initTimeLimit(timeLimit == 0 ? null : new Long(timeLimit * 1000));
+						cachedAssessment.initDueDate(dueDate);
+						cachedAssessment.initAllowLateSubmit((allowLateSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
+						cachedAssessment.initRetractDate(retractDate);
+						cachedAssessment.initTotalPoints(new Float(points));
+					}
 
-					// return the id
-					return cachedSubmission;
+					// return a copy of the cached submission
+					return new SubmissionImpl(cachedSubmission);
 				}
 				catch (SQLException e)
 				{
@@ -2421,13 +2455,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				Time over = submission.getWhenOver();
 				completeTheSubmission(over, submission);
 
-				// update what we read
+				// update what we read (completeTheSubmission uncaches, so we own this submission object now)
 				((SubmissionImpl) submission).initStatus(new Integer(1));
 				((SubmissionImpl) submission).initIsComplete(Boolean.TRUE);
 				((SubmissionImpl) submission).initSubmittedDate(over);
 
-				// recache
-				cacheSubmission((SubmissionImpl) submission);
+				// recache a copy
+				cacheSubmission(new SubmissionImpl((SubmissionImpl) submission));
 			}
 
 			// set it's sibling count to 1 (itself), or 0 if it's not really there
@@ -2464,8 +2498,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						candidateSub.initIsComplete(Boolean.TRUE);
 						candidateSub.initSubmittedDate(over);
 
-						// recache
-						cacheSubmission(candidateSub);
+						// recache a copy
+						cacheSubmission(new SubmissionImpl(candidateSub));
 					}
 
 					// count as a sibling if not unstarted
@@ -2851,28 +2885,27 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// Note: ID column is set to autoincrement... by using the special JDBC feature in dbInsert, we get the value just
 		// allocated
 		String statement = "INSERT INTO SAM_PUBLISHEDASSESSMENT_T"
-				+ " (TITLE, DESCRIPTION, ASSESSMENTID, DESCRIPTION, COMMENTS, TYPEID, INSTRUCTORNOTIFICATION, TESTEENOTIFICATION, MULTIPARTALLOWED,"
+				+ " (TITLE, DESCRIPTION, ASSESSMENTID, COMMENTS, TYPEID, INSTRUCTORNOTIFICATION, TESTEENOTIFICATION, MULTIPARTALLOWED,"
 				+ " STATUS, CREATEDBY, CREATEDDATE, LASTMODIFIEDBY, LASTMODIFIEDDATE" + ((id == null) ? "" : ", ID") + ")"
-				+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?") + ")";
-		Object fields[] = new Object[(id == null) ? 14 : 15];
+				+ " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?") + ")";
+		Object fields[] = new Object[(id == null) ? 13 : 14];
 		fields[0] = a.getTitle();
 		fields[1] = a.getDescription();
 		fields[2] = ""; // TODO: reference to the base (not published) assessment... a.getId();
-		fields[3] = ""; // TODO: description
-		fields[4] = ""; // TODO: comments
-		fields[5] = new Integer(62); // TODO: type id
-		fields[6] = new Integer(1); // TODO: instructor notification
-		fields[7] = new Integer(1); // TODO: test notification
-		fields[8] = new Integer(1); // TODO: multipart allowed
-		fields[9] = a.getStatus().dbEncoding();
-		fields[10] = a.getCreatedBy();
-		fields[11] = now; // TODO: from a
-		fields[12] = a.getCreatedBy(); // TODO: modifiedBy
-		fields[13] = now; // TODO: from a
+		fields[3] = ""; // TODO: comments
+		fields[4] = new Integer(62); // TODO: type id
+		fields[5] = new Integer(1); // TODO: instructor notification
+		fields[6] = new Integer(1); // TODO: test notification
+		fields[7] = new Integer(1); // TODO: multipart allowed
+		fields[8] = a.getStatus().dbEncoding();
+		fields[9] = a.getCreatedBy();
+		fields[10] = now; // TODO: from a
+		fields[11] = a.getCreatedBy(); // TODO: modifiedBy
+		fields[12] = now; // TODO: from a
 
 		if (id != null)
 		{
-			fields[14] = id;
+			fields[13] = id;
 			m_sqlService.dbWrite(statement, fields);
 		}
 		else
@@ -3977,7 +4010,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// the submission is altered by this - clear the cache (or update)
 		unCacheSubmission(submission.getId());
 
-		// recache
+		// recache (this object that used to be in the cache is no longer in the cache, so we are the only owner)
 		if (recache != null)
 		{
 			// if the cached submission has had its answers read, we will update them
@@ -4004,8 +4037,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				recache.initIsComplete(Boolean.TRUE);
 			}
 
-			// cache a copy
-			cacheSubmission(new SubmissionImpl(recache));
+			// cache the object
+			cacheSubmission(recache);
 		}
 	}
 
@@ -4252,10 +4285,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// event track it
 		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(answer.getSubmission().getId()), true));
 
-		// the submission is altered by this - clear the cache (or update)
+		// the submission is altered by this - clear the cache
 		unCacheSubmission(answer.getSubmission().getId());
 
-		// recache
+		// recache (this object used to be in the cache but is no longer, so we are the only owner)
 		if (recache != null)
 		{
 			// if the cached submission has had its answers read, we will update it and re-cache
@@ -4270,8 +4303,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				recache.answers.add(answer);
 			}
 
-			// cache a copy
-			cacheSubmission(new SubmissionImpl(recache));
+			// cache the object
+			cacheSubmission(recache);
 		}
 	}
 
@@ -4332,14 +4365,14 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public void completeSubmission(Submission s) throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException
+	public void completeSubmission(final Submission s) throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException
 	{
 		// trust only the submission id passed in - get fresh and trusted additional information
 		Submission submission = idSubmission(s.getId());
 		Assessment assessment = submission.getAssessment();
 
 		// the current time
-		Time asOf = m_timeService.newTime();
+		final Time asOf = m_timeService.newTime();
 
 		// make sure this is an incomplete submission
 		if ((submission.getIsComplete() == null) || (submission.getIsComplete().booleanValue()))
@@ -4363,92 +4396,56 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		if (M_log.isDebugEnabled()) M_log.debug("completeSubmission: submission: " + submission.getId());
 
-		// submission from cache to update and re-cache
-		SubmissionImpl recache = null;
-
-		Connection connection = null;
-		boolean wasCommit = true;
-		try
+		// run our save code in a transaction that will restart on deadlock
+		// if deadlock retry fails, or any other error occurs, a runtime error will be thrown
+		m_sqlService.transact(new Runnable()
 		{
-			connection = m_sqlService.borrowConnection();
-			wasCommit = connection.getAutoCommit();
-			connection.setAutoCommit(false);
-
-			String statement = "UPDATE SAM_ASSESSMENTGRADING_T" + " SET SUBMITTEDDATE = ?, STATUS = 1, FORGRADE = "
-					+ m_sqlService.getBooleanConstant(true) + " WHERE ASSESSMENTGRADINGID = ?";
-			Object fields[] = new Object[2];
-			fields[0] = asOf;
-			fields[1] = submission.getId();
-			if (!m_sqlService.dbWrite(connection, statement, fields))
+			public void run()
 			{
-				throw new Exception("completeSubmission: dbWrite Failed");
+				completeSubmissionTx(asOf, s.getId());
 			}
+		}, "completeSubmission:" + s.getId());
 
-			// commit
-			connection.commit();
+		// record in the gradebook if so configured
+		recordInGradebook(submission, true);
 
-			// record in the gradebook if so configured
-			recordInGradebook(submission, true);
+		// update the submission parameter for the caller
+		s.setSubmittedDate(asOf);
+		s.setStatus(new Integer(1));
+		s.setIsComplete(Boolean.TRUE);
 
-			// update the submission parameter for the caller
-			s.setSubmittedDate(asOf);
-			s.setStatus(new Integer(1));
-			s.setIsComplete(Boolean.TRUE);
+		// collect the cached submission, before the event clears it
+		SubmissionImpl recache = getCachedSubmission(s.getId());
 
-			// collect the cached submission, before the event clears it
-			recache = getCachedSubmission(s.getId());
+		// event track it
+		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission.getId()), true));
 
-			// event track it
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission.getId()), true));
-		}
-		catch (Exception e)
-		{
-			if (connection != null)
-			{
-				try
-				{
-					recache = null;
-					connection.rollback();
-				}
-				catch (Exception ee)
-				{
-					M_log.warn("completeSubmission: rollback: " + ee);
-				}
-			}
-			M_log.warn("completeSubmission: " + e);
-		}
-		finally
-		{
-			if (connection != null)
-			{
-				// restore autocommit, if it was not false
-				try
-				{
-					if (wasCommit) connection.setAutoCommit(wasCommit);
-				}
-				catch (Exception e)
-				{
-					M_log.warn("completeSubmission, while setting auto commit: " + e);
-				}
-
-				// return the connetion
-				m_sqlService.returnConnection(connection);
-			}
-		}
-
-		// the submission is altered by this - clear the cache (or update?)
+		// the submission is altered by this - clear the cache
 		unCacheSubmission(submission.getId());
 
-		// recache
+		// recache (this object used to be in the cache, but has been cleared, so we are the only owner)
 		if (recache != null)
 		{
 			recache.initSubmittedDate(asOf);
 			recache.initStatus(new Integer(1));
 			recache.initIsComplete(Boolean.TRUE);
 
-			// cache a copy
-			cacheSubmission(new SubmissionImpl(recache));
+			// cache the object
+			cacheSubmission(recache);
 		}
+	}
+
+	/**
+	 * Transaction code for completeSubmission.
+	 */
+	protected void completeSubmissionTx(Time asOf, String submissionId)
+	{
+		String statement = "UPDATE SAM_ASSESSMENTGRADING_T" + " SET SUBMITTEDDATE = ?, STATUS = 1, FORGRADE = "
+				+ m_sqlService.getBooleanConstant(true) + " WHERE ASSESSMENTGRADINGID = ?";
+		Object fields[] = new Object[2];
+		fields[0] = asOf;
+		fields[1] = submissionId;
+		m_sqlService.dbWrite(statement, fields);
 	}
 
 	/**
@@ -4903,7 +4900,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * Find the submissions that are open, timed, and well expired, or open and past a retract date or hard deadline
 	 * 
-	 * @param well
+	 * @param grace
 	 *        The number of ms past the time limit that the submission's elapsed time must be to qualify
 	 * @return A List of the submissions that are open, timed, and well expired.
 	 */
@@ -4993,13 +4990,16 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 							cachedSubmission.initId(submissionId);
 							cacheSubmission(cachedSubmission);
 						}
-						cachedSubmission.initAssessmentId(publishedAssessmentId);
-						cachedSubmission.initTotalScore(score);
-						cachedSubmission.initStartDate(attemptDate);
-						cachedSubmission.initUserId(userId);
-						cachedSubmission.initIsComplete(Boolean.FALSE);
+						synchronized (cachedSubmission)
+						{
+							cachedSubmission.initAssessmentId(publishedAssessmentId);
+							cachedSubmission.initTotalScore(score);
+							cachedSubmission.initStartDate(attemptDate);
+							cachedSubmission.initUserId(userId);
+							cachedSubmission.initIsComplete(Boolean.FALSE);
+						}
 
-						rv.add(cachedSubmission);
+						rv.add(new SubmissionImpl(cachedSubmission));
 
 						// create or update these properties in the assessment cache
 						AssessmentImpl cachedAssessment = getCachedAssessment(publishedAssessmentId);
@@ -5010,10 +5010,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 							cachedAssessment.initId(publishedAssessmentId);
 							cacheAssessment(cachedAssessment);
 						}
-						cachedAssessment.initTimeLimit(timeLimit == 0 ? null : new Long(timeLimit));
-						cachedAssessment.initDueDate(dueDate);
-						cachedAssessment.initAllowLateSubmit(Boolean.valueOf(allowLate));
-						cachedAssessment.initRetractDate(retractDate);
+						synchronized (cachedAssessment)
+						{
+							cachedAssessment.initTimeLimit(timeLimit == 0 ? null : new Long(timeLimit));
+							cachedAssessment.initDueDate(dueDate);
+							cachedAssessment.initAllowLateSubmit(Boolean.valueOf(allowLate));
+							cachedAssessment.initRetractDate(retractDate);
+						}
 					}
 					return null;
 				}
@@ -5037,23 +5040,23 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 *        The submission.
 	 * @return true if it was successful, false if not.
 	 */
-	protected boolean completeTheSubmission(Time asOf, Submission submission)
+	protected boolean completeTheSubmission(Time asOf, final Submission submission)
 	{
 		// the current time if not set
 		if (asOf == null) asOf = m_timeService.newTime();
+		final Time fAsOf = asOf;
 
 		if (M_log.isDebugEnabled()) M_log.debug("completeTheSubmission: submission: " + submission.getId());
 
-		String statement = "UPDATE SAM_ASSESSMENTGRADING_T" + " SET SUBMITTEDDATE = ?, STATUS = 1, FORGRADE = "
-				+ m_sqlService.getBooleanConstant(true) + " WHERE ASSESSMENTGRADINGID = ? AND FORGRADE = " + m_sqlService.getBooleanConstant(false);
-		Object fields[] = new Object[2];
-		fields[0] = asOf;
-		fields[1] = submission.getId();
-		if (!m_sqlService.dbWrite(null, statement, fields))
+		// run our save code in a transaction that will restart on deadlock
+		// if deadlock retry fails, or any other error occurs, a runtime error will be thrown
+		m_sqlService.transact(new Runnable()
 		{
-			// it didn't work!
-			return false;
-		}
+			public void run()
+			{
+				completeTheSubmissionTx(fAsOf, submission.getId());
+			}
+		}, "completeSubmission:" + submission.getId());
 
 		// record in the gradebook if so configured, using data only from the submission, no db refresh
 		recordInGradebook(submission, false);
@@ -5065,5 +5068,18 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		unCacheSubmission(submission.getId());
 
 		return true;
+	}
+
+	/**
+	 * The transaction code for completeTheSubmission.
+	 */
+	protected void completeTheSubmissionTx(Time asOf, String submissionId)
+	{
+		String statement = "UPDATE SAM_ASSESSMENTGRADING_T" + " SET SUBMITTEDDATE = ?, STATUS = 1, FORGRADE = "
+				+ m_sqlService.getBooleanConstant(true) + " WHERE ASSESSMENTGRADINGID = ? AND FORGRADE = " + m_sqlService.getBooleanConstant(false);
+		Object fields[] = new Object[2];
+		fields[0] = asOf;
+		fields[1] = submissionId;
+		m_sqlService.dbWrite(statement, fields);
 	}
 }

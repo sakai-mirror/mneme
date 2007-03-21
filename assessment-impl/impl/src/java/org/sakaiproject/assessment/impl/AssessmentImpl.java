@@ -1451,6 +1451,16 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Check if the attachments info has been initialized
+	 * 
+	 * @return true if the attachments info has been initialized, false if not.
+	 */
+	protected boolean isAttachmentsInited()
+	{
+		return this.attachmentsStatus == PropertyStatus.inited;
+	}
+
+	/**
 	 * Check if the main info has been initialized
 	 * 
 	 * @return true if the main info has been initialized, false if not.

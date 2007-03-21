@@ -24,8 +24,10 @@ package org.sakaiproject.assessment.tool;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import javax.servlet.ServletConfig;
@@ -44,12 +46,15 @@ import org.sakaiproject.assessment.api.AssessmentPermissionException;
 import org.sakaiproject.assessment.api.AssessmentQuestion;
 import org.sakaiproject.assessment.api.AssessmentSection;
 import org.sakaiproject.assessment.api.AssessmentService;
+import org.sakaiproject.assessment.api.AssessmentSubmissionStatus;
 import org.sakaiproject.assessment.api.FeedbackDelivery;
 import org.sakaiproject.assessment.api.MultipleSubmissionSelectionPolicy;
 import org.sakaiproject.assessment.api.QuestionPart;
+import org.sakaiproject.assessment.api.QuestionPresentation;
 import org.sakaiproject.assessment.api.QuestionType;
 import org.sakaiproject.assessment.api.Submission;
 import org.sakaiproject.assessment.api.SubmissionAnswer;
+import org.sakaiproject.assessment.api.SubmissionCompletedException;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.cover.ComponentManager;
@@ -61,11 +66,16 @@ import org.sakaiproject.sludge.api.Context;
 import org.sakaiproject.sludge.api.Controller;
 import org.sakaiproject.sludge.api.UiService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
+import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.UserDirectoryService;
+import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.util.ResourceLoader;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -87,17 +97,31 @@ public class AssessmentTestTool extends HttpServlet
 	// final int contextStudents = 2;
 	// final int itemsPerAssessment = 2;
 
-	public class Specs
+	public class GenerateSpecs
 	{
-		protected int assessmentsPerContext = 0;
+		protected Integer assessmentsPerContext = new Integer(0);
 
-		protected int contextStudents = 0;
+		protected Integer contextStudents = new Integer(0);
 
-		protected int contextsWithAssessments = 0;
+		protected Integer contextsWithAssessments = new Integer(0);
 
-		protected int itemsPerAssessment = 0;
+		protected Integer itemsPerAssessment = new Integer(0);
 
-		protected int submissionsPerStudent = 0;
+		protected Integer submissionsPerStudent = new Integer(0);
+
+		public GenerateSpecs()
+		{
+		}
+
+		public GenerateSpecs(String value)
+		{
+			String[] values = StringUtil.split(value, "x");
+			assessmentsPerContext = Integer.valueOf(values[0]);
+			contextStudents = Integer.valueOf(values[1]);
+			contextsWithAssessments = Integer.valueOf(values[2]);
+			itemsPerAssessment = Integer.valueOf(values[3]);
+			submissionsPerStudent = Integer.valueOf(values[4]);
+		}
 
 		public Integer getAssessmentsPerContext()
 		{
@@ -148,12 +172,74 @@ public class AssessmentTestTool extends HttpServlet
 		{
 			submissionsPerStudent = value;
 		}
+
+		public String toString()
+		{
+			return assessmentsPerContext.toString() + "x" + contextStudents.toString() + "x" + contextsWithAssessments.toString() + "x"
+					+ itemsPerAssessment.toString() + "x" + submissionsPerStudent.toString();
+		}
+	}
+
+	public class SimulateSpecs
+	{
+		protected Integer numUsers = 0;
+
+		protected Integer startGap = 0;
+
+		protected Integer thinkTime = 0;
+
+		public SimulateSpecs()
+		{
+		}
+
+		public SimulateSpecs(String value)
+		{
+			String[] values = StringUtil.split(value, "x");
+			numUsers = Integer.valueOf(values[0]);
+			startGap = Integer.valueOf(values[1]);
+			thinkTime = Integer.valueOf(values[2]);
+		}
+
+		public Integer getNumUsers()
+		{
+			return numUsers;
+		}
+
+		public Integer getStartGap()
+		{
+			return this.startGap;
+		}
+
+		public Integer getThinkTime()
+		{
+			return this.thinkTime;
+		}
+
+		public void setNumUsers(Integer value)
+		{
+			numUsers = value;
+		}
+
+		public void setStartGap(Integer startGap)
+		{
+			this.startGap = startGap;
+		}
+
+		public void setThinkTime(Integer thinkTime)
+		{
+			this.thinkTime = thinkTime;
+		}
+
+		public String toString()
+		{
+			return numUsers.toString() + "x" + startGap.toString() + "x" + thinkTime.toString();
+		}
 	}
 
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		error, home
+		error, generate, home, simulate
 	}
 
 	/** Our log (commons). */
@@ -181,20 +267,29 @@ public class AssessmentTestTool extends HttpServlet
 	/** Our self-injected site service reference. */
 	protected SiteService siteService = null;
 
+	/** Our self-injected thread local manager reference. */
+	protected ThreadLocalManager threadLocalManager = null;
+
 	/** Our self-injected time service reference. */
 	protected TimeService timeService = null;
 
 	/** Our self-injected tool manager reference. */
 	protected ToolManager toolManager = null;
 
-	/** Our self-injected thread local manager reference. */
-	protected ThreadLocalManager threadLocalManager = null;
-
 	/** Our self-injected ui service reference. */
 	protected UiService ui = null;
 
+	/** The generate interface. */
+	protected Controller uiGenerate = null;
+
 	/** The home interface. */
 	protected Controller uiHome = null;
+
+	/** The simulate interface. */
+	protected Controller uiSimulate = null;
+
+	/** Our self-injected user directory service reference. */
+	protected UserDirectoryService userDirectoryService = null;
 
 	/**
 	 * Shutdown the servlet.
@@ -237,10 +332,101 @@ public class AssessmentTestTool extends HttpServlet
 		ui = (UiService) ComponentManager.get(UiService.class);
 		securityService = (SecurityService) ComponentManager.get(SecurityService.class);
 		threadLocalManager = (ThreadLocalManager) ComponentManager.get(ThreadLocalManager.class);
+		userDirectoryService = (UserDirectoryService) ComponentManager.get(UserDirectoryService.class);
 
 		uiHome = TestControllers.constructHome(ui);
+		uiGenerate = TestControllers.constructGenerate(ui);
+		uiSimulate = TestControllers.constructSimulate(ui);
 
 		M_log.info("init()");
+	}
+
+	protected void answerEssay(AssessmentQuestion question, SubmissionAnswer answer)
+	{
+		answer.setEntryAnswerText("Essay text.");
+
+		answerRationale(question, answer);
+	}
+
+	protected void answerFillIn(AssessmentQuestion question, SubmissionAnswer answer)
+	{
+		// The corrects list the answers (text). One part.
+		List<AssessmentAnswer> answers = question.getPart().getCorrectAnswers();
+		if ((answers == null) || (answers.isEmpty()))
+		{
+			return;
+		}
+
+		// pack the answer text into an array
+		String[] answerIds = new String[answers.size()];
+		int index = 0;
+		for (AssessmentAnswer a : answers)
+		{
+			answerIds[index++] = a.getText();
+		}
+
+		// set the answer
+		answer.setEntryAnswerTexts(answerIds);
+
+		answerRationale(question, answer);
+	}
+
+	protected void answerMatch(AssessmentQuestion question, SubmissionAnswer answer)
+	{
+		// get a correct from each part
+		List<AssessmentAnswer> answers = new ArrayList<AssessmentAnswer>();
+		for (QuestionPart part : question.getParts())
+		{
+			List<AssessmentAnswer> partAnswers = part.getCorrectAnswers();
+			answers.addAll(partAnswers);
+		}
+
+		// pack the answer ids into an array
+		String[] answerIds = new String[answers.size()];
+		int index = 0;
+		for (AssessmentAnswer a : answers)
+		{
+			answerIds[index++] = a.getId();
+		}
+
+		// set the answer
+		answer.setEntryAnswerIds(answerIds);
+
+		answerRationale(question, answer);
+	}
+
+	protected void answerRationale(AssessmentQuestion question, SubmissionAnswer answer)
+	{
+		// rational required?
+		if ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue()))
+		{
+			answer.setRationale("rationale");
+		}
+	}
+
+	protected void answerTF_MC_Survey(AssessmentQuestion question, SubmissionAnswer answer)
+	{
+		// which is correct? One part.
+		List<AssessmentAnswer> answers = question.getPart().getCorrectAnswers();
+		if ((answers == null) || (answers.isEmpty()))
+		{
+			// no correct answer, pick one.
+			answers = new ArrayList<AssessmentAnswer>(1);
+			answers.add(question.getPart().getAnswers().get(0));
+		}
+
+		// pack the answer ids into an array
+		String[] answerIds = new String[answers.size()];
+		int index = 0;
+		for (AssessmentAnswer a : answers)
+		{
+			answerIds[index++] = a.getId();
+		}
+
+		// set the answer
+		answer.setEntryAnswerIds(answerIds);
+
+		answerRationale(question, answer);
 	}
 
 	/**
@@ -277,6 +463,30 @@ public class AssessmentTestTool extends HttpServlet
 			case home:
 			{
 				homeGet(req, res, context);
+				break;
+			}
+			case generate:
+			{
+				// we need a single parameter (specs)
+				if (parts.length != 3)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/")));
+					return;
+				}
+				generateGet(req, res, context, parts[2]);
+				break;
+			}
+			case simulate:
+			{
+				// we need a single parameter (specs)
+				if (parts.length != 3)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/")));
+					return;
+				}
+				simulateGet(req, res, context, parts[2]);
 				break;
 			}
 			case error:
@@ -347,9 +557,40 @@ public class AssessmentTestTool extends HttpServlet
 	}
 
 	/**
+	 * Establish this as the "current" user.
+	 * 
+	 * @param userEid
+	 *        The user eid.
+	 */
+	protected User establishUser(User user, String userEid)
+	{
+		// get the postmaster user
+		try
+		{
+			if (user == null)
+			{
+				user = userDirectoryService.getUserByEid(userEid);
+			}
+
+			Session s = sessionManager.getCurrentSession();
+			if (s != null)
+			{
+				s.setUserId(user.getId());
+				s.setUserEid(user.getEid());
+			}
+
+			return user;
+		}
+		catch (UserNotDefinedException e)
+		{
+			return null;
+		}
+	}
+
+	/**
 	 * Generate some assessments and submissions
 	 */
-	protected void generate(Specs specs)
+	protected String generate(GenerateSpecs specs)
 	{
 		// suppress event trackin events for better performance
 		threadLocalManager.set("sakai.event.suppress", Boolean.TRUE);
@@ -358,7 +599,7 @@ public class AssessmentTestTool extends HttpServlet
 		String context = toolManager.getCurrentPlacement().getContext();
 
 		// if not at least assessment add in the current context, reject
-		if (!assessmentService.allowAddAssessment(context)) return;
+		if (!assessmentService.allowAddAssessment(context)) return "not permitted";
 
 		// get the session and current user info
 		Session sakaiSession = sessionManager.getCurrentSession();
@@ -522,6 +763,8 @@ public class AssessmentTestTool extends HttpServlet
 			// clear the advisor
 			securityService.popAdvisor();
 		}
+
+		return "ok";
 	}
 
 	/**
@@ -661,6 +904,34 @@ public class AssessmentTestTool extends HttpServlet
 		}
 
 		return question;
+	}
+
+	/**
+	 * Get the UI for the generate destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param assessmentId
+	 *        The selected assessment id.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void generateGet(HttpServletRequest req, HttpServletResponse res, Context context, String specsStr)
+	{
+		// reconstitute the specs
+		GenerateSpecs specs = new GenerateSpecs(specsStr);
+
+		// do it
+		String rv = generate(specs);
+
+		context.put("rv", rv);
+
+		// render
+		ui.render(uiGenerate, context);
 	}
 
 	/**
@@ -1068,7 +1339,8 @@ public class AssessmentTestTool extends HttpServlet
 	 */
 	protected void homeGet(HttpServletRequest req, HttpServletResponse res, Context context)
 	{
-		context.put("specs", new Specs());
+		context.put("gspecs", new GenerateSpecs());
+		context.put("sspecs", new SimulateSpecs());
 
 		// render
 		ui.render(uiHome, context);
@@ -1095,28 +1367,27 @@ public class AssessmentTestTool extends HttpServlet
 		}
 
 		// read form
-		Specs specs = new Specs();
-		context.put("specs", specs);
+		GenerateSpecs gspecs = new GenerateSpecs();
+		context.put("gspecs", gspecs);
+		SimulateSpecs sspecs = new SimulateSpecs();
+		context.put("sspecs", sspecs);
 		String destination = ui.decode(req, context);
 
-		// generate (one)
-		// "Vivie" numbers
-		// final int contextsWithAssessments = 500;
-		// final int assessmentsPerContext = 25;
-		// final int submissionsPerStudent = 2;
-		// final int contextStudents = 50;
-		// final int itemsPerAssessment = 10;
+		// look for special codes in the destination
+		if ("/generate".equals(destination))
+		{
+			// add the specs
+			destination = destination + "/" + gspecs.toString();
+		}
 
-		// // small
-		// final int contextsWithAssessments = 2;
-		// final int assessmentsPerContext = 2;
-		// final int submissionsPerStudent = 2;
-		// final int contextStudents = 2;
-		// final int itemsPerAssessment = 2;
-		generate(specs);
+		else if ("/simulate".equals(destination))
+		{
+			// add the specs
+			destination = destination + "/" + sspecs.toString();
+		}
 
 		// redirect to home
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/home")));
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
@@ -1130,5 +1401,329 @@ public class AssessmentTestTool extends HttpServlet
 	{
 		String error = Web.returnUrl(req, "/" + Destinations.error);
 		res.sendRedirect(res.encodeRedirectURL(error));
+	}
+
+	protected String simulate(final SimulateSpecs specs)
+	{
+		final String sakaiContext = toolManager.getCurrentPlacement().getContext();
+		final StringBuffer results = new StringBuffer();
+
+		// create a thread for each user
+		Thread[] threads = new Thread[specs.numUsers];
+		for (int i = 0; i < specs.numUsers; i++)
+		{
+			final String userEid = "student" + (i + 1);
+
+			threads[i] = new Thread(new Runnable()
+			{
+				public void run()
+				{
+					String rv = simulateSubmission(sakaiContext, userEid, specs.getThinkTime().intValue());
+					results.append(rv + "<br />");
+				};
+			});
+		}
+
+		// start them all
+		for (int i = 0; i < specs.numUsers; i++)
+		{
+			threads[i].start();
+
+			// pause a bit between starts
+			if (specs.getStartGap().intValue() > 0)
+			{
+				try
+				{
+					Thread.sleep(specs.getStartGap().intValue());
+				}
+				catch (InterruptedException ignore)
+				{
+				}
+			}
+		}
+
+		// wait for them all
+		for (int i = 0; i < specs.numUsers; i++)
+		{
+			try
+			{
+				threads[i].join();
+			}
+			catch (InterruptedException e)
+			{
+			}
+		}
+
+		return results.toString();
+	}
+
+	/**
+	 * Get the UI for the generate destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param assessmentId
+	 *        The selected assessment id.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void simulateGet(HttpServletRequest req, HttpServletResponse res, Context context, String specsStr)
+	{
+		SimulateSpecs specs = new SimulateSpecs(specsStr);
+
+		// do the simulation
+		String rv = simulate(specs);
+
+		context.put("rv", rv);
+
+		// render
+		ui.render(uiSimulate, context);
+	}
+
+	/**
+	 * Submit the correct answers to a test for a user.
+	 * 
+	 * @param context
+	 *        The context in which to find and submit an assessment.
+	 * @param userEid
+	 *        The user EID for which we will simulate a submission.
+	 * @param thinkTime
+	 *        The time (ms) to wait between seeing a question and answering it.
+	 */
+	protected String simulateSubmission(String context, String userEid, int thinkTime)
+	{
+		Time start = timeService.newTime();
+
+		User currentUser = null;
+		try
+		{
+			currentUser = userDirectoryService.getUser(sessionManager.getCurrentSessionUserId());
+		}
+		catch (UserNotDefinedException e)
+		{
+		}
+
+		try
+		{
+			User user = establishUser(null, userEid);
+
+			// get the list of assessments (simulate list view)
+			AssessmentService.GetUserContextSubmissionsSort sort = AssessmentService.GetUserContextSubmissionsSort.status_d;
+			List<Submission> submissions = assessmentService.getUserContextSubmissions(context, null, sort);
+
+			// shuffle these to get a random available one
+			Collections.shuffle(submissions, new Random(userEid.hashCode()));
+
+			// clear the thread to simulate a new requst / response cycle
+			threadLocalManager.clear();
+			if (thinkTime > 0)
+			{
+				try
+				{
+					Thread.sleep(thinkTime);
+				}
+				catch (InterruptedException ignore)
+				{
+				}
+			}
+			establishUser(user, userEid);
+
+			// pick one that is ready to take
+			String aid = null;
+			for (Submission submission : submissions)
+			{
+				AssessmentSubmissionStatus status = submission.getAssessmentSubmissionStatus();
+				if ((status == AssessmentSubmissionStatus.completeReady) || (status == AssessmentSubmissionStatus.ready))
+				{
+					aid = submission.getAssessment().getId();
+					break;
+				}
+			}
+			if (aid == null) return "no assessment";
+
+			// simulate the enter view get
+
+			// useless code
+			Assessment assessment = assessmentService.idAssessment(aid);
+			assessment.getIsClosed();
+			assessmentService.allowSubmit(assessment, null);
+			if ((assessment.getPassword() == null) && (assessment.getDescription() == null) && (assessment.getAttachments().isEmpty())
+					&& (assessment.getRandomAccess().booleanValue()) && (assessment.getTimeLimit() == null))
+			{
+			}
+			// useless code
+
+			// enter the submission (simulate enter view post)
+
+			// useless code
+			assessment = assessmentService.idAssessment(aid);
+			assessment.getPassword();
+			// useless code
+
+			String sid = null;
+			try
+			{
+				Submission submission = assessmentService.enterSubmission(assessmentService.idAssessment(aid), null);
+				sid = submission.getId();
+
+				// useless code
+				assessment = submission.getAssessment();
+				QuestionPresentation presentation = assessment.getQuestionPresentation();
+				assessment.getRandomAccess();
+				// useless code
+			}
+			catch (AssessmentClosedException e)
+			{
+				return e.toString();
+			}
+			catch (AssessmentCompletedException e)
+			{
+				return e.toString();
+			}
+			catch (AssessmentPermissionException e)
+			{
+				return e.toString();
+			}
+
+			if (sid == null) return "could not enter submission";
+
+			// pick the first question
+			AssessmentQuestion firstQuestion = assessmentService.idSubmission(sid).getAssessment().getFirstSection().getFirstQuestion();
+			if (firstQuestion == null) return "no first quesiton";
+			String qid = firstQuestion.getId();
+
+			// loop for the entire test
+			int count = 0;
+			while (qid != null)
+			{
+				// emulate the question view get
+
+				// useless code
+				Submission submission = assessmentService.idSubmission(sid);
+				submission.completeIfOver();
+				submission = assessmentService.idSubmission(sid);
+				assessmentService.allowCompleteSubmission(submission, null);
+				AssessmentQuestion question = submission.getAssessment().getQuestion(qid);
+				question.getSection().getAssessment().getRandomAccess();
+				submission.getIsCompleteQuestion(question);
+				// useless code
+
+				// clear the thread to simulate a new requst / response cycle
+				threadLocalManager.clear();
+				if (thinkTime > 0)
+				{
+					try
+					{
+						Thread.sleep(thinkTime);
+					}
+					catch (InterruptedException ignore)
+					{
+					}
+				}
+				establishUser(user, userEid);
+
+				// emulate the quesiton view post
+				// form an answer to qid
+				submission = assessmentService.idSubmission(sid);
+				question = submission.getAssessment().getQuestion(qid);
+				SubmissionAnswer answer = submission.getAnswer(question);
+
+				// answer the question
+				switch (question.getType())
+				{
+					case trueFalse:
+					case multipleChoice:
+					case multipleCorrect:
+					case survey:
+					{
+						answerTF_MC_Survey(question, answer);
+						break;
+					}
+
+					case essay:
+					{
+						answerEssay(question, answer);
+						break;
+					}
+
+					case fillIn:
+					case numeric:
+					{
+						answerFillIn(question, answer);
+						break;
+					}
+
+					case matching:
+					{
+						answerMatch(question, answer);
+						break;
+					}
+						// TODO: fileUpload, audioRecording
+				}
+
+				// get the next question
+				AssessmentQuestion nextQuesiton = question.getAssessmentOrdering().getNext();
+				if (nextQuesiton != null)
+				{
+					qid = nextQuesiton.getId();
+				}
+				else
+				{
+					qid = null;
+				}
+
+				// submit it
+				try
+				{
+					assessmentService.submitAnswer(answer, Boolean.TRUE, Boolean.FALSE);
+					count++;
+				}
+				catch (AssessmentClosedException e)
+				{
+				}
+				catch (SubmissionCompletedException e)
+				{
+				}
+				catch (AssessmentPermissionException e)
+				{
+				}
+			}
+
+			// finish
+			try
+			{
+				assessmentService.completeSubmission(assessmentService.idSubmission(sid));
+			}
+			catch (AssessmentClosedException e)
+			{
+				return e.toString();
+			}
+			catch (SubmissionCompletedException e)
+			{
+				return e.toString();
+			}
+			catch (AssessmentPermissionException e)
+			{
+				return e.toString();
+			}
+
+			Time end = timeService.newTime();
+			return "user: " + userEid + " submission: " + sid + " assessment: " + aid + " questions: " + count + " time(ms): "
+					+ (end.getTime() - start.getTime());
+		}
+
+		finally
+		{
+			threadLocalManager.clear();
+
+			if (currentUser != null)
+			{
+				establishUser(currentUser, null);
+			}
+		}
 	}
 }

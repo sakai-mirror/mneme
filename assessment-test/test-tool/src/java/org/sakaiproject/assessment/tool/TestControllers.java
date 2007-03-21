@@ -40,37 +40,103 @@ public class TestControllers
 			ui.newInterface()
 				.setTitle("home-title")
 				.setHeader("home-header")
-				.setTitle("home-section-title")
 				.add(
 					ui.newSection()
-						.add(
-							ui.newText()
-								.setText("home-generate"))
+						.setTitle("home-generate-title")
 						.add(
 							ui.newTextEdit()
-								.setProperty(ui.newPropertyReference().setReference("specs.contextsWithAssessments"))
+								.setSize(1, 12)
+								.setProperty(ui.newPropertyReference().setReference("gspecs.contextsWithAssessments"))
 								.setTitle("home-contextsWithAssessments"))
 						.add(
 							ui.newTextEdit()
-								.setProperty(ui.newPropertyReference().setReference("specs.assessmentsPerContext"))
+								.setSize(1, 12)
+								.setProperty(ui.newPropertyReference().setReference("gspecs.assessmentsPerContext"))
 								.setTitle("home-assessmentsPerContext"))
 						.add(
 							ui.newTextEdit()
-								.setProperty(ui.newPropertyReference().setReference("specs.submissionsPerStudent"))
+								.setSize(1, 12)
+								.setProperty(ui.newPropertyReference().setReference("gspecs.submissionsPerStudent"))
 								.setTitle("home-submissionsPerStudent"))
 						.add(
 							ui.newTextEdit()
-								.setProperty(ui.newPropertyReference().setReference("specs.contextStudents"))
+								.setSize(1, 12)
+								.setProperty(ui.newPropertyReference().setReference("gspecs.contextStudents"))
 								.setTitle("home-contextStudents"))
 						.add(
 							ui.newTextEdit()
-								.setProperty(ui.newPropertyReference().setReference("specs.itemsPerAssessment"))
-								.setTitle("home-itemsPerAssessment")))
+								.setSize(1, 12)
+								.setProperty(ui.newPropertyReference().setReference("gspecs.itemsPerAssessment"))
+								.setTitle("home-itemsPerAssessment"))
+						.add(
+							ui.newNavigationBar()
+								.add(ui.newNavigation()
+									.setSubmit()
+									.setDestination(ui.newDestination().setDestination("/generate"))
+									.setTitle("home-generate")
+									.setStyle(Navigation.Style.button)))
+						)
 				.add(
-					ui.newButtonBar()
+					ui.newSection()
+						.setTitle("home-simulate-title")
+						.add(
+							ui.newTextEdit()
+								.setSize(1, 12)
+								.setProperty(ui.newPropertyReference().setReference("sspecs.numUsers"))
+								.setTitle("home-numUsers"))
+						.add(
+							ui.newTextEdit()
+								.setSize(1, 12)
+								.setProperty(ui.newPropertyReference().setReference("sspecs.startGap"))
+								.setTitle("home-startGap"))
+						.add(
+							ui.newTextEdit()
+								.setSize(1, 12)
+								.setProperty(ui.newPropertyReference().setReference("sspecs.thinkTime"))
+								.setTitle("home-thinkTime"))
+						.add(
+							ui.newNavigationBar()
+								.add(ui.newNavigation()
+									.setSubmit()
+									.setDestination(ui.newDestination().setDestination("/simulate"))
+									.setTitle("home-simulate")
+									.setStyle(Navigation.Style.button)))
+						);
+	}
+
+	/**
+	 */
+	public static Controller constructGenerate(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("generate-title")
+				.setHeader("generate-header")
+				.add(
+					ui.newInstructions().setText(null, ui.newPropertyReference().setReference("rv")))
+				.add(
+					ui.newNavigationBar()
 						.add(ui.newNavigation()
-							.setSubmit()
-							.setTitle("home-generate")
+							.setDestination(ui.newDestination().setDestination("/home"))
+							.setTitle("return")
+							.setStyle(Navigation.Style.button)));
+	}
+
+	/**
+	 */
+	public static Controller constructSimulate(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("simulate-title")
+				.setHeader("simulate-header")
+				.add(
+					ui.newInstructions().setText(null, ui.newPropertyReference().setReference("rv")))
+				.add(
+					ui.newNavigationBar()
+						.add(ui.newNavigation()
+							.setDestination(ui.newDestination().setDestination("/home"))
+							.setTitle("return")
 							.setStyle(Navigation.Style.button)));
 	}
 }
