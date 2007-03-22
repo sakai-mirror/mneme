@@ -237,7 +237,7 @@ public class DeliveryControllers
 						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("assessment.description")))
 						.add(
 							ui.newAttachments()
-								.setTitle("enter-attachments")
+								.setTitle("attachments")
 								.setAttachments(ui.newPropertyReference().setReference("assessment.attachments"), null)
 								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.attachments")))))
 				.add(
@@ -401,7 +401,7 @@ public class DeliveryControllers
 								.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.section.description")))
 						.add(
 							ui.newAttachments()
-								.setTitle("enter-attachments")
+								.setTitle("attachments")
 								.setAttachments(ui.newPropertyReference().setReference("answer.question.section.attachments"), null)
 								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.attachments"))))
 						.add(
@@ -746,7 +746,7 @@ public class DeliveryControllers
 							ui.newNavigation()
 								.setTitle("next")
 								.setAccessKey("next-access")
-								.setDescription("next-description")
+								.setDescription("review-next-description")
 								.setIcon("/icons/next.gif",Navigation.IconStyle.right)
 								.setStyle(Navigation.Style.button)
 								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true"))))
