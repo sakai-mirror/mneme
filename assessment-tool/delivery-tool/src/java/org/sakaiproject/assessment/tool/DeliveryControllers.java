@@ -66,7 +66,6 @@ public class DeliveryControllers
 			ui.newInterface()
 				.setTitle("list-title")
 				.setHeader("list-header")
-				.add(ui.newInstructions().setText("list-instructions"))
 				.add(
 					ui.newEntityList()
 						.setStyle(EntityList.Style.flat)
@@ -105,7 +104,7 @@ public class DeliveryControllers
 							ui.newPropertyColumn()
 								.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatListDecoration()))
 								.setTitle("list-status-title")
-								.setCentered()
+								//.setCentered()
 								.setWidthEm(10)
 								.setSorting(
 									ui.newCompareDecision().setEqualsConstant("1").setProperty(ui.newPropertyReference().setReference("sort_column")),
@@ -133,7 +132,8 @@ public class DeliveryControllers
 										.setReference("submission.assessment.releaseDate")
 										.setMissingText("dash"))
 								.setTitle("list-header-open")
-								.setCentered())
+								//.setCentered()
+								)
 						.addColumn(
 							ui.newPropertyColumn()
 								.setProperty(
@@ -148,7 +148,8 @@ public class DeliveryControllers
 								.setSortDestination(
 									ui.newDestination().setDestination("/list/2A"),
 									ui.newDestination().setDestination("/list/2D"))
-								.setCentered())
+								//.setCentered()
+								)
 						.addColumn(
 							ui.newEntityListColumn()
 								.add(
@@ -169,7 +170,8 @@ public class DeliveryControllers
 												.setMissingText("dash"))
 										.setIncluded(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayContinue"))))
 								.setTitle("list-header-limit")
-								.setCentered())
+								//.setCentered()
+								)
 						.addColumn(
 							ui.newPropertyColumn()
 								.setProperty(
@@ -177,7 +179,8 @@ public class DeliveryControllers
 									ui.newPropertyReference().setReference("submission.siblingCount"),
 									ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed").setMissingText("infinite"))
 								.setTitle("list-header-tries")
-								.setCentered())
+								//.setCentered()
+								)
 						.addColumn(
 							ui.newPropertyColumn()
 								.setProperty(
@@ -185,7 +188,7 @@ public class DeliveryControllers
 										.setReference("submission.submittedDate")
 										.setMissingText("dash"))
 								.setTitle("list-header-finished")
-								.setCentered()
+								//.setCentered()
 								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash"))
 						.addColumn(
 							ui.newPropertyColumn()
@@ -194,7 +197,7 @@ public class DeliveryControllers
 									ui.newPropertyReference().setReference("submission.totalScore"),
 									ui.newPropertyReference().setReference("submission.assessment.totalPoints"))
 								.setTitle("list-header-score")
-								.setCentered()
+								//.setCentered()
 								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash")
 						.addNavigation(
 							ui.newNavigation()
