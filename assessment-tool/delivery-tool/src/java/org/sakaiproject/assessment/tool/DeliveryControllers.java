@@ -454,14 +454,6 @@ public class DeliveryControllers
 					ui.newTextPropertyReference().setReference("actionTitle"),
 					ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.add(ui.newAlias().setTo("nav"))
-//				.add(
-//					ui.newSection()
-//						.add(
-//							ui.newInstructions()
-//								.setText("linear-instructions")
-//								.setIncluded(
-//									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
-//									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")))))
 				.add(
 					ui.newCountdownTimer()
 						//.setHideMessage("timer-hide")
@@ -501,6 +493,12 @@ public class DeliveryControllers
 //								.setClump(5)
 //								.setMark(ui.newPropertyReference().setReference("submission.totalScore"))
 //								.setMax(ui.newPropertyReference().setReference("submission.assessment.totalPoints")))
+						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("submission.assessment.description")))
+						.add(
+							ui.newAttachments()
+								.setTitle("attachments")
+								.setAttachments(ui.newPropertyReference().setReference("submission.assessment.attachments"), null)
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.attachments"))))
 						.add(
 							ui.newSection()
 								.setTitle("question-eval-overall-comment-title")
@@ -533,18 +531,57 @@ public class DeliveryControllers
 												.setProperty(
 													ui.newPropertyReference()
 														.setReference("answer.question.sectionOrdering.isFirst"))),
+									ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
 									ui.newCompareDecision()
 										.setEqualsConstant("Default")
 										.setReversed()
 										.setProperty(ui.newPropertyReference().setReference("answer.question.section.title"))))
 						.add(
 							ui.newText()
-								.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.section.description")))
+								.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.section.description"))
+								.setIncluded(
+										ui.newAndDecision()
+											.setRequirements(
+												ui.newOrDecision()
+													.setOptions(
+														ui.newHasValueDecision()
+															.setProperty(
+																ui.newPropertyReference()
+																	.setReference("question")),
+														ui.newDecision()
+															.setProperty(
+																ui.newPropertyReference()
+																	.setReference("answer.question.sectionOrdering.isFirst"))),
+													ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
+													ui.newCompareDecision()
+														.setEqualsConstant("Default")
+														.setReversed()
+														.setProperty(ui.newPropertyReference().setReference("answer.question.section.title"))))
+								)
 						.add(
 							ui.newAttachments()
 								.setTitle("attachments")
 								.setAttachments(ui.newPropertyReference().setReference("answer.question.section.attachments"), null)
-								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.attachments"))))
+								.setIncluded(
+										ui.newAndDecision()
+											.setRequirements(
+												ui.newOrDecision()
+													.setOptions(
+														ui.newHasValueDecision()
+															.setProperty(
+																ui.newPropertyReference()
+																	.setReference("question")),
+														ui.newDecision()
+															.setProperty(
+																ui.newPropertyReference()
+																	.setReference("answer.question.sectionOrdering.isFirst"))),
+													ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
+													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.attachments")),
+													ui.newCompareDecision()
+														.setEqualsConstant("Default")
+														.setReversed()
+														.setProperty(ui.newPropertyReference().setReference("answer.question.section.title"))))
+								)
 						.add(
 							ui.newSection()
 								.setTitle(null,ui.newTextPropertyReference().setReference("answer.question").setFormatDelegate(new FormatQuestionTitle()))
