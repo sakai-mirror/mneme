@@ -226,7 +226,6 @@ public class DeliveryControllers
 	/**
 	 * The enter interface needs the following entities in the context:
 	 * assessment - the selected Assessment object
-	 * XX remainingSubmissions - Integer count of remaining submissions allowed to the current user for the selected assessment
 	 * password - an object with a "value" property to hold the entered password.
 	 */
 	public static Controller constructEnter(UiService ui)
@@ -257,35 +256,174 @@ public class DeliveryControllers
 								.setText("timed-instructions"))
 						.setIncluded(
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.timeLimit"))))
-					.add(
-						ui.newSection()
-							.add(ui.newInstructions().setText("enter-pw-instructions"))
-							.add(
-								ui.newPassword()
-									.setProperty(ui.newPropertyReference().setReference("password.value"))
-									.setTitle("enter-password"))
-						.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.password"))))
-					.add(ui.newGap())
-					.add(
-						ui.newNavigationBar()
-							.add(
-								ui.newNavigation()
-									.setSubmit()
-									.setTitle("begin")
-									.setIcon("/icons/begin.gif",Navigation.IconStyle.left)
-									.setAccessKey("begin-access")
-									.setDescription("begin-description")
-									.setStyle(Navigation.Style.button))
-							.add(
-								ui.newNavigation()
-									.setDefault()
-									.setTitle("cancel")
-									.setIcon("/icons/cancel.gif",Navigation.IconStyle.left)
-									.setAccessKey("cancel-access")
-									.setDescription("cancel-description")
-									.setStyle(Navigation.Style.button)
-									.setDestination(ui.newDestination().setDestination("/list")))
-							.setId("nav"));
+				.add(
+					ui.newSection()
+						.add(ui.newInstructions().setText("enter-pw-instructions"))
+						.add(
+							ui.newPassword()
+								.setProperty(ui.newPropertyReference().setReference("password.value"))
+								.setTitle("enter-password"))
+					.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.password"))))
+				.add(ui.newGap())
+				.add(
+					ui.newNavigationBar()
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setTitle("begin")
+								.setIcon("/icons/begin.gif",Navigation.IconStyle.left)
+								.setAccessKey("begin-access")
+								.setDescription("begin-description")
+								.setStyle(Navigation.Style.button))
+						.add(
+							ui.newNavigation()
+								.setDefault()
+								.setTitle("cancel")
+								.setIcon("/icons/cancel.gif",Navigation.IconStyle.left)
+								.setAccessKey("cancel-access")
+								.setDescription("cancel-description")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/list")))
+						.setId("nav"));
+	}
+
+	/**
+	 * The instructions interface needs the following entities in the context:
+	 * submission - the current submission object
+	 * question - the current question being answered
+	 */
+	public static Controller constructInstructions(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("instructions-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.setHeader("instructions-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.add(ui.newAlias().setTo("nav"))
+				.add(
+					ui.newCountdownTimer()
+						//.setHideMessage("timer-hide")
+						//.setShowMessage("timer-show")
+						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
+						.setRemainingMessage("timer-remaining")
+						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
+						.setExpireDestination(
+							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
+						.setIncluded(
+							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")),
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
+							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
+				.add(
+					ui.newCountdownTimer()
+						//.setHideMessage("timer-hide")
+						//.setShowMessage("timer-show")
+						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
+						.setRemainingMessage("timer-remaining")
+						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
+						.setExpireDestination(
+							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
+						.setIncluded(
+							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")),
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
+							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.closedDate.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
+				.add(
+					ui.newSection()
+						.setTitle("instructions-test-title",
+							ui.newPropertyReference().setReference("submission.assessment.title"),
+							ui.newPropertyReference().setReference("submission.assessment.totalPoints"))
+						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("submission.assessment.description")))
+						.add(
+							ui.newAttachments()
+								.setTitle("attachments")
+								.setAttachments(ui.newPropertyReference().setReference("submission.assessment.attachments"), null)
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.attachments")))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("linear-instructions"))
+						.setIncluded(
+							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("timed-instructions-inprogress"))
+						.setIncluded(
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
+				.add(
+					ui.newSection()
+						.setTitle("question-section-title",
+							ui.newTextPropertyReference().setReference("question.section.ordering.position"),
+							ui.newTextPropertyReference().setReference("question.section.assessment.numSections"),
+							ui.newTextPropertyReference().setReference("question.section.title"),
+							ui.newPropertyReference().setReference("question.section").setFormatDelegate(new SectionScore()))
+						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("question.section.description")))
+						.add(
+							ui.newAttachments()
+								.setTitle("attachments")
+								.setAttachments(ui.newPropertyReference().setReference("question.section.attachments"), null)
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question.section.attachments"))))
+						.setIncluded(
+							ui.newCompareDecision()
+								.setEqualsConstant("Default")
+								.setReversed()
+								.setProperty(ui.newPropertyReference().setReference("question.section.title"))))
+				.add(ui.newGap())
+				.add(
+					ui.newNavigationBar()
+						.add(
+							ui.newNavigation()
+								.setTitle("continue")
+								.setIcon("/icons/return.png",Navigation.IconStyle.left)
+								.setAccessKey("continue-access")
+								.setDescription("continue-description")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
+									ui.newPropertyReference().setReference("submission.id"),
+									ui.newPropertyReference().setReference("question.id"))))
+						.setIncluded(
+								ui.newCompareDecision()
+									.setEqualsConstant(QuestionPresentation.BY_QUESTION.toString())
+									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
+						.setId("nav"))
+				.add(
+					ui.newNavigationBar()
+						.add(
+							ui.newNavigation()
+								.setTitle("continue")
+								.setIcon("/icons/return.png",Navigation.IconStyle.left)
+								.setAccessKey("continue-access")
+								.setDescription("continue-description")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}#{2}",
+									ui.newPropertyReference().setReference("submission.id"),
+									ui.newPropertyReference().setReference("question.section.id"),
+									ui.newPropertyReference().setReference("question.id"))))
+						.setIncluded(
+								ui.newCompareDecision()
+									.setEqualsConstant(QuestionPresentation.BY_SECTION.toString())
+									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
+						.setId("nav"))
+				.add(
+					ui.newNavigationBar()
+						.add(
+							ui.newNavigation()
+								.setTitle("continue")
+								.setIcon("/icons/return.png",Navigation.IconStyle.left)
+								.setAccessKey("continue-access")
+								.setDescription("continue-description")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/a#{1}",
+									ui.newPropertyReference().setReference("submission.id"),
+									ui.newPropertyReference().setReference("question.id"))))
+						.setIncluded(
+								ui.newCompareDecision()
+									.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
+									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
+						.setId("nav"))
+		;
 	}
 
 	/**
@@ -316,14 +454,14 @@ public class DeliveryControllers
 					ui.newTextPropertyReference().setReference("actionTitle"),
 					ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.add(ui.newAlias().setTo("nav"))
-				.add(
-					ui.newSection()
-						.add(
-							ui.newInstructions()
-								.setText("linear-instructions")
-								.setIncluded(
-									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
-									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")))))
+//				.add(
+//					ui.newSection()
+//						.add(
+//							ui.newInstructions()
+//								.setText("linear-instructions")
+//								.setIncluded(
+//									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
+//									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")))))
 				.add(
 					ui.newCountdownTimer()
 						//.setHideMessage("timer-hide")
@@ -929,6 +1067,21 @@ public class DeliveryControllers
 									ui.newOrDecision().setOptions(
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("finishReady")),
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
+						.add(
+							ui.newDivider())
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setTitle("instructions")
+								.setAccessKey("instructions-access")
+								.setDescription("instructions-description")
+								//.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
+								.setStyle(Navigation.Style.link)
+								.setDestination(
+									ui.newDestination()
+										.setDestination("/instructions/{0}/{1}",
+											ui.newTextPropertyReference().setReference("submission.id"),
+											ui.newTextPropertyReference().setReference("question.id"))))
 						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed())
 						.setId("nav"));
 	}

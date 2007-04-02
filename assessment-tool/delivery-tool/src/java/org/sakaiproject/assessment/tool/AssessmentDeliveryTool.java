@@ -70,7 +70,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		enter, error, final_review, list, list2, question, remove, review, submitted, toc
+		enter, error, final_review, list, list2, question, remove, review, submitted, toc, instructions
 	}
 
 	/** Our errors. */
@@ -130,6 +130,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** The table of contents interface. */
 	protected Controller uiToc = null;
 
+	/** The instructions interface. */
+	protected Controller uiInstructions = null;
+
 	/**
 	 * Shutdown the servlet.
 	 */
@@ -178,6 +181,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		this.uiToc = DeliveryControllers.constructToc(ui);
 		this.uiRemove = DeliveryControllers.constructRemove(ui);
 		this.uiError = DeliveryControllers.constructError(ui);
+		this.uiInstructions = DeliveryControllers.constructInstructions(ui);
 
 		// setup the resource paths
 		this.resourcePaths.add("icons");
@@ -339,6 +343,21 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				break;
 			}
+			case instructions:
+			{
+				// we need two parameters (sid/qid)
+				if (parts.length < 4)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+				else
+				{
+					instructionsGet(req, res, parts[2], parts[3], context);
+				}
+				break;
+			}
 			case error:
 			{
 				// we would like a single parameter (error code), and perhaps one more
@@ -446,6 +465,20 @@ public class AssessmentDeliveryTool extends HttpServlet
 				else
 				{
 					finalReviewPost(req, res, context, parts[2]);
+				}
+				break;
+			}
+			case instructions:
+			{
+				// we expect two parameters (sid/qid)
+				if (parts.length < 4)
+				{
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalidpost)));
+					return;
+				}
+				else
+				{
+					instructionsPost(req, res, context, parts[2]);
 				}
 				break;
 			}
@@ -788,6 +821,24 @@ public class AssessmentDeliveryTool extends HttpServlet
 	}
 
 	/**
+	 * Read the input for the instructions destination, process, and redirect to the next destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param context
+	 *        The UiContext.
+	 * @param submissionId
+	 *        the selected submission id.
+	 */
+	protected void instructionsPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId) throws IOException
+	{
+		// this post is from the timer, and completes the submission
+		submissionCompletePost(req, res, context, submissionId);
+	}
+
+	/**
 	 * Get the UI for the list destination.
 	 * 
 	 * @param req
@@ -982,9 +1033,11 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// if we are going to submitted, we must complete the submission (unless there was an upload error)
 		Boolean complete = Boolean.valueOf((!uploadError) && destination.startsWith("/submitted"));
 
-		// unless we are going to list, remove, or feedback, or this very same question, or we have a file upload error, mark the answers as complete
+		// unless we are going to list, remove, instructions (or soon hints), or this very same question, or we have a file upload error, mark the
+		// answers as complete
+		// TODO: when hints are in, this counts (adding ~ || destination.endsWith("/feedback"))
 		Boolean answersComplete = Boolean.valueOf(!(uploadError || destination.startsWith("/list") || destination.startsWith("/remove")
-				|| destination.endsWith("/feedback") || context.getPreviousDestination().equals(destination)));
+				|| destination.startsWith("/instructions") || context.getPreviousDestination().equals(destination)));
 
 		// submit all answers
 		try
@@ -1289,6 +1342,56 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// render
 		ui.render(uiRemove, context);
+	}
+
+	/**
+	 * Get the UI for the instructions destination
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submisssionId
+	 *        The selected submission id.
+	 * @param questionId
+	 *        The current question id.
+	 * @param context
+	 *        UiContext.
+	 */
+	protected void instructionsGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId, Context context)
+			throws IOException
+	{
+		// collect the submission
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		context.put("submission", submission);
+
+		// collect the question
+		AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+		if (question == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		context.put("question", question);
+
+		// render
+		ui.render(uiInstructions, context);
 	}
 
 	/**
