@@ -345,7 +345,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case instructions:
 			{
-				// we need two parameters (sid/qid)
+				// two parameters, sid and all the rest as return destination
 				if (parts.length < 4)
 				{
 					// redirect to error
@@ -354,7 +354,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				else
 				{
-					instructionsGet(req, res, parts[2], parts[3], context);
+					instructionsGet(req, res, parts[2],  "/" + StringUtil.unsplit(parts, 3, parts.length - 3, "/"), context);
 				}
 				break;
 			}
@@ -470,7 +470,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 			case instructions:
 			{
-				// we expect two parameters (sid/qid)
+				// two parameters, sid and all the rest as return destination (which we don't need for post)
 				if (parts.length < 4)
 				{
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalidpost)));
@@ -1353,12 +1353,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Servlet response.
 	 * @param submisssionId
 	 *        The selected submission id.
-	 * @param questionId
-	 *        The current question id.
+	 * @param returnDestination
+	 *        The destination to return to.
 	 * @param context
 	 *        UiContext.
 	 */
-	protected void instructionsGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId, Context context)
+	protected void instructionsGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String returnDestination, Context context)
 			throws IOException
 	{
 		// collect the submission
@@ -1378,17 +1378,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 
 		context.put("submission", submission);
-
-		// collect the question
-		AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
-		if (question == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
-		context.put("question", question);
+		context.put("destination", returnDestination);
 
 		// render
 		ui.render(uiInstructions, context);

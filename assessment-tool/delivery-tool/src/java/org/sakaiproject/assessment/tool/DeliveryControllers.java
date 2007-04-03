@@ -290,7 +290,7 @@ public class DeliveryControllers
 	/**
 	 * The instructions interface needs the following entities in the context:
 	 * submission - the current submission object
-	 * question - the current question being answered
+	 * destination - the return destination
 	 */
 	public static Controller constructInstructions(UiService ui)
 	{
@@ -352,7 +352,7 @@ public class DeliveryControllers
 								.setText("timed-instructions-inprogress"))
 						.setIncluded(
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
-				.add(
+				.add(// TODO: repeate for ALL parts submission.assessment.sections as section
 					ui.newSection()
 						.setTitle("question-section-title",
 							ui.newTextPropertyReference().setReference("question.section.ordering.position"),
@@ -380,48 +380,8 @@ public class DeliveryControllers
 								.setAccessKey("continue-access")
 								.setDescription("continue-description")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
-									ui.newPropertyReference().setReference("submission.id"),
-									ui.newPropertyReference().setReference("question.id"))))
-						.setIncluded(
-								ui.newCompareDecision()
-									.setEqualsConstant(QuestionPresentation.BY_QUESTION.toString())
-									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
-						.setId("nav"))
-				.add(
-					ui.newNavigationBar()
-						.add(
-							ui.newNavigation()
-								.setTitle("continue")
-								.setIcon("/icons/return.png",Navigation.IconStyle.left)
-								.setAccessKey("continue-access")
-								.setDescription("continue-description")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}#{2}",
-									ui.newPropertyReference().setReference("submission.id"),
-									ui.newPropertyReference().setReference("question.section.id"),
-									ui.newPropertyReference().setReference("question.id"))))
-						.setIncluded(
-								ui.newCompareDecision()
-									.setEqualsConstant(QuestionPresentation.BY_SECTION.toString())
-									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
-						.setId("nav"))
-				.add(
-					ui.newNavigationBar()
-						.add(
-							ui.newNavigation()
-								.setTitle("continue")
-								.setIcon("/icons/return.png",Navigation.IconStyle.left)
-								.setAccessKey("continue-access")
-								.setDescription("continue-description")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/a#{1}",
-									ui.newPropertyReference().setReference("submission.id"),
-									ui.newPropertyReference().setReference("question.id"))))
-						.setIncluded(
-								ui.newCompareDecision()
-									.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
-									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
+								.setDestination(ui.newDestination().setDestination("{0}",
+									ui.newPropertyReference().setReference("destination"))))
 						.setId("nav"))
 		;
 	}
@@ -434,7 +394,6 @@ public class DeliveryControllers
 	 * question - for a single question page, the single question
 	 * section - for a single section page, the single section
 	 * review - set if we are in review mode
-	 * questionSelector - the current question selector string
 	 * finishReady - if finish is allowed to submit
 	 * actionTitle - a string to use in the header and title indicating what's going on (working on, review)
 	 * 
@@ -531,7 +490,7 @@ public class DeliveryControllers
 												.setProperty(
 													ui.newPropertyReference()
 														.setReference("answer.question.sectionOrdering.isFirst"))),
-									ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
+									//ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
 									ui.newCompareDecision()
 										.setEqualsConstant("Default")
 										.setReversed()
@@ -1112,13 +1071,12 @@ public class DeliveryControllers
 								.setTitle("instructions")
 								.setAccessKey("instructions-access")
 								.setDescription("instructions-description")
-								//.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
 								.setStyle(Navigation.Style.link)
 								.setDestination(
 									ui.newDestination()
-										.setDestination("/instructions/{0}/{1}",
+										.setDestination("/instructions/{0}{1}",
 											ui.newTextPropertyReference().setReference("submission.id"),
-											ui.newTextPropertyReference().setReference("question.id"))))
+											ui.newTextPropertyReference().setReference("sakai_destination"))))
 						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed())
 						.setId("nav"));
 	}
@@ -1345,6 +1303,19 @@ public class DeliveryControllers
 								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id"))))
+						.add(
+							ui.newDivider())
+						.add(
+							ui.newNavigation()
+								.setTitle("instructions")
+								.setAccessKey("instructions-access")
+								.setDescription("instructions-description")
+								.setStyle(Navigation.Style.link)
+								.setDestination(
+									ui.newDestination()
+										.setDestination("/instructions/{0}{1}",
+											ui.newTextPropertyReference().setReference("submission.id"),
+											ui.newTextPropertyReference().setReference("sakai_destination"))))
 						.setId("nav"));
 	}
 
