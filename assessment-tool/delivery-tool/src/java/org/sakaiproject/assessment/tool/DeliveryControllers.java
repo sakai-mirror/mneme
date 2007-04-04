@@ -253,6 +253,22 @@ public class DeliveryControllers
 					ui.newSection()
 						.add(
 							ui.newInstructions()
+								.setText("flexible-instructions"))
+						.setIncluded(
+							ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_SECTION.toString(), QuestionPresentation.BY_QUESTION.toString()).setProperty(ui.newPropertyReference().setReference("assessment.questionPresentation")),
+							ui.newDecision().setProperty(ui.newPropertyReference().setReference("assessment.randomAccess"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("flexible-instructions-by-assessment"))
+						.setIncluded(
+							ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString()).setProperty(ui.newPropertyReference().setReference("assessment.questionPresentation")),
+							ui.newDecision().setProperty(ui.newPropertyReference().setReference("assessment.randomAccess"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
 								.setText("timed-instructions"))
 						.setIncluded(
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.timeLimit"))))
@@ -339,6 +355,13 @@ public class DeliveryControllers
 								.setText("linear-instructions"))
 						.setIncluded(
 							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("flexible-instructions"))
+						.setIncluded(
+							ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
 				.add(
 					ui.newSection()
 						.add(
@@ -862,7 +885,9 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setReference("answer.entryCorrects"),
 											"/icons/correct.gif",
-											"question-correct",
+											"correct",
+											"/icons/wrong.png",
+											"incorrect",
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackShowCorrectAnswer")))
@@ -887,7 +912,9 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setReference("answer.entryCorrects"),
 											"/icons/correct.gif",
-											"question-correct",
+											"correct",
+											"/icons/wrong.png",
+											"incorrect",
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackShowCorrectAnswer")))
@@ -911,7 +938,9 @@ public class DeliveryControllers
 											ui.newPropertyReference()
 												.setReference("answer.entryCorrects"),
 											"/icons/correct.gif",
-											"question-correct",
+											"correct",
+											"/icons/wrong.png",
+											"incorrect",
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackShowCorrectAnswer")))
@@ -1277,10 +1306,37 @@ public class DeliveryControllers
 								.setStyle(EntityList.Style.form)
 								.setIterator(
 									ui.newPropertyReference().setReference("submission.assessment.questions"), "question")
+//								.addHeading(
+//									ui.newAndDecision().setRequirements(
+//										ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("section.isMerged")),
+//										ui.newDecision().setProperty(ui.newPropertyReference().setReference("question.sectionOrdering.isFirst")),
+//										ui.newCompareDecision()
+//											.setEqualsConstant(QuestionPresentation.BY_QUESTION.toString(), QuestionPresentation.BY_SECTION.toString())
+//											.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))),
+//									ui.newNavigation()
+//										.setStyle(Navigation.Style.link)
+//										.setTitle(
+//											"toc-questions-title",
+//											// Part{0} - {1} - {2}/{3} Answered Questions, {4} Points
+//											ui.newPropertyReference().setReference("question.section.ordering.position"),
+//											ui.newPropertyReference().setReference("question.section.title"),
+//											ui.newPropertyReference().setFormatDelegate(new QuestionsAnswered()),
+//											ui.newPropertyReference().setReference("question.section.numQuestions"),
+//											ui.newPropertyReference().setReference("question.section").setFormatDelegate(new SectionScore()))
+//										.setDestination(
+//											ui.newDestination()
+//												.setDestination(
+//													"/section_instructions/{0}/{1}",
+//													ui.newPropertyReference().setReference("submission.id"),
+//													ui.newPropertyReference().setReference("question.section.id"))))
 								.addHeading(
 									ui.newAndDecision().setRequirements(
 										ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("section.isMerged")),
-										ui.newDecision().setProperty(ui.newPropertyReference().setReference("question.sectionOrdering.isFirst"))),
+										ui.newDecision().setProperty(ui.newPropertyReference().setReference("question.sectionOrdering.isFirst"))
+//										,ui.newCompareDecision()
+//											.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
+//											.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))
+											),
 									ui.newNavigation()
 										.setStyle(Navigation.Style.link)
 										.setTitle(
@@ -1291,6 +1347,10 @@ public class DeliveryControllers
 											ui.newPropertyReference().setFormatDelegate(new QuestionsAnswered()),
 											ui.newPropertyReference().setReference("question.section.numQuestions"),
 											ui.newPropertyReference().setReference("question.section").setFormatDelegate(new SectionScore()))
+										.setDisabled(
+											ui.newCompareDecision()
+												.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
+												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
 										.setDestination(
 											ui.newDestination()
 												.setDestination(
@@ -1627,6 +1687,33 @@ public class DeliveryControllers
 								.setTitle("return")));
 	}
 
+	/**
+	 * Format a score to 2 decimal places, trimming ".0" if present.
+	 * 
+	 * @param score
+	 *        The score to format.
+	 * @return The formatted score
+	 */
+	protected static String formatScore(float score)
+	{
+		// round to a single place
+		String rv = Float.toString(Math.round(score*100.0f) / 100.0f);
+
+		// get rid of ".00"
+		if (rv.endsWith(".00"))
+		{
+			rv = rv.substring(0, rv.length()-3);
+		}
+
+		// get rid of ".0"
+		if (rv.endsWith(".0"))
+		{
+			rv = rv.substring(0, rv.length()-2);
+		}
+
+		return rv;
+	}
+
 	public static class ReviewDateDecision implements DecisionDelegate
 	{
 		/**
@@ -1816,12 +1903,12 @@ public class DeliveryControllers
 					}
 				}
 
-				rv.append(Float.toString(score));
-				rv.append('/');
+				rv.append(formatScore(score));
+				rv.append(" / ");
 			}
 
 			// add the total possible points for the section
-			rv.append(section.getTotalPoints().toString());
+			rv.append(formatScore(section.getTotalPoints()));
 
 			return rv.toString();
 		}
@@ -1856,12 +1943,12 @@ public class DeliveryControllers
 				// the total score
 				Float score = submission.getTotalScore();
 
-				rv.append(score.toString());
-				rv.append('/');
+				rv.append(formatScore(score));
+				rv.append(" / ");
 			}
 
 			// add the total possible points for the assessment
-			rv.append(assessment.getTotalPoints().toString());
+			rv.append(formatScore(assessment.getTotalPoints()));
 
 			return rv.toString();
 		}
@@ -1914,13 +2001,13 @@ public class DeliveryControllers
 						}
 					}
 
-					rv.append(Float.toString(score));
-					rv.append('/');
+					rv.append(formatScore(score));
+					rv.append(" / ");
 				}
 			}
 
 			// add the possible points for the question
-			rv.append(question.getPoints().toString());
+			rv.append(formatScore(question.getPoints()));
 
 			return rv.toString();
 		}
@@ -2026,14 +2113,25 @@ public class DeliveryControllers
 						// is this submission answer the answer to our assessment question answer's question?
 						if (subAnswer.getQuestion().equals(question))
 						{
-							// is the submission answer selected this answer?
-							if (StringUtil.contains(subAnswer.getEntryAnswerIds(), answer.getId()))
+							// not for survey
+							if (question.getType() != QuestionType.survey)
 							{
-								// is this a correct answer
-								if ((answer.getIsCorrect() != null) && answer.getIsCorrect().booleanValue())
+								// is the submission answer this answer?
+								if (StringUtil.contains(subAnswer.getEntryAnswerIds(), answer.getId()))
 								{
-									return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.gif\" alt=\""
-											+ context.getMessages().getString("toc-alt-correct-answer") + "\" />";
+									// correct
+									if ((answer.getIsCorrect() != null) && answer.getIsCorrect().booleanValue())
+									{
+										return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.gif\" alt=\""
+												+ context.getMessages().getString("correct") + "\" />";
+									}
+	
+									// incorrect
+									else
+									{
+										return "<img src=\"" + context.get("sakai.return.url") + "/icons/wrong.png\" alt=\""
+												+ context.getMessages().getString("incorrect") + "\" />";
+									}
 								}
 							}
 						}

@@ -576,12 +576,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 
 		// see if we can skip the enter view and go right to the quesiton
-		if ((assessment.getPassword() == null) && (assessment.getDescription() == null) && (assessment.getAttachments().isEmpty())
-				&& (assessment.getRandomAccess().booleanValue()) && (assessment.getTimeLimit() == null))
-		{
-			enterSubmission(req, res, assessment);
-			return;
-		}
+//		if ((assessment.getPassword() == null) && (assessment.getDescription() == null) && (assessment.getAttachments().isEmpty())
+//				&& (assessment.getRandomAccess().booleanValue()) && (assessment.getTimeLimit() == null))
+//		{
+//			enterSubmission(req, res, assessment);
+//			return;
+//		}
 
 		// collect information: the selected assessment (id the request)
 		context.put("assessment", assessment);
