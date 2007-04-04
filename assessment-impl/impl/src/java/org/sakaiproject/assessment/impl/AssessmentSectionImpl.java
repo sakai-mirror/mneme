@@ -235,6 +235,14 @@ public class AssessmentSectionImpl implements AssessmentSection
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsMerged()
+	{
+		return Boolean.valueOf("Default".equals(this.title));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public AssessmentQuestion getLastQuestion()
 	{
 		if (this.questions.isEmpty()) return null;

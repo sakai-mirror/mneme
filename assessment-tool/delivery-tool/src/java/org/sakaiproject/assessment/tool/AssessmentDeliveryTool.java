@@ -70,7 +70,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		enter, error, final_review, list, list2, question, remove, review, submitted, toc, instructions
+		enter, error, final_review, instructions, list, list2, question, remove, review, section_instructions, submitted, toc
 	}
 
 	/** Our errors. */
@@ -115,6 +115,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** The error interface. */
 	protected Controller uiError = null;
 
+	/** The instructions interface. */
+	protected Controller uiInstructions = null;
+
 	/** The list interface. */
 	protected Controller uiList = null;
 
@@ -124,14 +127,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** The remove interface. */
 	protected Controller uiRemove = null;
 
+	/** The section instructions interface. */
+	protected Controller uiSectionInstructions = null;
+
 	/** The submitted interface. */
 	protected Controller uiSubmitted = null;
 
 	/** The table of contents interface. */
 	protected Controller uiToc = null;
-
-	/** The instructions interface. */
-	protected Controller uiInstructions = null;
 
 	/**
 	 * Shutdown the servlet.
@@ -182,6 +185,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		this.uiRemove = DeliveryControllers.constructRemove(ui);
 		this.uiError = DeliveryControllers.constructError(ui);
 		this.uiInstructions = DeliveryControllers.constructInstructions(ui);
+		this.uiSectionInstructions = DeliveryControllers.constructSectionInstructions(ui);
 
 		// setup the resource paths
 		this.resourcePaths.add("icons");
@@ -354,7 +358,22 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				else
 				{
-					instructionsGet(req, res, parts[2],  "/" + StringUtil.unsplit(parts, 3, parts.length - 3, "/"), context);
+					instructionsGet(req, res, parts[2], "/" + StringUtil.unsplit(parts, 3, parts.length - 3, "/"), context);
+				}
+				break;
+			}
+			case section_instructions:
+			{
+				// wo parameters, sid & section id
+				if (parts.length != 4)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+				else
+				{
+					sectionInstructionsGet(req, res, parts[2], parts[3], context);
 				}
 				break;
 			}
@@ -479,6 +498,20 @@ public class AssessmentDeliveryTool extends HttpServlet
 				else
 				{
 					instructionsPost(req, res, context, parts[2]);
+				}
+				break;
+			}
+			case section_instructions:
+			{
+				// two parameters, sid and section id
+				if (parts.length != 4)
+				{
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalidpost)));
+					return;
+				}
+				else
+				{
+					sectionInstructionsPost(req, res, context, parts[2], parts[3]);
 				}
 				break;
 			}
@@ -821,6 +854,46 @@ public class AssessmentDeliveryTool extends HttpServlet
 	}
 
 	/**
+	 * Get the UI for the instructions destination
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submisssionId
+	 *        The selected submission id.
+	 * @param returnDestination
+	 *        The destination to return to.
+	 * @param context
+	 *        UiContext.
+	 */
+	protected void instructionsGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String returnDestination, Context context)
+			throws IOException
+	{
+		// collect the submission
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		context.put("submission", submission);
+		context.put("destination", returnDestination);
+
+		// render
+		ui.render(uiInstructions, context);
+	}
+
+	/**
 	 * Read the input for the instructions destination, process, and redirect to the next destination.
 	 * 
 	 * @param req
@@ -920,6 +993,157 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// render
 		ui.render(uiList, context);
+	}
+
+	/**
+	 * for PREV and NEXT, choose the destination.
+	 * 
+	 * @param destination
+	 *        The destination encoded in the request.
+	 * @param questionSelector
+	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections
+	 * @param submisssionId
+	 *        The selected submission id.
+	 */
+	protected String questionChooseDestination(String destination, String questionSelector, String submissionId)
+	{
+		// get the submission
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission == null)
+		{
+			return "/" + Destinations.error + "/" + Errors.invalid;
+		}
+
+		// for requests for a single question
+		if (questionSelector.startsWith("q"))
+		{
+			// make sure by-question is valid for this assessment
+			if (submission.getAssessment().getQuestionPresentation() != QuestionPresentation.BY_QUESTION)
+			{
+				return "/" + Destinations.error + "/" + Errors.invalid;
+			}
+
+			String questionId = questionSelector.substring(1);
+			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+			if (question == null)
+			{
+				return "/" + Destinations.error + "/" + Errors.invalid;
+			}
+
+			if ("NEXT".equals(destination))
+			{
+				// if the question is not the last of the section, go to the next quesiton
+				if (!question.getSectionOrdering().getIsLast())
+				{
+					return "/" + Destinations.question + "/" + submissionId + "/q" + question.getAssessmentOrdering().getNext().getId();
+				}
+
+				// if there's a next section
+				if (!question.getSection().getOrdering().getIsLast().booleanValue())
+				{
+					// if the next section is not merged
+					AssessmentSection next = question.getSection().getOrdering().getNext();
+					if (!next.getIsMerged().booleanValue())
+					{
+						// choose the section instructions
+						return "/" + Destinations.section_instructions + "/" + submissionId + "/" + next.getId();
+					}
+
+					// otherwise choose the first question of the next section
+					return "/" + Destinations.question + "/" + submissionId + "/q" + next.getFirstQuestion().getId();
+				}
+
+				// no next part, this is an error
+				return "/" + Destinations.error + "/" + Errors.invalid;
+			}
+
+			else if ("PREV".equals(destination))
+			{
+				// if the question is not the first of the section, go to the prev quesiton
+				if (!question.getSectionOrdering().getIsFirst())
+				{
+					return "/" + Destinations.question + "/" + submissionId + "/q" + question.getAssessmentOrdering().getPrevious().getId();
+				}
+
+				// prev into this section's instructions... if this section is not merged
+				AssessmentSection section = question.getSection();
+				if (!section.getIsMerged().booleanValue())
+				{
+					// choose the section instructions
+					return "/" + Destinations.section_instructions + "/" + submissionId + "/" + section.getId();
+				}
+
+				// otherwise choose the last question of the prev section, if we have one
+				AssessmentSection prev = section.getOrdering().getPrevious();
+				if (prev != null)
+				{
+					return "/" + Destinations.question + "/" + submissionId + "/q" + prev.getLastQuestion().getId();
+				}
+
+				// no prev part, this is an error
+				return "/" + Destinations.error + "/" + Errors.invalid;
+			}
+		}
+
+		// for section-per-page
+		else if (questionSelector.startsWith("s"))
+		{
+			// make sure by-section is valid for this assessment
+			if (submission.getAssessment().getQuestionPresentation() != QuestionPresentation.BY_SECTION)
+			{
+				return "/" + Destinations.error + "/" + Errors.invalid;
+			}
+
+			String sectionId = questionSelector.substring(1);
+			AssessmentSection section = submission.getAssessment().getSection(sectionId);
+			if (section == null)
+			{
+				return "/" + Destinations.error + "/" + Errors.invalid;
+			}
+
+			if ("NEXT".equals(destination))
+			{
+				// if there's a next section
+				if (!section.getOrdering().getIsLast().booleanValue())
+				{
+					// if the next section is not merged
+					AssessmentSection next = section.getOrdering().getNext();
+					if (!next.getIsMerged().booleanValue())
+					{
+						// choose the section instructions
+						return "/" + Destinations.section_instructions + "/" + submissionId + "/" + next.getId();
+					}
+
+					// otherwise choose the next section
+					return "/" + Destinations.question + "/" + submissionId + "/s" + next.getId();
+				}
+
+				// no next section, this is an error
+				return "/" + Destinations.error + "/" + Errors.invalid;
+			}
+
+			else if ("PREV".equals(destination))
+			{
+				// if this section is not merged
+				if (!section.getIsMerged().booleanValue())
+				{
+					// choose the section instructions
+					return "/" + Destinations.section_instructions + "/" + submissionId + "/" + section.getId();
+				}
+
+				// if there's a prev section, choose to enter that
+				if (!section.getOrdering().getIsFirst().booleanValue())
+				{
+					AssessmentSection prev = section.getOrdering().getPrevious();
+					return "/" + Destinations.question + "/" + submissionId + "/s" + prev.getId();
+				}
+
+				// no prev section, this is an error
+				return "/" + Destinations.error + "/" + Errors.invalid;
+			}
+		}
+
+		return destination;
 	}
 
 	/**
@@ -1038,6 +1262,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// TODO: when hints are in, this counts (adding ~ || destination.endsWith("/feedback"))
 		Boolean answersComplete = Boolean.valueOf(!(uploadError || destination.startsWith("/list") || destination.startsWith("/remove")
 				|| destination.startsWith("/instructions") || context.getPreviousDestination().equals(destination)));
+
+		// where are we going?
+		destination = questionChooseDestination(destination, questionSelector, submissionId);
 
 		// submit all answers
 		try
@@ -1210,11 +1437,25 @@ public class AssessmentDeliveryTool extends HttpServlet
 			AssessmentSection section = assessment.getFirstSection();
 			if (section != null)
 			{
-				String destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + section.getId();
+				// instructions or questions
+				if (section.getIsMerged().booleanValue())
+				{
+					// to questions
+					String destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + section.getId();
 
-				// redirect
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
+					// redirect
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+					return;
+				}
+				else
+				{
+					// to instructions
+					String destination = "/" + Destinations.section_instructions + "/" + submission.getId() + "/" + section.getId();
+
+					// redirect
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+					return;
+				}
 			}
 		}
 
@@ -1237,6 +1478,17 @@ public class AssessmentDeliveryTool extends HttpServlet
 			AssessmentQuestion question = submission.getFirstIncompleteQuestion();
 			if (question != null)
 			{
+				// if this is the first question of a non-merged part, send to instructions
+				if ((question.getSectionOrdering().getIsFirst().booleanValue()) && (!question.getSection().getIsMerged().booleanValue()))
+				{
+					// to instructions
+					String destination = "/" + Destinations.section_instructions + "/" + submission.getId() + "/" + question.getSection().getId();
+
+					// redirect
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+					return;
+				}
+
 				questionId = question.getId();
 			}
 
@@ -1253,10 +1505,21 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// for random access, start at the first question of the first part
 		else
 		{
-			AssessmentSection part = assessment.getFirstSection();
-			if (part != null)
+			AssessmentSection section = assessment.getFirstSection();
+			if (section != null)
 			{
-				AssessmentQuestion question = part.getFirstQuestion();
+				// if not merged, start at instructions
+				if (!section.getIsMerged().booleanValue())
+				{
+					// to instructions
+					String destination = "/" + Destinations.section_instructions + "/" + submission.getId() + "/" + section.getId();
+
+					// redirect
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+					return;
+				}
+
+				AssessmentQuestion question = section.getFirstQuestion();
 				if (question != null)
 				{
 					questionId = question.getId();
@@ -1342,46 +1605,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// render
 		ui.render(uiRemove, context);
-	}
-
-	/**
-	 * Get the UI for the instructions destination
-	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
-	 * @param submisssionId
-	 *        The selected submission id.
-	 * @param returnDestination
-	 *        The destination to return to.
-	 * @param context
-	 *        UiContext.
-	 */
-	protected void instructionsGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String returnDestination, Context context)
-			throws IOException
-	{
-		// collect the submission
-		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
-		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
-
-		context.put("submission", submission);
-		context.put("destination", returnDestination);
-
-		// render
-		ui.render(uiInstructions, context);
 	}
 
 	/**
@@ -1554,6 +1777,78 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// render using the question interface
 		ui.render(uiQuestion, context);
+	}
+
+	/**
+	 * Get the UI for the instructions destination
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param submisssionId
+	 *        The selected submission id.
+	 * @param sectionId
+	 *        The section id.
+	 * @param context
+	 *        UiContext.
+	 */
+	protected void sectionInstructionsGet(HttpServletRequest req, HttpServletResponse res, String submissionId, String sectionId, Context context)
+			throws IOException
+	{
+		// collect the submission
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		// collect the section
+		AssessmentSection section = submission.getAssessment().getSection(sectionId);
+		if (section == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		context.put("actionTitle", messages.getString("question-header-instructions"));
+		context.put("submission", submission);
+		context.put("section", section);
+		// context.put("mode", mode);
+
+		// render
+		ui.render(uiSectionInstructions, context);
+	}
+
+	/**
+	 * Read the input for the section instructions destination, process, and redirect to the next destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param context
+	 *        The UiContext.
+	 * @param submissionId
+	 *        the selected submission id.
+	 * @param sectionId
+	 *        The section id.
+	 */
+	protected void sectionInstructionsPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId, String sectionId)
+			throws IOException
+	{
+		// this post is from the timer, and completes the submission
+		submissionCompletePost(req, res, context, submissionId);
 	}
 
 	/**

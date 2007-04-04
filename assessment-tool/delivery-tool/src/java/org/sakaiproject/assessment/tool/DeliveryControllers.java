@@ -301,8 +301,6 @@ public class DeliveryControllers
 				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newCountdownTimer()
-						//.setHideMessage("timer-hide")
-						//.setShowMessage("timer-show")
 						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -310,13 +308,10 @@ public class DeliveryControllers
 						.setExpireDestination(
 							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
 						.setIncluded(
-							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")),
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
 							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newCountdownTimer()
-						//.setHideMessage("timer-hide")
-						//.setShowMessage("timer-show")
 						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -324,7 +319,6 @@ public class DeliveryControllers
 						.setExpireDestination(
 							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
 						.setIncluded(
-							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")),
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
 							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.closedDate.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
@@ -352,24 +346,21 @@ public class DeliveryControllers
 								.setText("timed-instructions-inprogress"))
 						.setIncluded(
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
-				.add(// TODO: repeate for ALL parts submission.assessment.sections as section
+				.add(
 					ui.newSection()
+						.setIterator(ui.newPropertyReference().setReference("submission.assessment.sections"), "section")
 						.setTitle("question-section-title",
-							ui.newTextPropertyReference().setReference("question.section.ordering.position"),
-							ui.newTextPropertyReference().setReference("question.section.assessment.numSections"),
-							ui.newTextPropertyReference().setReference("question.section.title"),
-							ui.newPropertyReference().setReference("question.section").setFormatDelegate(new SectionScore()))
-						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("question.section.description")))
+							ui.newTextPropertyReference().setReference("section.ordering.position"),
+							ui.newTextPropertyReference().setReference("section.assessment.numSections"),
+							ui.newTextPropertyReference().setReference("section.title"),
+							ui.newPropertyReference().setReference("section").setFormatDelegate(new SectionScore()))
+						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("section.description")))
 						.add(
 							ui.newAttachments()
 								.setTitle("attachments")
-								.setAttachments(ui.newPropertyReference().setReference("question.section.attachments"), null)
-								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question.section.attachments"))))
-						.setIncluded(
-							ui.newCompareDecision()
-								.setEqualsConstant("Default")
-								.setReversed()
-								.setProperty(ui.newPropertyReference().setReference("question.section.title"))))
+								.setAttachments(ui.newPropertyReference().setReference("section.attachments"), null)
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section.attachments"))))
+						.setIncluded(ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("section.isMerged"))))
 				.add(ui.newGap())
 				.add(
 					ui.newNavigationBar()
@@ -384,6 +375,185 @@ public class DeliveryControllers
 									ui.newPropertyReference().setReference("destination"))))
 						.setId("nav"))
 		;
+	}
+
+	/**
+	 * The section instructions interface needs the following entities in the context:
+	 * submission - the current submission object
+	 * section - the section object
+	 * actionTitle - a string to use in the header and title indicating what's going on (working on, review)
+	 */
+	public static Controller constructSectionInstructions(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle(
+					"question-title",
+					ui.newTextPropertyReference().setReference("actionTitle"),
+					ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.setHeader(
+					"question-header",
+					ui.newTextPropertyReference().setReference("actionTitle"),
+					ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.add(ui.newAlias().setTo("nav"))
+				.add(
+					ui.newCountdownTimer()
+						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
+						.setRemainingMessage("timer-remaining")
+						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
+						.setExpireDestination(
+							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
+						.setIncluded(
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
+							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
+				.add(
+					ui.newCountdownTimer()
+						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
+						.setRemainingMessage("timer-remaining")
+						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
+						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
+						.setExpireDestination(
+							ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
+						.setIncluded(
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
+							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.closedDate.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
+				.add(
+					ui.newSection()
+						.setTitle("question-section-title",
+							ui.newTextPropertyReference().setReference("section.ordering.position"),
+							ui.newTextPropertyReference().setReference("section.assessment.numSections"),
+							ui.newTextPropertyReference().setReference("section.title"),
+							ui.newPropertyReference().setReference("section").setFormatDelegate(new SectionScore()))
+						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("section.description")))
+						.add(
+							ui.newAttachments()
+								.setTitle("attachments")
+								.setAttachments(ui.newPropertyReference().setReference("section.attachments"), null)
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section.attachments"))))
+						.setIncluded(ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("section.isMerged"))))
+				.add(ui.newGap())
+				.add(
+					ui.newNavigationBar()
+						.add(
+							ui.newNavigation()
+								.setIcon("/icons/prev.gif",Navigation.IconStyle.left)
+								.setTitle("prev")
+								.setAccessKey("prev-access")
+								.setDescription("prev-description")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
+									ui.newTextPropertyReference().setReference("submission.id"),
+									ui.newTextPropertyReference().setReference("section.ordering.previous.id")))
+								.setDisabled(ui.newOrDecision().setOptions(
+									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
+									ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isFirst"))))
+								.setIncluded(ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_SECTION.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
+						.add(
+							ui.newNavigation()
+								.setIcon("/icons/prev.gif",Navigation.IconStyle.left)
+								.setTitle("prev")
+								.setAccessKey("prev-access")
+								.setDescription("prev-description")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
+									ui.newTextPropertyReference().setReference("submission.id"),
+									ui.newTextPropertyReference().setReference("section.ordering.previous.lastQuestion.id")))
+								.setDisabled(ui.newOrDecision().setOptions(
+									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
+									ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isFirst"))))
+								.setIncluded(ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_QUESTION.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
+						.add(
+							ui.newNavigation()
+								.setTitle("toc")
+								.setAccessKey("toc-access")
+								.setDescription("toc-description")
+								.setIcon("/icons/contents.gif",Navigation.IconStyle.left)
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/toc/{0}", ui.newTextPropertyReference().setReference("submission.id")))
+								.setDisabled(
+									ui.newDecision()
+										.setReversed()
+										.setProperty(
+											ui.newPropertyReference()
+												.setReference("submission.assessment.randomAccess"))))
+						.add(
+							ui.newNavigation()
+								.setDefault()
+								.setValidation(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))
+								.setTitle("next")
+								.setAccessKey("next-access")
+								.setDescription("next-description")
+								.setIcon("/icons/next.gif",Navigation.IconStyle.right)
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
+										ui.newTextPropertyReference().setReference("submission.id"),
+										ui.newTextPropertyReference().setReference("section.id")))
+								.setIncluded(ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_SECTION.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
+						.add(
+							ui.newNavigation()
+								.setDefault()
+								.setValidation(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))
+								.setTitle("next")
+								.setAccessKey("next-access")
+								.setDescription("next-description")
+								.setIcon("/icons/next.gif",Navigation.IconStyle.right)
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
+										ui.newTextPropertyReference().setReference("submission.id"),
+										ui.newTextPropertyReference().setReference("section.firstQuestion.id")))
+								.setIncluded(ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_QUESTION.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
+						.add(
+							ui.newDivider())
+						.add(
+							ui.newNavigation()
+								.setIcon("/icons/exit.gif",Navigation.IconStyle.left)
+								.setTitle("save-exit")
+								.setDescription("save-exit-description")
+								.setAccessKey("save-exit-access")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/list")))
+						.add(
+							ui.newNavigation()
+								.setAccessKey("finish-exam-access")
+								.setDescription("finish-exam-description")
+								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
+								.setTitle("finish-exam")
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/final_review/{0}",ui.newTextPropertyReference().setReference("submission.id")))
+								.setIncluded(
+									ui.newAndDecision().setRequirements(
+										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("finishReady")),
+										ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
+						.add(
+							ui.newNavigation()
+								.setSubmit()
+								.setTitle("finish-exam")
+								.setAccessKey("finish-exam-access")
+								.setDescription("finish-exam-description")
+								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
+								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setStyle(Navigation.Style.button)
+								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))
+								.setIncluded(
+									ui.newOrDecision().setOptions(
+										ui.newDecision().setProperty(ui.newPropertyReference().setReference("finishReady")),
+										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
+						.add(
+							ui.newDivider())
+						.add(
+							ui.newNavigation()
+								.setTitle("instructions")
+								.setAccessKey("instructions-access")
+								.setDescription("instructions-description")
+								.setStyle(Navigation.Style.link)
+								.setDestination(
+									ui.newDestination()
+										.setDestination("/instructions/{0}{1}",
+											ui.newTextPropertyReference().setReference("submission.id"),
+											ui.newTextPropertyReference().setReference("sakai_destination"))))
+						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed())
+						.setId("nav"));
 	}
 
 	/**
@@ -415,8 +585,6 @@ public class DeliveryControllers
 				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newCountdownTimer()
-						//.setHideMessage("timer-hide")
-						//.setShowMessage("timer-show")
 						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -429,8 +597,6 @@ public class DeliveryControllers
 							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newCountdownTimer()
-						//.setHideMessage("timer-hide")
-						//.setShowMessage("timer-show")
 						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -491,10 +657,7 @@ public class DeliveryControllers
 													ui.newPropertyReference()
 														.setReference("answer.question.sectionOrdering.isFirst"))),
 									//ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
-									ui.newCompareDecision()
-										.setEqualsConstant("Default")
-										.setReversed()
-										.setProperty(ui.newPropertyReference().setReference("answer.question.section.title"))))
+									ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("answer.question.section.isMerged"))))
 						.add(
 							ui.newText()
 								.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.section.description"))
@@ -512,10 +675,7 @@ public class DeliveryControllers
 																ui.newPropertyReference()
 																	.setReference("answer.question.sectionOrdering.isFirst"))),
 													ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
-													ui.newCompareDecision()
-														.setEqualsConstant("Default")
-														.setReversed()
-														.setProperty(ui.newPropertyReference().setReference("answer.question.section.title"))))
+													ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("answer.question.section.isMerged"))))
 								)
 						.add(
 							ui.newAttachments()
@@ -536,10 +696,7 @@ public class DeliveryControllers
 																	.setReference("answer.question.sectionOrdering.isFirst"))),
 													ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
 													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.attachments")),
-													ui.newCompareDecision()
-														.setEqualsConstant("Default")
-														.setReversed()
-														.setProperty(ui.newPropertyReference().setReference("answer.question.section.title"))))
+													ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("answer.question.section.isMerged"))))
 								)
 						.add(
 							ui.newSection()
@@ -903,61 +1060,20 @@ public class DeliveryControllers
 								.setAccessKey("prev-access")
 								.setDescription("prev-description")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
-									ui.newTextPropertyReference().setReference("submission.id"),
-									ui.newTextPropertyReference().setReference("question.assessmentOrdering.previous.id")))
-								.setDisabled(
-									ui.newOrDecision()
-										.setOptions(
-											ui.newDecision()
-												.setProperty(
-													ui.newBooleanPropertyReference()
-														.setReference("question.assessmentOrdering.isFirst")),
-											ui.newDecision()
-												.setReversed()
-												.setProperty(
-													ui.newPropertyReference()
-														.setReference("submission.assessment.randomAccess"))))
-								.setIncluded(
-									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question"))))
-						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setIcon("/icons/prev.gif",Navigation.IconStyle.left)
-								.setTitle("prev")
-								.setAccessKey("prev-access")
-								.setDescription("prev-description")
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
-									ui.newTextPropertyReference().setReference("submission.id"),
-									ui.newTextPropertyReference().setReference("section.ordering.previous.id")))
-								.setDisabled(
-									ui.newOrDecision()
-										.setOptions(
-											ui.newDecision()
-												.setProperty(
-													ui.newBooleanPropertyReference()
-														.setReference("section.ordering.isFirst")),
-											ui.newDecision()
-												.setReversed()
-												.setProperty(
-													ui.newPropertyReference()
-														.setReference("submission.assessment.randomAccess"))))
-								.setIncluded(
-									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section"))))	
-						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setTitle("prev")
-								.setAccessKey("prev-access")
-								.setDescription("prev-description")
-								.setIcon("/icons/prev.gif",Navigation.IconStyle.left)
-								.setStyle(Navigation.Style.button)
-								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
-								.setIncluded(
+								.setDestination(ui.newDestination().setDestination("PREV"))
+								.setDisabled(ui.newOrDecision().setOptions(
+									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
+									ui.newAndDecision().setRequirements(
+										ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
+										ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("question.assessmentOrdering.isFirst")),
+										ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("question.section.isMerged"))),
+									ui.newAndDecision().setRequirements(
+										ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
+										ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isFirst")),
+										ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.isMerged"))),
 									ui.newAndDecision().setRequirements(
 										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
-										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section")))))
+										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section"))))))
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -983,48 +1099,17 @@ public class DeliveryControllers
 								.setDescription("next-description")
 								.setIcon("/icons/next.gif",Navigation.IconStyle.right)
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
-									ui.newTextPropertyReference().setReference("submission.id"),
-									ui.newTextPropertyReference().setReference("question.assessmentOrdering.next.id")))
-								.setDisabled(
-									ui.newDecision()
-										.setProperty(
-											ui.newBooleanPropertyReference()
-												.setReference("question.assessmentOrdering.isLast")))
-								.setIncluded(
-									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question"))))
-						.add(
-							ui.newNavigation()
-								.setDefault()
-								.setSubmit()
-								.setTitle("next")
-								.setAccessKey("next-access")
-								.setDescription("next-description")
-								.setIcon("/icons/next.gif",Navigation.IconStyle.right)
-								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
-									ui.newTextPropertyReference().setReference("submission.id"),
-									ui.newTextPropertyReference().setReference("section.ordering.next.id")))
-								.setDisabled(
-									ui.newDecision()
-										.setProperty(
-											ui.newBooleanPropertyReference()
-												.setReference("section.ordering.isLast")))
-								.setIncluded(
-									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section"))))
-						.add(
-							ui.newNavigation()
-								.setSubmit()
-								.setTitle("next")
-								.setAccessKey("next-access")
-								.setDescription("next-description")
-								.setIcon("/icons/next.gif",Navigation.IconStyle.right)
-								.setStyle(Navigation.Style.button)
-								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
-								.setIncluded(
+								.setDestination(ui.newDestination().setDestination("NEXT"))
+								.setDisabled(ui.newOrDecision().setOptions(
+									ui.newAndDecision().setRequirements(
+										ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
+										ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("question.assessmentOrdering.isLast"))),
+									ui.newAndDecision().setRequirements(
+										ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
+										ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isLast"))),
 									ui.newAndDecision().setRequirements(
 										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
-										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section")))))
+										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section"))))))
 						.add(
 							ui.newDivider())
 						.add(
@@ -1061,8 +1146,8 @@ public class DeliveryControllers
 								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))
 								.setIncluded(
 									ui.newOrDecision().setOptions(
-											ui.newDecision().setProperty(ui.newPropertyReference().setReference("finishReady")),
-											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
+										ui.newDecision().setProperty(ui.newPropertyReference().setReference("finishReady")),
+										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
 						.add(
 							ui.newDivider())
 						.add(
@@ -1193,20 +1278,25 @@ public class DeliveryControllers
 								.setIterator(
 									ui.newPropertyReference().setReference("submission.assessment.questions"), "question")
 								.addHeading(
-									ui.newAndDecision()
-										.setRequirements(
-											ui.newCompareDecision()
-												.setEqualsConstant("Default")
-												.setReversed()
-												.setProperty(ui.newPropertyReference().setReference("question.section.title")),
-											ui.newDecision().setProperty(ui.newPropertyReference().setReference("question.sectionOrdering.isFirst"))),
-									"toc-questions-title",
-									// Part{0} - {1} - {2}/{3} Answered Questions, {4} Points
-									ui.newPropertyReference().setReference("question.section.ordering.position"),
-									ui.newPropertyReference().setReference("question.section.title"),
-									ui.newPropertyReference().setFormatDelegate(new QuestionsAnswered()),
-									ui.newPropertyReference().setReference("question.section.numQuestions"),
-									ui.newPropertyReference().setReference("question.section").setFormatDelegate(new SectionScore()))
+									ui.newAndDecision().setRequirements(
+										ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("section.isMerged")),
+										ui.newDecision().setProperty(ui.newPropertyReference().setReference("question.sectionOrdering.isFirst"))),
+									ui.newNavigation()
+										.setStyle(Navigation.Style.link)
+										.setTitle(
+											"toc-questions-title",
+											// Part{0} - {1} - {2}/{3} Answered Questions, {4} Points
+											ui.newPropertyReference().setReference("question.section.ordering.position"),
+											ui.newPropertyReference().setReference("question.section.title"),
+											ui.newPropertyReference().setFormatDelegate(new QuestionsAnswered()),
+											ui.newPropertyReference().setReference("question.section.numQuestions"),
+											ui.newPropertyReference().setReference("question.section").setFormatDelegate(new SectionScore()))
+										.setDestination(
+											ui.newDestination()
+												.setDestination(
+													"/section_instructions/{0}/{1}",
+													ui.newPropertyReference().setReference("submission.id"),
+													ui.newPropertyReference().setReference("question.section.id"))))
 								.addColumn(
 									ui.newPropertyColumn()
 										.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatQuestionDecoration()))

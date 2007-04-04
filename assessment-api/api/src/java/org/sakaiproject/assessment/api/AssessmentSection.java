@@ -68,6 +68,13 @@ public interface AssessmentSection
 	String getId();
 
 	/**
+	 * Check if the section is to be merged with the sections around it.
+	 * 
+	 * @return TRUE if the section is to be merged, FALSE if not.
+	 */
+	Boolean getIsMerged();
+
+	/**
 	 * Access the last question. The order will be in a random order (if enabled) based on the current user.
 	 * 
 	 * @return The last question, or null if there are none.
