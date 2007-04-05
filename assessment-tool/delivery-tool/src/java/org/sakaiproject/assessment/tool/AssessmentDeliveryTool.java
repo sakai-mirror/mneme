@@ -576,12 +576,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 
 		// see if we can skip the enter view and go right to the quesiton
-//		if ((assessment.getPassword() == null) && (assessment.getDescription() == null) && (assessment.getAttachments().isEmpty())
-//				&& (assessment.getRandomAccess().booleanValue()) && (assessment.getTimeLimit() == null))
-//		{
-//			enterSubmission(req, res, assessment);
-//			return;
-//		}
+		// if ((assessment.getPassword() == null) && (assessment.getDescription() == null) && (assessment.getAttachments().isEmpty())
+		// && (assessment.getRandomAccess().booleanValue()) && (assessment.getTimeLimit() == null))
+		// {
+		// enterSubmission(req, res, assessment);
+		// return;
+		// }
 
 		// collect information: the selected assessment (id the request)
 		context.put("assessment", assessment);
@@ -1426,120 +1426,56 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 */
 	protected void redirectToQuestion(HttpServletRequest req, HttpServletResponse res, Submission submission) throws IOException
 	{
+		String destination = null;
 		Assessment assessment = submission.getAssessment();
 
-		// question, section or all?
-		QuestionPresentation presentation = assessment.getQuestionPresentation();
+		// find the first incomplete question
+		AssessmentQuestion question = submission.getFirstIncompleteQuestion();
 
-		// for by section
-		if ((presentation != null) && (presentation == QuestionPresentation.BY_SECTION))
+		// if we don't have one, we will go to the toc (or final_review for linear)
+		if (question == null)
 		{
-			AssessmentSection section = assessment.getFirstSection();
-			if (section != null)
+			if (!assessment.getRandomAccess().booleanValue())
 			{
-				// instructions or questions
-				if (section.getIsMerged().booleanValue())
-				{
-					// to questions
-					String destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + section.getId();
+				destination = "/" + Destinations.final_review + "/" + submission.getId();
+			}
+			else
+			{
+				destination = "/" + Destinations.toc + "/" + submission.getId();
+			}
+		}
 
-					// redirect
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-					return;
+		else
+		{
+			// send to the section instructions if it's a first question (unless by-assessment)
+			if ((question.getSectionOrdering().getIsFirst().booleanValue()) && (!question.getSection().getIsMerged().booleanValue())
+					&& (assessment.getQuestionPresentation() != QuestionPresentation.BY_ASSESSMENT))
+			{
+				// to instructions
+				destination = "/" + Destinations.section_instructions + "/" + submission.getId() + "/" + question.getSection().getId();
+			}
+
+			// or to the question
+			else
+			{
+				if (assessment.getQuestionPresentation() == QuestionPresentation.BY_QUESTION)
+				{
+					destination = "/" + Destinations.question + "/" + submission.getId() + "/q" + question.getId();
+				}
+				else if (assessment.getQuestionPresentation() == QuestionPresentation.BY_SECTION)
+				{
+					destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + question.getSection().getId() + "#"
+							+ question.getId();
 				}
 				else
 				{
-					// to instructions
-					String destination = "/" + Destinations.section_instructions + "/" + submission.getId() + "/" + section.getId();
-
-					// redirect
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-					return;
+					destination = "/" + Destinations.question + "/" + submission.getId() + "/a" + "#" + question.getId();
 				}
 			}
 		}
 
-		// for all
-		else if ((presentation != null) && (presentation == QuestionPresentation.BY_ASSESSMENT))
-		{
-			String destination = "/" + Destinations.question + "/" + submission.getId() + "/a";
-
-			// redirect
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-			return;
-		}
-
-		// otherwise by quesion
-		String questionId = null;
-
-		// for linear assessments, start at the first incomplete question
-		if (!assessment.getRandomAccess().booleanValue())
-		{
-			AssessmentQuestion question = submission.getFirstIncompleteQuestion();
-			if (question != null)
-			{
-				// if this is the first question of a non-merged part, send to instructions
-				if ((question.getSectionOrdering().getIsFirst().booleanValue()) && (!question.getSection().getIsMerged().booleanValue()))
-				{
-					// to instructions
-					String destination = "/" + Destinations.section_instructions + "/" + submission.getId() + "/" + question.getSection().getId();
-
-					// redirect
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-					return;
-				}
-
-				questionId = question.getId();
-			}
-
-			// otherwise send the user to the toc/final review view
-			// Note: this is unlikely, since there's no way to mark the last question as complete without a "finish" -ggolden
-			else
-			{
-				String destination = "/" + Destinations.final_review + "/" + submission.getId();
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-		}
-
-		// for random access, start at the first question of the first part
-		else
-		{
-			AssessmentSection section = assessment.getFirstSection();
-			if (section != null)
-			{
-				// if not merged, start at instructions
-				if (!section.getIsMerged().booleanValue())
-				{
-					// to instructions
-					String destination = "/" + Destinations.section_instructions + "/" + submission.getId() + "/" + section.getId();
-
-					// redirect
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-					return;
-				}
-
-				AssessmentQuestion question = section.getFirstQuestion();
-				if (question != null)
-				{
-					questionId = question.getId();
-				}
-			}
-		}
-
-		if (questionId != null)
-		{
-			// next destination: first question of submission
-			String destination = "/" + Destinations.question + "/" + submission.getId() + "/q" + questionId;
-
-			// redirect
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-			return;
-		}
-
-		// we are here because there are no questions!
-		String destination = "/" + Destinations.final_review + "/" + submission.getId();
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+		return;
 	}
 
 	/**
