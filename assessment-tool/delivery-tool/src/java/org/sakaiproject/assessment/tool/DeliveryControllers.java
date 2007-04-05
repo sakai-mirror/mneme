@@ -236,6 +236,10 @@ public class DeliveryControllers
 				.setHeader("enter-header", ui.newTextPropertyReference().setReference("assessment.title"))
 				.add(
 					ui.newSection()
+						.setTitle("instructions-test-title",
+							ui.newIconPropertyReference().setIcon("/icons/test.png"),
+							ui.newPropertyReference().setReference("assessment.title"),
+							ui.newPropertyReference().setReference("assessment.totalPoints"))
 						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("assessment.description")))
 						.add(
 							ui.newAttachments()
@@ -246,14 +250,14 @@ public class DeliveryControllers
 					ui.newSection()
 						.add(
 							ui.newInstructions()
-								.setText("linear-instructions"))
+								.setText("linear-instructions", ui.newIconPropertyReference().setIcon("/icons/linear.png")))
 						.setIncluded(
 							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("assessment.randomAccess"))))
 				.add(
 					ui.newSection()
 						.add(
 							ui.newInstructions()
-								.setText("flexible-instructions"))
+								.setText("flexible-instructions", ui.newIconPropertyReference().setIcon("/icons/flexible.png")))
 						.setIncluded(
 							ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_SECTION.toString(), QuestionPresentation.BY_QUESTION.toString()).setProperty(ui.newPropertyReference().setReference("assessment.questionPresentation")),
 							ui.newDecision().setProperty(ui.newPropertyReference().setReference("assessment.randomAccess"))))
@@ -261,7 +265,7 @@ public class DeliveryControllers
 					ui.newSection()
 						.add(
 							ui.newInstructions()
-								.setText("flexible-instructions-by-assessment"))
+								.setText("flexible-instructions-by-assessment", ui.newIconPropertyReference().setIcon("/icons/flexible.png")))
 						.setIncluded(
 							ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString()).setProperty(ui.newPropertyReference().setReference("assessment.questionPresentation")),
 							ui.newDecision().setProperty(ui.newPropertyReference().setReference("assessment.randomAccess"))))
@@ -276,7 +280,7 @@ public class DeliveryControllers
 								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true"))))
 						.add(
 							ui.newInstructions()
-								.setText("timed-instructions"))
+								.setText("timed-instructions", ui.newIconPropertyReference().setIcon("/icons/clock.png")))
 						.setIncluded(
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.timeLimit"))))
 				.add(
@@ -348,6 +352,7 @@ public class DeliveryControllers
 				.add(
 					ui.newSection()
 						.setTitle("instructions-test-title",
+							ui.newIconPropertyReference().setIcon("/icons/test.png"),
 							ui.newPropertyReference().setReference("submission.assessment.title"),
 							ui.newPropertyReference().setReference("submission.assessment.totalPoints"))
 						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("submission.assessment.description")))
@@ -358,29 +363,9 @@ public class DeliveryControllers
 								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.attachments")))))
 				.add(
 					ui.newSection()
-						.add(
-							ui.newInstructions()
-								.setText("linear-instructions"))
-						.setIncluded(
-							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
-				.add(
-					ui.newSection()
-						.add(
-							ui.newInstructions()
-								.setText("flexible-instructions"))
-						.setIncluded(
-							ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
-				.add(
-					ui.newSection()
-						.add(
-							ui.newInstructions()
-								.setText("timed-instructions-inprogress"))
-						.setIncluded(
-							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
-				.add(
-					ui.newSection()
 						.setIterator(ui.newPropertyReference().setReference("submission.assessment.sections"), "section")
-						.setTitle("question-section-title",
+						.setTitle("instructions-section-title",
+							ui.newIconPropertyReference().setIcon("/icons/section.png"),
 							ui.newTextPropertyReference().setReference("section.ordering.position"),
 							ui.newTextPropertyReference().setReference("section.assessment.numSections"),
 							ui.newTextPropertyReference().setReference("section.title"),
@@ -392,6 +377,36 @@ public class DeliveryControllers
 								.setAttachments(ui.newPropertyReference().setReference("section.attachments"), null)
 								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section.attachments"))))
 						.setIncluded(ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("section.isMerged"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("linear-instructions", ui.newIconPropertyReference().setIcon("/icons/linear.png")))
+						.setIncluded(
+							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("flexible-instructions", ui.newIconPropertyReference().setIcon("/icons/flexible.png")))
+						.setIncluded(
+							ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_SECTION.toString(), QuestionPresentation.BY_QUESTION.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")),
+							ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("flexible-instructions-by-assessment", ui.newIconPropertyReference().setIcon("/icons/flexible.png")))
+						.setIncluded(
+							ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")),
+							ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("timed-instructions-inprogress", ui.newIconPropertyReference().setIcon("/icons/clock.png")))
+						.setIncluded(
+							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit"))))
 				.add(ui.newGap())
 				.add(
 					ui.newNavigationBar()
