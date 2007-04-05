@@ -268,6 +268,13 @@ public class DeliveryControllers
 				.add(
 					ui.newSection()
 						.add(
+							ui.newCountdownTimer()
+								.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("assessment.timeLimit"))
+								.setRemainingMessage("timer-remaining")
+								.setDuration(ui.newPropertyReference().setReference("assessment.timeLimit"))
+								.setTimeTillExpire(ui.newPropertyReference().setReference("assessment.timeLimit"))
+								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true"))))
+						.add(
 							ui.newInstructions()
 								.setText("timed-instructions"))
 						.setIncluded(
@@ -283,6 +290,7 @@ public class DeliveryControllers
 				.add(ui.newGap())
 				.add(
 					ui.newNavigationBar()
+						.setWidth("70em")
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -387,6 +395,7 @@ public class DeliveryControllers
 				.add(ui.newGap())
 				.add(
 					ui.newNavigationBar()
+						.setWidth("70em")
 						.add(
 							ui.newNavigation()
 								.setTitle("continue")
@@ -458,6 +467,7 @@ public class DeliveryControllers
 				.add(ui.newGap())
 				.add(
 					ui.newNavigationBar()
+						.setWidth("70em")
 						.add(
 							ui.newNavigation()
 								.setIcon("/icons/prev.gif",Navigation.IconStyle.left)
@@ -1049,6 +1059,7 @@ public class DeliveryControllers
 				.add(ui.newGap())
 				.add(
 					ui.newNavigationBar()
+						.setWidth("70em")
 						.add(
 							ui.newNavigation()
 								.setTitle("prev")
@@ -1081,6 +1092,7 @@ public class DeliveryControllers
 						.setId("nav"))
 				.add(
 					ui.newNavigationBar()
+						.setWidth("70em")
 						.add(
 							ui.newNavigation()
 								.setSubmit()
@@ -1216,6 +1228,7 @@ public class DeliveryControllers
 				.add(ui.newGap())
 				.add(
 					ui.newNavigationBar()
+						.setWidth("70em")
 						.add(
 							ui.newNavigation()
 								.setDefault()
@@ -1434,6 +1447,7 @@ public class DeliveryControllers
 							.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))))
 				.add(
 					ui.newNavigationBar()
+						.setWidth("70em")
 						.add(
 							ui.newNavigation()
 								.setDefault()
@@ -1522,6 +1536,7 @@ public class DeliveryControllers
 				.add(ui.newGap())
 				.add(
 					ui.newNavigationBar()
+						.setWidth("70em")
 						.add(
 							ui.newNavigation()
 								.setDefault()
@@ -1551,6 +1566,7 @@ public class DeliveryControllers
 						.setId("nav"))	
 				.add(
 					ui.newNavigationBar()
+						.setWidth("70em")
 						.add(
 							ui.newNavigation()
 								.setDefault()
@@ -1582,6 +1598,7 @@ public class DeliveryControllers
 						.setId("nav"))		
 				.add(
 					ui.newNavigationBar()
+						.setWidth("70em")
 						.add(
 							ui.newNavigation()
 								.setDefault()

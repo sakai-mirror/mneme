@@ -503,7 +503,7 @@ public class SubmissionImpl implements Submission
 
 		Assessment a = getAssessment();
 
-		// for each section / question, make sure we have an answer, and if there's rationale, make sure it's entered
+		// for each section / question, make sure we have an answer and not a mark for review
 		for (AssessmentSection section : a.getSections())
 		{
 			for (AssessmentQuestion question : section.getQuestionsAsAuthored())
@@ -516,8 +516,8 @@ public class SubmissionImpl implements Submission
 				if (answer.getSubmittedDate() == null) return Boolean.FALSE;
 				if (!answer.getIsAnswered()) return Boolean.FALSE;
 				if ((answer.getMarkedForReview() != null && (answer.getMarkedForReview().booleanValue()))) return Boolean.FALSE;
-				if ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue())
-						&& (StringUtil.trimToNull(answer.getRationale()) == null)) return Boolean.FALSE;
+//				if ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue())
+//						&& (StringUtil.trimToNull(answer.getRationale()) == null)) return Boolean.FALSE;
 			}
 		}
 

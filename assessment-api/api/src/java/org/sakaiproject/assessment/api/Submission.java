@@ -127,8 +127,7 @@ public interface Submission
 	String getId();
 
 	/**
-	 * Check if all the questions (except perhaps one) have an answer that is fully answered, not marked for review, complete with rationale if
-	 * included.
+	 * Check if all the questions (except any in the list) have been answered and not marked for review.
 	 * 
 	 * @param questionsToSkip
 	 *        A List of question not to check, or null or empty to check them all.
