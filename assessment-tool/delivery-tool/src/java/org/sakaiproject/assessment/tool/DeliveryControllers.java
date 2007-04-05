@@ -1336,7 +1336,7 @@ public class DeliveryControllers
 									ui.newPropertyReference().setReference("submission.assessment.questions"), "question")
 //								.addHeading(
 //									ui.newAndDecision().setRequirements(
-//										ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("section.isMerged")),
+//										ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("question.section.isMerged")),
 //										ui.newDecision().setProperty(ui.newPropertyReference().setReference("question.sectionOrdering.isFirst")),
 //										ui.newCompareDecision()
 //											.setEqualsConstant(QuestionPresentation.BY_QUESTION.toString(), QuestionPresentation.BY_SECTION.toString())
@@ -1359,7 +1359,7 @@ public class DeliveryControllers
 //													ui.newPropertyReference().setReference("question.section.id"))))
 								.addHeading(
 									ui.newAndDecision().setRequirements(
-										ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("section.isMerged")),
+										ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("question.section.isMerged")),
 										ui.newDecision().setProperty(ui.newPropertyReference().setReference("question.sectionOrdering.isFirst"))
 //										,ui.newCompareDecision()
 //											.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
