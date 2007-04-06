@@ -63,6 +63,7 @@ import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.service.gradebook.shared.AssessmentNotFoundException;
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
 import org.sakaiproject.service.gradebook.shared.GradebookNotFoundException;
+import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.api.TimeService;
@@ -159,7 +160,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	protected EventTrackingService m_eventTrackingService = null;
 
 	/** Dependency: GradebookExternalAssessmentService */
-	protected GradebookExternalAssessmentService m_gradebookService = null;
+	// for 2.4 only: protected GradebookExternalAssessmentService m_gradebookService = null;
+	protected GradebookService m_gradebookService = null;
 
 	/** Dependency: MemoryService */
 	protected MemoryService m_memoryService = null;
@@ -218,7 +220,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 * @param service
 	 *        The GradebookService.
 	 */
-	public void setGradebookService(GradebookExternalAssessmentService service)
+	public void setGradebookService(/* for 2.4 only: GradebookExternalAssessmentService */GradebookService service)
 	{
 		m_gradebookService = service;
 	}

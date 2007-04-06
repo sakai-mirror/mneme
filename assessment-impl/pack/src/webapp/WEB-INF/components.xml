@@ -18,7 +18,8 @@
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
 		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
 		<property name="attachmentService"><ref bean="org.sakaiproject.assessment.api.AttachmentService"/></property>
-		<property name="gradebookService"><ref bean="org.sakaiproject.service.gradebook.GradebookExternalAssessmentService"/></property>
+		<!-- for 2.4 only: <property name="gradebookService"><ref bean="org.sakaiproject.service.gradebook.GradebookExternalAssessmentService"/></property> -->
+		<property name="gradebookService"><ref bean="org.sakaiproject.service.gradebook.GradebookService"/></property>
 
  		<property name="autoDdl"><value>${auto.ddl}</value></property>
  		<property name="cacheMinutes"><value>5</value></property>
