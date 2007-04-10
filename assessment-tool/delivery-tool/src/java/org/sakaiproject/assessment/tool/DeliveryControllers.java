@@ -909,7 +909,7 @@ public class DeliveryControllers
 										.setCorrectMarker(
 											ui.newPropertyReference()
 												.setReference("answer.entryCorrects"),
-											"/icons/correct.gif",
+											"/icons/correct.png",
 											"correct",
 											"/icons/wrong.png",
 											"incorrect",
@@ -936,7 +936,7 @@ public class DeliveryControllers
 										.setCorrectMarker(
 											ui.newPropertyReference()
 												.setReference("answer.entryCorrects"),
-											"/icons/correct.gif",
+											"/icons/correct.png",
 											"correct",
 											"/icons/wrong.png",
 											"incorrect",
@@ -962,7 +962,7 @@ public class DeliveryControllers
 										.setCorrectMarker(
 											ui.newPropertyReference()
 												.setReference("answer.entryCorrects"),
-											"/icons/correct.gif",
+											"/icons/correct.png",
 											"correct",
 											"/icons/wrong.png",
 											"incorrect",
@@ -2154,7 +2154,7 @@ public class DeliveryControllers
 									// correct
 									if ((answer.getIsCorrect() != null) && answer.getIsCorrect().booleanValue())
 									{
-										return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.gif\" alt=\""
+										return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.png\" alt=\""
 												+ context.getMessages().getString("correct") + "\" />";
 									}
 	
