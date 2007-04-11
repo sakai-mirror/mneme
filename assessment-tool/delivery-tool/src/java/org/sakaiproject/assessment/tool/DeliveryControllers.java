@@ -498,7 +498,8 @@ public class DeliveryControllers
 							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.closedDate.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newSection()
-						.setTitle("question-section-title",
+						.setTitle("section-instructions-section-title",
+							ui.newIconPropertyReference().setIcon("/icons/section.png"),
 							ui.newTextPropertyReference().setReference("section.ordering.position"),
 							ui.newTextPropertyReference().setReference("section.assessment.numSections"),
 							ui.newTextPropertyReference().setReference("section.title"),
