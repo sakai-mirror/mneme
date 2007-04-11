@@ -152,6 +152,13 @@ public interface Submission
 	Boolean getIsCompleteQuestion(AssessmentQuestion question);
 
 	/**
+	 * Check if the submission has been graded or not.
+	 * 
+	 * @return TRUE if the assessment has been graded, FALSE if not.
+	 */
+	Boolean getIsGraded();
+
+	/**
 	 * Check if the submission is past its time limit, retract or hard due date.
 	 * 
 	 * @param qasOf
@@ -193,8 +200,8 @@ public interface Submission
 	Boolean getMayReview();
 
 	/**
-	 * Check if the submission may be reviewed at some later point - the user must be the submission user, and the submission must be complete and not from a retracted
-	 * assessment, and the assessment must be set to eventually allow review.
+	 * Check if the submission may be reviewed at some later point - the user must be the submission user, and the submission must be complete and not
+	 * from a retracted assessment, and the assessment must be set to eventually allow review.
 	 * 
 	 * @return TRUE if the submission may be reviewed later, FALSE if not.
 	 */

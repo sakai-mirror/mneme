@@ -223,7 +223,12 @@ public class DeliveryControllers
 									.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
 									.setIncluded(
 										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
-										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater"))))));
+										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater")))))
+						.addColumn(
+								ui.newPropertyColumn()
+									.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatGradedDecoration()))
+									.setTitle("list-graded")
+									.setCentered()));
 	}
 
 	/**
@@ -1811,8 +1816,8 @@ public class DeliveryControllers
 
 			Boolean review = (Boolean) context.get("review");
 
-			// if we are doing review
-			if ((review != null) && review.booleanValue())
+			// if we are doing review and the submission has been graded
+			if ((review != null) && review.booleanValue() && submission.getIsGraded().booleanValue())
 			{
 				// add the sum of scores for any answered question in this section
 				float score = 0;
@@ -1860,8 +1865,8 @@ public class DeliveryControllers
 
 			Boolean review = (Boolean) context.get("review");
 
-			// if we are doing review
-			if ((review != null) && review.booleanValue())
+			// if we are doing review and the submission has been graded
+			if ((review != null) && review.booleanValue() && submission.getIsGraded().booleanValue())
 			{
 				// the total score
 				Float score = submission.getTotalScore();
@@ -1905,8 +1910,8 @@ public class DeliveryControllers
 
 			Boolean review = (Boolean) context.get("review");
 
-			// if we are doing feedback just now, and if we are needing review and it's set
-			if ((review != null) && review.booleanValue())
+			// if we are doing feedback just now, and if we are needing review and it's set, and if the submission has been graded
+			if ((review != null) && review.booleanValue() && submission.getIsGraded().booleanValue())
 			{
 				// if we are doing question score feedback
 				if (assessment.getFeedbackShowQuestionScore().booleanValue())
@@ -2233,6 +2238,30 @@ public class DeliveryControllers
 			}
 
 			return null;
+		}
+	}
+
+	/**
+	 * From a value which is a submission, 'format' this into the html for the icon decoration for the list interface column for 'graded'.
+	 */
+	public static class FormatGradedDecoration implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{
+			Object o = context.get("submission");
+			if (!(o instanceof Submission)) return value.toString();
+			Submission submission = (Submission) o;
+
+			if (submission.getIsGraded().booleanValue())
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.png\" alt=\""
+						+ context.getMessages().getString("list-graded") + "\" />";
+			}
+
+			return context.getMessages().getString("dash");
 		}
 	}
 }

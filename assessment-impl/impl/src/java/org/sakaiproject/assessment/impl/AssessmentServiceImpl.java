@@ -2294,7 +2294,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		String statement = "SELECT AG.ASSESSMENTGRADINGID, P.ID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
 				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE, PF.FEEDBACKDELIVERY, AG.FORGRADE,"
-				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING, PAC.RETRACTDATE,"
+				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING, PAC.RETRACTDATE, PE.TOGRADEBOOK,"
 				+ " SUM(PI.SCORE)" + " FROM SAM_PUBLISHEDASSESSMENT_T P"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID AND (PAC.RETRACTDATE IS NULL OR ? < PAC.RETRACTDATE)"
@@ -2305,7 +2305,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " LEFT OUTER JOIN SAM_ASSESSMENTGRADING_T AG ON P.ID = AG.PUBLISHEDASSESSMENTID AND AG.AGENTID = ?"
 				+ " GROUP BY AG.ASSESSMENTGRADINGID, P.ID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
 				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE, PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, AG.FORGRADE,"
-				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING, PAC.RETRACTDATE"
+				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING, PAC.RETRACTDATE, PE.TOGRADEBOOK"
 				+ " ORDER BY " + sortSql;
 
 		Object[] fields = new Object[4];
@@ -2378,7 +2378,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						retractDate = m_timeService.newTime(ts.getTime());
 					}
 
-					float points = result.getFloat(18);
+					int toGradebook = result.getInt(18);
+					float points = result.getFloat(19);
 
 					// for the non-submissions, create an non-null id
 					if (submissionId == null)
@@ -2427,6 +2428,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						cachedAssessment.initDueDate(dueDate);
 						cachedAssessment.initAllowLateSubmit((allowLateSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
 						cachedAssessment.initRetractDate(retractDate);
+						cachedAssessment.initGradebookIntegration(Boolean.valueOf(toGradebook == 1));
 						cachedAssessment.initTotalPoints(new Float(points));
 					}
 

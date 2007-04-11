@@ -260,7 +260,7 @@ public class SubmissionImpl implements Submission
 		if (this.assessmentIdStatus == PropertyStatus.unset) readMain();
 
 		AssessmentImpl assessment = (AssessmentImpl) this.service.idAssessment(this.assessmentId);
-		
+
 		// set the submision context
 		assessment.initSubmissionContext(this);
 
@@ -516,8 +516,8 @@ public class SubmissionImpl implements Submission
 				if (answer.getSubmittedDate() == null) return Boolean.FALSE;
 				if (!answer.getIsAnswered()) return Boolean.FALSE;
 				if ((answer.getMarkedForReview() != null && (answer.getMarkedForReview().booleanValue()))) return Boolean.FALSE;
-//				if ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue())
-//						&& (StringUtil.trimToNull(answer.getRationale()) == null)) return Boolean.FALSE;
+				// if ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue())
+				// && (StringUtil.trimToNull(answer.getRationale()) == null)) return Boolean.FALSE;
 			}
 		}
 
@@ -552,6 +552,21 @@ public class SubmissionImpl implements Submission
 		}
 
 		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsGraded()
+	{
+		// base this for now of the assessment setting - if the assessment is marked to send grades to gradebook, consider the submission graded.
+		// also, only if complete.
+		if ((getAssessment().getGradebookIntegration() != null) && getAssessment().getGradebookIntegration().booleanValue())
+		{
+			if (this.getIsComplete().booleanValue()) return Boolean.TRUE;
+		}
+
+		return Boolean.FALSE;
 	}
 
 	/**
