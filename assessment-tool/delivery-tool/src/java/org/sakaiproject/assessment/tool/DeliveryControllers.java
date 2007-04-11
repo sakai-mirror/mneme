@@ -194,33 +194,36 @@ public class DeliveryControllers
 							ui.newPropertyColumn()
 								.setProperty(
 									"list-header-score-fmt",
+									ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy").setFormatDelegate(new FormatMssPolicy()),
 									ui.newPropertyReference().setReference("submission.totalScore"),
 									ui.newPropertyReference().setReference("submission.assessment.totalPoints"))
 								.setTitle("list-header-score")
 								//.setCentered()
 								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash")
-						.addNavigation(
-							ui.newNavigation()
-								.setTitle("list-nav-review")
-								.setStyle(Navigation.Style.link)
-								.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.id")))
-								.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReview"))))
-						.addNavigation(
-							ui.newNavigation()
-								.setTitle("list-nav-review-later", ui.newDatePropertyReference().setReference("submission.assessment.feedbackDate"))
-								.setStyle(Navigation.Style.link)
-								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
-								.setIncluded(
-									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
-									ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater"))))
-						.addNavigation(
-							ui.newNavigation()
-								.setTitle("list-nav-review-not")
-								.setStyle(Navigation.Style.link)
-								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
-								.setIncluded(
-									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
-									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater"))))));
+							.addNavigation(
+								ui.newNavigation()
+									.setTitle("list-nav-review")
+									.setStyle(Navigation.Style.link)
+									.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.id")))
+									.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReview"))))
+							.addNavigation(
+								ui.newNavigation()
+									.setTitle(
+										"list-nav-review-later",
+										ui.newDatePropertyReference().setReference("submission.assessment.feedbackDate"))
+									.setStyle(Navigation.Style.link)
+									.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
+									.setIncluded(
+										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
+										ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater"))))
+							.addNavigation(
+								ui.newNavigation()
+									.setTitle("list-nav-review-not")
+									.setStyle(Navigation.Style.link)
+									.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
+									.setIncluded(
+										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
+										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater"))))));
 	}
 
 	/**
@@ -269,6 +272,20 @@ public class DeliveryControllers
 						.setIncluded(
 							ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString()).setProperty(ui.newPropertyReference().setReference("assessment.questionPresentation")),
 							ui.newDecision().setProperty(ui.newPropertyReference().setReference("assessment.randomAccess"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("highest-instructions", ui.newIconPropertyReference().setIcon("/icons/highest.gif")))
+						.setIncluded(
+							ui.newCompareDecision().setEqualsConstant(MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED.toString()).setProperty(ui.newPropertyReference().setReference("assessment.multipleSubmissionSelectionPolicy"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("latest-instructions", ui.newIconPropertyReference().setIcon("/icons/latest.gif")))
+						.setIncluded(
+							ui.newCompareDecision().setEqualsConstant(MultipleSubmissionSelectionPolicy.USE_LATEST.toString()).setProperty(ui.newPropertyReference().setReference("assessment.multipleSubmissionSelectionPolicy"))))
 				.add(
 					ui.newSection()
 						.add(
@@ -400,6 +417,20 @@ public class DeliveryControllers
 						.setIncluded(
 							ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")),
 							ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("highest-instructions", ui.newIconPropertyReference().setIcon("/icons/highest.gif")))
+						.setIncluded(
+							ui.newCompareDecision().setEqualsConstant(MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy"))))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newInstructions()
+								.setText("latest-instructions", ui.newIconPropertyReference().setIcon("/icons/latest.gif")))
+						.setIncluded(
+							ui.newCompareDecision().setEqualsConstant(MultipleSubmissionSelectionPolicy.USE_LATEST.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy"))))
 				.add(
 					ui.newSection()
 						.add(
@@ -1767,56 +1798,6 @@ public class DeliveryControllers
 		}
 	}
 
-	public static class HighestGradeFootnoteDecision implements DecisionDelegate
-	{
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean decide(Decision decision, Context context, Object focus)
-		{
-			// focus is the submission
-			if (focus == null) return false;
-			if (!(focus instanceof Submission)) return false;
-
-			Submission submission = (Submission) focus;
-			Assessment assessment = submission.getAssessment();
-			if (assessment == null) return false;
-
-			// if multiple submission are allowed, and if we choose the highest score for grading
-			Integer numAllowed = assessment.getNumSubmissionsAllowed();
-			if (((numAllowed == null) || (numAllowed.intValue() > 1))
-					&& (assessment.getMultipleSubmissionSelectionPolicy() == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED))
-				return true;
-
-			return false;
-		}
-	}
-
-	public static class LatestSubmissionFootnoteDecision implements DecisionDelegate
-	{
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean decide(Decision decision, Context context, Object focus)
-		{
-			// focus is the submission
-			if (focus == null) return false;
-			if (!(focus instanceof Submission)) return false;
-
-			Submission submission = (Submission) focus;
-			Assessment assessment = submission.getAssessment();
-			if (assessment == null) return false;
-
-			// if multiple submission are allowed, and if we choose the lastest submission for grading
-			Integer numAllowed = assessment.getNumSubmissionsAllowed();
-			if (((numAllowed == null) || (numAllowed.intValue() > 1))
-					&& (assessment.getMultipleSubmissionSelectionPolicy() == MultipleSubmissionSelectionPolicy.USE_LATEST))
-				return true;
-
-			return false;
-		}
-	}
-
 	/**
 	 * if we want feedback, are doing answer feedback, and the question is multi choice or multi correct, and this answer is the one selected...
 	 */
@@ -2237,6 +2218,38 @@ public class DeliveryControllers
 				num = question.getSectionOrdering().getPosition();
 			}
 			return num.toString();
+		}
+	}
+
+	/**
+	 * Focus is the assessment MultipleSubmissionSelectionPolicy - format as an icon for the list view.
+	 */
+	public static class FormatMssPolicy implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{
+			if (value == null) return null;
+			if (!(value instanceof MultipleSubmissionSelectionPolicy)) return null;
+
+			String iconName = null;
+			String altKey = null;
+			
+			if (((MultipleSubmissionSelectionPolicy) value) == MultipleSubmissionSelectionPolicy.USE_LATEST)
+			{
+				iconName = "latest.gif";
+				altKey = "use-latest";
+			}
+			else
+			{
+				iconName = "highest.gif";
+				altKey = "use-highest";
+			}
+
+			return "<img src=\"" + context.get("sakai.return.url") + "/icons/" + iconName + "\" alt=\"" + context.getMessages().getString(altKey)
+					+ "\" />";
 		}
 	}
 
