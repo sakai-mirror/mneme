@@ -498,7 +498,7 @@ public class DeliveryControllers
 							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.closedDate.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newSection()
-						.setTitle("section-instructions-section-title",
+						.setTitle("instructions-section-title",
 							ui.newIconPropertyReference().setIcon("/icons/section.png"),
 							ui.newTextPropertyReference().setReference("section.ordering.position"),
 							ui.newTextPropertyReference().setReference("section.assessment.numSections"),
@@ -522,27 +522,12 @@ public class DeliveryControllers
 								.setAccessKey("prev-access")
 								.setDescription("prev-description")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
-									ui.newTextPropertyReference().setReference("submission.id"),
-									ui.newTextPropertyReference().setReference("section.ordering.previous.id")))
-								.setDisabled(ui.newOrDecision().setOptions(
-									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
-									ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isFirst"))))
-								.setIncluded(ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_SECTION.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
-						.add(
-							ui.newNavigation()
-								.setIcon("/icons/prev.gif",Navigation.IconStyle.left)
-								.setTitle("prev")
-								.setAccessKey("prev-access")
-								.setDescription("prev-description")
-								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
 									ui.newTextPropertyReference().setReference("submission.id"),
 									ui.newTextPropertyReference().setReference("section.ordering.previous.lastQuestion.id")))
 								.setDisabled(ui.newOrDecision().setOptions(
 									ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
-									ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isFirst"))))
-								.setIncluded(ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_QUESTION.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
+									ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isFirst")))))
 						.add(
 							ui.newNavigation()
 								.setTitle("toc")
@@ -566,23 +551,9 @@ public class DeliveryControllers
 								.setDescription("next-description")
 								.setIcon("/icons/next.gif",Navigation.IconStyle.right)
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/question/{0}/s{1}",
-										ui.newTextPropertyReference().setReference("submission.id"),
-										ui.newTextPropertyReference().setReference("section.id")))
-								.setIncluded(ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_SECTION.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
-						.add(
-							ui.newNavigation()
-								.setDefault()
-								.setValidation(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")))
-								.setTitle("next")
-								.setAccessKey("next-access")
-								.setDescription("next-description")
-								.setIcon("/icons/next.gif",Navigation.IconStyle.right)
-								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/question/{0}/q{1}",
 										ui.newTextPropertyReference().setReference("submission.id"),
-										ui.newTextPropertyReference().setReference("section.firstQuestion.id")))
-								.setIncluded(ui.newCompareDecision().setEqualsConstant(QuestionPresentation.BY_QUESTION.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))))
+										ui.newTextPropertyReference().setReference("section.firstQuestion.id"))))
 						.add(
 							ui.newDivider())
 						.add(
@@ -689,7 +660,10 @@ public class DeliveryControllers
 							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.closedDate.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newSection()
-						.setTitle("question-total-score", ui.newTextPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore()))
+						.setTitle("instructions-test-title",
+							ui.newIconPropertyReference().setIcon("/icons/test.png"),
+							ui.newPropertyReference().setReference("submission.assessment.title"),
+							ui.newTextPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore()))
 //						.add(
 //							ui.newDistributionChart()
 //								.setData(ui.newPropertyReference().setReference("submission.assessment.scores"))
@@ -711,73 +685,44 @@ public class DeliveryControllers
 									ui.newEvaluation()
 										.setIcon("/icons/note.png", "comments")
 										.setText("question-eval-overall-comment", ui.newTextPropertyReference().setReference("submission.evalComment")))
-								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.evalComment"))))
-						.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
+								.setIncluded(
+									ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
+									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.evalComment"))))
+						.setIncluded(
+							ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
+							ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section"))))
 				.add(
 					ui.newSection()
 						.setIterator(
 							ui.newPropertyReference().setReference("answers"), "answer")
-						.setTitle("question-section-title",
+						.setTitle("instructions-section-title",
+							ui.newIconPropertyReference().setIcon("/icons/section.png"),
 							ui.newTextPropertyReference().setReference("answer.question.section.ordering.position"),
 							ui.newTextPropertyReference().setReference("answer.question.section.assessment.numSections"),
 							ui.newTextPropertyReference().setReference("answer.question.section.title"),
 							ui.newPropertyReference().setReference("answer.question.section").setFormatDelegate(new SectionScore()))
 						.setAnchor("question-anchor", ui.newPropertyReference().setReference("answer.question.id"))
-						.setTitleIncluded(
-							ui.newAndDecision()
-								.setRequirements(
-									ui.newOrDecision()
-										.setOptions(
-											ui.newHasValueDecision()
-												.setProperty(
-													ui.newPropertyReference()
-														.setReference("question")),
-											ui.newDecision()
-												.setProperty(
-													ui.newPropertyReference()
-														.setReference("answer.question.sectionOrdering.isFirst"))),
-									//ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
-									ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("answer.question.section.isMerged"))))
+						.setTitleIncluded(ui.newAndDecision().setRequirements(
+							ui.newOrDecision().setOptions(
+								ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")),
+								ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.sectionOrdering.isFirst"))),
+							ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("answer.question.section.isMerged"))))
 						.add(
 							ui.newText()
 								.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.section.description"))
-								.setIncluded(
-										ui.newAndDecision()
-											.setRequirements(
-												ui.newOrDecision()
-													.setOptions(
-														ui.newHasValueDecision()
-															.setProperty(
-																ui.newPropertyReference()
-																	.setReference("question")),
-														ui.newDecision()
-															.setProperty(
-																ui.newPropertyReference()
-																	.setReference("answer.question.sectionOrdering.isFirst"))),
-													ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
-													ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("answer.question.section.isMerged"))))
-								)
+								.setIncluded(ui.newAndDecision().setRequirements(
+									ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.sectionOrdering.isFirst")),
+									ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
+									ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("answer.question.section.isMerged")))))
 						.add(
 							ui.newAttachments()
 								.setTitle("attachments")
 								.setAttachments(ui.newPropertyReference().setReference("answer.question.section.attachments"), null)
-								.setIncluded(
-										ui.newAndDecision()
-											.setRequirements(
-												ui.newOrDecision()
-													.setOptions(
-														ui.newHasValueDecision()
-															.setProperty(
-																ui.newPropertyReference()
-																	.setReference("question")),
-														ui.newDecision()
-															.setProperty(
-																ui.newPropertyReference()
-																	.setReference("answer.question.sectionOrdering.isFirst"))),
-													ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
-													ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.attachments")),
-													ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("answer.question.section.isMerged"))))
-								)
+								.setIncluded(ui.newAndDecision().setRequirements(
+									ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.attachments")),
+									ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.sectionOrdering.isFirst")),
+									ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
+									ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("answer.question.section.isMerged")))))
 						.add(
 							ui.newSection()
 								.setTitle(null,ui.newTextPropertyReference().setReference("answer.question").setFormatDelegate(new FormatQuestionTitle()))
@@ -1157,8 +1102,7 @@ public class DeliveryControllers
 										ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("question.section.isMerged"))),
 									ui.newAndDecision().setRequirements(
 										ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section")),
-										ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isFirst")),
-										ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.isMerged"))),
+										ui.newDecision().setProperty(ui.newBooleanPropertyReference().setReference("section.ordering.isFirst"))),
 									ui.newAndDecision().setRequirements(
 										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("question")),
 										ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("section"))))))
@@ -1320,8 +1264,6 @@ public class DeliveryControllers
 				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newCountdownTimer()
-						//.setHideMessage("timer-hide")
-						//.setShowMessage("timer-show")
 						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -1334,8 +1276,6 @@ public class DeliveryControllers
 							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newCountdownTimer()
-						//.setHideMessage("timer-hide")
-						//.setShowMessage("timer-show")
 						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -1366,37 +1306,10 @@ public class DeliveryControllers
 								.setStyle(EntityList.Style.form)
 								.setIterator(
 									ui.newPropertyReference().setReference("submission.assessment.questions"), "question")
-//								.addHeading(
-//									ui.newAndDecision().setRequirements(
-//										ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("question.section.isMerged")),
-//										ui.newDecision().setProperty(ui.newPropertyReference().setReference("question.sectionOrdering.isFirst")),
-//										ui.newCompareDecision()
-//											.setEqualsConstant(QuestionPresentation.BY_QUESTION.toString(), QuestionPresentation.BY_SECTION.toString())
-//											.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))),
-//									ui.newNavigation()
-//										.setStyle(Navigation.Style.link)
-//										.setTitle(
-//											"toc-questions-title",
-//											// Part{0} - {1} - {2}/{3} Answered Questions, {4} Points
-//											ui.newPropertyReference().setReference("question.section.ordering.position"),
-//											ui.newPropertyReference().setReference("question.section.title"),
-//											ui.newPropertyReference().setFormatDelegate(new QuestionsAnswered()),
-//											ui.newPropertyReference().setReference("question.section.numQuestions"),
-//											ui.newPropertyReference().setReference("question.section").setFormatDelegate(new SectionScore()))
-//										.setDestination(
-//											ui.newDestination()
-//												.setDestination(
-//													"/section_instructions/{0}/{1}",
-//													ui.newPropertyReference().setReference("submission.id"),
-//													ui.newPropertyReference().setReference("question.section.id"))))
 								.addHeading(
 									ui.newAndDecision().setRequirements(
 										ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("question.section.isMerged")),
-										ui.newDecision().setProperty(ui.newPropertyReference().setReference("question.sectionOrdering.isFirst"))
-//										,ui.newCompareDecision()
-//											.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
-//											.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation"))
-											),
+										ui.newDecision().setProperty(ui.newPropertyReference().setReference("question.sectionOrdering.isFirst"))),
 									ui.newNavigation()
 										.setStyle(Navigation.Style.link)
 										.setTitle(
@@ -1409,7 +1322,7 @@ public class DeliveryControllers
 											ui.newPropertyReference().setReference("question.section").setFormatDelegate(new SectionScore()))
 										.setDisabled(
 											ui.newCompareDecision()
-												.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
+												.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString(), QuestionPresentation.BY_SECTION.toString())
 												.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
 										.setDestination(
 											ui.newDestination()
@@ -1544,8 +1457,6 @@ public class DeliveryControllers
 				.setHeader("remove-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.add(
 					ui.newCountdownTimer()
-						//.setHideMessage("timer-hide")
-						//.setShowMessage("timer-show")
 						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -1558,8 +1469,6 @@ public class DeliveryControllers
 							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newCountdownTimer()
-						//.setHideMessage("timer-hide")
-						//.setShowMessage("timer-show")
 						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))

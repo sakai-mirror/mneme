@@ -1103,18 +1103,10 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 			if ("NEXT".equals(destination))
 			{
-				// if there's a next section
+				// if there's a next section, go there
 				if (!section.getOrdering().getIsLast().booleanValue())
 				{
-					// if the next section is not merged
 					AssessmentSection next = section.getOrdering().getNext();
-					if (!next.getIsMerged().booleanValue())
-					{
-						// choose the section instructions
-						return "/" + Destinations.section_instructions + "/" + submissionId + "/" + next.getId();
-					}
-
-					// otherwise choose the next section
 					return "/" + Destinations.question + "/" + submissionId + "/s" + next.getId();
 				}
 
@@ -1124,13 +1116,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 			else if ("PREV".equals(destination))
 			{
-				// if this section is not merged
-				if (!section.getIsMerged().booleanValue())
-				{
-					// choose the section instructions
-					return "/" + Destinations.section_instructions + "/" + submissionId + "/" + section.getId();
-				}
-
 				// if there's a prev section, choose to enter that
 				if (!section.getOrdering().getIsFirst().booleanValue())
 				{
