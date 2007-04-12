@@ -104,7 +104,6 @@ public class DeliveryControllers
 							ui.newPropertyColumn()
 								.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatListDecoration()))
 								.setTitle("list-status-title")
-								//.setCentered()
 								.setWidthEm(10)
 								.setSorting(
 									ui.newCompareDecision().setEqualsConstant("1").setProperty(ui.newPropertyReference().setReference("sort_column")),
@@ -131,9 +130,7 @@ public class DeliveryControllers
 									ui.newDatePropertyReference().setTwoLine()
 										.setReference("submission.assessment.releaseDate")
 										.setMissingText("dash"))
-								.setTitle("list-header-open")
-								//.setCentered()
-								)
+								.setTitle("list-header-open"))
 						.addColumn(
 							ui.newPropertyColumn()
 								.setProperty(
@@ -147,9 +144,7 @@ public class DeliveryControllers
 								.setSortIcons("/icons/sortascending.gif", ui.newMessage().setMessage("asc"), "/icons/sortdescending.gif", ui.newMessage().setMessage("desc"))
 								.setSortDestination(
 									ui.newDestination().setDestination("/list/2A"),
-									ui.newDestination().setDestination("/list/2D"))
-								//.setCentered()
-								)
+									ui.newDestination().setDestination("/list/2D")))
 						.addColumn(
 							ui.newEntityListColumn()
 								.add(
@@ -169,18 +164,14 @@ public class DeliveryControllers
 												.setReference("submission.assessment.timeLimit")
 												.setMissingText("dash"))
 										.setIncluded(ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayContinue"))))
-								.setTitle("list-header-limit")
-								//.setCentered()
-								)
+								.setTitle("list-header-limit"))
 						.addColumn(
 							ui.newPropertyColumn()
 								.setProperty(
 									"list-format-tries",
 									ui.newPropertyReference().setReference("submission.siblingCount"),
 									ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed").setMissingText("infinite"))
-								.setTitle("list-header-tries")
-								//.setCentered()
-								)
+								.setTitle("list-header-tries"))
 						.addColumn(
 							ui.newPropertyColumn()
 								.setProperty(
@@ -188,47 +179,42 @@ public class DeliveryControllers
 										.setReference("submission.submittedDate")
 										.setMissingText("dash"))
 								.setTitle("list-header-finished")
-								//.setCentered()
 								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash"))
 						.addColumn(
 							ui.newPropertyColumn()
-								.setProperty(
-									"list-header-score-fmt",
-									ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy").setFormatDelegate(new FormatMssPolicy()),
-									ui.newPropertyReference().setReference("submission.totalScore"),
-									ui.newPropertyReference().setReference("submission.assessment.totalPoints"))
+								.setProperty("list-format-score", ui.newPropertyReference().setReference("submission.totalScore").setFormatDelegate(new FormatListScore()))
 								.setTitle("list-header-score")
-								//.setCentered()
 								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash")
-							.addNavigation(
-								ui.newNavigation()
-									.setTitle("list-nav-review")
-									.setStyle(Navigation.Style.link)
-									.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.id")))
-									.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReview"))))
-							.addNavigation(
-								ui.newNavigation()
-									.setTitle(
-										"list-nav-review-later",
-										ui.newDatePropertyReference().setReference("submission.assessment.feedbackDate"))
-									.setStyle(Navigation.Style.link)
-									.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
-									.setIncluded(
-										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
-										ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater"))))
-							.addNavigation(
-								ui.newNavigation()
-									.setTitle("list-nav-review-not")
-									.setStyle(Navigation.Style.link)
-									.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
-									.setIncluded(
-										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
-										ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater")))))
+								.addNavigation(
+									ui.newNavigation()
+										.setTitle("list-nav-review")
+										.setStyle(Navigation.Style.link)
+										.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.id")))
+										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReview"))))
+								.addNavigation(
+									ui.newNavigation()
+										.setTitle(
+											"list-nav-review-later",
+											ui.newDatePropertyReference().setReference("submission.assessment.feedbackDate"))
+										.setStyle(Navigation.Style.link)
+										.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
+										.setIncluded(
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater"))))
+								.addNavigation(
+									ui.newNavigation()
+										.setTitle("list-nav-review-not")
+										.setStyle(Navigation.Style.link)
+										.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
+										.setIncluded(
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater")))))
 						.addColumn(
-								ui.newPropertyColumn()
-									.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatGradedDecoration()))
-									.setTitle("list-graded")
-									.setCentered()));
+							ui.newPropertyColumn()
+								.setProperty("list-worth-fmt",
+									ui.newPropertyReference().setReference("submission.assessment.totalPoints").setFormatDelegate(new FormatListWorth()),
+									ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy").setFormatDelegate(new FormatMssPolicy()))
+								.setTitle("list-worth")));
 	}
 
 	/**
@@ -663,6 +649,12 @@ public class DeliveryControllers
 							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("review")),
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.expiration")),
 							ui.newCompareDecision().setEqualsConstant(SubmissionExpiration.Cause.closedDate.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
+				.add(
+					ui.newAlert()
+						.setText("review-not-graded")
+						.setIncluded(
+							ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
+							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.isGraded"))))
 				.add(
 					ui.newSection()
 						.setTitle("instructions-test-title",
@@ -1692,27 +1684,6 @@ public class DeliveryControllers
 		return rv;
 	}
 
-	public static class ReviewDateDecision implements DecisionDelegate
-	{
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean decide(Decision decision, Context context, Object focus)
-		{
-			// focus is the submission
-			if (focus == null) return false;
-			if (!(focus instanceof Submission)) return false;
-
-			Submission submission = (Submission) focus;
-			Assessment assessment = submission.getAssessment();
-			if (assessment == null) return false;
-
-			// if we are doing feedback ever
-			FeedbackDelivery delivery = assessment.getFeedbackDelivery();
-			return delivery != FeedbackDelivery.NONE;
-		}
-	}
-
 	/**
 	 * if we want feedback, are doing answer feedback, and the question is multi choice or multi correct, and this answer is the one selected...
 	 */
@@ -2242,26 +2213,39 @@ public class DeliveryControllers
 	}
 
 	/**
-	 * From a value which is a submission, 'format' this into the html for the icon decoration for the list interface column for 'graded'.
+	 * From a value which is a the total score (Float), 'format' this into a message if not yet graded, or let the score show through
 	 */
-	public static class FormatGradedDecoration implements FormatDelegate
+	public static class FormatListScore implements FormatDelegate
 	{
 		/**
 		 * {@inheritDoc}
 		 */
 		public String format(Context context, Object value)
-		{
+		{	
 			Object o = context.get("submission");
 			if (!(o instanceof Submission)) return value.toString();
 			Submission submission = (Submission) o;
 
 			if (submission.getIsGraded().booleanValue())
 			{
-				return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.png\" alt=\""
-						+ context.getMessages().getString("list-graded") + "\" />";
+				return "<span class=\"sludgeSpecialText\">" + formatScore((Float) value) + "</span>";
 			}
 
-			return context.getMessages().getString("dash");
+			return context.getMessages().getString("list-not-graded");
+		}
+	}
+
+	/**
+	 * From a value which is a the total points (Float)
+	 */
+	public static class FormatListWorth implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{	
+			return formatScore((Float) value);
 		}
 	}
 }
