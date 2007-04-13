@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>master</artifactId>
+    <groupId>org.muse</groupId>
+    <version>M2</version>
+    <relativePath>../../../master/pom.xml</relativePath>
+  </parent>
+  <name>ambrosia_library</name>
+  <groupId>org.muse</groupId>
+  <artifactId>ambrosia_library</artifactId>
+	<organization>
+		<name>University of Michigan and Foothill College, ETUDES Project</name>
+		<url>http://etudesproject.org/mneme</url>
+	</organization>
+  <inceptionYear>2007</inceptionYear>
+  <packaging>war</packaging>
+  <dependencies/>
+  <build>
+    
+    
+    
+    
+    
+    
+    <resources/>
+<!-- java source -->
+    
+  </build>
+</project>
