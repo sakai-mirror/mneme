@@ -1,0 +1,506 @@
+/**********************************************************************************
+ * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ **********************************************************************************/
+
+package org.muse.mneme.impl;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.AssessmentQuestion;
+import org.muse.mneme.api.AssessmentSection;
+import org.muse.mneme.api.Ordering;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.entity.cover.EntityManager;
+
+/**
+ * <p>
+ * AssessmentImpl is ...
+ * </p>
+ */
+public class AssessmentSectionImpl implements AssessmentSection
+{
+	public class MyOrdering implements Ordering<AssessmentSection>
+	{
+		protected AssessmentSectionImpl section = null;
+
+		public MyOrdering(AssessmentSectionImpl section)
+		{
+			this.section = section;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Boolean getIsFirst()
+		{
+			if (section.getAssessment() == null) return true;
+
+			if (section.equals(section.getAssessment().getSections().get(0))) return true;
+
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Boolean getIsLast()
+		{
+			if (section.getAssessment() == null) return true;
+
+			if (section.equals(section.getAssessment().getSections().get(section.getAssessment().getSections().size() - 1))) return true;
+
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public AssessmentSection getNext()
+		{
+			if (section.getAssessment() == null) return null;
+
+			int index = section.getAssessment().getSections().indexOf(section);
+			if (index == section.getAssessment().getSections().size() - 1) return null;
+
+			return section.getAssessment().getSections().get(index + 1);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Integer getPosition()
+		{
+			if (section.getAssessment() == null) return new Integer(1);
+
+			int index = section.getAssessment().getSections().indexOf(section);
+
+			return new Integer(index + 1);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public AssessmentSection getPrevious()
+		{
+			if (section.getAssessment() == null) return null;
+
+			int index = section.getAssessment().getSections().indexOf(section);
+			if (index == 0) return null;
+
+			return section.getAssessment().getSections().get(index - 1);
+		}
+	}
+
+	/** Our logger. */
+	private static Log M_log = LogFactory.getLog(AssessmentSectionImpl.class);
+
+	/** The back pointer to the assessment. */
+	protected transient AssessmentImpl assessment = null;;
+
+	protected List<Reference> attachments = new ArrayList<Reference>();
+
+	protected String description = null;
+
+	protected String id = null;
+
+	protected MyOrdering ordering = new MyOrdering(this);
+
+	protected Integer questionLimit = null;
+
+	protected List<AssessmentQuestionImpl> questions = new ArrayList<AssessmentQuestionImpl>();
+
+	protected Boolean randomizeOnlyByUser = Boolean.FALSE;
+
+	protected Boolean randomQuestionOrdering = null;
+
+	protected String title = null;
+
+	/**
+	 * Construct
+	 */
+	public AssessmentSectionImpl()
+	{
+	}
+
+	/**
+	 * Construct as a deep copy of another
+	 */
+	protected AssessmentSectionImpl(AssessmentSectionImpl other)
+	{
+		this.assessment = other.assessment;
+		setAttachments(other.attachments);
+		this.description = other.description;
+		this.id = other.id;
+		this.randomQuestionOrdering = other.randomQuestionOrdering;
+		this.questionLimit = other.questionLimit;
+		this.title = other.title;
+		this.randomizeOnlyByUser = other.randomizeOnlyByUser;
+		setQuestions(other.questions);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int compareTo(Object obj)
+	{
+		if (!(obj instanceof AssessmentSection)) throw new ClassCastException();
+
+		// if the object are the same, say so
+		if (obj == this) return 0;
+
+		// TODO: how to compare? position?
+		int compare = getOrdering().getPosition().compareTo(((AssessmentSection) obj).getOrdering().getPosition());
+
+		return compare;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean equals(Object obj)
+	{
+		if (!(obj instanceof AssessmentSection)) return false;
+		if (this == obj) return true;
+		if (this.getId() == null) return false;
+		if (((AssessmentSection) obj).getId() == null) return false;
+		return ((AssessmentSection) obj).getId().equals(getId());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Assessment getAssessment()
+	{
+		return this.assessment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Reference> getAttachments()
+	{
+		return this.attachments;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDescription()
+	{
+		return this.description;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentQuestion getFirstQuestion()
+	{
+		if (this.questions.isEmpty()) return null;
+
+		// based on the possibly random order
+		return getQuestions().get(0);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getId()
+	{
+		return this.id;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsMerged()
+	{
+		return Boolean.valueOf("Default".equals(this.title));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentQuestion getLastQuestion()
+	{
+		if (this.questions.isEmpty()) return null;
+
+		// based on the possibly random order
+		List<? extends AssessmentQuestion> questions = getQuestions();
+		return questions.get(questions.size() - 1);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer getNumQuestions()
+	{
+		// if we are limiting, return the effective number of questions
+		if ((this.questionLimit != null) && (this.questionLimit.intValue() < this.questions.size()))
+		{
+			return this.questionLimit;
+		}
+
+		return this.questions.size();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Ordering<AssessmentSection> getOrdering()
+	{
+		return this.ordering;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentQuestion getQuestion(String questionId)
+	{
+		if (questionId == null) return null;
+
+		for (AssessmentQuestion question : this.questions)
+		{
+			if (question.getId().equals(questionId)) return question;
+		}
+
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer getQuestionLimit()
+	{
+		return this.questionLimit;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<? extends AssessmentQuestion> getQuestions()
+	{
+		// copy the questions
+		List<AssessmentQuestionImpl> rv = new ArrayList<AssessmentQuestionImpl>(this.questions);
+
+		// randomize if needed (only if we are in a submission context)
+		if ((this.randomQuestionOrdering != null) && (this.randomQuestionOrdering.booleanValue()) && (this.assessment.getSubmissionContext() != null))
+		{
+			long seed = 0;
+
+			// for Samigo, we still need to support the user id-only mode
+			if (randomizeOnlyByUser.booleanValue())
+			{
+				seed = this.assessment.service.m_sessionManager.getCurrentSessionUserId().hashCode();
+			}
+
+			else
+			{
+				// set the seed based on the id of the submission context (if any),
+				// so each user's submission to any assessment has a unique ordering,
+				// and the section's id, so the randomization of questions in each section is not the same
+				seed = (this.assessment.getSubmissionContext().getId() + "_" + this.id).hashCode();
+			}
+
+			// mix up the questions
+			Collections.shuffle(rv, new Random(seed));
+		}
+
+		// if we have a limit set, limit to just that number
+		if ((this.questionLimit != null) && (this.questionLimit.intValue() < rv.size()))
+		{
+			rv = rv.subList(0, this.questionLimit.intValue());
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<? extends AssessmentQuestion> getQuestionsAsAuthored()
+	{
+		return this.questions;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getRandomQuestionOrder()
+	{
+		return this.randomQuestionOrdering;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getTitle()
+	{
+		return this.title;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getTotalPoints()
+	{
+		// base this on getQuestions, so it picks the subset (if any) based on random and limit
+		List<? extends AssessmentQuestion> questions = getQuestions();
+
+		float total = 0;
+		for (AssessmentQuestion question : questions)
+		{
+			total += question.getPoints();
+		}
+
+		return new Float(total);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int hashCode()
+	{
+		return getId().hashCode();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setAttachments(List<Reference> attachments)
+	{
+		this.attachments.clear();
+		if (attachments == null) return;
+
+		// deep copy
+		this.attachments = new ArrayList<Reference>(attachments.size());
+		for (Reference ref : attachments)
+		{
+			Reference copy = EntityManager.newReference(ref);
+			this.attachments.add(copy);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setDescription(String description)
+	{
+		this.description = description;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setQuestionLimit(Integer setting)
+	{
+		this.questionLimit = setting;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setQuestions(List<? extends AssessmentQuestion> questions)
+	{
+		this.questions.clear();
+		if (questions == null) return;
+
+		// deep copy
+		this.questions = new ArrayList<AssessmentQuestionImpl>();
+		for (AssessmentQuestion question : questions)
+		{
+			AssessmentQuestionImpl copy = new AssessmentQuestionImpl((AssessmentQuestionImpl) question);
+			copy.initSection(this);
+
+			this.questions.add(copy);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setRandomQuestionOrder(Boolean setting)
+	{
+		this.randomQuestionOrdering = setting;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setTitle(String title)
+	{
+		this.title = title;
+	}
+
+	/**
+	 * Take another attachment to init the attachments.
+	 * 
+	 * @param attachment
+	 *        The reference to add to the attachments.
+	 */
+	protected void initAddAttachment(Reference attachment)
+	{
+		this.attachments.add(attachment);
+	}
+
+	/**
+	 * Establish the link to the containing assessment.
+	 * 
+	 * @param assessment
+	 *        The containing assessment.
+	 */
+	protected void initAssement(AssessmentImpl assessment)
+	{
+		this.assessment = assessment;
+	}
+
+	/**
+	 * Initialize the id property.
+	 * 
+	 * @param id
+	 *        The id property.
+	 */
+	protected void initId(String id)
+	{
+		this.id = id;
+	}
+
+	/**
+	 * Initialize the questions.
+	 * 
+	 * @param questions
+	 *        The questions - these are taken exactly, not deep copied.
+	 */
+	protected void initQuestions(List<AssessmentQuestionImpl> questions)
+	{
+		this.questions = questions;
+
+		// set the back link
+		for (AssessmentQuestionImpl question : this.questions)
+		{
+			question.initSection(this);
+		}
+	}
+}

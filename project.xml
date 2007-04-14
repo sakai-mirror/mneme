@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+	<pomVersion>3</pomVersion>
+	<extend>../master/project.xml</extend>
+	<name>mneme</name>
+	<groupId>muse</groupId>
+	<currentVersion>${mneme.version}</currentVersion>
+	<organization>
+		<name>University of Michigan and Foothill College, ETUDES Project</name>
+		<url>http://etudesproject.org/mneme</url>
+	</organization>
+	<inceptionYear>2007</inceptionYear>
+
+	<properties>
+	</properties>
+
+	<dependencies>
+	</dependencies>
+
+	<build>
+	</build>
+
+</project>
