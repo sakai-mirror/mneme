@@ -214,7 +214,14 @@ public class DeliveryControllers
 								.setProperty("list-worth-fmt",
 									ui.newPropertyReference().setReference("submission.assessment.totalPoints").setFormatDelegate(new FormatListWorth()),
 									ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy").setFormatDelegate(new FormatMssPolicy()))
-								.setTitle("list-worth")));
+								.setTitle("list-worth")))
+				.add(
+					ui.newSection()
+						.add(
+							ui.newIconKey()
+								.setTitle("list-key-title")
+								.addIcon("/icons/highest.png", ui.newMessage().setMessage("list-key-highest"))
+								.addIcon("/icons/latest.png", ui.newMessage().setMessage("list-key-latest"))));
 	}
 
 	/**
@@ -267,14 +274,14 @@ public class DeliveryControllers
 					ui.newSection()
 						.add(
 							ui.newInstructions()
-								.setText("highest-instructions", ui.newIconPropertyReference().setIcon("/icons/highest.gif")))
+								.setText("highest-instructions", ui.newIconPropertyReference().setIcon("/icons/highest.png")))
 						.setIncluded(
 							ui.newCompareDecision().setEqualsConstant(MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED.toString()).setProperty(ui.newPropertyReference().setReference("assessment.multipleSubmissionSelectionPolicy"))))
 				.add(
 					ui.newSection()
 						.add(
 							ui.newInstructions()
-								.setText("latest-instructions", ui.newIconPropertyReference().setIcon("/icons/latest.gif")))
+								.setText("latest-instructions", ui.newIconPropertyReference().setIcon("/icons/latest.png")))
 						.setIncluded(
 							ui.newCompareDecision().setEqualsConstant(MultipleSubmissionSelectionPolicy.USE_LATEST.toString()).setProperty(ui.newPropertyReference().setReference("assessment.multipleSubmissionSelectionPolicy"))))
 				.add(
@@ -412,14 +419,14 @@ public class DeliveryControllers
 					ui.newSection()
 						.add(
 							ui.newInstructions()
-								.setText("highest-instructions", ui.newIconPropertyReference().setIcon("/icons/highest.gif")))
+								.setText("highest-instructions", ui.newIconPropertyReference().setIcon("/icons/highest.png")))
 						.setIncluded(
 							ui.newCompareDecision().setEqualsConstant(MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy"))))
 				.add(
 					ui.newSection()
 						.add(
 							ui.newInstructions()
-								.setText("latest-instructions", ui.newIconPropertyReference().setIcon("/icons/latest.gif")))
+								.setText("latest-instructions", ui.newIconPropertyReference().setIcon("/icons/latest.png")))
 						.setIncluded(
 							ui.newCompareDecision().setEqualsConstant(MultipleSubmissionSelectionPolicy.USE_LATEST.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy"))))
 				.add(
@@ -2125,12 +2132,12 @@ public class DeliveryControllers
 			
 			if (((MultipleSubmissionSelectionPolicy) value) == MultipleSubmissionSelectionPolicy.USE_LATEST)
 			{
-				iconName = "latest.gif";
+				iconName = "latest.png";
 				altKey = "use-latest";
 			}
 			else
 			{
-				iconName = "highest.gif";
+				iconName = "highest.png";
 				altKey = "use-highest";
 			}
 

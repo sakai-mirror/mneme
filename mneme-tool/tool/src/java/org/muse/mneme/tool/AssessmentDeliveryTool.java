@@ -1432,9 +1432,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		else
 		{
-			// send to the section instructions if it's a first question (unless by-assessment)
+			// send to the section instructions if it's a first question and by-question
 			if ((question.getSectionOrdering().getIsFirst().booleanValue()) && (!question.getSection().getIsMerged().booleanValue())
-					&& (assessment.getQuestionPresentation() != QuestionPresentation.BY_ASSESSMENT))
+					&& (assessment.getQuestionPresentation() == QuestionPresentation.BY_QUESTION))
 			{
 				// to instructions
 				destination = "/" + Destinations.section_instructions + "/" + submission.getId() + "/" + question.getSection().getId();
@@ -1449,12 +1449,23 @@ public class AssessmentDeliveryTool extends HttpServlet
 				}
 				else if (assessment.getQuestionPresentation() == QuestionPresentation.BY_SECTION)
 				{
-					destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + question.getSection().getId() + "#"
-							+ question.getId();
+					destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + question.getSection().getId();
+					
+					// include the question target if not the first quesiton in the section
+					if (!question.getSectionOrdering().getIsFirst().booleanValue())
+					{
+						destination = destination + "#" + question.getId();
+					}
 				}
 				else
 				{
-					destination = "/" + Destinations.question + "/" + submission.getId() + "/a" + "#" + question.getId();
+					destination = "/" + Destinations.question + "/" + submission.getId() + "/a";
+
+					// include the question target if not the first quesiton in the assessment
+					if (!question.getAssessmentOrdering().getIsFirst().booleanValue())
+					{
+						destination = destination + "#" + question.getId();
+					}
 				}
 			}
 		}
