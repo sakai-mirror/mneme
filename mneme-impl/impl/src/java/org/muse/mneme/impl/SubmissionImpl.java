@@ -710,6 +710,14 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getReference()
+	{
+		return this.service.getSubmissionReference(this.id);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer getSiblingCount()
 	{
 		return this.siblingCount;

@@ -384,7 +384,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				// assessment and submissions caches, automatiaclly checking for expiration as configured mins, expire on events...
 				m_assessmentCache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAssessmentReference(""));
 
-				m_submissionCache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getSubmissionReference(""));
+				m_submissionCache = new SubmissionCacheImpl(m_memoryService, m_eventTrackingService, m_cacheCleanerSeconds,
+						getSubmissionReference(""), ":");
+				// m_memoryService.newHardCache(m_cacheCleanerSeconds, getSubmissionReference(""));
 			}
 
 			// start the checking thread
@@ -2295,7 +2297,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		String statement = "SELECT AG.ASSESSMENTGRADINGID, P.ID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
 				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE, PF.FEEDBACKDELIVERY, AG.FORGRADE,"
 				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING, PAC.RETRACTDATE, PE.TOGRADEBOOK,"
-				+ " SUM(PI.SCORE)" + " FROM SAM_PUBLISHEDASSESSMENT_T P"
+				+ " SUM(PI.SCORE)"
+				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID AND (PAC.RETRACTDATE IS NULL OR ? < PAC.RETRACTDATE)"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
@@ -2826,7 +2829,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	public Boolean allowAddAssessment(String context)
 	{
 		// check permission - cuser must have PUBLISH_PERMISSION in the context
-		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, context, getAssessmentReference(""));
+		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), MANAGE_PERMISSION, context, getAssessmentReference(""));
 
 		return Boolean.valueOf(ok);
 	}
@@ -2839,7 +2842,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (M_log.isDebugEnabled()) M_log.debug("addAssessment: " + assessment.getId());
 
 		// check permission - created by user must have PUBLISH_PERMISSION in the context of the assessment
-		secure(m_sessionManager.getCurrentSessionUserId(), PUBLISH_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+		secure(m_sessionManager.getCurrentSessionUserId(), MANAGE_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
 
 		// run our save code in a transaction that will restart on deadlock
 		// if deadlock retry fails, or any other error occurs, a runtime error will be thrown
@@ -2854,7 +2857,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// event track it
 		if (m_threadLocalManager.get("sakai.event.suppress") == null)
 		{
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(ASSESSMENT_PUBLISH, getAssessmentReference(assessment.getId()), true));
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(TEST_ADD, getAssessmentReference(assessment.getId()), true));
 		}
 
 		// cache a copy
@@ -3636,7 +3639,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// event track it
 		if (m_threadLocalManager.get("sakai.event.suppress") == null)
 		{
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ADD, getSubmissionReference(submission.getId()), true));
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_ADD, getSubmissionReference(submission.getId()), true));
 		}
 	}
 
@@ -3872,7 +3875,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (submissionInProgress != null)
 		{
 			// event track it (not a modify event)
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_REENTER, getSubmissionReference(submissionInProgress.getId()), false));
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_CONTINUE, getSubmissionReference(submissionInProgress.getId()), false));
 
 			return submissionInProgress;
 		}
@@ -3908,7 +3911,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		cacheSubmission(new SubmissionImpl((SubmissionImpl) submission));
 
 		// event track it
-		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ENTER, getSubmissionReference(submission.getId()), true));
+		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_ENTER, getSubmissionReference(submission.getId()), true));
 
 		return submission;
 	}
@@ -4001,13 +4004,17 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// collect the cached submission, before the event clears it
 		recache = getCachedSubmission(submission.getId());
 
-		// event track it
-		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(submission.getId()), true));
+		// event track it (one for each answer)
+		for (SubmissionAnswer answer : answers)
+		{
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_ANSWER, getSubmissionReference(submission.getId()) + ":"
+					+ answer.getQuestion().getId(), true));
+		}
 
 		// track if we are complete
 		if ((completSubmission != null) && completSubmission.booleanValue())
 		{
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission.getId()), true));
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_COMPLETE, getSubmissionReference(submission.getId()), true));
 		}
 
 		// the submission is altered by this - clear the cache (or update)
@@ -4286,7 +4293,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		SubmissionImpl recache = getCachedSubmission(answer.getSubmission().getId());
 
 		// event track it
-		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_ANSWER, getSubmissionReference(answer.getSubmission().getId()), true));
+		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_ANSWER, getSubmissionReference(answer.getSubmission().getId()) + ":"
+				+ answer.getQuestion().getId(), true));
 
 		// the submission is altered by this - clear the cache
 		unCacheSubmission(answer.getSubmission().getId());
@@ -4421,7 +4429,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		SubmissionImpl recache = getCachedSubmission(s.getId());
 
 		// event track it
-		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission.getId()), true));
+		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_COMPLETE, getSubmissionReference(submission.getId()), true));
 
 		// the submission is altered by this - clear the cache
 		unCacheSubmission(submission.getId());
@@ -5035,7 +5043,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	}
 
 	/**
-	 * Mark the submission as complete as of now.
+	 * Mark the submission as auto-complete as of now.
 	 * 
 	 * @param asOf
 	 *        The effective time of the completion.
@@ -5065,7 +5073,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		recordInGradebook(submission, false);
 
 		// event track it
-		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMIT_COMPLETE, getSubmissionReference(submission.getId()), true));
+		m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_AUTO_COMPLETE, getSubmissionReference(submission.getId()), true));
 
 		// the submission is altered by this - clear the cache
 		unCacheSubmission(submission.getId());

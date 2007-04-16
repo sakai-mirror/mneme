@@ -35,6 +35,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Controller;
+import org.muse.ambrosia.api.UiService;
+import org.muse.ambrosia.api.Value;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentCompletedException;
@@ -51,10 +55,7 @@ import org.muse.mneme.api.SubmissionCompletedException;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.Reference;
-import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Controller;
-import org.muse.ambrosia.api.UiService;
-import org.muse.ambrosia.api.Value;
+import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
@@ -105,6 +106,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 	/** Our self-injected tool manager reference. */
 	protected ToolManager toolManager = null;
+
+	/** Our self-injected event manager reference. */
+	protected EventTrackingService eventTrackingService = null;
 
 	/** Our self-injected ui service reference. */
 	protected UiService ui = null;
@@ -175,8 +179,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 		this.timeService = (TimeService) ComponentManager.get(TimeService.class);
 		this.ui = (UiService) ComponentManager.get(UiService.class);
 		this.entityManager = (EntityManager) ComponentManager.get(EntityManager.class);
+		this.eventTrackingService = (EventTrackingService) ComponentManager.get(EventTrackingService.class);
 
-		// make the uis
+		// make the ui's
 		this.uiList = DeliveryControllers.constructList(ui);
 		this.uiEnter = DeliveryControllers.constructEnter(ui);
 		this.uiQuestion = DeliveryControllers.constructQuestion(ui);
@@ -1706,6 +1711,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 		}
 
 		context.put("answers", answers);
+
+		// in this special case, since there's no real action in the service to do this, we need to generate an event
+		eventTrackingService.post(eventTrackingService.newEvent(AssessmentService.SUBMISSION_REVIEW, submission.getReference(), false));
 
 		// render using the question interface
 		ui.render(uiQuestion, context);

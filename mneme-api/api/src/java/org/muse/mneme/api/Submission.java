@@ -208,6 +208,13 @@ public interface Submission
 	Boolean getMayReviewLater();
 
 	/**
+	 * Access the reference of this submission.
+	 * 
+	 * @return The submission's reference.
+	 */
+	String getReference();
+
+	/**
 	 * Get the total count of submissions, including this one, to this same assignment from the same user. May not be known
 	 * 
 	 * @return The total count of submissions to the assignment by the user, or NULL if not known.

@@ -41,48 +41,54 @@ public interface AssessmentService
 	/**
 	 * The type string for this application: should not change over time as it may be stored in various parts of persistent entities.
 	 */
-	static final String APPLICATION_ID = "sakai:assessment";
-
-	/** Event tracking event for publishing an assessment. */
-	static final String ASSESSMENT_PUBLISH = "assessment.publish";
-
-	/** The sub-type for assessment in references (/assessment/assessment/...) */
-	static final String ASSESSMENT_TYPE = "assessment";
-
-	/** The security function used to check if users can publish an assessment. */
-	static final String PUBLISH_PERMISSION = "assessment.createAssessment";
+	static final String APPLICATION_ID = "sakai:mneme";
 
 	/** This string starts the references to resources in this service. */
-	static final String REFERENCE_ROOT = "/assessment";
+	static final String REFERENCE_ROOT = "/mneme";
 
-	/** The sub-type for submissions in references (/assessment/submission/...) */
+	/** The sub-type for assessment in references (/mneme/test/...) */
+	static final String ASSESSMENT_TYPE = "test";
+
+	/** The sub-type for submissions in references (/mneme/submission/...) */
 	static final String SUBMISSION_TYPE = "submission";
 
+	/** Event tracking event for adding a test. */
+	static final String TEST_ADD = "mneme.publish";
+
 	/** Event tracking event for adding a submission. */
-	static final String SUBMIT_ADD = "submission.add";
+	static final String SUBMISSION_ADD = "mneme.submit";
+
+	/** Event tracking event for entering a submission. */
+	static final String SUBMISSION_ENTER = "mneme.enter";
+
+	/** Event tracking event for re-entering a submission. */
+	static final String SUBMISSION_CONTINUE = "mneme.continue";
 
 	/** Event tracking event for answering a question in a submission. */
-	static final String SUBMIT_ANSWER = "submission.answer";
+	static final String SUBMISSION_ANSWER = "mneme.answer";
 
 	/** Event tracking event for completing a submission. */
-	static final String SUBMIT_COMPLETE = "submission.complete";
+	static final String SUBMISSION_COMPLETE = "mneme.complete";
+
+	/** Event tracking event for the system automatically completing a submission. */
+	static final String SUBMISSION_AUTO_COMPLETE = "mneme.auto_complete";
+
+	/** Event tracking event for reviewing a submission. */
+	static final String SUBMISSION_REVIEW = "mneme.review";
+
+	/** The security function used to check if users can submit to an assessment. */
+	static final String SUBMIT_PERMISSION = "assessment.takeAssessment";
+
+	/** The security function used to check if users can manage tests. */
+	static final String MANAGE_PERMISSION = "assessment.createAssessment";
 
 	/*************************************************************************************************************************************************
 	 * Assessment Access
 	 ************************************************************************************************************************************************/
 
-	/** Event tracking event for entering a submission. */
-	static final String SUBMIT_ENTER = "submission.enter";
-
-	/** The security function used to check if users can submit to an assessment. */
-	static final String SUBMIT_PERMISSION = "assessment.takeAssessment";
-
 	/*************************************************************************************************************************************************
 	 * Submission Access
 	 ************************************************************************************************************************************************/
-
-	/** Event tracking event for re-entering a submission. */
-	static final String SUBMIT_REENTER = "submission.reenter";
 
 	/**
 	 * Create a new persistent assessment from the given information.<br />

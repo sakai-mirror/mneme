@@ -534,7 +534,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 					// user must have review or grading permission
 					// TODO: for now, we use PUBLISH_PERMISSION... refine this
 					if (!m_assessmentService.checkSecurity(m_sessionManager.getCurrentSessionUserId(),
-							AssessmentService.PUBLISH_PERMISSION, submission.getAssessment().getContext(), m_assessmentService
+							AssessmentService.MANAGE_PERMISSION, submission.getAssessment().getContext(), m_assessmentService
 									.getAssessmentReference(submission.getAssessment().getId())))
 					{
 						throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), ATTACHMENT_READ, ref
