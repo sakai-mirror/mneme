@@ -74,6 +74,7 @@ Sakai ~ samSectionHeader h4 + <br />
 	font-weight: bold;
 	font-family: Arial,Helvetica,sans-serif;
 	background-color: transparent !important;
+	clear: both;
 }
 
 /*
@@ -92,6 +93,9 @@ Header text at the top of a section that has been highlighted (Section.header)
 	font-size: 100%;
 	font-weight: bold;
 	font-family: Arial,Helvetica,sans-serif;
+	height: 2em;
+	line-height: 2em;
+	clear: both;
 }
 
 /*
@@ -484,5 +488,13 @@ Special class for text that floats to the right
 */
 .ambrosiaRight
 {
-	padding-left: 30em;
+	float: right;
+}
+
+/*
+Special class for text that floats to the left
+*/
+.ambrosiaLeft
+{
+	float: left;
 }
