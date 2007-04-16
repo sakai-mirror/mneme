@@ -174,17 +174,13 @@ Sakai ~ itemAction
 */
 .ambrosiaUnderNav
 {
-	font-size: .85em;
+	font-size: .80em;
 	font-family: verdana,arial;
-	margin: .1em 0 0 .5em;
-	line-height: 1.6em;
 	color: #888;
-	padding: 2px;
 }
 .ambrosiaUnderNav a,
 .ambrosiaUnderNav a:visited
 {
-	padding:.3em .6em !important;
 	color: #35b;
 }
 .ambrosiaUnderNav a:hover
@@ -460,7 +456,7 @@ Special class for text that is to stand out
 .ambrosiaSpecialText
 {
 	color: #006400;
-	font-weight: bolder;
+	font-weight: 900;
 	background: #E4E4E4;
 	border: 1px solid #bbb;
 }

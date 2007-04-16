@@ -227,9 +227,22 @@ public class UiNavigation extends UiController implements Navigation
 		{
 			case link:
 			{
+				if ((this.icon != null) && (this.iconStyle == IconStyle.left))
+				{
+					response.print("<img style=\"vertical-align:text-bottom; padding-right:0.3em;\" src=\"" + context.get("sakai.return.url") + this.icon + "\" />");
+				}
+
 				if (!disabled) response.print("<a href=\"#\" onclick=\"act_" + id + "();\">");
+
 				response.print(title);
+
 				if (!disabled) response.print("</a>");
+
+				if ((this.icon != null) && (this.iconStyle == IconStyle.right))
+				{
+					response.print("<img style=\"vertical-align:text-bottom; padding-left:0.3em;\" src=\"" + context.get("sakai.return.url") + this.icon + "\" />");
+				}
+
 				response.println();
 
 				break;

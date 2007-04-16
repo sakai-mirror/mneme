@@ -43,7 +43,7 @@ public class UiDatePropertyReference extends UiPropertyReference implements Date
 		{
 			if (multiLine)
 			{
-				return Validator.escapeHtml(((Time) value).toStringLocalDate()) + "<br />" + Validator.escapeHtml(((Time) value).toStringLocalTime());
+				return "<span style=\"white-space: nowrap;\">" + Validator.escapeHtml(((Time) value).toStringLocalDate()) + "</span><br /><spanstyle=\"white-space: nowrap;\">" + Validator.escapeHtml(((Time) value).toStringLocalTime()) + "</span>";
 			}
 			else
 			{
