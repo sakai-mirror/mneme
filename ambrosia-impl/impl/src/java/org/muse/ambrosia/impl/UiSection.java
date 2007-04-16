@@ -55,6 +55,9 @@ public class UiSection extends UiContainer implements Section
 	/** The message for the title. */
 	protected Message title = null;
 
+	/** The highlight decision for the title. */
+	protected Decision[] titleHighlighted = null;
+
 	/** The include decision array for the itle. */
 	protected Decision[] titleIncluded = null;
 
@@ -198,10 +201,42 @@ public class UiSection extends UiContainer implements Section
 	/**
 	 * {@inheritDoc}
 	 */
+	public Section setTitleHighlighted(Decision... decision)
+	{
+		this.titleHighlighted = decision;
+		return this;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Section setTitleIncluded(Decision... decision)
 	{
 		this.titleIncluded = decision;
 		return this;
+	}
+
+	/**
+	 * Check if this title is highlighted.
+	 * 
+	 * @param context
+	 *        The Context.
+	 * @param focus
+	 *        The object focus.
+	 * @return true if highlighted, false if not.
+	 */
+	protected boolean isTitleHighlighted(Context context, Object focus)
+	{
+		if (this.titleHighlighted == null) return false;
+		for (Decision decision : this.titleHighlighted)
+		{
+			if (!decision.decide(context, focus))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -251,7 +286,16 @@ public class UiSection extends UiContainer implements Section
 		// title
 		if ((this.title != null) && (isTitleIncluded(context, focus)))
 		{
-			response.println("<div class=\"ambrosiaSectionHeader\">" + this.title.getMessage(context, focus) + "</div>");
+			if (isTitleHighlighted(context, focus))
+			{
+				response.print("<div class=\"ambrosiaSectionHeaderHighlight\">");
+			}
+			else
+			{
+				response.print("<div class=\"ambrosiaSectionHeader\">");
+			}
+			response.print(this.title.getMessage(context, focus));
+			response.println("</div>");
 		}
 
 		// body... being a container, let the base class render the contained

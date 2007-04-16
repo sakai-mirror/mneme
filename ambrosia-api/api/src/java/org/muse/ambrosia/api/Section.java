@@ -85,6 +85,15 @@ public interface Section extends Container
 	Section setTitle(String selection, PropertyReference... references);
 
 	/**
+	 * Set the decision to highlight the title.
+	 * 
+	 * @param decision
+	 *        The decision, or set of decisions, all of which must pass to highlight the title.
+	 * @return self.
+	 */
+	Section setTitleHighlighted(Decision... decision);
+
+	/**
 	 * Set the decision to include the title.
 	 * 
 	 * @param decision
