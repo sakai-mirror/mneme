@@ -1,0 +1,12 @@
+Index: samigo-app/sakai-samigo/webapp/tools/sakai.samigo.tool.xml
+===================================================================
+--- samigo-app/sakai-samigo/webapp/tools/sakai.samigo.tool.xml	(revision 21278)
++++ samigo-app/sakai-samigo/webapp/tools/sakai.samigo.tool.xml	(working copy)
+@@ -5,6 +5,7 @@
+         description="For creating and taking online tests and quizzes.">
+      <category name="course" />
+      <category name="project" />
++     <configuration name="functions.require" value="assessment.createAssessment" />
+   </tool>
+ 
+         <function name="assessment.takeAssessment" />

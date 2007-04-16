@@ -60,6 +60,10 @@ svn merge -r22556:22557 https://source.sakaiproject.org/svn/reference/trunk
 svn merge -r28500:28501 https://source.sakaiproject.org/svn/reference/trunk
 #G    library/src/webapp/js/headscripts.js
 #
-#binary:~/dev/sakai_2-3-1 ggolden$ 
 cd ..
 #
+#Patch Samigo for conditional visibility in the portal (creators only)
+cd sam
+patch -p0 < ../mneme/patch/sam_portal_patch.txt
+cd ..
+
