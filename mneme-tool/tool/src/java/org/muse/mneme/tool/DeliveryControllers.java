@@ -730,7 +730,8 @@ public class DeliveryControllers
 									ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("answer.question.section.isMerged")))))
 						.add(
 							ui.newSection()
-								.setTitle(null,ui.newTextPropertyReference().setReference("answer.question").setFormatDelegate(new FormatQuestionTitle()))
+								.setTitle(null,ui.newHtmlPropertyReference().setReference("answer.question").setFormatDelegate(new FormatQuestionTitle()))
+								.setTitleHighlighted(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
 //								.add(
 //									ui.newDistributionChart()
 //										.setData(ui.newPropertyReference().setReference("answer.question.scores"))
