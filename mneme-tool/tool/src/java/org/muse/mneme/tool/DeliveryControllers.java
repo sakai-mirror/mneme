@@ -593,6 +593,7 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setTitle("instructions")
+								.setIcon("/icons/test.png",Navigation.IconStyle.left)
 								.setAccessKey("instructions-access")
 								.setDescription("instructions-description")
 								.setStyle(Navigation.Style.link)
@@ -1190,6 +1191,7 @@ public class DeliveryControllers
 							ui.newNavigation()
 								.setSubmit()
 								.setTitle("instructions")
+								.setIcon("/icons/test.png",Navigation.IconStyle.left)
 								.setAccessKey("instructions-access")
 								.setDescription("instructions-description")
 								.setStyle(Navigation.Style.link)
@@ -1436,6 +1438,7 @@ public class DeliveryControllers
 						.add(
 							ui.newNavigation()
 								.setTitle("instructions")
+								.setIcon("/icons/test.png",Navigation.IconStyle.left)
 								.setAccessKey("instructions-access")
 								.setDescription("instructions-description")
 								.setStyle(Navigation.Style.link)
@@ -2235,7 +2238,7 @@ public class DeliveryControllers
 
 			if (submission.getIsGraded().booleanValue())
 			{
-				return "<span class=\"sludgeSpecialText\">" + formatScore((Float) value) + "</span>";
+				return "<span class=\"ambrosiaSpecialText\">" + formatScore((Float) value) + "</span><br />" + context.getMessages().getString("list-earned");
 			}
 
 			return context.getMessages().getString("list-not-graded");
