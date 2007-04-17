@@ -1942,6 +1942,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
+		// linear is not allowed in here
+		if (!submission.getAssessment().getRandomAccess().booleanValue())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.linear + "/" + submissionId)));
+			return;
+		}
+
 		// collect information: the selected assessment (id the request)
 		context.put("submission", submission);
 
