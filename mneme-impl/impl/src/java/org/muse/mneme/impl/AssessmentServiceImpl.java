@@ -2280,15 +2280,12 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					break;
 				}
 
+				// status ascending, i.e. boring to important, is backed by date boring (later) to important (sooner), i.e. date desc
+				// status is always read ascending, reversed when we sort it later
 				case status_a:
-				{
-					sortSql = "P.TITLE ASC";
-					break;
-				}
-
 				case status_d:
 				{
-					sortSql = "P.TITLE DESC";
+					sortSql = "PAC.DUEDATE DESC, P.TITLE DESC";
 					break;
 				}
 			}
