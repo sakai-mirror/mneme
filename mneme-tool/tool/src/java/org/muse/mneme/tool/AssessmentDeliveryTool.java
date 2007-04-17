@@ -1455,7 +1455,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 				else if (assessment.getQuestionPresentation() == QuestionPresentation.BY_SECTION)
 				{
 					destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + question.getSection().getId();
-					
+
 					// include the question target if not the first quesiton in the section
 					if (!question.getSectionOrdering().getIsFirst().booleanValue())
 					{
@@ -1739,6 +1739,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		// make sure by-question is valid for this assessment
+		if (submission.getAssessment().getQuestionPresentation() != QuestionPresentation.BY_QUESTION)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
