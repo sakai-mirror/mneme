@@ -833,6 +833,7 @@ public class DeliveryControllers
 										.setProperty(
 											ui.newPropertyReference()
 												.setReference("answer.entryAnswerText"))
+										.setFocus(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")))
 										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.essay.toString())
@@ -886,6 +887,7 @@ public class DeliveryControllers
 											"question-fillin-on-empty-alert")
 										.setText(null, ui.newTextPropertyReference().setReference("answer.question.part.title"))
 										.setReadOnly(ui.newPropertyReference().setReference("review"))
+										.setFocus(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")))
 										.setProperty(
 											ui.newPropertyReference()
 												.setReference("answer.entryAnswerTexts"))
@@ -913,6 +915,7 @@ public class DeliveryControllers
 											"question-fillin-on-empty-alert")
 										.setText(null, ui.newTextPropertyReference().setReference("answer.question.part.title"))
 										.setReadOnly(ui.newPropertyReference().setReference("review"))
+										.setFocus(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")))
 										.setProperty(
 											ui.newPropertyReference()
 												.setReference("answer.entryAnswerTexts"))
