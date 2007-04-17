@@ -2828,8 +2828,19 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 */
 	public Boolean allowAddAssessment(String context)
 	{
-		// check permission - cuser must have PUBLISH_PERMISSION in the context
+		// check permission - user must have MANAGE_PERMISSION in the context
 		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), MANAGE_PERMISSION, context, getAssessmentReference(""));
+
+		return Boolean.valueOf(ok);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean allowListDeliveryAssessment(String context)
+	{
+		// check permission - user must have SUBMIT_PERMISSION in the context
+		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, context, getAssessmentReference(""));
 
 		return Boolean.valueOf(ok);
 	}
@@ -3875,7 +3886,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (submissionInProgress != null)
 		{
 			// event track it (not a modify event)
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_CONTINUE, getSubmissionReference(submissionInProgress.getId()), false));
+			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_CONTINUE, getSubmissionReference(submissionInProgress.getId()),
+					false));
 
 			return submissionInProgress;
 		}

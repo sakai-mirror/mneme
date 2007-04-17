@@ -129,6 +129,15 @@ public interface AssessmentService
 	Boolean allowAddAssessment(String context);
 
 	/**
+	 * Check if the current user is allowed to list delivery assessments in this context.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return TRUE if the user is allowed to list delivery assessments in this context, FALSE if not.
+	 */
+	Boolean allowListDeliveryAssessment(String context);
+
+	/**
 	 * Check if the current user is allowed to update or add answers or complete this submission.<br />
 	 * Any hard deadlines are extended by a grace period to allow for inaccuracies in timing.<br />
 	 * The user must match the submission user.<br />

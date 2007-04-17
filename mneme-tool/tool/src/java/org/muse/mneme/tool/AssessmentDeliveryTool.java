@@ -932,6 +932,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 */
 	protected void listGet(HttpServletRequest req, HttpServletResponse res, String sortCode, Context context) throws IOException
 	{
+		// check security
+		if (!assessmentService.allowListDeliveryAssessment(toolManager.getCurrentPlacement().getContext()).booleanValue())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
 		// SORT: 0|1|2 A|D - 2 chars, column | direction
 		if ((sortCode != null) && (sortCode.length() != 2))
 		{
