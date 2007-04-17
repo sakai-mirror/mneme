@@ -22,6 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -57,6 +58,7 @@ import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.time.api.TimeService;
+import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.ResourceLoader;
@@ -71,7 +73,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		enter, error, final_review, instructions, list, list2, question, remove, review, section_instructions, submitted, toc
+		courier, enter, error, final_review, instructions, list, list2, question, remove, review, section_instructions, submitted, toc
 	}
 
 	/** Our errors. */
@@ -95,6 +97,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/** Our self-injected entity manager reference. */
 	protected EntityManager entityManager = null;
 
+	/** Our self-injected event manager reference. */
+	protected EventTrackingService eventTrackingService = null;
+
 	/** set of static resource paths. */
 	protected Set<String> resourcePaths = new HashSet<String>();
 
@@ -106,9 +111,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 	/** Our self-injected tool manager reference. */
 	protected ToolManager toolManager = null;
-
-	/** Our self-injected event manager reference. */
-	protected EventTrackingService eventTrackingService = null;
 
 	/** Our self-injected ui service reference. */
 	protected UiService ui = null;
@@ -212,6 +214,13 @@ public class AssessmentDeliveryTool extends HttpServlet
 	{
 		// handle static resource requests
 		if (ui.dispatchResource(req, res, getServletContext(), this.resourcePaths)) return;
+
+		// special courier handling
+		if ((req.getPathInfo() != null) && (req.getPathInfo().startsWith("/" + Destinations.courier.toString())))
+		{
+			courierGet(req, res);
+			return;
+		}
 
 		// handle pathless requests
 		if (ui.redirectToCurrentDestination(req, res, Destinations.list.toString())) return;
@@ -399,6 +408,11 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 				errorGet(req, res, error, param, context);
 				break;
+			}
+			default:
+			{
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
 			}
 		}
 	}
@@ -1958,6 +1972,40 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// render
 		ui.render(uiToc, context);
 		return;
+	}
+
+	/**
+	 * Handle a courier request.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param context
+	 *        UiContext.
+	 */
+	protected void courierGet(HttpServletRequest req, HttpServletResponse res) throws IOException
+	{
+		res.setContentType("text/plain; charset=UTF-8");
+		res.addDateHeader("Expires", System.currentTimeMillis() - (1000L * 60L * 60L * 24L * 365L));
+		res.addDateHeader("Last-Modified", System.currentTimeMillis());
+		res.addHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0");
+		res.addHeader("Pragma", "no-cache");
+
+		// mark the session as active
+		Session s = sessionManager.getCurrentSession();
+		if (s != null)
+		{
+			s.setActive();
+		}
+		else
+		{
+			M_log.warn("courierGet: no session");
+		}
+
+		// send a do-nothing response
+		PrintWriter out = res.getWriter();
+		out.println("//");
 	}
 
 	/**

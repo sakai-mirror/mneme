@@ -341,6 +341,7 @@ public class DeliveryControllers
 			ui.newInterface()
 				.setTitle("instructions-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.setHeader("instructions-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.add(ui.newCourier().setDestination(ui.newDestination().setDestination("/courier")).setFrequency(60))
 				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newCountdownTimer()
@@ -471,6 +472,7 @@ public class DeliveryControllers
 					"question-header",
 					ui.newTextPropertyReference().setReference("actionTitle"),
 					ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.add(ui.newCourier().setDestination(ui.newDestination().setDestination("/courier")).setFrequency(60))
 				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newCountdownTimer()
@@ -632,6 +634,7 @@ public class DeliveryControllers
 					"question-header",
 					ui.newTextPropertyReference().setReference("actionTitle"),
 					ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.add(ui.newCourier().setDestination(ui.newDestination().setDestination("/courier")).setFrequency(60))
 				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newCountdownTimer()
@@ -1271,6 +1274,7 @@ public class DeliveryControllers
 			ui.newInterface()
 				.setTitle("toc-title", ui.newTextPropertyReference().setReference("submission.assessment.title"))
 				.setHeader("toc-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.add(ui.newCourier().setDestination(ui.newDestination().setDestination("/courier")).setFrequency(60))
 				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newCountdownTimer()
@@ -1466,6 +1470,7 @@ public class DeliveryControllers
 			ui.newInterface()
 				.setTitle("remove-title")
 				.setHeader("remove-header", ui.newTextPropertyReference().setReference("submission.assessment.title"))
+				.add(ui.newCourier().setDestination(ui.newDestination().setDestination("/courier")).setFrequency(60))
 				.add(
 					ui.newCountdownTimer()
 						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
