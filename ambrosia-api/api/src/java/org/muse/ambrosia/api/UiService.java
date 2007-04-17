@@ -139,6 +139,13 @@ public interface UiService
 	CountdownTimer newCountdownTimer();
 
 	/**
+	 * Construct a new Courier
+	 * 
+	 * @return a new Courier
+	 */
+	Courier newCourier();
+
+	/**
 	 * Construct a new DatePropertyReference
 	 * 
 	 * @return a new DatePropertyReference

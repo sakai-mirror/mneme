@@ -33,7 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.sakaiproject.i18n.InternationalizedMessages;
 import org.muse.ambrosia.api.Alert;
 import org.muse.ambrosia.api.Alias;
 import org.muse.ambrosia.api.AndDecision;
@@ -48,6 +47,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.ContextInfoPropertyReference;
 import org.muse.ambrosia.api.Controller;
 import org.muse.ambrosia.api.CountdownTimer;
+import org.muse.ambrosia.api.Courier;
 import org.muse.ambrosia.api.DatePropertyReference;
 import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.Decoder;
@@ -90,6 +90,7 @@ import org.muse.ambrosia.api.UiService;
 import org.muse.ambrosia.api.UrlPropertyReference;
 import org.muse.ambrosia.api.UserInfoPropertyReference;
 import org.muse.ambrosia.api.Value;
+import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.tool.api.ActiveTool;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.Tool;
@@ -302,6 +303,14 @@ public class UiServiceImpl implements UiService
 	public CountdownTimer newCountdownTimer()
 	{
 		return new UiCountdownTimer();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Courier newCourier()
+	{
+		return new UiCourier();
 	}
 
 	/**
