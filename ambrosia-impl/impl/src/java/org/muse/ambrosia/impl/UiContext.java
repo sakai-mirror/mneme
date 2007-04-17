@@ -52,6 +52,9 @@ public class UiContext implements Context
 	/** named objects and encoding references. */
 	protected Map<String, String> encodings = new HashMap<String, String>();
 
+	/** The list of form element ids for the focus path. */
+	protected List<String> focusIds = new ArrayList<String>();
+
 	/** The name of the form that wraps the entire interface. */
 	protected String formName = null;
 
@@ -81,6 +84,14 @@ public class UiContext implements Context
 
 	/** The writer on the response output stream. */
 	protected PrintWriter writer = null;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void addFocusId(String id)
+	{
+		this.focusIds.add(id);
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -179,6 +190,14 @@ public class UiContext implements Context
 		if (name == null) return null;
 
 		return encodings.get(name);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<String> getFocusIds()
+	{
+		return this.focusIds;
 	}
 
 	/**

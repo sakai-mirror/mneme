@@ -36,6 +36,14 @@ public interface Context
 	static final String FRAGMENT = "sakai:fragment";
 
 	/**
+	 * Add a form element id to the focus path (for on-load focus)
+	 * 
+	 * @param id
+	 *        The form element id.
+	 */
+	void addFocusId(String id);
+
+	/**
 	 * Add some javascript code.
 	 * 
 	 * @param validation
@@ -96,6 +104,13 @@ public interface Context
 	 * @return The named object's encoding in the context, or null if missing.
 	 */
 	String getEncoding(String name);
+
+	/**
+	 * Access the collected focus ids.
+	 * 
+	 * @return The list of focus ids, or an empty list if there are none.
+	 */
+	List<String> getFocusIds();
 
 	/**
 	 * Access the name of the form that wraps the entire interface.

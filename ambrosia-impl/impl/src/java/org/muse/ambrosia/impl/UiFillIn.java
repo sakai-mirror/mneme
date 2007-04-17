@@ -29,6 +29,7 @@ import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.FillIn;
 import org.muse.ambrosia.api.Message;
 import org.muse.ambrosia.api.PropertyReference;
+import org.muse.ambrosia.api.TextEdit;
 import org.sakaiproject.util.Validator;
 
 /**
@@ -49,6 +50,9 @@ public class UiFillIn extends UiController implements FillIn
 
 	/** The PropertyReference for getting a correctness flag for each part. */
 	protected PropertyReference correctsReference = null;
+
+	/** The decision that controls if the field should get on-load focus. */
+	protected Decision focusDecision = null;
 
 	/** The icon to use to mark incorrect parts. */
 	protected String incorrectIcon = null;
@@ -297,6 +301,13 @@ public class UiFillIn extends UiController implements FillIn
 		}
 
 		response.println("<br />");
+
+		// for on-load focus
+		if ((!readOnly) && (this.focusDecision != null) && (this.focusDecision.decide(context, focus)))
+		{
+			// add the first field id to the focus path
+			context.addFocusId(id + "0");
+		}
 	}
 
 	/**
@@ -311,6 +322,16 @@ public class UiFillIn extends UiController implements FillIn
 		this.incorrectIcon = incorrectIcon;
 		this.incorrectMessage = incorrectMessage;
 		this.correctDecision = decision;
+		return this;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public FillIn setFocus(Decision decision)
+	{
+		this.focusDecision = decision;
+
 		return this;
 	}
 

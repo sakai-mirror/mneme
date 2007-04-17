@@ -49,6 +49,15 @@ public interface FillIn extends Controller
 			String incorrectMessage, Decision... decision);
 
 	/**
+	 * Set a decision to enable on-load cursor focus on this field.
+	 * 
+	 * @param decision
+	 *        The decision.
+	 * @return self.
+	 */
+	FillIn setFocus(Decision decision);
+
+	/**
 	 * Set an alert that will triger once on submit if the field is empty.
 	 * 
 	 * @param decision

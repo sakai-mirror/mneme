@@ -35,6 +35,9 @@ import org.sakaiproject.util.Validator;
  */
 public class UiTextEdit extends UiController implements TextEdit
 {
+	/** The decision that controls if the field should get on-load focus. */
+	protected Decision focusDecision = null;
+
 	/** The number of columns per row for the box. */
 	protected int numCols = 50;
 
@@ -119,7 +122,7 @@ public class UiTextEdit extends UiController implements TextEdit
 			// title
 			if (this.titleMessage != null)
 			{
-				response.println("<p class=\"ambrosiaTextEdit sludgeTextEditSingle\">");
+				response.println("<p class=\"ambrosiaTextEdit ambrosiaTextEditSingle\">");
 				response.println("<label for=\"" + id + "\">");
 				response.println(Validator.escapeHtml(this.titleMessage.getMessage(context, focus)));
 				response.println("</label>");
@@ -145,7 +148,7 @@ public class UiTextEdit extends UiController implements TextEdit
 
 			if (this.titleMessage != null)
 			{
-				response.println("<div class=\"ambrosiaTextEdit sludgeTextEditMultiple\">");
+				response.println("<div class=\"ambrosiaTextEdit ambrosiaTextEditMultiple\">");
 				response.println("<label class=\"block\" for=\"" + id + "\">");
 				response.println(Validator.escapeHtml(this.titleMessage.getMessage(context, focus)));
 				response.println("</label>");
@@ -175,6 +178,23 @@ public class UiTextEdit extends UiController implements TextEdit
 					+ "			document.getElementById('alert_" + id + "').style.display = \"\";\n" + "			rv=false;\n" + "		}\n"
 					+ "	}\n");
 		}
+		
+		// for on-load focus
+		if ((!readOnly) && (this.focusDecision != null) && (this.focusDecision.decide(context, focus)))
+		{
+			// add the field name / id to the focus path
+			context.addFocusId(id);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public TextEdit setFocus(Decision decision)
+	{
+		this.focusDecision = decision;
+
+		return this;
 	}
 
 	/**

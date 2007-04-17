@@ -27,6 +27,15 @@ package org.muse.ambrosia.api;
 public interface TextEdit extends Controller
 {
 	/**
+	 * Set a decision to enable on-load cursor focus on this field.
+	 * 
+	 * @param decision
+	 *        The decision.
+	 * @return self.
+	 */
+	TextEdit setFocus(Decision decision);
+
+	/**
 	 * Set an alert that will triger once on submit if the field is empty.
 	 * 
 	 * @param decision

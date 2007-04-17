@@ -22,13 +22,12 @@
 package org.muse.ambrosia.impl;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Controller;
 import org.muse.ambrosia.api.Interface;
-import org.muse.ambrosia.api.MenuBar;
 import org.muse.ambrosia.api.Message;
-import org.muse.ambrosia.api.NavigationBar;
 import org.muse.ambrosia.api.PropertyReference;
 import org.sakaiproject.util.Validator;
 
@@ -173,6 +172,20 @@ public class UiInterface extends UiContainer implements Interface
 		if (script != null)
 		{
 			response.println(script);
+		}
+
+		// and any focus path ids
+		List<String> focusIds = context.getFocusIds();
+		if ((focusIds != null) && (!focusIds.isEmpty()))
+		{
+			StringBuffer buf = new StringBuffer();
+			for (String id : focusIds)
+			{
+				buf.append("\"" + id + "\",");
+			}
+			buf.setLength(buf.length()-1);
+
+			response.println("focus_path = [" + buf.toString() + "];");
 		}
 
 		response.println("</script>");
