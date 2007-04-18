@@ -39,6 +39,9 @@ public class UiCountdownTimer extends UiController implements CountdownTimer
 	/** The tool destination for this navigation. */
 	protected Destination destination = null;
 
+	/** The disabled decision array. */
+	protected Decision[] disabledDecision = null;
+
 	/** Duration in ms of the entire timer. */
 	protected PropertyReference duration = null;
 
@@ -53,6 +56,9 @@ public class UiCountdownTimer extends UiController implements CountdownTimer
 
 	/** The message selector for the show button text. */
 	protected Message showMessage = null;
+
+	/** The tight setting. */
+	protected boolean tight = false;
 
 	/** Time in ms from now till expire. */
 	protected PropertyReference tillExpire = null;
@@ -135,14 +141,16 @@ public class UiCountdownTimer extends UiController implements CountdownTimer
 		}
 
 		// our elements
-		response.println("<table id=\"timer_" + id + "\" cellspacing=\"2px\" cellpadding=\"0\" border=\"0\">");
-		response.println("<tr><td id=\"current_" + id + "\" style=\"text-align:left;font-size: 0.8em;\">00:00:00</td><tr>");
-		response.println("<tr><td><div id=\"holder_" + id + "\" style=\"width:" + this.width
-				+ "px; height:12px; border:solid; border-color:#808080; border-width:thin; background-color:#E0E0E0; font-size:1px;\">");
-		response.println("<div id=\"bar_" + id + "\" style=\"width:" + this.width
-				+ "px; height:12px; background-color:#66CD00; font-size:1px;\"></div>");
+		response.println("<table id=\"timer_" + id + "\" cellspacing=\"" + (this.tight ? "0" : "2px") + "\" cellpadding=\"0\" border=\"0\">");
+		response.println("<tr><td id=\"current_" + id
+				+ "\" style=\"text-align:left;font-size:0.8em;" + (this.tight ? "line-height:0.8em;" : "") + "white-space:nowrap\">00:00:00</td><tr>");
+		response.println("<tr><td style=\"margin:0;padding:0;\"><div id=\"holder_" + id + "\" style=\"width:" + this.width
+				+ "px;height:12px;border:solid;border-color:#808080;border-width:thin;background-color:#E0E0E0;font-size:1px;\">");
+		response
+				.println("<div id=\"bar_" + id + "\" style=\"width:" + this.width + "px;height:12px;background-color:#66CD00;font-size:1px;\"></div>");
 		response.println("</div></td></tr>");
-		response.println("<tr><td id=\"total_" + id + "\" style=\"text-align:right;font-size: 0.8em;\">00:00:00</td></tr></table>");
+		response.println("<tr><td id=\"total_" + id
+				+ "\" style=\"text-align:right;font-size:0.8em;" + (this.tight ? "line-height:0.8em;" : "") + "white-space:nowrap\">00:00:00</td></tr></table>");
 
 		if ((hideText != null) && (showText != null))
 		{
@@ -150,160 +158,167 @@ public class UiCountdownTimer extends UiController implements CountdownTimer
 		}
 
 		// our script
-		response.println("<script language=\"JavaScript\">");
 
 		// date to expire
-		response.println("var target_" + id + " = 0;");
+		context.addScript("var target_" + id + " = 0;\n");
 
 		// date to warn
-		response.println("var warning_" + id + " = 0;");
+		context.addScript("var warning_" + id + " = 0;\n");
 
 		// we warned
-		response.println("var warned_" + id + " = false;");
+		context.addScript("var warned_" + id + " = false;\n");
 
 		// the setTimeout object
-		response.println("var timeout_" + id + " = 0;");
+		context.addScript("var timeout_" + id + " = 0;\n");
 
 		// the fixed width (px) of the display bar
-		response.println("var holderWidth_" + id + " = " + this.width + ";");
+		context.addScript("var holderWidth_" + id + " = " + this.width + ";\n");
 
 		// time till expire
-		response.println("var tillExpire_" + id + " = " + tillExpire + ";");
+		context.addScript("var tillExpire_" + id + " = " + tillExpire + ";\n");
 
 		// total duration of assessment (ms)
-		response.println("var duration_" + id + " = " + duration + ";");
+		context.addScript("var duration_" + id + " = " + duration + ";\n");
 
 		// time from exipre for warning
-		response.println("var warnZone_" + id + " = " + this.warn + ";");
+		context.addScript("var warnZone_" + id + " = " + this.warn + ";\n");
 
 		// text to go with the total display
-		response.println("var durationText_" + id + " = \"" + durationText + "\";");
+		context.addScript("var durationText_" + id + " = \"" + durationText + "\";\n");
 
 		// text to go with the remaining display
-		response.println("var remainingText_" + id + " = \"" + remainingText + "\";");
+		context.addScript("var remainingText_" + id + " = \"" + remainingText + "\";\n");
 
 		// text for hide
-		response.println("var hideText_" + id + " = \"" + hideText + "\";");
+		context.addScript("var hideText_" + id + " = \"" + hideText + "\";\n");
 
 		// text for show
-		response.println("var showText_" + id + " = \"" + showText + "\";");
+		context.addScript("var showText_" + id + " = \"" + showText + "\";\n");
 
-		response.println("function start_" + id + "()");
-		response.println("{");
+		context.addScript("function start_" + id + "()\n");
+		context.addScript("{\n");
 		// time out in 4 minutes
-		response.println("	target_" + id + " = new Date();");
-		response.println("	target_" + id + ".setTime(target_" + id + ".getTime() + tillExpire_" + id + ");");
+		context.addScript("	target_" + id + " = new Date();\n");
+		context.addScript("	target_" + id + ".setTime(target_" + id + ".getTime() + tillExpire_" + id + ");\n");
 
 		// warning when 60 seconds to go
-		response.println("	warning_" + id + " = new Date()");
-		response.println("	warning_" + id + ".setTime(target_" + id + ".getTime() - warnZone_" + id + ");");
+		context.addScript("	warning_" + id + " = new Date()\n");
+		context.addScript("	warning_" + id + ".setTime(target_" + id + ".getTime() - warnZone_" + id + ");\n");
 
-		response.println("	document.getElementById('total_" + id + "').firstChild.nodeValue = durationText_" + id + ";");
+		context.addScript("	document.getElementById('total_" + id + "').firstChild.nodeValue = durationText_" + id + ";\n");
 
-		response.println("	document.getElementById('current_" + id + "').firstChild.nodeValue = remainingText_" + id + " + fmtTime_" + id + "(duration_" + id + ");");
-		response.println("	document.getElementById('bar_" + id + "').style.width = holderWidth_" + id + " + \"px\";");
+		context.addScript("	document.getElementById('current_" + id + "').firstChild.nodeValue = remainingText_" + id + " + fmtTime_" + id
+				+ "(duration_" + id + ");\n");
+		context.addScript("	document.getElementById('bar_" + id + "').style.width = holderWidth_" + id + " + \"px\";\n");
 
 		// if we are disabled, never call update
 		if (!isDisabled(context, focus))
 		{
-			response.println("	update_" + id + "();");
+			context.addScript("	update_" + id + "();\n");
 		}
-		response.println("}");
+		context.addScript("}\n");
 
-		response.println("function end_" + id + "()");
-		response.println("{");
-		response.println("	clearTimeout(timeout_" + id + ");");
-		response.println("	timeout_" + id + " = 0;");
-		response.println("}");
+		context.addScript("function end_" + id + "()\n");
+		context.addScript("{\n");
+		context.addScript("	clearTimeout(timeout_" + id + ");\n");
+		context.addScript("	timeout_" + id + " = 0;\n");
+		context.addScript("}\n");
 
-		response.println("function update_" + id + "()");
-		response.println("{");
-		response.println("	timeout_" + id + " = 0;");
-		response.println("	var now = new Date();");
-		response.println("	if (now >= target_" + id + ")");
-		response.println("	{");
-		response.println("		expire_" + id + "();");
-		response.println("	}");
-		response.println("	else");
-		response.println("	{");
-		response.println("		if (now >= warning_" + id + ")");
-		response.println("		{");
-		response.println("			warn_" + id + "();");
-		response.println("		}");
-		response.println("		format_" + id + "();");
-		response.println("		timeout_" + id + " = setTimeout(\"update_" + id + "()\", 1000);");
-		response.println("	}");
-		response.println("}");
+		context.addScript("function update_" + id + "()\n");
+		context.addScript("{\n");
+		context.addScript("	timeout_" + id + " = 0;\n");
+		context.addScript("	var now = new Date();\n");
+		context.addScript("	if (now >= target_" + id + ")\n");
+		context.addScript("	{\n");
+		context.addScript("		expire_" + id + "();\n");
+		context.addScript("	}\n");
+		context.addScript("	else\n");
+		context.addScript("	{\n");
+		context.addScript("		if (now >= warning_" + id + ")\n");
+		context.addScript("		{\n");
+		context.addScript("			warn_" + id + "();\n");
+		context.addScript("		}\n");
+		context.addScript("		format_" + id + "();\n");
+		context.addScript("		timeout_" + id + " = setTimeout(\"update_" + id + "()\", 1000);\n");
+		context.addScript("	}\n");
+		context.addScript("}\n");
 
-		response.println("function format_" + id + "()");
-		response.println("{");
-		response.println("	var diff = target_" + id + " - new Date();");
-		response.println("	document.getElementById('current_" + id + "').firstChild.nodeValue = remainingText_" + id + " + fmtTime_" + id
-				+ "(target_" + id + " - new Date());");
-		response.println("	var pct = diff / duration_" + id + ";");
-		response.println("	document.getElementById('bar_" + id + "').style.width = (holderWidth_" + id + " * pct) + \"px\";");
-		response.println("}");
+		context.addScript("function format_" + id + "()\n");
+		context.addScript("{\n");
+		context.addScript("	var diff = target_" + id + " - new Date();\n");
+		context.addScript("	document.getElementById('current_" + id + "').firstChild.nodeValue = remainingText_" + id + " + fmtTime_" + id
+				+ "(target_" + id + " - new Date());\n");
+		context.addScript("	var pct = diff / duration_" + id + ";\n");
+		context.addScript("	document.getElementById('bar_" + id + "').style.width = (holderWidth_" + id + " * pct) + \"px\";\n");
+		context.addScript("}\n");
 
-		response.println("function fmtTime_" + id + "(diff)");
-		response.println("{");
-		response.println("	var secs = Math.floor(diff / 1000);");
-		response.println("	var mins = Math.floor(secs / 60);");
-		response.println("	var hours = Math.floor(mins / 60);");
-		response.println("	mins = mins - (hours * 60);");
-		response.println("	secs = secs - (hours * 60 * 60) - (mins * 60);");
-		response.println("	return d2_" + id + "(hours) + \":\" + d2_" + id + "(mins) + \":\" + d2_" + id + "(secs);");
-		response.println("}");
+		context.addScript("function fmtTime_" + id + "(diff)\n");
+		context.addScript("{\n");
+		context.addScript("	var secs = Math.floor(diff / 1000);\n");
+		context.addScript("	var mins = Math.floor(secs / 60);\n");
+		context.addScript("	var hours = Math.floor(mins / 60);\n");
+		context.addScript("	mins = mins - (hours * 60);\n");
+		context.addScript("	secs = secs - (hours * 60 * 60) - (mins * 60);\n");
+		context.addScript("	return d2_" + id + "(hours) + \":\" + d2_" + id + "(mins) + \":\" + d2_" + id + "(secs);\n");
+		context.addScript("}\n");
 
-		response.println("function d2_" + id + "(value)");
-		response.println("{");
-		response.println("	if (value < 10)");
-		response.println("	{");
-		response.println("		return \"0\" + value;");
-		response.println("	}");
-		response.println("	return \"\" + value;");
-		response.println("}");
+		context.addScript("function d2_" + id + "(value)\n");
+		context.addScript("{\n");
+		context.addScript("	if (value < 10)\n");
+		context.addScript("	{\n");
+		context.addScript("		return \"0\" + value;\n");
+		context.addScript("	}\n");
+		context.addScript("	return \"\" + value;\n");
+		context.addScript("}\n");
 
-		response.println("function expire_" + id + "()");
-		response.println("{");
-		response.println("	document.getElementById('holder_" + id + "').style.backgroundColor=\"#ff0000\";");
+		context.addScript("function expire_" + id + "()\n");
+		context.addScript("{\n");
+		context.addScript("	document.getElementById('holder_" + id + "').style.backgroundColor=\"#ff0000\";\n");
 		if (this.destination != null)
 		{
 			// submit the form, encoding the destination (if any) in the "destination_" hidden field
-			response.println("	document." + context.getFormName() + ".destination_.value='"
-					+ (this.destination != null ? this.destination.getDestination(context, focus) : "") + "';");
-			response.println("	document." + context.getFormName() + ".submit();");
+			context.addScript("	document." + context.getFormName() + ".destination_.value='"
+					+ (this.destination != null ? this.destination.getDestination(context, focus) : "") + "';\n");
+			context.addScript("	document." + context.getFormName() + ".submit();\n");
 		}
-		response.println("}");
+		context.addScript("}\n");
 
-		response.println("function warn_" + id + "()");
-		response.println("{");
-		response.println("	if (!warned_" + id + ")");
-		response.println("	{");
-		response.println("		warned_" + id + " = true;");
-		response.println("		document.getElementById('bar_" + id + "').style.backgroundColor=\"#ffff33\";");
-		response.println("	}");
-		response.println("}");
+		context.addScript("function warn_" + id + "()\n");
+		context.addScript("{\n");
+		context.addScript("	if (!warned_" + id + ")\n");
+		context.addScript("	{\n");
+		context.addScript("		warned_" + id + " = true;\n");
+		context.addScript("		document.getElementById('bar_" + id + "').style.backgroundColor=\"#ffff33\";\n");
+		context.addScript("	}\n");
+		context.addScript("}\n");
 
 		if ((hideText != null) && (showText != null))
 		{
-			response.println("function hideShow_" + id + "()");
-			response.println("{");
-			response.println("	if (document.getElementById('timer_" + id + "').style.display == \"none\")");
-			response.println("	{");
-			response.println("		document.getElementById('timer_" + id + "').style.display = \"\";");
-			response.println("		document.getElementById('hideshow_" + id + "').value = hideText_" + id + ";");
-			response.println("	}");
-			response.println("	else");
-			response.println("	{");
-			response.println("		document.getElementById('timer_" + id + "').style.display = \"none\";");
-			response.println("		document.getElementById('hideshow_" + id + "').value = showText_" + id + ";");
-			response.println("	}");
-			response.println("}");
+			context.addScript("function hideShow_" + id + "()\n");
+			context.addScript("{\n");
+			context.addScript("	if (document.getElementById('timer_" + id + "').style.display == \"none\")\n");
+			context.addScript("	{\n");
+			context.addScript("		document.getElementById('timer_" + id + "').style.display = \"\";\n");
+			context.addScript("		document.getElementById('hideshow_" + id + "').value = hideText_" + id + ";\n");
+			context.addScript("	}\n");
+			context.addScript("	else\n");
+			context.addScript("	{\n");
+			context.addScript("		document.getElementById('timer_" + id + "').style.display = \"none\";\n");
+			context.addScript("		document.getElementById('hideshow_" + id + "').value = showText_" + id + ";\n");
+			context.addScript("	}\n");
+			context.addScript("}\n");
 		}
 
-		response.println("start_" + id + "();");
+		context.addScript("start_" + id + "();\n");
+	}
 
-		response.println("</script>");
+	/**
+	 * {@inheritDoc}
+	 */
+	public CountdownTimer setDisabled(Decision... decision)
+	{
+		this.disabledDecision = decision;
+		return this;
 	}
 
 	/**
@@ -372,6 +387,15 @@ public class UiCountdownTimer extends UiController implements CountdownTimer
 	/**
 	 * {@inheritDoc}
 	 */
+	public CountdownTimer setTight()
+	{
+		this.tight = true;
+		return this;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public CountdownTimer setTimeTillExpire(PropertyReference time)
 	{
 		this.tillExpire = time;
@@ -402,18 +426,6 @@ public class UiCountdownTimer extends UiController implements CountdownTimer
 	public CountdownTimer setWidth(int width)
 	{
 		this.width = width;
-		return this;
-	}
-
-	/** The disabled decision array. */
-	protected Decision[] disabledDecision = null;
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public CountdownTimer setDisabled(Decision... decision)
-	{
-		this.disabledDecision = decision;
 		return this;
 	}
 

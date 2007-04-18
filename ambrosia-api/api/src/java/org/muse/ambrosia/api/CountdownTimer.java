@@ -107,6 +107,13 @@ public interface CountdownTimer extends Controller
 	CountdownTimer setShowMessage(String selector, PropertyReference... references);
 
 	/**
+	 * Set the display to be tight spaced for small timers.
+	 * 
+	 * @return self.
+	 */
+	CountdownTimer setTight();
+
+	/**
 	 * Set the property reference for the time from now till the countdown expires.
 	 * 
 	 * @param time
