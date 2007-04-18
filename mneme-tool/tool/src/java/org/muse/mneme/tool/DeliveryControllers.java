@@ -146,6 +146,7 @@ public class DeliveryControllers
 											ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.expiration")))))
 								.add(
 									ui.newCountdownTimer()
+										.setTight()
 										.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.assessment.expiration.time"))
 										.setRemainingMessage("timer-remaining")
 										.setDuration(ui.newPropertyReference().setReference("submission.assessment.expiration.limit"))
@@ -171,6 +172,7 @@ public class DeliveryControllers
 							ui.newEntityListColumn()
 								.add(
 									ui.newCountdownTimer()
+										.setTight()
 										.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 										.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
 										.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
