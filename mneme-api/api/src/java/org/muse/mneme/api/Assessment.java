@@ -117,6 +117,13 @@ public interface Assessment
 	Long getDurationTillDue();
 
 	/**
+	 * Access the expiration information for the assessment.
+	 * 
+	 * @return The expiration information for the assessment.
+	 */
+	Expiration getExpiration();
+
+	/**
 	 * Access the feedback date; the date on which feedback is made available.
 	 * 
 	 * @return The assessment's feedback date, or null there is no feedback date.

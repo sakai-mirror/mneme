@@ -19,50 +19,43 @@
  *
  **********************************************************************************/
 
-package org.muse.mneme.api;
+package org.muse.mneme.impl;
 
+import org.muse.mneme.api.Expiration;
 import org.sakaiproject.time.api.Time;
 
 /**
  * <p>
- * SubmissionExpiration models information about the time a submission expires and can no loger be worked upon.
+ * ExpirationImpl implements Expiration
  * </p>
  */
-public interface SubmissionExpiration
+public class ExpirationImpl implements Expiration
 {
-	/**
-	 * The possible expiration causes.
-	 */
-	enum Cause
+	protected Cause cause;
+
+	protected Long duration;
+
+	protected Long limit;
+
+	protected Time time;
+
+	public Cause getCause()
 	{
-		closedDate, timeLimit
+		return this.cause;
 	}
 
-	/**
-	 * Access the cause of the expiration.
-	 * 
-	 * @return The cause of the expiration.
-	 */
-	Cause getCause();
+	public Long getDuration()
+	{
+		return this.duration;
+	}
 
-	/**
-	 * Access the duration, in ms, till expiration.
-	 * 
-	 * @return The duration, in ms, till expiration.
-	 */
-	Long getDuration();
+	public Long getLimit()
+	{
+		return this.limit;
+	}
 
-	/**
-	 * Access the time limit that is set for this submission.
-	 * 
-	 * @return The time limit that is set for this submission, or null if none.
-	 */
-	Long getLimit();
-
-	/**
-	 * Access the Time that marks the expiration date.
-	 * 
-	 * @return The Time that marks the expiration date, or null if none.
-	 */
-	Time getTime();
+	public Time getTime()
+	{
+		return this.time;
+	}
 }

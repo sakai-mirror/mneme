@@ -30,6 +30,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentQuestion;
 import org.muse.mneme.api.AssessmentSection;
 import org.muse.mneme.api.AssessmentStatus;
+import org.muse.mneme.api.Expiration;
 import org.muse.mneme.api.FeedbackDelivery;
 import org.muse.mneme.api.MultipleSubmissionSelectionPolicy;
 import org.muse.mneme.api.QuestionPresentation;
@@ -1648,5 +1649,48 @@ public class AssessmentImpl implements Assessment
 		// deep copy the sections, preserve the status
 		setSections(other.sections);
 		this.sectionsStatus = other.sectionsStatus;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Expiration getExpiration()
+	{
+		// check the thread cache
+		String key = "assessment_" + getId() + "_expiration";
+		ExpirationImpl rv = (ExpirationImpl) this.service.m_threadLocalManager.get(key);
+		if (rv != null) return rv;
+
+		rv = new ExpirationImpl();
+
+		// see if the assessment has a hard due date (w/ no late submissions accepted) or a retract date
+		Time closedDate = getClosedDate();
+
+		// compute an end time based on the assessment's closed date
+		if (closedDate == null) return null;
+
+		rv.time = closedDate;
+
+		// the closeDate is the end time
+		long endTime = closedDate.getTime();
+
+		// if this closed date is more than 2 hours from now, ignore it and say we have no expiration
+		if (endTime > this.service.m_timeService.newTime().getTime() + (2l * 60l * 60l * 1000l)) return null;
+
+		// set the limit to 2 hours
+		rv.limit = 2l * 60l * 60l * 1000l;
+
+		rv.cause = Expiration.Cause.closedDate;
+
+		// how long from now till endTime?
+		long tillExpires = endTime - this.service.m_timeService.newTime().getTime();
+		if (tillExpires <= 0) tillExpires = 0;
+
+		rv.duration = new Long(tillExpires);
+
+		// thread cache
+		this.service.m_threadLocalManager.set(key, rv);
+
+		return rv;
 	}
 }

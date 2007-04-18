@@ -33,7 +33,7 @@ import org.muse.mneme.api.AssessmentSubmissionStatus;
 import org.muse.mneme.api.FeedbackDelivery;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionAnswer;
-import org.muse.mneme.api.SubmissionExpiration;
+import org.muse.mneme.api.Expiration;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.cover.TimeService;
 import org.sakaiproject.util.StringUtil;
@@ -45,37 +45,6 @@ import org.sakaiproject.util.StringUtil;
  */
 public class SubmissionImpl implements Submission
 {
-	public class MySubmissionExpiration implements SubmissionExpiration
-	{
-		protected Cause cause;
-
-		protected Long duration;
-
-		protected Long limit;
-
-		protected Time time;
-
-		public Cause getCause()
-		{
-			return this.cause;
-		}
-
-		public Long getDuration()
-		{
-			return this.duration;
-		}
-
-		public Long getLimit()
-		{
-			return this.limit;
-		}
-
-		public Time getTime()
-		{
-			return this.time;
-		}
-	}
-
 	/** Each property may be not yet set, already set from persistence, or modified since. */
 	enum PropertyStatus
 	{
@@ -382,14 +351,14 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public SubmissionExpiration getExpiration()
+	public Expiration getExpiration()
 	{
 		// check the thread cache
 		String key = "submission_" + getId() + "_expiration";
-		MySubmissionExpiration rv = (MySubmissionExpiration) this.service.m_threadLocalManager.get(key);
+		ExpirationImpl rv = (ExpirationImpl) this.service.m_threadLocalManager.get(key);
 		if (rv != null) return rv;
 
-		rv = new MySubmissionExpiration();
+		rv = new ExpirationImpl();
 
 		// the end might be from a time limit, or because we are near the closed date
 		long endTime = 0;
@@ -425,12 +394,12 @@ public class SubmissionImpl implements Submission
 			if ((closedDate != null) && (closedDate.getTime() < endTime))
 			{
 				endTime = closedDate.getTime();
-				rv.cause = SubmissionExpiration.Cause.closedDate;
+				rv.cause = Expiration.Cause.closedDate;
 			}
 
 			else
 			{
-				rv.cause = SubmissionExpiration.Cause.timeLimit;
+				rv.cause = Expiration.Cause.timeLimit;
 			}
 		}
 
@@ -449,7 +418,7 @@ public class SubmissionImpl implements Submission
 			// set the limit to 2 hours
 			rv.limit = 2l * 60l * 60l * 1000l;
 
-			rv.cause = SubmissionExpiration.Cause.closedDate;
+			rv.cause = Expiration.Cause.closedDate;
 		}
 
 		// how long from now till endTime?

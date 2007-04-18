@@ -110,7 +110,7 @@ public interface Submission
 	 * 
 	 * @return The expiration information for the submission.
 	 */
-	SubmissionExpiration getExpiration();
+	Expiration getExpiration();
 
 	/**
 	 * Find the first assessment question that has not been marked as complete.
