@@ -3903,6 +3903,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		submission.setStatus(new Integer(0));
 		submission.setIsComplete(Boolean.FALSE);
 		submission.setStartDate(asOf);
+		submission.setSubmittedDate(asOf);
 
 		if (M_log.isDebugEnabled()) M_log.debug("addSubmission: " + submission.getId());
 
@@ -3948,7 +3949,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		// trust only the answer information passed in, and the submission id it points to - get fresh and trusted additional
 		// information
-		Submission submission = idSubmission(answers.get(0).getSubmission().getId());
+		final Submission submission = idSubmission(answers.get(0).getSubmission().getId());
 		Assessment assessment = submission.getAssessment();
 
 		// a submission from the cache to update and re-cache
@@ -4000,7 +4001,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		{
 			public void run()
 			{
-				submitAnswersTx(answers, completSubmission);
+				submitAnswersTx(answers, submission, completSubmission);
 			}
 		}, "submitAnswers:" + submission.getId());
 
@@ -4062,9 +4063,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Transaction code for submitAnswers.
 	 */
-	protected void submitAnswersTx(List<SubmissionAnswer> answers, Boolean completSubmission)
+	protected void submitAnswersTx(List<SubmissionAnswer> answers, Submission submission, Boolean completSubmission)
 	{
 		for (SubmissionAnswer answer : answers)
 		{
@@ -4099,10 +4100,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 							// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
 							+ ((answerId == null) ? "" : ",?") + ")";
 					Object[] fields = new Object[(answerId == null) ? 10 : 11];
-					fields[0] = answer.getSubmission().getId();
+					fields[0] = submission.getId();
 					fields[1] = answer.getQuestion().getId();
 					fields[2] = entry.getQuestionPart().getId();
-					fields[3] = answer.getSubmission().getUserId();
+					fields[3] = submission.getUserId();
 					fields[4] = answer.getSubmittedDate();
 					fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
 					fields[6] = answer.getRationale();
@@ -4181,8 +4182,6 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// clear the unused now we have deleted what we must
 			((SubmissionAnswerImpl) answer).recycle.clear();
 		}
-
-		Submission submission = idSubmission(answers.get(0).getSubmission().getId());
 
 		// if complete, update the STATUS to 1 and the FORGRADE to TRUE... always update the date
 		// Note: for Samigo compat., we need to update the scores in the SAM_ASSESSMENTGRADING_T based on the sums of the item
