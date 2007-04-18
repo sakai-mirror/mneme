@@ -18,6 +18,7 @@
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
 		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
 		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
+		<property name="functionManager"><ref bean="org.sakaiproject.authz.api.FunctionManager"/></property>
 		<!-- for 2.4 only: <property name="gradebookService"><ref bean="org.sakaiproject.service.gradebook.GradebookExternalAssessmentService"/></property> -->
 		<property name="gradebookService"><ref bean="org.sakaiproject.service.gradebook.GradebookService"/></property>
 

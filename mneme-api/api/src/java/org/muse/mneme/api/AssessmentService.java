@@ -53,7 +53,7 @@ public interface AssessmentService
 	static final String SUBMISSION_TYPE = "submission";
 
 	/** Event tracking event for adding a test. */
-	static final String TEST_ADD = "mneme.publish";
+	static final String TEST_ADD = "mneme.manage";
 
 	/** Event tracking event for adding a submission. */
 	static final String SUBMISSION_ADD = "mneme.submit";
@@ -77,10 +77,13 @@ public interface AssessmentService
 	static final String SUBMISSION_REVIEW = "mneme.review";
 
 	/** The security function used to check if users can submit to an assessment. */
-	static final String SUBMIT_PERMISSION = "assessment.takeAssessment";
+	static final String SUBMIT_PERMISSION = "mneme.submit";
 
 	/** The security function used to check if users can manage tests. */
-	static final String MANAGE_PERMISSION = "assessment.createAssessment";
+	static final String MANAGE_PERMISSION = "mneme.manage";
+
+	/** The security function used to check if users can grade tests. */
+	static final String GRADE_PERMISSION = "mneme.grade";
 
 	/*************************************************************************************************************************************************
 	 * Assessment Access

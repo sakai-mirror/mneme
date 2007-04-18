@@ -50,6 +50,7 @@ import org.muse.mneme.api.QuestionType;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionAnswer;
 import org.muse.mneme.api.SubmissionCompletedException;
+import org.sakaiproject.authz.api.FunctionManager;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.db.api.SqlReader;
@@ -180,6 +181,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/** Dependency: TimeService */
 	protected TimeService m_timeService = null;
 
+	/** Dependency: FunctionManager */
+	protected FunctionManager m_functionManager = null;
+
 	/**
 	 * Dependency: AttachmentService.
 	 * 
@@ -211,6 +215,17 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	public void setEventTrackingService(EventTrackingService service)
 	{
 		m_eventTrackingService = service;
+	}
+
+	/**
+	 * Dependency: FunctionManager.
+	 * 
+	 * @param service
+	 *        The FunctionManager.
+	 */
+	public void setFunctionManager(FunctionManager service)
+	{
+		m_functionManager = service;
 	}
 
 	/**
@@ -388,6 +403,11 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						getSubmissionReference(""), ":");
 				// m_memoryService.newHardCache(m_cacheCleanerSeconds, getSubmissionReference(""));
 			}
+
+			// register functions
+			m_functionManager.registerFunction(SUBMIT_PERMISSION);
+			m_functionManager.registerFunction(MANAGE_PERMISSION);
+			m_functionManager.registerFunction(GRADE_PERMISSION);
 
 			// start the checking thread
 			if (m_timeoutCheckMs > 0)
@@ -2280,8 +2300,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					break;
 				}
 
-				// status ascending, i.e. boring to important, is backed by date boring (later) to important (sooner), i.e. date desc
-				// status is always read ascending, reversed when we sort it later
+					// status ascending, i.e. boring to important, is backed by date boring (later) to important (sooner), i.e. date desc
+					// status is always read ascending, reversed when we sort it later
 				case status_a:
 				case status_d:
 				{
