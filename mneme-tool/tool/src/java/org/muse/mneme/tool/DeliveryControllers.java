@@ -136,14 +136,17 @@ public class DeliveryControllers
 								.add(
 									ui.newText()
 										.setText(null, ui.newDatePropertyReference().setTwoLine().setReference("submission.assessment.dueDate").setMissingText("dash"))
-										.setIncluded(ui.newOrDecision().setOptions(
-											ui.newCompareDecision()
-												.setEqualsConstant(
-													AssessmentSubmissionStatus.ready.toString(),
-													AssessmentSubmissionStatus.inProgress.toString(),
-													AssessmentSubmissionStatus.inProgressAlert.toString())
-												.setProperty(ui.newPropertyReference().setReference("submission.assessmentSubmissionStatus")).setReversed(),
-											ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.expiration")))))
+										.setIncluded(ui.newAndDecision().setRequirements(ui.newAndDecision().setRequirements(
+											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.expiration")),
+											ui.newOrDecision().setOptions(
+												ui.newCompareDecision().setEqualsConstant(AssessmentSubmissionStatus.ready.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessmentSubmissionStatus")),
+												ui.newAndDecision().setRequirements(
+													ui.newCompareDecision()
+														.setEqualsConstant(
+															AssessmentSubmissionStatus.inProgress.toString(),
+															AssessmentSubmissionStatus.inProgressAlert.toString())
+														.setProperty(ui.newPropertyReference().setReference("submission.assessmentSubmissionStatus")),
+													ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit")))))).setReversed()))
 								.add(
 									ui.newCountdownTimer()
 										.setTight()
@@ -151,15 +154,19 @@ public class DeliveryControllers
 										.setRemainingMessage("timer-remaining")
 										.setDuration(ui.newPropertyReference().setReference("submission.assessment.expiration.limit"))
 										.setTimeTillExpire(ui.newPropertyReference().setReference("submission.assessment.expiration.duration"))
+										.setExpireDestination(ui.newDestination().setDestination("/list"))
 										.setWidth(100)
-										.setIncluded(
-											ui.newCompareDecision()
-												.setEqualsConstant(
-													AssessmentSubmissionStatus.ready.toString(),
-													AssessmentSubmissionStatus.inProgress.toString(),
-													AssessmentSubmissionStatus.inProgressAlert.toString())
-												.setProperty(ui.newPropertyReference().setReference("submission.assessmentSubmissionStatus")),
-											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.expiration"))))
+										.setIncluded(ui.newAndDecision().setRequirements(
+											ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("submission.assessment.expiration")),
+											ui.newOrDecision().setOptions(
+												ui.newCompareDecision().setEqualsConstant(AssessmentSubmissionStatus.ready.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessmentSubmissionStatus")),
+												ui.newAndDecision().setRequirements(
+													ui.newCompareDecision()
+														.setEqualsConstant(
+															AssessmentSubmissionStatus.inProgress.toString(),
+															AssessmentSubmissionStatus.inProgressAlert.toString())
+														.setProperty(ui.newPropertyReference().setReference("submission.assessmentSubmissionStatus")),
+													ui.newHasValueDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.timeLimit")))))))
 								.setTitle("list-header-due")
 								.setSorting(
 									ui.newCompareDecision().setEqualsConstant("2").setProperty(ui.newPropertyReference().setReference("sort_column")),
@@ -176,6 +183,7 @@ public class DeliveryControllers
 										.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 										.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
 										.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
+										.setExpireDestination(ui.newDestination().setDestination("/list"))
 										.setWidth(100)
 										.setIncluded(
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayContinue")),
@@ -312,6 +320,7 @@ public class DeliveryControllers
 					ui.newSection()
 						.add(
 							ui.newCountdownTimer()
+								.setSubmit()
 								.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("assessment.timeLimit"))
 								.setRemainingMessage("timer-remaining")
 								.setDuration(ui.newPropertyReference().setReference("assessment.timeLimit"))
@@ -326,10 +335,14 @@ public class DeliveryControllers
 					ui.newSection()
 						.add(
 							ui.newCountdownTimer()
+								.setExpireDestination(ui.newDestination().setDestination("/list"))
 								.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("assessment.expiration.time"))
 								.setRemainingMessage("timer-remaining")
 								.setDuration(ui.newPropertyReference().setReference("assessment.expiration.limit"))
 								.setTimeTillExpire(ui.newPropertyReference().setReference("assessment.expiration.duration")))
+						.add(
+							ui.newInstructions()
+								.setText("near-due-instructions", ui.newIconPropertyReference().setIcon("/icons/future.gif")))
 						.setIncluded(
 							ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("assessment.expiration")),
 							ui.newCompareDecision().setEqualsConstant(Expiration.Cause.closedDate.toString()).setProperty(ui.newPropertyReference().setReference("assessment.expiration.cause"))))
@@ -380,6 +393,7 @@ public class DeliveryControllers
 				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newCountdownTimer()
+						.setSubmit()
 						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -391,6 +405,7 @@ public class DeliveryControllers
 							ui.newCompareDecision().setEqualsConstant(Expiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newCountdownTimer()
+						.setSubmit()
 						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -511,6 +526,7 @@ public class DeliveryControllers
 				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newCountdownTimer()
+						.setSubmit()
 						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -522,6 +538,7 @@ public class DeliveryControllers
 							ui.newCompareDecision().setEqualsConstant(Expiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newCountdownTimer()
+						.setSubmit()
 						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -673,6 +690,7 @@ public class DeliveryControllers
 				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newCountdownTimer()
+						.setSubmit()
 						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -685,6 +703,7 @@ public class DeliveryControllers
 							ui.newCompareDecision().setEqualsConstant(Expiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newCountdownTimer()
+						.setSubmit()
 						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -1313,6 +1332,7 @@ public class DeliveryControllers
 				.add(ui.newAlias().setTo("nav"))
 				.add(
 					ui.newCountdownTimer()
+						.setSubmit()
 						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -1325,6 +1345,7 @@ public class DeliveryControllers
 							ui.newCompareDecision().setEqualsConstant(Expiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newCountdownTimer()
+						.setSubmit()
 						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -1508,6 +1529,7 @@ public class DeliveryControllers
 				.add(ui.newCourier().setDestination(ui.newDestination().setDestination("/courier")).setFrequency(60))
 				.add(
 					ui.newCountdownTimer()
+						.setSubmit()
 						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
@@ -1520,6 +1542,7 @@ public class DeliveryControllers
 							ui.newCompareDecision().setEqualsConstant(Expiration.Cause.timeLimit.toString()).setProperty(ui.newPropertyReference().setReference("submission.expiration.cause"))))
 				.add(
 					ui.newCountdownTimer()
+						.setSubmit()
 						.setDurationMessage("timer-due", ui.newDatePropertyReference().setReference("submission.expiration.time"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
