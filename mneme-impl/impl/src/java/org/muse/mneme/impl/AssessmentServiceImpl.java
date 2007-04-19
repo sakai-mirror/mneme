@@ -2590,7 +2590,36 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			official.add(submission);
 		}
 
-		// id the selected submissions
+		// if sorting by due date, fix it so null due dates are LARGE not SMALL
+		if (sort == GetUserContextSubmissionsSort.dueDate_a || sort == GetUserContextSubmissionsSort.dueDate_d
+				|| sort == GetUserContextSubmissionsSort.status_a || sort == GetUserContextSubmissionsSort.status_d)
+		{
+			// pull out the null date entries
+			List<Submission> nulls = new ArrayList<Submission>();
+			for (Iterator i = official.iterator(); i.hasNext();)
+			{
+				Submission s = (Submission) i.next();
+				if (s.getAssessment().getDueDate() == null)
+				{
+					nulls.add(s);
+					i.remove();
+				}
+			}
+
+			// for ascending, treat the null dates as LARGE so put them at the end
+			if (sort == GetUserContextSubmissionsSort.dueDate_a)
+			{
+				official.addAll(nulls);
+			}
+
+			// for descending, (all status is first sorted date descending) treat the null dates as LARGE so put them at the beginning
+			else
+			{
+				nulls.addAll(official);
+				official.clear();
+				official.addAll(nulls);
+			}
+		}
 
 		// if sorting by status, do that sort
 		if (sort == GetUserContextSubmissionsSort.status_a || sort == GetUserContextSubmissionsSort.status_d)
