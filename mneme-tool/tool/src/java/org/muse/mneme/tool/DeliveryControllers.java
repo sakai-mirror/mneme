@@ -1118,14 +1118,14 @@ public class DeliveryControllers
 				.add(
 					ui.newNavigationBar()
 						.setWidth("70em")
-						.add(
-							ui.newNavigation()
-								.setTitle("prev")
-								.setAccessKey("prev-access")
-								.setDescription("review-prev-description")
-								.setIcon("/icons/prev.gif",Navigation.IconStyle.left)
-								.setStyle(Navigation.Style.button)
-								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true"))))
+//						.add(
+//							ui.newNavigation()
+//								.setTitle("prev")
+//								.setAccessKey("prev-access")
+//								.setDescription("review-prev-description")
+//								.setIcon("/icons/prev.gif",Navigation.IconStyle.left)
+//								.setStyle(Navigation.Style.button)
+//								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true"))))
 						.add(
 								ui.newNavigation()
 								.setTitle("return")
@@ -1134,14 +1134,14 @@ public class DeliveryControllers
 								.setIcon("/icons/return.png",Navigation.IconStyle.left)
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/list")))
-						.add(
-							ui.newNavigation()
-								.setTitle("next")
-								.setAccessKey("next-access")
-								.setDescription("review-next-description")
-								.setIcon("/icons/next.gif",Navigation.IconStyle.right)
-								.setStyle(Navigation.Style.button)
-								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true"))))
+//						.add(
+//							ui.newNavigation()
+//								.setTitle("next")
+//								.setAccessKey("next-access")
+//								.setDescription("review-next-description")
+//								.setIcon("/icons/next.gif",Navigation.IconStyle.right)
+//								.setStyle(Navigation.Style.button)
+//								.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true"))))
 						.setIncluded(
 							ui.newDecision()
 								.setProperty(
