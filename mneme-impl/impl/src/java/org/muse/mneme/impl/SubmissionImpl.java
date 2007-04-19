@@ -473,9 +473,10 @@ public class SubmissionImpl implements Submission
 		Assessment a = getAssessment();
 
 		// for each section / question, make sure we have an answer and not a mark for review
+		// only consider questions that are selected to be part of the test for this submision!
 		for (AssessmentSection section : a.getSections())
 		{
-			for (AssessmentQuestion question : section.getQuestionsAsAuthored())
+			for (AssessmentQuestion question : section.getQuestions())
 			{
 				// we may be asked to skip checking this question
 				if ((questionsToSkip != null) && (questionsToSkip.contains(question))) continue;
@@ -483,7 +484,7 @@ public class SubmissionImpl implements Submission
 				SubmissionAnswerImpl answer = this.findAnswer(question.getId());
 				if (answer == null) return Boolean.FALSE;
 				if (answer.getSubmittedDate() == null) return Boolean.FALSE;
-				if (!answer.getIsAnswered()) return Boolean.FALSE;
+				if ((answer.getIsAnswered() == null) || (!answer.getIsAnswered().booleanValue())) return Boolean.FALSE;
 				if ((answer.getMarkedForReview() != null && (answer.getMarkedForReview().booleanValue()))) return Boolean.FALSE;
 				// if ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue())
 				// && (StringUtil.trimToNull(answer.getRationale()) == null)) return Boolean.FALSE;
