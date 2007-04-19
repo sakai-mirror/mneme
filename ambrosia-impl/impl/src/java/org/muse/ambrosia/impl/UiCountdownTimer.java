@@ -57,6 +57,9 @@ public class UiCountdownTimer extends UiController implements CountdownTimer
 	/** The message selector for the show button text. */
 	protected Message showMessage = null;
 
+	/** If we should submit to our destination or not. */
+	protected boolean submit = false;
+
 	/** The tight setting. */
 	protected boolean tight = false;
 
@@ -142,15 +145,15 @@ public class UiCountdownTimer extends UiController implements CountdownTimer
 
 		// our elements
 		response.println("<table id=\"timer_" + id + "\" cellspacing=\"" + (this.tight ? "0" : "2px") + "\" cellpadding=\"0\" border=\"0\">");
-		response.println("<tr><td id=\"current_" + id
-				+ "\" style=\"text-align:left;font-size:0.8em;" + (this.tight ? "line-height:0.8em;" : "") + "white-space:nowrap\">00:00:00</td><tr>");
+		response.println("<tr><td id=\"current_" + id + "\" style=\"text-align:left;font-size:0.8em;" + (this.tight ? "line-height:0.8em;" : "")
+				+ "white-space:nowrap\">00:00:00</td><tr>");
 		response.println("<tr><td style=\"margin:0;padding:0;\"><div id=\"holder_" + id + "\" style=\"width:" + this.width
 				+ "px;height:12px;border:solid;border-color:#808080;border-width:thin;background-color:#E0E0E0;font-size:1px;\">");
 		response
 				.println("<div id=\"bar_" + id + "\" style=\"width:" + this.width + "px;height:12px;background-color:#66CD00;font-size:1px;\"></div>");
 		response.println("</div></td></tr>");
-		response.println("<tr><td id=\"total_" + id
-				+ "\" style=\"text-align:right;font-size:0.8em;" + (this.tight ? "line-height:0.8em;" : "") + "white-space:nowrap\">00:00:00</td></tr></table>");
+		response.println("<tr><td id=\"total_" + id + "\" style=\"text-align:right;font-size:0.8em;" + (this.tight ? "line-height:0.8em;" : "")
+				+ "white-space:nowrap\">00:00:00</td></tr></table>");
 
 		if ((hideText != null) && (showText != null))
 		{
@@ -276,10 +279,19 @@ public class UiCountdownTimer extends UiController implements CountdownTimer
 		context.addScript("	document.getElementById('holder_" + id + "').style.backgroundColor=\"#ff0000\";\n");
 		if (this.destination != null)
 		{
-			// submit the form, encoding the destination (if any) in the "destination_" hidden field
-			context.addScript("	document." + context.getFormName() + ".destination_.value='"
-					+ (this.destination != null ? this.destination.getDestination(context, focus) : "") + "';\n");
-			context.addScript("	document." + context.getFormName() + ".submit();\n");
+			if (this.submit)
+			{
+				// submit the form, encoding the destination (if any) in the "destination_" hidden field
+				context.addScript("	document." + context.getFormName() + ".destination_.value='"
+						+ (this.destination != null ? this.destination.getDestination(context, focus) : "") + "';\n");
+				context.addScript("	document." + context.getFormName() + ".submit();\n");
+			}
+
+			else
+			{
+				context.addScript("	document.location=\"" + context.get("sakai.return.url")
+						+ (this.destination != null ? this.destination.getDestination(context, focus) : "") + "\";\n");
+			}
 		}
 		context.addScript("}\n");
 
@@ -381,6 +393,15 @@ public class UiCountdownTimer extends UiController implements CountdownTimer
 	public CountdownTimer setShowMessage(String selector, PropertyReference... references)
 	{
 		this.showMessage = new UiMessage().setMessage(selector, references);
+		return this;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public CountdownTimer setSubmit()
+	{
+		this.submit = true;
 		return this;
 	}
 

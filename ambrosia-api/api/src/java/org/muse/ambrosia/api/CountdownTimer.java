@@ -107,6 +107,13 @@ public interface CountdownTimer extends Controller
 	CountdownTimer setShowMessage(String selector, PropertyReference... references);
 
 	/**
+	 * Indicate that the timer needs to submit the form when it fires.
+	 * 
+	 * @return self.
+	 */
+	CountdownTimer setSubmit();
+
+	/**
 	 * Set the display to be tight spaced for small timers.
 	 * 
 	 * @return self.
