@@ -41,6 +41,9 @@ public class UiInterface extends UiContainer implements Interface
 	/** The message selector and properties for the header. */
 	protected Message header = null;
 
+	/** If we want to disable browser auto-complete. */
+	protected boolean noAutoComplete = false;
+
 	/** The message selector and properties for the title. */
 	protected Message title = null;
 
@@ -123,7 +126,7 @@ public class UiInterface extends UiContainer implements Interface
 		String href = (String) context.get("sakai.destination.url");
 		response.println("<div class=\"ambrosiaInterface\">");
 		response.println("<form name=\"" + name + "\" method=\"post\" action=\"" + href
-				+ "\" enctype=\"multipart/form-data\" onsubmit=\"return validate();\">");
+				+ "\" enctype=\"multipart/form-data\" onsubmit=\"return validate();\" " + (this.noAutoComplete ? "autocomplete=\"off\" " : "") + ">");
 
 		// put in a hidden field that can be set with a tool destination (for use when submitting the form without a normal submit
 		// button
@@ -183,7 +186,7 @@ public class UiInterface extends UiContainer implements Interface
 			{
 				buf.append("\"" + id + "\",");
 			}
-			buf.setLength(buf.length()-1);
+			buf.setLength(buf.length() - 1);
 
 			response.println("focus_path = [" + buf.toString() + "];");
 		}
@@ -193,8 +196,9 @@ public class UiInterface extends UiContainer implements Interface
 		// the blocker for disabling the screen after a navigation
 		// Note: set to 0, can set to like 0.1 for a visual effect, perhaps with a color of #BBBBBB for a very slight visual effect
 		// -ggolden
-//		response
-//				.println("<div id=\"blocker\" style=\"width:100%; height:100%; position:absolute; left:0px; top:0px; background-color:#000000; opacity:0; display:none;\"></div>");
+		// response
+		// .println("<div id=\"blocker\" style=\"width:100%; height:100%; position:absolute; left:0px; top:0px; background-color:#000000; opacity:0;
+		// display:none;\"></div>");
 
 		if (!fragment)
 		{
@@ -208,6 +212,15 @@ public class UiInterface extends UiContainer implements Interface
 	public Interface setHeader(String selector, PropertyReference... references)
 	{
 		this.header = new UiMessage().setMessage(selector, references);
+		return this;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Interface setNoAutoComplete()
+	{
+		this.noAutoComplete = true;
 		return this;
 	}
 

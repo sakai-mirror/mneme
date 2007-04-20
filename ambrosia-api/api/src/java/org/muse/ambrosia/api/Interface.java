@@ -35,8 +35,16 @@ public interface Interface extends Container
 	 *        The message selector.
 	 * @param references
 	 *        one or more (or an array) of UiPropertyReferences to form the additional values in the formatted message.
+	 * @return self.
 	 */
 	Interface setHeader(String selector, PropertyReference... references);
+
+	/**
+	 * Set to disable browser auto-complete for the interface.
+	 * 
+	 * @return self.
+	 */
+	Interface setNoAutoComplete();
 
 	/**
 	 * Set the user interface title message.
@@ -45,6 +53,7 @@ public interface Interface extends Container
 	 *        The message selector.
 	 * @param references
 	 *        one or more (or an array) of UiPropertyReferences to form the additional values in the formatted message.
+	 * @return self.
 	 */
 	Interface setTitle(String selector, PropertyReference... references);
 }
