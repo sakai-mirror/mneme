@@ -477,5 +477,5 @@ Special class for text that is to stand out
 	color: #006400;
 	font-weight: 900;
 	background: #E4E4E4;
-	border: 1px solid #bbb;
+	padding: 2px;
 }
