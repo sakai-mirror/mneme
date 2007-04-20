@@ -676,6 +676,7 @@ public class DeliveryControllers
 	{
 		return
 			ui.newInterface()
+				.setNoAutoComplete()
 				.setTitle(
 					"question-title",
 					ui.newTextPropertyReference().setReference("actionTitle"),
