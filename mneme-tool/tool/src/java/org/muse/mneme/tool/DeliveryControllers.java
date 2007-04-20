@@ -202,7 +202,8 @@ public class DeliveryControllers
 								.setProperty(
 									"list-format-tries",
 									ui.newPropertyReference().setReference("submission.siblingCount"),
-									ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed").setMissingText("infinite"))
+									ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed").setMissingText("infinite"),
+									ui.newPropertyReference().setReference("submission.assessment").setFormatDelegate(new FormatMssPolicy()))
 								.setTitle("list-header-tries"))
 						.addColumn(
 							ui.newPropertyColumn()
@@ -214,9 +215,11 @@ public class DeliveryControllers
 								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash"))
 						.addColumn(
 							ui.newPropertyColumn()
-								.setProperty("list-format-score", ui.newPropertyReference().setReference("submission.totalScore").setFormatDelegate(new FormatListScore()))
-								.setTitle("list-header-score")
-								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash")
+								.setProperty("list-format-grade",
+									ui.newPropertyReference().setReference("submission").setFormatDelegate(new FormatListGrade()),
+									ui.newPropertyReference().setReference("submission.assessment.totalPoints").setFormatDelegate(new FormatListWorth()))
+								.setTitle("list-header-grade")
+								.setNoWrap()
 								.addNavigation(
 									ui.newNavigation()
 										.setTitle("list-nav-review")
@@ -239,14 +242,9 @@ public class DeliveryControllers
 										.setStyle(Navigation.Style.link)
 										.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
 										.setIncluded(
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")),
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
-											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater")))))
-						.addColumn(
-							ui.newPropertyColumn()
-								.setProperty("list-worth-fmt",
-									ui.newPropertyReference().setReference("submission.assessment.totalPoints").setFormatDelegate(new FormatListWorth()),
-									ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy").setFormatDelegate(new FormatMssPolicy()))
-								.setTitle("list-worth")))
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater"))))))
 				.add(
 					ui.newSection()
 						.add(
@@ -269,7 +267,7 @@ public class DeliveryControllers
 				.setHeader("enter-header", ui.newTextPropertyReference().setReference("assessment.title"))
 				.add(
 					ui.newSection()
-						.setTitle("instructions-test-title",
+						.setTitle("enter-test-title",
 							ui.newIconPropertyReference().setIcon("/icons/test.png"),
 							ui.newPropertyReference().setReference("assessment.title"),
 							ui.newPropertyReference().setReference("assessment.totalPoints"))
@@ -722,10 +720,10 @@ public class DeliveryControllers
 							ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.isGraded"))))
 				.add(
 					ui.newSection()
-						.setTitle("instructions-test-title",
+						.setTitle("question-test-title",
 							ui.newIconPropertyReference().setIcon("/icons/test.png"),
 							ui.newPropertyReference().setReference("submission.assessment.title"),
-							ui.newTextPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore()))
+							ui.newHtmlPropertyReference().setReference("submission").setFormatDelegate(new SubmissionScore()))
 //						.add(
 //							ui.newDistributionChart()
 //								.setData(ui.newPropertyReference().setReference("submission.assessment.scores"))
@@ -1879,12 +1877,11 @@ public class DeliveryControllers
 					}
 				}
 
-				rv.append(formatScore(score));
-				rv.append(" / ");
+				rv.append(context.getMessages().getString("score") + ": " + formatScore(score));
 			}
 
 			// add the total possible points for the section
-			rv.append(formatScore(section.getTotalPoints()));
+			rv.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> " + formatScore(section.getTotalPoints()) + ")");
 
 			return rv.toString();
 		}
@@ -1918,13 +1915,11 @@ public class DeliveryControllers
 			{
 				// the total score
 				Float score = submission.getTotalScore();
-
-				rv.append(formatScore(score));
-				rv.append(" / ");
+				rv.append(context.getMessages().getString("grade") + ": " + formatScore(score));
 			}
 
 			// add the total possible points for the assessment
-			rv.append(formatScore(assessment.getTotalPoints()));
+			rv.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> " + formatScore(assessment.getTotalPoints()) + ")");
 
 			return rv.toString();
 		}
@@ -1977,13 +1972,12 @@ public class DeliveryControllers
 						}
 					}
 
-					rv.append(formatScore(score));
-					rv.append(" / ");
+					rv.append(context.getMessages().getString("score") + ": " + formatScore(score));
 				}
 			}
 
 			// add the possible points for the question
-			rv.append(formatScore(question.getPoints()));
+			rv.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> " + formatScore(question.getPoints()) + ")");
 
 			return rv.toString();
 		}
@@ -2185,7 +2179,7 @@ public class DeliveryControllers
 	}
 
 	/**
-	 * Focus is the assessment MultipleSubmissionSelectionPolicy - format as an icon for the list view.
+	 * Focus is the assessment - format as an icon showing MultipleSubmissionSelectionPolicy for the list view (only if > 1 tries allowed.
 	 */
 	public static class FormatMssPolicy implements FormatDelegate
 	{
@@ -2195,24 +2189,33 @@ public class DeliveryControllers
 		public String format(Context context, Object value)
 		{
 			if (value == null) return null;
-			if (!(value instanceof MultipleSubmissionSelectionPolicy)) return null;
+			if (!(value instanceof Assessment)) return null;
+			Assessment assessment = (Assessment) value;
 
-			String iconName = null;
-			String altKey = null;
-			
-			if (((MultipleSubmissionSelectionPolicy) value) == MultipleSubmissionSelectionPolicy.USE_LATEST)
+			if ((assessment.getNumSubmissionsAllowed() == null) || (assessment.getNumSubmissionsAllowed().intValue() > 1))
 			{
-				iconName = "latest.png";
-				altKey = "use-latest";
+				String iconName = null;
+				String altKey = null;
+				
+				if (assessment.getMultipleSubmissionSelectionPolicy() == MultipleSubmissionSelectionPolicy.USE_LATEST)
+				{
+					iconName = "latest.png";
+					altKey = "use-latest";
+				}
+				else
+				{
+					iconName = "highest.png";
+					altKey = "use-highest";
+				}
+	
+				return " <img style=\"position:relative;top:-8px\" src=\"" + context.get("sakai.return.url") + "/icons/" + iconName + "\" alt=\"" + context.getMessages().getString(altKey)
+						+ "\" />";
 			}
+
 			else
 			{
-				iconName = "highest.png";
-				altKey = "use-highest";
+				return "";
 			}
-
-			return "<img src=\"" + context.get("sakai.return.url") + "/icons/" + iconName + "\" alt=\"" + context.getMessages().getString(altKey)
-					+ "\" />";
 		}
 	}
 
@@ -2290,25 +2293,31 @@ public class DeliveryControllers
 	}
 
 	/**
-	 * From a value which is a the total score (Float), 'format' this into a message if not yet graded, or let the score show through
+	 * From a value (a Submission), format for the grade column in list view: use the score, "ungraded", or dash if not complete.
 	 */
-	public static class FormatListScore implements FormatDelegate
+	public static class FormatListGrade implements FormatDelegate
 	{
 		/**
 		 * {@inheritDoc}
 		 */
 		public String format(Context context, Object value)
-		{	
-			Object o = context.get("submission");
-			if (!(o instanceof Submission)) return value.toString();
-			Submission submission = (Submission) o;
+		{
+			if (!(value instanceof Submission)) return context.getMessages().getString("dash");
+			Submission submission = (Submission) value;
 
-			if (submission.getIsGraded().booleanValue())
+			if (submission.getIsComplete().booleanValue())
 			{
-				return "<span class=\"ambrosiaSpecialText\">" + formatScore((Float) value) + "</span><br />" + context.getMessages().getString("list-earned");
+				if (submission.getIsGraded().booleanValue())
+				{
+					return formatScore(submission.getTotalScore());
+				}
+				else
+				{
+					return context.getMessages().getString("list-not-graded");
+				}
 			}
 
-			return context.getMessages().getString("list-not-graded");
+			return context.getMessages().getString("dash");
 		}
 	}
 
