@@ -1079,7 +1079,9 @@ public class DeliveryControllers
 												ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.markedForReview")))))
 								.add(
 									ui.newText()
-										.setText("question-answer-key", ui.newHtmlPropertyReference().setReference("answer.question.answerKey"))
+										.setText("question-answer-key",
+												ui.newIconPropertyReference().setIcon("/icons/answer_key.png"),
+												ui.newHtmlPropertyReference().setReference("answer.question.answerKey"))
 										.setIncluded(
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
@@ -1095,14 +1097,18 @@ public class DeliveryControllers
 												.setProperty(ui.newPropertyReference().setReference("answer.question.type"))))
 								.add(
 									ui.newText()
-										.setText("question-feedback", ui.newHtmlPropertyReference().setReference("answer.questionFeedback"))
+										.setText("question-feedback",
+												ui.newIconPropertyReference().setIcon("/icons/feedback.png"),
+												ui.newHtmlPropertyReference().setReference("answer.questionFeedback"))
 										.setIncluded(
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackShowQuestionFeedback"))))
 								.add(
 									ui.newText()
-										.setText("question-model-answer", ui.newHtmlPropertyReference().setReference("answer.question.part.answer.text"))
+										.setText("question-model-answer",
+												ui.newIconPropertyReference().setIcon("/icons/model_answer.png"),
+												ui.newHtmlPropertyReference().setReference("answer.question.part.answer.text"))
 										.setIncluded(
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")),
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("answer.question.section.assessment.feedbackNow")),
