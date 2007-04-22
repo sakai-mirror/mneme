@@ -105,6 +105,7 @@ public class DeliveryControllers
 								.setProperty(null, ui.newHtmlPropertyReference().setFormatDelegate(new FormatListDecoration()))
 								.setTitle("list-status-title")
 								.setWidthEm(10)
+								.setNoWrap()
 								.setSorting(
 									ui.newCompareDecision().setEqualsConstant("1").setProperty(ui.newPropertyReference().setReference("sort_column")),
 									ui.newCompareDecision().setEqualsConstant("A").setProperty(ui.newPropertyReference().setReference("sort_direction")))
@@ -202,8 +203,7 @@ public class DeliveryControllers
 								.setProperty(
 									"list-format-tries",
 									ui.newPropertyReference().setReference("submission.siblingCount"),
-									ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed").setMissingText("infinite"),
-									ui.newPropertyReference().setReference("submission.assessment").setFormatDelegate(new FormatMssPolicy()))
+									ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed").setMissingText("infinite"))
 								.setTitle("list-header-tries"))
 						.addColumn(
 							ui.newPropertyColumn()
@@ -216,8 +216,7 @@ public class DeliveryControllers
 						.addColumn(
 							ui.newPropertyColumn()
 								.setProperty("list-format-grade",
-									ui.newPropertyReference().setReference("submission").setFormatDelegate(new FormatListGrade()),
-									ui.newPropertyReference().setReference("submission.assessment.totalPoints").setFormatDelegate(new FormatListWorth()))
+									ui.newPropertyReference().setReference("submission").setFormatDelegate(new FormatListGrade()))
 								.setTitle("list-header-grade")
 								.setNoWrap()
 								.addNavigation(
@@ -244,7 +243,14 @@ public class DeliveryControllers
 										.setIncluded(
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")),
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
-											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater"))))))
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater")))))
+						.addColumn(
+							ui.newPropertyColumn()
+								.setProperty("list-format-worth",
+									ui.newPropertyReference().setReference("submission.assessment.totalPoints").setFormatDelegate(new FormatListWorth()),
+									ui.newPropertyReference().setReference("submission.assessment").setFormatDelegate(new FormatMssPolicy()))
+								.setTitle("list-header-worth")
+								.setNoWrap()))
 				.add(
 					ui.newSection()
 						.add(
@@ -2209,8 +2215,9 @@ public class DeliveryControllers
 					altKey = "use-highest";
 				}
 	
-				return " <img style=\"position:relative;top:-8px\" src=\"" + context.get("sakai.return.url") + "/icons/" + iconName + "\" alt=\"" + context.getMessages().getString(altKey)
-						+ "\" />";
+//				return " <img style=\"position:relative;top:-8px\" src=\"" + context.get("sakai.return.url") + "/icons/" + iconName + "\" alt=\"" + context.getMessages().getString(altKey)
+//						+ "\" />";
+				return " <img src=\"" + context.get("sakai.return.url") + "/icons/" + iconName + "\" alt=\"" + context.getMessages().getString(altKey) + "\" />";
 			}
 
 			else
