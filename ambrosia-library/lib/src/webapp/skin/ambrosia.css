@@ -28,7 +28,7 @@ TODO: padding or margin works
 */
 .ambrosiaInterface
 {
-	padding: 1px 1px 1px 1px;
+	padding: 2px 2px 2px 2px;
 }
 
 /*
@@ -86,7 +86,7 @@ Header text at the top of a section that has been highlighted (Section.header)
 	line-height: 2em;
 	margin-top: 1em;
 	/*margin-left: -4em;*/
-	padding-left: 2em;
+	padding-left: 4px;
 	margin-bottom: 1em;
 	/*margin-right: -2em;*/
 	color: #555;
@@ -270,6 +270,10 @@ EntityList
 Sakai ~ listHier lines nolines
 */
 .ambrosiaEntityList
+{
+	margin-bottom: 1em;
+}
+.ambrosiaEntityListTable
 {
 	font-size: 1em;
 	clear: both;
@@ -459,6 +463,7 @@ Sakai ~ shorttext longtext
 */
 .ambrosiaTextEdit
 {
+	margin-bottom: 1em;
 }
 
 .ambrosiaTextEditSingle
@@ -467,6 +472,23 @@ Sakai ~ shorttext longtext
 
 .ambrosiaTextEditMultiple
 {
+}
+
+/*
+FillIn
+*/
+.ambrosiaFillIn
+{
+	margin-bottom: 1em;
+}
+
+/*
+FileUpload
+*/
+.ambrosiaFileUpload
+{
+	margin-top: 1em;
+	margin-bottom: 1em;
 }
 
 /*

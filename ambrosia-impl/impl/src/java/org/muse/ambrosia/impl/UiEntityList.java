@@ -158,8 +158,10 @@ public class UiEntityList extends UiController implements EntityList
 			response.println("<div class =\"ambrosiaInstructions\">" + Validator.escapeHtml(this.emptyTitle.getMessage(context, focus)) + "</div>");
 		}
 
+		response.println("<div class=\"ambrosiaEntityList\">");
+
 		// start the table
-		response.println("<table class=\"ambrosiaEntityList "
+		response.println("<table class=\"ambrosiaEntityListTable "
 				+ ((this.style == Style.flat) ? "ambrosiaEntityListFlat" : "ambrosiaEntityListForm") + "\" cellpadding=\"0\" cellspacing=\"0\" >");
 
 		// columns headers
@@ -434,6 +436,8 @@ public class UiEntityList extends UiController implements EntityList
 						+ Validator.escapeHtml(f.getText().getMessage(context, focus)) + "</div>");
 			}
 		}
+
+		response.println("</div>");
 	}
 
 	/**

@@ -100,6 +100,8 @@ public class UiFileUpload extends UiController implements FileUpload
 
 		PrintWriter response = context.getResponseWriter();
 
+		response.println("<div class=\"ambrosiaFileUpload\">");
+
 		if (onEmptyAlert)
 		{
 			// this will become visible if a submit happens and the validation fails
@@ -153,6 +155,7 @@ public class UiFileUpload extends UiController implements FileUpload
 						+ "	}\n");
 			}
 
+			response.println("</div>");
 		}
 	}
 

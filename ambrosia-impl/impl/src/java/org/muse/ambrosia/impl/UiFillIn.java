@@ -203,6 +203,8 @@ public class UiFillIn extends UiController implements FillIn
 		// count the boxes
 		int boxCount = 0;
 
+		response.print("<div class=\"ambrosiaFillIn\">");
+
 		// put out the text and inputs
 		if ((fillInParts != null) && (fillInParts.length > 0))
 		{
@@ -300,7 +302,7 @@ public class UiFillIn extends UiController implements FillIn
 					+ "			rv=false;\n" + "		}\n" + "	}\n");
 		}
 
-		response.println("<br />");
+		response.println("</div>");
 
 		// for on-load focus
 		if ((!readOnly) && (this.focusDecision != null) && (this.focusDecision.decide(context, focus)))

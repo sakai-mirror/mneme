@@ -122,7 +122,7 @@ public class UiTextEdit extends UiController implements TextEdit
 			// title
 			if (this.titleMessage != null)
 			{
-				response.println("<p class=\"ambrosiaTextEdit ambrosiaTextEditSingle\">");
+				response.println("<div class=\"ambrosiaTextEdit ambrosiaTextEditSingle\">");
 				response.println("<label for=\"" + id + "\">");
 				response.println(Validator.escapeHtml(this.titleMessage.getMessage(context, focus)));
 				response.println("</label>");
@@ -130,7 +130,7 @@ public class UiTextEdit extends UiController implements TextEdit
 
 			response.println("<input type=\"text\" id=\"" + id + "\" name=\"" + id + "\" size=\"" + Integer.toString(numCols) + "\" value=\""
 					+ Validator.escapeHtml(value) + "\"" + (readOnly ? " disabled=\"disabled\"" : "") + " />");
-			response.println("</p>");
+			response.println("</div>");
 		}
 
 		// or multi line

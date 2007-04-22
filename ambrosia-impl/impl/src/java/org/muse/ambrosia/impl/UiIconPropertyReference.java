@@ -38,7 +38,7 @@ public class UiIconPropertyReference extends UiPropertyReference implements Icon
 	public String read(Context context, Object focus)
 	{
 		// alt=\"" + Validator.escapeHtml(name) + "\"
-		return "<img src=\"" + context.get("sakai.return.url") + name + "\" />";
+		return "<img style=\"vertical-align:middle\" src=\"" + context.get("sakai.return.url") + name + "\" />";
 	}
 
 	/**
