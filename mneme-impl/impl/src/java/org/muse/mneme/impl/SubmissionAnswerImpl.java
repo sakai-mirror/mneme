@@ -273,12 +273,12 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		if ((type == QuestionType.essay) || (type == QuestionType.fillIn) || (type == QuestionType.numeric)
 				|| (type == QuestionType.fileUpload))
 		{
-			if (this.entries.size() == 0) return false;
+			if (this.entries.size() == 0) return Boolean.FALSE;
 			for (SubmissionAnswerEntryImpl entry : this.entries)
 			{
 				if ((entry.answerText != null) && (entry.answerText.length() > 0))
 				{
-					return true;
+					return Boolean.TRUE;
 				}
 			}
 		}
@@ -286,12 +286,12 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		// matching, t/f, survey, multi choice and multi correct need at least one entry with a question answer id
 		else
 		{
-			if (this.entries.size() == 0) return false;
+			if (this.entries.size() == 0) return Boolean.FALSE;
 			for (SubmissionAnswerEntryImpl entry : this.entries)
 			{
 				if ((entry.answerId != null) && (entry.answerId.length() > 0))
 				{
-					return true;
+					return Boolean.TRUE;
 				}
 			}
 		}
