@@ -1207,13 +1207,22 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// collect the questions (actually their answers) to put on the page
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
 
-		Errors err = questionSetup(submissionId, questionSelector, context, answers, true);
-
+		Errors err = questionSetup(submission, questionSelector, context, answers, true);
 		if (err != null)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + err + "/" + submissionId)));
 			return;
+		}
+
+		// check that the answers are all unchanged
+		if (submission.getIsAnswersChanged().booleanValue())
+		{
+			M_log.warn("quesitonGet: submission has modified answers: " + submissionId);
+
+//			// redirect to error
+//			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+//			return;
 		}
 
 		// render
@@ -1250,14 +1259,33 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// collect the questions (actually their answers) to put on the page
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
 
+		// get the submission
+		Submission submission = assessmentService.idSubmission(submissionId);
+		if (submission == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
 		// setup receiving context
-		Errors err = questionSetup(submissionId, questionSelector, context, answers, false);
+		Errors err = questionSetup(submission, questionSelector, context, answers, false);
 		if (Errors.invalid == err) err = Errors.invalidpost;
 		if (err != null)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + err)));
 			return;
+		}
+
+		// check that the answers are all unchanged
+		if (submission.getIsAnswersChanged().booleanValue())
+		{
+			M_log.warn("quesitonPost: submission has modified answers: " + submissionId);
+
+//			// redirect to error
+//			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+//			return;
 		}
 
 		// read form
@@ -1311,8 +1339,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	/**
 	 * Setup the context for question get and post
 	 * 
-	 * @param submisssionId
-	 *        The selected submission id.
+	 * @param submisssion
+	 *        The selected submission.
 	 * @param questionSelector
 	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections worth, and a
 	 *        picks them all.
@@ -1324,20 +1352,13 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Output writer.
 	 * @return null if all went well, else an Errors to indicate what went wrong.
 	 */
-	protected Errors questionSetup(String submissionId, String questionSelector, Context context, List<SubmissionAnswer> answers, boolean linearCheck)
+	protected Errors questionSetup(Submission submission, String questionSelector, Context context, List<SubmissionAnswer> answers, boolean linearCheck)
 	{
 		// not in review mode
 		context.put("review", Boolean.FALSE);
 
 		// put in the selector
 		context.put("questionSelector", questionSelector);
-
-		// get the submission
-		Submission submission = assessmentService.idSubmission(submissionId);
-		if (submission == null)
-		{
-			return Errors.invalid;
-		}
 
 		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
 		{

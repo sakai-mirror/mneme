@@ -497,6 +497,23 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsAnswersChanged()
+	{
+		if (answersStatus == PropertyStatus.unset) return Boolean.FALSE;
+		for (SubmissionAnswer answer : this.answers)
+		{
+			if (answer.getIsChanged().booleanValue())
+			{
+				return Boolean.TRUE;
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsComplete()
 	{
 		// read the basic info if this property has not yet been set

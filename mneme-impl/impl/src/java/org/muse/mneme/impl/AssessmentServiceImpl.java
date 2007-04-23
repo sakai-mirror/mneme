@@ -1471,9 +1471,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					{
 						answer = new SubmissionAnswerImpl();
 						answer.initQuestionId(questionId);
-						answer.setRationale(rationale);
-						answer.setMarkedForReview(Boolean.valueOf(markedForReview));
-						answer.setSubmittedDate(submittedDate);
+						answer.initRationale(rationale);
+						answer.initMarkedForReview(Boolean.valueOf(markedForReview));
+						answer.initSubmittedDate(submittedDate);
 						answer.initEvalComments(StringUtil.trimToNull(comments));
 						answer.id = id;
 
@@ -3995,26 +3995,50 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public void submitAnswer(SubmissionAnswer answer, Boolean completeAnswer, Boolean completSubmission) throws AssessmentPermissionException,
+	public void submitAnswer(SubmissionAnswer answer, Boolean completeAnswer, Boolean completeSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException
 	{
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>(1);
 		answers.add(answer);
-		submitAnswers(answers, completeAnswer, completSubmission);
+		submitAnswers(answers, completeAnswer, completeSubmission);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void submitAnswers(final List<SubmissionAnswer> answers, Boolean completeAnswers, final Boolean completSubmission)
+	public void submitAnswers(final List<SubmissionAnswer> answers, Boolean completeAnswers, Boolean completeSubmission)
 			throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException
 	{
+		// treat null booleans as false
+		if (completeAnswers == null) completeAnswers = Boolean.FALSE;
+		if (completeSubmission == null) completeSubmission = Boolean.FALSE;
+
 		if ((answers == null) || (answers.size() == 0)) return;
 
-		// TODO: one transaction, or separate ones?
+		// unless we are going to complete the submission, if there has been no change in the answers, do nothing...
+		// unless the answers are to be marked complete and they don't all have a submitted date
+		if (!completeSubmission.booleanValue())
+		{
+			boolean anyChange = false;
+			for (SubmissionAnswer answer : answers)
+			{
+				if (answer.getIsChanged().booleanValue())
+				{
+					anyChange = true;
+					break;
+				}
+				
+				if (completeAnswers.booleanValue() && (answer.getSubmittedDate() == null))
+				{
+					anyChange = true;
+					break;
+				}					
+			}
 
-		// trust only the answer information passed in, and the submission id it points to - get fresh and trusted additional
-		// information
+			if (!anyChange) return;
+		}
+
+		// trust only the answer information passed in, and the submission id it points to - get fresh and trusted additional information
 		final Submission submission = idSubmission(answers.get(0).getSubmission().getId());
 		Assessment assessment = submission.getAssessment();
 
@@ -4030,7 +4054,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		Time asOf = m_timeService.newTime();
 
 		if (M_log.isDebugEnabled())
-			M_log.debug("submitAnswer: submission: " + submission.getId() + " complete?: " + Boolean.toString(completSubmission) + " asOf: " + asOf);
+			M_log.debug("submitAnswer: submission: " + submission.getId() + " complete?: " + Boolean.toString(completeSubmission) + " asOf: " + asOf);
 
 		// check that the current user is the submission user
 		if (!submission.getUserId().equals(m_sessionManager.getCurrentSessionUserId()))
@@ -4047,14 +4071,17 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// Note: we accept answers up to GRACE ms after any hard deadlilne
 		if (!isAssessmentOpen(assessment, asOf, GRACE)) throw new AssessmentClosedException();
 
-		// update the submission parameter for the caller
+		// update the dates and answer scores
 		submission.setSubmittedDate(asOf);
 		for (SubmissionAnswer answer : answers)
 		{
-			// mark a submitted date only if the answer is complete
-			if ((completeAnswers != null) && (completeAnswers.booleanValue()))
+			// mark a submitted date only if the new answers are complete (and the answer has otherwise been changed OR the answer is incomplete)
+			if (completeAnswers.booleanValue())
 			{
-				answer.setSubmittedDate(asOf);
+				if (answer.getIsChanged().booleanValue() || (answer.getSubmittedDate() == null))
+				{
+					answer.setSubmittedDate(asOf);
+				}
 			}
 
 			// auto-score
@@ -4063,16 +4090,17 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		// run our save code in a transaction that will restart on deadlock
 		// if deadlock retry fails, or any other error occurs, a runtime error will be thrown
+		final Boolean completeSubmissionFinal = completeSubmission;
 		m_sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
-				submitAnswersTx(answers, submission, completSubmission);
+				submitAnswersTx(answers, submission, completeSubmissionFinal);
 			}
 		}, "submitAnswers:" + submission.getId());
 
 		// if complete and the assessment is integrated into the Gradebook, record the grade
-		if ((completSubmission != null) && completSubmission.booleanValue())
+		if (completeSubmission.booleanValue())
 		{
 			recordInGradebook(submission, true);
 		}
@@ -4083,17 +4111,20 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// event track it (one for each answer)
 		for (SubmissionAnswer answer : answers)
 		{
-			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_ANSWER, getSubmissionReference(submission.getId()) + ":"
-					+ answer.getQuestion().getId(), true));
+			if (answer.getIsChanged())
+			{
+				m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_ANSWER, getSubmissionReference(submission.getId()) + ":"
+						+ answer.getQuestion().getId(), true));
+			}
 		}
 
 		// track if we are complete
-		if ((completSubmission != null) && completSubmission.booleanValue())
+		if (completeSubmission.booleanValue())
 		{
 			m_eventTrackingService.post(m_eventTrackingService.newEvent(SUBMISSION_COMPLETE, getSubmissionReference(submission.getId()), true));
 		}
 
-		// the submission is altered by this - clear the cache (or update)
+		// the submission is altered by this - clear the cache
 		unCacheSubmission(submission.getId());
 
 		// recache (this object that used to be in the cache is no longer in the cache, so we are the only owner)
@@ -4104,20 +4135,27 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			{
 				for (SubmissionAnswer answer : answers)
 				{
-					// This new answer for it's question id should replace an existing on in the submission, or, be added to the
-					// answers
-					SubmissionAnswerImpl old = recache.findAnswer(answer.getQuestion().getId());
-					if (old != null)
+					if (answer.getIsChanged().booleanValue())
 					{
-						recache.answers.remove(old);
+						// This new answer for it's question id should replace an existing on in the submission, or, be added to the answers
+						SubmissionAnswerImpl old = recache.findAnswer(answer.getQuestion().getId());
+						if (old != null)
+						{
+							recache.answers.remove(old);
+						}
+						
+						// update the cache with a copy of the answer, with the change flag cleared
+						SubmissionAnswerImpl newAnswer = new SubmissionAnswerImpl((SubmissionAnswerImpl) answer);
+						newAnswer.changed = Boolean.FALSE;
+
+						recache.answers.add(newAnswer);
 					}
-					recache.answers.add((SubmissionAnswerImpl) answer);
 				}
 			}
 
 			recache.initSubmittedDate(asOf);
 
-			if ((completSubmission != null) && (completSubmission.booleanValue()))
+			if (completeSubmission.booleanValue())
 			{
 				recache.initStatus(new Integer(1));
 				recache.initIsComplete(Boolean.TRUE);
@@ -4125,6 +4163,12 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 			// cache the object
 			cacheSubmission(recache);
+		}
+		
+		// return properly updated answers - clear the chanegd flags
+		for (SubmissionAnswer answer : answers)
+		{
+			((SubmissionAnswerImpl) answer).changed = Boolean.FALSE;
 		}
 	}
 
@@ -4135,6 +4179,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	{
 		for (SubmissionAnswer answer : answers)
 		{
+			// if not changed, skip it
+			if (!answer.getIsChanged().booleanValue()) continue;
+
 			// unwrap file upload attachments from multiple entries to just one
 			// TODO: do this when save submission also
 			List<SubmissionAnswerEntryImpl> entries = ((SubmissionAnswerImpl) answer).entries;

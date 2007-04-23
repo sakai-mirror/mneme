@@ -136,6 +136,13 @@ public interface Submission
 	Boolean getIsAnswered(List<AssessmentQuestion> questionsToSkip);
 
 	/**
+	 * Check if any of the answers in the submission have been changed by a setter.
+	 * 
+	 * @return TRUE if any answers have been changed, FALSE if not.
+	 */
+	Boolean getIsAnswersChanged();
+
+	/**
 	 * Access the complete flag for the submission.
 	 * 
 	 * @return TRUE if the submission is complete, FALSE if still in progress.

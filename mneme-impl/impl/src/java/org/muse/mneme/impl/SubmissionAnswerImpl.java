@@ -47,6 +47,9 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(SubmissionAnswerImpl.class);
 
+	/** Set if any property has been changed with a setter. */
+	protected Boolean changed = Boolean.FALSE;
+
 	/** Entries are ordered to match the assessment question part order, and there's one entry per part. */
 	protected List<SubmissionAnswerEntryImpl> entries = new ArrayList<SubmissionAnswerEntryImpl>();
 
@@ -94,6 +97,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		this.id = other.id;
 		this.evalComments = other.evalComments;
 		this.evalScore = other.evalScore;
+		this.changed = other.changed;
 	}
 
 	/**
@@ -270,8 +274,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		QuestionType type = getQuestion().getType();
 
 		// fill in, numeric, essay, upload, needs some text in an entry
-		if ((type == QuestionType.essay) || (type == QuestionType.fillIn) || (type == QuestionType.numeric)
-				|| (type == QuestionType.fileUpload))
+		if ((type == QuestionType.essay) || (type == QuestionType.fillIn) || (type == QuestionType.numeric) || (type == QuestionType.fileUpload))
 		{
 			if (this.entries.size() == 0) return Boolean.FALSE;
 			for (SubmissionAnswerEntryImpl entry : this.entries)
@@ -297,6 +300,14 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		}
 
 		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsChanged()
+	{
+		return this.changed;
 	}
 
 	/**
@@ -412,6 +423,8 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 
 				verifyEntries();
 
+				this.changed = Boolean.TRUE;
+
 				break;
 			}
 		}
@@ -441,32 +454,35 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			// treat an empty string as a missing id
 			String aid = (answerIds == null) ? null : StringUtil.trimToNull(answerIds[i++]);
 
-			// if not null, the answer id must be to our assessment question, and it must be in our question part
-			if (aid != null)
+			// is it different from what we have?
+			if (StringUtil.different(aid, entry.answerId))
 			{
-				if (question.getAnswer(aid) == null)
+				// if not null, the answer id must be to our assessment question, and it must be in our question part
+				if (aid != null)
 				{
-					M_log.warn("setEntryAnswerIds: provided answerId not to our assessment question: answerId: " + aid
-							+ " questionId: " + question.getId());
-					throw new RuntimeException();
+					if (question.getAnswer(aid) == null)
+					{
+						M_log.warn("setEntryAnswerIds: provided answerId not to our assessment question: answerId: " + aid + " questionId: "
+								+ question.getId());
+						throw new RuntimeException();
+					}
+
+					if (!(question.getAnswer(aid).getPart().getId().equals(entry.getQuestionPart().getId())))
+					{
+						M_log.warn("setEntryAnswerIds: provided answerId not to our assessment question part: answerId: " + aid + " partId: "
+								+ entry.getQuestionPart().getId());
+						throw new RuntimeException();
+					}
 				}
 
-				if (!(question.getAnswer(aid).getPart().getId().equals(entry.getQuestionPart().getId())))
-				{
-					M_log.warn("setEntryAnswerIds: provided answerId not to our assessment question part: answerId: " + aid
-							+ " partId: " + entry.getQuestionPart().getId());
-					throw new RuntimeException();
-				}
+				// store the new answer id (clears the auto score)
+				entry.initAssessmentAnswerId(aid);
+
+				// clear any text
+				entry.setAnswerText(null);
+
+				this.changed = Boolean.TRUE;
 			}
-
-			// store the new answer id
-			entry.initAssessmentAnswerId(aid);
-
-			// clear the auto score
-			entry.initAutoScore(null);
-
-			// clear any text
-			entry.setAnswerText(null);
 		}
 
 		// make sure all is well
@@ -485,7 +501,13 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			throw new RuntimeException();
 		}
 
-		this.entries.get(0).setAnswerText(answerText);
+		// is it different from what we have?
+		if (StringUtil.different(answerText, this.entries.get(0).getAnswerText()))
+		{
+			this.entries.get(0).setAnswerText(answerText);
+
+			this.changed = Boolean.TRUE;
+		}
 	}
 
 	/**
@@ -509,11 +531,14 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		{
 			String answerText = (answerTexts == null) ? null : StringUtil.trimToNull(answerTexts[i++]);
 
-			// store the new answer text
-			entry.setAnswerText(answerText);
+			// is it different from what we have?
+			if (StringUtil.different(answerText, entry.getAnswerText()))
+			{
+				// store the new answer text (clears the auto score)
+				entry.setAnswerText(answerText);
 
-			// clear the auto score
-			entry.initAutoScore(null);
+				this.changed = Boolean.TRUE;
+			}
 		}
 	}
 
@@ -522,7 +547,16 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public void setMarkedForReview(Boolean forReview)
 	{
-		this.markedForReview = forReview == null ? Boolean.FALSE : forReview;
+		// treat a null as false
+		if (forReview == null) forReview = Boolean.FALSE;
+
+		// is it different from what we have?
+		if (forReview.booleanValue() != this.markedForReview.booleanValue())
+		{
+			this.markedForReview = forReview;
+
+			this.changed = Boolean.TRUE;
+		}
 	}
 
 	/**
@@ -530,7 +564,13 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public void setRationale(String rationale)
 	{
-		this.rationale = rationale;
+		// is it different from what we have?
+		if (StringUtil.different(rationale, this.rationale))
+		{
+			this.rationale = rationale;
+
+			this.changed = Boolean.TRUE;
+		}
 	}
 
 	/**
@@ -538,7 +578,13 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	 */
 	public void setSubmittedDate(Time submitted)
 	{
-		this.submittedDate = submitted;
+		// is it different from what we have?
+		if (timeDifferent(this.submittedDate, submitted))
+		{
+			this.submittedDate = submitted;
+
+			this.changed = Boolean.TRUE;
+		}
 	}
 
 	/**
@@ -556,14 +602,16 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			// detect no file selected
 			if ((name == null) || (type == null) || (body == null) || (size == 0)) return;
 
+			this.changed = Boolean.TRUE;
+
 			if (this.id == null)
 			{
 				((SubmissionImpl) this.getSubmission()).service.reserveAnswer(this);
 			}
 
 			Attachment a = new AttachmentImpl(null, size, name, null, type, null);
-			String id = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService))
-					.putAttachment(a, body, this.id, getQuestion());
+			String id = ((AttachmentServiceImpl) (((SubmissionImpl) this.getSubmission()).service.m_attachmentService)).putAttachment(a, body,
+					this.id, getQuestion());
 
 			// close the stream!
 			if (body != null) body.close();
@@ -745,6 +793,20 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	}
 
 	/**
+	 * Init the marked for review value.
+	 * 
+	 * @param forReview
+	 *        The marked for review value.
+	 */
+	protected void initMarkedForReview(Boolean forReview)
+	{
+		// treat a null as false
+		if (forReview == null) forReview = Boolean.FALSE;
+
+		this.markedForReview = forReview;
+	}
+
+	/**
 	 * Init the assessment question that this is an answer to, and align the entries to match.
 	 * 
 	 * @param question
@@ -775,6 +837,17 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	}
 
 	/**
+	 * Init the rational value.
+	 * 
+	 * @param rationale
+	 *        The rational value.
+	 */
+	protected void initRationale(String rationale)
+	{
+		this.rationale = rationale;
+	}
+
+	/**
 	 * Deep copy a set of entries into our recycle
 	 * 
 	 * @param entries
@@ -802,6 +875,17 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	protected void initSubmission(SubmissionImpl submission)
 	{
 		this.submission = submission;
+	}
+
+	/**
+	 * Init the submitted date value.
+	 * 
+	 * @param submitted
+	 *        The submitted date value.
+	 */
+	protected void initSubmittedDate(Time submitted)
+	{
+		this.submittedDate = submitted;
 	}
 
 	/**
@@ -844,6 +928,8 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 				this.entries.add(entry);
 
 				excess++;
+
+				this.changed = Boolean.TRUE;
 			}
 
 			// if we have too many send a few to the recycle
@@ -852,8 +938,31 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 				this.recycle.add(this.entries.remove(this.entries.size() - 1));
 
 				excess--;
+
+				this.changed = Boolean.TRUE;
 			}
 		}
+	}
+
+	/**
+	 * Check if these two Times are different - either may be null.
+	 * 
+	 * @param a
+	 *        One Time.
+	 * @param b
+	 *        Another Time.
+	 * @return true if they are different, false if not.
+	 */
+	protected boolean timeDifferent(Time a, Time b)
+	{
+		// if both null, they are the same
+		if ((a == null) && (b == null)) return false;
+
+		// if either are null (they both are not), they are different
+		if ((a == null) || (b == null)) return true;
+
+		// now we know neither are null, so compare
+		return (!a.equals(b));
 	}
 
 	/**
@@ -876,8 +985,8 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			if (this.entries.size() != question.getPart().getAnswersAsAuthored().size())
 			{
 				M_log.warn("verifyEntries: fillin/numeric: num answers: " + question.getPart().getAnswersAsAuthored().size()
-						+ " doesn't match num entries: " + this.entries.size() + " submission: " + this.getSubmission().getId()
-						+ " question: " + question.getId());
+						+ " doesn't match num entries: " + this.entries.size() + " submission: " + this.getSubmission().getId() + " question: "
+						+ question.getId());
 				throw new RuntimeException();
 			}
 			for (int i = 0; i < this.entries.size(); i++)
@@ -887,17 +996,16 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 				AssessmentAnswer answer = question.getPart().getAnswersAsAuthored().get(i);
 				if (!entry.questionPartId.equals(question.getPart().getId()))
 				{
-					M_log.warn("verifyEntries: fillin/numeric: entry / answer part not aligned: entry part: "
-							+ entry.questionPartId + " question single part: " + question.getPart().getId() + " submission: "
-							+ this.getSubmission().getId() + " question: " + question.getId());
+					M_log.warn("verifyEntries: fillin/numeric: entry / answer part not aligned: entry part: " + entry.questionPartId
+							+ " question single part: " + question.getPart().getId() + " submission: " + this.getSubmission().getId() + " question: "
+							+ question.getId());
 					throw new RuntimeException();
 				}
 
 				if (!entry.answerId.equals(answer.getId()))
 				{
-					M_log.warn("verifyEntries: fillin/numeric: entry / answer answer id not aligned: entry answer id: "
-							+ entry.answerId + " answer id: " + answer.getId() + " submission: " + this.getSubmission().getId()
-							+ " question: " + question.getId());
+					M_log.warn("verifyEntries: fillin/numeric: entry / answer answer id not aligned: entry answer id: " + entry.answerId
+							+ " answer id: " + answer.getId() + " submission: " + this.getSubmission().getId() + " question: " + question.getId());
 					throw new RuntimeException();
 				}
 			}
@@ -908,8 +1016,8 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		{
 			if (this.entries.size() != question.getParts().size())
 			{
-				M_log.warn("verifyEntries: matching: num parts: " + question.getParts().size() + " doesn't match num entries: "
-						+ this.entries.size() + " submission: " + this.getSubmission().getId() + " question: " + question.getId());
+				M_log.warn("verifyEntries: matching: num parts: " + question.getParts().size() + " doesn't match num entries: " + this.entries.size()
+						+ " submission: " + this.getSubmission().getId() + " question: " + question.getId());
 				throw new RuntimeException();
 			}
 			for (int i = 0; i < this.entries.size(); i++)
@@ -919,9 +1027,8 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 				QuestionPart part = question.getParts().get(i);
 				if (!entry.questionPartId.equals(part.getId()))
 				{
-					M_log.warn("verifyEntries: matching: entry / question part not aligned: entry part: " + entry.questionPartId
-							+ " question part: " + part.getId() + " submission: " + this.getSubmission().getId() + " question: "
-							+ question.getId());
+					M_log.warn("verifyEntries: matching: entry / question part not aligned: entry part: " + entry.questionPartId + " question part: "
+							+ part.getId() + " submission: " + this.getSubmission().getId() + " question: " + question.getId());
 					throw new RuntimeException();
 				}
 			}
@@ -940,8 +1047,8 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			if ((this.entries.size() > 1)
 					&& ((question.getType() != QuestionType.multipleCorrect) && (question.getType() != QuestionType.fileUpload)))
 			{
-				M_log.warn("verifyEntries: (other): too many entries: " + this.entries.size() + " submission: "
-						+ this.getSubmission().getId() + " question: " + this.getQuestion().getId());
+				M_log.warn("verifyEntries: (other): too many entries: " + this.entries.size() + " submission: " + this.getSubmission().getId()
+						+ " question: " + this.getQuestion().getId());
 				throw new RuntimeException();
 			}
 

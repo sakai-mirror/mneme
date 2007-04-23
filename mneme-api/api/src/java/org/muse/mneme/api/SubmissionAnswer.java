@@ -70,8 +70,8 @@ public interface SubmissionAnswer
 	List<Reference> getEntryAnswerAttachments();
 
 	/**
-	 * Access the assessment question answer ids that are currently in the entries as a List, in entry (question part) order, one
-	 * per entry (per question part).
+	 * Access the assessment question answer ids that are currently in the entries as a List, in entry (question part) order, one per entry (per
+	 * question part).
 	 * 
 	 * @return The assessment question answer ids that are currently in the entries as a List.
 	 */
@@ -85,16 +85,16 @@ public interface SubmissionAnswer
 	String getEntryAnswerText();
 
 	/**
-	 * Access assessment question answer texts that are currently in the entries as a Listy, in entry (question part) order, one per
-	 * entry (per question part).
+	 * Access assessment question answer texts that are currently in the entries as a Listy, in entry (question part) order, one per entry (per
+	 * question part).
 	 * 
 	 * @return The assessment question answer texts that are currently in the entries as a List.
 	 */
 	List<String> getEntryAnswerTexts();
 
 	/**
-	 * Access the correctness of each of the entry - TRUE if correct, FALSE if not, null if not answered, in entry (question part)
-	 * order, one per entry (per question part).
+	 * Access the correctness of each of the entry - TRUE if correct, FALSE if not, null if not answered, in entry (question part) order, one per
+	 * entry (per question part).
 	 * 
 	 * @return The correctness of each of the entry - TRUE if correct, FALSE if not, null if not answered.
 	 */
@@ -115,12 +115,19 @@ public interface SubmissionAnswer
 	Float getEvalScore();
 
 	/**
-	 * Check if the question is answered; if the user has made the answer entries. Answers that have only "mark for review" or a
-	 * rational are not considered answered.
+	 * Check if the question is answered; if the user has made the answer entries. Answers that have only "mark for review" or a rational are not
+	 * considered answered.
 	 * 
 	 * @return TRUE if the question is considered to be answered, FALSE if not.
 	 */
 	Boolean getIsAnswered();
+
+	/**
+	 * Check if this answer has been changed by a setter.
+	 * 
+	 * @return TRUE if changed, FALSE if not.
+	 */
+	Boolean getIsChanged();
 
 	/**
 	 * Access the "mark for review" setting for this answer.
@@ -180,8 +187,8 @@ public interface SubmissionAnswer
 	void removeAnswerText(String answerText);
 
 	/**
-	 * Set these answer ids, ordered by question part, as the new answer ids for our entries. There must be an id for each entry
-	 * (and for each question part) in order.
+	 * Set these answer ids, ordered by question part, as the new answer ids for our entries. There must be an id for each entry (and for each
+	 * question part) in order.
 	 * 
 	 * @param answerIds
 	 *        The ordered set of assessment question answer ids for our entries. If null, all entry ids will be cleared.
@@ -197,8 +204,8 @@ public interface SubmissionAnswer
 	void setEntryAnswerText(String answerText);
 
 	/**
-	 * Set these answer texts, ordered by question part, as the new answer texts for our entries. There must be an text for each
-	 * entry (and for each question part) in order.
+	 * Set these answer texts, ordered by question part, as the new answer texts for our entries. There must be an text for each entry (and for each
+	 * question part) in order.
 	 * 
 	 * @param answerTexts
 	 *        The ordered set of answer texts for our entries. If null, all entry texts will be cleared
