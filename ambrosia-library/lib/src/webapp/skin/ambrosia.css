@@ -483,6 +483,14 @@ FillIn
 }
 
 /*
+Selection
+*/
+.ambrosiaSelection
+{
+	margin-bottom: 1em;
+}
+
+/*
 FileUpload
 */
 .ambrosiaFileUpload

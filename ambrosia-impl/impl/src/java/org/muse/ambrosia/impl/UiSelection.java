@@ -89,8 +89,10 @@ public class UiSelection extends UiController implements Selection
 		// convert to boolean
 		boolean checked = Boolean.parseBoolean(value);
 
+		response.println("<div class=\"ambrosiaSelection\">");
+
 		// the check box
-		response.println("<br /><input type=\"checkbox\" name=\"" + id + "\" id=\"" + id + "\" value=\"" + this.selectedValue
+		response.println("<input type=\"checkbox\" name=\"" + id + "\" id=\"" + id + "\" value=\"" + this.selectedValue
 				+ "\" " + (checked ? "CHECKED" : "") + (readOnly ? " disabled=\"disabled\"" : "") + " />");
 
 		// the decode directive
@@ -109,6 +111,8 @@ public class UiSelection extends UiController implements Selection
 			response.println(this.titleMessage.getMessage(context, focus));
 			response.println("</label>");
 		}
+		
+		response.println("</div>");
 	}
 
 	/**
