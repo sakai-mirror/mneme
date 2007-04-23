@@ -571,7 +571,7 @@ public class SubmissionImpl implements Submission
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
 		if (!this.service.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), service.SUBMIT_PERMISSION, getAssessment()
-				.getContext(), this.service.getAssessmentReference(getAssessment().getId()))) return Boolean.FALSE;
+				.getContext())) return Boolean.FALSE;
 
 		// under limit
 		if ((getAssessment().getNumSubmissionsAllowed() != null)
@@ -602,7 +602,7 @@ public class SubmissionImpl implements Submission
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
 		if (!this.service.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), service.SUBMIT_PERMISSION, getAssessment()
-				.getContext(), this.service.getAssessmentReference(getAssessment().getId()))) return Boolean.FALSE;
+				.getContext())) return Boolean.FALSE;
 
 		return Boolean.TRUE;
 	}
@@ -626,7 +626,7 @@ public class SubmissionImpl implements Submission
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
 		if (!this.service.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), service.SUBMIT_PERMISSION, getAssessment()
-				.getContext(), this.service.getAssessmentReference(getAssessment().getId()))) return Boolean.FALSE;
+				.getContext())) return Boolean.FALSE;
 
 		return Boolean.TRUE;
 	}

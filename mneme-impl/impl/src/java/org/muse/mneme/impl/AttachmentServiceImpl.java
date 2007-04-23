@@ -94,9 +94,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/** A cache of attachments. */
 	protected Cache m_cache = null;
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Dependencies
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/** Dependency: AssessmentService: Note: dependent on the impl... */
 	protected AssessmentServiceImpl m_assessmentService = null;
@@ -222,9 +222,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		m_timeService = service;
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Configuration
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/** The # seconds between cache cleaning runs. */
 	protected int m_cacheCleanerSeconds = 0;
@@ -274,9 +274,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		}
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Init and Destroy
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/**
 	 * Final initialization, once all dependencies are set.
@@ -321,9 +321,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		M_log.info("destroy()");
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * AttachmentService
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/**
 	 * {@inheritDoc}
@@ -360,8 +360,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 
 					String fileSystemPath = StringUtil.trimToNull(result.getString(5));
 
-					return new AttachmentImpl(attachmentRef.getId(), new Long(contentLength), name, timestamp, contentType,
-							fileSystemPath);
+					return new AttachmentImpl(attachmentRef.getId(), new Long(contentLength), name, timestamp, contentType, fileSystemPath);
 				}
 				catch (SQLException e)
 				{
@@ -392,7 +391,8 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public String getAttachmentReference(String container, String id, String name)
 	{
-		String ref = REFERENCE_ROOT + ((container == null) ? "" : ("/" + container + ((id == null) ? "" : ("/" + id + ((name == null) ? "" : ("/" + name))))));
+		String ref = REFERENCE_ROOT
+				+ ((container == null) ? "" : ("/" + container + ((id == null) ? "" : ("/" + id + ((name == null) ? "" : ("/" + name))))));
 		return ref;
 	}
 
@@ -447,9 +447,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		m_eventTrackingService.post(m_eventTrackingService.newEvent(ATTACHMENT_DELETE, attachment.getReference(), true));
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * EntityProducer
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/**
 	 * {@inheritDoc}
@@ -516,29 +516,25 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	{
 		return new HttpAccess()
 		{
-			public void handleAccess(HttpServletRequest req, HttpServletResponse res, Reference ref,
-					Collection copyrightAcceptedRefs) throws EntityPermissionException, EntityNotDefinedException,
-					EntityAccessOverloadException, EntityCopyrightException
+			public void handleAccess(HttpServletRequest req, HttpServletResponse res, Reference ref, Collection copyrightAcceptedRefs)
+					throws EntityPermissionException, EntityNotDefinedException, EntityAccessOverloadException, EntityCopyrightException
 			{
 				// get the submission (the refrence container) for security checks
 				Submission submission = m_assessmentService.idSubmission(ref.getContainer());
 				if (submission == null)
 				{
-					throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), ATTACHMENT_READ, ref
-							.getReference());
+					throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), ATTACHMENT_READ, ref.getReference());
 				}
 
 				// if the user is the submission user, pass security...
 				if (!submission.getUserId().equals(m_sessionManager.getCurrentSessionUserId()))
 				{
 					// user must have review or grading permission
-					// TODO: for now, we use PUBLISH_PERMISSION... refine this
-					if (!m_assessmentService.checkSecurity(m_sessionManager.getCurrentSessionUserId(),
-							AssessmentService.MANAGE_PERMISSION, submission.getAssessment().getContext(), m_assessmentService
-									.getAssessmentReference(submission.getAssessment().getId())))
+					// TODO: for now, we use MANAGE_PERMISSION... refine this
+					if (!m_assessmentService.checkSecurity(m_sessionManager.getCurrentSessionUserId(), AssessmentService.MANAGE_PERMISSION,
+							submission.getAssessment().getContext()))
 					{
-						throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), ATTACHMENT_READ, ref
-								.getReference());
+						throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), ATTACHMENT_READ, ref.getReference());
 					}
 				}
 
@@ -767,9 +763,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		return false;
 	}
 
-	/*******************************************************************************************************************************
+	/*************************************************************************************************************************************************
 	 * Etc.
-	 ******************************************************************************************************************************/
+	 ************************************************************************************************************************************************/
 
 	/**
 	 * Cache this attachment. Use the short-term cache if enable, else use the thread-local cache.
@@ -855,13 +851,13 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		}
 		catch (FileNotFoundException e)
 		{
-			M_log.warn("getAttachmentBodyFilesystem(): file not found for attachment: file path: " + name + " attachment id: "
-					+ attachment.getId() + " " + e.toString());
+			M_log.warn("getAttachmentBodyFilesystem(): file not found for attachment: file path: " + name + " attachment id: " + attachment.getId()
+					+ " " + e.toString());
 		}
 		catch (IOException e)
 		{
-			M_log.warn("getAttachmentBodyFilesystem(): IOException for attachment: file path: " + name + " attachment id: "
-					+ attachment.getId() + " " + e.toString());
+			M_log.warn("getAttachmentBodyFilesystem(): IOException for attachment: file path: " + name + " attachment id: " + attachment.getId()
+					+ " " + e.toString());
 		}
 
 		return new byte[0];
@@ -921,8 +917,8 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		if (this.m_fileSystemRoot != null)
 		{
 			// form a file name: root, assessment id, question id, user id, then something random for the file name
-			a.setFileSystemPath(this.m_fileSystemRoot + question.getSection().getAssessment().getId() + "/" + question.getId()
-					+ "/" + userId + "/" + this.m_timeService.newTime().getTime());
+			a.setFileSystemPath(this.m_fileSystemRoot + question.getSection().getAssessment().getId() + "/" + question.getId() + "/" + userId + "/"
+					+ this.m_timeService.newTime().getTime());
 
 			// write the file
 			putAttachmentFilesystem(a, body);
@@ -930,9 +926,8 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 
 		String statement = "INSERT INTO SAM_MEDIA_T"
 				+ " (FILESIZE, MIMETYPE, FILENAME, CREATEDDATE, LASTMODIFIEDDATE, ISLINK, ISHTMLINLINE, DESCRIPTION, CREATEDBY, LASTMODIFIEDBY, STATUS, ITEMGRADINGID, LOCATION"
-				+ ((id == null) ? "" : " ,MEDIAID") + ((this.m_fileSystemRoot != null) ? "" : " ,MEDIA")
-				+ ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?")
-				+ ((this.m_fileSystemRoot != null) ? "" : ",?") + ")";
+				+ ((id == null) ? "" : " ,MEDIAID") + ((this.m_fileSystemRoot != null) ? "" : " ,MEDIA") + ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?"
+				+ ((id == null) ? "" : ",?") + ((this.m_fileSystemRoot != null) ? "" : ",?") + ")";
 		Object[] fields = new Object[(id == null) ? 13 : 14];
 		fields[0] = a.getLength();
 		fields[1] = a.getType();
@@ -1024,8 +1019,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		}
 		catch (IOException e)
 		{
-			M_log.warn("putAttachmentFilesystem(): IOException: file path: " + a.getFileSystemPath() + " id: " + a.getId() + " "
-					+ e.toString());
+			M_log.warn("putAttachmentFilesystem(): IOException: file path: " + a.getFileSystemPath() + " id: " + a.getId() + " " + e.toString());
 		}
 		finally
 		{
@@ -1037,8 +1031,8 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 				}
 				catch (IOException e)
 				{
-					M_log.warn("putAttachmentFilesystem(): IOException closing output stream: file path: " + a.getFileSystemPath()
-							+ " id: " + a.getId() + " " + e.toString());
+					M_log.warn("putAttachmentFilesystem(): IOException closing output stream: file path: " + a.getFileSystemPath() + " id: "
+							+ a.getId() + " " + e.toString());
 				}
 			}
 		}

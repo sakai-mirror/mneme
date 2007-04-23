@@ -18,5 +18,6 @@
 	<classpathentry kind="var" path="MAVEN_REPO/commons-fileupload/jars/commons-fileupload-1.1.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/gradebook"/>
 	<classpathentry kind="var" path="MAVEN_REPO/concurrent/jars/concurrent-1.3.4.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/site-api"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

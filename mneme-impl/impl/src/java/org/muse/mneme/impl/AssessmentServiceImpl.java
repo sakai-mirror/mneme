@@ -64,6 +64,7 @@ import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.service.gradebook.shared.AssessmentNotFoundException;
 import org.sakaiproject.service.gradebook.shared.GradebookNotFoundException;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
+import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.api.TimeService;
@@ -107,20 +108,24 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 *        The entity reference.
 	 * @return true if the user has permission, false if not.
 	 */
-	protected boolean checkSecurity(String userId, String function, String context, String ref)
+	protected boolean checkSecurity(String userId, String function, String context)
 	{
 		// check for super user
 		if (m_securityService.isSuperUser(userId)) return true;
 
 		// check for the user / function / context-as-site-authz
+		// use the site ref for the security service (used to cache the security calls in the security service)
+		String siteRef = m_siteService.siteReference(context);
 
 		// form the azGroups for a context-as-implemented-by-site (Note the *lack* of direct dependency on Site, i.e. we stole the
 		// code!)
 		Collection azGroups = new Vector(2);
-		azGroups.add("/site/" + context);
+		azGroups.add(siteRef);
 		azGroups.add("!site.helper");
 
-		boolean rv = m_securityService.unlock(userId, function, ref, azGroups);
+		String rev = "/site/" + context;
+
+		boolean rv = m_securityService.unlock(userId, function, siteRef, azGroups);
 		return rv;
 	}
 
@@ -138,9 +143,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 * @throws AssessmentPermissionException
 	 *         if security is not satisfied.
 	 */
-	protected void secure(String userId, String function, String context, String ref) throws AssessmentPermissionException
+	protected void secure(String userId, String function, String context) throws AssessmentPermissionException
 	{
-		if (!checkSecurity(userId, function, context, ref))
+		if (!checkSecurity(userId, function, context))
 		{
 			throw new AssessmentPermissionException(userId, function, context);
 		}
@@ -159,6 +164,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService m_eventTrackingService = null;
 
+	/** Dependency: FunctionManager */
+	protected FunctionManager m_functionManager = null;
+
 	/** Dependency: GradebookExternalAssessmentService */
 	// for 2.4 only: protected GradebookExternalAssessmentService m_gradebookService = null;
 	protected GradebookService m_gradebookService = null;
@@ -172,6 +180,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/** Dependency: SessionManager */
 	protected SessionManager m_sessionManager = null;
 
+	/** Dependency: SiteService */
+	protected SiteService m_siteService = null;
+
 	/** Dependency: SqlService */
 	protected SqlService m_sqlService = null;
 
@@ -180,9 +191,6 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 	/** Dependency: TimeService */
 	protected TimeService m_timeService = null;
-
-	/** Dependency: FunctionManager */
-	protected FunctionManager m_functionManager = null;
 
 	/**
 	 * Dependency: AttachmentService.
@@ -270,6 +278,17 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	public void setSessionManager(SessionManager service)
 	{
 		m_sessionManager = service;
+	}
+
+	/**
+	 * Dependency: SiteService.
+	 * 
+	 * @param service
+	 *        The SiteService.
+	 */
+	public void setSiteService(SiteService service)
+	{
+		m_siteService = service;
 	}
 
 	/**
@@ -2875,7 +2894,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	public Boolean allowAddAssessment(String context)
 	{
 		// check permission - user must have MANAGE_PERMISSION in the context
-		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), MANAGE_PERMISSION, context, getAssessmentReference(""));
+		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), MANAGE_PERMISSION, context);
 
 		return Boolean.valueOf(ok);
 	}
@@ -2886,7 +2905,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	public Boolean allowListDeliveryAssessment(String context)
 	{
 		// check permission - user must have SUBMIT_PERMISSION in the context
-		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, context, getAssessmentReference(""));
+		boolean ok = checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, context);
 
 		return Boolean.valueOf(ok);
 	}
@@ -2899,7 +2918,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (M_log.isDebugEnabled()) M_log.debug("addAssessment: " + assessment.getId());
 
 		// check permission - created by user must have PUBLISH_PERMISSION in the context of the assessment
-		secure(m_sessionManager.getCurrentSessionUserId(), MANAGE_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+		secure(m_sessionManager.getCurrentSessionUserId(), MANAGE_PERMISSION, assessment.getContext());
 
 		// run our save code in a transaction that will restart on deadlock
 		// if deadlock retry fails, or any other error occurs, a runtime error will be thrown
@@ -3666,7 +3685,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		}
 
 		// check permission - submission user must have SUBMIT_PERMISSION in the context of the assessment
-		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext());
 
 		// check that the assessment is currently open for submission
 		if (!isAssessmentOpen(assessment, submission.getSubmittedDate(), 0)) throw new AssessmentClosedException();
@@ -3806,8 +3825,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (assessment != null)
 		{
 			// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-			if (checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, assessment.getContext(),
-					getAssessmentReference(assessment.getId())))
+			if (checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, assessment.getContext()))
 			{
 				// check that the assessment is currently open for submission
 				// if there is an in-progress submission, but it's too late now... this would catch it
@@ -3859,8 +3877,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					if (assessment != null)
 					{
 						// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-						if (checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, assessment.getContext(),
-								getAssessmentReference(assessment.getId())))
+						if (checkSecurity(m_sessionManager.getCurrentSessionUserId(), SUBMIT_PERMISSION, assessment.getContext()))
 						{
 							// check that the assessment is currently open for submission
 							if (isAssessmentOpen(assessment, m_timeService.newTime(), GRACE))
@@ -3922,7 +3939,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		if (M_log.isDebugEnabled()) M_log.debug("enterSubmission: assessment: " + assessment.getId() + " user: " + userId + " asOf: " + asOf);
 
 		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-		secure(userId, SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+		secure(userId, SUBMIT_PERMISSION, assessment.getContext());
 
 		// check that the assessment is currently open for submission
 		if (!isAssessmentOpen(assessment, asOf, 0)) throw new AssessmentClosedException();
@@ -4024,7 +4041,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment (use the assessment as ref, not
 		// submission)
-		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext());
 
 		// check that the assessment is currently open for submission
 		// Note: we accept answers up to GRACE ms after any hard deadlilne
@@ -4457,7 +4474,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment (use the assessment as ref, not
 		// submission)
-		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext(), getAssessmentReference(assessment.getId()));
+		secure(submission.getUserId(), SUBMIT_PERMISSION, assessment.getContext());
 
 		// check that the assessment is currently open for submission
 		if (!isAssessmentOpen(assessment, asOf, GRACE)) throw new AssessmentClosedException();
