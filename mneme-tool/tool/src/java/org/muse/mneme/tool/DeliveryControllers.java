@@ -639,7 +639,11 @@ public class DeliveryControllers
 								.setAccessKey("finish-exam-access")
 								.setDescription("finish-exam-description")
 								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
-								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setConfirm(
+									ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")),
+									"cancel",
+									"/icons/cancel.gif",
+									"finish-confirm")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))
 								.setIncluded(
@@ -1250,7 +1254,11 @@ public class DeliveryControllers
 								.setAccessKey("finish-exam-access")
 								.setDescription("finish-exam-description")
 								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
-								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setConfirm(
+									ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")),
+									"cancel",
+									"/icons/cancel.gif",
+									"finish-confirm")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))
 								.setIncluded(
@@ -1505,7 +1513,11 @@ public class DeliveryControllers
 								.setIcon("/icons/finish.gif",Navigation.IconStyle.left)
 								.setTitle("finish-exam")
 								.setSubmit()
-								.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")))
+								.setConfirm(
+									ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")),
+									"cancel",
+									"/icons/cancel.gif",
+									"finish-confirm")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id"))))
 						.add(
