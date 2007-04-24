@@ -130,6 +130,14 @@ Confirm for Navigation
 	font-weight:bolder;
 	color:#b11;
 }
+.ambrosiaConfirmPanel
+{
+	border-left:medium double black;
+	border-right:medium double black;
+	border-bottom:medium double black;
+	background:#FFFFCC;
+	position:absolute;
+}
 
 /*
 Alert message. (Alert)
@@ -356,7 +364,7 @@ Sakai ~ listHier lines nolines tableAction
 }
 .ambrosiaIconKey td
 {
-	vertical-align:middle
+	vertical-align:middle;
 	padding: .3em;
 }
 
@@ -395,7 +403,7 @@ Sakai ~ navIntraTool
 	margin-right:1em;
 	text-decoration: underline;
 	white-space: nowrap;
-	display:inline-block
+	display: inline-block
 }
 .ambrosiaMenuBar a:visited
 {

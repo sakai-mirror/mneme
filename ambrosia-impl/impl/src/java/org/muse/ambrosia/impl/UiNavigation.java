@@ -39,8 +39,17 @@ public class UiNavigation extends UiController implements Navigation
 	/** Message to form the access key. */
 	protected Message accessKey = null;
 
+	/** The icon for the "cancel" in a confirm. */
+	protected String confirmCancelIcon = null;
+
+	/** The message for the "cancel" in a confirm. */
+	protected Message confirmCancelMsg = null;
+
 	/** Decision to make a two step (confirm) button. */
 	protected Decision confirmDecision = null;
+
+	/** The confirm message. */
+	protected Message confirmMsg = null;
 
 	/** The default decision array. */
 	protected Decision[] defaultDecision = null;
@@ -151,6 +160,10 @@ public class UiNavigation extends UiController implements Navigation
 			StringBuffer script = new StringBuffer();
 
 			script.append("var enabled_" + id + "=" + (confirm ? "false" : "true") + ";\n");
+			script.append("function cancel_" + id + "()\n");
+			script.append("{\n");
+			script.append("    enabled_" + id + "=false;\n");
+			script.append("}\n");
 			script.append("function act_" + id + "()\n");
 			script.append("{\n");
 
@@ -161,7 +174,8 @@ public class UiNavigation extends UiController implements Navigation
 			if (confirm)
 			{
 				script.append("    enabled_" + id + "=true;\n");
-				script.append("    document.getElementById(\"confirm_" + id + "\").style.display=\"\";\n");
+				// script.append(" document.getElementById(\"confirm_" + id + "\").style.display=\"\";\n");
+				script.append("    showConfirm('confirm_" + id + "');\n");
 			}
 			script.append("    return;\n");
 			script.append("  }\n");
@@ -220,7 +234,22 @@ public class UiNavigation extends UiController implements Navigation
 		if (confirm)
 		{
 			// TODO: either change style, or at least localize "confirm"
-			response.print("<span class=\"ambrosiaNavigationConfirm\" id=\"confirm_" + id + "\" style=\"display:none;\">CONFIRM --> </span>");
+			// response.print("<span class=\"ambrosiaNavigationConfirm\" id=\"confirm_" + id + "\" style=\"display:none;\">CONFIRM --> </span>");
+			response.println("<div class=\"ambrosiaConfirmPanel\" style=\"display:none; left:0px; top:0px; width:340px; height:120px\" id=\"confirm_"
+					+ id + "\">");
+			response.println("<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\"><tr>");
+			response.println("<td rowspan=\"2\" style=\"padding:4px\"><img style=\"width:32px; height:32px\" src=\""
+					+ context.get("sakai.return.url") + this.icon + "\" /></td>");
+			response.println("<td colspan=\"2\" style=\"padding:1em; white-space:normal; line-height:1em; \" align=\"left\">" + this.confirmMsg.getMessage(context, focus) + "</td>");
+			response.println("</tr><tr>");
+			response.println("<td style=\"padding:1em\" align=\"left\"><input type=\"button\" value=\""
+					+ this.confirmCancelMsg.getMessage(context, focus) + "\" onclick=\"hideConfirm('confirm_" + id + "','cancel_" + id
+					+ "()');\" style=\"padding-left:2em; background: #eee url('" + context.get("sakai.return.url") + this.confirmCancelIcon
+					+ "') .2em no-repeat;\"/></td>");
+			response.println("<td style=\"padding:1em\" align=\"right\"><input type=\"button\" value=\"" + title
+					+ "\" onclick=\"hideConfirm('confirm_" + id + "','act_" + id + "()');\" style=\"padding-left:2em; background: #eee url('"
+					+ context.get("sakai.return.url") + this.icon + "') .2em no-repeat;\"/></td>");
+			response.println("</tr></table></div>");
 		}
 
 		switch (this.style)
@@ -229,7 +258,8 @@ public class UiNavigation extends UiController implements Navigation
 			{
 				if ((this.icon != null) && (this.iconStyle == IconStyle.left))
 				{
-					response.print("<img style=\"vertical-align:text-bottom; padding-right:0.3em;\" src=\"" + context.get("sakai.return.url") + this.icon + "\" />");
+					response.print("<img style=\"vertical-align:text-bottom; padding-right:0.3em;\" src=\"" + context.get("sakai.return.url")
+							+ this.icon + "\" />");
 				}
 
 				if (!disabled) response.print("<a href=\"#\" onclick=\"act_" + id + "();\">");
@@ -240,7 +270,8 @@ public class UiNavigation extends UiController implements Navigation
 
 				if ((this.icon != null) && (this.iconStyle == IconStyle.right))
 				{
-					response.print("<img style=\"vertical-align:text-bottom; padding-left:0.3em;\" src=\"" + context.get("sakai.return.url") + this.icon + "\" />");
+					response.print("<img style=\"vertical-align:text-bottom; padding-left:0.3em;\" src=\"" + context.get("sakai.return.url")
+							+ this.icon + "\" />");
 				}
 
 				response.println();
@@ -289,9 +320,12 @@ public class UiNavigation extends UiController implements Navigation
 	/**
 	 * {@inheritDoc}
 	 */
-	public Navigation setConfirm(Decision decision)
+	public Navigation setConfirm(Decision decision, String cancelSelector, String cancelIcon, String msgSelector, PropertyReference... references)
 	{
 		this.confirmDecision = decision;
+		this.confirmCancelMsg = new UiMessage().setMessage(cancelSelector);
+		this.confirmCancelIcon = cancelIcon;
+		this.confirmMsg = new UiMessage().setMessage(msgSelector, references);
 		return this;
 	}
 

@@ -19,9 +19,51 @@
  *
  **********************************************************************************/
 
-// functions for Sludge applications
+// functions for Ambrosia applications
 
 function trim(s)
 {
 	return s.replace(/^\s+/g, "").replace(/\s+$/g, "");
+}
+
+function showConfirm(name)
+{
+	el = document.getElementById(name);
+	if (el.style.display == "none")
+	{
+		el.style.left = ((document.body.scrollWidth / 2) - (parseInt(el.style.width) / 2)) + "px";
+		el.style.top = (-1 * (parseInt(el.style.height) + 10)) + "px";
+	}
+	el.style.display = "";
+
+	if (parseInt(el.style.top) < -10)
+	{
+		el.style.top = (parseInt(el.style.top) + 10) + "px";
+		setTimeout("showConfirm('" + name + "')",10);
+	}
+	else
+	{
+		el.style.top = "0px";
+	}
+}
+
+var confirmedAction="";
+
+function hideConfirm(name, action)
+{
+	if (action != "") confirmedAction = action;
+	el = document.getElementById(name);
+
+	if (parseInt(el.style.top) > (-1 * (parseInt(el.style.height))))
+	{
+		el.style.top = (parseInt(el.style.top) - 10) + "px";
+		setTimeout("hideConfirm('" + name + "','')",10);
+	}
+	else
+	{
+		el.style.top = (-1 * (parseInt(el.style.height) + 10)) + "px"
+		el.style.display = "none";
+		eval(confirmedAction);
+		confirmedAction="";
+	}
 }
