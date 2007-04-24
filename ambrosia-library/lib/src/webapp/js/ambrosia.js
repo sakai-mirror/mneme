@@ -33,6 +33,8 @@ function showConfirm(name)
 	{
 		el.style.left = ((document.body.scrollWidth / 2) - (parseInt(el.style.width) / 2)) + "px";
 		el.style.top = (-1 * (parseInt(el.style.height) + 10)) + "px";
+		if (parent) parent.window.scrollTo(0,0);
+		window.scrollTo(0,0);
 	}
 	el.style.display = "";
 
