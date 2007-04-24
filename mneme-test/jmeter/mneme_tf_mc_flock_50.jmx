@@ -233,7 +233,7 @@ The pattern is enter, toc, q1, toc, q2, toc ... finish, review (if immediate), l
           <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="Mneme" enabled="true"/>
           <hashTree>
             <HTTPSampler guiclass="HttpTestSampleGui" testclass="HTTPSampler" testname="Mneme /list" enabled="true">
-              <stringProp name="HTTPSampler.path">/mercury/sakai.assessment.delivery/${site}/list</stringProp>
+              <stringProp name="HTTPSampler.path">/mercury/sakai.mneme/${site}/list</stringProp>
               <stringProp name="HTTPSampler.method">GET</stringProp>
               <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -266,7 +266,7 @@ The pattern is enter, toc, q1, toc, q2, toc ... finish, review (if immediate), l
             </ConstantTimer>
             <hashTree/>
             <HTTPSampler guiclass="HttpTestSampleGui" testclass="HTTPSampler" testname="Mneme /enter get" enabled="true">
-              <stringProp name="HTTPSampler.path">/mercury/sakai.assessment.delivery/${site}/enter/${aid}</stringProp>
+              <stringProp name="HTTPSampler.path">/mercury/sakai.mneme/${site}/enter/${aid}</stringProp>
               <stringProp name="HTTPSampler.method">GET</stringProp>
               <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -289,7 +289,7 @@ The pattern is enter, toc, q1, toc, q2, toc ... finish, review (if immediate), l
             </ConstantTimer>
             <hashTree/>
             <HTTPSampler guiclass="HttpTestSampleGui" testclass="HTTPSampler" testname="Mneme /enter post" enabled="true">
-              <stringProp name="HTTPSampler.path">/mercury/sakai.assessment.delivery/${site}/enter/${aid}</stringProp>
+              <stringProp name="HTTPSampler.path">/mercury/sakai.mneme/${site}/enter/${aid}</stringProp>
               <stringProp name="HTTPSampler.method">POST</stringProp>
               <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -318,7 +318,7 @@ The pattern is enter, toc, q1, toc, q2, toc ... finish, review (if immediate), l
               <hashTree/>
             </hashTree>
             <HTTPSampler guiclass="HttpTestSampleGui" testclass="HTTPSampler" testname="Mneme /toc get" enabled="true">
-              <stringProp name="HTTPSampler.path">/mercury/sakai.assessment.delivery/${site}/toc/${sid}</stringProp>
+              <stringProp name="HTTPSampler.path">/mercury/sakai.mneme/${site}/toc/${sid}</stringProp>
               <stringProp name="HTTPSampler.method">GET</stringProp>
               <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -357,7 +357,7 @@ The pattern is enter, toc, q1, toc, q2, toc ... finish, review (if immediate), l
             </ForeachController>
             <hashTree>
               <HTTPSampler guiclass="HttpTestSampleGui" testclass="HTTPSampler" testname="Mneme /question get" enabled="true">
-                <stringProp name="HTTPSampler.path">/mercury/sakai.assessment.delivery/${site}/question/${sid}/q${qid}</stringProp>
+                <stringProp name="HTTPSampler.path">/mercury/sakai.mneme/${site}/question/${sid}/q${qid}</stringProp>
                 <stringProp name="HTTPSampler.method">GET</stringProp>
                 <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
                 <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -399,7 +399,7 @@ The pattern is enter, toc, q1, toc, q2, toc ... finish, review (if immediate), l
               </ConstantTimer>
               <hashTree/>
               <HTTPSampler guiclass="HttpTestSampleGui" testclass="HTTPSampler" testname="Mneme /question post" enabled="true">
-                <stringProp name="HTTPSampler.path">/mercury/sakai.assessment.delivery/${site}/question/${sid}/q${qid}</stringProp>
+                <stringProp name="HTTPSampler.path">/mercury/sakai.mneme/${site}/question/${sid}/q${qid}</stringProp>
                 <stringProp name="HTTPSampler.method">POST</stringProp>
                 <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
                 <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -452,7 +452,7 @@ The pattern is enter, toc, q1, toc, q2, toc ... finish, review (if immediate), l
               <hashTree/>
             </hashTree>
             <HTTPSampler guiclass="HttpTestSampleGui" testclass="HTTPSampler" testname="Mneme /toc post" enabled="true">
-              <stringProp name="HTTPSampler.path">/mercury/sakai.assessment.delivery/${site}/toc/${sid}</stringProp>
+              <stringProp name="HTTPSampler.path">/mercury/sakai.mneme/${site}/toc/${sid}</stringProp>
               <stringProp name="HTTPSampler.method">POST</stringProp>
               <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
@@ -483,7 +483,7 @@ The pattern is enter, toc, q1, toc, q2, toc ... finish, review (if immediate), l
             </ConstantTimer>
             <hashTree/>
             <HTTPSampler guiclass="HttpTestSampleGui" testclass="HTTPSampler" testname="Mneme /list" enabled="true">
-              <stringProp name="HTTPSampler.path">/mercury/sakai.assessment.delivery/${site}/list</stringProp>
+              <stringProp name="HTTPSampler.path">/mercury/sakai.mneme/${site}/list</stringProp>
               <stringProp name="HTTPSampler.method">GET</stringProp>
               <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
               <stringProp name="HTTPSampler.protocol"></stringProp>
