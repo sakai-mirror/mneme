@@ -29,6 +29,7 @@ import org.muse.ambrosia.api.Controller;
 import org.muse.ambrosia.api.Interface;
 import org.muse.ambrosia.api.Message;
 import org.muse.ambrosia.api.PropertyReference;
+import org.muse.ambrosia.api.UiService;
 import org.sakaiproject.util.Validator;
 
 /**
@@ -82,10 +83,10 @@ public class UiInterface extends UiContainer implements Interface
 			}
 
 			// our js
-			response.println("<script type=\"text/javascript\" language=\"JavaScript\" src=\"/ambrosia_library/js/ambrosia.js\"></script>\n");
+			response.println("<script type=\"text/javascript\" language=\"JavaScript\" src=\"/ambrosia_library/js/ambrosia_" + UiService.VERSION + ".js\"></script>\n");
 
 			// our css
-			response.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"/ambrosia_library/skin/ambrosia.css\" />");
+			response.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"/ambrosia_library/skin/ambrosia_" + UiService.VERSION + ".css\" />");
 
 			// use our title
 			// TODO: we might want to send in the placement title and deal with that...
