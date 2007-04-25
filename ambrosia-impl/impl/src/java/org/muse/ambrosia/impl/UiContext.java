@@ -73,6 +73,9 @@ public class UiContext implements Context
 	/** The "current" destination when this request came in (i.e. where we just were). */
 	protected String previousDestination = null;
 
+	/** Registrations made by components. */
+	protected Map<String, String> registrations = new HashMap<String, String>();
+
 	/** Collect various javascript. */
 	protected StringBuffer scriptCode = new StringBuffer();
 
@@ -235,6 +238,14 @@ public class UiContext implements Context
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getRegistration(String componentId)
+	{
+		return registrations.get(componentId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public PrintWriter getResponseWriter()
 	{
 		if (this.collectingWriter != null) return this.collectingWriter;
@@ -313,6 +324,14 @@ public class UiContext implements Context
 			objects.put(name, value);
 			encodings.put(name, encoding);
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void register(String componentId, String value)
+	{
+		registrations.put(componentId, value);
 	}
 
 	/**

@@ -141,6 +141,15 @@ public interface Context
 	String getPreviousDestination();
 
 	/**
+	 * Find the registered value for this component id.
+	 * 
+	 * @param componentId
+	 *        The component id.
+	 * @return The registered value, or null if nothing has been registered.
+	 */
+	String getRegistration(String componentId);
+
+	/**
 	 * Access the writer over the response stream.
 	 * 
 	 * @return The writer over the response stream.
@@ -196,6 +205,16 @@ public interface Context
 	 *        The encode - decode value to use instead of the object name when encoding for later decode.
 	 */
 	void put(String name, Object value, String encoding);
+
+	/**
+	 * Register this value for this component id.
+	 * 
+	 * @param componentId
+	 *        The component's id.
+	 * @param value
+	 *        The value.
+	 */
+	void register(String componentId, String value);
 
 	/**
 	 * Remove the named object from the context.
