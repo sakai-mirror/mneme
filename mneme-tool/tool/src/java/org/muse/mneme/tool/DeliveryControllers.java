@@ -646,6 +646,7 @@ public class DeliveryControllers
 									"finish-confirm")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))
+								.setId("finish")
 								.setIncluded(
 									ui.newOrDecision().setOptions(
 										ui.newDecision().setProperty(ui.newPropertyReference().setReference("finishReady")),
@@ -1261,6 +1262,7 @@ public class DeliveryControllers
 									"finish-confirm")
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/submitted/{0}",ui.newTextPropertyReference().setReference("submission.id")))
+								.setId("finish")
 								.setIncluded(
 									ui.newOrDecision().setOptions(
 										ui.newDecision().setProperty(ui.newPropertyReference().setReference("finishReady")),
@@ -1519,7 +1521,8 @@ public class DeliveryControllers
 									"/icons/cancel.gif",
 									"finish-confirm")
 								.setStyle(Navigation.Style.button)
-								.setDestination(ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id"))))
+								.setDestination(ui.newDestination().setDestination("/submitted/{0}", ui.newTextPropertyReference().setReference("submission.id")))
+								.setId("finish"))
 						.add(
 							ui.newDivider())
 						.add(
