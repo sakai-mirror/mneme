@@ -62,6 +62,7 @@ import org.sakaiproject.authz.api.Role;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.id.api.IdManager;
@@ -274,7 +275,7 @@ public class AssessmentTestTool extends HttpServlet
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		error, generate, home, install, simulate
+		error, generate, home, install, install_all, simulate
 	}
 
 	/** Our log (commons). */
@@ -301,6 +302,9 @@ public class AssessmentTestTool extends HttpServlet
 
 	/** Our self-injected site service reference. */
 	protected SiteService siteService = null;
+
+	/** Our self-injected sql service. */
+	protected SqlService sqlService = null;
 
 	/** Our self-injected thread local manager reference. */
 	protected ThreadLocalManager threadLocalManager = null;
@@ -363,6 +367,7 @@ public class AssessmentTestTool extends HttpServlet
 		// self-inject
 		sessionManager = (SessionManager) ComponentManager.get(SessionManager.class);
 		toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
+		sqlService = (SqlService) ComponentManager.get(SqlService.class);
 		assessmentService = (AssessmentService) ComponentManager.get(AssessmentService.class);
 		timeService = (TimeService) ComponentManager.get(TimeService.class);
 		siteService = (SiteService) ComponentManager.get(SiteService.class);
@@ -538,6 +543,18 @@ public class AssessmentTestTool extends HttpServlet
 					return;
 				}
 				installGet(req, res, context, parts[2]);
+				break;
+			}
+			case install_all:
+			{
+				// we need no parameters
+				if (parts.length != 2)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/")));
+					return;
+				}
+				installAllGet(req, res, context);
 				break;
 			}
 			case error:
@@ -1451,6 +1468,31 @@ public class AssessmentTestTool extends HttpServlet
 	}
 
 	/**
+	 * Get the UI for the install all destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param assessmentId
+	 *        The selected assessment id.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void installAllGet(HttpServletRequest req, HttpServletResponse res, Context context)
+	{
+		// do the install
+		String rv = installMnemeAll();
+
+		context.put("rv", rv);
+
+		// render
+		ui.render(uiInstall, context);
+	}
+
+	/**
 	 * Get the UI for the install destination.
 	 * 
 	 * @param req
@@ -1583,6 +1625,37 @@ public class AssessmentTestTool extends HttpServlet
 		}
 
 		return rv;
+	}
+
+	/**
+	 * Add Mneme to all the sites that have Samigo.
+	 */
+	protected String installMnemeAll()
+	{
+		StringBuffer rv = new StringBuffer();
+		rv.append("Installing Mneme:<br />");
+
+		// find all the sites
+		StringBuffer statement = new StringBuffer();
+		statement.append("SELECT S.SITE_ID ");
+		statement.append("FROM SAKAI_SITE S ");
+		statement.append("LEFT OUTER JOIN SAKAI_SITE_TOOL A ON S.SITE_ID = A.SITE_ID AND A.REGISTRATION = 'sakai.samigo' ");
+		statement.append("LEFT OUTER JOIN SAKAI_SITE_TOOL B ON S.SITE_ID = B.SITE_ID AND B.REGISTRATION = 'sakai.mneme' ");
+		statement.append("WHERE A.REGISTRATION IS NOT NULL AND B.REGISTRATION IS NULL");
+		List sites = sqlService.dbRead(statement.toString(), null, null);
+
+		// for each one, install
+		for (Iterator i = sites.iterator(); i.hasNext();)
+		{
+			String site = (String) i.next();
+			String res = installMneme(site);
+			rv.append(site);
+			rv.append(": ");
+			rv.append(res);
+			rv.append("<br />");
+		}
+
+		return rv.toString();
 	}
 
 	/**

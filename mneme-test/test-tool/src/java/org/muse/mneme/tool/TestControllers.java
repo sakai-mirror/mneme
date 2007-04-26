@@ -115,7 +115,14 @@ public class TestControllers
 									.setSubmit()
 									.setDestination(ui.newDestination().setDestination("/install"))
 									.setTitle("home-install")
-									.setStyle(Navigation.Style.button))));
+									.setStyle(Navigation.Style.button))
+								.add(ui.newNavigation()
+									.setSubmit()
+									.setDestination(ui.newDestination().setDestination("/install_all"))
+									.setTitle("home-install-all")
+									.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")), "cancel", null, "home-install-all-confirm")
+									.setStyle(Navigation.Style.button))
+								));
 	}
 
 	/**
