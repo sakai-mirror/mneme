@@ -60,6 +60,12 @@ svn merge -r22556:22557 https://source.sakaiproject.org/svn/reference/trunk
 svn merge -r28500:28501 https://source.sakaiproject.org/svn/reference/trunk
 #G    library/src/webapp/js/headscripts.js
 #
+#SAK-7154
+cd ../site
+svn merge -r18632:18633 https://source.sakaiproject.org/svn/site/trunk
+#U    site-impl/impl/src/java/org/sakaiproject/site/impl/ResourceVector.java
+#U    site-api/api/src/java/org/sakaiproject/site/api/SitePage.java
+#U    site-impl/impl/src/java/org/sakaiproject/site/impl/BaseSitePage.java
 cd ..
 #
 #Patch Samigo for conditional visibility in the portal (creators only)
