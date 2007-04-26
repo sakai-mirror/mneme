@@ -38,6 +38,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Controller;
+import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentAnswer;
 import org.muse.mneme.api.AssessmentClosedException;
@@ -55,21 +58,24 @@ import org.muse.mneme.api.QuestionType;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionAnswer;
 import org.muse.mneme.api.SubmissionCompletedException;
+import org.sakaiproject.authz.api.Role;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.id.api.IdManager;
 import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.SiteService;
-import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Controller;
-import org.muse.ambrosia.api.UiService;
+import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
@@ -180,6 +186,36 @@ public class AssessmentTestTool extends HttpServlet
 		}
 	}
 
+	public class InstallSpecs
+	{
+		protected String context = null;
+
+		public InstallSpecs()
+		{
+		}
+
+		public InstallSpecs(String value)
+		{
+			String[] values = StringUtil.split(value, "x");
+			context = values[0];
+		}
+
+		public String getContext()
+		{
+			return context;
+		}
+
+		public void setContext(String value)
+		{
+			context = value;
+		}
+
+		public String toString()
+		{
+			return context;
+		}
+	}
+
 	public class SimulateSpecs
 	{
 		protected Integer numUsers = 0;
@@ -239,7 +275,7 @@ public class AssessmentTestTool extends HttpServlet
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		error, generate, home, simulate
+		error, generate, home, install, install_all, simulate
 	}
 
 	/** Our log (commons). */
@@ -267,6 +303,9 @@ public class AssessmentTestTool extends HttpServlet
 	/** Our self-injected site service reference. */
 	protected SiteService siteService = null;
 
+	/** Our self-injected sql service. */
+	protected SqlService sqlService = null;
+
 	/** Our self-injected thread local manager reference. */
 	protected ThreadLocalManager threadLocalManager = null;
 
@@ -284,6 +323,9 @@ public class AssessmentTestTool extends HttpServlet
 
 	/** The home interface. */
 	protected Controller uiHome = null;
+
+	/** The install interface. */
+	protected Controller uiInstall = null;
 
 	/** The simulate interface. */
 	protected Controller uiSimulate = null;
@@ -325,6 +367,7 @@ public class AssessmentTestTool extends HttpServlet
 		// self-inject
 		sessionManager = (SessionManager) ComponentManager.get(SessionManager.class);
 		toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
+		sqlService = (SqlService) ComponentManager.get(SqlService.class);
 		assessmentService = (AssessmentService) ComponentManager.get(AssessmentService.class);
 		timeService = (TimeService) ComponentManager.get(TimeService.class);
 		siteService = (SiteService) ComponentManager.get(SiteService.class);
@@ -337,6 +380,7 @@ public class AssessmentTestTool extends HttpServlet
 		uiHome = TestControllers.constructHome(ui);
 		uiGenerate = TestControllers.constructGenerate(ui);
 		uiSimulate = TestControllers.constructSimulate(ui);
+		uiInstall = TestControllers.constructInstall(ui);
 
 		M_log.info("init()");
 	}
@@ -487,6 +531,30 @@ public class AssessmentTestTool extends HttpServlet
 					return;
 				}
 				simulateGet(req, res, context, parts[2]);
+				break;
+			}
+			case install:
+			{
+				// we need a single parameter (specs)
+				if (parts.length != 3)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/")));
+					return;
+				}
+				installGet(req, res, context, parts[2]);
+				break;
+			}
+			case install_all:
+			{
+				// we need no parameters
+				if (parts.length != 2)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/")));
+					return;
+				}
+				installAllGet(req, res, context);
 				break;
 			}
 			case error:
@@ -1341,6 +1409,7 @@ public class AssessmentTestTool extends HttpServlet
 	{
 		context.put("gspecs", new GenerateSpecs());
 		context.put("sspecs", new SimulateSpecs());
+		context.put("ispecs", new InstallSpecs());
 
 		// render
 		ui.render(uiHome, context);
@@ -1371,6 +1440,8 @@ public class AssessmentTestTool extends HttpServlet
 		context.put("gspecs", gspecs);
 		SimulateSpecs sspecs = new SimulateSpecs();
 		context.put("sspecs", sspecs);
+		InstallSpecs ispecs = new InstallSpecs();
+		context.put("ispecs", ispecs);
 		String destination = ui.decode(req, context);
 
 		// look for special codes in the destination
@@ -1386,8 +1457,205 @@ public class AssessmentTestTool extends HttpServlet
 			destination = destination + "/" + sspecs.toString();
 		}
 
+		else if ("/install".equals(destination))
+		{
+			// add the specs
+			destination = destination + "/" + ispecs.toString();
+		}
+
 		// redirect to home
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+	}
+
+	/**
+	 * Get the UI for the install all destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param assessmentId
+	 *        The selected assessment id.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void installAllGet(HttpServletRequest req, HttpServletResponse res, Context context)
+	{
+		// do the install
+		String rv = installMnemeAll();
+
+		context.put("rv", rv);
+
+		// render
+		ui.render(uiInstall, context);
+	}
+
+	/**
+	 * Get the UI for the install destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param assessmentId
+	 *        The selected assessment id.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void installGet(HttpServletRequest req, HttpServletResponse res, Context context, String specsStr)
+	{
+		InstallSpecs specs = new InstallSpecs(specsStr);
+
+		// do the install
+		String rv = installMneme(specs.getContext());
+
+		context.put("rv", rv);
+
+		// render
+		ui.render(uiInstall, context);
+	}
+
+	/**
+	 * Add Mneme to the named site if T&Q is there.
+	 * 
+	 * @param context
+	 *        The site id.
+	 */
+	protected String installMneme(String context)
+	{
+		String rv = "installed in site " + context;
+
+		// get the Test Center tool
+		Tool tcTool = toolManager.getTool("sakai.mneme");
+
+		// get the site, add a new page, modify the t&q tool permission
+		try
+		{
+			Site site = siteService.getSite(context);
+			boolean samFound = false;
+
+			// find the site page with Mneme already
+			boolean mnemeFound = false;
+			for (Iterator i = site.getPages().iterator(); i.hasNext();)
+			{
+				SitePage page = (SitePage) i.next();
+				String[] mnemeToolIds = {"sakai.mneme"};
+				Collection mnemeTools = page.getTools(mnemeToolIds);
+				if (!mnemeTools.isEmpty())
+				{
+					mnemeFound = true;
+					break;
+				}
+			}
+
+			if (mnemeFound)
+			{
+				return "Test Center already installed in site " + context;
+			}
+
+			// find the site page with T&Q
+			for (Iterator i = site.getPages().iterator(); i.hasNext();)
+			{
+				SitePage page = (SitePage) i.next();
+				String[] samToolIds = {"sakai.samigo"};
+				Collection samTools = page.getTools(samToolIds);
+				if (!samTools.isEmpty())
+				{
+					samFound = true;
+
+					// add a new page just after this one
+					SitePage newPage = site.addPage();
+					newPage.setTitle(tcTool.getTitle());
+					newPage.setPosition(page.getPosition() + 1);
+
+					// add the tool
+					ToolConfiguration config = newPage.addTool();
+					config.setTitle(tcTool.getTitle());
+					config.setTool("sakai.mneme", tcTool);
+
+					// set the tool permission
+					config.getPlacementConfig().put("functions.require", "mneme.submit");
+
+					// set the T&Q tool permission
+					((ToolConfiguration) samTools.iterator().next()).getPlacementConfig().put("functions.require", "assessment.createAssessment");
+
+					break;
+				}
+			}
+
+			if (samFound)
+			{
+				// add permissions to realm
+				for (Iterator i = site.getRoles().iterator(); i.hasNext();)
+				{
+					Role role = (Role) i.next();
+					if (role.isAllowed("assessment.createAssessment"))
+					{
+						role.allowFunction("mneme.manage");
+						role.allowFunction("mneme.grade");
+					}
+					else if (role.isAllowed("assessment.takeAssessment"))
+					{
+						role.allowFunction("mneme.submit");
+					}
+				}
+
+				// work around an "issue" in the Site impl - role changes do not trigger an azg save
+				site.setMaintainRole(site.getMaintainRole());
+
+				// save the site
+				siteService.save(site);
+			}
+			else
+			{
+				rv = "T&Q not found in site " + context;
+			}
+		}
+		catch (IdUnusedException e)
+		{
+			rv = e.toString();
+		}
+		catch (PermissionException e)
+		{
+			rv = e.toString();
+		}
+
+		return rv;
+	}
+
+	/**
+	 * Add Mneme to all the sites that have Samigo.
+	 */
+	protected String installMnemeAll()
+	{
+		StringBuffer rv = new StringBuffer();
+		rv.append("Installing Mneme:<br />");
+
+		// find all the sites
+		StringBuffer statement = new StringBuffer();
+		statement.append("SELECT S.SITE_ID ");
+		statement.append("FROM SAKAI_SITE S ");
+		statement.append("LEFT OUTER JOIN SAKAI_SITE_TOOL A ON S.SITE_ID = A.SITE_ID AND A.REGISTRATION = 'sakai.samigo' ");
+		statement.append("LEFT OUTER JOIN SAKAI_SITE_TOOL B ON S.SITE_ID = B.SITE_ID AND B.REGISTRATION = 'sakai.mneme' ");
+		statement.append("WHERE A.REGISTRATION IS NOT NULL AND B.REGISTRATION IS NULL");
+		List sites = sqlService.dbRead(statement.toString(), null, null);
+
+		// for each one, install
+		for (Iterator i = sites.iterator(); i.hasNext();)
+		{
+			String site = (String) i.next();
+			String res = installMneme(site);
+			rv.append(site);
+			rv.append(": ");
+			rv.append(res);
+			rv.append("<br />");
+		}
+
+		return rv.toString();
 	}
 
 	/**
@@ -1458,7 +1726,7 @@ public class AssessmentTestTool extends HttpServlet
 	}
 
 	/**
-	 * Get the UI for the generate destination.
+	 * Get the UI for the simulate destination.
 	 * 
 	 * @param req
 	 *        Servlet request.
