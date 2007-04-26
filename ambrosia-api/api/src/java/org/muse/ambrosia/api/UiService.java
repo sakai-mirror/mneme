@@ -36,6 +36,9 @@ import org.sakaiproject.i18n.InternationalizedMessages;
  */
 public interface UiService
 {
+	/** Ambrosia version used in some (js, css) library files that will change with each release. */
+	public static String VERSION = "0-5-0";
+
 	/*************************************************************************************************************************************************
 	 * Component factory methods
 	 ************************************************************************************************************************************************/

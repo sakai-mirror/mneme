@@ -22,8 +22,8 @@
 package org.muse.ambrosia.api;
 
 /**
- * Navigation presents a navigation control (button or text link) to the user. The result of the press is a navigation to some tool
- * destination. A form submit is optional.
+ * Navigation presents a navigation control (button or text link) to the user. The result of the press is a navigation to some tool destination. A
+ * form submit is optional.
  */
 public interface Navigation extends Controller
 {
@@ -62,13 +62,21 @@ public interface Navigation extends Controller
 	Navigation setAccessKey(String selector, PropertyReference... references);
 
 	/**
-	 * Set the decision about makeing this a two step / confirmed process
+	 * Set the decision and other details about makeing this a two step / confirmed process
 	 * 
 	 * @param decision
 	 *        The decicion.
+	 * @param cancelSelcetor
+	 *        A message selector for the "cancel" wording.
+	 * @param cancelIcon
+	 *        An icon path for the "cancel" choice.
+	 * @param msgSelector
+	 *        A message selector for the confirm message.
+	 * @param references
+	 *        One or more PropertyReferences to form the additional values in the confirm message.
 	 * @return self.
 	 */
-	Navigation setConfirm(Decision decision);
+	Navigation setConfirm(Decision decision, String cancelSelector, String cancelIcon, String msgSelector, PropertyReference... references);
 
 	/**
 	 * Set this as a default choice.
