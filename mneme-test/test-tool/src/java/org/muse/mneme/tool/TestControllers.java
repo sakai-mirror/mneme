@@ -100,8 +100,22 @@ public class TestControllers
 									.setSubmit()
 									.setDestination(ui.newDestination().setDestination("/simulate"))
 									.setTitle("home-simulate")
-									.setStyle(Navigation.Style.button)))
-						);
+									.setStyle(Navigation.Style.button))))
+				.add(
+					ui.newSection()
+						.setTitle("home-install-title")
+						.add(
+							ui.newTextEdit()
+								.setSize(1, 12)
+								.setProperty(ui.newPropertyReference().setReference("ispecs.context"))
+								.setTitle("home-context"))
+						.add(
+							ui.newNavigationBar()
+								.add(ui.newNavigation()
+									.setSubmit()
+									.setDestination(ui.newDestination().setDestination("/install"))
+									.setTitle("home-install")
+									.setStyle(Navigation.Style.button))));
 	}
 
 	/**
@@ -130,6 +144,24 @@ public class TestControllers
 			ui.newInterface()
 				.setTitle("simulate-title")
 				.setHeader("simulate-header")
+				.add(
+					ui.newInstructions().setText(null, ui.newPropertyReference().setReference("rv")))
+				.add(
+					ui.newNavigationBar()
+						.add(ui.newNavigation()
+							.setDestination(ui.newDestination().setDestination("/home"))
+							.setTitle("return")
+							.setStyle(Navigation.Style.button)));
+	}
+
+	/**
+	 */
+	public static Controller constructInstall(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("install-title")
+				.setHeader("install-header")
 				.add(
 					ui.newInstructions().setText(null, ui.newPropertyReference().setReference("rv")))
 				.add(
