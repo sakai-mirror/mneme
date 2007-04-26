@@ -263,9 +263,14 @@ public class UiNavigation extends UiController implements Navigation
 						+ this.confirmMsg.getMessage(context, focus) + "</td>");
 				response.println("</tr><tr>");
 				response.println("<td style=\"padding:1em\" align=\"left\"><input type=\"button\" value=\""
-						+ this.confirmCancelMsg.getMessage(context, focus) + "\" onclick=\"hideConfirm('confirm_" + id + "','cancel_" + id
-						+ "()');\" style=\"padding-left:2em; background: #eee url('" + context.get("sakai.return.url") + this.confirmCancelIcon
-						+ "') .2em no-repeat;\"/></td>");
+						+ this.confirmCancelMsg.getMessage(context, focus)
+						+ "\" onclick=\"hideConfirm('confirm_"
+						+ id
+						+ "','cancel_"
+						+ id
+						+ "()');\" "
+						+ ((this.confirmCancelIcon != null) ? "style=\"padding-left:2em; background: #eee url('" + context.get("sakai.return.url")
+								+ this.confirmCancelIcon + "') .2em no-repeat;\"" : "") + "/></td>");
 				response.println("<td style=\"padding:1em\" align=\"right\"><input type=\"button\" value=\"" + title
 						+ "\" onclick=\"hideConfirm('confirm_" + id + "','act_" + id + "()');\" style=\"padding-left:2em; background: #eee url('"
 						+ context.get("sakai.return.url") + this.icon + "') .2em no-repeat;\"/></td>");
