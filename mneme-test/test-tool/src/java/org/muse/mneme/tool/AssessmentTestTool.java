@@ -185,6 +185,36 @@ public class AssessmentTestTool extends HttpServlet
 		}
 	}
 
+	public class InstallSpecs
+	{
+		protected String context = null;
+
+		public InstallSpecs()
+		{
+		}
+
+		public InstallSpecs(String value)
+		{
+			String[] values = StringUtil.split(value, "x");
+			context = values[0];
+		}
+
+		public String getContext()
+		{
+			return context;
+		}
+
+		public void setContext(String value)
+		{
+			context = value;
+		}
+
+		public String toString()
+		{
+			return context;
+		}
+	}
+
 	public class SimulateSpecs
 	{
 		protected Integer numUsers = 0;
@@ -241,40 +271,10 @@ public class AssessmentTestTool extends HttpServlet
 		}
 	}
 
-	public class InstallSpecs
-	{
-		protected String context = null;
-
-		public InstallSpecs()
-		{
-		}
-
-		public InstallSpecs(String value)
-		{
-			String[] values = StringUtil.split(value, "x");
-			context = values[0];
-		}
-
-		public String getContext()
-		{
-			return context;
-		}
-
-		public void setContext(String value)
-		{
-			context = value;
-		}
-
-		public String toString()
-		{
-			return context;
-		}
-	}
-
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		error, generate, home, simulate, install
+		error, generate, home, install, simulate
 	}
 
 	/** Our log (commons). */
@@ -317,11 +317,11 @@ public class AssessmentTestTool extends HttpServlet
 	/** The generate interface. */
 	protected Controller uiGenerate = null;
 
-	/** The install interface. */
-	protected Controller uiInstall = null;
-
 	/** The home interface. */
 	protected Controller uiHome = null;
+
+	/** The install interface. */
+	protected Controller uiInstall = null;
 
 	/** The simulate interface. */
 	protected Controller uiSimulate = null;
@@ -1451,6 +1451,141 @@ public class AssessmentTestTool extends HttpServlet
 	}
 
 	/**
+	 * Get the UI for the install destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param assessmentId
+	 *        The selected assessment id.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void installGet(HttpServletRequest req, HttpServletResponse res, Context context, String specsStr)
+	{
+		InstallSpecs specs = new InstallSpecs(specsStr);
+
+		// do the install
+		String rv = installMneme(specs.getContext());
+
+		context.put("rv", rv);
+
+		// render
+		ui.render(uiInstall, context);
+	}
+
+	/**
+	 * Add Mneme to the named site if T&Q is there.
+	 * 
+	 * @param context
+	 *        The site id.
+	 */
+	protected String installMneme(String context)
+	{
+		String rv = "installed in site " + context;
+
+		// get the Test Center tool
+		Tool tcTool = toolManager.getTool("sakai.mneme");
+
+		// get the site, add a new page, modify the t&q tool permission
+		try
+		{
+			Site site = siteService.getSite(context);
+			boolean samFound = false;
+
+			// find the site page with Mneme already
+			boolean mnemeFound = false;
+			for (Iterator i = site.getPages().iterator(); i.hasNext();)
+			{
+				SitePage page = (SitePage) i.next();
+				String[] mnemeToolIds = {"sakai.mneme"};
+				Collection mnemeTools = page.getTools(mnemeToolIds);
+				if (!mnemeTools.isEmpty())
+				{
+					mnemeFound = true;
+					break;
+				}
+			}
+
+			if (mnemeFound)
+			{
+				return "Test Center already installed in site " + context;
+			}
+
+			// find the site page with T&Q
+			for (Iterator i = site.getPages().iterator(); i.hasNext();)
+			{
+				SitePage page = (SitePage) i.next();
+				String[] samToolIds = {"sakai.samigo"};
+				Collection samTools = page.getTools(samToolIds);
+				if (!samTools.isEmpty())
+				{
+					samFound = true;
+
+					// add a new page just after this one
+					SitePage newPage = site.addPage();
+					newPage.setTitle(tcTool.getTitle());
+					newPage.setPosition(page.getPosition() + 1);
+
+					// add the tool
+					ToolConfiguration config = newPage.addTool();
+					config.setTitle(tcTool.getTitle());
+					config.setTool("sakai.mneme", tcTool);
+
+					// set the tool permission
+					config.getPlacementConfig().put("functions.require", "mneme.submit");
+
+					// set the T&Q tool permission
+					((ToolConfiguration) samTools.iterator().next()).getPlacementConfig().put("functions.require", "assessment.createAssessment");
+
+					break;
+				}
+			}
+
+			if (samFound)
+			{
+				// add permissions to realm
+				for (Iterator i = site.getRoles().iterator(); i.hasNext();)
+				{
+					Role role = (Role) i.next();
+					if (role.isAllowed("assessment.createAssessment"))
+					{
+						role.allowFunction("mneme.manage");
+						role.allowFunction("mneme.grade");
+					}
+					else if (role.isAllowed("assessment.takeAssessment"))
+					{
+						role.allowFunction("mneme.submit");
+					}
+				}
+
+				// work around an "issue" in the Site impl - role changes do not trigger an azg save
+				site.setMaintainRole(site.getMaintainRole());
+
+				// save the site
+				siteService.save(site);
+			}
+			else
+			{
+				rv = "T&Q not found in site " + context;
+			}
+		}
+		catch (IdUnusedException e)
+		{
+			rv = e.toString();
+		}
+		catch (PermissionException e)
+		{
+			rv = e.toString();
+		}
+
+		return rv;
+	}
+
+	/**
 	 * Send a redirect to the error destination.
 	 * 
 	 * @param req
@@ -1542,33 +1677,6 @@ public class AssessmentTestTool extends HttpServlet
 
 		// render
 		ui.render(uiSimulate, context);
-	}
-
-	/**
-	 * Get the UI for the install destination.
-	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
-	 * @param assessmentId
-	 *        The selected assessment id.
-	 * @param context
-	 *        UiContext.
-	 * @param out
-	 *        Output writer.
-	 */
-	protected void installGet(HttpServletRequest req, HttpServletResponse res, Context context, String specsStr)
-	{
-		InstallSpecs specs = new InstallSpecs(specsStr);
-
-		// do the install
-		String rv = installMneme(specs.getContext());
-
-		context.put("rv", rv);
-
-		// render
-		ui.render(uiInstall, context);
 	}
 
 	/**
@@ -1812,111 +1920,5 @@ public class AssessmentTestTool extends HttpServlet
 				establishUser(currentUser, null);
 			}
 		}
-	}
-
-	/**
-	 * Add Mneme to the named site if T&Q is there.
-	 * @param context The site id.
-	 */
-	protected String installMneme(String context)
-	{
-		String rv = "installed in site " + context;
-
-		// get the Test Center tool
-		Tool tcTool = toolManager.getTool("sakai.mneme");
-
-		// get the site, add a new page, modify the t&q tool permission
-		try
-		{
-			Site site = siteService.getSite(context);
-			boolean samFound = false;
-
-			// find the site page with Mneme already
-			boolean mnemeFound = false;
-			for (Iterator i = site.getPages().iterator(); i.hasNext();)
-			{
-				SitePage page = (SitePage) i.next();
-				String[] mnemeToolIds = {"sakai.mneme"};
-				Collection mnemeTools = page.getTools(mnemeToolIds);
-				if (!mnemeTools.isEmpty())
-				{
-					mnemeFound = true;
-					break;
-				}
-			}
-			
-			if (mnemeFound)
-			{
-				return "Test Center already installed in site " + context;
-			}
-
-			// find the site page with T&Q
-			for (Iterator i = site.getPages().iterator(); i.hasNext();)
-			{
-				SitePage page = (SitePage) i.next();
-				String[] samToolIds = {"sakai.samigo"};
-				Collection samTools = page.getTools(samToolIds);
-				if (!samTools.isEmpty())
-				{
-					samFound = true;
-
-					// add a new page just after this one
-					SitePage newPage = site.addPage();
-					newPage.setTitle(tcTool.getTitle());
-					newPage.setPosition(page.getPosition() + 1);
-
-					// add the tool
-					ToolConfiguration config = newPage.addTool();
-					config.setTitle(tcTool.getTitle());
-					config.setTool("sakai.mneme", tcTool);
-
-					// set the tool permission
-					config.getPlacementConfig().put("functions.require", "mneme.submit");
-
-					// set the T&Q tool permission
-					((ToolConfiguration) samTools.iterator().next()).getPlacementConfig().put("functions.require", "assessment.createAssessment");
-
-					break;
-				}
-			}
-
-			if (samFound)
-			{
-				// add permissions to realm
-				for (Iterator i = site.getRoles().iterator(); i.hasNext();)
-				{
-					Role role = (Role) i.next();
-					if (role.isAllowed("assessment.createAssessment"))
-					{
-						role.allowFunction("mneme.manage");
-						role.allowFunction("mneme.grade");
-					}
-					else if (role.isAllowed("assessment.takeAssessment"))
-					{
-						role.allowFunction("mneme.submit");
-					}
-				}
-
-				// work around an "issue" in the Site impl - role changes do not trigger an azg save
-				site.setMaintainRole(site.getMaintainRole());
-
-				// save the site
-				siteService.save(site);
-			}
-			else
-			{
-				rv = "T&Q not found in site " + context;
-			}
-		}
-		catch (IdUnusedException e)
-		{
-			rv = e.toString();
-		}
-		catch (PermissionException e)
-		{
-			rv = e.toString();
-		}
-		
-		return rv;
 	}
 }
