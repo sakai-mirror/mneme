@@ -5,6 +5,13 @@
     <display-name>muse-mneme-tool-test</display-name>
     <description>muse-mneme-tool-test</description>
 
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            /WEB-INF/applicationContext.xml
+        </param-value>
+    </context-param>
+
     <filter>
         <filter-name>sakai.request</filter-name>
         <filter-class>org.sakaiproject.util.RequestFilter</filter-class>
@@ -20,12 +27,24 @@
 
     <servlet>
         <servlet-name>sakai.mneme.test</servlet-name>
-        <servlet-class>org.muse.mneme.tool.AssessmentTestTool</servlet-class>
+        <servlet-class>org.muse.ambrosia.util.AmbrosiaServlet</servlet-class>
+        <init-param>
+            <param-name>defaultView</param-name>
+            <param-value>home</param-value>
+        </init-param>
+        <init-param>
+            <param-name>toolId</param-name>
+            <param-value>sakai.mneme.test</param-value>
+        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
     <listener>
         <listener-class>org.sakaiproject.util.ToolListener</listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>org.sakaiproject.util.ContextLoaderListener</listener-class>
     </listener>
 
 </web-app>
