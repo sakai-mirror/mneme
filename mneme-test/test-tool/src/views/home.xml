@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface title="home-title" header="home-header">
+	<container>
+		<section title="home-generate-title">
+			<container>
+				<navigationBar>
+					<container>
+						<navigation style="BUTTON" destination="/generate" title="home-generate" submit="TRUE" />
+					</container>
+				</navigationBar>
+			</container>
+		</section>
+		<section title="home-simulate-title">
+			<container>
+				<navigationBar>
+					<container>
+						<navigation style="BUTTON" destination="/simulate" title="home-simulate" submit="TRUE" />
+					</container>
+				</navigationBar>
+			</container>
+		</section>
+		<section title="home-install-title">
+			<container>
+				<navigationBar>
+					<container>
+						<navigation style="BUTTON" destination="/install" title="home-install" submit="TRUE" />
+						<navigation style="BUTTON" destination="/install_all" title="home-install-all" submit="TRUE" />
+					</container>
+				</navigationBar>
+			</container>
+		</section>
+	</container>
+</interface>

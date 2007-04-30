@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="org.muse.mneme.tool.SimulateView"
+			class="org.muse.mneme.tool.SimulateView"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
+		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
+		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
+		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
+		<property name="userDirectoryService"><ref bean="org.sakaiproject.user.api.UserDirectoryService"/></property>
+
+ 		<property name="toolId"><value>sakai.mneme.test</value></property>
+ 		<property name="viewId"><value>simulate</value></property>
+ 		<property name="bundle"><value>mneme-test-tool</value></property>
+		<property name="viewPath"><value>simulate.xml</value></property>
+	</bean>
+
+</beans>

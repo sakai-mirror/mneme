@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface title="generate-title" header="generate-header">
+	<container>
+		<instructions ref="rv" />
+		<navigationBar>
+			<container>
+				<navigation style="BUTTON" destination="/home" title="return" />
+			</container>
+		</navigationBar>		
+	</container>
+</interface>

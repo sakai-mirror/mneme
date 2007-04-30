@@ -81,9 +81,6 @@ public class SimulateView extends ViewImpl
 	/** The tool manager. */
 	protected ToolManager toolManager = null;
 
-	/** The simulate interface. */
-	protected Controller uiSimulate = null;
-
 	/** The user directory service. */
 	protected UserDirectoryService userDirectoryService = null;
 
@@ -114,7 +111,7 @@ public class SimulateView extends ViewImpl
 		context.put("rv", rv);
 
 		// render
-		ui.render(uiSimulate, context);
+		uiService.render(ui, context);
 	}
 
 	/**
@@ -123,8 +120,6 @@ public class SimulateView extends ViewImpl
 	public void init()
 	{
 		super.init();
-
-		uiSimulate = TestControllers.constructSimulate(ui);
 
 		M_log.info("init()");
 	}

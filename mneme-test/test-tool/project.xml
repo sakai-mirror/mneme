@@ -125,6 +125,13 @@
 				</includes>
 			</resource>
 
+			<resource>
+				<directory>${basedir}/src/views</directory>
+				<includes>
+					<include>**/*.xml</include>
+				</includes>
+			</resource>
+
 		</resources>
 
 	</build>

@@ -94,9 +94,6 @@ public class GenerateView extends ViewImpl
 	/** The tool manager. */
 	protected ToolManager toolManager = null;
 
-	/** The home interface. */
-	protected Controller uiGenerate = null;
-
 	/**
 	 * Shutdown.
 	 */
@@ -125,7 +122,7 @@ public class GenerateView extends ViewImpl
 		context.put("rv", rv);
 
 		// render
-		ui.render(uiGenerate, context);
+		uiService.render(ui, context);
 	}
 
 	/**
@@ -134,8 +131,6 @@ public class GenerateView extends ViewImpl
 	public void init()
 	{
 		super.init();
-
-		uiGenerate = TestControllers.constructGenerate(ui);
 
 		M_log.info("init()");
 	}

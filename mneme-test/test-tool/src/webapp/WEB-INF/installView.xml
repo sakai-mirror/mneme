@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="org.muse.mneme.tool.InstallView"
+			class="org.muse.mneme.tool.InstallView"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+		<property name="siteService"><ref bean="org.sakaiproject.site.api.SiteService"/></property>
+		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
+
+ 		<property name="toolId"><value>sakai.mneme.test</value></property>
+ 		<property name="viewId"><value>install</value></property>
+ 		<property name="bundle"><value>mneme-test-tool</value></property>
+		<property name="viewPath"><value>install.xml</value></property>
+	</bean>
+
+</beans>

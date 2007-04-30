@@ -41,9 +41,6 @@ public class HomeView extends ViewImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(HomeView.class);
 
-	/** The home interface. */
-	protected Controller uiHome = null;
-
 	/**
 	 * Shutdown.
 	 */
@@ -68,7 +65,7 @@ public class HomeView extends ViewImpl
 		context.put("ispecs", new InstallSpecs());
 
 		// render
-		ui.render(uiHome, context);
+		uiService.render(ui, context);
 	}
 
 	/**
@@ -78,7 +75,7 @@ public class HomeView extends ViewImpl
 	{
 		super.init();
 
-		uiHome = TestControllers.constructHome(ui);
+		// uiHome = TestControllers.constructHome(uiService);
 
 		M_log.info("init()");
 	}
@@ -106,7 +103,7 @@ public class HomeView extends ViewImpl
 		context.put("sspecs", sspecs);
 		InstallSpecs ispecs = new InstallSpecs();
 		context.put("ispecs", ispecs);
-		String destination = ui.decode(req, context);
+		String destination = uiService.decode(req, context);
 
 		// look for special codes in the destination
 		if ("/generate".equals(destination))

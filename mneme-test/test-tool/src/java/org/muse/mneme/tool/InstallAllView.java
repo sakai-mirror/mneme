@@ -46,9 +46,6 @@ public class InstallAllView extends ViewImpl
 	/** The sql service. */
 	protected SqlService sqlService = null;
 
-	/** The install interface. */
-	protected Controller uiInstall = null;
-
 	/**
 	 * Shutdown.
 	 */
@@ -74,7 +71,7 @@ public class InstallAllView extends ViewImpl
 		context.put("rv", rv);
 
 		// render
-		ui.render(uiInstall, context);
+		uiService.render(ui, context);
 	}
 
 	/**
@@ -83,8 +80,6 @@ public class InstallAllView extends ViewImpl
 	public void init()
 	{
 		super.init();
-
-		uiInstall = TestControllers.constructInstall(ui);
 
 		M_log.info("init()");
 	}
