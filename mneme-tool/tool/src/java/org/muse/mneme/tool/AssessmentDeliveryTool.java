@@ -1220,9 +1220,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 		{
 			M_log.warn("quesitonGet: submission has modified answers: " + submissionId);
 
-//			// redirect to error
-//			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-//			return;
+			// // redirect to error
+			// res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			// return;
 		}
 
 		// render
@@ -1283,9 +1283,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 		{
 			M_log.warn("quesitonPost: submission has modified answers: " + submissionId);
 
-//			// redirect to error
-//			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-//			return;
+			// // redirect to error
+			// res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			// return;
 		}
 
 		// read form
@@ -1316,6 +1316,26 @@ public class AssessmentDeliveryTool extends HttpServlet
 			{
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.upload + "/" + req.getAttribute("upload.limit"))));
 				return;
+			}
+
+			if (destination.equals("SUBMIT"))
+			{
+				// get the submission again, to make sure that the answers we just posted are reflected
+				submission = assessmentService.idSubmission(submissionId);
+
+				// if linear, or the submission is all answered, we can complete the submission and go to submitted
+				if ((!submission.getAssessment().getRandomAccess().booleanValue()) || (submission.getIsAnswered(null).booleanValue()))
+				{
+					assessmentService.completeSubmission(submission);
+
+					destination = "/" + Destinations.submitted + "/" + submissionId;
+				}
+
+				// if not linear, and there are unanswered parts, send to final review
+				else
+				{
+					destination = "/" + Destinations.final_review + "/" + submissionId;
+				}
 			}
 
 			// redirect to the next destination
@@ -1352,7 +1372,8 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Output writer.
 	 * @return null if all went well, else an Errors to indicate what went wrong.
 	 */
-	protected Errors questionSetup(Submission submission, String questionSelector, Context context, List<SubmissionAnswer> answers, boolean linearCheck)
+	protected Errors questionSetup(Submission submission, String questionSelector, Context context, List<SubmissionAnswer> answers,
+			boolean linearCheck)
 	{
 		// not in review mode
 		context.put("review", Boolean.FALSE);
@@ -1376,10 +1397,6 @@ public class AssessmentDeliveryTool extends HttpServlet
 			{
 				return Errors.invalid;
 			}
-
-			List<AssessmentQuestion> questions = new ArrayList<AssessmentQuestion>(1);
-			questions.add(question);
-			context.put("finishReady", submission.getIsAnswered(questions));
 
 			// if we need to do our linear assessment check, and this is a linear assessment,
 			// we will reject if the question has been marked as 'complete'
@@ -1411,15 +1428,11 @@ public class AssessmentDeliveryTool extends HttpServlet
 			}
 
 			// get all the answers for this section
-			List<AssessmentQuestion> questions = new ArrayList<AssessmentQuestion>();
 			for (AssessmentQuestion question : section.getQuestions())
 			{
 				SubmissionAnswer answer = submission.getAnswer(question);
 				answers.add(answer);
-				questions.add(question);
 			}
-
-			context.put("finishReady", submission.getIsAnswered(questions));
 
 			// tell the UI that we are doing single section
 			context.put("section", section);
@@ -1429,18 +1442,14 @@ public class AssessmentDeliveryTool extends HttpServlet
 		else if (questionSelector.startsWith("a"))
 		{
 			// get all the answers to all the questions in all sections
-			List<AssessmentQuestion> questions = new ArrayList<AssessmentQuestion>();
 			for (AssessmentSection section : submission.getAssessment().getSections())
 			{
 				for (AssessmentQuestion question : section.getQuestions())
 				{
 					SubmissionAnswer answer = submission.getAnswer(question);
 					answers.add(answer);
-					questions.add(question);
 				}
 			}
-
-			context.put("finishReady", submission.getIsAnswered(questions));
 		}
 
 		context.put("answers", answers);
@@ -1865,6 +1874,28 @@ public class AssessmentDeliveryTool extends HttpServlet
 
 		// read form
 		String destination = ui.decode(req, context);
+
+		if (destination.equals("SUBMIT"))
+		{
+			Submission submission = assessmentService.idSubmission(submissionId);
+
+			// if linear, or the submission is all answered, we can go to submitted
+			if ((!submission.getAssessment().getRandomAccess().booleanValue()) || (submission.getIsAnswered(null).booleanValue()))
+			{
+				destination = "/" + Destinations.submitted + "/" + submissionId;
+				// we will complete below
+			}
+
+			// if not linear, and there are unanswered parts, send to final review
+			else
+			{
+				destination = "/" + Destinations.final_review + "/" + submissionId;
+
+				// we do not want to complete - redirect now
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
+		}
 
 		// we need to be headed to submitted...
 		if (!destination.startsWith("/submitted"))
