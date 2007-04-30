@@ -436,6 +436,7 @@ public class DeliveryControllers
 				.add(
 					ui.newSection()
 						.setIterator(ui.newPropertyReference().setReference("submission.assessment.sections"), "section")
+						.setEntityIncluded(ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("section.isMerged")))
 						.setTitle("instructions-section-title",
 							ui.newIconPropertyReference().setIcon("/icons/section.png"),
 							ui.newTextPropertyReference().setReference("section.ordering.position"),
@@ -447,8 +448,7 @@ public class DeliveryControllers
 							ui.newAttachments()
 								.setTitle("attachments")
 								.setAttachments(ui.newPropertyReference().setReference("section.attachments"), null)
-								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section.attachments"))))
-						.setIncluded(ui.newDecision().setReversed().setProperty(ui.newBooleanPropertyReference().setReference("section.isMerged"))))
+								.setIncluded(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("section.attachments")))))
 				.add(
 					ui.newSection()
 						.add(
