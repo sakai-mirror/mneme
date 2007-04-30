@@ -1874,6 +1874,8 @@ public class DeliveryControllers
 					}
 				}
 
+				rv.append("<img src=\"" + context.get("sakai.return.url") + "/icons/grade.png\" alt=\"" + context.getMessages().getString("score")
+						+ "\" />");
 				rv.append(context.getMessages().getString("score") + ": " + formatScore(score));
 			}
 
@@ -1911,12 +1913,15 @@ public class DeliveryControllers
 			if ((review != null) && review.booleanValue() && submission.getIsGraded().booleanValue())
 			{
 				// the total score
+				rv.append("<img src=\"" + context.get("sakai.return.url") + "/icons/grade.png\" alt=\"" + context.getMessages().getString("grade")
+						+ "\" />");
 				Float score = submission.getTotalScore();
 				rv.append(context.getMessages().getString("grade") + ": " + formatScore(score));
 			}
 
 			// add the total possible points for the assessment
-			rv.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> " + formatScore(assessment.getTotalPoints()) + ")");
+			rv.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> "
+					+ formatScore(assessment.getTotalPoints()) + ")");
 
 			return rv.toString();
 		}
@@ -2205,8 +2210,6 @@ public class DeliveryControllers
 					altKey = "use-highest";
 				}
 	
-//				return " <img style=\"position:relative;top:-8px\" src=\"" + context.get("sakai.return.url") + "/icons/" + iconName + "\" alt=\"" + context.getMessages().getString(altKey)
-//						+ "\" />";
 				return " <img src=\"" + context.get("sakai.return.url") + "/icons/" + iconName + "\" alt=\"" + context.getMessages().getString(altKey) + "\" />";
 			}
 
