@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<registration>
+
+	<tool
+			id="sakai.mneme"
+			title="Test Center"
+			description="Test Center"
+	>
+
+		<category name="course" />
+		<category name="project" />
+
+		<configuration name="functions.require" value="" />
+
+	</tool>
+
+</registration>
