@@ -51,8 +51,8 @@ public class UiTextEdit extends UiController implements TextEdit
 	protected Message onEmptyAlertMsg = null;
 
 	/**
-	 * The PropertyReference for encoding and decoding this selection - this is what will be updated with the end-user's text edit,
-	 * and what value seeds the display.
+	 * The PropertyReference for encoding and decoding this selection - this is what will be updated with the end-user's text edit, and what value
+	 * seeds the display.
 	 */
 	protected PropertyReference propertyReference = null;
 
@@ -154,7 +154,7 @@ public class UiTextEdit extends UiController implements TextEdit
 				response.println("</label>");
 			}
 
-			response.println("<textarea id=\"" + id + "\" name=\"" + id + "\" cols=" + Integer.toString(numCols) + " rows="
+			response.println("<textarea " + (readOnly ? " class=\"ambrosiaTextEditDisabled\"" : "") + "id=\"" + id + "\" name=\"" + id + "\" cols=" + Integer.toString(numCols) + " rows="
 					+ Integer.toString(numRows) + (readOnly ? " disabled=\"disabled\"" : "") + ">");
 			response.print(Validator.escapeHtmlTextarea(value));
 			response.println("</textarea>");
@@ -165,9 +165,8 @@ public class UiTextEdit extends UiController implements TextEdit
 		// the decode directive
 		if ((this.propertyReference != null) && (!readOnly))
 		{
-			response.println("<input type=\"hidden\" name=\"" + decodeId + "\" value =\"" + id + "\" />"
-					+ "<input type=\"hidden\" name=\"" + "prop_" + decodeId + "\" value=\""
-					+ this.propertyReference.getFullReference(context) + "\" />");
+			response.println("<input type=\"hidden\" name=\"" + decodeId + "\" value =\"" + id + "\" />" + "<input type=\"hidden\" name=\"" + "prop_"
+					+ decodeId + "\" value=\"" + this.propertyReference.getFullReference(context) + "\" />");
 		}
 
 		// for onEmptyAlert, add some client-side validation
@@ -175,10 +174,9 @@ public class UiTextEdit extends UiController implements TextEdit
 		{
 			context.addValidation("	if (trim(document.getElementById('" + id + "').value) == \"\")\n" + "	{\n"
 					+ "		if (document.getElementById('alert_" + id + "').style.display == \"none\")\n" + "		{\n"
-					+ "			document.getElementById('alert_" + id + "').style.display = \"\";\n" + "			rv=false;\n" + "		}\n"
-					+ "	}\n");
+					+ "			document.getElementById('alert_" + id + "').style.display = \"\";\n" + "			rv=false;\n" + "		}\n" + "	}\n");
 		}
-		
+
 		// for on-load focus
 		if ((!readOnly) && (this.focusDecision != null) && (this.focusDecision.decide(context, focus)))
 		{

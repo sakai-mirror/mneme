@@ -482,6 +482,12 @@ Sakai ~ shorttext longtext
 {
 }
 
+.ambrosiaTextEditDisabled
+{
+	background-color: white;
+	color: black;
+}
+
 /*
 FillIn
 */
