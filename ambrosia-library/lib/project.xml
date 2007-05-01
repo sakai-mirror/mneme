@@ -2,9 +2,10 @@
 
 <project>
 	<pomVersion>3</pomVersion>
-	<extend>../master/project.xml</extend>
-	<name>ambrosia</name>
+	<extend>../../project.xml</extend>
+	<name>ambrosia_library</name>
 	<groupId>muse</groupId>
+	<id>ambrosia_library</id>
 	<currentVersion>${ambrosia.version}</currentVersion>
 	<organization>
 		<name>University of Michigan and Foothill College, ETUDES Project</name>
@@ -13,12 +14,23 @@
 	<inceptionYear>2007</inceptionYear>
 
 	<properties>
+		<!-- build as a war -->
+		<deploy.type>war</deploy.type>
 	</properties>
 
 	<dependencies>
+
 	</dependencies>
 
 	<build>
+
+		<!-- java source -->
+		<sourceDirectory>src/java</sourceDirectory>
+
+		<resources>
+
+		</resources>
+
 	</build>
 
 </project>

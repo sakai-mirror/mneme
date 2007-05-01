@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="org.muse.ambrosia.api.UiService"
+			class="org.muse.ambrosia.impl.UiServiceImpl"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
+
+	</bean>
+
+</beans>
