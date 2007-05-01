@@ -478,14 +478,16 @@ public class DeliveryControllers
 							ui.newInstructions()
 								.setText("highest-instructions", ui.newIconPropertyReference().setIcon("/icons/highest.png")))
 						.setIncluded(
-							ui.newCompareDecision().setEqualsConstant(MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy"))))
+							ui.newCompareDecision().setEqualsConstant(MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy")),
+							ui.newDecision().setDelegate(new MssDecision()).setProperty(ui.newPropertyReference().setReference("submission.assessment"))))
 				.add(
 					ui.newSection()
 						.add(
 							ui.newInstructions()
 								.setText("latest-instructions", ui.newIconPropertyReference().setIcon("/icons/latest.png")))
 						.setIncluded(
-							ui.newCompareDecision().setEqualsConstant(MultipleSubmissionSelectionPolicy.USE_LATEST.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy"))))
+							ui.newCompareDecision().setEqualsConstant(MultipleSubmissionSelectionPolicy.USE_LATEST.toString()).setProperty(ui.newPropertyReference().setReference("submission.assessment.multipleSubmissionSelectionPolicy")),
+							ui.newDecision().setDelegate(new MssDecision()).setProperty(ui.newPropertyReference().setReference("submission.assessment"))))
 				.add(
 					ui.newSection()
 						.add(
@@ -2230,11 +2232,10 @@ public class DeliveryControllers
 		 */
 		public boolean decide(Decision decision, Context context, Object focus)
 		{
-			Object o = context.get("assessment");
-			if (o == null) return false;
-			if (!(o instanceof Assessment)) return false;
+			if (focus == null) return false;
+			if (!(focus instanceof Assessment)) return false;
 
-			Assessment assessment = (Assessment) o;
+			Assessment assessment = (Assessment) focus;
 			if ((assessment.getNumSubmissionsAllowed() == null) || (assessment.getNumSubmissionsAllowed().intValue() > 1))
 			{
 				return true;
