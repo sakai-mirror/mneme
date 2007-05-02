@@ -633,7 +633,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		String statement = "SELECT P.ID FROM SAM_PUBLISHEDASSESSMENT_T P WHERE P.ID = ?";
 		Object[] fields = new Object[1];
-		fields[0] = id;
+		fields[0] = Integer.valueOf(id);
 
 		List results = m_sqlService.dbRead(statement, fields, null);
 		return !results.isEmpty();
@@ -666,7 +666,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON P.ID = PE.ASSESSMENTID" + " WHERE P.ID = ?";
 		Object[] fields = new Object[2];
 		fields[0] = "VIEW_PUBLISHED_ASSESSMENT";
-		fields[1] = assessment.getId();
+		fields[1] = Integer.valueOf(assessment.getId());
 
 		List results = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -818,7 +818,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDSECTIONMETADATA_T SMD3 ON P.SECTIONID = SMD3.SECTIONID AND SMD3.LABEL = 'RANDOMIZATION_TYPE'"
 				+ " WHERE P.ASSESSMENTID = ? ORDER BY P.SEQUENCE ASC";
 		Object[] fields = new Object[1];
-		fields[0] = assessment.getId();
+		fields[0] = Integer.valueOf(assessment.getId());
 
 		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -873,7 +873,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMFEEDBACK_T PF3 ON PI.ITEMID = PF3.ITEMID AND PF3.TYPEID = 'InCorrect Feedback'"
 				+ " ORDER BY PI.SEQUENCE ASC";
 		fields = new Object[1];
-		fields[0] = assessment.id;
+		fields[0] = Integer.valueOf(assessment.id);
 
 		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -936,7 +936,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON PI.SECTIONID = PS.SECTIONID AND PS.ASSESSMENTID = ?"
 				+ " ORDER BY PIT.ITEMID ASC, PIT.SEQUENCE ASC";
 		fields = new Object[1];
-		fields[0] = assessment.id;
+		fields[0] = Integer.valueOf(assessment.id);
 
 		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -984,7 +984,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDANSWERFEEDBACK_T PF3 ON PA.ANSWERID = PF3.ANSWERID AND PF3.TYPEID = 'InCorrect Feedback'"
 				+ " ORDER BY PA.SEQUENCE ASC";
 		fields = new Object[1];
-		fields[0] = assessment.id;
+		fields[0] = Integer.valueOf(assessment.id);
 
 		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -1050,7 +1050,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		statement = "SELECT A.RESOURCEID, A.SECTIONID" + " FROM SAM_PUBLISHEDATTACHMENT_T A"
 				+ " INNER JOIN SAM_PUBLISHEDSECTION_T S ON A.SECTIONID = S.SECTIONID" + " WHERE S.ASSESSMENTID = ?";
 		fields = new Object[1];
-		fields[0] = assessment.getId();
+		fields[0] = Integer.valueOf(assessment.getId());
 
 		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -1094,7 +1094,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " INNER JOIN SAM_PUBLISHEDITEM_T Q ON A.ITEMID = Q.ITEMID" + " INNER JOIN SAM_PUBLISHEDSECTION_T S ON Q.SECTIONID = S.SECTIONID"
 				+ " WHERE S.ASSESSMENTID = ?";
 		fields = new Object[1];
-		fields[0] = assessment.getId();
+		fields[0] = Integer.valueOf(assessment.getId());
 
 		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -1165,7 +1165,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		// get the attachments
 		String statement = "SELECT A.RESOURCEID" + " FROM SAM_PUBLISHEDATTACHMENT_T A" + " WHERE A.ASSESSMENTID = ?";
 		Object[] fields = new Object[1];
-		fields[0] = assessment.getId();
+		fields[0] = Integer.valueOf(assessment.getId());
 
 		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -1338,7 +1338,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		String statement = "SELECT AG.PUBLISHEDASSESSMENTID, AG.TOTALOVERRIDESCORE, AG.SUBMITTEDDATE, AG.AGENTID, AG.FORGRADE, AG.ATTEMPTDATE, AG.STATUS, AG.COMMENTS"
 				+ " FROM SAM_ASSESSMENTGRADING_T AG" + " WHERE AG.ASSESSMENTGRADINGID = ?";
 		Object[] fields = new Object[1];
-		fields[0] = submission.getId();
+		fields[0] = Integer.valueOf(submission.getId());
 
 		List results = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -1437,7 +1437,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " LEFT OUTER JOIN SAM_PUBLISHEDITEMTEXT_T PIT ON I.PUBLISHEDITEMTEXTID = PIT.ITEMTEXTID"
 				+ " WHERE I.ASSESSMENTGRADINGID = ?" + " ORDER BY PIT.SEQUENCE ASC";
 		Object[] fields = new Object[1];
-		fields[0] = submission.getId();
+		fields[0] = Integer.valueOf(submission.getId());
 
 		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -1524,7 +1524,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " INNER JOIN SAM_ITEMGRADING_T I ON M.ITEMGRADINGID = I.ITEMGRADINGID" + " WHERE I.ASSESSMENTGRADINGID = ?"
 				+ " ORDER BY M.CREATEDDATE ASC";
 		fields = new Object[1];
-		fields[0] = submission.getId();
+		fields[0] = Integer.valueOf(submission.getId());
 		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -1692,7 +1692,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		String statement = "SELECT AG.ASSESSMENTGRADINGID FROM SAM_ASSESSMENTGRADING_T AG WHERE AG.ASSESSMENTGRADINGID = ?";
 		Object[] fields = new Object[1];
-		fields[0] = id;
+		fields[0] = Integer.valueOf(id);
 
 		List results = m_sqlService.dbRead(statement, fields, null);
 		return !results.isEmpty();
@@ -1732,9 +1732,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " GROUP BY AG.PUBLISHEDASSESSMENTID, PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING";
 
 		Object[] fields = new Object[3];
-		fields[0] = assessment.getId();
+		fields[0] = Integer.valueOf(assessment.getId());
 		fields[1] = userId;
-		fields[2] = assessment.getId();
+		fields[2] = Integer.valueOf(assessment.getId());
 
 		List rv = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -2761,7 +2761,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ m_sqlService.getBooleanConstant(true) + " ORDER BY AG.FINALSCORE";
 
 		Object[] fields = new Object[1];
-		fields[0] = assessment.getId();
+		fields[0] = Integer.valueOf(assessment.getId());
 
 		final AssessmentServiceImpl service = this;
 		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
@@ -2800,7 +2800,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " ORDER BY SCORE";
 
 		Object[] fields = new Object[1];
-		fields[0] = questionId;
+		fields[0] = Integer.valueOf(questionId);
 
 		final AssessmentServiceImpl service = this;
 		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
@@ -3414,7 +3414,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						+ ((questionId == null) ? "" : ", ITEMID") + ")" + " VALUES (?,?,?,?,?,?,?,?,?,?,?" + ((questionId == null) ? "" : ",?")
 						+ ")";
 				fields = new Object[(questionId == null) ? 11 : 12];
-				fields[0] = section.getId();
+				fields[0] = Integer.valueOf(section.getId());
 				fields[1] = new Integer(questionPosition++);
 				fields[2] = question.getType().getDbEncoding();
 				fields[3] = question.getPoints();
@@ -3739,7 +3739,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " TOTALOVERRIDESCORE, FINALSCORE, STATUS, ATTEMPTDATE, TIMEELAPSED" + ((id == null) ? "" : ", ASSESSMENTGRADINGID") + ")"
 				+ " VALUES (?,?,?,?,?,?,?,?,?,?,?" + ((id == null) ? "" : ",?") + ")";
 		Object fields[] = new Object[(id == null) ? 11 : 12];
-		fields[0] = s.getAssessmentId();
+		fields[0] = Integer.valueOf(s.getAssessmentId());
 		fields[1] = s.getUserId();
 		fields[2] = s.getSubmittedDate();
 		fields[3] = new Integer(0); // TODO: islate
@@ -3780,11 +3780,11 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						+ " RATIONALE, ANSWERTEXT, AUTOSCORE, OVERRIDESCORE" + ((answerId == null) ? "" : ", ITEMGRADINGID") + ")"
 						+ " VALUES (?,?,?,?,?,?,?,?,?,?" + ((answerId == null) ? "" : ",?") + ")";
 				fields = new Object[(answerId == null) ? 10 : 11];
-				fields[0] = answer.getSubmission().getId();
-				fields[1] = answer.getQuestionId();
+				fields[0] = Integer.valueOf(answer.getSubmission().getId());
+				fields[1] = Integer.valueOf(answer.getQuestionId());
 				// if the entry's assessment answer is null, use the single part id
-				fields[2] = (entry.getAssessmentAnswer() != null) ? entry.getAssessmentAnswer().getPart().getId() : answer.getQuestion().getPart()
-						.getId();
+				fields[2] = Integer.valueOf((entry.getAssessmentAnswer() != null) ? entry.getAssessmentAnswer().getPart().getId() : answer.getQuestion().getPart()
+						.getId());
 				fields[3] = s.getUserId();
 				fields[4] = answer.getSubmittedDate();
 				fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
@@ -4213,12 +4213,12 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 							// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
 							+ ((answerId == null) ? "" : ",?") + ")";
 					Object[] fields = new Object[(answerId == null) ? 10 : 11];
-					fields[0] = submission.getId();
-					fields[1] = answer.getQuestion().getId();
-					fields[2] = entry.getQuestionPart().getId();
+					fields[0] = Integer.valueOf(submission.getId());
+					fields[1] = Integer.valueOf(answer.getQuestion().getId());
+					fields[2] = Integer.valueOf(entry.getQuestionPart().getId());
 					fields[3] = submission.getUserId();
 					fields[4] = answer.getSubmittedDate();
-					fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
+					fields[5] = (entry.getAssessmentAnswer() == null) ? null : Integer.valueOf(entry.getAssessmentAnswer().getId());
 					fields[6] = answer.getRationale();
 					fields[7] = entry.getAnswerText();
 					fields[8] = entry.getAutoScore();
@@ -4261,12 +4261,12 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					// PUBLISHEDITEMID = ?answer.getQuestionId() -ggolden
 					Object[] fields = new Object[7];
 					fields[0] = answer.getSubmittedDate();
-					fields[1] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
-					fields[2] = entry.getQuestionPart().getId();
+					fields[1] = (entry.getAssessmentAnswer() == null) ? null : Integer.valueOf(entry.getAssessmentAnswer().getId());
+					fields[2] = Integer.valueOf(entry.getQuestionPart().getId());
 					fields[3] = answer.getRationale();
 					fields[4] = entry.getAnswerText();
 					fields[5] = entry.getAutoScore();
-					fields[6] = entry.getId();
+					fields[6] = Integer.valueOf(entry.getId());
 
 					if (!m_sqlService.dbWrite(statement, fields))
 					{
@@ -4283,7 +4283,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				{
 					String statement = "DELETE FROM SAM_ITEMGRADING_T WHERE ITEMGRADINGID = ?";
 					Object[] fields = new Object[1];
-					fields[0] = entry.getId();
+					fields[0] = Integer.valueOf(entry.getId());
 					if (!m_sqlService.dbWrite(statement, fields))
 					{
 						// TODO: better exception
@@ -4307,8 +4307,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						.getBooleanConstant(true)) : "") + " WHERE ASSESSMENTGRADINGID = ?";
 		Object[] fields = new Object[3];
 		fields[0] = submission.getSubmittedDate();
-		fields[1] = submission.getId();
-		fields[2] = submission.getId();
+		fields[1] = Integer.valueOf(submission.getId());
+		fields[2] = Integer.valueOf(submission.getId());
 		if (!m_sqlService.dbWrite(statement, fields))
 		{
 			// TODO: better exception
@@ -4342,7 +4342,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					// read the final score
 					String statement = "SELECT FINALSCORE FROM SAM_ASSESSMENTGRADING_T WHERE ASSESSMENTGRADINGID = ?";
 					Object[] fields = new Object[1];
-					fields[0] = submission.getId();
+					fields[0] = Integer.valueOf(submission.getId());
 					final List<String> scores = new ArrayList<String>(1);
 					m_sqlService.dbRead(statement, fields, new SqlReader()
 					{
@@ -4458,10 +4458,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				// TODO: it would be nice if our ? / Boolean worked with bit fields -ggolden
 				+ ((answerId == null) ? "" : ",?") + ")";
 		Object[] fields = new Object[(answerId == null) ? 10 : 11];
-		fields[0] = answer.getSubmission().getId();
-		fields[1] = answer.getQuestion().getId();
-		answer.getQuestion().getPart().getId();
-		fields[2] = answer.getQuestion().getPart().getId();
+		fields[0] = Integer.valueOf(answer.getSubmission().getId());
+		fields[1] = Integer.valueOf(answer.getQuestion().getId());
+		fields[2] = Integer.valueOf(answer.getQuestion().getPart().getId());
 		fields[3] = answer.getSubmission().getUserId();
 		fields[4] = answer.getSubmittedDate();
 		fields[5] = null;
@@ -4576,7 +4575,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ m_sqlService.getBooleanConstant(true) + " WHERE ASSESSMENTGRADINGID = ?";
 		Object fields[] = new Object[2];
 		fields[0] = asOf;
-		fields[1] = submissionId;
+		fields[1] = Integer.valueOf(submissionId);
 		m_sqlService.dbWrite(statement, fields);
 	}
 
@@ -4917,7 +4916,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.AGENTID = ? AND AG.FORGRADE = " + m_sqlService.getBooleanConstant(false);
 		// TODO: order by id asc so we always use the lowest (oldest) if there are ever two open?
 		Object[] fields = new Object[2];
-		fields[0] = assessment.getId();
+		fields[0] = Integer.valueOf(assessment.getId());
 		fields[1] = userId;
 		List results = m_sqlService.dbRead(statement, fields, null);
 		if (results.size() > 0)
@@ -5211,7 +5210,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ m_sqlService.getBooleanConstant(true) + " WHERE ASSESSMENTGRADINGID = ? AND FORGRADE = " + m_sqlService.getBooleanConstant(false);
 		Object fields[] = new Object[2];
 		fields[0] = asOf;
-		fields[1] = submissionId;
+		fields[1] = Integer.valueOf(submissionId);
 		m_sqlService.dbWrite(statement, fields);
 	}
 }

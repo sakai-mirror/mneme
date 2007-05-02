@@ -340,7 +340,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		String statement = "SELECT M.FILESIZE, M.MIMETYPE, M.FILENAME, M.LASTMODIFIEDDATE, M.LOCATION" + " FROM SAM_MEDIA_T M"
 				+ " WHERE M.MEDIAID = ?";
 		Object[] fields = new Object[1];
-		fields[0] = attachmentRef.getId();
+		fields[0] = Integer.valueOf(attachmentRef.getId());
 		List found = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -406,7 +406,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 
 		String statement = "SELECT M.LOCATION FROM SAM_MEDIA_T M WHERE M.MEDIAID = ?";
 		Object[] fields = new Object[1];
-		fields[0] = attachment.getId();
+		fields[0] = Integer.valueOf(attachment.getId());
 		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -811,7 +811,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		String sql = "SELECT M.MEDIA" + " FROM SAM_MEDIA_T M " + " WHERE M.MEDIAID = ?";
 
 		Object[] fields = new Object[1];
-		fields[0] = attachment.getId();
+		fields[0] = Integer.valueOf(attachment.getId());
 
 		// create the body to read into
 		byte[] body = new byte[attachment.getLength().intValue()];
@@ -940,7 +940,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		fields[8] = userId;
 		fields[9] = userId;
 		fields[10] = new Integer(1);
-		fields[11] = answerId;
+		fields[11] = Integer.valueOf(answerId);
 		fields[12] = a.getFileSystemPath();
 
 		if (id != null)
@@ -1057,7 +1057,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		String sql = "SELECT M.MEDIA" + " FROM SAM_MEDIA_T M " + " WHERE M.MEDIAID = ?";
 
 		Object[] fields = new Object[1];
-		fields[0] = attachment.getId();
+		fields[0] = Integer.valueOf(attachment.getId());
 
 		// get the stream, set expectations that this could be big
 		InputStream in = m_sqlService.dbReadBinary(sql, fields, true);
@@ -1098,5 +1098,4 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 
 		return null;
 	}
-
 }
