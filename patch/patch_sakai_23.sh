@@ -49,6 +49,10 @@ svn merge -r22825:22826 https://source.sakaiproject.org/svn/db/trunk
 svn revert db-util/storage/src/java/org/sakaiproject/util/BaseDbFlatStorage.java
 #Reverted 'db-util/storage/src/java/org/sakaiproject/util/BaseDbFlatStorage.java'
 #
+# SAK-9830 (Float support in SqlService for prepared statements)
+svn merge -r29864:29865 https://source.sakaiproject.org/svn/db/trunk
+#G    db-impl/impl/src/java/org/sakaiproject/db/impl/BasicSqlService.java
+#
 #SAK-8624
 cd ../reference
 svn merge -r21831:21832 https://source.sakaiproject.org/svn/reference/trunk
