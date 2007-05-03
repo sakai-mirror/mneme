@@ -852,7 +852,8 @@ public class DeliveryControllers
 													"question-select-on-empty-alert")
 												.setLabel("question-label",
 													ui.newTextPropertyReference()
-														.setReference("qanswer.label")))
+														.setReference("qanswer.label"))
+												.setNoWrap())
 										.addColumn(
 											ui.newPropertyColumn()
 												.setProperty(
