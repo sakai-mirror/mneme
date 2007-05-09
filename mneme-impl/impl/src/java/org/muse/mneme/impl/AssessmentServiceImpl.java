@@ -2825,6 +2825,43 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		return rv;
 	}
 
+	/**
+	 * Find the highest score for this submission's user and assessment.
+	 * 
+	 * @param submission
+	 *        The submission.
+	 * @return The highest final score for the submissions's user and assessment.
+	 */
+	protected Float getSubmissionHighestScore(Submission submission)
+	{
+		String statement = "SELECT MAX(FINALSCORE) FROM SAM_ASSESSMENTGRADING_T AG WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.AGENTID = ? AND AG.FORGRADE = "
+				+ m_sqlService.getBooleanConstant(true);
+
+		Object[] fields = new Object[2];
+		fields[0] = Integer.valueOf(submission.getAssessment().getId());
+		fields[1] = submission.getUserId();
+
+		final AssessmentServiceImpl service = this;
+		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					float score = result.getFloat(1);
+					return new Float(score);
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getSubmissionHighestScore: " + e);
+					return null;
+				}
+			}
+		});
+
+		return all.isEmpty() ? null : (Float) all.get(0);
+	}
+
 	/*************************************************************************************************************************************************
 	 * Authoring Support
 	 ************************************************************************************************************************************************/
@@ -4371,6 +4408,18 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				else
 				{
 					points = submission.getTotalScore().doubleValue();
+				}
+
+				// if the mss policy is to use highest score
+				if (assessment.getMultipleSubmissionSelectionPolicy() == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED)
+				{
+					// find the highest score recorded for this user and this assessment
+					Float highestScore = getSubmissionHighestScore(submission);
+					if ((highestScore != null) && (points.doubleValue() < highestScore.doubleValue()))
+					{
+						// if this submission's points is not highest, don't record this in GB
+						return;
+					}
 				}
 
 				// post it
