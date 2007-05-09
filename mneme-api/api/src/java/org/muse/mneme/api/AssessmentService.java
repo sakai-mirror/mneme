@@ -253,6 +253,25 @@ public interface AssessmentService
 	 */
 	List<Float> getQuestionScores(String questionId);
 
+	/**
+	 * Update the assessment's gradebook entry for all users with their highest score.
+	 * 
+	 * @param assessment
+	 *        The assessment to update.
+	 * @throws AssessmentPermissionException
+	 *         if the user does not have permission to create the assessment.
+	 */
+	void updateGradebook(Assessment assessment) throws AssessmentPermissionException;
+
+	/**
+	 * Get all the assessments for the context.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return The List <Assessment> of all assessments in the context, or empty if there are none.
+	 */
+	List<Assessment> getContextAssessments(String context);
+
 	/*************************************************************************************************************************************************
 	 * Authoring Support
 	 ************************************************************************************************************************************************/

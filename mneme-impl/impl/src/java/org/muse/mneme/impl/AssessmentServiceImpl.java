@@ -691,12 +691,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						feedbackDate = m_timeService.newTime(ts.getTime());
 					}
 
-					MultipleSubmissionSelectionPolicy mssPolicy = MultipleSubmissionSelectionPolicy.parse(result.getInt(5));
+//					MultipleSubmissionSelectionPolicy mssPolicy = MultipleSubmissionSelectionPolicy.parse(result.getInt(5));
+					MultipleSubmissionSelectionPolicy mssPolicy = MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED;
 
 					AssessmentStatus status = AssessmentStatus.parse(result.getInt(6));
 
 					FeedbackDelivery delivery = FeedbackDelivery.parse(result.getInt(7));
-					boolean showStudentScore = result.getBoolean(8);
+					//boolean showStudentScore = result.getBoolean(8);
 					boolean showStatistics = result.getBoolean(9);
 					String createdBy = result.getString(10);
 					boolean unlimitedSubmissions = result.getBoolean(11);
@@ -2159,7 +2160,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						submittedDate = m_timeService.newTime(ts.getTime());
 					}
 
-					int mssPolicy = result.getInt(8);
+					//int mssPolicy = result.getInt(8);
 					FeedbackDelivery feedbackDelivery = FeedbackDelivery.parse(result.getInt(9));
 					boolean showScore = result.getBoolean(10);
 					boolean showStatistics = result.getBoolean(11);
@@ -2199,9 +2200,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					{
 						cachedAssessment.initTitle(title);
 						cachedAssessment.initFeedbackDate(feedbackDate);
-						cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
+						// cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
+						cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED);
 						cachedAssessment.initFeedbackDelivery(feedbackDelivery);
-						// cachedAssessment.initFeedbackShowScore(Boolean.valueOf(showScore));
 						cachedAssessment.initFeedbackShowStatistics(Boolean.valueOf(showStatistics));
 						cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
 					}
@@ -2332,19 +2333,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		String statement = "SELECT AG.ASSESSMENTGRADINGID, P.ID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
 				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE, PF.FEEDBACKDELIVERY, AG.FORGRADE,"
-				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING, PAC.RETRACTDATE, PE.TOGRADEBOOK,"
-				+ " SUM(PI.SCORE)"
+				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING, PAC.RETRACTDATE, PE.TOGRADEBOOK"
 				+ " FROM SAM_PUBLISHEDASSESSMENT_T P"
 				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?"
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID AND (PAC.RETRACTDATE IS NULL OR ? < PAC.RETRACTDATE)"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON P.ID = PE.ASSESSMENTID"
-				+ " INNER JOIN SAM_PUBLISHEDSECTION_T PS ON P.ID = PS.ASSESSMENTID"
-				+ " INNER JOIN SAM_PUBLISHEDITEM_T PI ON PS.SECTIONID = PI.SECTIONID"
 				+ " LEFT OUTER JOIN SAM_ASSESSMENTGRADING_T AG ON P.ID = AG.PUBLISHEDASSESSMENTID AND AG.AGENTID = ?"
-				+ " GROUP BY AG.ASSESSMENTGRADINGID, P.ID, P.TITLE, AG.FINALSCORE, AG.ATTEMPTDATE,"
-				+ " PAC.FEEDBACKDATE, AG.SUBMITTEDDATE, PE.SCORINGTYPE, PF.FEEDBACKDELIVERY, PF.SHOWSTUDENTSCORE, PF.SHOWSTATISTICS, AG.FORGRADE,"
-				+ " PAC.UNLIMITEDSUBMISSIONS, PAC.SUBMISSIONSALLOWED, PAC.STARTDATE, PAC.TIMELIMIT, PAC.DUEDATE, PAC.LATEHANDLING, PAC.RETRACTDATE, PE.TOGRADEBOOK"
 				+ " ORDER BY " + sortSql;
 
 		Object[] fields = new Object[4];
@@ -2418,7 +2413,6 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					}
 
 					int toGradebook = result.getInt(18);
-					float points = result.getFloat(19);
 
 					// for the non-submissions, create an non-null id
 					if (submissionId == null)
@@ -2459,7 +2453,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						cachedAssessment.initContext(context);
 						cachedAssessment.initTitle(title);
 						cachedAssessment.initFeedbackDate(feedbackDate);
-						cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
+						// cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.parse(mssPolicy));
+						cachedAssessment.initMultipleSubmissionSelectionPolicy(MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED);
 						cachedAssessment.initFeedbackDelivery(feedbackDelivery);
 						cachedAssessment.initNumSubmissionsAllowed(unlimitedSubmissions ? null : new Integer(submissionsAllowed));
 						cachedAssessment.initReleaseDate(releaseDate);
@@ -2468,7 +2463,6 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						cachedAssessment.initAllowLateSubmit((allowLateSubmit == 1) ? Boolean.TRUE : Boolean.FALSE);
 						cachedAssessment.initRetractDate(retractDate);
 						cachedAssessment.initGradebookIntegration(Boolean.valueOf(toGradebook == 1));
-						cachedAssessment.initTotalPoints(new Float(points));
 					}
 
 					// return a copy of the cached submission
@@ -2832,14 +2826,14 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 *        The submission.
 	 * @return The highest final score for the submissions's user and assessment.
 	 */
-	protected Float getSubmissionHighestScore(Submission submission)
+	protected Float getSubmissionHighestScore(String assessmentId, String userId)
 	{
 		String statement = "SELECT MAX(FINALSCORE) FROM SAM_ASSESSMENTGRADING_T AG WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.AGENTID = ? AND AG.FORGRADE = "
 				+ m_sqlService.getBooleanConstant(true);
 
 		Object[] fields = new Object[2];
-		fields[0] = Integer.valueOf(submission.getAssessment().getId());
-		fields[1] = submission.getUserId();
+		fields[0] = Integer.valueOf(assessmentId);
+		fields[1] = userId;
 
 		final AssessmentServiceImpl service = this;
 		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
@@ -4354,6 +4348,106 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public List<Assessment> getContextAssessments(String context)
+	{
+		String statement = "SELECT P.ID" + " FROM SAM_PUBLISHEDASSESSMENT_T P "
+				+ " INNER JOIN SAM_AUTHZDATA_T AD ON P.ID = AD.QUALIFIERID AND AD.FUNCTIONID = ? AND AD.AGENTID = ?";
+
+		Object[] fields = new Object[2];
+		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
+		fields[1] = context;
+
+		final List<Assessment> rv = new ArrayList<Assessment>();
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String assesmentId = result.getString(1);
+					Assessment a = idAssessment(assesmentId);
+					rv.add(a);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getContextAssessments: " + e);
+					return null;
+				}
+			}
+		});
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void updateGradebook(Assessment assessment) throws AssessmentPermissionException
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("updateGradebook: " + assessment.getId());
+
+		// check permission
+		secure(m_sessionManager.getCurrentSessionUserId(), GRADE_PERMISSION, assessment.getContext());
+
+		// skip if there is no gradebook integration
+		if ((assessment.getGradebookIntegration() == null) || !assessment.getGradebookIntegration().booleanValue()) return;
+
+		// try each user with a submission
+		List<String> userIds = getAssessmentSubmittedUsers(assessment);
+		for (String uid : userIds)
+		{
+			// find the user's highest score among the completed submissions
+			Float highestScore = getSubmissionHighestScore(assessment.getId(), uid);
+
+			// push this into the GB
+			try
+			{
+				m_gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(), uid, ((highestScore == null) ? null
+						: new Double(highestScore.doubleValue())));
+			}
+			catch (GradebookNotFoundException e)
+			{
+				// if there's no gradebook for this context, oh well...
+				M_log.warn("updateGradebook: (no gradebook for context): " + e);
+			}
+			catch (AssessmentNotFoundException e)
+			{
+				// if the assessment has not been registered in gb, this is a problem
+				M_log.warn("updateGradebook: (assessment has not been registered in context's gb): " + e);
+			}
+		}
+	}
+
+	/**
+	 * Get a list of the users who have submitted to the assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return A List <String> of user ids of the users who have any form of submission to the assessment.
+	 */
+	protected List<String> getAssessmentSubmittedUsers(Assessment assessment)
+	{
+		String statement = "SELECT DISTINCT AG.AGENTID FROM SAM_ASSESSMENTGRADING_T AG WHERE AG.PUBLISHEDASSESSMENTID = ? AND AG.FORGRADE = "
+				+ m_sqlService.getBooleanConstant(true);
+
+		Object[] fields = new Object[1];
+		fields[0] = Integer.valueOf(assessment.getId());
+
+		List all = m_sqlService.dbRead(statement, fields, null);
+		List<String> rv = new ArrayList<String>(all.size());
+		for (Iterator i = all.iterator(); i.hasNext();)
+		{
+			rv.add((String) i.next());
+		}
+		
+		return rv;
+	}
+
+	/**
 	 * Record this submission in the gradebook. Assume it has complete and ready to go.
 	 * 
 	 * @param submission
@@ -4414,7 +4508,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				if (assessment.getMultipleSubmissionSelectionPolicy() == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED)
 				{
 					// find the highest score recorded for this user and this assessment
-					Float highestScore = getSubmissionHighestScore(submission);
+					Float highestScore = getSubmissionHighestScore(submission.getAssessment().getId(), submission.getUserId());
 					if ((highestScore != null) && (points.doubleValue() < highestScore.doubleValue()))
 					{
 						// if this submission's points is not highest, don't record this in GB
@@ -5092,8 +5186,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		// select all the open submissions (or, just the TIMELIMIT > 0 or DUEDATE not null or RETRACTDATE not null?)
 		String statement = "SELECT AG.ASSESSMENTGRADINGID, AG.ATTEMPTDATE, AG.AGENTID, AG.FINALSCORE, AG.PUBLISHEDASSESSMENTID,"
-				+ " PAC.TIMELIMIT, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING" + " FROM SAM_ASSESSMENTGRADING_T AG"
-				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON AG.PUBLISHEDASSESSMENTID = PAC.ASSESSMENTID" + " WHERE AG.FORGRADE = "
+				+ " PAC.TIMELIMIT, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING, PE.SCORINGTYPE, PE.TOGRADEBOOK" + " FROM SAM_ASSESSMENTGRADING_T AG"
+				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON AG.PUBLISHEDASSESSMENTID = PAC.ASSESSMENTID" 
+				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON AG.PUBLISHEDASSESSMENTID = PE.ASSESSMENTID"
+				+ " WHERE AG.FORGRADE = "
 				+ m_sqlService.getBooleanConstant(false);
 
 		Object[] fields = new Object[0];
@@ -5137,6 +5233,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					}
 
 					boolean allowLate = (result.getInt(9) == 1);
+					// MultipleSubmissionSelectionPolicy mssPolicy = MultipleSubmissionSelectionPolicy.parse(result.getInt(10));
+					MultipleSubmissionSelectionPolicy mssPolicy = MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED;
+					int toGradebook = result.getInt(11);
 
 					// see if we want this one
 					boolean selected = false;
@@ -5196,6 +5295,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 							cachedAssessment.initDueDate(dueDate);
 							cachedAssessment.initAllowLateSubmit(Boolean.valueOf(allowLate));
 							cachedAssessment.initRetractDate(retractDate);
+							cachedAssessment.initMultipleSubmissionSelectionPolicy(mssPolicy);
+							cachedAssessment.initGradebookIntegration(Boolean.valueOf(toGradebook == 1));
 						}
 					}
 					return null;

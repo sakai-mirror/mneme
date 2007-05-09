@@ -122,6 +122,28 @@ public class TestControllers
 									.setTitle("home-install-all")
 									.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")), "cancel", null, "home-install-all-confirm")
 									.setStyle(Navigation.Style.button))
+								))	
+				.add(
+					ui.newSection()
+						.setTitle("home-gb-title")
+						.add(
+							ui.newTextEdit()
+								.setSize(1, 12)
+								.setProperty(ui.newPropertyReference().setReference("gbspecs.context"))
+								.setTitle("home-context"))
+						.add(
+							ui.newNavigationBar()
+								.add(ui.newNavigation()
+									.setSubmit()
+									.setDestination(ui.newDestination().setDestination("/gb"))
+									.setTitle("home-update")
+									.setStyle(Navigation.Style.button))
+//								.add(ui.newNavigation()
+//									.setSubmit()
+//									.setDestination(ui.newDestination().setDestination("/install_all"))
+//									.setTitle("home-install-all")
+//									.setConfirm(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")), "cancel", null, "home-install-all-confirm")
+//									.setStyle(Navigation.Style.button))
 								));
 	}
 
@@ -169,6 +191,24 @@ public class TestControllers
 			ui.newInterface()
 				.setTitle("install-title")
 				.setHeader("install-header")
+				.add(
+					ui.newInstructions().setText(null, ui.newPropertyReference().setReference("rv")))
+				.add(
+					ui.newNavigationBar()
+						.add(ui.newNavigation()
+							.setDestination(ui.newDestination().setDestination("/home"))
+							.setTitle("return")
+							.setStyle(Navigation.Style.button)));
+	}
+
+	/**
+	 */
+	public static Controller constructGb(UiService ui)
+	{
+		return
+			ui.newInterface()
+				.setTitle("gb-title")
+				.setHeader("gb-header")
 				.add(
 					ui.newInstructions().setText(null, ui.newPropertyReference().setReference("rv")))
 				.add(

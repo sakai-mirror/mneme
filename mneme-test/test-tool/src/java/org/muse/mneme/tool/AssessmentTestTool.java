@@ -275,7 +275,7 @@ public class AssessmentTestTool extends HttpServlet
 	/** Our tool destinations. */
 	enum Destinations
 	{
-		error, generate, home, install, install_all, simulate
+		error, gb, generate, home, install, install_all, simulate
 	}
 
 	/** Our log (commons). */
@@ -317,6 +317,9 @@ public class AssessmentTestTool extends HttpServlet
 
 	/** Our self-injected ui service reference. */
 	protected UiService ui = null;
+
+	/** The gb interface. */
+	protected Controller uiGb = null;
 
 	/** The generate interface. */
 	protected Controller uiGenerate = null;
@@ -381,6 +384,7 @@ public class AssessmentTestTool extends HttpServlet
 		uiGenerate = TestControllers.constructGenerate(ui);
 		uiSimulate = TestControllers.constructSimulate(ui);
 		uiInstall = TestControllers.constructInstall(ui);
+		uiGb = TestControllers.constructGb(ui);
 
 		M_log.info("init()");
 	}
@@ -557,6 +561,18 @@ public class AssessmentTestTool extends HttpServlet
 				installAllGet(req, res, context);
 				break;
 			}
+			case gb:
+			{
+				// we need a single parameter (specs)
+				if (parts.length != 3)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/")));
+					return;
+				}
+				gbGet(req, res, context, parts[2]);
+				break;
+			}
 			case error:
 			{
 				errorGet(req, res, context);
@@ -653,6 +669,33 @@ public class AssessmentTestTool extends HttpServlet
 		{
 			return null;
 		}
+	}
+
+	/**
+	 * Get the UI for the gb destination.
+	 * 
+	 * @param req
+	 *        Servlet request.
+	 * @param res
+	 *        Servlet response.
+	 * @param assessmentId
+	 *        The selected assessment id.
+	 * @param context
+	 *        UiContext.
+	 * @param out
+	 *        Output writer.
+	 */
+	protected void gbGet(HttpServletRequest req, HttpServletResponse res, Context context, String specsStr)
+	{
+		GbSpecs specs = new GbSpecs(specsStr);
+
+		// do the update
+		String rv = updateGb(specs.getContext());
+
+		context.put("rv", rv);
+
+		// render
+		ui.render(uiGb, context);
 	}
 
 	/**
@@ -1410,6 +1453,7 @@ public class AssessmentTestTool extends HttpServlet
 		context.put("gspecs", new GenerateSpecs());
 		context.put("sspecs", new SimulateSpecs());
 		context.put("ispecs", new InstallSpecs());
+		context.put("gbspecs", new GbSpecs());
 
 		// render
 		ui.render(uiHome, context);
@@ -1442,6 +1486,8 @@ public class AssessmentTestTool extends HttpServlet
 		context.put("sspecs", sspecs);
 		InstallSpecs ispecs = new InstallSpecs();
 		context.put("ispecs", ispecs);
+		GbSpecs gbspecs = new GbSpecs();
+		context.put("gbspecs", gbspecs);
 		String destination = ui.decode(req, context);
 
 		// look for special codes in the destination
@@ -1461,6 +1507,12 @@ public class AssessmentTestTool extends HttpServlet
 		{
 			// add the specs
 			destination = destination + "/" + ispecs.toString();
+		}
+
+		else if ("/gb".equals(destination))
+		{
+			// add the specs
+			destination = destination + "/" + gbspecs.toString();
 		}
 
 		// redirect to home
@@ -1993,5 +2045,34 @@ public class AssessmentTestTool extends HttpServlet
 				establishUser(currentUser, null);
 			}
 		}
+	}
+
+	/**
+	 * Update the Gradebook entries for each test in the context.
+	 * 
+	 * @param context
+	 *        The context (site id).
+	 */
+	protected String updateGb(String context)
+	{
+		String rv = "GB updated in site " + context;
+
+		try
+		{
+			// get a list of the tests in the site
+			List<Assessment> tests = assessmentService.getContextAssessments(context);
+
+			// for each one, update the gb
+			for (Assessment test : tests)
+			{
+				assessmentService.updateGradebook(test);
+			}
+		}
+		catch (AssessmentPermissionException e)
+		{
+			rv += " FAILED due to lack of permissions!";
+		}
+
+		return rv;
 	}
 }
