@@ -204,6 +204,7 @@ public class DeliveryControllers
 									"list-format-tries",
 									ui.newPropertyReference().setReference("submission.siblingCount"),
 									ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed").setMissingText("infinite"))
+								.setNoWrap()
 								.setTitle("list-header-tries"))
 						.addColumn(
 							ui.newPropertyColumn()
@@ -244,14 +245,15 @@ public class DeliveryControllers
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")),
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater")))))
-						.addColumn(
-							ui.newPropertyColumn()
-								.setProperty("list-format-worth",
-									ui.newPropertyReference().setReference("submission.assessment.totalPoints").setFormatDelegate(new FormatListWorth())
-									//,ui.newPropertyReference().setReference("submission.assessment").setFormatDelegate(new FormatMssPolicy())
-									)
-								.setTitle("list-header-worth")
-								.setNoWrap()))
+//						.addColumn(
+//							ui.newPropertyColumn()
+//								.setProperty("list-format-worth",
+//									ui.newPropertyReference().setReference("submission.assessment.totalPoints").setFormatDelegate(new FormatListWorth())
+//									//,ui.newPropertyReference().setReference("submission.assessment").setFormatDelegate(new FormatMssPolicy())
+//									)
+//								.setTitle("list-header-worth")
+//								.setNoWrap())
+							)
 //				.add(
 //					ui.newSection()
 //						.add(

@@ -196,8 +196,7 @@ public class AssessmentTestTool extends HttpServlet
 
 		public InstallSpecs(String value)
 		{
-			String[] values = StringUtil.split(value, "x");
-			context = values[0];
+			context = value;
 		}
 
 		public String getContext()
@@ -685,8 +684,14 @@ public class AssessmentTestTool extends HttpServlet
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void gbGet(HttpServletRequest req, HttpServletResponse res, Context context, String specsStr)
+	protected void gbGet(HttpServletRequest req, HttpServletResponse res, Context context, String specsStr) throws IOException
 	{
+		// if not logged in as the super user, we won't do anything
+		if (!securityService.isSuperUser())
+		{
+			redirectError(req, res);
+		}
+
 		GbSpecs specs = new GbSpecs(specsStr);
 
 		// do the update
@@ -1448,8 +1453,14 @@ public class AssessmentTestTool extends HttpServlet
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void homeGet(HttpServletRequest req, HttpServletResponse res, Context context)
+	protected void homeGet(HttpServletRequest req, HttpServletResponse res, Context context) throws IOException
 	{
+		// if not logged in as the super user, we won't do anything
+		if (!securityService.isSuperUser())
+		{
+			redirectError(req, res);
+		}
+
 		context.put("gspecs", new GenerateSpecs());
 		context.put("sspecs", new SimulateSpecs());
 		context.put("ispecs", new InstallSpecs());
@@ -1473,6 +1484,12 @@ public class AssessmentTestTool extends HttpServlet
 	 */
 	protected void homePost(HttpServletRequest req, HttpServletResponse res, Context context) throws IOException
 	{
+		// if not logged in as the super user, we won't do anything
+		if (!securityService.isSuperUser())
+		{
+			redirectError(req, res);
+		}
+
 		if (!context.getPostExpected())
 		{
 			redirectError(req, res);
@@ -1533,8 +1550,14 @@ public class AssessmentTestTool extends HttpServlet
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void installAllGet(HttpServletRequest req, HttpServletResponse res, Context context)
+	protected void installAllGet(HttpServletRequest req, HttpServletResponse res, Context context) throws IOException
 	{
+		// if not logged in as the super user, we won't do anything
+		if (!securityService.isSuperUser())
+		{
+			redirectError(req, res);
+		}
+
 		// do the install
 		String rv = installMnemeAll();
 
@@ -1558,8 +1581,14 @@ public class AssessmentTestTool extends HttpServlet
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void installGet(HttpServletRequest req, HttpServletResponse res, Context context, String specsStr)
+	protected void installGet(HttpServletRequest req, HttpServletResponse res, Context context, String specsStr) throws IOException
 	{
+		// if not logged in as the super user, we won't do anything
+		if (!securityService.isSuperUser())
+		{
+			redirectError(req, res);
+		}
+
 		InstallSpecs specs = new InstallSpecs(specsStr);
 
 		// do the install
@@ -1791,8 +1820,14 @@ public class AssessmentTestTool extends HttpServlet
 	 * @param out
 	 *        Output writer.
 	 */
-	protected void simulateGet(HttpServletRequest req, HttpServletResponse res, Context context, String specsStr)
+	protected void simulateGet(HttpServletRequest req, HttpServletResponse res, Context context, String specsStr) throws IOException
 	{
+		// if not logged in as the super user, we won't do anything
+		if (!securityService.isSuperUser())
+		{
+			redirectError(req, res);
+		}
+
 		SimulateSpecs specs = new SimulateSpecs(specsStr);
 
 		// do the simulation

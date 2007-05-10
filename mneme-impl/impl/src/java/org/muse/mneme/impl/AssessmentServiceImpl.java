@@ -668,6 +668,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		fields[0] = "VIEW_PUBLISHED_ASSESSMENT";
 		fields[1] = Integer.valueOf(assessment.getId());
 
+		// collect an id if we need to update the SAM_PUBLISHEDEVALUATION_T SCORINGTYPE from 2 to 1
+		final List<String> toConvert = new ArrayList<String>();
+
 		List results = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -691,13 +694,19 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						feedbackDate = m_timeService.newTime(ts.getTime());
 					}
 
-//					MultipleSubmissionSelectionPolicy mssPolicy = MultipleSubmissionSelectionPolicy.parse(result.getInt(5));
+					// check if we need to convert from latest to highest
+					if (result.getInt(5) == 2)
+					{
+						toConvert.add(title);
+					}
+
+					// MultipleSubmissionSelectionPolicy mssPolicy = MultipleSubmissionSelectionPolicy.parse(result.getInt(5));
 					MultipleSubmissionSelectionPolicy mssPolicy = MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED;
 
 					AssessmentStatus status = AssessmentStatus.parse(result.getInt(6));
 
 					FeedbackDelivery delivery = FeedbackDelivery.parse(result.getInt(7));
-					//boolean showStudentScore = result.getBoolean(8);
+					// boolean showStudentScore = result.getBoolean(8);
 					boolean showStatistics = result.getBoolean(9);
 					String createdBy = result.getString(10);
 					boolean unlimitedSubmissions = result.getBoolean(11);
@@ -774,6 +783,15 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				}
 			}
 		});
+
+		// if we detected an assessment set to latest mss policy, change it!
+		if (!toConvert.isEmpty())
+		{
+			statement = "UPDATE SAM_PUBLISHEDEVALUATION_T SET SCORINGTYPE = 1 WHERE ASSESSMENTID = ?";
+			fields = new Object[1];
+			fields[0] = Integer.valueOf(assessment.getId());
+			m_sqlService.dbWrite(statement, fields);
+		}
 
 		if (!results.isEmpty())
 		{

@@ -33,8 +33,7 @@ public class GbSpecs
 
 	public GbSpecs(String value)
 	{
-		String[] values = StringUtil.split(value, "x");
-		context = values[0];
+		context = value;
 	}
 
 	public String getContext()

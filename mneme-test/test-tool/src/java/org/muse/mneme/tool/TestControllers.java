@@ -72,6 +72,11 @@ public class TestControllers
 							ui.newNavigationBar()
 								.add(ui.newNavigation()
 									.setSubmit()
+									.setConfirm(
+										ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")),
+										"cancel",
+										null,
+										"confirm-generate")
 									.setDestination(ui.newDestination().setDestination("/generate"))
 									.setTitle("home-generate")
 									.setStyle(Navigation.Style.button)))
@@ -98,6 +103,11 @@ public class TestControllers
 							ui.newNavigationBar()
 								.add(ui.newNavigation()
 									.setSubmit()
+									.setConfirm(
+										ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")),
+										"cancel",
+										null,
+										"confirm-simulate")
 									.setDestination(ui.newDestination().setDestination("/simulate"))
 									.setTitle("home-simulate")
 									.setStyle(Navigation.Style.button))))
@@ -106,13 +116,18 @@ public class TestControllers
 						.setTitle("home-install-title")
 						.add(
 							ui.newTextEdit()
-								.setSize(1, 12)
+								.setSize(1, 50)
 								.setProperty(ui.newPropertyReference().setReference("ispecs.context"))
 								.setTitle("home-context"))
 						.add(
 							ui.newNavigationBar()
 								.add(ui.newNavigation()
 									.setSubmit()
+									.setConfirm(
+										ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")),
+										"cancel",
+										null,
+										"confirm-install")
 									.setDestination(ui.newDestination().setDestination("/install"))
 									.setTitle("home-install")
 									.setStyle(Navigation.Style.button))
@@ -128,13 +143,18 @@ public class TestControllers
 						.setTitle("home-gb-title")
 						.add(
 							ui.newTextEdit()
-								.setSize(1, 12)
+								.setSize(1, 50)
 								.setProperty(ui.newPropertyReference().setReference("gbspecs.context"))
 								.setTitle("home-context"))
 						.add(
 							ui.newNavigationBar()
 								.add(ui.newNavigation()
 									.setSubmit()
+									.setConfirm(
+										ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("true")),
+										"cancel",
+										null,
+										"confirm-gb")
 									.setDestination(ui.newDestination().setDestination("/gb"))
 									.setTitle("home-update")
 									.setStyle(Navigation.Style.button))
