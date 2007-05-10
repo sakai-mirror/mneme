@@ -254,6 +254,7 @@ public class DeliveryControllers
 //								.setTitle("list-header-worth")
 //								.setNoWrap())
 							)
+				.add(ui.newInstructions().setText("list-highest-note"))
 //				.add(
 //					ui.newSection()
 //						.add(
