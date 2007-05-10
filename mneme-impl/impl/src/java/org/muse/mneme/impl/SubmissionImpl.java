@@ -748,6 +748,9 @@ public class SubmissionImpl implements Submission
 	 */
 	public Float getTotalScore()
 	{
+		// Note: treat this as getGrade() - later make getGrade() and let this always return the score, graded or not -ggolden
+		if (!getIsGraded().booleanValue()) return new Float(0);
+
 		// if our special "total score" is set, use this, otherwise we compute
 		if (this.totalScore != null) return this.totalScore;
 

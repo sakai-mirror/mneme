@@ -204,6 +204,7 @@ public class DeliveryControllers
 									"list-format-tries",
 									ui.newPropertyReference().setReference("submission.siblingCount"),
 									ui.newPropertyReference().setReference("submission.assessment.numSubmissionsAllowed").setMissingText("infinite"))
+								.setNoWrap()
 								.setTitle("list-header-tries"))
 						.addColumn(
 							ui.newPropertyColumn()
@@ -244,20 +245,24 @@ public class DeliveryControllers
 											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")),
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater")))))
-						.addColumn(
-							ui.newPropertyColumn()
-								.setProperty("list-format-worth",
-									ui.newPropertyReference().setReference("submission.assessment.totalPoints").setFormatDelegate(new FormatListWorth()),
-									ui.newPropertyReference().setReference("submission.assessment").setFormatDelegate(new FormatMssPolicy()))
-								.setTitle("list-header-worth")
-								.setNoWrap()))
-				.add(
-					ui.newSection()
-						.add(
-							ui.newIconKey()
-								.setTitle("list-key-title")
-								.addIcon("/icons/highest.png", ui.newMessage().setMessage("list-key-highest"))
-								.addIcon("/icons/latest.png", ui.newMessage().setMessage("list-key-latest"))));
+//						.addColumn(
+//							ui.newPropertyColumn()
+//								.setProperty("list-format-worth",
+//									ui.newPropertyReference().setReference("submission.assessment.totalPoints").setFormatDelegate(new FormatListWorth())
+//									//,ui.newPropertyReference().setReference("submission.assessment").setFormatDelegate(new FormatMssPolicy())
+//									)
+//								.setTitle("list-header-worth")
+//								.setNoWrap())
+							)
+				.add(ui.newInstructions().setText("list-highest-note"))
+//				.add(
+//					ui.newSection()
+//						.add(
+//							ui.newIconKey()
+//								.setTitle("list-key-title")
+//								.addIcon("/icons/highest.png", ui.newMessage().setMessage("list-key-highest"))
+//								.addIcon("/icons/latest.png", ui.newMessage().setMessage("list-key-latest"))))
+								;
 	}
 
 	/**
