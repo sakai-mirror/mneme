@@ -175,8 +175,6 @@ public class QuestionPartImpl implements QuestionPart
 			}
 		}
 
-		if (rv.isEmpty()) return null;
-
 		return rv;
 	}
 
@@ -201,8 +199,6 @@ public class QuestionPartImpl implements QuestionPart
 				rv.add(answer);
 			}
 		}
-
-		if (rv.isEmpty()) return null;
 
 		return rv;
 	}

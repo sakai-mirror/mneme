@@ -984,11 +984,14 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		{
 			if (this.entries.size() != question.getPart().getAnswersAsAuthored().size())
 			{
-				M_log.warn("verifyEntries: fillin/numeric: num answers: " + question.getPart().getAnswersAsAuthored().size()
+				String msg = "verifyEntries: fillin/numeric: num answers: " + question.getPart().getAnswersAsAuthored().size()
 						+ " doesn't match num entries: " + this.entries.size() + " submission: " + this.getSubmission().getId() + " question: "
-						+ question.getId());
-				throw new RuntimeException();
+						+ question.getId();
+				M_log.warn(msg);
+				throw new RuntimeException(msg);
 			}
+
+			boolean fixOrder = false;
 			for (int i = 0; i < this.entries.size(); i++)
 			{
 				// check that the entry is to the part and answer
@@ -996,18 +999,58 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 				AssessmentAnswer answer = question.getPart().getAnswersAsAuthored().get(i);
 				if (!entry.questionPartId.equals(question.getPart().getId()))
 				{
-					M_log.warn("verifyEntries: fillin/numeric: entry / answer part not aligned: entry part: " + entry.questionPartId
+					String msg = "verifyEntries: fillin/numeric: entry / answer part not aligned: entry part: " + entry.questionPartId
 							+ " question single part: " + question.getPart().getId() + " submission: " + this.getSubmission().getId() + " question: "
-							+ question.getId());
-					throw new RuntimeException();
+							+ question.getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				if (entry.answerId == null)
+				{
+					String msg = "verifyEntries: fillin/numeric: entry has null answer id: part: " + entry.questionPartId + " question single part: "
+							+ question.getPart().getId() + " submission: " + this.getSubmission().getId() + " question: " + question.getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+
 				}
 
 				if (!entry.answerId.equals(answer.getId()))
 				{
-					M_log.warn("verifyEntries: fillin/numeric: entry / answer answer id not aligned: entry answer id: " + entry.answerId
-							+ " answer id: " + answer.getId() + " submission: " + this.getSubmission().getId() + " question: " + question.getId());
-					throw new RuntimeException();
+					// we can fix this
+					fixOrder = true;
+					// String msg = "verifyEntries: fillin/numeric: entry / answer answer id not aligned: entry answer id: " + entry.answerId
+					// + " answer id: " + answer.getId() + " submission: " + this.getSubmission().getId() + " question: " + question.getId();
+					// M_log.warn(msg);
+					// throw new RuntimeException(msg);
 				}
+			}
+
+			// if needed, re-arrange the this.entries to that they match the question.getPart().getAnswersAsAuthored()
+			if (fixOrder)
+			{
+				String msg = "verifyEntries: fillin/numeric: CORRECTED: entry / answer ids not aligned:  submission: "
+						+ this.getSubmission().getId() + " question: " + question.getId();
+				M_log.info(msg);
+				
+				List<SubmissionAnswerEntryImpl> ordered = new ArrayList<SubmissionAnswerEntryImpl>(this.entries.size());
+				List<? extends AssessmentAnswer> questionAnswers = question.getPart().getAnswersAsAuthored();
+				for (AssessmentAnswer answer : questionAnswers)
+				{					
+					// find the entry with this answer id
+					for (SubmissionAnswerEntryImpl entry : this.entries)
+					{
+						if (entry.answerId.equals(answer.getId()))
+						{
+							// move the entry to the new list
+							ordered.add(entry);
+							break;
+						}
+					}
+				}
+				
+				// use the new list
+				this.entries = ordered;
 			}
 		}
 
@@ -1016,9 +1059,10 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		{
 			if (this.entries.size() != question.getParts().size())
 			{
-				M_log.warn("verifyEntries: matching: num parts: " + question.getParts().size() + " doesn't match num entries: " + this.entries.size()
-						+ " submission: " + this.getSubmission().getId() + " question: " + question.getId());
-				throw new RuntimeException();
+				String msg = "verifyEntries: matching: num parts: " + question.getParts().size() + " doesn't match num entries: "
+						+ this.entries.size() + " submission: " + this.getSubmission().getId() + " question: " + question.getId();
+				M_log.warn(msg);
+				throw new RuntimeException(msg);
 			}
 			for (int i = 0; i < this.entries.size(); i++)
 			{
@@ -1027,9 +1071,10 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 				QuestionPart part = question.getParts().get(i);
 				if (!entry.questionPartId.equals(part.getId()))
 				{
-					M_log.warn("verifyEntries: matching: entry / question part not aligned: entry part: " + entry.questionPartId + " question part: "
-							+ part.getId() + " submission: " + this.getSubmission().getId() + " question: " + question.getId());
-					throw new RuntimeException();
+					String msg = "verifyEntries: matching: entry / question part not aligned: entry part: " + entry.questionPartId
+							+ " question part: " + part.getId() + " submission: " + this.getSubmission().getId() + " question: " + question.getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
 				}
 			}
 		}
@@ -1039,17 +1084,19 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		{
 			if (this.entries.size() < 1)
 			{
-				M_log.warn("verifyEntries: (other): no entries: " + " submission: " + this.getSubmission().getId() + " question: "
-						+ this.getQuestion().getId());
-				throw new RuntimeException();
+				String msg = "verifyEntries: (other): no entries: " + " submission: " + this.getSubmission().getId() + " question: "
+						+ this.getQuestion().getId();
+				M_log.warn(msg);
+				throw new RuntimeException(msg);
 			}
 
 			if ((this.entries.size() > 1)
 					&& ((question.getType() != QuestionType.multipleCorrect) && (question.getType() != QuestionType.fileUpload)))
 			{
-				M_log.warn("verifyEntries: (other): too many entries: " + this.entries.size() + " submission: " + this.getSubmission().getId()
-						+ " question: " + this.getQuestion().getId());
-				throw new RuntimeException();
+				String msg = "verifyEntries: (other): too many entries: " + this.entries.size() + " submission: " + this.getSubmission().getId()
+						+ " question: " + this.getQuestion().getId();
+				M_log.warn(msg);
+				throw new RuntimeException(msg);
 			}
 
 			// each entry needs to be to the single part
@@ -1057,10 +1104,11 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 			{
 				if (!entry.questionPartId.equals(question.getPart().getId()))
 				{
-					M_log.warn("verifyEntries: (other): entry part: " + entry.questionPartId + " doesn't match question part: "
+					String msg = "verifyEntries: (other): entry part: " + entry.questionPartId + " doesn't match question part: "
 							+ question.getPart().getId() + " submission: " + this.getSubmission().getId() + " question: "
-							+ this.getQuestion().getId());
-					throw new RuntimeException();
+							+ this.getQuestion().getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
 				}
 			}
 		}
