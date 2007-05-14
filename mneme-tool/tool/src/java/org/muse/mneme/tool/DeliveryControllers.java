@@ -946,7 +946,7 @@ public class DeliveryControllers
 										.setOnEmptyAlert(
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
 											"question-fillin-on-empty-alert")
-										.setText(null, ui.newTextPropertyReference().setReference("answer.question.part.title"))
+										.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.part.title"))
 										.setReadOnly(ui.newPropertyReference().setReference("review"))
 										.setFocus(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")))
 										.setProperty(
@@ -974,7 +974,7 @@ public class DeliveryControllers
 										.setOnEmptyAlert(
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
 											"question-fillin-on-empty-alert")
-										.setText(null, ui.newTextPropertyReference().setReference("answer.question.part.title"))
+										.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.part.title"))
 										.setReadOnly(ui.newPropertyReference().setReference("review"))
 										.setFocus(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")))
 										.setProperty(
