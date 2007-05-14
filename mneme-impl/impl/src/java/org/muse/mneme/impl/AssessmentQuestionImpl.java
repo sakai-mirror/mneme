@@ -24,6 +24,8 @@ package org.muse.mneme.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentAnswer;
 import org.muse.mneme.api.AssessmentQuestion;
 import org.muse.mneme.api.AssessmentSection;
@@ -35,6 +37,9 @@ import org.sakaiproject.entity.cover.EntityManager;
 
 public class AssessmentQuestionImpl implements AssessmentQuestion
 {
+	/** Our logger. */
+	private static Log M_log = LogFactory.getLog(AssessmentQuestionImpl.class);
+
 	/** Ordering logic within the assessment. */
 	public class MyAssessmentOrdering implements Ordering<AssessmentQuestion>
 	{
@@ -243,6 +248,271 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	protected transient MySectionOrdering sectionOrdering = new MySectionOrdering(this);
 
 	protected QuestionType type = null;
+
+	/**
+	 * Check that the question and its answers are well formed.
+	 */
+	protected void verifyQuesion()
+	{
+		switch (this.type)
+		{
+			case fillIn:
+			case numeric:
+			{
+				// fillin and numeric need a single part, and an answer for each fill-in box, with each answer marked as correct
+				if (this.parts.size() != 1)
+				{
+					String msg = "verifyQuesion: (fillin/numeric): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				// TODO: check that the part's answers.size() matches the fill in blanks in the question.
+
+				for (AssessmentAnswerImpl answer : this.parts.get(0).answers)
+				{
+					if (answer.id == null)
+					{
+						String msg = "verifyQuesion: (fillin/numeric): null answer id: question: " + getId();
+						M_log.warn(msg);
+						throw new RuntimeException(msg);
+					}
+
+					if ((answer.isCorrect == null) || (!answer.isCorrect.booleanValue()))
+					{
+						// we can correct this
+						answer.setIsCorrect(Boolean.TRUE);
+						String msg = "verifyQuesion: (fillin/numeric): CORRECTED: part answer not marked correct : answer " + answer.id + " part: "
+								+ this.parts.get(0).id + " question: " + getId();
+						M_log.info(msg);
+						// throw new RuntimeException(msg);
+					}
+				}
+
+				break;
+			}
+
+			case audioRecording:
+			{
+				break;
+			}
+
+			case essay:
+			{
+				// essay needs a single part and a single answer
+				if (this.parts.size() != 1)
+				{
+					String msg = "verifyQuesion: (essay): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				if (this.parts.get(0).answers.size() != 1)
+				{
+					String msg = "verifyQuesion: (essay): num answers to single part != 1 = " + this.parts.get(0).answers.size() + " part: "
+							+ this.parts.get(0).id + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				break;
+			}
+
+			case fileUpload:
+			{
+				// file upload needs a single part and no answer (a single answer?).
+				if (this.parts.size() != 1)
+				{
+					String msg = "verifyQuesion: (fileUpload): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				// if (this.parts.get(0).answers.size() != 1)
+				// {
+				// String msg = "verifyQuesion: (fileUpload): num answers to single part != 1 = " + this.parts.get(0).answers.size() + " part: "
+				// + this.parts.get(0).id + " question: " + getId();
+				// M_log.warn(msg);
+				// throw new RuntimeException(msg);
+				// }
+
+				if (this.parts.get(0).answers.size() != 0)
+				{
+					String msg = "verifyQuesion: (fileUpload): expecting 0 answers, found: " + this.parts.get(0).answers.size() + " part: "
+							+ this.parts.get(0).id + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				break;
+			}
+
+			case matching:
+			{
+				// matching needs a bunch of parts, each with the same number of answers, each with exactly one marked correct
+				break;
+			}
+
+			case multipleChoice:
+			{
+				// mc needs a single part with one or more answers, with exactly one marked correct
+				if (this.parts.size() != 1)
+				{
+					String msg = "verifyQuesion: (multipleChoice): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				if (this.parts.get(0).answers.isEmpty())
+				{
+					String msg = "verifyQuesion: (multipleChoice): no answers: part: " + this.parts.get(0).id + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				int count = 0;
+				for (AssessmentAnswerImpl answer : this.parts.get(0).answers)
+				{
+					if ((answer.isCorrect != null) && (answer.isCorrect.booleanValue()))
+					{
+						count++;
+					}
+				}
+				if (count != 1)
+				{
+					String msg = "verifyQuesion: (multipleChoice): # correct answers != 1 = " + count + " : part: " + this.parts.get(0).id
+							+ " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				break;
+			}
+
+			case multipleCorrect:
+			{
+				// multi-choice needs a single part with one or more answers, with one or more marked correct
+				if (this.parts.size() != 1)
+				{
+					String msg = "verifyQuesion: (multipleCorrect): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				if (this.parts.get(0).answers.isEmpty())
+				{
+					String msg = "verifyQuesion: (multipleCorrect): no answers: part: " + this.parts.get(0).id + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				int count = 0;
+				for (AssessmentAnswerImpl answer : this.parts.get(0).answers)
+				{
+					if ((answer.isCorrect != null) && (answer.isCorrect.booleanValue()))
+					{
+						count++;
+					}
+				}
+				if (count == 0)
+				{
+					String msg = "verifyQuesion: (multipleCorrect): 0 correct answers : part: " + this.parts.get(0).id + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				break;
+			}
+
+			case survey:
+			{
+				// survey needs a single part with one or more answers, none of which are correct
+				if (this.parts.size() != 1)
+				{
+					String msg = "verifyQuesion: (survey): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				if (this.parts.get(0).answers.isEmpty())
+				{
+					String msg = "verifyQuesion: (survey): no answers: part: " + this.parts.get(0).id + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				int count = 0;
+				for (AssessmentAnswerImpl answer : this.parts.get(0).answers)
+				{
+					if ((answer.isCorrect != null) && (answer.isCorrect.booleanValue()))
+					{
+						count++;
+					}
+				}
+				if (count != 0)
+				{
+					String msg = "verifyQuesion: (survey): # answers marked correct: " + count + " : part: " + this.parts.get(0).id + " question: "
+							+ getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				break;
+			}
+
+			case trueFalse:
+			{
+				// true/false needs two answers, one "true" and one "false" (case insensitive), with only one marked correct
+				if (this.parts.size() != 1)
+				{
+					String msg = "verifyQuesion: (trueFalse): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				if (this.parts.get(0).answers.isEmpty())
+				{
+					String msg = "verifyQuesion: (trueFalse): no answers: part: " + this.parts.get(0).id + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				if (this.parts.get(0).answers.size() != 2)
+				{
+					String msg = "verifyQuesion: (trueFalse): expecting 2 answers, got: " + this.parts.get(0).answers.size() + " part: "
+							+ this.parts.get(0).id + " question: " + getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				int count = 0;
+				// TODO: check for existence of "true" and "false"
+				for (AssessmentAnswerImpl answer : this.parts.get(0).answers)
+				{
+					if ((answer.isCorrect != null) && (answer.isCorrect.booleanValue()))
+					{
+						count++;
+					}
+				}
+				if (count != 1)
+				{
+					String msg = "verifyQuesion: (trueFalse): # correct answers != 1 = " + count + " : part: " + this.parts.get(0).id + " question: "
+							+ getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+
+				break;
+			}
+
+			default:
+			{
+				String msg = "verifyQuesion: (unknown type): question: " + getId();
+				M_log.warn(msg);
+				throw new RuntimeException(msg);
+			}
+		}
+	}
 
 	/**
 	 * Construct
@@ -666,17 +936,14 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 			for (QuestionPart part : this.parts)
 			{
 				List<AssessmentAnswer> correct = part.getCorrectAnswers();
-				if (correct != null)
+				for (AssessmentAnswer answer : correct)
 				{
-					for (AssessmentAnswer answer : correct)
-					{
-						rv.append(answer.getText() + ", ");
-					}
+					rv.append(answer.getText() + ", ");
 				}
 			}
 
 			// remove the last two characters (the trailing ", ")
-			rv.setLength(rv.length() - 2);
+			if (rv.length() - 2 >= 0) rv.setLength(rv.length() - 2);
 
 			return rv.toString();
 		}

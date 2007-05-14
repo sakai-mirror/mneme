@@ -1151,6 +1151,15 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			}
 		});
 
+		// verify what we read
+		for (AssessmentSectionImpl section : assessment.sections)
+		{
+			for (AssessmentQuestionImpl question : section.questions)
+			{
+				question.verifyQuesion();
+			}
+		}
+
 		// update the cache if cached
 		AssessmentImpl cached = getCachedAssessment(assessment.getId());
 		if (cached != null)
