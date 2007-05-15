@@ -982,13 +982,16 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		// fillin and numeric need an entry per assessment question (single part) answer, with answer ids set
 		if ((question.getType() == QuestionType.fillIn) || (question.getType() == QuestionType.numeric))
 		{
+			// would be nice, but there are tests with a single entry for multiple answers
 			if (this.entries.size() != question.getPart().getAnswersAsAuthored().size())
 			{
-				String msg = "verifyEntries: fillin/numeric: num answers: " + question.getPart().getAnswersAsAuthored().size()
-						+ " doesn't match num entries: " + this.entries.size() + " submission: " + this.getSubmission().getId() + " question: "
-						+ question.getId();
-				M_log.warn(msg);
-				throw new RuntimeException(msg);
+				// we cannot continue with this entry
+				return;
+//				String msg = "verifyEntries: fillin/numeric: num answers: " + question.getPart().getAnswersAsAuthored().size()
+//						+ " doesn't match num entries: " + this.entries.size() + " submission: " + this.getSubmission().getId() + " question: "
+//						+ question.getId();
+//				M_log.warn(msg);
+//				throw new RuntimeException(msg);
 			}
 
 			boolean fixOrder = false;
