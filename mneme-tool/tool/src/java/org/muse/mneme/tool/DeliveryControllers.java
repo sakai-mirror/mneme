@@ -1295,9 +1295,8 @@ public class DeliveryControllers
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/list"))
 								.setIncluded(
-									ui.newCompareDecision()
-										.setEqualsConstant(FeedbackDelivery.IMMEDIATE.toString())
-										.setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackDelivery"))
+									ui.newDecision()
+										.setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackNow"))
 										.setReversed()))
 						.add(
 							ui.newNavigation()
@@ -1309,9 +1308,8 @@ public class DeliveryControllers
 								.setStyle(Navigation.Style.button)
 								.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.id")))
 								.setIncluded(
-									ui.newCompareDecision()
-										.setEqualsConstant(FeedbackDelivery.IMMEDIATE.toString())
-										.setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackDelivery"))))
+									ui.newDecision()
+										.setProperty(ui.newPropertyReference().setReference("submission.assessment.feedbackNow"))))
 						.setId("nav"));
 	}
 

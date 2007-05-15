@@ -1961,9 +1961,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// if we have no authored message or URL, skip right to ...
 		if ((submission.getAssessment().getSubmitMessage() == null) && (submission.getAssessment().getSubmitUrl() == null))
 		{
-			// if the assessment is marked for immediate review, go to review, else to list
+			// if the assessment review is allowed, go to review, else to list
 			String dest = "/list";
-			if (submission.getAssessment().getFeedbackDelivery() == FeedbackDelivery.IMMEDIATE)
+			if (submission.getAssessment().getFeedbackNow().booleanValue())
 			{
 				dest = "/review/" + submission.getId();
 			}
