@@ -1158,6 +1158,21 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			{
 				question.verifyQuestion();
 			}
+
+			// also makes sure each section has at least one question
+			if (section.questions.isEmpty())
+			{
+				String msg = "readAssessmentSections: section with no questions: section: " + section.id + " test: " + assessment.getId();
+				M_log.warn(msg);
+				throw new RuntimeException(msg);
+			}
+			if ((section.getQuestionLimit() != null) && (section.getQuestionLimit().intValue() < 1))
+			{
+				String msg = "readAssessmentSections: section with <1 limit: " + section.getQuestionLimit().intValue() + " section: " + section.id
+						+ " test: " + assessment.getId();
+				M_log.warn(msg);
+				throw new RuntimeException(msg);
+			}
 		}
 
 		// update the cache if cached
