@@ -1156,7 +1156,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		{
 			for (AssessmentQuestionImpl question : section.questions)
 			{
-				question.verifyQuesion();
+				question.verifyQuestion();
 			}
 
 			// also makes sure each section has at least one question

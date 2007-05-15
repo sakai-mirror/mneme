@@ -982,13 +982,16 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		// fillin and numeric need an entry per assessment question (single part) answer, with answer ids set
 		if ((question.getType() == QuestionType.fillIn) || (question.getType() == QuestionType.numeric))
 		{
+			// would be nice, but there are tests with a single entry for multiple answers
 			if (this.entries.size() != question.getPart().getAnswersAsAuthored().size())
 			{
-				String msg = "verifyEntries: fillin/numeric: num answers: " + question.getPart().getAnswersAsAuthored().size()
-						+ " doesn't match num entries: " + this.entries.size() + " submission: " + this.getSubmission().getId() + " question: "
-						+ question.getId();
-				M_log.warn(msg);
-				throw new RuntimeException(msg);
+				// we cannot continue with this entry
+				return;
+//				String msg = "verifyEntries: fillin/numeric: num answers: " + question.getPart().getAnswersAsAuthored().size()
+//						+ " doesn't match num entries: " + this.entries.size() + " submission: " + this.getSubmission().getId() + " question: "
+//						+ question.getId();
+//				M_log.warn(msg);
+//				throw new RuntimeException(msg);
 			}
 
 			boolean fixOrder = false;
@@ -1005,6 +1008,9 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
+
+				// a null answer id *could* be ok if the entry.answerText is also null
+				if ((entry.answerId == null) && (StringUtil.trimToNull(entry.answerText) == null)) continue;
 
 				if (entry.answerId == null)
 				{
@@ -1040,7 +1046,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 					// find the entry with this answer id
 					for (SubmissionAnswerEntryImpl entry : this.entries)
 					{
-						if (entry.answerId.equals(answer.getId()))
+						if ((entry.answerId != null) && (entry.answerId.equals(answer.getId())))
 						{
 							// move the entry to the new list
 							ordered.add(entry);
@@ -1048,7 +1054,16 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 						}
 					}
 				}
-				
+
+				// throw any null answer id entries at the end
+				for (SubmissionAnswerEntryImpl entry : this.entries)
+				{
+					if (entry.answerId == null)
+					{
+						ordered.add(entry);
+					}
+				}
+
 				// use the new list
 				this.entries = ordered;
 			}
