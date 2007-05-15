@@ -1072,25 +1072,65 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 		// matching needs an entry per assessment question part
 		else if (question.getType() == QuestionType.matching)
 		{
+			boolean fixOrder = false;
 			if (this.entries.size() != question.getParts().size())
 			{
-				String msg = "verifyEntries: matching: num parts: " + question.getParts().size() + " doesn't match num entries: "
+				// we can fix this
+				fixOrder = true;
+				String msg = "verifyEntries: matching: CORRECTED: num parts: " + question.getParts().size() + " doesn't match num entries: "
 						+ this.entries.size() + " submission: " + this.getSubmission().getId() + " question: " + question.getId();
-				M_log.warn(msg);
-				throw new RuntimeException(msg);
+				M_log.info(msg);
+				// throw new RuntimeException(msg);
 			}
-			for (int i = 0; i < this.entries.size(); i++)
+			else
 			{
-				// check that the entry is to the part
-				SubmissionAnswerEntryImpl entry = this.entries.get(i);
-				QuestionPart part = question.getParts().get(i);
-				if (!entry.questionPartId.equals(part.getId()))
+				for (int i = 0; i < this.entries.size(); i++)
 				{
-					String msg = "verifyEntries: matching: entry / question part not aligned: entry part: " + entry.questionPartId
-							+ " question part: " + part.getId() + " submission: " + this.getSubmission().getId() + " question: " + question.getId();
-					M_log.warn(msg);
-					throw new RuntimeException(msg);
+					// check that the entry is to the part
+					SubmissionAnswerEntryImpl entry = this.entries.get(i);
+					QuestionPart part = question.getParts().get(i);
+					if (!entry.questionPartId.equals(part.getId()))
+					{
+						fixOrder = true;
+						String msg = "verifyEntries: matching: CORRECTED: entry / question part not aligned: entry part: " + entry.questionPartId
+								+ " question part: " + part.getId() + " submission: " + this.getSubmission().getId() + " question: " + question.getId();
+						M_log.info(msg);
+						//throw new RuntimeException(msg);
+					}
 				}
+			}
+
+			if (fixOrder)
+			{
+				// make sure we have an entry per part and in the proper order
+				List<SubmissionAnswerEntryImpl> ordered = new ArrayList<SubmissionAnswerEntryImpl>(this.entries.size());
+				
+				for (QuestionPart part : question.getParts())
+				{
+					// do we have an entry for this part?
+					SubmissionAnswerEntryImpl entryForPart = null;
+					for (SubmissionAnswerEntryImpl entry : this.entries)
+					{
+						if ((entry.questionPartId != null) && (entry.questionPartId.equals(part.getId())))
+						{
+							entryForPart = entry;
+							break;
+						}
+					}
+
+					// if missing, make an entry for this part, leaving the answer id and text null
+					if (entryForPart == null)
+					{
+						entryForPart = new SubmissionAnswerEntryImpl();
+						entryForPart.initQuestionPartId(part.getId());
+
+						entryForPart.initAnswer(this);
+					}
+					
+					ordered.add(entryForPart);
+				}
+
+				this.entries = ordered;
 			}
 		}
 
