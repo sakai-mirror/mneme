@@ -1006,6 +1006,9 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 					throw new RuntimeException(msg);
 				}
 
+				// a null answer id *could* be ok if the entry.answerText is also null
+				if ((entry.answerId == null) && (StringUtil.trimToNull(entry.answerText) == null)) continue;
+
 				if (entry.answerId == null)
 				{
 					String msg = "verifyEntries: fillin/numeric: entry has null answer id: part: " + entry.questionPartId + " question single part: "
@@ -1040,7 +1043,7 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 					// find the entry with this answer id
 					for (SubmissionAnswerEntryImpl entry : this.entries)
 					{
-						if (entry.answerId.equals(answer.getId()))
+						if ((entry.answerId != null) && (entry.answerId.equals(answer.getId())))
 						{
 							// move the entry to the new list
 							ordered.add(entry);
@@ -1048,7 +1051,16 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 						}
 					}
 				}
-				
+
+				// throw any null answer id entries at the end
+				for (SubmissionAnswerEntryImpl entry : this.entries)
+				{
+					if (entry.answerId == null)
+					{
+						ordered.add(entry);
+					}
+				}
+
 				// use the new list
 				this.entries = ordered;
 			}

@@ -252,7 +252,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	/**
 	 * Check that the question and its answers are well formed.
 	 */
-	protected void verifyQuesion()
+	protected void verifyQuestion()
 	{
 		switch (this.type)
 		{
@@ -262,7 +262,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				// fillin and numeric need a single part, and an answer for each fill-in box, with each answer marked as correct
 				if (this.parts.size() != 1)
 				{
-					String msg = "verifyQuesion: (fillin/numeric): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					String msg = "verifyQuestion: (fillin/numeric): num parts != 1 = " + this.parts.size() + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
@@ -273,7 +273,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				{
 					if (answer.id == null)
 					{
-						String msg = "verifyQuesion: (fillin/numeric): null answer id: question: " + getId();
+						String msg = "verifyQuestion: (fillin/numeric): null answer id: question: " + getId();
 						M_log.warn(msg);
 						throw new RuntimeException(msg);
 					}
@@ -282,7 +282,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 					{
 						// we can correct this
 						answer.setIsCorrect(Boolean.TRUE);
-						String msg = "verifyQuesion: (fillin/numeric): CORRECTED: part answer not marked correct : answer " + answer.id + " part: "
+						String msg = "verifyQuestion: (fillin/numeric): CORRECTED: part answer not marked correct : answer " + answer.id + " part: "
 								+ this.parts.get(0).id + " question: " + getId();
 						M_log.info(msg);
 						// throw new RuntimeException(msg);
@@ -299,17 +299,17 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 
 			case essay:
 			{
-				// essay needs a single part and a single answer
+				// essay needs a single part (we can live with or without a single answer)
 				if (this.parts.size() != 1)
 				{
-					String msg = "verifyQuesion: (essay): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					String msg = "verifyQuestion: (essay): num parts != 1 = " + this.parts.size() + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
 
-				if (this.parts.get(0).answers.size() != 1)
+				if (this.parts.get(0).answers.size() > 1)
 				{
-					String msg = "verifyQuesion: (essay): num answers to single part != 1 = " + this.parts.get(0).answers.size() + " part: "
+					String msg = "verifyQuestion: (essay): num answers to single part != 0 or 1 = " + this.parts.get(0).answers.size() + " part: "
 							+ this.parts.get(0).id + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
@@ -323,7 +323,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				// file upload needs a single part and no answer (a single answer?).
 				if (this.parts.size() != 1)
 				{
-					String msg = "verifyQuesion: (fileUpload): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					String msg = "verifyQuestion: (fileUpload): num parts != 1 = " + this.parts.size() + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
@@ -338,7 +338,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 
 				if (this.parts.get(0).answers.size() != 0)
 				{
-					String msg = "verifyQuesion: (fileUpload): expecting 0 answers, found: " + this.parts.get(0).answers.size() + " part: "
+					String msg = "verifyQuestion: (fileUpload): expecting 0 answers, found: " + this.parts.get(0).answers.size() + " part: "
 							+ this.parts.get(0).id + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
@@ -358,14 +358,14 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				// mc needs a single part with one or more answers, with exactly one marked correct
 				if (this.parts.size() != 1)
 				{
-					String msg = "verifyQuesion: (multipleChoice): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					String msg = "verifyQuestion: (multipleChoice): num parts != 1 = " + this.parts.size() + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
 
 				if (this.parts.get(0).answers.isEmpty())
 				{
-					String msg = "verifyQuesion: (multipleChoice): no answers: part: " + this.parts.get(0).id + " question: " + getId();
+					String msg = "verifyQuestion: (multipleChoice): no answers: part: " + this.parts.get(0).id + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
@@ -380,7 +380,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				}
 				if (count != 1)
 				{
-					String msg = "verifyQuesion: (multipleChoice): # correct answers != 1 = " + count + " : part: " + this.parts.get(0).id
+					String msg = "verifyQuestion: (multipleChoice): # correct answers != 1 = " + count + " : part: " + this.parts.get(0).id
 							+ " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
@@ -394,14 +394,14 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				// multi-choice needs a single part with one or more answers, with one or more marked correct
 				if (this.parts.size() != 1)
 				{
-					String msg = "verifyQuesion: (multipleCorrect): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					String msg = "verifyQuestion: (multipleCorrect): num parts != 1 = " + this.parts.size() + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
 
 				if (this.parts.get(0).answers.isEmpty())
 				{
-					String msg = "verifyQuesion: (multipleCorrect): no answers: part: " + this.parts.get(0).id + " question: " + getId();
+					String msg = "verifyQuestion: (multipleCorrect): no answers: part: " + this.parts.get(0).id + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
@@ -416,7 +416,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				}
 				if (count == 0)
 				{
-					String msg = "verifyQuesion: (multipleCorrect): 0 correct answers : part: " + this.parts.get(0).id + " question: " + getId();
+					String msg = "verifyQuestion: (multipleCorrect): 0 correct answers : part: " + this.parts.get(0).id + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
@@ -429,14 +429,14 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				// survey needs a single part with one or more answers, none of which are correct
 				if (this.parts.size() != 1)
 				{
-					String msg = "verifyQuesion: (survey): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					String msg = "verifyQuestion: (survey): num parts != 1 = " + this.parts.size() + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
 
 				if (this.parts.get(0).answers.isEmpty())
 				{
-					String msg = "verifyQuesion: (survey): no answers: part: " + this.parts.get(0).id + " question: " + getId();
+					String msg = "verifyQuestion: (survey): no answers: part: " + this.parts.get(0).id + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
@@ -451,7 +451,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				}
 				if (count != 0)
 				{
-					String msg = "verifyQuesion: (survey): # answers marked correct: " + count + " : part: " + this.parts.get(0).id + " question: "
+					String msg = "verifyQuestion: (survey): # answers marked correct: " + count + " : part: " + this.parts.get(0).id + " question: "
 							+ getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
@@ -465,21 +465,21 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				// true/false needs two answers, one "true" and one "false" (case insensitive), with only one marked correct
 				if (this.parts.size() != 1)
 				{
-					String msg = "verifyQuesion: (trueFalse): num parts != 1 = " + this.parts.size() + " question: " + getId();
+					String msg = "verifyQuestion: (trueFalse): num parts != 1 = " + this.parts.size() + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
 
 				if (this.parts.get(0).answers.isEmpty())
 				{
-					String msg = "verifyQuesion: (trueFalse): no answers: part: " + this.parts.get(0).id + " question: " + getId();
+					String msg = "verifyQuestion: (trueFalse): no answers: part: " + this.parts.get(0).id + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
 				}
 
 				if (this.parts.get(0).answers.size() != 2)
 				{
-					String msg = "verifyQuesion: (trueFalse): expecting 2 answers, got: " + this.parts.get(0).answers.size() + " part: "
+					String msg = "verifyQuestion: (trueFalse): expecting 2 answers, got: " + this.parts.get(0).answers.size() + " part: "
 							+ this.parts.get(0).id + " question: " + getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
@@ -496,7 +496,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 				}
 				if (count != 1)
 				{
-					String msg = "verifyQuesion: (trueFalse): # correct answers != 1 = " + count + " : part: " + this.parts.get(0).id + " question: "
+					String msg = "verifyQuestion: (trueFalse): # correct answers != 1 = " + count + " : part: " + this.parts.get(0).id + " question: "
 							+ getId();
 					M_log.warn(msg);
 					throw new RuntimeException(msg);
@@ -507,7 +507,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 
 			default:
 			{
-				String msg = "verifyQuesion: (unknown type): question: " + getId();
+				String msg = "verifyQuestion: (unknown type): question: " + getId();
 				M_log.warn(msg);
 				throw new RuntimeException(msg);
 			}
