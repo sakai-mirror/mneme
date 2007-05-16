@@ -69,13 +69,26 @@
 		</section>
 		<section title="home-install-title">
 			<container>
-				<textEdit title="home-context" rows="1" cols="12">
+				<textEdit title="home-context" rows="1" cols="50">
 					<model ref="ispecs.context" />
 				</textEdit>
 				<navigationBar>
 					<container>
 						<navigation style="BUTTON" destination="/install" title="home-install" submit="TRUE" />
 						<navigation style="BUTTON" destination="/install_all" title="home-install-all" submit="TRUE" />
+					</container>
+				</navigationBar>
+			</container>
+		</section>
+		<section title="home-gb-title">
+			<container>
+				<textEdit title="home-context" rows="1" cols="50">
+					<model ref="gbspecs.context" />
+				</textEdit>
+				<navigationBar>
+					<container>
+						<navigation style="BUTTON" destination="/gb" title="home-update" submit="TRUE" />
+						<!-- <navigation style="BUTTON" destination="/gb_all" title="home-update-all" submit="TRUE" /> -->
 					</container>
 				</navigationBar>
 			</container>

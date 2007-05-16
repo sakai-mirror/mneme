@@ -22,6 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,17 +30,25 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Controller;
 import org.muse.ambrosia.util.ViewImpl;
-import org.sakaiproject.util.Web;
+import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentService;
+import org.sakaiproject.authz.api.SecurityService;
 
 /**
- * The /home view for the mneme test tool.
+ * The /gb view for the mneme test tool.
  */
-public class HomeView extends ViewImpl
+public class GbView extends ViewImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(HomeView.class);
+	private static Log M_log = LogFactory.getLog(GbView.class);
+
+	/** The assessment service. */
+	protected AssessmentService assessmentService = null;
+
+	/** The security service. */
+	protected SecurityService securityService = null;
 
 	/**
 	 * Shutdown.
@@ -54,15 +63,24 @@ public class HomeView extends ViewImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params)
 	{
-		// no parameters expected
-		if (params.length != 2)
+		// if not logged in as the super user, we won't do anything
+		if (!securityService.isSuperUser())
 		{
 			throw new IllegalArgumentException();
 		}
 
-		context.put("gspecs", new GenerateSpecs());
-		context.put("sspecs", new SimulateSpecs());
-		context.put("ispecs", new InstallSpecs());
+		// one parameter expected
+		if (params.length != 3)
+		{
+			throw new IllegalArgumentException();
+		}
+
+		GbSpecs specs = new GbSpecs(params[2]);
+
+		// do the update
+		String rv = updateGb(specs.getContext());
+
+		context.put("rv", rv);
 
 		// render
 		uiService.render(ui, context);
@@ -75,8 +93,6 @@ public class HomeView extends ViewImpl
 	{
 		super.init();
 
-		// uiHome = TestControllers.constructHome(uiService);
-
 		M_log.info("init()");
 	}
 
@@ -85,54 +101,57 @@ public class HomeView extends ViewImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (!context.getPostExpected())
+		throw new IllegalArgumentException();
+	}
+
+	/**
+	 * Set the assessment service.
+	 * 
+	 * @param service
+	 *        The assessment service.
+	 */
+	public void setAssessmentService(AssessmentService service)
+	{
+		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the security service.
+	 * 
+	 * @param service
+	 *        The security service.
+	 */
+	public void setSecurityService(SecurityService service)
+	{
+		this.securityService = service;
+	}
+
+	/**
+	 * Update the Gradebook entries for each test in the context.
+	 * 
+	 * @param context
+	 *        The context (site id).
+	 */
+	protected String updateGb(String context)
+	{
+		String rv = "GB updated in site " + context;
+
+		try
 		{
-			throw new IllegalArgumentException();
+			// get a list of the tests in the site
+			List<Assessment> tests = assessmentService.getContextAssessments(context);
+
+			// for each one, update the gb
+			for (Assessment test : tests)
+			{
+				assessmentService.updateGradebook(test);
+			}
+		}
+		catch (AssessmentPermissionException e)
+		{
+			rv += " FAILED due to lack of permissions!";
 		}
 
-		// no parameters expected
-		if (params.length != 2)
-		{
-			throw new IllegalArgumentException();
-		}
-
-		// read form
-		GenerateSpecs gspecs = new GenerateSpecs();
-		context.put("gspecs", gspecs);
-		SimulateSpecs sspecs = new SimulateSpecs();
-		context.put("sspecs", sspecs);
-		InstallSpecs ispecs = new InstallSpecs();
-		context.put("ispecs", ispecs);
-		GbSpecs gbspecs = new GbSpecs();
-		context.put("gbspecs", gbspecs);
-		String destination = uiService.decode(req, context);
-
-		// look for special codes in the destination
-		if ("/generate".equals(destination))
-		{
-			// add the specs
-			destination = destination + "/" + gspecs.toString();
-		}
-
-		else if ("/simulate".equals(destination))
-		{
-			// add the specs
-			destination = destination + "/" + sspecs.toString();
-		}
-
-		else if ("/install".equals(destination))
-		{
-			// add the specs
-			destination = destination + "/" + ispecs.toString();
-		}
-
-		else if ("/gb".equals(destination))
-		{
-			// add the specs
-			destination = destination + "/" + gbspecs.toString();
-		}
-
-		// redirect to home
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+		return rv;
 	}
 }

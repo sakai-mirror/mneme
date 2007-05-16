@@ -23,7 +23,7 @@
  **********************************************************************************/
 -->
 
-<interface title="simulate-title" header="simulate-header">
+<interface title="gb-title" header="gb-header">
 	<container>
 		<instructions ref="rv" />
 		<navigationBar>
