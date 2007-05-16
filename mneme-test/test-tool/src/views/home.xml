@@ -44,7 +44,9 @@
 				</textEdit>
 				<navigationBar>
 					<container>
-						<navigation style="BUTTON" destination="/generate" title="home-generate" submit="TRUE" />
+						<navigation style="BUTTON" destination="/generate" title="home-generate" submit="TRUE">
+							<confirm decision="TRUE" cancelSelector="cancel" selector="confirm-generate" />
+						</navigation>
 					</container>
 				</navigationBar>
 			</container>
@@ -62,7 +64,9 @@
 				</textEdit>
 				<navigationBar>
 					<container>
-						<navigation style="BUTTON" destination="/simulate" title="home-simulate" submit="TRUE" />
+						<navigation style="BUTTON" destination="/simulate" title="home-simulate" submit="TRUE">
+							<confirm decision="TRUE" cancelSelector="cancel" selector="confirm-simulate" />
+						</navigation>
 					</container>
 				</navigationBar>
 			</container>
@@ -74,8 +78,12 @@
 				</textEdit>
 				<navigationBar>
 					<container>
-						<navigation style="BUTTON" destination="/install" title="home-install" submit="TRUE" />
-						<navigation style="BUTTON" destination="/install_all" title="home-install-all" submit="TRUE" />
+						<navigation style="BUTTON" destination="/install" title="home-install" submit="TRUE">
+							<confirm decision="TRUE" cancelSelector="cancel" selector="confirm-install" />
+						</navigation>
+						<navigation style="BUTTON" destination="/install_all" title="home-install-all" submit="TRUE">
+							<confirm decision="TRUE" cancelSelector="cancel" selector="confirm-install-all" />
+						</navigation>
 					</container>
 				</navigationBar>
 			</container>
@@ -87,7 +95,9 @@
 				</textEdit>
 				<navigationBar>
 					<container>
-						<navigation style="BUTTON" destination="/gb" title="home-update" submit="TRUE" />
+						<navigation style="BUTTON" destination="/gb" title="home-update" submit="TRUE">
+							<confirm decision="TRUE" cancelSelector="cancel" selector="confirm-gb" />
+						</navigation>
 						<!-- <navigation style="BUTTON" destination="/gb_all" title="home-update-all" submit="TRUE" /> -->
 					</container>
 				</navigationBar>
