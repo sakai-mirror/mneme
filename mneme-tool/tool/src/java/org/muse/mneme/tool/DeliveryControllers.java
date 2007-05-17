@@ -281,7 +281,7 @@ public class DeliveryControllers
 						.setTitle("enter-test-title",
 							ui.newIconPropertyReference().setIcon("/icons/test.png"),
 							ui.newPropertyReference().setReference("assessment.title"),
-							ui.newPropertyReference().setReference("assessment.totalPoints"))
+							ui.newPropertyReference().setReference("assessment.totalPoints").setFormatDelegate(new FormatScore()))
 						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("assessment.description")))
 						.add(
 							ui.newAttachments()
@@ -431,7 +431,7 @@ public class DeliveryControllers
 						.setTitle("instructions-test-title",
 							ui.newIconPropertyReference().setIcon("/icons/test.png"),
 							ui.newPropertyReference().setReference("submission.assessment.title"),
-							ui.newPropertyReference().setReference("submission.assessment.totalPoints"))
+							ui.newPropertyReference().setReference("submission.assessment.totalPoints").setFormatDelegate(new FormatScore()))
 						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("submission.assessment.description")))
 						.add(
 							ui.newAttachments()
@@ -1988,6 +1988,23 @@ public class DeliveryControllers
 			rv.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> " + formatScore(question.getPoints()) + ")");
 
 			return rv.toString();
+		}
+	}
+
+	/**
+	 * From a value which is an score or points to 2 decimals rounded.
+	 */
+	public static class FormatScore implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{
+			if (value == null) return null;
+			if (!(value instanceof Float)) return value.toString();
+			Float valueFloat = (Float) value;
+			return formatScore(valueFloat);
 		}
 	}
 
