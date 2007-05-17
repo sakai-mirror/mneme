@@ -77,6 +77,13 @@ public interface Submission
 	AssessmentSubmissionStatus getAssessmentSubmissionStatus();
 
 	/**
+	 * Get the best submission to this same assignment from the same user. May not be known.
+	 * 
+	 * @return The best submission to this same assignment from the same user, or NULL if not known.
+	 */
+	Submission getBest();
+
+	/**
 	 * Access the confirmation string for this submission.
 	 * 
 	 * @return The confirmation string for this submission.
@@ -222,7 +229,7 @@ public interface Submission
 	String getReference();
 
 	/**
-	 * Get the total count of submissions, including this one, to this same assignment from the same user. May not be known
+	 * Get the total count of submissions, including this one, to this same assignment from the same user. May not be known.
 	 * 
 	 * @return The total count of submissions to the assignment by the user, or NULL if not known.
 	 */

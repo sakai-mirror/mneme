@@ -210,41 +210,41 @@ public class DeliveryControllers
 							ui.newPropertyColumn()
 								.setProperty(
 									ui.newDatePropertyReference().setTwoLine()
-										.setReference("submission.submittedDate")
+										.setReference("submission.best.submittedDate")
 										.setMissingText("dash"))
 								.setTitle("list-header-finished")
-								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash"))
+								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.best.isComplete")), "dash"))
 						.addColumn(
 							ui.newPropertyColumn()
 								.setProperty("list-format-grade",
-									ui.newPropertyReference().setReference("submission").setFormatDelegate(new FormatListGrade()))
+									ui.newPropertyReference().setReference("submission.best").setFormatDelegate(new FormatListGrade()))
 								.setTitle("list-header-grade")
 								.setNoWrap()
 								.addNavigation(
 									ui.newNavigation()
 										.setTitle("list-nav-review")
 										.setStyle(Navigation.Style.link)
-										.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.id")))
-										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReview"))))
+										.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.best.id")))
+										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.best.mayReview"))))
 								.addNavigation(
 									ui.newNavigation()
 										.setTitle(
 											"list-nav-review-later",
-											ui.newDatePropertyReference().setReference("submission.assessment.feedbackDate"))
+											ui.newDatePropertyReference().setReference("submission.best.assessment.feedbackDate"))
 										.setStyle(Navigation.Style.link)
 										.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
 										.setIncluded(
-											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
-											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater"))))
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.best.mayReview")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.best.mayReviewLater"))))
 								.addNavigation(
 									ui.newNavigation()
 										.setTitle("list-nav-review-not")
 										.setStyle(Navigation.Style.link)
 										.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
 										.setIncluded(
-											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")),
-											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
-											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater")))))
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.best.isComplete")),
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.best.mayReview")),
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.best.mayReviewLater")))))
 //						.addColumn(
 //							ui.newPropertyColumn()
 //								.setProperty("list-format-worth",
