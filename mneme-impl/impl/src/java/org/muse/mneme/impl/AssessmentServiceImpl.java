@@ -1152,8 +1152,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		});
 
 		// verify what we read
-		for (AssessmentSectionImpl section : assessment.sections)
+		for (Iterator i = assessment.sections.iterator(); i.hasNext();)
 		{
+			AssessmentSectionImpl section = (AssessmentSectionImpl) i.next();
+
 			for (AssessmentQuestionImpl question : section.questions)
 			{
 				question.verifyQuestion();
@@ -1162,16 +1164,22 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// also makes sure each section has at least one question
 			if (section.questions.isEmpty())
 			{
-				String msg = "readAssessmentSections: section with no questions: section: " + section.id + " test: " + assessment.getId();
-				M_log.warn(msg);
-				throw new RuntimeException(msg);
+				String msg = "readAssessmentSections: CORRECTED: section with no questions: section: " + section.id + " test: " + assessment.getId();
+				M_log.info(msg);
+
+				// remove the section
+				i.remove();
+				continue;
 			}
 			if ((section.getQuestionLimit() != null) && (section.getQuestionLimit().intValue() < 1))
 			{
-				String msg = "readAssessmentSections: section with <1 limit: " + section.getQuestionLimit().intValue() + " section: " + section.id
+				String msg = "readAssessmentSections: CORRECTED: section with <1 limit: " + section.getQuestionLimit().intValue() + " section: " + section.id
 						+ " test: " + assessment.getId();
-				M_log.warn(msg);
-				throw new RuntimeException(msg);
+				M_log.info(msg);
+
+				// remove the section
+				i.remove();
+				continue;
 			}
 		}
 
