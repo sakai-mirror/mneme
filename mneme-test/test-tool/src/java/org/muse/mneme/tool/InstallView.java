@@ -34,6 +34,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Controller;
 import org.muse.ambrosia.util.ViewImpl;
 import org.sakaiproject.authz.api.Role;
+import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.site.api.Site;
@@ -165,6 +166,9 @@ public class InstallView extends ViewImpl
 		return rv;
 	}
 
+	/** The security service. */
+	protected SecurityService securityService = null;
+
 	/**
 	 * Shutdown.
 	 */
@@ -178,6 +182,12 @@ public class InstallView extends ViewImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params)
 	{
+		// if not logged in as the super user, we won't do anything
+		if (!securityService.isSuperUser())
+		{
+			throw new IllegalArgumentException();
+		}
+
 		// one parameter expected
 		if (params.length != 3)
 		{
@@ -211,6 +221,17 @@ public class InstallView extends ViewImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		throw new IllegalArgumentException();
+	}
+
+	/**
+	 * Set the security service.
+	 * 
+	 * @param service
+	 *        The security service.
+	 */
+	public void setSecurityService(SecurityService service)
+	{
+		this.securityService = service;
 	}
 
 	/**

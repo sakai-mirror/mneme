@@ -107,6 +107,12 @@ public class GenerateView extends ViewImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params)
 	{
+		// if not logged in as the super user, we won't do anything
+		if (!securityService.isSuperUser())
+		{
+			throw new IllegalArgumentException();
+		}
+
 		// one parameter expected
 		if (params.length != 3)
 		{

@@ -33,6 +33,7 @@
 			singleton="true">
 
 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+		<property name="securityService"><ref bean="org.sakaiproject.authz.api.SecurityService"/></property>
 
  		<property name="toolId"><value>sakai.mneme.test</value></property>
  		<property name="viewId"><value>home</value></property>

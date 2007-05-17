@@ -48,6 +48,7 @@ import org.muse.mneme.api.QuestionPresentation;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionAnswer;
 import org.muse.mneme.api.SubmissionCompletedException;
+import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.api.TimeService;
@@ -68,6 +69,9 @@ public class SimulateView extends ViewImpl
 
 	/** The assessment service. */
 	protected AssessmentService assessmentService = null;
+
+	/** The security service. */
+	protected SecurityService securityService = null;
 
 	/** The session manager. */
 	protected SessionManager sessionManager = null;
@@ -97,6 +101,12 @@ public class SimulateView extends ViewImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params)
 	{
+		// if not logged in as the super user, we won't do anything
+		if (!securityService.isSuperUser())
+		{
+			throw new IllegalArgumentException();
+		}
+
 		// one parameters expected
 		if (params.length != 3)
 		{
@@ -141,6 +151,17 @@ public class SimulateView extends ViewImpl
 	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the security service.
+	 * 
+	 * @param service
+	 *        The security service.
+	 */
+	public void setSecurityService(SecurityService service)
+	{
+		this.securityService = service;
 	}
 
 	/**

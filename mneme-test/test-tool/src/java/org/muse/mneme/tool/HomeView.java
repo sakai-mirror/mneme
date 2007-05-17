@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Controller;
 import org.muse.ambrosia.util.ViewImpl;
+import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.util.Web;
 
 /**
@@ -40,6 +41,9 @@ public class HomeView extends ViewImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(HomeView.class);
+
+	/** The security service. */
+	protected SecurityService securityService = null;
 
 	/**
 	 * Shutdown.
@@ -54,6 +58,12 @@ public class HomeView extends ViewImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params)
 	{
+		// if not logged in as the super user, we won't do anything
+		if (!securityService.isSuperUser())
+		{
+			throw new IllegalArgumentException();
+		}
+
 		// no parameters expected
 		if (params.length != 2)
 		{
@@ -134,5 +144,16 @@ public class HomeView extends ViewImpl
 
 		// redirect to home
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+	}
+
+	/**
+	 * Set the security service.
+	 * 
+	 * @param service
+	 *        The security service.
+	 */
+	public void setSecurityService(SecurityService service)
+	{
+		this.securityService = service;
 	}
 }
