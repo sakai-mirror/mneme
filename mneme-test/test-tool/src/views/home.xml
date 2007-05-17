@@ -44,8 +44,14 @@
 				</textEdit>
 				<navigationBar>
 					<container>
-						<navigation style="BUTTON" destination="/generate" title="home-generate" submit="TRUE">
-							<confirm decision="TRUE" cancelSelector="cancel" selector="confirm-generate" />
+						<navigation style="BUTTON" destination="/generate" submit="TRUE">
+							<title>
+								<message selector="home-generate" />
+							</title>
+							<confirm decision="TRUE">
+								<cancel selector="cancel" />
+								<message selector="confirm-generate" />
+							</confirm>
 						</navigation>
 					</container>
 				</navigationBar>
