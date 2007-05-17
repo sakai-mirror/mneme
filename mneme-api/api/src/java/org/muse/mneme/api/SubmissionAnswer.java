@@ -130,6 +130,13 @@ public interface SubmissionAnswer
 	Boolean getIsChanged();
 
 	/**
+	 * Check if the question is marked as complete.
+	 * 
+	 * @return TRUE if the question is marked as complete, FALSE if not.
+	 */
+	Boolean getIsComplete();
+
+	/**
 	 * Access the "mark for review" setting for this answer.
 	 * 
 	 * @return The answer's "mark for review" setting; TRUE if the user has marked this answer for review, FALSE if not.

@@ -313,6 +313,19 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsComplete()
+	{
+		if (getSubmittedDate() == null)
+		{
+			return Boolean.FALSE;
+		}
+		
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getMarkedForReview()
 	{
 		return this.markedForReview;

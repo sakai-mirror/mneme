@@ -543,7 +543,7 @@ public class SubmissionImpl implements Submission
 		if (this.answersStatus == PropertyStatus.unset) readAnswers();
 
 		SubmissionAnswerImpl answer = findAnswer(question.getId());
-		if ((answer != null) && (answer.getSubmittedDate() != null))
+		if ((answer != null) && (answer.getIsComplete().booleanValue()))
 		{
 			return true;
 		}

@@ -2038,7 +2038,7 @@ public class DeliveryControllers
 			{
 				if (answer.getQuestion().equals(question))
 				{
-					answered = answer.getIsAnswered();
+					answered = answer.getIsAnswered().booleanValue() && answer.getIsComplete().booleanValue();
 					markForReview = answer.getMarkedForReview().booleanValue();
 					missingRationale = ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue()) && (StringUtil
 							.trimToNull(answer.getRationale()) == null));
