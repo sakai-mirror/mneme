@@ -210,41 +210,41 @@ public class DeliveryControllers
 							ui.newPropertyColumn()
 								.setProperty(
 									ui.newDatePropertyReference().setTwoLine()
-										.setReference("submission.submittedDate")
+										.setReference("submission.best.submittedDate")
 										.setMissingText("dash"))
 								.setTitle("list-header-finished")
-								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")), "dash"))
+								.setEntityIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.best.isComplete")), "dash"))
 						.addColumn(
 							ui.newPropertyColumn()
 								.setProperty("list-format-grade",
-									ui.newPropertyReference().setReference("submission").setFormatDelegate(new FormatListGrade()))
+									ui.newPropertyReference().setReference("submission.best").setFormatDelegate(new FormatListGrade()))
 								.setTitle("list-header-grade")
 								.setNoWrap()
 								.addNavigation(
 									ui.newNavigation()
 										.setTitle("list-nav-review")
 										.setStyle(Navigation.Style.link)
-										.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.id")))
-										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReview"))))
+										.setDestination(ui.newDestination().setDestination("/review/{0}", ui.newPropertyReference().setReference("submission.best.id")))
+										.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.best.mayReview"))))
 								.addNavigation(
 									ui.newNavigation()
 										.setTitle(
 											"list-nav-review-later",
-											ui.newDatePropertyReference().setReference("submission.assessment.feedbackDate"))
+											ui.newDatePropertyReference().setReference("submission.best.assessment.feedbackDate"))
 										.setStyle(Navigation.Style.link)
 										.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
 										.setIncluded(
-											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
-											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater"))))
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.best.mayReview")),
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.best.mayReviewLater"))))
 								.addNavigation(
 									ui.newNavigation()
 										.setTitle("list-nav-review-not")
 										.setStyle(Navigation.Style.link)
 										.setDisabled(ui.newDecision().setProperty(ui.newConstantPropertyReference().setValue("TRUE")))
 										.setIncluded(
-											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.isComplete")),
-											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReview")),
-											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.mayReviewLater")))))
+											ui.newDecision().setProperty(ui.newPropertyReference().setReference("submission.best.isComplete")),
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.best.mayReview")),
+											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.best.mayReviewLater")))))
 //						.addColumn(
 //							ui.newPropertyColumn()
 //								.setProperty("list-format-worth",
@@ -281,7 +281,7 @@ public class DeliveryControllers
 						.setTitle("enter-test-title",
 							ui.newIconPropertyReference().setIcon("/icons/test.png"),
 							ui.newPropertyReference().setReference("assessment.title"),
-							ui.newPropertyReference().setReference("assessment.totalPoints"))
+							ui.newPropertyReference().setReference("assessment.totalPoints").setFormatDelegate(new FormatScore()))
 						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("assessment.description")))
 						.add(
 							ui.newAttachments()
@@ -431,7 +431,7 @@ public class DeliveryControllers
 						.setTitle("instructions-test-title",
 							ui.newIconPropertyReference().setIcon("/icons/test.png"),
 							ui.newPropertyReference().setReference("submission.assessment.title"),
-							ui.newPropertyReference().setReference("submission.assessment.totalPoints"))
+							ui.newPropertyReference().setReference("submission.assessment.totalPoints").setFormatDelegate(new FormatScore()))
 						.add(ui.newText().setText(null, ui.newHtmlPropertyReference().setReference("submission.assessment.description")))
 						.add(
 							ui.newAttachments()
@@ -1992,6 +1992,23 @@ public class DeliveryControllers
 	}
 
 	/**
+	 * From a value which is an score or points to 2 decimals rounded.
+	 */
+	public static class FormatScore implements FormatDelegate
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public String format(Context context, Object value)
+		{
+			if (value == null) return null;
+			if (!(value instanceof Float)) return value.toString();
+			Float valueFloat = (Float) value;
+			return formatScore(valueFloat);
+		}
+	}
+
+	/**
 	 * From a value which is an AssessmentQuestion, 'format' this into the html for the icons<br />
 	 * for 'unanswerd' or 'mark for review' or 'rationale empty' for the related submission question.
 	 */
@@ -2021,7 +2038,7 @@ public class DeliveryControllers
 			{
 				if (answer.getQuestion().equals(question))
 				{
-					answered = answer.getIsAnswered();
+					answered = answer.getIsAnswered().booleanValue() && answer.getIsComplete().booleanValue();
 					markForReview = answer.getMarkedForReview().booleanValue();
 					missingRationale = ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue()) && (StringUtil
 							.trimToNull(answer.getRationale()) == null));

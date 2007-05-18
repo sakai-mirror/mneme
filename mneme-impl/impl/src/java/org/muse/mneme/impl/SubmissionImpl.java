@@ -63,6 +63,8 @@ public class SubmissionImpl implements Submission
 
 	protected PropertyStatus assessmentIdStatus = PropertyStatus.unset;
 
+	protected String bestSubmissionId = null;
+
 	protected String evalComment = null;
 
 	protected PropertyStatus evalCommentStatus = PropertyStatus.unset;
@@ -294,6 +296,14 @@ public class SubmissionImpl implements Submission
 		}
 
 		return AssessmentSubmissionStatus.other;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Submission getBest()
+	{
+		return this.bestSubmissionId == null ? this : this.service.idSubmission(this.bestSubmissionId);
 	}
 
 	/**
@@ -533,7 +543,7 @@ public class SubmissionImpl implements Submission
 		if (this.answersStatus == PropertyStatus.unset) readAnswers();
 
 		SubmissionAnswerImpl answer = findAnswer(question.getId());
-		if ((answer != null) && (answer.getSubmittedDate() != null))
+		if ((answer != null) && (answer.getIsComplete().booleanValue()))
 		{
 			return true;
 		}
@@ -987,6 +997,14 @@ public class SubmissionImpl implements Submission
 	{
 		this.assessmentId = id;
 		this.assessmentIdStatus = PropertyStatus.inited;
+	}
+
+	/**
+	 * Initialize the best.
+	 */
+	protected void initBest(Submission best)
+	{
+		this.bestSubmissionId = best.getId();
 	}
 
 	/**

@@ -1152,8 +1152,10 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		});
 
 		// verify what we read
-		for (AssessmentSectionImpl section : assessment.sections)
+		for (Iterator i = assessment.sections.iterator(); i.hasNext();)
 		{
+			AssessmentSectionImpl section = (AssessmentSectionImpl) i.next();
+
 			for (AssessmentQuestionImpl question : section.questions)
 			{
 				question.verifyQuestion();
@@ -1162,16 +1164,22 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// also makes sure each section has at least one question
 			if (section.questions.isEmpty())
 			{
-				String msg = "readAssessmentSections: section with no questions: section: " + section.id + " test: " + assessment.getId();
-				M_log.warn(msg);
-				throw new RuntimeException(msg);
+				String msg = "readAssessmentSections: CORRECTED: section with no questions: section: " + section.id + " test: " + assessment.getId();
+				M_log.info(msg);
+
+				// remove the section
+				i.remove();
+				continue;
 			}
 			if ((section.getQuestionLimit() != null) && (section.getQuestionLimit().intValue() < 1))
 			{
-				String msg = "readAssessmentSections: section with <1 limit: " + section.getQuestionLimit().intValue() + " section: " + section.id
+				String msg = "readAssessmentSections: CORRECTED: section with <1 limit: " + section.getQuestionLimit().intValue() + " section: " + section.id
 						+ " test: " + assessment.getId();
-				M_log.warn(msg);
-				throw new RuntimeException(msg);
+				M_log.info(msg);
+
+				// remove the section
+				i.remove();
+				continue;
 			}
 		}
 
@@ -2542,20 +2550,34 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				cacheSubmission(new SubmissionImpl((SubmissionImpl) submission));
 			}
 
-			// set it's sibling count to 1 (itself), or 0 if it's not really there
+			// count the submissions actually present in the list for this assessment
 			int count = 0;
 			if (submission.getStartDate() != null)
 			{
-				count = 1;
+				count++;
 			}
-			((SubmissionImpl) submission).initSiblingCount(new Integer(count));
 
 			String aid = submission.getAssessment().getId();
-			MultipleSubmissionSelectionPolicy policy = idAssessment(aid).getMultipleSubmissionSelectionPolicy();
-			Object value = (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED) ? (Object) (((SubmissionImpl) submission).getTotalScore())
-					: (Object) submission.getSubmittedDate();
+			SubmissionImpl bestSubmission = null;
+			SubmissionImpl inProgressSubmission = null;
+			
+			// this one may be our best, or in progress, but only if it's started
+			if (submission.getStartDate() != null)
+			{
+				// if incomplete, record this as in progress
+				if ((submission.getIsComplete() == null) || (!submission.getIsComplete()))
+				{
+					inProgressSubmission = (SubmissionImpl) submission;
+				}
+				
+				// else, if complete, make it the best so far
+				else
+				{
+					bestSubmission = (SubmissionImpl) submission;
+				}
+			}
 
-			// remove all others with this one's assessment id - keeping the one that will be best
+			// remove all others with this one's assessment id - keeping track of the best score if complete
 			for (Iterator i = all.iterator(); i.hasNext();)
 			{
 				SubmissionImpl candidateSub = (SubmissionImpl) i.next();
@@ -2580,69 +2602,65 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						cacheSubmission(new SubmissionImpl(candidateSub));
 					}
 
-					// count as a sibling if not unstarted
-					count = 0;
-					if (candidateSub.getStartDate() != null)
+					// we should not get a second one that is unstarted
+					if (candidateSub.getStartDate() == null)
 					{
-						count = 1;
+						M_log.warn("getUserContextSubmissions: another unstarted for aid: " + aid + " sid:" + candidateSub.getId());
+						continue;
 					}
 
-					// if the winner so far is in progress, it remains the winner
-					if ((submission.getIsComplete() == null) || (!submission.getIsComplete()))
+					// count as a sibling
+					count++;
+
+					// track the in-progress one, if any
+					if ((candidateSub.getIsComplete() == null) || (!candidateSub.getIsComplete()))
 					{
-						// keep the submission we already have, add a sibling for this one we are skipping
-						((SubmissionImpl) submission).initSiblingCount(new Integer(submission.getSiblingCount().intValue() + count));
+						inProgressSubmission = candidateSub;
 					}
 
-					// if this one is in progress, it wins
-					else if ((candidateSub.getIsComplete() == null) || (!candidateSub.getIsComplete()))
-					{
-						// transfer sibling count
-						candidateSub.initSiblingCount(new Integer(submission.getSiblingCount().intValue() + count));
-						submission = candidateSub;
-					}
-
-					// see if this wins over the best so far
-					else if (policy == MultipleSubmissionSelectionPolicy.USE_HIGHEST_GRADED)
-					{
-						// for totalScore, if the winner so far is smaller or equal to the new, use the new (the later one for a tie
-						// is the later submission based on our sort)
-						if (((Float) value).floatValue() <= ((SubmissionImpl) candidateSub).getTotalScore().floatValue())
-						{
-							// switch to this one
-							value = ((SubmissionImpl) candidateSub).getTotalScore();
-
-							candidateSub.initSiblingCount(new Integer(submission.getSiblingCount().intValue() + count));
-							submission = candidateSub;
-						}
-						else
-						{
-							// keep the submission we already have, add a sibling for this one we are skipping
-							((SubmissionImpl) submission).initSiblingCount(new Integer(submission.getSiblingCount().intValue() + count));
-						}
-					}
+					// if not in progress, then see if it has the best score so far
 					else
 					{
-						// use the latest one
-						if (((Time) value).before(candidateSub.getSubmittedDate()))
+						if (bestSubmission == null)
 						{
-							// switch to this one
-							value = candidateSub.getSubmittedDate();
-
-							candidateSub.initSiblingCount(new Integer(submission.getSiblingCount().intValue() + 1));
-							submission = candidateSub;
+							bestSubmission = candidateSub;
 						}
-						else
+
+						// take the new one if it exceeds the best so far
+						else if (bestSubmission.getTotalScore().floatValue() < candidateSub.getTotalScore().floatValue())
 						{
-							// keep the submission we already have, add a sibling for this one we are skipping
-							((SubmissionImpl) submission).initSiblingCount(new Integer(submission.getSiblingCount().intValue() + count));
+							bestSubmission = candidateSub;
+						}
+						
+						// if we match the best, pick the latest submit date
+						else if (bestSubmission.getTotalScore().floatValue() == candidateSub.getTotalScore().floatValue())
+						{
+							if ((bestSubmission.getSubmittedDate() != null) && (candidateSub.getSubmittedDate() != null)
+									&& (bestSubmission.getSubmittedDate().before(candidateSub.getSubmittedDate())))
+							{
+								bestSubmission = candidateSub;
+							}
 						}
 					}
 				}
 			}
 
+			// pick the winner
+			SubmissionImpl winner = inProgressSubmission;
+			if (winner == null) winner = bestSubmission;
+			if (winner == null) winner = (SubmissionImpl) submission;
+
+			// set the winner's sibling count
+			winner.initSiblingCount(new Integer(count));
+
+			// set the winner's best
+			if (bestSubmission != null)
+			{
+				winner.initBest(bestSubmission);
+			}
+
 			// keep the winner
-			official.add(submission);
+			official.add(winner);
 		}
 
 		// if sorting by due date, fix it so null due dates are LARGE not SMALL

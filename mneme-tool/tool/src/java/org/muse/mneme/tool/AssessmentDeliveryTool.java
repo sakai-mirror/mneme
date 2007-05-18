@@ -693,7 +693,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		redirectToQuestion(req, res, submission);
+		redirectToQuestion(req, res, submission, true);
 	}
 
 	/**
@@ -1190,7 +1190,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// handle our 'z' selector - redirect to the appropriate question for this submission
 		if ("z".equals(questionSelector))
 		{
-			redirectToQuestion(req, res, submission);
+			redirectToQuestion(req, res, submission, false);
 			return;
 		}
 
@@ -1465,8 +1465,11 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Servlet response.
 	 * @param submission
 	 *        The submission.
+	 * @param instructions
+	 *        if true, send to section instructions for first question.
 	 */
-	protected void redirectToQuestion(HttpServletRequest req, HttpServletResponse res, Submission submission) throws IOException
+	protected void redirectToQuestion(HttpServletRequest req, HttpServletResponse res, Submission submission, boolean instructions)
+			throws IOException
 	{
 		String destination = null;
 		Assessment assessment = submission.getAssessment();
@@ -1490,7 +1493,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		else
 		{
 			// send to the section instructions if it's a first question and by-question
-			if ((question.getSectionOrdering().getIsFirst().booleanValue()) && (!question.getSection().getIsMerged().booleanValue())
+			if (instructions && (question.getSectionOrdering().getIsFirst().booleanValue()) && (!question.getSection().getIsMerged().booleanValue())
 					&& (assessment.getQuestionPresentation() == QuestionPresentation.BY_QUESTION))
 			{
 				// to instructions
