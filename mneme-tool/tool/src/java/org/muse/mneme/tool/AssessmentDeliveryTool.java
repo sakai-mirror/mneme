@@ -693,7 +693,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		redirectToQuestion(req, res, submission, true);
+		redirectToQuestion(req, res, submission, false, true);
 	}
 
 	/**
@@ -1190,7 +1190,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// handle our 'z' selector - redirect to the appropriate question for this submission
 		if ("z".equals(questionSelector))
 		{
-			redirectToQuestion(req, res, submission, false);
+			redirectToQuestion(req, res, submission, true, false);
 			return;
 		}
 
@@ -1302,6 +1302,9 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// TODO: when hints are in, this counts (adding ~ || destination.endsWith("/feedback"))
 		Boolean answersComplete = Boolean.valueOf(!(uploadError || destination.startsWith("/list") || destination.startsWith("/remove")
 				|| destination.startsWith("/instructions") || context.getPreviousDestination().equals(destination)));
+		
+		// and if we are working in a random access test, answers are always complete
+		if (submission.getAssessment().getRandomAccess().booleanValue()) answersComplete = Boolean.TRUE;
 
 		// where are we going?
 		destination = questionChooseDestination(destination, questionSelector, submissionId);
@@ -1465,66 +1468,78 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 *        Servlet response.
 	 * @param submission
 	 *        The submission.
+	 * @param toc
+	 *        if true, send to TOC if possible (not possible for linear).
 	 * @param instructions
 	 *        if true, send to section instructions for first question.
 	 */
-	protected void redirectToQuestion(HttpServletRequest req, HttpServletResponse res, Submission submission, boolean instructions)
+	protected void redirectToQuestion(HttpServletRequest req, HttpServletResponse res, Submission submission, boolean toc, boolean instructions)
 			throws IOException
 	{
 		String destination = null;
 		Assessment assessment = submission.getAssessment();
 
-		// find the first incomplete question
-		AssessmentQuestion question = submission.getFirstIncompleteQuestion();
-
-		// if we don't have one, we will go to the toc (or final_review for linear)
-		if (question == null)
+		// if we are random access, and allowed, send to TOC
+		if (toc && assessment.getRandomAccess().booleanValue())
 		{
-			if (!assessment.getRandomAccess().booleanValue())
-			{
-				destination = "/" + Destinations.final_review + "/" + submission.getId();
-			}
-			else
-			{
-				destination = "/" + Destinations.toc + "/" + submission.getId();
-			}
+			destination = "/" + Destinations.toc + "/" + submission.getId();
 		}
 
 		else
 		{
-			// send to the section instructions if it's a first question and by-question
-			if (instructions && (question.getSectionOrdering().getIsFirst().booleanValue()) && (!question.getSection().getIsMerged().booleanValue())
-					&& (assessment.getQuestionPresentation() == QuestionPresentation.BY_QUESTION))
-			{
-				// to instructions
-				destination = "/" + Destinations.section_instructions + "/" + submission.getId() + "/" + question.getSection().getId();
-			}
+			// find the first incomplete question
+			AssessmentQuestion question = submission.getFirstIncompleteQuestion();
 
-			// or to the question
-			else
+			// if we don't have one, we will go to the toc (or final_review for linear)
+			if (question == null)
 			{
-				if (assessment.getQuestionPresentation() == QuestionPresentation.BY_QUESTION)
+				if (!assessment.getRandomAccess().booleanValue())
 				{
-					destination = "/" + Destinations.question + "/" + submission.getId() + "/q" + question.getId();
-				}
-				else if (assessment.getQuestionPresentation() == QuestionPresentation.BY_SECTION)
-				{
-					destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + question.getSection().getId();
-
-					// include the question target if not the first quesiton in the section
-					if (!question.getSectionOrdering().getIsFirst().booleanValue())
-					{
-						destination = destination + "#" + question.getId();
-					}
+					destination = "/" + Destinations.final_review + "/" + submission.getId();
 				}
 				else
 				{
-					destination = "/" + Destinations.question + "/" + submission.getId() + "/a";
+					destination = "/" + Destinations.toc + "/" + submission.getId();
+				}
+			}
 
-					// include the question target if not the first quesiton in the assessment
-					if (!question.getAssessmentOrdering().getIsFirst().booleanValue())
+			else
+			{
+				// send to the section instructions if it's a first question and by-question
+				if (instructions && (question.getSectionOrdering().getIsFirst().booleanValue())
+						&& (!question.getSection().getIsMerged().booleanValue())
+						&& (assessment.getQuestionPresentation() == QuestionPresentation.BY_QUESTION))
+				{
+					// to instructions
+					destination = "/" + Destinations.section_instructions + "/" + submission.getId() + "/" + question.getSection().getId();
+				}
+
+				// or to the question
+				else
+				{
+					if (assessment.getQuestionPresentation() == QuestionPresentation.BY_QUESTION)
 					{
-						destination = destination + "#" + question.getId();
+						destination = "/" + Destinations.question + "/" + submission.getId() + "/q" + question.getId();
+					}
+					else if (assessment.getQuestionPresentation() == QuestionPresentation.BY_SECTION)
+					{
+						destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + question.getSection().getId();
+
+						// include the question target if not the first quesiton in the section
+						if (!question.getSectionOrdering().getIsFirst().booleanValue())
+						{
+							destination = destination + "#" + question.getId();
+						}
+					}
+					else
+					{
+						destination = "/" + Destinations.question + "/" + submission.getId() + "/a";
+
+						// include the question target if not the first quesiton in the assessment
+						if (!question.getAssessmentOrdering().getIsFirst().booleanValue())
+						{
+							destination = destination + "#" + question.getId();
+						}
 					}
 				}
 			}
