@@ -623,13 +623,13 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 */
 	protected void enterPost(HttpServletRequest req, HttpServletResponse res, Context context, String assessmentId) throws IOException
 	{
-		// check expected
-		if (!context.getPostExpected())
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
-			return;
-		}
+//		// check expected
+//		if (!context.getPostExpected())
+//		{
+//			// redirect to error
+//			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
+//			return;
+//		}
 
 		// for the password
 		Value value = ui.newValue();
@@ -1249,12 +1249,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void questionPost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId, String questionSelector)
 			throws IOException
 	{
-		if (!context.getPostExpected())
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
-			return;
-		}
+//		if (!context.getPostExpected())
+//		{
+//			// redirect to error
+//			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
+//			return;
+//		}
 
 		// collect the questions (actually their answers) to put on the page
 		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
@@ -1633,12 +1633,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected void removePost(HttpServletRequest req, HttpServletResponse res, String submissionId, String questionId, String reference,
 			Context context) throws IOException
 	{
-		if (!context.getPostExpected())
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
-			return;
-		}
+//		if (!context.getPostExpected())
+//		{
+//			// redirect to error
+//			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
+//			return;
+//		}
 
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission == null)
@@ -1883,12 +1883,12 @@ public class AssessmentDeliveryTool extends HttpServlet
 	 */
 	protected void submissionCompletePost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId) throws IOException
 	{
-		if (!context.getPostExpected())
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
-			return;
-		}
+//		if (!context.getPostExpected())
+//		{
+//			// redirect to error
+//			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
+//			return;
+//		}
 
 		// read form
 		String destination = ui.decode(req, context);
