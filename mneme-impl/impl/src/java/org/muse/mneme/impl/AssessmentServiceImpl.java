@@ -1505,7 +1505,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						submittedDate = m_timeService.newTime(ts.getTime());
 					}
 
-					String answerId = result.getString(3);
+					String answerId = StringUtil.trimToNull(result.getString(3));
 					String rationale = result.getString(4);
 					String answerText = result.getString(5);
 					boolean markedForReview = result.getBoolean(6);

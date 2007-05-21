@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.fileupload.FileItem;
@@ -1144,6 +1145,66 @@ public class SubmissionAnswerImpl implements SubmissionAnswer
 				}
 
 				this.entries = ordered;
+			}
+		}
+
+		else if ((question.getType() == QuestionType.multipleChoice) || (question.getType() == QuestionType.trueFalse))
+		{
+			if (this.entries.size() < 1)
+			{
+				String msg = "verifyEntries: (multipleChoice or trueFalse): no entries: " + " submission: " + this.getSubmission().getId() + " question: "
+						+ this.getQuestion().getId();
+				M_log.warn(msg);
+				throw new RuntimeException(msg);
+			}
+
+			if (this.entries.size() > 1)
+			{
+				// try to fix this by removing any entries that have a null answer
+				SubmissionAnswerEntryImpl first = this.entries.get(0);
+				for (Iterator i = this.entries.iterator(); i.hasNext();)
+				{
+					SubmissionAnswerEntryImpl entry = (SubmissionAnswerEntryImpl) i.next();
+
+					if (entry.answerId == null)
+					{
+						i.remove();
+					}
+				}
+
+				// if they were all null, put one back!
+				if (this.entries.isEmpty())
+				{
+					this.entries.add(first);
+				}
+
+				// if we end up with only one, we are set
+				if (this.entries.size() > 1)
+				{
+					String msg = "verifyEntries: (multipleChoice or trueFalse): too many non-null entries: " + this.entries.size() + " submission: "
+							+ this.getSubmission().getId() + " question: " + this.getQuestion().getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
+				else
+				{
+					String msg = "verifyEntries: (multipleChoice or trueFalse): CORRECTED: too many non-null entries: " + this.entries.size() + " submission: "
+							+ this.getSubmission().getId() + " question: " + this.getQuestion().getId();
+					M_log.info(msg);
+				}
+			}
+
+			// each entry needs to be to the single part
+			for (SubmissionAnswerEntryImpl entry : this.entries)
+			{
+				if (!entry.questionPartId.equals(question.getPart().getId()))
+				{
+					String msg = "verifyEntries: (other): entry part: " + entry.questionPartId + " doesn't match question part: "
+							+ question.getPart().getId() + " submission: " + this.getSubmission().getId() + " question: "
+							+ this.getQuestion().getId();
+					M_log.warn(msg);
+					throw new RuntimeException(msg);
+				}
 			}
 		}
 
