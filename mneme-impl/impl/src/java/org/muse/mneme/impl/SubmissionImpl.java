@@ -230,10 +230,27 @@ public class SubmissionImpl implements Submission
 		// read the basic info if this property has not yet been set
 		if (this.assessmentIdStatus == PropertyStatus.unset) readMain();
 
-		AssessmentImpl assessment = (AssessmentImpl) this.service.idAssessment(this.assessmentId);
+		// cache the actual assessment for the thread, to avoid the real assessment cache's copy-out policy
 
-		// set the submision context
-		assessment.initSubmissionContext(this);
+		// Note: this is safe!  We have to assure two things:
+		// 1- when we modify the assessment, we don't get concurrent mod exception, and
+		// 2- when the assessment's lazy parts are updated, that is not repeated
+		// 1 is ok because we are sharing ONLY in the single thread.
+		// 2 is good because when the shared object gets un-lazyed, the object is updated, so when we next access the shared object it will have the lazy parts read.
+		// -ggolden
+
+		String key = "submissionAssessment_" + this.id + "_" + this.assessmentId;
+		AssessmentImpl assessment = (AssessmentImpl) this.service.m_threadLocalManager.get(key);
+		if (assessment == null)
+		{
+			assessment = (AssessmentImpl) this.service.idAssessment(this.assessmentId);
+
+			// set the submision context
+			assessment.initSubmissionContext(this);
+
+			// thread cache it
+			this.service.m_threadLocalManager.set(key, assessment);
+		}
 
 		return assessment;
 	}
@@ -966,6 +983,9 @@ public class SubmissionImpl implements Submission
 	 */
 	protected String getAssessmentId()
 	{
+		// read the basic info if this property has not yet been set
+		if (this.assessmentIdStatus == PropertyStatus.unset) readMain();
+
 		return this.assessmentId;
 	}
 

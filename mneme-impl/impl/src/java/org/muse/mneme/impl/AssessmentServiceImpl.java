@@ -2532,7 +2532,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		while (all.size() > 0)
 		{
 			// take the first one out
-			Submission submission = (Submission) all.remove(0);
+			SubmissionImpl submission = (SubmissionImpl) all.remove(0);
 
 			// check if this is over time limit / deadline
 			if (submission.getIsOver(asOf, 0))
@@ -2542,12 +2542,12 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				completeTheSubmission(over, submission);
 
 				// update what we read (completeTheSubmission uncaches, so we own this submission object now)
-				((SubmissionImpl) submission).initStatus(new Integer(1));
-				((SubmissionImpl) submission).initIsComplete(Boolean.TRUE);
-				((SubmissionImpl) submission).initSubmittedDate(over);
+				submission.initStatus(new Integer(1));
+				submission.initIsComplete(Boolean.TRUE);
+				submission.initSubmittedDate(over);
 
 				// recache a copy
-				cacheSubmission(new SubmissionImpl((SubmissionImpl) submission));
+				cacheSubmission(new SubmissionImpl(submission));
 			}
 
 			// count the submissions actually present in the list for this assessment
@@ -2557,7 +2557,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				count++;
 			}
 
-			String aid = submission.getAssessment().getId();
+			String aid = submission.getAssessmentId();
 			SubmissionImpl bestSubmission = null;
 			SubmissionImpl inProgressSubmission = null;
 			
@@ -2567,13 +2567,13 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				// if incomplete, record this as in progress
 				if ((submission.getIsComplete() == null) || (!submission.getIsComplete()))
 				{
-					inProgressSubmission = (SubmissionImpl) submission;
+					inProgressSubmission = submission;
 				}
 				
 				// else, if complete, make it the best so far
 				else
 				{
-					bestSubmission = (SubmissionImpl) submission;
+					bestSubmission = submission;
 				}
 			}
 
@@ -2581,7 +2581,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			for (Iterator i = all.iterator(); i.hasNext();)
 			{
 				SubmissionImpl candidateSub = (SubmissionImpl) i.next();
-				if (candidateSub.getAssessment().getId().equals(aid))
+				if (candidateSub.getAssessmentId().equals(aid))
 				{
 					// take this one out
 					i.remove();
@@ -2648,7 +2648,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// pick the winner
 			SubmissionImpl winner = inProgressSubmission;
 			if (winner == null) winner = bestSubmission;
-			if (winner == null) winner = (SubmissionImpl) submission;
+			if (winner == null) winner = submission;
 
 			// set the winner's sibling count
 			winner.initSiblingCount(new Integer(count));
