@@ -68,6 +68,11 @@
             <param-name>toolId</param-name>
             <param-value>sakai.mneme</param-value>
         </init-param>
+        <init-param>
+            <param-name>resourcePaths</param-name>
+            <param-value>icons</param-value>
+        </init-param>
+
         <load-on-startup>1</load-on-startup>
     </servlet>
 

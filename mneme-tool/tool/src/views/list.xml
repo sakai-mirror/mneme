@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+/**********************************************************************************
+ * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ **********************************************************************************/
+-->
+
+<interface title="list-title" header="list-header">
+	<container>
+		<entityList style="FLAT" >
+			<iterator name="submission" model="submissions">
+				<model ref="submissions" />
+			</iterator>
+			<emptyTitle>
+				<message selector="list-empty" />
+			</emptyTitle>
+			<columns>
+				<modelColumn>
+					<title>
+						<message selector="list-header-title" />
+					</title>
+					<model ref="submission.assessment.title" />
+					<sort>
+						<active>
+							<compareDecision>
+								<model ref="sort_column" />
+								<comparison>
+									<constant value="0" />
+								</comparison>
+							</compareDecision>
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/list/0A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/list/0D" />
+						</desc>
+					</sort>
+					<navigations>
+						<navigation style="LINK" title="list-nav-begin">
+							<destination template="/enter/{0}" ref="submission.assessment.id" />
+							<included>
+								<decision model="submission.mayBegin" />
+							</included>
+						</navigation>
+						<navigation style="LINK" title="list-nav-continue">
+							<destination template="/question/{0}/z" ref="submission.id" />
+							<included>
+								<decision model="submission.mayContinue" />
+							</included>
+						</navigation>
+						<navigation style="LINK" title="list-nav-begin-again">
+							<destination template="/enter/{0}" ref="submission.assessment.id" />
+							<included>
+								<decision model="submission.mayBeginAgain" />
+							</included>
+						</navigation>
+					</navigations>
+				</modelColumn>
+				<modelColumn em="10" wrap="FALSE" >
+					<title>
+						<message selector="list-status-title" />
+					</title>
+					<model type="html" delegate="FormatListDecoration" tool="sakai.mneme" />
+					<sort>
+						<active>
+							<compareDecision>
+								<model ref="sort_column" />
+								<comparison>
+									<constant value="1" />
+								</comparison>
+							</compareDecision>
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/list/1A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/list/1D" />
+						</desc>
+					</sort>
+					<entityNavigations>
+						<navigation>
+							<destination template="/enter/{0}" ref="submission.assessment.id" />
+							<included>
+								<decision model="submission.mayBegin" />
+							</included>
+						</navigation>
+						<navigation>
+							<destination template="/question/{0}/z" ref="submission.id" />
+							<included>
+								<decision model="submission.mayContinue" />
+							</included>
+						</navigation>
+						<navigation>
+							<destination template="/enter/{0}" ref="submission.assessment.id" />
+							<included>
+								<decision model="submission.mayBeginAgain" />
+							</included>
+						</navigation>
+					</entityNavigations>
+				</modelColumn>
+			</columns>
+		</entityList>
+		<instructions selector="list-highest-note" />
+	</container>
+</interface>
