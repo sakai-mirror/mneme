@@ -183,10 +183,20 @@
 								</andDecision>
 							</included>
 						</text>
-						<text timer="true">
-							<message>
-								<model type="date" twoLine="TRUE" missing="dash" ref="submission.assessment.dueDate" />
-							</message>
+						<countdownTimer tight="TRUE" pixels="100">
+							<duration>
+								<message selector="timer-due">
+									<model type="date" ref="submission.assessment.expiration.time" />
+								</message>
+								<model ref="submission.assessment.expiration.limit" />
+							</duration>
+							<remaining>
+								<message selector="timer-remaining" />
+							</remaining>
+							<timeTillExpire>
+								<model ref="submission.assessment.expiration.duration" />
+							</timeTillExpire>
+							<destination template="/list" />
 							<included>
 								<andDecision>
 									<hasValueDecision model="submission.assessment.expiration" />
@@ -204,7 +214,7 @@
 									</orDecision>
 								</andDecision>
 							</included>
-						</text>
+						</countdownTimer>
 					</container>
 				</column>
 				<column>
@@ -220,15 +230,25 @@
 								<decision reversed="TRUE" model="submission.mayContinue" />
 							</included>
 						</text>
-						<text timer="true">
-							<message>
-								<model type="duration" concise="TRUE" missing="dash" ref="submission.assessment.timeLimit" />
-							</message>
+						<countdownTimer tight="TRUE" pixels="100">
+							<duration>
+								<message selector="timer-duration">
+									<model type="date" ref="submission.expiration.limit" />
+								</message>
+								<model ref="submission.expiration.limit" />
+							</duration>
+							<remaining>
+								<message selector="timer-remaining" />
+							</remaining>
+							<timeTillExpire>
+								<model ref="submission.expiration.duration" />
+							</timeTillExpire>
+							<destination template="/list" />
 							<included>
 								<decision model="submission.mayContinue" />
 								<hasValueDecision model="submission.assessment.timeLimit" />
 							</included>
-						</text>
+						</countdownTimer>
 					</container>
 				</column>
 				<column wrap="FALSE">
