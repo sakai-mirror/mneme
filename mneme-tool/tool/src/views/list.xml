@@ -25,7 +25,7 @@
 
 <interface title="list-title" header="list-header">
 	<container>
-		<entityList style="FLAT" >
+		<entityList style="FLAT">
 			<iterator name="submission" model="submissions">
 				<model ref="submissions" />
 			</iterator>
@@ -127,6 +127,170 @@
 						</navigation>
 					</entityNavigations>
 				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="list-header-open" />
+					</title>
+					<model type="date" twoLine="TRUE" missing="dash" ref="submission.assessment.releaseDate" />
+				</modelColumn>
+				<column>
+					<title>
+						<message selector="list-header-due" />
+					</title>
+					<sort>
+						<active>
+							<compareDecision>
+								<model ref="sort_column" />
+								<comparison>
+									<constant value="2" />
+								</comparison>
+							</compareDecision>
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/list/2A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/list/2D" />
+						</desc>
+					</sort>
+					<container>
+						<text>
+							<message>
+								<model type="date" twoLine="TRUE" missing="dash" ref="submission.assessment.dueDate" />
+							</message>
+							<included>
+								<andDecision reversed="TRUE">
+									<andDecision>
+										<hasValueDecision model="submission.assessment.expiration" />
+										<orDecision>
+											<compareDecision model="submission.assessmentSubmissionStatus" constant="ready" />
+											<andDecision>
+												<compareDecision model="submission.assessmentSubmissionStatus">
+													<comparison>
+														<constant value="inProgress" />
+														<constant value="inProgressAlert" />
+													</comparison>
+												</compareDecision>
+												<hasValueDecision reversed="TRUE" model="submission.assessment.timeLimit" />
+											</andDecision>
+										</orDecision>
+									</andDecision>
+								</andDecision>
+							</included>
+						</text>
+						<text timer="true">
+							<message>
+								<model type="date" twoLine="TRUE" missing="dash" ref="submission.assessment.dueDate" />
+							</message>
+							<included>
+								<andDecision>
+									<hasValueDecision model="submission.assessment.expiration" />
+									<orDecision>
+										<compareDecision model="submission.assessmentSubmissionStatus" constant="ready" />
+										<andDecision>
+											<compareDecision model="submission.assessmentSubmissionStatus">
+												<comparison>
+													<constant value="inProgress" />
+													<constant value="inProgressAlert" />
+												</comparison>
+											</compareDecision>
+											<hasValueDecision reversed="TRUE" model="submission.assessment.timeLimit" />
+										</andDecision>
+									</orDecision>
+								</andDecision>
+							</included>
+						</text>
+					</container>
+				</column>
+				<column>
+					<title>
+						<message selector="list-header-limit" />
+					</title>
+					<container>
+						<text>
+							<message>
+								<model type="duration" concise="TRUE" missing="dash" ref="submission.assessment.timeLimit" />
+							</message>
+							<included>
+								<decision reversed="TRUE" model="submission.mayContinue" />
+							</included>
+						</text>
+						<text timer="true">
+							<message>
+								<model type="duration" concise="TRUE" missing="dash" ref="submission.assessment.timeLimit" />
+							</message>
+							<included>
+								<decision model="submission.mayContinue" />
+								<hasValueDecision model="submission.assessment.timeLimit" />
+							</included>
+						</text>
+					</container>
+				</column>
+				<column wrap="FALSE">
+					<title>
+						<message selector="list-header-tries" />
+					</title>
+					<container>
+						<text>
+							<message selector="list-format-tries">
+								<model ref="submission.siblingCount"/>
+								<model ref="submission.assessment.numSubmissionsAllowed" missing="infinite" />
+							</message>
+						</text>
+					</container>
+				</column>
+				<modelColumn>
+					<title>
+						<message selector="list-header-finished" />
+					</title>
+					<model type="date" twoLine="TRUE" missing="dash" ref="submission.best.submittedDate" />
+					<entityIncluded selector="dash">
+						<decision model="submission.best.isComplete" />
+					</entityIncluded>
+				</modelColumn>
+				<column wrap="FALSE">
+					<title>
+						<message selector="list-header-grade" />
+					</title>
+					<container>
+						<text>
+							<message selector="list-format-grade">
+								<model ref="submission.best" delegate="FormatListGrade" tool="sakai.mneme" />
+							</message>
+						</text>
+					</container>
+					<navigations>
+						<navigation style="LINK" title="list-nav-review">
+							<destination template="/review/{0}" ref="submission.best.id" />
+							<included>
+								<decision model="submission.best.mayReview" />
+							</included>
+						</navigation>
+						<navigation style="LINK" disabled="TRUE">
+							<title>
+								<message selector="list-nav-review-later">
+									<model type="date" ref="submission.best.assessment.feedbackDate" />
+								</message>
+							</title>
+							<included>
+								<decision reversed="TRUE" model="submission.best.mayReview" />
+								<decision model="submission.best.mayReviewLater" />
+							</included>
+						</navigation>
+						<navigation style="LINK" title="list-nav-review-not" disabled="TRUE">
+							<included>
+								<decision model="submission.best.isComplete" />
+								<decision reversed="TRUE" model="submission.best.mayReview" />
+								<decision reversed="TRUE" model="submission.best.mayReviewLater" />
+							</included>
+						</navigation>
+					</navigations>
+				</column>
 			</columns>
 		</entityList>
 		<instructions selector="list-highest-note" />

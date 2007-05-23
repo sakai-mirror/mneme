@@ -31,7 +31,7 @@
 			init-method="init"
 			destroy-method="destroy"
 			singleton="true"
-			depends-on="FormatListDecoration">
+			depends-on="FormatListDecoration,FormatListGrade">
 
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
  		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
@@ -52,6 +52,18 @@
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
 
  		<property name="id"><value>FormatListDecoration</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
+	<bean id="FormatListGrade"
+			class="org.muse.mneme.tool.FormatListGradeDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>FormatListGrade</value></property>
  		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 
