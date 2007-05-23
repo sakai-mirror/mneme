@@ -233,13 +233,10 @@
 						<countdownTimer tight="TRUE" pixels="100">
 							<duration>
 								<message selector="timer-duration">
-									<model type="date" ref="submission.expiration.limit" />
+									<model type="duration" concise="TRUE" ref="submission.expiration.limit" />
 								</message>
 								<model ref="submission.expiration.limit" />
 							</duration>
-							<remaining>
-								<message selector="timer-remaining" />
-							</remaining>
 							<timeTillExpire>
 								<model ref="submission.expiration.duration" />
 							</timeTillExpire>

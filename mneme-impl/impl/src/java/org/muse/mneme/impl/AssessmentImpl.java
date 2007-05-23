@@ -568,6 +568,19 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsMultipleSubmissionsAllowed()
+	{
+		if ((getNumSubmissionsAllowed() == null) || (getNumSubmissionsAllowed().intValue() > 1))
+		{
+			return Boolean.TRUE;
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getPassword()
 	{
 		// read the basic info if this property has not yet been set

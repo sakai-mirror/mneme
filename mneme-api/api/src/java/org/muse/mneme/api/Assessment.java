@@ -238,6 +238,13 @@ public interface Assessment
 	Integer getNumSubmissionsAllowed();
 
 	/**
+	 * Are multiple submissions allowed?
+	 * 
+	 * @return TRUE if multiple submissions are allowed, FALSE if not.
+	 */
+	Boolean getIsMultipleSubmissionsAllowed();
+
+	/**
 	 * Access the defined password.
 	 * 
 	 * @return The password, or null if not defined.
