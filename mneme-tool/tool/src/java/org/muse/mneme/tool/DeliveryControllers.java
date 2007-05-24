@@ -837,7 +837,7 @@ public class DeliveryControllers
 												.setIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review"))))
 										.addColumn(
 											ui.newSelectionColumn()
-												.setReadOnly(ui.newPropertyReference().setReference("review"))
+												.setReadOnly(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")))
 												.setSingleSelectDecision(
 													ui.newCompareDecision()
 														.setEqualsConstant(
@@ -889,7 +889,7 @@ public class DeliveryControllers
 										.setOnEmptyAlert(
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
 											"question-essay-on-empty-alert")
-										.setReadOnly(ui.newPropertyReference().setReference("review"))
+										.setReadOnly(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")))
 										.setSize(20, 80)
 										.setProperty(
 											ui.newPropertyReference()
@@ -912,7 +912,7 @@ public class DeliveryControllers
 										.setTitleIncluded(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")).setReversed())
 										.setUpload("quesiton-upload-upload")
 										.setProperty(ui.newPropertyReference().setReference("answer.uploadFile"))
-										.setReadOnly(ui.newPropertyReference().setReference("review"))
+										.setReadOnly(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")))
 										.setIncluded(
 											ui.newCompareDecision()
 												.setEqualsConstant(QuestionType.fileUpload.toString())
@@ -947,7 +947,7 @@ public class DeliveryControllers
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
 											"question-fillin-on-empty-alert")
 										.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.part.title"))
-										.setReadOnly(ui.newPropertyReference().setReference("review"))
+										.setReadOnly(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")))
 										.setFocus(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")))
 										.setProperty(
 											ui.newPropertyReference()
@@ -975,7 +975,7 @@ public class DeliveryControllers
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
 											"question-fillin-on-empty-alert")
 										.setText(null, ui.newHtmlPropertyReference().setReference("answer.question.part.title"))
-										.setReadOnly(ui.newPropertyReference().setReference("review"))
+										.setReadOnly(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")))
 										.setFocus(ui.newHasValueDecision().setProperty(ui.newPropertyReference().setReference("question")))
 										.setProperty(
 											ui.newPropertyReference()
@@ -1002,7 +1002,7 @@ public class DeliveryControllers
 										.setOnEmptyAlert(
 											ui.newDecision().setReversed().setProperty(ui.newPropertyReference().setReference("submission.assessment.randomAccess")),
 											"question-match-on-empty-alert")
-										.setReadOnly(ui.newPropertyReference().setReference("review"))
+										.setReadOnly(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")))
 										.setProperty(
 											ui.newPropertyReference()
 												.setReference("answer.entryAnswerIds"))
@@ -1050,7 +1050,7 @@ public class DeliveryControllers
 														.setReference("answer.question.type"))))
 								.add(
 									ui.newTextEdit()
-										.setReadOnly(ui.newPropertyReference().setReference("review"))
+										.setReadOnly(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")))
 										.setTitle("question-rationale")
 										.setProperty(
 											ui.newPropertyReference()
@@ -1067,7 +1067,7 @@ public class DeliveryControllers
 								.add(
 									ui.newSelection()
 										.setTitle("question-mark-review")
-										.setReadOnly(ui.newPropertyReference().setReference("review"))
+										.setReadOnly(ui.newDecision().setProperty(ui.newPropertyReference().setReference("review")))
 										.setProperty(
 											ui.newPropertyReference()
 												.setReference("answer.markedForReview"))
