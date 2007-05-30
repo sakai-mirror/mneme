@@ -26,9 +26,7 @@
 <interface title="list-title" header="list-header">
 	<container>
 		<entityList style="FLAT">
-			<iterator name="submission" model="submissions">
-				<model ref="submissions" />
-			</iterator>
+			<iterator name="submission" model="submissions" />
 			<emptyTitle>
 				<message selector="list-empty" />
 			</emptyTitle>
@@ -61,19 +59,19 @@
 					</sort>
 					<navigations>
 						<navigation style="LINK" title="list-nav-begin">
-							<destination template="/enter/{0}" ref="submission.assessment.id" />
+							<destination template="/enter/{0}" model="submission.assessment.id" />
 							<included>
 								<decision model="submission.mayBegin" />
 							</included>
 						</navigation>
 						<navigation style="LINK" title="list-nav-continue">
-							<destination template="/question/{0}/z" ref="submission.id" />
+							<destination template="/question/{0}/z" model="submission.id" />
 							<included>
 								<decision model="submission.mayContinue" />
 							</included>
 						</navigation>
 						<navigation style="LINK" title="list-nav-begin-again">
-							<destination template="/enter/{0}" ref="submission.assessment.id" />
+							<destination template="/enter/{0}" model="submission.assessment.id" />
 							<included>
 								<decision model="submission.mayBeginAgain" />
 							</included>
@@ -108,19 +106,19 @@
 					</sort>
 					<entityNavigations>
 						<navigation>
-							<destination template="/enter/{0}" ref="submission.assessment.id" />
+							<destination template="/enter/{0}" model="submission.assessment.id" />
 							<included>
 								<decision model="submission.mayBegin" />
 							</included>
 						</navigation>
 						<navigation>
-							<destination template="/question/{0}/z" ref="submission.id" />
+							<destination template="/question/{0}/z" model="submission.id" />
 							<included>
 								<decision model="submission.mayContinue" />
 							</included>
 						</navigation>
 						<navigation>
-							<destination template="/enter/{0}" ref="submission.assessment.id" />
+							<destination template="/enter/{0}" model="submission.assessment.id" />
 							<included>
 								<decision model="submission.mayBeginAgain" />
 							</included>
@@ -283,7 +281,7 @@
 					</container>
 					<navigations>
 						<navigation style="LINK" title="list-nav-review">
-							<destination template="/review/{0}" ref="submission.best.id" />
+							<destination template="/review/{0}" model="submission.best.id" />
 							<included>
 								<decision model="submission.best.mayReview" />
 							</included>

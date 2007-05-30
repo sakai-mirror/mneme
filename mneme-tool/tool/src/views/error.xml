@@ -27,7 +27,7 @@
 	<container>
 		<section>
 			<container>
-				<alert selector="error-invalid-url-alert" ref="invalidUrl" />
+				<alert selector="error-invalid-url-alert" model="invalidUrl" />
 			</container>
 			<included>
 				<decision type="hasValue">
@@ -67,7 +67,7 @@
 		</section>
 		<section>
 			<container>
-				<alert selector="error-upload" ref="uploadMax" />
+				<alert selector="error-upload" model="uploadMax" />
 			</container>
 			<included>
 				<decision type="hasValue">

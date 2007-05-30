@@ -1,0 +1,654 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+/**********************************************************************************
+ * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ **********************************************************************************/
+-->
+
+<interface autoComplete="FALSE">
+
+	<!-- title & header-->
+	<title>
+		<message selector="question-title">
+			<model ref="actionTitle" />
+			<model ref="submission.assessment.title" />
+		</message>
+	</title>
+	<header>
+		<message selector="question-title">
+			<model ref="actionTitle" />
+			<model ref="submission.assessment.title" />
+		</message>
+	</header>
+
+	<container>
+		<!-- courier to keep the session alive -->
+		<courier destination="/courier" frequency="600" />
+
+		<!-- repeat the nav up top -->
+		<alias to="nav" />
+
+		<!-- timer for timed tests -->
+		<countdownTimer submit="TRUE">
+			<duration>
+				<message selector="timer-duration">
+					<model type="duration" concise="TRUE" ref="submission.expiration.limit" />
+				</message>
+				<model ref="submission.expiration.limit" />
+			</duration>
+			<remaining>
+				<message selector="timer-remaining" />
+			</remaining>
+			<timeTillExpire>
+				<model ref="submission.expiration.duration" />
+			</timeTillExpire>
+			<destination template="/submitted/{0}">
+				<model ref="submission.id" />
+			</destination>
+			<included>
+				<decision model="review" reversed="TRUE" />
+				<hasValueDecision model="submission.expiration" />
+				<compareDecision>
+					<model ref="submission.expiration.cause" />
+					<comparison>
+						<constant value="timeLimit" />
+					</comparison>
+				</compareDecision>
+			</included>
+		</countdownTimer>
+		
+		<!-- timer for near-due tests -->
+		<countdownTimer submit="TRUE">
+			<duration>
+				<message selector="timer-due">
+					<model type="date" concise="TRUE" ref="submission.expiration.time" />
+				</message>
+				<model ref="submission.expiration.limit" />
+			</duration>
+			<remaining>
+				<message selector="timer-remaining" />
+			</remaining>
+			<timeTillExpire>
+				<model ref="submission.expiration.duration" />
+			</timeTillExpire>
+			<destination template="/submitted/{0}">
+				<model ref="submission.id" />
+			</destination>
+			<included>
+				<decision model="review" reversed="TRUE" />
+				<hasValueDecision model="submission.expiration" />
+				<compareDecision>
+					<model ref="submission.expiration.cause" />
+					<comparison>
+						<constant value="closedDate" />
+					</comparison>
+				</compareDecision>
+			</included>
+		</countdownTimer>
+		
+		<!-- review only - not graded alert -->
+		<alert selector="review-not-graded">
+			<included>
+				<decision model="review" />
+				<decision reversed="TRUE" model="submission.isGraded" />
+			</included>
+		</alert>
+		
+		<!-- test title, description and comments -->
+		<section>
+			<title>
+				<message selector="question-test-title">
+					<model type="icon" ref="/icons/test.png" />
+					<model ref="submission.assessment.title" />
+					<model type="html" ref="submission" delegate="SubmissionScore" tool="sakai.mneme" />
+				</message>
+			</title>
+			<container>
+				<text>
+					<message>
+						<model type="html" ref="submission.assessment.description" />
+					</message>
+				</text>
+				<attachments title="attachments" model="submission.assessment.attachments">
+					<included>
+						<hasValueDecision model="submission.assessment.attachments" />
+					</included>
+				</attachments>
+				<section title ="question-eval-overall-comment-title">
+					<container>
+						<evaluation>
+							<icon icon="/icons/note.png" selector="comments" />
+							<message selector="question-eval-overall-comment">
+								<model type="test" ref="submission.evalComment" />
+							</message>
+						</evaluation>
+					</container>
+					<included>
+						<decision model="review" />
+						<hasValueDecision model="submission.evalComment" />
+					</included>
+				</section>
+			</container>
+			<included>
+				<hasValueDecision reversed="TRUE" model="question" />
+				<hasValueDecision reversed="TRUE" model="section" />
+			</included>
+		</section>
+
+		<!-- iterating section for each question -->
+		<section>
+			<iterator name="answer">
+				<model ref="answers" />
+			</iterator>
+			
+			<!-- section title -->
+			<title>
+				<message selector="instructions-section-title">
+					<model type="icon" ref="/icons/section.png" />
+					<model type="text" ref="answer.question.section.ordering.position" />
+					<model type="text" ref="answer.question.section.assessment.numSections" />
+					<model type="text" ref="answer.question.section.title" />
+					<model ref="answer.question.section" delegate="SectionScore" tool="sakai.mneme" />
+				</message>
+				<included>
+					<orDecision>
+						<hasValueDecision model="question" />
+						<decision model="answer.question.sectionOrdering.isFirst" />
+					</orDecision>
+					<decision reversed="TRUE" model="answer.question.section.isMerged" />
+				</included>
+			</title>
+			
+			<!-- page anchor to be able to return to this particular question -->
+			<anchor>
+				<message selector="question-anchor">
+					<model ref="answer.question.id" />
+				</message>
+			</anchor>
+			<container>
+
+				<!-- section description -->
+				<text>
+					<model ref="answer.question.section.description" />
+					<included>
+						<decision model="answer.question.sectionOrdering.isFirst" />
+						<hasValueDecision reversed="TRUE" model="question" />
+						<decision reversed="TRUE" model="answer.question.section.isMerged" />
+					</included>
+				</text>			
+				<attachments title="attachments" model="answer.question.section.attachments">
+					<included>
+						<hasValueDecision model="answer.question.section.attachments" />
+						<decision model="answer.question.sectionOrdering.isFirst" />
+						<hasValueDecision reversed="TRUE" model="question" />
+						<decision reversed="TRUE" model="answer.question.section.isMerged" />
+					</included>
+				</attachments>
+
+				<section>
+				
+					<!-- question header -->
+					<title highlighted="TRUE">
+						<message>
+							<model type="html" ref="answer.question" delegate="FormatQuestionTitle" tool="sakai.mneme" />
+						</message>
+					</title>
+
+					<container>
+
+						<!-- title for matching questions -->
+						<text>
+							<message>
+								<model type="html" ref="answer.question.instructions" />
+							</message>
+							<included>
+								<compareDecision model="answer.question.type" constant="matching" />
+							</included>
+						</text>
+
+						<!-- title for other questions -->
+						<text>
+							<message>
+								<model type="html" ref="answer.question.part.title" />
+							</message>
+							<included>
+								<compareDecision reversed="TRUE" model="answer.question.type">
+									<comparison>
+										<constant value="fillIn" />
+										<constant value="numeric" />
+										<constant value="matching" />
+									</comparison>
+								</compareDecision>
+							</included>
+						</text>
+
+						<!-- question attachments -->
+						<attachments model="answer.question.attachments">
+							<included>
+								<hasValueDecision model="answer.question.attachments" />
+							</included>
+						</attachments>
+
+						<!-- list of possible answers for enumerated question types -->
+						<entityList style="FORM">
+							<iterator name="qanswer" model="answer.question.part.answers" />
+							<columns>
+								<modelColumn>
+									<model type="html" delegate="FormatAnswerCorrectFeedback" tool="sakai.mneme" />
+									<included>
+										<decision model="review" />
+									</included>
+								</modelColumn>
+								<selectionColumn wrap="FALSE">
+									<readOnly>
+										<decision model="review" />
+									</readOnly>
+									<singleSelect>
+										<compareDecision reversed="TRUE" model="answer.question.type" constant="multipleCorrect" />
+									</singleSelect>
+									<value>
+										<model type="text" ref="qanswer.id" />
+									</value>
+									<model ref="answer.entryAnswerIds" />
+									<onEmptyAlert>
+										<message selector="question-select-on-empty-alert" />
+										<decision reversed="TRUE" model="submission.assessment.randomAccess" />
+									</onEmptyAlert>
+									<label>
+										<message selector="question-label" model="qanswer.label" />
+									</label>
+								</selectionColumn>
+								<modelColumn>
+									<model type="html" ref="qanswer.text" />
+								</modelColumn>
+								<modelColumn>
+									<model type="html" ref="qanswer.feedbackGeneral" />
+									<included>
+										<decision model="review" />
+										<decision delegate="AnswerFeedbackDecision" tool="sakai.mneme" />
+									</included>
+								</modelColumn>
+							</columns>
+							<included>
+								<compareDecision model="answer.question.type">
+									<comparison>
+										<constant value="multipleChoice" />
+										<constant value="multipleCorrect" />
+										<constant value="survey" />
+										<constant value="trueFalse" />
+									</comparison>
+								</compareDecision>
+							</included>
+						</entityList>
+						
+						<!-- essay's main component -->
+						<textEdit title="question-text" rows="20" cols="80">
+							<onEmptyAlert>
+								<message selector="question-essay-on-empty-alert" />
+								<decision reversed="TRUE" model="submission.assessment.randomAccess" />
+							</onEmptyAlert>
+							<readOnly>
+								<decision model="review" />
+							</readOnly>
+							<model ref="answer.entryAnswerText" />
+							<focus>
+								<hasValueDecision model="question" />
+							</focus>
+							<included>
+								<compareDecision model="answer.question.type" constant="essay" />
+							</included>
+						</textEdit>
+						
+						<!-- file upload's main component -->
+						<fileUpload>
+							<title selector="question-upload-title">
+								<included>
+									<decision reversed="TRUE" model="review" />
+								</included>
+							</title>
+							<upload>
+								<message selector="quesiton-upload-upload" />
+							</upload>
+							<onEmptyAlert>
+								<message selector="question-upload-on-empty-alert" />
+								<decision reversed="TRUE" model="submission.assessment.randomAccess" />
+								<hasValueDecision reversed="TRUE" model="answer.entryAnswerAttachments" />
+							</onEmptyAlert>
+							<readOnly>
+								<decision model="review" />
+							</readOnly>
+							<model ref="answer.uploadFile" />
+							<included>
+								<compareDecision model="answer.question.type" constant="fileUpload" />
+							</included>
+						</fileUpload>
+						
+						<!-- file upload's existing uploads (as attachments) -->
+						<attachments model="answer.entryAnswerAttachments" name="attachment" size="FALSE" timestamp="TRUE">
+							<navigations>
+								<navigation title="question-upload-remove" style="LINK" submit="TRUE">
+									<destination template="/remove/{0}/{1}{2}">
+										<model type="text" ref="submission.id"/>
+										<model type="text" ref="answer.question.id"/>
+										<model type="text" ref="attachment.reference"/>
+									</destination>
+									<included>
+										<decision reversed="TRUE" model="review" />
+									</included>				
+								</navigation>
+							</navigations>
+							<included>
+								<compareDecision model="answer.question.type" constant="fileUpload" />
+							</included>
+						</attachments>
+
+						<!-- fillin's main component -->
+						<fillin title="answer.question.part.title" cols="20">
+							<onEmptyAlert>
+								<message selector="question-fillin-on-empty-alert" />
+								<decision reversed="TRUE" model="submission.assessment.randomAccess" />
+								<hasValueDecision reversed="TRUE" model="answer.entryAnswerAttachments" />
+							</onEmptyAlert>
+							<readOnly>
+								<decision model="review" />
+							</readOnly>
+							<focus>
+								<hasValueDecision model="question" />
+							</focus>
+							<model ref="answer.entryAnswerTexts" />
+							<correctMarker correctIcon="/icons/correct.png" correctSelector="correct" incorrectIcon="/icons/wrong.png" incorrectSelector="incorrect">
+								<model ref="answer.entryCorrects" />
+								<decision model="review"/>
+								<decision model="answer.question.section.assessment.feedbackNow"/>
+								<decision model="answer.question.section.assessment.feedbackShowCorrectAnswer"/>
+							</correctMarker>
+							<included>
+								<compareDecision model="answer.question.type" constant="fillIn" />
+							</included>
+						</fillin>
+
+						<!-- numeric - like fill-in but with a different width -->
+						<fillin title="answer.question.part.title" cols="10">
+							<onEmptyAlert>
+								<message selector="question-fillin-on-empty-alert" />
+								<decision reversed="TRUE" model="submission.assessment.randomAccess" />
+								<hasValueDecision reversed="TRUE" model="answer.entryAnswerAttachments" />
+							</onEmptyAlert>
+							<readOnly>
+								<decision model="review" />
+							</readOnly>
+							<focus>
+								<hasValueDecision model="question" />
+							</focus>
+							<model ref="answer.entryAnswerTexts" />
+							<correctMarker correctIcon="/icons/correct.png" correctSelector="correct" incorrectIcon="/icons/wrong.png" incorrectSelector="incorrect">
+								<model ref="answer.entryCorrects" />
+								<decision model="review"/>
+								<decision model="answer.question.section.assessment.feedbackNow"/>
+								<decision model="answer.question.section.assessment.feedbackShowCorrectAnswer"/>
+							</correctMarker>
+							<included>
+								<compareDecision model="answer.question.type" constant="numeric" />
+							</included>
+						</fillin>
+
+						<!-- match's main component -->
+						<match>
+							<onEmptyAlert>
+								<message selector="question-fillin-on-empty-alert" />
+								<decision reversed="TRUE" model="submission.assessment.randomAccess" />
+								<hasValueDecision reversed="TRUE" model="answer.entryAnswerAttachments" />
+							</onEmptyAlert>
+							<readOnly>
+								<decision model="review" />
+							</readOnly>
+							<model ref="answer.entryAnswerIds" />
+							<correctMarker correctIcon="/icons/correct.png" correctSelector="correct" incorrectIcon="/icons/wrong.png" incorrectSelector="incorrect">
+								<model ref="answer.entryCorrects" />
+								<decision model="review"/>
+								<decision model="answer.question.section.assessment.feedbackNow"/>
+								<decision model="answer.question.section.assessment.feedbackShowCorrectAnswer"/>
+							</correctMarker>
+							<feedback selector="question-match-answer-feedback">
+								<model ref="answer.answerFeedbacks" />
+								<decision model="review"/>
+								<decision model="answer.question.section.assessment.feedbackNow"/>
+								<decision model="answer.question.section.assessment.feedbackShowAnswerFeedback"/>
+							</feedback>
+							<select>
+								<message selector="question-select" />
+							</select>
+							<parts>
+								<model ref="answer.question.parts" />
+							</parts>
+							<partsChoices>
+								<model ref="part.answers" />
+							</partsChoices>
+							<partsTitle>
+								<model ref="part.title" />
+							</partsTitle>
+							<choiceId>
+								<model ref="choice.id" />
+							</choiceId>
+							<choiceText>
+								<model ref="choice.text" />
+							</choiceText>
+							<choiceLabel>
+								<model ref="choice.label" />
+							</choiceLabel>
+							<included>
+								<compareDecision model="answer.question.type" constant="matching" />
+							</included>
+						</match>
+
+						<!-- rationale -->
+						<textEdit title="question-rationale" rows="5" cols="40">
+							<readOnly>
+								<decision model="review" />
+							</readOnly>
+							<model ref="answer.rationale" />
+							<included>
+								<decision model="answer.question.requireRationale" />
+							</included>
+						</textEdit>
+
+						<!-- mark for review -->
+						<selection title="question-mark-review">
+							<readOnly>
+								<decision model="review" />
+							</readOnly>
+							<model ref="answer.markedForReview" />
+							<included>
+								<decision model="answer.question.section.assessment.randomAccess" />
+								<orDecision>
+									<decision reversed="TRUE" model="review" />
+									<decision model="answer.markedForReview" />
+								</orDecision>
+							</included>
+						</selection>
+
+						<!-- answer key -->
+						<text>
+							<message selector="question-answer-key">
+								<model type="icon" ref="/icons/answer_key.png" />
+								<model type="html" ref="answer.question.answerKey" />
+							</message>
+							<included>
+								<decision model="review" />
+								<decision model="answer.question.section.assessment.feedbackNow" />
+								<decision model="answer.question.section.assessment.feedbackShowCorrectAnswer" />
+								<compareDecision model="answer.question.type">
+									<constant value="fillIn" />
+									<constant value="matching" />
+									<constant value="multipleChoice" />
+									<constant value="multipleCorrect" />
+									<constant value="numeric" />
+									<constant value="trueFalse" />
+								</compareDecision>
+							</included>
+						</text>
+
+						<!-- question feedback -->
+						<text>
+							<message selector="question-feedback">
+								<model type="icon" ref="/icons/feedback.png" />
+								<model type="html" ref="answer.questionFeedback" />
+							</message>
+							<included>
+								<decision model="review" />
+								<decision model="answer.question.section.assessment.feedbackNow" />
+								<decision model="answer.question.section.assessment.feedbackShowQuestionFeedback" />
+							</included>
+						</text>
+
+						<!-- model answer -->
+						<text>
+							<message selector="question-model-answer">
+								<model type="icon" ref="/icons/model_answer.png" />
+								<model type="html" ref="answer.question.part.answer.text" />
+							</message>
+							<included>
+								<decision model="review" />
+								<decision model="answer.question.section.assessment.feedbackNow" />
+								<decision model="answer.question.section.assessment.feedbackShowQuestionFeedback" />
+								<compareDecision model="answer.question.type" constant="essay" />
+							</included>
+						</text>
+
+						<!-- evaluation -->
+						<section>
+							<container>
+								<evaluation>
+									<icon icon="/icons/note.png" selector="comments" />
+									<message selector="question-eval-question-comment">
+										<model type="text" ref="answer.evalComment" />
+									</message>
+								</evaluation>
+							</container>
+							<included>
+								<decision model="review" />
+								<hasValueDecision model="answer.evalComment" />
+							</included>
+						</section>
+
+					</container>
+				</section>
+			</container>
+		</section>
+		
+		<gap />
+		
+		<!-- review nav bar -->
+		<navigationBar id="nav" width="70em">
+			<included>
+				<decision model="review" />
+			</included>
+			<container>
+			<!--
+				<navigation title="prev" accessKey="prev-access" description="review-prev-description" style="BUTTON" disabled="TRUE">
+					<icon icon="/icons/prev.gif" style="LEFT" />
+				</navigation>
+			-->
+				<navigation title="return" accessKey="return-access" description="return-description" style="BUTTON" destination="/list">
+					<icon icon="/icons/return.png" style="LEFT" />
+				</navigation>
+			<!--
+				<navigation title="next" accessKey="nexy-access" description="review-next-description" style="BUTTON" disabled="TRUE">
+					<icon icon="/icons/next.gif" style="RIGHT" />
+				</navigation>
+			-->
+			</container>
+		</navigationBar>
+		
+		<!-- question nav bar -->
+		<navigationBar id="nav" width="70em">
+			<included>
+				<decision reversed="TRUE" model="review" />
+			</included>
+			<container>
+				<navigation title="prev" accessKey="prev-access" description="prev-description" style="BUTTON" destination="PREV" submit="TRUE">
+					<icon icon="/icons/prev.gif" style="LEFT" />
+					<disabled>
+						<orDecision>
+							<decision reversed="TRUE" model="submission.assessment.randomAccess" />
+							<andDecision>
+								<hasValueDecision model="question" />
+								<decision model="question.assessmentOrdering.isFirst" />
+								<decision model="question.section.isMerged" />
+							</andDecision>
+							<andDecision>
+								<hasValueDecision model="section" />
+								<decision model="section.ordering.isFirst" />
+							</andDecision>
+							<andDecision>
+								<hasValueDecision reversed="TRUE" model="question" />
+								<hasValueDecision reversed="TRUE" model="section" />
+							</andDecision>
+						</orDecision>
+					</disabled>
+				</navigation>
+				<navigation title="toc" accessKey="toc-access" description="toc-description" style="BUTTON" submit="TRUE">
+					<icon icon="/icons/contents.gif" style="LEFT" />
+					<destination template="/toc/{0}" model="submission.id" />
+					<disabled>
+						<decision reversed="TRUE" model="submission.assessment.randomAccess" />
+					</disabled>
+				</navigation>
+				<navigation title="next" accessKey="next-access" description="next-description" style="BUTTON" destination="NEXT" submit="TRUE" default="TRUE">
+					<icon icon="/icons/next.gif" style="RIGHT" />
+					<disabled>
+						<orDecision>
+							<andDecision>
+								<hasValueDecision model="question" />
+								<decision model="question.assessmentOrdering.isLast" />
+							</andDecision>
+							<andDecision>
+								<hasValueDecision model="section" />
+								<decision model="section.ordering.isLast" />
+							</andDecision>
+							<andDecision>
+								<hasValueDecision reversed="TRUE" model="question" />
+								<hasValueDecision reversed="TRUE" model="section" />
+							</andDecision>
+						</orDecision>
+					</disabled>
+				</navigation>
+				<divider />
+				<navigation title="save-exit" accessKey="save-exit-access" description="save-exit-description" style="BUTTON" submit="TRUE" destination="/list">
+					<icon icon="/icons/exit.gif" style="LEFT" />
+				</navigation>
+				<navigation title="finish-exam" accessKey="finish-exam-access" description="finish-exam-description" style="BUTTON" submit="TRUE" destination="SUBMIT" id="finish">
+					<icon icon="/icons/finish.gif" style="LEFT" />
+					<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="finish-confirm" />
+				</navigation>
+				<divider />
+				<navigation title="instructions" accessKey="instructions-access" description="instructions-description" style="LINK" submit="TRUE">
+					<icon icon="/icons/test.png" style="LEFT" />
+					<destination template="/instructions/{0}{1}">
+						<model ref="submission.id" />
+						<model ref="sakai_destination" />
+					</destination>
+				</navigation>
+			</container>
+		</navigationBar>
+
+	</container>
+</interface>
