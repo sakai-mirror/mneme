@@ -30,19 +30,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ViewImpl;
-import org.muse.mneme.api.AssessmentSection;
 import org.muse.mneme.api.AssessmentService;
-import org.muse.mneme.api.QuestionPresentation;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.tool.AssessmentDeliveryTool.Errors;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
- * The /section_instructions view for the mneme tool.
+ * The /instructions view for the mneme tool.
  */
-public class SectionInstructionView extends ViewImpl
+public class InstructionsView extends ViewImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(SectionInstructionView.class);
+	private static Log M_log = LogFactory.getLog(InstructionsView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
@@ -61,25 +61,17 @@ public class SectionInstructionView extends ViewImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// we need two parameters (submissionId, sectionId)
-		if (params.length != 4)
+		if (params.length < 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
 		String submissionId = params[2];
-		String sectionId = params[3];
+		String returnDestination = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
 
 		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
-		// make sure by-question is valid for this assessment
-		if (submission.getAssessment().getQuestionPresentation() != QuestionPresentation.BY_QUESTION)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
@@ -93,19 +85,8 @@ public class SectionInstructionView extends ViewImpl
 			return;
 		}
 
-		// collect the section
-		AssessmentSection section = submission.getAssessment().getSection(sectionId);
-		if (section == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
-		context.put("actionTitle", messages.getString("question-header-instructions"));
 		context.put("submission", submission);
-		context.put("section", section);
-		// context.put("mode", mode);
+		context.put("destination", returnDestination);
 
 		// render
 		uiService.render(ui, context);
@@ -126,13 +107,12 @@ public class SectionInstructionView extends ViewImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// we need two parameters (submissionId, sectionId)
-		if (params.length != 4)
+		if (params.length < 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
 		String submissionId = params[2];
-		String sectionId = params[3];
 
 		// this post is from the timer, and completes the submission
 		TocView.submissionCompletePost(req, res, context, submissionId, this.uiService, this.assessmentService);
