@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+/**********************************************************************************
+ * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ **********************************************************************************/
+-->
+
+<interface>
+	<title>
+		<message selector="enter-title">
+			<model ref="assessment.title" />
+		</message>
+	</title>
+	<header>
+		<message selector="enter-header">
+			<model ref="assessment.title" />
+		</message>
+	</header>
+	<container>
+		<section>
+			<title>
+				<message selector="enter-test-title">
+					<model type="icon" icon="/icons/test.png" />
+					<model ref="assessment.title" />
+					<model ref="assessment.totalPoints" delegate="FormatScore" tool="sakai.mneme" />
+				</message>
+			</title>
+			<container>
+				<text>
+					<message>
+						<model type="html" ref="assessment.description" />
+					</message>
+				</text>
+				<attachments>
+					<title selector="attachments" />
+					<model ref="assessment.attachments" />
+					<included>
+						<hasValueDecision model="assessment.attachments" />
+					</included>
+				</attachments>
+			</container>
+		</section>
+		<section>
+			<container>
+				<instructions>
+					<message selector="linear-instructions">
+						<model type="icon" icon="/icons/linear.png" />
+					</message>
+				</instructions>
+			</container>
+			<included>
+				<hasValueDecision reversed="TRUE" model="assessment.randomAccess" />
+			</included>
+		</section>
+		<section>
+			<container>
+				<instructions>
+					<message selector="flexible-instructions">
+						<model type="icon" icon="/icons/flexible.png" />
+					</message>
+				</instructions>
+			</container>
+			<included>
+				<compareDecision>
+					<model ref="assessment.questionPresentation" />
+					<comparison>
+						<constant value="BY_SECTION" />
+						<constant value="BY_QUESTION" />
+					</comparison>
+				</compareDecision>
+				<decision model="assessment.randomAccess" />
+			</included>
+		</section>
+		<section>
+			<container>
+				<instructions>
+					<message selector="flexible-instructions-by-assessment">
+						<model type="icon" icon="/icons/flexible.png" />
+					</message>
+				</instructions>
+			</container>
+			<included>
+				<compareDecision>
+					<model ref="assessment.questionPresentation" />
+					<comparison>
+						<constant value="BY_ASSESSMENT" />
+					</comparison>
+				</compareDecision>
+				<decision model="assessment.randomAccess" />
+			</included>
+		</section>
+		<section>
+			<container>
+				<instructions>
+					<message selector="highest-instructions">
+						<model type="icon" icon="/icons/highest.png" />
+					</message>
+				</instructions>
+			</container>
+			<included>
+				<decision model="assessment.isMultipleSubmissionsAllowed" />
+			</included>
+		</section>
+		<section>
+			<container>
+				<countdownTimer disabled="TRUE">
+					<duration>
+						<message selector="timer-duration">
+							<model type="duration" concise="TRUE" ref="assessment.timeLimit" />
+						</message>
+						<model ref="assessment.timeLimit" />
+					</duration>
+					<remaining>
+						<message selector="timer-remaining" />
+					</remaining>
+					<timeTillExpire>
+						<model ref="assessment.timeLimit" />
+					</timeTillExpire>
+				</countdownTimer>
+				<instructions>
+					<message selector="timed-instructions">
+						<model type="icon" icon="/icons/clock.png" />
+					</message>
+				</instructions>
+			</container>
+			<included>
+				<hasValueDecision model="assessment.timeLimit" />
+			</included>
+		</section>
+		<section>
+			<container>
+				<countdownTimer>
+					<destination template="/list" />
+					<duration>
+						<message selector="timer-due">
+							<model type="date" ref="assessment.expiration.time" />
+						</message>
+						<model ref="assessment.expiration.limit" />
+					</duration>
+					<remaining>
+						<message selector="timer-remaining" />
+					</remaining>
+					<timeTillExpire>
+						<model ref="assessment.expiration.duration" />
+					</timeTillExpire>
+				</countdownTimer>
+				<instructions>
+					<message selector="near-due-instructions">
+						<model type="icon" icon="/icons/future.gif" />
+					</message>
+				</instructions>
+			</container>
+			<included>
+				<hasValueDecision model="assessment.expiration" />
+				<compareDecision>
+					<model ref="assessment.expiration.cause" />
+					<comparison>
+						<constant value="closedDate" />
+					</comparison>
+				</compareDecision>
+			</included>
+		</section>
+		<section>
+			<container>
+				<instructions selector="enter-pw-instructions" />
+				<password title="enter-password" model="password.value" />
+			</container>
+			<included>
+				<hasValueDecision model="assessment.password" />
+			</included>
+		</section>
+		<gap />
+		<navigationBar width="70em" id="nav">
+			<container>
+				<navigation submit="TRUE" title="begin" style="BUTTON" accessKey="begin-access" description="begin-description">
+					<icon icon="/icons/begin.gif" style="LEFT" />
+				</navigation>
+				<navigation destination="/list" title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
+					<icon icon="/icons/cancel.gif" style="LEFT" />
+				</navigation>
+			</container>
+		</navigationBar>
+	</container>
+</interface>

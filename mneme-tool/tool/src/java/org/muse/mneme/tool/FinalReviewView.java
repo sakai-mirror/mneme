@@ -29,24 +29,19 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.UiService;
 import org.muse.ambrosia.util.ViewImpl;
-import org.muse.mneme.api.AssessmentClosedException;
-import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionCompletedException;
-import org.muse.mneme.tool.AssessmentDeliveryTool.Destinations;
 import org.muse.mneme.tool.AssessmentDeliveryTool.Errors;
 import org.sakaiproject.util.Web;
 
 /**
- * The /question view for the mneme tool.
+ * The /final_review view for the mneme tool.
  */
-public class TocView extends ViewImpl
+public class FinalReviewView extends ViewImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(TocView.class);
+	private static Log M_log = LogFactory.getLog(FinalReviewView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
@@ -72,6 +67,7 @@ public class TocView extends ViewImpl
 
 		String submissionId = params[2];
 
+		// collect the submission
 		Submission submission = assessmentService.idSubmission(submissionId);
 		if (submission == null)
 		{
@@ -86,19 +82,9 @@ public class TocView extends ViewImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
-
-		// linear is not allowed in here
-		if (!submission.getAssessment().getRandomAccess().booleanValue())
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.linear + "/" + submissionId)));
-			return;
-		}
-
-		// collect information: the selected assessment (id the request)
 		context.put("submission", submission);
 
-		context.put("finalReview", Boolean.FALSE);
+		context.put("finalReview", Boolean.TRUE);
 
 		// render
 		uiService.render(ui, context);
@@ -127,7 +113,7 @@ public class TocView extends ViewImpl
 		String submissionId = params[2];
 
 		// this post is from the timer, or the "submit" button, and completes the submission
-		submissionCompletePost(req, res, context, submissionId, this.uiService, this.assessmentService);
+		TocView.submissionCompletePost(req, res, context, submissionId, this.uiService, this.assessmentService);
 	}
 
 	/**
@@ -139,83 +125,5 @@ public class TocView extends ViewImpl
 	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
-	}
-
-	/**
-	 * Handle the many cases of a post that completes the submission
-	 * 
-	 * @param req
-	 *        Servlet request.
-	 * @param res
-	 *        Servlet response.
-	 * @param context
-	 *        The UiContext.
-	 * @param submissionId
-	 *        the selected submission id.
-	 */
-	protected static void submissionCompletePost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId,
-			UiService uiService, AssessmentService assessmentService) throws IOException
-	{
-		// if (!context.getPostExpected())
-		// {
-		// // redirect to error
-		// res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
-		// return;
-		// }
-
-		// read form
-		String destination = uiService.decode(req, context);
-
-		if (destination.equals("SUBMIT"))
-		{
-			Submission submission = assessmentService.idSubmission(submissionId);
-
-			// if linear, or the submission is all answered, we can go to submitted
-			if ((!submission.getAssessment().getRandomAccess().booleanValue()) || (submission.getIsAnswered(null).booleanValue()))
-			{
-				destination = "/" + Destinations.submitted + "/" + submissionId;
-				// we will complete below
-			}
-
-			// if not linear, and there are unanswered parts, send to final review
-			else
-			{
-				destination = "/" + Destinations.final_review + "/" + submissionId;
-
-				// we do not want to complete - redirect now
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-		}
-
-		// we need to be headed to submitted...
-		if (!destination.startsWith("/submitted"))
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalidpost)));
-			return;
-		}
-
-		Submission submission = assessmentService.idSubmission(submissionId);
-		try
-		{
-			assessmentService.completeSubmission(submission);
-
-			// if no exception, it worked! redirect
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-			return;
-		}
-		catch (AssessmentClosedException e)
-		{
-		}
-		catch (SubmissionCompletedException e)
-		{
-		}
-		catch (AssessmentPermissionException e)
-		{
-		}
-
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 	}
 }
