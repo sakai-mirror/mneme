@@ -361,7 +361,7 @@
 						</attachments>
 
 						<!-- fillin's main component -->
-						<fillin title="answer.question.part.title" cols="20">
+						<fillIn title="answer.question.part.title" cols="20">
 							<onEmptyAlert>
 								<message selector="question-fillin-on-empty-alert" />
 								<decision reversed="TRUE" model="submission.assessment.randomAccess" />
@@ -373,6 +373,9 @@
 							<focus>
 								<hasValueDecision model="question" />
 							</focus>
+							<text>
+								<message model="answer.question.part.title" />
+							</text>
 							<model ref="answer.entryAnswerTexts" />
 							<correctMarker correctIcon="/icons/correct.png" correctSelector="correct" incorrectIcon="/icons/wrong.png" incorrectSelector="incorrect">
 								<model ref="answer.entryCorrects" />
@@ -383,10 +386,10 @@
 							<included>
 								<compareDecision model="answer.question.type" constant="fillIn" />
 							</included>
-						</fillin>
+						</fillIn>
 
 						<!-- numeric - like fill-in but with a different width -->
-						<fillin title="answer.question.part.title" cols="10">
+						<fillIn title="answer.question.part.title" cols="10">
 							<onEmptyAlert>
 								<message selector="question-fillin-on-empty-alert" />
 								<decision reversed="TRUE" model="submission.assessment.randomAccess" />
@@ -398,6 +401,9 @@
 							<focus>
 								<hasValueDecision model="question" />
 							</focus>
+							<text>
+								<message model="answer.question.part.title" />
+							</text>
 							<model ref="answer.entryAnswerTexts" />
 							<correctMarker correctIcon="/icons/correct.png" correctSelector="correct" incorrectIcon="/icons/wrong.png" incorrectSelector="incorrect">
 								<model ref="answer.entryCorrects" />
@@ -408,7 +414,7 @@
 							<included>
 								<compareDecision model="answer.question.type" constant="numeric" />
 							</included>
-						</fillin>
+						</fillIn>
 
 						<!-- match's main component -->
 						<match>
