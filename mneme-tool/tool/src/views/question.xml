@@ -40,6 +40,7 @@
 	</header>
 
 	<container>
+
 		<!-- courier to keep the session alive -->
 		<courier destination="/courier" frequency="600" />
 
@@ -620,6 +621,9 @@
 				</navigation>
 				<navigation title="next" accessKey="next-access" description="next-description" style="BUTTON" destination="NEXT" submit="TRUE" default="TRUE">
 					<icon icon="/icons/next.gif" style="RIGHT" />
+					<validate>
+						<decision reversed="TRUE" model="submission.assessment.randomAccess" />
+					</validate>
 					<disabled>
 						<orDecision>
 							<andDecision>
