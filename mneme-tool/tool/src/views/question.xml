@@ -332,7 +332,7 @@
 						<attachments model="answer.entryAnswerAttachments" name="attachment" size="FALSE" timestamp="TRUE">
 							<navigations>
 								<navigation title="question-upload-remove" style="LINK" submit="TRUE">
-									<destination template="/remove/{0}/{1}{2}">
+									<destination template="/upload_remove/{0}/{1}{2}">
 										<model type="text" ref="submission.id"/>
 										<model type="text" ref="answer.question.id"/>
 										<model type="text" ref="attachment.reference"/>
