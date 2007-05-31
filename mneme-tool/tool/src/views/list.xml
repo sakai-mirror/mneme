@@ -38,12 +38,7 @@
 					<model ref="submission.assessment.title" />
 					<sort>
 						<active>
-							<compareDecision>
-								<model ref="sort_column" />
-								<comparison>
-									<constant value="0" />
-								</comparison>
-							</compareDecision>
+							<compareDecision model="sort_column" constant="0" />
 						</active>
 						<direction>
 							<compareDecision model="sort_direction" constant="A" />
@@ -85,12 +80,7 @@
 					<model type="html" delegate="FormatListDecoration" tool="sakai.mneme" />
 					<sort>
 						<active>
-							<compareDecision>
-								<model ref="sort_column" />
-								<comparison>
-									<constant value="1" />
-								</comparison>
-							</compareDecision>
+							<compareDecision model="sort_column" constant="1" />
 						</active>
 						<direction>
 							<compareDecision model="sort_direction" constant="A" />
@@ -131,18 +121,15 @@
 					</title>
 					<model type="date" twoLine="TRUE" missing="dash" ref="submission.assessment.releaseDate" />
 				</modelColumn>
+				
+				<!-- due date -->
 				<column>
 					<title>
 						<message selector="list-header-due" />
 					</title>
 					<sort>
 						<active>
-							<compareDecision>
-								<model ref="sort_column" />
-								<comparison>
-									<constant value="2" />
-								</comparison>
-							</compareDecision>
+							<compareDecision model="sort_column" constant="2" />
 						</active>
 						<direction>
 							<compareDecision model="sort_direction" constant="A" />
@@ -169,10 +156,8 @@
 											<compareDecision model="submission.assessmentSubmissionStatus" constant="ready" />
 											<andDecision>
 												<compareDecision model="submission.assessmentSubmissionStatus">
-													<comparison>
-														<constant value="inProgress" />
-														<constant value="inProgressAlert" />
-													</comparison>
+													<constant value="inProgress" />
+													<constant value="inProgressAlert" />
 												</compareDecision>
 												<hasValueDecision reversed="TRUE" model="submission.assessment.timeLimit" />
 											</andDecision>
@@ -202,10 +187,8 @@
 										<compareDecision model="submission.assessmentSubmissionStatus" constant="ready" />
 										<andDecision>
 											<compareDecision model="submission.assessmentSubmissionStatus">
-												<comparison>
-													<constant value="inProgress" />
-													<constant value="inProgressAlert" />
-												</comparison>
+												<constant value="inProgress" />
+												<constant value="inProgressAlert" />
 											</compareDecision>
 											<hasValueDecision reversed="TRUE" model="submission.assessment.timeLimit" />
 										</andDecision>
@@ -215,6 +198,8 @@
 						</countdownTimer>
 					</container>
 				</column>
+
+				<!-- time limit -->
 				<column>
 					<title>
 						<message selector="list-header-limit" />
@@ -246,6 +231,7 @@
 						</countdownTimer>
 					</container>
 				</column>
+
 				<column wrap="FALSE">
 					<title>
 						<message selector="list-header-tries" />

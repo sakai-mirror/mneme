@@ -81,10 +81,8 @@
 			<included>
 				<compareDecision>
 					<model ref="assessment.questionPresentation" />
-					<comparison>
-						<constant value="BY_SECTION" />
-						<constant value="BY_QUESTION" />
-					</comparison>
+					<constant value="BY_SECTION" />
+					<constant value="BY_QUESTION" />
 				</compareDecision>
 				<decision model="assessment.randomAccess" />
 			</included>
@@ -98,12 +96,7 @@
 				</instructions>
 			</container>
 			<included>
-				<compareDecision>
-					<model ref="assessment.questionPresentation" />
-					<comparison>
-						<constant value="BY_ASSESSMENT" />
-					</comparison>
-				</compareDecision>
+				<compareDecision model="assessment.questionPresentation" constant="BY_ASSESSMENT" />
 				<decision model="assessment.randomAccess" />
 			</included>
 		</section>
@@ -170,12 +163,7 @@
 			</container>
 			<included>
 				<hasValueDecision model="assessment.expiration" />
-				<compareDecision>
-					<model ref="assessment.expiration.cause" />
-					<comparison>
-						<constant value="closedDate" />
-					</comparison>
-				</compareDecision>
+				<compareDecision model="assessment.expiration.cause" constant="closedDate" />
 			</included>
 		</section>
 		<section>

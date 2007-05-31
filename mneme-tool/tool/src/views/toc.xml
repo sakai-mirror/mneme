@@ -59,12 +59,7 @@
 			<included>
 				<decision model="review" reversed="TRUE" />
 				<hasValueDecision model="submission.expiration" />
-				<compareDecision>
-					<model ref="submission.expiration.cause" />
-					<comparison>
-						<constant value="timeLimit" />
-					</comparison>
-				</compareDecision>
+				<compareDecision model="submission.expiration.cause" constant="timeLimit" />
 			</included>
 		</countdownTimer>
 		
@@ -88,12 +83,7 @@
 			<included>
 				<decision model="review" reversed="TRUE" />
 				<hasValueDecision model="submission.expiration" />
-				<compareDecision>
-					<model ref="submission.expiration.cause" />
-					<comparison>
-						<constant value="closedDate" />
-					</comparison>
-				</compareDecision>
+				<compareDecision model="submission.expiration.cause" constant="closedDate" />
 			</included>
 		</countdownTimer>
 
@@ -144,8 +134,8 @@
 								</title>
 								<disabled>
 									<compareDecision model="submission.assessment.questionPresentation">
-										<comparison value="BY_ASSESSMENT" />
-										<comparison value="BY_SECTION" />
+										<constant value="BY_ASSESSMENT" />
+										<constant value="BY_SECTION" />
 									</compareDecision>
 								</disabled>
 								<destination template="/section_instructions/{0}/{1}">
