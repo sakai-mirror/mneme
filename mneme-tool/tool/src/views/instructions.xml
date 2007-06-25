@@ -126,7 +126,7 @@
 			</entityIncluded>
 			<title>
 				<message selector="instructions-section-title">
-					<model type="icon" ref="/icons/section.png" />
+					<model type="icon" icon="/icons/section.png" />
 					<model type="text" ref="section.ordering.position" />
 					<model type="text" ref="section.assessment.numSections" />
 					<model type="text" ref="section.title" />

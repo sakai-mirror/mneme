@@ -107,7 +107,7 @@
 		<section>
 			<title>
 				<message selector="question-test-title">
-					<model type="icon" ref="/icons/test.png" />
+					<model type="icon" icon="/icons/test.png" />
 					<model ref="submission.assessment.title" />
 					<model type="html" ref="submission" delegate="SubmissionScore" tool="sakai.mneme" />
 				</message>
@@ -153,7 +153,7 @@
 			<!-- section title -->
 			<title>
 				<message selector="instructions-section-title">
-					<model type="icon" ref="/icons/section.png" />
+					<model type="icon" icon="/icons/section.png" />
 					<model type="text" ref="answer.question.section.ordering.position" />
 					<model type="text" ref="answer.question.section.assessment.numSections" />
 					<model type="text" ref="answer.question.section.title" />
@@ -481,7 +481,7 @@
 						<!-- answer key -->
 						<text>
 							<message selector="question-answer-key">
-								<model type="icon" ref="/icons/answer_key.png" />
+								<model type="icon" icon="/icons/answer_key.png" />
 								<model type="html" ref="answer.question.answerKey" />
 							</message>
 							<included>
@@ -502,7 +502,7 @@
 						<!-- question feedback -->
 						<text>
 							<message selector="question-feedback">
-								<model type="icon" ref="/icons/feedback.png" />
+								<model type="icon" icon="/icons/feedback.png" />
 								<model type="html" ref="answer.questionFeedback" />
 							</message>
 							<included>
@@ -515,7 +515,7 @@
 						<!-- model answer -->
 						<text>
 							<message selector="question-model-answer">
-								<model type="icon" ref="/icons/model_answer.png" />
+								<model type="icon" icon="/icons/model_answer.png" />
 								<model type="html" ref="answer.question.part.answer.text" />
 							</message>
 							<included>
