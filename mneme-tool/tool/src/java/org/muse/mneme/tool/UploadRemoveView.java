@@ -30,8 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Controller;
 import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.UiService;
 import org.muse.ambrosia.util.ViewImpl;
@@ -301,7 +301,7 @@ public class UploadRemoveView extends ViewImpl
 	 * question - the current quesiton
 	 * attachment - List containing he attachment selected for removal
 	 */
-	protected Controller constructRemove(UiService ui)
+	protected Component constructRemove(UiService ui)
 	{
 		return
 			ui.newInterface()

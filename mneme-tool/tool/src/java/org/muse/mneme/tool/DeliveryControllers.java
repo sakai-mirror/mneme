@@ -35,7 +35,7 @@ import org.muse.mneme.api.SubmissionAnswer;
 import org.muse.mneme.api.Expiration;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.ContextInfoPropertyReference;
-import org.muse.ambrosia.api.Controller;
+import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.DecisionDelegate;
 import org.muse.ambrosia.api.EntityList;
@@ -60,7 +60,7 @@ public class DeliveryControllers
 	 * sort-column - a digit indicating which column is selected for sort
 	 * sort-direction - 'a' for ascending or 'd' for descending
 	 */
-	public static Controller constructList(UiService ui)
+	public static Component constructList(UiService ui)
 	{
 		return
 			ui.newInterface()
@@ -270,7 +270,7 @@ public class DeliveryControllers
 	 * assessment - the selected Assessment object
 	 * password - an object with a "value" property to hold the entered password.
 	 */
-	public static Controller constructEnter(UiService ui)
+	public static Component constructEnter(UiService ui)
 	{
 		return
 			ui.newInterface()
@@ -394,7 +394,7 @@ public class DeliveryControllers
 	 * submission - the current submission object
 	 * destination - the return destination
 	 */
-	public static Controller constructInstructions(UiService ui)
+	public static Component constructInstructions(UiService ui)
 	{
 		return
 			ui.newInterface()
@@ -523,7 +523,7 @@ public class DeliveryControllers
 	 * section - the section object
 	 * actionTitle - a string to use in the header and title indicating what's going on (working on, review)
 	 */
-	public static Controller constructSectionInstructions(UiService ui)
+	public static Component constructSectionInstructions(UiService ui)
 	{
 		return
 			ui.newInterface()
@@ -676,7 +676,7 @@ public class DeliveryControllers
 	 * When decoding a response, we need in the context:
 	 * answers - a collection to get the answer id(s) selected.
 	 */
-	public static Controller constructQuestion(UiService ui)
+	public static Component constructQuestion(UiService ui)
 	{
 		return
 			ui.newInterface()
@@ -1267,7 +1267,7 @@ public class DeliveryControllers
 	 * The exit interface needs the following entities in the context:
 	 * submission - the completed submission
 	 */
-	public static Controller constructSubmitted(UiService ui)
+	public static Component constructSubmitted(UiService ui)
 	{
 		return
 			ui.newInterface()
@@ -1318,7 +1318,7 @@ public class DeliveryControllers
 	 * submission - the completed submission
 	 * finalReview - if we are in final review mode
 	 */
-	public static Controller constructToc(UiService ui)
+	public static Component constructToc(UiService ui)
 	{
 		return
 			ui.newInterface()
@@ -1521,7 +1521,7 @@ public class DeliveryControllers
 	 * question - the current quesiton
 	 * attachment - List containing he attachment selected for removal
 	 */
-	public static Controller constructRemove(UiService ui)
+	public static Component constructRemove(UiService ui)
 	{
 		return
 			ui.newInterface()
@@ -1666,7 +1666,7 @@ public class DeliveryControllers
 	 * unauthorized - if set, indicates that we had an unauthorized request.
 	 * testUrl if we have another re-entry point, in the test in progress.
 	 */
-	public static Controller constructError(UiService ui)
+	public static Component constructError(UiService ui)
 	{
 		return
 			ui.newInterface()

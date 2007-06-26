@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Controller;
+import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.UiService;
 import org.muse.ambrosia.api.Value;
 import org.muse.mneme.api.Assessment;
@@ -116,31 +116,31 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected UiService ui = null;
 
 	/** The enter interface. */
-	protected Controller uiEnter = null;
+	protected Component uiEnter = null;
 
 	/** The error interface. */
-	protected Controller uiError = null;
+	protected Component uiError = null;
 
 	/** The instructions interface. */
-	protected Controller uiInstructions = null;
+	protected Component uiInstructions = null;
 
 	/** The list interface. */
-	protected Controller uiList = null;
+	protected Component uiList = null;
 
 	/** The question interface. */
-	protected Controller uiQuestion = null;
+	protected Component uiQuestion = null;
 
 	/** The remove interface. */
-	protected Controller uiRemove = null;
+	protected Component uiRemove = null;
 
 	/** The section instructions interface. */
-	protected Controller uiSectionInstructions = null;
+	protected Component uiSectionInstructions = null;
 
 	/** The submitted interface. */
-	protected Controller uiSubmitted = null;
+	protected Component uiSubmitted = null;
 
 	/** The table of contents interface. */
-	protected Controller uiToc = null;
+	protected Component uiToc = null;
 
 	/**
 	 * Shutdown the servlet.
