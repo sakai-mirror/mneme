@@ -38,9 +38,9 @@
  		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="viewId"><value>review</value></property>
+ 		<property name="path"><value>review</value></property>
  		<property name="bundle"><value>question</value></property>
-		<property name="viewPath"><value>question.xml</value></property>
+		<property name="components"><value>question.xml</value></property>
 	</bean>
 
 </beans>

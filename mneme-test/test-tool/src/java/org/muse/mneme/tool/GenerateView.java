@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.util.ViewImpl;
+import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentAnswer;
 import org.muse.mneme.api.AssessmentClosedException;
@@ -64,7 +64,7 @@ import org.sakaiproject.tool.api.ToolManager;
 /**
  * The /generate view for the mneme test tool.
  */
-public class GenerateView extends ViewImpl
+public class GenerateView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(GenerateView.class);

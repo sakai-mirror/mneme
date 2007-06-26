@@ -43,9 +43,9 @@
 		<property name="securityService"><ref bean="org.sakaiproject.authz.api.SecurityService"/></property>
 
  		<property name="toolId"><value>sakai.mneme.test</value></property>
- 		<property name="viewId"><value>generate</value></property>
+ 		<property name="path"><value>generate</value></property>
  		<property name="bundle"><value>generate</value></property>
-		<property name="viewPath"><value>generate.xml</value></property>
+		<property name="components"><value>generate.xml</value></property>
 	</bean>
 
 </beans>

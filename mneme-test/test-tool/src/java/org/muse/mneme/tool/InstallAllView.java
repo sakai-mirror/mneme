@@ -31,14 +31,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.util.ViewImpl;
+import org.muse.ambrosia.util.ControllerImpl;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.db.api.SqlService;
 
 /**
  * The /install_all view for the mneme test tool.
  */
-public class InstallAllView extends ViewImpl
+public class InstallAllView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(InstallAllView.class);

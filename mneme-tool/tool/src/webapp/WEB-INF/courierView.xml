@@ -36,7 +36,7 @@
  		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="viewId"><value>courier</value></property>
+ 		<property name="path"><value>courier</value></property>
 	</bean>
 
 </beans>

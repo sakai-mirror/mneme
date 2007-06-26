@@ -29,12 +29,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.util.ViewImpl;
+import org.muse.ambrosia.util.ControllerImpl;
 
 /**
  * The /error view for the mneme test tool.
  */
-public class ErrorView extends ViewImpl
+public class ErrorView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(ErrorView.class);

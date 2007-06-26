@@ -37,9 +37,9 @@
  		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="viewId"><value>final_review</value></property>
+ 		<property name="path"><value>final_review</value></property>
  		<property name="bundle"><value>toc</value></property>
-		<property name="viewPath"><value>toc.xml</value></property>
+		<property name="components"><value>toc.xml</value></property>
 	</bean>
 
 </beans>

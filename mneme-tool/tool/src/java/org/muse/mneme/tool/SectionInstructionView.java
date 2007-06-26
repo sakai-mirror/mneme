@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.util.ViewImpl;
+import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentSection;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.QuestionPresentation;
@@ -39,7 +39,7 @@ import org.sakaiproject.util.Web;
 /**
  * The /section_instructions view for the mneme tool.
  */
-public class SectionInstructionView extends ViewImpl
+public class SectionInstructionView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(SectionInstructionView.class);

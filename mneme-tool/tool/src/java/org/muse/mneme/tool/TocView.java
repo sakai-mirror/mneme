@@ -30,7 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.UiService;
-import org.muse.ambrosia.util.ViewImpl;
+import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
@@ -43,7 +43,7 @@ import org.sakaiproject.util.Web;
 /**
  * The /question view for the mneme tool.
  */
-public class TocView extends ViewImpl
+public class TocView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(TocView.class);

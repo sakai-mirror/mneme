@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.util.ViewImpl;
+import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
@@ -38,7 +38,7 @@ import org.sakaiproject.util.Web;
 /**
  * The /list view for the mneme tool.
  */
-public class ListView extends ViewImpl
+public class ListView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(ListView.class);

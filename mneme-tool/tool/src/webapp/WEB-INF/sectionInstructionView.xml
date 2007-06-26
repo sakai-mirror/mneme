@@ -36,9 +36,9 @@
  		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="viewId"><value>section_instructions</value></property>
+ 		<property name="path"><value>section_instructions</value></property>
  		<property name="bundle"><value>sectionInstruction</value></property>
-		<property name="viewPath"><value>sectionInstruction.xml</value></property>
+		<property name="components"><value>sectionInstruction.xml</value></property>
 	</bean>
 
 </beans>

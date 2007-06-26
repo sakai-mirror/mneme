@@ -38,9 +38,8 @@
  		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="viewId"><value>upload_remove</value></property>
+ 		<property name="path"><value>upload_remove</value></property>
  		<property name="bundle"><value>uploadRemove</value></property>
-		<!-- <property name="viewPath"><value>list.xml</value></property> -->
 	</bean>
 
 </beans>

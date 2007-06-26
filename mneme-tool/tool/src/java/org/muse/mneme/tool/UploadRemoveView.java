@@ -34,7 +34,7 @@ import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.UiService;
-import org.muse.ambrosia.util.ViewImpl;
+import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentQuestion;
@@ -54,7 +54,7 @@ import org.sakaiproject.util.Web;
 /**
  * The /list view for the mneme tool.
  */
-public class UploadRemoveView extends ViewImpl
+public class UploadRemoveView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(UploadRemoveView.class);

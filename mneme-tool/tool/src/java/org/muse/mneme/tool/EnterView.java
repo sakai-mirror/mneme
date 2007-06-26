@@ -30,7 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Value;
-import org.muse.ambrosia.util.ViewImpl;
+import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentCompletedException;
@@ -46,7 +46,7 @@ import org.sakaiproject.util.Web;
 /**
  * The /enter view for the mneme tool.
  */
-public class EnterView extends ViewImpl
+public class EnterView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(EnterView.class);

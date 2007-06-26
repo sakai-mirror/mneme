@@ -29,14 +29,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.util.ViewImpl;
+import org.muse.ambrosia.util.ControllerImpl;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
 
 /**
  * The /courier view for the mneme tool.
  */
-public class CourierView extends ViewImpl
+public class CourierView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(CourierView.class);

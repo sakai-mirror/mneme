@@ -38,9 +38,9 @@
  		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="viewId"><value>list</value></property>
+ 		<property name="path"><value>list</value></property>
  		<property name="bundle"><value>list</value></property>
-		<property name="viewPath"><value>list.xml</value></property>
+		<property name="components"><value>list.xml</value></property>
 	</bean>
 
 	<bean id="FormatListDecoration"

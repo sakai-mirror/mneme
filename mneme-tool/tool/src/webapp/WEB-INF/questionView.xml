@@ -37,9 +37,9 @@
  		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="viewId"><value>question</value></property>
+ 		<property name="path"><value>question</value></property>
  		<property name="bundle"><value>question</value></property>
-		<property name="viewPath"><value>question.xml</value></property>
+		<property name="components"><value>question.xml</value></property>
 	</bean>
 
 	<bean id="SubmissionScore"
