@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
 /**********************************************************************************
@@ -108,8 +109,7 @@
 						<model type="html" ref="submission.assessment.description" />
 					</message>
 				</text>
-				<attachments>
-					<title selector="attachments" />
+				<attachments title="attachments">
 					<model ref="submission.assessment.attachments" />
 					<included>
 						<hasValueDecision model="submission.assessment.attachments" />
@@ -139,8 +139,7 @@
 						<model type="html" ref="section.description" />
 					</message>
 				</text>
-				<attachments>
-					<title selector="attachments" />
+				<attachments title="attachments">
 					<model ref="section.attachments" />
 					<included>
 						<hasValueDecision model="section.attachments" />

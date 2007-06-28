@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
 /**********************************************************************************
@@ -38,7 +39,7 @@
 			<model ref="submission.assessment.title" />
 		</message>
 	</header>
-
+	
 	<container>
 
 		<!-- courier to keep the session alive -->
@@ -126,9 +127,9 @@
 				<section title ="question-eval-overall-comment-title">
 					<container>
 						<evaluation>
-							<icon icon="/icons/note.png" selector="comments" />
+							<icon icon="/icons/note.png" message="comments" />
 							<message selector="question-eval-overall-comment">
-								<model type="test" ref="submission.evalComment" />
+								<model type="text" ref="submission.evalComment" />
 							</message>
 						</evaluation>
 					</container>
@@ -177,8 +178,7 @@
 			<container>
 
 				<!-- section description -->
-				<text>
-					<model ref="answer.question.section.description" />
+				<text model="answer.question.section.description">
 					<included>
 						<decision model="answer.question.sectionOrdering.isFirst" />
 						<hasValueDecision reversed="TRUE" model="question" />
@@ -306,7 +306,8 @@
 						
 						<!-- file upload's main component -->
 						<fileUpload>
-							<title selector="question-upload-title">
+							<title>
+								<message selector="question-upload-title" />
 								<included>
 									<decision reversed="TRUE" model="review" />
 								</included>
@@ -348,7 +349,10 @@
 						</attachments>
 
 						<!-- fillin's main component -->
-						<fillIn title="answer.question.part.title" cols="20">
+						<fillIn cols="20">
+							<title>
+								<message selector="answer.question.part.title" />		
+							</title>
 							<onEmptyAlert>
 								<message selector="question-fillin-on-empty-alert" />
 								<decision reversed="TRUE" model="submission.assessment.randomAccess" />
@@ -376,7 +380,10 @@
 						</fillIn>
 
 						<!-- numeric - like fill-in but with a different width -->
-						<fillIn title="answer.question.part.title" cols="10">
+						<fillIn cols="10">
+							<title>
+								<message selector="answer.question.part.title"/>
+							</title>
 							<onEmptyAlert>
 								<message selector="question-fillin-on-empty-alert" />
 								<decision reversed="TRUE" model="submission.assessment.randomAccess" />
@@ -530,7 +537,7 @@
 						<section>
 							<container>
 								<evaluation>
-									<icon icon="/icons/note.png" selector="comments" />
+									<icon icon="/icons/note.png" message="comments" />
 									<message selector="question-eval-question-comment">
 										<model type="text" ref="answer.evalComment" />
 									</message>
