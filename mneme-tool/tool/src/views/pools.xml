@@ -24,15 +24,15 @@
 -->
 
 <interface title="pools-title" header="pools-header">
+	<modeBar>
+		<container>
+			<navigation destination="/list" title="test-manager-nav-title" style="LINK" accessKey="test-manager-nav-access-key" description="test-manager-nav-description"/>
+			<navigation destination="/grading" title="grading-nav-title" style="LINK" accessKey="grading-nav-access-key" description="grading-nav-description"/>
+			<navigation destination="/pools" title="pools-nav-title" style="LINK" accessKey="pools-nav-access-key" description="pools-nav-description" disabled="TRUE"/>
+			<navigation destination="/studentview" title="student-view-nav-title" style="LINK" accessKey="student-view-nav-access-key" description="student-view-nav-description"/>
+		</container>
+	</modeBar>
 	<container>
-		<navigationBar width="100%" seperator="LINE">
-			<container>
-				<navigation destination="/list" title="test-manager-nav-title" style="LINK" accessKey="test-manager-nav-access-key" description="test-manager-nav-description"/>
-				<navigation destination="/grading" title="grading-nav-title" style="LINK" accessKey="grading-nav-access-key" description="grading-nav-description"/>
-				<navigation destination="/pools" title="pools-nav-title" style="LINK" accessKey="pools-nav-access-key" description="pools-nav-description" disabled="TRUE"/>
-				<navigation destination="/studentview" title="student-view-nav-title" style="LINK" accessKey="student-view-nav-access-key" description="student-view-nav-description"/>
-			</container>
-		</navigationBar>
 		<navigationBar width="100%">
 			<container>
 				<navigation destination="/" title="add-pool-title" style="LINK" description="add-pool-description"/>
