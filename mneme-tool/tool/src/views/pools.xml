@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
 /**********************************************************************************
@@ -26,5 +25,21 @@
 
 <interface title="pools-title" header="pools-header">
 	<container>
+		<navigationBar width="100%" seperator="LINE">
+			<container>
+				<navigation destination="/list" title="test-manager-nav-title" style="LINK" accessKey="test-manager-nav-access-key" description="test-manager-nav-description"/>
+				<navigation destination="/grading" title="grading-nav-title" style="LINK" accessKey="grading-nav-access-key" description="grading-nav-description"/>
+				<navigation destination="/pools" title="pools-nav-title" style="LINK" accessKey="pools-nav-access-key" description="pools-nav-description" disabled="TRUE"/>
+				<navigation destination="/studentview" title="student-view-nav-title" style="LINK" accessKey="student-view-nav-access-key" description="student-view-nav-description"/>
+			</container>
+		</navigationBar>
+		<navigationBar width="100%">
+			<container>
+				<navigation destination="/" title="add-pool-title" style="LINK" description="add-pool-description"/>
+				<navigation destination="/" title="add-question-title" style="LINK" description="add-question-description"/>
+				<navigation destination="/" title="combine-title" style="LINK" description="combine-description" disabled="TRUE"/>
+				<navigation destination="/" title="import-export-title" style="LINK" description="import-export-description"/>
+			</container>
+		</navigationBar>
 	</container>
 </interface>
