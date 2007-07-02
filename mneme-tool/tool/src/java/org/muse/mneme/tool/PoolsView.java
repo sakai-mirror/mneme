@@ -22,6 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.Pool;
 
 /**
  * The /pools view for the mneme tool.
@@ -56,6 +58,10 @@ public class PoolsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// collect the pools to show
+		List<Pool> pools = this.assessmentService.findPools(null);
+		context.put("pools", pools);
+
 		// render
 		uiService.render(ui, context);
 	}

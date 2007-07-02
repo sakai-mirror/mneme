@@ -67,5 +67,22 @@
 				</navigation>
 			</container>
 		</navigationBar>
+		
+		<!-- the list of pools -->
+		<entityList style="FLAT">
+			<iterator name="pool" model="pools" />
+			<emptyTitle>
+				<message selector="no-pools" />
+			</emptyTitle>
+			<columns>
+				<modelColumn>
+					<title>
+						<message selector="pool-title" />
+					</title>
+					<model ref="pool.title" />
+				</modelColumn>
+			</columns>
+		</entityList>
+
 	</container>
 </interface>

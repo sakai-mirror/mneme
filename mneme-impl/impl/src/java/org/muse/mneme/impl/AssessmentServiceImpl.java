@@ -44,6 +44,8 @@ import org.muse.mneme.api.AssessmentStatus;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.FeedbackDelivery;
 import org.muse.mneme.api.MultipleSubmissionSelectionPolicy;
+import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.QuestionPart;
 import org.muse.mneme.api.QuestionPresentation;
 import org.muse.mneme.api.QuestionType;
@@ -155,6 +157,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	 * Dependencies
 	 ************************************************************************************************************************************************/
 
+	/** Dependency: PoolService */
+	protected PoolService m_poolService = null;
+
 	/** Dependency: AttachmentService */
 	protected AttachmentService m_attachmentService = null;
 
@@ -201,6 +206,17 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	public void setAttachmentService(AttachmentService service)
 	{
 		m_attachmentService = service;
+	}
+
+	/**
+	 * Dependency: PoolService.
+	 * 
+	 * @param service
+	 *        The PoolService.
+	 */
+	public void setPoolService(PoolService service)
+	{
+		m_poolService = service;
 	}
 
 	/**
@@ -1173,8 +1189,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			}
 			if ((section.getQuestionLimit() != null) && (section.getQuestionLimit().intValue() < 1))
 			{
-				String msg = "readAssessmentSections: CORRECTED: section with <1 limit: " + section.getQuestionLimit().intValue() + " section: " + section.id
-						+ " test: " + assessment.getId();
+				String msg = "readAssessmentSections: CORRECTED: section with <1 limit: " + section.getQuestionLimit().intValue() + " section: "
+						+ section.id + " test: " + assessment.getId();
 				M_log.info(msg);
 
 				// remove the section
@@ -2210,7 +2226,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						submittedDate = m_timeService.newTime(ts.getTime());
 					}
 
-					//int mssPolicy = result.getInt(8);
+					// int mssPolicy = result.getInt(8);
 					FeedbackDelivery feedbackDelivery = FeedbackDelivery.parse(result.getInt(9));
 					boolean showScore = result.getBoolean(10);
 					boolean showStatistics = result.getBoolean(11);
@@ -2389,8 +2405,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON P.ID = PAC.ASSESSMENTID AND (PAC.RETRACTDATE IS NULL OR ? < PAC.RETRACTDATE)"
 				+ " INNER JOIN SAM_PUBLISHEDFEEDBACK_T PF ON P.ID = PF.ASSESSMENTID"
 				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON P.ID = PE.ASSESSMENTID"
-				+ " LEFT OUTER JOIN SAM_ASSESSMENTGRADING_T AG ON P.ID = AG.PUBLISHEDASSESSMENTID AND AG.AGENTID = ?"
-				+ " ORDER BY " + sortSql;
+				+ " LEFT OUTER JOIN SAM_ASSESSMENTGRADING_T AG ON P.ID = AG.PUBLISHEDASSESSMENTID AND AG.AGENTID = ?" + " ORDER BY " + sortSql;
 
 		Object[] fields = new Object[4];
 		fields[0] = "TAKE_PUBLISHED_ASSESSMENT";
@@ -2560,7 +2575,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			String aid = submission.getAssessmentId();
 			SubmissionImpl bestSubmission = null;
 			SubmissionImpl inProgressSubmission = null;
-			
+
 			// this one may be our best, or in progress, but only if it's started
 			if (submission.getStartDate() != null)
 			{
@@ -2569,7 +2584,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				{
 					inProgressSubmission = submission;
 				}
-				
+
 				// else, if complete, make it the best so far
 				else
 				{
@@ -2631,7 +2646,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						{
 							bestSubmission = candidateSub;
 						}
-						
+
 						// if we match the best, pick the latest submit date
 						else if (bestSubmission.getTotalScore().floatValue() == candidateSub.getTotalScore().floatValue())
 						{
@@ -3874,8 +3889,8 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 				fields[0] = Integer.valueOf(answer.getSubmission().getId());
 				fields[1] = Integer.valueOf(answer.getQuestionId());
 				// if the entry's assessment answer is null, use the single part id
-				fields[2] = Integer.valueOf((entry.getAssessmentAnswer() != null) ? entry.getAssessmentAnswer().getPart().getId() : answer.getQuestion().getPart()
-						.getId());
+				fields[2] = Integer.valueOf((entry.getAssessmentAnswer() != null) ? entry.getAssessmentAnswer().getPart().getId() : answer
+						.getQuestion().getPart().getId());
 				fields[3] = s.getUserId();
 				fields[4] = answer.getSubmittedDate();
 				fields[5] = (entry.getAssessmentAnswer() == null) ? null : entry.getAssessmentAnswer().getId();
@@ -4118,12 +4133,12 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 					anyChange = true;
 					break;
 				}
-				
+
 				if (completeAnswers.booleanValue() && (answer.getSubmittedDate() == null))
 				{
 					anyChange = true;
 					break;
-				}					
+				}
 			}
 
 			if (!anyChange) return;
@@ -4234,7 +4249,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 						{
 							recache.answers.remove(old);
 						}
-						
+
 						// update the cache with a copy of the answer, with the change flag cleared
 						SubmissionAnswerImpl newAnswer = new SubmissionAnswerImpl((SubmissionAnswerImpl) answer);
 						newAnswer.changed = Boolean.FALSE;
@@ -4255,7 +4270,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 			// cache the object
 			cacheSubmission(recache);
 		}
-		
+
 		// return properly updated answers - clear the chanegd flags
 		for (SubmissionAnswer answer : answers)
 		{
@@ -4503,7 +4518,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		{
 			rv.add((String) i.next());
 		}
-		
+
 		return rv;
 	}
 
@@ -5246,10 +5261,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		// select all the open submissions (or, just the TIMELIMIT > 0 or DUEDATE not null or RETRACTDATE not null?)
 		String statement = "SELECT AG.ASSESSMENTGRADINGID, AG.ATTEMPTDATE, AG.AGENTID, AG.FINALSCORE, AG.PUBLISHEDASSESSMENTID,"
-				+ " PAC.TIMELIMIT, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING, PE.SCORINGTYPE, PE.TOGRADEBOOK" + " FROM SAM_ASSESSMENTGRADING_T AG"
-				+ " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON AG.PUBLISHEDASSESSMENTID = PAC.ASSESSMENTID" 
-				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON AG.PUBLISHEDASSESSMENTID = PE.ASSESSMENTID"
-				+ " WHERE AG.FORGRADE = "
+				+ " PAC.TIMELIMIT, PAC.DUEDATE, PAC.RETRACTDATE, PAC.LATEHANDLING, PE.SCORINGTYPE, PE.TOGRADEBOOK"
+				+ " FROM SAM_ASSESSMENTGRADING_T AG" + " INNER JOIN SAM_PUBLISHEDACCESSCONTROL_T PAC ON AG.PUBLISHEDASSESSMENTID = PAC.ASSESSMENTID"
+				+ " INNER JOIN SAM_PUBLISHEDEVALUATION_T PE ON AG.PUBLISHEDASSESSMENTID = PE.ASSESSMENTID" + " WHERE AG.FORGRADE = "
 				+ m_sqlService.getBooleanConstant(false);
 
 		Object[] fields = new Object[0];
@@ -5422,5 +5436,61 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		fields[0] = asOf;
 		fields[1] = Integer.valueOf(submissionId);
 		m_sqlService.dbWrite(statement, fields);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean allowEditPool(Pool pool, String context, String userId)
+	{
+		return m_poolService.allowEditPool(pool, context, userId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean allowManagePools(String context, String userId)
+	{
+		return m_poolService.allowManagePools(context, userId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Pool> findPools(String userId)
+	{
+		return m_poolService.findPools(userId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Pool idPool(String poolId)
+	{
+		return m_poolService.idPool(poolId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Pool newPool() throws AssessmentPermissionException
+	{
+		return m_poolService.newPool();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removePool(Pool pool) throws AssessmentPermissionException
+	{
+		m_poolService.removePool(pool);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void savePool(Pool pool) throws AssessmentPermissionException
+	{
+		m_poolService.savePool(pool);
 	}
 }
