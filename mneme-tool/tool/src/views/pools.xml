@@ -36,16 +36,16 @@
 		<navigationBar width="100%">
 			<container>
 				<navigation destination="/" title="add-pool-title" style="LINK" description="add-pool-description">
-					<icon icon="/icons/add_pool.png" style="LEFT"/>
+					<icon icon="/icons/add.png" style="LEFT"/>
 				</navigation>
 				<navigation destination="/" title="add-question-title" style="LINK" description="add-question-description">
-					<icon icon="/icons/add_question.png" style="LEFT"/>
+					<icon icon="/icons/add.png" style="LEFT"/>
 				</navigation>
-				<navigation destination="/" title="combine-title" style="LINK" description="combine-description" disabled="TRUE">
+				<navigation destination="/" title="combine-title" style="LINK" description="combine-description" disabled="FALSE">
 					<icon icon="/icons/combine_pools.png" style="LEFT"/>
 				</navigation>
 				<navigation destination="/" title="import-export-title" style="LINK" description="import-export-description">
-					<icon icon="/icons/import_export_pools.png" style="LEFT"/>
+					<icon icon="/icons/import_export.png" style="LEFT"/>
 				</navigation>
 				<navigation destination="/" title="delete-title" style="LINK" description="delete-description">
 					<icon icon="/icons/delete.png" style="LEFT"/>
@@ -54,16 +54,16 @@
 					<icon icon="/icons/search.png" style="LEFT"/>
 				</navigation>
 				<navigation destination="/" title="gotofirst-title" style="LINK" description="gotofirst-description">
-					<icon icon="/icons/nav_to_first.png" style="LEFT"/>
+					<icon icon="/icons/first.png" style="LEFT"/>
 				</navigation>
 				<navigation destination="/" title="gotoprev-title" style="LINK" description="gotoprev-description">
-					<icon icon="/icons/nav_to_previous.png" style="LEFT"/>
+					<icon icon="/icons/previous.png" style="LEFT"/>
 				</navigation>
 				<navigation destination="/" title="gotonext-title" style="LINK" description="gotonext-description">
-					<icon icon="/icons/nav_to_next.png" style="LEFT"/>
+					<icon icon="/icons/next.png" style="LEFT"/>
 				</navigation>
 				<navigation destination="/" title="gotolast-title" style="LINK" description="gotolast-description">
-					<icon icon="/icons/nav_to_last.png" style="LEFT"/>
+					<icon icon="/icons/last.png" style="LEFT"/>
 				</navigation>
 			</container>
 		</navigationBar>
