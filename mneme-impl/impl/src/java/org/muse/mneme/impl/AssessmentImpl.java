@@ -158,7 +158,7 @@ public class AssessmentImpl implements Assessment
 
 	protected PropertyStatus sectionsStatus = PropertyStatus.unset;
 
-	protected MnemeServiceImpl service = null;
+	protected AssessmentServiceImpl service = null;
 
 	protected AssessmentStatus status = null;
 
@@ -188,7 +188,7 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * Construct
 	 */
-	public AssessmentImpl(MnemeServiceImpl service)
+	public AssessmentImpl(AssessmentServiceImpl service)
 	{
 		this.service = service;
 	}
@@ -674,7 +674,7 @@ public class AssessmentImpl implements Assessment
 	 */
 	public List<Float> getScores()
 	{
-		return service.getAssessmentScores(this);
+		return service.m_submissionService.getAssessmentScores(this);
 	}
 
 	/**

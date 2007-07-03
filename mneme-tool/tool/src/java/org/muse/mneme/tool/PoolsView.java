@@ -31,7 +31,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 
@@ -85,12 +84,12 @@ public class PoolsView extends ControllerImpl
 	}
 
 	/**
-	 * Set the assessment service.
+	 * Set the PoolService.
 	 * 
 	 * @param service
-	 *        The assessment service.
+	 *        The PoolService.
 	 */
-	public void setAssessmentService(MnemeService service)
+	public void setPoolService(PoolService service)
 	{
 		this.poolService = service;
 	}

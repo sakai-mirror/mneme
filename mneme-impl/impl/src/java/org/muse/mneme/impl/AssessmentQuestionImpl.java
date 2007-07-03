@@ -732,7 +732,7 @@ public class AssessmentQuestionImpl implements AssessmentQuestion
 	 */
 	public List<Float> getScores()
 	{
-		return this.section.assessment.service.getQuestionScores(this.id);
+		return this.section.assessment.service.m_submissionService.getQuestionScores(this.id);
 	}
 
 	/**

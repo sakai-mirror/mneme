@@ -30,18 +30,16 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentQuestion;
 import org.muse.mneme.api.AssessmentSection;
 import org.muse.mneme.api.AssessmentSubmissionStatus;
+import org.muse.mneme.api.Expiration;
 import org.muse.mneme.api.FeedbackDelivery;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionAnswer;
-import org.muse.mneme.api.Expiration;
 import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.cover.TimeService;
-import org.sakaiproject.util.StringUtil;
 
 /**
- * <p>
- * SubmissionImpl is ...
- * </p>
+ * SubmissionImpl implements Submission.
  */
 public class SubmissionImpl implements Submission
 {
@@ -84,7 +82,7 @@ public class SubmissionImpl implements Submission
 	/** Tracks when we have read the entire main property set. */
 	protected PropertyStatus mainStatus = PropertyStatus.unset;
 
-	protected MnemeServiceImpl service = null;
+	protected SubmissionServiceImpl service = null;
 
 	protected Integer siblingCount = null;
 
@@ -110,7 +108,7 @@ public class SubmissionImpl implements Submission
 	/**
 	 * Construct
 	 */
-	public SubmissionImpl(MnemeServiceImpl service)
+	public SubmissionImpl(SubmissionServiceImpl service)
 	{
 		this.service = service;
 	}
@@ -243,7 +241,7 @@ public class SubmissionImpl implements Submission
 		AssessmentImpl assessment = (AssessmentImpl) this.service.m_threadLocalManager.get(key);
 		if (assessment == null)
 		{
-			assessment = (AssessmentImpl) this.service.idAssessment(this.assessmentId);
+			assessment = (AssessmentImpl) this.service.m_assessmentService.idAssessment(this.assessmentId);
 
 			// set the submision context
 			assessment.initSubmissionContext(this);
@@ -611,10 +609,10 @@ public class SubmissionImpl implements Submission
 		if (getStartDate() != null) return Boolean.FALSE;
 
 		// assessment is open
-		if (!this.service.isAssessmentOpen(getAssessment(), this.service.m_timeService.newTime(), 0)) return Boolean.FALSE;
+		if (!((AssessmentServiceImpl) this.service.m_assessmentService).isAssessmentOpen(getAssessment(), this.service.m_timeService.newTime(), 0)) return Boolean.FALSE;
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-		if (!this.service.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), service.SUBMIT_PERMISSION, getAssessment()
+		if (!this.service.m_securityService.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
 				.getContext())) return Boolean.FALSE;
 
 		// under limit
@@ -638,14 +636,14 @@ public class SubmissionImpl implements Submission
 		if ((getIsComplete() == null) || (!getIsComplete().booleanValue())) return Boolean.FALSE;
 
 		// assessment is open
-		if (!this.service.isAssessmentOpen(getAssessment(), this.service.m_timeService.newTime(), 0)) return Boolean.FALSE;
+		if (!((AssessmentServiceImpl) this.service.m_assessmentService).isAssessmentOpen(getAssessment(), this.service.m_timeService.newTime(), 0)) return Boolean.FALSE;
 
 		// under limit
 		if ((getAssessment().getNumSubmissionsAllowed() != null)
 				&& (this.getSiblingCount().intValue() >= getAssessment().getNumSubmissionsAllowed().intValue())) return Boolean.FALSE;
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-		if (!this.service.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), service.SUBMIT_PERMISSION, getAssessment()
+		if (!this.service.m_securityService.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
 				.getContext())) return Boolean.FALSE;
 
 		return Boolean.TRUE;
@@ -666,10 +664,10 @@ public class SubmissionImpl implements Submission
 		if (!this.service.m_sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
 
 		// assessment is open
-		if (!this.service.isAssessmentOpen(getAssessment(), this.service.m_timeService.newTime(), 0)) return Boolean.FALSE;
+		if (!((AssessmentServiceImpl) this.service.m_assessmentService).isAssessmentOpen(getAssessment(), this.service.m_timeService.newTime(), 0)) return Boolean.FALSE;
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-		if (!this.service.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), service.SUBMIT_PERMISSION, getAssessment()
+		if (!this.service.m_securityService.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
 				.getContext())) return Boolean.FALSE;
 
 		return Boolean.TRUE;

@@ -42,10 +42,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentQuestion;
-import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Attachment;
 import org.muse.mneme.api.AttachmentService;
+import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
@@ -76,9 +78,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * <p>
- * AssessmentServiceImpl is ...
- * </p>
+ * AttachmentServiceImpl implements AttachmentService.
  */
 public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 {
@@ -94,223 +94,49 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/** A cache of attachments. */
 	protected Cache m_cache = null;
 
-	/*************************************************************************************************************************************************
-	 * Dependencies
-	 ************************************************************************************************************************************************/
-
-	/** Dependency: AssessmentService: Note: dependent on the impl... */
-	protected MnemeServiceImpl m_mnemeService = null;
-
-	/**
-	 * Dependency: MnemeService.
-	 * 
-	 * @param service
-	 *        The MnemeService.
-	 */
-	public void setMnemeService(MnemeService service)
-	{
-		m_mnemeService = (MnemeServiceImpl) service;
-	}
-
-	/** Dependency: EntityManager */
-	protected EntityManager m_entityManager = null;
-
-	/**
-	 * Dependency: EntityManager.
-	 * 
-	 * @param service
-	 *        The EntityManager.
-	 */
-	public void setEntityManager(EntityManager service)
-	{
-		m_entityManager = service;
-	}
-
-	/** Dependency: EventTrackingService */
-	protected EventTrackingService m_eventTrackingService = null;
-
-	/**
-	 * Dependency: EventTrackingService.
-	 * 
-	 * @param service
-	 *        The EventTrackingService.
-	 */
-	public void setEventTrackingService(EventTrackingService service)
-	{
-		m_eventTrackingService = service;
-	}
-
-	/** Dependency: MemoryService */
-	protected MemoryService m_memoryService = null;
-
-	/**
-	 * Dependency: MemoryService.
-	 * 
-	 * @param service
-	 *        The MemoryService.
-	 */
-	public void setMemoryService(MemoryService service)
-	{
-		m_memoryService = service;
-	}
-
-	/** Dependency: SessionManager */
-	protected SessionManager m_sessionManager = null;
-
-	/**
-	 * Dependency: SessionManager.
-	 * 
-	 * @param service
-	 *        The SessionManager.
-	 */
-	public void setSessionManager(SessionManager service)
-	{
-		m_sessionManager = service;
-	}
-
-	/** Dependency: ServerConfigurationService */
-	protected ServerConfigurationService m_serverConfigurationService = null;
-
-	/**
-	 * Dependency: ServerConfigurationService.
-	 * 
-	 * @param service
-	 *        The ServerConfigurationService.
-	 */
-	public void setServerConfigurationService(ServerConfigurationService service)
-	{
-		m_serverConfigurationService = service;
-	}
-
-	/** Dependency: SqlService */
-	protected SqlService m_sqlService = null;
-
-	/**
-	 * Dependency: SqlService.
-	 * 
-	 * @param service
-	 *        The SqlService.
-	 */
-	public void setSqlService(SqlService service)
-	{
-		m_sqlService = service;
-	}
-
-	protected ThreadLocalManager m_threadLocalManager = null;
-
-	/**
-	 * Dependency: ThreadLocalManager.
-	 * 
-	 * @param service
-	 *        The ThreadLocalManager.
-	 */
-	public void setThreadLocalManager(ThreadLocalManager service)
-	{
-		m_threadLocalManager = service;
-	}
-
-	protected TimeService m_timeService = null;
-
-	/**
-	 * Dependency: TimeService.
-	 * 
-	 * @param service
-	 *        The TimeService.
-	 */
-	public void setTimeService(TimeService service)
-	{
-		m_timeService = service;
-	}
-
-	/*************************************************************************************************************************************************
-	 * Configuration
-	 ************************************************************************************************************************************************/
-
 	/** The # seconds between cache cleaning runs. */
 	protected int m_cacheCleanerSeconds = 0;
 
 	/** The # seconds to cache assessment reads. 0 disables the cache. */
 	protected int m_cacheSeconds = 0;
 
+	/** Dependency: EntityManager */
+	protected EntityManager m_entityManager = null;
+
+	/** Dependency: EventTrackingService */
+	protected EventTrackingService m_eventTrackingService = null;
+
 	/** If set, use this file system for storing body content, rather than the MEDIA field in the db. */
 	protected String m_fileSystemRoot = null;
 
-	/**
-	 * Set the # minutes between cache cleanings.
-	 * 
-	 * @param time
-	 *        The # minutes between cache cleanings. (as an integer string).
-	 */
-	public void setCacheCleanerMinutes(String time)
-	{
-		m_cacheCleanerSeconds = Integer.parseInt(time) * 60;
-	}
+	/** Dependency: MemoryService */
+	protected MemoryService m_memoryService = null;
+
+	/** Dependency: SecurityService */
+	protected SecurityService m_securityService = null;
+
+	/** Dependency: ServerConfigurationService */
+	protected ServerConfigurationService m_serverConfigurationService = null;
+
+	/** Dependency: SessionManager */
+	protected SessionManager m_sessionManager = null;
+
+	/** Dependency: SqlService */
+	protected SqlService m_sqlService = null;
+
+	/** Dependency: SubmissionService */
+	protected SubmissionService m_submissionService = null;
+
+	protected ThreadLocalManager m_threadLocalManager = null;
+
+	protected TimeService m_timeService = null;
 
 	/**
-	 * Set the # minutes to cache.
-	 * 
-	 * @param time
-	 *        The # minutes to cache a get (as an integer string).
+	 * {@inheritDoc}
 	 */
-	public void setCacheMinutes(String time)
+	public String archive(String siteId, Document doc, Stack stack, String archivePath, List attachments)
 	{
-		m_cacheSeconds = Integer.parseInt(time) * 60;
-	}
-
-	/**
-	 * Set the file system root.
-	 * 
-	 * @param root
-	 *        The file system root.
-	 */
-	public void setFileSystemRoot(String root)
-	{
-		m_fileSystemRoot = root;
-
-		// make sure it ends with a slash
-		if (!m_fileSystemRoot.endsWith("/"))
-		{
-			m_fileSystemRoot = m_fileSystemRoot + "/";
-		}
-	}
-
-	/*************************************************************************************************************************************************
-	 * Init and Destroy
-	 ************************************************************************************************************************************************/
-
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		try
-		{
-			// register as an entity producer
-			m_entityManager.registerEntityProducer(this, REFERENCE_ROOT);
-
-			// <= 0 indicates no caching desired
-			if ((m_cacheSeconds > 0) && (m_cacheCleanerSeconds > 0))
-			{
-				m_cache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAttachmentReference(null, null, null));
-			}
-
-			// check config for file system (Samigo) setting
-			if (!m_serverConfigurationService.getBoolean("samigo.saveMediaToDb", false))
-			{
-				String root = m_serverConfigurationService.getString("samigo.answerUploadRepositoryPath", null);
-				if (root != null)
-				{
-					setFileSystemRoot(root);
-				}
-			}
-
-			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60
-					+ ((m_fileSystemRoot != null) ? (" fileRoot: " + m_fileSystemRoot) : " media in db"));
-		}
-		catch (Throwable t)
-		{
-			M_log.warn("init(): ", t);
-		}
+		return null;
 	}
 
 	/**
@@ -320,10 +146,6 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	{
 		M_log.info("destroy()");
 	}
-
-	/*************************************************************************************************************************************************
-	 * AttachmentService
-	 ************************************************************************************************************************************************/
 
 	/**
 	 * {@inheritDoc}
@@ -399,69 +221,6 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removeAttachment(Reference attachment)
-	{
-		// read the attachment from the samigo media table to get the file path, if present
-		final StringBuffer path = new StringBuffer();
-
-		String statement = "SELECT M.LOCATION FROM SAM_MEDIA_T M WHERE M.MEDIAID = ?";
-		Object[] fields = new Object[1];
-		fields[0] = Integer.valueOf(attachment.getId());
-		m_sqlService.dbRead(statement, fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String fileSystemPath = StringUtil.trimToNull(result.getString(1));
-					if (fileSystemPath != null)
-					{
-						path.append(fileSystemPath);
-					}
-
-					return null;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("removeAttachment: " + e);
-					return null;
-				}
-			}
-		});
-
-		// if there is a path, delete the file
-		if (path.length() > 0)
-		{
-			File file = new File(path.toString());
-			if (file.exists())
-			{
-				file.delete();
-			}
-		}
-
-		// delete the db record
-		statement = "DELETE FROM SAM_MEDIA_T WHERE MEDIAID = ?";
-		m_sqlService.dbWrite(statement, fields);
-
-		// generate an event
-		m_eventTrackingService.post(m_eventTrackingService.newEvent(ATTACHMENT_DELETE, attachment.getReference(), true));
-	}
-
-	/*************************************************************************************************************************************************
-	 * EntityProducer
-	 ************************************************************************************************************************************************/
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String archive(String siteId, Document doc, Stack stack, String archivePath, List attachments)
-	{
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Entity getEntity(Reference ref)
 	{
 		return null;
@@ -520,7 +279,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 					throws EntityPermissionException, EntityNotDefinedException, EntityAccessOverloadException, EntityCopyrightException
 			{
 				// get the submission (the refrence container) for security checks
-				Submission submission = m_mnemeService.idSubmission(ref.getContainer());
+				Submission submission = m_submissionService.idSubmission(ref.getContainer());
 				if (submission == null)
 				{
 					throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), ATTACHMENT_READ, ref.getReference());
@@ -531,8 +290,8 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 				{
 					// user must have review or grading permission
 					// TODO: for now, we use MANAGE_PERMISSION... refine this
-					if (!m_mnemeService.checkSecurity(m_sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION,
-							submission.getAssessment().getContext()))
+					if (!m_securityService.checkSecurity(m_sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, submission
+							.getAssessment().getContext()))
 					{
 						throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), ATTACHMENT_READ, ref.getReference());
 					}
@@ -719,6 +478,41 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		try
+		{
+			// register as an entity producer
+			m_entityManager.registerEntityProducer(this, REFERENCE_ROOT);
+
+			// <= 0 indicates no caching desired
+			if ((m_cacheSeconds > 0) && (m_cacheCleanerSeconds > 0))
+			{
+				m_cache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAttachmentReference(null, null, null));
+			}
+
+			// check config for file system (Samigo) setting
+			if (!m_serverConfigurationService.getBoolean("samigo.saveMediaToDb", false))
+			{
+				String root = m_serverConfigurationService.getString("samigo.answerUploadRepositoryPath", null);
+				if (root != null)
+				{
+					setFileSystemRoot(root);
+				}
+			}
+
+			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60
+					+ ((m_fileSystemRoot != null) ? (" fileRoot: " + m_fileSystemRoot) : " media in db"));
+		}
+		catch (Throwable t)
+		{
+			M_log.warn("init(): ", t);
+		}
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public String merge(String siteId, Element root, String archivePath, String fromSiteId, Map attachmentNames, Map userIdTrans,
@@ -757,15 +551,211 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/**
 	 * {@inheritDoc}
 	 */
+	public void removeAttachment(Reference attachment)
+	{
+		// read the attachment from the samigo media table to get the file path, if present
+		final StringBuffer path = new StringBuffer();
+
+		String statement = "SELECT M.LOCATION FROM SAM_MEDIA_T M WHERE M.MEDIAID = ?";
+		Object[] fields = new Object[1];
+		fields[0] = Integer.valueOf(attachment.getId());
+		m_sqlService.dbRead(statement, fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String fileSystemPath = StringUtil.trimToNull(result.getString(1));
+					if (fileSystemPath != null)
+					{
+						path.append(fileSystemPath);
+					}
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("removeAttachment: " + e);
+					return null;
+				}
+			}
+		});
+
+		// if there is a path, delete the file
+		if (path.length() > 0)
+		{
+			File file = new File(path.toString());
+			if (file.exists())
+			{
+				file.delete();
+			}
+		}
+
+		// delete the db record
+		statement = "DELETE FROM SAM_MEDIA_T WHERE MEDIAID = ?";
+		m_sqlService.dbWrite(statement, fields);
+
+		// generate an event
+		m_eventTrackingService.post(m_eventTrackingService.newEvent(ATTACHMENT_DELETE, attachment.getReference(), true));
+	}
+
+	/**
+	 * Set the # minutes between cache cleanings.
+	 * 
+	 * @param time
+	 *        The # minutes between cache cleanings. (as an integer string).
+	 */
+	public void setCacheCleanerMinutes(String time)
+	{
+		m_cacheCleanerSeconds = Integer.parseInt(time) * 60;
+	}
+
+	/**
+	 * Set the # minutes to cache.
+	 * 
+	 * @param time
+	 *        The # minutes to cache a get (as an integer string).
+	 */
+	public void setCacheMinutes(String time)
+	{
+		m_cacheSeconds = Integer.parseInt(time) * 60;
+	}
+
+	/**
+	 * Dependency: EntityManager.
+	 * 
+	 * @param service
+	 *        The EntityManager.
+	 */
+	public void setEntityManager(EntityManager service)
+	{
+		m_entityManager = service;
+	}
+
+	/**
+	 * Dependency: EventTrackingService.
+	 * 
+	 * @param service
+	 *        The EventTrackingService.
+	 */
+	public void setEventTrackingService(EventTrackingService service)
+	{
+		m_eventTrackingService = service;
+	}
+
+	/**
+	 * Set the file system root.
+	 * 
+	 * @param root
+	 *        The file system root.
+	 */
+	public void setFileSystemRoot(String root)
+	{
+		m_fileSystemRoot = root;
+
+		// make sure it ends with a slash
+		if (!m_fileSystemRoot.endsWith("/"))
+		{
+			m_fileSystemRoot = m_fileSystemRoot + "/";
+		}
+	}
+
+	/**
+	 * Dependency: MemoryService.
+	 * 
+	 * @param service
+	 *        The MemoryService.
+	 */
+	public void setMemoryService(MemoryService service)
+	{
+		m_memoryService = service;
+	}
+
+	/**
+	 * Dependency: SecurityService.
+	 * 
+	 * @param service
+	 *        The SecurityService.
+	 */
+	public void setSecurityService(SecurityService service)
+	{
+		m_securityService = service;
+	}
+
+	/**
+	 * Dependency: ServerConfigurationService.
+	 * 
+	 * @param service
+	 *        The ServerConfigurationService.
+	 */
+	public void setServerConfigurationService(ServerConfigurationService service)
+	{
+		m_serverConfigurationService = service;
+	}
+
+	/**
+	 * Dependency: SessionManager.
+	 * 
+	 * @param service
+	 *        The SessionManager.
+	 */
+	public void setSessionManager(SessionManager service)
+	{
+		m_sessionManager = service;
+	}
+
+	/**
+	 * Dependency: SqlService.
+	 * 
+	 * @param service
+	 *        The SqlService.
+	 */
+	public void setSqlService(SqlService service)
+	{
+		m_sqlService = service;
+	}
+
+	/**
+	 * Dependency: MnemeService.
+	 * 
+	 * @param service
+	 *        The MnemeService.
+	 */
+	public void setSubmissionService(SubmissionService service)
+	{
+		m_submissionService = service;
+	}
+
+	/**
+	 * Dependency: ThreadLocalManager.
+	 * 
+	 * @param service
+	 *        The ThreadLocalManager.
+	 */
+	public void setThreadLocalManager(ThreadLocalManager service)
+	{
+		m_threadLocalManager = service;
+	}
+
+	/**
+	 * Dependency: TimeService.
+	 * 
+	 * @param service
+	 *        The TimeService.
+	 */
+	public void setTimeService(TimeService service)
+	{
+		m_timeService = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean willArchiveMerge()
 	{
 		// TODO Auto-generated method stub
 		return false;
 	}
-
-	/*************************************************************************************************************************************************
-	 * Etc.
-	 ************************************************************************************************************************************************/
 
 	/**
 	 * Cache this attachment. Use the short-term cache if enable, else use the thread-local cache.
