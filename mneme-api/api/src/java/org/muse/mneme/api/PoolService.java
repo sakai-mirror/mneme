@@ -24,9 +24,7 @@ package org.muse.mneme.api;
 import java.util.List;
 
 /**
- * <p>
  * PoolService provides services around question pool management for Mneme.
- * </p>
  */
 public interface PoolService
 {
@@ -58,7 +56,7 @@ public interface PoolService
 	 * Locate a list of pools with this criteria.
 	 * 
 	 * @param userId
-	 *        Local pools that this user has access to.
+	 *        the user id.
 	 * @return a list of pools that meet the criteria.
 	 */
 	List<Pool> findPools(String userId);

@@ -28,8 +28,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
-import org.muse.mneme.api.Pool;
-import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.entity.api.EntityManager;
@@ -42,13 +42,13 @@ import org.sakaiproject.tool.api.SessionManager;
 
 /**
  * <p>
- * PoolServiceImpl implements PoolService
+ * QuestionServiceImpl implements QuestionService
  * </p>
  */
-public class PoolServiceImpl implements PoolService
+public class QuestionServiceImpl implements QuestionService
 {
 	/** Our logger. */
-	private static Log M_log = LogFactory.getLog(PoolServiceImpl.class);
+	private static Log M_log = LogFactory.getLog(QuestionServiceImpl.class);
 
 	/** A cache of attachments. */
 	protected Cache m_cache = null;
@@ -247,13 +247,13 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/*************************************************************************************************************************************************
-	 * PoolService
+	 * QuestionService
 	 ************************************************************************************************************************************************/
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowEditPool(Pool pool, String context, String userId)
+	public Boolean allowEditQuestion(Question question, String context, String userId)
 	{
 		return Boolean.TRUE;
 	}
@@ -261,7 +261,7 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowManagePools(String context, String userId)
+	public Boolean allowManageQuestions(String context, String userId)
 	{
 		return Boolean.TRUE;
 	}
@@ -269,15 +269,15 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String userId)
+	public List<Question> findQuestions(String userId)
 	{
-		List<Pool> rv = new ArrayList<Pool>(0);
+		List<Question> rv = new ArrayList<Question>(0);
 
-		rv.add(new PoolImpl("1", "1-description", new Integer(1), "admin", new Float(10), "1-subject", "1-title"));
-		rv.add(new PoolImpl("2", "2-description", new Integer(1), "admin", new Float(10), "2-subject", "2-title"));
-		rv.add(new PoolImpl("3", "3-description", new Integer(1), "admin", new Float(10), "3-subject", "3-title"));
-		rv.add(new PoolImpl("4", "4-description", new Integer(1), "admin", new Float(10), "4-subject", "4-title"));
-		rv.add(new PoolImpl("5", "5-description", new Integer(1), "admin", new Float(10), "5-subject", "5-title"));
+		rv.add(new QuestionImpl("1"));
+		rv.add(new QuestionImpl("2"));
+		rv.add(new QuestionImpl("3"));
+		rv.add(new QuestionImpl("4"));
+		rv.add(new QuestionImpl("5"));
 
 		return rv;
 	}
@@ -285,7 +285,7 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Pool idPool(String poolId)
+	public Question idQuestion(String questionId)
 	{
 		return null;
 	}
@@ -293,7 +293,7 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Pool newPool() throws AssessmentPermissionException
+	public Question newQuestion() throws AssessmentPermissionException
 	{
 		throw new AssessmentPermissionException("", "", "");
 	}
@@ -301,14 +301,14 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removePool(Pool pool) throws AssessmentPermissionException
+	public void removeQuestion(Question question) throws AssessmentPermissionException
 	{
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void savePool(Pool pool) throws AssessmentPermissionException
+	public void saveQuestion(Question question) throws AssessmentPermissionException
 	{
 	}
 }

@@ -46,8 +46,10 @@ import org.muse.mneme.api.FeedbackDelivery;
 import org.muse.mneme.api.MultipleSubmissionSelectionPolicy;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPart;
 import org.muse.mneme.api.QuestionPresentation;
+import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.QuestionType;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionAnswer;
@@ -160,6 +162,9 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	/** Dependency: PoolService */
 	protected PoolService m_poolService = null;
 
+	/** Dependency: QuestionService */
+	protected QuestionService m_questionService = null;
+
 	/** Dependency: AttachmentService */
 	protected AttachmentService m_attachmentService = null;
 
@@ -217,6 +222,17 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	public void setPoolService(PoolService service)
 	{
 		m_poolService = service;
+	}
+
+	/**
+	 * Dependency: QuestionService.
+	 * 
+	 * @param service
+	 *        The QuestionService.
+	 */
+	public void setQuestionService(QuestionService service)
+	{
+		m_questionService = service;
 	}
 
 	/**
@@ -5492,5 +5508,53 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 	public void savePool(Pool pool) throws AssessmentPermissionException
 	{
 		m_poolService.savePool(pool);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean allowEditQuestion(Question question, String context, String userId)
+	{
+		return m_questionService.allowEditQuestion(question, context, userId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Question> findQuestions(String userId)
+	{
+		return m_questionService.findQuestions(userId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Question idQuestion(String questionId)
+	{
+		return m_questionService.idQuestion(questionId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Question newQuestion() throws AssessmentPermissionException
+	{
+		return m_questionService.newQuestion();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeQuestion(Question question) throws AssessmentPermissionException
+	{
+		m_questionService.removeQuestion(question);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void saveQuestion(Question question) throws AssessmentPermissionException
+	{
+		m_questionService.saveQuestion(question);
 	}
 }

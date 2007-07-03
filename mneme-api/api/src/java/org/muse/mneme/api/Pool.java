@@ -22,9 +22,7 @@
 package org.muse.mneme.api;
 
 /**
- * <p>
  * Pool defines the question pools.
- * </p>
  */
 public interface Pool
 {
@@ -33,7 +31,7 @@ public interface Pool
 	 * 
 	 * @return The description of the pool.
 	 */
-	String getDesiption();
+	String getDescription();
 
 	/**
 	 * Access the difficulty value for the questions in this pool.<br />
@@ -91,7 +89,7 @@ public interface Pool
 	 * @param description
 	 *        The description of the pool.
 	 */
-	void setDesiption(String description);
+	void setDescription(String description);
 
 	/**
 	 * Set the difficulty value for the questions in this pool.

@@ -24,11 +24,9 @@ package org.muse.mneme.api;
 import java.util.List;
 
 /**
- * <p>
- * AssessmentService ...
- * </p>
+ * SubmissionService manages submissions.
  */
-public interface AssessmentService extends PoolService, QuestionService
+public interface SubmissionService
 {
 	/**
 	 * Sort options for GetUserContextSubmissions()
@@ -37,76 +35,6 @@ public interface AssessmentService extends PoolService, QuestionService
 	{
 		dueDate_a, dueDate_d, status_a, status_d, title_a, title_d
 	}
-
-	/**
-	 * The type string for this application: should not change over time as it may be stored in various parts of persistent entities.
-	 */
-	static final String APPLICATION_ID = "sakai:mneme";
-
-	/** This string starts the references to resources in this service. */
-	static final String REFERENCE_ROOT = "/mneme";
-
-	/** The sub-type for assessment in references (/mneme/test/...) */
-	static final String ASSESSMENT_TYPE = "test";
-
-	/** The sub-type for submissions in references (/mneme/submission/...) */
-	static final String SUBMISSION_TYPE = "submission";
-
-	/** Event tracking event for adding a test. */
-	static final String TEST_ADD = "mneme.manage";
-
-	/** Event tracking event for adding a submission. */
-	static final String SUBMISSION_ADD = "mneme.submit";
-
-	/** Event tracking event for entering a submission. */
-	static final String SUBMISSION_ENTER = "mneme.enter";
-
-	/** Event tracking event for re-entering a submission. */
-	static final String SUBMISSION_CONTINUE = "mneme.continue";
-
-	/** Event tracking event for answering a question in a submission. */
-	static final String SUBMISSION_ANSWER = "mneme.answer";
-
-	/** Event tracking event for completing a submission. */
-	static final String SUBMISSION_COMPLETE = "mneme.complete";
-
-	/** Event tracking event for the system automatically completing a submission. */
-	static final String SUBMISSION_AUTO_COMPLETE = "mneme.auto_complete";
-
-	/** Event tracking event for reviewing a submission. */
-	static final String SUBMISSION_REVIEW = "mneme.review";
-
-	/** The security function used to check if users can submit to an assessment. */
-	static final String SUBMIT_PERMISSION = "mneme.submit";
-
-	/** The security function used to check if users can manage tests. */
-	static final String MANAGE_PERMISSION = "mneme.manage";
-
-	/** The security function used to check if users can grade tests. */
-	static final String GRADE_PERMISSION = "mneme.grade";
-
-	/*************************************************************************************************************************************************
-	 * Assessment Access
-	 ************************************************************************************************************************************************/
-
-	/*************************************************************************************************************************************************
-	 * Submission Access
-	 ************************************************************************************************************************************************/
-
-	/**
-	 * Create a new persistent assessment from the given information.<br />
-	 * The id will be re-generated, default values set, and the parameter assessment updated.
-	 * 
-	 * @param a
-	 *        The information from which to make the new assesment.
-	 * @throws AssessmentPermissionException
-	 *         if the user does not have permission to create the assessment.
-	 */
-	void addAssessment(Assessment a) throws AssessmentPermissionException;
-
-	/*************************************************************************************************************************************************
-	 * Delivery Support
-	 ************************************************************************************************************************************************/
 
 	/**
 	 * Create a new persistent submission from the given information.
@@ -121,24 +49,6 @@ public interface AssessmentService extends PoolService, QuestionService
 	 *         if an assessment has been submitted to by the user the maximum number of times.
 	 */
 	void addSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException, AssessmentCompletedException;
-
-	/**
-	 * Check if the current user is allowed to add an assessment in this context.
-	 * 
-	 * @param context
-	 *        The context.
-	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
-	 */
-	Boolean allowAddAssessment(String context);
-
-	/**
-	 * Check if the current user is allowed to list delivery assessments in this context.
-	 * 
-	 * @param context
-	 *        The context.
-	 * @return TRUE if the user is allowed to list delivery assessments in this context, FALSE if not.
-	 */
-	Boolean allowListDeliveryAssessment(String context);
 
 	/**
 	 * Check if the current user is allowed to update or add answers or complete this submission.<br />
@@ -195,15 +105,6 @@ public interface AssessmentService extends PoolService, QuestionService
 	void completeSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException;
 
 	/**
-	 * Count the published assessments in the context - all of them!
-	 * 
-	 * @param context
-	 *        The context.
-	 * @return The count of published assessments in the context.
-	 */
-	Integer countAssessments(String context);
-
-	/**
 	 * Check how many additional submissions are allowed to this assessment by this user.<br />
 	 * If the user has no permission to submit, has submitted the maximum, or the assessment is closed for submissions as of this time, return 0.
 	 * 
@@ -254,38 +155,7 @@ public interface AssessmentService extends PoolService, QuestionService
 	List<Float> getQuestionScores(String questionId);
 
 	/**
-	 * Update the assessment's gradebook entry for all users with their highest score.
-	 * 
-	 * @param assessment
-	 *        The assessment to update.
-	 * @throws AssessmentPermissionException
-	 *         if the user does not have permission to create the assessment.
-	 */
-	void updateGradebook(Assessment assessment) throws AssessmentPermissionException;
-
-	/**
-	 * Get all the assessments for the context.
-	 * 
-	 * @param context
-	 *        The context.
-	 * @return The List <Assessment> of all assessments in the context, or empty if there are none.
-	 */
-	List<Assessment> getContextAssessments(String context);
-
-	/*************************************************************************************************************************************************
-	 * Authoring Support
-	 ************************************************************************************************************************************************/
-
-	/**
-	 * Access an assessment by id. Assures that the full assessment information is populated. TODO: security
-	 * 
-	 * @param id
-	 *        The assessment id.
-	 * @return The assessment object, complete, or null if not found.
-	 */
-	Assessment getAssessment(String id);
-
-	/**
+	 * TODO: needed?
 	 * Access a submission by id. TODO: security
 	 * 
 	 * @param id
@@ -295,7 +165,8 @@ public interface AssessmentService extends PoolService, QuestionService
 	Submission getSubmission(String id);
 
 	/**
-	 * TODO: Find the submissions to assignments in this context made by this user. Consider:
+	 * TODO: rename find...
+	 * Find the submissions to assignments in this context made by this user. Consider:
 	 * <ul>
 	 * <li>published assessments</li>
 	 * <li>assessments in this context</li>
@@ -315,19 +186,6 @@ public interface AssessmentService extends PoolService, QuestionService
 	List<Submission> getUserContextSubmissions(String context, String userId, GetUserContextSubmissionsSort sort);
 
 	/**
-	 * Access an assessment by id, but do not populate any information. Information will be populated as needed. TODO: security
-	 * 
-	 * @param id
-	 *        The assessment id.
-	 * @return The assessment object, or null if not found.
-	 */
-	Assessment idAssessment(String id);
-
-	/*************************************************************************************************************************************************
-	 * Submission Support
-	 ************************************************************************************************************************************************/
-
-	/**
 	 * Access a submission by id, but do not populate any information. Information will be populated as needed. TODO: security
 	 * 
 	 * @param id
@@ -335,49 +193,6 @@ public interface AssessmentService extends PoolService, QuestionService
 	 * @return The submission object, or null if not found.
 	 */
 	Submission idSubmission(String id);
-
-	/**
-	 * Create a new Assessment object, currently detached from persistence.
-	 * 
-	 * @return a new, detached from persistence, assessment object.
-	 */
-	Assessment newAssessment();
-
-	/**
-	 * Create a new AssessmentAnswer object in this question part.
-	 * 
-	 * @param part
-	 *        The part this answer is in.
-	 * @return a new answer that is in this part.
-	 */
-	AssessmentAnswer newAssessmentAnswer(QuestionPart part);
-
-	/**
-	 * Create a new question object in this section.
-	 * 
-	 * @param section
-	 *        The assessment section to hold the question.
-	 * @return a new question that is in the section.
-	 */
-	AssessmentQuestion newQuestion(AssessmentSection section);
-
-	/**
-	 * Create a new question part object in this question.
-	 * 
-	 * @param question
-	 *        The question that this part is in.
-	 * @return a new part that is in the question.
-	 */
-	QuestionPart newQuestionPart(AssessmentQuestion question);
-
-	/**
-	 * Create a new Assessment section for this assessment.
-	 * 
-	 * @param assessment
-	 *        The assessment this section goes in.
-	 * @return a new section that is in the assessment.
-	 */
-	AssessmentSection newSection(Assessment assessment);
 
 	/**
 	 * Create a new Submission object for this assessment.
@@ -438,4 +253,14 @@ public interface AssessmentService extends PoolService, QuestionService
 	 */
 	void submitAnswers(List<SubmissionAnswer> answers, Boolean completeAnswers, Boolean completeSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException;
+
+	/**
+	 * Update the assessment's gradebook entry for all users with their highest score.
+	 * 
+	 * @param assessment
+	 *        The assessment to update.
+	 * @throws AssessmentPermissionException
+	 *         if the user does not have permission to create the assessment.
+	 */
+	void updateGradebook(Assessment assessment) throws AssessmentPermissionException;
 }

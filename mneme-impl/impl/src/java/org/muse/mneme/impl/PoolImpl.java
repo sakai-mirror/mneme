@@ -49,10 +49,21 @@ public class PoolImpl implements Pool
 		this.id = id;
 	}
 
+	public PoolImpl(String id, String description, Integer difficulty, String ownerId, Float points, String subject, String title)
+	{
+		this.id = id;
+		this.description = description;
+		this.difficulty = difficulty;
+		this.ownerId = ownerId;
+		this.points = points;
+		this.subject = subject;
+		this.title = title;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getDesiption()
+	public String getDescription()
 	{
 		return this.description;
 	}
@@ -94,7 +105,6 @@ public class PoolImpl implements Pool
 	 */
 	public String getSubject()
 	{
-		if (this.subject == null) return "Subject " + this.id;
 		return this.subject;
 	}
 
@@ -103,7 +113,6 @@ public class PoolImpl implements Pool
 	 */
 	public String getTitle()
 	{
-		if (this.title == null) return "Pool " + this.id;
 		return this.title;
 	}
 
@@ -118,7 +127,7 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setDesiption(String description)
+	public void setDescription(String description)
 	{
 		this.description = description;
 	}
