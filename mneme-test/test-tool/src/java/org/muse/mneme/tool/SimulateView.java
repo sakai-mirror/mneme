@@ -40,7 +40,7 @@ import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentQuestion;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.AssessmentSubmissionStatus;
 import org.muse.mneme.api.QuestionPart;
 import org.muse.mneme.api.QuestionPresentation;
@@ -67,7 +67,7 @@ public class SimulateView extends ControllerImpl
 	private static Log M_log = LogFactory.getLog(SimulateView.class);
 
 	/** The assessment service. */
-	protected AssessmentService assessmentService = null;
+	protected MnemeService assessmentService = null;
 
 	/** The security service. */
 	protected SecurityService securityService = null;
@@ -147,7 +147,7 @@ public class SimulateView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
 	}
@@ -419,7 +419,7 @@ public class SimulateView extends ControllerImpl
 			User user = establishUser(null, userEid);
 
 			// get the list of assessments (simulate list view)
-			AssessmentService.GetUserContextSubmissionsSort sort = AssessmentService.GetUserContextSubmissionsSort.status_d;
+			MnemeService.GetUserContextSubmissionsSort sort = MnemeService.GetUserContextSubmissionsSort.status_d;
 			List<Submission> submissions = assessmentService.getUserContextSubmissions(context, null, sort);
 
 			// shuffle these to get a random available one

@@ -30,7 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.tool.AssessmentDeliveryTool.Errors;
 import org.sakaiproject.util.Web;
@@ -44,7 +44,7 @@ public class SubmittedView extends ControllerImpl
 	private static Log M_log = LogFactory.getLog(SubmittedView.class);
 
 	/** Assessment service. */
-	protected AssessmentService assessmentService = null;
+	protected MnemeService assessmentService = null;
 
 	/**
 	 * Shutdown.
@@ -127,7 +127,7 @@ public class SubmittedView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
 	}

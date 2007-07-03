@@ -3,8 +3,8 @@
 
 <beans>
 
-	<bean id="org.muse.mneme.api.AssessmentService"
-			class="org.muse.mneme.impl.AssessmentServiceImpl"
+	<bean id="org.muse.mneme.api.MnemeService"
+			class="org.muse.mneme.impl.MnemeServiceImpl"
 			init-method="init"
 			destroy-method="destroy"
 			singleton="true">
@@ -45,7 +45,7 @@
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
 		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
 		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
-		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
 
  		<property name="cacheMinutes"><value>5</value></property>
  		<property name="cacheCleanerMinutes"><value>15</value></property>
@@ -65,7 +65,6 @@
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
 		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
 		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
-		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
 		
 		<property name="cacheMinutes"><value>5</value></property>
 		<property name="cacheCleanerMinutes"><value>15</value></property>
@@ -85,7 +84,6 @@
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
 		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
 		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
-		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
 		
 		<property name="cacheMinutes"><value>5</value></property>
 		<property name="cacheCleanerMinutes"><value>15</value></property>

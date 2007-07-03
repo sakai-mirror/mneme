@@ -31,8 +31,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolService;
 
 /**
  * The /pools view for the mneme tool.
@@ -43,7 +44,7 @@ public class PoolsView extends ControllerImpl
 	private static Log M_log = LogFactory.getLog(PoolsView.class);
 
 	/** Assessment service. */
-	protected AssessmentService assessmentService = null;
+	protected PoolService poolService = null;
 
 	/**
 	 * Shutdown.
@@ -59,7 +60,7 @@ public class PoolsView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// collect the pools to show
-		List<Pool> pools = this.assessmentService.findPools(null);
+		List<Pool> pools = this.poolService.findPools(null);
 		context.put("pools", pools);
 
 		// render
@@ -89,8 +90,8 @@ public class PoolsView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setAssessmentService(MnemeService service)
 	{
-		this.assessmentService = service;
+		this.poolService = service;
 	}
 }

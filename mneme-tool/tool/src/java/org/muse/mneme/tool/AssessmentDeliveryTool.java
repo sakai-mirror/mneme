@@ -46,7 +46,7 @@ import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentQuestion;
 import org.muse.mneme.api.AssessmentSection;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.FeedbackDelivery;
 import org.muse.mneme.api.QuestionPresentation;
@@ -89,7 +89,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 	protected static ResourceLoader messages = new ResourceLoader("mneme-tool");
 
 	/** Our self-injected assessment service reference. */
-	protected AssessmentService assessmentService = null;
+	protected MnemeService assessmentService = null;
 
 	/** Our self-injected attachment service reference. */
 	protected AttachmentService attachmentService = null;;
@@ -176,7 +176,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		// self-inject
 		this.sessionManager = (SessionManager) ComponentManager.get(SessionManager.class);
 		this.toolManager = (ToolManager) ComponentManager.get(ToolManager.class);
-		this.assessmentService = (AssessmentService) ComponentManager.get(AssessmentService.class);
+		this.assessmentService = (MnemeService) ComponentManager.get(MnemeService.class);
 		this.attachmentService = (AttachmentService) ComponentManager.get(AttachmentService.class);
 		this.timeService = (TimeService) ComponentManager.get(TimeService.class);
 		this.ui = (UiService) ComponentManager.get(UiService.class);
@@ -962,7 +962,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 			return;
 		}
 
-		AssessmentService.GetUserContextSubmissionsSort sort = AssessmentService.GetUserContextSubmissionsSort.title_a;
+		MnemeService.GetUserContextSubmissionsSort sort = MnemeService.GetUserContextSubmissionsSort.title_a;
 		if (sortCode != null)
 		{
 			context.put("sort_column", sortCode.charAt(0));
@@ -971,31 +971,31 @@ public class AssessmentDeliveryTool extends HttpServlet
 			// 0 is title
 			if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
 			{
-				sort = AssessmentService.GetUserContextSubmissionsSort.title_a;
+				sort = MnemeService.GetUserContextSubmissionsSort.title_a;
 			}
 			else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
 			{
-				sort = AssessmentService.GetUserContextSubmissionsSort.title_d;
+				sort = MnemeService.GetUserContextSubmissionsSort.title_d;
 			}
 
 			// 1 is status
 			else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
 			{
-				sort = AssessmentService.GetUserContextSubmissionsSort.status_a;
+				sort = MnemeService.GetUserContextSubmissionsSort.status_a;
 			}
 			else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
 			{
-				sort = AssessmentService.GetUserContextSubmissionsSort.status_d;
+				sort = MnemeService.GetUserContextSubmissionsSort.status_d;
 			}
 
 			// 2 is due date
 			else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
 			{
-				sort = AssessmentService.GetUserContextSubmissionsSort.dueDate_a;
+				sort = MnemeService.GetUserContextSubmissionsSort.dueDate_a;
 			}
 			else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
 			{
-				sort = AssessmentService.GetUserContextSubmissionsSort.dueDate_d;
+				sort = MnemeService.GetUserContextSubmissionsSort.dueDate_d;
 			}
 
 			else
@@ -1011,7 +1011,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		{
 			context.put("sort_column", '1');
 			context.put("sort_direction", 'D');
-			sort = AssessmentService.GetUserContextSubmissionsSort.status_d;
+			sort = MnemeService.GetUserContextSubmissionsSort.status_d;
 		}
 
 		// collect information: submissions / assessments
@@ -1783,7 +1783,7 @@ public class AssessmentDeliveryTool extends HttpServlet
 		context.put("answers", answers);
 
 		// in this special case, since there's no real action in the service to do this, we need to generate an event
-		eventTrackingService.post(eventTrackingService.newEvent(AssessmentService.SUBMISSION_REVIEW, submission.getReference(), false));
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_REVIEW, submission.getReference(), false));
 
 		// render using the question interface
 		ui.render(uiQuestion, context);

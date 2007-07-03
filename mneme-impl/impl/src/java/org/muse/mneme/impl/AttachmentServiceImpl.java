@@ -42,7 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentQuestion;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Attachment;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Submission;
@@ -99,17 +99,17 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 ************************************************************************************************************************************************/
 
 	/** Dependency: AssessmentService: Note: dependent on the impl... */
-	protected AssessmentServiceImpl m_assessmentService = null;
+	protected MnemeServiceImpl m_mnemeService = null;
 
 	/**
-	 * Dependency: AssessmentService.
+	 * Dependency: MnemeService.
 	 * 
 	 * @param service
-	 *        The AssessmentService.
+	 *        The MnemeService.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setMnemeService(MnemeService service)
 	{
-		m_assessmentService = (AssessmentServiceImpl) service;
+		m_mnemeService = (MnemeServiceImpl) service;
 	}
 
 	/** Dependency: EntityManager */
@@ -520,7 +520,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 					throws EntityPermissionException, EntityNotDefinedException, EntityAccessOverloadException, EntityCopyrightException
 			{
 				// get the submission (the refrence container) for security checks
-				Submission submission = m_assessmentService.idSubmission(ref.getContainer());
+				Submission submission = m_mnemeService.idSubmission(ref.getContainer());
 				if (submission == null)
 				{
 					throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), ATTACHMENT_READ, ref.getReference());
@@ -531,7 +531,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 				{
 					// user must have review or grading permission
 					// TODO: for now, we use MANAGE_PERMISSION... refine this
-					if (!m_assessmentService.checkSecurity(m_sessionManager.getCurrentSessionUserId(), AssessmentService.MANAGE_PERMISSION,
+					if (!m_mnemeService.checkSecurity(m_sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION,
 							submission.getAssessment().getContext()))
 					{
 						throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), ATTACHMENT_READ, ref.getReference());

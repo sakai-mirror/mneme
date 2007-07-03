@@ -33,7 +33,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.sakaiproject.authz.api.SecurityService;
 
 /**
@@ -45,7 +45,7 @@ public class GbView extends ControllerImpl
 	private static Log M_log = LogFactory.getLog(GbView.class);
 
 	/** The assessment service. */
-	protected AssessmentService assessmentService = null;
+	protected MnemeService assessmentService = null;
 
 	/** The security service. */
 	protected SecurityService securityService = null;
@@ -110,7 +110,7 @@ public class GbView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
 	}

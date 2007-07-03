@@ -37,7 +37,7 @@ import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentQuestion;
 import org.muse.mneme.api.AssessmentSection;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.QuestionPresentation;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionAnswer;
@@ -55,7 +55,7 @@ public class QuestionView extends ControllerImpl
 	private static Log M_log = LogFactory.getLog(QuestionView.class);
 
 	/** Assessment service. */
-	protected AssessmentService assessmentService = null;
+	protected MnemeService assessmentService = null;
 
 	/**
 	 * Shutdown.
@@ -269,7 +269,7 @@ public class QuestionView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
 	}

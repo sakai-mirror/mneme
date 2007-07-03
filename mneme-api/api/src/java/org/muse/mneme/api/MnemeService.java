@@ -28,7 +28,7 @@ import java.util.List;
  * AssessmentService ...
  * </p>
  */
-public interface AssessmentService extends PoolService, QuestionService
+public interface MnemeService extends PoolService, QuestionService
 {
 	/**
 	 * Sort options for GetUserContextSubmissions()

@@ -42,7 +42,7 @@ import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentQuestion;
 import org.muse.mneme.api.AssessmentSection;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.FeedbackDelivery;
 import org.muse.mneme.api.MultipleSubmissionSelectionPolicy;
 import org.muse.mneme.api.QuestionPart;
@@ -70,7 +70,7 @@ public class GenerateView extends ControllerImpl
 	private static Log M_log = LogFactory.getLog(GenerateView.class);
 
 	/** The assessment service. */
-	protected AssessmentService assessmentService = null;
+	protected MnemeService assessmentService = null;
 
 	/** The id manager. */
 	protected IdManager idManager = null;
@@ -154,7 +154,7 @@ public class GenerateView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
 	}

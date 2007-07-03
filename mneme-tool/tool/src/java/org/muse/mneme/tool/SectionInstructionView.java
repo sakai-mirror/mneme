@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentSection;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.QuestionPresentation;
 import org.muse.mneme.api.Submission;
 import org.sakaiproject.util.Web;
@@ -45,7 +45,7 @@ public class SectionInstructionView extends ControllerImpl
 	private static Log M_log = LogFactory.getLog(SectionInstructionView.class);
 
 	/** Assessment service. */
-	protected AssessmentService assessmentService = null;
+	protected MnemeService assessmentService = null;
 
 	/**
 	 * Shutdown.
@@ -144,7 +144,7 @@ public class SectionInstructionView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
 	}

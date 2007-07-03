@@ -38,7 +38,7 @@ import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentQuestion;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Expiration;
 import org.muse.mneme.api.QuestionPresentation;
@@ -60,7 +60,7 @@ public class UploadRemoveView extends ControllerImpl
 	private static Log M_log = LogFactory.getLog(UploadRemoveView.class);
 
 	/** Assessment service. */
-	protected AssessmentService assessmentService = null;
+	protected MnemeService assessmentService = null;
 
 	/** Attachment service. */
 	protected AttachmentService attachmentService = null;
@@ -268,7 +268,7 @@ public class UploadRemoveView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
 	}

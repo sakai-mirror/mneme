@@ -84,7 +84,7 @@ public class SubmissionImpl implements Submission
 	/** Tracks when we have read the entire main property set. */
 	protected PropertyStatus mainStatus = PropertyStatus.unset;
 
-	protected AssessmentServiceImpl service = null;
+	protected MnemeServiceImpl service = null;
 
 	protected Integer siblingCount = null;
 
@@ -110,7 +110,7 @@ public class SubmissionImpl implements Submission
 	/**
 	 * Construct
 	 */
-	public SubmissionImpl(AssessmentServiceImpl service)
+	public SubmissionImpl(MnemeServiceImpl service)
 	{
 		this.service = service;
 	}

@@ -34,7 +34,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentQuestion;
 import org.muse.mneme.api.AssessmentSection;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionAnswer;
 import org.sakaiproject.event.api.EventTrackingService;
@@ -49,7 +49,7 @@ public class ReviewView extends ControllerImpl
 	private static Log M_log = LogFactory.getLog(ReviewView.class);
 
 	/** Assessment service. */
-	protected AssessmentService assessmentService = null;
+	protected MnemeService assessmentService = null;
 
 	/** Event tracking service. */
 	protected EventTrackingService eventTrackingService = null;
@@ -111,7 +111,7 @@ public class ReviewView extends ControllerImpl
 		context.put("answers", answers);
 
 		// in this special case, since there's no real action in the service to do this, we need to generate an event
-		eventTrackingService.post(eventTrackingService.newEvent(AssessmentService.SUBMISSION_REVIEW, submission.getReference(), false));
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_REVIEW, submission.getReference(), false));
 
 		// render
 		uiService.render(ui, context);
@@ -140,7 +140,7 @@ public class ReviewView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
 	}

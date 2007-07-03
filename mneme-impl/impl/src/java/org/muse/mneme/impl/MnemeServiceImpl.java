@@ -39,7 +39,7 @@ import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentQuestion;
 import org.muse.mneme.api.AssessmentSection;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.AssessmentStatus;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.FeedbackDelivery;
@@ -81,10 +81,10 @@ import org.sakaiproject.util.StringUtil;
  * AssessmentServiceImpl is ...
  * </p>
  */
-public class AssessmentServiceImpl implements AssessmentService, Runnable
+public class MnemeServiceImpl implements MnemeService, Runnable
 {
 	/** Our logger. */
-	private static Log M_log = LogFactory.getLog(AssessmentServiceImpl.class);
+	private static Log M_log = LogFactory.getLog(MnemeServiceImpl.class);
 
 	/** A cache of assessments. */
 	protected Cache m_assessmentCache = null;
@@ -2019,7 +2019,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		fields[4] = asOf;
 		fields[5] = userId;
 
-		final AssessmentServiceImpl service = this;
+		final MnemeServiceImpl service = this;
 		final List<String> ids = new ArrayList<String>();
 		List rv = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
@@ -2209,7 +2209,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		fields[1] = context;
 		fields[2] = userId;
 
-		final AssessmentServiceImpl service = this;
+		final MnemeServiceImpl service = this;
 		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -2429,7 +2429,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		fields[2] = asOf;
 		fields[3] = userId;
 
-		final AssessmentServiceImpl service = this;
+		final MnemeServiceImpl service = this;
 		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -2848,7 +2848,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		Object[] fields = new Object[1];
 		fields[0] = Integer.valueOf(assessment.getId());
 
-		final AssessmentServiceImpl service = this;
+		final MnemeServiceImpl service = this;
 		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -2887,7 +2887,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		Object[] fields = new Object[1];
 		fields[0] = Integer.valueOf(questionId);
 
-		final AssessmentServiceImpl service = this;
+		final MnemeServiceImpl service = this;
 		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -2926,7 +2926,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 		fields[0] = Integer.valueOf(assessmentId);
 		fields[1] = userId;
 
-		final AssessmentServiceImpl service = this;
+		final MnemeServiceImpl service = this;
 		List all = m_sqlService.dbRead(statement, fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -5284,7 +5284,7 @@ public class AssessmentServiceImpl implements AssessmentService, Runnable
 
 		Object[] fields = new Object[0];
 
-		final AssessmentServiceImpl service = this;
+		final MnemeServiceImpl service = this;
 		final List<Submission> rv = new ArrayList<Submission>();
 		m_sqlService.dbRead(statement, fields, new SqlReader()
 		{

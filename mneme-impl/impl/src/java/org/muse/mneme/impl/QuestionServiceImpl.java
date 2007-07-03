@@ -27,7 +27,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -56,20 +56,6 @@ public class QuestionServiceImpl implements QuestionService
 	/*************************************************************************************************************************************************
 	 * Dependencies
 	 ************************************************************************************************************************************************/
-
-	/** Dependency: AssessmentService: Note: dependent on the impl... */
-	protected AssessmentServiceImpl m_assessmentService = null;
-
-	/**
-	 * Dependency: AssessmentService.
-	 * 
-	 * @param service
-	 *        The AssessmentService.
-	 */
-	public void setAssessmentService(AssessmentService service)
-	{
-		m_assessmentService = (AssessmentServiceImpl) service;
-	}
 
 	/** Dependency: EntityManager */
 	protected EntityManager m_entityManager = null;

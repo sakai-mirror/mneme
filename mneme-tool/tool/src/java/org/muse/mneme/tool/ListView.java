@@ -31,7 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
@@ -44,7 +44,7 @@ public class ListView extends ControllerImpl
 	private static Log M_log = LogFactory.getLog(ListView.class);
 
 	/** Assessment service. */
-	protected AssessmentService assessmentService = null;
+	protected MnemeService assessmentService = null;
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
@@ -91,7 +91,7 @@ public class ListView extends ControllerImpl
 			return;
 		}
 
-		AssessmentService.GetUserContextSubmissionsSort sort = AssessmentService.GetUserContextSubmissionsSort.title_a;
+		MnemeService.GetUserContextSubmissionsSort sort = MnemeService.GetUserContextSubmissionsSort.title_a;
 		if (sortCode != null)
 		{
 			context.put("sort_column", sortCode.charAt(0));
@@ -100,31 +100,31 @@ public class ListView extends ControllerImpl
 			// 0 is title
 			if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
 			{
-				sort = AssessmentService.GetUserContextSubmissionsSort.title_a;
+				sort = MnemeService.GetUserContextSubmissionsSort.title_a;
 			}
 			else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
 			{
-				sort = AssessmentService.GetUserContextSubmissionsSort.title_d;
+				sort = MnemeService.GetUserContextSubmissionsSort.title_d;
 			}
 
 			// 1 is status
 			else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
 			{
-				sort = AssessmentService.GetUserContextSubmissionsSort.status_a;
+				sort = MnemeService.GetUserContextSubmissionsSort.status_a;
 			}
 			else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
 			{
-				sort = AssessmentService.GetUserContextSubmissionsSort.status_d;
+				sort = MnemeService.GetUserContextSubmissionsSort.status_d;
 			}
 
 			// 2 is due date
 			else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
 			{
-				sort = AssessmentService.GetUserContextSubmissionsSort.dueDate_a;
+				sort = MnemeService.GetUserContextSubmissionsSort.dueDate_a;
 			}
 			else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
 			{
-				sort = AssessmentService.GetUserContextSubmissionsSort.dueDate_d;
+				sort = MnemeService.GetUserContextSubmissionsSort.dueDate_d;
 			}
 
 			else
@@ -140,7 +140,7 @@ public class ListView extends ControllerImpl
 		{
 			context.put("sort_column", '1');
 			context.put("sort_direction", 'D');
-			sort = AssessmentService.GetUserContextSubmissionsSort.status_d;
+			sort = MnemeService.GetUserContextSubmissionsSort.status_d;
 		}
 
 		// collect information: submissions / assessments
@@ -174,7 +174,7 @@ public class ListView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
 	}

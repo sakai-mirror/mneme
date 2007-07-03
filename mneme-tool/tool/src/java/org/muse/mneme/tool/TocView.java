@@ -33,7 +33,7 @@ import org.muse.ambrosia.api.UiService;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCompletedException;
 import org.muse.mneme.tool.AssessmentDeliveryTool.Destinations;
@@ -49,7 +49,7 @@ public class TocView extends ControllerImpl
 	private static Log M_log = LogFactory.getLog(TocView.class);
 
 	/** Assessment service. */
-	protected AssessmentService assessmentService = null;
+	protected MnemeService assessmentService = null;
 
 	/**
 	 * Shutdown.
@@ -136,7 +136,7 @@ public class TocView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
 	}
@@ -154,7 +154,7 @@ public class TocView extends ControllerImpl
 	 *        the selected submission id.
 	 */
 	protected static void submissionCompletePost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId,
-			UiService uiService, AssessmentService assessmentService) throws IOException
+			UiService uiService, MnemeService assessmentService) throws IOException
 	{
 		// if (!context.getPostExpected())
 		// {
