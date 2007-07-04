@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
 
@@ -35,20 +36,25 @@ public class QuestionImpl implements Question
 
 	protected String id = null;
 
+	protected String poolId = null;
+
 	protected Presentation presentation = null;
+
+	protected transient QuestionServiceImpl service;
 
 	protected String type = null;
 
 	protected String version = "only";
 
-	public QuestionImpl(String id)
+	public QuestionImpl(String id, QuestionServiceImpl service)
 	{
 		this.id = id;
+		this.service = service;
 	}
 
-	public QuestionImpl(String id, Object data, String description, Presentation presentation, String type)
+	public QuestionImpl(String id, QuestionServiceImpl service, Object data, String description, Presentation presentation, String type)
 	{
-		this.id = id;
+		this(id, service);
 		this.data = data;
 		this.description = description;
 		this.presentation = presentation;
@@ -74,6 +80,14 @@ public class QuestionImpl implements Question
 	public String getId()
 	{
 		return this.id;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Pool getPool()
+	{
+		return this.service.m_poolService.idPool(this.poolId);
 	}
 
 	/**
@@ -114,6 +128,14 @@ public class QuestionImpl implements Question
 	public void setDescription(String description)
 	{
 		this.description = description;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setPool(Pool pool)
+	{
+		this.poolId = pool.getId();
 	}
 
 	/**

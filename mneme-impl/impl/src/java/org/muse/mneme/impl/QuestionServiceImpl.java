@@ -27,7 +27,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -56,6 +56,20 @@ public class QuestionServiceImpl implements QuestionService
 	/*************************************************************************************************************************************************
 	 * Dependencies
 	 ************************************************************************************************************************************************/
+
+	/** Dependency: PoolService */
+	protected PoolService m_poolService = null;
+
+	/**
+	 * Dependency: PoolService.
+	 * 
+	 * @param service
+	 *        The PoolService.
+	 */
+	public void setPoolService(PoolService service)
+	{
+		m_poolService = service;
+	}
 
 	/** Dependency: EntityManager */
 	protected EntityManager m_entityManager = null;
@@ -259,11 +273,11 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		List<Question> rv = new ArrayList<Question>(0);
 
-		rv.add(new QuestionImpl("1"));
-		rv.add(new QuestionImpl("2"));
-		rv.add(new QuestionImpl("3"));
-		rv.add(new QuestionImpl("4"));
-		rv.add(new QuestionImpl("5"));
+		rv.add(new QuestionImpl("1", this, null, "1 description", null, null));
+		rv.add(new QuestionImpl("2", this, null, "1 description", null, null));
+		rv.add(new QuestionImpl("3", this, null, "1 description", null, null));
+		rv.add(new QuestionImpl("4", this, null, "1 description", null, null));
+		rv.add(new QuestionImpl("5", this, null, "1 description", null, null));
 
 		return rv;
 	}

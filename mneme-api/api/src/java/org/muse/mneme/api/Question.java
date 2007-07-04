@@ -48,6 +48,13 @@ public interface Question
 	String getId();
 
 	/**
+	 * Access the question pool that holds this question.
+	 * 
+	 * @return The question pool that holds this question.
+	 */
+	Pool getPool();
+
+	/**
 	 * Access question's presentation (rich 'text' and attachments)
 	 * 
 	 * @return The question's presentation.
@@ -83,6 +90,14 @@ public interface Question
 	 *        The description of the question.
 	 */
 	void setDescription(String description);
+
+	/**
+	 * Set the question pool that holds this question.
+	 * 
+	 * @param pool
+	 *        The question pool to hold this question.
+	 */
+	void setPool(Pool pool);
 
 	/**
 	 * Set the question type.
