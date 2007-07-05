@@ -24,6 +24,7 @@
 -->
 
 <interface title="pools-title" header="pools-header">
+	<!--mode bar-->
 	<modeBar>
 		<container>
 			<navigation destination="/list" title="test-manager-nav-title" style="LINK" accessKey="test-manager-nav-access-key" description="test-manager-nav-description"/>
@@ -33,6 +34,7 @@
 		</container>
 	</modeBar>
 	<container>
+		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
 				<navigation destination="/" title="add-pool-title" style="LINK" description="add-pool-description">
@@ -77,10 +79,45 @@
 			<columns>
 				<modelColumn>
 					<title>
+						<message selector="pool-subject" />
+					</title>
+					<model ref="pool.subject" />
+				</modelColumn>
+				<modelColumn>
+					<title>
 						<message selector="pool-title" />
 					</title>
 					<model ref="pool.title" />
 				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="pool-description" />
+					</title>
+					<model ref="pool.description" />
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="pool-questions" />
+					</title>
+					<model ref="pool.numQuestions" />
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="pool-questions" />
+					</title>
+					<model ref="pool.points" />
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="pool-difficulty" />
+					</title>
+					<model ref="pool.difficulty" />
+				</modelColumn>
+				<column>
+					<title>
+						<message selector="pool-action" />
+					</title>
+				</column>
 			</columns>
 		</entityList>
 
