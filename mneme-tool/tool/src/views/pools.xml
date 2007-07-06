@@ -126,11 +126,11 @@
 					<navigations>
 						<navigation style="LINK" title="gotonext-title">
 							<destination template="/" model="pool.id" />
-							<icon icon="/icons/add.png" style="LEFT"/>
+							<icon icon="/icons/edit.png" style="LEFT"/>
 						</navigation>
 						<navigation style="LINK">
 							<destination template="/" model="pool.id" />
-							<icon icon="/icons/add.png" style="LEFT"/>
+							<icon icon="/icons/copy.png" style="RIGHT"/>
 						</navigation>
 					</navigations>
 				</modelColumn>
