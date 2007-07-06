@@ -34,6 +34,11 @@
 		</container>
 	</modeBar>
 	<container>
+
+		<text>
+			<message selector="pool-list-page-nav" />
+		</text>
+
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
@@ -55,6 +60,7 @@
 				<navigation destination="/" title="search-title" style="LINK" description="search-description">
 					<icon icon="/icons/search.png" style="LEFT"/>
 				</navigation>
+				<textEdit rows="1" cols="30"/>
 				<navigation destination="/" title="gotofirst-title" style="LINK" description="gotofirst-description">
 					<icon icon="/icons/first.png" style="LEFT"/>
 				</navigation>
@@ -103,9 +109,9 @@
 				</modelColumn>
 				<modelColumn>
 					<title>
-						<message selector="pool-questions" />
+						<message selector="pool-points" />
 					</title>
-					<model ref="pool.points" />
+					<!-- model ref="pool.points" /-->
 				</modelColumn>
 				<modelColumn>
 					<title>
@@ -113,11 +119,21 @@
 					</title>
 					<model ref="pool.difficulty" />
 				</modelColumn>
-				<column>
+				<modelColumn>
 					<title>
 						<message selector="pool-action" />
 					</title>
-				</column>
+					<navigations>
+						<navigation style="LINK" title="gotonext-title">
+							<destination template="/" model="pool.id" />
+							<icon icon="/icons/add.png" style="LEFT"/>
+						</navigation>
+						<navigation style="LINK">
+							<destination template="/" model="pool.id" />
+							<icon icon="/icons/add.png" style="LEFT"/>
+						</navigation>
+					</navigations>
+				</modelColumn>
 			</columns>
 		</entityList>
 
