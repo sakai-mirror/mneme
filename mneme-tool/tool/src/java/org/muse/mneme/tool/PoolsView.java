@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
@@ -61,6 +62,10 @@ public class PoolsView extends ControllerImpl
 		// collect the pools to show
 		List<Pool> pools = this.poolService.findPools(null);
 		context.put("pools", pools);
+		
+		//for the checkboxes
+		Values values = this.uiService.newValues();
+		context.put("poolids", values);
 
 		// render
 		uiService.render(ui, context);

@@ -27,10 +27,20 @@
 	<!--mode bar-->
 	<modeBar>
 		<container>
-			<navigation destination="/list" title="test-manager-nav-title" style="LINK" accessKey="test-manager-nav-access-key" description="test-manager-nav-description"/>
-			<navigation destination="/grading" title="grading-nav-title" style="LINK" accessKey="grading-nav-access-key" description="grading-nav-description"/>
-			<navigation destination="/pools" title="pools-nav-title" style="LINK" accessKey="pools-nav-access-key" description="pools-nav-description" disabled="TRUE"/>
-			<navigation destination="/studentview" title="student-view-nav-title" style="LINK" accessKey="student-view-nav-access-key" description="student-view-nav-description"/>
+			<navigation destination="/list"
+				title="test-manager-nav-title" style="LINK"
+				accessKey="test-manager-nav-access-key"
+				description="test-manager-nav-description" />
+			<navigation destination="/grading" title="grading-nav-title"
+				style="LINK" accessKey="grading-nav-access-key"
+				description="grading-nav-description" />
+			<navigation destination="/pools" title="pools-nav-title"
+				style="LINK" accessKey="pools-nav-access-key"
+				description="pools-nav-description" disabled="TRUE" />
+			<navigation destination="/studentview"
+				title="student-view-nav-title" style="LINK"
+				accessKey="student-view-nav-access-key"
+				description="student-view-nav-description" />
 		</container>
 	</modeBar>
 	<container>
@@ -42,40 +52,50 @@
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation destination="/" title="add-pool-title" style="LINK" description="add-pool-description">
-					<icon icon="/icons/add.png" style="LEFT"/>
+				<navigation destination="/" title="add-pool-title"
+					style="LINK" description="add-pool-description">
+					<icon icon="/icons/add.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="add-question-title" style="LINK" description="add-question-description">
-					<icon icon="/icons/add.png" style="LEFT"/>
+				<navigation destination="/" title="add-question-title"
+					style="LINK" description="add-question-description">
+					<icon icon="/icons/add.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="combine-title" style="LINK" description="combine-description" disabled="FALSE">
-					<icon icon="/icons/combine_pools.png" style="LEFT"/>
+				<navigation destination="/" title="combine-title"
+					style="LINK" description="combine-description" disabled="FALSE">
+					<icon icon="/icons/combine_pools.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="import-export-title" style="LINK" description="import-export-description">
-					<icon icon="/icons/import_export.png" style="LEFT"/>
+				<navigation destination="/" title="import-export-title"
+					style="LINK" description="import-export-description">
+					<icon icon="/icons/import_export.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="delete-title" style="LINK" description="delete-description">
-					<icon icon="/icons/delete.png" style="LEFT"/>
+				<navigation destination="/" title="delete-title"
+					style="LINK" description="delete-description">
+					<icon icon="/icons/delete.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="search-title" style="LINK" description="search-description">
-					<icon icon="/icons/search.png" style="LEFT"/>
+				<navigation destination="/" title="search-title"
+					style="LINK" description="search-description">
+					<icon icon="/icons/search.png" style="LEFT" />
 				</navigation>
-				<textEdit rows="1" cols="30"/>
-				<navigation destination="/" title="gotofirst-title" style="LINK" description="gotofirst-description">
-					<icon icon="/icons/first.png" style="LEFT"/>
+				<textEdit rows="1" cols="30" />
+				<navigation destination="/" title="gotofirst-title"
+					style="LINK" description="gotofirst-description">
+					<icon icon="/icons/first.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="gotoprev-title" style="LINK" description="gotoprev-description">
-					<icon icon="/icons/previous.png" style="LEFT"/>
+				<navigation destination="/" title="gotoprev-title"
+					style="LINK" description="gotoprev-description">
+					<icon icon="/icons/previous.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="gotonext-title" style="LINK" description="gotonext-description">
-					<icon icon="/icons/next.png" style="LEFT"/>
+				<navigation destination="/" title="gotonext-title"
+					style="LINK" description="gotonext-description">
+					<icon icon="/icons/next.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="gotolast-title" style="LINK" description="gotolast-description">
-					<icon icon="/icons/last.png" style="LEFT"/>
+				<navigation destination="/" title="gotolast-title"
+					style="LINK" description="gotolast-description">
+					<icon icon="/icons/last.png" style="LEFT" />
 				</navigation>
 			</container>
 		</navigationBar>
-		
+
 		<!-- the list of pools -->
 		<entityList style="FLAT">
 			<iterator name="pool" model="pools" />
@@ -83,6 +103,12 @@
 				<message selector="no-pools" />
 			</emptyTitle>
 			<columns>
+				<selectionColumn multiple="TRUE">
+					<value>
+						<model type="text" ref="pool.id" />
+					</value>
+					<model ref="poolids.values" />
+				</selectionColumn>
 				<modelColumn>
 					<title>
 						<message selector="pool-subject" />
@@ -124,13 +150,14 @@
 						<message selector="pool-action" />
 					</title>
 					<navigations>
-						<navigation style="LINK" title="gotonext-title">
+						<navigation style="LINK"
+							title="gotonext-title">
 							<destination template="/" model="pool.id" />
-							<icon icon="/icons/edit.png" style="LEFT"/>
+							<icon icon="/icons/edit.png" style="LEFT" />
 						</navigation>
 						<navigation style="LINK">
 							<destination template="/" model="pool.id" />
-							<icon icon="/icons/copy.png" style="RIGHT"/>
+							<icon icon="/icons/copy.png" style="RIGHT" />
 						</navigation>
 					</navigations>
 				</modelColumn>
