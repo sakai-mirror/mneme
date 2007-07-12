@@ -34,6 +34,7 @@ import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.sakaiproject.util.Web;
 
 /**
  * The /pools view for the mneme tool.
@@ -85,7 +86,18 @@ public class PoolsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		throw new IllegalArgumentException();
+		//for the checkboxes
+		Values values = this.uiService.newValues();
+		context.put("poolids", values);
+
+		// read form
+		String destination = this.uiService.decode(req, context);
+		
+		String[] selectedPoolIds = values.getValues();
+		//throw new IllegalArgumentException();
+		
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+
 	}
 
 	/**

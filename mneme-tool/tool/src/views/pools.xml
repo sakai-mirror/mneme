@@ -68,8 +68,8 @@
 					style="LINK" description="import-export-description">
 					<icon icon="/icons/import_export.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="delete-title"
-					style="LINK" description="delete-description">
+				<navigation destination="/list" title="delete-title"
+					style="LINK" description="delete-description" submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
 				</navigation>
 				<navigation destination="/" title="search-title"
