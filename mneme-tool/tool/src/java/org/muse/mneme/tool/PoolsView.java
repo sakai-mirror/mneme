@@ -86,7 +86,8 @@ public class PoolsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		//for the checkboxes
+		//throw new IllegalArgumentException();
+		//for the selected pools to delete
 		Values values = this.uiService.newValues();
 		context.put("poolids", values);
 
@@ -94,8 +95,15 @@ public class PoolsView extends ControllerImpl
 		String destination = this.uiService.decode(req, context);
 		
 		String[] selectedPoolIds = values.getValues();
-		//throw new IllegalArgumentException();
 		
+		if (destination != null && (destination.trim().equalsIgnoreCase("/pools_delete")))
+		{
+			//delete the pools
+
+		}
+		
+		//res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+		destination = "/pools";
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 
 	}
