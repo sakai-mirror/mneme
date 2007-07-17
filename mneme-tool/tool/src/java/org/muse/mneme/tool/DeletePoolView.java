@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: $
- * $Id: $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2007 The Sakai Foundation.
@@ -68,7 +68,7 @@ public class DeletePoolView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		//delete the pools
+		//confirm the deleting the pools
 		
 		//navigate to pools page
 		String destination = "/pools";
