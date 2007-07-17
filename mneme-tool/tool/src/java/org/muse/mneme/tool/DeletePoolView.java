@@ -19,6 +19,7 @@
  *
  **********************************************************************************/
 
+
 package org.muse.mneme.tool;
 
 import java.io.IOException;
@@ -67,7 +68,11 @@ public class DeletePoolView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (M_log.isInfoEnabled()) M_log.info("In get....");
+		//delete the pools
+		
+		//navigate to pools page
+		String destination = "/pools";
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 		
 	}
 
@@ -76,17 +81,7 @@ public class DeletePoolView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		//for the checkboxes
-		Values values = this.uiService.newValues();
-		context.put("poolids", values);
-
-		// read form
-		String destination = this.uiService.decode(req, context);
-		
-		String[] selectedPoolIds = values.getValues();
-		
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-		
+		throw new IllegalArgumentException();
 	}
 
 	/**
