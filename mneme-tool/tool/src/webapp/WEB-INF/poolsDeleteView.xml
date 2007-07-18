@@ -3,8 +3,8 @@
 
 <!--
 /**********************************************************************************
- * $URL:
- * $Id:
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
@@ -39,5 +39,6 @@
  		<property name="path"><value>pools_delete</value></property>
  		<property name="bundle"><value>poolsDelete</value></property>
 	</bean>
+
 
 </beans>
