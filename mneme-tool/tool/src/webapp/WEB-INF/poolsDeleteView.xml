@@ -26,8 +26,8 @@
 
 <beans>
 
-	<bean id="org.muse.mneme.tool.DeletePoolView"
-			class="org.muse.mneme.tool.DeletePoolView"
+	<bean id="org.muse.mneme.tool.PoolsDeleteView"
+			class="org.muse.mneme.tool.PoolsDeleteView"
 			init-method="init"
 			destroy-method="destroy"
 			singleton="true">
@@ -38,7 +38,7 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>pools_delete</value></property>
  		<property name="bundle"><value>poolsDelete</value></property>
- 		<property name="components"><value>confirmPoolsDelete.xml</value></property>
+ 		<property name="components"><value>poolsDelete.xml</value></property>
 	</bean>
 
 
