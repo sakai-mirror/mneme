@@ -38,6 +38,7 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>pools_delete</value></property>
  		<property name="bundle"><value>poolsDelete</value></property>
+ 		<property name="components"><value>confirmPoolsDelete.xml</value></property>
 	</bean>
 
 

@@ -63,7 +63,7 @@ public class PoolsView extends ControllerImpl
 		// collect the pools to show
 		List<Pool> pools = this.poolService.findPools(null);
 		context.put("pools", pools);
-		
+
 		//for the checkboxes
 		Values values = this.uiService.newValues();
 		context.put("poolids", values);
@@ -93,28 +93,29 @@ public class PoolsView extends ControllerImpl
 
 		// read form
 		String destination = this.uiService.decode(req, context);
-		
+
 		String[] selectedPoolIds = values.getValues();
-		
+
 		if (destination != null && (destination.trim().equalsIgnoreCase("/pools_delete")))
 		{
 			//delete the pools with ids
 			StringBuffer path = new StringBuffer();
-			String separator = "+";
-		    if (selectedPoolIds.length > 0) {
-		    	path.append(destination + "/");
-		    	path.append(selectedPoolIds[0]);
-		        for (int i=1; i<selectedPoolIds.length; i++) {
-		        	path.append(separator);
-		        	path.append(selectedPoolIds[i]);
-		        }
-		        
-		        res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
-		        return;
-		    }
+			String separator = "/";
+			if (selectedPoolIds != null && (selectedPoolIds.length > 0))
+			{
+				path.append(destination + "/");
+				path.append(selectedPoolIds[0]);
+				for (int i = 1; i < selectedPoolIds.length; i++)
+				{
+					path.append(separator);
+					path.append(selectedPoolIds[i]);
+				}
+
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
+				return;
+			}
 		}
-		
-		//res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+
 		destination = "/pools";
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 
