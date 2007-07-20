@@ -41,10 +41,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.muse.mneme.api.AssessmentQuestion;
 import org.muse.mneme.api.Attachment;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
@@ -279,7 +279,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 					throws EntityPermissionException, EntityNotDefinedException, EntityAccessOverloadException, EntityCopyrightException
 			{
 				// get the submission (the refrence container) for security checks
-				Submission submission = m_submissionService.idSubmission(ref.getContainer());
+				Submission submission = m_submissionService.getSubmission(ref.getContainer());
 				if (submission == null)
 				{
 					throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), ATTACHMENT_READ, ref.getReference());
@@ -896,7 +896,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 *        The assessment question this is an answer to.
 	 * @return The new attachment id.
 	 */
-	protected String putAttachment(Attachment a, InputStream body, String answerId, AssessmentQuestion question)
+	protected String putAttachment(Attachment a, InputStream body, String answerId, Question question)
 	{
 		// ID column? For non sequence db vendors, it is defaulted
 		Long id = m_sqlService.getNextSequence("SAM_MEDIA_ID_S", null);
@@ -906,9 +906,10 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		// handle file system body
 		if (this.m_fileSystemRoot != null)
 		{
+			// TODO: question does not belong to assessment anymore!
 			// form a file name: root, assessment id, question id, user id, then something random for the file name
-			a.setFileSystemPath(this.m_fileSystemRoot + question.getSection().getAssessment().getId() + "/" + question.getId() + "/" + userId + "/"
-					+ this.m_timeService.newTime().getTime());
+//			a.setFileSystemPath(this.m_fileSystemRoot + question.getSection().getAssessment().getId() + "/" + question.getId() + "/" + userId + "/"
+//					+ this.m_timeService.newTime().getTime());
 
 			// write the file
 			putAttachmentFilesystem(a, body);

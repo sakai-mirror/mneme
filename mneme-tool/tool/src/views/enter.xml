@@ -41,19 +41,19 @@
 				<message selector="enter-test-title">
 					<model type="icon" icon="/icons/test.png" />
 					<model ref="assessment.title" />
-					<model ref="assessment.totalPoints" delegate="FormatScore" tool="sakai.mneme" />
+					<model ref="assessment.parts.totalPoints" delegate="FormatScore" tool="sakai.mneme" />
 				</message>
 			</title>
 			<container>
 				<text>
 					<message>
-						<model type="html" ref="assessment.description" />
+						<model type="html" ref="assessment.presentation.text" />
 					</message>
 				</text>
 				<attachments title="attachments">
-					<model ref="assessment.attachments" />
+					<model ref="assessment.presentation.attachments" />
 					<included>
-						<hasValueDecision model="assessment.attachments" />
+						<hasValueDecision model="assessment.presentation.attachments" />
 					</included>
 				</attachments>
 			</container>
@@ -80,9 +80,9 @@
 			</container>
 			<included>
 				<compareDecision>
-					<model ref="assessment.questionPresentation" />
-					<constant value="BY_SECTION" />
-					<constant value="BY_QUESTION" />
+					<model ref="assessment.questionGrouping" />
+					<constant value="part" />
+					<constant value="question" />
 				</compareDecision>
 				<decision model="assessment.randomAccess" />
 			</included>
@@ -96,7 +96,7 @@
 				</instructions>
 			</container>
 			<included>
-				<compareDecision model="assessment.questionPresentation" constant="BY_ASSESSMENT" />
+				<compareDecision model="assessment.questionGrouping" constant="assessment" />
 				<decision model="assessment.randomAccess" />
 			</included>
 		</section>
@@ -144,15 +144,15 @@
 					<destination template="/list" />
 					<duration>
 						<message selector="timer-due">
-							<model type="date" ref="assessment.expiration.time" />
+							<model type="date" ref="assessment.dates.expiration.time" />
 						</message>
-						<model ref="assessment.expiration.limit" />
+						<model ref="assessment.dates.expiration.limit" />
 					</duration>
 					<remaining>
 						<message selector="timer-remaining" />
 					</remaining>
 					<timeTillExpire>
-						<model ref="assessment.expiration.duration" />
+						<model ref="assessment.dates.expiration.duration" />
 					</timeTillExpire>
 				</countdownTimer>
 				<instructions>
@@ -162,8 +162,8 @@
 				</instructions>
 			</container>
 			<included>
-				<hasValueDecision model="assessment.expiration" />
-				<compareDecision model="assessment.expiration.cause" constant="closedDate" />
+				<hasValueDecision model="assessment.dates.expiration" />
+				<compareDecision model="assessment.dates.expiration.cause" constant="closedDate" />
 			</included>
 		</section>
 		<section>
@@ -172,7 +172,7 @@
 				<password title="enter-password" model="password.value" />
 			</container>
 			<included>
-				<hasValueDecision model="assessment.password" />
+				<hasValueDecision model="assessment.access.password" />
 			</included>
 		</section>
 		<gap />

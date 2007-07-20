@@ -54,36 +54,45 @@ public interface QuestionService
 	 * Access a question by id.
 	 * 
 	 * @param questionId
+	 *        The question id.
 	 * @return The Question with this id, or null if not found.
 	 */
-	Question idQuestion(String questionId);
+	Question getQuestion(String questionId);
 
 	/**
 	 * Create a new question.
 	 * 
+	 * @param context
+	 *        The current context.
+	 * @param userId
+	 *        The user to own the question.
 	 * @return The new question.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to create a new question.
 	 */
-	Question newQuestion() throws AssessmentPermissionException;
+	Question newQuestion(String context, String userId) throws AssessmentPermissionException;
 
 	/**
 	 * Remove this question.
 	 * 
 	 * @param question
 	 *        The question to remove.
+	 * @param context
+	 *        The current context.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to edit this question.
 	 */
-	void removeQuestion(Question question) throws AssessmentPermissionException;
+	void removeQuestion(Question question, String context) throws AssessmentPermissionException;
 
 	/**
 	 * Save changes made to this question.
 	 * 
 	 * @param question
 	 *        The question to save.
+	 * @param context
+	 *        The current context.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to edit this question.
 	 */
-	void saveQuestion(Question question) throws AssessmentPermissionException;
+	void saveQuestion(Question question, String context) throws AssessmentPermissionException;
 }

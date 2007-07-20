@@ -21,8 +21,8 @@
 
 package org.muse.mneme.impl;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,14 +30,10 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
-import org.sakaiproject.component.api.ServerConfigurationService;
+import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.SecurityService;
 import org.sakaiproject.db.api.SqlService;
-import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.event.api.EventTrackingService;
-import org.sakaiproject.memory.api.Cache;
-import org.sakaiproject.memory.api.MemoryService;
-import org.sakaiproject.thread_local.api.ThreadLocalManager;
-import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 
 /**
@@ -50,178 +46,62 @@ public class PoolServiceImpl implements PoolService
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(PoolServiceImpl.class);
 
-	/** A cache of attachments. */
-	protected Cache m_cache = null;
-
-	/*************************************************************************************************************************************************
-	 * Dependencies
-	 ************************************************************************************************************************************************/
-
-	/** Dependency: EntityManager */
-	protected EntityManager m_entityManager = null;
-
-	/**
-	 * Dependency: EntityManager.
-	 * 
-	 * @param service
-	 *        The EntityManager.
-	 */
-	public void setEntityManager(EntityManager service)
-	{
-		m_entityManager = service;
-	}
-
 	/** Dependency: EventTrackingService */
-	protected EventTrackingService m_eventTrackingService = null;
+	protected EventTrackingService eventTrackingService = null;
 
-	/**
-	 * Dependency: EventTrackingService.
-	 * 
-	 * @param service
-	 *        The EventTrackingService.
-	 */
-	public void setEventTrackingService(EventTrackingService service)
-	{
-		m_eventTrackingService = service;
-	}
-
-	/** Dependency: MemoryService */
-	protected MemoryService m_memoryService = null;
-
-	/**
-	 * Dependency: MemoryService.
-	 * 
-	 * @param service
-	 *        The MemoryService.
-	 */
-	public void setMemoryService(MemoryService service)
-	{
-		m_memoryService = service;
-	}
+	/** Dependency: SecurityService */
+	protected SecurityService securityService = null;
 
 	/** Dependency: SessionManager */
-	protected SessionManager m_sessionManager = null;
-
-	/**
-	 * Dependency: SessionManager.
-	 * 
-	 * @param service
-	 *        The SessionManager.
-	 */
-	public void setSessionManager(SessionManager service)
-	{
-		m_sessionManager = service;
-	}
-
-	/** Dependency: ServerConfigurationService */
-	protected ServerConfigurationService m_serverConfigurationService = null;
-
-	/**
-	 * Dependency: ServerConfigurationService.
-	 * 
-	 * @param service
-	 *        The ServerConfigurationService.
-	 */
-	public void setServerConfigurationService(ServerConfigurationService service)
-	{
-		m_serverConfigurationService = service;
-	}
+	protected SessionManager sessionManager = null;
 
 	/** Dependency: SqlService */
-	protected SqlService m_sqlService = null;
+	protected SqlService sqlService = null;
+
+	/** Storage handler. */
+	protected PoolStorage storage = null;
+
+	/** Storage option map key for the option to use. */
+	protected String storageKey = null;
+
+	/** Map of registered PoolStorage options. */
+	protected Map<String, PoolStorage> storgeOptions;
 
 	/**
-	 * Dependency: SqlService.
-	 * 
-	 * @param service
-	 *        The SqlService.
+	 * {@inheritDoc}
 	 */
-	public void setSqlService(SqlService service)
+	public Boolean allowEditPool(Pool pool, String context, String userId)
 	{
-		m_sqlService = service;
-	}
+		if (pool == null) throw new IllegalArgumentException();
+		if (context == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
-	protected ThreadLocalManager m_threadLocalManager = null;
+		if (M_log.isDebugEnabled()) M_log.debug("allowEditPool: " + pool.getId() + ": " + userId);
 
-	/**
-	 * Dependency: ThreadLocalManager.
-	 * 
-	 * @param service
-	 *        The ThreadLocalManager.
-	 */
-	public void setThreadLocalManager(ThreadLocalManager service)
-	{
-		m_threadLocalManager = service;
-	}
+		// check permission - user must have MANAGE_PERMISSION in the context
+		boolean ok = securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context);
 
-	protected TimeService m_timeService = null;
-
-	/**
-	 * Dependency: TimeService.
-	 * 
-	 * @param service
-	 *        The TimeService.
-	 */
-	public void setTimeService(TimeService service)
-	{
-		m_timeService = service;
-	}
-
-	/*************************************************************************************************************************************************
-	 * Configuration
-	 ************************************************************************************************************************************************/
-
-	/** The # seconds between cache cleaning runs. */
-	protected int m_cacheCleanerSeconds = 0;
-
-	/** The # seconds to cache assessment reads. 0 disables the cache. */
-	protected int m_cacheSeconds = 0;
-
-	/**
-	 * Set the # minutes between cache cleanings.
-	 * 
-	 * @param time
-	 *        The # minutes between cache cleanings. (as an integer string).
-	 */
-	public void setCacheCleanerMinutes(String time)
-	{
-		m_cacheCleanerSeconds = Integer.parseInt(time) * 60;
+		// TODO: other users allowed...
+		// TODO: or is this user based...
+		return ok;
 	}
 
 	/**
-	 * Set the # minutes to cache.
-	 * 
-	 * @param time
-	 *        The # minutes to cache a get (as an integer string).
+	 * {@inheritDoc}
 	 */
-	public void setCacheMinutes(String time)
+	public Boolean allowManagePools(String context, String userId)
 	{
-		m_cacheSeconds = Integer.parseInt(time) * 60;
-	}
+		if (context == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
-	/*************************************************************************************************************************************************
-	 * Init and Destroy
-	 ************************************************************************************************************************************************/
+		if (M_log.isDebugEnabled()) M_log.debug("allowManagePools: " + context + ": " + userId);
 
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		try
-		{
-			// // <= 0 indicates no caching desired
-			// if ((m_cacheSeconds > 0) && (m_cacheCleanerSeconds > 0))
-			// {
-			// m_cache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAttachmentReference(null, null, null));
-			// }
+		// check permission - user must have MANAGE_PERMISSION in the context
+		boolean ok = securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context);
 
-			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60);
-		}
-		catch (Throwable t)
-		{
-			M_log.warn("init(): ", t);
-		}
+		// TODO: other users allowed...
+		// TODO: or is this user based...
+		return ok;
 	}
 
 	/**
@@ -232,69 +112,241 @@ public class PoolServiceImpl implements PoolService
 		M_log.info("destroy()");
 	}
 
-	/*************************************************************************************************************************************************
-	 * PoolService
-	 ************************************************************************************************************************************************/
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean allowEditPool(Pool pool, String context, String userId)
-	{
-		return Boolean.TRUE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean allowManagePools(String context, String userId)
-	{
-		return Boolean.TRUE;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
 	public List<Pool> findPools(String userId)
 	{
-		List<Pool> rv = new ArrayList<Pool>(0);
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
-		rv.add(new PoolImpl("1", "1-description", new Integer(1), "admin", new Float(10), "1-subject", "1-title"));
-		rv.add(new PoolImpl("2", "2-description", new Integer(1), "admin", new Float(10), "2-subject", "2-title"));
-		rv.add(new PoolImpl("3", "3-description", new Integer(1), "admin", new Float(10), "3-subject", "3-title"));
-		rv.add(new PoolImpl("4", "4-description", new Integer(1), "admin", new Float(10), "4-subject", "4-title"));
-		rv.add(new PoolImpl("5", "5-description", new Integer(1), "admin", new Float(10), "5-subject", "5-title"));
+		if (M_log.isDebugEnabled()) M_log.debug("findPools: " + userId);
 
+		List<Pool> rv = storage.findPools(userId);
 		return rv;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Pool idPool(String poolId)
+	public Pool getPool(String poolId)
 	{
-		return null;
+		if (poolId == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getPool: " + poolId);
+
+		// TODO: check to see if id is a valid existing pool?
+		// storage.checkPool(poolId);
+
+		PoolImpl pool = this.storage.getPool(poolId);
+
+		return pool;
+	}
+
+	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		try
+		{
+			// storage - as configured
+			if (this.storageKey != null)
+			{
+				// if set to "SQL", replace with the current SQL vendor
+				if ("SQL".equals(this.storageKey))
+				{
+					this.storageKey = sqlService.getVendor();
+				}
+
+				this.storage = this.storgeOptions.get(this.storageKey);
+			}
+
+			// use "default" if needed
+			if (this.storage == null)
+			{
+				this.storage = this.storgeOptions.get("default");
+			}
+
+			if (storage == null) M_log.warn("no storage set: " + this.storageKey);
+			this.storage.setPoolService(this);
+			this.storage.setQuestionService((QuestionServiceImpl) this.questionService);
+
+			M_log.info("init()");
+		}
+		catch (Throwable t)
+		{
+			M_log.warn("init(): ", t);
+		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Pool newPool() throws AssessmentPermissionException
+	public Pool newPool(String context, String userId) throws AssessmentPermissionException
 	{
-		throw new AssessmentPermissionException("", "", "");
+		if (context == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		if (M_log.isDebugEnabled()) M_log.debug("newPool: " + context);
+
+		// security check
+		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+
+		PoolImpl pool = storage.newPool();
+		pool.setOwnerId(userId);
+
+		return pool;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removePool(Pool pool) throws AssessmentPermissionException
+	public void removePool(Pool pool, String context) throws AssessmentPermissionException
 	{
+		if (pool == null) throw new IllegalArgumentException();
+		if (context == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("removePool: " + pool.getId());
+
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+
+		storage.removePool((PoolImpl) pool);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void savePool(Pool pool) throws AssessmentPermissionException
+	public void savePool(Pool pool, String context) throws AssessmentPermissionException
 	{
+		if (pool == null) throw new IllegalArgumentException();
+		if (context == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("savePool: " + pool.getId());
+
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+
+		storage.savePool((PoolImpl) pool);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
+	}
+
+	/**
+	 * Dependency: EventTrackingService.
+	 * 
+	 * @param service
+	 *        The EventTrackingService.
+	 */
+	public void setEventTrackingService(EventTrackingService service)
+	{
+		eventTrackingService = service;
+	}
+
+	/**
+	 * Dependency: SecurityService.
+	 * 
+	 * @param service
+	 *        The SecurityService.
+	 */
+	public void setSecurityService(SecurityService service)
+	{
+		securityService = service;
+	}
+
+	/**
+	 * Dependency: SessionManager.
+	 * 
+	 * @param service
+	 *        The SessionManager.
+	 */
+	public void setSessionManager(SessionManager service)
+	{
+		sessionManager = service;
+	}
+
+	/**
+	 * Dependency: SqlService.
+	 * 
+	 * @param service
+	 *        The SqlService.
+	 */
+	public void setSqlService(SqlService service)
+	{
+		sqlService = service;
+	}
+
+	protected QuestionService questionService = null;
+
+	/**
+	 * Dependency: QuestionService.
+	 * 
+	 * @param service
+	 *        The QuestionService.
+	 */
+	public void setQuestionService(QuestionService service)
+	{
+		this.questionService = service;
+	}
+
+	/**
+	 * Set the storage class options.
+	 * 
+	 * @param options
+	 *        The PoolStorage options.
+	 */
+	public void setStorage(Map options)
+	{
+		this.storgeOptions = options;
+	}
+
+	/**
+	 * Set the storage option key to use, selecting which PoolStorage to use.
+	 * 
+	 * @param key
+	 *        The storage option key.
+	 */
+	public void setStorageKey(String key)
+	{
+		this.storageKey = key;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected List<String> drawQuestionIds(Pool pool, long seed, Integer numQuestions)
+	{
+		List<String> rv = storage.drawQuestionIds(pool, seed, numQuestions);
+		return rv;
+	}
+
+	/**
+	 * Form an pool reference for this pool id.
+	 * 
+	 * @param poolId
+	 *        the pool id.
+	 * @return the pool reference for this pool id.
+	 */
+	protected String getPoolReference(String poolId)
+	{
+		String ref = MnemeService.REFERENCE_ROOT + "/" + MnemeService.POOL_TYPE + "/" + poolId;
+		return ref;
+	}
+
+	/**
+	 * Count the questions in a pool.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @return The number of questions in the pool.
+	 */
+	protected Integer getPoolSize(Pool pool)
+	{
+		Integer rv = storage.getPoolSize((PoolImpl) pool);
+		return rv;
 	}
 }

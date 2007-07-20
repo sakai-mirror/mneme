@@ -22,54 +22,44 @@
 package org.muse.mneme.api;
 
 /**
- * <p>
- * FeedbackDelivery enumerates feedback options
- * </p>
+ * Evaluation holds a comment and a score from an evaluator for a submission or an answer.
  */
-public class FeedbackDelivery
+public interface Evaluation
 {
-	private final Integer id;
+	/**
+	 * Access the user / date attribution for who made this evaluation and when.
+	 * 
+	 * @return The attribution.
+	 */
+	Attribution getAttribution();
 
-	private final String name;
+	/**
+	 * Access the rich text (html) comment.
+	 * 
+	 * @return The rich text (html) comment.
+	 */
+	String getComment();
 
-	private FeedbackDelivery(int id, String name)
-	{
-		this.id = new Integer(id);
-		this.name = name;
-	}
+	/**
+	 * Access the score.
+	 * 
+	 * @return The score.
+	 */
+	Float getScore();
 
-	public String toString()
-	{
-		return this.name;
-	}
+	/**
+	 * Set the rich text (html) comment.
+	 * 
+	 * @param comment
+	 *        The rich text (html) comment.
+	 */
+	void setComment(String comment);
 
-	public Integer dbEncoding()
-	{
-		return this.id;
-	}
-
-	static public FeedbackDelivery parse(int id)
-	{
-		switch (id)
-		{
-			case 1:
-				return IMMEDIATE;
-			case 2:
-				return BY_DATE;
-			case 3:
-				return NONE;
-			default:
-				// TODO: what is the default?
-				return IMMEDIATE;
-		}
-	}
-
-	/** Immediate. */
-	public static final FeedbackDelivery IMMEDIATE = new FeedbackDelivery(1, "IMMEDIATE_FEEDBACK");
-
-	/** After the feedback date. */
-	public static final FeedbackDelivery BY_DATE = new FeedbackDelivery(2, "FEEDBACK_BY_DATE");
-
-	/** None. */
-	public static final FeedbackDelivery NONE = new FeedbackDelivery(3, "NO_FEEDBACK");
+	/**
+	 * Set the score.
+	 * 
+	 * @param score
+	 *        The score.
+	 */
+	void setScore(Float score);
 }

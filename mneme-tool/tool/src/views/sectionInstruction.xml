@@ -71,7 +71,7 @@
 				<compareDecision model="submission.expiration.cause" constant="timeLimit" />
 			</included>
 		</countdownTimer>
-		
+
 		<!-- timer for near-due tests -->
 		<countdownTimer submit="TRUE">
 			<duration>
@@ -101,26 +101,29 @@
 			<title>
 				<message selector="instructions-section-title">
 					<model type="icon" icon="/icons/section.png" />
-					<model type="text" ref="section.ordering.position" />
-					<model type="text" ref="section.assessment.numSections" />
-					<model type="text" ref="section.title" />
-					<model ref="section" delegate="SectionScore" tool="sakai.mneme" />
+					<model type="text" ref="part.ordering.position" />
+					<model type="text" ref="part.assessment.parts.size" />
+					<model type="text" ref="part.title" />
+					<model ref="part" delegate="SectionScore" tool="sakai.mneme" />
 				</message>
 			</title>
 			<container>
 				<text>
 					<message>
-						<model type="html" ref="section.description" />
+						<model type="html" ref="part.presentation.text" />
 					</message>
-				</text>
-				<attachments title="attachments" model="section.attachments">
 					<included>
-						<hasValueDecision model="section.attachments" />
+						<hasValueDecision model="part.presentation.text" />
+					</included>
+				</text>
+				<attachments title="attachments" model="part.presentation.attachments">
+					<included>
+						<hasValueDecision model="part.presentation.attachments" />
 					</included>
 				</attachments>
 			</container>
 			<included>
-				<decision reversed="TRUE" model="section.isMerged" />
+				<decision model="submission.assessment.parts.showPresentation" />
 			</included>
 		</section>
 
@@ -136,12 +139,12 @@
 					<icon icon="/icons/prev.gif" style="LEFT" />
 					<destination template="/question/{0}/q{1}">
 						<model ref="submission.id" />
-						<model ref="section.ordering.previous.lastQuestion.id" />
+						<model ref="part.ordering.previous.lastQuestion.id" />
 					</destination>
 					<disabled>
 						<orDecision>
 							<decision reversed="TRUE" model="submission.assessment.randomAccess" />
-							<decision model="section.ordering.isFirst" />
+							<decision model="part.ordering.isFirst" />
 						</orDecision>
 					</disabled>
 				</navigation>
@@ -156,14 +159,15 @@
 					<icon icon="/icons/next.gif" style="RIGHT" />
 					<destination template="/question/{0}/q{1}">
 						<model ref="submission.id" />
-						<model ref="section.firstQuestion.id" />
+						<model ref="part.firstQuestion.id" />
 					</destination>
 				</navigation>
 				<divider />
 				<navigation title="save-exit" accessKey="save-exit-access" description="save-exit-description" style="BUTTON" destination="/list">
 					<icon icon="/icons/exit.gif" style="LEFT" />
 				</navigation>
-				<navigation title="finish-exam" accessKey="finish-exam-access" description="finish-exam-description" style="BUTTON" submit="TRUE" destination="SUBMIT" id="finish">
+				<navigation title="finish-exam" accessKey="finish-exam-access" description="finish-exam-description" style="BUTTON" submit="TRUE"
+					destination="SUBMIT" id="finish">
 					<icon icon="/icons/finish.gif" style="LEFT" />
 					<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="finish-confirm" />
 				</navigation>

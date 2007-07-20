@@ -22,95 +22,87 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentQuestion;
-import org.muse.mneme.api.AssessmentSection;
+import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentSubmissionStatus;
 import org.muse.mneme.api.Expiration;
-import org.muse.mneme.api.FeedbackDelivery;
 import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Part;
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.ReviewTiming;
+import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
+import org.muse.mneme.api.SubmissionEvaluation;
 import org.sakaiproject.time.api.Time;
-import org.sakaiproject.time.cover.TimeService;
+import org.sakaiproject.time.api.TimeService;
+import org.sakaiproject.tool.api.SessionManager;
 
 /**
  * SubmissionImpl implements Submission.
  */
 public class SubmissionImpl implements Submission
 {
-	/** Each property may be not yet set, already set from persistence, or modified since. */
-	enum PropertyStatus
-	{
-		inited, modified, unset
-	}
-
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(SubmissionImpl.class);
 
-	protected List<SubmissionAnswerImpl> answers = new ArrayList<SubmissionAnswerImpl>();
+	protected List<AnswerImpl> answers = new ArrayList<AnswerImpl>();
 
-	protected PropertyStatus answersStatus = PropertyStatus.unset;
-
-	/** Don't hold (anc cache) the actual assessment. */
 	protected String assessmentId = null;
 
-	protected PropertyStatus assessmentIdStatus = PropertyStatus.unset;
+	protected transient AssessmentService assessmentService = null;
 
 	protected String bestSubmissionId = null;
 
-	protected String evalComment = null;
+	protected SubmissionEvaluationImpl evaluation = null;
 
-	protected PropertyStatus evalCommentStatus = PropertyStatus.unset;
-
-	protected Float evalScore = null;
-
-	protected PropertyStatus evalScoreStatus = PropertyStatus.unset;
+	protected Boolean graded = Boolean.FALSE;
 
 	protected String id = null;
 
-	protected PropertyStatus idStatus = PropertyStatus.unset;
+	protected Boolean isComplete = Boolean.FALSE;
 
-	protected Boolean isComplete = null;
+	protected transient QuestionService questionService = null;
 
-	protected PropertyStatus isCompleteStatus = PropertyStatus.unset;
+	protected transient SecurityService securityService = null;
 
-	/** Tracks when we have read the entire main property set. */
-	protected PropertyStatus mainStatus = PropertyStatus.unset;
+	protected transient SessionManager sessionManager = null;
 
-	protected SubmissionServiceImpl service = null;
-
-	protected Integer siblingCount = null;
+	protected Integer siblingCount = 0;
 
 	protected Time startDate = null;
 
-	protected PropertyStatus startDateStatus = PropertyStatus.unset;
-
-	protected Integer status = null;
-
-	protected PropertyStatus statusStatus = PropertyStatus.unset;
+	protected SubmissionServiceImpl submissionService = null;
 
 	protected Time submittedDate = null;
 
-	protected PropertyStatus submittedDateStatus = PropertyStatus.unset;
+	protected transient TimeService timeService = null;
 
 	/** This is a pre-compute for the total score (trust me!), to be used if set and we don't have the answers & evaluations. */
-	protected Float totalScore = null;
+	protected transient Float totalScore = null;
 
 	protected String userId = null;
-
-	protected PropertyStatus userIdStatus = PropertyStatus.unset;
 
 	/**
 	 * Construct
 	 */
-	public SubmissionImpl(SubmissionServiceImpl service)
+	public SubmissionImpl(AssessmentService assessmentService, QuestionService questionService, SecurityService securityService,
+			SubmissionServiceImpl submissionService, SessionManager sessionManager, TimeService timeService)
 	{
-		this.service = service;
+		this.assessmentService = assessmentService;
+		this.questionService = questionService;
+		this.securityService = securityService;
+		this.submissionService = submissionService;
+		this.sessionManager = sessionManager;
+		this.timeService = timeService;
+
+		this.evaluation = new SubmissionEvaluationImpl(this);
 	}
 
 	/**
@@ -118,24 +110,7 @@ public class SubmissionImpl implements Submission
 	 */
 	protected SubmissionImpl(SubmissionImpl other)
 	{
-		setMain(other);
-		setAnswers(other);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public int compareTo(Object obj)
-	{
-		if (!(obj instanceof Submission)) throw new ClassCastException();
-
-		// if the object are the same, say so
-		if (obj == this) return 0;
-
-		// TODO: how to compare?
-		int compare = getId().compareTo(((Submission) obj).getId());
-
-		return compare;
+		set(other);
 	}
 
 	/**
@@ -143,10 +118,10 @@ public class SubmissionImpl implements Submission
 	 */
 	public Boolean completeIfOver()
 	{
-		if (getIsOver(null, 0).booleanValue())
+		if (getIsOver(null, 0))
 		{
 			Time over = getWhenOver();
-			service.completeTheSubmission(over, this);
+			submissionService.autoCompleteSubmission(over, this);
 			return Boolean.TRUE;
 		}
 
@@ -158,34 +133,27 @@ public class SubmissionImpl implements Submission
 	 */
 	public boolean equals(Object obj)
 	{
-		if (!(obj instanceof Submission)) return false;
+		// two SubmissionImpls are equals if they have the same id
 		if (this == obj) return true;
-		if (this.getId() == null) return false;
-		if (((Submission) obj).getId() == null) return false;
-		return ((Submission) obj).getId().equals(getId());
+		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
+		return this.id.equals(((SubmissionImpl) obj).id);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public SubmissionAnswer getAnswer(AssessmentQuestion question)
+	public Answer getAnswer(Question question)
 	{
 		if (question == null) return null;
 
-		// read the answers if needed
-		if (this.answersStatus == PropertyStatus.unset) readAnswers();
-
-		SubmissionAnswerImpl answer = findAnswer(question.getId());
+		AnswerImpl answer = findAnswer(question.getId());
 		if (answer != null) return answer;
 
 		// not found, add one
-		answer = new SubmissionAnswerImpl();
+		answer = new AnswerImpl(this.questionService);
 		answer.initSubmission(this);
-		this.answers.add(answer);
-
 		answer.initQuestion(question);
-
-		this.answersStatus = PropertyStatus.modified;
+		this.answers.add(answer);
 
 		return answer;
 	}
@@ -193,11 +161,8 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<? extends SubmissionAnswer> getAnswers()
+	public List<? extends Answer> getAnswers()
 	{
-		// read the answers info if this property has not yet been set
-		if (this.answersStatus == PropertyStatus.unset) readAnswers();
-
 		return this.answers;
 	}
 
@@ -206,12 +171,9 @@ public class SubmissionImpl implements Submission
 	 */
 	public Float getAnswersAutoScore()
 	{
-		// read the answers info if this property has not yet been set
-		if (this.answersStatus == PropertyStatus.unset) readAnswers();
-
 		// count the answer auto scores
 		float total = 0;
-		for (SubmissionAnswerImpl answer : this.answers)
+		for (AnswerImpl answer : this.answers)
 		{
 			// add it up
 			total += answer.getAutoScore().floatValue();
@@ -225,30 +187,12 @@ public class SubmissionImpl implements Submission
 	 */
 	public Assessment getAssessment()
 	{
-		// read the basic info if this property has not yet been set
-		if (this.assessmentIdStatus == PropertyStatus.unset) readMain();
+		// TODO: cache the actual assessment for the thread, to avoid the real assessment cache's copy-out policy
 
-		// cache the actual assessment for the thread, to avoid the real assessment cache's copy-out policy
+		AssessmentImpl assessment = (AssessmentImpl) this.assessmentService.getAssessment(this.assessmentId);
 
-		// Note: this is safe!  We have to assure two things:
-		// 1- when we modify the assessment, we don't get concurrent mod exception, and
-		// 2- when the assessment's lazy parts are updated, that is not repeated
-		// 1 is ok because we are sharing ONLY in the single thread.
-		// 2 is good because when the shared object gets un-lazyed, the object is updated, so when we next access the shared object it will have the lazy parts read.
-		// -ggolden
-
-		String key = "submissionAssessment_" + this.id + "_" + this.assessmentId;
-		AssessmentImpl assessment = (AssessmentImpl) this.service.m_threadLocalManager.get(key);
-		if (assessment == null)
-		{
-			assessment = (AssessmentImpl) this.service.m_assessmentService.idAssessment(this.assessmentId);
-
-			// set the submision context
-			assessment.initSubmissionContext(this);
-
-			// thread cache it
-			this.service.m_threadLocalManager.set(key, assessment);
-		}
+		// set the submision context
+		assessment.initSubmissionContext(this);
 
 		return assessment;
 	}
@@ -258,18 +202,18 @@ public class SubmissionImpl implements Submission
 	 */
 	public AssessmentSubmissionStatus getAssessmentSubmissionStatus()
 	{
-		Time now = TimeService.newTime();
+		Time now = this.timeService.newTime();
 		Assessment assessment = getAssessment();
 
 		// if not open yet...
-		if ((assessment.getReleaseDate() != null) && now.before(assessment.getReleaseDate()))
+		if ((assessment.getDates().getOpenDate() != null) && now.before(assessment.getDates().getOpenDate()))
 		{
 			return AssessmentSubmissionStatus.future;
 		}
 
 		// overdue?
-		boolean overdue = (assessment.getDueDate() != null) && now.after(assessment.getDueDate())
-				&& ((assessment.getAllowLateSubmit() == null) || (!assessment.getAllowLateSubmit().booleanValue()));
+		boolean overdue = (assessment.getDates().getDueDate() != null) && now.after(assessment.getDates().getDueDate())
+				&& ((assessment.getDates().getAcceptUntilDate() == null) || (now.before(assessment.getDates().getAcceptUntilDate())));
 
 		// todo (not overdue)
 		if ((getStartDate() == null) && !overdue)
@@ -278,7 +222,7 @@ public class SubmissionImpl implements Submission
 		}
 
 		// if in progress...
-		if (((getIsComplete() == null) || (!getIsComplete().booleanValue())) && (getStartDate() != null))
+		if ((!getIsComplete()) && (getStartDate() != null))
 		{
 			// if timed, add an alert
 			if (assessment.getTimeLimit() != null)
@@ -290,13 +234,11 @@ public class SubmissionImpl implements Submission
 		}
 
 		// completed
-		if ((getIsComplete() != null) && (getIsComplete().booleanValue()))
+		if (getIsComplete())
 		{
 			// if there are fewer sibs than allowed, add the todo image as well
-			if (!overdue
-					&& (getSiblingCount() != null)
-					&& ((assessment.getNumSubmissionsAllowed() == null) || (getSiblingCount().intValue() < assessment.getNumSubmissionsAllowed()
-							.intValue())))
+			if (!overdue && (getSiblingCount() != null)
+					&& ((assessment.getNumSubmissionsAllowed() == null) || (getSiblingCount().intValue() < assessment.getNumSubmissionsAllowed())))
 			{
 				return AssessmentSubmissionStatus.completeReady;
 			}
@@ -318,24 +260,7 @@ public class SubmissionImpl implements Submission
 	 */
 	public Submission getBest()
 	{
-		return this.bestSubmissionId == null ? this : this.service.idSubmission(this.bestSubmissionId);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getConfirmation()
-	{
-		StringBuffer rv = new StringBuffer();
-		rv.append(this.id);
-		rv.append('_');
-		rv.append(this.assessmentId);
-		rv.append('_');
-		rv.append(this.userId);
-		rv.append('_');
-		rv.append(this.submittedDate.toString());
-
-		return rv.toString();
+		return this.bestSubmissionId == null ? this : this.submissionService.getSubmission(this.bestSubmissionId);
 	}
 
 	/**
@@ -343,9 +268,6 @@ public class SubmissionImpl implements Submission
 	 */
 	public Long getElapsedTime()
 	{
-		// read the basic info if this property has not yet been set
-		if ((this.submittedDateStatus == PropertyStatus.unset) || (this.startDateStatus == PropertyStatus.unset)) readMain();
-
 		if ((submittedDate == null) || (startDate == null)) return null;
 
 		return new Long(submittedDate.getTime() - startDate.getTime());
@@ -354,23 +276,9 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getEvalComment()
+	public SubmissionEvaluation getEvaluation()
 	{
-		// read the basic info if this property has not yet been set
-		if (this.evalCommentStatus == PropertyStatus.unset) readMain();
-
-		return this.evalComment;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Float getEvalScore()
-	{
-		// read the basic info if this property has not yet been set
-		if (this.evalScoreStatus == PropertyStatus.unset) readMain();
-
-		return this.evalScore;
+		return this.evaluation;
 	}
 
 	/**
@@ -378,18 +286,14 @@ public class SubmissionImpl implements Submission
 	 */
 	public Expiration getExpiration()
 	{
-		// check the thread cache
-		String key = "submission_" + getId() + "_expiration";
-		ExpirationImpl rv = (ExpirationImpl) this.service.m_threadLocalManager.get(key);
-		if (rv != null) return rv;
-
-		rv = new ExpirationImpl();
+		// TODO: thread caching
+		ExpirationImpl rv = new ExpirationImpl();
 
 		// the end might be from a time limit, or because we are near the closed date
 		long endTime = 0;
 
 		// see if the assessment has a hard due date (w/ no late submissions accepted) or a retract date
-		Time closedDate = getAssessment().getClosedDate();
+		Time closedDate = getAssessment().getDates().getAcceptUntilDate();
 		rv.time = closedDate;
 
 		// if we have a time limit, compute the end time based on that limit
@@ -409,7 +313,7 @@ public class SubmissionImpl implements Submission
 			// if we have not started, compute the end from now
 			else
 			{
-				startTime = this.service.m_timeService.newTime().getTime();
+				startTime = this.timeService.newTime().getTime();
 			}
 
 			// a full time limit duration would end here
@@ -438,7 +342,7 @@ public class SubmissionImpl implements Submission
 			endTime = closedDate.getTime();
 
 			// if this closed date is more than 2 hours from now, ignore it and say we have no expiration
-			if (endTime > this.service.m_timeService.newTime().getTime() + (2l * 60l * 60l * 1000l)) return null;
+			if (endTime > this.timeService.newTime().getTime() + (2l * 60l * 60l * 1000l)) return null;
 
 			// set the limit to 2 hours
 			rv.limit = 2l * 60l * 60l * 1000l;
@@ -447,13 +351,10 @@ public class SubmissionImpl implements Submission
 		}
 
 		// how long from now till endTime?
-		long tillExpires = endTime - this.service.m_timeService.newTime().getTime();
+		long tillExpires = endTime - this.timeService.newTime().getTime();
 		if (tillExpires <= 0) tillExpires = 0;
 
 		rv.duration = new Long(tillExpires);
-
-		// thread cache
-		this.service.m_threadLocalManager.set(key, rv);
 
 		return rv;
 	}
@@ -461,13 +362,13 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public AssessmentQuestion getFirstIncompleteQuestion()
+	public Question getFirstIncompleteQuestion()
 	{
 		Assessment assessment = getAssessment();
 
-		for (AssessmentSection section : assessment.getSections())
+		for (Part part : assessment.getParts().getParts())
 		{
-			for (AssessmentQuestion question : section.getQuestions())
+			for (Question question : part.getQuestions())
 			{
 				if (!getIsCompleteQuestion(question).booleanValue())
 				{
@@ -490,29 +391,21 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsAnswered(List<AssessmentQuestion> questionsToSkip)
+	public Boolean getIsAnswered()
 	{
-		// read the answers info if this property has not yet been set
-		if (this.answersStatus == PropertyStatus.unset) readAnswers();
-
 		Assessment a = getAssessment();
 
 		// for each section / question, make sure we have an answer and not a mark for review
 		// only consider questions that are selected to be part of the test for this submision!
-		for (AssessmentSection section : a.getSections())
+		for (Part part : a.getParts().getParts())
 		{
-			for (AssessmentQuestion question : section.getQuestions())
+			for (Question question : part.getQuestions())
 			{
-				// we may be asked to skip checking this question
-				if ((questionsToSkip != null) && (questionsToSkip.contains(question))) continue;
-
-				SubmissionAnswerImpl answer = this.findAnswer(question.getId());
+				AnswerImpl answer = this.findAnswer(question.getId());
 				if (answer == null) return Boolean.FALSE;
 				if (answer.getSubmittedDate() == null) return Boolean.FALSE;
 				if ((answer.getIsAnswered() == null) || (!answer.getIsAnswered().booleanValue())) return Boolean.FALSE;
 				if ((answer.getMarkedForReview() != null && (answer.getMarkedForReview().booleanValue()))) return Boolean.FALSE;
-				// if ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue())
-				// && (StringUtil.trimToNull(answer.getRationale()) == null)) return Boolean.FALSE;
 			}
 		}
 
@@ -522,42 +415,19 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsAnswersChanged()
-	{
-		if (answersStatus == PropertyStatus.unset) return Boolean.FALSE;
-		for (SubmissionAnswer answer : this.answers)
-		{
-			if (answer.getIsChanged().booleanValue())
-			{
-				return Boolean.TRUE;
-			}
-		}
-
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean getIsComplete()
 	{
-		// read the basic info if this property has not yet been set
-		if (this.isCompleteStatus == PropertyStatus.unset) readMain();
-
 		return this.isComplete;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsCompleteQuestion(AssessmentQuestion question)
+	public Boolean getIsCompleteQuestion(Question question)
 	{
-		if (question == null) return false;
+		if (question == null) throw new IllegalArgumentException();
 
-		// read the answers info if this property has not yet been set
-		if (this.answersStatus == PropertyStatus.unset) readAnswers();
-
-		SubmissionAnswerImpl answer = findAnswer(question.getId());
+		AnswerImpl answer = findAnswer(question.getId());
 		if ((answer != null) && (answer.getIsComplete().booleanValue()))
 		{
 			return true;
@@ -571,14 +441,7 @@ public class SubmissionImpl implements Submission
 	 */
 	public Boolean getIsGraded()
 	{
-		// base this for now of the assessment setting - if the assessment is marked to send grades to gradebook, consider the submission graded.
-		// also, only if complete.
-		if ((getAssessment().getGradebookIntegration() != null) && getAssessment().getGradebookIntegration().booleanValue())
-		{
-			if (this.getIsComplete().booleanValue()) return Boolean.TRUE;
-		}
-
-		return Boolean.FALSE;
+		return this.graded;
 	}
 
 	/**
@@ -590,7 +453,7 @@ public class SubmissionImpl implements Submission
 		if (over == null) return Boolean.FALSE;
 
 		// set the time to now if missing
-		if (asOf == null) asOf = service.m_timeService.newTime();
+		if (asOf == null) asOf = timeService.newTime();
 
 		return Boolean.valueOf(asOf.getTime() > over.getTime() + grace);
 	}
@@ -609,15 +472,15 @@ public class SubmissionImpl implements Submission
 		if (getStartDate() != null) return Boolean.FALSE;
 
 		// assessment is open
-		if (!((AssessmentServiceImpl) this.service.m_assessmentService).isAssessmentOpen(getAssessment(), this.service.m_timeService.newTime(), 0)) return Boolean.FALSE;
+		if (!getAssessment().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-		if (!this.service.m_securityService.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
+		if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
 				.getContext())) return Boolean.FALSE;
 
 		// under limit
-		if ((getAssessment().getNumSubmissionsAllowed() != null)
-				&& (this.getSiblingCount().intValue() >= getAssessment().getNumSubmissionsAllowed().intValue())) return Boolean.FALSE;
+		if ((getAssessment().getNumSubmissionsAllowed() != null) && (this.getSiblingCount() >= getAssessment().getNumSubmissionsAllowed()))
+			return Boolean.FALSE;
 
 		return Boolean.TRUE;
 	}
@@ -636,14 +499,14 @@ public class SubmissionImpl implements Submission
 		if ((getIsComplete() == null) || (!getIsComplete().booleanValue())) return Boolean.FALSE;
 
 		// assessment is open
-		if (!((AssessmentServiceImpl) this.service.m_assessmentService).isAssessmentOpen(getAssessment(), this.service.m_timeService.newTime(), 0)) return Boolean.FALSE;
+		if (!getAssessment().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
 
 		// under limit
 		if ((getAssessment().getNumSubmissionsAllowed() != null)
 				&& (this.getSiblingCount().intValue() >= getAssessment().getNumSubmissionsAllowed().intValue())) return Boolean.FALSE;
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-		if (!this.service.m_securityService.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
+		if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
 				.getContext())) return Boolean.FALSE;
 
 		return Boolean.TRUE;
@@ -661,13 +524,13 @@ public class SubmissionImpl implements Submission
 		if ((getIsComplete() != null) && (getIsComplete().booleanValue())) return Boolean.FALSE;
 
 		// same user
-		if (!this.service.m_sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
+		if (!this.sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
 
 		// assessment is open
-		if (!((AssessmentServiceImpl) this.service.m_assessmentService).isAssessmentOpen(getAssessment(), this.service.m_timeService.newTime(), 0)) return Boolean.FALSE;
+		if (!getAssessment().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-		if (!this.service.m_securityService.checkSecurity(this.service.m_sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
+		if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
 				.getContext())) return Boolean.FALSE;
 
 		return Boolean.TRUE;
@@ -679,17 +542,16 @@ public class SubmissionImpl implements Submission
 	public Boolean getMayReview()
 	{
 		// same user
-		if (!this.service.m_sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
+		if (!this.sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
 
 		// submission complete
-		if ((this.getIsComplete() == null) || (!getIsComplete().booleanValue())) return Boolean.FALSE;
+		if (!getIsComplete()) return Boolean.FALSE;
 
-		// not retracted
-		if ((getAssessment().getRetractDate() != null) && (this.service.m_timeService.newTime().after(getAssessment().getRetractDate())))
-			return Boolean.FALSE;
+		// not inactive
+		if (!getAssessment().getActive()) return Boolean.FALSE;
 
-		// assessment feedback (i.e. review) enabled
-		if (!getAssessment().getFeedbackNow().booleanValue()) return Boolean.FALSE;
+		// assessment review enabled
+		if (!getAssessment().getReview().getNowAvailable()) return Boolean.FALSE;
 
 		// TODO: permission?
 
@@ -702,17 +564,16 @@ public class SubmissionImpl implements Submission
 	public Boolean getMayReviewLater()
 	{
 		// same user
-		if (!this.service.m_sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
+		if (!this.sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
 
 		// submission complete
-		if ((this.getIsComplete() == null) || (!getIsComplete().booleanValue())) return Boolean.FALSE;
+		if (!getIsComplete().booleanValue()) return Boolean.FALSE;
 
-		// not retracted
-		if ((getAssessment().getRetractDate() != null) && (this.service.m_timeService.newTime().after(getAssessment().getRetractDate())))
-			return Boolean.FALSE;
+		// not inactive
+		if (!getAssessment().getActive()) return Boolean.FALSE;
 
 		// assessment not set to no review
-		if (getAssessment().getFeedbackDelivery() == FeedbackDelivery.NONE) return Boolean.FALSE;
+		if (getAssessment().getReview().getTiming() == ReviewTiming.never) return Boolean.FALSE;
 
 		// TODO: permission?
 
@@ -724,7 +585,7 @@ public class SubmissionImpl implements Submission
 	 */
 	public String getReference()
 	{
-		return this.service.getSubmissionReference(this.id);
+		return this.submissionService.getSubmissionReference(this.id);
 	}
 
 	/**
@@ -740,21 +601,7 @@ public class SubmissionImpl implements Submission
 	 */
 	public Time getStartDate()
 	{
-		// read the basic info if this property has not yet been set
-		if (this.startDateStatus == PropertyStatus.unset) readMain();
-
 		return this.startDate;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Integer getStatus()
-	{
-		// read the basic info if this property has not yet been set
-		if (this.statusStatus == PropertyStatus.unset) readMain();
-
-		return this.status;
 	}
 
 	/**
@@ -762,9 +609,6 @@ public class SubmissionImpl implements Submission
 	 */
 	public Time getSubmittedDate()
 	{
-		// read the basic info if this property has not yet been set
-		if (this.submittedDateStatus == PropertyStatus.unset) readMain();
-
 		return this.submittedDate;
 	}
 
@@ -774,29 +618,23 @@ public class SubmissionImpl implements Submission
 	public Float getTotalScore()
 	{
 		// Note: treat this as getGrade() - later make getGrade() and let this always return the score, graded or not -ggolden
-		if (!getIsGraded().booleanValue()) return new Float(0);
+		if (!getIsGraded()) return new Float(0);
 
 		// if our special "total score" is set, use this, otherwise we compute
 		if (this.totalScore != null) return this.totalScore;
-
-		// read the basic info if this property has not yet been set
-		if (this.mainStatus == PropertyStatus.unset) readMain();
-
-		// read the answers info if this property has not yet been set
-		if (this.answersStatus == PropertyStatus.unset) readAnswers();
 
 		// add the answer auto scores, the answer evaluations, (these are combined into the answer total scores) and the overall
 		// evaluation
 		float total = 0;
 
-		for (SubmissionAnswer answer : answers)
+		for (Answer answer : answers)
 		{
 			total += answer.getTotalScore();
 		}
 
-		if (this.evalScore != null)
+		if (this.evaluation.getScore() != null)
 		{
-			total += this.evalScore.floatValue();
+			total += this.evaluation.getScore().floatValue();
 		}
 
 		return new Float(total);
@@ -807,9 +645,6 @@ public class SubmissionImpl implements Submission
 	 */
 	public String getUserId()
 	{
-		// read the basic info if this property has not yet been set
-		if (this.userIdStatus == PropertyStatus.unset) readMain();
-
 		return this.userId;
 	}
 
@@ -822,33 +657,24 @@ public class SubmissionImpl implements Submission
 		if (getStartDate() == null) return null;
 
 		// if we are complete, we are not over
-		if ((getIsComplete() != null) && (getIsComplete().booleanValue())) return null;
+		if (getIsComplete()) return null;
 
 		Assessment a = getAssessment();
 		Time rv = null;
 
 		// for timed
-		if ((a.getTimeLimit() != null) && (a.getTimeLimit().intValue() > 0))
+		if ((a.getTimeLimit() != null) && (a.getTimeLimit() > 0))
 		{
 			// pick up the end time
-			rv = service.m_timeService.newTime(getStartDate().getTime() + a.getTimeLimit().longValue());
-		}
-
-		// check the retract date
-		if (a.getRetractDate() != null)
-		{
-			if ((rv == null) || (a.getRetractDate().before(rv)))
-			{
-				rv = a.getRetractDate();
-			}
+			rv = this.timeService.newTime(getStartDate().getTime() + a.getTimeLimit());
 		}
 
 		// for hard due date
-		if ((a.getDueDate() != null) && ((a.getAllowLateSubmit() == null) || (!a.getAllowLateSubmit().booleanValue())))
+		if (a.getDates().getAcceptUntilDate() != null)
 		{
-			if ((rv == null) || (a.getDueDate().before(rv)))
+			if ((rv == null) || (a.getDates().getAcceptUntilDate().before(rv)))
 			{
-				rv = a.getDueDate();
+				rv = a.getDates().getAcceptUntilDate();
 			}
 		}
 
@@ -866,55 +692,19 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setAnswers(List<? extends SubmissionAnswer> answers)
-	{
-		this.answers.clear();
-		this.answersStatus = PropertyStatus.modified;
-		if (answers == null) return;
-
-		// deep copy
-		for (SubmissionAnswer answer : answers)
-		{
-			SubmissionAnswerImpl copy = new SubmissionAnswerImpl((SubmissionAnswerImpl) answer);
-			copy.initSubmission(this);
-			this.answers.add(copy);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setAssessment(Assessment assessment)
-	{
-		this.assessmentId = assessment.getId();
-		this.assessmentIdStatus = PropertyStatus.modified;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setEvalComment(String comment)
-	{
-		this.evalComment = comment;
-		this.evalCommentStatus = PropertyStatus.modified;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setEvalScore(Float score)
-	{
-		this.evalScore = score;
-		this.evalScoreStatus = PropertyStatus.modified;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void setIsComplete(Boolean complete)
 	{
+		if (complete == null) throw new IllegalArgumentException();
 		this.isComplete = complete;
-		this.isCompleteStatus = PropertyStatus.modified;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setIsGraded(Boolean graded)
+	{
+		if (graded == null) throw new IllegalArgumentException();
+		this.graded = graded;
 	}
 
 	/**
@@ -923,16 +713,6 @@ public class SubmissionImpl implements Submission
 	public void setStartDate(Time startDate)
 	{
 		this.startDate = startDate;
-		this.startDateStatus = PropertyStatus.modified;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setStatus(Integer status)
-	{
-		this.status = status;
-		this.statusStatus = PropertyStatus.modified;
 	}
 
 	/**
@@ -941,16 +721,14 @@ public class SubmissionImpl implements Submission
 	public void setSubmittedDate(Time submittedDate)
 	{
 		this.submittedDate = submittedDate;
-		this.submittedDateStatus = PropertyStatus.modified;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Clear all answer information.
 	 */
-	public void setUserId(String userId)
+	protected void clearAnswers()
 	{
-		this.userId = userId;
-		this.userIdStatus = PropertyStatus.modified;
+		this.answers.clear();
 	}
 
 	/**
@@ -960,10 +738,10 @@ public class SubmissionImpl implements Submission
 	 *        The question id.
 	 * @return The existing answer in the submission for this question id, or null if not found.
 	 */
-	protected SubmissionAnswerImpl findAnswer(String questionId)
+	protected AnswerImpl findAnswer(String questionId)
 	{
 		// find the answer to this assessment question
-		for (SubmissionAnswerImpl answer : this.answers)
+		for (AnswerImpl answer : this.answers)
 		{
 			if (answer.questionId.equals(questionId))
 			{
@@ -975,34 +753,32 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
+	 * Replace an existing answer with this one, or add it if there is no existing one.
+	 * 
+	 * @param answer
+	 *        The answer.
+	 */
+	protected void replaceAnswer(AnswerImpl answer)
+	{
+		// this needs to be an answer to this same submission
+		if (!answer.getSubmission().equals(this))
+		{
+			M_log.warn("replaceAnswer: " + this.id + ": answer to another submission: " + answer.getSubmission().getId());
+			return;
+		}
+
+		this.answers.remove(answer);
+		this.answers.add(answer);
+	}
+
+	/**
 	 * Access the assessment id.
 	 * 
 	 * @return The assessment id.
 	 */
 	protected String getAssessmentId()
 	{
-		// read the basic info if this property has not yet been set
-		if (this.assessmentIdStatus == PropertyStatus.unset) readMain();
-
 		return this.assessmentId;
-	}
-
-	/**
-	 * Initialize the answers property.
-	 * 
-	 * @param answers
-	 *        The exact answers property (not deep copied).
-	 */
-	protected void initAnswers(List<SubmissionAnswerImpl> answers)
-	{
-		this.answers = answers;
-
-		for (SubmissionAnswerImpl answer : this.answers)
-		{
-			answer.initSubmission(this);
-		}
-
-		this.answersStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -1014,7 +790,6 @@ public class SubmissionImpl implements Submission
 	protected void initAssessmentId(String id)
 	{
 		this.assessmentId = id;
-		this.assessmentIdStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -1026,30 +801,6 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
-	 * Initialize the evaluation comments
-	 * 
-	 * @param comment
-	 *        The evaluation comment.
-	 */
-	protected void initEvalComment(String comment)
-	{
-		this.evalComment = comment;
-		this.evalCommentStatus = PropertyStatus.inited;
-	}
-
-	/**
-	 * Initialize the evaluation score.
-	 * 
-	 * @param score
-	 *        The evaluation score.
-	 */
-	protected void initEvalScore(Float score)
-	{
-		this.evalScore = score;
-		this.evalScoreStatus = PropertyStatus.inited;
-	}
-
-	/**
 	 * Initialize the id property.
 	 * 
 	 * @param id
@@ -1058,19 +809,6 @@ public class SubmissionImpl implements Submission
 	protected void initId(String id)
 	{
 		this.id = id;
-		this.idStatus = PropertyStatus.inited;
-	}
-
-	/**
-	 * Initialize the is complete property.
-	 * 
-	 * @param complete
-	 *        The is complete property.
-	 */
-	protected void initIsComplete(Boolean complete)
-	{
-		this.isComplete = complete;
-		this.isCompleteStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -1079,42 +817,6 @@ public class SubmissionImpl implements Submission
 	protected void initSiblingCount(Integer count)
 	{
 		this.siblingCount = count;
-	}
-
-	/**
-	 * Initialize the start date property.
-	 * 
-	 * @param startDate
-	 *        The start date property.
-	 */
-	protected void initStartDate(Time startDate)
-	{
-		this.startDate = startDate;
-		this.startDateStatus = PropertyStatus.inited;
-	}
-
-	/**
-	 * Initialize the status property.
-	 * 
-	 * @param status
-	 *        The status property.
-	 */
-	protected void initStatus(Integer status)
-	{
-		this.status = status;
-		this.statusStatus = PropertyStatus.inited;
-	}
-
-	/**
-	 * Initialize the submitted date property.
-	 * 
-	 * @param submittedDate
-	 *        The submitted date property.
-	 */
-	protected void initSubmittedDate(Time submittedDate)
-	{
-		this.submittedDate = submittedDate;
-		this.submittedDateStatus = PropertyStatus.inited;
 	}
 
 	/**
@@ -1138,113 +840,51 @@ public class SubmissionImpl implements Submission
 	protected void initUserId(String userId)
 	{
 		this.userId = userId;
-		this.userIdStatus = PropertyStatus.inited;
 	}
 
 	/**
-	 * Check if the answers info has been initialized
-	 * 
-	 * @return true if the answers info has been initialized, false if not.
-	 */
-	protected boolean isAnswersInited()
-	{
-		return this.answersStatus == PropertyStatus.inited;
-	}
-
-	/**
-	 * Check if the main info has been initialized
-	 * 
-	 * @return true if the main info has been initialized, false if not.
-	 */
-	protected boolean isMainInited()
-	{
-		return this.mainStatus == PropertyStatus.inited;
-	}
-
-	/**
-	 * Read the answers info into this submission.
-	 */
-	protected void readAnswers()
-	{
-		// if our id is not set, we are new, and there's nothing to read
-		if (this.id == null) return;
-
-		service.readSubmissionAnswers(this);
-	}
-
-	/**
-	 * Read the main info into this submission.
-	 */
-	protected void readMain()
-	{
-		// if our id is not set, we are new, and there's nothing to read
-		if (this.id == null) return;
-
-		service.readSubmissionMain(this);
-		this.mainStatus = PropertyStatus.inited;
-	}
-
-	/**
-	 * Set my answers properties to exactly match the answers properties of this other
+	 * Set as a copy of another.
 	 * 
 	 * @param other
-	 *        The other submission to set my answers to match.
+	 *        The other to copy.
 	 */
-	protected void setAnswers(SubmissionImpl other)
+	protected void set(SubmissionImpl other)
 	{
-		// deep copy the answers, preserve the status
-		setAnswers(other.answers);
-		this.answersStatus = other.answersStatus;
+		this.answers.clear();
+		for (AnswerImpl answer : other.answers)
+		{
+			AnswerImpl a = new AnswerImpl(answer);
+			a.initSubmission(this);
+			this.answers.add(a);
+		}
+
+		setMain(other);
 	}
 
 	/**
-	 * Set all the flags to inited.
-	 */
-	protected void setInited()
-	{
-		this.answersStatus = PropertyStatus.inited;
-		this.assessmentIdStatus = PropertyStatus.inited;
-		this.evalCommentStatus = PropertyStatus.inited;
-		this.evalScoreStatus = PropertyStatus.inited;
-		this.idStatus = PropertyStatus.inited;
-		this.isCompleteStatus = PropertyStatus.inited;
-		this.mainStatus = PropertyStatus.inited;
-		this.startDateStatus = PropertyStatus.inited;
-		this.statusStatus = PropertyStatus.inited;
-		this.submittedDateStatus = PropertyStatus.inited;
-		this.userIdStatus = PropertyStatus.inited;
-	}
-
-	/**
-	 * Set my main properties to exactly match the main properties of this other
+	 * Set as a copy of another - main parts only, no answers.
 	 * 
 	 * @param other
-	 *        The other submission to set my properties to match.
+	 *        The other to copy.
 	 */
 	protected void setMain(SubmissionImpl other)
 	{
-		this.service = other.service;
-		this.mainStatus = other.mainStatus;
-
 		this.assessmentId = other.assessmentId;
-		this.assessmentIdStatus = other.assessmentIdStatus;
-		this.evalComment = other.evalComment;
-		this.evalCommentStatus = other.evalCommentStatus;
-		this.evalScore = other.evalScore;
-		this.evalScoreStatus = other.evalScoreStatus;
+		this.assessmentService = other.assessmentService;
+		this.bestSubmissionId = other.bestSubmissionId;
+		this.evaluation = new SubmissionEvaluationImpl(other.evaluation);
+		this.graded = other.graded;
 		this.id = other.id;
-		this.idStatus = other.idStatus;
 		this.isComplete = other.isComplete;
-		this.isCompleteStatus = other.isCompleteStatus;
+		this.questionService = other.questionService;
+		this.securityService = other.securityService;
+		this.sessionManager = other.sessionManager;
+		this.siblingCount = other.siblingCount;
 		this.startDate = other.startDate;
-		this.startDateStatus = other.startDateStatus;
-		this.status = other.status;
-		this.statusStatus = other.statusStatus;
+		this.submissionService = other.submissionService;
 		this.submittedDate = other.submittedDate;
-		this.submittedDateStatus = other.submittedDateStatus;
-		this.userId = other.userId;
-		this.userIdStatus = other.userIdStatus;
-
+		this.timeService = other.timeService;
 		this.totalScore = other.totalScore;
+		this.userId = other.userId;
 	}
 }

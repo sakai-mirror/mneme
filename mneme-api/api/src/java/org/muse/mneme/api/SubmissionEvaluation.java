@@ -22,41 +22,14 @@
 package org.muse.mneme.api;
 
 /**
- * <p>
- * MultipleSubmissionSelectionPolicy enumerates different policies for how to pick from multiple submissions to an assessment from a single user.
- * </p>
+ * SubmissionEvaluation holds a comment and a score from an evaluator for a submission.
  */
-public class MultipleSubmissionSelectionPolicy
+public interface SubmissionEvaluation extends Evaluation
 {
-	private final String m_name;
-
-	private final Integer m_id;
-
-	private MultipleSubmissionSelectionPolicy(int id, String name)
-	{
-		m_id = new Integer(id);
-		m_name = name;
-	}
-
-	static public MultipleSubmissionSelectionPolicy parse(int id)
-	{
-		if (USE_HIGHEST_GRADED.m_id.intValue() == id) return USE_HIGHEST_GRADED;
-		return USE_LATEST;
-	}
-
-	public String toString()
-	{
-		return m_name;
-	}
-
-	public Integer dbEncoding()
-	{
-		return m_id;
-	}
-
-	/** Use the latest submission. */
-	public static final MultipleSubmissionSelectionPolicy USE_LATEST = new MultipleSubmissionSelectionPolicy(2, "latest");
-
-	/** Use the highest graded submission. */
-	public static final MultipleSubmissionSelectionPolicy USE_HIGHEST_GRADED = new MultipleSubmissionSelectionPolicy(1, "highest");
+	/**
+	 * Access the submission that this evaluation applies to.
+	 * 
+	 * @return The submission that this evaluation applies to.
+	 */
+	Submission getSubmission();
 }

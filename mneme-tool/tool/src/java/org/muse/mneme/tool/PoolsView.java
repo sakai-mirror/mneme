@@ -118,7 +118,6 @@ public class PoolsView extends ControllerImpl
 
 		destination = "/pools";
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-
 	}
 
 	/**

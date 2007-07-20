@@ -36,8 +36,6 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCompletedException;
-import org.muse.mneme.tool.AssessmentDeliveryTool.Destinations;
-import org.muse.mneme.tool.AssessmentDeliveryTool.Errors;
 import org.sakaiproject.util.Web;
 
 /**
@@ -72,7 +70,7 @@ public class TocView extends ControllerImpl
 
 		String submissionId = params[2];
 
-		Submission submission = assessmentService.idSubmission(submissionId);
+		Submission submission = assessmentService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			// redirect to error
@@ -80,7 +78,7 @@ public class TocView extends ControllerImpl
 			return;
 		}
 
-		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
+		if (!assessmentService.allowCompleteSubmission(submission, null))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -88,7 +86,7 @@ public class TocView extends ControllerImpl
 		}
 
 		// linear is not allowed in here
-		if (!submission.getAssessment().getRandomAccess().booleanValue())
+		if (!submission.getAssessment().getRandomAccess())
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.linear + "/" + submissionId)));
@@ -168,19 +166,19 @@ public class TocView extends ControllerImpl
 
 		if (destination.equals("SUBMIT"))
 		{
-			Submission submission = assessmentService.idSubmission(submissionId);
+			Submission submission = assessmentService.getSubmission(submissionId);
 
 			// if linear, or the submission is all answered, we can go to submitted
-			if ((!submission.getAssessment().getRandomAccess().booleanValue()) || (submission.getIsAnswered(null).booleanValue()))
+			if ((!submission.getAssessment().getRandomAccess()) || (submission.getIsAnswered()))
 			{
-				destination = "/" + Destinations.submitted + "/" + submissionId;
+				destination = "/submitted/" + submissionId;
 				// we will complete below
 			}
 
 			// if not linear, and there are unanswered parts, send to final review
 			else
 			{
-				destination = "/" + Destinations.final_review + "/" + submissionId;
+				destination = "/final_review/" + submissionId;
 
 				// we do not want to complete - redirect now
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
@@ -196,7 +194,7 @@ public class TocView extends ControllerImpl
 			return;
 		}
 
-		Submission submission = assessmentService.idSubmission(submissionId);
+		Submission submission = assessmentService.getSubmission(submissionId);
 		try
 		{
 			assessmentService.completeSubmission(submission);

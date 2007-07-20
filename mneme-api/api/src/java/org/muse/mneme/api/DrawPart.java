@@ -21,43 +21,35 @@
 
 package org.muse.mneme.api;
 
-public enum QuestionType
+import java.util.List;
+
+/**
+ * DrawPart holds a set of manually selected questions.
+ */
+public interface DrawPart extends Part
 {
-	audioRecording(7), essay(5), fileUpload(6), fillIn(8), matching(9), multipleChoice(1), multipleCorrect(2), numeric(11), survey(
-			3), trueFalse(4);
+	/**
+	 * Add a pool and count to draw from.
+	 * 
+	 * @param pool
+	 *        The pool to draw from.
+	 * @param numQuestions
+	 *        The number of questions to draw.
+	 */
+	void addPool(Pool pool, Integer numQuestions);
 
 	/**
-	 * Find the type that matches this db encoding.
+	 * Get all the pools and their counts.
 	 * 
-	 * @param dbEncoding
-	 *        The db encoding.
-	 * @return The type that matches the encoding, or null if not found.
+	 * @return The List of draws.
 	 */
-	public static QuestionType valueOf(Integer dbEncoding)
-	{
-		for (QuestionType type : QuestionType.values())
-		{
-			if (type.dbEncoding.equals(dbEncoding)) return type;
-		}
-
-		return null;
-	}
-
-	/** The database encoding for this type. */
-	protected Integer dbEncoding = null;
-
-	QuestionType(int dbEncoding)
-	{
-		this.dbEncoding = new Integer(dbEncoding);
-	}
+	List<PoolDraw> getDraws();
 
 	/**
-	 * Access the database encoding for this type.
+	 * Remove a pool's draw from the part.
 	 * 
-	 * @return The database encoding for this type.
+	 * @param pool
+	 *        The pool to remove.
 	 */
-	public Integer getDbEncoding()
-	{
-		return this.dbEncoding;
-	}
+	void removePool(Pool pool);
 }

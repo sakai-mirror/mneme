@@ -23,9 +23,7 @@ package org.muse.mneme.tool;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,22 +32,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentAnswer;
-import org.muse.mneme.api.AssessmentClosedException;
-import org.muse.mneme.api.AssessmentCompletedException;
-import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.AssessmentQuestion;
+import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.MnemeService;
-import org.muse.mneme.api.AssessmentSubmissionStatus;
-import org.muse.mneme.api.QuestionPart;
-import org.muse.mneme.api.QuestionPresentation;
-import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
-import org.muse.mneme.api.SubmissionCompletedException;
+import org.muse.mneme.api.Question;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
-import org.sakaiproject.time.api.Time;
 import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
@@ -218,92 +205,92 @@ public class SimulateView extends ControllerImpl
 		this.userDirectoryService = service;
 	}
 
-	protected void answerEssay(AssessmentQuestion question, SubmissionAnswer answer)
+	protected void answerEssay(Question question, Answer answer)
 	{
-		answer.setEntryAnswerText("Essay text.");
+//		answer.setEntryAnswerText("Essay text.");
 
 		answerRationale(question, answer);
 	}
 
-	protected void answerFillIn(AssessmentQuestion question, SubmissionAnswer answer)
+	protected void answerFillIn(Question question, Answer answer)
 	{
-		// The corrects list the answers (text). One part.
-		List<AssessmentAnswer> answers = question.getPart().getCorrectAnswers();
-		if ((answers == null) || (answers.isEmpty()))
-		{
-			return;
-		}
-
-		// pack the answer text into an array
-		String[] answerIds = new String[answers.size()];
-		int index = 0;
-		for (AssessmentAnswer a : answers)
-		{
-			answerIds[index++] = a.getText();
-		}
-
-		// set the answer
-		answer.setEntryAnswerTexts(answerIds);
-
-		answerRationale(question, answer);
+//		// The corrects list the answers (text). One part.
+//		List<AssessmentAnswer> answers = question.getPart().getCorrectAnswers();
+//		if ((answers == null) || (answers.isEmpty()))
+//		{
+//			return;
+//		}
+//
+//		// pack the answer text into an array
+//		String[] answerIds = new String[answers.size()];
+//		int index = 0;
+//		for (AssessmentAnswer a : answers)
+//		{
+//			answerIds[index++] = a.getText();
+//		}
+//
+//		// set the answer
+//		answer.setEntryAnswerTexts(answerIds);
+//
+//		answerRationale(question, answer);
 	}
 
-	protected void answerMatch(AssessmentQuestion question, SubmissionAnswer answer)
+	protected void answerMatch(Question question, Answer answer)
 	{
-		// get a correct from each part
-		List<AssessmentAnswer> answers = new ArrayList<AssessmentAnswer>();
-		for (QuestionPart part : question.getParts())
-		{
-			List<AssessmentAnswer> partAnswers = part.getCorrectAnswers();
-			answers.addAll(partAnswers);
-		}
-
-		// pack the answer ids into an array
-		String[] answerIds = new String[answers.size()];
-		int index = 0;
-		for (AssessmentAnswer a : answers)
-		{
-			answerIds[index++] = a.getId();
-		}
-
-		// set the answer
-		answer.setEntryAnswerIds(answerIds);
-
-		answerRationale(question, answer);
+//		// get a correct from each part
+//		List<AssessmentAnswer> answers = new ArrayList<AssessmentAnswer>();
+//		for (QuestionPart part : question.getParts())
+//		{
+//			List<AssessmentAnswer> partAnswers = part.getCorrectAnswers();
+//			answers.addAll(partAnswers);
+//		}
+//
+//		// pack the answer ids into an array
+//		String[] answerIds = new String[answers.size()];
+//		int index = 0;
+//		for (AssessmentAnswer a : answers)
+//		{
+//			answerIds[index++] = a.getId();
+//		}
+//
+//		// set the answer
+//		answer.setEntryAnswerIds(answerIds);
+//
+//		answerRationale(question, answer);
 	}
 
-	protected void answerRationale(AssessmentQuestion question, SubmissionAnswer answer)
+	protected void answerRationale(Question question, Answer answer)
 	{
-		// rational required?
-		if ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue()))
-		{
-			answer.setRationale("rationale");
-		}
+//		// rational required?
+//		if ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue()))
+//		{
+//			answer.setRationale("rationale");
+//		}
 	}
 
-	protected void answerTF_MC_Survey(AssessmentQuestion question, SubmissionAnswer answer)
+	protected void answerTF_MC_Survey(Question question, Answer answer)
 	{
-		// which is correct? One part.
-		List<AssessmentAnswer> answers = question.getPart().getCorrectAnswers();
-		if ((answers == null) || (answers.isEmpty()))
-		{
-			// no correct answer, pick one.
-			answers = new ArrayList<AssessmentAnswer>(1);
-			answers.add(question.getPart().getAnswers().get(0));
-		}
-
-		// pack the answer ids into an array
-		String[] answerIds = new String[answers.size()];
-		int index = 0;
-		for (AssessmentAnswer a : answers)
-		{
-			answerIds[index++] = a.getId();
-		}
-
-		// set the answer
-		answer.setEntryAnswerIds(answerIds);
-
-		answerRationale(question, answer);
+//		// which is correct? One part.
+//		List<AssessmentAnswer> answers = question.getPart().getCorrectAnswers();
+//		if ((answers == null) || (answers.isEmpty()))
+//		{
+//			// no correct answer, pick one.
+//			answers = new ArrayList<AssessmentAnswer>(1);
+//			answers.add(question.getPart().getAnswers().get(0));
+//		}
+//
+//		// pack the answer ids into an array
+//		String[] answerIds = new String[answers.size()];
+//		int index = 0;
+//		for (AssessmentAnswer a : answers)
+//		{
+//			answerIds[index++] = a.getId();
+//		}
+//
+//		// set the answer
+//		answer.setEntryAnswerIds(answerIds);
+//
+//		answerRationale(question, answer);
 	}
 
 	/**
@@ -403,234 +390,235 @@ public class SimulateView extends ControllerImpl
 	 */
 	protected String simulateSubmission(String context, String userEid, int thinkTime)
 	{
-		Time start = timeService.newTime();
-
-		User currentUser = null;
-		try
-		{
-			currentUser = userDirectoryService.getUser(sessionManager.getCurrentSessionUserId());
-		}
-		catch (UserNotDefinedException e)
-		{
-		}
-
-		try
-		{
-			User user = establishUser(null, userEid);
-
-			// get the list of assessments (simulate list view)
-			MnemeService.GetUserContextSubmissionsSort sort = MnemeService.GetUserContextSubmissionsSort.status_d;
-			List<Submission> submissions = assessmentService.getUserContextSubmissions(context, null, sort);
-
-			// shuffle these to get a random available one
-			Collections.shuffle(submissions, new Random(userEid.hashCode()));
-
-			// clear the thread to simulate a new requst / response cycle
-			threadLocalManager.clear();
-			if (thinkTime > 0)
-			{
-				try
-				{
-					Thread.sleep(thinkTime);
-				}
-				catch (InterruptedException ignore)
-				{
-				}
-			}
-			establishUser(user, userEid);
-
-			// pick one that is ready to take
-			String aid = null;
-			for (Submission submission : submissions)
-			{
-				AssessmentSubmissionStatus status = submission.getAssessmentSubmissionStatus();
-				if ((status == AssessmentSubmissionStatus.completeReady) || (status == AssessmentSubmissionStatus.ready))
-				{
-					aid = submission.getAssessment().getId();
-					break;
-				}
-			}
-			if (aid == null) return "no assessment";
-
-			// simulate the enter view get
-
-			// useless code
-			Assessment assessment = assessmentService.idAssessment(aid);
-			assessment.getIsClosed();
-			assessmentService.allowSubmit(assessment, null);
-			if ((assessment.getPassword() == null) && (assessment.getDescription() == null) && (assessment.getAttachments().isEmpty())
-					&& (assessment.getRandomAccess().booleanValue()) && (assessment.getTimeLimit() == null))
-			{
-			}
-			// useless code
-
-			// enter the submission (simulate enter view post)
-
-			// useless code
-			assessment = assessmentService.idAssessment(aid);
-			assessment.getPassword();
-			// useless code
-
-			String sid = null;
-			try
-			{
-				Submission submission = assessmentService.enterSubmission(assessmentService.idAssessment(aid), null);
-				sid = submission.getId();
-
-				// useless code
-				assessment = submission.getAssessment();
-				QuestionPresentation presentation = assessment.getQuestionPresentation();
-				assessment.getRandomAccess();
-				// useless code
-			}
-			catch (AssessmentClosedException e)
-			{
-				return e.toString();
-			}
-			catch (AssessmentCompletedException e)
-			{
-				return e.toString();
-			}
-			catch (AssessmentPermissionException e)
-			{
-				return e.toString();
-			}
-
-			if (sid == null) return "could not enter submission";
-
-			// pick the first question
-			AssessmentQuestion firstQuestion = assessmentService.idSubmission(sid).getAssessment().getFirstSection().getFirstQuestion();
-			if (firstQuestion == null) return "no first quesiton";
-			String qid = firstQuestion.getId();
-
-			// loop for the entire test
-			int count = 0;
-			while (qid != null)
-			{
-				// emulate the question view get
-
-				// useless code
-				Submission submission = assessmentService.idSubmission(sid);
-				submission.completeIfOver();
-				submission = assessmentService.idSubmission(sid);
-				assessmentService.allowCompleteSubmission(submission, null);
-				AssessmentQuestion question = submission.getAssessment().getQuestion(qid);
-				question.getSection().getAssessment().getRandomAccess();
-				submission.getIsCompleteQuestion(question);
-				// useless code
-
-				// clear the thread to simulate a new requst / response cycle
-				threadLocalManager.clear();
-				if (thinkTime > 0)
-				{
-					try
-					{
-						Thread.sleep(thinkTime);
-					}
-					catch (InterruptedException ignore)
-					{
-					}
-				}
-				establishUser(user, userEid);
-
-				// emulate the quesiton view post
-				// form an answer to qid
-				submission = assessmentService.idSubmission(sid);
-				question = submission.getAssessment().getQuestion(qid);
-				SubmissionAnswer answer = submission.getAnswer(question);
-
-				// answer the question
-				switch (question.getType())
-				{
-					case trueFalse:
-					case multipleChoice:
-					case multipleCorrect:
-					case survey:
-					{
-						answerTF_MC_Survey(question, answer);
-						break;
-					}
-
-					case essay:
-					{
-						answerEssay(question, answer);
-						break;
-					}
-
-					case fillIn:
-					case numeric:
-					{
-						answerFillIn(question, answer);
-						break;
-					}
-
-					case matching:
-					{
-						answerMatch(question, answer);
-						break;
-					}
-						// TODO: fileUpload, audioRecording
-				}
-
-				// get the next question
-				AssessmentQuestion nextQuesiton = question.getAssessmentOrdering().getNext();
-				if (nextQuesiton != null)
-				{
-					qid = nextQuesiton.getId();
-				}
-				else
-				{
-					qid = null;
-				}
-
-				// submit it
-				try
-				{
-					assessmentService.submitAnswer(answer, Boolean.TRUE, Boolean.FALSE);
-					count++;
-				}
-				catch (AssessmentClosedException e)
-				{
-				}
-				catch (SubmissionCompletedException e)
-				{
-				}
-				catch (AssessmentPermissionException e)
-				{
-				}
-			}
-
-			// finish
-			try
-			{
-				assessmentService.completeSubmission(assessmentService.idSubmission(sid));
-			}
-			catch (AssessmentClosedException e)
-			{
-				return e.toString();
-			}
-			catch (SubmissionCompletedException e)
-			{
-				return e.toString();
-			}
-			catch (AssessmentPermissionException e)
-			{
-				return e.toString();
-			}
-
-			Time end = timeService.newTime();
-			return "user: " + userEid + " submission: " + sid + " assessment: " + aid + " questions: " + count + " time(ms): "
-					+ (end.getTime() - start.getTime());
-		}
-
-		finally
-		{
-			threadLocalManager.clear();
-
-			if (currentUser != null)
-			{
-				establishUser(currentUser, null);
-			}
-		}
+		return "";
+//		Time start = timeService.newTime();
+//
+//		User currentUser = null;
+//		try
+//		{
+//			currentUser = userDirectoryService.getUser(sessionManager.getCurrentSessionUserId());
+//		}
+//		catch (UserNotDefinedException e)
+//		{
+//		}
+//
+//		try
+//		{
+//			User user = establishUser(null, userEid);
+//
+//			// get the list of assessments (simulate list view)
+//			MnemeService.GetUserContextSubmissionsSort sort = MnemeService.GetUserContextSubmissionsSort.status_d;
+//			List<Submission> submissions = assessmentService.getUserContextSubmissions(context, null, sort);
+//
+//			// shuffle these to get a random available one
+//			Collections.shuffle(submissions, new Random(userEid.hashCode()));
+//
+//			// clear the thread to simulate a new requst / response cycle
+//			threadLocalManager.clear();
+//			if (thinkTime > 0)
+//			{
+//				try
+//				{
+//					Thread.sleep(thinkTime);
+//				}
+//				catch (InterruptedException ignore)
+//				{
+//				}
+//			}
+//			establishUser(user, userEid);
+//
+//			// pick one that is ready to take
+//			String aid = null;
+//			for (Submission submission : submissions)
+//			{
+//				AssessmentSubmissionStatus status = submission.getAssessmentSubmissionStatus();
+//				if ((status == AssessmentSubmissionStatus.completeReady) || (status == AssessmentSubmissionStatus.ready))
+//				{
+//					aid = submission.getAssessment().getId();
+//					break;
+//				}
+//			}
+//			if (aid == null) return "no assessment";
+//
+//			// simulate the enter view get
+//
+//			// useless code
+//			Assessment assessment = assessmentService.idAssessment(aid);
+//			assessment.getIsClosed();
+//			assessmentService.allowSubmit(assessment, null);
+//			if ((assessment.getPassword() == null) && (assessment.getDescription() == null) && (assessment.getAttachments().isEmpty())
+//					&& (assessment.getRandomAccess().booleanValue()) && (assessment.getTimeLimit() == null))
+//			{
+//			}
+//			// useless code
+//
+//			// enter the submission (simulate enter view post)
+//
+//			// useless code
+//			assessment = assessmentService.idAssessment(aid);
+//			assessment.getPassword();
+//			// useless code
+//
+//			String sid = null;
+//			try
+//			{
+//				Submission submission = assessmentService.enterSubmission(assessmentService.idAssessment(aid), null);
+//				sid = submission.getId();
+//
+//				// useless code
+//				assessment = submission.getAssessment();
+//				QuestionPresentation presentation = assessment.getQuestionPresentation();
+//				assessment.getRandomAccess();
+//				// useless code
+//			}
+//			catch (AssessmentClosedException e)
+//			{
+//				return e.toString();
+//			}
+//			catch (AssessmentCompletedException e)
+//			{
+//				return e.toString();
+//			}
+//			catch (AssessmentPermissionException e)
+//			{
+//				return e.toString();
+//			}
+//
+//			if (sid == null) return "could not enter submission";
+//
+//			// pick the first question
+//			Question firstQuestion = assessmentService.idSubmission(sid).getAssessment().getFirstSection().getFirstQuestion();
+//			if (firstQuestion == null) return "no first quesiton";
+//			String qid = firstQuestion.getId();
+//
+//			// loop for the entire test
+//			int count = 0;
+//			while (qid != null)
+//			{
+//				// emulate the question view get
+//
+//				// useless code
+//				Submission submission = assessmentService.idSubmission(sid);
+//				submission.completeIfOver();
+//				submission = assessmentService.idSubmission(sid);
+//				assessmentService.allowCompleteSubmission(submission, null);
+//				Question question = submission.getAssessment().getQuestion(qid);
+//				question.getSection().getAssessment().getRandomAccess();
+//				submission.getIsCompleteQuestion(question);
+//				// useless code
+//
+//				// clear the thread to simulate a new requst / response cycle
+//				threadLocalManager.clear();
+//				if (thinkTime > 0)
+//				{
+//					try
+//					{
+//						Thread.sleep(thinkTime);
+//					}
+//					catch (InterruptedException ignore)
+//					{
+//					}
+//				}
+//				establishUser(user, userEid);
+//
+//				// emulate the quesiton view post
+//				// form an answer to qid
+//				submission = assessmentService.idSubmission(sid);
+//				question = submission.getAssessment().getQuestion(qid);
+//				Answer answer = submission.getAnswer(question);
+//
+//				// answer the question
+//				switch (question.getType())
+//				{
+//					case trueFalse:
+//					case multipleChoice:
+//					case multipleCorrect:
+//					case survey:
+//					{
+//						answerTF_MC_Survey(question, answer);
+//						break;
+//					}
+//
+//					case essay:
+//					{
+//						answerEssay(question, answer);
+//						break;
+//					}
+//
+//					case fillIn:
+//					case numeric:
+//					{
+//						answerFillIn(question, answer);
+//						break;
+//					}
+//
+//					case matching:
+//					{
+//						answerMatch(question, answer);
+//						break;
+//					}
+//						// TODO: fileUpload, audioRecording
+//				}
+//
+//				// get the next question
+//				Question nextQuesiton = question.getAssessmentOrdering().getNext();
+//				if (nextQuesiton != null)
+//				{
+//					qid = nextQuesiton.getId();
+//				}
+//				else
+//				{
+//					qid = null;
+//				}
+//
+//				// submit it
+//				try
+//				{
+//					assessmentService.submitAnswer(answer, Boolean.TRUE, Boolean.FALSE);
+//					count++;
+//				}
+//				catch (AssessmentClosedException e)
+//				{
+//				}
+//				catch (SubmissionCompletedException e)
+//				{
+//				}
+//				catch (AssessmentPermissionException e)
+//				{
+//				}
+//			}
+//
+//			// finish
+//			try
+//			{
+//				assessmentService.completeSubmission(assessmentService.idSubmission(sid));
+//			}
+//			catch (AssessmentClosedException e)
+//			{
+//				return e.toString();
+//			}
+//			catch (SubmissionCompletedException e)
+//			{
+//				return e.toString();
+//			}
+//			catch (AssessmentPermissionException e)
+//			{
+//				return e.toString();
+//			}
+//
+//			Time end = timeService.newTime();
+//			return "user: " + userEid + " submission: " + sid + " assessment: " + aid + " questions: " + count + " time(ms): "
+//					+ (end.getTime() - start.getTime());
+//		}
+//
+//		finally
+//		{
+//			threadLocalManager.clear();
+//
+//			if (currentUser != null)
+//			{
+//				establishUser(currentUser, null);
+//			}
+//		}
 	}
 }

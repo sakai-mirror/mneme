@@ -32,18 +32,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.AssessmentQuestion;
-import org.muse.mneme.api.AssessmentSection;
 import org.muse.mneme.api.MnemeService;
-import org.muse.mneme.api.QuestionPresentation;
+import org.muse.mneme.api.Part;
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
 import org.muse.mneme.api.SubmissionCompletedException;
-import org.muse.mneme.tool.AssessmentDeliveryTool.Destinations;
-import org.muse.mneme.tool.AssessmentDeliveryTool.Errors;
 import org.sakaiproject.util.Web;
 
 /**
@@ -79,7 +77,7 @@ public class QuestionView extends ControllerImpl
 		String submissionId = params[2];
 		String questionSelector = params[3];
 
-		Submission submission = assessmentService.idSubmission(submissionId);
+		Submission submission = assessmentService.getSubmission(submissionId);
 
 		if (submission == null)
 		{
@@ -96,7 +94,7 @@ public class QuestionView extends ControllerImpl
 		}
 
 		// if the submission has past a hard deadline or ran out of time, close it and tell the user
-		if (submission.completeIfOver().booleanValue())
+		if (submission.completeIfOver())
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.over)));
@@ -106,7 +104,7 @@ public class QuestionView extends ControllerImpl
 		context.put("actionTitle", messages.getString("question-header-work"));
 
 		// collect the questions (actually their answers) to put on the page
-		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
+		List<Answer> answers = new ArrayList<Answer>();
 
 		Errors err = questionSetup(submission, questionSelector, context, answers, true);
 		if (err != null)
@@ -114,16 +112,6 @@ public class QuestionView extends ControllerImpl
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + err + "/" + submissionId)));
 			return;
-		}
-
-		// check that the answers are all unchanged
-		if (submission.getIsAnswersChanged().booleanValue())
-		{
-			M_log.warn("quesitonGet: submission has modified answers: " + submissionId);
-
-			// // redirect to error
-			// res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			// return;
 		}
 
 		// render
@@ -161,10 +149,10 @@ public class QuestionView extends ControllerImpl
 		// }
 
 		// collect the questions (actually their answers) to put on the page
-		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
+		List<Answer> answers = new ArrayList<Answer>();
 
 		// get the submission
-		Submission submission = assessmentService.idSubmission(submissionId);
+		Submission submission = assessmentService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			// redirect to error
@@ -180,16 +168,6 @@ public class QuestionView extends ControllerImpl
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + err)));
 			return;
-		}
-
-		// check that the answers are all unchanged
-		if (submission.getIsAnswersChanged().booleanValue())
-		{
-			M_log.warn("quesitonPost: submission has modified answers: " + submissionId);
-
-			// // redirect to error
-			// res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			// return;
 		}
 
 		// read form
@@ -208,7 +186,7 @@ public class QuestionView extends ControllerImpl
 				|| destination.startsWith("/instructions") || context.getPreviousDestination().equals(destination)));
 
 		// and if we are working in a random access test, answers are always complete
-		if (submission.getAssessment().getRandomAccess().booleanValue()) answersComplete = Boolean.TRUE;
+		if (submission.getAssessment().getRandomAccess()) answersComplete = Boolean.TRUE;
 
 		// where are we going?
 		destination = questionChooseDestination(destination, questionSelector, submissionId);
@@ -228,20 +206,20 @@ public class QuestionView extends ControllerImpl
 			if (destination.equals("SUBMIT"))
 			{
 				// get the submission again, to make sure that the answers we just posted are reflected
-				submission = assessmentService.idSubmission(submissionId);
+				submission = assessmentService.getSubmission(submissionId);
 
 				// if linear, or the submission is all answered, we can complete the submission and go to submitted
-				if ((!submission.getAssessment().getRandomAccess().booleanValue()) || (submission.getIsAnswered(null).booleanValue()))
+				if ((!submission.getAssessment().getRandomAccess()) || (submission.getIsAnswered()))
 				{
 					assessmentService.completeSubmission(submission);
 
-					destination = "/" + Destinations.submitted + "/" + submissionId;
+					destination = "/submitted/" + submissionId;
 				}
 
 				// if not linear, and there are unanswered parts, send to final review
 				else
 				{
-					destination = "/" + Destinations.final_review + "/" + submissionId;
+					destination = "/final_review/" + submissionId;
 				}
 			}
 
@@ -287,123 +265,123 @@ public class QuestionView extends ControllerImpl
 	protected String questionChooseDestination(String destination, String questionSelector, String submissionId)
 	{
 		// get the submission
-		Submission submission = assessmentService.idSubmission(submissionId);
+		Submission submission = assessmentService.getSubmission(submissionId);
 		if (submission == null)
 		{
-			return "/" + Destinations.error + "/" + Errors.invalid;
+			return "/error/" + Errors.invalid;
 		}
 
 		// for requests for a single question
 		if (questionSelector.startsWith("q"))
 		{
 			// make sure by-question is valid for this assessment
-			if (submission.getAssessment().getQuestionPresentation() != QuestionPresentation.BY_QUESTION)
+			if (submission.getAssessment().getQuestionGrouping() != QuestionGrouping.question)
 			{
-				return "/" + Destinations.error + "/" + Errors.invalid;
+				return "/error/" + Errors.invalid;
 			}
 
 			String questionId = questionSelector.substring(1);
-			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+			Question question = submission.getAssessment().getParts().getQuestion(questionId);
 			if (question == null)
 			{
-				return "/" + Destinations.error + "/" + Errors.invalid;
+				return "/error/" + Errors.invalid;
 			}
 
 			if ("NEXT".equals(destination))
 			{
-				// if the question is not the last of the section, go to the next quesiton
-				if (!question.getSectionOrdering().getIsLast())
+				// if the question is not the last of the part, go to the next quesiton
+				if (!question.getPartOrdering().getIsLast())
 				{
-					return "/" + Destinations.question + "/" + submissionId + "/q" + question.getAssessmentOrdering().getNext().getId();
+					return "/question/" + submissionId + "/q" + question.getAssessmentOrdering().getNext().getId();
 				}
 
-				// if there's a next section
-				if (!question.getSection().getOrdering().getIsLast().booleanValue())
+				// if there's a next part
+				if (!question.getPart().getOrdering().getIsLast())
 				{
-					// if the next section is not merged
-					AssessmentSection next = question.getSection().getOrdering().getNext();
-					if (!next.getIsMerged().booleanValue())
+					// if showing part presentation
+					Part next = question.getPart().getOrdering().getNext();
+					if (submission.getAssessment().getParts().getShowPresentation())
 					{
-						// choose the section instructions
-						return "/" + Destinations.section_instructions + "/" + submissionId + "/" + next.getId();
+						// choose the part instructions
+						return "/part_instructions/" + submissionId + "/" + next.getId();
 					}
 
-					// otherwise choose the first question of the next section
-					return "/" + Destinations.question + "/" + submissionId + "/q" + next.getFirstQuestion().getId();
+					// otherwise choose the first question of the next part
+					return "/question/" + submissionId + "/q" + next.getFirstQuestion().getId();
 				}
 
 				// no next part, this is an error
-				return "/" + Destinations.error + "/" + Errors.invalid;
+				return "/error/" + Errors.invalid;
 			}
 
 			else if ("PREV".equals(destination))
 			{
-				// if the question is not the first of the section, go to the prev quesiton
-				if (!question.getSectionOrdering().getIsFirst())
+				// if the question is not the first of the part, go to the prev quesiton
+				if (!question.getPartOrdering().getIsFirst())
 				{
-					return "/" + Destinations.question + "/" + submissionId + "/q" + question.getAssessmentOrdering().getPrevious().getId();
+					return "/question/" + submissionId + "/q" + question.getAssessmentOrdering().getPrevious().getId();
 				}
 
-				// prev into this section's instructions... if this section is not merged
-				AssessmentSection section = question.getSection();
-				if (!section.getIsMerged().booleanValue())
+				// prev into this part's instructions... if showing part presentation
+				Part part = question.getPart();
+				if (submission.getAssessment().getParts().getShowPresentation())
 				{
-					// choose the section instructions
-					return "/" + Destinations.section_instructions + "/" + submissionId + "/" + section.getId();
+					// choose the part instructions
+					return "/part_instructions/" + submissionId + "/" + part.getId();
 				}
 
-				// otherwise choose the last question of the prev section, if we have one
-				AssessmentSection prev = section.getOrdering().getPrevious();
+				// otherwise choose the last question of the prev part, if we have one
+				Part prev = part.getOrdering().getPrevious();
 				if (prev != null)
 				{
-					return "/" + Destinations.question + "/" + submissionId + "/q" + prev.getLastQuestion().getId();
+					return "/question/" + submissionId + "/q" + prev.getLastQuestion().getId();
 				}
 
 				// no prev part, this is an error
-				return "/" + Destinations.error + "/" + Errors.invalid;
+				return "/error/" + Errors.invalid;
 			}
 		}
 
-		// for section-per-page
-		else if (questionSelector.startsWith("s"))
+		// for part-per-page
+		else if (questionSelector.startsWith("p"))
 		{
-			// make sure by-section is valid for this assessment
-			if (submission.getAssessment().getQuestionPresentation() != QuestionPresentation.BY_SECTION)
+			// make sure by-part is valid for this assessment
+			if (submission.getAssessment().getQuestionGrouping() != QuestionGrouping.part)
 			{
-				return "/" + Destinations.error + "/" + Errors.invalid;
+				return "/error /" + Errors.invalid;
 			}
 
 			String sectionId = questionSelector.substring(1);
-			AssessmentSection section = submission.getAssessment().getSection(sectionId);
-			if (section == null)
+			Part part = submission.getAssessment().getParts().getPart(sectionId);
+			if (part == null)
 			{
-				return "/" + Destinations.error + "/" + Errors.invalid;
+				return "/error/" + Errors.invalid;
 			}
 
 			if ("NEXT".equals(destination))
 			{
-				// if there's a next section, go there
-				if (!section.getOrdering().getIsLast().booleanValue())
+				// if there's a next part, go there
+				if (!part.getOrdering().getIsLast())
 				{
-					AssessmentSection next = section.getOrdering().getNext();
-					return "/" + Destinations.question + "/" + submissionId + "/s" + next.getId();
+					Part next = part.getOrdering().getNext();
+					return "/question/" + submissionId + "/s" + next.getId();
 				}
 
-				// no next section, this is an error
-				return "/" + Destinations.error + "/" + Errors.invalid;
+				// no next part, this is an error
+				return "/error/" + Errors.invalid;
 			}
 
 			else if ("PREV".equals(destination))
 			{
-				// if there's a prev section, choose to enter that
-				if (!section.getOrdering().getIsFirst().booleanValue())
+				// if there's a prev part, choose to enter that
+				if (!part.getOrdering().getIsFirst())
 				{
-					AssessmentSection prev = section.getOrdering().getPrevious();
-					return "/" + Destinations.question + "/" + submissionId + "/s" + prev.getId();
+					Part prev = part.getOrdering().getPrevious();
+					return "/question/" + submissionId + "/s" + prev.getId();
 				}
 
-				// no prev section, this is an error
-				return "/" + Destinations.error + "/" + Errors.invalid;
+				// no prev part, this is an error
+				return "/error/" + Errors.invalid;
 			}
 		}
 
@@ -426,8 +404,7 @@ public class QuestionView extends ControllerImpl
 	 *        Output writer.
 	 * @return null if all went well, else an Errors to indicate what went wrong.
 	 */
-	protected Errors questionSetup(Submission submission, String questionSelector, Context context, List<SubmissionAnswer> answers,
-			boolean linearCheck)
+	protected Errors questionSetup(Submission submission, String questionSelector, Context context, List<Answer> answers, boolean linearCheck)
 	{
 		// not in review mode
 		context.put("review", Boolean.FALSE);
@@ -435,7 +412,7 @@ public class QuestionView extends ControllerImpl
 		// put in the selector
 		context.put("questionSelector", questionSelector);
 
-		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
+		if (!assessmentService.allowCompleteSubmission(submission, null))
 		{
 			return Errors.unauthorized;
 		}
@@ -448,7 +425,7 @@ public class QuestionView extends ControllerImpl
 			// TODO: assure the test is by-question
 
 			String questionId = questionSelector.substring(1);
-			AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+			Question question = submission.getAssessment().getParts().getQuestion(questionId);
 			if (question == null)
 			{
 				return Errors.invalid;
@@ -456,14 +433,13 @@ public class QuestionView extends ControllerImpl
 
 			// if we need to do our linear assessment check, and this is a linear assessment,
 			// we will reject if the question has been marked as 'complete'
-			if (linearCheck && !question.getSection().getAssessment().getRandomAccess().booleanValue()
-					&& submission.getIsCompleteQuestion(question).booleanValue())
+			if (linearCheck && !question.getPart().getAssessment().getRandomAccess() && submission.getIsCompleteQuestion(question))
 			{
 				return Errors.linear;
 			}
 
 			// find the answer (or have one created) for this submission / question
-			SubmissionAnswer answer = submission.getAnswer(question);
+			Answer answer = submission.getAnswer(question);
 			if (answer != null)
 			{
 				answers.add(answer);
@@ -473,27 +449,27 @@ public class QuestionView extends ControllerImpl
 			context.put("question", question);
 		}
 
-		// for requests for a section
+		// for requests for a part
 		else if (questionSelector.startsWith("s"))
 		{
-			// TODO: assure the test is by-section
+			// TODO: assure the test is by-part
 
 			String sectionId = questionSelector.substring(1);
-			AssessmentSection section = submission.getAssessment().getSection(sectionId);
-			if (section == null)
+			Part part = submission.getAssessment().getParts().getPart(sectionId);
+			if (part == null)
 			{
 				return Errors.invalid;
 			}
 
-			// get all the answers for this section
-			for (AssessmentQuestion question : section.getQuestions())
+			// get all the answers for this part
+			for (Question question : part.getQuestions())
 			{
-				SubmissionAnswer answer = submission.getAnswer(question);
+				Answer answer = submission.getAnswer(question);
 				answers.add(answer);
 			}
 
-			// tell the UI that we are doing single section
-			context.put("section", section);
+			// tell the UI that we are doing single part
+			context.put("part", part);
 		}
 
 		// for requests for the entire assessment
@@ -502,11 +478,11 @@ public class QuestionView extends ControllerImpl
 			// TODO: assure the test is by-test
 
 			// get all the answers to all the questions in all sections
-			for (AssessmentSection section : submission.getAssessment().getSections())
+			for (Part part : submission.getAssessment().getParts().getParts())
 			{
-				for (AssessmentQuestion question : section.getQuestions())
+				for (Question question : part.getQuestions())
 				{
-					SubmissionAnswer answer = submission.getAnswer(question);
+					Answer answer = submission.getAnswer(question);
 					answers.add(answer);
 				}
 			}
@@ -528,7 +504,7 @@ public class QuestionView extends ControllerImpl
 	 * @param toc
 	 *        if true, send to TOC if possible (not possible for linear).
 	 * @param instructions
-	 *        if true, send to section instructions for first question.
+	 *        if true, send to part instructions for first question.
 	 */
 	protected void redirectToQuestion(HttpServletRequest req, HttpServletResponse res, Submission submission, boolean toc, boolean instructions)
 			throws IOException
@@ -537,63 +513,62 @@ public class QuestionView extends ControllerImpl
 		Assessment assessment = submission.getAssessment();
 
 		// if we are random access, and allowed, send to TOC
-		if (toc && assessment.getRandomAccess().booleanValue())
+		if (toc && assessment.getRandomAccess())
 		{
-			destination = "/" + Destinations.toc + "/" + submission.getId();
+			destination = "/toc/" + submission.getId();
 		}
 
 		else
 		{
 			// find the first incomplete question
-			AssessmentQuestion question = submission.getFirstIncompleteQuestion();
+			Question question = submission.getFirstIncompleteQuestion();
 
 			// if we don't have one, we will go to the toc (or final_review for linear)
 			if (question == null)
 			{
-				if (!assessment.getRandomAccess().booleanValue())
+				if (!assessment.getRandomAccess())
 				{
-					destination = "/" + Destinations.final_review + "/" + submission.getId();
+					destination = "/final_review/" + submission.getId();
 				}
 				else
 				{
-					destination = "/" + Destinations.toc + "/" + submission.getId();
+					destination = "/toc/" + submission.getId();
 				}
 			}
 
 			else
 			{
-				// send to the section instructions if it's a first question and by-question
-				if (instructions && (question.getSectionOrdering().getIsFirst().booleanValue())
-						&& (!question.getSection().getIsMerged().booleanValue())
-						&& (assessment.getQuestionPresentation() == QuestionPresentation.BY_QUESTION))
+				// send to the part instructions if it's a first question and by-question
+				if (instructions && (question.getPartOrdering().getIsFirst()) && (assessment.getParts().getShowPresentation())
+						&& (assessment.getQuestionGrouping() == QuestionGrouping.question))
 				{
 					// to instructions
-					destination = "/" + Destinations.section_instructions + "/" + submission.getId() + "/" + question.getSection().getId();
+					destination = "/part_instructions/" + submission.getId() + "/" + question.getPart().getId();
 				}
 
 				// or to the question
 				else
 				{
-					if (assessment.getQuestionPresentation() == QuestionPresentation.BY_QUESTION)
+					if (assessment.getQuestionGrouping() == QuestionGrouping.question)
 					{
-						destination = "/" + Destinations.question + "/" + submission.getId() + "/q" + question.getId();
+						destination = "/question/" + submission.getId() + "/q" + question.getId();
 					}
-					else if (assessment.getQuestionPresentation() == QuestionPresentation.BY_SECTION)
+					else if (assessment.getQuestionGrouping() == QuestionGrouping.part)
 					{
-						destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + question.getSection().getId();
+						destination = "/question/" + submission.getId() + "/s" + question.getPart().getId();
 
-						// include the question target if not the first quesiton in the section
-						if (!question.getSectionOrdering().getIsFirst().booleanValue())
+						// include the question target if not the first quesiton in the part
+						if (!question.getPartOrdering().getIsFirst())
 						{
 							destination = destination + "#" + question.getId();
 						}
 					}
 					else
 					{
-						destination = "/" + Destinations.question + "/" + submission.getId() + "/a";
+						destination = "/question/" + submission.getId() + "/a";
 
 						// include the question target if not the first quesiton in the assessment
-						if (!question.getAssessmentOrdering().getIsFirst().booleanValue())
+						if (!question.getAssessmentOrdering().getIsFirst())
 						{
 							destination = destination + "#" + question.getId();
 						}

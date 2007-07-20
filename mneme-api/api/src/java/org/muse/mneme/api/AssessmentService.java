@@ -29,51 +29,46 @@ import java.util.List;
 public interface AssessmentService
 {
 	/**
-	 * Create a new persistent assessment from the given information.<br />
-	 * The id will be re-generated, default values set, and the parameter assessment updated.
+	 * Check if the user is allowed to edit this assessment.
 	 * 
-	 * @param a
-	 *        The information from which to make the new assesment.
-	 * @throws AssessmentPermissionException
-	 *         if the user does not have permission to create the assessment.
+	 * @param assessment
+	 *        The assessment.
+	 * @param userId
+	 *        The user (if null, the current user is used).
+	 * @return TRUE if the user is allowed, FALSE if not.
 	 */
-	void addAssessment(Assessment a) throws AssessmentPermissionException;
+	Boolean allowEditAssessment(Assessment assessment, String userId);
 
 	/**
-	 * Check if the current user is allowed to add an assessment in this context.
+	 * Check if the user is allowed to list delivery assessments in this context.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
-	 */
-	Boolean allowAddAssessment(String context);
-
-	/**
-	 * Check if the current user is allowed to list delivery assessments in this context.
-	 * 
-	 * @param context
-	 *        The context.
+	 * @param userId
+	 *        The user (if null, the current user is used).
 	 * @return TRUE if the user is allowed to list delivery assessments in this context, FALSE if not.
 	 */
-	Boolean allowListDeliveryAssessment(String context);
+	Boolean allowListDeliveryAssessment(String context, String userId);
 
 	/**
-	 * Count the published assessments in the context - all of them!
+	 * Check if the user is allowed to manage assessments in this context.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @return The count of published assessments in the context.
+	 * @param userId
+	 *        The user (if null, the current user is used).
+	 * @return TRUE if the user is allowed to manage assessments in this context, FALSE if not.
 	 */
-	Integer countAssessments(String context);
+	Boolean allowManageAssessments(String context, String userId);
 
 	/**
-	 * Access an assessment by id. Assures that the full assessment information is populated. TODO: security
+	 * Count the assessments in the context - all of them!
 	 * 
-	 * @param id
-	 *        The assessment id.
-	 * @return The assessment object, complete, or null if not found.
+	 * @param context
+	 *        The context.
+	 * @return The count of assessments in the context.
 	 */
-	Assessment getAssessment(String id);
+	Integer countAssessments(String context);
 
 	/**
 	 * Get all the assessments for the context.
@@ -85,54 +80,42 @@ public interface AssessmentService
 	List<Assessment> getContextAssessments(String context);
 
 	/**
-	 * Access an assessment by id, but do not populate any information. Information will be populated as needed. TODO: security
+	 * Access an assessment by id.
 	 * 
 	 * @param id
 	 *        The assessment id.
 	 * @return The assessment object, or null if not found.
 	 */
-	Assessment idAssessment(String id);
+	Assessment getAssessment(String id);
 
 	/**
-	 * Create a new Assessment object, currently detached from persistence.
+	 * Create a new Assessment in the context.
 	 * 
-	 * @return a new, detached from persistence, assessment object.
+	 * @param context
+	 *        The context in which the assessment lives.
+	 * @throws AssessmentPermissionException
+	 *         if the current user is not allowed to create assessments in this context.
+	 * @return The new Assessment.
 	 */
-	Assessment newAssessment();
+	Assessment newAssessment(String context) throws AssessmentPermissionException;
 
 	/**
-	 * Create a new AssessmentAnswer object in this question part.
-	 * 
-	 * @param part
-	 *        The part this answer is in.
-	 * @return a new answer that is in this part.
-	 */
-	AssessmentAnswer newAssessmentAnswer(QuestionPart part);
-
-	/**
-	 * Create a new question object in this section.
-	 * 
-	 * @param section
-	 *        The assessment section to hold the question.
-	 * @return a new question that is in the section.
-	 */
-	AssessmentQuestion newQuestion(AssessmentSection section);
-
-	/**
-	 * Create a new question part object in this question.
-	 * 
-	 * @param question
-	 *        The question that this part is in.
-	 * @return a new part that is in the question.
-	 */
-	QuestionPart newQuestionPart(AssessmentQuestion question);
-
-	/**
-	 * Create a new Assessment section for this assessment.
+	 * Remove this assessment.
 	 * 
 	 * @param assessment
-	 *        The assessment this section goes in.
-	 * @return a new section that is in the assessment.
+	 *        The assessment to remove.
+	 * @throws AssessmentPermissionException
+	 *         if the current user is not allowed to remove this assessment.
 	 */
-	AssessmentSection newSection(Assessment assessment);
+	void removeAssessment(Assessment assessment) throws AssessmentPermissionException;
+
+	/**
+	 * Save changes made to this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment to save.
+	 * @throws AssessmentPermissionException
+	 *         if the current user is not allowed to edit this assessment.
+	 */
+	void saveAssessment(Assessment assessment) throws AssessmentPermissionException;
 }

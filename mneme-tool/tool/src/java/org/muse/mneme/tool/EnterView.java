@@ -35,12 +35,10 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.AssessmentQuestion;
 import org.muse.mneme.api.MnemeService;
-import org.muse.mneme.api.QuestionPresentation;
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.tool.AssessmentDeliveryTool.Destinations;
-import org.muse.mneme.tool.AssessmentDeliveryTool.Errors;
 import org.sakaiproject.util.Web;
 
 /**
@@ -75,7 +73,7 @@ public class EnterView extends ControllerImpl
 
 		String assessmentId = params[2];
 
-		Assessment assessment = assessmentService.idAssessment(assessmentId);
+		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
 			// redirect to error
@@ -98,14 +96,6 @@ public class EnterView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
-
-		// see if we can skip the enter view and go right to the quesiton
-		// if ((assessment.getPassword() == null) && (assessment.getDescription() == null) && (assessment.getAttachments().isEmpty())
-		// && (assessment.getRandomAccess().booleanValue()) && (assessment.getTimeLimit() == null))
-		// {
-		// enterSubmission(req, res, assessment);
-		// return;
-		// }
 
 		// collect information: the selected assessment (id the request)
 		context.put("assessment", assessment);
@@ -152,7 +142,7 @@ public class EnterView extends ControllerImpl
 		String destination = this.uiService.decode(req, context);
 
 		// process: enter the assessment for this user, find the submission id and starting question
-		Assessment assessment = assessmentService.idAssessment(assessmentId);
+		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
 			// redirect to error
@@ -161,7 +151,7 @@ public class EnterView extends ControllerImpl
 		}
 
 		// check password
-		if ((assessment.getPassword() != null) && (!assessment.checkPassword(value.getValue()).booleanValue()))
+		if ((assessment.getAccess().getPassword() != null) && (!assessment.getAccess().checkPassword(value.getValue())))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.password)));
@@ -241,60 +231,60 @@ public class EnterView extends ControllerImpl
 		Assessment assessment = submission.getAssessment();
 
 		// if we are random access, and allowed, send to TOC
-		if (toc && assessment.getRandomAccess().booleanValue())
+		if (toc && assessment.getRandomAccess())
 		{
-			destination = "/" + Destinations.toc + "/" + submission.getId();
+			destination = "/toc/" + submission.getId();
 		}
 
 		else
 		{
 			// find the first incomplete question
-			AssessmentQuestion question = submission.getFirstIncompleteQuestion();
+			Question question = submission.getFirstIncompleteQuestion();
 
 			// if we don't have one, we will go to the toc (or final_review for linear)
 			if (question == null)
 			{
-				if (!assessment.getRandomAccess().booleanValue())
+				if (!assessment.getRandomAccess())
 				{
-					destination = "/" + Destinations.final_review + "/" + submission.getId();
+					destination = "/final_review/" + submission.getId();
 				}
 				else
 				{
-					destination = "/" + Destinations.toc + "/" + submission.getId();
+					destination = "/toc/" + submission.getId();
 				}
 			}
 
 			else
 			{
 				// send to the section instructions if it's a first question and by-question
-				if (instructions && (question.getSectionOrdering().getIsFirst().booleanValue())
-						&& (!question.getSection().getIsMerged().booleanValue())
-						&& (assessment.getQuestionPresentation() == QuestionPresentation.BY_QUESTION))
+				// and we are showing part presentation and we have something authored for this part
+				if (instructions && (question.getPartOrdering().getIsFirst()) && (assessment.getParts().getShowPresentation())
+						&& (!question.getPart().getPresentation().getIsEmpty()) && (assessment.getQuestionGrouping() == QuestionGrouping.question))
 				{
 					// to instructions
-					destination = "/" + Destinations.section_instructions + "/" + submission.getId() + "/" + question.getSection().getId();
+					destination = "/part_instructions/" + submission.getId() + "/" + question.getPart().getId();
 				}
 
 				// or to the question
 				else
 				{
-					if (assessment.getQuestionPresentation() == QuestionPresentation.BY_QUESTION)
+					if (assessment.getQuestionGrouping() == QuestionGrouping.question)
 					{
-						destination = "/" + Destinations.question + "/" + submission.getId() + "/q" + question.getId();
+						destination = "/question/" + submission.getId() + "/q" + question.getId();
 					}
-					else if (assessment.getQuestionPresentation() == QuestionPresentation.BY_SECTION)
+					else if (assessment.getQuestionGrouping() == QuestionGrouping.part)
 					{
-						destination = "/" + Destinations.question + "/" + submission.getId() + "/s" + question.getSection().getId();
+						destination = "/question/" + submission.getId() + "/p" + question.getPart().getId();
 
 						// include the question target if not the first quesiton in the section
-						if (!question.getSectionOrdering().getIsFirst().booleanValue())
+						if (!question.getPartOrdering().getIsFirst())
 						{
 							destination = destination + "#" + question.getId();
 						}
 					}
 					else
 					{
-						destination = "/" + Destinations.question + "/" + submission.getId() + "/a";
+						destination = "/question/" + submission.getId() + "/a";
 
 						// include the question target if not the first quesiton in the assessment
 						if (!question.getAssessmentOrdering().getIsFirst().booleanValue())

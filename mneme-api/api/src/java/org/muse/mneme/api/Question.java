@@ -27,6 +27,27 @@ package org.muse.mneme.api;
 public interface Question
 {
 	/**
+	 * Access the rich text (html) answer key that shows the correct answer to the question.
+	 * 
+	 * @return The answer key, or null if there is none.
+	 */
+	String getAnswerKey();
+
+	/**
+	 * Access the ordering information within the context of an assessment, ordering within the entire assessment (counting all parts).
+	 * 
+	 * @return The ordering information within the assessment.
+	 */
+	Ordering<Question> getAssessmentOrdering();
+
+	/**
+	 * Access the attribution (owner / date created)
+	 * 
+	 * @return The attribution for the question.
+	 */
+	Attribution getAttribution();
+
+	/**
 	 * Access the question's type-specific data.
 	 * 
 	 * @return The question's type-specific data.
@@ -48,6 +69,20 @@ public interface Question
 	String getId();
 
 	/**
+	 * Access the assessment part, within the context of an assessment, that this question is being used in.
+	 * 
+	 * @return The assessment part that this question is being used in.
+	 */
+	Part getPart();
+
+	/**
+	 * Access the ordering information within the context of an assessment, ordering within a single part in which the question is being used.
+	 * 
+	 * @return The ordering information within the part in the assessment.
+	 */
+	Ordering<Question> getPartOrdering();
+
+	/**
 	 * Access the question pool that holds this question.
 	 * 
 	 * @return The question pool that holds this question.
@@ -60,6 +95,13 @@ public interface Question
 	 * @return The question's presentation.
 	 */
 	Presentation getPresentation();
+
+	/**
+	 * Access the require-rationale setting.
+	 * 
+	 * @return TRUE if this question also collects "rationale" from the user, FALSE if not.
+	 */
+	Boolean getRequireRationale();
 
 	/**
 	 * Access the question type.
@@ -98,6 +140,14 @@ public interface Question
 	 *        The question pool to hold this question.
 	 */
 	void setPool(Pool pool);
+
+	/**
+	 * Set the require-rationale setting.
+	 * 
+	 * @param rationale
+	 *        TRUE if this question also collects "rationale" from the user, FALSE if not.
+	 */
+	void setRequireRationale(Boolean rationale);
 
 	/**
 	 * Set the question type.

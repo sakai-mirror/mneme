@@ -35,17 +35,16 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.UiService;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.AssessmentQuestion;
-import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Expiration;
-import org.muse.mneme.api.QuestionPresentation;
+import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
 import org.muse.mneme.api.SubmissionCompletedException;
-import org.muse.mneme.tool.AssessmentDeliveryTool.Errors;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.util.StringUtil;
@@ -92,7 +91,7 @@ public class UploadRemoveView extends ControllerImpl
 		String reference = "/" + StringUtil.unsplit(params, 4, params.length - 4, "/");
 
 		// collect the submission
-		Submission submission = assessmentService.idSubmission(submissionId);
+		Submission submission = assessmentService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			// redirect to error
@@ -110,7 +109,7 @@ public class UploadRemoveView extends ControllerImpl
 		context.put("submission", submission);
 
 		// collect the question
-		AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+		Question question = submission.getAssessment().getParts().getQuestion(questionId);
 		if (question == null)
 		{
 			// redirect to error
@@ -171,7 +170,7 @@ public class UploadRemoveView extends ControllerImpl
 		// return;
 		// }
 
-		Submission submission = assessmentService.idSubmission(submissionId);
+		Submission submission = assessmentService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			// redirect to error
@@ -219,7 +218,7 @@ public class UploadRemoveView extends ControllerImpl
 
 		// remove the referenced attachment from the answer
 
-		AssessmentQuestion question = submission.getAssessment().getQuestion(questionId);
+		Question question = submission.getAssessment().getParts().getQuestion(questionId);
 		if (question == null)
 		{
 			// redirect to error
@@ -227,7 +226,7 @@ public class UploadRemoveView extends ControllerImpl
 			return;
 		}
 
-		SubmissionAnswer answer = submission.getAnswer(question);
+		Answer answer = submission.getAnswer(question);
 		if (answer == null)
 		{
 			// redirect to error
@@ -236,7 +235,8 @@ public class UploadRemoveView extends ControllerImpl
 		}
 
 		// remove this one
-		answer.removeAnswerText(reference);
+		// TODO: return here when we figure out how this question-specific thing works! -ggolden
+//		answer.removeAnswerText(reference);
 		attachmentService.removeAttachment(entityManager.newReference(reference));
 
 		// submit the user's answer
@@ -372,7 +372,7 @@ public class UploadRemoveView extends ControllerImpl
 									ui.newPropertyReference().setReference("question.id"))))
 						.setIncluded(
 								ui.newCompareDecision()
-									.setEqualsConstant(QuestionPresentation.BY_QUESTION.toString())
+									.setEqualsConstant(QuestionGrouping.question.toString())
 									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
 						.setId("nav"))	
 				.add(
@@ -404,7 +404,7 @@ public class UploadRemoveView extends ControllerImpl
 									ui.newPropertyReference().setReference("question.id"))))
 						.setIncluded(
 								ui.newCompareDecision()
-									.setEqualsConstant(QuestionPresentation.BY_SECTION.toString())
+									.setEqualsConstant(QuestionGrouping.part.toString())
 									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
 						.setId("nav"))		
 				.add(
@@ -434,7 +434,7 @@ public class UploadRemoveView extends ControllerImpl
 									ui.newPropertyReference().setReference("question.id"))))
 						.setIncluded(
 								ui.newCompareDecision()
-									.setEqualsConstant(QuestionPresentation.BY_ASSESSMENT.toString())
+									.setEqualsConstant(QuestionGrouping.assessment.toString())
 									.setProperty(ui.newPropertyReference().setReference("submission.assessment.questionPresentation")))
 						.setId("nav"));
 	}

@@ -23,7 +23,7 @@ package org.muse.mneme.api;
 
 /**
  * <p>
- * Ordering provides information about an objcet's order within its container.
+ * Ordering provides information about an object's order within its container.
  * </p>
  */
 public interface Ordering<E>

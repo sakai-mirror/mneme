@@ -56,7 +56,7 @@ public interface PoolService
 	 * Locate a list of pools with this criteria.
 	 * 
 	 * @param userId
-	 *        the user id.
+	 *        the user id, (if null, the current user is used).
 	 * @return a list of pools that meet the criteria.
 	 */
 	List<Pool> findPools(String userId);
@@ -67,34 +67,42 @@ public interface PoolService
 	 * @param poolId
 	 * @return The Pool with this id, or null if not found.
 	 */
-	Pool idPool(String poolId);
+	Pool getPool(String poolId);
 
 	/**
 	 * Create a new pool.
 	 * 
+	 * @param context
+	 *        The context.
+	 * @param userId
+	 *        the pool owner (if null, the currrent user is used)
 	 * @return The new pool.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to create a new pool.
 	 */
-	Pool newPool() throws AssessmentPermissionException;
+	Pool newPool(String context, String userId) throws AssessmentPermissionException;
 
 	/**
 	 * Remove this pool.
 	 * 
 	 * @param pool
 	 *        The pool to remove.
+	 * @param context
+	 *        The context.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to edit this pool.
 	 */
-	void removePool(Pool pool) throws AssessmentPermissionException;
+	void removePool(Pool pool, String context) throws AssessmentPermissionException;
 
 	/**
 	 * Save changes made to this pool.
 	 * 
 	 * @param pool
 	 *        The pool to save.
+	 * @param context
+	 *        The context.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to edit this pool.
 	 */
-	void savePool(Pool pool) throws AssessmentPermissionException;
+	void savePool(Pool pool, String context) throws AssessmentPermissionException;
 }

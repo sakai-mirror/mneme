@@ -26,13 +26,8 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.util.DecisionDelegateImpl;
+import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentAnswer;
-import org.muse.mneme.api.AssessmentQuestion;
-import org.muse.mneme.api.AssessmentSection;
-import org.muse.mneme.api.QuestionType;
-import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -56,26 +51,26 @@ public class AnswerFeedbackDecisionDelegate extends DecisionDelegateImpl
 	 */
 	public boolean decide(Decision decision, Context context, Object focus)
 	{
-		// focus is the AssessmentAnswer
-		if (focus == null) return false;
-		if (!(focus instanceof AssessmentAnswer)) return false;
-
-		AssessmentAnswer answer = (AssessmentAnswer) focus;
-		AssessmentQuestion question = answer.getPart().getQuestion();
-		Assessment assessment = question.getSection().getAssessment();
-
-		if (!assessment.getFeedbackNow()) return false;
-		if (!assessment.getFeedbackShowAnswerFeedback()) return false;
-
-		if (!((question.getType() == QuestionType.multipleChoice) || (question.getType() == QuestionType.multipleCorrect))) return false;
-
-		// for multipleChoice, this must be the answer selected by the entry of the submission answer
-		if (question.getType() == QuestionType.multipleChoice)
-		{
-			SubmissionAnswer submissionAnswer = (SubmissionAnswer) context.get("answer");
-			if (!StringUtil.contains(submissionAnswer.getEntryAnswerIds(), answer.getId())) return false;
-		}
-
+//		// focus is the AssessmentAnswer
+//		if (focus == null) return false;
+//		if (!(focus instanceof AssessmentAnswer)) return false;
+//
+//		AssessmentAnswer answer = (AssessmentAnswer) focus;
+//		AssessmentQuestion question = answer.getPart().getQuestion();
+//		Assessment assessment = question.getSection().getAssessment();
+//
+//		if (!assessment.getFeedbackNow()) return false;
+//		if (!assessment.getFeedbackShowAnswerFeedback()) return false;
+//
+//		if (!((question.getType() == QuestionType.multipleChoice) || (question.getType() == QuestionType.multipleCorrect))) return false;
+//
+//		// for multipleChoice, this must be the answer selected by the entry of the submission answer
+//		if (question.getType() == QuestionType.multipleChoice)
+//		{
+//			Answer submissionAnswer = (Answer) context.get("answer");
+//			if (!StringUtil.contains(submissionAnswer.getEntryAnswerIds(), answer.getId())) return false;
+//		}
+//
 		return true;
 	}
 

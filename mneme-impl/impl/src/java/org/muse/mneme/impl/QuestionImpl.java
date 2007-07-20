@@ -21,48 +21,280 @@
 
 package org.muse.mneme.impl;
 
+import java.util.List;
+
+import org.muse.mneme.api.Attribution;
+import org.muse.mneme.api.Ordering;
+import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.Submission;
 
 /**
  * QuestionImpl implements Question
  */
 public class QuestionImpl implements Question
 {
+	public class MyAssessmentOrdering implements Ordering<Question>
+	{
+		protected QuestionImpl question = null;
+
+		public MyAssessmentOrdering(QuestionImpl question)
+		{
+			this.question = question;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Boolean getIsFirst()
+		{
+			if (question.partContext == null) return true;
+
+			if (!question.getPart().getOrdering().getIsFirst()) return false;
+
+			return question.getPartOrdering().getIsFirst();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Boolean getIsLast()
+		{
+			if (question.partContext == null) return true;
+
+			if (!question.getPart().getOrdering().getIsLast()) return false;
+
+			return question.getPartOrdering().getIsLast();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Question getNext()
+		{
+			if (question.partContext == null) return null;
+
+			Question rv = question.getPartOrdering().getNext();
+			if (rv != null) return rv;
+
+			Part part = question.getPart().getOrdering().getNext();
+			if (part == null) return null;
+
+			return part.getFirstQuestion();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Integer getPosition()
+		{
+			if (question.partContext == null) return new Integer(1);
+
+			// position in this part
+			int pos = question.getPartOrdering().getPosition();
+
+			// count up questions in preceeding parts
+			for (Part part : question.getPart().getAssessment().getParts().getParts())
+			{
+				if (part.equals(question.partContext)) break;
+				pos += part.getNumQuestions();
+			}
+
+			return pos;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Question getPrevious()
+		{
+			if (question.partContext == null) return null;
+
+			Question rv = question.getPartOrdering().getPrevious();
+			if (rv != null) return rv;
+
+			Part part = question.getPart().getOrdering().getPrevious();
+			if (part == null) return null;
+
+			return part.getLastQuestion();
+		}
+	}
+
+	public class MyPartOrdering implements Ordering<Question>
+	{
+		protected QuestionImpl question = null;
+
+		public MyPartOrdering(QuestionImpl question)
+		{
+			this.question = question;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Boolean getIsFirst()
+		{
+			if (question.partContext == null) return true;
+
+			List<String> questions = ((PartImpl) question.getPart()).getQuestionOrder();
+			if (question.getId().equals(questions.get(0))) return true;
+
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Boolean getIsLast()
+		{
+			if (question.partContext == null) return true;
+
+			List<String> questions = ((PartImpl) question.getPart()).getQuestionOrder();
+			if (question.getId().equals(questions.get(questions.size() - 1))) return true;
+
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Question getNext()
+		{
+			if (question.partContext == null) return null;
+
+			List<String> questions = ((PartImpl) question.getPart()).getQuestionOrder();
+			int index = questions.indexOf(question.getId());
+			if (index == questions.size() - 1) return null;
+
+			return question.questionService.getQuestion(questions.get(index + 1));
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Integer getPosition()
+		{
+			if (question.partContext == null) return new Integer(1);
+
+			List<String> questions = ((PartImpl) question.getPart()).getQuestionOrder();
+			int index = questions.indexOf(question.getId());
+
+			return index + 1;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Question getPrevious()
+		{
+			if (question.partContext == null) return null;
+
+			List<String> questions = ((PartImpl) question.getPart()).getQuestionOrder();
+			int index = questions.indexOf(question.getId());
+			if (index == 0) return null;
+
+			return question.questionService.getQuestion(questions.get(index - 1));
+		}
+	}
+
+	protected MyAssessmentOrdering assessmentOrdering = new MyAssessmentOrdering(this);
+
+	protected AttributionImpl attribution = new AttributionImpl();
+
 	protected Object data = null;
 
 	protected String description = null;
 
 	protected String id = null;
 
+	protected Part partContext = null;
+
+	protected MyPartOrdering partOrdering = new MyPartOrdering(this);
+
 	protected String poolId = null;
 
-	protected Presentation presentation = null;
+	protected transient PoolService poolService = null;
 
-	protected transient QuestionServiceImpl service;
+	protected PresentationImpl presentation = new PresentationImpl();
+
+	protected transient QuestionService questionService = null;
+
+	protected Boolean requireRationale = null;
+
+	protected Submission submissionContext = null;
 
 	protected String type = null;
 
 	protected String version = "only";
 
-	public QuestionImpl(String id, QuestionServiceImpl service)
+	/**
+	 * Construct.
+	 * 
+	 * @param poolService
+	 *        the PoolService.
+	 * @param questionService
+	 *        The QuestionService.
+	 */
+	public QuestionImpl(PoolService poolService, QuestionService questionService)
 	{
-		this.id = id;
-		this.service = service;
+		this.poolService = poolService;
+		this.questionService = questionService;
 	}
 
-	public QuestionImpl(String id, QuestionServiceImpl service, Object data, String description, Presentation presentation, String type)
+	/**
+	 * Construct.
+	 * 
+	 * @param other
+	 *        The other to copy.
+	 */
+	public QuestionImpl(QuestionImpl other)
 	{
-		this(id, service);
-		this.data = data;
-		this.description = description;
-		this.presentation = presentation;
-		this.type = type;
+		set(other);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean equals(Object obj)
+	{
+		// two PartImpls are equals if they have the same id
+		if (this == obj) return true;
+		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
+		return this.id.equals(((QuestionImpl) obj).id);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getAnswerKey()
+	{
+		// TODO: type-specific
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Ordering<Question> getAssessmentOrdering()
+	{
+		return this.assessmentOrdering;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Attribution getAttribution()
+	{
+		return this.attribution;
 	}
 
 	public Object getData()
 	{
+		// TODO: type-specific
 		return this.data;
 	}
 
@@ -85,9 +317,25 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
+	public Part getPart()
+	{
+		return this.partContext;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Ordering<Question> getPartOrdering()
+	{
+		return this.partOrdering;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Pool getPool()
 	{
-		return this.service.m_poolService.idPool(this.poolId);
+		return this.poolService.getPool(this.poolId);
 	}
 
 	/**
@@ -96,6 +344,14 @@ public class QuestionImpl implements Question
 	public Presentation getPresentation()
 	{
 		return this.presentation;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getRequireRationale()
+	{
+		return this.requireRationale;
 	}
 
 	/**
@@ -117,8 +373,17 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
+	public int hashCode()
+	{
+		return this.id.hashCode();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setData(Object data)
 	{
+		// TODO: type-specific
 		this.data = data;
 	}
 
@@ -135,7 +400,17 @@ public class QuestionImpl implements Question
 	 */
 	public void setPool(Pool pool)
 	{
+		if (pool == null) throw new IllegalArgumentException();
 		this.poolId = pool.getId();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setRequireRationale(Boolean rationale)
+	{
+		if (rationale == null) throw new IllegalArgumentException();
+		this.requireRationale = rationale;
 	}
 
 	/**
@@ -143,6 +418,56 @@ public class QuestionImpl implements Question
 	 */
 	public void setType(String type)
 	{
+		if (type == null) throw new IllegalArgumentException();
 		this.type = type;
+	}
+
+	/**
+	 * Initialize the id.
+	 * 
+	 * @param id
+	 *        The id.
+	 */
+	protected void initId(String id)
+	{
+		this.id = id;
+	}
+
+	/**
+	 * Initialize the part context for this question - the part this question instance was created to support.
+	 * 
+	 * @param part
+	 *        The Part.
+	 */
+	protected void initPartContext(Part part)
+	{
+		this.partContext = part;
+	}
+
+	/**
+	 * Initialize the submission context for this question - the submission this question instance was created to support.
+	 * 
+	 * @param submission
+	 *        The submission.
+	 */
+	protected void initSubmissionContext(Submission submission)
+	{
+		this.submissionContext = submission;
+	}
+
+	protected void set(QuestionImpl other)
+	{
+		this.data = other.data; // TODO:
+		this.description = other.description;
+		this.id = other.id;
+		this.partContext = other.partContext;
+		this.poolId = other.poolId;
+		this.poolService = other.poolService;
+		this.presentation = new PresentationImpl(other.presentation);
+		this.requireRationale = other.requireRationale;
+		this.questionService = other.questionService;
+		this.submissionContext = other.submissionContext;
+		this.type = other.type;
+		this.version = other.version;
 	}
 }

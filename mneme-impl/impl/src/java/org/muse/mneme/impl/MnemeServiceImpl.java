@@ -25,23 +25,19 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentAnswer;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.AssessmentQuestion;
-import org.muse.mneme.api.AssessmentSection;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.QuestionPart;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
 import org.muse.mneme.api.SubmissionCompletedException;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.authz.api.FunctionManager;
@@ -82,33 +78,18 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void addAssessment(Assessment a) throws AssessmentPermissionException
-	{
-		m_assessmentService.addAssessment(a);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void addSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException, AssessmentCompletedException
-	{
-		m_submissionService.addSubmission(submission);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean allowAddAssessment(String context)
-	{
-		return m_assessmentService.allowAddAssessment(context);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean allowCompleteSubmission(Submission submission, String userId)
 	{
 		return m_submissionService.allowCompleteSubmission(submission, userId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+
+	public Boolean allowEditAssessment(Assessment assessment, String userId)
+	{
+		return m_assessmentService.allowEditAssessment(assessment, userId);
 	}
 
 	/**
@@ -130,9 +111,17 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowListDeliveryAssessment(String context)
+	public Boolean allowListDeliveryAssessment(String context, String userId)
 	{
-		return m_assessmentService.allowListDeliveryAssessment(context);
+		return m_assessmentService.allowListDeliveryAssessment(context, userId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean allowManageAssessments(String context, String userId)
+	{
+		return m_assessmentService.allowManageAssessments(context, userId);
 	}
 
 	/**
@@ -244,9 +233,25 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Float> getQuestionScores(String questionId)
+	public Pool getPool(String poolId)
 	{
-		return m_submissionService.getQuestionScores(questionId);
+		return m_poolService.getPool(poolId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Question getQuestion(String questionId)
+	{
+		return m_questionService.getQuestion(questionId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Float> getQuestionScores(Question question)
+	{
+		return m_submissionService.getQuestionScores(question);
 	}
 
 	/**
@@ -263,38 +268,6 @@ public class MnemeServiceImpl implements MnemeService
 	public List<Submission> getUserContextSubmissions(String context, String userId, GetUserContextSubmissionsSort sort)
 	{
 		return m_submissionService.getUserContextSubmissions(context, userId, sort);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Assessment idAssessment(String id)
-	{
-		return m_assessmentService.idAssessment(id);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Pool idPool(String poolId)
-	{
-		return m_poolService.idPool(poolId);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Question idQuestion(String questionId)
-	{
-		return m_questionService.idQuestion(questionId);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Submission idSubmission(String id)
-	{
-		return m_submissionService.idSubmission(id);
 	}
 
 	/**
@@ -326,105 +299,73 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Assessment newAssessment()
+	public Assessment newAssessment(String context) throws AssessmentPermissionException
 	{
-		return m_assessmentService.newAssessment();
+		return m_assessmentService.newAssessment(context);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public AssessmentAnswer newAssessmentAnswer(QuestionPart part)
+	public Pool newPool(String context, String userId) throws AssessmentPermissionException
 	{
-		return m_assessmentService.newAssessmentAnswer(part);
+		return m_poolService.newPool(context, userId);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Pool newPool() throws AssessmentPermissionException
+	public Question newQuestion(String context, String userId) throws AssessmentPermissionException
 	{
-		return m_poolService.newPool();
+		return m_questionService.newQuestion(context, userId);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Question newQuestion() throws AssessmentPermissionException
+	public void removeAssessment(Assessment assessment) throws AssessmentPermissionException
 	{
-		return m_questionService.newQuestion();
+		m_assessmentService.removeAssessment(assessment);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public AssessmentQuestion newQuestion(AssessmentSection section)
+	public void removePool(Pool pool, String context) throws AssessmentPermissionException
 	{
-		return m_assessmentService.newQuestion(section);
+		m_poolService.removePool(pool, context);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public QuestionPart newQuestionPart(AssessmentQuestion question)
+	public void removeQuestion(Question question, String context) throws AssessmentPermissionException
 	{
-		return m_assessmentService.newQuestionPart(question);
+		m_questionService.removeQuestion(question, context);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public AssessmentSection newSection(Assessment assessment)
+	public void saveAssessment(Assessment assessment) throws AssessmentPermissionException
 	{
-		return m_assessmentService.newSection(assessment);
+		m_assessmentService.saveAssessment(assessment);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Submission newSubmission(Assessment assessment)
+	public void savePool(Pool pool, String context) throws AssessmentPermissionException
 	{
-		return m_submissionService.newSubmission(assessment);
+		m_poolService.savePool(pool, context);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public SubmissionAnswer newSubmissionAnswer(Submission submission, AssessmentQuestion question)
+	public void saveQuestion(Question question, String context) throws AssessmentPermissionException
 	{
-		return m_submissionService.newSubmissionAnswer(submission, question);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void removePool(Pool pool) throws AssessmentPermissionException
-	{
-		m_poolService.removePool(pool);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void removeQuestion(Question question) throws AssessmentPermissionException
-	{
-		m_questionService.removeQuestion(question);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void savePool(Pool pool) throws AssessmentPermissionException
-	{
-		m_poolService.savePool(pool);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void saveQuestion(Question question) throws AssessmentPermissionException
-	{
-		m_questionService.saveQuestion(question);
+		m_questionService.saveQuestion(question, context);
 	}
 
 	/**
@@ -518,7 +459,7 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void submitAnswer(SubmissionAnswer answer, Boolean completeAnswer, Boolean completeSubmission) throws AssessmentPermissionException,
+	public void submitAnswer(Answer answer, Boolean completeAnswer, Boolean completeSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException
 	{
 		m_submissionService.submitAnswer(answer, completeAnswer, completeSubmission);
@@ -527,8 +468,8 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void submitAnswers(List<SubmissionAnswer> answers, Boolean completeAnswers, Boolean completeSubmission)
-			throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException
+	public void submitAnswers(List<Answer> answers, Boolean completeAnswers, Boolean completeSubmission) throws AssessmentPermissionException,
+			AssessmentClosedException, SubmissionCompletedException
 	{
 		m_submissionService.submitAnswers(answers, completeAnswers, completeSubmission);
 	}
@@ -536,7 +477,6 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-
 	public void updateGradebook(Assessment assessment) throws AssessmentPermissionException
 	{
 		m_submissionService.updateGradebook(assessment);

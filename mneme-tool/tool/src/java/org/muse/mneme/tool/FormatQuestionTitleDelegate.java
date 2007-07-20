@@ -25,12 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
-import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentQuestion;
-import org.muse.mneme.api.AssessmentSection;
-import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
-import org.muse.mneme.tool.DeliveryControllers.QuestionScore;
+import org.muse.mneme.api.Question;
 
 /**
  * The "FormatScore" format delegate for the mneme tool.
@@ -54,25 +49,25 @@ public class FormatQuestionTitleDelegate extends FormatDelegateImpl
 	public String format(Context context, Object value)
 	{
 		if (value == null) return null;
-		if (!(value instanceof AssessmentQuestion)) return null;
+		if (!(value instanceof Question)) return null;
 
-		AssessmentQuestion question = (AssessmentQuestion) value;
-		Boolean continuous = question.getSection().getAssessment().getContinuousNumbering();
+		Question question = (Question) value;
+		Boolean continuous = question.getPart().getAssessment().getParts().getContinuousNumbering();
 
 		Object[] args = new Object[3];
-		if ((continuous != null) && (continuous.booleanValue()))
+		if (continuous)
 		{
 			args[0] = question.getAssessmentOrdering().getPosition();
-			args[1] = question.getSection().getAssessment().getNumQuestions();
+			args[1] = question.getPart().getAssessment().getParts().getNumQuestions();
 		}
 		else
 		{
-			args[0] = question.getSectionOrdering().getPosition();
-			args[1] = question.getSection().getNumQuestions();
+			args[0] = question.getPartOrdering().getPosition();
+			args[1] = question.getPart().getNumQuestions();
 		}
 
 		// use the QuestionScore formater to get the points with possible score
-		QuestionScore qs = new QuestionScore();
+		QuestionScoreDelegate qs = new QuestionScoreDelegate();
 		args[2] = qs.format(context, value);
 
 		return context.getMessages().getFormattedMessage("question-question-title", args);

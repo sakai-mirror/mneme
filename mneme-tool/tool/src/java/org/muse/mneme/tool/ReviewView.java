@@ -32,11 +32,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.AssessmentQuestion;
-import org.muse.mneme.api.AssessmentSection;
+import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Part;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.util.Web;
 
@@ -80,7 +80,7 @@ public class ReviewView extends ControllerImpl
 		context.put("actionTitle", messages.getString("question-header-review"));
 
 		// collect the submission
-		Submission submission = assessmentService.idSubmission(submissionId);
+		Submission submission = assessmentService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			// redirect to error
@@ -88,7 +88,7 @@ public class ReviewView extends ControllerImpl
 			return;
 		}
 
-		if (!assessmentService.allowReviewSubmission(submission, null).booleanValue())
+		if (!assessmentService.allowReviewSubmission(submission, null))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -98,12 +98,12 @@ public class ReviewView extends ControllerImpl
 		context.put("submission", submission);
 
 		// collect all the answers for review
-		List<SubmissionAnswer> answers = new ArrayList<SubmissionAnswer>();
-		for (AssessmentSection section : submission.getAssessment().getSections())
+		List<Answer> answers = new ArrayList<Answer>();
+		for (Part part : submission.getAssessment().getParts().getParts())
 		{
-			for (AssessmentQuestion question : section.getQuestions())
+			for (Question question : part.getQuestions())
 			{
-				SubmissionAnswer answer = submission.getAnswer(question);
+				Answer answer = submission.getAnswer(question);
 				answers.add(answer);
 			}
 		}

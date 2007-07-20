@@ -32,7 +32,6 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.tool.AssessmentDeliveryTool.Errors;
 import org.sakaiproject.util.Web;
 
 /**
@@ -68,7 +67,7 @@ public class FinalReviewView extends ControllerImpl
 		String submissionId = params[2];
 
 		// collect the submission
-		Submission submission = assessmentService.idSubmission(submissionId);
+		Submission submission = assessmentService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			// redirect to error
@@ -76,7 +75,7 @@ public class FinalReviewView extends ControllerImpl
 			return;
 		}
 
-		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
+		if (!assessmentService.allowCompleteSubmission(submission, null))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));

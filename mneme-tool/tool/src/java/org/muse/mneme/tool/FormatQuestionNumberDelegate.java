@@ -25,10 +25,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
-import org.muse.mneme.api.AssessmentQuestion;
+import org.muse.mneme.api.Question;
 
 /**
- * The "FormatQuestionDecoration" format delegate for the mneme tool.
+ * The "FormatQuestionNumberDelegate" format delegate for the mneme tool.
  */
 public class FormatQuestionNumberDelegate extends FormatDelegateImpl
 {
@@ -49,19 +49,19 @@ public class FormatQuestionNumberDelegate extends FormatDelegateImpl
 	public String format(Context context, Object value)
 	{
 		if (value == null) return null;
-		if (!(value instanceof AssessmentQuestion)) return null;
+		if (!(value instanceof Question)) return null;
 
-		AssessmentQuestion question = (AssessmentQuestion) value;
-		Boolean continuous = question.getSection().getAssessment().getContinuousNumbering();
+		Question question = (Question) value;
+		Boolean continuous = question.getPart().getAssessment().getParts().getContinuousNumbering();
 
 		Integer num = null;
-		if ((continuous != null) && (continuous.booleanValue()))
+		if (continuous)
 		{
 			num = question.getAssessmentOrdering().getPosition();
 		}
 		else
 		{
-			num = question.getSectionOrdering().getPosition();
+			num = question.getPartOrdering().getPosition();
 		}
 		return num.toString();
 	}

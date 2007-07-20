@@ -25,13 +25,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
+import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentSection;
+import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
 
 /**
- * The "FormatScore" format delegate for the mneme tool.
+ * The "SectionScoreDelegate" format delegate for the mneme tool.
  */
 public class SectionScoreDelegate extends FormatDelegateImpl
 {
@@ -79,8 +79,8 @@ public class SectionScoreDelegate extends FormatDelegateImpl
 	public String format(Context context, Object value)
 	{
 		if (value == null) return null;
-		if (!(value instanceof AssessmentSection)) return value.toString();
-		AssessmentSection section = (AssessmentSection) value;
+		if (!(value instanceof Part)) return value.toString();
+		Part part = (Part) value;
 
 		Object o = context.get("submission");
 		if (!(o instanceof Submission)) return value.toString();
@@ -95,15 +95,15 @@ public class SectionScoreDelegate extends FormatDelegateImpl
 		Boolean review = (Boolean) context.get("review");
 
 		// if we are doing review and the submission has been graded
-		if ((review != null) && review.booleanValue() && submission.getIsGraded().booleanValue())
+		if ((review != null) && review && submission.getIsGraded())
 		{
 			// add the sum of scores for any answered question in this section
 			float score = 0;
 
 			// find the section's answers to AssessmentQuestions that are in this section.
-			for (SubmissionAnswer answer : submission.getAnswers())
+			for (Answer answer : submission.getAnswers())
 			{
-				if (answer.getQuestion().getSection().equals(section))
+				if (answer.getQuestion().getPart().equals(part))
 				{
 					score += answer.getTotalScore().floatValue();
 				}
@@ -115,8 +115,9 @@ public class SectionScoreDelegate extends FormatDelegateImpl
 		}
 
 		// add the total possible points for the section
-		rv.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> " + formatScore(section.getTotalPoints())
-				+ ")");
+		rv
+				.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> " + formatScore(part.getTotalPoints())
+						+ ")");
 
 		return rv.toString();
 	}

@@ -44,29 +44,23 @@
 		<!-- test's submit message -->
 		<text>
 			<message selector="submitted-display-message">
-				<model type="html" ref="submission.assessment.submitMessage" />
+				<model type="html" ref="submission.assessment.submitPresentation.text" />
 			</message>
 			<included>
-				<hasValueDecision model="submission.assessment.submitMessage" />
+				<hasValueDecision model="submission.assessment.submitPresentation.text" />
 			</included>
 		</text>
-
-		<!-- test's submit URL -->
-		<instructions>
-			<message selector="submitted-final-url">
-				<model type="url" ref="submission.assessment.submitUrl" />
-			</message>
-		</instructions>
 
 		<gap />
 
 		<!-- navigation -->
 		<navigationBar width="70em" id="nav">
 			<container>
-				<navigation title="return" style="BUTTON" accessKey="return-access" description="return-description" default="TRUE" destination="/list">
+				<navigation title="return" style="BUTTON" accessKey="return-access" description="return-description" default="TRUE"
+					destination="/list">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<included>
-						<decision reversed="TRUE" model="submission.assessment.feedbackNow" />
+						<decision reversed="TRUE" model="submission.assessment.review.nowAvailable" />
 					</included>
 				</navigation>
 				<navigation title="review" style="BUTTON" accessKey="review-access" description="review-description" default="TRUE">
@@ -75,7 +69,7 @@
 						<model ref="submission.id" />
 					</destination>
 					<included>
-						<decision model="submission.assessment.feedbackNow" />
+						<decision model="submission.assessment.review.nowAvailable" />
 					</included>
 				</navigation>
 			</container>

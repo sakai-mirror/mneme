@@ -30,8 +30,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.AssessmentQuestion;
 import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
 
 /**
@@ -117,10 +117,10 @@ public class ErrorView extends ControllerImpl
 				if (param != null)
 				{
 					// treat the param as a submission id
-					Submission s = assessmentService.idSubmission(param);
+					Submission s = assessmentService.getSubmission(param);
 					if (s != null)
 					{
-						AssessmentQuestion question = s.getFirstIncompleteQuestion();
+						Question question = s.getFirstIncompleteQuestion();
 						if (question != null)
 						{
 							// next destination: first question of submission

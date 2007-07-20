@@ -89,7 +89,7 @@ public class SubmissionScoreDelegate extends FormatDelegateImpl
 		Boolean review = (Boolean) context.get("review");
 
 		// if we are doing review and the submission has been graded
-		if ((review != null) && review.booleanValue() && submission.getIsGraded().booleanValue())
+		if ((review != null) && review && submission.getIsGraded())
 		{
 			// the total score
 			rv.append("<img src=\"" + context.get("sakai.return.url") + "/icons/grade.png\" alt=\"" + context.getMessages().getString("grade")
@@ -99,8 +99,8 @@ public class SubmissionScoreDelegate extends FormatDelegateImpl
 		}
 
 		// add the total possible points for the assessment
-		rv.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> " + formatScore(assessment.getTotalPoints())
-				+ ")");
+		rv.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> "
+				+ formatScore(assessment.getParts().getTotalPoints()) + ")");
 
 		return rv.toString();
 	}

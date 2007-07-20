@@ -21,11 +21,55 @@
 
 package org.muse.mneme.api;
 
+import java.util.List;
+
 /**
- * <p>
  * Presentation defines a rich text with attachments.
- * </p>
  */
 public interface Presentation
 {
+	/**
+	 * Add this reference string as another attachment.
+	 * 
+	 * @param reference
+	 *        The attachment reference string.
+	 */
+	void addAttachment(String reference);
+
+	/**
+	 * Access the attachments for the presentation, each a reference string.
+	 * 
+	 * @return The list of attachment reference strings, or an empty list if there are none.
+	 */
+	List<String> getAttachments();
+
+	/**
+	 * Check if there is nothing defined for this presentation.
+	 * 
+	 * @return TRUE if the text and attachments are empty, FALSE if there is something defined in either place.
+	 */
+	Boolean getIsEmpty();
+
+	/**
+	 * Access the rich text (html) part of the presentation.
+	 * 
+	 * @return The rich text (html) part of the presentation.
+	 */
+	String getText();
+
+	/**
+	 * Remove the attachment that matches this reference string.
+	 * 
+	 * @param reference
+	 *        The attachment to remove.
+	 */
+	void removeAttachment(String reference);
+
+	/**
+	 * Set the rich text (html) part of the presentation.
+	 * 
+	 * @param text
+	 *        The rich text (html) part of the presentation.
+	 */
+	void setText(String text);
 }

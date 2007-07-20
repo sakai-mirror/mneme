@@ -31,7 +31,8 @@
 			init-method="init"
 			destroy-method="destroy"
 			singleton="true"
-			depends-on="SubmissionScore,SectionScore,FormatQuestionTitle,FormatAnswerCorrectFeedback,AnswerFeedbackDecision">
+			depends-on="SubmissionScore,SectionScore,FormatQuestionTitle">
+<!-- ,AnswerFeedbackDecision,FormatAnswerCorrectFeedback -->
 
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
  		<property name="assessmentService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
@@ -78,6 +79,7 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 
+	<!--
 	<bean id="FormatAnswerCorrectFeedback"
 			class="org.muse.mneme.tool.FormatAnswerCorrectFeedbackDelegate"
 			init-method="init"
@@ -89,7 +91,9 @@
  		<property name="id"><value>FormatAnswerCorrectFeedback</value></property>
  		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
+	-->
 
+	<!--
 	<bean id="AnswerFeedbackDecision"
 			class="org.muse.mneme.tool.AnswerFeedbackDecisionDelegate"
 			init-method="init"
@@ -101,5 +105,6 @@
  		<property name="id"><value>AnswerFeedbackDecision</value></property>
  		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
-
+ 	-->
+ 
 </beans>

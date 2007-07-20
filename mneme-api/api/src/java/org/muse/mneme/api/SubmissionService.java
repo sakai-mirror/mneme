@@ -37,20 +37,6 @@ public interface SubmissionService
 	}
 
 	/**
-	 * Create a new persistent submission from the given information.
-	 * 
-	 * @param submission
-	 *        The information from which to make the new submission.
-	 * @throws AssessmentPermissionException
-	 *         if the user does not have permission to submit to the assessment.
-	 * @throws AssessmentClosedException
-	 *         if assessment is not currently open for submission.
-	 * @throws AssessmentCompletedException
-	 *         if an assessment has been submitted to by the user the maximum number of times.
-	 */
-	void addSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException, AssessmentCompletedException;
-
-	/**
 	 * Check if the current user is allowed to update or add answers or complete this submission.<br />
 	 * Any hard deadlines are extended by a grace period to allow for inaccuracies in timing.<br />
 	 * The user must match the submission user.<br />
@@ -112,8 +98,7 @@ public interface SubmissionService
 	 *        The assessment.
 	 * @param userId
 	 *        The user id.
-	 * @return The count of remaining submissions allowed for this user to this assessment, -1 if it is unlimited, or null if we cannot find the
-	 *         assessment.
+	 * @return The count of remaining submissions allowed for this user to this assessment, or null if submissions are unlimited.
 	 */
 	Integer countRemainingSubmissions(Assessment assessment, String userId);
 
@@ -147,26 +132,24 @@ public interface SubmissionService
 	/**
 	 * Get the total scores for this question from all completed submissions to the question's assessment.
 	 * 
-	 * @param questionId
-	 *        The question id.
+	 * @param question
+	 *        The question.
 	 * @return A List containing all the scores for this question from all completed submissions to the question's assessment, or an empty list if
 	 *         there are none.
 	 */
-	List<Float> getQuestionScores(String questionId);
+	List<Float> getQuestionScores(Question question);
 
 	/**
-	 * TODO: needed?
 	 * Access a submission by id. TODO: security
 	 * 
 	 * @param id
 	 *        The submission id.
-	 * @return The submission object, complete, or null if not found.
+	 * @return The submission object, or null if not found.
 	 */
 	Submission getSubmission(String id);
 
 	/**
-	 * TODO: rename find...
-	 * Find the submissions to assignments in this context made by this user. Consider:
+	 * TODO: rename find... Find the submissions to assignments in this context made by this user. Consider:
 	 * <ul>
 	 * <li>published assessments</li>
 	 * <li>assessments in this context</li>
@@ -186,33 +169,6 @@ public interface SubmissionService
 	List<Submission> getUserContextSubmissions(String context, String userId, GetUserContextSubmissionsSort sort);
 
 	/**
-	 * Access a submission by id, but do not populate any information. Information will be populated as needed. TODO: security
-	 * 
-	 * @param id
-	 *        The submission id.
-	 * @return The submission object, or null if not found.
-	 */
-	Submission idSubmission(String id);
-
-	/**
-	 * Create a new Submission object for this assessment.
-	 * 
-	 * @return a new submission.
-	 */
-	Submission newSubmission(Assessment assessment);
-
-	/**
-	 * Create a new Answer object for this submission, that answers this question.
-	 * 
-	 * @param submission
-	 *        The submission.
-	 * @param question
-	 *        The assessment question that this answers.
-	 * @return a new submission answer.
-	 */
-	SubmissionAnswer newSubmissionAnswer(Submission submission, AssessmentQuestion question);
-
-	/**
 	 * Enter or update an answer to a question of an incomplete submission to an assessment. Auto grade. Updated realated info (such as the
 	 * submission's score).<br />
 	 * Complete the submission if indicated.
@@ -230,7 +186,7 @@ public interface SubmissionService
 	 * @throws SubmissionCompletedException
 	 *         if the submission is already completed.
 	 */
-	void submitAnswer(SubmissionAnswer answer, Boolean completeAnswer, Boolean completeSubmission) throws AssessmentPermissionException,
+	void submitAnswer(Answer answer, Boolean completeAnswer, Boolean completeSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException;
 
 	/**
@@ -251,7 +207,7 @@ public interface SubmissionService
 	 * @throws SubmissionCompletedException
 	 *         if the submission is already completed.
 	 */
-	void submitAnswers(List<SubmissionAnswer> answers, Boolean completeAnswers, Boolean completeSubmission) throws AssessmentPermissionException,
+	void submitAnswers(List<Answer> answers, Boolean completeAnswers, Boolean completeSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException;
 
 	/**

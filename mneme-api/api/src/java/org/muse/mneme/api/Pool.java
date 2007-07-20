@@ -21,11 +21,24 @@
 
 package org.muse.mneme.api;
 
+import java.util.List;
+
 /**
  * Pool defines the question pools.
  */
 public interface Pool
 {
+	/**
+	 * Draw questions based on this random seed.
+	 * 
+	 * @param seed
+	 *        The random seed.
+	 * @param numQuestions
+	 *        The number of questions to draw.
+	 * @return A List of question ids drawn from the pool.
+	 */
+	List<String> drawQuestionIds(long seed, Integer numQuestions);
+
 	/**
 	 * Access the description of the pool.
 	 * 
@@ -61,6 +74,13 @@ public interface Pool
 	 * @return The pool's owner id.
 	 */
 	String getOwnerId();
+
+	/**
+	 * Access the number of points for each question in this pool.
+	 * 
+	 * @return The number of points for each question in this pool.
+	 */
+	Float getPoints();
 
 	/**
 	 * Access the subject of the pool.

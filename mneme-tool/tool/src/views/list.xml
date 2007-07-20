@@ -74,7 +74,7 @@
 						</navigation>
 					</navigations>
 				</modelColumn>
-				<modelColumn em="10" wrap="FALSE" >
+				<modelColumn em="10" wrap="FALSE">
 					<title>
 						<message selector="list-status-title" />
 					</title>
@@ -120,9 +120,9 @@
 					<title>
 						<message selector="list-header-open" />
 					</title>
-					<model type="date" twoLine="TRUE" missing="dash" ref="submission.assessment.releaseDate" />
+					<model type="date" twoLine="TRUE" missing="dash" ref="submission.assessment.dates.openDate" />
 				</modelColumn>
-				
+
 				<!-- due date -->
 				<column>
 					<title>
@@ -147,12 +147,12 @@
 					<container>
 						<text>
 							<message>
-								<model type="date" twoLine="TRUE" missing="dash" ref="submission.assessment.dueDate" />
+								<model type="date" twoLine="TRUE" missing="dash" ref="submission.assessment.dates.dueDate" />
 							</message>
 							<included>
 								<andDecision reversed="TRUE">
 									<andDecision>
-										<hasValueDecision model="submission.assessment.expiration" />
+										<hasValueDecision model="submission.assessment.dates.expiration" />
 										<orDecision>
 											<compareDecision model="submission.assessmentSubmissionStatus" constant="ready" />
 											<andDecision>
@@ -170,20 +170,20 @@
 						<countdownTimer tight="TRUE" pixels="100">
 							<duration>
 								<message selector="timer-due">
-									<model type="date" ref="submission.assessment.expiration.time" />
+									<model type="date" ref="submission.assessment.dates.expiration.time" />
 								</message>
-								<model ref="submission.assessment.expiration.limit" />
+								<model ref="submission.assessment.dates.expiration.limit" />
 							</duration>
 							<remaining>
 								<message selector="timer-remaining" />
 							</remaining>
 							<timeTillExpire>
-								<model ref="submission.assessment.expiration.duration" />
+								<model ref="submission.assessment.dates.expiration.duration" />
 							</timeTillExpire>
 							<destination template="/list" />
 							<included>
 								<andDecision>
-									<hasValueDecision model="submission.assessment.expiration" />
+									<hasValueDecision model="submission.assessment.dates.expiration" />
 									<orDecision>
 										<compareDecision model="submission.assessmentSubmissionStatus" constant="ready" />
 										<andDecision>
@@ -240,7 +240,7 @@
 					<container>
 						<text>
 							<message selector="list-format-tries">
-								<model ref="submission.siblingCount"/>
+								<model ref="submission.siblingCount" />
 								<model ref="submission.assessment.numSubmissionsAllowed" missing="infinite" />
 							</message>
 						</text>
@@ -276,7 +276,7 @@
 						<navigation style="LINK" disabled="TRUE">
 							<title>
 								<message selector="list-nav-review-later">
-									<model type="date" ref="submission.best.assessment.feedbackDate" />
+									<model type="date" ref="submission.best.assessment.dates.reviewDate" />
 								</message>
 							</title>
 							<included>

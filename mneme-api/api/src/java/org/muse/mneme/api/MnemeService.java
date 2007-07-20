@@ -29,19 +29,35 @@ import java.util.List;
  */
 public interface MnemeService extends PoolService, QuestionService, SubmissionService, AssessmentService
 {
-	/**
-	 * The type string for this application: should not change over time as it may be stored in various parts of persistent entities.
-	 */
+	/** The type string for this application: should not change over time as it may be stored in various parts of persistent entities. */
 	static final String APPLICATION_ID = "sakai:mneme";
 
-	/** The sub-type for assessment in references (/mneme/test/...) */
-	static final String ASSESSMENT_TYPE = "test";
+	/** Event tracking event for changing an assessment. */
+	static final String ASSESSMENT_EDIT = "mneme.manage";
+
+	/** The sub-type for assessment in references (/mneme/assessment/...) */
+	static final String ASSESSMENT_TYPE = "assessment";
+
+	/** The number of ms we allow answers and completions of submissions after hard deadlines. */
+	static final long GRACE = 2 * 60 * 1000;
 
 	/** The security function used to check if users can grade tests. */
 	static final String GRADE_PERMISSION = "mneme.grade";
 
 	/** The security function used to check if users can manage tests. */
 	static final String MANAGE_PERMISSION = "mneme.manage";
+
+	/** Event tracking event for changing a pool. */
+	static final String POOL_EDIT = "mneme.manage";
+
+	/** The sub-type for pool in references (/mneme/pool/...) */
+	static final String POOL_TYPE = "pool";
+
+	/** Event tracking event for changing a question. */
+	static final String QUESTION_EDIT = "mneme.manage";
+
+	/** The sub-type for question in references (/mneme/question/...) */
+	static final String QUESTION_TYPE = "question";
 
 	/** This string starts the references to resources in this service. */
 	static final String REFERENCE_ROOT = "/mneme";
@@ -69,10 +85,7 @@ public interface MnemeService extends PoolService, QuestionService, SubmissionSe
 
 	/** The sub-type for submissions in references (/mneme/submission/...) */
 	static final String SUBMISSION_TYPE = "submission";
-
+	
 	/** The security function used to check if users can submit to an assessment. */
 	static final String SUBMIT_PERMISSION = "mneme.submit";
-
-	/** Event tracking event for adding a test. */
-	static final String TEST_ADD = "mneme.manage";
 }

@@ -39,21 +39,33 @@ public class ExpirationImpl implements Expiration
 
 	protected Time time;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public Cause getCause()
 	{
 		return this.cause;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public Long getDuration()
 	{
 		return this.duration;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public Long getLimit()
 	{
 		return this.limit;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public Time getTime()
 	{
 		return this.time;

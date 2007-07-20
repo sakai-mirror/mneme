@@ -21,7 +21,11 @@
 
 package org.muse.mneme.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolService;
 
 /**
  * PoolImpl implements Pool
@@ -38,26 +42,51 @@ public class PoolImpl implements Pool
 
 	protected Float points = null;
 
+	protected PoolServiceImpl poolService = null;
+
 	protected String subject = null;
 
 	protected String title = null;
 
+	// TODO: version
 	protected String version = "only";
 
-	public PoolImpl(String id)
+	/**
+	 * Construct.
+	 * 
+	 * @param other
+	 *        The other to copy.
+	 */
+	public PoolImpl(PoolImpl other)
 	{
-		this.id = id;
+		set(other);
 	}
 
-	public PoolImpl(String id, String description, Integer difficulty, String ownerId, Float points, String subject, String title)
+	/**
+	 * Construct.
+	 */
+	public PoolImpl(PoolServiceImpl service)
 	{
-		this.id = id;
-		this.description = description;
-		this.difficulty = difficulty;
-		this.ownerId = ownerId;
-		this.points = points;
-		this.subject = subject;
-		this.title = title;
+		this.poolService = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<String> drawQuestionIds(long seed, Integer numQuestions)
+	{
+		return this.poolService.drawQuestionIds(this, seed, numQuestions);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean equals(Object obj)
+	{
+		// two PoolImpls are equals if they have the same id
+		if (this == obj) return true;
+		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
+		return this.id.equals(((PoolImpl) obj).id);
 	}
 
 	/**
@@ -89,7 +118,7 @@ public class PoolImpl implements Pool
 	 */
 	public Integer getNumQuestions()
 	{
-		return new Integer(0);
+		return this.poolService.getPoolSize(this);
 	}
 
 	/**
@@ -98,6 +127,14 @@ public class PoolImpl implements Pool
 	public String getOwnerId()
 	{
 		return this.ownerId;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getPoints()
+	{
+		return this.points;
 	}
 
 	/**
@@ -122,6 +159,14 @@ public class PoolImpl implements Pool
 	public String getVersion()
 	{
 		return this.version;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int hashCode()
+	{
+		return getId().hashCode();
 	}
 
 	/**
@@ -170,5 +215,29 @@ public class PoolImpl implements Pool
 	public void setTitle(String title)
 	{
 		this.title = title;
+	}
+
+	/**
+	 * Establish the id.
+	 * 
+	 * @param id
+	 *        The pool id.
+	 */
+	protected void initId(String id)
+	{
+		this.id = id;
+	}
+
+	protected void set(PoolImpl other)
+	{
+		this.description = other.description;
+		this.difficulty = other.difficulty;
+		this.id = other.id;
+		this.ownerId = other.ownerId;
+		this.points = other.points;
+		this.poolService = other.poolService;
+		this.subject = other.subject;
+		this.title = other.title;
+		this.version = other.version;
 	}
 }

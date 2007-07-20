@@ -11,9 +11,9 @@
 
 		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
 		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
-		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
+		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
 
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 		<property name="functionManager"><ref bean="org.sakaiproject.authz.api.FunctionManager"/></property>
@@ -49,17 +49,27 @@
 		destroy-method="destroy"
 		singleton="true">
 
-		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
-		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
-		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
-		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
-		<property name="memoryService"><ref bean="org.sakaiproject.memory.api.MemoryService"/></property>
+		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
+
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
-		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
-		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
-		
-		<property name="cacheMinutes"><value>5</value></property>
-		<property name="cacheCleanerMinutes"><value>15</value></property>
+		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
+		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
+
+		<property name="storage">
+			<map>
+				<!-- <entry key="default"><ref bean="org.muse.mneme.impl.PoolStorageDefault"/></entry> -->
+				<entry key="sample"><ref bean="org.muse.mneme.impl.PoolStorageSample"/></entry>
+			</map>
+		</property>
+		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
+ 	</bean>
+
+	<bean id="org.muse.mneme.impl.PoolStorageSample"
+		class="org.muse.mneme.impl.PoolStorageSample"
+		init-method="init"
+		destroy-method="destroy"
+		singleton="true">
 	</bean>
 
 	<bean id="org.muse.mneme.api.QuestionService"
@@ -68,18 +78,27 @@
 		destroy-method="destroy"
 		singleton="true">
 		
-		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
-		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
-		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
-		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
-		<property name="memoryService"><ref bean="org.sakaiproject.memory.api.MemoryService"/></property>
-		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
-		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
-		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
-		
-		<property name="cacheMinutes"><value>5</value></property>
-		<property name="cacheCleanerMinutes"><value>15</value></property>
+		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
+
+		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
+		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
+		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
+
+		<property name="storage">
+			<map>
+				<!-- <entry key="default"><ref bean="org.muse.mneme.impl.QuestionStorageDefault"/></entry> -->
+				<entry key="sample"><ref bean="org.muse.mneme.impl.QuestionStorageSample"/></entry>
+			</map>
+		</property>
+		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
+	</bean>
+
+	<bean id="org.muse.mneme.impl.QuestionStorageSample"
+		class="org.muse.mneme.impl.QuestionStorageSample"
+		init-method="init"
+		destroy-method="destroy"
+		singleton="true">
 	</bean>
 
 	<bean id="org.muse.mneme.api.SubmissionService"
@@ -89,20 +108,31 @@
 		singleton="true">
 		
 		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
-		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
 
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
 		<!-- for 2.4 only: <property name="gradebookService"><ref bean="org.sakaiproject.service.gradebook.GradebookExternalAssessmentService"/></property> -->
 		<property name="gradebookService"><ref bean="org.sakaiproject.service.gradebook.GradebookService"/></property>
-		<property name="memoryService"><ref bean="org.sakaiproject.memory.api.MemoryService"/></property>
 		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>		
 		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
-		
-		<property name="cacheMinutes"><value>5</value></property>
-		<property name="cacheCleanerMinutes"><value>15</value></property>
+
+		<property name="storage">
+			<map>
+				<!-- <entry key="default"><ref bean="org.muse.mneme.impl.SubmissionStorageDefault"/></entry> -->
+				<entry key="sample"><ref bean="org.muse.mneme.impl.SubmissionStorageSample"/></entry>
+			</map>
+		</property>
+		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
+	</bean>
+
+	<bean id="org.muse.mneme.impl.SubmissionStorageSample"
+		class="org.muse.mneme.impl.SubmissionStorageSample"
+		init-method="init"
+		destroy-method="destroy"
+		singleton="true">
 	</bean>
 
 	<bean id="org.muse.mneme.api.AssessmentService"
@@ -111,19 +141,30 @@
 		destroy-method="destroy"
 		singleton="true">
 		
-		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
+		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
+		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
 
-		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
-		<property name="memoryService"><ref bean="org.sakaiproject.memory.api.MemoryService"/></property>
 		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
-		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
 		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
-		
-		<property name="cacheMinutes"><value>5</value></property>
-		<property name="cacheCleanerMinutes"><value>15</value></property>
+
+		<property name="storage">
+			<map>
+				<!-- <entry key="default"><ref bean="org.muse.mneme.impl.AssesmentStorageDefault"/></entry> -->
+				<entry key="sample"><ref bean="org.muse.mneme.impl.AssessmentStorageSample"/></entry>
+			</map>
+		</property>
+		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
+	</bean>
+
+	<bean id="org.muse.mneme.impl.AssessmentStorageSample"
+		class="org.muse.mneme.impl.AssessmentStorageSample"
+		init-method="init"
+		destroy-method="destroy"
+		singleton="true">
 	</bean>
 
 	<bean id="org.muse.mneme.api.SecurityService"

@@ -25,13 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
-import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentAnswer;
-import org.muse.mneme.api.AssessmentQuestion;
-import org.muse.mneme.api.QuestionType;
-import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
-import org.sakaiproject.util.StringUtil;
 
 /**
  * The "FormatAnswerCorrectFeedback" format delegate for the mneme tool.
@@ -49,63 +42,65 @@ public class FormatAnswerCorrectFeedbackDelegate extends FormatDelegateImpl
 		M_log.info("destroy()");
 	}
 
+	// TODO: revisit how this is used - it seems question type specific
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String format(Context context, Object focus)
 	{
-		if (focus == null) return null;
-		if (!(focus instanceof AssessmentAnswer)) return null;
-		AssessmentAnswer answer = (AssessmentAnswer) focus;
-
-		// the question this is an answer to
-		AssessmentQuestion question = answer.getPart().getQuestion();
-		if (question == null) return null;
-
-		Object o = context.get("submission");
-		if (!(o instanceof Submission)) return null;
-		Submission submission = (Submission) o;
-
-		Assessment assessment = submission.getAssessment();
-		if (assessment == null) return null;
-
-		// if we are doing feedback just now
-		if (assessment.getFeedbackNow())
-		{
-			// if we are doing currect answer feedback
-			if (assessment.getFeedbackShowCorrectAnswer().booleanValue())
-			{
-				// search for our answer without creating it, and if found check if it is this QuestionAnswer
-				for (SubmissionAnswer subAnswer : submission.getAnswers())
-				{
-					// is this submission answer the answer to our assessment question answer's question?
-					if (subAnswer.getQuestion().equals(question))
-					{
-						// not for survey
-						if (question.getType() != QuestionType.survey)
-						{
-							// is the submission answer this answer?
-							if (StringUtil.contains(subAnswer.getEntryAnswerIds(), answer.getId()))
-							{
-								// correct
-								if ((answer.getIsCorrect() != null) && answer.getIsCorrect().booleanValue())
-								{
-									return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.png\" alt=\""
-											+ context.getMessages().getString("correct") + "\" />";
-								}
-
-								// incorrect
-								else
-								{
-									return "<img src=\"" + context.get("sakai.return.url") + "/icons/wrong.png\" alt=\""
-											+ context.getMessages().getString("incorrect") + "\" />";
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+//		if (focus == null) return null;
+//		if (!(focus instanceof Answer)) return null;
+//		Answer answer = (Answer) focus;
+//
+//		// the question this is an answer to
+//		Question question = answer.getQuestion();
+//		if (question == null) return null;
+//
+//		Object o = context.get("submission");
+//		if (!(o instanceof Submission)) return null;
+//		Submission submission = (Submission) o;
+//
+//		Assessment assessment = submission.getAssessment();
+//		if (assessment == null) return null;
+//
+//		// if we are doing review just now
+//		if (assessment.getReview().getNowAvailable())
+//		{
+//			// if we are doing currect answer review
+//			if (assessment.getReview().getShowCorrectAnswer())
+//			{
+//				// search for our answer without creating it, and if found check if it is this QuestionAnswer
+//				for (Answer subAnswer : submission.getAnswers())
+//				{
+//					// is this submission answer the answer to our assessment question answer's question?
+//					if (subAnswer.getQuestion().equals(question))
+//					{
+//						// not for survey
+//						if (question.getType() != QuestionType.survey)
+//						{
+//							// is the submission answer this answer?
+//							if (StringUtil.contains(subAnswer.getEntryAnswerIds(), answer.getId()))
+//							{
+//								// correct
+//								if ((answer.getIsCorrect() != null) && answer.getIsCorrect().booleanValue())
+//								{
+//									return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.png\" alt=\""
+//											+ context.getMessages().getString("correct") + "\" />";
+//								}
+//
+//								// incorrect
+//								else
+//								{
+//									return "<img src=\"" + context.get("sakai.return.url") + "/icons/wrong.png\" alt=\""
+//											+ context.getMessages().getString("incorrect") + "\" />";
+//								}
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
 
 		return null;
 	}

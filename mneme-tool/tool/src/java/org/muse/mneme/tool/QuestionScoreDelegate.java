@@ -26,9 +26,9 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentQuestion;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
+import org.muse.mneme.api.Answer;
 
 /**
  * The "FormatQuestionDecoration" format delegate for the mneme tool.
@@ -79,8 +79,8 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 	public String format(Context context, Object value)
 	{
 		if (value == null) return null;
-		if (!(value instanceof AssessmentQuestion)) return value.toString();
-		AssessmentQuestion question = (AssessmentQuestion) value;
+		if (!(value instanceof Question)) return value.toString();
+		Question question = (Question) value;
 
 		Object o = context.get("submission");
 		if (!(o instanceof Submission)) return value.toString();
@@ -94,17 +94,17 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 
 		Boolean review = (Boolean) context.get("review");
 
-		// if we are doing feedback just now, and if we are needing review and it's set, and if the submission has been graded
-		if ((review != null) && review.booleanValue() && submission.getIsGraded().booleanValue())
+		// if we are doing review just now, and if we are needing review and it's set, and if the submission has been graded
+		if ((review != null) && review && submission.getIsGraded())
 		{
 			// if we are doing question score feedback
-			if (assessment.getFeedbackShowQuestionScore().booleanValue())
+			if (assessment.getReview().getShowCorrectAnswer())
 			{
 				// the auto-scores for this answered question
 				float score = 0;
 
 				// find the section answer to this question (don't create it!)
-				for (SubmissionAnswer answer : submission.getAnswers())
+				for (Answer answer : submission.getAnswers())
 				{
 					if (answer.getQuestion().equals(question))
 					{
@@ -118,7 +118,8 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 		}
 
 		// add the possible points for the question
-		rv.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> " + formatScore(question.getPoints()) + ")");
+		rv.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> "
+				+ formatScore(question.getPool().getPoints()) + ")");
 
 		return rv.toString();
 	}

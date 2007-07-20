@@ -32,7 +32,6 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.tool.AssessmentDeliveryTool.Errors;
 import org.sakaiproject.util.Web;
 
 /**
@@ -67,7 +66,7 @@ public class SubmittedView extends ControllerImpl
 
 		String submissionId = params[2];
 
-		Submission submission = assessmentService.idSubmission(submissionId);
+		Submission submission = assessmentService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			// redirect to error
@@ -76,19 +75,19 @@ public class SubmittedView extends ControllerImpl
 		}
 
 		// make sure this is a completed submission
-		if ((submission.getIsComplete() == null) || (!submission.getIsComplete().booleanValue()))
+		if (!submission.getIsComplete())
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
-		// if we have no authored message or URL, skip right to ...
-		if ((submission.getAssessment().getSubmitMessage() == null) && (submission.getAssessment().getSubmitUrl() == null))
+		// if we have no authored submitted presentation, skip right to ...
+		if (submission.getAssessment().getSubmitPresentation() == null)
 		{
 			// if the assessment review is allowed, go to review, else to list
 			String dest = "/list";
-			if (submission.getAssessment().getFeedbackNow().booleanValue())
+			if (submission.getAssessment().getReview().getNowAvailable())
 			{
 				dest = "/review/" + submission.getId();
 			}

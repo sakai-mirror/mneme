@@ -21,23 +21,20 @@
 
 package org.muse.mneme.impl;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
-import org.sakaiproject.component.api.ServerConfigurationService;
+import org.muse.mneme.api.SecurityService;
 import org.sakaiproject.db.api.SqlService;
-import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.event.api.EventTrackingService;
-import org.sakaiproject.memory.api.Cache;
-import org.sakaiproject.memory.api.MemoryService;
-import org.sakaiproject.thread_local.api.ThreadLocalManager;
-import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 
 /**
@@ -50,192 +47,65 @@ public class QuestionServiceImpl implements QuestionService
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(QuestionServiceImpl.class);
 
-	/** A cache of attachments. */
-	protected Cache m_cache = null;
-
-	/*************************************************************************************************************************************************
-	 * Dependencies
-	 ************************************************************************************************************************************************/
+	/** Dependency: EventTrackingService */
+	protected EventTrackingService eventTrackingService = null;
 
 	/** Dependency: PoolService */
-	protected PoolService m_poolService = null;
+	protected PoolService poolService = null;
 
-	/**
-	 * Dependency: PoolService.
-	 * 
-	 * @param service
-	 *        The PoolService.
-	 */
-	public void setPoolService(PoolService service)
-	{
-		m_poolService = service;
-	}
-
-	/** Dependency: EntityManager */
-	protected EntityManager m_entityManager = null;
-
-	/**
-	 * Dependency: EntityManager.
-	 * 
-	 * @param service
-	 *        The EntityManager.
-	 */
-	public void setEntityManager(EntityManager service)
-	{
-		m_entityManager = service;
-	}
-
-	/** Dependency: EventTrackingService */
-	protected EventTrackingService m_eventTrackingService = null;
-
-	/**
-	 * Dependency: EventTrackingService.
-	 * 
-	 * @param service
-	 *        The EventTrackingService.
-	 */
-	public void setEventTrackingService(EventTrackingService service)
-	{
-		m_eventTrackingService = service;
-	}
-
-	/** Dependency: MemoryService */
-	protected MemoryService m_memoryService = null;
-
-	/**
-	 * Dependency: MemoryService.
-	 * 
-	 * @param service
-	 *        The MemoryService.
-	 */
-	public void setMemoryService(MemoryService service)
-	{
-		m_memoryService = service;
-	}
+	/** Dependency: SecurityService */
+	protected SecurityService securityService = null;
 
 	/** Dependency: SessionManager */
-	protected SessionManager m_sessionManager = null;
-
-	/**
-	 * Dependency: SessionManager.
-	 * 
-	 * @param service
-	 *        The SessionManager.
-	 */
-	public void setSessionManager(SessionManager service)
-	{
-		m_sessionManager = service;
-	}
-
-	/** Dependency: ServerConfigurationService */
-	protected ServerConfigurationService m_serverConfigurationService = null;
-
-	/**
-	 * Dependency: ServerConfigurationService.
-	 * 
-	 * @param service
-	 *        The ServerConfigurationService.
-	 */
-	public void setServerConfigurationService(ServerConfigurationService service)
-	{
-		m_serverConfigurationService = service;
-	}
+	protected SessionManager sessionManager = null;
 
 	/** Dependency: SqlService */
-	protected SqlService m_sqlService = null;
+	protected SqlService sqlService = null;
+
+	/** Storage handler. */
+	protected QuestionStorage storage = null;
+
+	/** Storage option map key for the option to use. */
+	protected String storageKey = null;
+
+	/** Map of registered QuestionStorage options. */
+	protected Map<String, QuestionStorage> storgeOptions;
 
 	/**
-	 * Dependency: SqlService.
-	 * 
-	 * @param service
-	 *        The SqlService.
+	 * {@inheritDoc}
 	 */
-	public void setSqlService(SqlService service)
+	public Boolean allowEditQuestion(Question question, String context, String userId)
 	{
-		m_sqlService = service;
-	}
+		if (question == null) throw new IllegalArgumentException();
+		if (context == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
-	protected ThreadLocalManager m_threadLocalManager = null;
+		if (M_log.isDebugEnabled()) M_log.debug("allowEditQuestion: " + question.getId() + ": " + context + ": " + userId);
 
-	/**
-	 * Dependency: ThreadLocalManager.
-	 * 
-	 * @param service
-	 *        The ThreadLocalManager.
-	 */
-	public void setThreadLocalManager(ThreadLocalManager service)
-	{
-		m_threadLocalManager = service;
-	}
+		// check permission - user must have MANAGE_PERMISSION in the context
+		boolean ok = securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context);
 
-	protected TimeService m_timeService = null;
-
-	/**
-	 * Dependency: TimeService.
-	 * 
-	 * @param service
-	 *        The TimeService.
-	 */
-	public void setTimeService(TimeService service)
-	{
-		m_timeService = service;
-	}
-
-	/*************************************************************************************************************************************************
-	 * Configuration
-	 ************************************************************************************************************************************************/
-
-	/** The # seconds between cache cleaning runs. */
-	protected int m_cacheCleanerSeconds = 0;
-
-	/** The # seconds to cache assessment reads. 0 disables the cache. */
-	protected int m_cacheSeconds = 0;
-
-	/**
-	 * Set the # minutes between cache cleanings.
-	 * 
-	 * @param time
-	 *        The # minutes between cache cleanings. (as an integer string).
-	 */
-	public void setCacheCleanerMinutes(String time)
-	{
-		m_cacheCleanerSeconds = Integer.parseInt(time) * 60;
+		// TODO: other users allowed...
+		// TODO: or is this user based...
+		return ok;
 	}
 
 	/**
-	 * Set the # minutes to cache.
-	 * 
-	 * @param time
-	 *        The # minutes to cache a get (as an integer string).
+	 * {@inheritDoc}
 	 */
-	public void setCacheMinutes(String time)
+	public Boolean allowManageQuestions(String context, String userId)
 	{
-		m_cacheSeconds = Integer.parseInt(time) * 60;
-	}
+		if (context == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
-	/*************************************************************************************************************************************************
-	 * Init and Destroy
-	 ************************************************************************************************************************************************/
+		if (M_log.isDebugEnabled()) M_log.debug("allowManageQuestions: " + context + ": " + userId);
 
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		try
-		{
-			// // <= 0 indicates no caching desired
-			// if ((m_cacheSeconds > 0) && (m_cacheCleanerSeconds > 0))
-			// {
-			// m_cache = m_memoryService.newHardCache(m_cacheCleanerSeconds, getAttachmentReference(null, null, null));
-			// }
+		// check permission - user must have MANAGE_PERMISSION in the context
+		boolean ok = securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context);
 
-			M_log.info("init(): caching minutes: " + m_cacheSeconds / 60 + " cache cleaner minutes: " + m_cacheCleanerSeconds / 60);
-		}
-		catch (Throwable t)
-		{
-			M_log.warn("init(): ", t);
-		}
+		// TODO: other users allowed...
+		// TODO: or is this user based...
+		return ok;
 	}
 
 	/**
@@ -246,38 +116,15 @@ public class QuestionServiceImpl implements QuestionService
 		M_log.info("destroy()");
 	}
 
-	/*************************************************************************************************************************************************
-	 * QuestionService
-	 ************************************************************************************************************************************************/
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean allowEditQuestion(Question question, String context, String userId)
-	{
-		return Boolean.TRUE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean allowManageQuestions(String context, String userId)
-	{
-		return Boolean.TRUE;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
 	public List<Question> findQuestions(String userId)
 	{
-		List<Question> rv = new ArrayList<Question>(0);
+		// TODO: other (sort, select, paging, ...) parameters
 
-		rv.add(new QuestionImpl("1", this, null, "1 description", null, null));
-		rv.add(new QuestionImpl("2", this, null, "1 description", null, null));
-		rv.add(new QuestionImpl("3", this, null, "1 description", null, null));
-		rv.add(new QuestionImpl("4", this, null, "1 description", null, null));
-		rv.add(new QuestionImpl("5", this, null, "1 description", null, null));
+		if (M_log.isDebugEnabled()) M_log.debug("findQuestions: " + userId);
+		List<Question> rv = this.storage.findQuestions(userId);
 
 		return rv;
 	}
@@ -285,30 +132,216 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Question idQuestion(String questionId)
+	public Question getQuestion(String questionId)
 	{
-		return null;
+		if (questionId == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getQuestion: " + questionId);
+
+		// TODO: check to see if id is a valid existing question?
+		// this.storage.questionExists(questionId);
+
+		QuestionImpl question = this.storage.getQuestion(questionId);
+
+		return question;
+	}
+
+	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		try
+		{
+			// storage - as configured
+			if (this.storageKey != null)
+			{
+				// if set to "SQL", replace with the current SQL vendor
+				if ("SQL".equals(this.storageKey))
+				{
+					this.storageKey = sqlService.getVendor();
+				}
+
+				this.storage = this.storgeOptions.get(this.storageKey);
+			}
+
+			// use "default" if needed
+			if (this.storage == null)
+			{
+				this.storage = this.storgeOptions.get("default");
+			}
+
+			if (storage == null) M_log.warn("no storage set: " + this.storageKey);
+			this.storage.setQuestionService(this);
+			this.storage.setPoolService(this.poolService);
+
+			M_log.info("init()");
+		}
+		catch (Throwable t)
+		{
+			M_log.warn("init(): ", t);
+		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Question newQuestion() throws AssessmentPermissionException
+	public Question newQuestion(String context, String userId) throws AssessmentPermissionException
 	{
-		throw new AssessmentPermissionException("", "", "");
+		// TODO: which pool?
+
+		if (context == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		if (M_log.isDebugEnabled()) M_log.debug("newQuestion: " + context + ": " + userId);
+
+		// security check
+		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+
+		QuestionImpl question = this.storage.newQuestion();
+		question.getAttribution().setUserId(userId);
+		// TODO: date
+
+		return question;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removeQuestion(Question question) throws AssessmentPermissionException
+	public void removeQuestion(Question question, String context) throws AssessmentPermissionException
 	{
+		if (question == null) throw new IllegalArgumentException();
+		if (context == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("removeQuestion: " + question.getId() + ": " + context);
+
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+
+		this.storage.removeQuestion((QuestionImpl) question);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void saveQuestion(Question question) throws AssessmentPermissionException
+	public void saveQuestion(Question question, String context) throws AssessmentPermissionException
 	{
+		if (question == null) throw new IllegalArgumentException();
+		if (context == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: " + question.getId() + ": " + context);
+
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+
+		this.storage.saveQuestion((QuestionImpl) question);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
+	}
+
+	/**
+	 * Dependency: EventTrackingService.
+	 * 
+	 * @param service
+	 *        The EventTrackingService.
+	 */
+	public void setEventTrackingService(EventTrackingService service)
+	{
+		eventTrackingService = service;
+	}
+
+	/**
+	 * Dependency: PoolService.
+	 * 
+	 * @param service
+	 *        The PoolService.
+	 */
+	public void setPoolService(PoolService service)
+	{
+		poolService = service;
+	}
+
+	/**
+	 * Dependency: SecurityService.
+	 * 
+	 * @param service
+	 *        The SecurityService.
+	 */
+	public void setSecurityService(SecurityService service)
+	{
+		securityService = service;
+	}
+
+	/**
+	 * Dependency: SessionManager.
+	 * 
+	 * @param service
+	 *        The SessionManager.
+	 */
+	public void setSessionManager(SessionManager service)
+	{
+		sessionManager = service;
+	}
+
+	/**
+	 * Dependency: SqlService.
+	 * 
+	 * @param service
+	 *        The SqlService.
+	 */
+	public void setSqlService(SqlService service)
+	{
+		sqlService = service;
+	}
+
+	/**
+	 * Set the storage class options.
+	 * 
+	 * @param options
+	 *        The PoolStorage options.
+	 */
+	public void setStorage(Map options)
+	{
+		this.storgeOptions = options;
+	}
+
+	/**
+	 * Set the storage option key to use, selecting which PoolStorage to use.
+	 * 
+	 * @param key
+	 *        The storage option key.
+	 */
+	public void setStorageKey(String key)
+	{
+		this.storageKey = key;
+	}
+
+	/**
+	 * Find all the questions in the pool
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @return The List of question ids that are in the pool.
+	 */
+	protected List<String> getPoolQuestions(Pool pool)
+	{
+		return this.storage.getPoolQuestions(pool);
+	}
+
+	/**
+	 * Form an question reference for this question id.
+	 * 
+	 * @param questionId
+	 *        the question id.
+	 * @return the pool reference for this pool id.
+	 */
+	protected String getQuestionReference(String questionId)
+	{
+		String ref = MnemeService.REFERENCE_ROOT + "/" + MnemeService.QUESTION_TYPE + "/" + questionId;
+		return ref;
 	}
 }

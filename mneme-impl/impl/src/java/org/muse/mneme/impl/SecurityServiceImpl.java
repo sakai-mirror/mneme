@@ -39,10 +39,10 @@ public class SecurityServiceImpl implements SecurityService
 	private static Log M_log = LogFactory.getLog(SecurityServiceImpl.class);
 
 	/** Dependency: SecurityService */
-	protected org.sakaiproject.authz.api.SecurityService m_securityService = null;
+	protected org.sakaiproject.authz.api.SecurityService securityService = null;
 
 	/** Dependency: SiteService */
-	protected SiteService m_siteService = null;
+	protected SiteService siteService = null;
 
 	/**
 	 * Check the security for this user doing this function withing this context.
@@ -60,11 +60,11 @@ public class SecurityServiceImpl implements SecurityService
 	public boolean checkSecurity(String userId, String function, String context)
 	{
 		// check for super user
-		if (m_securityService.isSuperUser(userId)) return true;
+		if (securityService.isSuperUser(userId)) return true;
 
 		// check for the user / function / context-as-site-authz
 		// use the site ref for the security service (used to cache the security calls in the security service)
-		String siteRef = m_siteService.siteReference(context);
+		String siteRef = siteService.siteReference(context);
 
 		// form the azGroups for a context-as-implemented-by-site (Note the *lack* of direct dependency on Site, i.e. we stole the
 		// code!)
@@ -74,7 +74,7 @@ public class SecurityServiceImpl implements SecurityService
 
 		String rev = "/site/" + context;
 
-		boolean rv = m_securityService.unlock(userId, function, siteRef, azGroups);
+		boolean rv = securityService.unlock(userId, function, siteRef, azGroups);
 		return rv;
 	}
 
@@ -124,7 +124,7 @@ public class SecurityServiceImpl implements SecurityService
 	 */
 	public void setSecurityService(org.sakaiproject.authz.api.SecurityService service)
 	{
-		m_securityService = service;
+		securityService = service;
 	}
 
 	/**
@@ -135,6 +135,6 @@ public class SecurityServiceImpl implements SecurityService
 	 */
 	public void setSiteService(SiteService service)
 	{
-		m_siteService = service;
+		siteService = service;
 	}
 }

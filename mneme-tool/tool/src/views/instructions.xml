@@ -69,7 +69,7 @@
 				<compareDecision model="submission.expiration.cause" constant="timeLimit" />
 			</included>
 		</countdownTimer>
-		
+
 		<!-- timer for near-due tests -->
 		<countdownTimer submit="TRUE">
 			<duration>
@@ -100,49 +100,53 @@
 				<message selector="instructions-test-title">
 					<model type="icon" icon="/icons/test.png" />
 					<model ref="submission.assessment.title" />
-					<model ref="submission.assessment.totalPoints" delegate="FormatScore" tool="sakai.mneme" />
+					<model ref="submission.assessment.parts.totalPoints" delegate="FormatScore" tool="sakai.mneme" />
 				</message>
 			</title>
 			<container>
 				<text>
 					<message>
-						<model type="html" ref="submission.assessment.description" />
+						<model type="html" ref="submission.assessment.presentation.text" />
 					</message>
 				</text>
 				<attachments title="attachments">
-					<model ref="submission.assessment.attachments" />
+					<model ref="submission.assessment.presentation.attachments" />
 					<included>
-						<hasValueDecision model="submission.assessment.attachments" />
+						<hasValueDecision model="submission.assessment.presentation.attachments" />
 					</included>
 				</attachments>
 			</container>
 		</section>
 
-		<!-- for each section, section information -->
+		<!-- for each part, part information -->
+		<!--  TODO: the entityIncluded can be changed to a section included since there's just one setting -ggolden -->
 		<section>
-			<iterator model="submission.assessment.sections" name="section" />
+			<iterator model="submission.assessment.parts.parts" name="part" />
 			<entityIncluded>
-				<decision reversed="TRUE" model="section.isMerged" />
+				<decision model="submission.assessment.parts.showPresentation" />
 			</entityIncluded>
 			<title>
 				<message selector="instructions-section-title">
 					<model type="icon" icon="/icons/section.png" />
-					<model type="text" ref="section.ordering.position" />
-					<model type="text" ref="section.assessment.numSections" />
-					<model type="text" ref="section.title" />
-					<model ref="section" delegate="SectionScore" tool="sakai.mneme" />
+					<model type="text" ref="part.ordering.position" />
+					<model type="text" ref="part.assessment.parts.size" />
+					<model type="text" ref="part.title" />
+					<model ref="part" delegate="SectionScore" tool="sakai.mneme" />
 				</message>
 			</title>
 			<container>
 				<text>
 					<message>
-						<model type="html" ref="section.description" />
+						<model type="html" ref="part.presentation.text" />
 					</message>
+					<included>
+						<hasValueDecision model="part.presentation.text" />
+					</included>
 				</text>
 				<attachments title="attachments">
-					<model ref="section.attachments" />
+					<model ref="part.presentation.attachments" />
 					<included>
-						<hasValueDecision model="section.attachments" />
+						<hasValueDecision model="part.presentation.attachments" />
 					</included>
 				</attachments>
 			</container>
@@ -162,7 +166,7 @@
 			</included>
 		</section>
 
-		<!-- flexible instructions (by-question and by-section) -->
+		<!-- flexible instructions (by-question and by-part) -->
 		<section>
 			<container>
 				<instructions>
@@ -173,9 +177,9 @@
 			</container>
 			<included>
 				<compareDecision>
-					<model ref="submission.assessment.questionPresentation" />
-					<constant value="BY_SECTION" />
-					<constant value="BY_QUESTION" />
+					<model ref="submission.assessment.questionGrouping" />
+					<constant value="part" />
+					<constant value="question" />
 				</compareDecision>
 				<decision model="submission.assessment.randomAccess" />
 			</included>
@@ -191,7 +195,7 @@
 				</instructions>
 			</container>
 			<included>
-				<compareDecision model="submission.assessment.questionPresentation" constant="BY_ASSESSMENT" />
+				<compareDecision model="submission.assessment.questionGrouping" constant="assessment" />
 				<decision model="submission.assessment.randomAccess" />
 			</included>
 		</section>

@@ -25,6 +25,7 @@
 -->
 
 <interface>
+
 	<!-- title and header -->
 	<title>
 		<message selector="toc-title" model="submission.assessment.title" />
@@ -36,7 +37,7 @@
 	<container>
 		<!-- courier to keep the session alive -->
 		<courier destination="/courier" frequency="600" />
-	
+
 		<!-- repeat the nav up top -->
 		<alias to="nav" />
 
@@ -63,7 +64,7 @@
 				<compareDecision model="submission.expiration.cause" constant="timeLimit" />
 			</included>
 		</countdownTimer>
-		
+
 		<!-- timer for near-due tests -->
 		<countdownTimer submit="TRUE">
 			<duration>
@@ -101,7 +102,7 @@
 				<message selector="toc-section-title">
 					<model ref="submission.assessment.title" />
 					<model ref="submission.assessment" delegate="QuestionsAnswered" tool="sakai.mneme" />
-					<model ref="submission.assessment.numQuestions" />
+					<model ref="submission.assessment.parts.numQuestions" />
 					<model ref="submission" delegate="SubmissionScore" tool="sakai.mneme" />
 				</message>
 			</title>
@@ -116,32 +117,32 @@
 
 				<!-- for each question -->
 				<entityList style="FORM">
-					<iterator name="question" model="submission.assessment.questions" />
+					<iterator name="question" model="submission.assessment.parts.questions" />
 
 					<!-- section title (click to instructions) -->
 					<headings>
 						<heading>
-							<decision reversed="TRUE" model="question.section.isMerged" />
-							<decision model="question.sectionOrdering.isFirst" />
+							<decision model="submission.assessment.parts.showPresentation" />
+							<decision model="question.partOrdering.isFirst" />
 							<navigation style="LINK">
 								<title>
 									<message selector="toc-questions-title">
-										<model ref="question.section.ordering.position" />
-										<model ref="question.section.title" />
-										<model delegate="QuestionsAnswered" tool="sakai.mneme" />
-										<model ref="question.section.numQuestions" />
-										<model ref="question.section" delegate="SectionScore" tool="sakai.mneme" />
+										<model ref="question.part.ordering.position" />
+										<model ref="question.part.title" />
+										<model ref="question.part" delegate="QuestionsAnswered" tool="sakai.mneme" />
+										<model ref="question.part.numQuestions" />
+										<model ref="question.part" delegate="SectionScore" tool="sakai.mneme" />
 									</message>
 								</title>
 								<disabled>
-									<compareDecision model="submission.assessment.questionPresentation">
-										<constant value="BY_ASSESSMENT" />
-										<constant value="BY_SECTION" />
+									<compareDecision model="submission.assessment.questionGrouping">
+										<constant value="assessment" />
+										<constant value="section" />
 									</compareDecision>
 								</disabled>
-								<destination template="/section_instructions/{0}/{1}">
+								<destination template="/part_instructions/{0}/{1}">
 									<model ref="submission.id" />
-									<model ref="question.section.id" />
+									<model ref="question.part.id" />
 								</destination>
 							</navigation>
 						</heading>
@@ -158,7 +159,7 @@
 						<modelColumn>
 							<message selector="toc-question-entry">
 								<model delegate="FormatQuestionNumber" tool="sakai.mneme" />
-								<model type="text" stripHtml="TRUE" max="60" ref="question.title" />
+								<model type="text" stripHtml="TRUE" max="60" ref="question.description" />
 								<model delegate="QuestionScore" tool="sakai.mneme" />
 							</message>
 							<entityNavigations>
@@ -170,7 +171,7 @@
 								</navigation>
 							</entityNavigations>
 							<included>
-								<compareDecision model="submission.assessment.questionPresentation" constant="BY_QUESTION" />
+								<compareDecision model="submission.assessment.questionGrouping" constant="question" />
 							</included>
 						</modelColumn>
 
@@ -178,20 +179,20 @@
 						<modelColumn>
 							<message selector="toc-question-entry">
 								<model delegate="FormatQuestionNumber" tool="sakai.mneme" />
-								<model type="text" stripHtml="TRUE" max="60" ref="question.title" />
+								<model type="text" stripHtml="TRUE" max="60" ref="question.description" />
 								<model delegate="QuestionScore" tool="sakai.mneme" />
 							</message>
 							<entityNavigations>
 								<navigation>
-									<destination template="/question/{0}/s{1}#{2}">
+									<destination template="/question/{0}/p{1}#{2}">
 										<model ref="submission.id" />
-										<model ref="question.section.id" />
+										<model ref="question.part.id" />
 										<model ref="question.id" />
 									</destination>
 								</navigation>
 							</entityNavigations>
 							<included>
-								<compareDecision model="submission.assessment.questionPresentation" constant="BY_SECTION" />
+								<compareDecision model="submission.assessment.questionGrouping" constant="part" />
 							</included>
 						</modelColumn>
 
@@ -199,7 +200,7 @@
 						<modelColumn>
 							<message selector="toc-question-entry">
 								<model delegate="FormatQuestionNumber" tool="sakai.mneme" />
-								<model type="text" stripHtml="TRUE" max="60" ref="question.title" />
+								<model type="text" stripHtml="TRUE" max="60" ref="question.description" />
 								<model delegate="QuestionScore" tool="sakai.mneme" />
 							</message>
 							<entityNavigations>
@@ -211,7 +212,7 @@
 								</navigation>
 							</entityNavigations>
 							<included>
-								<compareDecision model="submission.assessment.questionPresentation" constant="BY_ASSESSMENT" />
+								<compareDecision model="submission.assessment.questionGrouping" constant="assessment" />
 							</included>
 						</modelColumn>
 
@@ -242,10 +243,12 @@
 		<!-- nav bar -->
 		<navigationBar id="nav" width="70em">
 			<container>
-				<navigation title="save-exit" accessKey="save-exit-access" description="save-exit-description" style="BUTTON" destination="/list" default="TRUE">
+				<navigation title="save-exit" accessKey="save-exit-access" description="save-exit-description" style="BUTTON" destination="/list"
+					default="TRUE">
 					<icon icon="/icons/exit.gif" style="LEFT" />
 				</navigation>
-				<navigation title="finish-exam" accessKey="finish-exam-access" description="finish-exam-description" style="BUTTON" submit="TRUE" id="finish">
+				<navigation title="finish-exam" accessKey="finish-exam-access" description="finish-exam-description" style="BUTTON" submit="TRUE"
+					id="finish">
 					<icon icon="/icons/finish.gif" style="LEFT" />
 					<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="finish-confirm" />
 					<destination template="/submitted/{0}" model="submission.id" />

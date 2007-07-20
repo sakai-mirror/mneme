@@ -34,6 +34,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
@@ -44,17 +45,11 @@ public class DeletePoolView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(DeletePoolView.class);
 
-	/** Pool Service*/
+	/** Pool Service */
 	protected PoolService poolService = null;
 
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		super.init();
-		M_log.info("init()");
-	}
+	/** tool manager reference. */
+	protected ToolManager toolManager = null;
 
 	/**
 	 * Shutdown.
@@ -78,11 +73,11 @@ public class DeletePoolView extends ControllerImpl
 		List<Pool> pools = new ArrayList<Pool>(0);
 		StringBuffer deletePoolIds = new StringBuffer();
 
-		//pool id's are in the params array from the index 2
+		// pool id's are in the params array from the index 2
 		for (int i = 2; i < params.length; i++)
 		{
-			//get the pool and add to the list to show			
-			Pool pool = this.poolService.idPool(params[i]);
+			// get the pool and add to the list to show
+			Pool pool = this.poolService.getPool(params[i]);
 
 			if (pool != null) pools.add(pool);
 		}
@@ -92,24 +87,41 @@ public class DeletePoolView extends ControllerImpl
 	}
 
 	/**
+	 * @return the poolService
+	 */
+	public PoolService getPoolService()
+	{
+		return this.poolService;
+	}
+
+	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		super.init();
+		M_log.info("init()");
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		//throw new IllegalArgumentException();
+		// throw new IllegalArgumentException();
 		String destination = this.uiService.decode(req, context);
 
 		if (destination != null && (destination.trim().equalsIgnoreCase("/pools_delete")))
 		{
 			try
 			{
-				//pool id's are in the params array from the index 2
+				// pool id's are in the params array from the index 2
 				for (int i = 2; i < params.length; i++)
 				{
-					Pool pool = this.poolService.idPool(params[i]);
+					Pool pool = this.poolService.getPool(params[i]);
 					if (pool != null)
 					{
-						this.poolService.removePool(pool);
+						this.poolService.removePool(pool, toolManager.getCurrentPlacement().getContext());
 					}
 				}
 			}
@@ -124,19 +136,22 @@ public class DeletePoolView extends ControllerImpl
 	}
 
 	/**
-	 * @return the poolService
-	 */
-	public PoolService getPoolService()
-	{
-		return this.poolService;
-	}
-
-	/**
-	 * @param poolService the poolService to set
+	 * @param poolService
+	 *        the poolService to set
 	 */
 	public void setPoolService(PoolService poolService)
 	{
 		this.poolService = poolService;
 	}
 
+	/**
+	 * Set the tool manager.
+	 * 
+	 * @param manager
+	 *        The tool manager.
+	 */
+	public void setToolManager(ToolManager manager)
+	{
+		toolManager = manager;
+	}
 }

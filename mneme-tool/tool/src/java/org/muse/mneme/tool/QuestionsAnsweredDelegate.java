@@ -25,11 +25,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
-import org.muse.mneme.api.AssessmentSection;
-import org.muse.mneme.api.MnemeService;
-import org.muse.mneme.api.AssessmentSubmissionStatus;
+import org.muse.mneme.api.Answer;
+import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
 
 /**
  * The "QuestionsAnswered" format delegate for the mneme tool.
@@ -55,20 +53,20 @@ public class QuestionsAnsweredDelegate extends FormatDelegateImpl
 		if (!(o instanceof Submission)) return value.toString();
 		Submission submission = (Submission) o;
 
-		// if focused on a section, we pick only that section's questions, else we use them all
-		AssessmentSection section = null;
-		if (value instanceof AssessmentSection)
+		// if focused on a part, we pick only that part's questions, else we use them all
+		Part part = null;
+		if (value instanceof Part)
 		{
-			section = (AssessmentSection) value;
+			part = (Part) value;
 		}
 
 		// count the questions answered
 		int count = 0;
 
 		// find the section's answers to AssessmentQuestions that are in this section and are considered answered.
-		for (SubmissionAnswer answer : submission.getAnswers())
+		for (Answer answer : submission.getAnswers())
 		{
-			if ((section == null || answer.getQuestion().getSection().equals(section)) && answer.getIsAnswered().booleanValue())
+			if ((part == null || answer.getQuestion().getPart().equals(part)) && answer.getIsAnswered())
 			{
 				count++;
 			}

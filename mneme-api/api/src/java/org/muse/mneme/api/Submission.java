@@ -46,14 +46,14 @@ public interface Submission
 	 *        The assessment question for which this will be an answer.
 	 * @return The answer for this question.
 	 */
-	SubmissionAnswer getAnswer(AssessmentQuestion question);
+	Answer getAnswer(Question question);
 
 	/**
 	 * Access the submission's answers.
 	 * 
 	 * @return The submission's answers.
 	 */
-	List<? extends SubmissionAnswer> getAnswers();
+	List<? extends Answer> getAnswers();
 
 	/**
 	 * Access the sum of all auto score's for this answers of this submission.
@@ -84,13 +84,6 @@ public interface Submission
 	Submission getBest();
 
 	/**
-	 * Access the confirmation string for this submission.
-	 * 
-	 * @return The confirmation string for this submission.
-	 */
-	String getConfirmation();
-
-	/**
 	 * Access the time taken to make this submission, in ms, based on the start and lastest submission dates.
 	 * 
 	 * @return The time taken to make this submission, in ms (or null if it was not timed or not available).
@@ -98,19 +91,11 @@ public interface Submission
 	Long getElapsedTime();
 
 	/**
-	 * Access the evaluation comment for the overall submission.
+	 * Access the evaluation for the overall submission.
 	 * 
-	 * @return The evaluation comment for the overall submission, or null if there is none.
+	 * @return The evaluation for the overall submission, or null if there is none.
 	 */
-	String getEvalComment();
-
-	/**
-	 * Access the evaluation score for the overall submission. This is combined with the auto scores and the answer evaluation scores for the total
-	 * score.
-	 * 
-	 * @return The evaluation score for the overall submission, or null if there is none.
-	 */
-	Float getEvalScore();
+	SubmissionEvaluation getEvaluation();
 
 	/**
 	 * Access the expiration information for the submission.
@@ -124,7 +109,7 @@ public interface Submission
 	 * 
 	 * @return The first incomplete assessment question, or null if they have all been completed.
 	 */
-	AssessmentQuestion getFirstIncompleteQuestion();
+	Question getFirstIncompleteQuestion();
 
 	/**
 	 * Access the id of this submission.
@@ -134,20 +119,11 @@ public interface Submission
 	String getId();
 
 	/**
-	 * Check if all the questions (except any in the list) have been answered and not marked for review.
+	 * Check if all the questions have been answered and not marked for review.
 	 * 
-	 * @param questionsToSkip
-	 *        A List of question not to check, or null or empty to check them all.
 	 * @return TRUE if the asssessment's questions are all answered, FALSE if not.
 	 */
-	Boolean getIsAnswered(List<AssessmentQuestion> questionsToSkip);
-
-	/**
-	 * Check if any of the answers in the submission have been changed by a setter.
-	 * 
-	 * @return TRUE if any answers have been changed, FALSE if not.
-	 */
-	Boolean getIsAnswersChanged();
+	Boolean getIsAnswered();
 
 	/**
 	 * Access the complete flag for the submission.
@@ -157,13 +133,13 @@ public interface Submission
 	Boolean getIsComplete();
 
 	/**
-	 * Check if this the answer to this question has been marked "complete" - this is not "fully answered" as in getIsAnswered().
+	 * Check if this the answer to this question has been marked "complete" - this is different than "fully answered" as in getIsAnswered().
 	 * 
 	 * @param question
 	 *        The assessment question
 	 * @return TRUE if the question has been marked "complete", FALSE if not.
 	 */
-	Boolean getIsCompleteQuestion(AssessmentQuestion question);
+	Boolean getIsCompleteQuestion(Question question);
 
 	/**
 	 * Check if the submission has been graded or not.
@@ -173,7 +149,7 @@ public interface Submission
 	Boolean getIsGraded();
 
 	/**
-	 * Check if the submission is past its time limit, retract or hard due date.
+	 * Check if the submission is past its time limit, due or accept until date, or is to an assessment that is inactive.
 	 * 
 	 * @param qasOf
 	 *        The effective time of the check.
@@ -243,13 +219,6 @@ public interface Submission
 	Time getStartDate();
 
 	/**
-	 * Access the submission status.
-	 * 
-	 * @return The submission status.
-	 */
-	Integer getStatus();
-
-	/**
 	 * Access the submission date for this submission.
 	 * 
 	 * @return the submission date for this submission, or null if there is none.
@@ -272,43 +241,11 @@ public interface Submission
 	String getUserId();
 
 	/**
-	 * Compute the 'over' date for the submission - when it would be over based on time limit, retract or hard due date.
+	 * Compute the 'over' date for the submission - when it would be over based on time limit, due or accept-until dates.
 	 * 
 	 * @return The 'over' time for the submission, or NULL if there is none.
 	 */
 	Time getWhenOver();
-
-	/**
-	 * Set the submission's answers to (a deep copy of) this list of SubmissionAnswer.
-	 * 
-	 * @param answers
-	 *        The submission's answers.
-	 */
-	void setAnswers(List<? extends SubmissionAnswer> answers);
-
-	/**
-	 * Set the assessment for this submission.
-	 * 
-	 * @param assessment
-	 *        The assessment for this submission.
-	 */
-	void setAssessment(Assessment assessment);
-
-	/**
-	 * Set the evaluation comment.
-	 * 
-	 * @param comment
-	 *        The evaluation comment.
-	 */
-	void setEvalComment(String comment);
-
-	/**
-	 * Set the evaluation score.
-	 * 
-	 * @param score
-	 *        The evaluation score.
-	 */
-	void setEvalScore(Float score);
 
 	/**
 	 * Set the complete flag for the submission.
@@ -319,6 +256,14 @@ public interface Submission
 	void setIsComplete(Boolean complete);
 
 	/**
+	 * Set the graded flag for the submission.
+	 * 
+	 * @param graded
+	 *        True if the submission is graded, False if it is not yet.
+	 */
+	void setIsGraded(Boolean graded);
+
+	/**
 	 * Set the start date for this submission - the earliest date that this submission was altered by the submitter.
 	 * 
 	 * @param startDate
@@ -327,26 +272,10 @@ public interface Submission
 	void setStartDate(Time startDate);
 
 	/**
-	 * Set the submission status.
-	 * 
-	 * @param status
-	 *        The submission status.
-	 */
-	void setStatus(Integer status);
-
-	/**
 	 * Set the submission date for this submission - the latest date that this submission was altered by the submitter.
 	 * 
 	 * @param submittedDate
 	 *        the submission date for this submission.
 	 */
 	void setSubmittedDate(Time submittedDate);
-
-	/**
-	 * Set the user id for this submission.
-	 * 
-	 * @param userId
-	 *        The user id who made this submission.
-	 */
-	void setUserId(String userId);
 }

@@ -26,9 +26,9 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentQuestion;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionAnswer;
+import org.muse.mneme.api.Answer;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -53,8 +53,8 @@ public class FormatQuestionDecorationDelegate extends FormatDelegateImpl
 	public String format(Context context, Object value)
 	{
 		if (value == null) return null;
-		if (!(value instanceof AssessmentQuestion)) return value.toString();
-		AssessmentQuestion question = (AssessmentQuestion) value;
+		if (!(value instanceof Question)) return value.toString();
+		Question question = (Question) value;
 
 		Object o = context.get("submission");
 		if (!(o instanceof Submission)) return value.toString();
@@ -67,7 +67,7 @@ public class FormatQuestionDecorationDelegate extends FormatDelegateImpl
 		boolean answered = false;
 		boolean markForReview = false;
 		boolean missingRationale = false;
-		for (SubmissionAnswer answer : submission.getAnswers())
+		for (Answer answer : submission.getAnswers())
 		{
 			if (answer.getQuestion().equals(question))
 			{

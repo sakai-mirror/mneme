@@ -77,9 +77,9 @@ public class FormatListGradeDelegate extends FormatDelegateImpl
 		if (!(value instanceof Submission)) return context.getMessages().getString("dash");
 		Submission submission = (Submission) value;
 
-		if (submission.getIsComplete().booleanValue())
+		if (submission.getIsComplete())
 		{
-			if (submission.getIsGraded().booleanValue())
+			if (submission.getIsGraded())
 			{
 				return formatScore(submission.getTotalScore());
 			}

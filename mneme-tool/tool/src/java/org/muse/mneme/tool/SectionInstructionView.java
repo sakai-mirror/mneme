@@ -30,14 +30,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.AssessmentSection;
 import org.muse.mneme.api.MnemeService;
-import org.muse.mneme.api.QuestionPresentation;
+import org.muse.mneme.api.Part;
+import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.Submission;
 import org.sakaiproject.util.Web;
 
 /**
- * The /section_instructions view for the mneme tool.
+ * The /part_instructions view for the mneme tool.
  */
 public class SectionInstructionView extends ControllerImpl
 {
@@ -60,17 +60,17 @@ public class SectionInstructionView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need two parameters (submissionId, sectionId)
+		// we need two parameters (submissionId, partId)
 		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
 		String submissionId = params[2];
-		String sectionId = params[3];
+		String partId = params[3];
 
 		// collect the submission
-		Submission submission = assessmentService.idSubmission(submissionId);
+		Submission submission = assessmentService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			// redirect to error
@@ -79,23 +79,23 @@ public class SectionInstructionView extends ControllerImpl
 		}
 
 		// make sure by-question is valid for this assessment
-		if (submission.getAssessment().getQuestionPresentation() != QuestionPresentation.BY_QUESTION)
+		if (submission.getAssessment().getQuestionGrouping() != QuestionGrouping.question)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
 
-		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
+		if (!assessmentService.allowCompleteSubmission(submission, null))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
-		// collect the section
-		AssessmentSection section = submission.getAssessment().getSection(sectionId);
-		if (section == null)
+		// collect the part
+		Part part = submission.getAssessment().getParts().getPart(partId);
+		if (part == null)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
@@ -104,8 +104,7 @@ public class SectionInstructionView extends ControllerImpl
 
 		context.put("actionTitle", messages.getString("question-header-instructions"));
 		context.put("submission", submission);
-		context.put("section", section);
-		// context.put("mode", mode);
+		context.put("part", part);
 
 		// render
 		uiService.render(ui, context);
