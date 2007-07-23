@@ -22,7 +22,6 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,27 +29,22 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
-import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
- * The /tests view for the mneme tool.
+ * The /test_settings view for the mneme tool.
  */
-public class TestsView extends ControllerImpl
+public class TestSettingsView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(TestsView.class);
+	private static Log M_log = LogFactory.getLog(TestSettingsView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
-
-	/** tool manager reference. */
-	protected ToolManager toolManager = null;
 
 	/**
 	 * Shutdown.
@@ -65,13 +59,32 @@ public class TestsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// collect the assessments in this context
-		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext());
-		context.put("assessments", assessments);
+		// we need a single parameter (aid)
+		if (params.length != 3)
+		{
+			throw new IllegalArgumentException();
+		}
 
-		// value holders for the selection checkboxes
-		Values values = this.uiService.newValues();
-		context.put("ids", values);
+		String assessmentId = params[2];
+
+		Assessment assessment = assessmentService.getAssessment(assessmentId);
+		if (assessment == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		// security check
+		if (!assessmentService.allowEditAssessment(assessment, null))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		// collect information: the selected assessment
+		context.put("assessment", assessment);
 
 		// render
 		uiService.render(ui, context);
@@ -91,47 +104,50 @@ public class TestsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// from an add or delete request
+		// we need a single parameter (aid)
+		if (params.length != 3)
+		{
+			throw new IllegalArgumentException();
+		}
+
+		String assessmentId = params[2];
+
+		Assessment assessment = assessmentService.getAssessment(assessmentId);
+		if (assessment == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
 
 		// security check
-		if (!assessmentService.allowManageAssessments(this.toolManager.getCurrentPlacement().getContext(), null))
+		if (!assessmentService.allowEditAssessment(assessment, null))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
+		// setup the model: the selected assessment
+		context.put("assessment", assessment);
+
 		// read the form
 		String destination = uiService.decode(req, context);
 
-		// for an add
-		if (destination.startsWith("/test_edit"))
+		// commit the save
+		try
 		{
-			// create a new test
-			try
-			{
-				Assessment assessment = this.assessmentService.newAssessment(this.toolManager.getCurrentPlacement().getContext());
-
-				// commit it empty
-				this.assessmentService.saveAssessment(assessment);
-
-				// redirect to edit for this assessment
-				destination = destination + assessment.getId();
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-				return;
-			}
+			this.assessmentService.saveAssessment(assessment);
+		}
+		catch (AssessmentPermissionException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
 		}
 
-		// TODO: delete
-
-		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+		// redirect to the next destination
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
@@ -143,16 +159,5 @@ public class TestsView extends ControllerImpl
 	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
-	}
-
-	/**
-	 * Set the tool manager.
-	 * 
-	 * @param manager
-	 *        The tool manager.
-	 */
-	public void setToolManager(ToolManager manager)
-	{
-		toolManager = manager;
 	}
 }

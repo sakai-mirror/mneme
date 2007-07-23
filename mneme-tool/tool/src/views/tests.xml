@@ -29,12 +29,10 @@
 		<!-- entity options -->
 		<navigationBar width="100%">
 			<container>
-				<navigation destination="/test_edit" title="add-test"
-					style="LINK" description="add-test-description">
+				<navigation destination="/test_edit/" title="add-test" style="LINK" description="add-test-description" submit="TRUE">
 					<icon icon="/icons/add.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/tests_delete" title="delete-tests"
-					style="LINK" description="delete-tests-description" submit="TRUE">
+				<navigation destination="/tests_delete" title="delete-tests" style="LINK" description="delete-tests-description" submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
 				</navigation>
 			</container>
@@ -47,6 +45,12 @@
 				<message selector="no-assessments" />
 			</emptyTitle>
 			<columns>
+				<modelColumn>
+					<title>
+						<message selector="assessment-type" />
+					</title>
+					<model ref="assessment.type" delegate="FormatAssesmentType" tool="sakai.mneme" />
+				</modelColumn>
 				<selectionColumn multiple="TRUE">
 					<value>
 						<model ref="assessment.id" />
@@ -58,6 +62,29 @@
 						<message selector="assessment-title" />
 					</title>
 					<model ref="assessment.title" />
+					<entityNavigations>
+						<navigation>
+							<destination template="/test_edit/{0}">
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+					</entityNavigations>
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="assessment-active" />
+					</title>
+					<model ref="assessment.active" delegate="FormatAssesmentActive" tool="sakai.mneme" />
+				</modelColumn>
+				<modelColumn>
+					<model type="icon" icon="/icons/settings.png" />
+					<entityNavigations>
+						<navigation>
+							<destination template="/test_settings/{0}">
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+					</entityNavigations>
 				</modelColumn>
 			</columns>
 		</entityList>

@@ -26,45 +26,19 @@
 
 <beans>
 
-	<bean id="org.muse.mneme.tool.TestsView"
-			class="org.muse.mneme.tool.TestsView"
+	<bean id="org.muse.mneme.tool.TestSettingsView"
+			class="org.muse.mneme.tool.TestSettingsView"
 			init-method="init"
 			destroy-method="destroy"
-			singleton="true"
-			depends-on="FormatAssesmentActive, FormatAssesmentType">
+			singleton="true">
 
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
  		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
- 		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="path"><value>tests</value></property>
- 		<property name="bundle"><value>tests</value></property>
-		<property name="components"><value>tests.xml</value></property>
-	</bean>
-
-	<bean id="FormatAssesmentActive"
-			class="org.muse.mneme.tool.FormatAssesmentActiveDelegate"
-			init-method="init"
-			destroy-method="destroy"
-			singleton="true">
-
- 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
-
- 		<property name="id"><value>FormatAssesmentActive</value></property>
- 		<property name="toolId"><value>sakai.mneme</value></property>
-	</bean>
-
-	<bean id="FormatAssesmentType"
-			class="org.muse.mneme.tool.FormatAssesmentTypeDelegate"
-			init-method="init"
-			destroy-method="destroy"
-			singleton="true">
-
- 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
-
- 		<property name="id"><value>FormatAssesmentType</value></property>
- 		<property name="toolId"><value>sakai.mneme</value></property>
+ 		<property name="path"><value>test_settings</value></property>
+ 		<property name="bundle"><value>testSettings</value></property>
+		<property name="components"><value>testSettings.xml</value></property>
 	</bean>
 
 </beans>

@@ -23,60 +23,14 @@
  **********************************************************************************/
 -->
 
-<interface title="testEdit-title" header="testEdit-header">
+<interface title="testSettings-title" header="testSettings-header">
 	<container>
 
-		<section title="test-properties">
-			<container>
-				<textEdit title="test-title" model="assessment.title" />
-			</container>
-		</section>
+		<textEdit title="test-title" model="assessment.title" disabled="TRUE" />
 
-		<section title="test-parts">
-			<container>
+		<textEdit title="test-timeLimit" model="assessment.timeLimit" />
 
-				<!-- the list of parts -->
-				<entityList style="FLAT">
-					<iterator name="part" model="assessment.parts.parts" />
-					<emptyTitle>
-						<message selector="no-parts" />
-					</emptyTitle>
-					<columns>
-						<selectionColumn multiple="TRUE">
-							<value>
-								<model ref="part.id" />
-							</value>
-							<model ref="ids.values" />
-						</selectionColumn>
-						<modelColumn>
-							<title>
-								<message selector="part-title" />
-							</title>
-							<model ref="part.title" />
-						</modelColumn>
-							<modelColumn>
-							<title>
-								<message selector="part-summary" />
-							</title>
-							<model ref="part" delegate="FormatPartSummary" tool="sakai.mneme" />
-						</modelColumn>
-						<modelColumn>
-							<title>
-								<message selector="part-points" />
-							</title>
-							<model ref="part.totalPoints" />
-						</modelColumn>
-					</columns>
-				</entityList>
-
-			</container>
-		</section>
-
-		<text>
-			<message selector="assessment-points">
-				<model ref="assessment.parts.totalPoints" />
-			</message>
-		</text>
+		<textEdit title="test-submitMessage" model="assessment.submitPresentation.text" />
 
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="70em">
