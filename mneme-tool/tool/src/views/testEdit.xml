@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+/**********************************************************************************
+ * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ **********************************************************************************/
+-->
+
+<interface title="testEdit-title" header="testEdit-header">
+	<container>
+
+		<section title="test-properties">
+			<container>
+				<textEdit title="test-title" model="assessment.title" />
+			</container>
+		</section>
+
+		<section title="test-parts">
+			<container>
+
+				<!-- the list of parts -->
+				<entityList style="FLAT">
+					<iterator name="part" model="assessment.parts.parts" />
+					<emptyTitle>
+						<message selector="no-parts" />
+					</emptyTitle>
+					<columns>
+						<selectionColumn multiple="TRUE">
+							<value>
+								<model ref="part.id" />
+							</value>
+							<model ref="ids.values" />
+						</selectionColumn>
+						<modelColumn>
+							<title>
+								<message selector="part-title" />
+							</title>
+							<model ref="part.title" />
+						</modelColumn>
+							<modelColumn>
+							<title>
+								<message selector="part-summary" />
+							</title>
+							<model delegate="FormatPartSummary" tool="sakai.mneme" />
+						</modelColumn>
+						<modelColumn>
+							<title>
+								<message selector="part-points" />
+							</title>
+							<model ref="part.totalPoints" />
+						</modelColumn>
+					</columns>
+				</entityList>
+
+			</container>
+		</section>
+
+		<text>
+			<message selector="assessment-points">
+				<model ref="assessment.parts.totalPoints" />
+			</message>
+		</text>
+
+		<!-- save / cancel nav bar -->
+		<navigationBar id="nav" width="70em">
+			<container>
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/tests">
+					<icon icon="/icons/return.png" style="LEFT" />
+				</navigation>
+				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON" destination="/tests">
+					<icon icon="/icons/cancel.gif" style="LEFT" />
+				</navigation>
+			</container>
+		</navigationBar>
+
+	</container>
+</interface>
