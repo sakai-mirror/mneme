@@ -64,9 +64,27 @@ public class PoolsView extends ControllerImpl
 		List<Pool> pools = this.poolService.findPools(null);
 		context.put("pools", pools);
 
-		//for the checkboxes
+		// for the checkboxes
 		Values values = this.uiService.newValues();
 		context.put("poolids", values);
+
+		// sort parameter
+		String sortCode = null;
+		if (params.length == 3)
+		{
+			sortCode = params[2];
+		}
+		if (sortCode != null)
+		{
+			context.put("sort_column", sortCode.charAt(0));
+			context.put("sort_direction", sortCode.charAt(1));
+		}
+		else
+		{
+			// default sort: status descending
+			context.put("sort_column", '1');
+			context.put("sort_direction", 'D');
+		}
 
 		// render
 		uiService.render(ui, context);
@@ -86,8 +104,8 @@ public class PoolsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		//throw new IllegalArgumentException();
-		//for the selected pools to delete
+		// throw new IllegalArgumentException();
+		// for the selected pools to delete
 		Values values = this.uiService.newValues();
 		context.put("poolids", values);
 
@@ -98,7 +116,7 @@ public class PoolsView extends ControllerImpl
 
 		if (destination != null && (destination.trim().equalsIgnoreCase("/pools_delete")))
 		{
-			//delete the pools with ids
+			// delete the pools with ids
 			StringBuffer path = new StringBuffer();
 			String separator = "/";
 			if (selectedPoolIds != null && (selectedPoolIds.length > 0))
