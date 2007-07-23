@@ -41,13 +41,6 @@ public interface Answer
 	Float getAutoScore();
 
 	/**
-	 * Get the question-type-specific entry data for the answer.
-	 * 
-	 * @return The question-type-specific entry data for the answer.
-	 */
-	Object getData();
-
-	/**
 	 * Access the evaluation for the answer.
 	 * 
 	 * @return The evaluation for the answer, or null if there is none.
@@ -140,12 +133,11 @@ public interface Answer
 	Float getTotalScore();
 
 	/**
-	 * Set the question-type-specific entry data for the answer.
+	 * Get the question-type-specific handler for the answer.
 	 * 
-	 * @param data
-	 *        The question-type-specific entry data for the answer.
+	 * @return The question-type-specific handler for the answer.
 	 */
-	void setData(Object data);
+	TypeSpecificAnswer getTypeSpecificAnswer();
 
 	/**
 	 * Set the "mark for review" setting for this answer.

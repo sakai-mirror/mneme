@@ -75,6 +75,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	// for 2.4 only: protected GradebookExternalAssessmentService m_gradebookService = null;
 	protected GradebookService gradebookService = null;
 
+	/** Dependency: MnemeService */
+	protected MnemeService mnemeService = null;
+
 	/** Dependency: QuestionService */
 	protected QuestionService questionService = null;
 
@@ -567,12 +570,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			}
 
 			if (storage == null) M_log.warn("no storage set: " + this.storageKey);
-			this.storage.setAssessmentService(this.assessmentService);
-			this.storage.setQuestionService(this.questionService);
-			this.storage.setSecurityService(this.securityService);
-			this.storage.setSessionManager(this.sessionManager);
-			this.storage.setSubmissionService(this);
-			this.storage.setTimeService(this.timeService);
 
 			// start the checking thread
 			if (timeoutCheckMs > 0)
@@ -679,6 +676,17 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	public void setGradebookService(/* for 2.4 only: GradebookExternalAssessmentService */GradebookService service)
 	{
 		this.gradebookService = service;
+	}
+
+	/**
+	 * Dependency: MnemeService.
+	 * 
+	 * @param service
+	 *        The MnemeService.
+	 */
+	public void setMnemeService(MnemeService service)
+	{
+		mnemeService = service;
 	}
 
 	/**

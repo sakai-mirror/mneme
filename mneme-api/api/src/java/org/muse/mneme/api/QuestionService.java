@@ -66,11 +66,15 @@ public interface QuestionService
 	 *        The current context.
 	 * @param userId
 	 *        The user to own the question.
+	 * @param The
+	 *        pool where the question will live.
+	 * @param type
+	 *        The question type.
 	 * @return The new question.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to create a new question.
 	 */
-	Question newQuestion(String context, String userId) throws AssessmentPermissionException;
+	Question newQuestion(String context, String userId, Pool pool, String type) throws AssessmentPermissionException;
 
 	/**
 	 * Remove this question.

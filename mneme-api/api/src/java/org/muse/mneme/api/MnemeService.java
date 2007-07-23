@@ -21,7 +21,6 @@
 
 package org.muse.mneme.api;
 
-import java.util.List;
 
 /**
  * MnemeService is the overall service interface for Mneme, providing some application specific support<br />
@@ -85,7 +84,24 @@ public interface MnemeService extends PoolService, QuestionService, SubmissionSe
 
 	/** The sub-type for submissions in references (/mneme/submission/...) */
 	static final String SUBMISSION_TYPE = "submission";
-	
+
 	/** The security function used to check if users can submit to an assessment. */
 	static final String SUBMIT_PERMISSION = "mneme.submit";
+
+	/**
+	 * Find a question plugin for this question type.
+	 * 
+	 * @param type
+	 *        The question type.
+	 * @return The question plugin for this question type, or null if none found.
+	 */
+	QuestionPlugin getQuestionPlugin(String type);
+
+	/**
+	 * Register a question plugin.
+	 * 
+	 * @param plugin
+	 *        The question plugin.
+	 */
+	void registerQuestionPlugin(QuestionPlugin plugin);
 }

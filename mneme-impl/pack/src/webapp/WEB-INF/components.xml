@@ -70,6 +70,9 @@
 		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
+
+		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 	</bean>
 
 	<bean id="org.muse.mneme.api.QuestionService"
@@ -78,6 +81,7 @@
 		destroy-method="destroy"
 		singleton="true">
 		
+		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
 
@@ -99,6 +103,10 @@
 		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
+
+		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
+		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 	</bean>
 
 	<bean id="org.muse.mneme.api.SubmissionService"
@@ -108,6 +116,7 @@
 		singleton="true">
 		
 		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
 
@@ -133,6 +142,14 @@
 		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
+
+		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
+		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
+		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
+		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
+		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
 	</bean>
 
 	<bean id="org.muse.mneme.api.AssessmentService"
@@ -165,6 +182,11 @@
 		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
+
+		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
+		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
+		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
 	</bean>
 
 	<bean id="org.muse.mneme.api.SecurityService"
@@ -175,6 +197,16 @@
 		
 		<property name="securityService"><ref bean="org.sakaiproject.authz.api.SecurityService"/></property>
 		<property name="siteService"><ref bean="org.sakaiproject.site.api.SiteService"/></property>
+	</bean>
+
+	<bean id="org.muse.mneme.impl.TrueFalsePlugin"
+		class="org.muse.mneme.impl.TrueFalsePlugin"
+		init-method="init"
+		destroy-method="destroy"
+		singleton="true">
+
+		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
 	</bean>
 
 </beans>

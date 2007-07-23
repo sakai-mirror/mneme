@@ -48,13 +48,6 @@ public interface Question
 	Attribution getAttribution();
 
 	/**
-	 * Access the question's type-specific data.
-	 * 
-	 * @return The question's type-specific data.
-	 */
-	Object getData();
-
-	/**
 	 * Access the description of the question.
 	 * 
 	 * @return The description of the question.
@@ -111,19 +104,18 @@ public interface Question
 	String getType();
 
 	/**
+	 * Access the question's type-specific handler.
+	 * 
+	 * @return The question's type-specific handler.
+	 */
+	TypeSpecificQuestion getTypeSpecificQuestion();
+
+	/**
 	 * Access the version of this question.
 	 * 
 	 * @return The question's version.
 	 */
 	String getVersion();
-
-	/**
-	 * Set the question's type-specific data.
-	 * 
-	 * @param data
-	 *        the question's type-specific data.
-	 */
-	void setData(Object data);
 
 	/**
 	 * Set the description of the question.
@@ -148,12 +140,4 @@ public interface Question
 	 *        TRUE if this question also collects "rationale" from the user, FALSE if not.
 	 */
 	void setRequireRationale(Boolean rationale);
-
-	/**
-	 * Set the question type.
-	 * 
-	 * @param type
-	 *        The question type.
-	 */
-	void setType(String type);
 }

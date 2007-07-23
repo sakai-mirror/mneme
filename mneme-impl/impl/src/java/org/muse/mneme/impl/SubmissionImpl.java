@@ -68,8 +68,6 @@ public class SubmissionImpl implements Submission
 
 	protected Boolean isComplete = Boolean.FALSE;
 
-	protected transient QuestionService questionService = null;
-
 	protected transient SecurityService securityService = null;
 
 	protected transient SessionManager sessionManager = null;
@@ -92,11 +90,10 @@ public class SubmissionImpl implements Submission
 	/**
 	 * Construct
 	 */
-	public SubmissionImpl(AssessmentService assessmentService, QuestionService questionService, SecurityService securityService,
-			SubmissionServiceImpl submissionService, SessionManager sessionManager, TimeService timeService)
+	public SubmissionImpl(AssessmentService assessmentService, SecurityService securityService, SubmissionServiceImpl submissionService,
+			SessionManager sessionManager, TimeService timeService)
 	{
 		this.assessmentService = assessmentService;
-		this.questionService = questionService;
 		this.securityService = securityService;
 		this.submissionService = submissionService;
 		this.sessionManager = sessionManager;
@@ -150,7 +147,7 @@ public class SubmissionImpl implements Submission
 		if (answer != null) return answer;
 
 		// not found, add one
-		answer = new AnswerImpl(this.questionService);
+		answer = this.submissionService.storage.newAnswer();
 		answer.initSubmission(this);
 		answer.initQuestion(question);
 		this.answers.add(answer);
@@ -876,7 +873,6 @@ public class SubmissionImpl implements Submission
 		this.graded = other.graded;
 		this.id = other.id;
 		this.isComplete = other.isComplete;
-		this.questionService = other.questionService;
 		this.securityService = other.securityService;
 		this.sessionManager = other.sessionManager;
 		this.siblingCount = other.siblingCount;

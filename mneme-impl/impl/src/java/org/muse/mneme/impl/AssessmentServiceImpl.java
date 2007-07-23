@@ -208,10 +208,6 @@ public class AssessmentServiceImpl implements AssessmentService
 			}
 
 			if (storage == null) M_log.warn("no storage set: " + this.storageKey);
-			this.storage.setPoolService(this.poolService);
-			this.storage.setQuestionService(this.questionService);
-			this.storage.setSubmissionService(this.submissionService);
-			this.storage.setTimeService(this.timeService);
 
 			M_log.info("init()");
 		}

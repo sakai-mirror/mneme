@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
@@ -50,6 +51,8 @@ public class SubmissionStorageSample implements SubmissionStorage
 	protected AssessmentService assessmentService = null;
 
 	protected Object idGenerator = new Object();
+
+	protected MnemeService mnemeService = null;
 
 	protected long nextAnswerId = 100;
 
@@ -269,7 +272,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 	 */
 	public AnswerImpl newAnswer()
 	{
-		return new AnswerImpl(questionService);
+		return new AnswerImpl(mnemeService, questionService);
 	}
 
 	/**
@@ -277,7 +280,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 	 */
 	public SubmissionImpl newSubmission()
 	{
-		return new SubmissionImpl(assessmentService, questionService, securityService, submissionService, sessionManager, timeService);
+		return new SubmissionImpl(assessmentService, securityService, submissionService, sessionManager, timeService);
 	}
 
 	/**
@@ -357,6 +360,14 @@ public class SubmissionStorageSample implements SubmissionStorage
 	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setMnemeService(MnemeService service)
+	{
+		this.mnemeService = service;
 	}
 
 	/**

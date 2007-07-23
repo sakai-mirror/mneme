@@ -168,8 +168,6 @@ public class PoolServiceImpl implements PoolService
 			}
 
 			if (storage == null) M_log.warn("no storage set: " + this.storageKey);
-			this.storage.setPoolService(this);
-			this.storage.setQuestionService((QuestionServiceImpl) this.questionService);
 
 			M_log.info("init()");
 		}

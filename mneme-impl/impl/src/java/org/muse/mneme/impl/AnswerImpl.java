@@ -21,13 +21,17 @@
 
 package org.muse.mneme.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.AnswerEvaluation;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionService;
+import org.muse.mneme.api.TypeSpecificAnswer;
 import org.sakaiproject.time.api.Time;
 
 /**
@@ -35,6 +39,10 @@ import org.sakaiproject.time.api.Time;
  */
 public class AnswerImpl implements Answer
 {
+	private static Log M_log = LogFactory.getLog(AnswerImpl.class);
+
+	protected TypeSpecificAnswer answerHandler = null;
+
 	protected Float autoScore = null;
 
 	protected AnswerEvaluationImpl evaluation = new AnswerEvaluationImpl(this);
@@ -42,6 +50,8 @@ public class AnswerImpl implements Answer
 	protected String id = null;
 
 	protected Boolean markedForReview = Boolean.FALSE;
+
+	protected MnemeService mnemeService = null;
 
 	protected String partId = null;
 
@@ -69,10 +79,12 @@ public class AnswerImpl implements Answer
 	/**
 	 * Construct.
 	 * 
+	 * @param mnemeService
 	 * @param questionService
 	 */
-	public AnswerImpl(QuestionService questionService)
+	public AnswerImpl(MnemeService mnemeService, QuestionService questionService)
 	{
+		this.mnemeService = mnemeService;
 		this.questionService = questionService;
 	}
 
@@ -81,7 +93,10 @@ public class AnswerImpl implements Answer
 	 */
 	public void autoScore()
 	{
-		// TODO Auto-generated method stub
+		if (this.answerHandler != null)
+		{
+			this.answerHandler.autoScore();
+		}
 	}
 
 	/**
@@ -106,15 +121,6 @@ public class AnswerImpl implements Answer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getData()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public AnswerEvaluation getEvaluation()
 	{
 		return this.evaluation;
@@ -133,8 +139,9 @@ public class AnswerImpl implements Answer
 	 */
 	public Boolean getIsAnswered()
 	{
-		// TODO: questionSpecific
-		return Boolean.TRUE;
+		if (this.answerHandler == null) return Boolean.FALSE;
+
+		return this.answerHandler.getIsAnswered();
 	}
 
 	/**
@@ -143,7 +150,8 @@ public class AnswerImpl implements Answer
 	public Boolean getIsChanged()
 	{
 		// TODO ???
-		return Boolean.TRUE;
+		if (this.answerHandler == null) return Boolean.FALSE;
+		return this.answerHandler.getIsChanged();
 	}
 
 	/**
@@ -151,8 +159,8 @@ public class AnswerImpl implements Answer
 	 */
 	public Boolean getIsComplete()
 	{
-		// TODO: questionSpecific
-		return Boolean.TRUE;
+		// this is "complete" if we have a submission date
+		return this.submittedDate != null;
 	}
 
 	/**
@@ -160,8 +168,9 @@ public class AnswerImpl implements Answer
 	 */
 	public Boolean getIsCorrect()
 	{
-		// TODO: questionSpecific
-		return Boolean.TRUE;
+		if (this.answerHandler == null) return Boolean.FALSE;
+
+		return this.answerHandler.getIsCorrect();
 	}
 
 	/**
@@ -190,7 +199,15 @@ public class AnswerImpl implements Answer
 	 */
 	public String getQuestionFeedback()
 	{
-		// TODO: questionSpecific
+		if (getIsCorrect())
+		{
+			// TODO: return the correct feedback
+		}
+		else
+		{
+			// TODO: return the incorrect feedback
+		}
+
 		return null;
 	}
 
@@ -240,17 +257,17 @@ public class AnswerImpl implements Answer
 	/**
 	 * {@inheritDoc}
 	 */
-	public int hashCode()
+	public TypeSpecificAnswer getTypeSpecificAnswer()
 	{
-		return this.id.hashCode();
+		return this.answerHandler;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setData(Object data)
+	public int hashCode()
 	{
-		// TODO Auto-generated method stub
+		return this.id.hashCode();
 	}
 
 	/**
@@ -299,6 +316,17 @@ public class AnswerImpl implements Answer
 	{
 		this.questionId = question.getId();
 		this.partId = question.getPart().getId();
+
+		QuestionPlugin plugin = this.mnemeService.getQuestionPlugin(question.getType());
+		if (plugin != null)
+		{
+			this.answerHandler = plugin.newAnswer(this);
+		}
+
+		if (this.answerHandler == null)
+		{
+			M_log.warn("initQuestion: no plugin for type: " + question.getType());
+		}
 	}
 
 	/**
@@ -313,6 +341,17 @@ public class AnswerImpl implements Answer
 	}
 
 	/**
+	 * Establish the type-specific answer handler.
+	 * 
+	 * @param answerHandler
+	 *        The type-specific answer handler.
+	 */
+	protected void initTypeSpecificAnswer(TypeSpecificAnswer answerHandler)
+	{
+		this.answerHandler = answerHandler;
+	}
+
+	/**
 	 * Set as a copy of another
 	 * 
 	 * @param other
@@ -320,10 +359,12 @@ public class AnswerImpl implements Answer
 	 */
 	protected void set(AnswerImpl other)
 	{
+		if (other.answerHandler != null) this.answerHandler = (TypeSpecificAnswer) (other.answerHandler.clone());
 		this.autoScore = other.autoScore;
 		this.evaluation = new AnswerEvaluationImpl(other.evaluation);
 		this.id = other.id;
 		this.markedForReview = other.markedForReview;
+		this.mnemeService = other.mnemeService;
 		this.partId = other.partId;
 		this.questionId = other.questionId;
 		this.questionService = other.questionService;

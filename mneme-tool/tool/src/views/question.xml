@@ -205,7 +205,7 @@
 
 					<container>
 
-						<!-- question presentation (text and attachments -->
+						<!-- question presentation (text and attachments) -->
 						<text>
 							<message>
 								<model type="html" ref="answer.question.presentation.text" />
@@ -218,7 +218,19 @@
 							</included>
 						</attachments>
 
-						<!-- Question specific stuff goes here! -ggolden -->
+						<!-- Question specific delivery -->
+						<modelComponent model="answer.question.typeSpecificQuestion.deliveryUi">
+							<included>
+								<decision reversed="TRUE" model="review" />
+							</included>
+						</modelComponent>
+
+						<!-- Question specific review -->
+						<modelComponent model="answer.question.typeSpecificQuestion.reviewUi">
+							<included>
+								<decision model="review" />
+							</included>
+						</modelComponent>
 
 						<!-- rationale -->
 						<textEdit title="question-rationale" rows="5" cols="40">

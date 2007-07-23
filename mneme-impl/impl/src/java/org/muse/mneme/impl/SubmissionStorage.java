@@ -26,6 +26,7 @@ import java.util.List;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
@@ -184,6 +185,14 @@ public interface SubmissionStorage
 	 *        The AssessmentService.
 	 */
 	void setAssessmentService(AssessmentService service);
+
+	/**
+	 * Set the MnemeService
+	 * 
+	 * @param service
+	 *        The MnemeService.
+	 */
+	void setMnemeService(MnemeService service);
 
 	/**
 	 * Set the QuestionService

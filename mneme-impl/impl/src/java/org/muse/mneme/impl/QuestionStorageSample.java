@@ -28,10 +28,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.TypeSpecificQuestion;
 
 /**
  * QuestionStorageSample defines a sample storage for questions.
@@ -43,12 +45,17 @@ public class QuestionStorageSample implements QuestionStorage
 
 	protected Object idGenerator = new Object();
 
+	/** Dependency: MnemeService */
+	protected MnemeService mnemeService = null;
+
 	protected long nextId = 100;
 
+	/** Dependency: PoolService */
 	protected PoolService poolService = null;
 
 	protected Map<String, QuestionImpl> questions = new HashMap<String, QuestionImpl>();
 
+	/** Dependency: QuestionService */
 	protected QuestionService questionService = null;
 
 	/**
@@ -106,13 +113,9 @@ public class QuestionStorageSample implements QuestionStorage
 	{
 		fakeIt();
 
+		// if found, return a copy
 		QuestionImpl rv = this.questions.get(id);
-		if (rv == null)
-		{
-			rv = newQuestion();
-			rv.initId(id);
-		}
-		else
+		if (rv != null)
 		{
 			rv = new QuestionImpl(rv);
 		}
@@ -133,7 +136,8 @@ public class QuestionStorageSample implements QuestionStorage
 	 */
 	public QuestionImpl newQuestion()
 	{
-		return new QuestionImpl(poolService, questionService);
+		QuestionImpl rv = new QuestionImpl(poolService, questionService);
+		return rv;
 	}
 
 	/**
@@ -179,7 +183,21 @@ public class QuestionStorageSample implements QuestionStorage
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Dependency: MnemeService.
+	 * 
+	 * @param service
+	 *        The MnemeService.
+	 */
+	public void setMnemeService(MnemeService service)
+	{
+		this.mnemeService = service;
+	}
+
+	/**
+	 * Dependency: PoolService.
+	 * 
+	 * @param service
+	 *        The PoolService.
 	 */
 	public void setPoolService(PoolService service)
 	{
@@ -187,7 +205,10 @@ public class QuestionStorageSample implements QuestionStorage
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Dependency: QuestionService.
+	 * 
+	 * @param service
+	 *        The QuestionService.
 	 */
 	public void setQuestionService(QuestionService service)
 	{
@@ -200,33 +221,39 @@ public class QuestionStorageSample implements QuestionStorage
 		if (questions.isEmpty())
 		{
 			QuestionImpl q = newQuestion();
+			q.initType("mneme:TrueFalse");
+			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q1");
 			q.setDescription("question one");
 			q.setRequireRationale(Boolean.TRUE);
-			q.setType("mneme:true/false");
 			q.setPool(poolService.getPool("b1"));
 			q.getAttribution().setUserId("admin");
 			q.getPresentation().setText("True or False (one)?");
+			((TrueFalseQuestionImpl) q.getTypeSpecificQuestion()).setCorrectAnswer("TRUE");
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
+			q.initType("mneme:TrueFalse");
+			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q2");
 			q.setDescription("question two");
 			q.setRequireRationale(Boolean.TRUE);
-			q.setType("mneme:true/false");
 			q.setPool(poolService.getPool("b1"));
 			q.getAttribution().setUserId("admin");
 			q.getPresentation().setText("True or False (two)?");
+			((TrueFalseQuestionImpl) q.getTypeSpecificQuestion()).setCorrectAnswer("FALSE");
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
+			q.initType("mneme:TrueFalse");
+			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q3");
 			q.setDescription("question three");
 			q.setRequireRationale(Boolean.TRUE);
-			q.setType("mneme:true/false");
 			q.setPool(poolService.getPool("b1"));
 			q.getAttribution().setUserId("admin");
 			q.getPresentation().setText("True or False (three)?");
+			((TrueFalseQuestionImpl) q.getTypeSpecificQuestion()).setCorrectAnswer("TRUE");
 			questions.put(q.getId(), q);
 		}
 	}

@@ -21,7 +21,9 @@
 
 package org.muse.mneme.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,6 +38,7 @@ import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCompletedException;
@@ -52,35 +55,38 @@ public class MnemeServiceImpl implements MnemeService
 	private static Log M_log = LogFactory.getLog(MnemeServiceImpl.class);
 
 	/** Dependency: AssessmentService */
-	protected AssessmentService m_assessmentService = null;
+	protected AssessmentService assessmentService = null;
 
 	/** Dependency: AttachmentService */
-	protected AttachmentService m_attachmentService = null;
+	protected AttachmentService attachmentService = null;
+
+	/** Dependency: FunctionManager */
+	protected FunctionManager functionManager = null;
 
 	/** Configuration: to run the ddl on init or not. */
 	protected boolean m_autoDdl = false;
 
-	/** Dependency: FunctionManager */
-	protected FunctionManager m_functionManager = null;
-
 	/** Dependency: PoolService */
-	protected PoolService m_poolService = null;
+	protected PoolService poolService = null;
+
+	/** Question type plugins. */
+	protected Map<String, QuestionPlugin> questionPlugins = new HashMap<String, QuestionPlugin>();
 
 	/** Dependency: QuestionService */
-	protected QuestionService m_questionService = null;
+	protected QuestionService questionService = null;
 
 	/** Dependency: SqlService */
-	protected SqlService m_sqlService = null;
+	protected SqlService sqlService = null;
 
 	/** Dependency: SubmissionService */
-	protected SubmissionService m_submissionService = null;
+	protected SubmissionService submissionService = null;
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public Boolean allowCompleteSubmission(Submission submission, String userId)
 	{
-		return m_submissionService.allowCompleteSubmission(submission, userId);
+		return submissionService.allowCompleteSubmission(submission, userId);
 	}
 
 	/**
@@ -89,7 +95,7 @@ public class MnemeServiceImpl implements MnemeService
 
 	public Boolean allowEditAssessment(Assessment assessment, String userId)
 	{
-		return m_assessmentService.allowEditAssessment(assessment, userId);
+		return assessmentService.allowEditAssessment(assessment, userId);
 	}
 
 	/**
@@ -97,7 +103,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Boolean allowEditPool(Pool pool, String context, String userId)
 	{
-		return m_poolService.allowEditPool(pool, context, userId);
+		return poolService.allowEditPool(pool, context, userId);
 	}
 
 	/**
@@ -105,7 +111,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Boolean allowEditQuestion(Question question, String context, String userId)
 	{
-		return m_questionService.allowEditQuestion(question, context, userId);
+		return questionService.allowEditQuestion(question, context, userId);
 	}
 
 	/**
@@ -113,7 +119,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Boolean allowListDeliveryAssessment(String context, String userId)
 	{
-		return m_assessmentService.allowListDeliveryAssessment(context, userId);
+		return assessmentService.allowListDeliveryAssessment(context, userId);
 	}
 
 	/**
@@ -121,7 +127,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Boolean allowManageAssessments(String context, String userId)
 	{
-		return m_assessmentService.allowManageAssessments(context, userId);
+		return assessmentService.allowManageAssessments(context, userId);
 	}
 
 	/**
@@ -129,7 +135,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Boolean allowManagePools(String context, String userId)
 	{
-		return m_poolService.allowManagePools(context, userId);
+		return poolService.allowManagePools(context, userId);
 	}
 
 	/**
@@ -137,7 +143,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Boolean allowReviewSubmission(Submission submission, String userId)
 	{
-		return m_submissionService.allowReviewSubmission(submission, userId);
+		return submissionService.allowReviewSubmission(submission, userId);
 	}
 
 	/**
@@ -145,7 +151,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Boolean allowSubmit(Assessment assessment, String userId)
 	{
-		return m_submissionService.allowSubmit(assessment, userId);
+		return submissionService.allowSubmit(assessment, userId);
 	}
 
 	/**
@@ -154,7 +160,7 @@ public class MnemeServiceImpl implements MnemeService
 	public void completeSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException,
 			SubmissionCompletedException
 	{
-		m_submissionService.completeSubmission(submission);
+		submissionService.completeSubmission(submission);
 	}
 
 	/**
@@ -162,7 +168,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Integer countAssessments(String context)
 	{
-		return m_assessmentService.countAssessments(context);
+		return assessmentService.countAssessments(context);
 	}
 
 	/**
@@ -170,7 +176,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Integer countRemainingSubmissions(Assessment assessment, String userId)
 	{
-		return m_submissionService.countRemainingSubmissions(assessment, userId);
+		return submissionService.countRemainingSubmissions(assessment, userId);
 	}
 
 	/**
@@ -187,7 +193,7 @@ public class MnemeServiceImpl implements MnemeService
 	public Submission enterSubmission(Assessment assessment, String userId) throws AssessmentPermissionException, AssessmentClosedException,
 			AssessmentCompletedException
 	{
-		return m_submissionService.enterSubmission(assessment, userId);
+		return submissionService.enterSubmission(assessment, userId);
 	}
 
 	/**
@@ -195,7 +201,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public List<Pool> findPools(String userId)
 	{
-		return m_poolService.findPools(userId);
+		return poolService.findPools(userId);
 	}
 
 	/**
@@ -203,7 +209,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public List<Question> findQuestions(String userId)
 	{
-		return m_questionService.findQuestions(userId);
+		return questionService.findQuestions(userId);
 	}
 
 	/**
@@ -211,7 +217,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Assessment getAssessment(String id)
 	{
-		return m_assessmentService.getAssessment(id);
+		return assessmentService.getAssessment(id);
 	}
 
 	/**
@@ -219,7 +225,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public List<Float> getAssessmentScores(Assessment assessment)
 	{
-		return m_submissionService.getAssessmentScores(assessment);
+		return submissionService.getAssessmentScores(assessment);
 	}
 
 	/**
@@ -227,7 +233,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public List<Assessment> getContextAssessments(String context)
 	{
-		return m_assessmentService.getContextAssessments(context);
+		return assessmentService.getContextAssessments(context);
 	}
 
 	/**
@@ -235,7 +241,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Pool getPool(String poolId)
 	{
-		return m_poolService.getPool(poolId);
+		return poolService.getPool(poolId);
 	}
 
 	/**
@@ -243,7 +249,15 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Question getQuestion(String questionId)
 	{
-		return m_questionService.getQuestion(questionId);
+		return questionService.getQuestion(questionId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public QuestionPlugin getQuestionPlugin(String type)
+	{
+		return this.questionPlugins.get(type);
 	}
 
 	/**
@@ -251,7 +265,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public List<Float> getQuestionScores(Question question)
 	{
-		return m_submissionService.getQuestionScores(question);
+		return submissionService.getQuestionScores(question);
 	}
 
 	/**
@@ -259,7 +273,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Submission getSubmission(String id)
 	{
-		return m_submissionService.getSubmission(id);
+		return submissionService.getSubmission(id);
 	}
 
 	/**
@@ -267,7 +281,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public List<Submission> getUserContextSubmissions(String context, String userId, GetUserContextSubmissionsSort sort)
 	{
-		return m_submissionService.getUserContextSubmissions(context, userId, sort);
+		return submissionService.getUserContextSubmissions(context, userId, sort);
 	}
 
 	/**
@@ -280,13 +294,13 @@ public class MnemeServiceImpl implements MnemeService
 			// if we are auto-creating our schema, check and create
 			if (m_autoDdl)
 			{
-				m_sqlService.ddl(this.getClass().getClassLoader(), "mneme");
+				sqlService.ddl(this.getClass().getClassLoader(), "mneme");
 			}
 
 			// register functions
-			m_functionManager.registerFunction(SUBMIT_PERMISSION);
-			m_functionManager.registerFunction(MANAGE_PERMISSION);
-			m_functionManager.registerFunction(GRADE_PERMISSION);
+			functionManager.registerFunction(SUBMIT_PERMISSION);
+			functionManager.registerFunction(MANAGE_PERMISSION);
+			functionManager.registerFunction(GRADE_PERMISSION);
 
 			M_log.info("init()");
 		}
@@ -301,7 +315,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Assessment newAssessment(String context) throws AssessmentPermissionException
 	{
-		return m_assessmentService.newAssessment(context);
+		return assessmentService.newAssessment(context);
 	}
 
 	/**
@@ -309,15 +323,23 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public Pool newPool(String context, String userId) throws AssessmentPermissionException
 	{
-		return m_poolService.newPool(context, userId);
+		return poolService.newPool(context, userId);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Question newQuestion(String context, String userId) throws AssessmentPermissionException
+	public Question newQuestion(String context, String userId, Pool pool, String type) throws AssessmentPermissionException
 	{
-		return m_questionService.newQuestion(context, userId);
+		return questionService.newQuestion(context, userId, pool, type);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void registerQuestionPlugin(QuestionPlugin plugin)
+	{
+		this.questionPlugins.put(plugin.getType(), plugin);
 	}
 
 	/**
@@ -325,7 +347,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void removeAssessment(Assessment assessment) throws AssessmentPermissionException
 	{
-		m_assessmentService.removeAssessment(assessment);
+		assessmentService.removeAssessment(assessment);
 	}
 
 	/**
@@ -333,7 +355,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void removePool(Pool pool, String context) throws AssessmentPermissionException
 	{
-		m_poolService.removePool(pool, context);
+		poolService.removePool(pool, context);
 	}
 
 	/**
@@ -341,7 +363,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void removeQuestion(Question question, String context) throws AssessmentPermissionException
 	{
-		m_questionService.removeQuestion(question, context);
+		questionService.removeQuestion(question, context);
 	}
 
 	/**
@@ -349,7 +371,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void saveAssessment(Assessment assessment) throws AssessmentPermissionException
 	{
-		m_assessmentService.saveAssessment(assessment);
+		assessmentService.saveAssessment(assessment);
 	}
 
 	/**
@@ -357,7 +379,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void savePool(Pool pool, String context) throws AssessmentPermissionException
 	{
-		m_poolService.savePool(pool, context);
+		poolService.savePool(pool, context);
 	}
 
 	/**
@@ -365,7 +387,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void saveQuestion(Question question, String context) throws AssessmentPermissionException
 	{
-		m_questionService.saveQuestion(question, context);
+		questionService.saveQuestion(question, context);
 	}
 
 	/**
@@ -376,7 +398,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void setAssessmentService(AssessmentService service)
 	{
-		m_assessmentService = service;
+		assessmentService = service;
 	}
 
 	/**
@@ -387,7 +409,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void setAttachmentService(AttachmentService service)
 	{
-		m_attachmentService = service;
+		attachmentService = service;
 	}
 
 	/**
@@ -409,7 +431,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void setFunctionManager(FunctionManager service)
 	{
-		m_functionManager = service;
+		functionManager = service;
 	}
 
 	/**
@@ -420,7 +442,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void setPoolService(PoolService service)
 	{
-		m_poolService = service;
+		poolService = service;
 	}
 
 	/**
@@ -431,7 +453,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void setQuestionService(QuestionService service)
 	{
-		m_questionService = service;
+		questionService = service;
 	}
 
 	/**
@@ -442,7 +464,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void setSqlService(SqlService service)
 	{
-		m_sqlService = service;
+		sqlService = service;
 	}
 
 	/**
@@ -453,7 +475,7 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void setSubmissionService(SubmissionService service)
 	{
-		m_submissionService = service;
+		submissionService = service;
 	}
 
 	/**
@@ -462,7 +484,7 @@ public class MnemeServiceImpl implements MnemeService
 	public void submitAnswer(Answer answer, Boolean completeAnswer, Boolean completeSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException
 	{
-		m_submissionService.submitAnswer(answer, completeAnswer, completeSubmission);
+		submissionService.submitAnswer(answer, completeAnswer, completeSubmission);
 	}
 
 	/**
@@ -471,7 +493,7 @@ public class MnemeServiceImpl implements MnemeService
 	public void submitAnswers(List<Answer> answers, Boolean completeAnswers, Boolean completeSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException
 	{
-		m_submissionService.submitAnswers(answers, completeAnswers, completeSubmission);
+		submissionService.submitAnswers(answers, completeAnswers, completeSubmission);
 	}
 
 	/**
@@ -479,6 +501,6 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void updateGradebook(Assessment assessment) throws AssessmentPermissionException
 	{
-		m_submissionService.updateGradebook(assessment);
+		submissionService.updateGradebook(assessment);
 	}
 }

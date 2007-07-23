@@ -31,8 +31,10 @@ import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
+import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.tool.api.SessionManager;
@@ -49,6 +51,9 @@ public class QuestionServiceImpl implements QuestionService
 
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
+
+	/** Dependency: MnemeService */
+	protected MnemeService mnemeService = null;
 
 	/** Dependency: PoolService */
 	protected PoolService poolService = null;
@@ -172,8 +177,6 @@ public class QuestionServiceImpl implements QuestionService
 			}
 
 			if (storage == null) M_log.warn("no storage set: " + this.storageKey);
-			this.storage.setQuestionService(this);
-			this.storage.setPoolService(this.poolService);
 
 			M_log.info("init()");
 		}
@@ -186,10 +189,8 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Question newQuestion(String context, String userId) throws AssessmentPermissionException
+	public Question newQuestion(String context, String userId, Pool pool, String type) throws AssessmentPermissionException
 	{
-		// TODO: which pool?
-
 		if (context == null) throw new IllegalArgumentException();
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
@@ -200,6 +201,25 @@ public class QuestionServiceImpl implements QuestionService
 
 		QuestionImpl question = this.storage.newQuestion();
 		question.getAttribution().setUserId(userId);
+		question.setPool(pool);
+		question.initType(type);
+
+		// build a type-specific handler
+		QuestionPlugin plugin = this.mnemeService.getQuestionPlugin(type);
+		TypeSpecificQuestion handler = null;
+		if (plugin != null)
+		{
+			handler = plugin.newQuestion(question);
+		}
+		if (handler != null)
+		{
+			question.initTypeSpecificQuestion(handler);
+		}
+		else
+		{
+			M_log.warn("newQuestion: no plugin for type: " + type);
+		}
+
 		// TODO: date
 
 		return question;
@@ -252,6 +272,17 @@ public class QuestionServiceImpl implements QuestionService
 	public void setEventTrackingService(EventTrackingService service)
 	{
 		eventTrackingService = service;
+	}
+
+	/**
+	 * Dependency: MnemeService.
+	 * 
+	 * @param service
+	 *        The MnemeService.
+	 */
+	public void setMnemeService(MnemeService service)
+	{
+		mnemeService = service;
 	}
 
 	/**

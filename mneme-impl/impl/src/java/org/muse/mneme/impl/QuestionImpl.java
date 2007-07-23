@@ -32,6 +32,8 @@ import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.TypeSpecificAnswer;
+import org.muse.mneme.api.TypeSpecificQuestion;
 
 /**
  * QuestionImpl implements Question
@@ -205,8 +207,6 @@ public class QuestionImpl implements Question
 
 	protected AttributionImpl attribution = new AttributionImpl();
 
-	protected Object data = null;
-
 	protected String description = null;
 
 	protected String id = null;
@@ -220,6 +220,8 @@ public class QuestionImpl implements Question
 	protected transient PoolService poolService = null;
 
 	protected PresentationImpl presentation = new PresentationImpl();
+
+	protected TypeSpecificQuestion questionHandler = null;
 
 	protected transient QuestionService questionService = null;
 
@@ -272,8 +274,8 @@ public class QuestionImpl implements Question
 	 */
 	public String getAnswerKey()
 	{
-		// TODO: type-specific
-		return null;
+		if (this.questionHandler == null) return null;
+		return this.questionHandler.getAnswerKey();
 	}
 
 	/**
@@ -290,12 +292,6 @@ public class QuestionImpl implements Question
 	public Attribution getAttribution()
 	{
 		return this.attribution;
-	}
-
-	public Object getData()
-	{
-		// TODO: type-specific
-		return this.data;
 	}
 
 	/**
@@ -365,6 +361,14 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
+	public TypeSpecificQuestion getTypeSpecificQuestion()
+	{
+		return this.questionHandler;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getVersion()
 	{
 		return this.version;
@@ -376,15 +380,6 @@ public class QuestionImpl implements Question
 	public int hashCode()
 	{
 		return this.id.hashCode();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setData(Object data)
-	{
-		// TODO: type-specific
-		this.data = data;
 	}
 
 	/**
@@ -411,15 +406,6 @@ public class QuestionImpl implements Question
 	{
 		if (rationale == null) throw new IllegalArgumentException();
 		this.requireRationale = rationale;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setType(String type)
-	{
-		if (type == null) throw new IllegalArgumentException();
-		this.type = type;
 	}
 
 	/**
@@ -455,9 +441,31 @@ public class QuestionImpl implements Question
 		this.submissionContext = submission;
 	}
 
+	/**
+	 * Establish the type.
+	 * 
+	 * @param type
+	 *        The type.
+	 */
+	protected void initType(String type)
+	{
+		this.type = type;
+	}
+
+	/**
+	 * Establish the type-specific question handler.
+	 * 
+	 * @param questionHandler
+	 *        The type-specific question handler.
+	 */
+	protected void initTypeSpecificQuestion(TypeSpecificQuestion questionHandler)
+	{
+		this.questionHandler = questionHandler;
+	}
+
 	protected void set(QuestionImpl other)
 	{
-		this.data = other.data; // TODO:
+		if (other.questionHandler != null) this.questionHandler = (TypeSpecificQuestion) (other.questionHandler.clone());
 		this.description = other.description;
 		this.id = other.id;
 		this.partContext = other.partContext;
