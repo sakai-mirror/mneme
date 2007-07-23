@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+/**********************************************************************************
+ * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ **********************************************************************************/
+-->
+
+<interface title="tests-title" header="tests-header">
+	<container>
+
+		<!-- entity options -->
+		<navigationBar width="100%">
+			<container>
+				<navigation destination="/test_edit" title="add-test"
+					style="LINK" description="add-test-description">
+					<icon icon="/icons/add.png" style="LEFT" />
+				</navigation>
+				<navigation destination="/tests_delete" title="delete-tests"
+					style="LINK" description="delete-tests-description" submit="TRUE">
+					<icon icon="/icons/delete.png" style="LEFT" />
+				</navigation>
+			</container>
+		</navigationBar>
+
+		<!-- the list of assessments -->
+		<entityList style="FLAT">
+			<iterator name="assessment" model="assessments" />
+			<emptyTitle>
+				<message selector="no-assessments" />
+			</emptyTitle>
+			<columns>
+				<selectionColumn multiple="TRUE">
+					<value>
+						<model ref="assessment.id" />
+					</value>
+					<model ref="ids.values" />
+				</selectionColumn>
+				<modelColumn>
+					<title>
+						<message selector="assessment-title" />
+					</title>
+					<model ref="assessment.title" />
+				</modelColumn>
+			</columns>
+		</entityList>
+
+	</container>
+</interface>
