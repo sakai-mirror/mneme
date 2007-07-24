@@ -59,7 +59,7 @@
 
     <servlet>
         <servlet-name>sakai.mneme</servlet-name>
-        <servlet-class>org.muse.ambrosia.util.AmbrosiaServlet</servlet-class>
+        <servlet-class>org.muse.mneme.tool.MnemeServlet</servlet-class>
         <init-param>
             <param-name>defaultView</param-name>
             <param-value>list</param-value>

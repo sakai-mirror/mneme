@@ -17,5 +17,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/ambrosia-api"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/event-api"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ambrosia-util"/>
+	<classpathentry kind="var" path="MAVEN_REPO/org.springframework/jars/spring-1.2.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -27,11 +27,11 @@
 	<!--mode bar-->
 	<modeBar>
 		<container>
-			<navigation destination="/list"
+			<navigation destination="/tests"
 				title="test-manager-nav-title" style="LINK"
 				accessKey="test-manager-nav-access-key"
 				description="test-manager-nav-description" />
-			<navigation destination="/grading" title="grading-nav-title"
+			<navigation destination="/grades" title="grading-nav-title"
 				style="LINK" accessKey="grading-nav-access-key"
 				description="grading-nav-description" />
 			<navigation destination="/pools" title="pools-nav-title"

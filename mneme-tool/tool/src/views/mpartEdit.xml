@@ -23,56 +23,58 @@
  **********************************************************************************/
 -->
 
-<interface title="testEdit-title" header="testEdit-header">
+<interface title="partEdit-title" header="partEdit-header">
 	<container>
 
-		<section title="test-properties">
+		<section>
 			<container>
-				<textEdit title="test-title" model="assessment.title" />
+				<textEdit title="part-title" model="part.title" />
+				<textEdit title="part-instructions" model="part.presentation.text" />
 			</container>
 		</section>
 
-		<section title="test-parts">
+		<section>
 			<container>
 
-				<!-- the list of parts -->
+				<!-- the list of the selected questions -->
 				<entityList style="FLAT">
-					<iterator name="part" model="assessment.parts.parts" />
-					<emptyTitle>
-						<message selector="no-parts" />
-					</emptyTitle>
+					<iterator name="question" model="part.questionsAsAuthored" />
 					<columns>
-						<selectionColumn multiple="TRUE">
-							<value>
-								<model ref="part.id" />
-							</value>
-							<model ref="ids.values" />
-						</selectionColumn>
 						<modelColumn>
 							<title>
-								<message selector="part-title" />
+								<message selector="question-subject" />
 							</title>
-							<model ref="part.title" />
-							<entityNavigations>
-								<navigation>
-									<destination template="/part_edit/{0}/{1}">
-										<model ref="assessment.id" />
-										<model ref="part.id" />
-									</destination>
-								</navigation>
-							</entityNavigations>
+							<model ref="question.pool.subject" />
 						</modelColumn>
 						<modelColumn>
 							<title>
-								<message selector="part-summary" />
+								<message selector="question-pool-title" />
 							</title>
-							<model ref="part" delegate="FormatPartSummary" tool="sakai.mneme" />
+							<model ref="question.pool.title" />
 						</modelColumn>
 						<modelColumn>
 							<title>
-								<message selector="part-points" />
+								<message selector="question-description" />
 							</title>
-							<model ref="part.totalPoints" />
+							<model ref="question.description" />
+						</modelColumn>
+						<modelColumn>
+							<title>
+								<message selector="question-type" />
+							</title>
+							<model ref="question.type" />
+						</modelColumn>
+						<modelColumn>
+							<title>
+								<message selector="question-difficulty" />
+							</title>
+							<model ref="question.pool.difficulty" />
+						</modelColumn>
+						<modelColumn>
+							<title>
+								<message selector="question-points" />
+							</title>
+							<model ref="question.pool.points" />
 						</modelColumn>
 					</columns>
 				</entityList>
@@ -80,20 +82,20 @@
 			</container>
 		</section>
 
-		<text>
-			<message selector="assessment-points">
-				<model ref="assessment.parts.totalPoints" />
-			</message>
-		</text>
-
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="70em">
 			<container>
-				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/tests">
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
+					<destination template="/test_edit/{0}">
+						<model ref="assessment.id" />
+					</destination>
 				</navigation>
-				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON" destination="/tests">
+				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
+					<destination template="/test_edit/{0}">
+						<model ref="assessment.id" />
+					</destination>
 				</navigation>
 			</container>
 		</navigationBar>
