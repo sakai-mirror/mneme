@@ -60,13 +60,10 @@ public class PoolsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// collect the pools to show
-		List<Pool> pools = this.poolService.findPools(null, null, null);
-		context.put("pools", pools);
-
-		// for the checkboxes
-		Values values = this.uiService.newValues();
-		context.put("poolids", values);
+		if ((params.length != 2) && (params.length != 3))
+		{
+			throw new IllegalArgumentException();
+		}
 
 		// sort parameter
 		String sortCode = null;
@@ -74,17 +71,66 @@ public class PoolsView extends ControllerImpl
 		{
 			sortCode = params[2];
 		}
+
+		// default sort is title ascending
+		PoolService.FindPoolsSort sort;
+
 		if (sortCode != null)
 		{
-			context.put("sort_column", sortCode.charAt(0));
-			context.put("sort_direction", sortCode.charAt(1));
+			if (sortCode.trim().length() == 2)
+			{
+				context.put("sort_column", sortCode.charAt(0));
+				context.put("sort_direction", sortCode.charAt(1));
+
+				// 0 is subject
+				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
+				{
+					sort = PoolService.FindPoolsSort.subject_a;
+				}
+				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+				{
+					sort = PoolService.FindPoolsSort.subject_d;
+				}
+				// 1 is title
+				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+				{
+					sort = PoolService.FindPoolsSort.title_a;
+				}
+				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+				{
+					sort = PoolService.FindPoolsSort.title_d;
+				}
+				else
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+			}
+			else
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
 		}
 		else
 		{
-			// default sort: status descending
+			// default sort: title ascending
+			sort = PoolService.FindPoolsSort.title_a;
+
 			context.put("sort_column", '1');
-			context.put("sort_direction", 'D');
+			context.put("sort_direction", 'A');
+
 		}
+
+		// collect the pools to show
+		List<Pool> pools = this.poolService.findPools(null, sort, null);
+		context.put("pools", pools);
+
+		// for the checkboxes
+		Values values = this.uiService.newValues();
+		context.put("poolids", values);
 
 		// render
 		uiService.render(ui, context);
