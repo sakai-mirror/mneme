@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-/**********************************************************************************
- * $URL$
- * $Id$
- ***********************************************************************************
- *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- **********************************************************************************/
+	/**********************************************************************************
+	* $URL$
+	* $Id$
+	***********************************************************************************
+	*
+	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* 
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	* 
+	*      http://www.apache.org/licenses/LICENSE-2.0
+	* 
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*
+	**********************************************************************************/
 -->
 
 <interface title="pools-delete-confirm-title"
@@ -53,7 +53,7 @@
 		</text>
 
 		<!-- the list of pools -->
-		<entityList style="FLAT">
+		<entityList style="FORM">
 			<iterator name="pool" model="pools" />
 			<emptyTitle>
 				<message selector="no-pools" />
@@ -67,10 +67,10 @@
 		</entityList>
 
 
-		<text>
+		<!--text>
 			<message selector="pool-delete-alert" />
-		</text>
-
+		</text-->
+		<alert selector="pool-delete-alert" />
 		<text>
 			<message selector="pool-delete-message2" />
 		</text>
@@ -79,12 +79,13 @@
 		<navigationBar width="100%">
 			<container>
 				<navigation destination="/pools_delete"
-					title="continue-title" style="LINK"
+					title="continue-title" style="BUTTON" accessKey="continue-access"
 					description="continue-description" submit="TRUE">
 				</navigation>
-				<navigation destination="/pools" title="cancel-title"
-					style="LINK" description="cancel-description">
-					<!--icon icon="/icons/cancel.gif" style="LEFT" /-->
+				<navigation destination="/pools" title="cancel"
+					style="BUTTON" accessKey="cancel-access"
+					description="cancel-description">
+					<icon icon="/icons/cancel.gif" style="LEFT" />
 				</navigation>
 			</container>
 		</navigationBar>

@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-/**********************************************************************************
- * $URL$
- * $Id$
- ***********************************************************************************
- *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- **********************************************************************************/
+	/**********************************************************************************
+	* $URL$
+	* $Id$
+	***********************************************************************************
+	*
+	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* 
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	* 
+	*      http://www.apache.org/licenses/LICENSE-2.0
+	* 
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*
+	**********************************************************************************/
 -->
 
 <interface title="pools-title" header="pools-header">
@@ -68,29 +68,30 @@
 					style="LINK" description="import-export-description">
 					<icon icon="/icons/import_export.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/pools_delete" title="delete-title"
-					style="LINK" description="delete-description" submit="TRUE">
+				<navigation destination="/pools_delete"
+					title="delete-title" style="LINK" description="delete-description"
+					submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
 				</navigation>
 				<navigation destination="/" title="search-title"
 					style="LINK" description="search-description">
 					<icon icon="/icons/search.png" style="LEFT" />
 				</navigation>
-				<textEdit rows="1" cols="30" />
-				<navigation destination="/" title="gotofirst-title"
-					style="LINK" description="gotofirst-description">
+				<!--textEdit rows="1" cols="30" /-->
+				<navigation destination="/" style="LINK"
+					description="gotofirst-description">
 					<icon icon="/icons/first.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="gotoprev-title"
-					style="LINK" description="gotoprev-description">
+				<navigation destination="/" style="LINK"
+					description="gotoprev-description">
 					<icon icon="/icons/previous.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="gotonext-title"
-					style="LINK" description="gotonext-description">
+				<navigation destination="/" style="LINK"
+					description="gotonext-description">
 					<icon icon="/icons/next.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="gotolast-title"
-					style="LINK" description="gotolast-description">
+				<navigation destination="/" style="LINK"
+					description="gotolast-description">
 					<icon icon="/icons/last.png" style="LEFT" />
 				</navigation>
 			</container>
@@ -116,10 +117,12 @@
 					<model ref="pool.subject" />
 					<sort>
 						<active>
-							<compareDecision model="sort_column" constant="0" />
+							<compareDecision model="sort_column"
+								constant="0" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction" constant="A" />
+							<compareDecision model="sort_direction"
+								constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
@@ -138,10 +141,12 @@
 					<model ref="pool.title" />
 					<sort>
 						<active>
-							<compareDecision model="sort_column" constant="1" />
+							<compareDecision model="sort_column"
+								constant="1" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction" constant="A" />
+							<compareDecision model="sort_direction"
+								constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
@@ -182,8 +187,7 @@
 						<message selector="pool-action" />
 					</title>
 					<navigations>
-						<navigation style="LINK"
-							title="gotonext-title">
+						<navigation style="LINK" title="">
 							<destination template="/" model="pool.id" />
 							<icon icon="/icons/edit.png" style="LEFT" />
 						</navigation>
