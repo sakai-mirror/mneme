@@ -38,7 +38,7 @@
 
 				<!-- the list of ALL pools, with those selected for this part checked and their "draw" filled in -->
 				<entityList style="FLAT">
-					<iterator name="draw" model="part.draws" />
+					<iterator name="draw" model="draws" />
 					<columns>
 						<modelColumn>
 							<title>

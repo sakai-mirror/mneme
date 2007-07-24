@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.List;
 
 import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolService;
 
 /**
  * PoolStorage defines the storage interface for Pools.
@@ -47,9 +48,13 @@ public interface PoolStorage
 	 * 
 	 * @param userId
 	 *        The user id
+	 * @param sort
+	 *        The sort criteria.
+	 * @param search
+	 *        The search criteria.
 	 * @return The list of pools the user has access to.
 	 */
-	List<Pool> findPools(String userId);
+	List<Pool> findPools(String userId, PoolService.FindPoolsSort sort, String search);
 
 	/**
 	 * Access a pool by id.

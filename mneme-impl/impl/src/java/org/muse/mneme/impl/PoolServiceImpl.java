@@ -115,13 +115,14 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String userId)
+	public List<Pool> findPools(String userId, FindPoolsSort sort, String search)
 	{
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		if (sort == null) sort = PoolService.FindPoolsSort.title_a;
 
 		if (M_log.isDebugEnabled()) M_log.debug("findPools: " + userId);
 
-		List<Pool> rv = storage.findPools(userId);
+		List<Pool> rv = storage.findPools(userId, sort, search);
 		return rv;
 	}
 

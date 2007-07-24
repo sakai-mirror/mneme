@@ -199,9 +199,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String userId)
+	public List<Pool> findPools(String userId, PoolService.FindPoolsSort sort, String search)
 	{
-		return poolService.findPools(userId);
+		return poolService.findPools(userId, sort, search);
 	}
 
 	/**

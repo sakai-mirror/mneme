@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolService;
 
 /**
  * PoolStorageSample defines a sample storage for PoolStorage.
@@ -77,7 +79,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String userId)
+	public List<Pool> findPools(String userId, final PoolService.FindPoolsSort sort, String search)
 	{
 		fakeIt();
 
@@ -90,6 +92,42 @@ public class PoolStorageSample implements PoolStorage
 				rv.add(new PoolImpl(pool));
 			}
 		}
+
+		// TODO: sort
+		Collections.sort(rv, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				int rv = 0;
+				switch (sort)
+				{
+					case subject_a:
+					{
+						rv = ((Pool) arg0).getSubject().compareTo(((Pool) arg1).getSubject());
+						break;
+					}
+					case subject_d:
+					{
+						rv = -1 * ((Pool) arg0).getSubject().compareTo(((Pool) arg1).getSubject());
+						break;
+					}
+					case title_a:
+					{
+						rv = ((Pool) arg0).getTitle().compareTo(((Pool) arg1).getTitle());
+						break;
+					}
+					case title_d:
+					{
+						rv = -1 * ((Pool) arg0).getTitle().compareTo(((Pool) arg1).getTitle());
+						break;
+					}
+				}
+
+				return rv;
+			}
+		});
+
+		// TODO: search
 
 		return rv;
 	}
@@ -221,7 +259,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.setSubject("subject 2");
 			pool.setTitle("title 2");
 			this.pools.put(pool.getId(), pool);
-			
+
 			pool = newPool();
 			pool.initId("b3");
 			pool.setDescription("description 3");
@@ -231,7 +269,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.setSubject("subject 3");
 			pool.setTitle("title 3");
 			this.pools.put(pool.getId(), pool);
-			
+
 			pool = newPool();
 			pool.initId("b4");
 			pool.setDescription("description 4");
@@ -241,7 +279,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.setSubject("subject 4");
 			pool.setTitle("title 4");
 			this.pools.put(pool.getId(), pool);
-			
+
 			pool = newPool();
 			pool.initId("b5");
 			pool.setDescription("description 5");

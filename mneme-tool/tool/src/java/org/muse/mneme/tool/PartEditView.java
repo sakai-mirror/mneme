@@ -22,6 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,6 +38,8 @@ import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
+import org.muse.mneme.api.PoolDraw;
+import org.muse.mneme.api.PoolService;
 import org.sakaiproject.util.Web;
 import org.springframework.core.io.ClassPathResource;
 
@@ -120,9 +123,12 @@ public class PartEditView extends ControllerImpl
 	public void getDraw(Assessment assessment, DrawPart part, HttpServletRequest req, HttpServletResponse res, Context context, String[] params)
 			throws IOException
 	{
-		// collect information: the selected assessment
 		context.put("assessment", assessment);
 		context.put("part", part);
+
+		// get the pool draw list - all the pools for the user (select, sort, page) crossed with this part's actual draws
+		List<PoolDraw> draws = part.getDrawsForPools(null, PoolService.FindPoolsSort.subject_a, null);
+		context.put("draws", draws);
 
 		// render
 		uiService.render(ui, context);
@@ -206,6 +212,8 @@ public class PartEditView extends ControllerImpl
 		// setup the model: the selected assessment
 		context.put("assessment", assessment);
 		context.put("part", part);
+
+		// TODO: the draws...
 
 		// read the form
 		String destination = uiService.decode(req, context);

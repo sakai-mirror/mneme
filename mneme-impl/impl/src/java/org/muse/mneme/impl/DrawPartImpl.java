@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolDraw;
@@ -86,7 +85,32 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 */
 	public List<PoolDraw> getDraws()
 	{
-		return pools;
+		return this.pools;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<PoolDraw> getDrawsForPools(String userId, PoolService.FindPoolsSort sort, String search)
+	{
+		// get all the pools we need
+		List<Pool> allPools = this.poolService.findPools(userId, sort, search);
+
+		List<PoolDraw> rv = new ArrayList<PoolDraw>();
+
+		// prepare draws
+		for (Pool pool : allPools)
+		{
+			PoolDraw draw = new PoolDrawImpl(this.poolService, pool, 0);
+			if (this.pools.contains(draw))
+			{
+				PoolDraw myDraw = this.pools.get(this.pools.indexOf(draw));
+				draw.setNumQuestions(myDraw.getNumQuestions());
+			}
+			rv.add(draw);
+		}
+
+		return rv;
 	}
 
 	/**

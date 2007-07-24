@@ -46,6 +46,20 @@ public interface DrawPart extends Part
 	List<PoolDraw> getDraws();
 
 	/**
+	 * Get a list of draws for each pool specified - for those that are in se in this part, have a non-null numQuestions.
+	 * 
+	 * @param userId
+	 *        A user id - all the pools for this user will be included.
+	 * @param sort
+	 *        The sort criteria (from the PoolService).
+	 * @param search
+	 *        The search criteria.
+	 * @return A list of draws for each pool.
+	 */
+	// TODO: needs paging
+	List<PoolDraw> getDrawsForPools(String userId, PoolService.FindPoolsSort sort, String search);
+
+	/**
 	 * Remove a pool's draw from the part.
 	 * 
 	 * @param pool

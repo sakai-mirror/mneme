@@ -61,7 +61,7 @@ public class PoolsView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// collect the pools to show
-		List<Pool> pools = this.poolService.findPools(null);
+		List<Pool> pools = this.poolService.findPools(null, null, null);
 		context.put("pools", pools);
 
 		// for the checkboxes

@@ -29,6 +29,14 @@ import java.util.List;
 public interface PoolService
 {
 	/**
+	 * Sort options for findPools()
+	 */
+	enum FindPoolsSort
+	{
+		subject_a, subject_d, title_a, title_d
+	}
+
+	/**
 	 * Check if the current user is allowed to edit this pool from this context.
 	 * 
 	 * @param pool
@@ -57,9 +65,14 @@ public interface PoolService
 	 * 
 	 * @param userId
 	 *        the user id, (if null, the current user is used).
+	 * @param sort
+	 *        The sort criteria.
+	 * @param search
+	 *        The search criteria.
 	 * @return a list of pools that meet the criteria.
 	 */
-	List<Pool> findPools(String userId);
+	// TODO: needs paging
+	List<Pool> findPools(String userId, FindPoolsSort sort, String search);
 
 	/**
 	 * Access a pool by id.
