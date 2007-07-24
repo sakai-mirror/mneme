@@ -26,9 +26,11 @@
 <interface title="testSettings-title" header="testSettings-header">
 	<container>
 
-		<textEdit title="test-title" model="assessment.title" disabled="TRUE" />
+		<textEdit title="test-title" model="assessment.title" disabled="TRUE" rows="1" cols="50" />
 
-		<textEdit title="test-timeLimit" model="assessment.timeLimit" />
+		<textEdit title="test-timeLimit" rows="1" cols="10">
+			<model type="duration" ref="assessment.timeLimit" concise="TRUE" />
+		</textEdit>
 
 		<textEdit title="test-submitMessage" model="assessment.submitPresentation.text" />
 

@@ -40,12 +40,14 @@
 				<entityList style="FLAT">
 					<iterator name="draw" model="draws" />
 					<columns>
-						<modelColumn>
+						<column>
 							<title>
 								<message selector="pool-draw" />
 							</title>
-							<model ref="draw.numQuestions" />
-						</modelColumn>
+							<container>
+								<textEdit model="draw.numQuestions" rows="1" cols="4" />
+							</container>
+						</column>
 						<modelColumn>
 							<title>
 								<message selector="pool-subject" />
