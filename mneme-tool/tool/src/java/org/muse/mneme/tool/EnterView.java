@@ -35,10 +35,12 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.util.Web;
 
 /**
@@ -50,8 +52,9 @@ public class EnterView extends ControllerImpl
 	private static Log M_log = LogFactory.getLog(EnterView.class);
 
 	/** Assessment service. */
-	protected MnemeService assessmentService = null;
-
+	protected AssessmentService assessmentService = null;
+	protected SubmissionService submissionService = null;
+	
 	/**
 	 * Shutdown.
 	 */
@@ -90,7 +93,7 @@ public class EnterView extends ControllerImpl
 		}
 
 		// security check (submissions count / allowed check)
-		if (!assessmentService.allowSubmit(assessment, null).booleanValue())
+		if (!submissionService.allowSubmit(assessment, null).booleanValue())
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -167,9 +170,18 @@ public class EnterView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(MnemeService service)
+	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
+	}
+
+	
+	/**
+	 * @param submissionService the submissionService to set
+	 */
+	public void setSubmissionService(SubmissionService submissionService)
+	{
+		this.submissionService = submissionService;
 	}
 
 	/**
@@ -188,7 +200,7 @@ public class EnterView extends ControllerImpl
 		Submission submission = null;
 		try
 		{
-			submission = assessmentService.enterSubmission(assessment, null);
+			submission = submissionService.enterSubmission(assessment, null);
 		}
 		catch (AssessmentClosedException e)
 		{
