@@ -66,15 +66,13 @@ public class PoolsDeleteView extends ControllerImpl
 	{
 		String destination = this.uiService.decode(req, context);
 
-		if (params.length < 3)
-		{
-			throw new IllegalArgumentException();
-		}
+		if (params.length < 3) throw new IllegalArgumentException();
+
 		List<Pool> pools = new ArrayList<Pool>(0);
 		StringBuffer deletePoolIds = new StringBuffer();
 
-		// pool id's are in the params array from the index 2
-		for (int i = 2; i < params.length; i++)
+		// pool id's are in the params array from the index 3
+		for (int i = 3; i < params.length; i++)
 		{
 			// get the pool and add to the list to show
 			Pool pool = this.poolService.getPool(params[i]);
@@ -83,6 +81,9 @@ public class PoolsDeleteView extends ControllerImpl
 		}
 
 		context.put("pools", pools);
+		// sort code
+		context.put("sortcode", params[2]);
+
 		uiService.render(ui, context);
 	}
 
@@ -108,15 +109,16 @@ public class PoolsDeleteView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// throw new IllegalArgumentException();
+		if (params.length < 3) throw new IllegalArgumentException();
+
 		String destination = this.uiService.decode(req, context);
 
 		if (destination != null && (destination.trim().equalsIgnoreCase("/pools_delete")))
 		{
 			try
 			{
-				// pool id's are in the params array from the index 2
-				for (int i = 2; i < params.length; i++)
+				// pool id's are in the params array from the index 3
+				for (int i = 3; i < params.length; i++)
 				{
 					Pool pool = this.poolService.getPool(params[i]);
 					if (pool != null)
@@ -131,7 +133,7 @@ public class PoolsDeleteView extends ControllerImpl
 				e.printStackTrace();
 			}
 		}
-		destination = "/pools";
+		destination = "/pools/" + params[2];
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

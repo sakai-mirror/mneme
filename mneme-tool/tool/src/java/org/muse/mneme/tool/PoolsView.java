@@ -167,7 +167,22 @@ public class PoolsView extends ControllerImpl
 			String separator = "/";
 			if (selectedPoolIds != null && (selectedPoolIds.length > 0))
 			{
-				path.append(destination + "/");
+				path.append(destination);
+				path.append(separator);
+
+				// for sort code
+				if (params.length == 3)
+				{
+					path.append(params[2]);
+					path.append(separator);
+				}
+				else
+				{
+					// default sort - title ascending
+					path.append("1A");
+					path.append(separator);
+				}
+
 				path.append(selectedPoolIds[0]);
 				for (int i = 1; i < selectedPoolIds.length; i++)
 				{
@@ -180,7 +195,11 @@ public class PoolsView extends ControllerImpl
 			}
 		}
 
-		destination = "/pools";
+		if (params.length == 3)
+			destination = "/pools/" + params[2];
+		else
+			destination = "/pools/";
+
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

@@ -69,7 +69,7 @@
 
 		<!--text>
 			<message selector="pool-delete-alert" />
-		</text-->
+			</text-->
 		<alert selector="pool-delete-alert" />
 		<text>
 			<message selector="pool-delete-message2" />
@@ -82,10 +82,12 @@
 					title="continue-title" style="BUTTON" accessKey="continue-access"
 					description="continue-description" submit="TRUE">
 				</navigation>
-				<navigation destination="/pools" title="cancel"
-					style="BUTTON" accessKey="cancel-access"
-					description="cancel-description">
+				<navigation title="cancel" style="BUTTON"
+					accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
+					<destination template="/pools/{0}">
+						<model ref="sortcode" />
+					</destination>
 				</navigation>
 			</container>
 		</navigationBar>
