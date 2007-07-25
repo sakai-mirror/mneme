@@ -38,14 +38,18 @@
 
 				<!-- the list of ALL pools, with those selected for this part checked and their "draw" filled in -->
 				<entityList style="FLAT">
-					<iterator name="draw" model="draws" />
+					<iterator name="draw">
+						<model ref="draws" indexRef="pool.id" />
+					</iterator>
 					<columns>
 						<column>
 							<title>
 								<message selector="pool-draw" />
 							</title>
 							<container>
-								<textEdit model="draw.numQuestions" rows="1" cols="4" />
+								<textEdit rows="1" cols="4">
+									<model ref="draw.numQuestions" type="integer" />
+								</textEdit>
 							</container>
 						</column>
 						<modelColumn>

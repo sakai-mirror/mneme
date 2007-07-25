@@ -68,16 +68,30 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	{
 		super(other);
 		this.pools = new ArrayList<PoolDraw>(other.pools.size());
-		this.pools.addAll(other.pools);
+		for (PoolDraw draw : other.pools)
+		{
+			this.pools.add(new PoolDrawImpl((PoolDrawImpl) draw));
+		}
 		this.poolService = other.poolService;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void addPool(Pool pool, Integer numQuestions)
+	public PoolDraw addPool(Pool pool, Integer numQuestions)
 	{
-		pools.add(new PoolDrawImpl(this.poolService, pool, numQuestions));
+		PoolDraw rv = new PoolDrawImpl(this.poolService, pool, numQuestions);
+
+		// do we have this pool already?
+		if (this.pools.contains(rv))
+		{
+			this.pools.remove(rv);
+		}
+
+		// add this to the pools
+		pools.add(rv);
+		
+		return rv;
 	}
 
 	/**

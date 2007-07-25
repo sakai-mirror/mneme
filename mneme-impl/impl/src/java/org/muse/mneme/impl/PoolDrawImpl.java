@@ -118,6 +118,14 @@ public class PoolDrawImpl implements PoolDraw
 	/**
 	 * {@inheritDoc}
 	 */
+	public int hashCode()
+	{
+		return this.poolId.hashCode();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setNumQuestions(Integer numQuestions)
 	{
 		if (numQuestions == null) throw new IllegalArgumentException();

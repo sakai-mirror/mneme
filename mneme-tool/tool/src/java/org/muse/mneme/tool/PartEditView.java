@@ -22,6 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +32,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.PopulatingSet;
+import org.muse.ambrosia.api.PopulatingSet.Factory;
+import org.muse.ambrosia.api.PopulatingSet.Id;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
@@ -44,7 +48,7 @@ import org.sakaiproject.util.Web;
 import org.springframework.core.io.ClassPathResource;
 
 /**
- * The /dpart_edit view for the mneme tool.
+ * The /part_edit view for the mneme tool.
  */
 public class PartEditView extends ControllerImpl
 {
@@ -53,6 +57,8 @@ public class PartEditView extends ControllerImpl
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
+
+	protected PoolService poolService = null;
 
 	/** The UI (2). Used for manual parts (the main this.ui used for draw parts). */
 	protected Component ui2 = null;
@@ -213,10 +219,47 @@ public class PartEditView extends ControllerImpl
 		context.put("assessment", assessment);
 		context.put("part", part);
 
-		// TODO: the draws...
+		// based on the part type...
+		PopulatingSet draws = null;
+		if (part instanceof DrawPart)
+		{
+			final DrawPart dpart = (DrawPart) part;
+			final PoolService pservice = this.poolService;
+			draws = uiService.newPopulatingSet(new Factory()
+			{
+				public Object get(String id)
+				{
+					// add a draw to the part
+					PoolDraw draw = dpart.addPool(pservice.getPool(id), 0);
+					return draw;
+				}
+			}, new Id()
+			{
+				public String getId(Object o)
+				{
+					return ((PoolDraw) o).getPool().getId();
+				}
+			});
+
+			context.put("draws", draws);
+		}
 
 		// read the form
 		String destination = uiService.decode(req, context);
+
+		// filter out draw part draws that are no questions
+		if (part instanceof DrawPart)
+		{
+			DrawPart dpart = (DrawPart) part;
+			for (Iterator i = dpart.getDraws().iterator(); i.hasNext();)
+			{
+				PoolDraw draw = (PoolDraw) i.next();
+				if (draw.getNumQuestions() == 0)
+				{
+					i.remove();
+				}
+			}
+		}
 
 		// commit the save
 		try
@@ -254,5 +297,16 @@ public class PartEditView extends ControllerImpl
 	public void setComponents2(String path)
 	{
 		this.viewPath2 = path;
+	}
+
+	/**
+	 * Set the PoolService.
+	 * 
+	 * @param service
+	 *        The PoolService.
+	 */
+	public void setPoolService(PoolService service)
+	{
+		this.poolService = service;
 	}
 }

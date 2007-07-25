@@ -36,7 +36,7 @@ public interface DrawPart extends Part
 	 * @param numQuestions
 	 *        The number of questions to draw.
 	 */
-	void addPool(Pool pool, Integer numQuestions);
+	PoolDraw addPool(Pool pool, Integer numQuestions);
 
 	/**
 	 * Get all the pools and their counts.
