@@ -26,11 +26,31 @@
 <interface title="testEdit-title" header="testEdit-header">
 	<container>
 
-		<section title="test-properties">
-			<container>
-				<textEdit title="test-title" model="assessment.title" />
-			</container>
-		</section>
+		<entityDisplay title="test-properties">
+			<rows>
+				<row title="test-title">
+					<container>
+						<textEdit model="assessment.title" />
+					</container>
+				</row>
+				<row title="open-date">
+					<container>
+						<dateEdit>
+							<icon icon="/icons/date.png" message="edit-date" />
+							<model ref="assessment.dates.openDate" type="date" />
+						</dateEdit>
+					</container>
+				</row>
+				<row title="due-date">
+					<container>
+						<dateEdit>
+							<icon icon="/icons/date.png" message="edit-date" />
+							<model ref="assessment.dates.dueDate" type="date" />
+						</dateEdit>
+					</container>
+				</row>
+			</rows>
+		</entityDisplay>
 
 		<section title="test-parts">
 			<container>
