@@ -29,6 +29,13 @@ import java.util.List;
 public interface AssessmentService
 {
 	/**
+	 * Sort options for findPools()
+	 */
+	enum AssessmentsSort
+	{
+		title_a, title_d,odate_a, odate_d, ddate_a, ddate_d, active_a, active_d
+	}
+	/**
 	 * Check if the user is allowed to edit this assessment.
 	 * 
 	 * @param assessment
@@ -77,7 +84,7 @@ public interface AssessmentService
 	 *        The context.
 	 * @return The List <Assessment> of all assessments in the context, or empty if there are none.
 	 */
-	List<Assessment> getContextAssessments(String context);
+	List<Assessment> getContextAssessments(String context, AssessmentsSort sort);
 
 	/**
 	 * Access an assessment by id.
