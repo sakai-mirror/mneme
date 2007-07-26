@@ -107,6 +107,24 @@
 					<title>
 						<message selector="assessment-odate" />
 					</title>
+					   <sort>
+						<active>
+							<compareDecision model="sort_column"
+								constant="2" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction"
+								constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/tests/2A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/tests/2D" />
+						</desc>
+					</sort>					
 					<container>
 						<dateEdit>
 							<icon icon="/icons/date.png" message="edit-date" />
@@ -118,6 +136,24 @@
 					<title>
 						<message selector="assessment-ddate" />
 					</title>
+					   <sort>
+						<active>
+							<compareDecision model="sort_column"
+								constant="3" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction"
+								constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/tests/3A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/tests/3D" />
+						</desc>
+					</sort>					
 					<container>
 						<dateEdit>
 							<icon icon="/icons/date.png" message="edit-date" />
@@ -129,6 +165,24 @@
 					<title>
 						<message selector="assessment-active" />
 					</title>
+					   <sort>
+						<active>
+							<compareDecision model="sort_column"
+								constant="4" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction"
+								constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/tests/4A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/tests/4D" />
+						</desc>
+					</sort>					
 					<model ref="assessment.active" delegate="FormatAssesmentActive" tool="sakai.mneme" />
 				</modelColumn>
 				<modelColumn>
