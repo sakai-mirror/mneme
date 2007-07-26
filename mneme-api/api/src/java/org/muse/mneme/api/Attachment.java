@@ -21,7 +21,7 @@
 
 package org.muse.mneme.api;
 
-import org.sakaiproject.time.api.Time;
+import java.util.Date;
 
 /**
  * <p>
@@ -33,8 +33,8 @@ public interface Attachment
 	/**
 	 * Access the full path on the file system if the attachment body is stored in a file instead of the db.
 	 * 
-	 * @return The full path on the file system if the attachment body is stored in a file instead of the db, or null if the
-	 *         attachment body is in the db.
+	 * @return The full path on the file system if the attachment body is stored in a file instead of the db, or null if the attachment body is in the
+	 *         db.
 	 */
 	String getFileSystemPath();
 
@@ -64,7 +64,7 @@ public interface Attachment
 	 * 
 	 * @return The attachment timestamp.
 	 */
-	Time getTimestamp();
+	Date getTimestamp();
 
 	/**
 	 * Access the attachment mime type.
@@ -77,8 +77,8 @@ public interface Attachment
 	 * Set the full path on the file system if the attachment body is stored in a file instead of the db.
 	 * 
 	 * @param path
-	 *        The full path on the file system if the attachment body is stored in a file instead of the db, or null if the
-	 *        attachment body is in the db.
+	 *        The full path on the file system if the attachment body is stored in a file instead of the db, or null if the attachment body is in the
+	 *        db.
 	 */
 	void setFileSystemPath(String path);
 }

@@ -21,7 +21,7 @@
 
 package org.muse.mneme.api;
 
-import org.sakaiproject.time.api.Time;
+import java.util.Date;
 
 /**
  * AssessmentDates contain the details of the availability dates of an assessment.
@@ -33,14 +33,14 @@ public interface AssessmentDates
 	 * 
 	 * @return The date after which submissions will not be accepted, or null if there is none.
 	 */
-	Time getAcceptUntilDate();
+	Date getAcceptUntilDate();
 
 	/**
 	 * Access the due date. Submissions after this date are considered late, if they are accepted at all.
 	 * 
 	 * @return The assessment's due date, or null if there is none.
 	 */
-	Time getDueDate();
+	Date getDueDate();
 
 	/**
 	 * Access the number of ms from now that the due date on this assessment will be reached.
@@ -62,7 +62,7 @@ public interface AssessmentDates
 	 * 
 	 * @return The assessment's open date, or null if there is none.
 	 */
-	Time getOpenDate();
+	Date getOpenDate();
 
 	/**
 	 * Set the date after which submissions will not be accepted.
@@ -70,7 +70,7 @@ public interface AssessmentDates
 	 * @param date
 	 *        The date after which submissions will not be accepted, or null if there is none.
 	 */
-	void setAcceptUntilDate(Time date);
+	void setAcceptUntilDate(Date date);
 
 	/**
 	 * Set the due date. Submissions after this date are considered late, if they are accepted at all.
@@ -78,7 +78,7 @@ public interface AssessmentDates
 	 * @param date
 	 *        The assessment's due date, or null if there is none.
 	 */
-	void setDueDate(Time date);
+	void setDueDate(Date date);
 
 	/**
 	 * Set the release date. Only after this date (if defined) is the assessment open for submission.
@@ -86,5 +86,5 @@ public interface AssessmentDates
 	 * @param date
 	 *        The assessment's release date, or null if there is none.
 	 */
-	void setOpenDate(Time date);
+	void setOpenDate(Date date);
 }

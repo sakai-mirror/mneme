@@ -85,6 +85,26 @@
 						</navigation>
 					</entityNavigations>
 				</modelColumn>
+				<column>
+					<title>
+						<message selector="assessment-odate" />
+					</title>
+					<container>
+						<textEdit rows="1" cols="20">
+							<model ref="assessment.dates.openDate" type="date" />
+						</textEdit>
+					</container>
+				</column>
+				<column>
+					<title>
+						<message selector="assessment-ddate" />
+					</title>
+					<container>
+						<textEdit rows="1" cols="20">
+							<model ref="assessment.dates.dueDate" type="date" />
+						</textEdit>
+					</container>
+				</column>
 				<modelColumn>
 					<title>
 						<message selector="assessment-active" />

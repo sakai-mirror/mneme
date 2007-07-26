@@ -21,23 +21,21 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
+
 import org.muse.mneme.api.AssessmentDates;
 import org.muse.mneme.api.Expiration;
-import org.sakaiproject.time.api.Time;
-import org.sakaiproject.time.api.TimeService;
 
 /**
  * AssessmentDatesImpl implements AssessmentDates
  */
 public class AssessmentDatesImpl implements AssessmentDates
 {
-	protected Time acceptUntil = null;
+	protected Date acceptUntil = null;
 
-	protected Time due = null;
+	protected Date due = null;
 
-	protected Time open = null;
-
-	protected TimeService timeService = null;
+	protected Date open = null;
 
 	/**
 	 * Construct.
@@ -52,19 +50,15 @@ public class AssessmentDatesImpl implements AssessmentDates
 
 	/**
 	 * Construct.
-	 * 
-	 * @param service
-	 *        The TimeService.
 	 */
-	public AssessmentDatesImpl(TimeService service)
+	public AssessmentDatesImpl()
 	{
-		this.timeService = service;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Time getAcceptUntilDate()
+	public Date getAcceptUntilDate()
 	{
 		return this.acceptUntil;
 	}
@@ -72,7 +66,7 @@ public class AssessmentDatesImpl implements AssessmentDates
 	/**
 	 * {@inheritDoc}
 	 */
-	public Time getDueDate()
+	public Date getDueDate()
 	{
 		return this.due;
 	}
@@ -86,7 +80,8 @@ public class AssessmentDatesImpl implements AssessmentDates
 		if (this.due == null) return null;
 
 		// if we have started, the clock is running - compute how long from NOW the end is
-		long tillDue = this.due.getTime() - this.timeService.newTime().getTime();
+		Date now = new Date();
+		long tillDue = this.due.getTime() - now.getTime();
 		if (tillDue <= 0) return new Long(0);
 
 		return new Long(tillDue);
@@ -100,7 +95,7 @@ public class AssessmentDatesImpl implements AssessmentDates
 		ExpirationImpl rv = new ExpirationImpl();
 
 		// see if the assessment has a hard due date (w/ no late submissions accepted) or a retract date
-		Time closedDate = getAcceptUntilDate();
+		Date closedDate = getAcceptUntilDate();
 
 		// compute an end time based on the assessment's closed date
 		if (closedDate == null) return null;
@@ -110,8 +105,10 @@ public class AssessmentDatesImpl implements AssessmentDates
 		// the closeDate is the end time
 		long endTime = closedDate.getTime();
 
+		Date now = new Date();
+
 		// if this closed date is more than 2 hours from now, ignore it and say we have no expiration
-		if (endTime > this.timeService.newTime().getTime() + (2l * 60l * 60l * 1000l)) return null;
+		if (endTime > now.getTime() + (2l * 60l * 60l * 1000l)) return null;
 
 		// set the limit to 2 hours
 		rv.limit = 2l * 60l * 60l * 1000l;
@@ -119,7 +116,7 @@ public class AssessmentDatesImpl implements AssessmentDates
 		rv.cause = Expiration.Cause.closedDate;
 
 		// how long from now till endTime?
-		long tillExpires = endTime - this.timeService.newTime().getTime();
+		long tillExpires = endTime - now.getTime();
 		if (tillExpires <= 0) tillExpires = 0;
 
 		rv.duration = new Long(tillExpires);
@@ -130,7 +127,7 @@ public class AssessmentDatesImpl implements AssessmentDates
 	/**
 	 * {@inheritDoc}
 	 */
-	public Time getOpenDate()
+	public Date getOpenDate()
 	{
 		return this.open;
 	}
@@ -138,7 +135,7 @@ public class AssessmentDatesImpl implements AssessmentDates
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setAcceptUntilDate(Time date)
+	public void setAcceptUntilDate(Date date)
 	{
 		this.acceptUntil = date;
 	}
@@ -146,7 +143,7 @@ public class AssessmentDatesImpl implements AssessmentDates
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setDueDate(Time date)
+	public void setDueDate(Date date)
 	{
 		this.due = date;
 	}
@@ -154,7 +151,7 @@ public class AssessmentDatesImpl implements AssessmentDates
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setOpenDate(Time date)
+	public void setOpenDate(Date date)
 	{
 		this.open = date;
 	}
@@ -168,8 +165,7 @@ public class AssessmentDatesImpl implements AssessmentDates
 	protected void set(AssessmentDatesImpl other)
 	{
 		this.acceptUntil = other.acceptUntil;
-		this.timeService = other.timeService;
+		this.due = other.due;
 		this.open = other.open;
-		this.timeService = other.timeService;
 	}
 }

@@ -21,23 +21,21 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
+
 import org.muse.mneme.api.AssessmentReview;
 import org.muse.mneme.api.ReviewTiming;
-import org.sakaiproject.time.api.Time;
-import org.sakaiproject.time.api.TimeService;
 
 /**
  * AssessmentReviewImpl implements AssessmentReview
  */
 public class AssessmentReviewImpl implements AssessmentReview
 {
-	protected Time date = null;
+	protected Date date = null;
 
 	protected Boolean showCorrectAnswer = Boolean.FALSE;
 
 	protected Boolean showFeedback = Boolean.FALSE;
-
-	protected TimeService timeService = null;
 
 	protected ReviewTiming timing = ReviewTiming.never;
 
@@ -58,15 +56,14 @@ public class AssessmentReviewImpl implements AssessmentReview
 	 * @param service
 	 *        The TimeService.
 	 */
-	public AssessmentReviewImpl(TimeService service)
+	public AssessmentReviewImpl()
 	{
-		this.timeService = service;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Time getDate()
+	public Date getDate()
 	{
 		return this.date;
 	}
@@ -76,8 +73,8 @@ public class AssessmentReviewImpl implements AssessmentReview
 	 */
 	public Boolean getNowAvailable()
 	{
-		if ((this.timing == ReviewTiming.submitted)
-				|| ((this.timing == ReviewTiming.date) && ((this.date == null) || (!(this.date.after(timeService.newTime()))))))
+		Date now = new Date();
+		if ((this.timing == ReviewTiming.submitted) || ((this.timing == ReviewTiming.date) && ((this.date == null) || (!(this.date.after(now))))))
 		{
 			return Boolean.TRUE;
 		}
@@ -114,7 +111,7 @@ public class AssessmentReviewImpl implements AssessmentReview
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setDate(Time date)
+	public void setDate(Date date)
 	{
 		this.date = date;
 	}
@@ -157,7 +154,6 @@ public class AssessmentReviewImpl implements AssessmentReview
 		this.date = other.date;
 		this.showCorrectAnswer = other.showCorrectAnswer;
 		this.showFeedback = other.showFeedback;
-		this.timeService = other.timeService;
 		this.timing = other.timing;
 	}
 }

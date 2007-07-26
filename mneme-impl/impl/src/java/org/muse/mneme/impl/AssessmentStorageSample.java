@@ -21,6 +21,8 @@
 
 package org.muse.mneme.impl;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +39,6 @@ import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SubmissionService;
-import org.sakaiproject.time.api.TimeService;
 
 /**
  * QuestionStorageSample defines a sample storage for questions.
@@ -58,8 +59,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 	protected QuestionService questionService = null;
 
 	protected SubmissionService submissionService = null;
-
-	protected TimeService timeService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -153,7 +152,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	 */
 	public AssessmentImpl newAssessment()
 	{
-		return new AssessmentImpl(this.poolService, this.questionService, this.submissionService, this.timeService);
+		return new AssessmentImpl(this.poolService, this.questionService, this.submissionService);
 	}
 
 	/**
@@ -184,7 +183,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			}
 			assessment.initId("a" + Long.toString(id));
 		}
-		
+
 		// TODO: part ids!
 
 		this.assessments.put(assessment.getId(), new AssessmentImpl(assessment));
@@ -214,14 +213,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 		this.submissionService = service;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setTimeService(TimeService service)
-	{
-		this.timeService = service;
-	}
-
 	protected void fakeIt()
 	{
 		if (this.assessments.isEmpty())
@@ -239,7 +230,14 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.setType(AssessmentType.test);
 			// a.getAccess().setPassword("password");
 			a.getCreatedBy().setUserId("admin");
-			// a.getDates().setAcceptUntilDate(date);
+			try
+			{
+				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("06/01/07"));
+				a.getDates().setDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("09/22/07"));
+			}
+			catch (ParseException e)
+			{
+			}
 			a.getGrading().setAutoRelease(Boolean.TRUE);
 			a.getGrading().setGradebookIntegration(Boolean.FALSE);
 			a.getGrading().setShowIdentities(Boolean.TRUE);
@@ -283,7 +281,14 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.setType(AssessmentType.test);
 			// a.getAccess().setPassword("password");
 			a.getCreatedBy().setUserId("admin");
-			// a.getDates().setAcceptUntilDate(date);
+			try
+			{
+				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("07/01/07"));
+				a.getDates().setDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("08/15/07"));
+			}
+			catch (ParseException e)
+			{
+			}
 			a.getGrading().setAutoRelease(Boolean.TRUE);
 			a.getGrading().setGradebookIntegration(Boolean.FALSE);
 			a.getGrading().setShowIdentities(Boolean.TRUE);

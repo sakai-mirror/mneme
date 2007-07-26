@@ -21,7 +21,7 @@
 
 package org.muse.mneme.api;
 
-import org.sakaiproject.time.api.Time;
+import java.util.Date;
 
 /**
  * ReviewOpAssessmentReviewtions contain the details of how submissions can be reviewed.
@@ -33,7 +33,7 @@ public interface AssessmentReview
 	 * 
 	 * @return The review date.
 	 */
-	Time getDate();
+	Date getDate();
 
 	/**
 	 * Check if review is eanbled right now for this assessment, considering when now is and all the review settings.
@@ -69,7 +69,7 @@ public interface AssessmentReview
 	 * @param date
 	 *        The review date.
 	 */
-	void setDate(Time date);
+	void setDate(Date date);
 
 	/**
 	 * Set the setting that controlls if review includes correct-answer based information (checks and xes, answer key, item scores).

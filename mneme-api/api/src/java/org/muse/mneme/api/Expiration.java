@@ -21,12 +21,10 @@
 
 package org.muse.mneme.api;
 
-import org.sakaiproject.time.api.Time;
+import java.util.Date;
 
 /**
- * <p>
  * Expiration models information about the time a submission or assessment expires and can no loger be worked upon.
- * </p>
  */
 public interface Expiration
 {
@@ -64,5 +62,5 @@ public interface Expiration
 	 * 
 	 * @return The Time that marks the expiration date, or null if none.
 	 */
-	Time getTime();
+	Date getTime();
 }

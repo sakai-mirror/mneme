@@ -37,7 +37,6 @@ import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.memory.api.Cache;
-import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 
 /**
@@ -80,9 +79,6 @@ public class AssessmentServiceImpl implements AssessmentService
 
 	/** Dependency: SubmissionService */
 	protected SubmissionService submissionService = null;
-
-	/** Dependency: TimeService */
-	protected TimeService timeService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -368,17 +364,6 @@ public class AssessmentServiceImpl implements AssessmentService
 	public void setSubmissionService(SubmissionService service)
 	{
 		submissionService = service;
-	}
-
-	/**
-	 * Dependency: TimeService.
-	 * 
-	 * @param service
-	 *        The TimeService.
-	 */
-	public void setTimeService(TimeService service)
-	{
-		timeService = service;
 	}
 
 	/**

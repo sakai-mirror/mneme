@@ -21,8 +21,9 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
+
 import org.muse.mneme.api.Attachment;
-import org.sakaiproject.time.api.Time;
 
 /**
  * <p>
@@ -39,11 +40,11 @@ public class AttachmentImpl implements Attachment
 
 	protected String name = null;
 
-	protected Time timestamp = null;
+	protected Date timestamp = null;
 
 	protected String type = null;
 
-	public AttachmentImpl(String id, Long length, String name, Time timestamp, String type, String fileSystemPath)
+	public AttachmentImpl(String id, Long length, String name, Date timestamp, String type, String fileSystemPath)
 	{
 		this.id = id;
 		this.length = length;
@@ -88,7 +89,7 @@ public class AttachmentImpl implements Attachment
 	/**
 	 * {@inheritDoc}
 	 */
-	public Time getTimestamp()
+	public Date getTimestamp()
 	{
 		return this.timestamp;
 	}

@@ -28,7 +28,6 @@ import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SubmissionService;
-import org.sakaiproject.time.api.TimeService;
 
 /**
  * AssessmentStorage defines the storage interface for Assessments.
@@ -117,12 +116,4 @@ public interface AssessmentStorage
 	 *        The SubmissionService.
 	 */
 	void setSubmissionService(SubmissionService service);
-
-	/**
-	 * Set the TimeService
-	 * 
-	 * @param service
-	 *        The TimeService.
-	 */
-	void setTimeService(TimeService service);
 }

@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -40,8 +41,6 @@ import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
-import org.sakaiproject.time.api.Time;
-import org.sakaiproject.time.api.TimeService;
 
 /**
  * <p>
@@ -91,8 +90,6 @@ public class AssessmentImpl implements Assessment
 
 	protected Long timeLimit = null;
 
-	protected transient TimeService timeService = null;
-
 	protected String title = null;
 
 	protected AssessmentType type = AssessmentType.test;
@@ -100,16 +97,15 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * Construct
 	 */
-	public AssessmentImpl(PoolService poolService, QuestionService questionService, SubmissionService submissionService, TimeService timeService)
+	public AssessmentImpl(PoolService poolService, QuestionService questionService, SubmissionService submissionService)
 	{
-		this.timeService = timeService;
 		this.poolService = poolService;
 		this.submissionService = submissionService;
 		this.questionService = questionService;
 
-		this.dates = new AssessmentDatesImpl(timeService);
+		this.dates = new AssessmentDatesImpl();
 		this.parts = new AssessmentPartsImpl(this, questionService, poolService);
-		this.review = new AssessmentReviewImpl(timeService);
+		this.review = new AssessmentReviewImpl();
 	}
 
 	/**
@@ -195,7 +191,9 @@ public class AssessmentImpl implements Assessment
 		if (!this.active) return Boolean.TRUE;
 
 		if (this.dates.getAcceptUntilDate() == null) return Boolean.FALSE;
-		if (timeService.newTime().after(this.dates.getAcceptUntilDate())) return Boolean.TRUE;
+
+		Date now = new Date();
+		if (now.after(this.dates.getAcceptUntilDate())) return Boolean.TRUE;
 
 		return Boolean.FALSE;
 	}
@@ -218,7 +216,7 @@ public class AssessmentImpl implements Assessment
 	 */
 	public Boolean getIsOpen(Boolean withGrace)
 	{
-		Time now = timeService.newTime();
+		Date now = new Date();
 		long grace = withGrace ? MnemeService.GRACE : 0l;
 
 		if (!this.active) return Boolean.FALSE;
@@ -459,7 +457,6 @@ public class AssessmentImpl implements Assessment
 		this.submissionService = other.submissionService;
 		this.submitPresentation = new PresentationImpl((PresentationImpl) other.submitPresentation);
 		this.timeLimit = other.timeLimit;
-		this.timeService = other.timeService;
 		this.title = other.title;
 		this.type = other.type;
 	}

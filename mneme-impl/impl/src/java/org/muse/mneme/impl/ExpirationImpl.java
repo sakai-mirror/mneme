@@ -21,13 +21,12 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
+
 import org.muse.mneme.api.Expiration;
-import org.sakaiproject.time.api.Time;
 
 /**
- * <p>
  * ExpirationImpl implements Expiration
- * </p>
  */
 public class ExpirationImpl implements Expiration
 {
@@ -37,7 +36,7 @@ public class ExpirationImpl implements Expiration
 
 	protected Long limit;
 
-	protected Time time;
+	protected Date time;
 
 	/**
 	 * {@inheritDoc}
@@ -66,7 +65,7 @@ public class ExpirationImpl implements Expiration
 	/**
 	 * {@inheritDoc}
 	 */
-	public Time getTime()
+	public Date getTime()
 	{
 		return this.time;
 	}

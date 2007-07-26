@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,8 +50,6 @@ import org.sakaiproject.service.gradebook.shared.AssessmentNotFoundException;
 import org.sakaiproject.service.gradebook.shared.GradebookNotFoundException;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
-import org.sakaiproject.time.api.Time;
-import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
 
@@ -107,9 +106,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 	/** How long to wait (ms) between checks for timed-out submission in the db. 0 disables. */
 	protected long timeoutCheckMs = 1000L * 300L;
-
-	/** Dependency: TimeService */
-	protected TimeService timeService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -196,7 +192,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		Submission submission = getSubmission(s.getId());
 		Assessment assessment = submission.getAssessment();
 		if (assessment == null) throw new IllegalArgumentException();
-		Time asOf = timeService.newTime();
+		Date asOf = new Date();
 
 		// submission must be incomplete
 		if (submission.getIsComplete()) throw new SubmissionCompletedException();
@@ -246,7 +242,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
-		Time asOf = timeService.newTime();
+		Date asOf = new Date();
 
 		if (M_log.isDebugEnabled())
 			M_log.debug("countRemainingSubmissions: assessment: " + assessment.getId() + " userId: " + userId + " asOf: " + asOf);
@@ -287,7 +283,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (a == null) throw new IllegalArgumentException();
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 		Assessment assessment = assessmentService.getAssessment(a.getId());
-		Time asOf = timeService.newTime();
+		Date asOf = new Date();
 
 		if (M_log.isDebugEnabled()) M_log.debug("enterSubmission: assessment: " + assessment.getId() + " user: " + userId + " asOf: " + asOf);
 
@@ -375,7 +371,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (context == null) throw new IllegalArgumentException();
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 		if (sort == null) sort = GetUserContextSubmissionsSort.title_a;
-		Time asOf = timeService.newTime();
+		Date asOf = new Date();
 
 		if (M_log.isDebugEnabled()) M_log.debug("getUserContextSubmissions: context: " + context + " userId: " + userId + ": " + sort);
 
@@ -395,7 +391,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			if (submission.getIsOver(asOf, 0))
 			{
 				// complete this one, using the exact 'over' date for the final date
-				Time over = submission.getWhenOver();
+				Date over = submission.getWhenOver();
 				autoCompleteSubmission(over, submission);
 			}
 
@@ -439,7 +435,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					if (candidateSub.getIsOver(asOf, 0))
 					{
 						// complete this one, using the exact 'over' date for the final date
-						Time over = candidateSub.getWhenOver();
+						Date over = candidateSub.getWhenOver();
 						autoCompleteSubmission(over, candidateSub);
 					}
 
@@ -620,7 +616,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					}
 
 					// complete this submission, using the exact 'over' date for the final date
-					Time over = submission.getWhenOver();
+					Date over = submission.getWhenOver();
 					autoCompleteSubmission(over, submission);
 				}
 			}
@@ -778,17 +774,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
-	 * Dependency: TimeService.
-	 * 
-	 * @param service
-	 *        The TimeService.
-	 */
-	public void setTimeService(TimeService service)
-	{
-		this.timeService = service;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public void submitAnswer(Answer answer, Boolean completeAnswer, Boolean completeSubmission) throws AssessmentPermissionException,
@@ -858,7 +843,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// the assessment must be currently open for submission (with the grace period to support completion near closing time)
 		if (!assessment.getIsOpen(Boolean.TRUE)) throw new AssessmentClosedException();
 
-		Time asOf = timeService.newTime();
+		Date asOf = new Date();
 
 		if (M_log.isDebugEnabled())
 			M_log.debug("submitAnswer: submission: " + submission.getId() + " complete?: " + Boolean.toString(completeSubmission) + " asOf: " + asOf);
@@ -971,7 +956,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 *        The submission.
 	 * @return true if it was successful, false if not.
 	 */
-	protected boolean autoCompleteSubmission(Time asOf, Submission submission)
+	protected boolean autoCompleteSubmission(Date asOf, Submission submission)
 	{
 		if (submission == null) throw new IllegalArgumentException();
 		if (asOf == null) throw new IllegalArgumentException();
@@ -1025,7 +1010,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("getTimedOutSubmissions");
 
-		final Time asOf = timeService.newTime();
+		final Date asOf = new Date();
 
 		// select all open submission for every user assessment context
 		List<SubmissionImpl> all = this.storage.getOpenSubmissions();

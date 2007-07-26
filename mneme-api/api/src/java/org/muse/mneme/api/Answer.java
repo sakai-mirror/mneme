@@ -21,7 +21,7 @@
 
 package org.muse.mneme.api;
 
-import org.sakaiproject.time.api.Time;
+import java.util.Date;
 
 /**
  * Answer is the user's response to one question of an assessment.
@@ -123,7 +123,7 @@ public interface Answer
 	 * 
 	 * @return The answer's submitted date.
 	 */
-	Time getSubmittedDate();
+	Date getSubmittedDate();
 
 	/**
 	 * Access the total score of the answer - the total of the auto score and the evaluation score.
@@ -161,5 +161,5 @@ public interface Answer
 	 * @param submitted
 	 *        The answer's submitted date.
 	 */
-	void setSubmittedDate(Time submitted);
+	void setSubmittedDate(Date submitted);
 }

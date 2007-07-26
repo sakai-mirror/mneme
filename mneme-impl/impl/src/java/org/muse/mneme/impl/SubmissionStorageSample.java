@@ -37,7 +37,6 @@ import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
-import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 
 /**
@@ -67,8 +66,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 	protected Map<String, SubmissionImpl> submissions = new HashMap<String, SubmissionImpl>();
 
 	protected SubmissionServiceImpl submissionService = null;
-
-	protected TimeService timeService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -280,7 +277,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 	 */
 	public SubmissionImpl newSubmission()
 	{
-		return new SubmissionImpl(assessmentService, securityService, submissionService, sessionManager, timeService);
+		return new SubmissionImpl(assessmentService, securityService, submissionService, sessionManager);
 	}
 
 	/**
@@ -400,14 +397,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 	public void setSubmissionService(SubmissionServiceImpl service)
 	{
 		this.submissionService = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setTimeService(TimeService service)
-	{
-		this.timeService = service;
 	}
 
 	/**

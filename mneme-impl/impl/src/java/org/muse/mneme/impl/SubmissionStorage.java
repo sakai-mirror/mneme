@@ -32,7 +32,6 @@ import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
-import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 
 /**
@@ -225,14 +224,6 @@ public interface SubmissionStorage
 	 *        The SubmissionService.
 	 */
 	void setSubmissionService(SubmissionServiceImpl service);
-
-	/**
-	 * Set the TimeService
-	 * 
-	 * @param service
-	 *        The TimeService.
-	 */
-	void setTimeService(TimeService service);
 
 	/**
 	 * Check if an submission by this id exists.

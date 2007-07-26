@@ -21,15 +21,16 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
+
 import org.muse.mneme.api.Attribution;
-import org.sakaiproject.time.api.Time;
 
 /**
  * AttributionImpl implements Attribution
  */
 public class AttributionImpl implements Attribution
 {
-	protected Time date = null;
+	protected Date date = null;
 
 	protected String userId = null;
 
@@ -59,7 +60,7 @@ public class AttributionImpl implements Attribution
 	 * @param userId
 	 *        The user id.
 	 */
-	public AttributionImpl(Time date, String userId)
+	public AttributionImpl(Date date, String userId)
 	{
 		this.date = date;
 		this.userId = userId;
@@ -68,7 +69,7 @@ public class AttributionImpl implements Attribution
 	/**
 	 * {@inheritDoc}
 	 */
-	public Time getDate()
+	public Date getDate()
 	{
 		return this.date;
 	}
@@ -84,7 +85,7 @@ public class AttributionImpl implements Attribution
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setDate(Time date)
+	public void setDate(Date date)
 	{
 		this.date = date;
 	}

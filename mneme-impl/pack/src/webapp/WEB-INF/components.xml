@@ -37,7 +37,6 @@
 		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
-		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
 
  		<property name="cacheMinutes"><value>5</value></property>
  		<property name="cacheCleanerMinutes"><value>15</value></property>
@@ -126,7 +125,6 @@
 		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>		
-		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
 
 		<property name="storage">
 			<map>
@@ -149,7 +147,6 @@
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
 		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
 		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
-		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
 	</bean>
 
 	<bean id="org.muse.mneme.api.AssessmentService"
@@ -166,7 +163,6 @@
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
 		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
-		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
 
 		<property name="storage">
 			<map>
@@ -186,7 +182,6 @@
 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
-		<property name="timeService"><ref bean="org.sakaiproject.time.api.TimeService"/></property>
 	</bean>
 
 	<bean id="org.muse.mneme.api.SecurityService"

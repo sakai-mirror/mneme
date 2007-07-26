@@ -22,7 +22,7 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -35,13 +35,10 @@ import org.muse.mneme.api.Expiration;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionEvaluation;
-import org.sakaiproject.time.api.Time;
-import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 
 /**
@@ -74,13 +71,11 @@ public class SubmissionImpl implements Submission
 
 	protected Integer siblingCount = 0;
 
-	protected Time startDate = null;
+	protected Date startDate = null;
 
 	protected SubmissionServiceImpl submissionService = null;
 
-	protected Time submittedDate = null;
-
-	protected transient TimeService timeService = null;
+	protected Date submittedDate = null;
 
 	/** This is a pre-compute for the total score (trust me!), to be used if set and we don't have the answers & evaluations. */
 	protected transient Float totalScore = null;
@@ -91,13 +86,12 @@ public class SubmissionImpl implements Submission
 	 * Construct
 	 */
 	public SubmissionImpl(AssessmentService assessmentService, SecurityService securityService, SubmissionServiceImpl submissionService,
-			SessionManager sessionManager, TimeService timeService)
+			SessionManager sessionManager)
 	{
 		this.assessmentService = assessmentService;
 		this.securityService = securityService;
 		this.submissionService = submissionService;
 		this.sessionManager = sessionManager;
-		this.timeService = timeService;
 
 		this.evaluation = new SubmissionEvaluationImpl(this);
 	}
@@ -117,7 +111,7 @@ public class SubmissionImpl implements Submission
 	{
 		if (getIsOver(null, 0))
 		{
-			Time over = getWhenOver();
+			Date over = getWhenOver();
 			submissionService.autoCompleteSubmission(over, this);
 			return Boolean.TRUE;
 		}
@@ -199,7 +193,7 @@ public class SubmissionImpl implements Submission
 	 */
 	public AssessmentSubmissionStatus getAssessmentSubmissionStatus()
 	{
-		Time now = this.timeService.newTime();
+		Date now = new Date();
 		Assessment assessment = getAssessment();
 
 		// if not open yet...
@@ -286,11 +280,13 @@ public class SubmissionImpl implements Submission
 		// TODO: thread caching
 		ExpirationImpl rv = new ExpirationImpl();
 
+		Date now = new Date();
+
 		// the end might be from a time limit, or because we are near the closed date
 		long endTime = 0;
 
 		// see if the assessment has a hard due date (w/ no late submissions accepted) or a retract date
-		Time closedDate = getAssessment().getDates().getAcceptUntilDate();
+		Date closedDate = getAssessment().getDates().getAcceptUntilDate();
 		rv.time = closedDate;
 
 		// if we have a time limit, compute the end time based on that limit
@@ -301,7 +297,7 @@ public class SubmissionImpl implements Submission
 
 			// if we have started, compute the end from the start
 			long startTime = 0;
-			Time startDate = getStartDate();
+			Date startDate = getStartDate();
 			if (startDate != null)
 			{
 				startTime = startDate.getTime();
@@ -310,7 +306,7 @@ public class SubmissionImpl implements Submission
 			// if we have not started, compute the end from now
 			else
 			{
-				startTime = this.timeService.newTime().getTime();
+				startTime = now.getTime();
 			}
 
 			// a full time limit duration would end here
@@ -339,7 +335,7 @@ public class SubmissionImpl implements Submission
 			endTime = closedDate.getTime();
 
 			// if this closed date is more than 2 hours from now, ignore it and say we have no expiration
-			if (endTime > this.timeService.newTime().getTime() + (2l * 60l * 60l * 1000l)) return null;
+			if (endTime > now.getTime() + (2l * 60l * 60l * 1000l)) return null;
 
 			// set the limit to 2 hours
 			rv.limit = 2l * 60l * 60l * 1000l;
@@ -348,7 +344,7 @@ public class SubmissionImpl implements Submission
 		}
 
 		// how long from now till endTime?
-		long tillExpires = endTime - this.timeService.newTime().getTime();
+		long tillExpires = endTime - now.getTime();
 		if (tillExpires <= 0) tillExpires = 0;
 
 		rv.duration = new Long(tillExpires);
@@ -444,13 +440,13 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsOver(Time asOf, long grace)
+	public Boolean getIsOver(Date asOf, long grace)
 	{
-		Time over = getWhenOver();
+		Date over = getWhenOver();
 		if (over == null) return Boolean.FALSE;
 
 		// set the time to now if missing
-		if (asOf == null) asOf = timeService.newTime();
+		if (asOf == null) asOf = new Date();
 
 		return Boolean.valueOf(asOf.getTime() > over.getTime() + grace);
 	}
@@ -596,7 +592,7 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public Time getStartDate()
+	public Date getStartDate()
 	{
 		return this.startDate;
 	}
@@ -604,7 +600,7 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public Time getSubmittedDate()
+	public Date getSubmittedDate()
 	{
 		return this.submittedDate;
 	}
@@ -648,7 +644,7 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public Time getWhenOver()
+	public Date getWhenOver()
 	{
 		// if we have not been started, we are not over
 		if (getStartDate() == null) return null;
@@ -657,13 +653,13 @@ public class SubmissionImpl implements Submission
 		if (getIsComplete()) return null;
 
 		Assessment a = getAssessment();
-		Time rv = null;
+		Date rv = null;
 
 		// for timed
 		if ((a.getTimeLimit() != null) && (a.getTimeLimit() > 0))
 		{
 			// pick up the end time
-			rv = this.timeService.newTime(getStartDate().getTime() + a.getTimeLimit());
+			rv = new Date(getStartDate().getTime() + a.getTimeLimit());
 		}
 
 		// for hard due date
@@ -707,7 +703,7 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setStartDate(Time startDate)
+	public void setStartDate(Date startDate)
 	{
 		this.startDate = startDate;
 	}
@@ -715,7 +711,7 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setSubmittedDate(Time submittedDate)
+	public void setSubmittedDate(Date submittedDate)
 	{
 		this.submittedDate = submittedDate;
 	}
@@ -879,7 +875,6 @@ public class SubmissionImpl implements Submission
 		this.startDate = other.startDate;
 		this.submissionService = other.submissionService;
 		this.submittedDate = other.submittedDate;
-		this.timeService = other.timeService;
 		this.totalScore = other.totalScore;
 		this.userId = other.userId;
 	}

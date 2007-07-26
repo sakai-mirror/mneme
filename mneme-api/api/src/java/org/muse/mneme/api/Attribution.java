@@ -21,7 +21,7 @@
 
 package org.muse.mneme.api;
 
-import org.sakaiproject.time.api.Time;
+import java.util.Date;
 
 /**
  * Attribution holds a user id and a date, and is used to attribute something to someone and somewhen.
@@ -33,7 +33,7 @@ public interface Attribution
 	 * 
 	 * @return The date.
 	 */
-	Time getDate();
+	Date getDate();
 
 	/**
 	 * Access user.
@@ -48,7 +48,7 @@ public interface Attribution
 	 * @param date
 	 *        The date.
 	 */
-	void setDate(Time date);
+	void setDate(Date date);
 
 	/**
 	 * Set the user id.

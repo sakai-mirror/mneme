@@ -21,8 +21,6 @@
 
 package org.muse.mneme.api;
 
-import org.sakaiproject.time.api.Time;
-
 /**
  * GradingOptions contain the details of how submissions are graded.
  */

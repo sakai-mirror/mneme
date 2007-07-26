@@ -21,14 +21,11 @@
 
 package org.muse.mneme.api;
 
+import java.util.Date;
 import java.util.List;
 
-import org.sakaiproject.time.api.Time;
-
 /**
- * <p>
  * Submission is a user's response to an assessment. Each time the user takes the assessment, a new submission is made.
- * </p>
  */
 public interface Submission
 {
@@ -157,7 +154,7 @@ public interface Submission
 	 *        A grace period (in ms) to extend any hard deadline or timeout.
 	 * @return TRUE if the submission is over, FALSE if not.
 	 */
-	Boolean getIsOver(Time asOf, long grace);
+	Boolean getIsOver(Date asOf, long grace);
 
 	/**
 	 * Check if the submission may be started - the user must have permission, the submission must be a placeholder, the assessment must be open.
@@ -216,14 +213,14 @@ public interface Submission
 	 * 
 	 * @return the start date for this submission, or null if there is none.
 	 */
-	Time getStartDate();
+	Date getStartDate();
 
 	/**
 	 * Access the submission date for this submission.
 	 * 
 	 * @return the submission date for this submission, or null if there is none.
 	 */
-	Time getSubmittedDate();
+	Date getSubmittedDate();
 
 	/**
 	 * Access the total score of the submission - the total of the auto scores from the answers and the evaluation scores from the answers and
@@ -245,7 +242,7 @@ public interface Submission
 	 * 
 	 * @return The 'over' time for the submission, or NULL if there is none.
 	 */
-	Time getWhenOver();
+	Date getWhenOver();
 
 	/**
 	 * Set the complete flag for the submission.
@@ -269,7 +266,7 @@ public interface Submission
 	 * @param startDate
 	 *        the submission date for this submission.
 	 */
-	void setStartDate(Time startDate);
+	void setStartDate(Date startDate);
 
 	/**
 	 * Set the submission date for this submission - the latest date that this submission was altered by the submitter.
@@ -277,5 +274,5 @@ public interface Submission
 	 * @param submittedDate
 	 *        the submission date for this submission.
 	 */
-	void setSubmittedDate(Time submittedDate);
+	void setSubmittedDate(Date submittedDate);
 }

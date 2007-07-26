@@ -31,6 +31,7 @@ import java.io.OutputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,8 +69,6 @@ import org.sakaiproject.exception.ServerOverloadException;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
-import org.sakaiproject.time.api.Time;
-import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.util.BaseResourcePropertiesEdit;
 import org.sakaiproject.util.StringUtil;
@@ -127,9 +126,8 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/** Dependency: SubmissionService */
 	protected SubmissionService m_submissionService = null;
 
+	/** Dependency: ThreadLocalManager */
 	protected ThreadLocalManager m_threadLocalManager = null;
-
-	protected TimeService m_timeService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -174,15 +172,10 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 					String name = result.getString(3);
 
 					java.sql.Timestamp ts = result.getTimestamp(4, m_sqlService.getCal());
-					Time timestamp = null;
-					if (ts != null)
-					{
-						timestamp = m_timeService.newTime(ts.getTime());
-					}
 
 					String fileSystemPath = StringUtil.trimToNull(result.getString(5));
 
-					return new AttachmentImpl(attachmentRef.getId(), new Long(contentLength), name, timestamp, contentType, fileSystemPath);
+					return new AttachmentImpl(attachmentRef.getId(), new Long(contentLength), name, ts, contentType, fileSystemPath);
 				}
 				catch (SQLException e)
 				{
@@ -738,17 +731,6 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
-	 * Dependency: TimeService.
-	 * 
-	 * @param service
-	 *        The TimeService.
-	 */
-	public void setTimeService(TimeService service)
-	{
-		m_timeService = service;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public boolean willArchiveMerge()
@@ -923,7 +905,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		fields[0] = a.getLength();
 		fields[1] = a.getType();
 		fields[2] = a.getName();
-		fields[3] = a.getTimestamp() != null ? a.getTimestamp() : m_timeService.newTime();
+		fields[3] = a.getTimestamp() != null ? a.getTimestamp() : new Date();
 		fields[4] = fields[3];
 		fields[5] = new Integer(0);
 		fields[6] = new Integer(0);

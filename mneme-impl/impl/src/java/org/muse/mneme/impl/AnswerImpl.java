@@ -21,6 +21,8 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Answer;
@@ -32,7 +34,6 @@ import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.TypeSpecificAnswer;
-import org.sakaiproject.time.api.Time;
 
 /**
  * AnswerImpl implements Answer
@@ -63,7 +64,7 @@ public class AnswerImpl implements Answer
 
 	protected Submission submission = null;
 
-	protected Time submittedDate = null;
+	protected Date submittedDate = null;
 
 	/**
 	 * Construct.
@@ -230,7 +231,7 @@ public class AnswerImpl implements Answer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Time getSubmittedDate()
+	public Date getSubmittedDate()
 	{
 		return this.submittedDate;
 	}
@@ -290,7 +291,7 @@ public class AnswerImpl implements Answer
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setSubmittedDate(Time submitted)
+	public void setSubmittedDate(Date submitted)
 	{
 		this.submittedDate = submitted;
 	}
