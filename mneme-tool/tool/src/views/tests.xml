@@ -41,8 +41,8 @@
 
 	<container>
 
-		<!-- entity options -->
-		<navigationBar width="100%">
+		<!-- entity actions -->
+		<entityActionBar width="100%">
 			<container>
 				<navigation destination="/test_edit/" title="add-test" style="LINK" description="add-test-description" submit="TRUE">
 					<icon icon="/icons/add.png" style="LEFT" />
@@ -51,7 +51,7 @@
 					<icon icon="/icons/delete.png" style="LEFT" />
 				</navigation>
 			</container>
-		</navigationBar>
+		</entityActionBar>
 
 		<!-- the list of assessments -->
 		<entityList style="FLAT">

@@ -49,8 +49,8 @@
 			<message selector="pool-list-page-nav" />
 		</text>
 
-		<!--navigation-->
-		<navigationBar width="100%">
+		<!--entity actions-->
+		<entityActionBar width="100%">
 			<container>
 				<navigation destination="/" title="add-pool-title"
 					style="LINK" description="add-pool-description">
@@ -95,7 +95,7 @@
 					<icon icon="/icons/last.png" style="LEFT" />
 				</navigation>
 			</container>
-		</navigationBar>
+		</entityActionBar>
 
 		<!-- the list of pools -->
 		<entityList style="FLAT">
