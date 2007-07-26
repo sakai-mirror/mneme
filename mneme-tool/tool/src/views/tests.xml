@@ -77,6 +77,24 @@
 						<message selector="assessment-title" />
 					</title>
 					<model ref="assessment.title" />
+	                <sort>
+						<active>
+							<compareDecision model="sort_column"
+								constant="1" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction"
+								constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/tests/1A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/tests/1D" />
+						</desc>
+					</sort>					
 					<entityNavigations>
 						<navigation>
 							<destination template="/test_edit/{0}">
