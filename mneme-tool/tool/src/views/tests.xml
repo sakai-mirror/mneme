@@ -90,9 +90,10 @@
 						<message selector="assessment-odate" />
 					</title>
 					<container>
-						<textEdit rows="1" cols="20">
+						<dateEdit>
+							<icon icon="/icons/date.png" message="edit-date" />
 							<model ref="assessment.dates.openDate" type="date" />
-						</textEdit>
+						</dateEdit>
 					</container>
 				</column>
 				<column>
@@ -100,9 +101,10 @@
 						<message selector="assessment-ddate" />
 					</title>
 					<container>
-						<textEdit rows="1" cols="20">
+						<dateEdit>
+							<icon icon="/icons/date.png" message="edit-date" />
 							<model ref="assessment.dates.dueDate" type="date" />
-						</textEdit>
+						</dateEdit>
 					</container>
 				</column>
 				<modelColumn>
