@@ -128,6 +128,16 @@
 				</modelColumn>
 			</columns>
 		</entityList>
-
+	<!-- save / cancel nav bar -->
+		<navigationBar id="nav" width="70em">
+			<container>
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/tests">
+					<icon icon="/icons/return.png" style="LEFT" />
+				</navigation>
+				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON" destination="/tests">
+					<icon icon="/icons/cancel.gif" style="LEFT" />
+				</navigation>
+			</container>
+		</navigationBar>
 	</container>
 </interface>
