@@ -114,6 +114,9 @@
 					<model ref="assessment.active" delegate="FormatAssesmentActive" tool="sakai.mneme" />
 				</modelColumn>
 				<modelColumn>
+					<title>
+						<message selector="assessment-action" />
+					</title>
 					<model type="icon" icon="/icons/settings.png" />
 					<entityNavigations>
 						<navigation>
