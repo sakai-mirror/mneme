@@ -39,6 +39,7 @@ import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SubmissionService;
+import org.muse.mneme.api.AssessmentService;
 
 /**
  * QuestionStorageSample defines a sample storage for questions.
@@ -122,7 +123,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Assessment> getContextAssessments(String context)
+	public List<Assessment> getContextAssessments(String context, AssessmentService.AssessmentsSort sort)
 	{
 		fakeIt();
 

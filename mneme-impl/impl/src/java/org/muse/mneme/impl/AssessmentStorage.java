@@ -68,7 +68,7 @@ public interface AssessmentStorage
 	 *        The context.
 	 * @return The list of Assessments defined in the context.
 	 */
-	List<Assessment> getContextAssessments(String context);
+	List<Assessment> getContextAssessments(String context, AssessmentService.AssessmentsSort sort);
 
 	/**
 	 * Construct a new Assessment object.
