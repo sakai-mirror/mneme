@@ -23,16 +23,37 @@
  **********************************************************************************/
 -->
 
-<interface title="testEdit-title" header="testEdit-header">
+<interface>
+	<header>
+		<message selector="testEdit-header">
+			<model type="icon" icon="/icons/add.png" />
+		</message>
+	</header>	
+	<title>
+		<message selector="testEdit-title"/>			
+	</title>	
 	<container>
 
 		<entityDisplay title="test-properties">
 			<rows>
 				<row title="test-title">
 					<container>
-						<textEdit model="assessment.title" />
+						<textEdit model="assessment.title" rows="1" cols="25"/>
 					</container>
 				</row>
+				<row title="test-Id">
+					<container>
+						 <text>	<model ref="assessment.id" /></text>
+					</container>
+					</row>	 	
+				<row title="test-history">
+					<container>	
+					<text title="test-history-text">
+            			<model type="userInfo" selector="displayName" ref="assessment.createdBy.UserId" />
+            			<model type="date" ref="assessment.createdBy.date" />            			
+            		</text>	
+            	</container>
+            	</row>
 				<row title="open-date">
 					<container>
 						<dateEdit>
@@ -49,12 +70,52 @@
 						</dateEdit>
 					</container>
 				</row>
+				<row title="test-acceptUntilDate">
+					<container>
+						<dateEdit>
+							<icon icon="/icons/date.png" message="edit-date" />
+							<model ref="assessment.dates.acceptUntilDate" type="date" />
+						</dateEdit>
+						<instructions selector="test-acceptUntilDateMsg"/>	
+					</container>
+				</row>
+				<row title="test-instructions">
+					<container>
+					<textEdit model="assessment.presentation.text"/>
+					</container>
+				</row>
+				<row>
+					<container>
+						<attachments title="attachments">
+							<model ref="assessment.presentation.attachments" />					
+						</attachments>
+					</container>
+				</row> 
+				<row>
+					<container>				
+						<selection title="honor-pledge" />
+				</container>
+				</row> 
 			</rows>
 		</entityDisplay>
 
 		<section title="test-parts">
 			<container>
-
+				<!-- entity actions -->
+				<entityActionBar width="50%">
+					<container>
+						<navigation destination="/part_edit" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
+							<icon icon="/icons/hat_red.png" style="LEFT" />
+						</navigation>
+						<navigation destination="/part_edit" title="manual-draw" style="LINK" description="manual-draw-description" submit="TRUE">
+							<icon icon="/icons/hand_select.png" style="LEFT" />
+						</navigation>
+						<navigation destination="" title="delete-part" style="LINK" description="part-delete-description" submit="TRUE">
+							<icon icon="/icons/delete.png" style="LEFT" />
+						</navigation>
+					</container>
+				</entityActionBar>
+		
 				<!-- the list of parts -->
 				<entityList style="FLAT">
 					<iterator name="part" model="assessment.parts.parts" />
@@ -107,7 +168,7 @@
 		</text>
 
 		<!-- save / cancel nav bar -->
-		<navigationBar id="nav" width="70em">
+		<navigationBar id="nav" width="20em">
 			<container>
 				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/tests">
 					<icon icon="/icons/return.png" style="LEFT" />
