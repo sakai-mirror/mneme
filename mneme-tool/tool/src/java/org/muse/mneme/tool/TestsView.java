@@ -65,8 +65,85 @@ public class TestsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		
+		// sort parameter
+		String sortCode = null;
+		if (params.length == 1)
+		{
+			sortCode = params[0];
+		}
+	
+		// default sort is title ascending
+		AssessmentService.AssessmentsSort sort;
+
+		if (sortCode != null)
+		{
+			if (sortCode.trim().length() == 2)
+			{
+				context.put("sort_column", sortCode.charAt(0));
+				context.put("sort_direction", sortCode.charAt(1));
+
+				// 1 is title
+				if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+				{
+					sort = AssessmentService.AssessmentsSort.title_a;
+				}
+				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+				{
+					sort = AssessmentService.AssessmentsSort.title_d;
+				}
+				// 2 is odate
+				else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
+				{
+					sort = AssessmentService.AssessmentsSort.odate_a;
+				}
+				else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
+				{
+					sort = AssessmentService.AssessmentsSort.odate_d;
+				}
+				// 3 is ddate
+				else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'A'))
+				{
+					sort = AssessmentService.AssessmentsSort.ddate_a;
+				}
+				else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'D'))
+				{
+					sort = AssessmentService.AssessmentsSort.ddate_d;
+				}
+				//4 is active
+				else if ((sortCode.charAt(0) == '4') && (sortCode.charAt(1) == 'A'))
+				{
+					sort = AssessmentService.AssessmentsSort.active_a;
+				}
+				else if ((sortCode.charAt(0) == '4') && (sortCode.charAt(1) == 'D'))
+				{
+					sort = AssessmentService.AssessmentsSort.active_d;
+				}
+				else
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+			}
+			else
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+		}
+		else
+		{
+			// default sort: title ascending
+			sort = AssessmentService.AssessmentsSort.title_a;
+
+			context.put("sort_column", '1');
+			context.put("sort_direction", 'A');
+
+		}		
 		// collect the assessments in this context
-		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext());
+		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext(), sort);
 		context.put("assessments", assessments);
 
 		// value holders for the selection checkboxes
