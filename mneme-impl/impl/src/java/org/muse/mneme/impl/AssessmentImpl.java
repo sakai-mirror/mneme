@@ -64,6 +64,8 @@ public class AssessmentImpl implements Assessment
 
 	protected AssessmentGrading grading = new AssessmentGradingImpl();
 
+	protected Boolean honorPledge = Boolean.FALSE;
+
 	protected String id = null;
 
 	protected Integer numSubmissionsAllowed = null;
@@ -273,6 +275,14 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getRequireHonorPledge()
+	{
+		return this.honorPledge;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public AssessmentReview getReview()
 	{
 		return this.review;
@@ -386,6 +396,15 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setRequireHonorPledge(Boolean honorPledge)
+	{
+		if (honorPledge == null) throw new IllegalArgumentException();
+		this.honorPledge = honorPledge;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setTimeLimit(Long limit)
 	{
 		this.timeLimit = limit;
@@ -444,6 +463,7 @@ public class AssessmentImpl implements Assessment
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
 		this.dates = new AssessmentDatesImpl((AssessmentDatesImpl) other.dates);
 		this.grading = new AssessmentGradingImpl((AssessmentGradingImpl) other.grading);
+		this.honorPledge = other.honorPledge;
 		this.id = other.id;
 		this.numSubmissionsAllowed = other.numSubmissionsAllowed;
 		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts);

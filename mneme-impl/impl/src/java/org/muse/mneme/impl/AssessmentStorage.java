@@ -62,11 +62,13 @@ public interface AssessmentStorage
 	AssessmentImpl getAssessment(String id);
 
 	/**
-	 * Get all the assessments defined in this context.
+	 * Get all the assessments defined in this context, sorted.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @return The list of Assessments defined in the context.
+	 * @param sort
+	 *        The sort specification.
+	 * @return The list of Assessments defined in the context, sorted..
 	 */
 	List<Assessment> getContextAssessments(String context, AssessmentService.AssessmentsSort sort);
 

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
 /**********************************************************************************
@@ -48,7 +49,7 @@
 							</title>
 							<container>
 								<textEdit rows="1" cols="4">
-									<model ref="draw.numQuestions" type="integer" />
+									<model ref="draw.numQuestions" />
 								</textEdit>
 							</container>
 						</column>

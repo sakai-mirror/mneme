@@ -24,6 +24,8 @@ package org.muse.mneme.impl;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
@@ -123,7 +126,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Assessment> getContextAssessments(String context, AssessmentService.AssessmentsSort sort)
+	public List<Assessment> getContextAssessments(String context, final AssessmentService.AssessmentsSort sort)
 	{
 		fakeIt();
 
@@ -136,6 +139,60 @@ public class AssessmentStorageSample implements AssessmentStorage
 				rv.add(new AssessmentImpl(assessment));
 			}
 		}
+
+		// sort
+		Collections.sort(rv, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				int rv = 0;
+				switch (sort)
+				{
+					case active_a:
+					{
+						rv = ((Assessment) arg0).getActive().compareTo(((Assessment) arg1).getActive());
+						break;
+					}
+					case active_d:
+					{
+						rv = -1 * ((Assessment) arg0).getActive().compareTo(((Assessment) arg1).getActive());
+						break;
+					}
+					case title_a:
+					{
+						rv = ((Assessment) arg0).getTitle().compareTo(((Assessment) arg1).getTitle());
+						break;
+					}
+					case title_d:
+					{
+						rv = -1 * ((Assessment) arg0).getTitle().compareTo(((Assessment) arg1).getTitle());
+						break;
+					}
+					case odate_a:
+					{
+						rv = ((Assessment) arg0).getDates().getOpenDate().compareTo(((Assessment) arg1).getDates().getOpenDate());
+						break;
+					}
+					case odate_d:
+					{
+						rv = -1 * ((Assessment) arg0).getDates().getDueDate().compareTo(((Assessment) arg1).getDates().getDueDate());
+						break;
+					}
+					case ddate_a:
+					{
+						rv = ((Assessment) arg0).getTitle().compareTo(((Assessment) arg1).getTitle());
+						break;
+					}
+					case ddate_d:
+					{
+						rv = -1 * ((Assessment) arg0).getTitle().compareTo(((Assessment) arg1).getTitle());
+						break;
+					}
+				}
+
+				return rv;
+			}
+		});
 
 		return rv;
 	}

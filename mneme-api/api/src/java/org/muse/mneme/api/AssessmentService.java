@@ -29,12 +29,13 @@ import java.util.List;
 public interface AssessmentService
 {
 	/**
-	 * Sort options for findPools()
+	 * Sort options for getContextAssessments()
 	 */
 	enum AssessmentsSort
 	{
-		title_a, title_d,odate_a, odate_d, ddate_a, ddate_d, active_a, active_d
+		active_a, active_d, ddate_a, ddate_d, odate_a, odate_d, title_a, title_d
 	}
+
 	/**
 	 * Check if the user is allowed to edit this assessment.
 	 * 
@@ -78,15 +79,6 @@ public interface AssessmentService
 	Integer countAssessments(String context);
 
 	/**
-	 * Get all the assessments for the context.
-	 * 
-	 * @param context
-	 *        The context.
-	 * @return The List <Assessment> of all assessments in the context, or empty if there are none.
-	 */
-	List<Assessment> getContextAssessments(String context, AssessmentsSort sort);
-
-	/**
 	 * Access an assessment by id.
 	 * 
 	 * @param id
@@ -94,6 +86,17 @@ public interface AssessmentService
 	 * @return The assessment object, or null if not found.
 	 */
 	Assessment getAssessment(String id);
+
+	/**
+	 * Get all the assessments for the context, sorted.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @param sort
+	 *        The sort specification.
+	 * @return The List <Assessment> of all assessments in the context, sorteds, or empty if there are none.
+	 */
+	List<Assessment> getContextAssessments(String context, AssessmentsSort sort);
 
 	/**
 	 * Create a new Assessment in the context.

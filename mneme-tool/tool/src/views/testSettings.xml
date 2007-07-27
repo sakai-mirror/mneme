@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
 /**********************************************************************************
@@ -26,13 +27,32 @@
 <interface title="testSettings-title" header="testSettings-header">
 	<container>
 
-		<textEdit title="test-title" model="assessment.title" disabled="TRUE" rows="1" cols="50" />
-
-		<textEdit title="test-timeLimit" rows="1" cols="10">
-			<model type="duration" ref="assessment.timeLimit" concise="TRUE" />
-		</textEdit>
-
-		<textEdit title="test-submitMessage" model="assessment.submitPresentation.text" />
+		<entityDisplay>
+			<rows>
+				<row title="title">
+					<container>
+						<text model="assessment.title" />
+					</container>
+				</row>
+				<row title="id">
+					<container>
+						<text model="assessment.id" />
+					</container>
+				</row>
+				<row title="timeLimit">
+					<container>
+						<textEdit rows="1" cols="10">
+							<model type="duration" ref="assessment.timeLimit" concise="TRUE" />
+						</textEdit>
+					</container>
+				</row>
+				<row title="submitMessage">
+					<container>
+						<textEdit model="assessment.submitPresentation.text" />
+					</container>
+				</row>
+			</rows>
+		</entityDisplay>
 
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="70em">

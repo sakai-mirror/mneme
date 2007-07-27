@@ -172,7 +172,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		if (context == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("getContextAssessments: " + context);
+		if (M_log.isDebugEnabled()) M_log.debug("getContextAssessments: " + context + " " + sort);
 
 		List<Assessment> rv = this.storage.getContextAssessments(context, sort);
 		return rv;

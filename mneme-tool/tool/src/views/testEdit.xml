@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
 /**********************************************************************************
@@ -38,22 +39,36 @@
 			<rows>
 				<row title="test-title">
 					<container>
-						<textEdit model="assessment.title" rows="1" cols="25"/>
+						<textEdit model="assessment.title" rows="1" cols="25" />
 					</container>
 				</row>
 				<row title="test-Id">
 					<container>
-						 <text>	<model ref="assessment.id" /></text>
+						<text model="assessment.id" />
 					</container>
-					</row>	 	
+				</row>
 				<row title="test-history">
-					<container>	
-					<text title="test-history-text">
-            			<model type="userInfo" selector="displayName" ref="assessment.createdBy.UserId" />
-            			<model type="date" ref="assessment.createdBy.date" />            			
-            		</text>	
-            	</container>
-            	</row>
+					<container>
+						<text>
+							<message selector="test-history-text">
+								<model type="userInfo" selector="DISPLAYNAME" ref="assessment.createdBy.UserId" />
+								<model type="date" ref="assessment.createdBy.date" />
+							</message>
+						</text>
+					</container>
+				</row>
+				<row title="type">
+					<container>
+						<selection>
+							<model ref="assessment.type" />
+							<selectionChoices>
+								<selectionChoice value="test" selector="type-test" />
+								<selectionChoice value="assignment" selector="type-assignment" />
+								<selectionChoice value="survey" selector="type-survey" />
+							</selectionChoices>
+						</selection>
+					</container>
+				</row>
 				<row title="open-date">
 					<container>
 						<dateEdit>
@@ -76,26 +91,28 @@
 							<icon icon="/icons/date.png" message="edit-date" />
 							<model ref="assessment.dates.acceptUntilDate" type="date" />
 						</dateEdit>
-						<instructions selector="test-acceptUntilDateMsg"/>	
+						<instructions selector="test-acceptUntilDateMsg" />
 					</container>
 				</row>
 				<row title="test-instructions">
 					<container>
-					<textEdit model="assessment.presentation.text"/>
+						<textEdit model="assessment.presentation.text" />
 					</container>
 				</row>
 				<row>
 					<container>
 						<attachments title="attachments">
-							<model ref="assessment.presentation.attachments" />					
+							<model ref="assessment.presentation.attachments" />
 						</attachments>
 					</container>
-				</row> 
-				<row>
-					<container>				
-						<selection title="honor-pledge" />
-				</container>
-				</row> 
+				</row>
+				<row title="honor-pledge">
+					<container>
+						<selection>
+							<model ref="assessment.requireHonorPledge" />
+						</selection>
+					</container>
+				</row>
 			</rows>
 		</entityDisplay>
 

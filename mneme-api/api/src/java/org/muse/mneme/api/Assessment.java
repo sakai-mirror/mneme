@@ -136,6 +136,13 @@ public interface Assessment
 	Boolean getRandomAccess();
 
 	/**
+	 * Access the require-honor-pledge setting.
+	 * 
+	 * @return TRUE if this assessment requires an "honor pledge" from the user, FALSE if not.
+	 */
+	Boolean getRequireHonorPledge();
+
+	/**
 	 * Access the assessment review settings.
 	 * 
 	 * @return The assessment review settings.
@@ -236,6 +243,14 @@ public interface Assessment
 	 *        TRUE if random question access is supported, FALSE if only linear question access is supported.
 	 */
 	void setRandomAccess(Boolean setting);
+
+	/**
+	 * Set the require-honor-pledge setting.
+	 * 
+	 * @param rationale
+	 *        TRUE if this assessment requires an "honor pledge" from the user, FALSE if not.
+	 */
+	void setRequireHonorPledge(Boolean honorPledge);
 
 	/**
 	 * Set the time limit for taking the assessment (ms).

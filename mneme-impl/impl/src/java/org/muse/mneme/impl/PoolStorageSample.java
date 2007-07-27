@@ -93,7 +93,7 @@ public class PoolStorageSample implements PoolStorage
 			}
 		}
 
-		// TODO: sort
+		// sort
 		Collections.sort(rv, new Comparator()
 		{
 			public int compare(Object arg0, Object arg1)
