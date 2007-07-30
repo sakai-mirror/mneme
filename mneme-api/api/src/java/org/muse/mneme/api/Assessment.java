@@ -169,6 +169,13 @@ public interface Assessment
 	Submission getSubmissionContext();
 
 	/**
+	 * Access the assessment's submission count.
+	 * 
+	 * @return The assessment's submission count.
+	 */
+	SubmissionCount getSubmissionCount();
+
+	/**
 	 * Access the presentation to show after submit.
 	 * 
 	 * @return The presentation to show after submit.
