@@ -211,7 +211,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 		}
 
 		// get all the assessments for this context
-		List<Assessment> assessments = this.assessmentService.getContextAssessments(context, null);
+		List<Assessment> assessments = this.assessmentService.getContextAssessments(context, AssessmentService.AssessmentsSort.title_a);
 
 		// if any assessment is not represented in the submissions we found, add an empty submission for it
 		for (Assessment a : assessments)
