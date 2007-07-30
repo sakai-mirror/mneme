@@ -51,6 +51,9 @@
 				<navigation destination="/tests_delete" title="delete-tests" style="LINK" description="delete-tests-description" submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
 				</navigation>
+				<navigation destination="/test_import_export" title="import-export-tests" style="LINK" description="import-export-tests-description" submit="TRUE">
+					<icon icon="/icons/import_export.png" style="LEFT" />
+				</navigation>
 			</container>
 		</entityActionBar>
 
