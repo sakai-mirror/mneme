@@ -193,7 +193,7 @@
 					<title>
 						<message selector="assessment-innew" />
 					</title>	
-					<model ref="assessment.submissionCounts" tool="sakai.mneme" />/<model ref="assessment.submissionCounts.ungraded" tool="sakai.mneme" />
+					<model ref="assessment.submissionCounts.completed" tool="sakai.mneme" />/<model ref="assessment.submissionCounts.ungraded" tool="sakai.mneme" />
 					<entityNavigations>
 						<navigation>
 							<destination template="/grade_class/{0}">
