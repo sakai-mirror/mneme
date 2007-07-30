@@ -68,11 +68,12 @@ public class TestsView extends ControllerImpl
 		
 		// sort parameter
 		String sortCode = null;
-		if (params.length == 1)
+
+		if (params.length == 3)
 		{
-			sortCode = params[0];
+			sortCode = params[2];
 		}
-	
+
 		// default sort is title ascending
 		AssessmentService.AssessmentsSort sort;
 
@@ -142,6 +143,7 @@ public class TestsView extends ControllerImpl
 			context.put("sort_direction", 'A');
 
 		}		
+		
 		// collect the assessments in this context
 		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext(), sort);
 		context.put("assessments", assessments);
