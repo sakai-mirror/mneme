@@ -53,7 +53,7 @@
 		<!--entity actions-->
 		<entityActionBar width="100%">
 			<container>
-				<navigation destination="/pools_add" title="add-pool-title"
+				<navigation destination="/pool_properties/add" title="add-pool-title"
 					style="LINK" description="add-pool-description">
 					<icon icon="/icons/add.png" style="LEFT" />
 				</navigation>
