@@ -34,6 +34,8 @@ import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.DrawPart;
+import org.muse.mneme.api.ManualPart;
 import org.sakaiproject.util.Web;
 
 /**
@@ -116,7 +118,7 @@ public class TestEditView extends ControllerImpl
 		}
 
 		String assessmentId = params[2];
-
+		System.out.println("test id " + assessmentId);
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
@@ -146,7 +148,23 @@ public class TestEditView extends ControllerImpl
 		// commit the save
 		try
 		{
-			this.assessmentService.saveAssessment(assessment);
+			//save assessment properties
+			this.assessmentService.saveAssessment(assessment);	
+			
+			if (destination.equals("DRAW"))
+			{
+				DrawPart dPart=assessment.getParts().addDrawPart();
+				this.assessmentService.saveAssessment(assessment);
+				//create url for draw
+				destination = "/part_edit/" + assessment.getId()+"/" + dPart.getId();			
+			}
+			else if (destination.equals("MANUAL"))
+			{
+				ManualPart mPart=assessment.getParts().addManualPart();
+				this.assessmentService.saveAssessment(assessment);	
+				//create url for manual
+				destination = "/part_edit/" + assessment.getId()+"/" + mPart.getId();
+			}				
 		}
 		catch (AssessmentPermissionException e)
 		{

@@ -121,10 +121,10 @@
 				<!-- entity actions -->
 				<entityActionBar width="50%">
 					<container>
-						<navigation destination="/part_edit" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
+						<navigation destination="DRAW" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
 							<icon icon="/icons/hat_red.png" style="LEFT" />
 						</navigation>
-						<navigation destination="/part_edit" title="manual-draw" style="LINK" description="manual-draw-description" submit="TRUE">
+						<navigation destination="MANUAL" title="manual-draw" style="LINK" description="manual-draw-description" submit="TRUE">
 							<icon icon="/icons/hand_select.png" style="LEFT" />
 						</navigation>
 						<navigation destination="" title="delete-part" style="LINK" description="part-delete-description" submit="TRUE">

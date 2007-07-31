@@ -241,9 +241,27 @@ public class AssessmentStorageSample implements AssessmentStorage
 			}
 			assessment.initId("a" + Long.toString(id));
 		}
-
+		
 		// TODO: part ids!
-
+		
+		if(assessment.getParts() != null && assessment.getParts().getSize() != 0)
+		{
+			int totalParts = assessment.getParts().getSize();
+			List aParts = assessment.getParts().getParts();
+			for(int i=0; i < totalParts; i++)
+			{
+				if(((PartImpl)aParts.get(i)).getId() == null)
+				{
+					long id = 0;
+					synchronized (this.idGenerator)
+					{
+						id = this.nextId;
+						this.nextId++;
+					}
+					((PartImpl)aParts.get(i)).initId("p" + Long.toString(id));
+				}
+			}
+		}
 		this.assessments.put(assessment.getId(), new AssessmentImpl(assessment));
 	}
 
