@@ -24,18 +24,75 @@
  **********************************************************************************/
 -->
 
-<interface title="partEdit-title" header="partEdit-header">
+<interface title="partEdit-title">
+<!--mode bar-->
+	<modeBar>
+		<container>
+			<navigation destination="/tests"
+				title="test-manager-nav-title" style="LINK"
+				accessKey="test-manager-nav-access-key"
+				description="test-manager-nav-description" disabled="TRUE"/>
+			<navigation destination="/grades" title="grading-nav-title"
+				style="LINK" accessKey="grading-nav-access-key"
+				description="grading-nav-description" />
+			<navigation destination="/pools" title="pools-nav-title"
+				style="LINK" accessKey="pools-nav-access-key"
+				description="pools-nav-description"/>
+			<navigation destination="/list"
+				title="student-view-nav-title" style="LINK"
+				accessKey="student-view-nav-access-key"
+				description="student-view-nav-description" />
+		</container>
+	</modeBar>
+<header>
+		<message selector="partEdit-header">
+			<model type="icon" icon="/icons/edit.png" />
+			<model ref="assessment.title" />
+		</message>
+</header>
+
 	<container>
+	<entityDisplay>
+			<rows>
+				<row title="part-title">
+					<container>
+						<textEdit model="part.title" rows="1" cols="25"/>				
+					</container>
+				</row>
+				<row title="part-instructions">
+					<container>
+						<textEdit model="part.presentation.text" />
+					</container>
+					</row>
+			</rows>
+		</entityDisplay>
 
-		<section>
+		<section title="part-pools-msg">
+		<container>
+		<entityActionBar>
 			<container>
-				<textEdit title="part-title" model="part.title" />
-				<textEdit title="part-instructions" model="part.presentation.text" />
+			<navigation destination="/" title="search-title"
+					style="LINK" description="search-description">
+					<icon icon="/icons/search.png" style="LEFT" />
+				</navigation>
+				<navigation destination="/" style="LINK"
+					description="gotofirst-description">
+					<icon icon="/icons/first.png" style="LEFT" />
+				</navigation>
+				<navigation destination="/" style="LINK"
+					description="gotoprev-description">
+					<icon icon="/icons/previous.png" style="LEFT" />
+				</navigation>
+				<navigation destination="/" style="LINK"
+					description="gotonext-description">
+					<icon icon="/icons/next.png" style="LEFT" />
+				</navigation>
+				<navigation destination="/" style="LINK"
+					description="gotolast-description">
+					<icon icon="/icons/last.png" style="LEFT" />
+				</navigation>
 			</container>
-		</section>
-
-		<section>
-			<container>
+		</entityActionBar>			
 
 				<!-- the list of ALL pools, with those selected for this part checked and their "draw" filled in -->
 				<entityList style="FLAT">
@@ -58,6 +115,30 @@
 								<message selector="pool-subject" />
 							</title>
 							<model ref="draw.pool.subject" />
+							<sort>
+								<active>
+									<compareDecision model="sort_column"
+										constant="0" />
+								</active>
+								<direction>
+									<compareDecision model="sort_direction"
+										constant="A" />
+								</direction>
+								<asc icon="/icons/sortascending.gif">
+									<message selector="asc" />
+									<destination template="/part_edit/{0}/{1}/0A" >
+										<model ref="assessment.id" />
+										<model ref="part.id" />
+									</destination>
+								</asc>
+								<desc icon="/icons/sortdescending.gif">
+									<message selector="desc" />
+									<destination template="/part_edit/{0}/{1}/0D" >
+										<model ref="assessment.id" />
+										<model ref="part.id" />
+									</destination>
+								</desc>
+							</sort>
 						</modelColumn>
 						<modelColumn>
 							<title>
