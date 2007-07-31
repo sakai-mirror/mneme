@@ -118,7 +118,6 @@ public class TestEditView extends ControllerImpl
 		}
 
 		String assessmentId = params[2];
-		System.out.println("test id " + assessmentId);
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
