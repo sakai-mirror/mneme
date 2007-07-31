@@ -24,7 +24,7 @@ package org.muse.mneme.api;
 import java.util.Date;
 
 /**
- * ReviewOpAssessmentReviewtions contain the details of how submissions can be reviewed.
+ * AssessmentReview contain the details of how submissions can be reviewed.
  */
 public interface AssessmentReview
 {
