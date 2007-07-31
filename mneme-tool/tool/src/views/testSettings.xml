@@ -68,8 +68,68 @@
 							</selectionChoices>
 						</selection>
 					</container>
+				</row>	
+				<row title="layout">
+					<container>
+						<selection orientation="VERTICAL">
+							<model ref="assessment.questionGrouping" />
+							<selectionChoices>
+								<selectionChoice value="question" selector="type-question" />
+								<selectionChoice value="part" selector="type-part" />
+								<selectionChoice value="assessment" selector="type-assessment" />
+							</selectionChoices>
+						</selection>
+					</container>
 				</row>		
-             			
+                <row title="partSettings">
+					<container>
+						<selection title="showEachPart">
+							<model ref="assessment.parts.showPresentation" />
+							<selectionChoices>
+								<selectionChoice value="true" selector="type-yes" />
+								<selectionChoice value="false" selector="type-no" />
+							</selectionChoices>
+						</selection>
+					</container>
+				</row>		
+                <row>
+					<container>
+						<selection title="numbering">
+							<model ref="assessment.parts.continuousNumbering" />
+							<selectionChoices>
+								<selectionChoice value="true" selector="type-continuous" />
+								<selectionChoice value="false" selector="type-restart" />
+							</selectionChoices>
+						</selection>
+					</container>
+				</row>	
+                <row title="reviewOptions">
+					<container>
+						<selection>
+							<model ref="assessment.review.timing" />
+							<selectionChoices>
+								<selectionChoice value="submitted" selector="type-submitted" />
+								<selectionChoice value="graded" selector="type-graded" />
+								<selectionChoice value="date" selector="type-date" />
+								<selectionChoice value="never" selector="type-never" />
+							</selectionChoices>
+						</selection>
+					</container>
+				</row>																		
+                <row>	
+					<container>
+						<selection title="showAnswerKey">
+							<model ref="assessment.review.showCorrectAnswer" />
+						</selection>
+					</container>
+				</row>         
+				<row>	
+					<container>
+						<selection title="showFeedback">
+							<model ref="assessment.review.showFeedback" />
+						</selection>
+					</container>
+				</row>      
 				<row title="gradeOptions">
 					<container>
 						<selection title="studentid" orientation="VERTICAL">
