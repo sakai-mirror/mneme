@@ -34,7 +34,13 @@
 						<text model="assessment.title" />
 					</container>
 				</row>
-				<row title="nav">
+			
+				<row title="id">
+					<container>
+						<text model="assessment.id" />
+					</container>
+				</row>
+	            <row title="nav">
 					<container>
 						<selection orientation="VERTICAL">
 							<model ref="assessment.randomAccess" />
@@ -44,12 +50,7 @@
 							</selectionChoices>
 						</selection>
 					</container>
-				</row>
-				<row title="id">
-					<container>
-						<text model="assessment.id" />
-					</container>
-				</row>
+				</row>				
 				<row title="timeLimit">
 				<container>
 						<dateEdit>
@@ -83,7 +84,11 @@
 				</row>		
                 <row title="partSettings">
 					<container>
-						<selection title="showEachPart">
+					  <text>
+					  <message selector="showEachPart">
+					  </message>
+				       </text>
+						<selection>
 							<model ref="assessment.parts.showPresentation" />
 							<selectionChoices>
 								<selectionChoice value="true" selector="type-yes" />
@@ -94,7 +99,11 @@
 				</row>		
                 <row>
 					<container>
-						<selection title="numbering">
+					 <text>
+					  <message selector="numbering">
+					  </message>
+				       </text>
+						<selection>
 							<model ref="assessment.parts.continuousNumbering" />
 							<selectionChoices>
 								<selectionChoice value="true" selector="type-continuous" />
@@ -105,7 +114,7 @@
 				</row>	
                 <row title="reviewOptions">
 					<container>
-						<selection>
+						<selection orientation="VERTICAL">
 							<model ref="assessment.review.timing" />
 							<selectionChoices>
 								<selectionChoice value="submitted" selector="type-submitted" />
@@ -132,7 +141,11 @@
 				</row>      
 				<row title="gradeOptions">
 					<container>
-						<selection title="studentid" orientation="VERTICAL">
+					<text>
+					<message selector="studentid">
+					</message>
+				    </text>
+						<selection orientation="VERTICAL">
 							<model ref="assessment.grading.showIdentities" />
 							<selectionChoices>
 								<selectionChoice value="true" selector="type-yes" />
@@ -143,7 +156,11 @@
 				</row>
 				<row>	
 					<container>
-						<selection title="releasegrades" orientation="VERTICAL">
+					<text>
+					<message selector="releasegrades">
+					</message>
+				    </text>
+						<selection orientation="VERTICAL">
 							<model ref="assessment.grading.autoRelease" />
 							<selectionChoices>
 								<selectionChoice value="true" selector="type-auto" />
