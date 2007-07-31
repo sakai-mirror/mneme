@@ -33,16 +33,16 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
-import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.Part;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SubmissionService;
-import org.muse.mneme.api.AssessmentService;
 
 /**
  * QuestionStorageSample defines a sample storage for questions.
@@ -56,7 +56,9 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 	protected Object idGenerator = new Object();
 
-	protected long nextId = 100;
+	protected long nextAssessmentId = 100;
+
+	protected long nextPartId = 100;
 
 	protected PoolService poolService = null;
 
@@ -236,32 +238,27 @@ public class AssessmentStorageSample implements AssessmentStorage
 			long id = 0;
 			synchronized (this.idGenerator)
 			{
-				id = this.nextId;
-				this.nextId++;
+				id = this.nextAssessmentId;
+				this.nextAssessmentId++;
 			}
 			assessment.initId("a" + Long.toString(id));
 		}
-		
-		// TODO: part ids!
-		
-		if(assessment.getParts() != null && assessment.getParts().getSize() != 0)
+
+		// assign part ids
+		for (Part part : assessment.getParts().getParts())
 		{
-			int totalParts = assessment.getParts().getSize();
-			List aParts = assessment.getParts().getParts();
-			for(int i=0; i < totalParts; i++)
+			if (part.getId() == null)
 			{
-				if(((PartImpl)aParts.get(i)).getId() == null)
+				long id = 0;
+				synchronized (this.idGenerator)
 				{
-					long id = 0;
-					synchronized (this.idGenerator)
-					{
-						id = this.nextId;
-						this.nextId++;
-					}
-					((PartImpl)aParts.get(i)).initId("p" + Long.toString(id));
+					id = this.nextPartId;
+					this.nextPartId++;
 				}
+				((PartImpl) part).initId("p" + Long.toString(id));
 			}
 		}
+
 		this.assessments.put(assessment.getId(), new AssessmentImpl(assessment));
 	}
 
