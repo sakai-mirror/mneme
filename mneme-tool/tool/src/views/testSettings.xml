@@ -34,18 +34,71 @@
 						<text model="assessment.title" />
 					</container>
 				</row>
+				<row title="nav">
+					<container>
+						<selection orientation="VERTICAL">
+							<model ref="assessment.randomAccess" />
+							<selectionChoices>
+								<selectionChoice value="true" selector="type-flex" />
+								<selectionChoice value="false" selector="type-strict" />
+							</selectionChoices>
+						</selection>
+					</container>
+				</row>
 				<row title="id">
 					<container>
 						<text model="assessment.id" />
 					</container>
 				</row>
 				<row title="timeLimit">
-					<container>
-						<textEdit rows="1" cols="10">
-							<model type="duration" ref="assessment.timeLimit" concise="TRUE" />
-						</textEdit>
+				<container>
+						<dateEdit>
+							<icon icon="/icons/date.png" message="edit-date" />
+							<model ref="assessment.timeLimit" type="date" />
+						</dateEdit>
 					</container>
 				</row>
+                <row title="allowTries">
+					<container>
+						<selection orientation="VERTICAL">
+							<model ref="assessment.numSubmissionsAllowed" />
+							<selectionChoices>
+								<selectionChoice value="0" selector="type-unlimited" />
+								<selectionChoice value="10" selector="type-number" />
+							</selectionChoices>
+						</selection>
+					</container>
+				</row>		
+				<row title="gradeOptions">
+					<container>
+						<selection title="studentid" orientation="VERTICAL">
+							<model ref="assessment.grading.showIdentities" />
+							<selectionChoices>
+								<selectionChoice value="true" selector="type-yes" />
+								<selectionChoice value="false" selector="type-no" />
+							</selectionChoices>
+						</selection>
+					</container>
+				</row>
+				<row>	
+					<container>
+						<selection title="releasegrades" orientation="VERTICAL">
+							<model ref="assessment.grading.autoRelease" />
+							<selectionChoices>
+								<selectionChoice value="true" selector="type-auto" />
+								<selectionChoice value="false" selector="type-manual" />
+							</selectionChoices>
+						</selection>
+					</container>
+				</row>
+				<row>	
+					<container>
+						<selection title="sendgbook">
+							<model ref="assessment.grading.gradebookIntegration" />
+						</selection>
+					</container>
+				</row>
+               		
 				<row title="submitMessage">
 					<container>
 						<textEdit model="assessment.submitPresentation.text" />
