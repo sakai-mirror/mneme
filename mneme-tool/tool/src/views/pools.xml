@@ -187,22 +187,19 @@
 					<title>
 						<message selector="pool-action" />
 					</title>
-					<model type="icon" icon="/icons/edit.png" />
-					<entityNavigations>
-						<navigation>
+					<navigations>
+						<navigation style="LINK">
+							<icon icon="/icons/edit.png" style="LEFT" />
 							<destination template="/pool_properties/edit/{0}">
 								<model ref="pool.id" />
 							</destination>
 						</navigation>
-					</entityNavigations>
-					<model type="icon" icon="/icons/copy.png" />
-					<entityNavigations>
-						<navigation>
-							<destination template="/pool_properties/edit/{0}">
-								<model ref="pool.id" />
+						<navigation style="LINK">
+							<icon icon="/icons/copy.png" style="RIGHT" />
+							<destination template="/">
 							</destination>
 						</navigation>
-					</entityNavigations>
+					</navigations>
 				</modelColumn>
 			</columns>
 		</entityList>
