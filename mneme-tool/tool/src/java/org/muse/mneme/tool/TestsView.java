@@ -180,10 +180,13 @@ public class TestsView extends ControllerImpl
 			return;
 		}
 
+//		 throw new IllegalArgumentException();
+		// for the selected tests to delete
+		Values values = this.uiService.newValues();
+		context.put("ids", values);
 		// read the form
 		String destination = uiService.decode(req, context);
-
-		// for an add
+       // for an add
 		if (destination.startsWith("/test_edit"))
 		{
 			// create a new test
@@ -207,10 +210,51 @@ public class TestsView extends ControllerImpl
 			}
 		}
 
-		// TODO: delete
+		if (destination != null && (destination.trim().equalsIgnoreCase("/tests_delete")))
+		{
+			String[] selectedTestIds = values.getValues();
+			// delete the tests with ids
+			StringBuffer path = new StringBuffer();
+			String separator = "/";
 
+			if (selectedTestIds != null && (selectedTestIds.length > 0))
+			{
+				path.append(destination);
+				path.append(separator);
+
+				// for sort code
+				if (params.length == 3)
+				{
+					path.append(params[2]);
+					path.append(separator);
+				}
+				else
+				{
+					// default sort - title ascending
+					path.append("1A");
+					path.append(separator);
+				}
+
+				path.append(selectedTestIds[0]);
+				for (int i = 1; i < selectedTestIds.length; i++)
+				{
+					path.append(separator);
+					path.append(selectedTestIds[i]);
+				}
+
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
+				return;
+			}
+		}
+
+		if (params.length == 3)
+			destination = "/tests/" + params[2];
+		else
+			destination = "/tests/";
+
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 		// redirect to error
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+		//res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 	}
 
 	/**

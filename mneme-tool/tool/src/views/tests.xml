@@ -72,7 +72,7 @@
 				</modelColumn>
 				<selectionColumn multiple="TRUE">
 					<value>
-						<model ref="assessment.id" />
+						<model type="text" ref="assessment.id" />
 					</value>
 					<model ref="ids.values" />
 				</selectionColumn>
