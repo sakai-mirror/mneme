@@ -25,7 +25,7 @@
 -->
 
 <interface>
-!--mode bar-->
+<!--mode bar-->
 	<modeBar>
 		<container>
 			<navigation destination="/tests"
