@@ -53,8 +53,9 @@
 		<!--entity actions-->
 		<entityActionBar width="100%">
 			<container>
-				<navigation destination="/pool_properties/add" title="add-pool-title"
-					style="LINK" description="add-pool-description">
+				<navigation destination="/pool_properties"
+					title="add-pool-title" style="LINK"
+					description="add-pool-description">
 					<icon icon="/icons/add.png" style="LEFT" />
 				</navigation>
 				<navigation destination="/" title="add-question-title"
@@ -190,14 +191,14 @@
 					<navigations>
 						<navigation style="LINK">
 							<icon icon="/icons/edit.png" style="LEFT" />
-							<destination template="/pool_properties/edit/{0}">
+							<destination
+								template="/pool_properties/{0}">
 								<model ref="pool.id" />
 							</destination>
 						</navigation>
 						<navigation style="LINK">
 							<icon icon="/icons/copy.png" style="RIGHT" />
-							<destination template="/">
-							</destination>
+							<destination template="/"></destination>
 						</navigation>
 					</navigations>
 				</modelColumn>
