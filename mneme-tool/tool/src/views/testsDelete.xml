@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
+
+<!--
+	/**********************************************************************************
+	* $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/views/testsDelete.xml $
+	* $Id: poolsDelete.xml 10845 2007-07-27 03:29:56Z ggolden@umich.edu $
+	***********************************************************************************
+	*
+	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* 
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	* 
+	*      http://www.apache.org/licenses/LICENSE-2.0
+	* 
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*
+	**********************************************************************************/
+-->
+
+<interface title="tests-delete-confirm-title"
+	header="tests-delete-confirm-header">
+	<!--mode bar-->
+	<modeBar>
+		<container>
+			<navigation destination="/list"
+				title="test-manager-nav-title" style="LINK"
+				accessKey="test-manager-nav-access-key"
+				description="test-manager-nav-description" />
+			<navigation destination="/grading" title="grading-nav-title"
+				style="LINK" accessKey="grading-nav-access-key"
+				description="grading-nav-description" />
+			<navigation destination="/tests" title="tests-nav-title"
+				style="LINK" accessKey="tests-nav-access-key"
+				description="tests-nav-description" disabled="TRUE" />
+			<navigation destination="/studentview"
+				title="student-view-nav-title" style="LINK"
+				accessKey="student-view-nav-access-key"
+				description="student-view-nav-description" />
+		</container>
+	</modeBar>
+	<container>
+		<!--navigation-->
+		<navigationBar width="100%" />
+
+		<text>
+			<message selector="test-delete-message1" />
+		</text>
+
+		<!-- the list of tests -->
+		<entityList style="FORM">
+			<iterator name="test" model="tests" />
+			<emptyTitle>
+				<message selector="no-tests" />
+			</emptyTitle>
+			<columns>
+				<modelColumn>
+					<model ref="test.title" />
+				</modelColumn>
+			</columns>
+
+		</entityList>
+
+
+		<!--text>
+			<message selector="test-delete-alert" />
+			</text-->
+		<alert selector="test-delete-alert" />
+		<text>
+			<message selector="test-delete-message2" />
+		</text>
+
+		<!--navigation-->
+		<navigationBar width="100%">
+			<container>
+				<navigation destination="/tests_delete"
+					title="continue-title" style="BUTTON" accessKey="continue-access"
+					description="continue-description" submit="TRUE">
+				</navigation>
+				<navigation title="cancel" style="BUTTON"
+					accessKey="cancel-access" description="cancel-description">
+					<icon icon="/icons/cancel.gif" style="LEFT" />
+					<destination template="/tests/{0}">
+						<model ref="sortcode" />
+					</destination>
+				</navigation>
+			</container>
+		</navigationBar>
+	</container>
+</interface>
