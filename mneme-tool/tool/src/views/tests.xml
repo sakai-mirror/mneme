@@ -189,20 +189,31 @@
 					</sort>					
 					<model ref="assessment.active" delegate="FormatAssesmentActive" tool="sakai.mneme" />
 				</modelColumn>
-	            <modelColumn>
-					<title>
-						<message selector="assessment-innew" />
-					</title>	
-					<model ref="assessment.submissionCount.completed" tool="sakai.mneme" />/<model ref="assessment.submissionCount.ungraded" tool="sakai.mneme" />
-					<entityNavigations>
-						<navigation>
-							<destination template="/grade_class/{0}">
-								<model ref="assessment.id" />
-							</destination>
-						</navigation>
-					</entityNavigations>
-				</modelColumn>				
-				<modelColumn>
+	      		<column>
+	            <title>
+	              <message selector="assessment-innew" />
+	            </title>
+	            <container>
+	              <navigation style="LINK">
+        	       <title>
+        	       <message model="assessment.submissionCount.completed" />
+        	       </title>
+		            <destination template="/grade_class/{0}">
+	        	      <model ref="assessment.id" />
+		            </destination>
+	              </navigation>
+	              <text selector="nav-divider" />
+	              <navigation style="LINK">
+	               <title>
+        	       <message model="assessment.submissionCount.ungraded" />
+        	       </title>
+	                <destination template="/grade_class/{0}">
+	                  <model ref="assessment.id" />
+	                </destination>
+	              </navigation>
+	          </container>  
+              </column>
+			  <modelColumn>
 					<title>
 						<message selector="assessment-action" />
 					</title>
