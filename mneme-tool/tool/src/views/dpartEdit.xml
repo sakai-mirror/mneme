@@ -56,7 +56,9 @@
 			<rows>
 				<row title="part-title">
 					<container>
-						<textEdit model="part.title" rows="1" cols="25"/>				
+						<textEdit rows="1" cols="25" >
+							<model ref="part.title" missing="no-title"/>
+						</textEdit>				
 					</container>
 				</row>
 				<row title="part-instructions">
@@ -96,6 +98,9 @@
 
 				<!-- the list of ALL pools, with those selected for this part checked and their "draw" filled in -->
 				<entityList style="FLAT">
+				<emptyTitle>
+						<message selector="no-pools" />
+					</emptyTitle>
 					<iterator name="draw">
 						<model ref="draws" indexRef="pool.id" />
 					</iterator>
@@ -145,6 +150,30 @@
 								<message selector="pool-title" />
 							</title>
 							<model ref="draw.pool.title" />
+							<sort>
+								<active>
+									<compareDecision model="sort_column"
+										constant="1" />
+								</active>
+								<direction>
+									<compareDecision model="sort_direction"
+										constant="A" />
+								</direction>
+								<asc icon="/icons/sortascending.gif">
+									<message selector="asc" />
+									<destination template="/part_edit/{0}/{1}/1A" >
+										<model ref="assessment.id" />
+										<model ref="part.id" />
+									</destination>
+								</asc>
+								<desc icon="/icons/sortdescending.gif">
+									<message selector="desc" />
+									<destination template="/part_edit/{0}/{1}/1D" >
+										<model ref="assessment.id" />
+										<model ref="part.id" />
+									</destination>
+								</desc>
+							</sort>
 						</modelColumn>
 						<modelColumn>
 							<title>
