@@ -58,7 +58,9 @@
 			<rows>
 				<row title="test-title">
 					<container>
-						<textEdit model="assessment.title" rows="1" cols="25" />
+						<textEdit rows="1" cols="25" >
+							<model ref="assessment.title" missing="no-title"/>
+						</textEdit>
 					</container>
 				</row>
 				<row title="test-Id">
