@@ -55,7 +55,7 @@
 			<container>
 				<navigation destination="/pool_properties"
 					title="add-pool-title" style="LINK"
-					description="add-pool-description">
+					description="add-pool-description" submit="TRUE">
 					<icon icon="/icons/add.png" style="LEFT" />
 				</navigation>
 				<navigation destination="/" title="add-question-title"

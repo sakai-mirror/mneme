@@ -46,14 +46,29 @@
 	</modeBar>
 	<container>
 	
+		<entityDisplay>
+			<rows>
+				<row title="pool-id">
+					<container>
+						<textEdit model="pool.id" rows="1" cols="25" readOnly="TRUE"/>
+					</container>
+				</row>
+				<row title="pool-title">
+					<container>
+						<textEdit model="pool.title" rows="1" cols="25" />
+					</container>
+				</row>
+			</rows>
+		</entityDisplay>
+		
 	
-		<!--navigation-->
+		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation destination="/pools"
+				<navigation destination="/pool_properties"
 					title="save-title" style="BUTTON" accessKey="save-access"
-					description="save-description" submit="FALSE">
-					<icon icon="/icons/save.png" style="LEFT" />
+					description="save-description" submit="TRUE">
+					<icon icon="/icons/save.png" style="LEFT"/>
 				</navigation>
 				<navigation destination="/pools" title="cancel" style="BUTTON"
 					accessKey="cancel-access" description="cancel-description">

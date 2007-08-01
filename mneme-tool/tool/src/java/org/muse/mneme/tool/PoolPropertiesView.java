@@ -30,11 +30,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
-import org.sakaiproject.tool.api.SessionManager;
-import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.Web;
 
 /**
  * 
@@ -47,36 +45,16 @@ public class PoolPropertiesView extends ControllerImpl
 	/** Pool Service */
 	protected PoolService poolService = null;
 
-	/** tool manager */
-	protected ToolManager toolManager = null;
-
-	/** Dependency: SessionManager */
-	protected SessionManager sessionManager = null;
-
 	/**
 	 * {@inheritDoc}
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// if (params.length < 2) throw new IllegalArgumentException();
-		try
-		{
-			if (params.length == 2)
-			{
-				Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId());
-				context.put("pool", newPool);
-			}
-			else if (params.length == 3)
-			{
-				Pool pool = this.poolService.getPool(params[2]);
-				context.put("pool", pool);
-			}
-		}
-		catch (AssessmentPermissionException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		if (params.length < 3) throw new IllegalArgumentException();
+
+		Pool pool = this.poolService.getPool(params[2]);
+		context.put("pool", pool);
+
 		// render
 		uiService.render(ui, context);
 
@@ -87,7 +65,11 @@ public class PoolPropertiesView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		throw new IllegalArgumentException();
+		// throw new IllegalArgumentException();
+		String destination = this.uiService.decode(req, context);
+
+		destination = "/pools/";
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 
 	}
 
@@ -98,24 +80,6 @@ public class PoolPropertiesView extends ControllerImpl
 	public void setPoolService(PoolService poolService)
 	{
 		this.poolService = poolService;
-	}
-
-	/**
-	 * @param toolManager
-	 *        the toolManager to set
-	 */
-	public void setToolManager(ToolManager toolManager)
-	{
-		this.toolManager = toolManager;
-	}
-
-	/**
-	 * @param sessionManager
-	 *        the sessionManager to set
-	 */
-	public void setSessionManager(SessionManager sessionManager)
-	{
-		this.sessionManager = sessionManager;
 	}
 
 }

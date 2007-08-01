@@ -34,6 +34,8 @@ import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
@@ -46,6 +48,12 @@ public class PoolsView extends ControllerImpl
 
 	/** Assessment service. */
 	protected PoolService poolService = null;
+
+	/** tool manager */
+	protected ToolManager toolManager = null;
+
+	/** Dependency: SessionManager */
+	protected SessionManager sessionManager = null;
 
 	/**
 	 * Shutdown.
@@ -124,10 +132,17 @@ public class PoolsView extends ControllerImpl
 
 		}
 
-		// collect the pools to show
-		List<Pool> pools = this.poolService.findPools(null, sort, null);
-		context.put("pools", pools);
-
+		try
+		{
+			// collect the pools to show
+			List<Pool> pools = this.poolService.findPools(null, sort, null);
+			context.put("pools", pools);
+		}
+		catch (Exception e)
+		{
+			if (M_log.isErrorEnabled()) M_log.error(e.toString());
+			e.printStackTrace();
+		}
 		// for the checkboxes
 		Values values = this.uiService.newValues();
 		context.put("poolids", values);
@@ -160,38 +175,57 @@ public class PoolsView extends ControllerImpl
 
 		String[] selectedPoolIds = values.getValues();
 
-		if (destination != null && (destination.trim().equalsIgnoreCase("/pools_delete")))
+		if (destination != null)
 		{
-			// delete the pools with ids
-			StringBuffer path = new StringBuffer();
-			String separator = "/";
-			if (selectedPoolIds != null && (selectedPoolIds.length > 0))
+			if (destination.trim().equalsIgnoreCase("/pools_delete"))
 			{
-				path.append(destination);
-				path.append(separator);
-
-				// for sort code
-				if (params.length == 3)
+				// delete the pools
+				if (selectedPoolIds != null && (selectedPoolIds.length > 0))
 				{
-					path.append(params[2]);
-					path.append(separator);
-				}
-				else
-				{
-					// default sort - title ascending
-					path.append("1A");
-					path.append(separator);
-				}
+					StringBuffer path = new StringBuffer();
+					String separator = "/";
 
-				path.append(selectedPoolIds[0]);
-				for (int i = 1; i < selectedPoolIds.length; i++)
-				{
-					path.append(separator);
-					path.append(selectedPoolIds[i]);
-				}
+					path.append(destination);
 
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
-				return;
+					// for sort code
+					if (params.length == 3)
+					{
+						path.append(separator);
+						path.append(params[2]);
+					}
+					else
+					{
+						// default sort - title ascending
+						path.append(separator);
+						path.append("1A");
+					}
+
+					for (String selectedPoolId : selectedPoolIds)
+					{
+						path.append(separator);
+						path.append(selectedPoolId);
+					}
+
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
+					return;
+				}
+			}
+			else if (destination.trim().equalsIgnoreCase("/pool_properties"))
+			{
+				try
+				{
+					// create new pool and redirect to pool properties
+					Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId());
+					this.poolService.savePool(newPool, toolManager.getCurrentPlacement().getContext());
+
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination + "/" + newPool.getId())));
+					return;
+				}
+				catch (Exception e)
+				{
+					if (M_log.isErrorEnabled()) M_log.error(e.toString());
+					e.printStackTrace();
+				}
 			}
 		}
 
@@ -212,5 +246,23 @@ public class PoolsView extends ControllerImpl
 	public void setPoolService(PoolService service)
 	{
 		this.poolService = service;
+	}
+	
+	/**
+	 * @param sessionManager
+	 *        the sessionManager to set
+	 */
+	public void setSessionManager(SessionManager sessionManager)
+	{
+		this.sessionManager = sessionManager;
+	}
+
+	/**
+	 * @param toolManager
+	 *        the toolManager to set
+	 */
+	public void setToolManager(ToolManager toolManager)
+	{
+		this.toolManager = toolManager;
 	}
 }
