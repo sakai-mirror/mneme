@@ -86,6 +86,7 @@ public class PoolImpl implements Pool
 		// two PoolImpls are equals if they have the same id
 		if (this == obj) return true;
 		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
+		if ((this.id == null) || (((PoolImpl) obj).id == null)) return false;
 		return this.id.equals(((PoolImpl) obj).id);
 	}
 
@@ -166,7 +167,7 @@ public class PoolImpl implements Pool
 	 */
 	public int hashCode()
 	{
-		return getId().hashCode();
+		return getId() == null ? "null".hashCode() : this.getId().hashCode();
 	}
 
 	/**

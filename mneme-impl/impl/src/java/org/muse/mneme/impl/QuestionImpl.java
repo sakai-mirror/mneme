@@ -266,6 +266,7 @@ public class QuestionImpl implements Question
 		// two PartImpls are equals if they have the same id
 		if (this == obj) return true;
 		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
+		if ((this.id == null) || (((QuestionImpl) obj).id == null)) return false;
 		return this.id.equals(((QuestionImpl) obj).id);
 	}
 
@@ -379,7 +380,7 @@ public class QuestionImpl implements Question
 	 */
 	public int hashCode()
 	{
-		return this.id.hashCode();
+		return this.id == null ? "null".hashCode() : this.id.hashCode();
 	}
 
 	/**

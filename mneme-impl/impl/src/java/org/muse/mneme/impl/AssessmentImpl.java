@@ -57,7 +57,7 @@ public class AssessmentImpl implements Assessment
 
 	protected Boolean active = Boolean.FALSE;
 
-	protected String context = null;
+	protected String context = "";
 
 	protected Attribution createdBy = new AttributionImpl();
 
@@ -95,7 +95,7 @@ public class AssessmentImpl implements Assessment
 
 	protected Long timeLimit = null;
 
-	protected String title = null;
+	protected String title = "";
 
 	protected AssessmentType type = AssessmentType.test;
 
@@ -129,6 +129,7 @@ public class AssessmentImpl implements Assessment
 		// two AssessmentImpls are equals if they have the same id
 		if (this == obj) return true;
 		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
+		if ((this.id == null) || (((AssessmentImpl) obj).id == null)) return false;
 		return this.id.equals(((AssessmentImpl) obj).id);
 	}
 
@@ -349,7 +350,7 @@ public class AssessmentImpl implements Assessment
 	 */
 	public int hashCode()
 	{
-		return getId().hashCode();
+		return getId() == null ? "null".hashCode() : getId().hashCode();
 	}
 
 	/**
@@ -366,6 +367,7 @@ public class AssessmentImpl implements Assessment
 	 */
 	public void setContext(String context)
 	{
+		if (context == null) context = "";
 		this.context = context;
 	}
 
@@ -426,6 +428,7 @@ public class AssessmentImpl implements Assessment
 	 */
 	public void setTitle(String title)
 	{
+		if (title == null) title = "";
 		this.title = title;
 	}
 

@@ -108,6 +108,7 @@ public class AnswerImpl implements Answer
 		// two AnswerImpls are equals if they have the same id
 		if (this == obj) return true;
 		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
+		if ((this.id == null) || (((AnswerImpl) obj).id == null)) return false;
 		return this.id.equals(((AnswerImpl) obj).id);
 	}
 
@@ -268,7 +269,7 @@ public class AnswerImpl implements Answer
 	 */
 	public int hashCode()
 	{
-		return this.id.hashCode();
+		return this.id == null ? "null".hashCode() : this.id.hashCode();
 	}
 
 	/**

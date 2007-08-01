@@ -127,6 +127,7 @@ public class SubmissionImpl implements Submission
 		// two SubmissionImpls are equals if they have the same id
 		if (this == obj) return true;
 		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
+		if ((this.id == null) || (((SubmissionImpl) obj).id == null)) return false;
 		return this.id.equals(((SubmissionImpl) obj).id);
 	}
 
@@ -679,7 +680,7 @@ public class SubmissionImpl implements Submission
 	 */
 	public int hashCode()
 	{
-		return getId().hashCode();
+		return getId() == null ? "null".hashCode() : getId().hashCode();
 	}
 
 	/**
