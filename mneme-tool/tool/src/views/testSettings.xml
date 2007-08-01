@@ -45,7 +45,11 @@
 			<rows>
 				<row title="title">
 					<container>
-						<text model="assessment.title" />
+						<text>
+							<message>
+								<model ref="assessment.title" missing="no-title" />
+							</message>
+						</text>
 					</container>
 				</row>
 			

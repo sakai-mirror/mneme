@@ -80,7 +80,7 @@
 					<title>
 						<message selector="assessment-title" />
 					</title>
-					<model ref="assessment.title" />
+					<model ref="assessment.title" missing="no-title" />
 	                <sort>
 						<active>
 							<compareDecision model="sort_column"
