@@ -25,25 +25,12 @@
 -->
 
 <interface title="pools-title" header="pools-header">
+
 	<!--mode bar-->
-	<modeBar>
-		<container>
-			<navigation destination="/tests"
-				title="test-manager-nav-title" style="LINK"
-				accessKey="test-manager-nav-access-key"
-				description="test-manager-nav-description" />
-			<navigation destination="/grades" title="grading-nav-title"
-				style="LINK" accessKey="grading-nav-access-key"
-				description="grading-nav-description" />
-			<navigation destination="/pools" title="pools-nav-title"
-				style="LINK" accessKey="pools-nav-access-key"
-				description="pools-nav-description" disabled="TRUE" />
-			<navigation destination="/list"
-				title="student-view-nav-title" style="LINK"
-				accessKey="student-view-nav-access-key"
-				description="student-view-nav-description" />
-		</container>
-	</modeBar>
+	<modeContainer>
+		<alias to="ToolModeFragment" toolId="sakai.mneme" />
+	</modeContainer>
+
 	<container>
 
 		<text>
@@ -53,47 +40,35 @@
 		<!--entity actions-->
 		<entityActionBar width="100%">
 			<container>
-				<navigation destination="/pool_properties"
-					title="add-pool-title" style="LINK"
-					description="add-pool-description" submit="TRUE">
+				<navigation destination="/pool_properties" title="add-pool-title" style="LINK" description="add-pool-description" submit="TRUE">
 					<icon icon="/icons/add.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="add-question-title"
-					style="LINK" description="add-question-description">
+				<navigation destination="/" title="add-question-title" style="LINK" description="add-question-description">
 					<icon icon="/icons/add.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="combine-title"
-					style="LINK" description="combine-description" disabled="FALSE">
+				<navigation destination="/" title="combine-title" style="LINK" description="combine-description" disabled="FALSE">
 					<icon icon="/icons/combine_pools.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="import-export-title"
-					style="LINK" description="import-export-description">
+				<navigation destination="/" title="import-export-title" style="LINK" description="import-export-description">
 					<icon icon="/icons/import_export.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/pools_delete"
-					title="delete-title" style="LINK" description="delete-description"
-					submit="TRUE">
+				<navigation destination="/pools_delete" title="delete-title" style="LINK" description="delete-description" submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="search-title"
-					style="LINK" description="search-description">
+				<navigation destination="/" title="search-title" style="LINK" description="search-description">
 					<icon icon="/icons/search.png" style="LEFT" />
 				</navigation>
 				<!--textEdit rows="1" cols="30" /-->
-				<navigation destination="/" style="LINK"
-					description="gotofirst-description">
+				<navigation destination="/" style="LINK" description="gotofirst-description">
 					<icon icon="/icons/first.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" style="LINK"
-					description="gotoprev-description">
+				<navigation destination="/" style="LINK" description="gotoprev-description">
 					<icon icon="/icons/previous.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" style="LINK"
-					description="gotonext-description">
+				<navigation destination="/" style="LINK" description="gotonext-description">
 					<icon icon="/icons/next.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" style="LINK"
-					description="gotolast-description">
+				<navigation destination="/" style="LINK" description="gotolast-description">
 					<icon icon="/icons/last.png" style="LEFT" />
 				</navigation>
 			</container>
@@ -119,12 +94,10 @@
 					<model ref="pool.subject" />
 					<sort>
 						<active>
-							<compareDecision model="sort_column"
-								constant="0" />
+							<compareDecision model="sort_column" constant="0" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction"
-								constant="A" />
+							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
@@ -143,12 +116,10 @@
 					<model ref="pool.title" />
 					<sort>
 						<active>
-							<compareDecision model="sort_column"
-								constant="1" />
+							<compareDecision model="sort_column" constant="1" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction"
-								constant="A" />
+							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
@@ -191,8 +162,7 @@
 					<navigations>
 						<navigation style="LINK">
 							<icon icon="/icons/edit.png" style="LEFT" />
-							<destination
-								template="/pool_properties/{0}">
+							<destination template="/pool_properties/{0}">
 								<model ref="pool.id" />
 							</destination>
 						</navigation>

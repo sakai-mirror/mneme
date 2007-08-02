@@ -26,25 +26,12 @@
 
 <interface title="pools-delete-confirm-title"
 	header="pools-delete-confirm-header">
+
 	<!--mode bar-->
-	<modeBar>
-		<container>
-			<navigation destination="/list"
-				title="test-manager-nav-title" style="LINK"
-				accessKey="test-manager-nav-access-key"
-				description="test-manager-nav-description" />
-			<navigation destination="/grading" title="grading-nav-title"
-				style="LINK" accessKey="grading-nav-access-key"
-				description="grading-nav-description" />
-			<navigation destination="/pools" title="pools-nav-title"
-				style="LINK" accessKey="pools-nav-access-key"
-				description="pools-nav-description" disabled="TRUE" />
-			<navigation destination="/studentview"
-				title="student-view-nav-title" style="LINK"
-				accessKey="student-view-nav-access-key"
-				description="student-view-nav-description" />
-		</container>
-	</modeBar>
+	<modeContainer>
+		<alias to="ToolModeFragment" toolId="sakai.mneme" />
+	</modeContainer>
+
 	<container>
 		<!--navigation-->
 		<navigationBar width="100%" />

@@ -27,24 +27,9 @@
 <interface title="tests-title" header="tests-header">
 
 	<!--mode bar-->
-	<modeBar>
-		<container>
-			<navigation destination="/tests"
-				title="test-manager-nav-title" style="LINK"
-				accessKey="test-manager-nav-access-key"
-				description="test-manager-nav-description" disabled="TRUE" />
-			<navigation destination="/grades" title="grading-nav-title"
-				style="LINK" accessKey="grading-nav-access-key"
-				description="grading-nav-description" />
-			<navigation destination="/pools" title="pools-nav-title"
-				style="LINK" accessKey="pools-nav-access-key"
-				description="pools-nav-description" />
-			<navigation destination="/list"
-				title="student-view-nav-title" style="LINK"
-				accessKey="student-view-nav-access-key"
-				description="student-view-nav-description" />
-		</container>
-	</modeBar>
+	<modeContainer>
+		<alias to="ToolModeFragment" toolId="sakai.mneme" />
+	</modeContainer>
 
 	<container>
 

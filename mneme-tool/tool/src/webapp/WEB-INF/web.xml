@@ -33,6 +33,7 @@
         <param-name>contextConfigLocation</param-name>
         <param-value>
             /WEB-INF/*View.xml
+            /WEB-INF/*Fragment.xml
         </param-value>
     </context-param>
 
