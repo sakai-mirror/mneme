@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Pool;
@@ -68,7 +69,7 @@ public class PoolsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if ((params.length != 2) && (params.length != 3))
+		if ((params.length != 2) && (params.length != 3) && (params.length != 4))
 		{
 			throw new IllegalArgumentException();
 		}
@@ -78,6 +79,13 @@ public class PoolsView extends ControllerImpl
 		if (params.length == 3)
 		{
 			sortCode = params[2];
+		}
+		
+		// paging parameter
+		String pagingParameter = null;
+		if (params.length == 4)
+		{
+			pagingParameter = params[3];
 		}
 
 		// default sort is title ascending
@@ -132,10 +140,26 @@ public class PoolsView extends ControllerImpl
 
 		}
 
+		// how many pools, total?
+		Integer maxPools = this.poolService.countPools(null, null);
+
+		// default paging
+		if (pagingParameter == null)
+		{
+			// TODO: other than 2 size!
+			pagingParameter = "1-2";
+		}
+
+		// paging
+		Paging paging = uiService.newPaging();
+		paging.setMaxItems(maxPools);
+		paging.setCurrentAndSize(pagingParameter);
+		context.put("paging", paging);
+
 		try
 		{
 			// collect the pools to show
-			List<Pool> pools = this.poolService.findPools(null, sort, null);
+			List<Pool> pools = this.poolService.findPools(null, sort, null, paging.getCurrent(), paging.getSize());
 			context.put("pools", pools);
 		}
 		catch (Exception e)
@@ -143,6 +167,7 @@ public class PoolsView extends ControllerImpl
 			if (M_log.isErrorEnabled()) M_log.error(e.toString());
 			e.printStackTrace();
 		}
+
 		// for the checkboxes
 		Values values = this.uiService.newValues();
 		context.put("poolids", values);

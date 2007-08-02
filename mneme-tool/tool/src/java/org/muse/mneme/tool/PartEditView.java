@@ -133,7 +133,8 @@ public class PartEditView extends ControllerImpl
 		context.put("part", part);
 
 		// get the pool draw list - all the pools for the user (select, sort, page) crossed with this part's actual draws
-		List<PoolDraw> draws = part.getDrawsForPools(null, PoolService.FindPoolsSort.subject_a, null);
+		// TODO: paging (last two params)
+		List<PoolDraw> draws = part.getDrawsForPools(null, PoolService.FindPoolsSort.subject_a, null, null, null);
 		context.put("draws", draws);
 
 		// render

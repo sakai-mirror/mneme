@@ -174,6 +174,14 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Integer countPools(String userId, String search)
+	{
+		return poolService.countPools(userId, search);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer countRemainingSubmissions(Assessment assessment, String userId)
 	{
 		return submissionService.countRemainingSubmissions(assessment, userId);
@@ -199,9 +207,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String userId, PoolService.FindPoolsSort sort, String search)
+	public List<Pool> findPools(String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
-		return poolService.findPools(userId, sort, search);
+		return poolService.findPools(userId, sort, search, pageNum, pageSize);
 	}
 
 	/**

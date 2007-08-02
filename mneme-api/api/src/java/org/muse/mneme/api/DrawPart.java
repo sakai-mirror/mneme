@@ -54,10 +54,13 @@ public interface DrawPart extends Part
 	 *        The sort criteria (from the PoolService).
 	 * @param search
 	 *        The search criteria.
+	 * @param pageNum
+	 *        The page number (1 based) to display, or null to disable paging and get them all.
+	 * @param pageSize
+	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return A list of draws for each pool.
 	 */
-	// TODO: needs paging
-	List<PoolDraw> getDrawsForPools(String userId, PoolService.FindPoolsSort sort, String search);
+	List<PoolDraw> getDrawsForPools(String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Remove a pool's draw from the part.

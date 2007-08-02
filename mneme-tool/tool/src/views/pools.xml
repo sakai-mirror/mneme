@@ -58,19 +58,13 @@
 				<navigation destination="/" title="search-title" style="LINK" description="search-description">
 					<icon icon="/icons/search.png" style="LEFT" />
 				</navigation>
-				<!--textEdit rows="1" cols="30" /-->
-				<navigation destination="/" style="LINK" description="gotofirst-description">
-					<icon icon="/icons/first.png" style="LEFT" />
-				</navigation>
-				<navigation destination="/" style="LINK" description="gotoprev-description">
-					<icon icon="/icons/previous.png" style="LEFT" />
-				</navigation>
-				<navigation destination="/" style="LINK" description="gotonext-description">
-					<icon icon="/icons/next.png" style="LEFT" />
-				</navigation>
-				<navigation destination="/" style="LINK" description="gotolast-description">
-					<icon icon="/icons/last.png" style="LEFT" />
-				</navigation>
+				
+				<pager paging="paging">
+					<destination template="/pools/0A/{0}">
+						<model type="paging" ref="paging" />
+					</destination>
+				</pager>
+
 			</container>
 		</entityActionBar>
 

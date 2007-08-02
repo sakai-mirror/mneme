@@ -53,6 +53,28 @@ public class PoolStorageSample implements PoolStorage
 	protected QuestionServiceImpl questionService = null;
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countPools(String userId, String search)
+	{
+		fakeIt();
+
+		int count = 0;
+
+		for (PoolImpl pool : this.pools.values())
+		{
+			if (pool.getOwnerId().equals(userId))
+			{
+				count++;
+			}
+		}
+
+		// TODO: search
+
+		return count;
+	}
+
+	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -79,7 +101,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String userId, final PoolService.FindPoolsSort sort, String search)
+	public List<Pool> findPools(String userId, final PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		fakeIt();
 
@@ -128,6 +150,22 @@ public class PoolStorageSample implements PoolStorage
 		});
 
 		// TODO: search
+
+		// page
+		if ((pageNum != null) && (pageSize != null))
+		{
+			// start at ((pageNum-1)*pageSize)
+			int start = ((pageNum - 1) * pageSize);
+			if (start < 0) start = 0;
+			if (start > rv.size()) start = rv.size() - 1;
+
+			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
+			int end = ((pageNum) * pageSize);
+			if (end < 0) end = 0;
+			if (end > rv.size()) end = rv.size();
+
+			rv = rv.subList(start, end);
+		}
 
 		return rv;
 	}

@@ -49,6 +49,8 @@ public class PoolServiceImpl implements PoolService
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
 
+	protected QuestionService questionService = null;
+
 	/** Dependency: SecurityService */
 	protected SecurityService securityService = null;
 
@@ -105,6 +107,19 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countPools(String userId, String search)
+	{
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		if (M_log.isDebugEnabled()) M_log.debug("countPools: " + userId);
+
+		Integer rv = storage.countPools(userId, search);
+		return rv;
+	}
+
+	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -115,14 +130,14 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String userId, FindPoolsSort sort, String search)
+	public List<Pool> findPools(String userId, FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 		if (sort == null) sort = PoolService.FindPoolsSort.title_a;
 
 		if (M_log.isDebugEnabled()) M_log.debug("findPools: " + userId);
 
-		List<Pool> rv = storage.findPools(userId, sort, search);
+		List<Pool> rv = storage.findPools(userId, sort, search, pageNum, pageSize);
 		return rv;
 	}
 
@@ -247,6 +262,17 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
+	 * Dependency: QuestionService.
+	 * 
+	 * @param service
+	 *        The QuestionService.
+	 */
+	public void setQuestionService(QuestionService service)
+	{
+		this.questionService = service;
+	}
+
+	/**
 	 * Dependency: SecurityService.
 	 * 
 	 * @param service
@@ -277,19 +303,6 @@ public class PoolServiceImpl implements PoolService
 	public void setSqlService(SqlService service)
 	{
 		sqlService = service;
-	}
-
-	protected QuestionService questionService = null;
-
-	/**
-	 * Dependency: QuestionService.
-	 * 
-	 * @param service
-	 *        The QuestionService.
-	 */
-	public void setQuestionService(QuestionService service)
-	{
-		this.questionService = service;
 	}
 
 	/**

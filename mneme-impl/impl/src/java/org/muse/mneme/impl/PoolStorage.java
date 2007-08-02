@@ -32,6 +32,17 @@ import org.muse.mneme.api.PoolService;
 public interface PoolStorage
 {
 	/**
+	 * Count the pools with this criteria.
+	 * 
+	 * @param userId
+	 *        the user id.
+	 * @param search
+	 *        The search criteria.
+	 * @return a list of pools that meet the criteria.
+	 */
+	Integer countPools(String userId, String search);
+
+	/**
 	 * Draw a set of questions from the pool.
 	 * 
 	 * @param pool
@@ -52,9 +63,13 @@ public interface PoolStorage
 	 *        The sort criteria.
 	 * @param search
 	 *        The search criteria.
+	 * @param pageNum
+	 *        The page number (1 based) to display, or null to disable paging and get them all.
+	 * @param pageSize
+	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return The list of pools the user has access to.
 	 */
-	List<Pool> findPools(String userId, PoolService.FindPoolsSort sort, String search);
+	List<Pool> findPools(String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Access a pool by id.
