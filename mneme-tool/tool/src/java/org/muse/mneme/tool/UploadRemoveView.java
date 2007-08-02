@@ -311,7 +311,7 @@ public class UploadRemoveView extends ControllerImpl
 				.add(
 					ui.newCountdownTimer()
 						.setSubmit()
-						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise().setReference("submission.expiration.limit"))
+						.setDurationMessage("timer-duration", ui.newDurationPropertyReference().setConcise(Boolean.TRUE).setReference("submission.expiration.limit"))
 						.setRemainingMessage("timer-remaining")
 						.setDuration(ui.newPropertyReference().setReference("submission.expiration.limit"))
 						.setTimeTillExpire(ui.newPropertyReference().setReference("submission.expiration.duration"))
