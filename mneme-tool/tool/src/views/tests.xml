@@ -55,7 +55,9 @@
 
 		<!-- the list of assessments -->
 		<entityList style="FLAT">
-			<iterator name="assessment" model="assessments" />
+			<iterator name="assessment">
+				<model ref="assessments" indexRef="id" />
+			</iterator>
 			<emptyTitle>
 				<message selector="no-assessments" />
 			</emptyTitle>
