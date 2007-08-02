@@ -29,13 +29,19 @@
 	<!--mode bar-->
 	<modeBar>
 		<container>
-			<navigation destination="/tests" title="test-manager-nav-title" style="LINK" accessKey="test-manager-nav-access-key"
+			<navigation destination="/tests"
+				title="test-manager-nav-title" style="LINK"
+				accessKey="test-manager-nav-access-key"
 				description="test-manager-nav-description" disabled="TRUE" />
-			<navigation destination="/grades" title="grading-nav-title" style="LINK" accessKey="grading-nav-access-key"
+			<navigation destination="/grades" title="grading-nav-title"
+				style="LINK" accessKey="grading-nav-access-key"
 				description="grading-nav-description" />
-			<navigation destination="/pools" title="pools-nav-title" style="LINK" accessKey="pools-nav-access-key"
+			<navigation destination="/pools" title="pools-nav-title"
+				style="LINK" accessKey="pools-nav-access-key"
 				description="pools-nav-description" />
-			<navigation destination="/list" title="student-view-nav-title" style="LINK" accessKey="student-view-nav-access-key"
+			<navigation destination="/list"
+				title="student-view-nav-title" style="LINK"
+				accessKey="student-view-nav-access-key"
 				description="student-view-nav-description" />
 		</container>
 	</modeBar>
@@ -45,13 +51,18 @@
 		<!-- entity actions -->
 		<entityActionBar width="100%">
 			<container>
-				<navigation destination="/test_edit/" title="add-test" style="LINK" description="add-test-description" submit="TRUE">
+				<navigation destination="/test_edit/" title="add-test"
+					style="LINK" description="add-test-description" submit="TRUE">
 					<icon icon="/icons/add.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/tests_delete" title="delete-tests" style="LINK" description="delete-tests-description" submit="TRUE">
+				<navigation destination="/tests_delete"
+					title="delete-tests" style="LINK"
+					description="delete-tests-description" submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/test_import_export" title="import-export-tests" style="LINK" description="import-export-tests-description" submit="TRUE">
+				<navigation destination="/test_import_export"
+					title="import-export-tests" style="LINK"
+					description="import-export-tests-description" submit="TRUE">
 					<icon icon="/icons/import_export.png" style="LEFT" />
 				</navigation>
 			</container>
@@ -68,7 +79,8 @@
 					<title>
 						<message selector="assessment-type" />
 					</title>
-					<model ref="assessment.type" delegate="FormatAssesmentType" tool="sakai.mneme" />
+					<model ref="assessment.type"
+						delegate="FormatAssesmentType" tool="sakai.mneme" />
 				</modelColumn>
 				<selectionColumn multiple="TRUE">
 					<value>
@@ -81,7 +93,7 @@
 						<message selector="assessment-title" />
 					</title>
 					<model ref="assessment.title" missing="no-title" />
-	                <sort>
+					<sort>
 						<active>
 							<compareDecision model="sort_column"
 								constant="1" />
@@ -98,7 +110,7 @@
 							<message selector="desc" />
 							<destination template="/tests/1D" />
 						</desc>
-					</sort>					
+					</sort>
 					<entityNavigations>
 						<navigation>
 							<destination template="/test_edit/{0}">
@@ -111,7 +123,7 @@
 					<title>
 						<message selector="assessment-odate" />
 					</title>
-					   <sort>
+					<sort>
 						<active>
 							<compareDecision model="sort_column"
 								constant="2" />
@@ -128,11 +140,13 @@
 							<message selector="desc" />
 							<destination template="/tests/2D" />
 						</desc>
-					</sort>					
+					</sort>
 					<container>
 						<dateEdit>
-							<icon icon="/icons/date.png" message="edit-date" />
-							<model ref="assessment.dates.openDate" type="date" />
+							<icon icon="/icons/date.png"
+								message="edit-date" />
+							<model ref="assessment.dates.openDate"
+								type="date" />
 						</dateEdit>
 					</container>
 				</column>
@@ -140,7 +154,7 @@
 					<title>
 						<message selector="assessment-ddate" />
 					</title>
-					   <sort>
+					<sort>
 						<active>
 							<compareDecision model="sort_column"
 								constant="3" />
@@ -157,11 +171,13 @@
 							<message selector="desc" />
 							<destination template="/tests/3D" />
 						</desc>
-					</sort>					
+					</sort>
 					<container>
 						<dateEdit>
-							<icon icon="/icons/date.png" message="edit-date" />
-							<model ref="assessment.dates.dueDate" type="date" />
+							<icon icon="/icons/date.png"
+								message="edit-date" />
+							<model ref="assessment.dates.dueDate"
+								type="date" />
 						</dateEdit>
 					</container>
 				</column>
@@ -169,7 +185,7 @@
 					<title>
 						<message selector="assessment-active" />
 					</title>
-					   <sort>
+					<sort>
 						<active>
 							<compareDecision model="sort_column"
 								constant="4" />
@@ -186,41 +202,49 @@
 							<message selector="desc" />
 							<destination template="/tests/4D" />
 						</desc>
-					</sort>					
-					<model ref="assessment.active" delegate="FormatAssesmentActive" tool="sakai.mneme" />
+					</sort>
+					<model ref="assessment.active"
+						delegate="FormatAssesmentActive" tool="sakai.mneme" />
 				</modelColumn>
-	      		<column>
-	            <title>
-	              <message selector="assessment-innew" />
-	            </title>
-	            <container>
-	              <navigation style="LINK">
-        	       <title>
-        	       <message model="assessment.submissionCount.completed" />
-        	       </title>
-		            <destination template="/grade_class/{0}">
-	        	      <model ref="assessment.id" />
-		            </destination>
-	              </navigation>
-	              <text selector="nav-divider" />
-	              <navigation style="LINK">
-	               <title>
-        	       <message model="assessment.submissionCount.ungraded" />
-        	       </title>
-	                <destination template="/grade_class/{0}">
-	                  <model ref="assessment.id" />
-	                </destination>
-	              </navigation>
-	          </container>  
-              </column>
-			  <modelColumn>
+				<column>
+					<title>
+						<message selector="assessment-innew" />
+					</title>
+					<container>
+						<navigation style="LINK">
+							<title>
+								<message
+									model="assessment.submissionCount.completed" />
+							</title>
+							<destination template="/grade_class/{0}">
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+						<navigation>
+							<title>
+								<message selector="nav-divider" />
+							</title>
+						</navigation>
+						<navigation style="LINK">
+							<title>
+								<message
+									model="assessment.submissionCount.ungraded" />
+							</title>
+							<destination template="/grade_class/{0}">
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+					</container>
+				</column>
+				<modelColumn>
 					<title>
 						<message selector="assessment-action" />
 					</title>
 					<model type="icon" icon="/icons/settings.png" />
 					<entityNavigations>
 						<navigation>
-							<destination template="/test_settings/{0}">
+							<destination
+								template="/test_settings/{0}">
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
@@ -228,13 +252,17 @@
 				</modelColumn>
 			</columns>
 		</entityList>
-	<!-- save / cancel nav bar -->
+		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="70em">
 			<container>
-				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/tests">
+				<navigation title="save" accessKey="save-access"
+					description="save-description" style="BUTTON" submit="TRUE"
+					destination="/tests">
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
-				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON" destination="/tests">
+				<navigation title="cancel" accessKey="cancel-access"
+					description="cancel-description" style="BUTTON"
+					destination="/tests">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 				</navigation>
 			</container>
