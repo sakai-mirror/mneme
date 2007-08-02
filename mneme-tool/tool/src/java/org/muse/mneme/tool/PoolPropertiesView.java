@@ -54,7 +54,7 @@ public class PoolPropertiesView extends ControllerImpl
 
 		Pool pool = this.poolService.getPool(params[2]);
 		context.put("pool", pool);
-
+		
 		// render
 		uiService.render(ui, context);
 

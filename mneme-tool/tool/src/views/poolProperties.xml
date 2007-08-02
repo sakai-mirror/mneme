@@ -24,7 +24,7 @@
 	**********************************************************************************/
 -->
 
-<interface title="pools-add-title" header="pools-add-header">
+<interface>
 	<!--mode bar-->
 	<modeBar>
 		<container>
@@ -44,37 +44,94 @@
 				description="student-view-nav-description" />
 		</container>
 	</modeBar>
+	<header>
+		<message selector="pools-add-header">
+			<model type="icon" icon="/icons/add.png" />
+		</message>
+	</header>
+	<title>
+		<message selector="pools-add-title" />
+	</title>
 	<container>
-	
-		<entityDisplay>
-			<rows>
-				<row title="pool-id">
-					<container>
-						<textEdit model="pool.id" rows="1" cols="25" readOnly="TRUE"/>
-					</container>
-				</row>
-				<row title="pool-title">
-					<container>
-						<textEdit model="pool.title" rows="1" cols="25" />
-					</container>
-				</row>
-			</rows>
-		</entityDisplay>
-		
-	
+		<section>
+			<title highlighted="TRUE">
+				<message selector="pool-id">
+					<model type="html" ref="pool.id" />
+				</message>
+			</title>
+			<container>
+				<entityDisplay>
+					<rows>
+						<!--row title="pool-id">
+							<container>
+							<textEdit model="pool.id" rows="1"
+							cols="25" readOnly="TRUE" />
+							</container>
+							</row-->
+						<row title="pool-title">
+							<container>
+								<textEdit model="pool.title" rows="1"
+									cols="25" />
+							</container>
+						</row>
+						<row title="pool-subject">
+						</row>
+						<row title="pool-description">
+							<container>
+								<textEdit model="pool.description"
+									rows="5" cols="40" />
+							</container>
+						</row>
+						<row title="pool-points">
+							<container>
+								<textEdit model="pool.points" rows="1"
+									cols="25" />
+							</container>
+						</row>
+						<row title="pool-difficulty">
+							<container>
+								<selection>
+									<model ref="pool.difficulty" />
+									<selectionChoices>
+										<selectionChoice value="level1"
+											selector="Level-1" />
+										<selectionChoice value="level2"
+											selector="Level-2" />
+										<selectionChoice value="level3"
+											selector="Level-3" />
+										<selectionChoice value="level4"
+											selector="Level-4" />
+										<selectionChoice value="level3"
+											selector="Level-5" />
+									</selectionChoices>
+								</selection>
+							</container>
+						</row>
+						<row title="pool-access">
+							<container>
+								<textEdit rows="1" cols="25" />
+							</container>
+						</row>
+					</rows>
+				</entityDisplay>
+			</container>
+		</section>
+
+
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
 				<navigation destination="/pool_properties"
 					title="save-title" style="BUTTON" accessKey="save-access"
 					description="save-description" submit="TRUE">
-					<icon icon="/icons/save.png" style="LEFT"/>
+					<icon icon="/icons/save.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/pools" title="cancel" style="BUTTON"
-					accessKey="cancel-access" description="cancel-description">
+				<navigation destination="/pools" title="cancel"
+					style="BUTTON" accessKey="cancel-access"
+					description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 				</navigation>
 			</container>
-		</navigationBar>	
+		</navigationBar>
 	</container>
 </interface>
