@@ -38,7 +38,7 @@
 			<container>
 				<navigation destination="/test_edit/" title="add-test"
 					style="LINK" description="add-test-description" submit="TRUE">
-					<icon icon="/icons/add.png" style="LEFT" />
+					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
 				<navigation destination="/tests_delete"
 					title="delete-tests" style="LINK"
@@ -101,6 +101,19 @@
 					<entityNavigations>
 						<navigation>
 							<destination template="/test_edit/{0}">
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+					</entityNavigations>
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="assessment-view" />
+					</title>
+					<model type="icon" icon="/icons/preview.png" />
+					<entityNavigations>
+						<navigation>
+							<destination template="/tests">
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
