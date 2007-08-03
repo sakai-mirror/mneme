@@ -33,7 +33,7 @@
 
 	<header>
 		<message selector="pools-add-header">
-			<model type="icon" icon="/icons/add.png" />
+			<model type="icon" icon="/icons/document_add.png" />
 		</message>
 	</header>
 	<title>
@@ -80,15 +80,15 @@
 								<selection>
 									<model ref="pool.difficulty" />
 									<selectionChoices>
-										<selectionChoice value="level1"
+										<selectionChoice value="1"
 											selector="Level-1" />
-										<selectionChoice value="level2"
+										<selectionChoice value="2"
 											selector="Level-2" />
-										<selectionChoice value="level3"
+										<selectionChoice value="3"
 											selector="Level-3" />
-										<selectionChoice value="level4"
+										<selectionChoice value="4"
 											selector="Level-4" />
-										<selectionChoice value="level3"
+										<selectionChoice value="5"
 											selector="Level-5" />
 									</selectionChoices>
 								</selection>

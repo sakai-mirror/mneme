@@ -29,9 +29,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
@@ -45,6 +47,9 @@ public class PoolPropertiesView extends ControllerImpl
 	/** Pool Service */
 	protected PoolService poolService = null;
 
+	/** tool manager reference. */
+	protected ToolManager toolManager = null;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -54,7 +59,7 @@ public class PoolPropertiesView extends ControllerImpl
 
 		Pool pool = this.poolService.getPool(params[2]);
 		context.put("pool", pool);
-		
+
 		// render
 		uiService.render(ui, context);
 
@@ -65,8 +70,29 @@ public class PoolPropertiesView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// throw new IllegalArgumentException();
-		String destination = this.uiService.decode(req, context);
+		if (params.length != 3) throw new IllegalArgumentException();
+
+		// setup the model: the selected pool
+		Pool pool = this.poolService.getPool(params[2]);
+		context.put("pool", pool);
+
+		// read the form
+		String destination = uiService.decode(req, context);
+
+		if (pool != null)
+		{
+			try
+			{
+				this.poolService.savePool(pool, toolManager.getCurrentPlacement().getContext());
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				//redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unknown)));
+				return;
+			}			
+		}
 
 		destination = "/pools/";
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
@@ -80,6 +106,15 @@ public class PoolPropertiesView extends ControllerImpl
 	public void setPoolService(PoolService poolService)
 	{
 		this.poolService = poolService;
+	}
+
+	/**
+	 * @param toolManager
+	 *        the toolManager to set
+	 */
+	public void setToolManager(ToolManager toolManager)
+	{
+		this.toolManager = toolManager;
 	}
 
 }

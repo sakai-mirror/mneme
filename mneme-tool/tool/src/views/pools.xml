@@ -24,27 +24,35 @@
 	**********************************************************************************/
 -->
 
-<interface title="pools-title" header="pools-header">
+<interface>
 
 	<!--mode bar-->
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
-
+	<header>
+		<message selector="pools-header">
+			<model type="icon" icon="/icons/basket_add.png" />
+		</message>
+	</header>
+	<title>
+		<message selector="pools-title" />
+	</title>
+	
 	<container>
-
-		<text>
+		<gap />
+		<!--text>
 			<message selector="pool-list-page-nav" />
-		</text>
+		</text-->
 
 		<!--entity actions-->
 		<entityActionBar width="100%">
 			<container>
 				<navigation destination="/pool_properties" title="add-pool-title" style="LINK" description="add-pool-description" submit="TRUE">
-					<icon icon="/icons/add.png" style="LEFT" />
+					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
 				<navigation destination="/" title="add-question-title" style="LINK" description="add-question-description">
-					<icon icon="/icons/add.png" style="LEFT" />
+					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
 				<navigation destination="/" title="combine-title" style="LINK" description="combine-description" disabled="FALSE">
 					<icon icon="/icons/combine_pools.png" style="LEFT" />
@@ -83,9 +91,9 @@
 				</selectionColumn>
 				<modelColumn>
 					<title>
-						<message selector="pool-subject" />
+						<message selector="pool-subject"/>
 					</title>
-					<model ref="pool.subject" />
+					<model ref="pool.subject" missing="missing-subject"/>
 					<sort>
 						<active>
 							<compareDecision model="sort_column" constant="0" />
@@ -107,7 +115,7 @@
 					<title>
 						<message selector="pool-title" />
 					</title>
-					<model ref="pool.title" />
+					<model ref="pool.title" missing="missing-title"/>
 					<sort>
 						<active>
 							<compareDecision model="sort_column" constant="1" />
@@ -141,7 +149,7 @@
 					<title>
 						<message selector="pool-points" />
 					</title>
-					<!-- model ref="pool.points" /-->
+					<model ref="pool.points" />
 				</modelColumn>
 				<modelColumn>
 					<title>
