@@ -182,6 +182,14 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Integer countQuestions(String userId, Pool pool, String search)
+	{
+		return this.questionService.countQuestions(userId, pool, search);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer countRemainingSubmissions(Assessment assessment, String userId)
 	{
 		return submissionService.countRemainingSubmissions(assessment, userId);
@@ -215,9 +223,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findQuestions(String userId)
+	public List<Question> findQuestions(String userId, Pool pool, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
-		return questionService.findQuestions(userId);
+		return questionService.findQuestions(userId, pool, sort, search, pageNum, pageSize);
 	}
 
 	/**

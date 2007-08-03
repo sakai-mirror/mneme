@@ -34,13 +34,36 @@ import org.muse.mneme.api.QuestionService;
 public interface QuestionStorage
 {
 	/**
-	 * Find all the questions this user has access to.
+	 * Count the questions with this criteria.
 	 * 
 	 * @param userId
-	 *        The user id
-	 * @return The list of pools the user has access to.
+	 *        The user id.
+	 * @param pool
+	 *        The pool criteria - get questions from this pool only, or if null, across all accessible pools.
+	 * @param search
+	 *        The search criteria.
+	 * @return The questions in this pool with this criteria.
 	 */
-	List<Question> findQuestions(String userId);
+	Integer countQuestions(String userId, Pool pool, String search);
+
+	/**
+	 * Find all the questions that meet the criteria.
+	 * 
+	 * @param userId
+	 *        the user id.
+	 * @param pool
+	 *        The pool criteria - get questions from this pool only, or if null, across all accessible pools.
+	 * @param sort
+	 *        The sort criteria.
+	 * @param search
+	 *        The search criteria.
+	 * @param pageNum
+	 *        The page number (1 based) to display, or null to disable paging and get them all.
+	 * @param pageSize
+	 *        The number of items for the requested page, or null if we are not paging.
+	 * @return a list of pools that meet the criteria.
+	 */
+	List<Question> findQuestions(String userId, Pool pool, QuestionService.FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Find all the questions in the pool

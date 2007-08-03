@@ -114,6 +114,17 @@ public class QuestionServiceImpl implements QuestionService
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countQuestions(String userId, Pool pool, String search)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("findQuestions: " + userId);
+		Integer rv = this.storage.countQuestions(userId, pool, search);
+
+		return rv;
+	}
+
+	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -124,12 +135,10 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findQuestions(String userId)
+	public List<Question> findQuestions(String userId, Pool pool, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
-		// TODO: other (sort, select, paging, ...) parameters
-
 		if (M_log.isDebugEnabled()) M_log.debug("findQuestions: " + userId);
-		List<Question> rv = this.storage.findQuestions(userId);
+		List<Question> rv = this.storage.findQuestions(userId, pool, sort, search, pageNum, pageSize);
 
 		return rv;
 	}

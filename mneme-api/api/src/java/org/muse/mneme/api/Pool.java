@@ -23,11 +23,24 @@ package org.muse.mneme.api;
 
 import java.util.List;
 
+import org.muse.mneme.api.QuestionService.FindQuestionsSort;
+
 /**
  * Pool defines the question pools.
  */
 public interface Pool
 {
+	/**
+	 * Count the questions in this pool with this criteria.
+	 * 
+	 * @param userId
+	 *        The user id (if null, the current user is used).
+	 * @param search
+	 *        The search criteria.
+	 * @return The questions in this pool with this criteria.
+	 */
+	Integer countQuestions(String userId, String search);
+
 	/**
 	 * Draw questions based on this random seed.
 	 * 
@@ -81,6 +94,23 @@ public interface Pool
 	 * @return The number of points for each question in this pool.
 	 */
 	Float getPoints();
+
+	/**
+	 * Locate a list of questions in this pool with this criteria.
+	 * 
+	 * @param userId
+	 *        the user id (if null, the current user is used).
+	 * @param sort
+	 *        The sort criteria.
+	 * @param search
+	 *        The search criteria.
+	 * @param pageNum
+	 *        The page number (1 based) to display, or null to disable paging and get them all.
+	 * @param pageSize
+	 *        The number of items for the requested page, or null if we are not paging.
+	 * @return a list of questions that meet the criteria.
+	 */
+	List<Question> findQuestions(String userId, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Access the subject of the pool.

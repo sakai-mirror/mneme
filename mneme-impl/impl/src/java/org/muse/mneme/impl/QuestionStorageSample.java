@@ -22,6 +22,8 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +35,6 @@ import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
-import org.muse.mneme.api.TypeSpecificQuestion;
 
 /**
  * QuestionStorageSample defines a sample storage for questions.
@@ -59,6 +60,25 @@ public class QuestionStorageSample implements QuestionStorage
 	protected QuestionService questionService = null;
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countQuestions(String userId, Pool pool, String search)
+	{
+		// TODO: search
+
+		int count = 0;
+		for (QuestionImpl question : this.questions.values())
+		{
+			if (question.getAttribution().getUserId().equals(userId) && ((pool == null) || (question.getPool().equals(pool))))
+			{
+				count++;
+			}
+		}
+
+		return count;
+	}
+
+	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -69,17 +89,60 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findQuestions(String userId)
+	public List<Question> findQuestions(String userId, Pool pool, final QuestionService.FindQuestionsSort sort, String search, Integer pageNum,
+			Integer pageSize)
 	{
 		fakeIt();
+
+		// TODO: search
 
 		List<Question> rv = new ArrayList<Question>();
 		for (QuestionImpl question : this.questions.values())
 		{
-			if (question.getAttribution().getUserId().equals(userId))
+			if (question.getAttribution().getUserId().equals(userId) && ((pool == null) || (question.getPool().equals(pool))))
 			{
 				rv.add(new QuestionImpl(question));
 			}
+		}
+
+		// sort
+		Collections.sort(rv, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				int rv = 0;
+				switch (sort)
+				{
+					case type_a:
+					{
+						rv = ((Question) arg0).getType().compareTo(((Question) arg1).getType());
+						break;
+					}
+					case type_d:
+					{
+						rv = -1 * ((Question) arg0).getType().compareTo(((Question) arg1).getType());
+						break;
+					}
+				}
+
+				return rv;
+			}
+		});
+
+		// page
+		if ((pageNum != null) && (pageSize != null))
+		{
+			// start at ((pageNum-1)*pageSize)
+			int start = ((pageNum - 1) * pageSize);
+			if (start < 0) start = 0;
+			if (start > rv.size()) start = rv.size() - 1;
+
+			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
+			int end = ((pageNum) * pageSize);
+			if (end < 0) end = 0;
+			if (end > rv.size()) end = rv.size();
+
+			rv = rv.subList(start, end);
 		}
 
 		return rv;

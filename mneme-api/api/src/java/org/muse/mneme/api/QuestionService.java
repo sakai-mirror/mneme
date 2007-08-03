@@ -29,6 +29,14 @@ import java.util.List;
 public interface QuestionService
 {
 	/**
+	 * Sort options for findQuestions()
+	 */
+	enum FindQuestionsSort
+	{
+		type_a, type_d
+	}
+
+	/**
 	 * Check if the current user is allowed to edit this question from this context.
 	 * 
 	 * @param question
@@ -42,13 +50,36 @@ public interface QuestionService
 	Boolean allowEditQuestion(Question question, String context, String userId);
 
 	/**
+	 * Count the questions with this criteria.
+	 * 
+	 * @param userId
+	 *        The user id (if null, the current user is used).
+	 * @param pool
+	 *        The pool criteria - get questions from this pool only, or if null, across all accessible pools.
+	 * @param search
+	 *        The search criteria.
+	 * @return The questions in this pool with this criteria.
+	 */
+	Integer countQuestions(String userId, Pool pool, String search);
+
+	/**
 	 * Locate a list of questions with this criteria.
 	 * 
 	 * @param userId
-	 *        the user id.
+	 *        the user id (if null, the current user is used).
+	 * @param pool
+	 *        The pool criteria - get questions from this pool only, or if null, across all accessible pools.
+	 * @param sort
+	 *        The sort criteria.
+	 * @param search
+	 *        The search criteria.
+	 * @param pageNum
+	 *        The page number (1 based) to display, or null to disable paging and get them all.
+	 * @param pageSize
+	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return a list of questions that meet the criteria.
 	 */
-	List<Question> findQuestions(String userId);
+	List<Question> findQuestions(String userId, Pool pool, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Access a question by id.

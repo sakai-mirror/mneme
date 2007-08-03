@@ -21,11 +21,12 @@
 
 package org.muse.mneme.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.muse.mneme.api.Pool;
-import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.QuestionService.FindQuestionsSort;
 
 /**
  * PoolImpl implements Pool
@@ -42,7 +43,9 @@ public class PoolImpl implements Pool
 
 	protected Float points = null;
 
-	protected PoolServiceImpl poolService = null;
+	protected transient PoolServiceImpl poolService = null;
+
+	protected transient QuestionService questionService = null;
 
 	protected String subject = null;
 
@@ -65,9 +68,18 @@ public class PoolImpl implements Pool
 	/**
 	 * Construct.
 	 */
-	public PoolImpl(PoolServiceImpl service)
+	public PoolImpl(PoolServiceImpl service, QuestionService questionService)
 	{
 		this.poolService = service;
+		this.questionService = questionService;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countQuestions(String userId, String search)
+	{
+		return this.questionService.countQuestions(userId, this, search);
 	}
 
 	/**
@@ -88,6 +100,14 @@ public class PoolImpl implements Pool
 		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
 		if ((this.id == null) || (((PoolImpl) obj).id == null)) return false;
 		return this.id.equals(((PoolImpl) obj).id);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Question> findQuestions(String userId, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
+	{
+		return this.questionService.findQuestions(userId, this, sort, search, pageNum, pageSize);
 	}
 
 	/**

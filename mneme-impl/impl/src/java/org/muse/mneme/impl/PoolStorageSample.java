@@ -213,7 +213,7 @@ public class PoolStorageSample implements PoolStorage
 	 */
 	public PoolImpl newPool()
 	{
-		return new PoolImpl(this.poolService);
+		return new PoolImpl(this.poolService, this.questionService);
 	}
 
 	/**

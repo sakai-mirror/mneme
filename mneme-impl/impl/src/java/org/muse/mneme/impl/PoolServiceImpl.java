@@ -30,8 +30,10 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
+import org.muse.mneme.api.QuestionService.FindQuestionsSort;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.tool.api.SessionManager;
@@ -328,6 +330,23 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
+	 * Count the questions in this pool with this criteria.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @param userId
+	 *        The user id (if null, the current user is used).
+	 * @param search
+	 *        The search criteria.
+	 * @return The questions in this pool with this criteria.
+	 */
+	protected Integer countQuestions(Pool pool, String userId, String search)
+	{
+		Integer rv = this.questionService.countQuestions(userId, pool, search);
+		return rv;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	protected List<String> drawQuestionIds(Pool pool, long seed, Integer numQuestions)
@@ -359,6 +378,29 @@ public class PoolServiceImpl implements PoolService
 	protected Integer getPoolSize(Pool pool)
 	{
 		Integer rv = storage.getPoolSize((PoolImpl) pool);
+		return rv;
+	}
+
+	/**
+	 * Locate a list of questions in this pool with this criteria.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @param userId
+	 *        the user id (if null, the current user is used).
+	 * @param sort
+	 *        The sort criteria.
+	 * @param search
+	 *        The search criteria.
+	 * @param pageNum
+	 *        The page number (1 based) to display, or null to disable paging and get them all.
+	 * @param pageSize
+	 *        The number of items for the requested page, or null if we are not paging.
+	 * @return a list of questions that meet the criteria.
+	 */
+	protected List<Question> getQuestions(Pool pool, String userId, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
+	{
+		List<Question> rv = this.questionService.findQuestions(userId, pool, sort, search, pageNum, pageSize);
 		return rv;
 	}
 }
