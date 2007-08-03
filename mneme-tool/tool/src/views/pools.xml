@@ -40,7 +40,6 @@
 	</title>
 	
 	<container>
-		<gap />
 		<!--text>
 			<message selector="pool-list-page-nav" />
 		</text-->
