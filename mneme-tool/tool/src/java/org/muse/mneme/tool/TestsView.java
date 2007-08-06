@@ -24,6 +24,7 @@ package org.muse.mneme.tool;
 import java.io.IOException;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -197,7 +198,8 @@ public class TestsView extends ControllerImpl
 			try
 			{
 				Assessment assessment = this.assessmentService.newAssessment(this.toolManager.getCurrentPlacement().getContext());
-
+				assessment.getCreatedBy().setUserId("admin");
+				assessment.getCreatedBy().setDate(new Date());
 				// commit it empty
 				this.assessmentService.saveAssessment(assessment);
 
