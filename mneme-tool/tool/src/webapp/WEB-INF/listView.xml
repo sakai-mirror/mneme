@@ -40,6 +40,7 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>list</value></property>
  		<property name="bundle"><value>list</value></property>
+		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>list.xml</value></property>
 	</bean>
 

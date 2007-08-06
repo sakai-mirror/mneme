@@ -38,6 +38,7 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>part_instructions</value></property>
  		<property name="bundle"><value>sectionInstruction</value></property>
+		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>sectionInstruction.xml</value></property>
 	</bean>
 

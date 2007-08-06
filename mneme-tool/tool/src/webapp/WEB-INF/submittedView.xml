@@ -38,6 +38,7 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>submitted</value></property>
  		<property name="bundle"><value>submitted</value></property>
+		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>submitted.xml</value></property>
 	</bean>
 

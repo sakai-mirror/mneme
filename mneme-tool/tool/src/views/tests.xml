@@ -143,8 +143,6 @@
 					</sort>
 					<container>
 						<dateEdit>
-							<icon icon="/icons/date.png"
-								message="edit-date" />
 							<model ref="assessment.dates.openDate"
 								type="date" />
 						</dateEdit>
@@ -174,8 +172,6 @@
 					</sort>
 					<container>
 						<dateEdit>
-							<icon icon="/icons/date.png"
-								message="edit-date" />
 							<model ref="assessment.dates.dueDate"
 								type="date" />
 						</dateEdit>

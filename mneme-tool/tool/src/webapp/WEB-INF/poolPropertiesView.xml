@@ -39,6 +39,7 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>pool_properties</value></property>
  		<property name="bundle"><value>poolProperties</value></property>
+ 		<property name="shared"><value>mneme</value></property>
  		<property name="components"><value>poolProperties.xml</value></property>
 	</bean>
 

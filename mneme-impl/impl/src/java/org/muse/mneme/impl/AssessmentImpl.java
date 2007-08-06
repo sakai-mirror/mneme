@@ -69,6 +69,8 @@ public class AssessmentImpl implements Assessment
 
 	protected String id = null;
 
+	protected Attribution modifiedBy = new AttributionImpl();
+
 	protected Integer numSubmissionsAllowed = null;
 
 	protected AssessmentParts parts = null;
@@ -239,6 +241,14 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Attribution getModifiedBy()
+	{
+		return modifiedBy;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer getNumSubmissionsAllowed()
 	{
 		return this.numSubmissionsAllowed;
@@ -374,15 +384,6 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setCreatedBy(String userId)
-	{
-		this.createdBy.setUserId(userId);
-		// TODO: date?
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void setNumSubmissionsAllowed(Integer count)
 	{
 		this.numSubmissionsAllowed = count;
@@ -479,6 +480,7 @@ public class AssessmentImpl implements Assessment
 		this.grading = new AssessmentGradingImpl((AssessmentGradingImpl) other.grading);
 		this.honorPledge = other.honorPledge;
 		this.id = other.id;
+		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy);
 		this.numSubmissionsAllowed = other.numSubmissionsAllowed;
 		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts);
 		this.poolService = other.poolService;

@@ -38,6 +38,7 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>error</value></property>
  		<property name="bundle"><value>error</value></property>
+		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>error.xml</value></property>
 	</bean>
 

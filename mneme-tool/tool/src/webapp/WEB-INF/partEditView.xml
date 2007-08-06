@@ -39,6 +39,7 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>part_edit</value></property>
  		<property name="bundle"><value>partEdit</value></property>
+ 		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>dpartEdit.xml</value></property>
 		<property name="components2"><value>mpartEdit.xml</value></property>
 	</bean>

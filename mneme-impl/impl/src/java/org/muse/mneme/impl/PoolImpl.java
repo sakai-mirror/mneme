@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.List;
 
+import org.muse.mneme.api.Attribution;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
@@ -33,11 +34,15 @@ import org.muse.mneme.api.QuestionService.FindQuestionsSort;
  */
 public class PoolImpl implements Pool
 {
+	protected Attribution createdBy = new AttributionImpl();
+
 	protected String description = null;
 
 	protected Integer difficulty = null;
 
 	protected String id = null;
+
+	protected Attribution modifiedBy = new AttributionImpl();
 
 	protected String ownerId = null;
 
@@ -113,6 +118,14 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
+	public Attribution getCreatedBy()
+	{
+		return this.createdBy;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getDescription()
 	{
 		return this.description;
@@ -132,6 +145,14 @@ public class PoolImpl implements Pool
 	public String getId()
 	{
 		return this.id;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Attribution getModifiedBy()
+	{
+		return this.modifiedBy;
 	}
 
 	/**
@@ -251,9 +272,11 @@ public class PoolImpl implements Pool
 
 	protected void set(PoolImpl other)
 	{
+		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
 		this.description = other.description;
 		this.difficulty = other.difficulty;
 		this.id = other.id;
+		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy);
 		this.ownerId = other.ownerId;
 		this.points = other.points;
 		this.poolService = other.poolService;

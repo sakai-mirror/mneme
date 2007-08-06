@@ -101,6 +101,13 @@ public interface Assessment
 	Boolean getIsOpen(Boolean withGrace);
 
 	/**
+	 * Access the modified-by attribution (user and date).
+	 * 
+	 * @return The modified-by attribution.
+	 */
+	Attribution getModifiedBy();
+
+	/**
 	 * Access the number of submissions allowed, if not unlimited.
 	 * 
 	 * @return The number of submissions allowed, or null if unlimited.
@@ -218,14 +225,6 @@ public interface Assessment
 	 *        The assessment's context string.
 	 */
 	void setContext(String context);
-
-	/**
-	 * Set the creating uesr's id.
-	 * 
-	 * @param userId
-	 *        The creating user's id.
-	 */
-	void setCreatedBy(String userId);
 
 	/**
 	 * Set the number of submissions allowed for limited submissions.

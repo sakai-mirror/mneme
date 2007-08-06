@@ -32,7 +32,6 @@ import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.TypeSpecificAnswer;
 import org.muse.mneme.api.TypeSpecificQuestion;
 
 /**
@@ -205,11 +204,13 @@ public class QuestionImpl implements Question
 
 	protected MyAssessmentOrdering assessmentOrdering = new MyAssessmentOrdering(this);
 
-	protected AttributionImpl attribution = new AttributionImpl();
+	protected AttributionImpl createdBy = new AttributionImpl();
 
 	protected String description = null;
 
 	protected String id = null;
+
+	protected AttributionImpl modifiedBy = new AttributionImpl();
 
 	protected Part partContext = null;
 
@@ -290,9 +291,9 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
-	public Attribution getAttribution()
+	public Attribution getCreatedBy()
 	{
-		return this.attribution;
+		return this.createdBy;
 	}
 
 	/**
@@ -309,6 +310,14 @@ public class QuestionImpl implements Question
 	public String getId()
 	{
 		return this.id;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Attribution getModifiedBy()
+	{
+		return this.modifiedBy;
 	}
 
 	/**
@@ -467,8 +476,10 @@ public class QuestionImpl implements Question
 	protected void set(QuestionImpl other)
 	{
 		if (other.questionHandler != null) this.questionHandler = (TypeSpecificQuestion) (other.questionHandler.clone());
+		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
 		this.description = other.description;
 		this.id = other.id;
+		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy);
 		this.partContext = other.partContext;
 		this.poolId = other.poolId;
 		this.poolService = other.poolService;

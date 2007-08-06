@@ -40,6 +40,7 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>tests</value></property>
  		<property name="bundle"><value>tests</value></property>
+		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>tests.xml</value></property>
 	</bean>
 

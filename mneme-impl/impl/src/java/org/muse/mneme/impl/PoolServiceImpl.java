@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -245,6 +246,17 @@ public class PoolServiceImpl implements PoolService
 
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+
+		// if the pool is new (i.e. no id), set the createdBy information, if not already set
+		if ((pool.getId() == null) && (pool.getCreatedBy().getUserId() == null))
+		{
+			pool.getCreatedBy().setDate(new Date());
+			pool.getCreatedBy().setUserId(sessionManager.getCurrentSessionUserId());
+		}
+
+		// update last modified information
+		pool.getModifiedBy().setDate(new Date());
+		pool.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
 
 		storage.savePool((PoolImpl) pool);
 

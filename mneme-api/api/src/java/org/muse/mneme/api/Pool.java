@@ -53,6 +53,30 @@ public interface Pool
 	List<String> drawQuestionIds(long seed, Integer numQuestions);
 
 	/**
+	 * Locate a list of questions in this pool with this criteria.
+	 * 
+	 * @param userId
+	 *        the user id (if null, the current user is used).
+	 * @param sort
+	 *        The sort criteria.
+	 * @param search
+	 *        The search criteria.
+	 * @param pageNum
+	 *        The page number (1 based) to display, or null to disable paging and get them all.
+	 * @param pageSize
+	 *        The number of items for the requested page, or null if we are not paging.
+	 * @return a list of questions that meet the criteria.
+	 */
+	List<Question> findQuestions(String userId, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
+
+	/**
+	 * Access the created-by (owner / date)
+	 * 
+	 * @return The pool's created-by.
+	 */
+	Attribution getCreatedBy();
+
+	/**
 	 * Access the description of the pool.
 	 * 
 	 * @return The description of the pool.
@@ -75,6 +99,13 @@ public interface Pool
 	String getId();
 
 	/**
+	 * Access the modified-by (owner / date)
+	 * 
+	 * @return The pool's modified-bt.
+	 */
+	Attribution getModifiedBy();
+
+	/**
 	 * Access the number of questions currently defined in the pool.
 	 * 
 	 * @return The number of questions currently defined in the pool.
@@ -82,35 +113,11 @@ public interface Pool
 	Integer getNumQuestions();
 
 	/**
-	 * Access the pool's owner id.
-	 * 
-	 * @return The pool's owner id.
-	 */
-	String getOwnerId();
-
-	/**
 	 * Access the number of points for each question in this pool.
 	 * 
 	 * @return The number of points for each question in this pool.
 	 */
 	Float getPoints();
-
-	/**
-	 * Locate a list of questions in this pool with this criteria.
-	 * 
-	 * @param userId
-	 *        the user id (if null, the current user is used).
-	 * @param sort
-	 *        The sort criteria.
-	 * @param search
-	 *        The search criteria.
-	 * @param pageNum
-	 *        The page number (1 based) to display, or null to disable paging and get them all.
-	 * @param pageSize
-	 *        The number of items for the requested page, or null if we are not paging.
-	 * @return a list of questions that meet the criteria.
-	 */
-	List<Question> findQuestions(String userId, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Access the subject of the pool.
@@ -148,14 +155,6 @@ public interface Pool
 	 *        The difficulty value for the questions in this pool.
 	 */
 	void setDifficulty(Integer difficulty);
-
-	/**
-	 * Set the pool's owner id.
-	 * 
-	 * @param ownerId
-	 *        The pool's owner id.
-	 */
-	void setOwnerId(String ownerId);
 
 	/**
 	 * Set the number of points for each question in this pool.

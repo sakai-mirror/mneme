@@ -41,11 +41,11 @@ public interface Question
 	Ordering<Question> getAssessmentOrdering();
 
 	/**
-	 * Access the attribution (owner / date created)
+	 * Access the created-by (owner / date created)
 	 * 
-	 * @return The attribution for the question.
+	 * @return The created-by for the question.
 	 */
-	Attribution getAttribution();
+	Attribution getCreatedBy();
 
 	/**
 	 * Access the description of the question.
@@ -60,6 +60,13 @@ public interface Question
 	 * @return The question's id.
 	 */
 	String getId();
+
+	/**
+	 * Access the modified-by (owner / date created)
+	 * 
+	 * @return The modified-by for the question.
+	 */
+	Attribution getModifiedBy();
 
 	/**
 	 * Access the assessment part, within the context of an assessment, that this question is being used in.

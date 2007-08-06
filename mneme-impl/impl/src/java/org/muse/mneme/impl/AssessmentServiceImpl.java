@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -261,6 +262,17 @@ public class AssessmentServiceImpl implements AssessmentService
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
 
+		// if the assessment is new (i.e. no id), set the createdBy information, if not already set
+		if ((assessment.getId() == null) && (assessment.getCreatedBy().getUserId() == null))
+		{
+			assessment.getCreatedBy().setDate(new Date());
+			assessment.getCreatedBy().setUserId(sessionManager.getCurrentSessionUserId());
+		}
+
+		// update last modified information
+		assessment.getModifiedBy().setDate(new Date());
+		assessment.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
+		
 		this.storage.saveAssessment((AssessmentImpl) assessment);
 
 		// event

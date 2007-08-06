@@ -39,6 +39,7 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>tests_delete</value></property>
  		<property name="bundle"><value>testsDelete</value></property>
+ 		<property name="shared"><value>mneme</value></property>
  		<property name="components"><value>testsDelete.xml</value></property>
 	</bean>
 

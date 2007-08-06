@@ -26,6 +26,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -290,11 +291,13 @@ public class AssessmentStorageSample implements AssessmentStorage
 	{
 		if (this.assessments.isEmpty())
 		{
+			Date now = new Date();
+
 			AssessmentImpl a = newAssessment();
 			a.initId("a1");
 			a.setActive(Boolean.TRUE);
 			a.setContext("mercury");
-			a.setCreatedBy("admin");
+			a.getCreatedBy().setUserId("admin");
 			a.setNumSubmissionsAllowed(1);
 			a.setQuestionGrouping(QuestionGrouping.question);
 			a.setRandomAccess(Boolean.TRUE);
@@ -303,6 +306,9 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.setType(AssessmentType.test);
 			// a.getAccess().setPassword("password");
 			a.getCreatedBy().setUserId("admin");
+			a.getCreatedBy().setDate(now);
+			a.getModifiedBy().setUserId("admin");
+			a.getModifiedBy().setDate(now);
 			try
 			{
 				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("06/01/07"));
@@ -345,7 +351,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.initId("a2");
 			a.setActive(Boolean.TRUE);
 			a.setContext("mercury");
-			a.setCreatedBy("admin");
+			a.getCreatedBy().setUserId("admin");
 			a.setNumSubmissionsAllowed(5);
 			a.setQuestionGrouping(QuestionGrouping.question);
 			a.setRandomAccess(Boolean.TRUE);
@@ -354,6 +360,9 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.setType(AssessmentType.test);
 			// a.getAccess().setPassword("password");
 			a.getCreatedBy().setUserId("admin");
+			a.getCreatedBy().setDate(now);
+			a.getModifiedBy().setUserId("admin");
+			a.getModifiedBy().setDate(now);
 			try
 			{
 				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("07/01/07"));

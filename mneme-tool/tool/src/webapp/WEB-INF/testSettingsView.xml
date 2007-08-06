@@ -38,6 +38,7 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>test_settings</value></property>
  		<property name="bundle"><value>testSettings</value></property>
+		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>testSettings.xml</value></property>
 	</bean>
 

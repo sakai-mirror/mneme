@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -289,6 +290,8 @@ public class PoolStorageSample implements PoolStorage
 	{
 		if (pools.isEmpty())
 		{
+			Date now = new Date();
+
 			PoolImpl pool = newPool();
 			pool.initId("b1");
 			pool.setDescription("description");
@@ -297,6 +300,10 @@ public class PoolStorageSample implements PoolStorage
 			pool.setPoints(10f);
 			pool.setSubject("subject");
 			pool.setTitle("title");
+			pool.getCreatedBy().setUserId("admin");
+			pool.getCreatedBy().setDate(now);
+			pool.getModifiedBy().setUserId("admin");
+			pool.getModifiedBy().setDate(now);
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
@@ -307,6 +314,10 @@ public class PoolStorageSample implements PoolStorage
 			pool.setPoints(10f);
 			pool.setSubject("subject 2");
 			pool.setTitle("title 2");
+			pool.getCreatedBy().setUserId("admin");
+			pool.getCreatedBy().setDate(now);
+			pool.getModifiedBy().setUserId("admin");
+			pool.getModifiedBy().setDate(now);
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
@@ -317,6 +328,10 @@ public class PoolStorageSample implements PoolStorage
 			pool.setPoints(7f);
 			pool.setSubject("subject 3");
 			pool.setTitle("title 3");
+			pool.getCreatedBy().setUserId("admin");
+			pool.getCreatedBy().setDate(now);
+			pool.getModifiedBy().setUserId("admin");
+			pool.getModifiedBy().setDate(now);
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
@@ -327,6 +342,10 @@ public class PoolStorageSample implements PoolStorage
 			pool.setPoints(7f);
 			pool.setSubject("subject 4");
 			pool.setTitle("title 4");
+			pool.getCreatedBy().setUserId("admin");
+			pool.getCreatedBy().setDate(now);
+			pool.getModifiedBy().setUserId("admin");
+			pool.getModifiedBy().setDate(now);
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
@@ -337,6 +356,10 @@ public class PoolStorageSample implements PoolStorage
 			pool.setPoints(3f);
 			pool.setSubject("subject 5");
 			pool.setTitle("title 5");
+			pool.getCreatedBy().setUserId("admin");
+			pool.getCreatedBy().setDate(now);
+			pool.getModifiedBy().setUserId("admin");
+			pool.getModifiedBy().setDate(now);
 			this.pools.put(pool.getId(), pool);
 		}
 	}

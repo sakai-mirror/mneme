@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -209,7 +210,7 @@ public class QuestionServiceImpl implements QuestionService
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
 
 		QuestionImpl question = this.storage.newQuestion();
-		question.getAttribution().setUserId(userId);
+		question.getCreatedBy().setUserId(userId);
 		question.setPool(pool);
 		question.initType(type);
 
@@ -265,6 +266,17 @@ public class QuestionServiceImpl implements QuestionService
 
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+
+		// if the question is new (i.e. no id), set the createdBy information, if not already set
+		if ((question.getId() == null) && (question.getCreatedBy().getUserId() == null))
+		{
+			question.getCreatedBy().setDate(new Date());
+			question.getCreatedBy().setUserId(sessionManager.getCurrentSessionUserId());
+		}
+
+		// update last modified information
+		question.getModifiedBy().setDate(new Date());
+		question.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
 
 		this.storage.saveQuestion((QuestionImpl) question);
 

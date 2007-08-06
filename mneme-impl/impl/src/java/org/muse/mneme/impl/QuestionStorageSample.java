@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +70,7 @@ public class QuestionStorageSample implements QuestionStorage
 		int count = 0;
 		for (QuestionImpl question : this.questions.values())
 		{
-			if (question.getAttribution().getUserId().equals(userId) && ((pool == null) || (question.getPool().equals(pool))))
+			if (question.getCreatedBy().getUserId().equals(userId) && ((pool == null) || (question.getPool().equals(pool))))
 			{
 				count++;
 			}
@@ -99,7 +100,7 @@ public class QuestionStorageSample implements QuestionStorage
 		List<Question> rv = new ArrayList<Question>();
 		for (QuestionImpl question : this.questions.values())
 		{
-			if (question.getAttribution().getUserId().equals(userId) && ((pool == null) || (question.getPool().equals(pool))))
+			if (question.getCreatedBy().getUserId().equals(userId) && ((pool == null) || (question.getPool().equals(pool))))
 			{
 				rv.add(new QuestionImpl(question));
 			}
@@ -283,6 +284,8 @@ public class QuestionStorageSample implements QuestionStorage
 		// if we have not set up our questions, do so now
 		if (questions.isEmpty())
 		{
+			Date now = new Date();
+
 			QuestionImpl q = newQuestion();
 			q.initType("mneme:TrueFalse");
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
@@ -290,9 +293,13 @@ public class QuestionStorageSample implements QuestionStorage
 			q.setDescription("question one");
 			q.setRequireRationale(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
-			q.getAttribution().setUserId("admin");
+			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("True or False (one)?");
 			((TrueFalseQuestionImpl) q.getTypeSpecificQuestion()).setCorrectAnswer("TRUE");
+			q.getCreatedBy().setUserId("admin");
+			q.getCreatedBy().setDate(now);
+			q.getModifiedBy().setUserId("admin");
+			q.getModifiedBy().setDate(now);
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
@@ -302,9 +309,13 @@ public class QuestionStorageSample implements QuestionStorage
 			q.setDescription("question two");
 			q.setRequireRationale(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
-			q.getAttribution().setUserId("admin");
+			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("True or False (two)?");
 			((TrueFalseQuestionImpl) q.getTypeSpecificQuestion()).setCorrectAnswer("FALSE");
+			q.getCreatedBy().setUserId("admin");
+			q.getCreatedBy().setDate(now);
+			q.getModifiedBy().setUserId("admin");
+			q.getModifiedBy().setDate(now);
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
@@ -314,9 +325,13 @@ public class QuestionStorageSample implements QuestionStorage
 			q.setDescription("question three");
 			q.setRequireRationale(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
-			q.getAttribution().setUserId("admin");
+			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("True or False (three)?");
 			((TrueFalseQuestionImpl) q.getTypeSpecificQuestion()).setCorrectAnswer("TRUE");
+			q.getCreatedBy().setUserId("admin");
+			q.getCreatedBy().setDate(now);
+			q.getModifiedBy().setUserId("admin");
+			q.getModifiedBy().setDate(now);
 			questions.put(q.getId(), q);
 		}
 	}
