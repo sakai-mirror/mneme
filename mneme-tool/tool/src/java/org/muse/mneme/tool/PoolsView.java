@@ -76,15 +76,17 @@ public class PoolsView extends ControllerImpl
 
 		// sort parameter
 		String sortCode = null;
-		if (params.length == 3)
+		if (params.length > 2)
 		{
+			//sort is in param array at index 2
 			sortCode = params[2];
 		}
 		
 		// paging parameter
 		String pagingParameter = null;
-		if (params.length == 4)
+		if (params.length > 3)
 		{
+			//paging parameter is in param array at index 3
 			pagingParameter = params[3];
 		}
 
