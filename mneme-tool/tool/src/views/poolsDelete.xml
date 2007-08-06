@@ -73,8 +73,9 @@
 				<navigation title="cancel" style="BUTTON"
 					accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/pools/{0}">
+					<destination template="/pools/{0}/{1}">
 						<model ref="sortcode" />
+						<model ref="pagingParameter" />
 					</destination>
 				</navigation>
 			</container>

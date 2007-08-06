@@ -66,13 +66,13 @@ public class PoolsDeleteView extends ControllerImpl
 	{
 		String destination = this.uiService.decode(req, context);
 
-		if (params.length < 3) throw new IllegalArgumentException();
+		if (params.length < 4) throw new IllegalArgumentException();
 
 		List<Pool> pools = new ArrayList<Pool>(0);
 		StringBuffer deletePoolIds = new StringBuffer();
 
-		// pool id's are in the params array from the index 3
-		for (int i = 3; i < params.length; i++)
+		// pool id's are in the params array from the index 4
+		for (int i = 4; i < params.length; i++)
 		{
 			// get the pool and add to the list to show
 			Pool pool = this.poolService.getPool(params[i]);
@@ -83,6 +83,8 @@ public class PoolsDeleteView extends ControllerImpl
 		context.put("pools", pools);
 		// sort code
 		context.put("sortcode", params[2]);
+		
+		context.put("pagingParameter", params[3]);
 
 		uiService.render(ui, context);
 	}
@@ -133,7 +135,8 @@ public class PoolsDeleteView extends ControllerImpl
 				e.printStackTrace();
 			}
 		}
-		destination = "/pools/" + params[2];
+		//add sort and paging
+		destination = "/pools/" + params[2] + "/"+ params[3];
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

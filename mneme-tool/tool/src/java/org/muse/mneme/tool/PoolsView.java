@@ -157,6 +157,7 @@ public class PoolsView extends ControllerImpl
 		paging.setMaxItems(maxPools);
 		paging.setCurrentAndSize(pagingParameter);
 		context.put("paging", paging);
+		context.put("pagingParameter", pagingParameter);
 
 		try
 		{
@@ -214,8 +215,8 @@ public class PoolsView extends ControllerImpl
 
 					path.append(destination);
 
-					// for sort code
-					if (params.length == 3)
+					// for sort
+					if (params.length > 2)
 					{
 						path.append(separator);
 						path.append(params[2]);
@@ -225,6 +226,19 @@ public class PoolsView extends ControllerImpl
 						// default sort - title ascending
 						path.append(separator);
 						path.append("1A");
+					}
+					
+					//for paging 
+					if (params.length > 3)
+					{
+						path.append(separator);
+						path.append(params[3]);
+					}
+					else
+					{
+						// default paging 
+						path.append(separator);
+						path.append("1-2");
 					}
 
 					for (String selectedPoolId : selectedPoolIds)

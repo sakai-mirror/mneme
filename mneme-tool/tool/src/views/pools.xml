@@ -114,11 +114,15 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/pools/0A" />
+							<destination template="/pools/0A/{0}" >
+								<model ref="pagingParameter" />
+							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/pools/0D" />
+							<destination template="/pools/0D/{0}" >
+								<model ref="pagingParameter" />
+							</destination>
 						</desc>
 					</sort>
 				</modelColumn>
@@ -138,11 +142,15 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/pools/1A" />
+							<destination template="/pools/1A/{0}" >
+								<model ref="pagingParameter" />
+						    </destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/pools/1D" />
+							<destination template="/pools/1D/{0}" >
+								<model ref="pagingParameter" />
+							</destination>
 						</desc>
 					</sort>
 					<entityNavigations>
