@@ -33,7 +33,7 @@ public interface PoolService
 	 */
 	enum FindPoolsSort
 	{
-		subject_a, subject_d, title_a, title_d
+		points_a, points_d, subject_a, subject_d, title_a, title_d
 	}
 
 	/**

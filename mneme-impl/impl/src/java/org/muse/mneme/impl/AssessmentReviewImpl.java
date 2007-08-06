@@ -79,7 +79,8 @@ public class AssessmentReviewImpl implements AssessmentReview
 			return Boolean.TRUE;
 		}
 
-		// TODO: ReviewTiming.graded?
+		// TODO: ReviewTiming.graded? - based on submission context, if set, if submission is graded
+		// TODO: also, if submission context is set, make sure it is submitted?
 
 		return Boolean.FALSE;
 	}

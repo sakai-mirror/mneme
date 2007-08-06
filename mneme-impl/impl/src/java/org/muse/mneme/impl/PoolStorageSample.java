@@ -143,6 +143,17 @@ public class PoolStorageSample implements PoolStorage
 						rv = -1 * ((Pool) arg0).getTitle().compareTo(((Pool) arg1).getTitle());
 						break;
 					}
+					case points_a:
+					{
+						rv = ((Pool) arg0).getPoints().compareTo(((Pool) arg1).getPoints());
+						break;
+					}
+					case points_d:
+					{
+						rv = -1 * ((Pool) arg0).getPoints().compareTo(((Pool) arg1).getPoints());
+						break;
+					}
+						
 				}
 
 				return rv;

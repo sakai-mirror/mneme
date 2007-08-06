@@ -46,7 +46,7 @@ public interface DrawPart extends Part
 	List<PoolDraw> getDraws();
 
 	/**
-	 * Get a list of draws for each pool specified - for those that are in se in this part, have a non-null numQuestions.
+	 * Get a list of draws for each pool specified - for those that are already in this part, set the non-null numQuestions.
 	 * 
 	 * @param userId
 	 *        A user id - all the pools for this user will be included.
