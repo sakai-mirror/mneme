@@ -34,8 +34,7 @@
 
 	<container>
 		<!--navigation-->
-		<navigationBar width="100%" />
-
+		
 		<text>
 			<message selector="test-delete-message1" />
 		</text>
