@@ -205,7 +205,7 @@ public class PoolsView extends ControllerImpl
 
 		if (destination != null)
 		{
-			if (destination.trim().equalsIgnoreCase("/pools_delete"))
+			if (destination.startsWith("/pools_delete"))
 			{
 				// delete the pools
 				if (selectedPoolIds != null && (selectedPoolIds.length > 0))
@@ -214,33 +214,7 @@ public class PoolsView extends ControllerImpl
 					String separator = "/";
 
 					path.append(destination);
-
-					// for sort
-					if (params.length > 2)
-					{
-						path.append(separator);
-						path.append(params[2]);
-					}
-					else
-					{
-						// default sort - title ascending
-						path.append(separator);
-						path.append("1A");
-					}
-					
-					//for paging 
-					if (params.length > 3)
-					{
-						path.append(separator);
-						path.append(params[3]);
-					}
-					else
-					{
-						// default paging 
-						path.append(separator);
-						path.append("1-2");
-					}
-
+				
 					for (String selectedPoolId : selectedPoolIds)
 					{
 						path.append(separator);
@@ -273,8 +247,8 @@ public class PoolsView extends ControllerImpl
 			}
 		}
 
-		if (params.length == 3)
-			destination = "/pools/" + params[2];
+		if (params.length == 4)
+			destination = "/pools/" + params[2] +"/"+ params[3]; 
 		else
 			destination = "/pools/";
 
