@@ -36,6 +36,7 @@ import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.QuestionPlugin;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
@@ -180,6 +181,10 @@ public class PoolsView extends ControllerImpl
 		Values values = this.uiService.newValues();
 		context.put("poolids", values);
 
+		// the question types
+		List<QuestionPlugin> questionTypes = this.mnemeService.getQuestionPlugins();
+		context.put("questionTypes", questionTypes);
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -249,6 +254,11 @@ public class PoolsView extends ControllerImpl
 					if (M_log.isErrorEnabled()) M_log.error(e.toString());
 					e.printStackTrace();
 				}
+			}
+			else if (destination.startsWith("ADDQ:"))
+			{
+				// TODO: add a question, set the destination
+				M_log.info(destination);
 			}
 		}
 
