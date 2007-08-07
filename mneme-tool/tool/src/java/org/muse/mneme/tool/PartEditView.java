@@ -36,6 +36,8 @@ import org.muse.ambrosia.api.PopulatingSet;
 import org.muse.ambrosia.api.PopulatingSet.Factory;
 import org.muse.ambrosia.api.PopulatingSet.Id;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.ambrosia.api.Paging;
+import org.muse.ambrosia.api.Values;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
@@ -47,6 +49,7 @@ import org.muse.mneme.api.PoolService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 import org.springframework.core.io.ClassPathResource;
+
 
 /**
  * The /part_edit view for the mneme tool.
@@ -84,13 +87,16 @@ public class PartEditView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// we need a two parameters (aid, pid)
-		if (params.length != 4)
+		if (params.length != 4 && params.length !=5 && params.length !=6)
 		{
 			throw new IllegalArgumentException();
 		}
 
 		String assessmentId = params[2];
 		String partId = params[3];
+//		 sort parameter
+		String sortCode = null;
+		if (params.length >= 5)	sortCode = params[4];	
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
@@ -126,6 +132,7 @@ public class PartEditView extends ControllerImpl
 			getManual(assessment, (ManualPart) part, req, res, context, params);
 		}
 	}
+		
 
 	/**
 	 * {@inheritDoc}
@@ -136,10 +143,49 @@ public class PartEditView extends ControllerImpl
 		context.put("assessment", assessment);
 		context.put("part", part);
 
+		//find sort param
+		String sortCode = null;
+		PoolService.FindPoolsSort sort=PoolService.FindPoolsSort.subject_a;
+		char sortCol='0';
+		char sortDir='A';
+		
+		if (params.length >= 5)	{
+			sortCode = params[4];
+			if(sortCode != null && sortCode.length()==2)
+			{
+				sortCol = sortCode.charAt(0);
+				sortDir = sortCode.charAt(1);
+				sort = findSortCode(sortCode);
+			}			
+		}
+		context.put("sort_column", sortCol);
+		context.put("sort_direction", sortDir);
+		
+		// default paging
+		String pagingParameter = null;
+		if (params.length == 6)
+		{			
+			pagingParameter = params[5];
+		}
+		
+		if (pagingParameter == null)
+		{
+			// TODO: other than 2 size!
+			pagingParameter = "1-2";
+		}
+
+		Integer maxPools = this.poolService.countPools(toolManager.getCurrentPlacement().getContext(), null, null);
+		
+		Paging paging = uiService.newPaging();
+		paging.setMaxItems(maxPools);
+		paging.setCurrentAndSize(pagingParameter);
+		context.put("paging", paging);
+		context.put("pagingParameter", pagingParameter);
+
 		// get the pool draw list - all the pools for the user (select, sort, page) crossed with this part's actual draws
-		// TODO: paging (last two params)
-		List<PoolDraw> draws = part.getDrawsForPools(toolManager.getCurrentPlacement().getContext(), null, PoolService.FindPoolsSort.subject_a, null,
-				null, null);
+		List<PoolDraw> draws = part.getDrawsForPools(toolManager.getCurrentPlacement().getContext(), null, sort, null,
+				paging.getCurrent(),paging.getSize());
+		
 		context.put("draws", draws);
 
 		// render
@@ -156,10 +202,46 @@ public class PartEditView extends ControllerImpl
 		context.put("assessment", assessment);
 		context.put("part", part);
 
+//		checkboxes to remove questions
+		Values values = uiService.newValues();
+		context.put("questionids", values);
 		// render
 		uiService.render(ui2, context);
 	}
 
+	private PoolService.FindPoolsSort findSortCode(String sortCode)
+	{		
+		PoolService.FindPoolsSort sort=PoolService.FindPoolsSort.subject_a;
+		// 0 is subject
+		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = PoolService.FindPoolsSort.subject_a;
+		}
+		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = PoolService.FindPoolsSort.subject_d;
+		}
+		// 1 is title
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = PoolService.FindPoolsSort.title_a;
+		}
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = PoolService.FindPoolsSort.title_d;
+		}
+		// 2 is points
+		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = PoolService.FindPoolsSort.points_a;
+		}
+		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = PoolService.FindPoolsSort.points_d;
+		}
+		
+		return sort;
+	}
 	/**
 	 * Final initialization, once all dependencies are set.
 	 */
@@ -189,7 +271,7 @@ public class PartEditView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// we need a two parameters (aid, pid)
-		if (params.length != 4)
+		if (params.length != 4 && params.length !=5 && params.length !=6)
 		{
 			throw new IllegalArgumentException();
 		}
@@ -266,7 +348,11 @@ public class PartEditView extends ControllerImpl
 				}
 			}
 		}
-
+		else {
+			Values values = uiService.newValues();
+			context.put("questionids", values);
+			String[] removeQuesIds = values.getValues();
+		}
 		// commit the save
 		try
 		{
@@ -280,6 +366,9 @@ public class PartEditView extends ControllerImpl
 		}
 
 		// redirect to the next destination
+		//save sort parameter
+		if (params.length == 6)	destination = destination + params[4]+"/"+ params[5];
+		
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

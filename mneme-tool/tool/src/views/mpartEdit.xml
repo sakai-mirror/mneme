@@ -24,23 +24,72 @@
  **********************************************************************************/
 -->
 
-<interface title="partEdit-title" header="partEdit-header">
-	<container>
+<interface title="partEdit-title">
+<!--mode bar-->
+	<modeContainer>
+		<alias to="ToolModeFragment" toolId="sakai.mneme" />
+	</modeContainer>
+<header>
+		<message selector="partEdit-header">
+			<model type="icon" icon="/icons/edit.png" />
+			<model ref="assessment.title" missing="no-title"/>
+		</message>
+</header>
 
-		<section>
-			<container>
-				<textEdit title="part-title" model="part.title" />
-				<textEdit title="part-instructions" model="part.presentation.text" />
+	<container>
+	<section title="properties">
+		<container>
+			<entityDisplay>
+					<rows>
+						<row title="part-title">
+							<container>
+								<textEdit rows="1" cols="25" >
+									<model ref="part.title"/>
+								</textEdit>				
+							</container>
+						</row>
+						<row title="part-instructions">
+							<container>
+								<textEdit model="part.presentation.text" />
+							</container>
+							</row>
+						<row>
+							<container>
+								<attachmentsEdit title="attachments" model="part.presentation.attachments" />
+							</container>
+						</row>	
+					</rows>
+				</entityDisplay>
 			</container>
 		</section>
 
-		<section>
+		<section title="select-questions-msg">
 			<container>
-
+					<!-- entity actions -->
+				<entityActionBar width="40%">
+					<container>
+						<navigation destination="" title="select-questions" style="LINK" description="select-questions-description" submit="TRUE">
+							<icon icon="/icons/hand_select.png" style="LEFT" />
+						</navigation>
+						<navigation destination="" title="remove-question" style="LINK" description="remove-question-description" submit="TRUE">
+							<icon icon="/icons/page_delete.png" style="LEFT" />
+						</navigation>						
+					</container>
+				</entityActionBar>
+		
 				<!-- the list of the selected questions -->
 				<entityList style="FLAT">
+				<emptyTitle>
+						<message selector="no-questions" />
+					</emptyTitle>
 					<iterator name="question" model="part.questionsAsAuthored" />
 					<columns>
+						<selectionColumn multiple="TRUE">
+							<value>
+								<model type="text" ref="question.id" />
+							</value>
+							<model ref="questionids.values" />
+						</selectionColumn>
 						<modelColumn>
 							<title>
 								<message selector="question-subject" />
@@ -51,8 +100,22 @@
 							<title>
 								<message selector="question-pool-title" />
 							</title>
-							<model ref="question.pool.title" />
+							<model ref="question.pool.title" missing="no-title"/>
 						</modelColumn>
+						<column>
+							<title>
+								<message selector="question-preview" />
+							</title>
+							<navigations>
+								<navigation style="LINK">
+									<icon icon="/icons/preview.png" style="LEFT" />
+									<destination
+										template="/question_preview/{0}">
+										<model ref="question.id" />
+									</destination>
+								</navigation>
+							</navigations>
+						</column>
 						<modelColumn>
 							<title>
 								<message selector="question-description" />

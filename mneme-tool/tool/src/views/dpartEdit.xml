@@ -34,28 +34,36 @@
 <header>
 		<message selector="partEdit-header">
 			<model type="icon" icon="/icons/edit.png" />
-			<model ref="assessment.title" />
+			<model ref="assessment.title" missing="no-title"/>
 		</message>
 </header>
-
+	
 	<container>
-	<entityDisplay>
-			<rows>
-				<row title="part-title">
-					<container>
-						<textEdit rows="1" cols="25" >
-							<model ref="part.title" missing="no-title"/>
-						</textEdit>				
-					</container>
-				</row>
-				<row title="part-instructions">
-					<container>
-						<textEdit model="part.presentation.text" />
-					</container>
-					</row>
-			</rows>
-		</entityDisplay>
-
+		<section title="properties">
+		<container>
+			<entityDisplay>
+					<rows>
+						<row title="part-title">
+							<container>
+								<textEdit rows="1" cols="25" >
+									<model ref="part.title" />
+								</textEdit>				
+							</container>
+						</row>
+						<row title="part-instructions">
+							<container>
+								<textEdit model="part.presentation.text" />
+							</container>
+							</row>
+						<row>
+							<container>
+								<attachmentsEdit title="attachments" model="part.presentation.attachments" />
+							</container>
+						</row>	
+					</rows>
+				</entityDisplay>
+			</container>
+		</section>
 		<section title="part-pools-msg">
 		<container>
 		<entityActionBar>
@@ -64,22 +72,15 @@
 					style="LINK" description="search-description">
 					<icon icon="/icons/search.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" style="LINK"
-					description="gotofirst-description">
-					<icon icon="/icons/first.png" style="LEFT" />
-				</navigation>
-				<navigation destination="/" style="LINK"
-					description="gotoprev-description">
-					<icon icon="/icons/previous.png" style="LEFT" />
-				</navigation>
-				<navigation destination="/" style="LINK"
-					description="gotonext-description">
-					<icon icon="/icons/next.png" style="LEFT" />
-				</navigation>
-				<navigation destination="/" style="LINK"
-					description="gotolast-description">
-					<icon icon="/icons/last.png" style="LEFT" />
-				</navigation>
+				<pager paging="paging">
+					<destination template="/part_edit/{0}/{1}/{2}{3}/{4}">
+						<model ref="assessment.id" />
+						<model ref="part.id" />
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
+						<model type="paging" ref="paging" />
+					</destination>
+				</pager>				
 			</container>
 		</entityActionBar>			
 
@@ -136,7 +137,7 @@
 							<title>
 								<message selector="pool-title" />
 							</title>
-							<model ref="draw.pool.title" />
+							<model ref="draw.pool.title" missing="no-title"/>
 							<sort>
 								<active>
 									<compareDecision model="sort_column"
@@ -179,6 +180,30 @@
 								<message selector="pool-points" />
 							</title>
 							<model ref="draw.pool.points" />
+							<sort>
+								<active>
+									<compareDecision model="sort_column"
+										constant="2" />
+								</active>
+								<direction>
+									<compareDecision model="sort_direction"
+										constant="A" />
+								</direction>
+								<asc icon="/icons/sortascending.gif">
+									<message selector="asc" />
+									<destination template="/part_edit/{0}/{1}/2A" >
+										<model ref="assessment.id" />
+										<model ref="part.id" />
+									</destination>
+								</asc>
+								<desc icon="/icons/sortdescending.gif">
+									<message selector="desc" />
+									<destination template="/part_edit/{0}/{1}/2D" >
+										<model ref="assessment.id" />
+										<model ref="part.id" />
+									</destination>
+								</desc>
+							</sort>
 						</modelColumn>
 						<modelColumn>
 							<title>
