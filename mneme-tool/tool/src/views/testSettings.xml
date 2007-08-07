@@ -68,8 +68,6 @@
 				<row title="timeLimit">
 					<container>
 						<durationEdit>
-							<icon icon="/icons/date.png"
-								message="edit-date" />
 							<model ref="assessment.timeLimit"
 								type="duration" />
 						</durationEdit>
