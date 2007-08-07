@@ -48,7 +48,7 @@
 			</emptyTitle>
 			<columns>
 				<modelColumn>
-					<model ref="pool.title" />
+					<model ref="pool.title" missing="missing-title"/>
 				</modelColumn>
 			</columns>
 
