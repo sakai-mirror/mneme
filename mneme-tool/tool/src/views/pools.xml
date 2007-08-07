@@ -156,7 +156,7 @@
 					<entityNavigations>
 						<navigation>
 							<destination template="/pool_edit/{0}">
-								<model ref="pools.id" />
+								<model ref="pool.id" />
 							</destination>
 						</navigation>
 					</entityNavigations>
