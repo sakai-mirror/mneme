@@ -21,6 +21,7 @@
 
 package org.muse.mneme.api;
 
+import java.util.List;
 
 /**
  * MnemeService is the overall service interface for Mneme, providing some application specific support<br />
@@ -96,6 +97,13 @@ public interface MnemeService extends PoolService, QuestionService, SubmissionSe
 	 * @return The question plugin for this question type, or null if none found.
 	 */
 	QuestionPlugin getQuestionPlugin(String type);
+
+	/**
+	 * Access all the quesiton plugins, sorted by the (localized) type name.
+	 * 
+	 * @return A List of all the quesiton plugins, sorted by the (localized) type name.
+	 */
+	List<QuestionPlugin> getQuestionPlugins();
 
 	/**
 	 * Register a question plugin.

@@ -33,6 +33,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.sakaiproject.tool.api.SessionManager;
@@ -47,14 +48,17 @@ public class PoolsView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(PoolsView.class);
 
-	/** Assessment service. */
-	protected PoolService poolService = null;
+	/** Dependency: mneme service. */
+	protected MnemeService mnemeService = null;
 
-	/** tool manager */
-	protected ToolManager toolManager = null;
+	/** Dependency: Assessment service. */
+	protected PoolService poolService = null;
 
 	/** Dependency: SessionManager */
 	protected SessionManager sessionManager = null;
+
+	/** Dependency: ToolManager */
+	protected ToolManager toolManager = null;
 
 	/**
 	 * Shutdown.
@@ -78,15 +82,15 @@ public class PoolsView extends ControllerImpl
 		String sortCode = null;
 		if (params.length > 2)
 		{
-			//sort is in param array at index 2
+			// sort is in param array at index 2
 			sortCode = params[2];
 		}
-		
+
 		// paging parameter
 		String pagingParameter = null;
 		if (params.length > 3)
 		{
-			//paging parameter is in param array at index 3
+			// paging parameter is in param array at index 3
 			pagingParameter = params[3];
 		}
 
@@ -162,7 +166,8 @@ public class PoolsView extends ControllerImpl
 		try
 		{
 			// collect the pools to show
-			List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, sort, null, paging.getCurrent(), paging.getSize());
+			List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, sort, null, paging.getCurrent(),
+					paging.getSize());
 			context.put("pools", pools);
 		}
 		catch (Exception e)
@@ -214,7 +219,7 @@ public class PoolsView extends ControllerImpl
 					String separator = "/";
 
 					path.append(destination);
-				
+
 					for (String selectedPoolId : selectedPoolIds)
 					{
 						path.append(separator);
@@ -231,7 +236,7 @@ public class PoolsView extends ControllerImpl
 				{
 					// create new pool and redirect to pool properties
 					Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId());
-					//title and subject are required as sort may fail on pools page
+					// title and subject are required as sort may fail on pools page
 					newPool.setTitle("");
 					newPool.setSubject("");
 					this.poolService.savePool(newPool, toolManager.getCurrentPlacement().getContext());
@@ -248,11 +253,22 @@ public class PoolsView extends ControllerImpl
 		}
 
 		if (params.length == 4)
-			destination = "/pools/" + params[2] +"/"+ params[3]; 
+			destination = "/pools/" + params[2] + "/" + params[3];
 		else
 			destination = "/pools/";
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+	}
+
+	/**
+	 * Set the MnemeService.
+	 * 
+	 * @param service
+	 *        the MnemeService.
+	 */
+	public void setMnemeService(MnemeService sevice)
+	{
+		this.mnemeService = sevice;
 	}
 
 	/**
@@ -265,10 +281,10 @@ public class PoolsView extends ControllerImpl
 	{
 		this.poolService = service;
 	}
-	
+
 	/**
 	 * @param sessionManager
-	 *        the sessionManager to set
+	 *        the SessionManager.
 	 */
 	public void setSessionManager(SessionManager sessionManager)
 	{
@@ -277,7 +293,7 @@ public class PoolsView extends ControllerImpl
 
 	/**
 	 * @param toolManager
-	 *        the toolManager to set
+	 *        the ToolManager.
 	 */
 	public void setToolManager(ToolManager toolManager)
 	{

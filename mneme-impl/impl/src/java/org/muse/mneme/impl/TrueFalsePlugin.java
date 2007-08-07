@@ -76,6 +76,14 @@ public class TrueFalsePlugin implements QuestionPlugin
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public String getTypeName()
+	{
+		return this.messages.getString("name");
+	}
+
+	/**
 	 * Final initialization, once all dependencies are set.
 	 */
 	public void init()

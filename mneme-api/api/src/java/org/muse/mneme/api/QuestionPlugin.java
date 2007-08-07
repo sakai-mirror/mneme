@@ -34,6 +34,13 @@ public interface QuestionPlugin
 	String getType();
 
 	/**
+	 * Access the question type (human readable) string for this plugin.
+	 * 
+	 * @return The question type (human readable) string for this plugin.
+	 */
+	String getTypeName();
+
+	/**
 	 * Create a new TypeSpecificAnswer.
 	 * 
 	 * @param answer

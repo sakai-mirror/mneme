@@ -21,6 +21,9 @@
 
 package org.muse.mneme.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -274,6 +277,27 @@ public class MnemeServiceImpl implements MnemeService
 	public QuestionPlugin getQuestionPlugin(String type)
 	{
 		return this.questionPlugins.get(type);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<QuestionPlugin> getQuestionPlugins()
+	{
+		List<QuestionPlugin> rv = new ArrayList<QuestionPlugin>(this.questionPlugins.values());
+
+		// sort
+		Collections.sort(rv, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				// compare based on the localized type name
+				int rv = ((QuestionPlugin) arg0).getTypeName().compareTo(((QuestionPlugin) arg1).getTypeName());
+				return rv;
+			}
+		});
+
+		return rv;
 	}
 
 	/**
