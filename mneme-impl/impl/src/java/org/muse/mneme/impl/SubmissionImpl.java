@@ -203,12 +203,16 @@ public class SubmissionImpl implements Submission
 			return AssessmentSubmissionStatus.future;
 		}
 
-		// overdue?
-		boolean overdue = (assessment.getDates().getDueDate() != null) && now.after(assessment.getDates().getDueDate())
-				&& ((assessment.getDates().getAcceptUntilDate() == null) || (now.before(assessment.getDates().getAcceptUntilDate())));
+		// are we past the hard end date?
+		boolean over = ((assessment.getDates().getAcceptUntilDate() != null) && (now.after(assessment.getDates().getAcceptUntilDate())));
 
-		// todo (not overdue)
-		if ((getStartDate() == null) && !overdue)
+		// overdue, but still acceptable?
+		// Note: we make no distinction about this...
+		// boolean overdue = (assessment.getDates().getDueDate() != null) && now.after(assessment.getDates().getDueDate())
+		// && ((assessment.getDates().getAcceptUntilDate() == null) || (now.before(assessment.getDates().getAcceptUntilDate())));
+
+		// todo (not over, not started)
+		if ((getStartDate() == null) && !over)
 		{
 			return AssessmentSubmissionStatus.ready;
 		}
@@ -229,7 +233,7 @@ public class SubmissionImpl implements Submission
 		if (getIsComplete())
 		{
 			// if there are fewer sibs than allowed, add the todo image as well
-			if (!overdue && (getSiblingCount() != null)
+			if (!over && (getSiblingCount() != null)
 					&& ((assessment.getNumSubmissionsAllowed() == null) || (getSiblingCount().intValue() < assessment.getNumSubmissionsAllowed())))
 			{
 				return AssessmentSubmissionStatus.completeReady;
@@ -238,8 +242,8 @@ public class SubmissionImpl implements Submission
 			return AssessmentSubmissionStatus.complete;
 		}
 
-		// overdue, not in progress, never completed
-		if (overdue)
+		// over, not in progress, never completed
+		if (over)
 		{
 			return AssessmentSubmissionStatus.over;
 		}

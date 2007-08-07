@@ -94,18 +94,21 @@ public class AssessmentDatesImpl implements AssessmentDates
 	{
 		ExpirationImpl rv = new ExpirationImpl();
 
-		// see if the assessment has a hard due date (w/ no late submissions accepted) or a retract date
+		// see if the assessment has a hard due date
 		Date closedDate = getAcceptUntilDate();
 
 		// compute an end time based on the assessment's closed date
 		if (closedDate == null) return null;
 
+		Date now = new Date();
+
+		// if we are past it already
+		if (closedDate.before(now)) return null;
+
 		rv.time = closedDate;
 
 		// the closeDate is the end time
 		long endTime = closedDate.getTime();
-
-		Date now = new Date();
 
 		// if this closed date is more than 2 hours from now, ignore it and say we have no expiration
 		if (endTime > now.getTime() + (2l * 60l * 60l * 1000l)) return null;
