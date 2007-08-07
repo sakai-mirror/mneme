@@ -230,8 +230,6 @@ public class QuestionServiceImpl implements QuestionService
 			M_log.warn("newQuestion: no plugin for type: " + type);
 		}
 
-		// TODO: date
-
 		return question;
 	}
 

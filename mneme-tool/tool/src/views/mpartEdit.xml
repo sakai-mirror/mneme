@@ -63,7 +63,7 @@
 							<title>
 								<message selector="question-type" />
 							</title>
-							<model ref="question.type" />
+							<model ref="question.typeName" />
 						</modelColumn>
 						<modelColumn>
 							<title>

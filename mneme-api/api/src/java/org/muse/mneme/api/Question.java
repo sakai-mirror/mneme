@@ -111,6 +111,13 @@ public interface Question
 	String getType();
 
 	/**
+	 * Access the question type in a localized, human-readable form.
+	 * 
+	 * @return The question type in a localized, human-readable form.
+	 */
+	String getTypeName();
+
+	/**
 	 * Access the question's type-specific handler.
 	 * 
 	 * @return The question's type-specific handler.

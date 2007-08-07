@@ -30,6 +30,8 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificAnswer;
 import org.muse.mneme.api.TypeSpecificQuestion;
+import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.util.ResourceLoader;
 
 /**
  * TrueFalsePlugin handles the true/false question type.
@@ -37,6 +39,12 @@ import org.muse.mneme.api.TypeSpecificQuestion;
 public class TrueFalsePlugin implements QuestionPlugin
 {
 	private static Log M_log = LogFactory.getLog(TrueFalsePlugin.class);
+
+	/** Messages bundle name. */
+	protected String bundle = null;
+
+	/** Localized messages. */
+	protected InternationalizedMessages messages = null;
 
 	protected MnemeService mnemeService = null;
 
@@ -54,6 +62,14 @@ public class TrueFalsePlugin implements QuestionPlugin
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getName()
+	{
+		return this.messages.getString("name");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getType()
 	{
 		return "mneme:TrueFalse";
@@ -64,6 +80,9 @@ public class TrueFalsePlugin implements QuestionPlugin
 	 */
 	public void init()
 	{
+		// messages
+		if (this.bundle != null) this.messages = new ResourceLoader(this.bundle);
+
 		// register with Mneme as a question plugin
 		this.mnemeService.registerQuestionPlugin(this);
 
@@ -83,7 +102,18 @@ public class TrueFalsePlugin implements QuestionPlugin
 	 */
 	public TypeSpecificQuestion newQuestion(Question question)
 	{
-		return new TrueFalseQuestionImpl(uiService, question);
+		return new TrueFalseQuestionImpl(this.messages, this.uiService, question);
+	}
+
+	/**
+	 * Set the message bundle.
+	 * 
+	 * @param bundle
+	 *        The message bundle.
+	 */
+	public void setBundle(String name)
+	{
+		this.bundle = name;
 	}
 
 	/**
@@ -107,5 +137,4 @@ public class TrueFalsePlugin implements QuestionPlugin
 	{
 		this.uiService = service;
 	}
-
 }

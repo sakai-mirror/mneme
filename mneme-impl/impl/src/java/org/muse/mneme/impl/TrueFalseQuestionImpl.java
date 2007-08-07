@@ -25,6 +25,7 @@ import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificQuestion;
+import org.sakaiproject.i18n.InternationalizedMessages;
 
 /**
  * TrueFalseQuestionImpl handles questions for the true/false question type.
@@ -34,11 +35,28 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	/** The correct answer: TRUE or FALSE. */
 	protected Boolean correctAnswer = Boolean.TRUE;
 
+	protected InternationalizedMessages messages = null;
+
 	/** The question this is a helper for. */
 	protected transient Question question = null;
 
 	/** Dependency: The UI service (Ambrosia). */
 	protected UiService uiService = null;
+
+	/**
+	 * Construct.
+	 * 
+	 * @param uiService
+	 *        the UiService.
+	 * @param question
+	 *        The Question this is a helper for.
+	 */
+	public TrueFalseQuestionImpl(InternationalizedMessages messages, UiService uiService, Question question)
+	{
+		this.messages = messages;
+		this.uiService = uiService;
+		this.question = question;
+	}
 
 	/**
 	 * Construct.
@@ -50,20 +68,7 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	{
 		this.question = question;
 		this.correctAnswer = other.correctAnswer;
-	}
-
-	/**
-	 * Construct.
-	 * 
-	 * @param uiService
-	 *        the UiService.
-	 * @param question
-	 *        The Question this is a helper for.
-	 */
-	public TrueFalseQuestionImpl(UiService uiService, Question question)
-	{
-		this.uiService = uiService;
-		this.question = question;
+		this.messages = other.messages;
 	}
 
 	/**
@@ -131,6 +136,14 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getTypeName()
+	{
+		return this.messages.getString("name");
 	}
 
 	/**

@@ -62,4 +62,11 @@ public interface TypeSpecificQuestion extends Cloneable
 	 * @return The user interface component for review of this question type.
 	 */
 	Component getReviewUi();
+
+	/**
+	 * Access the question type (human readable) string for this plugin.
+	 * 
+	 * @return The question type (human readable) string for this plugin.
+	 */
+	String getTypeName();
 }

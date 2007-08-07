@@ -367,6 +367,14 @@ public class QuestionImpl implements Question
 	{
 		return this.type;
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getTypeName()
+	{
+		return this.questionHandler.getTypeName();
+	}
 
 	/**
 	 * {@inheritDoc}
