@@ -22,9 +22,9 @@
 package org.muse.mneme.api;
 
 /**
- * SubmissionCount contain counts of submissions: in-progress, completed, completed-not-graded, completed-graded
+ * SubmissionCounts contain counts of submissions: in-progress, completed, completed-not-graded, completed-graded
  */
-public interface SubmissionCount
+public interface SubmissionCounts
 {
 	/**
 	 * Access how many submissions are completed (graded or not).

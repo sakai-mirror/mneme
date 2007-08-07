@@ -31,6 +31,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.SubmissionCounts;
 import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 import org.sakaiproject.tool.api.SessionManager;
 
@@ -83,6 +84,15 @@ public interface SubmissionStorage
 	 * @return The submission with this id, or null if not found.
 	 */
 	SubmissionImpl getSubmission(String id);
+
+	/**
+	 * Access the assessment's submission count.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return The assessment's submission count.
+	 */
+	SubmissionCounts getSubmissionCounts(Assessment assessment);
 
 	/**
 	 * Find the highest submission score for this user to this assessment.

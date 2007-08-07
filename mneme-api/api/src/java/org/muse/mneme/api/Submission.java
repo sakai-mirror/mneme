@@ -123,7 +123,7 @@ public interface Submission
 	Boolean getIsAnswered();
 
 	/**
-	 * Access the complete flag for the submission.
+	 * Check if the submission is complete.
 	 * 
 	 * @return TRUE if the submission is complete, FALSE if still in progress.
 	 */
@@ -155,6 +155,13 @@ public interface Submission
 	 * @return TRUE if the submission is over, FALSE if not.
 	 */
 	Boolean getIsOver(Date asOf, long grace);
+
+	/**
+	 * Check if the submission has been started.
+	 * 
+	 * @return TRUE if the submission has been started, FALSE if not.
+	 */
+	Boolean getIsStarted();
 
 	/**
 	 * Check if the submission may be started - the user must have permission, the submission must be a placeholder, the assessment must be open.

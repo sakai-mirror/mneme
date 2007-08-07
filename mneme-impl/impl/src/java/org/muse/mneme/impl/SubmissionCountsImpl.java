@@ -21,12 +21,12 @@
 
 package org.muse.mneme.impl;
 
-import org.muse.mneme.api.SubmissionCount;
+import org.muse.mneme.api.SubmissionCounts;
 
 /**
  * SubmissionCountImpl implements SubmissionCountImpl
  */
-public class SubmissionCountImpl implements SubmissionCount
+public class SubmissionCountsImpl implements SubmissionCounts
 {
 	protected Integer completed = new Integer(0);
 
@@ -39,7 +39,7 @@ public class SubmissionCountImpl implements SubmissionCount
 	/**
 	 * Construct.
 	 */
-	public SubmissionCountImpl()
+	public SubmissionCountsImpl()
 	{
 	}
 
@@ -49,7 +49,7 @@ public class SubmissionCountImpl implements SubmissionCount
 	 * @param other
 	 *        The other to copy.
 	 */
-	public SubmissionCountImpl(SubmissionCountImpl other)
+	public SubmissionCountsImpl(SubmissionCountsImpl other)
 	{
 		set(other);
 	}
@@ -128,7 +128,7 @@ public class SubmissionCountImpl implements SubmissionCount
 	 * @param other
 	 *        The other to copy.
 	 */
-	protected void set(SubmissionCountImpl other)
+	protected void set(SubmissionCountsImpl other)
 	{
 		this.completed = other.completed;
 		this.graded = other.graded;

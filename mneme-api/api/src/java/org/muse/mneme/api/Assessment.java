@@ -180,7 +180,7 @@ public interface Assessment
 	 * 
 	 * @return The assessment's submission count.
 	 */
-	SubmissionCount getSubmissionCount();
+	SubmissionCounts getSubmissionCounts();
 
 	/**
 	 * Access the presentation to show after submit.

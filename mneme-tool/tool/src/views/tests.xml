@@ -210,7 +210,7 @@
 						<navigation style="LINK">
 							<title>
 								<message
-									model="assessment.submissionCount.completed" />
+									model="assessment.submissionCounts.completed" />
 							</title>
 							<destination template="/grade_class/{0}">
 								<model ref="assessment.id" />
@@ -224,7 +224,7 @@
 						<navigation style="LINK">
 							<title>
 								<message
-									model="assessment.submissionCount.ungraded" />
+									model="assessment.submissionCounts.ungraded" />
 							</title>
 							<destination template="/grade_class/{0}">
 								<model ref="assessment.id" />

@@ -40,7 +40,7 @@ import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionCount;
+import org.muse.mneme.api.SubmissionCounts;
 import org.muse.mneme.api.SubmissionService;
 
 /**
@@ -89,7 +89,7 @@ public class AssessmentImpl implements Assessment
 
 	protected transient Submission submissionContext = null;
 
-	protected SubmissionCount submissionCount = new SubmissionCountImpl();
+	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
 
 	protected transient SubmissionService submissionService = null;
 
@@ -321,9 +321,9 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public SubmissionCount getSubmissionCount()
+	public SubmissionCounts getSubmissionCounts()
 	{
-		return this.submissionCount;
+		return this.submissionService.getSubmissionCounts(this);
 	}
 
 	/**
@@ -490,7 +490,7 @@ public class AssessmentImpl implements Assessment
 		this.randomAccess = other.randomAccess;
 		this.review = new AssessmentReviewImpl((AssessmentReviewImpl) other.review);
 		this.submissionContext = other.submissionContext;
-		this.submissionCount = new SubmissionCountImpl((SubmissionCountImpl) other.submissionCount);
+		// this.submissionCounts = new SubmissionCountsImpl((SubmissionCountsImpl) other.submissionCounts);
 		this.submissionService = other.submissionService;
 		this.submitPresentation = new PresentationImpl((PresentationImpl) other.submitPresentation);
 		this.timeLimit = other.timeLimit;

@@ -459,6 +459,14 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsStarted()
+	{
+		return this.startDate != null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getMayBegin()
 	{
 		// ASSSUMPTION: this will be a submission with sibling count, and it will be:
@@ -751,25 +759,6 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
-	 * Replace an existing answer with this one, or add it if there is no existing one.
-	 * 
-	 * @param answer
-	 *        The answer.
-	 */
-	protected void replaceAnswer(AnswerImpl answer)
-	{
-		// this needs to be an answer to this same submission
-		if (!answer.getSubmission().equals(this))
-		{
-			M_log.warn("replaceAnswer: " + this.id + ": answer to another submission: " + answer.getSubmission().getId());
-			return;
-		}
-
-		this.answers.remove(answer);
-		this.answers.add(answer);
-	}
-
-	/**
 	 * Access the assessment id.
 	 * 
 	 * @return The assessment id.
@@ -838,6 +827,25 @@ public class SubmissionImpl implements Submission
 	protected void initUserId(String userId)
 	{
 		this.userId = userId;
+	}
+
+	/**
+	 * Replace an existing answer with this one, or add it if there is no existing one.
+	 * 
+	 * @param answer
+	 *        The answer.
+	 */
+	protected void replaceAnswer(AnswerImpl answer)
+	{
+		// this needs to be an answer to this same submission
+		if (!answer.getSubmission().equals(this))
+		{
+			M_log.warn("replaceAnswer: " + this.id + ": answer to another submission: " + answer.getSubmission().getId());
+			return;
+		}
+
+		this.answers.remove(answer);
+		this.answers.add(answer);
 	}
 
 	/**
