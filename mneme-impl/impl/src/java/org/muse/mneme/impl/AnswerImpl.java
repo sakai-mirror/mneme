@@ -44,8 +44,6 @@ public class AnswerImpl implements Answer
 
 	protected TypeSpecificAnswer answerHandler = null;
 
-	protected Float autoScore = null;
-
 	protected AnswerEvaluationImpl evaluation = new AnswerEvaluationImpl(this);
 
 	protected String id = null;
@@ -117,7 +115,7 @@ public class AnswerImpl implements Answer
 	 */
 	public Float getAutoScore()
 	{
-		return this.autoScore;
+		return this.answerHandler.getAutoScore();
 	}
 
 	/**
@@ -243,9 +241,9 @@ public class AnswerImpl implements Answer
 	public Float getTotalScore()
 	{
 		float rv = 0f;
-		if (this.autoScore != null)
+		if (getAutoScore() != null)
 		{
-			rv += this.autoScore;
+			rv += getAutoScore();
 		}
 
 		if (this.evaluation.getScore() != null)
@@ -362,7 +360,6 @@ public class AnswerImpl implements Answer
 	protected void set(AnswerImpl other)
 	{
 		if (other.answerHandler != null) this.answerHandler = (TypeSpecificAnswer) (other.answerHandler.clone());
-		this.autoScore = other.autoScore;
 		this.evaluation = new AnswerEvaluationImpl(other.evaluation);
 		this.id = other.id;
 		this.markedForReview = other.markedForReview;
