@@ -142,7 +142,7 @@
 					<title>
 						<message selector="pool-title" />
 					</title>
-					<model ref="pool.title" missing="missing-title" />
+					<model ref="pool.title" missing="no-title" />
 					<sort>
 						<active>
 							<compareDecision model="sort_column"
