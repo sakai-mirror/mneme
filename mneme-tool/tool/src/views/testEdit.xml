@@ -56,12 +56,22 @@
 								<text model="assessment.id" />
 							</container>
 						</row>
-						<row title="test-history">
+						<row title="history">
 							<container>
 								<text>
-									<message selector="test-history-text">
+									<message selector="history-createText">
 										<model type="userInfo" selector="DISPLAYNAME" ref="assessment.createdBy.UserId" />
 										<model type="date" ref="assessment.createdBy.date" />
+									</message>
+								</text>
+							</container>
+						</row>
+						<row>
+							<container>
+								<text>
+									<message selector="history-modifyText">
+										<model type="userInfo" selector="DISPLAYNAME" ref="assessment.modifiedBy.UserId" />
+										<model type="date" ref="assessment.modifiedBy.date" />
 									</message>
 								</text>
 							</container>
