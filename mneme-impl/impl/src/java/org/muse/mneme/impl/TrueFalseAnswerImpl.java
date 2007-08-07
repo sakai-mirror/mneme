@@ -62,6 +62,7 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	{
 		this.answer = answer;
 		this.answerData = other.answerData;
+		this.autoScore = other.autoScore;
 	}
 
 	/**

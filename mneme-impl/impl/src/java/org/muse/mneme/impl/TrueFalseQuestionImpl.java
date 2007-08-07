@@ -135,7 +135,8 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	public Component getReviewUi()
 	{
 		// TODO Auto-generated method stub
-		return null;
+		return this.uiService.newFragment().add(
+				this.uiService.newText().setText(null, uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer")));
 	}
 
 	/**
