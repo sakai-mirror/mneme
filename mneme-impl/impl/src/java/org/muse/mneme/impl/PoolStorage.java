@@ -34,13 +34,15 @@ public interface PoolStorage
 	/**
 	 * Count the pools with this criteria.
 	 * 
+	 * @param context
+	 *        The context.
 	 * @param userId
 	 *        the user id.
 	 * @param search
 	 *        The search criteria.
 	 * @return a list of pools that meet the criteria.
 	 */
-	Integer countPools(String userId, String search);
+	Integer countPools(String context, String userId, String search);
 
 	/**
 	 * Draw a set of questions from the pool.
@@ -57,6 +59,8 @@ public interface PoolStorage
 	/**
 	 * Find all the pools this user has access to.
 	 * 
+	 * @param context
+	 *        The context.
 	 * @param userId
 	 *        The user id
 	 * @param sort
@@ -69,7 +73,7 @@ public interface PoolStorage
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return The list of pools the user has access to.
 	 */
-	List<Pool> findPools(String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<Pool> findPools(String context, String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Access a pool by id.
@@ -88,6 +92,17 @@ public interface PoolStorage
 	 * @return The number of questions in the pool.
 	 */
 	Integer getPoolSize(PoolImpl pool);
+
+	/**
+	 * Get a list of all the subjects of all the pools accessible to the user.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @param userId
+	 *        The user.
+	 * @return a list of all the subjects of all the pools accessible to the user.
+	 */
+	List<String> getSubjects(String context, String userId);
 
 	/**
 	 * Construct a new pool object.

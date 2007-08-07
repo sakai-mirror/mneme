@@ -112,13 +112,14 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPools(String userId, String search)
+	public Integer countPools(String context, String userId, String search)
 	{
+		if (context == null) throw new IllegalArgumentException();
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
 		if (M_log.isDebugEnabled()) M_log.debug("countPools: " + userId);
 
-		Integer rv = storage.countPools(userId, search);
+		Integer rv = storage.countPools(context, userId, search);
 		return rv;
 	}
 
@@ -133,14 +134,15 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String userId, FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Pool> findPools(String context, String userId, FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
+		if (context == null) throw new IllegalArgumentException();
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 		if (sort == null) sort = PoolService.FindPoolsSort.title_a;
 
 		if (M_log.isDebugEnabled()) M_log.debug("findPools: " + userId);
 
-		List<Pool> rv = storage.findPools(userId, sort, search, pageNum, pageSize);
+		List<Pool> rv = storage.findPools(context, userId, sort, search, pageNum, pageSize);
 		return rv;
 	}
 
@@ -159,6 +161,17 @@ public class PoolServiceImpl implements PoolService
 		PoolImpl pool = this.storage.getPool(poolId);
 
 		return pool;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<String> getSubjects(String context, String userId)
+	{
+		if (context == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		return this.storage.getSubjects(context, userId);
 	}
 
 	/**

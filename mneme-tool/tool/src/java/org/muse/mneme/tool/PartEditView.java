@@ -44,6 +44,7 @@ import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 import org.springframework.core.io.ClassPathResource;
 
@@ -59,6 +60,9 @@ public class PartEditView extends ControllerImpl
 	protected AssessmentService assessmentService = null;
 
 	protected PoolService poolService = null;
+
+	/** tool manager */
+	protected ToolManager toolManager = null;
 
 	/** The UI (2). Used for manual parts (the main this.ui used for draw parts). */
 	protected Component ui2 = null;
@@ -134,7 +138,8 @@ public class PartEditView extends ControllerImpl
 
 		// get the pool draw list - all the pools for the user (select, sort, page) crossed with this part's actual draws
 		// TODO: paging (last two params)
-		List<PoolDraw> draws = part.getDrawsForPools(null, PoolService.FindPoolsSort.subject_a, null, null, null);
+		List<PoolDraw> draws = part.getDrawsForPools(toolManager.getCurrentPlacement().getContext(), null, PoolService.FindPoolsSort.subject_a, null,
+				null, null);
 		context.put("draws", draws);
 
 		// render
@@ -309,5 +314,14 @@ public class PartEditView extends ControllerImpl
 	public void setPoolService(PoolService service)
 	{
 		this.poolService = service;
+	}
+
+	/**
+	 * @param toolManager
+	 *        the toolManager to set
+	 */
+	public void setToolManager(ToolManager toolManager)
+	{
+		this.toolManager = toolManager;
 	}
 }

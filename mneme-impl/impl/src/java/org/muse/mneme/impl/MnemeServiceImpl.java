@@ -174,9 +174,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPools(String userId, String search)
+	public Integer countPools(String context, String userId, String search)
 	{
-		return poolService.countPools(userId, search);
+		return poolService.countPools(context, userId, search);
 	}
 
 	/**
@@ -215,9 +215,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Pool> findPools(String context, String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
-		return poolService.findPools(userId, sort, search, pageNum, pageSize);
+		return poolService.findPools(context, userId, sort, search, pageNum, pageSize);
 	}
 
 	/**
@@ -282,6 +282,14 @@ public class MnemeServiceImpl implements MnemeService
 	public List<Float> getQuestionScores(Question question)
 	{
 		return submissionService.getQuestionScores(question);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<String> getSubjects(String context, String userId)
+	{
+		return this.poolService.getSubjects(context, userId);
 	}
 
 	/**

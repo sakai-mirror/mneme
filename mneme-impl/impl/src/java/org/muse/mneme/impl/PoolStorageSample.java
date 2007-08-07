@@ -56,7 +56,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPools(String userId, String search)
+	public Integer countPools(String context, String userId, String search)
 	{
 		fakeIt();
 
@@ -102,7 +102,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String userId, final PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Pool> findPools(String context, String userId, final PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		fakeIt();
 
@@ -154,7 +154,7 @@ public class PoolStorageSample implements PoolStorage
 						rv = -1 * ((Pool) arg0).getPoints().compareTo(((Pool) arg1).getPoints());
 						break;
 					}
-						
+
 				}
 
 				return rv;
@@ -210,6 +210,35 @@ public class PoolStorageSample implements PoolStorage
 	{
 		List<String> rv = this.questionService.getPoolQuestions(pool);
 		return rv.size();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<String> getSubjects(String context, String userId)
+	{
+		fakeIt();
+
+		List<String> rv = new ArrayList<String>();
+
+		for (PoolImpl pool : this.pools.values())
+		{
+			if (pool.getOwnerId().equals(userId))
+			{
+				if (pool.getSubject() != null)
+				{
+					if (!rv.contains(pool.getSubject()))
+					{
+						rv.add(pool.getSubject());
+					}
+				}
+			}
+		}
+
+		// sort
+		Collections.sort(rv);
+
+		return rv;
 	}
 
 	/**
