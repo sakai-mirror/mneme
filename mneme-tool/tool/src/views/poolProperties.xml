@@ -41,20 +41,19 @@
 	</title>
 	<container>
 		<section>
-			<title highlighted="TRUE">
+			<!--title highlighted="TRUE">
 				<message selector="pool-id">
-					<model type="html" ref="pool.id" />
+					<model ref="pool.id" />
 				</message>
-			</title>
+			</title-->
 			<container>
 				<entityDisplay>
 					<rows>
-						<!--row title="pool-id">
+						<row title="pool-id">
 							<container>
-							<textEdit model="pool.id" rows="1"
-							cols="25" readOnly="TRUE" />
+								<text model="pool.id" />
 							</container>
-							</row-->
+						</row>
 						<row title="pool-title">
 							<container>
 								<textEdit model="pool.title" rows="1"
@@ -62,6 +61,10 @@
 							</container>
 						</row>
 						<row title="pool-subject">
+							<container>
+								<textEdit model="pool.subject" rows="1"
+									cols="25" />
+							</container>
 						</row>
 						<row title="pool-description">
 							<container>
@@ -92,12 +95,16 @@
 											selector="Level-5" />
 									</selectionChoices>
 								</selection>
+								<text selector="pool-difficulty-note" />
 							</container>
 						</row>
 						<row title="pool-access">
 							<container>
-								<textEdit rows="1" cols="25" />
+								<textEdit rows="1" cols="25" id="" />
+								<text
+									selector="pool-allow-access-description" />
 							</container>
+							<model type="icon" icon="/icons/access.png" />
 						</row>
 					</rows>
 				</entityDisplay>
