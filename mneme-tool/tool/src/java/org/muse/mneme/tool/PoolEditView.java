@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/java/org/muse/mneme/tool/PoolEditView.java $
- * $Id: PoolEditView.java 11097 2007-08-08 15:57:11Z tannirumurthy@foothill.edu $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2007 The Sakai Foundation.
