@@ -591,6 +591,17 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException
+	{
+		// permission
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
+
+		this.storage.removeIncompleteAssessmentSubmissions(assessment);
+	}
+
+	/**
 	 * Run the event checking thread.
 	 */
 	public void run()

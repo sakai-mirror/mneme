@@ -178,6 +178,16 @@ public interface SubmissionService
 	List<Submission> getUserContextSubmissions(String context, String userId, GetUserContextSubmissionsSort sort);
 
 	/**
+	 * Remove all incomplete submissions to this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @throws AssessmentPermissionException
+	 *         if the user does not have permission to remove these submissions.
+	 */
+	void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException;
+
+	/**
 	 * Enter or update an answer to a question of an incomplete submission to an assessment. Auto grade. Updated realated info (such as the
 	 * submission's score).<br />
 	 * Complete the submission if indicated.

@@ -260,6 +260,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		// policy check
 		if (!satisfyAssessmentRemovalPolicy(assessment)) throw new PolicyException();
 
+		// remove incomplete submissions
+		this.submissionService.removeIncompleteAssessmentSubmissions(assessment);
+
 		this.storage.removeAssessment((AssessmentImpl) assessment);
 
 		// event

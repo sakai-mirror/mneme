@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Question;
@@ -162,6 +163,14 @@ public interface SubmissionStorage
 	 * @return A new Submission object.
 	 */
 	SubmissionImpl newSubmission();
+
+	/**
+	 * Remove all incomplete submissions to this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	void removeIncompleteAssessmentSubmissions(Assessment assessment);
 
 	/**
 	 * Remove a submission from storage.

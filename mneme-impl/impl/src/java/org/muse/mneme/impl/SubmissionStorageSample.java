@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -310,6 +311,21 @@ public class SubmissionStorageSample implements SubmissionStorage
 	public SubmissionImpl newSubmission()
 	{
 		return new SubmissionImpl(assessmentService, securityService, submissionService, sessionManager);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeIncompleteAssessmentSubmissions(Assessment assessment)
+	{
+		for (Iterator i = this.submissions.values().iterator(); i.hasNext();)
+		{
+			SubmissionImpl submission = (SubmissionImpl) i.next();
+			if (submission.getAssessment().equals(assessment) && (!submission.getIsComplete()))
+			{
+				i.remove();
+			}
+		}
 	}
 
 	/**
