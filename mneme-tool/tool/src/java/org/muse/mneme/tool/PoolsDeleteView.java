@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.sakaiproject.tool.api.ToolManager;
@@ -117,23 +118,26 @@ public class PoolsDeleteView extends ControllerImpl
 
 		if (destination != null && (destination.trim().equalsIgnoreCase("/pools_delete")))
 		{
-			try
-			{
+			
 				// pool id's are in the params array from the index 3
 				for (int i = 4; i < params.length; i++)
 				{
 					Pool pool = this.poolService.getPool(params[i]);
 					if (pool != null)
 					{
-						this.poolService.removePool(pool, toolManager.getCurrentPlacement().getContext());
+						try
+						{
+							this.poolService.removePool(pool, toolManager.getCurrentPlacement().getContext());
+						}
+						catch (AssessmentPermissionException e)
+						{
+							//redirect to error
+							res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+							return;
+						}						
 					}
 				}
-			}
-			catch (Exception e)
-			{
-				if (M_log.isErrorEnabled()) M_log.error(e.toString());
-				e.printStackTrace();
-			}
+			
 		}
 		//add sort and paging
 		destination = "/pools/" + params[2] + "/"+ params[3];
