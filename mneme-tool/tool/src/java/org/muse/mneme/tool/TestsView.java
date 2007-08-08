@@ -213,6 +213,28 @@ public class TestsView extends ControllerImpl
 				return;
 			}
 		}
+		if (destination.startsWith("/test_publish"))
+		{
+			// create a new test
+			try
+			{
+				Assessment assessment = this.assessmentService.newAssessment(this.toolManager.getCurrentPlacement().getContext());
+			
+				// commit it empty
+				this.assessmentService.saveAssessment(assessment);
+
+				// redirect to edit for this assessment
+				destination = destination + assessment.getId();
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+		}
 
 		if (destination != null && (destination.trim().equalsIgnoreCase("/tests_delete")))
 		{

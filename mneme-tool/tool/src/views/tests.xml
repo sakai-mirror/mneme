@@ -199,8 +199,14 @@
 							<destination template="/tests/4D" />
 						</desc>
 					</sort>
-					<model ref="assessment.active"
+					<entityNavigations>
+						<navigation>
+							<destination template="/test_publish/{0}">
+							<model ref="assessment.active"
 						delegate="FormatAssesmentActive" tool="sakai.mneme" />
+						</destination>
+					</navigation>	
+				</entityNavigations>
 				</modelColumn>
 				<column>
 					<title>
