@@ -31,6 +31,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.PolicyException;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
@@ -127,6 +128,18 @@ public class AssessmentServiceImpl implements AssessmentService
 		boolean ok = securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context);
 
 		return ok;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean allowRemoveAssessment(Assessment assessment, String userId)
+	{
+		// user must have manage permission
+		if (!this.allowManageAssessments(assessment.getContext(), userId)) return Boolean.FALSE;
+
+		// check policy
+		return satisfyAssessmentRemovalPolicy(assessment);
 	}
 
 	/**
@@ -235,7 +248,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removeAssessment(Assessment assessment) throws AssessmentPermissionException
+	public void removeAssessment(Assessment assessment) throws AssessmentPermissionException, PolicyException
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 
@@ -243,6 +256,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
+
+		// policy check
+		if (!satisfyAssessmentRemovalPolicy(assessment)) throw new PolicyException();
 
 		this.storage.removeAssessment((AssessmentImpl) assessment);
 
@@ -272,7 +288,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		// update last modified information
 		assessment.getModifiedBy().setDate(new Date());
 		assessment.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
-		
+
 		this.storage.saveAssessment((AssessmentImpl) assessment);
 
 		// event
@@ -389,5 +405,21 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		String ref = MnemeService.REFERENCE_ROOT + "/" + MnemeService.ASSESSMENT_TYPE + "/" + assessmentId;
 		return ref;
+	}
+
+	/**
+	 * Check if this assessment meets the delete policy.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return TRUE if the assessment may be deleted, FALSE if not.
+	 */
+	protected Boolean satisfyAssessmentRemovalPolicy(Assessment assessment)
+	{
+		// TODO: removal policy
+		// assessment must have no completed submissions
+		if (assessment.getSubmissionCounts().getCompleted() > 0) return Boolean.FALSE;
+
+		return Boolean.TRUE;
 	}
 }

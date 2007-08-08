@@ -38,6 +38,7 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.PolicyException;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
@@ -140,6 +141,14 @@ public class MnemeServiceImpl implements MnemeService
 	public Boolean allowManagePools(String context, String userId)
 	{
 		return poolService.allowManagePools(context, userId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean allowRemoveAssessment(Assessment assessment, String userId)
+	{
+		return this.assessmentService.allowRemoveAssessment(assessment, userId);
 	}
 
 	/**
@@ -402,7 +411,7 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removeAssessment(Assessment assessment) throws AssessmentPermissionException
+	public void removeAssessment(Assessment assessment) throws AssessmentPermissionException, PolicyException
 	{
 		assessmentService.removeAssessment(assessment);
 	}

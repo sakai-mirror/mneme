@@ -70,6 +70,17 @@ public interface AssessmentService
 	Boolean allowManageAssessments(String context, String userId);
 
 	/**
+	 * Check if the assessment may be removed at this time by this user.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param userId
+	 *        The user (if null, the current user is used).
+	 * @return TRUE if the assessment may be removed by this user, FALSE if not.
+	 */
+	Boolean allowRemoveAssessment(Assessment assessment, String userId);
+
+	/**
 	 * Count the assessments in the context - all of them!
 	 * 
 	 * @param context
@@ -116,8 +127,10 @@ public interface AssessmentService
 	 *        The assessment to remove.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to remove this assessment.
+	 * @throws PolicyException
+	 *         if the assessment may not be removed due to API policy.
 	 */
-	void removeAssessment(Assessment assessment) throws AssessmentPermissionException;
+	void removeAssessment(Assessment assessment) throws AssessmentPermissionException, PolicyException;
 
 	/**
 	 * Save changes made to this assessment.
