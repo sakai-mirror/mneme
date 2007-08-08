@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.Date;
 
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentReview;
 import org.muse.mneme.api.ReviewTiming;
 
@@ -31,6 +32,8 @@ import org.muse.mneme.api.ReviewTiming;
  */
 public class AssessmentReviewImpl implements AssessmentReview
 {
+	protected transient Assessment assessment = null;
+
 	protected Date date = null;
 
 	protected Boolean showCorrectAnswer = Boolean.FALSE;
@@ -42,22 +45,26 @@ public class AssessmentReviewImpl implements AssessmentReview
 	/**
 	 * Construct.
 	 * 
-	 * @param other
-	 *        The other to copy.
+	 * @param assessment
+	 *        The assessment this belongs to.
 	 */
-	public AssessmentReviewImpl(AssessmentReviewImpl other)
+	public AssessmentReviewImpl(Assessment assessment)
 	{
-		set(other);
+		this.assessment = assessment;
 	}
 
 	/**
 	 * Construct.
 	 * 
-	 * @param service
-	 *        The TimeService.
+	 * @param assessment
+	 *        The assessment this belongs to.
+	 * @param other
+	 *        The other to copy.
 	 */
-	public AssessmentReviewImpl()
+	public AssessmentReviewImpl(Assessment assessment, AssessmentReviewImpl other)
 	{
+		set(other);
+		this.assessment = assessment;
 	}
 
 	/**
@@ -73,14 +80,32 @@ public class AssessmentReviewImpl implements AssessmentReview
 	 */
 	public Boolean getNowAvailable()
 	{
-		Date now = new Date();
-		if ((this.timing == ReviewTiming.submitted) || ((this.timing == ReviewTiming.date) && ((this.date == null) || (!(this.date.after(now))))))
+		// if review timing is date, we can tell without a submission
+		if (this.timing == ReviewTiming.date)
 		{
-			return Boolean.TRUE;
+			if (this.date != null)
+			{
+				return this.date.after(new Date());
+			}
+
+			// no date? no review
+			return Boolean.FALSE;
 		}
 
-		// TODO: ReviewTiming.graded? - based on submission context, if set, if submission is graded
-		// TODO: also, if submission context is set, make sure it is submitted?
+		// otherwise we need a submission
+		if (this.assessment.getSubmissionContext() == null) return Boolean.FALSE;
+
+		// for submittted
+		if (this.timing == ReviewTiming.submitted)
+		{
+			return this.assessment.getSubmissionContext().getIsComplete();
+		}
+
+		// for graded
+		if (this.timing == ReviewTiming.graded)
+		{
+			return this.assessment.getSubmissionContext().getIsGraded();
+		}
 
 		return Boolean.FALSE;
 	}

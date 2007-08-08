@@ -87,7 +87,7 @@ public class SubmittedView extends ControllerImpl
 		{
 			// if the assessment review is allowed, go to review, else to list
 			String dest = "/list";
-			if (submission.getAssessment().getReview().getNowAvailable())
+			if (submission.getMayReview())
 			{
 				dest = "/review/" + submission.getId();
 			}

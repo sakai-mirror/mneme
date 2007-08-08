@@ -266,7 +266,7 @@
 							</message>
 							<included>
 								<decision model="review" />
-								<decision model="answer.question.part.assessment.review.nowAvailable" />
+								<decision model="answer.submission.mayReview" />
 								<decision model="answer.question.part.assessment.review.showCorrectAnswer" />
 								<hasValueDecision model="answer.question.answerKey" />
 							</included>
@@ -280,7 +280,7 @@
 							</message>
 							<included>
 								<decision model="review" />
-								<decision model="answer.question.part.assessment.review.nowAvailable" />
+								<decision model="answer.submission.mayReview" />
 								<decision model="answer.question.part.assessment.review.showCorrectAnswer" />
 							</included>
 						</text>
@@ -294,7 +294,7 @@
 							</message>
 							<included>
 							<decision model="review" />
-							<decision model="answer.question.part.assessment.review.nowAvailable" />
+							<decision model="answer.submission.mayReview" />
 							<decision model="answer.question.part.assessment.review.showFeedback" />
 							<compareDecision model="answer.question.type" constant="essay" />
 							</included>

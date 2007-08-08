@@ -276,12 +276,23 @@
 						<navigation style="LINK" disabled="TRUE">
 							<title>
 								<message selector="list-nav-review-later">
-									<model type="date" ref="submission.best.assessment.dates.reviewDate" />
+									<model type="date" ref="submission.best.assessment.review.date" />
 								</message>
 							</title>
 							<included>
 								<decision reversed="TRUE" model="submission.best.mayReview" />
 								<decision model="submission.best.mayReviewLater" />
+								<compareDecision model="submission.best.assessment.review.timing" constant="date" />
+							</included>
+						</navigation>
+						<navigation style="LINK" disabled="TRUE">
+							<title>
+								<message selector="list-nav-review-graded" />
+							</title>
+							<included>
+								<decision reversed="TRUE" model="submission.best.mayReview" />
+								<decision model="submission.best.mayReviewLater" />
+								<compareDecision model="submission.best.assessment.review.timing" constant="graded" />
 							</included>
 						</navigation>
 						<navigation style="LINK" title="list-nav-review-not" disabled="TRUE">

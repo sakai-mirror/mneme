@@ -581,6 +581,10 @@ public class SubmissionImpl implements Submission
 		// assessment not set to no review
 		if (getAssessment().getReview().getTiming() == ReviewTiming.never) return Boolean.FALSE;
 
+		// or that it is set to date with no date
+		// Note: I don't like the redundancy of this code with AssessmentReviewImpl -ggolden
+		if ((getAssessment().getReview().getTiming() == ReviewTiming.date) && (getAssessment().getReview().getDate() == null)) return Boolean.FALSE;
+
 		// TODO: permission?
 
 		return Boolean.TRUE;

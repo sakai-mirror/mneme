@@ -1074,7 +1074,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		Double points = null;
 
-		// refresh from the database is requested
+		// refresh from the database if requested
 		if (refresh)
 		{
 			// read the final score for this submission from the db

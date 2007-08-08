@@ -112,7 +112,7 @@ public class AssessmentImpl implements Assessment
 
 		this.dates = new AssessmentDatesImpl();
 		this.parts = new AssessmentPartsImpl(this, questionService, poolService);
-		this.review = new AssessmentReviewImpl();
+		this.review = new AssessmentReviewImpl(this);
 	}
 
 	/**
@@ -488,7 +488,7 @@ public class AssessmentImpl implements Assessment
 		this.questionGrouping = other.questionGrouping;
 		this.questionService = other.questionService;
 		this.randomAccess = other.randomAccess;
-		this.review = new AssessmentReviewImpl((AssessmentReviewImpl) other.review);
+		this.review = new AssessmentReviewImpl(this, (AssessmentReviewImpl) other.review);
 		this.submissionContext = other.submissionContext;
 		// this.submissionCounts = new SubmissionCountsImpl((SubmissionCountsImpl) other.submissionCounts);
 		this.submissionService = other.submissionService;
