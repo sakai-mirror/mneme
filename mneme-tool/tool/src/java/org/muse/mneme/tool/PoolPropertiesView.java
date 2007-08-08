@@ -29,8 +29,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.sakaiproject.tool.api.ToolManager;
@@ -83,13 +83,18 @@ public class PoolPropertiesView extends ControllerImpl
 		{
 			try
 			{
+				if (pool.getTitle() == null)
+					pool.setTitle("");
+				
+				if (pool.getSubject() == null)
+					pool.setSubject("");
+				
 				this.poolService.savePool(pool, toolManager.getCurrentPlacement().getContext());
 			}
-			catch (Exception e)
+			catch (AssessmentPermissionException e)
 			{
-				e.printStackTrace();
 				//redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unknown)));
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 				return;
 			}			
 		}

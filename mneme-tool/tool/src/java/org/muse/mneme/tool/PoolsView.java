@@ -6,7 +6,6 @@
  * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -33,6 +32,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
@@ -163,19 +163,11 @@ public class PoolsView extends ControllerImpl
 		paging.setCurrentAndSize(pagingParameter);
 		context.put("paging", paging);
 		context.put("pagingParameter", pagingParameter);
-
-		try
-		{
-			// collect the pools to show
-			List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, sort, null, paging.getCurrent(),
-					paging.getSize());
-			context.put("pools", pools);
-		}
-		catch (Exception e)
-		{
-			if (M_log.isErrorEnabled()) M_log.error(e.toString());
-			e.printStackTrace();
-		}
+		
+		// collect the pools to show
+		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, sort, null, paging.getCurrent(),
+				paging.getSize());
+		context.put("pools", pools);
 
 		// for the checkboxes
 		Values values = this.uiService.newValues();
@@ -249,10 +241,11 @@ public class PoolsView extends ControllerImpl
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination + "/" + newPool.getId())));
 					return;
 				}
-				catch (Exception e)
+				catch (AssessmentPermissionException e)
 				{
-					if (M_log.isErrorEnabled()) M_log.error(e.toString());
-					e.printStackTrace();
+					//redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
 				}
 			}
 			else if (destination.startsWith("ADDQ:"))
