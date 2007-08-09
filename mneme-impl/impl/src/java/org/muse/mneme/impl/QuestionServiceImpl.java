@@ -236,6 +236,23 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
+	public void removePoolQuestions(Pool pool, String context) throws AssessmentPermissionException
+	{
+		if (pool == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("removePoolQuestions: " + pool.getId() + ": " + context);
+
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+
+		this.storage.removePoolQuestions(pool);
+
+		// TODO: events?
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void removeQuestion(Question question, String context) throws AssessmentPermissionException
 	{
 		if (question == null) throw new IllegalArgumentException();

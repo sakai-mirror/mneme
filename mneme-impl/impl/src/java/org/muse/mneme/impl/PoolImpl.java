@@ -36,6 +36,9 @@ public class PoolImpl implements Pool
 {
 	protected Attribution createdBy = new AttributionImpl();
 
+	/** Start of the versioning thing. */
+	protected Boolean deleted = Boolean.FALSE;
+
 	protected String description = null;
 
 	protected Integer difficulty = null;
@@ -273,6 +276,7 @@ public class PoolImpl implements Pool
 	protected void set(PoolImpl other)
 	{
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
+		this.deleted = other.deleted;
 		this.description = other.description;
 		this.difficulty = other.difficulty;
 		this.id = other.id;

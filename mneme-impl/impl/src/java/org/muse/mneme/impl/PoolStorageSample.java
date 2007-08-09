@@ -64,7 +64,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if (pool.getOwnerId().equals(userId))
+			if ((!pool.deleted) && pool.getOwnerId().equals(userId))
 			{
 				count++;
 			}
@@ -110,7 +110,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if (pool.getOwnerId().equals(userId))
+			if ((!pool.deleted) && pool.getOwnerId().equals(userId))
 			{
 				rv.add(new PoolImpl(pool));
 			}
@@ -223,7 +223,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if (pool.getOwnerId().equals(userId))
+			if ((!pool.deleted) && pool.getOwnerId().equals(userId))
 			{
 				if (pool.getSubject() != null)
 				{
@@ -274,7 +274,11 @@ public class PoolStorageSample implements PoolStorage
 	{
 		fakeIt();
 
-		this.pools.remove(pool.getId());
+		PoolImpl p = this.pools.get(pool.getId());
+		if (p != null)
+		{
+			p.deleted = Boolean.TRUE;
+		}
 	}
 
 	/**

@@ -595,10 +595,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	public void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException
 	{
+		if (assessment == null) throw new IllegalArgumentException();
+
 		// permission
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
 
 		this.storage.removeIncompleteAssessmentSubmissions(assessment);
+		
+		// TODO: events?
 	}
 
 	/**

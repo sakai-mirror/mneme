@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +71,7 @@ public class QuestionStorageSample implements QuestionStorage
 		int count = 0;
 		for (QuestionImpl question : this.questions.values())
 		{
-			if (question.getCreatedBy().getUserId().equals(userId) && ((pool == null) || (question.getPool().equals(pool))))
+			if ((!question.deleted) && question.getCreatedBy().getUserId().equals(userId) && ((pool == null) || (question.getPool().equals(pool))))
 			{
 				count++;
 			}
@@ -100,7 +101,7 @@ public class QuestionStorageSample implements QuestionStorage
 		List<Question> rv = new ArrayList<Question>();
 		for (QuestionImpl question : this.questions.values())
 		{
-			if (question.getCreatedBy().getUserId().equals(userId) && ((pool == null) || (question.getPool().equals(pool))))
+			if ((!question.deleted) && question.getCreatedBy().getUserId().equals(userId) && ((pool == null) || (question.getPool().equals(pool))))
 			{
 				rv.add(new QuestionImpl(question));
 			}
@@ -150,11 +151,7 @@ public class QuestionStorageSample implements QuestionStorage
 	}
 
 	/**
-	 * Find all the questions in the pool
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @return The List of question ids that are in the pool.
+	 * {@inheritDoc}
 	 */
 	public List<String> getPoolQuestions(Pool pool)
 	{
@@ -217,11 +214,30 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void removePoolQuestions(Pool pool)
+	{
+		for (Iterator i = this.questions.values().iterator(); i.hasNext();)
+		{
+			QuestionImpl question = (QuestionImpl) i.next();
+			if (question.getPool().equals(pool))
+			{
+				question.deleted = Boolean.TRUE;
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void removeQuestion(QuestionImpl question)
 	{
 		fakeIt();
 
-		this.questions.remove(question.getId());
+		QuestionImpl q = this.questions.get(question.getId());
+		if (q != null)
+		{
+			q.deleted = Boolean.TRUE;
+		}
 	}
 
 	/**

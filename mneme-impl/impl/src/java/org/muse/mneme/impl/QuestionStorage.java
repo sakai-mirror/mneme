@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.List;
 
+import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
@@ -98,6 +99,14 @@ public interface QuestionStorage
 	 * @return TRUE if the question with this id exists, FALSE if not.
 	 */
 	Boolean questionExists(String id);
+
+	/**
+	 * Remove all the questions that are in this pool
+	 * 
+	 * @param pool
+	 *        The pool.
+	 */
+	void removePoolQuestions(Pool pool);
 
 	/**
 	 * Remove a question from storage.

@@ -206,6 +206,9 @@ public class QuestionImpl implements Question
 
 	protected AttributionImpl createdBy = new AttributionImpl();
 
+	/** Start of the versioning thing. */
+	protected Boolean deleted = Boolean.FALSE;
+
 	protected String description = null;
 
 	protected String id = null;
@@ -367,7 +370,7 @@ public class QuestionImpl implements Question
 	{
 		return this.type;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -485,6 +488,7 @@ public class QuestionImpl implements Question
 	{
 		if (other.questionHandler != null) this.questionHandler = (TypeSpecificQuestion) (other.questionHandler.clone());
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
+		this.deleted = other.deleted;
 		this.description = other.description;
 		this.id = other.id;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy);

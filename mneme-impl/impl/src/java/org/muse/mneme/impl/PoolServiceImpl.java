@@ -241,6 +241,9 @@ public class PoolServiceImpl implements PoolService
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
 
+		// remove the questions from the pool
+		this.questionService.removePoolQuestions(pool, context);
+
 		storage.removePool((PoolImpl) pool);
 
 		// event
