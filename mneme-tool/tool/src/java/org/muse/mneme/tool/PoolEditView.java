@@ -22,8 +22,6 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,11 +30,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
-import org.sakaiproject.tool.api.ToolManager;
-import org.sakaiproject.util.Web;
 
 /**
  * The pools delete view for the mneme tool.
@@ -54,8 +49,13 @@ public class PoolEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		uiService.render(ui, context);
+		if (params.length != 3) throw new IllegalArgumentException();
 		
+		//setup the model: the selected pool
+		Pool pool = this.poolService.getPool(params[2]);
+		context.put("pool", pool);
+		
+		uiService.render(ui, context);
 	}
 
 	/**

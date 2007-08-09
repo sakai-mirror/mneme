@@ -32,9 +32,25 @@
 	<header>
 		<message selector="pool-edit-header">
 			<model type="icon" icon="/icons/basket_add.png" />
+			<model ref="pool.subject" missing="no-subject" />
+			<model ref="pool.title" missing="no-title" />
 		</message>
 	</header>
+	
 	<title>
 		<message selector="pool-edit-title" />
 	</title>
+	
+	<!--container>
+		<navigation destination="/pools" title="pool-edit-header"
+		style="LINK" description="pool-edit-description" submit="FALSE">
+		<icon icon="/icons/basket_add.png" style="LEFT" />
+		</navigation>
+		<text>
+		<message selector="pool-edit-header1">
+		<model ref="pool.subject" missing="no-subject"/>
+		<model ref="pool.title" missing="no-title"/>
+		</message>
+		</text>
+		</container-->
 </interface>
