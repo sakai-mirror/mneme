@@ -47,7 +47,7 @@
 			</emptyTitle>
 			<columns>
 				<modelColumn>
-					<model ref="test.title" />
+					<model ref="test.title" missing="no-title"/>
 				</modelColumn>
 			</columns>
 
