@@ -36,11 +36,11 @@
 			<model ref="pool.title" missing="no-title" />
 		</message>
 	</header>
-	
+
 	<title>
 		<message selector="pool-edit-title" />
 	</title>
-	
+
 	<!--container>
 		<navigation destination="/pools" title="pool-edit-header"
 		style="LINK" description="pool-edit-description" submit="FALSE">
@@ -53,4 +53,100 @@
 		</message>
 		</text>
 		</container-->
+	<container>
+		<text>
+			<message selector="point-value-text">
+				<model ref="pool.points"/>
+			</message>
+		</text>
+		<text>
+			<message selector="difficult-level-text">
+				<model ref="pool.difficulty"/>
+			</message>
+		</text>
+		
+		<!--entity actions-->
+		<entityActionBar width="100%">
+			<container>
+				<navigation submit="FALSE" style="LINK" description="add-question-description">
+					<title>
+						<message selector="add-question-title">
+						</message>
+					</title>
+					<destination template="/">
+					</destination>
+					<icon icon="/icons/document_add.png" style="LEFT" />
+				</navigation>
+				<navigation destination="/" title="move-to-pool"
+					style="LINK" description="move-to-pool-description" disabled="FALSE">
+					<icon icon="/icons/page_go.png" style="LEFT" />
+				</navigation>
+				<navigation destination="/" title="copy-to-pool"
+					style="LINK" description="copy-to-pool-description">
+					<icon icon="/icons/copy.png" style="LEFT" />
+				</navigation>
+				<navigation title="delete-title" style="LINK"
+					description="delete-description" submit="FALSE">
+					<icon icon="/icons/delete.png" style="LEFT" />
+					<destination template="/">
+					</destination>
+				</navigation>
+				<navigation destination="/" title="search-title"
+					style="LINK" description="search-description">
+					<icon icon="/icons/search.png" style="LEFT" />
+				</navigation>
+				<pager paging="paging">
+					<destination template="/">
+					</destination>
+				</pager>
+			</container>
+		</entityActionBar>
+		
+		<!-- the list of questions -->
+		<entityList style="FLAT">
+			<iterator name="question" model="questions" />
+			<emptyTitle>
+				<message selector="no-questions" />
+			</emptyTitle>
+			<columns>
+				<selectionColumn multiple="TRUE">
+					<value>
+						<model type="text" ref="question.id" />
+					</value>
+					<model ref="questionids.values" />
+				</selectionColumn>
+				<modelColumn>
+					<title>
+						<!--This should be limited to ??? characters with ... at the end -->
+						<message selector="question-description" />
+					</title>
+					<model ref="question.description"/>
+					<entityNavigations>
+						<navigation destination="/">
+						</navigation>
+					</entityNavigations>
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="question-type" />
+					</title>
+					<model ref="question.type" />
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="question-action" />
+					</title>
+					<navigations>
+						<navigation style="LINK" destination="/">
+							<icon icon="/icons/copy.png" style="LEFT" />
+						</navigation>
+						<navigation style="LINK">
+							<icon icon="/icons/chart_bar.png" style="RIGHT" />
+							<destination template="/"></destination>
+						</navigation>
+					</navigations>
+				</modelColumn>
+			</columns>
+		</entityList>
+	</container>
 </interface>
