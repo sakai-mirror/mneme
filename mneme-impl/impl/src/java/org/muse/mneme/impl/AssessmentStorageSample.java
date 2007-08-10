@@ -171,6 +171,16 @@ public class AssessmentStorageSample implements AssessmentStorage
 						rv = -1 * ((Assessment) arg0).getTitle().compareTo(((Assessment) arg1).getTitle());
 						break;
 					}
+					case type_a:
+					{
+						rv = ((Assessment) arg0).getType().toString().compareTo(((Assessment) arg1).getType().toString());
+						break;
+					}
+					case type_d:
+					{
+						rv = -1 * ((Assessment) arg0).getType().toString().compareTo(((Assessment) arg1).getType().toString());
+						break;
+					}
 					case odate_a:
 					{
 						rv = ((Assessment) arg0).getDates().getOpenDate().compareTo(((Assessment) arg1).getDates().getOpenDate());
