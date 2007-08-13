@@ -52,7 +52,8 @@
 					description="add-pool-description" submit="TRUE">
 					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
-				<navigation submit="TRUE" style="LINK" description="add-question-description">
+				<navigation submit="TRUE" style="LINK"
+					description="add-question-description">
 					<title>
 						<message selector="add-question-title">
 							<model ref="type.typeName" />
@@ -126,15 +127,11 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/pools/0A/{0}">
-								<model ref="pagingParameter" />
-							</destination>
+							<destination template="/pools/0A"/>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/pools/0D/{0}">
-								<model ref="pagingParameter" />
-							</destination>
+							<destination template="/pools/0D"/>
 						</desc>
 					</sort>
 				</modelColumn>
@@ -154,15 +151,11 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/pools/1A/{0}">
-								<model ref="pagingParameter" />
-							</destination>
+							<destination template="/pools/1A"/>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/pools/1D/{0}">
-								<model ref="pagingParameter" />
-							</destination>
+							<destination template="/pools/1D"/>
 						</desc>
 					</sort>
 					<entityNavigations>

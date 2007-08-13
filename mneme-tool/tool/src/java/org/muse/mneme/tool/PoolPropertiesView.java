@@ -55,7 +55,7 @@ public class PoolPropertiesView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length < 3) throw new IllegalArgumentException();
+		if (params.length != 3) throw new IllegalArgumentException();
 
 		Pool pool = this.poolService.getPool(params[2]);
 		context.put("pool", pool);
