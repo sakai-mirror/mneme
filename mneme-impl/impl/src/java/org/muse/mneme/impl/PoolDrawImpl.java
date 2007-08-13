@@ -128,7 +128,7 @@ public class PoolDrawImpl implements PoolDraw
 	 */
 	public void setNumQuestions(Integer numQuestions)
 	{
-		if (numQuestions == null) throw new IllegalArgumentException();
+		if (numQuestions == null) numQuestions = Integer.valueOf(0);
 		this.numQuestions = numQuestions;
 	}
 

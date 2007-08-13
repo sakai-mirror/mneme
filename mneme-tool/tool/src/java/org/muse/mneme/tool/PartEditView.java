@@ -50,7 +50,6 @@ import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 import org.springframework.core.io.ClassPathResource;
 
-
 /**
  * The /part_edit view for the mneme tool.
  */
@@ -86,17 +85,17 @@ public class PartEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a two parameters (aid, pid)
-		if (params.length != 4 && params.length !=5 && params.length !=6)
+		// we need a two, 3 or 4 parameters (aid, pid, sort, paging (dpart))
+		if (params.length != 4 && params.length != 5 && params.length != 6)
 		{
 			throw new IllegalArgumentException();
 		}
 
 		String assessmentId = params[2];
 		String partId = params[3];
-//		 sort parameter
+		// sort parameter
 		String sortCode = null;
-		if (params.length >= 5)	sortCode = params[4];	
+		if (params.length >= 5) sortCode = params[4];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
@@ -132,7 +131,6 @@ public class PartEditView extends ControllerImpl
 			getManual(assessment, (ManualPart) part, req, res, context, params);
 		}
 	}
-		
 
 	/**
 	 * {@inheritDoc}
@@ -143,31 +141,32 @@ public class PartEditView extends ControllerImpl
 		context.put("assessment", assessment);
 		context.put("part", part);
 
-		//find sort param
+		// find sort param
 		String sortCode = null;
-		PoolService.FindPoolsSort sort=PoolService.FindPoolsSort.subject_a;
-		char sortCol='0';
-		char sortDir='A';
-		
-		if (params.length >= 5)	{
+		PoolService.FindPoolsSort sort = PoolService.FindPoolsSort.subject_a;
+		char sortCol = '0';
+		char sortDir = 'A';
+
+		if (params.length >= 5)
+		{
 			sortCode = params[4];
-			if(sortCode != null && sortCode.length()==2)
+			if (sortCode != null && sortCode.length() == 2)
 			{
 				sortCol = sortCode.charAt(0);
 				sortDir = sortCode.charAt(1);
 				sort = findSortCode(sortCode);
-			}			
+			}
 		}
 		context.put("sort_column", sortCol);
 		context.put("sort_direction", sortDir);
-		
+
 		// default paging
 		String pagingParameter = null;
 		if (params.length == 6)
-		{			
+		{
 			pagingParameter = params[5];
 		}
-		
+
 		if (pagingParameter == null)
 		{
 			// TODO: other than 2 size!
@@ -175,7 +174,7 @@ public class PartEditView extends ControllerImpl
 		}
 
 		Integer maxPools = this.poolService.countPools(toolManager.getCurrentPlacement().getContext(), null, null);
-		
+
 		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxPools);
 		paging.setCurrentAndSize(pagingParameter);
@@ -183,9 +182,9 @@ public class PartEditView extends ControllerImpl
 		context.put("pagingParameter", pagingParameter);
 
 		// get the pool draw list - all the pools for the user (select, sort, page) crossed with this part's actual draws
-		List<PoolDraw> draws = part.getDrawsForPools(toolManager.getCurrentPlacement().getContext(), null, sort, null,
-				paging.getCurrent(),paging.getSize());
-		
+		List<PoolDraw> draws = part.getDrawsForPools(toolManager.getCurrentPlacement().getContext(), null, sort, null, paging.getCurrent(), paging
+				.getSize());
+
 		context.put("draws", draws);
 
 		// render
@@ -202,16 +201,17 @@ public class PartEditView extends ControllerImpl
 		context.put("assessment", assessment);
 		context.put("part", part);
 
-//		checkboxes to remove questions
+		// checkboxes to remove questions
 		Values values = uiService.newValues();
 		context.put("questionids", values);
+
 		// render
 		uiService.render(ui2, context);
 	}
 
 	private PoolService.FindPoolsSort findSortCode(String sortCode)
-	{		
-		PoolService.FindPoolsSort sort=PoolService.FindPoolsSort.subject_a;
+	{
+		PoolService.FindPoolsSort sort = PoolService.FindPoolsSort.subject_a;
 		// 0 is subject
 		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
 		{
@@ -239,9 +239,10 @@ public class PartEditView extends ControllerImpl
 		{
 			sort = PoolService.FindPoolsSort.points_d;
 		}
-		
+
 		return sort;
 	}
+
 	/**
 	 * Final initialization, once all dependencies are set.
 	 */
@@ -270,8 +271,8 @@ public class PartEditView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a two parameters (aid, pid)
-		if (params.length != 4 && params.length !=5 && params.length !=6)
+		// we need a two, 3 or 4 parameters (aid, pid, sort, paging (dpart))
+		if (params.length != 4 && params.length != 5 && params.length != 6)
 		{
 			throw new IllegalArgumentException();
 		}
@@ -307,6 +308,8 @@ public class PartEditView extends ControllerImpl
 		context.put("assessment", assessment);
 		context.put("part", part);
 
+		Values values = null;
+
 		// based on the part type...
 		PopulatingSet draws = null;
 		if (part instanceof DrawPart)
@@ -331,6 +334,13 @@ public class PartEditView extends ControllerImpl
 
 			context.put("draws", draws);
 		}
+		
+		// for mpart, we need to collect the checkbox ids
+		else
+		{
+			values = uiService.newValues();
+			context.put("questionids", values);
+		}
 
 		// read the form
 		String destination = uiService.decode(req, context);
@@ -348,11 +358,15 @@ public class PartEditView extends ControllerImpl
 				}
 			}
 		}
-		else {
-			Values values = uiService.newValues();
-			context.put("questionids", values);
+		
+		else
+		{
+			// get the ids
 			String[] removeQuesIds = values.getValues();
+			
+			// TODO: process the ids into the destination for a redirect to the remove confirm view...
 		}
+
 		// commit the save
 		try
 		{
@@ -366,9 +380,6 @@ public class PartEditView extends ControllerImpl
 		}
 
 		// redirect to the next destination
-		//save sort parameter
-		if (params.length == 6)	destination = destination + params[4]+"/"+ params[5];
-		
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

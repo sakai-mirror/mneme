@@ -31,62 +31,61 @@
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
 
-<header>
+	<header>
 		<message selector="partEdit-header">
 			<model type="icon" icon="/icons/edit.png" />
-			<model ref="assessment.title" missing="no-title"/>
+			<model ref="assessment.title" missing="no-title" />
 		</message>
-</header>
-	
+	</header>
+
 	<container>
 		<section title="properties">
-		<container>
-			<entityDisplay>
+			<container>
+				<entityDisplay>
 					<rows>
 						<row title="part-title">
 							<container>
-								<textEdit rows="1" cols="25" >
+								<textEdit rows="1" cols="25">
 									<model ref="part.title" />
-								</textEdit>				
+								</textEdit>
 							</container>
 						</row>
 						<row title="part-instructions">
 							<container>
 								<textEdit model="part.presentation.text" />
 							</container>
-							</row>
+						</row>
 						<row>
 							<container>
 								<attachmentsEdit title="attachments" model="part.presentation.attachments" />
 							</container>
-						</row>	
+						</row>
 					</rows>
 				</entityDisplay>
 			</container>
 		</section>
 		<section title="part-pools-msg">
-		<container>
-		<entityActionBar>
 			<container>
-			<navigation destination="/" title="search-title"
-					style="LINK" description="search-description">
-					<icon icon="/icons/search.png" style="LEFT" />
-				</navigation>
-				<pager paging="paging">
-					<destination template="/part_edit/{0}/{1}/{2}{3}/{4}">
-						<model ref="assessment.id" />
-						<model ref="part.id" />
-						<model ref="sort_column" />
-						<model ref="sort_direction" />
-						<model type="paging" ref="paging" />
-					</destination>
-				</pager>				
-			</container>
-		</entityActionBar>			
+				<entityActionBar>
+					<container>
+						<navigation destination="/" title="search-title" style="LINK" description="search-description">
+							<icon icon="/icons/search.png" style="LEFT" />
+						</navigation>
+						<pager paging="paging" submit="TRUE">
+							<destination template="/part_edit/{0}/{1}/{2}{3}/{4}">
+								<model ref="assessment.id" />
+								<model ref="part.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model type="paging" ref="paging" />
+							</destination>
+						</pager>
+					</container>
+				</entityActionBar>
 
 				<!-- the list of ALL pools, with those selected for this part checked and their "draw" filled in -->
 				<entityList style="FLAT">
-				<emptyTitle>
+					<emptyTitle>
 						<message selector="no-pools" />
 					</emptyTitle>
 					<iterator name="draw">
@@ -98,9 +97,10 @@
 								<message selector="pool-draw" />
 							</title>
 							<container>
-								<textEdit rows="1" cols="4">
+								<countEdit>
 									<model ref="draw.numQuestions" />
-								</textEdit>
+									<summary initialValue="part.numQuestions" title="part-num-questions" />
+								</countEdit>
 							</container>
 						</column>
 						<modelColumn>
@@ -108,25 +108,23 @@
 								<message selector="pool-subject" />
 							</title>
 							<model ref="draw.pool.subject" />
-							<sort>
+							<sort submit="TRUE">
 								<active>
-									<compareDecision model="sort_column"
-										constant="0" />
+									<compareDecision model="sort_column" constant="0" />
 								</active>
 								<direction>
-									<compareDecision model="sort_direction"
-										constant="A" />
+									<compareDecision model="sort_direction" constant="A" />
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/part_edit/{0}/{1}/0A" >
+									<destination template="/part_edit/{0}/{1}/0A">
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/part_edit/{0}/{1}/0D" >
+									<destination template="/part_edit/{0}/{1}/0D">
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
@@ -137,26 +135,24 @@
 							<title>
 								<message selector="pool-title" />
 							</title>
-							<model ref="draw.pool.title" missing="no-title"/>
-							<sort>
+							<model ref="draw.pool.title" missing="no-title" />
+							<sort submit="TRUE">
 								<active>
-									<compareDecision model="sort_column"
-										constant="1" />
+									<compareDecision model="sort_column" constant="1" />
 								</active>
 								<direction>
-									<compareDecision model="sort_direction"
-										constant="A" />
+									<compareDecision model="sort_direction" constant="A" />
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/part_edit/{0}/{1}/1A" >
+									<destination template="/part_edit/{0}/{1}/1A">
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/part_edit/{0}/{1}/1D" >
+									<destination template="/part_edit/{0}/{1}/1D">
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
@@ -180,25 +176,23 @@
 								<message selector="pool-points" />
 							</title>
 							<model ref="draw.pool.points" />
-							<sort>
+							<sort submit="TRUE">
 								<active>
-									<compareDecision model="sort_column"
-										constant="2" />
+									<compareDecision model="sort_column" constant="2" />
 								</active>
 								<direction>
-									<compareDecision model="sort_direction"
-										constant="A" />
+									<compareDecision model="sort_direction" constant="A" />
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/part_edit/{0}/{1}/2A" >
+									<destination template="/part_edit/{0}/{1}/2A">
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/part_edit/{0}/{1}/2D" >
+									<destination template="/part_edit/{0}/{1}/2D">
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
@@ -216,12 +210,6 @@
 
 			</container>
 		</section>
-
-		<text>
-			<message selector="part-num-questions">
-				<model ref="part.numQuestions" />
-			</message>
-		</text>
 
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="70em">
