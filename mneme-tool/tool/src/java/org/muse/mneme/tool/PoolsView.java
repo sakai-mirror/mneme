@@ -164,10 +164,10 @@ public class PoolsView extends ControllerImpl
 		paging.setCurrentAndSize(pagingParameter);
 		context.put("paging", paging);
 		context.put("pagingParameter", pagingParameter);
-		
+
 		// collect the pools to show
-		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, sort, null, paging.getCurrent(),
-				paging.getSize());
+		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, sort, null, paging.getCurrent(), paging
+				.getSize());
 		context.put("pools", pools);
 
 		// for the checkboxes
@@ -214,14 +214,15 @@ public class PoolsView extends ControllerImpl
 				if (selectedPoolIds != null && (selectedPoolIds.length > 0))
 				{
 					StringBuffer path = new StringBuffer();
-					String separator = "/";
+					String separator = "+";
 
 					path.append(destination);
+					path.append("/");
 
 					for (String selectedPoolId : selectedPoolIds)
 					{
-						path.append(separator);
 						path.append(selectedPoolId);
+						path.append(separator);
 					}
 
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
@@ -244,7 +245,7 @@ public class PoolsView extends ControllerImpl
 				}
 				catch (AssessmentPermissionException e)
 				{
-					//redirect to error
+					// redirect to error
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 					return;
 				}

@@ -67,16 +67,20 @@ public class PoolsDeleteView extends ControllerImpl
 	{
 		String destination = this.uiService.decode(req, context);
 
-		if (params.length < 4) throw new IllegalArgumentException();
+		if (params.length != 5) throw new IllegalArgumentException();
 
 		List<Pool> pools = new ArrayList<Pool>(0);
-		StringBuffer deletePoolIds = new StringBuffer();
+		// pool id's are in the params array at the index 4
+		String poolIds[] = params[4].split("\\+");
 
-		// pool id's are in the params array from the index 4
-		for (int i = 4; i < params.length; i++)
+		for (String selectedPoolId : poolIds)
 		{
-			// get the pool and add to the list to show
-			Pool pool = this.poolService.getPool(params[i]);
+			Pool pool = null;
+			// get the pool and add to the list
+			if (selectedPoolId != null && selectedPoolId.trim().length() > 0)
+				pool = this.poolService.getPool(selectedPoolId);
+			else
+				continue;
 
 			if (pool != null) pools.add(pool);
 		}
@@ -84,7 +88,7 @@ public class PoolsDeleteView extends ControllerImpl
 		context.put("pools", pools);
 		// sort code
 		context.put("sortcode", params[2]);
-		
+
 		context.put("pagingParameter", params[3]);
 
 		uiService.render(ui, context);
@@ -112,35 +116,40 @@ public class PoolsDeleteView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length < 4) throw new IllegalArgumentException();
+		if (params.length != 5) throw new IllegalArgumentException();
 
 		String destination = this.uiService.decode(req, context);
 
 		if (destination != null && (destination.trim().equalsIgnoreCase("/pools_delete")))
 		{
-			
-				// pool id's are in the params array from the index 3
-				for (int i = 4; i < params.length; i++)
+			// pool id's are in the params array at the index 4
+			String poolIds[] = params[4].split("\\+");
+
+			for (String selectedPoolId : poolIds)
+			{
+				Pool pool = null;
+				if (selectedPoolId != null && selectedPoolId.trim().length() > 0)
+					pool = this.poolService.getPool(selectedPoolId);
+				else
+					continue;
+				
+				if (pool != null)
 				{
-					Pool pool = this.poolService.getPool(params[i]);
-					if (pool != null)
+					try
 					{
-						try
-						{
-							this.poolService.removePool(pool, toolManager.getCurrentPlacement().getContext());
-						}
-						catch (AssessmentPermissionException e)
-						{
-							//redirect to error
-							res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-							return;
-						}						
+						this.poolService.removePool(pool, toolManager.getCurrentPlacement().getContext());
+					}
+					catch (AssessmentPermissionException e)
+					{
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+						return;
 					}
 				}
-			
+			}
 		}
-		//add sort and paging
-		destination = "/pools/" + params[2] + "/"+ params[3];
+		// add sort and paging
+		destination = "/pools/" + params[2] + "/" + params[3];
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
