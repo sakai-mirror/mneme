@@ -37,6 +37,7 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.util.Web;
 
 /**
  * The pools delete view for the mneme tool.
@@ -60,14 +61,55 @@ public class PoolEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 3) throw new IllegalArgumentException();
+		if ((params.length != 3) && (params.length != 4)) throw new IllegalArgumentException();
 
-		// setup the model: the selected pool
+		// sort parameter - sort is in param array at index 2
+		String sortCode = null;
+		if (params.length == 4) sortCode = params[3];
+
+		// setup the model: the selected pool - pool id is at index 2
 		Pool pool = this.poolService.getPool(params[2]);
 		context.put("pool", pool);
 
+		// default sort is title ascending
+		QuestionService.FindQuestionsSort sort;
+		if (sortCode != null)
+		{
+			if (sortCode.trim().length() == 2)
+			{
+				context.put("sort_column", sortCode.charAt(0));
+				context.put("sort_direction", sortCode.charAt(1));
+
+				// 0 is title
+				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
+					sort = QuestionService.FindQuestionsSort.type_a;
+				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+					sort = QuestionService.FindQuestionsSort.type_d;
+				else
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+			}
+			else
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+		}
+		else
+		{
+			// default sort: title ascending
+			sort = QuestionService.FindQuestionsSort.type_a;
+
+			context.put("sort_column", '0');
+			context.put("sort_direction", 'A');
+		}
+
 		// get questions -- passed userid as parameter as findQuestions is not fetching with out userid
-		List<Question> questions = questionService.findQuestions(sessionManager.getCurrentSessionUserId(), pool, QuestionService.FindQuestionsSort.type_a, null, null, null);
+		List<Question> questions = questionService.findQuestions(sessionManager.getCurrentSessionUserId(), pool, sort, null, null, null);
 		context.put("questions", questions);
 
 		// for the checkboxes

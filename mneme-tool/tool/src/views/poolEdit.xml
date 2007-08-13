@@ -56,29 +56,30 @@
 	<container>
 		<text>
 			<message selector="point-value-text">
-				<model ref="pool.points"/>
+				<model ref="pool.points" />
 			</message>
 		</text>
 		<text>
 			<message selector="difficult-level-text">
-				<model ref="pool.difficulty"/>
+				<model ref="pool.difficulty" />
 			</message>
 		</text>
-		
+
 		<!--entity actions-->
 		<entityActionBar width="100%">
 			<container>
-				<navigation submit="FALSE" style="LINK" description="add-question-description">
+				<navigation submit="FALSE" style="LINK"
+					description="add-question-description">
 					<title>
 						<message selector="add-question-title">
 						</message>
 					</title>
-					<destination template="/">
-					</destination>
+					<destination template="/"></destination>
 					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
 				<navigation destination="/" title="move-to-pool"
-					style="LINK" description="move-to-pool-description" disabled="FALSE">
+					style="LINK" description="move-to-pool-description"
+					disabled="FALSE">
 					<icon icon="/icons/page_go.png" style="LEFT" />
 				</navigation>
 				<navigation destination="/" title="copy-to-pool"
@@ -88,20 +89,18 @@
 				<navigation title="delete-title" style="LINK"
 					description="delete-description" submit="FALSE">
 					<icon icon="/icons/delete.png" style="LEFT" />
-					<destination template="/">
-					</destination>
+					<destination template="/"></destination>
 				</navigation>
 				<navigation destination="/" title="search-title"
 					style="LINK" description="search-description">
 					<icon icon="/icons/search.png" style="LEFT" />
 				</navigation>
 				<pager paging="paging">
-					<destination template="/">
-					</destination>
+					<destination template="/"></destination>
 				</pager>
 			</container>
 		</entityActionBar>
-		
+
 		<!-- the list of questions -->
 		<entityList style="FLAT">
 			<iterator name="question" model="questions" />
@@ -120,10 +119,9 @@
 						<!--This should be limited to ??? characters with ... at the end -->
 						<message selector="question-description" />
 					</title>
-					<model ref="question.description"/>
+					<model ref="question.description" />
 					<entityNavigations>
-						<navigation destination="/">
-						</navigation>
+						<navigation destination="/"></navigation>
 					</entityNavigations>
 				</modelColumn>
 				<modelColumn>
@@ -131,6 +129,28 @@
 						<message selector="question-type" />
 					</title>
 					<model ref="question.type" />
+					<sort>
+						<active>
+							<compareDecision model="sort_column"
+								constant="0" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction"
+								constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/pool_edit/{0}/0A">
+								<model ref="pool.id" />
+							</destination>
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/pool_edit/{0}/0D">
+								<model ref="pool.id" />
+							</destination>
+						</desc>
+					</sort>
 				</modelColumn>
 				<modelColumn>
 					<title>
@@ -141,7 +161,8 @@
 							<icon icon="/icons/copy.png" style="LEFT" />
 						</navigation>
 						<navigation style="LINK">
-							<icon icon="/icons/chart_bar.png" style="RIGHT" />
+							<icon icon="/icons/chart_bar.png"
+								style="RIGHT" />
 							<destination template="/"></destination>
 						</navigation>
 					</navigations>
