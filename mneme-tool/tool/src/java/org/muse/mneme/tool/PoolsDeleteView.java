@@ -65,9 +65,9 @@ public class PoolsDeleteView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		String destination = this.uiService.decode(req, context);
-
 		if (params.length != 5) throw new IllegalArgumentException();
+		
+		String destination = this.uiService.decode(req, context);
 
 		List<Pool> pools = new ArrayList<Pool>(0);
 		// pool id's are in the params array at the index 4
