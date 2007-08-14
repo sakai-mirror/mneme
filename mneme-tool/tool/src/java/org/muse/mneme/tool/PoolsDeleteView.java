@@ -77,10 +77,7 @@ public class PoolsDeleteView extends ControllerImpl
 		{
 			Pool pool = null;
 			// get the pool and add to the list
-			if (selectedPoolId != null && selectedPoolId.trim().length() > 0)
-				pool = this.poolService.getPool(selectedPoolId);
-			else
-				continue;
+			pool = this.poolService.getPool(selectedPoolId);
 
 			if (pool != null) pools.add(pool);
 		}
@@ -128,11 +125,7 @@ public class PoolsDeleteView extends ControllerImpl
 			for (String selectedPoolId : poolIds)
 			{
 				Pool pool = null;
-				if (selectedPoolId != null && selectedPoolId.trim().length() > 0)
-					pool = this.poolService.getPool(selectedPoolId);
-				else
-					continue;
-				
+				pool = this.poolService.getPool(selectedPoolId);
 				if (pool != null)
 				{
 					try
