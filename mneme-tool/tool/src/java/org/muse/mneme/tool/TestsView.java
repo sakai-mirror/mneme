@@ -90,15 +90,15 @@ public class TestsView extends ControllerImpl
 
 				// TODO: 0 is type, need to add code for processing it
 				// 1 is title
-				if ((sortCode.charAt(0) == '5') && (sortCode.charAt(1) == 'A'))
+				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
 				{
 					sort = AssessmentService.AssessmentsSort.type_a;
 				}
-				else if ((sortCode.charAt(0) == '5') && (sortCode.charAt(1) == 'D'))
+				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
 				{
 					sort = AssessmentService.AssessmentsSort.type_d;
 				}
-				if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
 				{
 					sort = AssessmentService.AssessmentsSort.title_a;
 				}

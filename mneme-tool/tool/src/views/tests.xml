@@ -83,7 +83,7 @@
 					<sort submit="TRUE">
 						<active>
 							<compareDecision model="sort_column"
-								constant="5" />
+								constant="0" />
 						</active>
 						<direction>
 							<compareDecision model="sort_direction"
@@ -91,11 +91,11 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/tests/5A" />
+							<destination template="/tests/0A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/tests/5D" />
+							<destination template="/tests/0D" />
 						</desc>
 					</sort>
 				</modelColumn>
@@ -186,7 +186,7 @@
 					<title>
 						<message selector="assessment-ddate" />
 					</title>
-					<sort>
+					<sort submit="TRUE">
 						<active>
 							<compareDecision model="sort_column"
 								constant="3" />
@@ -215,7 +215,7 @@
 					<title>
 						<message selector="assessment-active" />
 					</title>
-					<sort>
+					<sort submit="TRUE">
 						<active>
 							<compareDecision model="sort_column"
 								constant="4" />
@@ -236,7 +236,7 @@
 					<model ref="assessment.active"
 						delegate="FormatAssesmentActive" tool="sakai.mneme" />
 					<entityNavigations>
-						<navigation>
+						<navigation submit="TRUE">
 							<destination template="/test_publish/{0}">
 								<model ref="assessment.id" />
 							</destination>
@@ -280,7 +280,8 @@
 						<message selector="assessment-action" />
 					</title>
 					<navigations>
-						<navigation style="LINK" submit="TRUE">
+						<navigation style="LINK" submit="TRUE"
+							description="settings">
 							<icon icon="/icons/settings.png"
 								style="LEFT" />
 							<destination
@@ -288,14 +289,15 @@
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
-						<navigation style="LINK" submit="TRUE">
+						<navigation style="LINK" submit="TRUE"
+							description="access">
 							<icon icon="/icons/access.png" style="LEFT" />
 							<destination template="/test_access/{0}">
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
 						<navigation style="LINK" submit="TRUE"
-							title="copy">
+							description="copy">
 							<icon icon="/icons/page_copy.png"
 								style="LEFT" />
 							<destination template="/test_copy/{0}">
