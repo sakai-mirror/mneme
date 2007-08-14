@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Pool;
@@ -61,11 +62,15 @@ public class PoolEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if ((params.length != 3) && (params.length != 4)) throw new IllegalArgumentException();
+		if ((params.length != 3) && (params.length != 4) && (params.length != 5)) throw new IllegalArgumentException();
 
 		// sort parameter - sort is in param array at index 2
 		String sortCode = null;
-		if (params.length == 4) sortCode = params[3];
+		if (params.length > 3) sortCode = params[3];
+
+		// paging parameter - is in param array at index 4
+		String pagingParameter = null;
+		if (params.length == 5) pagingParameter = params[4];
 
 		// setup the model: the selected pool - pool id is at index 2
 		Pool pool = this.poolService.getPool(params[2]);
@@ -108,8 +113,25 @@ public class PoolEditView extends ControllerImpl
 			context.put("sort_direction", 'A');
 		}
 
-		// get questions -- passed userid as parameter as findQuestions is not fetching with out userid
-		List<Question> questions = questionService.findQuestions(sessionManager.getCurrentSessionUserId(), pool, sort, null, null, null);
+		// default paging
+		if (pagingParameter == null)
+		{
+			// TODO: other than 2 size!
+			pagingParameter = "1-2";
+		}
+		// total questions passed userid as parameter as countQuestions is not fetching data with out userid
+		Integer maxQuestions = this.questionService.countQuestions(sessionManager.getCurrentSessionUserId(), pool, null);
+
+		// paging
+		Paging paging = uiService.newPaging();
+		paging.setMaxItems(maxQuestions);
+		paging.setCurrentAndSize(pagingParameter);
+		context.put("paging", paging);
+		context.put("pagingParameter", pagingParameter);
+
+		// get questions -- passed userid as parameter as findQuestions is not fetching data with out userid
+		List<Question> questions = questionService.findQuestions(sessionManager.getCurrentSessionUserId(), pool, sort, null, paging.getCurrent(),
+				paging.getSize());
 		context.put("questions", questions);
 
 		// for the checkboxes
