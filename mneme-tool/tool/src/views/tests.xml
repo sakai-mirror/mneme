@@ -245,36 +245,6 @@
 				</modelColumn>
 
 
-				<column>
-					<title>
-						<message selector="assessment-innew" />
-					</title>
-					<container>
-						<navigation style="LINK" submit="TRUE">
-							<title>
-								<message
-									model="assessment.submissionCounts.completed" />
-							</title>
-							<destination template="/grade_class/{0}">
-								<model ref="assessment.id" />
-							</destination>
-						</navigation>
-						<navigation>
-							<title>
-								<message selector="nav-divider" />
-							</title>
-						</navigation>
-						<navigation style="LINK" submit="TRUE">
-							<title>
-								<message
-									model="assessment.submissionCounts.ungraded" />
-							</title>
-							<destination template="/grade_class/{0}">
-								<model ref="assessment.id" />
-							</destination>
-						</navigation>
-					</container>
-				</column>
 				<modelColumn>
 					<title>
 						<message selector="assessment-action" />

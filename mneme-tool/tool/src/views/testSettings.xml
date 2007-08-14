@@ -159,7 +159,14 @@
 												<selectionChoice
 													value="graded" selector="type-graded" />
 												<selectionChoice
-													value="date" selector="type-date" />
+													value="date" selector="type-date">
+													<container>
+														<dateEdit>
+															<model
+																ref="assessment.review.date" type="date" />
+														</dateEdit>
+													</container>
+												</selectionChoice>
 												<selectionChoice
 													value="never" selector="type-never" />
 											</selectionChoices>
