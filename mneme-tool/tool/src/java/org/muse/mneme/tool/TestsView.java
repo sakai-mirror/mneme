@@ -88,7 +88,16 @@ public class TestsView extends ControllerImpl
 				context.put("sort_column", sortCode.charAt(0));
 				context.put("sort_direction", sortCode.charAt(1));
 
+				// TODO: 0 is type, need to add code for processing it
 				// 1 is title
+				if ((sortCode.charAt(0) == '5') && (sortCode.charAt(1) == 'A'))
+				{
+					sort = AssessmentService.AssessmentsSort.type_a;
+				}
+				else if ((sortCode.charAt(0) == '5') && (sortCode.charAt(1) == 'D'))
+				{
+					sort = AssessmentService.AssessmentsSort.type_d;
+				}
 				if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
 				{
 					sort = AssessmentService.AssessmentsSort.title_a;
@@ -115,7 +124,7 @@ public class TestsView extends ControllerImpl
 				{
 					sort = AssessmentService.AssessmentsSort.ddate_d;
 				}
-				//4 is active
+				// 4 is active
 				else if ((sortCode.charAt(0) == '4') && (sortCode.charAt(1) == 'A'))
 				{
 					sort = AssessmentService.AssessmentsSort.active_a;
@@ -174,6 +183,7 @@ public class TestsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+
 		// from an add or delete request
 
 		// security check
@@ -184,125 +194,30 @@ public class TestsView extends ControllerImpl
 			return;
 		}
 
-//		 throw new IllegalArgumentException();
+		// throw new IllegalArgumentException();
 		// for the selected tests to delete
 		Values values = this.uiService.newValues();
 		context.put("ids", values);
 		// read the form
 		String destination = uiService.decode(req, context);
-       // for an add
-		if (destination.startsWith("/test_edit"))
+		if (destination != null)
 		{
-			// create a new test
-			try
+			saveDates(req,res,context);
+			// for an add
+			if (destination.startsWith("/test_add"))
 			{
-				Assessment assessment = this.assessmentService.newAssessment(this.toolManager.getCurrentPlacement().getContext());
-			
-				// commit it empty
-				this.assessmentService.saveAssessment(assessment);
-
-				// redirect to edit for this assessment
-				destination = destination + assessment.getId();
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-				return;
-			}
-		}
-		if (destination.startsWith("/test_publish"))
-		{
-			// create a new test
-			try
-			{
-				Assessment assessment = this.assessmentService.newAssessment(this.toolManager.getCurrentPlacement().getContext());
-			
-				// commit it empty
-				this.assessmentService.saveAssessment(assessment);
-
-				// redirect to edit for this assessment
-				destination = destination + assessment.getId();
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-				return;
-			}
-		}
-
-		if (destination != null && (destination.trim().equalsIgnoreCase("/tests_delete")))
-		{
-			String[] selectedTestIds = values.getValues();
-			// delete the tests with ids
-			StringBuffer path = new StringBuffer();
-			String separator = "/";
-
-			if (selectedTestIds != null && (selectedTestIds.length > 0))
-			{
-				path.append(destination);
-				path.append(separator);
-
-				// for sort code
-				if (params.length == 3)
-				{
-					path.append(params[2]);
-					path.append(separator);
-				}
-				else
-				{
-					// default sort - title ascending
-					path.append("1A");
-					path.append(separator);
-				}
-
-				path.append(selectedTestIds[0]);
-				for (int i = 1; i < selectedTestIds.length; i++)
-				{
-					path.append(separator);
-					path.append(selectedTestIds[i]);
-				}
-
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
-				return;
-			}
-		}
-
-		if (destination != null && (destination.trim().equalsIgnoreCase("/tests")))
-		{
-//		 based on the part type...
-		   PopulatingSet assessments = null;
-			final AssessmentService assessmentService = this.assessmentService;
-			assessments = uiService.newPopulatingSet(new Factory()
-			{
-				public Object get(String id)
-				{
-					// add a draw to the part
-					Assessment assessment = assessmentService.getAssessment(id);
-					return assessment;
-				}
-			}, new Id()
-			{
-				public String getId(Object o)
-				{
-					return ((Assessment) o).getId();
-				}
-			});
-
-			context.put("assessments", assessments);
-			destination = uiService.decode(req, context);
-			
-			for (Iterator i = assessments.getSet().iterator(); i.hasNext();)
-			{
-				Assessment assessment = (Assessment) i.next();
+				// create a new test
 				try
 				{
+					Assessment assessment = this.assessmentService.newAssessment(this.toolManager.getCurrentPlacement().getContext());
+
+					// commit it empty
 					this.assessmentService.saveAssessment(assessment);
+
+					// redirect to edit for this assessment
+					destination = "/test_edit/" + assessment.getId();
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+					return;
 				}
 				catch (AssessmentPermissionException e)
 				{
@@ -311,6 +226,48 @@ public class TestsView extends ControllerImpl
 					return;
 				}
 			}
+			if (destination.trim().equalsIgnoreCase("/tests_delete"))
+			{
+				String[] selectedTestIds = values.getValues();
+				// delete the tests with ids
+				StringBuffer path = new StringBuffer();
+				String separator = "/";
+
+				if (selectedTestIds != null && (selectedTestIds.length > 0))
+				{
+					path.append(destination);
+					path.append(separator);
+
+					// for sort code
+					if (params.length == 3)
+					{
+						path.append(params[2]);
+						path.append(separator);
+					}
+					else
+					{
+						// default sort - title ascending
+						path.append("1A");
+						path.append(separator);
+					}
+
+					path.append(selectedTestIds[0]);
+					for (int i = 1; i < selectedTestIds.length; i++)
+					{
+						path.append(separator);
+						path.append(selectedTestIds[i]);
+					}
+
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
+					return;
+				}
+			}
+			else
+			{
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;			
+			}
+
 		}
 		if (params.length == 3)
 			destination = "/tests/" + params[2];
@@ -319,12 +276,51 @@ public class TestsView extends ControllerImpl
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 		// redirect to error
-		//res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+		// res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+	}
+
+	private void saveDates(HttpServletRequest req,HttpServletResponse res,Context context) throws IOException
+	{
+		PopulatingSet assessments = null;
+		final AssessmentService assessmentService = this.assessmentService;
+		assessments = uiService.newPopulatingSet(new Factory()
+		{
+			public Object get(String id)
+			{
+				// add a draw to the part
+				Assessment assessment = assessmentService.getAssessment(id);
+				return assessment;
+			}
+		}, new Id()
+		{
+			public String getId(Object o)
+			{
+				return ((Assessment) o).getId();
+			}
+		});
+
+		context.put("assessments", assessments);
+		String destination = uiService.decode(req, context);
+
+		for (Iterator i = assessments.getSet().iterator(); i.hasNext();)
+		{
+			Assessment assessment = (Assessment) i.next();
+			try
+			{
+				this.assessmentService.saveAssessment(assessment);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+		}
 	}
 
 	/**
 	 * Set the AssessmentService.
-	 *
+	 * 
 	 * @param service
 	 *        The AssessmentService.
 	 */
@@ -335,7 +331,7 @@ public class TestsView extends ControllerImpl
 
 	/**
 	 * Set the tool manager.
-	 *
+	 * 
 	 * @param manager
 	 *        The tool manager.
 	 */

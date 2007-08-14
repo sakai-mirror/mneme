@@ -34,7 +34,7 @@
 
 	<container>
 		<!--navigation-->
-		
+
 		<text>
 			<message selector="test-delete-message1" />
 		</text>
@@ -47,7 +47,7 @@
 			</emptyTitle>
 			<columns>
 				<modelColumn>
-					<model ref="test.title" missing="no-title"/>
+					<model ref="test.title" missing="no-title" />
 				</modelColumn>
 			</columns>
 

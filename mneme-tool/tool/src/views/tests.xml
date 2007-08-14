@@ -24,19 +24,26 @@
  **********************************************************************************/
 -->
 
-<interface title="tests-title" header="tests-header">
+<interface>
 
 	<!--mode bar-->
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
-
+	<header>
+		<message selector="tests-header">
+			<model type="icon" icon="/icons/folder_page.png" />
+		</message>
+	</header>
+	<title>
+		<message selector="tests-title" />
+	</title>
 	<container>
 
 		<!-- entity actions -->
 		<entityActionBar width="100%">
 			<container>
-				<navigation destination="/test_edit/" title="add-test"
+				<navigation destination="/test_add/" title="add-test"
 					style="LINK" description="add-test-description" submit="TRUE">
 					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
@@ -44,6 +51,11 @@
 					title="delete-tests" style="LINK"
 					description="delete-tests-description" submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
+				</navigation>
+				<navigation destination="/tests_inactivate"
+					title="inactivate-tests" style="LINK"
+					description="inactivate-tests-description" submit="TRUE">
+					<icon icon="/icons/make_inactive.png" style="LEFT" />
 				</navigation>
 				<navigation destination="/test_import_export"
 					title="import-export-tests" style="LINK"
@@ -68,6 +80,24 @@
 					</title>
 					<model ref="assessment.type"
 						delegate="FormatAssesmentType" tool="sakai.mneme" />
+					<sort submit="TRUE">
+						<active>
+							<compareDecision model="sort_column"
+								constant="5" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction"
+								constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/tests/5A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/tests/5D" />
+						</desc>
+					</sort>
 				</modelColumn>
 				<selectionColumn multiple="TRUE">
 					<value>
@@ -75,12 +105,11 @@
 					</value>
 					<model ref="ids.values" />
 				</selectionColumn>
-				<modelColumn>
+				<column>
 					<title>
 						<message selector="assessment-title" />
 					</title>
-					<model ref="assessment.title" missing="no-title" />
-					<sort>
+					<sort submit="TRUE">
 						<active>
 							<compareDecision model="sort_column"
 								constant="1" />
@@ -98,32 +127,36 @@
 							<destination template="/tests/1D" />
 						</desc>
 					</sort>
-					<entityNavigations>
-						<navigation>
+					<container>
+						<navigation style="LINK" submit="TRUE">
+							<title>
+								<message model="assessment.title" />
+							</title>
 							<destination template="/test_edit/{0}">
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
-					</entityNavigations>
-				</modelColumn>
+
+					</container>
+				</column>
 				<modelColumn>
 					<title>
 						<message selector="assessment-view" />
 					</title>
-					<model type="icon" icon="/icons/preview.png" />
-					<entityNavigations>
-						<navigation>
+					<navigations>
+						<navigation style="LINK" submit="TRUE">
+						<icon icon="/icons/preview.png" style="LEFT" />
 							<destination template="/tests">
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
-					</entityNavigations>
+					</navigations>	
 				</modelColumn>
 				<column>
 					<title>
 						<message selector="assessment-odate" />
 					</title>
-					<sort>
+					<sort submit="TRUE">
 						<active>
 							<compareDecision model="sort_column"
 								constant="2" />
@@ -216,7 +249,7 @@
 						<message selector="assessment-innew" />
 					</title>
 					<container>
-						<navigation style="LINK">
+						<navigation style="LINK" submit="TRUE">
 							<title>
 								<message
 									model="assessment.submissionCounts.completed" />
@@ -230,7 +263,7 @@
 								<message selector="nav-divider" />
 							</title>
 						</navigation>
-						<navigation style="LINK">
+						<navigation style="LINK" submit="TRUE">
 							<title>
 								<message
 									model="assessment.submissionCounts.ungraded" />
@@ -245,15 +278,29 @@
 					<title>
 						<message selector="assessment-action" />
 					</title>
-					<model type="icon" icon="/icons/settings.png" />
-					<entityNavigations>
-						<navigation>
+					<navigations>
+						<navigation style="LINK" submit="TRUE">
+						<icon icon="/icons/settings.png" style="LEFT" />
 							<destination
 								template="/test_settings/{0}">
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
-					</entityNavigations>
+						<navigation style="LINK" submit="TRUE">
+						<icon icon="/icons/access.png" style="LEFT" />
+							<destination
+								template="/test_access/{0}">
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+						<navigation style="LINK" submit="TRUE" title="copy">
+						<icon icon="/icons/page_copy.png" style="LEFT" />
+							<destination
+								template="/test_copy/{0}">
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+					</navigations>
 				</modelColumn>
 			</columns>
 		</entityList>
