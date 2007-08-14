@@ -202,7 +202,7 @@ public class TestsView extends ControllerImpl
 		String destination = uiService.decode(req, context);
 		if (destination != null)
 		{
-			saveDates(req,res,context);
+			saveDates(req, res, context);
 			// for an add
 			if (destination.startsWith("/test_add"))
 			{
@@ -265,7 +265,7 @@ public class TestsView extends ControllerImpl
 			else
 			{
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;			
+				return;
 			}
 
 		}
@@ -279,7 +279,7 @@ public class TestsView extends ControllerImpl
 		// res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 	}
 
-	private void saveDates(HttpServletRequest req,HttpServletResponse res,Context context) throws IOException
+	private void saveDates(HttpServletRequest req, HttpServletResponse res, Context context) throws IOException
 	{
 		PopulatingSet assessments = null;
 		final AssessmentService assessmentService = this.assessmentService;

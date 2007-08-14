@@ -145,12 +145,13 @@
 					</title>
 					<navigations>
 						<navigation style="LINK" submit="TRUE">
-						<icon icon="/icons/preview.png" style="LEFT" />
+							<icon icon="/icons/preview.png"
+								style="LEFT" />
 							<destination template="/tests">
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
-					</navigations>	
+					</navigations>
 				</modelColumn>
 				<column>
 					<title>
@@ -280,23 +281,24 @@
 					</title>
 					<navigations>
 						<navigation style="LINK" submit="TRUE">
-						<icon icon="/icons/settings.png" style="LEFT" />
+							<icon icon="/icons/settings.png"
+								style="LEFT" />
 							<destination
 								template="/test_settings/{0}">
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
 						<navigation style="LINK" submit="TRUE">
-						<icon icon="/icons/access.png" style="LEFT" />
-							<destination
-								template="/test_access/{0}">
+							<icon icon="/icons/access.png" style="LEFT" />
+							<destination template="/test_access/{0}">
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
-						<navigation style="LINK" submit="TRUE" title="copy">
-						<icon icon="/icons/page_copy.png" style="LEFT" />
-							<destination
-								template="/test_copy/{0}">
+						<navigation style="LINK" submit="TRUE"
+							title="copy">
+							<icon icon="/icons/page_copy.png"
+								style="LEFT" />
+							<destination template="/test_copy/{0}">
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
