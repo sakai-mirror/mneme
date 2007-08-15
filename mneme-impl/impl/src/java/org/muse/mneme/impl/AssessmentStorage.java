@@ -80,6 +80,15 @@ public interface AssessmentStorage
 	AssessmentImpl newAssessment();
 
 	/**
+	 * Construct a new Assessment object that is a copy of another.
+	 * 
+	 * @param assessment
+	 *        The assessment to copy.
+	 * @return A new Assessment object.
+	 */
+	AssessmentImpl newAssessment(AssessmentImpl assessment);
+
+	/**
 	 * Remove a assessment from storage.
 	 * 
 	 * @param assessment

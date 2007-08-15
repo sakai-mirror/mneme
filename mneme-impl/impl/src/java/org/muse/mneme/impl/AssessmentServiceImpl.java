@@ -145,6 +145,25 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Assessment copyAssessment(String context, Assessment assessment) throws AssessmentPermissionException
+	{
+		if (context == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("copyAssessment: " + context);
+
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+
+		AssessmentImpl rv = this.storage.newAssessment((AssessmentImpl) assessment);
+		rv.setContext(context);
+		saveAssessment(rv);
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer countAssessments(String context)
 	{
 		if (context == null) throw new IllegalArgumentException();
@@ -241,6 +260,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		AssessmentImpl rv = this.storage.newAssessment();
 		rv.setContext(context);
+		saveAssessment(rv);
 
 		return rv;
 	}

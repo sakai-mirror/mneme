@@ -211,9 +211,6 @@ public class TestsView extends ControllerImpl
 				{
 					Assessment assessment = this.assessmentService.newAssessment(this.toolManager.getCurrentPlacement().getContext());
 
-					// commit it empty
-					this.assessmentService.saveAssessment(assessment);
-
 					// redirect to edit for this assessment
 					destination = "/test_edit/" + assessment.getId();
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));

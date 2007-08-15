@@ -117,6 +117,27 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Question copyQuestion(String context, String userId, Pool pool, Question question) throws AssessmentPermissionException
+	{
+		if (context == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		if (M_log.isDebugEnabled()) M_log.debug("copyQuestion: " + context + ": " + userId);
+
+		// security check
+		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+
+		QuestionImpl rv = this.storage.newQuestion((QuestionImpl) question);
+		rv.getCreatedBy().setUserId(userId);
+		rv.setPool(pool);
+		saveQuestion(question, context);
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer countQuestions(String userId, Pool pool, String search)
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("findQuestions: " + userId);
@@ -229,6 +250,8 @@ public class QuestionServiceImpl implements QuestionService
 		{
 			M_log.warn("newQuestion: no plugin for type: " + type);
 		}
+
+		saveQuestion(question, context);
 
 		return question;
 	}

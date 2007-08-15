@@ -179,6 +179,30 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Assessment copyAssessment(String context, Assessment assessment) throws AssessmentPermissionException
+	{
+		return assessmentService.copyAssessment(context, assessment);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Pool copyPool(String context, String userId, Pool pool) throws AssessmentPermissionException
+	{
+		return this.poolService.copyPool(context, userId, pool);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Question copyQuestion(String context, String userId, Pool pool, Question questions) throws AssessmentPermissionException
+	{
+		return questionService.copyQuestion(context, userId, pool, questions);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer countAssessments(String context)
 	{
 		return assessmentService.countAssessments(context);

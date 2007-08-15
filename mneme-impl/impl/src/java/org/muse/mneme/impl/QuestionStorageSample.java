@@ -204,6 +204,15 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public QuestionImpl newQuestion(QuestionImpl question)
+	{
+		QuestionImpl rv = new QuestionImpl(question);
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean questionExists(String id)
 	{
 		fakeIt();

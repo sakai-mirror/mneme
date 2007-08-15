@@ -112,6 +112,30 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Pool copyPool(String context, String userId, Pool pool) throws AssessmentPermissionException
+	{
+		if (context == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		if (M_log.isDebugEnabled()) M_log.debug("copyPool: " + context);
+
+		// security check
+		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+
+		// make a copy of the pool
+		PoolImpl rv = storage.newPool((PoolImpl) pool);
+		rv.setOwnerId(userId);
+		savePool(rv, context);
+
+		// make a copy of the questions
+		// TODO:
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer countPools(String context, String userId, String search)
 	{
 		if (context == null) throw new IllegalArgumentException();
@@ -224,6 +248,7 @@ public class PoolServiceImpl implements PoolService
 
 		PoolImpl pool = storage.newPool();
 		pool.setOwnerId(userId);
+		savePool(pool, context);
 
 		return pool;
 	}

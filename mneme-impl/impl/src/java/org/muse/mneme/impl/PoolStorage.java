@@ -112,6 +112,15 @@ public interface PoolStorage
 	PoolImpl newPool();
 
 	/**
+	 * Construct a new pool object as a copy of another.
+	 * 
+	 * @param pool
+	 *        The pool to copy.
+	 * @return A pool object.
+	 */
+	PoolImpl newPool(PoolImpl pool);
+
+	/**
 	 * Check if a pool by this id exists.
 	 * 
 	 * @param poolId

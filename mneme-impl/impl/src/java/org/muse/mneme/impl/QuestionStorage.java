@@ -92,6 +92,13 @@ public interface QuestionStorage
 	QuestionImpl newQuestion();
 
 	/**
+	 * Construct a new question object that is a copy of another.
+	 * @param question The question to copy.
+	 * @return A question object.
+	 */
+	QuestionImpl newQuestion(QuestionImpl question);
+
+	/**
 	 * Check if a question by this id exists.
 	 * 
 	 * @param id

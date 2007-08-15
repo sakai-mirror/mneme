@@ -125,6 +125,21 @@ public interface PoolService
 	Pool newPool(String context, String userId) throws AssessmentPermissionException;
 
 	/**
+	 * Copy an existing pool creating a new pool.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @param userId
+	 *        the pool owner (if null, the currrent user is used)
+	 * @param pool
+	 *        The pool to copy.
+	 * @return The new pool as a copy of the old pool, complete with questions.
+	 * @throws AssessmentPermissionException
+	 *         if the current user is not allowed to create a new pool.
+	 */
+	Pool copyPool(String context, String userId, Pool pool) throws AssessmentPermissionException;
+
+	/**
 	 * Remove this pool.
 	 * 
 	 * @param pool

@@ -269,6 +269,14 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public AssessmentImpl newAssessment(AssessmentImpl assessment)
+	{
+		return new AssessmentImpl(assessment);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void removeAssessment(AssessmentImpl assessment)
 	{
 		fakeIt();

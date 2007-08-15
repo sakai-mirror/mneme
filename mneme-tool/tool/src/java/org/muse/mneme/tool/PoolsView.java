@@ -235,10 +235,6 @@ public class PoolsView extends ControllerImpl
 				{
 					// create new pool and redirect to pool properties
 					Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId());
-					// title and subject are required as sort may fail on pools page
-					newPool.setTitle("");
-					newPool.setSubject("");
-					this.poolService.savePool(newPool, toolManager.getCurrentPlacement().getContext());
 
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination + "/" + newPool.getId())));
 					return;

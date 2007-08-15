@@ -81,6 +81,19 @@ public interface AssessmentService
 	Boolean allowRemoveAssessment(Assessment assessment, String userId);
 
 	/**
+	 * Create a new Assessment in the context that is a copy of another.
+	 * 
+	 * @param context
+	 *        The context in which the assessment lives.
+	 * @param assessment
+	 *        The assessment to copy.
+	 * @throws AssessmentPermissionException
+	 *         if the current user is not allowed to create assessments in this context.
+	 * @return The new Assessment.
+	 */
+	Assessment copyAssessment(String context, Assessment assessment) throws AssessmentPermissionException;
+
+	/**
 	 * Count the assessments in the context - all of them!
 	 * 
 	 * @param context

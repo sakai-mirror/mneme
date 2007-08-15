@@ -260,6 +260,14 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public PoolImpl newPool(PoolImpl pool)
+	{
+		return new PoolImpl(pool);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean poolExists(String poolId)
 	{
 		fakeIt();
