@@ -183,21 +183,61 @@ public class AssessmentStorageSample implements AssessmentStorage
 					}
 					case odate_a:
 					{
+						// no open date sorts low
+						if (((Assessment) arg0).getDates().getOpenDate() == null)
+						{
+							if (((Assessment) arg1).getDates().getOpenDate() == null) return 0;
+							return -1;
+						}
+						if (((Assessment) arg1).getDates().getOpenDate() == null)
+						{
+							return 1;
+						}
 						rv = ((Assessment) arg0).getDates().getOpenDate().compareTo(((Assessment) arg1).getDates().getOpenDate());
 						break;
 					}
 					case odate_d:
 					{
+						// no open date sorts low
+						if (((Assessment) arg0).getDates().getOpenDate() == null)
+						{
+							if (((Assessment) arg1).getDates().getOpenDate() == null) return 0;
+							return 1;
+						}
+						if (((Assessment) arg1).getDates().getOpenDate() == null)
+						{
+							return -1;
+						}
 						rv = -1 * ((Assessment) arg0).getDates().getOpenDate().compareTo(((Assessment) arg1).getDates().getOpenDate());
 						break;
 					}
 					case ddate_a:
 					{
+						// no open date sorts high
+						if (((Assessment) arg0).getDates().getDueDate() == null)
+						{
+							if (((Assessment) arg1).getDates().getDueDate() == null) return 0;
+							return 1;
+						}
+						if (((Assessment) arg1).getDates().getDueDate() == null)
+						{
+							return -1;
+						}
 						rv = ((Assessment) arg0).getDates().getDueDate().compareTo(((Assessment) arg1).getDates().getDueDate());
 						break;
 					}
 					case ddate_d:
 					{
+						// no open date sorts high
+						if (((Assessment) arg0).getDates().getDueDate() == null)
+						{
+							if (((Assessment) arg1).getDates().getDueDate() == null) return 0;
+							return -1;
+						}
+						if (((Assessment) arg1).getDates().getDueDate() == null)
+						{
+							return 1;
+						}
 						rv = -1 * ((Assessment) arg0).getDates().getDueDate().compareTo(((Assessment) arg1).getDates().getDueDate());
 						break;
 					}
