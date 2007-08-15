@@ -146,7 +146,50 @@ public class PoolEditView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		throw new IllegalArgumentException();
+		if ((params.length != 3) && (params.length != 4) && (params.length != 5)) throw new IllegalArgumentException();
+		
+		//for the selected questions to delete
+		Values values = this.uiService.newValues();
+		context.put("questionids", values);
+
+		// read form
+		String destination = this.uiService.decode(req, context);
+
+		String[] selectedQuestionIds = values.getValues();
+
+		if (destination != null)
+		{
+			if (destination.startsWith("/questions_delete"))
+			{
+				// delete the questions
+				if (selectedQuestionIds != null && (selectedQuestionIds.length > 0))
+				{
+					StringBuffer path = new StringBuffer();
+					String separator = "+";
+
+					path.append(destination);
+					path.append("/");
+
+					for (String selectedQuestionId : selectedQuestionIds)
+					{
+						path.append(selectedQuestionId);
+						path.append(separator);
+					}
+
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
+					return;
+				}
+			}
+		}
+
+		if (params.length == 5)
+			destination = "/pool_edit/" + params[2] +"/"+ params[3] + "/" + params[4];
+		else if (params.length == 4)
+			destination = "/pool_edit/" + params[2] +"/"+ params[3];
+		else if (params.length == 3)
+			destination = "/pool_edit/"+ params[2];
+
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 
 	}
 

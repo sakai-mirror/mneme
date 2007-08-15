@@ -41,18 +41,6 @@
 		<message selector="pool-edit-title" />
 	</title>
 
-	<!--container>
-		<navigation destination="/pools" title="pool-edit-header"
-		style="LINK" description="pool-edit-description" submit="FALSE">
-		<icon icon="/icons/basket_add.png" style="LEFT" />
-		</navigation>
-		<text>
-		<message selector="pool-edit-header1">
-		<model ref="pool.subject" missing="no-subject"/>
-		<model ref="pool.title" missing="no-title"/>
-		</message>
-		</text>
-		</container-->
 	<container>
 		<text>
 			<message selector="point-value-text">
@@ -87,9 +75,14 @@
 					<icon icon="/icons/copy.png" style="LEFT" />
 				</navigation>
 				<navigation title="delete-title" style="LINK"
-					description="delete-description" submit="FALSE">
+					description="delete-description" submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
-					<destination template="/"></destination>
+					<destination template="/questions_delete/{0}/{1}{2}/{3}">
+						<model ref="pool.id" />
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
+						<model ref="pagingParameter" />
+					</destination>
 				</navigation>
 				<navigation destination="/" title="search-title"
 					style="LINK" description="search-description">
