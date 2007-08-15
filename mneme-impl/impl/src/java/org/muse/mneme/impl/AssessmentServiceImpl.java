@@ -148,6 +148,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	public Assessment copyAssessment(String context, Assessment assessment) throws AssessmentPermissionException
 	{
 		if (context == null) throw new IllegalArgumentException();
+		if (assessment == null) throw new IllegalArgumentException();
 
 		if (M_log.isDebugEnabled()) M_log.debug("copyAssessment: " + context);
 

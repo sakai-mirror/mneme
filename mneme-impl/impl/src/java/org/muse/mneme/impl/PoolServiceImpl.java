@@ -115,6 +115,7 @@ public class PoolServiceImpl implements PoolService
 	public Pool copyPool(String context, String userId, Pool pool) throws AssessmentPermissionException
 	{
 		if (context == null) throw new IllegalArgumentException();
+		if (pool == null) throw new IllegalArgumentException();
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
 		if (M_log.isDebugEnabled()) M_log.debug("copyPool: " + context);

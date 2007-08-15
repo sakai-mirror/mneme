@@ -50,14 +50,30 @@ public interface QuestionService
 	Boolean allowEditQuestion(Question question, String context, String userId);
 
 	/**
+	 * Create a new question that is a copy of each question in the pool.
+	 * 
+	 * @param context
+	 *        The current context.
+	 * @param userId
+	 *        The user to own the questions.
+	 * @param source
+	 *        The pool of questions to copy.
+	 * @param destination
+	 *        the pool where the question will live.
+	 * @throws AssessmentPermissionException
+	 *         if the current user is not allowed to create a new question.
+	 */
+	void copyPoolQuestions(String context, String userId, Pool source, Pool destination) throws AssessmentPermissionException;
+
+	/**
 	 * Create a new question as a copy of another.
 	 * 
 	 * @param context
 	 *        The current context.
 	 * @param userId
 	 *        The user to own the question.
-	 * @param The
-	 *        pool where the question will live.
+	 * @param pool
+	 *        The pool where the question will live.
 	 * @param question
 	 *        The question to copy.
 	 * @return The new question.

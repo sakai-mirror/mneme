@@ -64,6 +64,23 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void copyPoolQuestions(String userId, Pool source, Pool destination)
+	{
+		for (QuestionImpl question : this.questions.values())
+		{
+			if (question.getPool().equals(source))
+			{
+				QuestionImpl q = new QuestionImpl(question);
+				q.setPool(destination);
+				q.getCreatedBy().setUserId(userId);
+				saveQuestion(q);
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer countQuestions(String userId, Pool pool, String search)
 	{
 		// TODO: search
@@ -117,12 +134,12 @@ public class QuestionStorageSample implements QuestionStorage
 				{
 					case type_a:
 					{
-						rv = ((Question) arg0).getType().compareTo(((Question) arg1).getType());
+						rv = ((Question) arg0).getType().compareTo(((Question) arg1).getTypeName());
 						break;
 					}
 					case type_d:
 					{
-						rv = -1 * ((Question) arg0).getType().compareTo(((Question) arg1).getType());
+						rv = -1 * ((Question) arg0).getType().compareTo(((Question) arg1).getTypeName());
 						break;
 					}
 				}

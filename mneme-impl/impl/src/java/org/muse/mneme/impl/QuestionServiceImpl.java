@@ -117,9 +117,30 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
+	public void copyPoolQuestions(String context, String userId, Pool source, Pool destination) throws AssessmentPermissionException
+	{
+		if (context == null) throw new IllegalArgumentException();
+		if (source == null) throw new IllegalArgumentException();
+		if (destination == null) throw new IllegalArgumentException();
+		if (source.equals(destination)) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		if (M_log.isDebugEnabled()) M_log.debug("copyPoolQuestions: " + context + ": " + userId);
+
+		// security check
+		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+
+		this.storage.copyPoolQuestions(userId, source, destination);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Question copyQuestion(String context, String userId, Pool pool, Question question) throws AssessmentPermissionException
 	{
 		if (context == null) throw new IllegalArgumentException();
+		if (question == null) throw new IllegalArgumentException();
+		if (pool == null) throw new IllegalArgumentException();
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
 		if (M_log.isDebugEnabled()) M_log.debug("copyQuestion: " + context + ": " + userId);

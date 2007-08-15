@@ -93,10 +93,24 @@ public interface QuestionStorage
 
 	/**
 	 * Construct a new question object that is a copy of another.
-	 * @param question The question to copy.
+	 * 
+	 * @param question
+	 *        The question to copy.
 	 * @return A question object.
 	 */
 	QuestionImpl newQuestion(QuestionImpl question);
+
+	/**
+	 * Create a new question that is a copy of each question in the pool.
+	 * 
+	 * @param userId
+	 *        The user to own the questions.
+	 * @param source
+	 *        The pool of questions to copy.
+	 * @param destination
+	 *        the pool where the question will live.
+	 */
+	void copyPoolQuestions(String userId, Pool source, Pool destination);
 
 	/**
 	 * Check if a question by this id exists.

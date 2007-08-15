@@ -44,6 +44,7 @@ import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * QuestionStorageSample defines a sample storage for questions.
@@ -163,12 +164,16 @@ public class AssessmentStorageSample implements AssessmentStorage
 					}
 					case title_a:
 					{
-						rv = ((Assessment) arg0).getTitle().compareTo(((Assessment) arg1).getTitle());
+						String s0 = StringUtil.trimToZero(((Assessment) arg0).getTitle());
+						String s1 = StringUtil.trimToZero(((Assessment) arg1).getTitle());
+						rv = s0.compareTo(s1);
 						break;
 					}
 					case title_d:
 					{
-						rv = -1 * ((Assessment) arg0).getTitle().compareTo(((Assessment) arg1).getTitle());
+						String s0 = StringUtil.trimToZero(((Assessment) arg0).getTitle());
+						String s1 = StringUtil.trimToZero(((Assessment) arg1).getTitle());
+						rv = -1 * s0.compareTo(s1);
 						break;
 					}
 					case type_a:

@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * PoolStorageSample defines a sample storage for PoolStorage.
@@ -126,35 +127,50 @@ public class PoolStorageSample implements PoolStorage
 				{
 					case subject_a:
 					{
-						rv = ((Pool) arg0).getSubject().compareTo(((Pool) arg1).getSubject());
+						String s0 = StringUtil.trimToZero(((Pool) arg0).getSubject());
+						String s1 = StringUtil.trimToZero(((Pool) arg1).getSubject());
+						rv = s0.compareTo(s1);
 						break;
 					}
 					case subject_d:
 					{
-						rv = -1 * ((Pool) arg0).getSubject().compareTo(((Pool) arg1).getSubject());
+						String s0 = StringUtil.trimToZero(((Pool) arg0).getSubject());
+						String s1 = StringUtil.trimToZero(((Pool) arg1).getSubject());
+						rv = -1 * s0.compareTo(s1);
 						break;
 					}
 					case title_a:
 					{
-						rv = ((Pool) arg0).getTitle().compareTo(((Pool) arg1).getTitle());
+						String s0 = StringUtil.trimToZero(((Pool) arg0).getTitle());
+						String s1 = StringUtil.trimToZero(((Pool) arg1).getTitle());
+						rv = s0.compareTo(s1);
 						break;
 					}
 					case title_d:
 					{
-						rv = -1 * ((Pool) arg0).getTitle().compareTo(((Pool) arg1).getTitle());
+						String s0 = StringUtil.trimToZero(((Pool) arg0).getTitle());
+						String s1 = StringUtil.trimToZero(((Pool) arg1).getTitle());
+						rv = -1 * s0.compareTo(s1);
 						break;
 					}
 					case points_a:
 					{
-						rv = ((Pool) arg0).getPoints().compareTo(((Pool) arg1).getPoints());
+						Float f0 = ((Pool) arg0).getPoints();
+						if (f0 == null) f0 = Float.valueOf(0f);
+						Float f1 = ((Pool) arg1).getPoints();
+						if (f1 == null) f1 = Float.valueOf(0f);
+						rv = f0.compareTo(f1);
 						break;
 					}
 					case points_d:
 					{
-						rv = -1 * ((Pool) arg0).getPoints().compareTo(((Pool) arg1).getPoints());
+						Float f0 = ((Pool) arg0).getPoints();
+						if (f0 == null) f0 = Float.valueOf(0f);
+						Float f1 = ((Pool) arg1).getPoints();
+						if (f1 == null) f1 = Float.valueOf(0f);
+						rv = -1 * f0.compareTo(f1);
 						break;
 					}
-
 				}
 
 				return rv;
