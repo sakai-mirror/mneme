@@ -56,26 +56,20 @@
 		<!--entity actions-->
 		<entityActionBar width="100%">
 			<container>
-				<navigation submit="FALSE" style="LINK"
-					description="add-question-description">
+				<navigation submit="FALSE" style="LINK" description="add-question-description">
 					<title>
-						<message selector="add-question-title">
-						</message>
+						<message selector="add-question-title"></message>
 					</title>
 					<destination template="/"></destination>
 					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="move-to-pool"
-					style="LINK" description="move-to-pool-description"
-					disabled="FALSE">
+				<navigation destination="/" title="move-to-pool" style="LINK" description="move-to-pool-description" disabled="FALSE">
 					<icon icon="/icons/page_go.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="copy-to-pool"
-					style="LINK" description="copy-to-pool-description">
+				<navigation destination="/" title="copy-to-pool" style="LINK" description="copy-to-pool-description">
 					<icon icon="/icons/copy.png" style="LEFT" />
 				</navigation>
-				<navigation title="delete-title" style="LINK"
-					description="delete-description" submit="TRUE">
+				<navigation title="delete-title" style="LINK" description="delete-description" submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
 					<destination template="/questions_delete/{0}/{1}{2}/{3}">
 						<model ref="pool.id" />
@@ -84,8 +78,7 @@
 						<model ref="pagingParameter" />
 					</destination>
 				</navigation>
-				<navigation destination="/" title="search-title"
-					style="LINK" description="search-description">
+				<navigation destination="/" title="search-title" style="LINK" description="search-description">
 					<icon icon="/icons/search.png" style="LEFT" />
 				</navigation>
 				<pager paging="paging">
@@ -126,15 +119,13 @@
 					<title>
 						<message selector="question-type" />
 					</title>
-					<model ref="question.type" />
+					<model ref="question.typeName" />
 					<sort>
 						<active>
-							<compareDecision model="sort_column"
-								constant="0" />
+							<compareDecision model="sort_column" constant="0" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction"
-								constant="A" />
+							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
@@ -159,13 +150,19 @@
 							<icon icon="/icons/copy.png" style="LEFT" />
 						</navigation>
 						<navigation style="LINK">
-							<icon icon="/icons/chart_bar.png"
-								style="RIGHT" />
+							<icon icon="/icons/chart_bar.png" style="RIGHT" />
 							<destination template="/"></destination>
 						</navigation>
 					</navigations>
 				</modelColumn>
 			</columns>
 		</entityList>
+
+		<!--bottom navigation-->
+		<navigationBar width="100%">
+			<container>
+				<navigation title="return" style="BUTTON" submit="FALSE" destination="/pools"/>
+			</container>
+		</navigationBar>
 	</container>
 </interface>
