@@ -2,26 +2,26 @@
 <!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
-/**********************************************************************************
- * $URL$
- * $Id$
- ***********************************************************************************
- *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- **********************************************************************************/
+	/**********************************************************************************
+	* $URL$
+	* $Id$
+	***********************************************************************************
+	*
+	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* 
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	* 
+	*      http://www.apache.org/licenses/LICENSE-2.0
+	* 
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*
+	**********************************************************************************/
 -->
 
 <interface title="partEdit-title">
@@ -52,12 +52,20 @@
 						</row>
 						<row title="part-instructions">
 							<container>
-								<textEdit model="part.presentation.text" />
-							</container>
-						</row>
-						<row>
-							<container>
-								<attachmentsEdit title="attachments" model="part.presentation.attachments" />
+								<entityDisplay>
+									<rows>
+										<row>
+											<container>
+												<textEdit model="part.presentation.text" />
+											</container>
+										</row>
+										<row title="attachments">
+											<container>
+												<attachmentsEdit model="part.presentation.attachments" />
+											</container>
+										</row>
+									</rows>
+								</entityDisplay>
 							</container>
 						</row>
 					</rows>
@@ -68,7 +76,7 @@
 			<container>
 				<entityActionBar>
 					<container>
-						<navigation destination="/" title="search-title" style="LINK" description="search-description">
+						<navigation destination="/" title="search-title" style="LINK" description="search-description" submit="TRUE">
 							<icon icon="/icons/search.png" style="LEFT" />
 						</navigation>
 						<pager paging="paging" submit="TRUE">
