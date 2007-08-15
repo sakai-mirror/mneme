@@ -130,7 +130,9 @@
 					<container>
 						<navigation style="LINK" submit="TRUE">
 							<title>
-								<message model="assessment.title" />
+								<message>
+									<model ref="assessment.title" missing="no-title" />
+								</message>
 							</title>
 							<destination template="/test_edit/{0}">
 								<model ref="assessment.id" />
