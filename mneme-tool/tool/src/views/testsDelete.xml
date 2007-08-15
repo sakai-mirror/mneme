@@ -35,16 +35,15 @@
 	<container>
 		<!--navigation-->
 
-		<text>
-			<message selector="test-delete-message1" />
-		</text>
-
 		<!-- the list of tests -->
 		<entityList style="FORM">
 			<iterator name="test" model="tests" />
 			<emptyTitle>
 				<message selector="no-tests" />
 			</emptyTitle>
+			<title>
+				<message selector="test-delete-message1" />
+			</title>
 			<columns>
 				<modelColumn>
 					<model ref="test.title" missing="no-title" />
@@ -52,6 +51,25 @@
 			</columns>
 
 		</entityList>
+
+
+		<!-- the list of tests -->
+		<entityList style="FORM">
+			<iterator name="test" model="nodeltests" />
+			<emptyTitle>
+				<message selector="no-tests" />
+			</emptyTitle>
+			<title>
+				<message selector="test-nodelete-message" />
+			</title>
+			<columns>
+				<modelColumn>
+					<model ref="test.title" missing="no-title" />
+				</modelColumn>
+			</columns>
+
+		</entityList>
+
 
 
 		<!--text>

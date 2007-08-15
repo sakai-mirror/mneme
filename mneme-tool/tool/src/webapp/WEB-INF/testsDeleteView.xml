@@ -27,20 +27,38 @@
 <beans>
 
 	<bean id="org.muse.mneme.tool.TestsDeleteView"
-			class="org.muse.mneme.tool.TestsDeleteView"
-			init-method="init"
-			destroy-method="destroy"
-			singleton="true">
+		class="org.muse.mneme.tool.TestsDeleteView" init-method="init"
+		destroy-method="destroy" singleton="true">
 
- 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
- 		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
- 		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
- 
- 		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="path"><value>tests_delete</value></property>
- 		<property name="bundle"><value>testsDelete</value></property>
- 		<property name="shared"><value>mneme</value></property>
- 		<property name="components"><value>testsDelete.xml</value></property>
+		<property name="ui">
+			<ref bean="org.muse.ambrosia.api.UiService" />
+		</property>
+		<property name="assessmentService">
+			<ref bean="org.muse.mneme.api.AssessmentService" />
+		</property>
+		<property name="toolManager">
+			<ref bean="org.sakaiproject.tool.api.ToolManager" />
+		</property>
+		<property name="sessionManager">
+			<ref bean="org.sakaiproject.tool.api.SessionManager" />
+		</property>
+
+
+		<property name="toolId">
+			<value>sakai.mneme</value>
+		</property>
+		<property name="path">
+			<value>tests_delete</value>
+		</property>
+		<property name="bundle">
+			<value>testsDelete</value>
+		</property>
+		<property name="shared">
+			<value>mneme</value>
+		</property>
+		<property name="components">
+			<value>testsDelete.xml</value>
+		</property>
 	</bean>
 
 

@@ -34,6 +34,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
+import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
@@ -50,6 +51,9 @@ public class TestsDeleteView extends ControllerImpl
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
+
+	/** Dependency: SessionManager */
+	protected SessionManager sessionManager = null;
 
 	/**
 	 * Shutdown.
@@ -69,18 +73,34 @@ public class TestsDeleteView extends ControllerImpl
 		if (params.length < 3) throw new IllegalArgumentException();
 
 		List<Assessment> assessments = new ArrayList<Assessment>(0);
-		StringBuffer deleteTestIds = new StringBuffer();
+		List<Assessment> nodelAssessments = new ArrayList<Assessment>(0);
 
-		// test id's are in the params array from the index 3
-		for (int i = 3; i < params.length; i++)
+		String selectedTestIds[] = params[3].split("\\+");
+
+		for (String selectTestId : selectedTestIds)
 		{
-			// get the test and add to the list to show
-			Assessment assessment = this.assessmentService.getAssessment(params[i]);
+			Assessment assessment = null;
 
-			if (assessment != null) assessments.add(assessment);
+			if (selectTestId != null && selectTestId.trim().length() > 0)
+			{
+				// get the test and add to the list to show
+				assessment = this.assessmentService.getAssessment(selectTestId);
+				if (assessment != null)
+				{
+					if (this.assessmentService.allowRemoveAssessment(assessment, sessionManager.getCurrentSessionUserId()))
+					{
+						assessments.add(assessment);
+					}
+					else
+					{
+						nodelAssessments.add(assessment);
+					}
+				}
+			}
 		}
 
 		context.put("tests", assessments);
+		context.put("nodeltests", nodelAssessments);
 		// sort code
 		context.put("sortcode", params[2]);
 
@@ -115,16 +135,33 @@ public class TestsDeleteView extends ControllerImpl
 
 		if (destination != null && (destination.trim().equalsIgnoreCase("/tests_delete")))
 		{
+			StringBuffer path = new StringBuffer();
+			String separator = "+";
 			try
 			{
-				// assessment id's are in the params array from the index 3
-				for (int i = 3; i < params.length; i++)
+				String selectedTestIds[] = params[3].split("\\+");
+
+				if (selectedTestIds != null && (selectedTestIds.length > 0))
 				{
-					Assessment assessment = this.assessmentService.getAssessment(params[i]);
-					if (assessment != null)
+					// path.append(destination);
+					System.out.println("Dest is " + destination);
+					path.append("/tests/");
+					for (String selectedTestId : selectedTestIds)
 					{
-						this.assessmentService.removeAssessment(assessment);
+						Assessment assessment = this.assessmentService.getAssessment(selectedTestId);
+						if (assessment != null)
+						{
+							if (this.assessmentService.allowRemoveAssessment(assessment, sessionManager.getCurrentSessionUserId()))
+							{
+								this.assessmentService.removeAssessment(assessment);
+								// path.append(selectedTestId);
+								// path.append(separator);
+							}
+						}
 					}
+					System.out.println("Path is " + path.toString());
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
+					return;
 				}
 			}
 			catch (Exception e)
@@ -144,6 +181,15 @@ public class TestsDeleteView extends ControllerImpl
 	public void setAssessmentService(AssessmentService assessmentService)
 	{
 		this.assessmentService = assessmentService;
+	}
+
+	/**
+	 * @param sessionManager
+	 *        the SessionManager.
+	 */
+	public void setSessionManager(SessionManager sessionManager)
+	{
+		this.sessionManager = sessionManager;
 	}
 
 	/**

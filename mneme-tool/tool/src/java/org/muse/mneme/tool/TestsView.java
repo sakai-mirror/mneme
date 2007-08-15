@@ -231,24 +231,24 @@ public class TestsView extends ControllerImpl
 				String[] selectedTestIds = values.getValues();
 				// delete the tests with ids
 				StringBuffer path = new StringBuffer();
-				String separator = "/";
+				String separator = "+";
 
 				if (selectedTestIds != null && (selectedTestIds.length > 0))
 				{
 					path.append(destination);
-					path.append(separator);
+					path.append("/");
 
 					// for sort code
 					if (params.length == 3)
 					{
 						path.append(params[2]);
-						path.append(separator);
+						path.append("/");
 					}
 					else
 					{
 						// default sort - title ascending
 						path.append("1A");
-						path.append(separator);
+						path.append("/");
 					}
 
 					path.append(selectedTestIds[0]);
