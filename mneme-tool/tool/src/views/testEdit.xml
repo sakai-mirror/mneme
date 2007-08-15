@@ -2,26 +2,26 @@
 <!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
-/**********************************************************************************
- * $URL$
- * $Id$
- ***********************************************************************************
- *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- **********************************************************************************/
+	/**********************************************************************************
+	* $URL$
+	* $Id$
+	***********************************************************************************
+	*
+	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* 
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	* 
+	*      http://www.apache.org/licenses/LICENSE-2.0
+	* 
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*
+	**********************************************************************************/
 -->
 
 <interface>
@@ -35,10 +35,10 @@
 		<message selector="testEdit-header">
 			<model type="icon" icon="/icons/document_add.png" />
 		</message>
-	</header>	
+	</header>
 	<title>
-		<message selector="testEdit-title"/>			
-	</title>	
+		<message selector="testEdit-title" />
+	</title>
 	<container>
 		<section title="test-properties">
 			<container>
@@ -46,7 +46,7 @@
 					<rows>
 						<row title="test-title">
 							<container>
-								<textEdit rows="1" cols="25" >
+								<textEdit rows="1" cols="25">
 									<model ref="assessment.title" />
 								</textEdit>
 							</container>
@@ -117,7 +117,7 @@
 									</rows>
 								</entityDisplay>
 							</container>
-						</row>		
+						</row>
 						<row title="test-instructions">
 							<container>
 								<entityDisplay>
@@ -127,15 +127,15 @@
 												<textEdit model="assessment.presentation.text" />
 											</container>
 										</row>
-										<row>
+										<row title="attachments">
 											<container>
-												<attachmentsEdit title="attachments" model="assessment.presentation.attachments" />
+												<attachmentsEdit model="assessment.presentation.attachments" />
 											</container>
 										</row>
 									</rows>
 								</entityDisplay>
-							</container>		
-						</row>		
+							</container>
+						</row>
 						<row title="honor-pledge">
 							<container>
 								<selection>
@@ -158,12 +158,12 @@
 						<navigation destination="MANUAL" title="manual-draw" style="LINK" description="manual-draw-description" submit="TRUE">
 							<icon icon="/icons/hand_select.png" style="LEFT" />
 						</navigation>
-						<navigation destination="" title="delete-part" style="LINK" description="part-delete-description" submit="TRUE">
+						<navigation destination="/part_delete" title="delete-part" style="LINK" description="part-delete-description" submit="TRUE">
 							<icon icon="/icons/delete.png" style="LEFT" />
 						</navigation>
 					</container>
 				</entityActionBar>
-		
+
 				<!-- the list of parts -->
 				<entityList style="FLAT">
 					<iterator name="part" model="assessment.parts.parts" />
@@ -183,7 +183,7 @@
 							</title>
 							<model ref="part.title" missing="no-title" />
 							<entityNavigations>
-								<navigation>
+								<navigation submit="TRUE">
 									<destination template="/part_edit/{0}/{1}">
 										<model ref="assessment.id" />
 										<model ref="part.id" />
@@ -216,6 +216,12 @@
 			</message>
 		</text>
 
+		<text>
+			<message selector="assessment-questions">
+				<model type="icon" icon="/icons/basket_add.png" />
+				<model ref="assessment.parts.numQuestions" />
+			</message>
+		</text>
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="20em">
 			<container>
