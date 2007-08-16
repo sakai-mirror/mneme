@@ -41,7 +41,7 @@ public class PoolImpl implements Pool
 
 	protected String description = null;
 
-	protected Integer difficulty = null;
+	protected Integer difficulty = Integer.valueOf(3);
 
 	protected String id = null;
 
@@ -49,7 +49,7 @@ public class PoolImpl implements Pool
 
 	protected String ownerId = null;
 
-	protected Float points = null;
+	protected Float points = Float.valueOf(0f);
 
 	protected transient PoolServiceImpl poolService = null;
 
