@@ -62,8 +62,7 @@
 						</row>
 						<row title="pool-subject">
 							<container>
-								<textEdit model="pool.subject" rows="1"
-									cols="25" />
+								<textEdit model="pool.subject" rows="1" cols="25" options="subjects" />
 							</container>
 						</row>
 						<row title="pool-description">
@@ -74,8 +73,9 @@
 						</row>
 						<row title="pool-points">
 							<container>
-								<textEdit model="pool.points" rows="1"
-									cols="25" />
+								<floatEdit>
+									<model ref="pool.points" type="float" />
+								</floatEdit>
 							</container>
 						</row>
 						<row title="pool-difficulty">

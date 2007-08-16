@@ -22,6 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,9 +61,12 @@ public class PoolPropertiesView extends ControllerImpl
 		Pool pool = this.poolService.getPool(params[2]);
 		context.put("pool", pool);
 
+		// get the subjects
+		List<String> subjects = poolService.getSubjects(toolManager.getCurrentPlacement().getContext(), null);
+		context.put("subjects", subjects);
+
 		// render
 		uiService.render(ui, context);
-
 	}
 
 	/**
