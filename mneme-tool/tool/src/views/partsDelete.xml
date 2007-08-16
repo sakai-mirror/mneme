@@ -33,16 +33,19 @@
 		<entityDisplay>
 			<rows>
 				<row>
+					<container>
+						<text>
+							<message selector="delete-message1" />
+						</text>
+					</container>
+				</row>
+				<row>
 					<title>
 						<message selector="delete-show-icon">
 							<model type="icon" icon="/icons/warning.gif" />
 						</message>
 					</title>
 					<container>
-						<text>
-							<message selector="delete-message1" />
-						</text>
-
 						<!-- the list of tests -->
 						<entityList style="FORM">
 							<iterator name="part" model="parts" />
