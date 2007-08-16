@@ -71,7 +71,7 @@ public class AssessmentImpl implements Assessment
 
 	protected Attribution modifiedBy = new AttributionImpl();
 
-	protected Integer numSubmissionsAllowed = null;
+	protected Integer numSubmissionsAllowed = Integer.valueOf(1);
 
 	protected AssessmentParts parts = null;
 
