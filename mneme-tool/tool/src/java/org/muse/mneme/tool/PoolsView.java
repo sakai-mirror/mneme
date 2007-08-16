@@ -251,6 +251,21 @@ public class PoolsView extends ControllerImpl
 				// TODO: add a question, set the destination
 				M_log.info(destination);
 			}
+			else if (destination.trim().startsWith("/pool_duplicate"))
+			{
+				try
+				{
+					Pool pool = this.poolService.getPool(destination.substring(destination.lastIndexOf("/") + 1));
+					if (pool != null)
+					this.poolService.copyPool(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId(), pool);
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}		
+			}
 		}
 
 		if (params.length == 4)

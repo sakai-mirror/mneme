@@ -47,13 +47,10 @@
 		<!--entity actions-->
 		<entityActionBar width="100%">
 			<container>
-				<navigation destination="/pool_properties"
-					title="add-pool-title" style="LINK"
-					description="add-pool-description" submit="TRUE">
+				<navigation destination="/pool_properties" title="add-pool-title" style="LINK" description="add-pool-description" submit="TRUE">
 					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
-				<navigation submit="TRUE" style="LINK"
-					description="add-question-description">
+				<navigation submit="TRUE" style="LINK" description="add-question-description">
 					<title>
 						<message selector="add-question-title">
 							<model ref="type.typeName" />
@@ -65,16 +62,13 @@
 					<iterator name="type" model="questionTypes" />
 					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="combine-title"
-					style="LINK" description="combine-description" disabled="FALSE">
+				<navigation destination="/" title="combine-title" style="LINK" description="combine-description" disabled="FALSE">
 					<icon icon="/icons/combine_pools.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="import-export-title"
-					style="LINK" description="import-export-description">
+				<navigation destination="/" title="import-export-title" style="LINK" description="import-export-description">
 					<icon icon="/icons/import_export.png" style="LEFT" />
 				</navigation>
-				<navigation title="delete-title" style="LINK"
-					description="delete-description" submit="TRUE">
+				<navigation title="delete-title" style="LINK" description="delete-description" submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
 					<destination template="/pools_delete/{0}{1}/{2}">
 						<model ref="sort_column" />
@@ -82,8 +76,7 @@
 						<model ref="pagingParameter" />
 					</destination>
 				</navigation>
-				<navigation destination="/" title="search-title"
-					style="LINK" description="search-description">
+				<navigation destination="/" title="search-title" style="LINK" description="search-description">
 					<icon icon="/icons/search.png" style="LEFT" />
 				</navigation>
 
@@ -118,20 +111,18 @@
 					<model ref="pool.subject" missing="missing-subject" />
 					<sort>
 						<active>
-							<compareDecision model="sort_column"
-								constant="0" />
+							<compareDecision model="sort_column" constant="0" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction"
-								constant="A" />
+							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/pools/0A"/>
+							<destination template="/pools/0A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/pools/0D"/>
+							<destination template="/pools/0D" />
 						</desc>
 					</sort>
 				</modelColumn>
@@ -142,20 +133,18 @@
 					<model ref="pool.title" missing="no-title" />
 					<sort>
 						<active>
-							<compareDecision model="sort_column"
-								constant="1" />
+							<compareDecision model="sort_column" constant="1" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction"
-								constant="A" />
+							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/pools/1A"/>
+							<destination template="/pools/1A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/pools/1D"/>
+							<destination template="/pools/1D" />
 						</desc>
 					</sort>
 					<entityNavigations>
@@ -197,14 +186,15 @@
 					<navigations>
 						<navigation style="LINK">
 							<icon icon="/icons/edit.png" style="LEFT" />
-							<destination
-								template="/pool_properties/{0}">
+							<destination template="/pool_properties/{0}">
 								<model ref="pool.id" />
 							</destination>
 						</navigation>
-						<navigation style="LINK">
+						<navigation style="LINK" submit="TRUE">
 							<icon icon="/icons/copy.png" style="RIGHT" />
-							<destination template="/"></destination>
+							<destination template="/pool_duplicate/{0}">
+								<model ref="pool.id" />
+							</destination>
 						</navigation>
 					</navigations>
 				</modelColumn>
