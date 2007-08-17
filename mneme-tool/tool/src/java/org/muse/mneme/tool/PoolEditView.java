@@ -33,11 +33,13 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
@@ -53,6 +55,9 @@ public class PoolEditView extends ControllerImpl
 
 	/** Question Service */
 	protected QuestionService questionService = null;
+
+	/** Dependency: ToolManager */
+	protected ToolManager toolManager = null;
 
 	/** Dependency: SessionManager */
 	protected SessionManager sessionManager = null;
@@ -147,8 +152,8 @@ public class PoolEditView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if ((params.length != 3) && (params.length != 4) && (params.length != 5)) throw new IllegalArgumentException();
-		
-		//for the selected questions to delete
+
+		// for the selected questions to delete
 		Values values = this.uiService.newValues();
 		context.put("questionids", values);
 
@@ -180,14 +185,32 @@ public class PoolEditView extends ControllerImpl
 					return;
 				}
 			}
+			else if (destination.trim().startsWith("/question_duplicate"))
+			{
+				try
+				{
+					String destinationParams[] = destination.split("/");
+					Pool pool = this.poolService.getPool(destinationParams[2]);
+					Question question = this.questionService.getQuestion(destinationParams[3]);
+
+					if (pool != null && question != null)
+						this.questionService.copyQuestion(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId(),
+								pool, question);
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+			}
 		}
 
 		if (params.length == 5)
-			destination = "/pool_edit/" + params[2] +"/"+ params[3] + "/" + params[4];
+			destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4];
 		else if (params.length == 4)
-			destination = "/pool_edit/" + params[2] +"/"+ params[3];
-		else if (params.length == 3)
-			destination = "/pool_edit/"+ params[2];
+			destination = "/pool_edit/" + params[2] + "/" + params[3];
+		else if (params.length == 3) destination = "/pool_edit/" + params[2];
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 
@@ -218,6 +241,15 @@ public class PoolEditView extends ControllerImpl
 	public void setSessionManager(SessionManager sessionManager)
 	{
 		this.sessionManager = sessionManager;
+	}
+
+	/**
+	 * @param toolManager
+	 *        the toolManager to set
+	 */
+	public void setToolManager(ToolManager toolManager)
+	{
+		this.toolManager = toolManager;
 	}
 
 }

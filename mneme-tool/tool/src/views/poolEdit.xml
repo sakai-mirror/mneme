@@ -146,8 +146,12 @@
 						<message selector="question-action" />
 					</title>
 					<navigations>
-						<navigation style="LINK" destination="/">
+						<navigation style="LINK" submit="TRUE">
 							<icon icon="/icons/copy.png" style="LEFT" />
+							<destination template="/question_duplicate/{0}/{1}">
+								<model ref="pool.id" />
+								<model ref="question.id" />
+							</destination>
 						</navigation>
 						<navigation style="LINK">
 							<icon icon="/icons/chart_bar.png" style="RIGHT" />
@@ -161,7 +165,7 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="return" style="BUTTON" submit="FALSE" destination="/pools"/>
+				<navigation title="return" style="BUTTON" submit="FALSE" destination="/pools" />
 			</container>
 		</navigationBar>
 	</container>
