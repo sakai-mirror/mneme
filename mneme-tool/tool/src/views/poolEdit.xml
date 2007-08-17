@@ -165,7 +165,10 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="return" style="BUTTON" submit="FALSE" destination="/pools" />
+				<navigation title="return" style="BUTTON" submit="FALSE">
+					<icon icon="/icons/return.png" style="LEFT" />
+					<destination template="/pools" />
+				</navigation>
 			</container>
 		</navigationBar>
 	</container>
