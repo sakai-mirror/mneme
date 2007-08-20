@@ -62,7 +62,7 @@ public class TestPublishView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-//		 we need a single parameter (aid)
+		// we need a single parameter (aid)
 		if (params.length != 3)
 		{
 			throw new IllegalArgumentException();
@@ -107,7 +107,7 @@ public class TestPublishView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-//		 we need a single parameter (aid)
+		// we need a single parameter (aid)
 		if (params.length != 3)
 		{
 			throw new IllegalArgumentException();
@@ -140,7 +140,7 @@ public class TestPublishView extends ControllerImpl
 		// commit the save
 		try
 		{
-				this.assessmentService.saveAssessment(assessment);
+			this.assessmentService.saveAssessment(assessment);
 		}
 		catch (AssessmentPermissionException e)
 		{
