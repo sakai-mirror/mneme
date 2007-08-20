@@ -60,12 +60,12 @@ public class TestSettingsView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// we need a single parameter (aid)
-		if (params.length != 3)
+		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
-		String assessmentId = params[2];
+		String assessmentId = params[3];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
@@ -85,6 +85,7 @@ public class TestSettingsView extends ControllerImpl
 
 		// collect information: the selected assessment
 		context.put("assessment", assessment);
+		context.put("sortcode", params[2]);
 
 		// render
 		uiService.render(ui, context);
@@ -105,12 +106,12 @@ public class TestSettingsView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// we need a single parameter (aid)
-		if (params.length != 3)
+		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
-		String assessmentId = params[2];
+		String assessmentId = params[3];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
@@ -134,25 +135,29 @@ public class TestSettingsView extends ControllerImpl
 		// read the form
 		String destination = uiService.decode(req, context);
 
-		// commit the save
-		try
+		if (destination != null && (destination.trim().startsWith("/tests")))
 		{
+			StringBuffer path = new StringBuffer();
+			// commit the save
+			try
+			{
 				this.assessmentService.saveAssessment(assessment);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+			path.append("/tests/" + params[2]);
+			// redirect to the next destination
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
 		}
-		catch (AssessmentPermissionException e)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
-
-		// redirect to the next destination
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
 	 * Set the AssessmentService.
-	 *
+	 * 
 	 * @param service
 	 *        The AssessmentService.
 	 */

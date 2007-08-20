@@ -184,8 +184,6 @@ public class TestsView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 
-		// from an add or delete request
-
 		// security check
 		if (!assessmentService.allowManageAssessments(this.toolManager.getCurrentPlacement().getContext(), null))
 		{
@@ -247,7 +245,6 @@ public class TestsView extends ControllerImpl
 						path.append("1A");
 						path.append("/");
 					}
-
 					path.append(selectedTestIds[0]);
 					for (int i = 1; i < selectedTestIds.length; i++)
 					{

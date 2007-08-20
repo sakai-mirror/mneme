@@ -43,23 +43,18 @@
 		<!-- entity actions -->
 		<entityActionBar width="100%">
 			<container>
-				<navigation destination="/test_add/" title="add-test"
-					style="LINK" description="add-test-description" submit="TRUE">
+				<navigation destination="/test_add/" title="add-test" style="LINK" description="add-test-description" submit="TRUE">
 					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/tests_delete"
-					title="delete-tests" style="LINK"
-					description="delete-tests-description" submit="TRUE">
+				<navigation destination="/tests_delete" title="delete-tests" style="LINK" description="delete-tests-description" submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/tests_inactivate"
-					title="inactivate-tests" style="LINK"
-					description="inactivate-tests-description" submit="TRUE">
+				<navigation destination="/tests_inactivate" title="inactivate-tests" style="LINK" description="inactivate-tests-description"
+					submit="TRUE">
 					<icon icon="/icons/make_inactive.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/test_import_export"
-					title="import-export-tests" style="LINK"
-					description="import-export-tests-description" submit="TRUE">
+				<navigation destination="/test_import_export" title="import-export-tests" style="LINK" description="import-export-tests-description"
+					submit="TRUE">
 					<icon icon="/icons/import_export.png" style="LEFT" />
 				</navigation>
 			</container>
@@ -78,16 +73,13 @@
 					<title>
 						<message selector="assessment-type" />
 					</title>
-					<model ref="assessment.type"
-						delegate="FormatAssesmentType" tool="sakai.mneme" />
+					<model ref="assessment.type" delegate="FormatAssesmentType" tool="sakai.mneme" />
 					<sort submit="TRUE">
 						<active>
-							<compareDecision model="sort_column"
-								constant="0" />
+							<compareDecision model="sort_column" constant="0" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction"
-								constant="A" />
+							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
@@ -111,12 +103,10 @@
 					</title>
 					<sort submit="TRUE">
 						<active>
-							<compareDecision model="sort_column"
-								constant="1" />
+							<compareDecision model="sort_column" constant="1" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction"
-								constant="A" />
+							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
@@ -147,8 +137,7 @@
 					</title>
 					<navigations>
 						<navigation style="LINK" submit="TRUE">
-							<icon icon="/icons/preview.png"
-								style="LEFT" />
+							<icon icon="/icons/preview.png" style="LEFT" />
 							<destination template="/tests">
 								<model ref="assessment.id" />
 							</destination>
@@ -161,12 +150,10 @@
 					</title>
 					<sort submit="TRUE">
 						<active>
-							<compareDecision model="sort_column"
-								constant="2" />
+							<compareDecision model="sort_column" constant="2" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction"
-								constant="A" />
+							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
@@ -179,8 +166,7 @@
 					</sort>
 					<container>
 						<dateEdit>
-							<model ref="assessment.dates.openDate"
-								type="date" />
+							<model ref="assessment.dates.openDate" type="date" />
 						</dateEdit>
 					</container>
 				</column>
@@ -190,12 +176,10 @@
 					</title>
 					<sort submit="TRUE">
 						<active>
-							<compareDecision model="sort_column"
-								constant="3" />
+							<compareDecision model="sort_column" constant="3" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction"
-								constant="A" />
+							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
@@ -208,8 +192,7 @@
 					</sort>
 					<container>
 						<dateEdit>
-							<model ref="assessment.dates.dueDate"
-								type="date" />
+							<model ref="assessment.dates.dueDate" type="date" />
 						</dateEdit>
 					</container>
 				</column>
@@ -219,12 +202,10 @@
 					</title>
 					<sort submit="TRUE">
 						<active>
-							<compareDecision model="sort_column"
-								constant="4" />
+							<compareDecision model="sort_column" constant="4" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction"
-								constant="A" />
+							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
@@ -235,11 +216,12 @@
 							<destination template="/tests/4D" />
 						</desc>
 					</sort>
-					<model ref="assessment.active"
-						delegate="FormatAssesmentActive" tool="sakai.mneme" />
+					<model ref="assessment.active" delegate="FormatAssesmentActive" tool="sakai.mneme" />
 					<entityNavigations>
 						<navigation submit="TRUE">
-							<destination template="/test_publish/{0}">
+							<destination template="/test_publish/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
@@ -252,27 +234,27 @@
 						<message selector="assessment-action" />
 					</title>
 					<navigations>
-						<navigation style="LINK" submit="TRUE"
-							description="settings">
-							<icon icon="/icons/settings.png"
-								style="LEFT" />
-							<destination
-								template="/test_settings/{0}">
+						<navigation style="LINK" submit="TRUE" description="settings">
+							<icon icon="/icons/settings.png" style="LEFT" />
+							<destination template="/test_settings/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
-						<navigation style="LINK" submit="TRUE"
-							description="access">
+						<navigation style="LINK" submit="TRUE" description="access">
 							<icon icon="/icons/access.png" style="LEFT" />
-							<destination template="/test_access/{0}">
+							<destination template="/test_access/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
-						<navigation style="LINK" submit="TRUE"
-							description="copy">
-							<icon icon="/icons/page_copy.png"
-								style="LEFT" />
-							<destination template="/test_copy/{0}">
+						<navigation style="LINK" submit="TRUE" description="copy">
+							<icon icon="/icons/page_copy.png" style="LEFT" />
+							<destination template="/test_copy/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
@@ -283,14 +265,10 @@
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="70em">
 			<container>
-				<navigation title="save" accessKey="save-access"
-					description="save-description" style="BUTTON" submit="TRUE"
-					destination="/tests">
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/tests">
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
-				<navigation title="cancel" accessKey="cancel-access"
-					description="cancel-description" style="BUTTON"
-					destination="/tests">
+				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON" destination="/tests">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 				</navigation>
 			</container>

@@ -24,8 +24,7 @@
 	**********************************************************************************/
 -->
 
-<interface title="tests-delete-confirm-title"
-	header="tests-delete-confirm-header">
+<interface title="tests-delete-confirm-title" header="tests-delete-confirm-header">
 
 	<!--mode bar-->
 	<modeContainer>
@@ -83,12 +82,12 @@
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation destination="/tests_delete"
-					title="continue-title" style="BUTTON" accessKey="continue-access"
-					description="continue-description" submit="TRUE">
+				<navigation title="continue-title" style="BUTTON" accessKey="continue-access" description="continue-description" submit="TRUE">
+					<destination template="/tests_delete/{0}">
+						<model ref="sortcode" />
+					</destination>
 				</navigation>
-				<navigation title="cancel" style="BUTTON"
-					accessKey="cancel-access" description="cancel-description">
+				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 					<destination template="/tests/{0}">
 						<model ref="sortcode" />
