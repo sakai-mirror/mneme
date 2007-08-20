@@ -54,7 +54,7 @@
 									<rows>
 										<row>
 											<container>
-												<textEdit model="part.presentation.text" />
+												<htmlEdit model="part.presentation.text" />
 											</container>
 										</row>
 										<row title="attachments">

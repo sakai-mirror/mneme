@@ -124,7 +124,7 @@
 									<rows>
 										<row>
 											<container>
-												<textEdit model="assessment.presentation.text" />
+												<htmlEdit model="assessment.presentation.text" />
 											</container>
 										</row>
 										<row title="attachments">
