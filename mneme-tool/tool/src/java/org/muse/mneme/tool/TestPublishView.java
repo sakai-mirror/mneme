@@ -62,7 +62,7 @@ public class TestPublishView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a single parameter (aid)
+//		 we need a single parameter (aid)
 		if (params.length != 3)
 		{
 			throw new IllegalArgumentException();
@@ -89,10 +89,6 @@ public class TestPublishView extends ControllerImpl
 		// collect information: the selected assessment
 		context.put("assessment", assessment);
 
-		// value holders for the selection checkboxes
-		Values values = this.uiService.newValues();
-		context.put("ids", values);
-
 		// render
 		uiService.render(ui, context);
 	}
@@ -111,13 +107,14 @@ public class TestPublishView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a single parameter (aid)
+//		 we need a single parameter (aid)
 		if (params.length != 3)
 		{
 			throw new IllegalArgumentException();
 		}
 
 		String assessmentId = params[2];
+
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
@@ -137,33 +134,13 @@ public class TestPublishView extends ControllerImpl
 		// setup the model: the selected assessment
 		context.put("assessment", assessment);
 
-		// value holders for the selection checkboxes
-		Values values = this.uiService.newValues();
-		context.put("ids", values);
-
 		// read the form
 		String destination = uiService.decode(req, context);
 
 		// commit the save
 		try
 		{
-			//save assessment properties
-			this.assessmentService.saveAssessment(assessment);	
-			
-			if (destination.equals("DRAW"))
-			{
-				DrawPart dPart=assessment.getParts().addDrawPart();
 				this.assessmentService.saveAssessment(assessment);
-				//create url for draw
-				destination = "/part_edit/" + assessment.getId()+"/" + dPart.getId();			
-			}
-			else if (destination.equals("MANUAL"))
-			{
-				ManualPart mPart=assessment.getParts().addManualPart();
-				this.assessmentService.saveAssessment(assessment);	
-				//create url for manual
-				destination = "/part_edit/" + assessment.getId()+"/" + mPart.getId();
-			}				
 		}
 		catch (AssessmentPermissionException e)
 		{

@@ -31,39 +31,53 @@
 	</modeContainer>
 
 	<title>
-		<message selector="test-publish-title">
-			<model ref="assessment.title" />
-		</message>
+		<message selector="test-publish-title"></message>
 	</title>
 	<container>
-	<section>
-		<container>
-			<instructions>
-				<message selector="check-instructions"></message>
-			</instructions>
-		</container>
-	</section>
-	<section>
-		<container>
-			<instructions>
-				<message selector="uncheck-instructions"></message>
-			</instructions>
-		</container>
-	</section>
-	<!-- save / cancel nav bar -->
-	<navigationBar id="nav" width="20em">
-		<container>
-			<navigation title="save" accessKey="save-access"
-				description="save-description" style="BUTTON" submit="TRUE"
-				destination="/tests">
-				<icon icon="/icons/return.png" style="LEFT" />
-			</navigation>
-			<navigation title="cancel" accessKey="cancel-access"
-				description="cancel-description" style="BUTTON"
-				destination="/tests">
-				<icon icon="/icons/cancel.gif" style="LEFT" />
-			</navigation>
-		</container>
-	</navigationBar>
+		<section>
+			<container>
+
+				<text>
+					<message>
+						<model type="icon" icon="/icons/active.png" />
+					</message>
+					<message>
+						<model ref="assessment.title" missing="no-title" />
+					</message>
+				</text>
+			</container>
+		</section>
+		<section title="manage-access">
+			<container>
+				<instructions>
+					<message selector="check-instructions"></message>
+				</instructions>
+			</container>
+		</section>
+		<section>
+			<container>
+				<instructions>
+					<message selector="uncheck-instructions"></message>
+				</instructions>
+			</container>
+		</section>
+		<section>
+			<container>
+				<selection>
+					<model ref="assessment.active" />
+				</selection>
+			</container>
+		</section>
+		<!-- save / cancel nav bar -->
+		<navigationBar id="nav" width="20em">
+			<container>
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/tests">
+					<icon icon="/icons/return.png" style="LEFT" />
+				</navigation>
+				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON" destination="/tests">
+					<icon icon="/icons/cancel.gif" style="LEFT" />
+				</navigation>
+			</container>
+		</navigationBar>
 	</container>
 </interface>
