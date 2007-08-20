@@ -41,7 +41,8 @@ import org.sakaiproject.util.Web;
 /**
  * The /test_edit view for the mneme tool.
  */
-public class TestEditView extends ControllerImpl {
+public class TestEditView extends ControllerImpl
+{
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(TestEditView.class);
 
@@ -51,35 +52,37 @@ public class TestEditView extends ControllerImpl {
 	/**
 	 * Shutdown.
 	 */
-	public void destroy() {
+	public void destroy()
+	{
 		M_log.info("destroy()");
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void get(HttpServletRequest req, HttpServletResponse res,
-			Context context, String[] params) throws IOException {
+	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
+	{
 		// we need a single parameter (aid)
-		if (params.length != 3) {
+		if (params.length != 3)
+		{
 			throw new IllegalArgumentException();
 		}
 
 		String assessmentId = params[2];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
-		if (assessment == null) {
+		if (assessment == null)
+		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/"
-					+ Errors.invalid)));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
 
 		// security check
-		if (!assessmentService.allowEditAssessment(assessment, null)) {
+		if (!assessmentService.allowEditAssessment(assessment, null))
+		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/"
-					+ Errors.unauthorized)));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
@@ -97,7 +100,8 @@ public class TestEditView extends ControllerImpl {
 	/**
 	 * Final initialization, once all dependencies are set.
 	 */
-	public void init() {
+	public void init()
+	{
 		super.init();
 		M_log.info("init()");
 	}
@@ -105,27 +109,28 @@ public class TestEditView extends ControllerImpl {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void post(HttpServletRequest req, HttpServletResponse res,
-			Context context, String[] params) throws IOException {
+	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
+	{
 		// we need a single parameter (aid)
-		if (params.length != 3) {
+		if (params.length != 3)
+		{
 			throw new IllegalArgumentException();
 		}
 
 		String assessmentId = params[2];
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
-		if (assessment == null) {
+		if (assessment == null)
+		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/"
-					+ Errors.invalid)));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
 
 		// security check
-		if (!assessmentService.allowEditAssessment(assessment, null)) {
+		if (!assessmentService.allowEditAssessment(assessment, null))
+		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/"
-					+ Errors.unauthorized)));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
@@ -140,54 +145,53 @@ public class TestEditView extends ControllerImpl {
 		String destination = uiService.decode(req, context);
 
 		// commit the save
-		try {
-			//save assessment properties
+		try
+		{
+			// save assessment properties
 			this.assessmentService.saveAssessment(assessment);
 
 			if (destination.equals("DRAW"))
-				{
+			{
 				DrawPart dPart = assessment.getParts().addDrawPart();
 				this.assessmentService.saveAssessment(assessment);
-				//create url for draw
-				destination = "/part_edit/" + assessment.getId() + "/"	+ dPart.getId();
-				}
-			else if (destination.equals("MANUAL")) 
-				{
+				// create url for draw
+				destination = "/part_edit/" + assessment.getId() + "/" + dPart.getId();
+			}
+			else if (destination.equals("MANUAL"))
+			{
 				ManualPart mPart = assessment.getParts().addManualPart();
 				this.assessmentService.saveAssessment(assessment);
-				//create url for manual
-				destination = "/part_edit/" + assessment.getId() + "/"	+ mPart.getId();
-				}
-			else if (destination.equals("/part_delete")) 
-				{
+				// create url for manual
+				destination = "/part_edit/" + assessment.getId() + "/" + mPart.getId();
+			}
+			else if (destination.equals("/part_delete"))
+			{
 				// delete the parts
-				StringBuffer path = new StringBuffer("/part_delete/"
-						+ assessment.getId() + "/");
+				StringBuffer path = new StringBuffer("/part_delete/" + assessment.getId() + "/");
 				String separator = "+";
-			
-				String [] deletePartIds = values.getValues();
-				if(deletePartIds != null && deletePartIds.length != 0)
+
+				String[] deletePartIds = values.getValues();
+				if (deletePartIds != null && deletePartIds.length != 0)
 				{
-				for (String deletePartId : deletePartIds) 
+					for (String deletePartId : deletePartIds)
 					{
 						path.append(deletePartId);
 						path.append(separator);
 					}
 				}
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path
-						.toString())));
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
 				return;
 			}
-		} catch (AssessmentPermissionException e) {
+		}
+		catch (AssessmentPermissionException e)
+		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/"
-					+ Errors.unauthorized)));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
 		// redirect to the next destination
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req,
-						destination)));
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
@@ -196,7 +200,8 @@ public class TestEditView extends ControllerImpl {
 	 * @param service
 	 *        The AssessmentService.
 	 */
-	public void setAssessmentService(AssessmentService service) {
+	public void setAssessmentService(AssessmentService service)
+	{
 		this.assessmentService = service;
 	}
 }

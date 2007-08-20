@@ -42,8 +42,9 @@ import org.sakaiproject.util.Web;
 /**
  * The pools delete view for the mneme tool.
  */
-public class PartsDeleteView extends ControllerImpl {
-	
+public class PartsDeleteView extends ControllerImpl
+{
+
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(PartsDeleteView.class);
 
@@ -53,49 +54,53 @@ public class PartsDeleteView extends ControllerImpl {
 	/**
 	 * Shutdown.
 	 */
-	public void destroy() {
+	public void destroy()
+	{
 		M_log.info("destroy()");
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void get(HttpServletRequest req, HttpServletResponse res,Context context, String[] params) throws IOException {
-		
+	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
+	{
+
 		String destination = this.uiService.decode(req, context);
 		List<Part> parts = new ArrayList<Part>(0);
 
 		String assessmentId = params[2];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
-		if (assessment == null) {
+		if (assessment == null)
+		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/"
-					+ Errors.invalid)));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
 
 		context.put("assessment", assessment);
-		if(params.length > 3 && params[3] != null && params[3].length() !=0)
-		{	
+		if (params.length > 3 && params[3] != null && params[3].length() != 0)
+		{
 			String[] selectedPartIds = params[3].split("\\+");
 
-			for (String selectedPartId : selectedPartIds) {
-				if (selectedPartId != null) {
+			for (String selectedPartId : selectedPartIds)
+			{
+				if (selectedPartId != null)
+				{
 					Part part = assessment.getParts().getPart(selectedPartId);
 
-					if (part == null) {
+					if (part == null)
+					{
 						// redirect to error
-						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req,
-								"/error/" + Errors.invalid)));
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 						return;
 					}
 
 					// security check
-					if (!assessmentService.allowRemoveAssessment(assessment, null)) {
+					if (!assessmentService.allowRemoveAssessment(assessment, null))
+					{
 						// redirect to error
-						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req,
-								"/error/" + Errors.unauthorized)));
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 						return;
 					}
 					parts.add(part);
@@ -111,7 +116,8 @@ public class PartsDeleteView extends ControllerImpl {
 	/**
 	 * Final initialization, once all dependencies are set.
 	 */
-	public void init() {
+	public void init()
+	{
 		super.init();
 		M_log.info("init()");
 	}
@@ -119,48 +125,52 @@ public class PartsDeleteView extends ControllerImpl {
 	/**
 	 * @return the assessmentService
 	 */
-	public AssessmentService getAssessmentService() {
+	public AssessmentService getAssessmentService()
+	{
 		return this.assessmentService;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void post(HttpServletRequest req, HttpServletResponse res,Context context, String[] params) throws IOException {
-	
-		if (params.length < 4)throw new IllegalArgumentException();
+	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
+	{
+
+		if (params.length < 4) throw new IllegalArgumentException();
 
 		String destination = this.uiService.decode(req, context);
 
 		String assessmentId = params[2];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
-		if (assessment == null) {
+		if (assessment == null)
+		{
 			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/"
-					+ Errors.invalid)));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
 
 		String[] selectedPartIds = params[3].split("\\+");
-		if(selectedPartIds != null && selectedPartIds.length !=0)
-		{	
-			for (String selectedPartId : selectedPartIds) {
-				if (selectedPartId != null) {
+		if (selectedPartIds != null && selectedPartIds.length != 0)
+		{
+			for (String selectedPartId : selectedPartIds)
+			{
+				if (selectedPartId != null)
+				{
 					Part part = assessment.getParts().getPart(selectedPartId);
 
-					if (part == null) {
+					if (part == null)
+					{
 						// redirect to error
-						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req,
-								"/error/" + Errors.invalid)));
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 						return;
 					}
 
 					// security check
-					if (!assessmentService.allowRemoveAssessment(assessment, null)) {
+					if (!assessmentService.allowRemoveAssessment(assessment, null))
+					{
 						// redirect to error
-						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req,
-								"/error/" + Errors.unauthorized)));
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 						return;
 					}
 					// remove part
@@ -168,23 +178,26 @@ public class PartsDeleteView extends ControllerImpl {
 				}
 			}
 
-			try {
+			try
+			{
 				this.assessmentService.saveAssessment(assessment);
-			} catch (AssessmentPermissionException e) {
+			}
+			catch (AssessmentPermissionException e)
+			{
 				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/"
-						+ Errors.unauthorized)));
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 				return;
 			}
 		}
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req,destination)));
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
 	 * @param assessmentService
-	 *            the assessmentService to set
+	 *        the assessmentService to set
 	 */
-	public void setAssessmentService(AssessmentService assessmentService) {
+	public void setAssessmentService(AssessmentService assessmentService)
+	{
 		this.assessmentService = assessmentService;
 	}
 }
