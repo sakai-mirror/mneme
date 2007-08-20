@@ -144,7 +144,7 @@ public class TestsDeleteView extends ControllerImpl
 				if (selectedTestIds != null && (selectedTestIds.length > 0))
 				{
 					// path.append(destination);
-					System.out.println("Dest is " + destination);
+
 					path.append("/tests/");
 					for (String selectedTestId : selectedTestIds)
 					{
@@ -159,7 +159,7 @@ public class TestsDeleteView extends ControllerImpl
 							}
 						}
 					}
-					System.out.println("Path is " + path.toString());
+
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
 					return;
 				}
