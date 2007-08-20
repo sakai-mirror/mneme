@@ -24,54 +24,57 @@
 	**********************************************************************************/
 -->
 
-<interface title="questions-delete-confirm-title"
-	header="questions-delete-confirm-header">
+<interface title="delete-confirm-title" header="delete-confirm-header">
 
 	<!--mode bar-->
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
-
 	<container>
-		<!--navigation-->
-		<navigationBar width="100%" />
-
-		<text>
-			<message selector="question-delete-message1" />
-		</text>
-
-		<!-- the list of questions -->
-		<entityList style="FORM">
-			<iterator name="question" model="questions" />
-			<emptyTitle>
-				<message selector="no-questions" />
-			</emptyTitle>
-			<columns>
-				<modelColumn>
-					<model ref="question.description" missing="no-description"/>
-				</modelColumn>
-			</columns>
-
-		</entityList>
-
-
-		<!--text>
-			<message selector="question-delete-alert" />
-			</text-->
-		<alert selector="question-delete-alert" />
-		<text>
-			<message selector="question-delete-message2" />
-		</text>
+		<entityDisplay>
+			<rows>
+				<row>
+					<container>
+						<text>
+							<message selector="delete-message1" />
+						</text>
+					</container>
+				</row>
+				<row>
+					<title>
+						<message selector="delete-show-icon">
+							<model type="icon" icon="/icons/warning.gif" />
+						</message>
+					</title>
+					<container>
+						<!-- the list of questions -->
+						<entityList style="FORM">
+							<iterator name="question" model="questions" />
+							<emptyTitle>
+								<message selector="no-questions" />
+							</emptyTitle>
+							<columns>
+								<modelColumn>
+									<model ref="question.description" missing="no-description" />
+								</modelColumn>
+							</columns>
+						</entityList>
+						<alert selector="delete-alert" />
+						<text>
+							<message selector="delete-message2" />
+						</text>
+					</container>
+				</row>
+			</rows>
+		</entityDisplay>
 
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation destination="/questions_delete"
-					title="continue-title" style="BUTTON" accessKey="continue-access"
+				<navigation destination="/questions_delete" title="continue-title" style="BUTTON" accessKey="continue-access"
 					description="continue-description" submit="TRUE">
 				</navigation>
-				<navigation title="cancel" style="BUTTON"
-					accessKey="cancel-access" description="cancel-description">
+				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 					<destination template="/pool_edit/{0}/{1}/{2}">
 						<model ref="poolid" />

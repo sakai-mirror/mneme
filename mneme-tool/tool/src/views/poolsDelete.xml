@@ -24,54 +24,58 @@
 	**********************************************************************************/
 -->
 
-<interface title="pools-delete-confirm-title"
-	header="pools-delete-confirm-header">
+<interface title="delete-confirm-title" header="delete-confirm-header">
 
 	<!--mode bar-->
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
-
 	<container>
-		<!--navigation-->
-		<navigationBar width="100%" />
+		<entityDisplay>
+			<rows>
+				<row>
+					<container>
+						<text>
+							<message selector="delete-message1" />
+						</text>
+					</container>
+				</row>
+				<row>
+					<title>
+						<message selector="delete-show-icon">
+							<model type="icon" icon="/icons/warning.gif" />
+						</message>
+					</title>
+					<container>
+						<!-- the list of pools -->
+						<entityList style="FORM">
+							<iterator name="pool" model="pools" />
+							<emptyTitle>
+								<message selector="no-pools" />
+							</emptyTitle>
+							<columns>
+								<modelColumn>
+									<model ref="pool.title" missing="no-title" />
+								</modelColumn>
+							</columns>
 
-		<text>
-			<message selector="pool-delete-message1" />
-		</text>
-
-		<!-- the list of pools -->
-		<entityList style="FORM">
-			<iterator name="pool" model="pools" />
-			<emptyTitle>
-				<message selector="no-pools" />
-			</emptyTitle>
-			<columns>
-				<modelColumn>
-					<model ref="pool.title" missing="no-title"/>
-				</modelColumn>
-			</columns>
-
-		</entityList>
-
-
-		<!--text>
-			<message selector="pool-delete-alert" />
-			</text-->
-		<alert selector="pool-delete-alert" />
-		<text>
-			<message selector="pool-delete-message2" />
-		</text>
+						</entityList>
+						<alert selector="delete-alert" />
+						<text>
+							<message selector="delete-message2" />
+						</text>
+					</container>
+				</row>
+			</rows>
+		</entityDisplay>
 
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation destination="/pools_delete"
-					title="continue-title" style="BUTTON" accessKey="continue-access"
+				<navigation destination="/pools_delete" title="continue-title" style="BUTTON" accessKey="continue-access"
 					description="continue-description" submit="TRUE">
 				</navigation>
-				<navigation title="cancel" style="BUTTON"
-					accessKey="cancel-access" description="cancel-description">
+				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 					<destination template="/pools/{0}/{1}">
 						<model ref="sortcode" />
