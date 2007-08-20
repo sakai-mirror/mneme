@@ -47,8 +47,7 @@
 					<container>
 						<text>
 							<message>
-								<model ref="assessment.title"
-									missing="no-title" />
+								<model ref="assessment.title" missing="no-title" />
 							</message>
 						</text>
 					</container>
@@ -64,10 +63,8 @@
 						<selection orientation="VERTICAL">
 							<model ref="assessment.randomAccess" />
 							<selectionChoices>
-								<selectionChoice value="true"
-									selector="type-flex" />
-								<selectionChoice value="false"
-									selector="type-strict" />
+								<selectionChoice value="true" selector="type-flex" />
+								<selectionChoice value="false" selector="type-strict" />
 							</selectionChoices>
 						</selection>
 					</container>
@@ -75,26 +72,21 @@
 				<row title="timeLimit">
 					<container>
 						<durationEdit>
-							<model ref="assessment.timeLimit"
-								type="duration" />
+							<model ref="assessment.timeLimit" type="duration" />
 						</durationEdit>
 						<text>
-							<message selector="optional"></message>
+							<message selector="time-limit-optional"></message>
 						</text>
 					</container>
 				</row>
 				<row title="allowTries">
 					<container>
-						<selection orientation="VERTICAL">
-							<model
-								ref="assessment.numSubmissionsAllowed" />
-							<selectionChoices>
-								<selectionChoice value="1"
-									selector="type-unlimited" />
-								<selectionChoice value="10"
-									selector="type-number" />
-							</selectionChoices>
-						</selection>
+						<textEdit rows="1" cols="8">
+							<model ref="assessment.numSubmissionsAllowed" />
+						</textEdit>
+						<text>
+							<message selector="tries-optional"></message>
+						</text>
 					</container>
 				</row>
 				<row title="layout">
@@ -102,12 +94,9 @@
 						<selection orientation="VERTICAL">
 							<model ref="assessment.questionGrouping" />
 							<selectionChoices>
-								<selectionChoice value="question"
-									selector="type-question" />
-								<selectionChoice value="part"
-									selector="type-part" />
-								<selectionChoice value="assessment"
-									selector="type-assessment" />
+								<selectionChoice value="question" selector="type-question" />
+								<selectionChoice value="part" selector="type-part" />
+								<selectionChoice value="assessment" selector="type-assessment" />
 							</selectionChoices>
 						</selection>
 					</container>
@@ -119,8 +108,7 @@
 								<row title="showEachPart">
 									<container>
 										<selection>
-											<model
-												ref="assessment.parts.showPresentation" />
+											<model ref="assessment.parts.showPresentation" />
 										</selection>
 									</container>
 								</row>
@@ -128,13 +116,10 @@
 									<container>
 
 										<selection>
-											<model
-												ref="assessment.parts.continuousNumbering" />
+											<model ref="assessment.parts.continuousNumbering" />
 											<selectionChoices>
-												<selectionChoice
-													value="true" selector="type-continuous" />
-												<selectionChoice
-													value="false" selector="type-restart" />
+												<selectionChoice value="true" selector="type-continuous" />
+												<selectionChoice value="false" selector="type-restart" />
 											</selectionChoices>
 										</selection>
 									</container>
@@ -149,26 +134,19 @@
 							<rows>
 								<row title="showReview">
 									<container>
-										<selection
-											orientation="VERTICAL">
-											<model
-												ref="assessment.review.timing" />
+										<selection orientation="VERTICAL">
+											<model ref="assessment.review.timing" />
 											<selectionChoices>
-												<selectionChoice
-													value="submitted" selector="type-submitted" />
-												<selectionChoice
-													value="graded" selector="type-graded" />
-												<selectionChoice
-													value="date" selector="type-date">
+												<selectionChoice value="submitted" selector="type-submitted" />
+												<selectionChoice value="graded" selector="type-graded" />
+												<selectionChoice value="date" selector="type-date">
 													<container>
 														<dateEdit>
-															<model
-																ref="assessment.review.date" type="date" />
+															<model ref="assessment.review.date" type="date" />
 														</dateEdit>
 													</container>
 												</selectionChoice>
-												<selectionChoice
-													value="never" selector="type-never" />
+												<selectionChoice value="never" selector="type-never" />
 											</selectionChoices>
 										</selection>
 									</container>
@@ -176,16 +154,14 @@
 								<row title="showAnswerKey">
 									<container>
 										<selection>
-											<model
-												ref="assessment.review.showCorrectAnswer" />
+											<model ref="assessment.review.showCorrectAnswer" />
 										</selection>
 									</container>
 								</row>
 								<row title="showFeedback">
 									<container>
 										<selection>
-											<model
-												ref="assessment.review.showFeedback" />
+											<model ref="assessment.review.showFeedback" />
 										</selection>
 									</container>
 								</row>
@@ -200,22 +176,17 @@
 								<row title="studentid">
 									<container>
 										<selection>
-											<model
-												ref="assessment.grading.showIdentities" />
+											<model ref="assessment.grading.showIdentities" />
 										</selection>
 									</container>
 								</row>
 								<row title="releasegrades">
 									<container>
-										<selection
-											orientation="VERTICAL">
-											<model
-												ref="assessment.grading.autoRelease" />
+										<selection orientation="VERTICAL">
+											<model ref="assessment.grading.autoRelease" />
 											<selectionChoices>
-												<selectionChoice
-													value="true" selector="type-auto" />
-												<selectionChoice
-													value="false" selector="type-manual" />
+												<selectionChoice value="true" selector="type-auto" />
+												<selectionChoice value="false" selector="type-manual" />
 											</selectionChoices>
 										</selection>
 									</container>
@@ -223,8 +194,7 @@
 								<row title="sendgbook">
 									<container>
 										<selection>
-											<model
-												ref="assessment.grading.gradebookIntegration" />
+											<model ref="assessment.grading.gradebookIntegration" />
 										</selection>
 									</container>
 								</row>
@@ -235,8 +205,7 @@
 
 				<row title="submitMessage">
 					<container>
-						<textEdit
-							model="assessment.submitPresentation.text" />
+						<textEdit model="assessment.submitPresentation.text" />
 					</container>
 				</row>
 			</rows>
@@ -245,14 +214,10 @@
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="70em">
 			<container>
-				<navigation title="save" accessKey="save-access"
-					description="save-description" style="BUTTON" submit="TRUE"
-					destination="/tests">
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/tests">
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
-				<navigation title="cancel" accessKey="cancel-access"
-					description="cancel-description" style="BUTTON"
-					destination="/tests">
+				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON" destination="/tests">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 				</navigation>
 			</container>
