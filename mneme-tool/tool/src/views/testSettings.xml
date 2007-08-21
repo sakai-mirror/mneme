@@ -81,9 +81,9 @@
 				</row>
 				<row title="allowTries">
 					<container>
-						<textEdit rows="1" cols="8">
-							<model ref="assessment.numSubmissionsAllowed" />
-						</textEdit>
+						<countEdit rows="1" cols="8">
+							<model ref="assessment.numSubmissionsAllowed" type="count" />
+						</countEdit>
 						<text>
 							<message selector="tries-optional"></message>
 						</text>
