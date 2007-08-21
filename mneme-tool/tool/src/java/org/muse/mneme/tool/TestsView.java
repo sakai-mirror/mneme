@@ -200,18 +200,33 @@ public class TestsView extends ControllerImpl
 		String destination = uiService.decode(req, context);
 		if (destination != null)
 		{
+			// Save date changes regardless of where user goes
 			saveDates(req, res, context);
 			// for an add
 			if (destination.startsWith("/test_add"))
 			{
+				StringBuffer path = new StringBuffer();
 				// create a new test
 				try
 				{
 					Assessment assessment = this.assessmentService.newAssessment(this.toolManager.getCurrentPlacement().getContext());
 
 					// redirect to edit for this assessment
-					destination = "/test_edit/" + assessment.getId();
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+					path.append("/test_edit/");
+					// for sort code
+					if (params.length == 3)
+					{
+						path.append(params[2]);
+						path.append("/");
+					}
+					else
+					{
+						// default sort - title ascending
+						path.append("1A");
+						path.append("/");
+					}
+					path.append(assessment.getId());
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
 					return;
 				}
 				catch (AssessmentPermissionException e)
@@ -269,8 +284,6 @@ public class TestsView extends ControllerImpl
 			destination = "/tests/";
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-		// redirect to error
-		// res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 	}
 
 	private void saveDates(HttpServletRequest req, HttpServletResponse res, Context context) throws IOException

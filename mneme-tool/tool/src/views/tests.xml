@@ -124,7 +124,9 @@
 									<model ref="assessment.title" missing="no-title" />
 								</message>
 							</title>
-							<destination template="/test_edit/{0}">
+							<destination template="/test_edit/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>

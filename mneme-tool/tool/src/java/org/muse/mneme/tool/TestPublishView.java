@@ -62,12 +62,12 @@ public class TestPublishView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a single parameter (aid)
 		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
+		// The last parameter is the assessment id
 		String assessmentId = params[3];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
@@ -88,6 +88,7 @@ public class TestPublishView extends ControllerImpl
 
 		// collect information: the selected assessment
 		context.put("assessment", assessment);
+		// The sort code is in this parameter
 		context.put("sortcode", params[2]);
 
 		// render
@@ -108,7 +109,6 @@ public class TestPublishView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a single parameter (aid)
 		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
@@ -153,6 +153,7 @@ public class TestPublishView extends ControllerImpl
 				return;
 			}
 
+			// Retain the sort order
 			path.append("/tests/" + params[2]);
 			// redirect to the next destination
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));

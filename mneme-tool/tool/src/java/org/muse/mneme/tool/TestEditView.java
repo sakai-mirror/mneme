@@ -62,13 +62,13 @@ public class TestEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a single parameter (aid)
-		if (params.length != 3)
+
+		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
-		String assessmentId = params[2];
+		String assessmentId = params[3];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
@@ -88,6 +88,7 @@ public class TestEditView extends ControllerImpl
 
 		// collect information: the selected assessment
 		context.put("assessment", assessment);
+		context.put("sortcode", params[2]);
 
 		// value holders for the selection checkboxes
 		Values values = this.uiService.newValues();
@@ -112,12 +113,12 @@ public class TestEditView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// we need a single parameter (aid)
-		if (params.length != 3)
+		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
-		String assessmentId = params[2];
+		String assessmentId = params[3];
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
