@@ -123,7 +123,8 @@
 							<navigations>
 								<navigation style="LINK" submit="TRUE">
 									<icon icon="/icons/preview.png" style="LEFT" />
-									<destination template="/question_preview/{0}">
+									<destination template="/question_preview/{0}/{1}">
+										<model ref="testsortcode" />
 										<model ref="question.id" />
 									</destination>
 								</navigation>
@@ -164,13 +165,15 @@
 			<container>
 				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
-					<destination template="/test_edit/{0}">
+					<destination template="/test_edit/{0}/{1}">
+						<model ref="testsortcode" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>
 				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/test_edit/{0}">
+					<destination template="/test_edit/{0}/{1}">
+						<model ref="testsortcode" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>

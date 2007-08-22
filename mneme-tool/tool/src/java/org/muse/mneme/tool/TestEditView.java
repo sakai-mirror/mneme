@@ -156,19 +156,19 @@ public class TestEditView extends ControllerImpl
 				DrawPart dPart = assessment.getParts().addDrawPart();
 				this.assessmentService.saveAssessment(assessment);
 				// create url for draw
-				destination = "/part_edit/" + assessment.getId() + "/" + dPart.getId();
+				destination = "/part_edit/" + params[2] + "/" + assessment.getId() + "/" + dPart.getId();
 			}
 			else if (destination.equals("MANUAL"))
 			{
 				ManualPart mPart = assessment.getParts().addManualPart();
 				this.assessmentService.saveAssessment(assessment);
 				// create url for manual
-				destination = "/part_edit/" + assessment.getId() + "/" + mPart.getId();
+				destination = "/part_edit/" + params[2] + "/" + assessment.getId() + "/" + mPart.getId();
 			}
 			else if (destination.equals("/part_delete"))
 			{
 				// delete the parts
-				StringBuffer path = new StringBuffer("/part_delete/" + assessment.getId() + "/");
+				StringBuffer path = new StringBuffer("/part_delete/" + params[2] + "/" + assessment.getId() + "/");
 				String separator = "+";
 
 				String[] deletePartIds = values.getValues();

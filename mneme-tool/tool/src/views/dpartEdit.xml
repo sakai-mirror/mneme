@@ -80,7 +80,8 @@
 							<icon icon="/icons/search.png" style="LEFT" />
 						</navigation>
 						<pager paging="paging" submit="TRUE">
-							<destination template="/part_edit/{0}/{1}/{2}{3}/{4}">
+							<destination template="/part_edit/{0}/{1}/{2}/{3}{4}/{5}">
+								<model ref="testsortcode" />
 								<model ref="assessment.id" />
 								<model ref="part.id" />
 								<model ref="sort_column" />
@@ -224,13 +225,15 @@
 			<container>
 				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
-					<destination template="/test_edit/{0}">
+					<destination template="/test_edit/{0}/{1}">
+						<model ref="testsortcode" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>
 				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/test_edit/{0}">
+					<destination template="/test_edit/{0}/{1}">
+						<model ref="testsortcode" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>

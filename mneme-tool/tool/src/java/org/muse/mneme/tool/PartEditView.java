@@ -86,16 +86,18 @@ public class PartEditView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// we need a two, 3 or 4 parameters (aid, pid, sort, paging (dpart))
-		if (params.length != 4 && params.length != 5 && params.length != 6)
+		if (params.length != 5 && params.length != 6 && params.length != 7)
 		{
 			throw new IllegalArgumentException();
 		}
 
-		String assessmentId = params[2];
-		String partId = params[3];
+		// Since we have two sorts here, we call this testsortcode
+		context.put("testsortcode", params[2]);
+		String assessmentId = params[3];
+		String partId = params[4];
 		// sort parameter
 		String sortCode = null;
-		if (params.length >= 5) sortCode = params[4];
+		if (params.length >= 6) sortCode = params[5];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
@@ -147,9 +149,9 @@ public class PartEditView extends ControllerImpl
 		char sortCol = '0';
 		char sortDir = 'A';
 
-		if (params.length >= 5)
+		if (params.length >= 6)
 		{
-			sortCode = params[4];
+			sortCode = params[5];
 			if (sortCode != null && sortCode.length() == 2)
 			{
 				sortCol = sortCode.charAt(0);
@@ -162,9 +164,9 @@ public class PartEditView extends ControllerImpl
 
 		// default paging
 		String pagingParameter = null;
-		if (params.length == 6)
+		if (params.length == 7)
 		{
-			pagingParameter = params[5];
+			pagingParameter = params[6];
 		}
 
 		if (pagingParameter == null)
@@ -272,13 +274,13 @@ public class PartEditView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// we need a two, 3 or 4 parameters (aid, pid, sort, paging (dpart))
-		if (params.length != 4 && params.length != 5 && params.length != 6)
+		if (params.length != 5 && params.length != 6 && params.length != 7)
 		{
 			throw new IllegalArgumentException();
 		}
 
-		String assessmentId = params[2];
-		String partId = params[3];
+		String assessmentId = params[3];
+		String partId = params[4];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
@@ -334,7 +336,7 @@ public class PartEditView extends ControllerImpl
 
 			context.put("draws", draws);
 		}
-		
+
 		// for mpart, we need to collect the checkbox ids
 		else
 		{
@@ -358,12 +360,12 @@ public class PartEditView extends ControllerImpl
 				}
 			}
 		}
-		
+
 		else
 		{
 			// get the ids
 			String[] removeQuesIds = values.getValues();
-			
+
 			// TODO: process the ids into the destination for a redirect to the remove confirm view...
 		}
 

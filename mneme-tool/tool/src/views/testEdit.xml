@@ -184,7 +184,8 @@
 							<model ref="part.title" missing="no-title" />
 							<entityNavigations>
 								<navigation submit="TRUE">
-									<destination template="/part_edit/{0}/{1}">
+									<destination template="/part_edit/{0}/{1}/{2}">
+										<model ref="sortcode" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
