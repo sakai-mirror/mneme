@@ -22,11 +22,11 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
@@ -184,6 +184,27 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	{
 		if (question == null) throw new IllegalArgumentException();
 		this.questionIds.remove(question.getId());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setQuestionOrder(String[] questionIds)
+	{
+		if (questionIds == null) throw new IllegalArgumentException();
+		List<String> ids = new ArrayList(Arrays.asList(questionIds));
+
+		// remove anything from the new list not in our questions
+		ids.retainAll(this.questionIds);
+
+		// remove these from our list
+		this.questionIds.removeAll(ids);
+
+		// add to the end of the new list any remaining quesitions from our list
+		ids.addAll(this.questionIds);
+
+		// take the new list
+		this.questionIds = ids;
 	}
 
 	/**

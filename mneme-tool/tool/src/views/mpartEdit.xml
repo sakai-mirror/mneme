@@ -92,6 +92,12 @@
 					</emptyTitle>
 					<iterator name="question" model="part.questionsAsAuthored" />
 					<columns>
+						<orderColumn>
+							<value>
+								<model type="text" ref="question.id" />
+							</value>
+							<model ref="part.questionOrder" />
+						</orderColumn>
 						<selectionColumn multiple="TRUE">
 							<value>
 								<model type="text" ref="question.id" />

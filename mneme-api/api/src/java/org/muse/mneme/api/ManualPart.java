@@ -59,6 +59,16 @@ public interface ManualPart extends Part
 	void removeQuestion(Question question);
 
 	/**
+	 * Reorder the existing questions to match this order.<br />
+	 * Any question not listed remain in their order following this list.<br />
+	 * Any questions in the list not matching existing questions are ignored.
+	 * 
+	 * @param questionIds
+	 *        A list of the question ids in order.
+	 */
+	void setQuestionOrder(String[] questionIds);
+
+	/**
 	 * Set the randomize flag.
 	 * 
 	 * @param setting
