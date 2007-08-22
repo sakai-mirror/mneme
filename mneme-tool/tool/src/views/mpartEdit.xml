@@ -79,7 +79,7 @@
 						<navigation destination="" title="select-questions" style="LINK" description="select-questions-description" submit="TRUE">
 							<icon icon="/icons/hand_select.png" style="LEFT" />
 						</navigation>
-						<navigation destination="" title="remove-question" style="LINK" description="remove-question-description" submit="TRUE">
+						<navigation destination="/part_ques_delete" title="remove-question" style="LINK" description="remove-question-description" submit="TRUE">
 							<icon icon="/icons/page_delete.png" style="LEFT" />
 						</navigation>
 					</container>

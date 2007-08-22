@@ -311,7 +311,8 @@ public class PartEditView extends ControllerImpl
 		context.put("part", part);
 
 		Values values = null;
-
+		String[] removeQuesIds = null;
+		
 		// based on the part type...
 		PopulatingSet draws = null;
 		if (part instanceof DrawPart)
@@ -341,6 +342,7 @@ public class PartEditView extends ControllerImpl
 		else
 		{
 			values = uiService.newValues();
+			removeQuesIds = values.getValues();
 			context.put("questionids", values);
 		}
 
@@ -360,15 +362,27 @@ public class PartEditView extends ControllerImpl
 				}
 			}
 		}
-
+		// process the ids into the destination for a redirect to the remove confirm view...
 		else
 		{
-			// get the ids
-			String[] removeQuesIds = values.getValues();
+			if (destination.equals("/part_ques_delete"))
+			{
+				// get the ids
+				if (removeQuesIds != null && removeQuesIds.length != 0)
+				{
+					// remove questions from part
+					StringBuffer path = new StringBuffer("/part_ques_delete/" + assessment.getId() + "/" + part.getId() + "/");
+					String separator = "+";
 
-			// TODO: process the ids into the destination for a redirect to the remove confirm view...
+					for (String removeQuesId : removeQuesIds)
+					{
+						path.append(removeQuesId);
+						path.append(separator);
+					}
+					destination = path.toString();	
+				}
+			}
 		}
-
 		// commit the save
 		try
 		{
