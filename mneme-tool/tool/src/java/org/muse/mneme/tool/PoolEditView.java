@@ -63,6 +63,23 @@ public class PoolEditView extends ControllerImpl
 	protected SessionManager sessionManager = null;
 
 	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		super.init();
+		M_log.info("init()");
+	}
+
+	/**
+	 * Shutdown.
+	 */
+	public void destroy()
+	{
+		M_log.info("destroy()");
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
@@ -203,6 +220,31 @@ public class PoolEditView extends ControllerImpl
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 					return;
 				}
+			}
+			else if ((destination.trim().startsWith("/question_copy")) || (destination.trim().startsWith("/question_move")))
+			{
+				if (selectedQuestionIds != null && (selectedQuestionIds.length > 0))
+				{
+					StringBuffer path = new StringBuffer();
+					String separator = "+";
+
+					path.append(destination);
+					path.append("/");
+
+					for (String selectedQuestionId : selectedQuestionIds)
+					{
+						path.append(selectedQuestionId);
+						path.append(separator);
+					}
+
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
+					return;
+				}
+			}
+			else
+			{
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
 			}
 		}
 

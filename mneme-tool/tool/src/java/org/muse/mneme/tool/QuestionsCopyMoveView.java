@@ -31,26 +31,28 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.sakaiproject.tool.api.ToolManager;
-import org.sakaiproject.util.Web;
 
 /**
- * 
+ * The /question_copy view for the mneme tool.
  */
-public class PoolPropertiesView extends ControllerImpl
+public class QuestionsCopyMoveView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(PoolPropertiesView.class);
+	private static Log M_log = LogFactory.getLog(QuestionsCopyMoveView.class);
+
+	/** Dependency: mneme service. */
+	protected MnemeService mnemeService = null;
 
 	/** Pool Service */
 	protected PoolService poolService = null;
 
-	/** tool manager reference. */
+	/** Dependency: ToolManager */
 	protected ToolManager toolManager = null;
-	
+
 	/**
 	 * Final initialization, once all dependencies are set.
 	 */
@@ -59,7 +61,7 @@ public class PoolPropertiesView extends ControllerImpl
 		super.init();
 		M_log.info("init()");
 	}
-	
+
 	/**
 	 * Shutdown.
 	 */
@@ -73,15 +75,18 @@ public class PoolPropertiesView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 3) throw new IllegalArgumentException();
+		if ((params.length != 3) && (params.length != 4)) throw new IllegalArgumentException();
 
-		Pool pool = this.poolService.getPool(params[2]);
-		context.put("pool", pool);
+		if (path.startsWith("question_copy"))
+			context.put("headerText", messages.get("copy-header-text"));
+		else if (path.startsWith("question_move")) 
+			context.put("headerText", messages.get("move-header-text"));
+		
 
-		// get the subjects
-		List<String> subjects = poolService.getSubjects(toolManager.getCurrentPlacement().getContext(), null);
-		context.put("subjects", subjects);
+		context.put("poolid", params[2]);
 
+		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, null, null, null, null);
+		context.put("pools", pools);
 		// render
 		uiService.render(ui, context);
 	}
@@ -91,38 +96,7 @@ public class PoolPropertiesView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 3) throw new IllegalArgumentException();
-
-		// setup the model: the selected pool
-		Pool pool = this.poolService.getPool(params[2]);
-		context.put("pool", pool);
-
-		// read the form
-		String destination = uiService.decode(req, context);
-
-		if (pool != null)
-		{
-			try
-			{
-				if (pool.getTitle() == null)
-					pool.setTitle("");
-				
-				if (pool.getSubject() == null)
-					pool.setSubject("");
-				
-				this.poolService.savePool(pool, toolManager.getCurrentPlacement().getContext());
-			}
-			catch (AssessmentPermissionException e)
-			{
-				//redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-				return;
-			}			
-		}
-
-		destination = "/pools/";
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-
+		throw new IllegalArgumentException();
 	}
 
 	/**
@@ -132,6 +106,15 @@ public class PoolPropertiesView extends ControllerImpl
 	public void setPoolService(PoolService poolService)
 	{
 		this.poolService = poolService;
+	}
+
+	/**
+	 * @param mnemeService
+	 *        the mnemeService to set
+	 */
+	public void setMnemeService(MnemeService mnemeService)
+	{
+		this.mnemeService = mnemeService;
 	}
 
 	/**

@@ -63,11 +63,17 @@
 					<destination template="/"></destination>
 					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/" title="move-to-pool" style="LINK" description="move-to-pool-description" disabled="FALSE">
+				<navigation title="move-to-pool" style="LINK" description="move-to-pool-description" disabled="FALSE" submit="TRUE">
 					<icon icon="/icons/page_go.png" style="LEFT" />
+					<destination template="/question_move/{0}">
+						<model ref="pool.id" />
+					</destination>
 				</navigation>
-				<navigation destination="/" title="copy-to-pool" style="LINK" description="copy-to-pool-description">
+				<navigation title="copy-to-pool" style="LINK" description="copy-to-pool-description" submit="TRUE">
 					<icon icon="/icons/copy.png" style="LEFT" />
+					<destination template="/question_copy/{0}">
+						<model ref="pool.id" />
+					</destination>
 				</navigation>
 				<navigation title="delete-title" style="LINK" description="delete-description" submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
