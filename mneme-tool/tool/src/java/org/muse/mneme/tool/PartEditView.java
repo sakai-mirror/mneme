@@ -311,8 +311,7 @@ public class PartEditView extends ControllerImpl
 		context.put("part", part);
 
 		Values values = null;
-		String[] removeQuesIds = null;
-		
+			
 		// based on the part type...
 		PopulatingSet draws = null;
 		if (part instanceof DrawPart)
@@ -342,7 +341,6 @@ public class PartEditView extends ControllerImpl
 		else
 		{
 			values = uiService.newValues();
-			removeQuesIds = values.getValues();
 			context.put("questionids", values);
 		}
 
@@ -368,6 +366,7 @@ public class PartEditView extends ControllerImpl
 			if (destination.equals("/part_ques_delete"))
 			{
 				// get the ids
+				String[] removeQuesIds = values.getValues();
 				if (removeQuesIds != null && removeQuesIds.length != 0)
 				{
 					// remove questions from part
