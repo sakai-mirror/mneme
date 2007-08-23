@@ -68,7 +68,7 @@ public class PartsDeleteView extends ControllerImpl
 		String destination = this.uiService.decode(req, context);
 		List<Part> parts = new ArrayList<Part>(0);
 
-		String assessmentId = params[2];
+		String assessmentId = params[3];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
@@ -77,12 +77,20 @@ public class PartsDeleteView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
-
+		
+		context.put("testsortcode", params[2]);
 		context.put("assessment", assessment);
-		if (params.length > 3 && params[3] != null && params[3].length() != 0)
+		if (params.length > 4 && params[4] != null && params[4].length() != 0)
 		{
-			String[] selectedPartIds = params[3].split("\\+");
-
+			// security check
+			if (!assessmentService.allowRemoveAssessment(assessment, null))
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+			
+			String[] selectedPartIds = params[4].split("\\+");
 			for (String selectedPartId : selectedPartIds)
 			{
 				if (selectedPartId != null)
@@ -93,14 +101,6 @@ public class PartsDeleteView extends ControllerImpl
 					{
 						// redirect to error
 						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-						return;
-					}
-
-					// security check
-					if (!assessmentService.allowRemoveAssessment(assessment, null))
-					{
-						// redirect to error
-						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 						return;
 					}
 					parts.add(part);
@@ -136,11 +136,11 @@ public class PartsDeleteView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 
-		if (params.length < 4) throw new IllegalArgumentException();
+		if (params.length < 5) throw new IllegalArgumentException();
 
 		String destination = this.uiService.decode(req, context);
 
-		String assessmentId = params[2];
+		String assessmentId = params[3];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
@@ -150,9 +150,17 @@ public class PartsDeleteView extends ControllerImpl
 			return;
 		}
 
-		String[] selectedPartIds = params[3].split("\\+");
+		String[] selectedPartIds = params[4].split("\\+");
 		if (selectedPartIds != null && selectedPartIds.length != 0)
 		{
+			// security check
+			if (!assessmentService.allowRemoveAssessment(assessment, null))
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+			
 			for (String selectedPartId : selectedPartIds)
 			{
 				if (selectedPartId != null)
@@ -165,14 +173,7 @@ public class PartsDeleteView extends ControllerImpl
 						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 						return;
 					}
-
-					// security check
-					if (!assessmentService.allowRemoveAssessment(assessment, null))
-					{
-						// redirect to error
-						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-						return;
-					}
+					
 					// remove part
 					assessment.getParts().removePart(part);
 				}

@@ -126,14 +126,16 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/part_edit/{0}/{1}/0A">
+									<destination template="/part_edit/{0}/{1}/{2}/0A">
+										<model ref="testsortcode" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/part_edit/{0}/{1}/0D">
+									<destination template="/part_edit/{0}/{1}/{2}/0D">
+										<model ref="testsortcode" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
@@ -154,14 +156,16 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/part_edit/{0}/{1}/1A">
+									<destination template="/part_edit/{0}/{1}/{2}/1A">
+										<model ref="testsortcode" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/part_edit/{0}/{1}/1D">
+									<destination template="/part_edit/{0}/{1}/{2}/1D">
+										<model ref="testsortcode" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
@@ -194,14 +198,16 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/part_edit/{0}/{1}/2A">
+									<destination template="/part_edit/{0}/{1}/{2}/2A">
+										<model ref="testsortcode" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/part_edit/{0}/{1}/2D">
+									<destination template="/part_edit/{0}/{1}/{2}/2D">
+										<model ref="testsortcode" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>

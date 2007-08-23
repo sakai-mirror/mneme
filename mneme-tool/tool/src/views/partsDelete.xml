@@ -78,13 +78,15 @@
 		<navigationBar width="100%">
 			<container>
 				<navigation title="continue-title" style="BUTTON" accessKey="continue-access" description="continue-description" submit="TRUE">
-					<destination template="/test_edit/{0}">
+					<destination template="/test_edit/{0}/{1}">
+						<model ref="testsortcode" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/test_edit/{0}">
+					<destination template="/test_edit/{0}/{1}">
+						<model ref="testsortcode" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>

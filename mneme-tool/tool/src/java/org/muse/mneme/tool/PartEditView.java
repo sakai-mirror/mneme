@@ -85,7 +85,7 @@ public class PartEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a two, 3 or 4 parameters (aid, pid, sort, paging (dpart))
+		// we need a two, 3 or 4 parameters (testsort, aid, pid, sort, paging (dpart))
 		if (params.length != 5 && params.length != 6 && params.length != 7)
 		{
 			throw new IllegalArgumentException();
@@ -172,7 +172,7 @@ public class PartEditView extends ControllerImpl
 		if (pagingParameter == null)
 		{
 			// TODO: other than 2 size!
-			pagingParameter = "1-2";
+			pagingParameter = "1-30";
 		}
 
 		Integer maxPools = this.poolService.countPools(toolManager.getCurrentPlacement().getContext(), null, null);
@@ -311,7 +311,7 @@ public class PartEditView extends ControllerImpl
 		context.put("part", part);
 
 		Values values = null;
-			
+
 		// based on the part type...
 		PopulatingSet draws = null;
 		if (part instanceof DrawPart)
@@ -378,7 +378,7 @@ public class PartEditView extends ControllerImpl
 						path.append(removeQuesId);
 						path.append(separator);
 					}
-					destination = path.toString();	
+					destination = path.toString();
 				}
 			}
 		}
