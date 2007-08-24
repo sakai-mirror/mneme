@@ -49,7 +49,7 @@
 				<navigation destination="/tests_delete" title="delete-tests" style="LINK" description="delete-tests-description" submit="TRUE">
 					<icon icon="/icons/delete.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/tests_inactivate" title="inactivate-tests" style="LINK" description="inactivate-tests-description"
+				<navigation destination="/tests_archive" title="inactivate-tests" style="LINK" description="inactivate-tests-description"
 					submit="TRUE">
 					<icon icon="/icons/make_inactive.png" style="LEFT" />
 				</navigation>
@@ -140,7 +140,9 @@
 					<navigations>
 						<navigation style="LINK" submit="TRUE">
 							<icon icon="/icons/preview.png" style="LEFT" />
-							<destination template="/tests">
+							<destination template="/test_preview/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
@@ -254,7 +256,7 @@
 						</navigation>
 						<navigation style="LINK" submit="TRUE" description="copy">
 							<icon icon="/icons/page_copy.png" style="LEFT" />
-							<destination template="/test_copy/{0}{1}/{2}">
+							<destination template="/COPY/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />

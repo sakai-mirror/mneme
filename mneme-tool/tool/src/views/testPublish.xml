@@ -24,29 +24,20 @@
  **********************************************************************************/
 -->
 
-<interface>
+<interface title="test-publish-title">
 	<!--mode bar-->
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
 
-	<title>
-		<message selector="test-publish-title"></message>
-	</title>
-	<container>
-		<section>
-			<container>
 
-				<text>
-					<message>
-						<model type="icon" icon="/icons/active.png" />
-					</message>
-					<message>
-						<model ref="assessment.title" missing="no-title" />
-					</message>
-				</text>
-			</container>
-		</section>
+	<header>
+		<message selector="test-publish-header">
+			<model type="icon" icon="/icons/active.png" />
+			<model ref="assessment.title" missing="no-title" />
+		</message>
+	</header>
+	<container>
 		<section title="manage-access">
 			<container>
 				<instructions>
@@ -63,9 +54,17 @@
 		</section>
 		<section>
 			<container>
-				<selection>
-					<model ref="assessment.active" />
-				</selection>
+				<entityDisplay>
+					<rows>
+						<row title="publish">
+							<container>
+								<selection>
+									<model ref="assessment.active" />
+								</selection>
+							</container>
+						</row>
+					</rows>
+				</entityDisplay>
 			</container>
 		</section>
 		<!-- save / cancel nav bar -->
