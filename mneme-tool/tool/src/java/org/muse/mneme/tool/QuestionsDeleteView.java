@@ -66,14 +66,14 @@ public class QuestionsDeleteView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 6) throw new IllegalArgumentException();
+		if (params.length != 8) throw new IllegalArgumentException();
 
 		String destination = this.uiService.decode(req, context);
 
 		List<Question> questions = new ArrayList<Question>(0);
 		
-		// question id's are in the params array at the index 5
-		String questionIds[] = params[5].split("\\+");
+		// question id's are in the params array at the index 7
+		String questionIds[] = params[7].split("\\+");
 
 		for (String selectedQuestionId : questionIds)
 		{
@@ -83,14 +83,20 @@ public class QuestionsDeleteView extends ControllerImpl
 
 			if (question != null) questions.add(question);
 		}
+		
+		//pools sort code is in params array at index 2
+		context.put("poolsSortCode", params[2]);
+
+		// pools paging parameter - is in param array at index 3
+		context.put("poolsPagingParameter", params[3]);
 
 		context.put("questions", questions);
 		
-		context.put("poolid", params[2]);
+		context.put("poolid", params[4]);
 
-		context.put("sortcode", params[3]);
+		context.put("sortcode", params[5]);
 
-		context.put("pagingParameter", params[4]);
+		context.put("pagingParameter", params[6]);
 
 		uiService.render(ui, context);
 	}
@@ -109,14 +115,14 @@ public class QuestionsDeleteView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 6) throw new IllegalArgumentException();
+		if (params.length != 8) throw new IllegalArgumentException();
 		
 		String destination = this.uiService.decode(req, context);
-
+		
 		if (destination != null && (destination.trim().equalsIgnoreCase("/questions_delete")))
 		{
-			//question id's are in the params array at the index 5
-			String questionIds[] = params[5].split("\\+");
+			//question id's are in the params array at the index 7
+			String questionIds[] = params[7].split("\\+");
 
 			for (String selectedQuestionId : questionIds)
 			{
@@ -137,8 +143,8 @@ public class QuestionsDeleteView extends ControllerImpl
 				}
 			}
 		}
-		// add pool id, sort and paging
-		destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4];
+		// add pools sort code, pools paging, pool id, sort and paging
+		destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4] + "/" + params[5] + "/" + params[6];
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

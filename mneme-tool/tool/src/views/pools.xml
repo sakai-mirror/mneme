@@ -149,7 +149,13 @@
 					</sort>
 					<entityNavigations>
 						<navigation>
-							<destination template="/pool_edit/{0}">
+							<!--destination template="/pool_edit/{0}">
+								<model ref="pool.id" />
+							</destination-->
+							<destination template="/pool_edit/{0}{1}/{2}/{3}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="pagingParameter" />
 								<model ref="pool.id" />
 							</destination>
 						</navigation>

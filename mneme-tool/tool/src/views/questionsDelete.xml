@@ -76,7 +76,9 @@
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/pool_edit/{0}/{1}/{2}">
+					<destination template="/pool_edit/{0}/{1}/{2}/{3}/{4}">
+						<model ref="poolsSortCode" />
+						<model ref="poolsPagingParameter" />
 						<model ref="poolid" />
 						<model ref="sortcode" />
 						<model ref="pagingParameter" />

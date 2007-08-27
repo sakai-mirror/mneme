@@ -84,18 +84,30 @@ public class PoolEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if ((params.length != 3) && (params.length != 4) && (params.length != 5)) throw new IllegalArgumentException();
+		if ((params.length != 3) && (params.length != 4) && (params.length != 5) && (params.length != 6) && (params.length != 7))
+			throw new IllegalArgumentException();
 
-		// sort parameter - sort is in param array at index 2
+		// pools - sort at index 2, paging at index 3. pool id at index 4. Move pool_edit sort to index 5, paging to index 6
+		// pools sort parameter is in param array at index 2
+		String poolsSortCode = null;
+		if (params.length > 2) poolsSortCode = params[2];
+		context.put("poolsSortCode", poolsSortCode);
+
+		// pools paging parameter - is in param array at index 4
+		String poolsPagingParameter = null;
+		if (params.length > 3) poolsPagingParameter = params[3];
+		context.put("poolsPagingParameter", poolsPagingParameter);
+
+		// sort parameter - sort is in param array at index 5
 		String sortCode = null;
-		if (params.length > 3) sortCode = params[3];
+		if (params.length > 5) sortCode = params[5];
 
-		// paging parameter - is in param array at index 4
+		// paging parameter - is in param array at index 6
 		String pagingParameter = null;
-		if (params.length == 5) pagingParameter = params[4];
+		if (params.length == 7) pagingParameter = params[6];
 
-		// setup the model: the selected pool - pool id is at index 2
-		Pool pool = this.poolService.getPool(params[2]);
+		// setup the model: the selected pool - pool id is at index 4
+		Pool pool = this.poolService.getPool(params[4]);
 		context.put("pool", pool);
 
 		// default sort is title ascending
@@ -168,7 +180,17 @@ public class PoolEditView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if ((params.length != 3) && (params.length != 4) && (params.length != 5)) throw new IllegalArgumentException();
+		if ((params.length != 3) && (params.length != 4) && (params.length != 5) && (params.length != 6) && (params.length != 7))
+			throw new IllegalArgumentException();
+
+		String poolsSortCode = null;
+		if (params.length > 2) poolsSortCode = params[2];
+		context.put("poolsSortCode", poolsSortCode);
+
+		// pools paging parameter - is in param array at index 3
+		String poolsPagingParameter = null;
+		if (params.length > 3) poolsPagingParameter = params[3];
+		context.put("poolsPagingParameter", poolsPagingParameter);
 
 		// for the selected questions to delete
 		Values values = this.uiService.newValues();
@@ -248,11 +270,9 @@ public class PoolEditView extends ControllerImpl
 			}
 		}
 
-		if (params.length == 5)
-			destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4];
-		else if (params.length == 4)
-			destination = "/pool_edit/" + params[2] + "/" + params[3];
-		else if (params.length == 3) destination = "/pool_edit/" + params[2];
+		if (params.length == 7)
+			destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4] + "/" + params[5] + "/" + params[6];
+		else if (params.length == 5) destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4];
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 
