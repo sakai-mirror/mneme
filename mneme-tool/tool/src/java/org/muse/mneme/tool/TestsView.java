@@ -271,6 +271,23 @@ public class TestsView extends ControllerImpl
 					return;
 				}
 			}
+			else if (destination.trim().startsWith("/COPY"))
+			{
+				try
+				{
+					Assessment assessment = this.assessmentService.getAssessment(destination.substring(destination.lastIndexOf("/") + 1));
+					if (assessment != null)
+					{
+						this.assessmentService.copyAssessment(toolManager.getCurrentPlacement().getContext(), assessment);
+					}
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+			}
 			else
 			{
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));

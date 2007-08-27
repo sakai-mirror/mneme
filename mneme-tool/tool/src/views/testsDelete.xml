@@ -32,52 +32,70 @@
 	</modeContainer>
 
 	<container>
-		<!--navigation-->
+		<entityDisplay>
+			<rows>
+				<row>
+					<container>
+						<text>
+							<message selector="test-delete-message1" />
+						</text>
+					</container>
+				</row>
+				<row>
+					<title>
+						<message selector="delete-show-icon">
+							<model type="icon" icon="/icons/warning.gif" />
+						</message>
+					</title>
+					<container>
+						<entityList style="FORM">
+							<iterator name="test" model="tests" />
+							<emptyTitle>
+								<message selector="no-tests" />
+							</emptyTitle>
+							<columns>
+								<modelColumn>
+									<model ref="test.title" missing="no-title" />
+								</modelColumn>
+							</columns>
 
-		<!-- the list of tests -->
-		<entityList style="FORM">
-			<iterator name="test" model="tests" />
-			<emptyTitle>
-				<message selector="no-tests" />
-			</emptyTitle>
-			<title>
-				<message selector="test-delete-message1" />
-			</title>
-			<columns>
-				<modelColumn>
-					<model ref="test.title" missing="no-title" />
-				</modelColumn>
-			</columns>
-
-		</entityList>
-
-
-		<!-- the list of tests -->
-		<entityList style="FORM">
-			<iterator name="test" model="nodeltests" />
-			<emptyTitle>
-				<message selector="no-tests" />
-			</emptyTitle>
-			<title>
-				<message selector="test-nodelete-message" />
-			</title>
-			<columns>
-				<modelColumn>
-					<model ref="test.title" missing="no-title" />
-				</modelColumn>
-			</columns>
-
-		</entityList>
+						</entityList>
 
 
+						<!-- the list of tests -->
+						<entityList style="FORM">
+							<iterator name="test" model="nodeltests" />
+							<included>
+								<hasValueDecision model="nodeltests" />
+							</included>
 
-		<!--text>
-			<message selector="test-delete-alert" />
-			</text-->
-		<alert selector="test-delete-alert" />
-		<text>
-			<message selector="test-delete-message2" />
-		</text>
+							<emptyTitle>
+								<message selector="no-tests" />
+							</emptyTitle>
+							<columns>
+								<modelColumn>
+									<title>
+										<message selector="test-nodelete-message" />
+									</title>
+									<model ref="test.title" missing="no-title" />
+								</modelColumn>
+							</columns>
+
+						</entityList>
+
+
+
+						<!--text>
+							<message selector="test-delete-alert" />
+							</text-->
+						<alert selector="test-delete-alert" />
+						<text>
+							<message selector="test-delete-message2" />
+						</text>
+					</container>
+				</row>
+			</rows>
+		</entityDisplay>
 
 		<!--navigation-->
 		<navigationBar width="100%">
