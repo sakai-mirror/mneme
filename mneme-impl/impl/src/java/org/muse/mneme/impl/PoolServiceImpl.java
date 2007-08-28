@@ -121,15 +121,22 @@ public class PoolServiceImpl implements PoolService
 		if (M_log.isDebugEnabled()) M_log.debug("copyPool: " + context);
 
 		// security check
-		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+		this.securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
 
 		// make a copy of the pool
 		PoolImpl rv = storage.newPool((PoolImpl) pool);
+
+		// clear the id to make it a new one
+		rv.id = null;
+
+		// set the new owner
 		rv.setOwnerId(userId);
+
+		// save
 		savePool(rv, context);
 
 		// make a copy of the questions
-		// TODO:
+		this.questionService.copyPoolQuestions(context, userId, pool, rv);
 
 		return rv;
 	}

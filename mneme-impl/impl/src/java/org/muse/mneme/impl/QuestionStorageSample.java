@@ -72,7 +72,14 @@ public class QuestionStorageSample implements QuestionStorage
 			{
 				QuestionImpl q = new QuestionImpl(question);
 				q.setPool(destination);
+
+				// clear the id to make it new
+				q.id = null;
+
+				// set the new created info
 				q.getCreatedBy().setUserId(userId);
+
+				// save
 				saveQuestion(q);
 			}
 		}

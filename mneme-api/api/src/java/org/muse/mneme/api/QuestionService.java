@@ -59,7 +59,7 @@ public interface QuestionService
 	 * @param source
 	 *        The pool of questions to copy.
 	 * @param destination
-	 *        the pool where the question will live.
+	 *        the pool where the new questions will live.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to create a new question.
 	 */

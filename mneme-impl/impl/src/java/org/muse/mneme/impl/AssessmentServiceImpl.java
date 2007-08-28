@@ -156,7 +156,14 @@ public class AssessmentServiceImpl implements AssessmentService
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
 
 		AssessmentImpl rv = this.storage.newAssessment((AssessmentImpl) assessment);
+
+		// clear the id to make it a new one
+		rv.id = null;
+
+		// set the context
 		rv.setContext(context);
+
+		// save
 		saveAssessment(rv);
 
 		return rv;

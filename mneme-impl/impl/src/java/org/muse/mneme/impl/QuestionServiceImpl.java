@@ -149,8 +149,17 @@ public class QuestionServiceImpl implements QuestionService
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
 
 		QuestionImpl rv = this.storage.newQuestion((QuestionImpl) question);
+
+		// clear the id to make it new
+		rv.id = null;
+
+		// set the new created info
 		rv.getCreatedBy().setUserId(userId);
+
+		// set the new pool
 		rv.setPool(pool);
+
+		// save
 		saveQuestion(question, context);
 
 		return rv;
