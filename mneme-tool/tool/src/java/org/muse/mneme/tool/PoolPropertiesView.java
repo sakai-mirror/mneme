@@ -50,7 +50,7 @@ public class PoolPropertiesView extends ControllerImpl
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
-	
+
 	/**
 	 * Final initialization, once all dependencies are set.
 	 */
@@ -59,7 +59,7 @@ public class PoolPropertiesView extends ControllerImpl
 		super.init();
 		M_log.info("init()");
 	}
-	
+
 	/**
 	 * Shutdown.
 	 */
@@ -73,9 +73,16 @@ public class PoolPropertiesView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 3) throw new IllegalArgumentException();
+		if (params.length != 5) throw new IllegalArgumentException();
 
-		Pool pool = this.poolService.getPool(params[2]);
+		// pools - sort at index 2, paging at index 3. pool id at index 4
+		// pools sort parameter is in param array at index 2
+		context.put("poolsSortCode", params[2]);
+
+		// pools paging parameter - is in param array at index 4
+		context.put("poolsPagingParameter", params[3]);
+
+		Pool pool = this.poolService.getPool(params[4]);
 		context.put("pool", pool);
 
 		// get the subjects
@@ -91,10 +98,10 @@ public class PoolPropertiesView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 3) throw new IllegalArgumentException();
+		if (params.length != 5) throw new IllegalArgumentException();
 
 		// setup the model: the selected pool
-		Pool pool = this.poolService.getPool(params[2]);
+		Pool pool = this.poolService.getPool(params[4]);
 		context.put("pool", pool);
 
 		// read the form
@@ -104,23 +111,21 @@ public class PoolPropertiesView extends ControllerImpl
 		{
 			try
 			{
-				if (pool.getTitle() == null)
-					pool.setTitle("");
-				
-				if (pool.getSubject() == null)
-					pool.setSubject("");
-				
+				if (pool.getTitle() == null) pool.setTitle("");
+
+				if (pool.getSubject() == null) pool.setSubject("");
+
 				this.poolService.savePool(pool, toolManager.getCurrentPlacement().getContext());
 			}
 			catch (AssessmentPermissionException e)
 			{
-				//redirect to error
+				// redirect to error
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 				return;
-			}			
+			}
 		}
 
-		destination = "/pools/";
+		destination = "/pools/" + params[2] + "/" + params[3];
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 
 	}

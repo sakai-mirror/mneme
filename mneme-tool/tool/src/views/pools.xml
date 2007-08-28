@@ -47,8 +47,13 @@
 		<!--entity actions-->
 		<entityActionBar width="100%">
 			<container>
-				<navigation destination="/pool_properties" title="add-pool-title" style="LINK" description="add-pool-description" submit="TRUE">
+				<navigation title="add-pool-title" style="LINK" description="add-pool-description" submit="TRUE">
 					<icon icon="/icons/document_add.png" style="LEFT" />
+					<destination template="/pool_properties/{0}{1}/{2}">
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
+						<model ref="pagingParameter" />
+					</destination>
 				</navigation>
 				<navigation submit="TRUE" style="LINK" description="add-question-description">
 					<title>
@@ -151,7 +156,7 @@
 						<navigation>
 							<!--destination template="/pool_edit/{0}">
 								<model ref="pool.id" />
-							</destination-->
+								</destination-->
 							<destination template="/pool_edit/{0}{1}/{2}/{3}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
@@ -192,7 +197,13 @@
 					<navigations>
 						<navigation style="LINK">
 							<icon icon="/icons/edit.png" style="LEFT" />
-							<destination template="/pool_properties/{0}">
+							<!--destination template="/pool_properties/{0}">
+								<model ref="pool.id" />
+								</destination-->
+							<destination template="/pool_properties/{0}{1}/{2}/{3}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="pagingParameter" />
 								<model ref="pool.id" />
 							</destination>
 						</navigation>

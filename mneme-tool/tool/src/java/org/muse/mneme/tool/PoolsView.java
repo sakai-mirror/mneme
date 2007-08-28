@@ -236,7 +236,7 @@ public class PoolsView extends ControllerImpl
 				}
 			}
 
-			else if (destination.trim().equalsIgnoreCase("/pool_properties"))
+			else if (destination.trim().startsWith("/pool_properties"))
 			{
 				try
 				{
