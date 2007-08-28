@@ -78,6 +78,7 @@ public class QuestionStorageSample implements QuestionStorage
 
 				// set the new created info
 				q.getCreatedBy().setUserId(userId);
+				q.getCreatedBy().setDate(new Date());
 
 				// save
 				saveQuestion(q);

@@ -155,6 +155,7 @@ public class QuestionServiceImpl implements QuestionService
 
 		// set the new created info
 		rv.getCreatedBy().setUserId(userId);
+		rv.getCreatedBy().setDate(new Date());
 
 		// set the new pool
 		rv.setPool(pool);
@@ -261,9 +262,12 @@ public class QuestionServiceImpl implements QuestionService
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
 
 		QuestionImpl question = this.storage.newQuestion();
-		question.getCreatedBy().setUserId(userId);
 		question.setPool(pool);
 		question.initType(type);
+
+		// set the new created info
+		question.getCreatedBy().setUserId(userId);
+		question.getCreatedBy().setDate(new Date());
 
 		// build a type-specific handler
 		QuestionPlugin plugin = this.mnemeService.getQuestionPlugin(type);
