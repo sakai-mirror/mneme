@@ -37,9 +37,12 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
+import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -53,8 +56,11 @@ public class PoolsView extends ControllerImpl
 	/** Dependency: mneme service. */
 	protected MnemeService mnemeService = null;
 
-	/** Dependency: Assessment service. */
+	/** Dependency: Pool service. */
 	protected PoolService poolService = null;
+
+	/** Dependency: Question service. */
+	protected QuestionService questionService = null;
 
 	/** Dependency: SessionManager */
 	protected SessionManager sessionManager = null;
@@ -229,6 +235,7 @@ public class PoolsView extends ControllerImpl
 					return;
 				}
 			}
+
 			else if (destination.trim().equalsIgnoreCase("/pool_properties"))
 			{
 				try
@@ -246,25 +253,75 @@ public class PoolsView extends ControllerImpl
 					return;
 				}
 			}
-			else if (destination.startsWith("ADDQ:"))
-			{
-				// TODO: add a question, set the destination
-				M_log.info(destination);
-			}
+
 			else if (destination.trim().startsWith("/pool_duplicate"))
 			{
 				try
 				{
 					Pool pool = this.poolService.getPool(destination.substring(destination.lastIndexOf("/") + 1));
 					if (pool != null)
-					this.poolService.copyPool(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId(), pool);
+						this.poolService.copyPool(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId(), pool);
 				}
 				catch (AssessmentPermissionException e)
 				{
 					// redirect to error
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 					return;
-				}		
+				}
+			}
+
+			// handle adding a question
+			else if (destination.startsWith("ADDQ:"))
+			{
+				// require one pool selected
+				if ((selectedPoolIds == null) || (selectedPoolIds.length != 1))
+				{
+					// TODO: do this better!
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+
+				Pool pool = this.poolService.getPool(selectedPoolIds[0]);
+				if (pool == null)
+				{
+					// TODO: do this better!
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+
+				// parse the type (after the : in the destination)
+				String type = StringUtil.splitFirst(destination, ":")[1];
+
+				// check security
+				if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext(), null))
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+
+				// create the question of the appropriate type (all the way to save)
+				Question newQuestion = null;
+				try
+				{
+					newQuestion = this.questionService.newQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, type);
+					this.questionService.saveQuestion(newQuestion, toolManager.getCurrentPlacement().getContext());
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+
+				// form the destionation
+				// TODO: preserve sort / paging parameters
+				destination = "/question_edit/" + newQuestion.getId();
+
+				// redirect
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
 			}
 		}
 
@@ -296,6 +353,17 @@ public class PoolsView extends ControllerImpl
 	public void setPoolService(PoolService service)
 	{
 		this.poolService = service;
+	}
+
+	/**
+	 * Set the QuestionService.
+	 * 
+	 * @param service
+	 *        The QuestionService.
+	 */
+	public void setQuestionService(QuestionService service)
+	{
+		this.questionService = service;
 	}
 
 	/**

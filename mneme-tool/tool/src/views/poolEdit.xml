@@ -124,9 +124,13 @@
 						<!--This should be limited to ??? characters with ... at the end -->
 						<message selector="question-description" />
 					</title>
-					<model ref="question.description" />
+					<model ref="question.description" missing="no-title"/>
 					<entityNavigations>
-						<navigation destination="/"></navigation>
+						<navigation>
+							<destination template="/question_edit/{0}">
+								<model ref="question.id" />
+							</destination>
+						</navigation>
 					</entityNavigations>
 				</modelColumn>
 				<modelColumn>
