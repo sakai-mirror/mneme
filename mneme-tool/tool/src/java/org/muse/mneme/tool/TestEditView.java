@@ -174,12 +174,14 @@ public class TestEditView extends ControllerImpl
 				String[] deletePartIds = values.getValues();
 				if (deletePartIds != null && deletePartIds.length != 0)
 				{
-					for (String deletePartId : deletePartIds)
+					path.append(deletePartIds[0]);
+					for (int i = 1; i < deletePartIds.length; i++)
 					{
-						path.append(deletePartId);
 						path.append(separator);
+						path.append(deletePartIds[i]);
 					}
 				}
+				
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
 				return;
 			}
