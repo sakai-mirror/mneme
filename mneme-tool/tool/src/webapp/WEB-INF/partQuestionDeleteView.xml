@@ -37,7 +37,7 @@
  		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="path"><value>part_ques_delete</value></property>
+ 		<property name="path"><value>part_question_delete</value></property>
  		<property name="bundle"><value>partQuestionDelete</value></property>
 		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>partQuestionDelete.xml</value></property>
