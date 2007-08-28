@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
+
+<!--
+/**********************************************************************************
+ * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ **********************************************************************************/
+-->
+
+<interface>
+
+	<!--mode bar-->
+	<modeContainer>
+		<alias to="ToolModeFragment" toolId="sakai.mneme" />
+	</modeContainer>
+	<header>
+		<message selector="testAccess-header">
+			<model type="icon" icon="/icons/access.png" />
+		</message>
+	</header>
+	<title>
+		<message selector="testAccess-title" />
+	</title>
+
+	<container>
+
+		<entityDisplay>
+			<rows>
+	<row title="id">
+					<container>
+						<text model="assessment.id" />
+					</container>
+				</row>			
+				<row title="title">
+					<container>
+						<textEdit rows="1" cols="25">
+								<model ref="assessment.title" missing="no-title" />
+						</textEdit>
+					</container>
+				</row>
+<row title="dates">
+					<container>
+						<entityDisplay>
+							<rows>
+								<row title="open-date">
+									<container>
+										<dateEdit>
+											<model ref="assessment.dates.openDate" type="date" />
+										</dateEdit>
+									</container>
+								</row>
+								<row title="due-date">
+									<container>
+											<dateEdit>
+											<model ref="assessment.dates.dueDate" type="date" />
+										</dateEdit>
+									</container>
+								</row>
+								<row title="accept-until">
+									<container>
+											<dateEdit>
+											<model ref="assessment.dates.acceptUntilDate" type="date" />
+										</dateEdit>
+										<text>
+							<message selector="late-message"></message>
+						</text>
+									</container>
+								</row>
+							</rows>
+						</entityDisplay>
+					</container>
+</row>
+				<row title="timeLimit">
+					<container>
+						<durationEdit>
+							<model ref="assessment.timeLimit" type="duration" />
+						</durationEdit>
+						<text>
+							<message selector="time-limit-optional"></message>
+						</text>
+					</container>
+				</row>
+				<row title="allowTries">
+					<container>
+						<countEdit rows="1" cols="8">
+							<model ref="assessment.numSubmissionsAllowed" type="count" />
+						</countEdit>
+						<text>
+							<message selector="tries-optional"></message>
+						</text>
+					</container>
+				</row>
+	<row title="pword">
+					<container>
+					<textEdit rows="1" cols="16">
+							<model ref="assessment.access.password" />
+						</textEdit>
+						<text>
+							<message selector="optional"></message>
+						</text>
+					</container>
+				</row>	
+			</rows>
+		</entityDisplay>
+
+		<!-- save / cancel nav bar -->
+		<navigationBar id="nav" width="70em">
+			<container>
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/tests">
+					<icon icon="/icons/return.png" style="LEFT" />
+				</navigation>
+				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
+					<destination template="/tests/{0}">
+						<model ref="sortcode" />
+					</destination>
+					<icon icon="/icons/cancel.gif" style="LEFT" />
+				</navigation>
+			</container>
+		</navigationBar>
+
+	</container>
+</interface>
