@@ -75,15 +75,21 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if ((params.length != 3) && (params.length != 4)) throw new IllegalArgumentException();
+		if (params.length != 6) throw new IllegalArgumentException();
+		
+		//pools sort param is in params array at index 2
+		context.put("poolsSortCode", params[2]);
+
+		// pools paging parameter - is in params array at index 3
+		context.put("poolsPagingParameter", params[3]);
 
 		if (path.startsWith("question_copy"))
 			context.put("headerText", messages.get("copy-header-text"));
 		else if (path.startsWith("question_move")) 
 			context.put("headerText", messages.get("move-header-text"));
 		
-
-		context.put("poolid", params[2]);
+		//pools id is in params array at index 4
+		context.put("poolid", params[4]);
 
 		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, null, null, null, null);
 		context.put("pools", pools);
