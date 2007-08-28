@@ -91,12 +91,17 @@
 								<text selector="pool-difficulty-note" />
 							</container>
 						</row>
-						<row title="pool-access">
+						<row>
+							<title>
+								<message selector="pool-access">
+									<model type="icon" icon="/icons/access.png" />
+								</message>
+							</title>
 							<container>
 								<textEdit rows="1" cols="25" id="" />
 								<text selector="pool-allow-access-description" />
 							</container>
-							<model type="icon" icon="/icons/access.png" />
+
 						</row>
 					</rows>
 				</entityDisplay>
