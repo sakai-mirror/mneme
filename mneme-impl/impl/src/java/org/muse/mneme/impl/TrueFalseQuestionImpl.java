@@ -105,8 +105,10 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getAuthoringUi()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		// TODO:
+		return this.uiService.newFragment().add(
+				this.uiService.newText().setText("answer",
+						this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer")));
 	}
 
 	/**
@@ -134,7 +136,7 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getReviewUi()
 	{
-		// TODO Auto-generated method stub
+		// TODO:
 		return this.uiService.newFragment().add(
 				this.uiService.newText().setText(null, uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer")));
 	}

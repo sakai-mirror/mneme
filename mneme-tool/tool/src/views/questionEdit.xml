@@ -107,7 +107,12 @@
 					</container>
 				</row>
 
-				<!-- TODO: question specific -->
+				<!-- question specific -->
+				<row>
+					<container>
+						<modelComponent model="question.typeSpecificQuestion.authoringUi" />
+					</container>
+				</row>
 
 				<row title="question-rationale">
 					<container>
@@ -123,16 +128,15 @@
 		<!-- navigation -->
 		<navigationBar id="nav" width="70em">
 			<container>
-				<!--  TODO: destination! -->
 				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
-					<destination template="/pools">
-						<!-- <model ref="sortcode" /> -->
+					<destination template="{0}">
+						<model ref="sakai_prev_destination" />
 					</destination>
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
 				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
-					<destination template="/pools">
-						<!-- <model ref="sortcode" /> -->
+					<destination template="{0}">
+						<model ref="sakai_prev_destination" />
 					</destination>
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 				</navigation>
