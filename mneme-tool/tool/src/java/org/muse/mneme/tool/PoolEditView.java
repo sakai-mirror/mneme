@@ -229,8 +229,8 @@ public class PoolEditView extends ControllerImpl
 				try
 				{
 					String destinationParams[] = destination.split("/");
-					Pool pool = this.poolService.getPool(destinationParams[2]);
-					Question question = this.questionService.getQuestion(destinationParams[3]);
+					Pool pool = this.poolService.getPool(destinationParams[4]);
+					Question question = this.questionService.getQuestion(destinationParams[5]);
 
 					if (pool != null && question != null)
 						this.questionService.copyQuestion(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId(),
