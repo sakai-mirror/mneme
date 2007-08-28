@@ -33,9 +33,11 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
@@ -69,8 +71,7 @@ public class PartQuestionsDeleteView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		String destination = this.uiService.decode(req, context);
-
-		String assessmentId = params[2];
+		String assessmentId = params[3];
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
@@ -78,9 +79,10 @@ public class PartQuestionsDeleteView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
+		context.put("testsortcode", params[2]);
 		context.put("assessment", assessment);
 
-		String partId = params[3];
+		String partId = params[4];
 		Part part = assessment.getParts().getPart(partId);
 		if (part == null)
 		{
@@ -94,9 +96,9 @@ public class PartQuestionsDeleteView extends ControllerImpl
 
 		List<Question> questions = new ArrayList<Question>(0);
 
-		if (params.length > 4 && params[4] != null && params[4].length() != 0)
+		if (params.length > 5 && params[5] != null && params[5].length() != 0)
 		{
-			String[] removeQuesIds = params[4].split("\\+");
+			String[] removeQuesIds = params[5].split("\\+");
 			for (String removeQuesId : removeQuesIds)
 			{
 				if (removeQuesId != null)
@@ -147,7 +149,53 @@ public class PartQuestionsDeleteView extends ControllerImpl
 		// if (params.length < 4) throw new IllegalArgumentException();
 
 		String destination = this.uiService.decode(req, context);
+		String assessmentId = params[3];
+		Assessment assessment = assessmentService.getAssessment(assessmentId);
+		if (assessment == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+		context.put("testsortcode", params[2]);
+		context.put("assessment", assessment);
 
+		String partId = params[4];
+		ManualPart part = (ManualPart) assessment.getParts().getPart(partId);
+		if (part == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+		
+		// TO DO: security check
+
+		List<Question> questions = new ArrayList<Question>(0);
+
+		if (params.length > 5 && params[5] != null && params[5].length() != 0)
+		{
+			String[] removeQuesIds = params[5].split("\\+");
+			for (String removeQuesId : removeQuesIds)
+			{
+				if (removeQuesId != null)
+				{
+					// remove question from part
+					Question question = this.questionService.getQuestion(removeQuesId);
+					part.removeQuestion(question);	
+				}
+			}
+		}
+		try
+		{
+			this.assessmentService.saveAssessment(assessment);
+		}
+		catch (AssessmentPermissionException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

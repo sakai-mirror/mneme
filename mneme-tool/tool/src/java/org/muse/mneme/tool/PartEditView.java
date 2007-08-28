@@ -363,20 +363,21 @@ public class PartEditView extends ControllerImpl
 		// process the ids into the destination for a redirect to the remove confirm view...
 		else
 		{
-			if (destination.equals("/part_ques_delete"))
+			if (destination.equals("/part_question_delete"))
 			{
 				// get the ids
 				String[] removeQuesIds = values.getValues();
 				if (removeQuesIds != null && removeQuesIds.length != 0)
 				{
 					// remove questions from part
-					StringBuffer path = new StringBuffer("/part_ques_delete/" + assessment.getId() + "/" + part.getId() + "/");
+					StringBuffer path = new StringBuffer("/part_question_delete/" +params[2]+"/" +assessment.getId() + "/" + part.getId() + "/");
 					String separator = "+";
-
-					for (String removeQuesId : removeQuesIds)
+					
+					path.append(removeQuesIds[0]);
+					for (int i = 1; i < removeQuesIds.length; i++)
 					{
-						path.append(removeQuesId);
 						path.append(separator);
+						path.append(removeQuesIds[i]);
 					}
 					destination = path.toString();
 				}
