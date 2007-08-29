@@ -51,7 +51,7 @@
 					<value>
 						<model type="text" ref="pool.id" />
 					</value>
-					<model ref="poolids.values" />
+					<model ref="selectedPoolId.value" />
 				</selectionColumn>
 				<modelColumn>
 					<title>
@@ -95,8 +95,10 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation destination="/" title="continue-title" style="BUTTON" accessKey="continue-access" description="continue-description"
-					submit="FALSE">
+				<navigation title="continue-title" style="BUTTON" accessKey="continue-access" description="continue-description" submit="TRUE">
+					<destination template="{0}">
+						<model ref="saveDestination"/>
+					</destination>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
