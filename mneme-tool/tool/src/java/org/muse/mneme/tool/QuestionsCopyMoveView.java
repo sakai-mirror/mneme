@@ -98,7 +98,7 @@ public class QuestionsCopyMoveView extends ControllerImpl
 
 		// pools id is in params array at index 4
 		context.put("poolid", params[4]);
-		
+
 		Pool pool = this.poolService.getPool(params[4]);
 
 		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, null, null, null, null);
@@ -129,33 +129,42 @@ public class QuestionsCopyMoveView extends ControllerImpl
 
 		String selectedPoolId = value.getValue();
 
-		Pool pool = this.poolService.getPool(selectedPoolId);
-
-		Question question = null;
-
-		try
+		if (selectedPoolId != null)
 		{
-			// question id's are in the params array at the index 5
-			String questionIds[] = params[5].split("\\+");
 
-			for (String questionId : questionIds)
+			Pool pool = this.poolService.getPool(selectedPoolId);
+
+			Question question = null;
+
+			try
 			{
-				// get the question
-				question = this.questionService.getQuestion(questionId);
-				if (path.startsWith("question_copy"))
-					this.questionService.copyQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, question);
-				/*else if (path.startsWith("question_move"))
-					this.questionService.moveQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, question);*/
-			}
-		}
-		catch (AssessmentPermissionException e)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
-		if (params.length > 5) destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4];
+				// question id's are in the params array at the index 5
+				String questionIds[] = params[5].split("\\+");
 
+				for (String questionId : questionIds)
+				{
+					// get the question
+					question = this.questionService.getQuestion(questionId);
+					if (path.startsWith("question_copy"))
+						this.questionService.copyQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, question);
+					/*
+					 * else if (path.startsWith("question_move")) this.questionService.moveQuestion(toolManager.getCurrentPlacement().getContext(),
+					 * null, pool, question);
+					 */
+				}
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+
+			if (params.length > 5) destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4];
+
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+		}
+		
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
