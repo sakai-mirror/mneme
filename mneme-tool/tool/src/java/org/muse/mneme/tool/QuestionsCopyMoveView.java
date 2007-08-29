@@ -83,7 +83,7 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 6) throw new IllegalArgumentException();
+		if (params.length != 8) throw new IllegalArgumentException();
 		context.put("saveDestination", context.getDestination());
 
 		// pools sort param is in params array at index 2
@@ -105,6 +105,12 @@ public class QuestionsCopyMoveView extends ControllerImpl
 		pools.remove(pool);
 		context.put("pools", pools);
 
+		// pools sort param is in params array at index 5
+		context.put("poolsEditSortCode", params[5]);
+
+		// pools paging parameter - is in params array at index 6
+		context.put("poolsEditPagingParameter", params[6]);
+
 		// for the selected pool
 		Value value = this.uiService.newValue();
 		context.put("selectedPoolId", value);
@@ -118,7 +124,7 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 6) throw new IllegalArgumentException();
+		if (params.length != 8) throw new IllegalArgumentException();
 
 		// for the selected pool
 		Value value = this.uiService.newValue();
@@ -138,8 +144,8 @@ public class QuestionsCopyMoveView extends ControllerImpl
 
 			try
 			{
-				// question id's are in the params array at the index 5
-				String questionIds[] = params[5].split("\\+");
+				// question id's are in the params array at the index 7
+				String questionIds[] = params[7].split("\\+");
 
 				for (String questionId : questionIds)
 				{
@@ -160,11 +166,11 @@ public class QuestionsCopyMoveView extends ControllerImpl
 				return;
 			}
 
-			if (params.length > 5) destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4];
+			if (params.length > 6) destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4] + "/" + params[5] + "/" + params[6];
 
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 		}
-		
+
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

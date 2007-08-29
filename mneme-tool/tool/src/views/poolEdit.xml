@@ -65,18 +65,24 @@
 				</navigation>
 				<navigation title="move-to-pool" style="LINK" description="move-to-pool-description" disabled="FALSE" submit="TRUE">
 					<icon icon="/icons/page_go.png" style="LEFT" />
-					<destination template="/question_move/{0}/{1}/{2}">
+					<destination template="/question_move/{0}/{1}/{2}/{3}{4}/{5}">
 						<model ref="poolsSortCode" />
 						<model ref="poolsPagingParameter" />
 						<model ref="pool.id" />
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
+						<model ref="pagingParameter" />
 					</destination>
 				</navigation>
 				<navigation title="copy-to-pool" style="LINK" description="copy-to-pool-description" submit="TRUE">
 					<icon icon="/icons/copy.png" style="LEFT" />
-					<destination template="/question_copy/{0}/{1}/{2}">
+					<destination template="/question_copy/{0}/{1}/{2}/{3}{4}/{5}">
 						<model ref="poolsSortCode" />
 						<model ref="poolsPagingParameter" />
 						<model ref="pool.id" />
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
+						<model ref="pagingParameter" />
 					</destination>
 				</navigation>
 				<navigation title="delete-title" style="LINK" description="delete-description" submit="TRUE">
