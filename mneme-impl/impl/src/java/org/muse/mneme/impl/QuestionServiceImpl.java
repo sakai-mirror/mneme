@@ -161,7 +161,7 @@ public class QuestionServiceImpl implements QuestionService
 		rv.setPool(pool);
 
 		// save
-		saveQuestion(question, context);
+		saveQuestion(rv, context);
 
 		return rv;
 	}
