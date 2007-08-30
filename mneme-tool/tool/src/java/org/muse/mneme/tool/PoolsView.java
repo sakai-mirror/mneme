@@ -4,13 +4,13 @@
  ***********************************************************************************
  *
  * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -214,6 +214,7 @@ public class PoolsView extends ControllerImpl
 
 		if (destination != null)
 		{
+
 			if (destination.startsWith("/pools_delete"))
 			{
 				// delete the pools
@@ -253,7 +254,7 @@ public class PoolsView extends ControllerImpl
 					return;
 				}
 			}
-			else if (destination.trim().startsWith("/pools_combine"))
+			else if (destination.trim().startsWith("/COMBINE"))
 			{
 				try
 				{
@@ -268,10 +269,17 @@ public class PoolsView extends ControllerImpl
 							this.questionService.copyPoolQuestions(toolManager.getCurrentPlacement().getContext(), sessionManager
 									.getCurrentSessionUserId(), sourcePool, newPool);
 						}
+
+						destination = destination.replace("COMBINE", "pool_properties");
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination + "/" + newPool.getId())));
+						return;
 					}
-					destination = destination.replace("pools_combine", "pool_properties");
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination + "/" + newPool.getId())));
-					return;
+					else
+					{
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+						return;
+					}
 				}
 				catch (AssessmentPermissionException e)
 				{

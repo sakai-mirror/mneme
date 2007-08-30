@@ -67,9 +67,13 @@
 					<iterator name="type" model="questionTypes" />
 					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
-				<navigation destination="/pools_combine" title="combine-title" style="LINK" description="combine-description" disabled="FALSE"
-					submit="TRUE">
+				<navigation title="combine-title" style="LINK" description="combine-description" disabled="FALSE" submit="TRUE">
 					<icon icon="/icons/combine_pools.png" style="LEFT" />
+					<destination template="/COMBINE/{0}{1}/{2}">
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
+						<model ref="pagingParameter" />
+					</destination>
 				</navigation>
 				<navigation destination="/" title="import-export-title" style="LINK" description="import-export-description">
 					<icon icon="/icons/import_export.png" style="LEFT" />
