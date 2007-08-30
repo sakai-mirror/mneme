@@ -22,6 +22,7 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -66,7 +67,8 @@ public class QuestionStorageSample implements QuestionStorage
 	 */
 	public void copyPoolQuestions(String userId, Pool source, Pool destination)
 	{
-		for (QuestionImpl question : this.questions.values())
+		List<QuestionImpl> questions = new ArrayList<QuestionImpl>(this.questions.values());
+		for (QuestionImpl question : questions)
 		{
 			if (question.getPool().equals(source))
 			{
