@@ -169,6 +169,7 @@ public class QuestionsCopyMoveView extends ControllerImpl
 			if (params.length > 6) destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4] + "/" + params[5] + "/" + params[6];
 
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
