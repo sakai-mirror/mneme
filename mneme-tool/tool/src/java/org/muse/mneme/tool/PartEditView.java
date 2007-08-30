@@ -382,6 +382,10 @@ public class PartEditView extends ControllerImpl
 					destination = path.toString();
 				}
 			}
+			else if (destination.equals("/select_add_mpart_question"))
+			{
+				destination = new StringBuffer("/select_add_mpart_question/" + params[2] +"/" +assessment.getId() + "/" + part.getId()).toString();
+			}
 		}
 		// commit the save
 		try
