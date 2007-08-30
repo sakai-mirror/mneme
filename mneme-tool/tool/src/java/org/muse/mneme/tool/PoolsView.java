@@ -253,7 +253,33 @@ public class PoolsView extends ControllerImpl
 					return;
 				}
 			}
+			else if (destination.trim().startsWith("/pools_combine"))
+			{
+				try
+				{
+					// create new pool and redirect to pool properties
+					Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId());
 
+					if (selectedPoolIds != null && (selectedPoolIds.length > 0))
+					{
+						for (String selectedPoolId : selectedPoolIds)
+						{
+							Pool sourcePool = this.poolService.getPool(selectedPoolId);
+							this.questionService.copyPoolQuestions(toolManager.getCurrentPlacement().getContext(), sessionManager
+									.getCurrentSessionUserId(), sourcePool, newPool);
+						}
+					}
+					destination = destination.replace("pools_combine", "pool_properties");
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination + "/" + newPool.getId())));
+					return;
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+			}
 			else if (destination.trim().startsWith("/pool_duplicate"))
 			{
 				try
