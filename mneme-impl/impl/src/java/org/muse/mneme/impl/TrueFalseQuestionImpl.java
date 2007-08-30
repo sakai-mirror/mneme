@@ -106,7 +106,7 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	public Component getAuthoringUi()
 	{
 		// TODO:
-		return this.uiService.newFragment().add(
+		return this.uiService.newFragment().setMessages(this.messages).add(
 				this.uiService.newText().setText("answer",
 						this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer")));
 	}
@@ -127,7 +127,7 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	public Component getDeliveryUi()
 	{
 		// TODO:
-		return this.uiService.newFragment().add(
+		return this.uiService.newFragment().setMessages(this.messages).add(
 				this.uiService.newTextEdit().setProperty(uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer")));
 	}
 
@@ -137,7 +137,7 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	public Component getReviewUi()
 	{
 		// TODO:
-		return this.uiService.newFragment().add(
+		return this.uiService.newFragment().setMessages(this.messages).add(
 				this.uiService.newText().setText(null, uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer")));
 	}
 
