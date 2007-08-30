@@ -22,6 +22,9 @@
 package org.muse.mneme.impl;
 
 import org.muse.ambrosia.api.Component;
+import org.muse.ambrosia.api.EntityDisplay;
+import org.muse.ambrosia.api.EntityDisplayRow;
+import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificQuestion;
@@ -96,8 +99,7 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getAnswerKey()
 	{
-		// TODO: localize
-		return this.correctAnswer.toString();
+		return this.correctAnswer ? this.messages.getString("true") : this.messages.getString("false");
 	}
 
 	/**
@@ -105,10 +107,19 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getAuthoringUi()
 	{
-		// TODO:
-		return this.uiService.newFragment().setMessages(this.messages).add(
-				this.uiService.newText().setText("answer",
-						this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer")));
+		Selection selection = this.uiService.newSelection();
+		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer"));
+		selection.addSelection("true", "true");
+		selection.addSelection("false", "false");
+
+		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
+		row.setTitle("correct-answer");
+		row.add(selection);
+
+		EntityDisplay display = this.uiService.newEntityDisplay();
+		display.addRow(row);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(display);
 	}
 
 	/**
@@ -126,9 +137,12 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getDeliveryUi()
 	{
-		// TODO:
-		return this.uiService.newFragment().setMessages(this.messages).add(
-				this.uiService.newTextEdit().setProperty(uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer")));
+		Selection selection = this.uiService.newSelection();
+		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
+		selection.addSelection("true", "true");
+		selection.addSelection("false", "false");
+
+		return this.uiService.newFragment().setMessages(this.messages).add(selection);
 	}
 
 	/**
@@ -136,9 +150,13 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getReviewUi()
 	{
-		// TODO:
-		return this.uiService.newFragment().setMessages(this.messages).add(
-				this.uiService.newText().setText(null, uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer")));
+		Selection selection = this.uiService.newSelection();
+		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
+		selection.addSelection("true", "true");
+		selection.addSelection("false", "false");
+		selection.setReadOnly(this.uiService.newDecision().setProperty(this.uiService.newConstantPropertyReference().setValue("true")));
+
+		return this.uiService.newFragment().setMessages(this.messages).add(selection);
 	}
 
 	/**

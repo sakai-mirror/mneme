@@ -48,6 +48,54 @@
 		<entityDisplay>
 			<rows>
 
+				<row title="question-type">
+					<container>
+						<text model="question.typeName" />
+					</container>
+				</row>
+
+				<row>
+					<container>
+						<entityDisplay>
+							<rows>
+								<row title="question-presentation">
+									<container>
+										<htmlEdit model="question.presentation.text" />
+									</container>
+								</row>
+								<row title="attachments">
+									<container>
+										<attachmentsEdit model="question.presentation.attachments" />
+									</container>
+								</row>
+							</rows>
+						</entityDisplay>
+					</container>
+				</row>
+
+				<!-- question specific -->
+				<row>
+					<container>
+						<modelComponent model="question.typeSpecificQuestion.authoringUi" />
+					</container>
+				</row>
+
+				<row>
+					<container>
+						<entityDisplay>
+							<rows>
+								<row title="question-rationale">
+									<container>
+										<selection>
+											<model ref="question.requireRationale" />
+										</selection>
+									</container>
+								</row>
+							</rows>
+						</entityDisplay>
+					</container>
+				</row>
+
 				<row title="question-id">
 					<container>
 						<text model="question.id" />
@@ -57,12 +105,6 @@
 				<row title="question-version">
 					<container>
 						<text model="question.version" />
-					</container>
-				</row>
-
-				<row title="question-type">
-					<container>
-						<text model="question.typeName" />
 					</container>
 				</row>
 
@@ -85,40 +127,6 @@
 								<model type="date" ref="question.modifiedBy.date" />
 							</message>
 						</text>
-					</container>
-				</row>
-
-				<row title="question-presentation">
-					<container>
-						<entityDisplay>
-							<rows>
-								<row>
-									<container>
-										<htmlEdit model="question.presentation.text" />
-									</container>
-								</row>
-								<row title="attachments">
-									<container>
-										<attachmentsEdit model="question.presentation.attachments" />
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
-					</container>
-				</row>
-
-				<!-- question specific -->
-				<row>
-					<container>
-						<modelComponent model="question.typeSpecificQuestion.authoringUi" />
-					</container>
-				</row>
-
-				<row title="question-rationale">
-					<container>
-						<selection>
-							<model ref="question.requireRationale" />
-						</selection>
 					</container>
 				</row>
 
