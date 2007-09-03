@@ -222,6 +222,14 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void moveQuestion(Question question, Pool pool)
+	{
+		((QuestionImpl) question).poolId = pool.getId();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public QuestionImpl newQuestion()
 	{
 		QuestionImpl rv = new QuestionImpl(poolService, questionService);

@@ -124,6 +124,22 @@ public interface QuestionService
 	Question getQuestion(String questionId);
 
 	/**
+	 * Move a question from one pool to another.
+	 * 
+	 * @param context
+	 *        The current context.
+	 * @param userId
+	 *        The user asking for the move (if null, the current user is used).
+	 * @param question
+	 *        The question to move.
+	 * @param pool
+	 *        The pool to hold the question.
+	 * @throws AssessmentPermissionException
+	 *         If the current user is not allowed to make changes to this question or pool.
+	 */
+	void moveQuestion(String context, String userId, Question question, Pool pool) throws AssessmentPermissionException;
+
+	/**
 	 * Create a new question.
 	 * 
 	 * @param context

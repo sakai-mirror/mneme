@@ -411,6 +411,14 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public void moveQuestion(String context, String userId, Question question, Pool pool) throws AssessmentPermissionException
+	{
+		questionService.moveQuestion(context, userId, question, pool);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Assessment newAssessment(String context) throws AssessmentPermissionException
 	{
 		return assessmentService.newAssessment(context);

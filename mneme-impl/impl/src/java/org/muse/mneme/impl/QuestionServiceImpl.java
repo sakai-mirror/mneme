@@ -251,6 +251,28 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
+	public void moveQuestion(String context, String userId, Question question, Pool pool) throws AssessmentPermissionException
+	{
+		if (context == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		if (question == null) throw new IllegalArgumentException();
+		if (pool == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("moveQuestion: " + context + ": " + userId);
+
+		// security check
+		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+
+		// allow this, do nothing
+		if (question.getPool().equals(pool)) return;
+
+		// do the move
+		this.storage.moveQuestion(question, pool);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Question newQuestion(String context, String userId, Pool pool, String type) throws AssessmentPermissionException
 	{
 		if (context == null) throw new IllegalArgumentException();

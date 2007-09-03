@@ -35,6 +35,18 @@ import org.muse.mneme.api.QuestionService;
 public interface QuestionStorage
 {
 	/**
+	 * Create a new question that is a copy of each question in the pool.
+	 * 
+	 * @param userId
+	 *        The user to own the questions.
+	 * @param source
+	 *        The pool of questions to copy.
+	 * @param destination
+	 *        the pool where the question will live.
+	 */
+	void copyPoolQuestions(String userId, Pool source, Pool destination);
+
+	/**
 	 * Count the questions with this criteria.
 	 * 
 	 * @param userId
@@ -85,6 +97,16 @@ public interface QuestionStorage
 	QuestionImpl getQuestion(String id);
 
 	/**
+	 * Move a question from one pool to another.
+	 * 
+	 * @param question
+	 *        The question to move.
+	 * @param pool
+	 *        The pool to hold the question.
+	 */
+	void moveQuestion(Question question, Pool pool);
+
+	/**
 	 * Construct a new question object.
 	 * 
 	 * @return A question object.
@@ -99,18 +121,6 @@ public interface QuestionStorage
 	 * @return A question object.
 	 */
 	QuestionImpl newQuestion(QuestionImpl question);
-
-	/**
-	 * Create a new question that is a copy of each question in the pool.
-	 * 
-	 * @param userId
-	 *        The user to own the questions.
-	 * @param source
-	 *        The pool of questions to copy.
-	 * @param destination
-	 *        the pool where the question will live.
-	 */
-	void copyPoolQuestions(String userId, Pool source, Pool destination);
 
 	/**
 	 * Check if a question by this id exists.
