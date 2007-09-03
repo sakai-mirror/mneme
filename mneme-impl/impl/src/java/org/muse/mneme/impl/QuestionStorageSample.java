@@ -152,6 +152,56 @@ public class QuestionStorageSample implements QuestionStorage
 						rv = -1 * ((Question) arg0).getType().compareTo(((Question) arg1).getTypeName());
 						break;
 					}
+					case description_a:
+					{
+						rv = ((Question) arg0).getDescription().compareTo(((Question) arg1).getDescription());
+						break;
+					}
+					case description_d:
+					{
+						rv = -1 * ((Question) arg0).getDescription().compareTo(((Question) arg1).getDescription());
+						break;
+					}
+					case pool_difficulty_a:
+					{
+						rv = ((Question) arg0).getPool().getDifficulty().compareTo(((Question) arg1).getPool().getDifficulty());
+						break;
+					}
+					case pool_difficulty_d:
+					{
+						rv = -1 * ((Question) arg0).getPool().getDifficulty().compareTo(((Question) arg1).getPool().getDifficulty());
+						break;
+					}
+					case pool_points_a:
+					{
+						rv = ((Question) arg0).getPool().getPoints().compareTo(((Question) arg1).getPool().getPoints());
+						break;
+					}
+					case pool_points_d:
+					{
+						rv = -1 * ((Question) arg0).getPool().getPoints().compareTo(((Question) arg1).getPool().getPoints());
+						break;
+					}
+					case pool_subject_a:
+					{
+						rv = ((Question) arg0).getPool().getSubject().compareTo(((Question) arg1).getPool().getSubject());
+						break;
+					}
+					case pool_subject_d:
+					{
+						rv = -1 * ((Question) arg0).getPool().getSubject().compareTo(((Question) arg1).getPool().getSubject());
+						break;
+					}
+					case pool_title_a:
+					{
+						rv = ((Question) arg0).getPool().getTitle().compareTo(((Question) arg1).getPool().getTitle());
+						break;
+					}
+					case pool_title_d:
+					{
+						rv = -1 * ((Question) arg0).getPool().getTitle().compareTo(((Question) arg1).getPool().getTitle());
+						break;
+					}
 				}
 
 				return rv;
