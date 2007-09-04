@@ -43,19 +43,17 @@
 
 		<entityDisplay>
 			<rows>
-	<row title="id">
+				<row title="id">
 					<container>
 						<text model="assessment.id" />
 					</container>
-				</row>			
+				</row>
 				<row title="title">
 					<container>
-						<textEdit rows="1" cols="25">
-								<model ref="assessment.title" missing="no-title" />
-						</textEdit>
+						<text model="assessment.title" />
 					</container>
 				</row>
-<row title="dates">
+				<row title="dates">
 					<container>
 						<entityDisplay>
 							<rows>
@@ -68,25 +66,25 @@
 								</row>
 								<row title="due-date">
 									<container>
-											<dateEdit>
+										<dateEdit>
 											<model ref="assessment.dates.dueDate" type="date" />
 										</dateEdit>
 									</container>
 								</row>
 								<row title="accept-until">
 									<container>
-											<dateEdit>
+										<dateEdit>
 											<model ref="assessment.dates.acceptUntilDate" type="date" />
 										</dateEdit>
 										<text>
-							<message selector="late-message"></message>
-						</text>
+											<message selector="late-message"></message>
+										</text>
 									</container>
 								</row>
 							</rows>
 						</entityDisplay>
 					</container>
-</row>
+				</row>
 				<row title="timeLimit">
 					<container>
 						<durationEdit>
@@ -107,16 +105,16 @@
 						</text>
 					</container>
 				</row>
-	<row title="pword">
+				<row title="pword">
 					<container>
-					<textEdit rows="1" cols="16">
+						<textEdit rows="1" cols="16">
 							<model ref="assessment.access.password" />
 						</textEdit>
 						<text>
 							<message selector="optional"></message>
 						</text>
 					</container>
-				</row>	
+				</row>
 			</rows>
 		</entityDisplay>
 
