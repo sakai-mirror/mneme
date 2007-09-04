@@ -153,10 +153,9 @@ public class QuestionsCopyMoveView extends ControllerImpl
 					question = this.questionService.getQuestion(questionId);
 					if (path.startsWith("question_copy"))
 						this.questionService.copyQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, question);
-					/*
-					 * else if (path.startsWith("question_move")) this.questionService.moveQuestion(toolManager.getCurrentPlacement().getContext(),
-					 * null, pool, question);
-					 */
+					else if (path.startsWith("question_move"))
+						this.questionService.moveQuestion(toolManager.getCurrentPlacement().getContext(), null, question, pool);
+
 				}
 			}
 			catch (AssessmentPermissionException e)
