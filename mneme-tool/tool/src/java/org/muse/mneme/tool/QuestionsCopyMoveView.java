@@ -170,8 +170,12 @@ public class QuestionsCopyMoveView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 			return;
 		}
-
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+		else
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
 	}
 
 	/**
