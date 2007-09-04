@@ -56,11 +56,16 @@
 		<!--entity actions-->
 		<entityActionBar width="100%">
 			<container>
-				<navigation submit="FALSE" style="LINK" description="add-question-description">
+				<navigation submit="TRUE" style="LINK" description="add-question-description">
 					<title>
-						<message selector="add-question-title"></message>
+						<message selector="add-question-title">
+							<model ref="type.typeName" />
+						</message>
 					</title>
-					<destination template="/"></destination>
+					<destination template="ADDQ:{0}">
+						<model ref="type.type" />
+					</destination>
+					<iterator name="type" model="questionTypes" />
 					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
 				<navigation title="move-to-pool" style="LINK" description="move-to-pool-description" disabled="FALSE" submit="TRUE">

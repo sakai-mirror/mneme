@@ -34,12 +34,15 @@ import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -49,6 +52,9 @@ public class PoolEditView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(PoolEditView.class);
+
+	/** Dependency: mneme service. */
+	protected MnemeService mnemeService = null;
 
 	/** Pool Service */
 	protected PoolService poolService = null;
@@ -84,19 +90,23 @@ public class PoolEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if ((params.length != 3) && (params.length != 4) && (params.length != 5) && (params.length != 6) && (params.length != 7))
+		if ((params.length != 4) && (params.length != 5) && (params.length != 6) && (params.length != 7))
 			throw new IllegalArgumentException();
 
 		// pools - sort at index 2, paging at index 3. pool id at index 4. Move pool_edit sort to index 5, paging to index 6
 		// pools sort parameter is in param array at index 2
 		String poolsSortCode = null;
-		if (params.length > 2) poolsSortCode = params[2];
+		poolsSortCode = params[2];
 		context.put("poolsSortCode", poolsSortCode);
 
-		// pools paging parameter - is in param array at index 4
+		// pools paging parameter - is in param array at index 3
 		String poolsPagingParameter = null;
-		if (params.length > 3) poolsPagingParameter = params[3];
+		poolsPagingParameter = params[3];
 		context.put("poolsPagingParameter", poolsPagingParameter);
+		
+		//setup the model: the selected pool - pool id is at index 4
+		Pool pool = this.poolService.getPool(params[4]);
+		context.put("pool", pool);
 
 		// sort parameter - sort is in param array at index 5
 		String sortCode = null;
@@ -105,10 +115,6 @@ public class PoolEditView extends ControllerImpl
 		// paging parameter - is in param array at index 6
 		String pagingParameter = null;
 		if (params.length == 7) pagingParameter = params[6];
-
-		// setup the model: the selected pool - pool id is at index 4
-		Pool pool = this.poolService.getPool(params[4]);
-		context.put("pool", pool);
 
 		// default sort is title ascending
 		QuestionService.FindQuestionsSort sort;
@@ -167,6 +173,10 @@ public class PoolEditView extends ControllerImpl
 		List<Question> questions = questionService.findQuestions(sessionManager.getCurrentSessionUserId(), pool, sort, null, paging.getCurrent(),
 				paging.getSize());
 		context.put("questions", questions);
+
+		// the question types
+		List<QuestionPlugin> questionTypes = this.mnemeService.getQuestionPlugins();
+		context.put("questionTypes", questionTypes);
 
 		// for the checkboxes
 		Values values = this.uiService.newValues();
@@ -263,6 +273,51 @@ public class PoolEditView extends ControllerImpl
 					return;
 				}
 			}
+			// handle adding a question
+			else if (destination.startsWith("ADDQ:"))
+			{
+				Pool pool = this.poolService.getPool(params[4]);
+
+				if (pool == null)
+				{
+					// TODO: do this better!
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+
+				// parse the type (after the : in the destination)
+				String type = StringUtil.splitFirst(destination, ":")[1];
+
+				// check security
+				if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext(), null))
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+
+				// create the question of the appropriate type (all the way to save)
+				Question newQuestion = null;
+				try
+				{
+					newQuestion = this.questionService.newQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, type);
+					this.questionService.saveQuestion(newQuestion, toolManager.getCurrentPlacement().getContext());
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+
+				// form the destionation
+				// TODO: preserve sort / paging parameters
+				destination = "/question_edit/" + newQuestion.getId();
+
+				// redirect
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
 			else
 			{
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
@@ -312,6 +367,15 @@ public class PoolEditView extends ControllerImpl
 	public void setToolManager(ToolManager toolManager)
 	{
 		this.toolManager = toolManager;
+	}
+
+	/**
+	 * @param mnemeService
+	 *        the mnemeService to set
+	 */
+	public void setMnemeService(MnemeService mnemeService)
+	{
+		this.mnemeService = mnemeService;
 	}
 
 }
