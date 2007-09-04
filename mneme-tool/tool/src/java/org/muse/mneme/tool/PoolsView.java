@@ -161,7 +161,7 @@ public class PoolsView extends ControllerImpl
 		if (pagingParameter == null)
 		{
 			// TODO: other than 2 size!
-			pagingParameter = "1-2";
+			pagingParameter = "1-30";
 		}
 
 		// paging

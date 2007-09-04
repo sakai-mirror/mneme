@@ -157,7 +157,7 @@ public class PoolEditView extends ControllerImpl
 		if (pagingParameter == null)
 		{
 			// TODO: other than 2 size!
-			pagingParameter = "1-2";
+			pagingParameter = "1-30";
 		}
 		// total questions passed userid as parameter as countQuestions is not fetching data with out userid
 		Integer maxQuestions = this.questionService.countQuestions(sessionManager.getCurrentSessionUserId(), pool, null);
