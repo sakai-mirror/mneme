@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/java/org/muse/mneme/tool/PoolsView.java $
- * $Id: PoolsView.java 11577 2007-08-28 05:39:09Z ggolden@umich.edu $
+ * $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/java/org/muse/mneme/tool/SelectAddPartQuestionsView.java $
+ * $Id: SelectAddPartQuestionsView.java 11577 2007-08-28 05:39:09Z maheshwarirashmi@foothill.edu $
  ***********************************************************************************
  *
  * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
@@ -89,6 +89,25 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		context.put("assessmentId", params[3]);
 		context.put("partId", params[4]);
 
+		Assessment assessment = assessmentService.getAssessment(params[3]);
+		if (assessment == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+		context.put("assessmentTitle", assessment.getTitle());
+
+		ManualPart part = (ManualPart) assessment.getParts().getPart(params[4]);
+
+		if (part == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+		context.put("partTitle", part.getTitle());
+
 		String pagingParameter = null;
 		Paging paging = uiService.newPaging();
 
@@ -108,15 +127,21 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		// default sort: title ascending
 		QuestionService.FindQuestionsSort sort = QuestionService.FindQuestionsSort.type_a;
 		String sortCode = null;
-		if (params.length > 5) sortCode = params[5];
-
-		if (sortCode != null && sortCode.length() == 2 && (sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+		if (params.length > 5)
 		{
-			context.put("sort_column", sortCode.charAt(0));
-			context.put("sort_direction", sortCode.charAt(1));
-			sort = QuestionService.FindQuestionsSort.type_d;
+			sortCode = params[5];
+			if (sortCode != null && sortCode.length() == 2)
+			{
+				context.put("sort_column", sortCode.charAt(0));
+				context.put("sort_direction", sortCode.charAt(1));
+				sort = findQuestionSortCode(sortCode);
+			}
 		}
-
+		else
+		{
+			context.put("sort_column", '0');
+			context.put("sort_direction", 'A');
+		}
 		// get questions
 		List<Question> questions = questionService.findQuestions(sessionManager.getCurrentSessionUserId(), null, sort, null, paging.getCurrent(),
 				paging.getSize());
@@ -128,6 +153,49 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		context.put("questionids", values);
 		// render
 		uiService.render(ui, context);
+	}
+
+	private QuestionService.FindQuestionsSort findQuestionSortCode(String sortCode)
+	{
+		QuestionService.FindQuestionsSort sort = QuestionService.FindQuestionsSort.type_a;
+		// 0 is question type
+		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = QuestionService.FindQuestionsSort.type_a;
+		}
+		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = QuestionService.FindQuestionsSort.type_d;
+		}
+		// 1 is pool subject
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = QuestionService.FindQuestionsSort.pool_subject_a;
+		}
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = QuestionService.FindQuestionsSort.pool_subject_d;
+		}
+		// 2 is pool title
+		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = QuestionService.FindQuestionsSort.pool_title_a;
+		}
+		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = QuestionService.FindQuestionsSort.pool_title_d;
+		}
+		// 3 is pool points
+		else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = QuestionService.FindQuestionsSort.pool_points_a;
+		}
+		else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = QuestionService.FindQuestionsSort.pool_points_d;
+		}
+
+		return sort;
 	}
 
 	/**
@@ -171,7 +239,7 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		}
 
 		String[] selectedQuesIds = values.getValues();
-		if (selectedQuesIds != null || selectedQuesIds.length != 0)
+		if (selectedQuesIds != null && selectedQuesIds.length != 0)
 		{
 			for (String selectedQuesId : selectedQuesIds)
 			{
