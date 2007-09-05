@@ -227,7 +227,7 @@
 		</section>
 
 		<!-- save / cancel nav bar -->
-		<navigationBar id="nav" width="70em">
+		<navigationBar id="nav" width="100%">
 			<container>
 				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />

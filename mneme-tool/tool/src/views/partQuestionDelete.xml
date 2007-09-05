@@ -59,7 +59,7 @@
 											<model ref="part.title" missing="no-title"></model>
 										</message>
 									</title>
-									<model ref="partQuestion.description" missing="no-description"/>
+									<model ref="partQuestion.description" missing="no-description" />
 								</modelColumn>
 							</columns>
 

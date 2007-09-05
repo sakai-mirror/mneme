@@ -74,12 +74,14 @@
 		<section title="select-questions-msg">
 			<container>
 				<!-- entity actions -->
-				<entityActionBar width="40%">
+				<entityActionBar>
 					<container>
-						<navigation destination="/select_add_mpart_question" title="select-questions" style="LINK" description="select-questions-description" submit="TRUE">
+						<navigation destination="/select_add_mpart_question" title="select-questions" style="LINK"
+							description="select-questions-description" submit="TRUE">
 							<icon icon="/icons/hand_select.png" style="LEFT" />
 						</navigation>
-						<navigation destination="/part_question_delete" title="remove-question" style="LINK" description="remove-question-description" submit="TRUE">
+						<navigation destination="/part_question_delete" title="remove-question" style="LINK" description="remove-question-description"
+							submit="TRUE">
 							<icon icon="/icons/page_delete.png" style="LEFT" />
 						</navigation>
 					</container>
@@ -92,18 +94,18 @@
 					</emptyTitle>
 					<iterator name="question" model="part.questionsAsAuthored" />
 					<columns>
-						<orderColumn>
-							<value>
-								<model type="text" ref="question.id" />
-							</value>
-							<model ref="part.questionOrder" />
-						</orderColumn>
 						<selectionColumn multiple="TRUE">
 							<value>
 								<model type="text" ref="question.id" />
 							</value>
 							<model ref="questionids.values" />
 						</selectionColumn>
+						<orderColumn>
+							<value>
+								<model type="text" ref="question.id" />
+							</value>
+							<model ref="part.questionOrder" />
+						</orderColumn>
 						<modelColumn>
 							<title>
 								<message selector="question-subject" />
@@ -161,7 +163,7 @@
 		</section>
 
 		<!-- save / cancel nav bar -->
-		<navigationBar id="nav" width="70em">
+		<navigationBar id="nav" width="100%">
 			<container>
 				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
