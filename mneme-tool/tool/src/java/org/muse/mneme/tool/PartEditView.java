@@ -365,26 +365,25 @@ public class PartEditView extends ControllerImpl
 		{
 			if (destination.equals("/part_question_delete"))
 			{
+				StringBuffer path = new StringBuffer("/part_question_delete/" + params[2] + "/" + assessment.getId() + "/" + part.getId() + "/");
 				// get the ids
 				String[] removeQuesIds = values.getValues();
 				if (removeQuesIds != null && removeQuesIds.length != 0)
 				{
 					// remove questions from part
-					StringBuffer path = new StringBuffer("/part_question_delete/" +params[2]+"/" +assessment.getId() + "/" + part.getId() + "/");
 					String separator = "+";
-					
 					path.append(removeQuesIds[0]);
 					for (int i = 1; i < removeQuesIds.length; i++)
 					{
 						path.append(separator);
 						path.append(removeQuesIds[i]);
 					}
-					destination = path.toString();
 				}
+				destination = path.toString();
 			}
 			else if (destination.equals("/select_add_mpart_question"))
 			{
-				destination = new StringBuffer("/select_add_mpart_question/" + params[2] +"/" +assessment.getId() + "/" + part.getId()).toString();
+				destination = new StringBuffer("/select_add_mpart_question/" + params[2] + "/" + assessment.getId() + "/" + part.getId()).toString();
 			}
 		}
 		// commit the save
