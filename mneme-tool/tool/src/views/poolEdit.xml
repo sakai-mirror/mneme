@@ -54,8 +54,14 @@
 		</text>
 
 		<!--entity actions-->
-		<entityActionBar width="100%">
-			<container>
+
+		<!-- the list of questions -->
+		<entityList style="FLAT">
+			<iterator name="question" model="questions" />
+			<emptyTitle>
+				<message selector="no-questions" />
+			</emptyTitle>
+			<entityActions>
 				<navigation submit="TRUE" style="LINK" description="add-question-description">
 					<title>
 						<message selector="add-question-title">
@@ -68,74 +74,65 @@
 					<iterator name="type" model="questionTypes" />
 					<icon icon="/icons/document_add.png" style="LEFT" />
 				</navigation>
-				<navigation title="move-to-pool" style="LINK" description="move-to-pool-description" disabled="FALSE" submit="TRUE">
-					<icon icon="/icons/page_go.png" style="LEFT" />
-					<destination template="/question_move/{0}/{1}/{2}/{3}{4}/{5}">
-						<model ref="poolsSortCode" />
-						<model ref="poolsPagingParameter" />
-						<model ref="pool.id" />
-						<model ref="sort_column" />
-						<model ref="sort_direction" />
-						<model ref="pagingParameter" />
-					</destination>
-				</navigation>
-				<navigation title="copy-to-pool" style="LINK" description="copy-to-pool-description" submit="TRUE">
-					<icon icon="/icons/copy.png" style="LEFT" />
-					<destination template="/question_copy/{0}/{1}/{2}/{3}{4}/{5}">
-						<model ref="poolsSortCode" />
-						<model ref="poolsPagingParameter" />
-						<model ref="pool.id" />
-						<model ref="sort_column" />
-						<model ref="sort_direction" />
-						<model ref="pagingParameter" />
-					</destination>
-				</navigation>
-				<navigation title="delete-title" style="LINK" description="delete-description" submit="TRUE">
-					<icon icon="/icons/delete.png" style="LEFT" />
-					<destination template="/questions_delete/{0}/{1}/{2}/{3}{4}/{5}">
-						<model ref="poolsSortCode" />
-						<model ref="poolsPagingParameter" />
-						<model ref="pool.id" />
-						<model ref="sort_column" />
-						<model ref="sort_direction" />
-						<model ref="pagingParameter" />
-					</destination>
-				</navigation>
-				<navigation destination="/" title="search-title" style="LINK" description="search-description">
-					<icon icon="/icons/search.png" style="LEFT" />
-				</navigation>
-				<pager paging="paging">
-					<destination template="/pool_edit/{0}/{1}/{2}/{3}{4}/{5}">
-						<model ref="poolsSortCode" />
-						<model ref="poolsPagingParameter" />
-						<model ref="pool.id" />
-						<model ref="sort_column" />
-						<model ref="sort_direction" />
-						<model type="paging" ref="paging" />
-					</destination>
-				</pager>
-			</container>
-		</entityActionBar>
-
-		<!-- the list of questions -->
-		<entityList style="FLAT">
-			<iterator name="question" model="questions" />
-			<emptyTitle>
-				<message selector="no-questions" />
-			</emptyTitle>
+			</entityActions>
+			<pager paging="paging">
+				<destination template="/pool_edit/{0}/{1}/{2}/{3}{4}/{5}">
+					<model ref="poolsSortCode" />
+					<model ref="poolsPagingParameter" />
+					<model ref="pool.id" />
+					<model ref="sort_column" />
+					<model ref="sort_direction" />
+					<model type="paging" ref="paging" />
+				</destination>
+			</pager>
 			<columns>
 				<selectionColumn multiple="TRUE">
 					<value>
 						<model type="text" ref="question.id" />
 					</value>
 					<model ref="questionids.values" />
+					<entityActions>
+						<navigation title="move-to-pool" selectRequirement="SOME" selectRequirementMessage="move-failed-requirements" style="LINK" description="move-to-pool-description" disabled="FALSE" submit="TRUE">
+							<icon icon="/icons/page_go.png" style="LEFT" />
+							<destination template="/question_move/{0}/{1}/{2}/{3}{4}/{5}">
+								<model ref="poolsSortCode" />
+								<model ref="poolsPagingParameter" />
+								<model ref="pool.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="pagingParameter" />
+							</destination>
+						</navigation>
+						<navigation title="copy-to-pool" selectRequirement="SOME" selectRequirementMessage="copy-failed-requirements" style="LINK" description="copy-to-pool-description" submit="TRUE">
+							<icon icon="/icons/copy.png" style="LEFT" />
+							<destination template="/question_copy/{0}/{1}/{2}/{3}{4}/{5}">
+								<model ref="poolsSortCode" />
+								<model ref="poolsPagingParameter" />
+								<model ref="pool.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="pagingParameter" />
+							</destination>
+						</navigation>
+						<navigation title="delete-title" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements" style="LINK" description="delete-description" submit="TRUE">
+							<icon icon="/icons/delete.png" style="LEFT" />
+							<destination template="/questions_delete/{0}/{1}/{2}/{3}{4}/{5}">
+								<model ref="poolsSortCode" />
+								<model ref="poolsPagingParameter" />
+								<model ref="pool.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="pagingParameter" />
+							</destination>
+						</navigation>
+					</entityActions>
 				</selectionColumn>
 				<modelColumn>
 					<title>
 						<!--This should be limited to ??? characters with ... at the end -->
 						<message selector="question-description" />
 					</title>
-					<model ref="question.description" missing="no-title"/>
+					<model ref="question.description" missing="no-title" />
 					<entityNavigations>
 						<navigation>
 							<destination template="/question_edit/{0}">
