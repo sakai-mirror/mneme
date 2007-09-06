@@ -97,7 +97,7 @@
 				</row>
 				<row title="allowTries">
 					<container>
-						<countEdit rows="1" cols="8">
+						<countEdit rows="1" cols="6">
 							<model ref="assessment.numSubmissionsAllowed" type="count" />
 						</countEdit>
 						<text>
