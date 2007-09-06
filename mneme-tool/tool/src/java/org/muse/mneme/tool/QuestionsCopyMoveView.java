@@ -3,18 +3,18 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Sakai Foundation.
- * 
- * Licensed under the Educational Community License, Version 1.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
+ * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.opensource.org/licenses/ecl1.php
- * 
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  **********************************************************************************/
@@ -62,15 +62,6 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	protected ToolManager toolManager = null;
 
 	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		super.init();
-		M_log.info("init()");
-	}
-
-	/**
 	 * Shutdown.
 	 */
 	public void destroy()
@@ -92,9 +83,17 @@ public class QuestionsCopyMoveView extends ControllerImpl
 		// pools paging parameter - is in params array at index 3
 		context.put("poolsPagingParameter", params[3]);
 
+		// header and icon dependent on which function
 		if (path.startsWith("question_copy"))
+		{
 			context.put("headerText", messages.get("copy-header-text"));
-		else if (path.startsWith("question_move")) context.put("headerText", messages.get("move-header-text"));
+			context.put("headerIcon", "/icons/copy.png");
+		}
+		else if (path.startsWith("question_move"))
+		{
+			context.put("headerText", messages.get("move-header-text"));
+			context.put("headerIcon", "/icons/page_go.png");
+		}
 
 		// pools id is in params array at index 4
 		context.put("poolid", params[4]);
@@ -120,6 +119,15 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	}
 
 	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		super.init();
+		M_log.info("init()");
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
@@ -137,7 +145,6 @@ public class QuestionsCopyMoveView extends ControllerImpl
 
 		if (selectedPoolId != null)
 		{
-
 			Pool pool = this.poolService.getPool(selectedPoolId);
 
 			Question question = null;
@@ -151,11 +158,16 @@ public class QuestionsCopyMoveView extends ControllerImpl
 				{
 					// get the question
 					question = this.questionService.getQuestion(questionId);
-					if (path.startsWith("question_copy"))
-						this.questionService.copyQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, question);
-					else if (path.startsWith("question_move"))
-						this.questionService.moveQuestion(toolManager.getCurrentPlacement().getContext(), null, question, pool);
 
+					// which function to perform
+					if (path.startsWith("question_copy"))
+					{
+						this.questionService.copyQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, question);
+					}
+					else if (path.startsWith("question_move"))
+					{
+						this.questionService.moveQuestion(toolManager.getCurrentPlacement().getContext(), null, question, pool);
+					}
 				}
 			}
 			catch (AssessmentPermissionException e)
@@ -179,15 +191,6 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	}
 
 	/**
-	 * @param poolService
-	 *        the poolService to set
-	 */
-	public void setPoolService(PoolService poolService)
-	{
-		this.poolService = poolService;
-	}
-
-	/**
 	 * @param mnemeService
 	 *        the mnemeService to set
 	 */
@@ -197,12 +200,12 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	}
 
 	/**
-	 * @param toolManager
-	 *        the toolManager to set
+	 * @param poolService
+	 *        the poolService to set
 	 */
-	public void setToolManager(ToolManager toolManager)
+	public void setPoolService(PoolService poolService)
 	{
-		this.toolManager = toolManager;
+		this.poolService = poolService;
 	}
 
 	/**
@@ -214,4 +217,12 @@ public class QuestionsCopyMoveView extends ControllerImpl
 		this.questionService = questionService;
 	}
 
+	/**
+	 * @param toolManager
+	 *        the toolManager to set
+	 */
+	public void setToolManager(ToolManager toolManager)
+	{
+		this.toolManager = toolManager;
+	}
 }

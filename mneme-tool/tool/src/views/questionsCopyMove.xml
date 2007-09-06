@@ -27,7 +27,7 @@
 <interface>
 	<header>
 		<message selector="copy-move-header">
-			<model type="icon" icon="/icons/page_go.png" />
+			<model type="icon" ref="headerIcon" />
 			<model ref="headerText" />
 		</message>
 	</header>
