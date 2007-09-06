@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/muse/ambrosia/trunk/ambrosia-impl/impl/src/java/org/muse/ambrosia/impl/UiValue.java $
- * $Id: UiValue.java 9047 2007-04-13 00:21:17Z ggolden@umich.edu $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
