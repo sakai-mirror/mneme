@@ -150,34 +150,40 @@
 		</section>
 		<section title="test-parts">
 			<container>
-				<!-- entity actions -->
-				<entityActionBar>
-					<container>
-						<navigation destination="DRAW" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
-							<icon icon="/icons/hat_red.png" style="LEFT" />
-						</navigation>
-						<navigation destination="MANUAL" title="manual-draw" style="LINK" description="manual-draw-description" submit="TRUE">
-							<icon icon="/icons/hand_select.png" style="LEFT" />
-						</navigation>
-						<navigation destination="/part_delete" title="delete-part" style="LINK" description="part-delete-description" submit="TRUE">
-							<icon icon="/icons/delete.png" style="LEFT" />
-						</navigation>
-					</container>
-				</entityActionBar>
-
 				<!-- the list of parts -->
 				<entityList style="FLAT">
 					<iterator name="part" model="assessment.parts.parts" />
 					<emptyTitle>
 						<message selector="no-parts" />
 					</emptyTitle>
+					<entityActions>
+						<navigation destination="DRAW" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
+							<icon icon="/icons/hat_red.png" style="LEFT" />
+						</navigation>
+						<navigation destination="MANUAL" title="manual-draw" style="LINK" description="manual-draw-description" submit="TRUE">
+							<icon icon="/icons/hand_select.png" style="LEFT" />
+						</navigation>
+					</entityActions>
 					<columns>
 						<selectionColumn multiple="TRUE">
 							<value>
 								<model ref="part.id" />
 							</value>
 							<model ref="ids.values" />
+							<!-- entity actions -->
+							<entityActions>
+								<navigation destination="/part_delete" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements"
+									title="delete-part" style="LINK" description="part-delete-description" submit="TRUE">
+									<icon icon="/icons/delete.png" style="LEFT" />
+								</navigation>
+							</entityActions>
 						</selectionColumn>
+						<orderColumn>
+							<value>
+								<model type="text" ref="part.id" />
+							</value>
+							<model ref="assessment.partOrder" />
+						</orderColumn>
 						<modelColumn>
 							<title>
 								<message selector="part-title" />
