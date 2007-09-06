@@ -274,7 +274,12 @@ public class QuestionStorageSample implements QuestionStorage
 	 */
 	public void moveQuestion(Question question, Pool pool)
 	{
-		((QuestionImpl) question).poolId = pool.getId();
+		// get the question
+		QuestionImpl fromStorage = this.questions.get(question.getId());
+		if (fromStorage == null) return;
+
+		//change the pool id
+		fromStorage.poolId = pool.getId();
 	}
 
 	/**
