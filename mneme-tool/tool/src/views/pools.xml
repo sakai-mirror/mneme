@@ -44,9 +44,13 @@
 			<message selector="pool-list-page-nav" />
 			</text-->
 
-		<!--entity actions-->
-		<entityActionBar width="100%">
-			<container>
+		<!-- the list of pools -->
+		<entityList style="FLAT">
+			<iterator name="pool" model="pools" />
+			<emptyTitle>
+				<message selector="no-pools" />
+			</emptyTitle>
+			<entityActions>
 				<navigation title="add-pool-title" style="LINK" description="add-pool-description" submit="TRUE">
 					<icon icon="/icons/document_add.png" style="LEFT" />
 					<destination template="/pool_properties/{0}{1}/{2}">
@@ -55,64 +59,55 @@
 						<model ref="pagingParameter" />
 					</destination>
 				</navigation>
-				<navigation submit="TRUE" style="LINK" description="add-question-description">
-					<title>
-						<message selector="add-question-title">
-							<model ref="type.typeName" />
-						</message>
-					</title>
-					<destination template="ADDQ:{0}">
-						<model ref="type.type" />
-					</destination>
-					<iterator name="type" model="questionTypes" />
-					<icon icon="/icons/document_add.png" style="LEFT" />
-				</navigation>
-				<navigation title="combine-title" style="LINK" description="combine-description" disabled="FALSE" submit="TRUE">
-					<icon icon="/icons/combine_pools.png" style="LEFT" />
-					<destination template="/COMBINE/{0}{1}/{2}">
-						<model ref="sort_column" />
-						<model ref="sort_direction" />
-						<model ref="pagingParameter" />
-					</destination>
-				</navigation>
-				<navigation destination="/" title="import-export-title" style="LINK" description="import-export-description">
-					<icon icon="/icons/import_export.png" style="LEFT" />
-				</navigation>
-				<navigation title="delete-title" style="LINK" description="delete-description" submit="TRUE">
-					<icon icon="/icons/delete.png" style="LEFT" />
-					<destination template="/pools_delete/{0}{1}/{2}">
-						<model ref="sort_column" />
-						<model ref="sort_direction" />
-						<model ref="pagingParameter" />
-					</destination>
-				</navigation>
-				<navigation destination="/" title="search-title" style="LINK" description="search-description">
-					<icon icon="/icons/search.png" style="LEFT" />
-				</navigation>
-
-				<pager paging="paging">
-					<destination template="/pools/{0}{1}/{2}">
-						<model ref="sort_column" />
-						<model ref="sort_direction" />
-						<model type="paging" ref="paging" />
-					</destination>
-				</pager>
-
-			</container>
-		</entityActionBar>
-
-		<!-- the list of pools -->
-		<entityList style="FLAT">
-			<iterator name="pool" model="pools" />
-			<emptyTitle>
-				<message selector="no-pools" />
-			</emptyTitle>
+			</entityActions>
+			<pager paging="paging">
+				<destination template="/pools/{0}{1}/{2}">
+					<model ref="sort_column" />
+					<model ref="sort_direction" />
+					<model type="paging" ref="paging" />
+				</destination>
+			</pager>
 			<columns>
 				<selectionColumn multiple="TRUE">
 					<value>
 						<model type="text" ref="pool.id" />
 					</value>
 					<model ref="poolids.values" />
+					<entityActions>
+						<navigation selectRequirement="SINGLE" selectRequirementMessage="add-failed-requirements" submit="TRUE" style="LINK" description="add-question-description">
+							<title>
+								<message selector="add-question-title">
+									<model ref="type.typeName" />
+								</message>
+							</title>
+							<destination template="ADDQ:{0}">
+								<model ref="type.type" />
+							</destination>
+							<iterator name="type" model="questionTypes" />
+							<icon icon="/icons/document_add.png" style="LEFT" />
+						</navigation>
+						<navigation selectRequirement="MULTIPLE" selectRequirementMessage="combine-failed-requirements" title="combine-title" style="LINK" description="combine-description" disabled="FALSE"
+							submit="TRUE">
+							<icon icon="/icons/combine_pools.png" style="LEFT" />
+							<destination template="/COMBINE/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="pagingParameter" />
+							</destination>
+						</navigation>
+						<navigation selectRequirement="SOME" selectRequirementMessage="export-failed-requirements" destination="/" title="import-export-title" style="LINK"
+							description="import-export-description">
+							<icon icon="/icons/import_export.png" style="LEFT" />
+						</navigation>
+						<navigation selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements" title="delete-title" style="LINK" description="delete-description" submit="TRUE">
+							<icon icon="/icons/delete.png" style="LEFT" />
+							<destination template="/pools_delete/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="pagingParameter" />
+							</destination>
+						</navigation>
+					</entityActions>
 				</selectionColumn>
 				<modelColumn>
 					<title>
