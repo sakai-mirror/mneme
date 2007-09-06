@@ -74,8 +74,11 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 8) throw new IllegalArgumentException();
+		if (params.length != 8 && params.length != 9) throw new IllegalArgumentException();
 		context.put("saveDestination", context.getDestination());
+		String saveDestination = context.getDestination();
+
+		if (params.length == 9) context.put("saveDestination", saveDestination.substring(0, saveDestination.lastIndexOf("/")));
 
 		// pools sort param is in params array at index 2
 		context.put("poolsSortCode", params[2]);
@@ -98,17 +101,72 @@ public class QuestionsCopyMoveView extends ControllerImpl
 		// pools id is in params array at index 4
 		context.put("poolid", params[4]);
 
-		Pool pool = this.poolService.getPool(params[4]);
-
-		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, null, null, null, null);
-		pools.remove(pool);
-		context.put("pools", pools);
-
 		// pools sort param is in params array at index 5
 		context.put("poolsEditSortCode", params[5]);
 
 		// pools paging parameter - is in params array at index 6
 		context.put("poolsEditPagingParameter", params[6]);
+
+		// sort parameter - sort is in param array at index 7
+		String sortCode = null;
+		if (params.length > 8) sortCode = params[8];
+
+		// default sort is title ascending
+		PoolService.FindPoolsSort sort;
+
+		if (sortCode != null)
+		{
+			if (sortCode.trim().length() == 2)
+			{
+				context.put("sort_column", sortCode.charAt(0));
+				context.put("sort_direction", sortCode.charAt(1));
+
+				// 0 is subject
+				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
+				{
+					sort = PoolService.FindPoolsSort.subject_a;
+				}
+				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+				{
+					sort = PoolService.FindPoolsSort.subject_d;
+				}
+				// 1 is title
+				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+				{
+					sort = PoolService.FindPoolsSort.title_a;
+				}
+				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+				{
+					sort = PoolService.FindPoolsSort.title_d;
+				}
+				else
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+			}
+			else
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+		}
+		else
+		{
+			// default sort: title ascending
+			sort = PoolService.FindPoolsSort.title_a;
+
+			context.put("sort_column", '1');
+			context.put("sort_direction", 'A');
+		}
+
+		Pool pool = this.poolService.getPool(params[4]);
+
+		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, sort, null, null, null);
+		pools.remove(pool);
+		context.put("pools", pools);
 
 		// for the selected pool
 		Value value = this.uiService.newValue();
@@ -132,7 +190,7 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 8) throw new IllegalArgumentException();
+		if (params.length != 8 && params.length != 9) throw new IllegalArgumentException();
 
 		// for the selected pool
 		Value value = this.uiService.newValue();
