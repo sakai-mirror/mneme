@@ -245,6 +245,9 @@ public class PoolEditView extends ControllerImpl
 					if (pool != null && question != null)
 						this.questionService.copyQuestion(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId(),
 								pool, question);
+					
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
+					return;
 				}
 				catch (AssessmentPermissionException e)
 				{
@@ -324,11 +327,7 @@ public class PoolEditView extends ControllerImpl
 				return;
 			}
 		}
-
-		if (params.length == 7)
-			destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4] + "/" + params[5] + "/" + params[6];
-		else if (params.length == 5) destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4];
-
+	
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 
 	}

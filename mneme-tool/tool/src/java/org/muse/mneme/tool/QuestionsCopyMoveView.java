@@ -75,10 +75,11 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if (params.length != 8 && params.length != 9) throw new IllegalArgumentException();
-		context.put("saveDestination", context.getDestination());
+		
 		String saveDestination = context.getDestination();
 
 		if (params.length == 9) context.put("saveDestination", saveDestination.substring(0, saveDestination.lastIndexOf("/")));
+		else context.put("saveDestination", context.getDestination());
 
 		// pools sort param is in params array at index 2
 		context.put("poolsSortCode", params[2]);

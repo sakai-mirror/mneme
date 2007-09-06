@@ -96,7 +96,7 @@
 							</destination>
 						</navigation>
 						<navigation selectRequirement="SOME" selectRequirementMessage="export-failed-requirements" destination="/" title="import-export-title" style="LINK"
-							description="import-export-description">
+							description="import-export-description" submit="TRUE">
 							<icon icon="/icons/import_export.png" style="LEFT" />
 						</navigation>
 						<navigation selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements" title="delete-title" style="LINK" description="delete-description" submit="TRUE">

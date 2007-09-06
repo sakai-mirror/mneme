@@ -236,7 +236,6 @@ public class PoolsView extends ControllerImpl
 					return;
 				}
 			}
-
 			else if (destination.trim().startsWith("/pool_properties"))
 			{
 				try
@@ -295,6 +294,9 @@ public class PoolsView extends ControllerImpl
 					Pool pool = this.poolService.getPool(destination.substring(destination.lastIndexOf("/") + 1));
 					if (pool != null)
 						this.poolService.copyPool(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId(), pool);
+					
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
+					return;
 				}
 				catch (AssessmentPermissionException e)
 				{
@@ -357,12 +359,12 @@ public class PoolsView extends ControllerImpl
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 				return;
 			}
+			else
+			{
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
 		}
-
-		if (params.length == 4)
-			destination = "/pools/" + params[2] + "/" + params[3];
-		else
-			destination = "/pools/";
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}

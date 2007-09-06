@@ -58,12 +58,52 @@
 						<message selector="pool-subject" />
 					</title>
 					<model ref="pool.subject" missing="missing-subject" />
+					<sort>
+						<active>
+							<compareDecision model="sort_column" constant="0" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="{0}/0A">
+								<model ref="saveDestination" />
+							</destination>
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="{0}/0D">
+								<model ref="saveDestination" />
+							</destination>
+						</desc>
+					</sort>
 				</modelColumn>
 				<modelColumn>
 					<title>
 						<message selector="pool-title" />
 					</title>
 					<model ref="pool.title" missing="no-title" />
+					<sort>
+						<active>
+							<compareDecision model="sort_column" constant="1" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="{0}/1A">
+								<model ref="saveDestination" />
+							</destination>
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="{0}/1D">
+								<model ref="saveDestination" />
+							</destination>
+						</desc>
+					</sort>
 				</modelColumn>
 				<modelColumn>
 					<title>
