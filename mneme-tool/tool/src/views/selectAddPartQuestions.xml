@@ -3,8 +3,8 @@
 
 <!--
 	/**********************************************************************************
-	* $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/views/pools.xml $
-	* $Id: pools.xml 11568 2007-08-27 23:43:17Z tannirumurthy@foothill.edu $
+	* $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/views/selectAddPartQuestions.xml $
+	* $Id: selectAddPartQuestions.xml 11568 2007-08-27 23:43:17Z maheshwarirashmi@foothill.edu $
 	***********************************************************************************
 	*
 	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
@@ -38,17 +38,6 @@
 		</message>
 	</header>
 	<container>
-		<entityActionBar width="100%">
-			<container>
-				<navigation destination="/" title="search-title" style="LINK" description="search-description">
-					<icon icon="/icons/search.png" style="LEFT" />
-				</navigation>
-
-				<pager paging="paging">
-					<destination template=""></destination>
-				</pager>
-			</container>
-		</entityActionBar>
 		<section>
 			<container>
 				<!-- the list of the selected questions -->
@@ -56,6 +45,9 @@
 					<emptyTitle>
 						<message selector="no-questions" />
 					</emptyTitle>
+					<pager paging="paging">
+						<destination template=""></destination>
+					</pager>
 					<iterator name="question" model="questions" />
 					<columns>
 						<selectionColumn multiple="TRUE">

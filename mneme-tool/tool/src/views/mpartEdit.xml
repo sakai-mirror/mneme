@@ -73,25 +73,19 @@
 
 		<section title="select-questions-msg">
 			<container>
-				<!-- entity actions -->
-				<entityActionBar>
-					<container>
-						<navigation destination="/select_add_mpart_question" title="select-questions" style="LINK"
-							description="select-questions-description" submit="TRUE">
-							<icon icon="/icons/hand_select.png" style="LEFT" />
-						</navigation>
-						<navigation destination="/part_question_delete" title="remove-question" style="LINK" description="remove-question-description"
-							submit="TRUE">
-							<icon icon="/icons/page_delete.png" style="LEFT" />
-						</navigation>
-					</container>
-				</entityActionBar>
-
 				<!-- the list of the selected questions -->
 				<entityList style="FLAT">
 					<emptyTitle>
 						<message selector="no-questions" />
 					</emptyTitle>
+					<!-- entity actions -->
+					<entityActions>
+						<navigation destination="/select_add_mpart_question" title="select-questions" style="LINK"
+							description="select-questions-description" submit="TRUE">
+							<icon icon="/icons/hand_select.png" style="LEFT" />
+						</navigation>
+
+					</entityActions>
 					<iterator name="question" model="part.questionsAsAuthored" />
 					<columns>
 						<selectionColumn multiple="TRUE">
@@ -99,6 +93,13 @@
 								<model type="text" ref="question.id" />
 							</value>
 							<model ref="questionids.values" />
+							<entityActions>
+								<navigation destination="/part_question_delete" selectRequirement="SOME"
+									selectRequirementMessage="remove-failed-requirements" title="remove-question" style="LINK" description="remove-question-description"
+									submit="TRUE">
+									<icon icon="/icons/page_delete.png" style="LEFT" />
+								</navigation>
+							</entityActions>
 						</selectionColumn>
 						<orderColumn>
 							<value>
