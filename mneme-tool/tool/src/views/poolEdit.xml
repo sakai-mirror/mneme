@@ -185,10 +185,6 @@
 								<model ref="question.id" />
 							</destination>
 						</navigation>
-						<navigation style="LINK">
-							<icon icon="/icons/chart_bar.png" style="RIGHT" />
-							<destination template="/"></destination>
-						</navigation>
 					</navigations>
 				</modelColumn>
 			</columns>
