@@ -46,7 +46,14 @@
 						<message selector="no-questions" />
 					</emptyTitle>
 					<pager paging="paging">
-						<destination template=""></destination>
+						<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}{4}/{5}">
+							<model ref="testsortcode" />
+							<model ref="assessmentId" />
+							<model ref="partId" />
+							<model ref="sort_column" />
+							<model ref="sort_direction" />
+							<model type="paging" ref="paging" />
+						</destination>
 					</pager>
 					<iterator name="question" model="questions" />
 					<columns>

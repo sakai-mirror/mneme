@@ -109,12 +109,16 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		context.put("partTitle", part.getTitle());
 
 		String pagingParameter = null;
+		if (params.length == 7)
+		{
+			pagingParameter = params[6];
+		}
 		Paging paging = uiService.newPaging();
 
 		// paging
 		if (pagingParameter == null)
 		{
-			pagingParameter = "1-30";
+			pagingParameter = "1-2";
 		}
 
 		Integer maxQuestions = this.questionService.countQuestions(sessionManager.getCurrentSessionUserId(), null, null);
