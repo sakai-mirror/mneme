@@ -4,13 +4,13 @@
  ***********************************************************************************
  *
  * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,6 +38,7 @@ import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.MultipleAnswerType;
 
 /**
  * QuestionStorageSample defines a sample storage for questions.
@@ -278,7 +279,7 @@ public class QuestionStorageSample implements QuestionStorage
 		QuestionImpl fromStorage = this.questions.get(question.getId());
 		if (fromStorage == null) return;
 
-		//change the pool id
+		// change the pool id
 		fromStorage.poolId = pool.getId();
 	}
 
@@ -434,15 +435,18 @@ public class QuestionStorageSample implements QuestionStorage
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
-			q.initType("mneme:TrueFalse");
+			q.initType("mneme:MultipleChoice");
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q3");
 			q.setDescription("question three");
 			q.setRequireRationale(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
-			q.getPresentation().setText("True or False (three)?");
-			((TrueFalseQuestionImpl) q.getTypeSpecificQuestion()).setCorrectAnswer("TRUE");
+			q.getPresentation().setText("Which value will it be?");
+			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).setAnswerType(MultipleAnswerType.single);
+			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).registerValueSelector("Oneval", "One");
+			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).registerValueSelector("Twoval", "Two");
+			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).setCorrectAnswer("Oneval");
 			q.getCreatedBy().setUserId("admin");
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");
