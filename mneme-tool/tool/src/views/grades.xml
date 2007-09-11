@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
+
+<!--
+/**********************************************************************************
+ * $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/views/grading.xml $
+ * $Id: grading.xml 11732 2007-09-04 22:25:02Z maheshwarirashmi@foothill.edu $
+ ***********************************************************************************
+ *
+ * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ **********************************************************************************/
+-->
+
+<interface>
+
+	<!--mode bar-->
+	<modeContainer>
+		<alias to="ToolModeFragment" toolId="sakai.mneme" />
+	</modeContainer>
+	<header>
+		<message selector="grading-header">
+			<model type="icon" icon="/icons/grade.png" />		
+		</message>
+	</header>
+	<title>
+		<message selector="grading-title" />
+	</title>
+	<container>		
+
+		<!-- the list of assessments -->
+		<entityList style="FLAT">
+			<iterator name="assessment">
+				<model ref="assessments" indexRef="id" />
+			</iterator>
+			<emptyTitle>
+				<message selector="no-assessments" />
+			</emptyTitle>
+			<columns>
+				<modelColumn>				
+					<model ref="assessment.type" delegate="FormatAssesmentType" tool="sakai.mneme" />
+					<sort submit="TRUE">
+						<active>
+							<compareDecision model="sort_column" constant="0" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/grades/0A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/grades/0D" />
+						</desc>
+					</sort>
+				</modelColumn>	
+				<modelColumn>
+					<title>
+						<message selector="assessment-view" />
+					</title>
+					<navigations>
+						<navigation style="LINK" submit="TRUE">
+							<icon icon="/icons/preview.png" style="LEFT" />
+							<destination template="/test_preview/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+					</navigations>
+				</modelColumn>			
+				<column>
+					<title>
+						<message selector="assessment-title" />
+					</title>					
+					<container>
+						<navigation style="LINK" submit="TRUE">
+							<title>
+								<message>
+									<model ref="assessment.title" missing="no-title" />
+								</message>
+							</title>
+							<destination template="/grades_classList/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+					</container>
+				</column>
+				<column>
+					<title>
+						<message selector="assessment-odate" />
+					</title>
+					<sort submit="TRUE">
+						<active>
+							<compareDecision model="sort_column" constant="1" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/grades/1A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/grades/1D" />
+						</desc>
+					</sort>
+					<container>
+						<text>
+							<message selector="assessment-show-odate">
+								<model ref="assessment.dates.openDate" type="date" />
+							</message>
+						</text>
+					</container>
+				</column>
+				<column>
+					<title>
+						<message selector="assessment-ddate" />
+					</title>
+					<sort submit="TRUE">
+						<active>
+							<compareDecision model="sort_column" constant="2" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/grades/2A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/grades/2D" />
+						</desc>
+					</sort>
+					<container>
+						<text>
+							<message selector="assessment-show-ddate">
+								<model ref="assessment.dates.dueDate" type="date" />
+							</message>
+						</text>
+					</container>
+				</column>
+				<modelColumn>
+					<title>
+						<message selector="grade" />
+					</title>
+					<navigations>	
+					<navigation style="LINK" submit="TRUE">
+							<icon icon="/icons/grade.png" />
+							<destination template="/grades_classList/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+					</navigations>					
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="graded" />
+					</title>					
+					<model ref="assessment.submissionContext.isGraded" delegate="FormatAssesmentGrade" tool="sakai.mneme" />
+				</modelColumn>
+			</columns>
+		</entityList>	
+	</container>
+</interface>
