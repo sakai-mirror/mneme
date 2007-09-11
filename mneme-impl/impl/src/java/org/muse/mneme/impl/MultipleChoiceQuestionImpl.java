@@ -54,6 +54,9 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	/** Single or multiple choice * */
 	protected MultipleAnswerType answerType = MultipleAnswerType.single;
 
+	/** The correct answer: TRUE or FALSE. */
+	protected Boolean shuffleChoices = Boolean.FALSE;
+
 	/** Dependency: The UI service (Ambrosia). */
 	protected UiService uiService = null;
 
@@ -83,6 +86,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		this.question = question;
 		this.correctAnswer = other.correctAnswer;
 		this.answerType = other.answerType;
+		this.shuffleChoices = other.shuffleChoices;
 		this.messages = other.messages;
 	}
 
@@ -222,6 +226,16 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * Access the shuffle choice as a string.
+	 * 
+	 * @return The shuffle choice.
+	 */
+	public String getShuffleChoices()
+	{
+		return this.shuffleChoices.toString();
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void setAnswerType(MultipleAnswerType answerType)
@@ -233,6 +247,17 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	public void registerValueSelector(String value, String selector)
 	{
 		this.valueSelectors.put(value, selector);
+	}
+
+	/**
+	 * Set the shuffle choice, as a Boolean string.
+	 * 
+	 * @param shuffleChoices
+	 *        The shuffle choice.
+	 */
+	public void setShuffleChoices(String shuffleChoices)
+	{
+		this.shuffleChoices = Boolean.valueOf(shuffleChoices);
 	}
 
 	/**

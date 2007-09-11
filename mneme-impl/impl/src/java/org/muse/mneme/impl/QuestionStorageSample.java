@@ -447,6 +447,7 @@ public class QuestionStorageSample implements QuestionStorage
 			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).registerValueSelector("Oneval", "One");
 			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).registerValueSelector("Twoval", "Two");
 			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).setCorrectAnswer("Oneval");
+			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).setShuffleChoices("TRUE");
 			q.getCreatedBy().setUserId("admin");
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");
