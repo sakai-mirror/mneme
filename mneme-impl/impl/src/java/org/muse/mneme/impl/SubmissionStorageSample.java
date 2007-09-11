@@ -38,6 +38,7 @@ import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCounts;
+import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
 import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 import org.sakaiproject.tool.api.SessionManager;
 
@@ -92,6 +93,50 @@ public class SubmissionStorageSample implements SubmissionStorage
 	public void destroy()
 	{
 		M_log.info("destroy()");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<SubmissionImpl> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort)
+	{
+		// collect the submissions to this assessment
+		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			if (submission.getAssessment().equals(assessment))
+			{
+				rv.add(new SubmissionImpl(submission));
+			}
+		}
+
+		// TODO: get all possible users who can submit
+		List<String> userIds = new ArrayList<String>();
+
+		// if any user is not represented in the submissions we found, add an empty submission
+		for (String userId : userIds)
+		{
+			boolean found = false;
+			for (Submission s : rv)
+			{
+				if (s.getUserId().equals(userId))
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				SubmissionImpl s = newSubmission();
+				s.initUserId(userId);
+				s.initAssessmentId(assessment.getId());
+				rv.add(s);
+			}
+		}
+
+		// TODO: sort
+		return rv;
 	}
 
 	/**

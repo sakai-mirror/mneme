@@ -33,6 +33,7 @@ import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCounts;
+import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
 import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 import org.sakaiproject.tool.api.SessionManager;
 
@@ -51,6 +52,18 @@ public interface SubmissionStorage
 	 * @return The count of completed submissions by this user to this assessment.
 	 */
 	Integer countCompleteSubmissions(Assessment assessment, String userId);
+
+	/**
+	 * Find the submissions to the assignment made by all users.<br />
+	 * If a user has not yet submitted, an empty one for that user is included. <br />
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param sort
+	 *        The sort order.
+	 * @return A sorted List<Submission> of the submissions for the assessment.
+	 */
+	List<SubmissionImpl> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort);
 
 	/**
 	 * Access all the submission scores to this assessment.

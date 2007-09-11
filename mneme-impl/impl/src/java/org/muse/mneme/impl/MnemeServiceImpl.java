@@ -122,6 +122,22 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean allowEvaluate(String context, String userId)
+	{
+		return this.submissionService.allowEvaluate(context, userId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean allowEvaluate(Submission submission, String userId)
+	{
+		return this.submissionService.allowEvaluate(submission, userId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean allowListDeliveryAssessment(String context, String userId)
 	{
 		return assessmentService.allowListDeliveryAssessment(context, userId);
@@ -260,6 +276,23 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markGraded) throws AssessmentPermissionException
+	{
+		this.evaluateSubmissions(assessment, comment, score, markGraded);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Submission> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort, Boolean official, Integer pageNum,
+			Integer pageSize)
+	{
+		return this.submissionService.findAssessmentSubmissions(assessment, sort, official, pageNum, pageSize);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Pool> findPools(String context, String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		return poolService.findPools(context, userId, sort, search, pageNum, pageSize);
@@ -271,6 +304,15 @@ public class MnemeServiceImpl implements MnemeService
 	public List<Question> findQuestions(String userId, Pool pool, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		return questionService.findQuestions(userId, pool, sort, search, pageNum, pageSize);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Boolean official,
+			Integer pageNum, Integer pageSize)
+	{
+		return this.findSubmissionAnswers(assessment, question, sort, official, pageNum, pageSize);
 	}
 
 	/**
@@ -510,6 +552,14 @@ public class MnemeServiceImpl implements MnemeService
 	public void saveQuestion(Question question, String context) throws AssessmentPermissionException
 	{
 		questionService.saveQuestion(question, context);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void saveSubmission(Submission submission) throws AssessmentPermissionException
+	{
+		this.submissionService.saveSubmission(submission);
 	}
 
 	/**

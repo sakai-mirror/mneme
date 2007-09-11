@@ -138,6 +138,41 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean allowEvaluate(String context, String userId)
+	{
+		if (context == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		if (M_log.isDebugEnabled()) M_log.debug("allowEvaluate_context: " + context + ": " + userId);
+
+		// user must have grade permission in the context of the assessment for this submission
+		if (!securityService.checkSecurity(userId, MnemeService.GRADE_PERMISSION, context)) return Boolean.FALSE;
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean allowEvaluate(Submission submission, String userId)
+	{
+		if (submission == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		if (M_log.isDebugEnabled()) M_log.debug("allowEvaluate: " + submission.getId() + ": " + userId);
+
+		// the submission must be complete
+		if (!submission.getIsComplete()) return Boolean.TRUE;
+
+		// user must have grade permission in the context of the assessment for this submission
+		if (!securityService.checkSecurity(userId, MnemeService.GRADE_PERMISSION, submission.getAssessment().getContext())) return Boolean.FALSE;
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean allowReviewSubmission(Submission submission, String userId)
 	{
 		if (submission == null) throw new IllegalArgumentException();
@@ -332,6 +367,152 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
+	public void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markGraded) throws AssessmentPermissionException
+	{
+		// TODO:
+
+		// for each submission to this assessment
+
+		// only for completed ones
+
+		// only for the "official" one
+
+		// get the evaluation
+
+		// set it
+
+		// save the submission
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Submission> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort, Boolean official, Integer pageNum,
+			Integer pageSize)
+	{
+		if (assessment == null) throw new IllegalArgumentException();
+		if (official == null) throw new IllegalArgumentException();
+		if (sort == null) sort = FindAssessmentSubmissionsSort.userName_a;
+		Date asOf = new Date();
+
+		if (M_log.isDebugEnabled()) M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId());
+
+		// read all the submissions for this user in the context, with all the assessment and submission data we need
+		// each assessment is covered with at least one - if there are no submission yet for a user, an empty submission is included
+		List<SubmissionImpl> all = this.storage.findAssessmentSubmissions(assessment, sort);
+
+		// see if any needs to be completed based on time limit or dates
+		checkAutoComplete(all, asOf);
+
+		// pick one for each assessment - the one in progress, or the official complete one (if official)
+		List<Submission> rv = null;
+		if (official)
+		{
+			rv = officialize(all);
+		}
+		else
+		{
+			rv.addAll(all);
+		}
+
+		// if sorting by status, do that sort
+		if (sort == FindAssessmentSubmissionsSort.status_a || sort == FindAssessmentSubmissionsSort.status_d)
+		{
+			rv = sortByStatus((sort == FindAssessmentSubmissionsSort.status_d), rv);
+		}
+
+		// TODO: similar sort for "graded_a/_d status"
+
+		// page the results
+		if ((pageNum != null) && (pageSize != null))
+		{
+			// start at ((pageNum-1)*pageSize)
+			int start = ((pageNum - 1) * pageSize);
+			if (start < 0) start = 0;
+			if (start > rv.size()) start = rv.size() - 1;
+
+			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
+			int end = ((pageNum) * pageSize);
+			if (end < 0) end = 0;
+			if (end > rv.size()) end = rv.size();
+
+			rv = rv.subList(start, end);
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Boolean official,
+			Integer pageNum, Integer pageSize)
+	{
+		// TODO: review the efficiency of this method! -ggolden
+
+		if (assessment == null) throw new IllegalArgumentException();
+		if (question == null) throw new IllegalArgumentException();
+		if (official == null) throw new IllegalArgumentException();
+		if (sort == null) sort = FindAssessmentSubmissionsSort.userName_a;
+		Date asOf = new Date();
+
+		if (M_log.isDebugEnabled()) M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId());
+
+		// read all the submissions for this user in the context, with all the assessment and submission data we need
+		// each assessment is covered with at least one - if there are no submission yet for a user, an empty submission is included
+		List<SubmissionImpl> all = this.storage.findAssessmentSubmissions(assessment, sort);
+
+		// see if any needs to be completed based on time limit or dates
+		checkAutoComplete(all, asOf);
+
+		// pick one for each assessment - the one in progress, or the official complete one (if official)
+		List<Submission> rv = null;
+		if (official)
+		{
+			rv = officialize(all);
+		}
+		else
+		{
+			rv.addAll(all);
+		}
+
+		// if sorting by status, do that sort
+		if (sort == FindAssessmentSubmissionsSort.status_a || sort == FindAssessmentSubmissionsSort.status_d)
+		{
+			rv = sortByStatus((sort == FindAssessmentSubmissionsSort.status_d), rv);
+		}
+
+		// TODO: similar sort for "graded_a/_d status"
+
+		// page the results
+		if ((pageNum != null) && (pageSize != null))
+		{
+			// start at ((pageNum-1)*pageSize)
+			int start = ((pageNum - 1) * pageSize);
+			if (start < 0) start = 0;
+			if (start > rv.size()) start = rv.size() - 1;
+
+			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
+			int end = ((pageNum) * pageSize);
+			if (end < 0) end = 0;
+			if (end > rv.size()) end = rv.size();
+
+			rv = rv.subList(start, end);
+		}
+
+		// pull out the one answer we want
+		List<Answer> answers = new ArrayList<Answer>();
+		for (Submission s : rv)
+		{
+			answers.add(s.getAnswer(question));
+		}
+
+		return answers;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Float> getAssessmentScores(Assessment assessment)
 	{
 		List<Float> rv = this.storage.getAssessmentScores(assessment);
@@ -388,126 +569,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// each assessment is covered with at least one - if there are no submission yet for an assessment, an empty submission is returned
 		List<SubmissionImpl> all = this.storage.getUserContextSubmissions(context, userId, sort);
 
+		// see if any needs to be completed based on time limit or dates
+		checkAutoComplete(all, asOf);
+
 		// pick one for each assessment - the one in progress, or the official complete one
-		List<Submission> official = new ArrayList<Submission>();
-
-		while (all.size() > 0)
-		{
-			// take the first one out
-			SubmissionImpl submission = all.remove(0);
-
-			// check if this is over time limit / deadline
-			if (submission.getIsOver(asOf, 0))
-			{
-				// complete this one, using the exact 'over' date for the final date
-				Date over = submission.getWhenOver();
-				autoCompleteSubmission(over, submission);
-			}
-
-			// count the submissions actually present in the list for this assessment
-			int count = 0;
-			if (submission.getStartDate() != null)
-			{
-				count++;
-			}
-
-			String aid = submission.getAssessmentId();
-			SubmissionImpl bestSubmission = null;
-			SubmissionImpl inProgressSubmission = null;
-
-			// this one may be our best, or in progress, but only if it's started
-			if (submission.getStartDate() != null)
-			{
-				// if incomplete, record this as in progress
-				if (!submission.getIsComplete())
-				{
-					inProgressSubmission = submission;
-				}
-
-				// else, if complete, make it the best so far
-				else
-				{
-					bestSubmission = submission;
-				}
-			}
-
-			// remove all others with this one's assessment id - keeping track of the best score if complete
-			for (Iterator i = all.iterator(); i.hasNext();)
-			{
-				SubmissionImpl candidateSub = (SubmissionImpl) i.next();
-				if (candidateSub.getAssessmentId().equals(aid))
-				{
-					// take this one out
-					i.remove();
-
-					// check if this is over time limit / deadline
-					if (candidateSub.getIsOver(asOf, 0))
-					{
-						// complete this one, using the exact 'over' date for the final date
-						Date over = candidateSub.getWhenOver();
-						autoCompleteSubmission(over, candidateSub);
-					}
-
-					// we should not get a second one that is unstarted
-					if (candidateSub.getStartDate() == null)
-					{
-						M_log.warn("getUserContextSubmissions: another unstarted for aid: " + aid + " sid:" + candidateSub.getId());
-						continue;
-					}
-
-					// count as a sibling
-					count++;
-
-					// track the in-progress one, if any
-					if ((candidateSub.getIsComplete() == null) || (!candidateSub.getIsComplete()))
-					{
-						inProgressSubmission = candidateSub;
-					}
-
-					// if not in progress, then see if it has the best score so far
-					else
-					{
-						if (bestSubmission == null)
-						{
-							bestSubmission = candidateSub;
-						}
-
-						// take the new one if it exceeds the best so far
-						else if (bestSubmission.getTotalScore().floatValue() < candidateSub.getTotalScore().floatValue())
-						{
-							bestSubmission = candidateSub;
-						}
-
-						// if we match the best, pick the latest submit date
-						else if (bestSubmission.getTotalScore().floatValue() == candidateSub.getTotalScore().floatValue())
-						{
-							if ((bestSubmission.getSubmittedDate() != null) && (candidateSub.getSubmittedDate() != null)
-									&& (bestSubmission.getSubmittedDate().before(candidateSub.getSubmittedDate())))
-							{
-								bestSubmission = candidateSub;
-							}
-						}
-					}
-				}
-			}
-
-			// pick the winner
-			SubmissionImpl winner = inProgressSubmission;
-			if (winner == null) winner = bestSubmission;
-			if (winner == null) winner = submission;
-
-			// set the winner's sibling count
-			winner.initSiblingCount(new Integer(count));
-
-			// set the winner's best
-			if (bestSubmission != null)
-			{
-				winner.initBest(bestSubmission);
-			}
-
-			// keep the winner
-			official.add(winner);
-		}
+		List<Submission> official = officialize(all);
 
 		// if sorting by due date, fix it so null due dates are LARGE not SMALL
 		if (sort == GetUserContextSubmissionsSort.dueDate_a || sort == GetUserContextSubmissionsSort.dueDate_d
@@ -543,7 +609,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// if sorting by status, do that sort
 		if (sort == GetUserContextSubmissionsSort.status_a || sort == GetUserContextSubmissionsSort.status_d)
 		{
-			official = sortByStatus(sort, official);
+			official = sortByStatus((sort == GetUserContextSubmissionsSort.status_d), official);
 		}
 
 		return official;
@@ -601,7 +667,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
 
 		this.storage.removeIncompleteAssessmentSubmissions(assessment);
-		
+
 		// TODO: events?
 	}
 
@@ -663,6 +729,37 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			{
 			}
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void saveSubmission(Submission submission) throws AssessmentPermissionException
+	{
+		if (submission == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("saveSubmission: " + submission.getId());
+
+		// security check
+		// TODO: grade_permission?
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, submission.getAssessment().getContext());
+
+		// if the assessment is new (i.e. no id), set the createdBy information, if not already set
+		// TODO:???
+		// if ((submission.getId() == null) && (submission.getCreatedBy().getUserId() == null))
+		// {
+		// submission.getCreatedBy().setDate(new Date());
+		// submission.getCreatedBy().setUserId(sessionManager.getCurrentSessionUserId());
+		// }
+		//
+		// // update last modified information
+		// submission.getModifiedBy().setDate(new Date());
+		// submission.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
+
+		this.storage.saveSubmission((SubmissionImpl) submission);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
 	}
 
 	/**
@@ -1012,6 +1109,28 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
+	 * Check a list of submissions to see if they need to be auto-completed.
+	 * 
+	 * @param submissions
+	 *        The submissions.
+	 * @param asOf
+	 *        The effective date.
+	 */
+	protected void checkAutoComplete(List<SubmissionImpl> submissions, Date asOf)
+	{
+		for (Submission submission : submissions)
+		{
+			// check if this is over time limit / deadline
+			if (submission.getIsOver(asOf, 0))
+			{
+				// complete this one, using the exact 'over' date for the final date
+				Date over = submission.getWhenOver();
+				autoCompleteSubmission(over, submission);
+			}
+		}
+	}
+
+	/**
 	 * Form a submission reference for this submission id.
 	 * 
 	 * @param submissionId
@@ -1071,6 +1190,123 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 
 		return rv;
+	}
+
+	/**
+	 * Clump a list of all submissions, which may include many from the same user, into a list of official ones with siblings.
+	 * 
+	 * @param all
+	 *        The list of all submissions.
+	 * @return
+	 */
+	protected List<Submission> officialize(List<SubmissionImpl> all)
+	{
+		// pick one for each assessment - the one in progress, or the official complete one
+		List<Submission> official = new ArrayList<Submission>();
+
+		while (all.size() > 0)
+		{
+			// take the first one out
+			SubmissionImpl submission = all.remove(0);
+
+			// count the submissions actually present in the list for this assessment
+			int count = 0;
+			if (submission.getStartDate() != null)
+			{
+				count++;
+			}
+
+			String aid = submission.getAssessmentId();
+			SubmissionImpl bestSubmission = null;
+			SubmissionImpl inProgressSubmission = null;
+
+			// this one may be our best, or in progress, but only if it's started
+			if (submission.getStartDate() != null)
+			{
+				// if incomplete, record this as in progress
+				if (!submission.getIsComplete())
+				{
+					inProgressSubmission = submission;
+				}
+
+				// else, if complete, make it the best so far
+				else
+				{
+					bestSubmission = submission;
+				}
+			}
+
+			// remove all others with this one's assessment id - keeping track of the best score if complete
+			for (Iterator i = all.iterator(); i.hasNext();)
+			{
+				SubmissionImpl candidateSub = (SubmissionImpl) i.next();
+				if (candidateSub.getAssessmentId().equals(aid))
+				{
+					// take this one out
+					i.remove();
+
+					// we should not get a second one that is unstarted
+					if (candidateSub.getStartDate() == null)
+					{
+						M_log.warn("getUserContextSubmissions: another unstarted for aid: " + aid + " sid:" + candidateSub.getId());
+						continue;
+					}
+
+					// count as a sibling
+					count++;
+
+					// track the in-progress one, if any
+					if ((candidateSub.getIsComplete() == null) || (!candidateSub.getIsComplete()))
+					{
+						inProgressSubmission = candidateSub;
+					}
+
+					// if not in progress, then see if it has the best score so far
+					else
+					{
+						if (bestSubmission == null)
+						{
+							bestSubmission = candidateSub;
+						}
+
+						// take the new one if it exceeds the best so far
+						else if (bestSubmission.getTotalScore().floatValue() < candidateSub.getTotalScore().floatValue())
+						{
+							bestSubmission = candidateSub;
+						}
+
+						// if we match the best, pick the latest submit date
+						else if (bestSubmission.getTotalScore().floatValue() == candidateSub.getTotalScore().floatValue())
+						{
+							if ((bestSubmission.getSubmittedDate() != null) && (candidateSub.getSubmittedDate() != null)
+									&& (bestSubmission.getSubmittedDate().before(candidateSub.getSubmittedDate())))
+							{
+								bestSubmission = candidateSub;
+							}
+						}
+					}
+				}
+			}
+
+			// pick the winner
+			SubmissionImpl winner = inProgressSubmission;
+			if (winner == null) winner = bestSubmission;
+			if (winner == null) winner = submission;
+
+			// set the winner's sibling count
+			winner.initSiblingCount(new Integer(count));
+
+			// set the winner's best
+			if (bestSubmission != null)
+			{
+				winner.initBest(bestSubmission);
+			}
+
+			// keep the winner
+			official.add(winner);
+		}
+
+		return official;
 	}
 
 	/**
@@ -1135,7 +1371,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 *        The submission list to sort.
 	 * @return The sorted list of submissions.
 	 */
-	protected List<Submission> sortByStatus(GetUserContextSubmissionsSort sort, List<Submission> submissions)
+	protected List<Submission> sortByStatus(boolean descending, List<Submission> submissions)
 	{
 		// the easy cases
 		if ((submissions == null) || (submissions.size() < 2)) return submissions;
@@ -1217,7 +1453,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		rv.addAll(inProgressAlert);
 
 		// reverse if descending
-		if (sort == GetUserContextSubmissionsSort.status_d)
+		if (descending)
 		{
 			Collections.reverse(rv);
 		}

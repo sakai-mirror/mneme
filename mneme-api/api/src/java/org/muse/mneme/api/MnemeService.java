@@ -80,6 +80,9 @@ public interface MnemeService extends PoolService, QuestionService, SubmissionSe
 	/** Event tracking event for entering a submission. */
 	static final String SUBMISSION_ENTER = "mneme.enter";
 
+	/** Event tracking event for grading a submission. */
+	static final String SUBMISSION_GRADE = "mneme.grade";
+
 	/** Event tracking event for reviewing a submission. */
 	static final String SUBMISSION_REVIEW = "mneme.review";
 

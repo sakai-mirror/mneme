@@ -29,6 +29,14 @@ import java.util.List;
 public interface SubmissionService
 {
 	/**
+	 * Sort options for findAssessmentSubmissionsSort()
+	 */
+	enum FindAssessmentSubmissionsSort
+	{
+		graded_a, graded_d, status_a, status_d, userName_a, userName_d
+	}
+
+	/**
 	 * Sort options for GetUserContextSubmissions()
 	 */
 	enum GetUserContextSubmissionsSort
@@ -49,6 +57,29 @@ public interface SubmissionService
 	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
 	 */
 	Boolean allowCompleteSubmission(Submission submission, String userId);
+
+	/**
+	 * Check if the current user is allowed to evaluate (grade) submissions in the context.<br />
+	 * 
+	 * @param context
+	 *        The context.
+	 * @param userId
+	 *        The user (if null, the current user is used).
+	 * @return TRUE if the user is allowed to evaluate submissions in the context, FALSE if not.
+	 */
+	Boolean allowEvaluate(String context, String userId);
+
+	/**
+	 * Check if the current user is allowed to evaluate (grade) this submission.<br />
+	 * The submission must be complete.<br />
+	 * 
+	 * @param submission
+	 *        The submission.
+	 * @param userId
+	 *        The user (if null, the current user is used).
+	 * @return TRUE if the user is allowed to evaluate the submission, FALSE if not.
+	 */
+	Boolean allowEvaluate(Submission submission, String userId);
 
 	/**
 	 * Check if the current user is allowed to review this submission.<br />
@@ -121,6 +152,61 @@ public interface SubmissionService
 			AssessmentCompletedException;
 
 	/**
+	 * Apply an evaluation to all the official completed submissions to this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param comment
+	 *        The overall comment. If null, no change to comment is made.
+	 * @param score
+	 *        The overall score adjustment. If null, no change to score is made.
+	 * @param markGraded
+	 *        If TRUE, mark them all as graded, otherwise no change to graded is made.
+	 * @throws AssessmentPermissionException
+	 *         If the current user is not allowed to save this Submission.
+	 */
+	void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markGraded) throws AssessmentPermissionException;
+
+	/**
+	 * Find the submissions to the assignment made by all users.<br />
+	 * If a user has not yet submitted, an empty one for that user is included. <br />
+	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param sort
+	 *        The sort order.
+	 * @param official
+	 *        if TRUE, clump multiple submissions by the same user behind the best one, else include all.
+	 * @param pageNum
+	 *        The page number (1 based) to display, or null to disable paging and get them all.
+	 * @param pageSize
+	 *        The number of items for the requested page, or null if we are not paging.
+	 * @return A sorted List<Submission> of the submissions for the assessment.
+	 */
+	List<Submission> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort, Boolean official, Integer pageNum,
+			Integer pageSize);
+
+	/**
+	 * Find the submission answers to the assignment and question made by all users.<br />
+	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param sort
+	 *        The sort order.
+	 * @param official
+	 *        if TRUE, clump multiple submissions by the same user behind the best one, else include all.
+	 * @param pageNum
+	 *        The page number (1 based) to display, or null to disable paging and get them all.
+	 * @param pageSize
+	 *        The number of items for the requested page, or null if we are not paging.
+	 * @return A sorted List<Answer> of the answers.
+	 */
+	List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Boolean official,
+			Integer pageNum, Integer pageSize);
+
+	/**
 	 * Get the total scores for all completed submissions to this assessment.
 	 * 
 	 * @param assessment
@@ -186,6 +272,16 @@ public interface SubmissionService
 	 *         if the user does not have permission to remove these submissions.
 	 */
 	void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException;
+
+	/**
+	 * Save changes made to this submission.
+	 * 
+	 * @param submission
+	 *        The submission to save.
+	 * @throws AssessmentPermissionException
+	 *         If the current user is not allowed to save this Submission.
+	 */
+	void saveSubmission(Submission submission) throws AssessmentPermissionException;
 
 	/**
 	 * Enter or update an answer to a question of an incomplete submission to an assessment. Auto grade. Updated realated info (such as the
