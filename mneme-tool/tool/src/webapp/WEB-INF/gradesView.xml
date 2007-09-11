@@ -71,7 +71,7 @@
 		</property>
 	</bean>
 
-	<bean id="FormatAssesmentGrade" class="org.muse.mneme.tool.FormatAssesmentGradedDelegate" init-method="init" destroy-method="destroy"
+	<bean id="FormatAssessmentGrade" class="org.muse.mneme.tool.FormatAssesmentGradedDelegate" init-method="init" destroy-method="destroy"
 		singleton="true">
 
 		<property name="ui">
