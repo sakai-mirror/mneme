@@ -95,7 +95,7 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 		Boolean review = (Boolean) context.get("review");
 
 		// if we are doing review just now, and if we are needing review and it's set, and if the submission has been graded
-		if ((review != null) && review && submission.getIsGraded())
+		if ((review != null) && review && submission.getIsReleased())
 		{
 			// if we are doing question score feedback
 			if (assessment.getReview().getShowCorrectAnswer())

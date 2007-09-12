@@ -104,7 +104,7 @@ public class AssessmentReviewImpl implements AssessmentReview
 		// for graded
 		if (this.timing == ReviewTiming.graded)
 		{
-			return this.assessment.getSubmissionContext().getIsGraded();
+			return this.assessment.getSubmissionContext().getIsReleased();
 		}
 
 		return Boolean.FALSE;

@@ -92,11 +92,11 @@ public interface Assessment
 	Boolean getIsClosed();
 
 	/**
-	 * Check if all the completed submissions to this assessment are marked as graded.
+	 * Check if all the completed submissions to this assessment have been released.
 	 * 
-	 * @return TRUE if all completed submissions (so far) to this assessment are marked as graded, FALSE if not.
+	 * @return TRUE if all completed submissions (so far) to this assessment have been released, FALSE if not.
 	 */
-	Boolean getIsFullyGraded();
+	Boolean getIsFullyReleased();
 
 	/**
 	 * Are multiple submissions allowed?

@@ -139,13 +139,6 @@ public interface Submission
 	Boolean getIsCompleteQuestion(Question question);
 
 	/**
-	 * Check if the submission has been graded or not.
-	 * 
-	 * @return TRUE if the assessment has been graded, FALSE if not.
-	 */
-	Boolean getIsGraded();
-
-	/**
 	 * Check if the submission is past its time limit, due or accept until date, or is to an assessment that is inactive.
 	 * 
 	 * @param qasOf
@@ -155,6 +148,13 @@ public interface Submission
 	 * @return TRUE if the submission is over, FALSE if not.
 	 */
 	Boolean getIsOver(Date asOf, long grace);
+
+	/**
+	 * Check if the submission has been released or not.
+	 * 
+	 * @return TRUE if the submission has been released, FALSE if not.
+	 */
+	Boolean getIsReleased();
 
 	/**
 	 * Check if the submission has been started.
@@ -267,12 +267,12 @@ public interface Submission
 	void setIsComplete(Boolean complete);
 
 	/**
-	 * Set the graded flag for the submission.
+	 * Set the released flag for the submission.
 	 * 
-	 * @param graded
-	 *        True if the submission is graded, False if it is not yet.
+	 * @param released
+	 *        True if the submission is released, False if it is not yet.
 	 */
-	void setIsGraded(Boolean graded);
+	void setIsReleased(Boolean released);
 
 	/**
 	 * Set the start date for this submission - the earliest date that this submission was altered by the submitter.

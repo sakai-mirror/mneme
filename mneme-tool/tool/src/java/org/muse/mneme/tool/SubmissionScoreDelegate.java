@@ -89,7 +89,7 @@ public class SubmissionScoreDelegate extends FormatDelegateImpl
 		Boolean review = (Boolean) context.get("review");
 
 		// if we are doing review and the submission has been graded
-		if ((review != null) && review && submission.getIsGraded())
+		if ((review != null) && review && submission.getIsReleased())
 		{
 			// the total score
 			rv.append("<img src=\"" + context.get("sakai.return.url") + "/icons/grade.png\" alt=\"" + context.getMessages().getString("grade")

@@ -177,7 +177,7 @@
 					<title>
 						<message selector="graded" />
 					</title>					
-					<model ref="assessment.submissionContext.isGraded" delegate="FormatAssesmentGrade" tool="sakai.mneme" />
+					<model ref="assessment.isFullyReleased" delegate="FormatAssesmentGrade" tool="sakai.mneme" />
 				</modelColumn>
 			</columns>
 		</entityList>	

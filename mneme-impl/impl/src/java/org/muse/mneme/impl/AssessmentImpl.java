@@ -233,10 +233,10 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsFullyGraded()
+	public Boolean getIsFullyReleased()
 	{
 		// TODO: we may want to compute this on read -ggolden
-		return this.submissionService.getAssessmentIsFullyGraded(this);
+		return this.submissionService.getAssessmentIsFullyReleased(this);
 	}
 
 	/**

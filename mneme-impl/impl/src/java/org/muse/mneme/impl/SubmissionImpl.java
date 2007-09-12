@@ -438,14 +438,6 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsGraded()
-	{
-		return this.graded;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean getIsOver(Date asOf, long grace)
 	{
 		Date over = getWhenOver();
@@ -455,6 +447,14 @@ public class SubmissionImpl implements Submission
 		if (asOf == null) asOf = new Date();
 
 		return Boolean.valueOf(asOf.getTime() > over.getTime() + grace);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsReleased()
+	{
+		return this.graded;
 	}
 
 	/**
@@ -646,7 +646,7 @@ public class SubmissionImpl implements Submission
 	public Float getTotalScore()
 	{
 		// Note: treat this as getGrade() - later make getGrade() and let this always return the score, graded or not -ggolden
-		if (!getIsGraded()) return new Float(0);
+		if (!getIsReleased()) return new Float(0);
 
 		// if our special "total score" is set, use this, otherwise we compute
 		if (this.totalScore != null) return this.totalScore;
@@ -729,7 +729,7 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setIsGraded(Boolean graded)
+	public void setIsReleased(Boolean graded)
 	{
 		if (graded == null) throw new IllegalArgumentException();
 		this.graded = graded;

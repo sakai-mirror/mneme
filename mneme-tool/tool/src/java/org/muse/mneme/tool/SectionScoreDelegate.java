@@ -95,7 +95,7 @@ public class SectionScoreDelegate extends FormatDelegateImpl
 		Boolean review = (Boolean) context.get("review");
 
 		// if we are doing review and the submission has been graded
-		if ((review != null) && review && submission.getIsGraded())
+		if ((review != null) && review && submission.getIsReleased())
 		{
 			// add the sum of scores for any answered question in this section
 			float score = 0;

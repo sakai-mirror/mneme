@@ -255,14 +255,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// if grade at submission
 		if (assessment.getGrading().getAutoRelease())
 		{
-			submission.setIsGraded(Boolean.TRUE);
+			submission.setIsReleased(Boolean.TRUE);
 		}
 
 		// store the changes
 		this.storage.saveSubmission((SubmissionImpl) submission);
 
 		// record in the gradebook if so configured
-		if (assessment.getGrading().getGradebookIntegration() && submission.getIsGraded())
+		if (assessment.getGrading().getGradebookIntegration() && submission.getIsReleased())
 		{
 			recordInGradebook(submission, true);
 		}
@@ -513,9 +513,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getAssessmentIsFullyGraded(Assessment assessment)
+	public Boolean getAssessmentIsFullyReleased(Assessment assessment)
 	{
-		return this.storage.getAssessmentIsFullyGraded(assessment);
+		return this.storage.getAssessmentIsFullyReleased(assessment);
 	}
 
 	/**
@@ -1002,7 +1002,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// check if we should also mark it graded
 			if (assessment.getGrading().getAutoRelease())
 			{
-				submission.setIsGraded(Boolean.TRUE);
+				submission.setIsReleased(Boolean.TRUE);
 			}
 		}
 
@@ -1011,7 +1011,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		this.storage.saveAnswers(answers);
 
 		// record in gradebook if needed
-		if (submission.getIsGraded() && assessment.getGrading().getGradebookIntegration())
+		if (submission.getIsReleased() && assessment.getGrading().getGradebookIntegration())
 		{
 			recordInGradebook(submission, true);
 		}
@@ -1098,13 +1098,13 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		if (submission.getAssessment().getGrading().getAutoRelease())
 		{
-			submission.setIsGraded(Boolean.TRUE);
+			submission.setIsReleased(Boolean.TRUE);
 		}
 
 		this.storage.saveSubmission((SubmissionImpl) submission);
 
 		// record in the gradebook if so configured, using data only from the submission, no db refresh
-		if (submission.getIsGraded() && submission.getAssessment().getGrading().getGradebookIntegration())
+		if (submission.getIsReleased() && submission.getAssessment().getGrading().getGradebookIntegration())
 		{
 			recordInGradebook(submission, false);
 		}

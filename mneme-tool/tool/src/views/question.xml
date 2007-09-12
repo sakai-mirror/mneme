@@ -100,7 +100,7 @@
 		<alert selector="review-not-graded">
 			<included>
 				<decision model="review" />
-				<decision reversed="TRUE" model="submission.isGraded" />
+				<decision reversed="TRUE" model="submission.isReleased" />
 			</included>
 		</alert>
 

@@ -142,13 +142,13 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getAssessmentIsFullyGraded(Assessment assessment)
+	public Boolean getAssessmentIsFullyReleased(Assessment assessment)
 	{
 		// check the submissions to this assessment
 		for (SubmissionImpl submission : this.submissions.values())
 		{
-			// if any for this assessment are complete and not graded, the assessment is not fully graded
-			if (submission.getAssessment().equals(assessment) && submission.getIsComplete() && (!submission.getIsGraded()))
+			// if any for this assessment are complete and not released, the assessment is not fully graded
+			if (submission.getAssessment().equals(assessment) && submission.getIsComplete() && (!submission.getIsReleased()))
 			{
 				return Boolean.FALSE;
 			}
@@ -230,8 +230,8 @@ public class SubmissionStorageSample implements SubmissionStorage
 			if (submission.getAssessment().equals(assessment))
 			{
 				if (submission.getIsComplete()) completed++;
-				if (submission.getIsComplete() && submission.getIsGraded()) graded++;
-				if (submission.getIsComplete() && (!submission.getIsGraded())) unGraded++;
+				if (submission.getIsComplete() && submission.getIsReleased()) graded++;
+				if (submission.getIsComplete() && (!submission.getIsReleased())) unGraded++;
 				if ((!submission.getIsComplete()) && submission.getIsStarted()) inProgress++;
 			}
 		}

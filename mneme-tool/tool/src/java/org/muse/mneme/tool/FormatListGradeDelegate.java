@@ -79,7 +79,7 @@ public class FormatListGradeDelegate extends FormatDelegateImpl
 
 		if (submission.getIsComplete())
 		{
-			if (submission.getIsGraded())
+			if (submission.getIsReleased())
 			{
 				return formatScore(submission.getTotalScore());
 			}
