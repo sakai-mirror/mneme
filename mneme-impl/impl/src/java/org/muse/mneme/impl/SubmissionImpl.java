@@ -39,6 +39,7 @@ import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionEvaluation;
+import org.muse.mneme.api.SubmissionStatus;
 import org.sakaiproject.tool.api.SessionManager;
 
 /**
@@ -612,6 +613,23 @@ public class SubmissionImpl implements Submission
 	public Date getStartDate()
 	{
 		return this.startDate;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public SubmissionStatus getStatus()
+	{
+		// if we have no start date, we are not yet started
+		if (this.startDate == null) return SubmissionStatus.unstarted;
+
+		// if not yet complete, we are in progress
+		if (!this.isComplete) return SubmissionStatus.in_progress;
+
+		// if not yet graded, we are "just" complete
+		if (!this.graded) return SubmissionStatus.complete;
+
+		return SubmissionStatus.graded;
 	}
 
 	/**

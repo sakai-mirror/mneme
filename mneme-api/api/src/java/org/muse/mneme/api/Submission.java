@@ -223,6 +223,13 @@ public interface Submission
 	Date getStartDate();
 
 	/**
+	 * Access the submission's status.
+	 * 
+	 * @return The submissions's status.
+	 */
+	SubmissionStatus getStatus();
+
+	/**
 	 * Access the submission date for this submission.
 	 * 
 	 * @return the submission date for this submission, or null if there is none.
