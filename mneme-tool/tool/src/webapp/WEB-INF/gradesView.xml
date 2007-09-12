@@ -3,8 +3,8 @@
 
 <!--
 	/**********************************************************************************
-	* $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/webapp/WEB-INF/gradingView.xml $
-	* $Id: gradingView.xml 11029 2007-08-06 23:48:15Z maheshwarirashmi@foothill.edu $
+	* $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/webapp/WEB-INF/gradesView.xml $
+	* $Id: gradesView.xml 11029 2007-09-11 23:48:15Z maheshwarirashmi@foothill.edu $
 	***********************************************************************************
 	*
 	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
@@ -27,7 +27,7 @@
 <beans>
 
 	<bean id="org.muse.mneme.tool.GradesView" class="org.muse.mneme.tool.GradesView" init-method="init" destroy-method="destroy" singleton="true"
-		depends-on="FormatAssesmentType, FormatAssessmentGrade">
+		depends-on="FormatAssesmentType">
 
 		<property name="ui">
 			<ref bean="org.muse.ambrosia.api.UiService" />
@@ -69,20 +69,5 @@
 		<property name="toolId">
 			<value>sakai.mneme</value>
 		</property>
-	</bean>
-
-	<bean id="FormatAssessmentGrade" class="org.muse.mneme.tool.FormatAssesmentGradedDelegate" init-method="init" destroy-method="destroy"
-		singleton="true">
-
-		<property name="ui">
-			<ref bean="org.muse.ambrosia.api.UiService" />
-		</property>
-
-		<property name="id">
-			<value>FormatAssesmentGrade</value>
-		</property>
-		<property name="toolId">
-			<value>sakai.mneme</value>
-		</property>
-	</bean>
+	</bean>	
 </beans>

@@ -3,8 +3,8 @@
 
 <!--
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/views/grading.xml $
- * $Id: grading.xml 11732 2007-09-04 22:25:02Z maheshwarirashmi@foothill.edu $
+ * $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/views/grades.xml $
+ * $Id: grades.xml 11732 2007-09-11 22:25:02Z maheshwarirashmi@foothill.edu $
  ***********************************************************************************
  *
  * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
@@ -175,9 +175,18 @@
 				</modelColumn>
 				<modelColumn>
 					<title>
-						<message selector="graded" />
+						<message selector="grade_status" />
 					</title>					
-					<model ref="assessment.isFullyReleased" delegate="FormatAssesmentGrade" tool="sakai.mneme" />
+					<model ref="assessment.acceptSubmitStatus" />
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="newSubmissions" />
+					</title>		
+					<model type="icon" icon="/icons/bullet_green.png" />	 
+					<entityIncluded>
+						<decision model="assessment.isFullyReleased" reversed="TRUE"/>						
+					</entityIncluded>
 				</modelColumn>
 			</columns>
 		</entityList>	
