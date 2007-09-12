@@ -127,11 +127,11 @@ public class TestsView extends ControllerImpl
 				// 4 is active
 				else if ((sortCode.charAt(0) == '4') && (sortCode.charAt(1) == 'A'))
 				{
-					sort = AssessmentService.AssessmentsSort.active_a;
+					sort = AssessmentService.AssessmentsSort.published_a;
 				}
 				else if ((sortCode.charAt(0) == '4') && (sortCode.charAt(1) == 'D'))
 				{
-					sort = AssessmentService.AssessmentsSort.active_d;
+					sort = AssessmentService.AssessmentsSort.published_d;
 				}
 				else
 				{

@@ -56,8 +56,6 @@ public class AssessmentImpl implements Assessment
 
 	protected AssessmentAccess access = new AssessmentAccessImpl();
 
-	protected Boolean active = Boolean.FALSE;
-
 	protected String context = "";
 
 	protected Attribution createdBy = new AttributionImpl();
@@ -79,6 +77,8 @@ public class AssessmentImpl implements Assessment
 	protected transient PoolService poolService = null;
 
 	protected Presentation presentation = new PresentationImpl();
+
+	protected Boolean published = Boolean.FALSE;
 
 	protected QuestionGrouping questionGrouping = QuestionGrouping.question;
 
@@ -142,7 +142,7 @@ public class AssessmentImpl implements Assessment
 	public AcceptSubmitStatus getAcceptSubmitStatus()
 	{
 		// TODO: also consider archive
-		if (!this.active) return AcceptSubmitStatus.closed;
+		if (!this.published) return AcceptSubmitStatus.closed;
 
 		Date now = new Date();
 
@@ -165,14 +165,6 @@ public class AssessmentImpl implements Assessment
 	public AssessmentAccess getAccess()
 	{
 		return this.access;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getActive()
-	{
-		return this.active;
 	}
 
 	/**
@@ -220,7 +212,7 @@ public class AssessmentImpl implements Assessment
 	 */
 	public Boolean getIsClosed()
 	{
-		if (!this.active) return Boolean.TRUE;
+		if (!this.published) return Boolean.TRUE;
 
 		if (this.dates.getAcceptUntilDate() == null) return Boolean.FALSE;
 
@@ -260,7 +252,7 @@ public class AssessmentImpl implements Assessment
 		Date now = new Date();
 		long grace = withGrace ? MnemeService.GRACE : 0l;
 
-		if (!this.active) return Boolean.FALSE;
+		if (!this.published) return Boolean.FALSE;
 
 		// if we have a release date and we are not there yet
 		if ((this.dates.getOpenDate() != null) && (now.before(dates.getOpenDate()))) return Boolean.FALSE;
@@ -301,6 +293,14 @@ public class AssessmentImpl implements Assessment
 	public Presentation getPresentation()
 	{
 		return this.presentation;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getPublished()
+	{
+		return this.published;
 	}
 
 	/**
@@ -399,15 +399,6 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setActive(Boolean active)
-	{
-		if (active == null) throw new IllegalArgumentException();
-		this.active = active;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void setContext(String context)
 	{
 		if (context == null) context = "";
@@ -420,6 +411,15 @@ public class AssessmentImpl implements Assessment
 	public void setNumSubmissionsAllowed(Integer count)
 	{
 		this.numSubmissionsAllowed = count;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setPublished(Boolean published)
+	{
+		if (published == null) throw new IllegalArgumentException();
+		this.published = published;
 	}
 
 	/**
@@ -506,7 +506,7 @@ public class AssessmentImpl implements Assessment
 	protected void set(AssessmentImpl other)
 	{
 		this.access = new AssessmentAccessImpl((AssessmentAccessImpl) other.access);
-		this.active = other.active;
+		this.published = other.published;
 		this.context = other.context;
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
 		this.dates = new AssessmentDatesImpl((AssessmentDatesImpl) other.dates);

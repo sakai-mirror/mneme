@@ -59,7 +59,7 @@
 						<row title="publish">
 							<container>
 								<selection>
-									<model ref="assessment.active" />
+									<model ref="assessment.published" />
 								</selection>
 							</container>
 						</row>

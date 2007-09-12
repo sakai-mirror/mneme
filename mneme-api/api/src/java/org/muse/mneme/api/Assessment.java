@@ -43,13 +43,6 @@ public interface Assessment
 	AssessmentAccess getAccess();
 
 	/**
-	 * Access the assessment's active setting; active assessments are immutable and visible to users, inactive ones can only be edited.
-	 * 
-	 * @return TRUE if the assessment is active, FALSE if not.
-	 */
-	Boolean getActive();
-
-	/**
 	 * Access the context of this assessment.
 	 * 
 	 * @return The assessment's context string.
@@ -143,6 +136,13 @@ public interface Assessment
 	Presentation getPresentation();
 
 	/**
+	 * Check if the assessment is published.
+	 * 
+	 * @return TRUE if the assessment is published, FALSE if not.
+	 */
+	Boolean getPublished();
+
+	/**
 	 * Access how questions are to be grouped per page for delivery..
 	 * 
 	 * @return The question gropuing setting.
@@ -225,14 +225,6 @@ public interface Assessment
 	AssessmentType getType();
 
 	/**
-	 * Set the assessment's active setting; active assessments are immutable and visible to users, inactive ones can only be edited.
-	 * 
-	 * @param active
-	 *        The active setting.
-	 */
-	void setActive(Boolean active);
-
-	/**
 	 * Set the context of this assessment.
 	 * 
 	 * @param context
@@ -247,6 +239,14 @@ public interface Assessment
 	 *        The number of submissions allowed, or null to make it unlimited.
 	 */
 	void setNumSubmissionsAllowed(Integer count);
+
+	/**
+	 * Set the assessment's published setting.
+	 * 
+	 * @param published
+	 *        The published setting.
+	 */
+	void setPublished(Boolean published);
 
 	/**
 	 * Set how questions are grouped per page for delivery.

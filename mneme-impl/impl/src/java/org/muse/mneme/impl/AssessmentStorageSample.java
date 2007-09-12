@@ -143,7 +143,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 				// filter out unpublished if requested
 				if (publishedOnly)
 				{
-					if (!assessment.getActive()) continue;
+					if (!assessment.getPublished()) continue;
 				}
 				rv.add(new AssessmentImpl(assessment));
 			}
@@ -157,14 +157,14 @@ public class AssessmentStorageSample implements AssessmentStorage
 				int rv = 0;
 				switch (sort)
 				{
-					case active_a:
+					case published_a:
 					{
-						rv = ((Assessment) arg0).getActive().compareTo(((Assessment) arg1).getActive());
+						rv = ((Assessment) arg0).getPublished().compareTo(((Assessment) arg1).getPublished());
 						break;
 					}
-					case active_d:
+					case published_d:
 					{
-						rv = -1 * ((Assessment) arg0).getActive().compareTo(((Assessment) arg1).getActive());
+						rv = -1 * ((Assessment) arg0).getPublished().compareTo(((Assessment) arg1).getPublished());
 						break;
 					}
 					case title_a:
@@ -363,7 +363,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 			AssessmentImpl a = newAssessment();
 			a.initId("a1");
-			a.setActive(Boolean.TRUE);
+			a.setPublished(Boolean.TRUE);
 			a.setContext("mercury");
 			a.getCreatedBy().setUserId("admin");
 			a.setNumSubmissionsAllowed(1);
@@ -417,7 +417,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 			a = newAssessment();
 			a.initId("a2");
-			a.setActive(Boolean.TRUE);
+			a.setPublished(Boolean.TRUE);
 			a.setContext("mercury");
 			a.getCreatedBy().setUserId("admin");
 			a.setNumSubmissionsAllowed(5);

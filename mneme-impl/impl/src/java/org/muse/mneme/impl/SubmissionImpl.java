@@ -60,11 +60,11 @@ public class SubmissionImpl implements Submission
 
 	protected SubmissionEvaluationImpl evaluation = null;
 
-	protected Boolean released = Boolean.FALSE;
-
 	protected String id = null;
 
 	protected Boolean isComplete = Boolean.FALSE;
+
+	protected Boolean released = Boolean.FALSE;
 
 	protected transient SecurityService securityService = null;
 
@@ -554,8 +554,8 @@ public class SubmissionImpl implements Submission
 		// submission complete
 		if (!getIsComplete()) return Boolean.FALSE;
 
-		// not inactive
-		if (!getAssessment().getActive()) return Boolean.FALSE;
+		// published
+		if (!getAssessment().getPublished()) return Boolean.FALSE;
 
 		// assessment review enabled
 		if (!getAssessment().getReview().getNowAvailable()) return Boolean.FALSE;
@@ -576,8 +576,8 @@ public class SubmissionImpl implements Submission
 		// submission complete
 		if (!getIsComplete().booleanValue()) return Boolean.FALSE;
 
-		// not inactive
-		if (!getAssessment().getActive()) return Boolean.FALSE;
+		// published
+		if (!getAssessment().getPublished()) return Boolean.FALSE;
 
 		// assessment not set to no review
 		if (getAssessment().getReview().getTiming() == ReviewTiming.never) return Boolean.FALSE;

@@ -220,7 +220,7 @@
 							<destination template="/tests/4D" />
 						</desc>
 					</sort>
-					<model ref="assessment.active" delegate="FormatAssesmentActive" tool="sakai.mneme" />
+					<model ref="assessment.published" delegate="FormatAssesmentActive" tool="sakai.mneme" />
 					<entityNavigations>
 						<navigation submit="TRUE">
 							<destination template="/test_publish/{0}{1}/{2}">
