@@ -60,7 +60,7 @@ public class SubmissionImpl implements Submission
 
 	protected SubmissionEvaluationImpl evaluation = null;
 
-	protected Boolean graded = Boolean.FALSE;
+	protected Boolean released = Boolean.FALSE;
 
 	protected String id = null;
 
@@ -454,7 +454,7 @@ public class SubmissionImpl implements Submission
 	 */
 	public Boolean getIsReleased()
 	{
-		return this.graded;
+		return this.released;
 	}
 
 	/**
@@ -626,8 +626,9 @@ public class SubmissionImpl implements Submission
 		// if not yet complete, we are in progress
 		if (!this.isComplete) return SubmissionStatus.in_progress;
 
-		// if not yet graded, we are "just" complete
-		if (!this.graded) return SubmissionStatus.complete;
+		// if not yet released, we are "just" complete
+		// TODO: this should probably be based on evaluated, not released
+		if (!this.released) return SubmissionStatus.complete;
 
 		return SubmissionStatus.graded;
 	}
@@ -729,10 +730,10 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setIsReleased(Boolean graded)
+	public void setIsReleased(Boolean released)
 	{
-		if (graded == null) throw new IllegalArgumentException();
-		this.graded = graded;
+		if (released == null) throw new IllegalArgumentException();
+		this.released = released;
 	}
 
 	/**
@@ -901,7 +902,7 @@ public class SubmissionImpl implements Submission
 		this.assessmentService = other.assessmentService;
 		this.bestSubmissionId = other.bestSubmissionId;
 		this.evaluation = new SubmissionEvaluationImpl(other.evaluation);
-		this.graded = other.graded;
+		this.released = other.released;
 		this.id = other.id;
 		this.isComplete = other.isComplete;
 		this.securityService = other.securityService;
