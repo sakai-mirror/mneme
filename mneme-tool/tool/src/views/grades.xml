@@ -94,7 +94,7 @@
 									<model ref="assessment.title" missing="no-title" />
 								</message>
 							</title>
-							<destination template="/grades_classList/{0}{1}/{2}">
+							<destination template="/grades_class_list/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
@@ -165,7 +165,7 @@
 					<navigations>	
 					<navigation style="LINK" submit="TRUE">
 							<icon icon="/icons/grade.png" />
-							<destination template="/grades_classList/{0}{1}/{2}">
+							<destination template="/grades_class_list/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
