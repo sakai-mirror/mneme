@@ -207,6 +207,15 @@ public interface SubmissionService
 			Integer pageNum, Integer pageSize);
 
 	/**
+	 * Check if this assessment is fully graded.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return TRUE if the assessment's complete submissions are all marked graded, FALSE if not.
+	 */
+	Boolean getAssessmentIsFullyGraded(Assessment assessment);
+
+	/**
 	 * Get the total scores for all completed submissions to this assessment.
 	 * 
 	 * @param assessment

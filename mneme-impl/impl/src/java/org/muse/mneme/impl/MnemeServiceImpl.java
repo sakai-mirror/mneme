@@ -326,6 +326,14 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getAssessmentIsFullyGraded(Assessment assessment)
+	{
+		return this.submissionService.getAssessmentIsFullyGraded(assessment);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Float> getAssessmentScores(Assessment assessment)
 	{
 		return submissionService.getAssessmentScores(assessment);

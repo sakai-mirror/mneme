@@ -233,6 +233,15 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsFullyGraded()
+	{
+		// TODO: we may want to compute this on read -ggolden
+		return this.submissionService.getAssessmentIsFullyGraded(this);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsMultipleSubmissionsAllowed()
 	{
 		if ((getNumSubmissionsAllowed() == null) || (getNumSubmissionsAllowed() > 1))

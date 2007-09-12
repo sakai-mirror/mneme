@@ -513,6 +513,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getAssessmentIsFullyGraded(Assessment assessment)
+	{
+		return this.storage.getAssessmentIsFullyGraded(assessment);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Float> getAssessmentScores(Assessment assessment)
 	{
 		List<Float> rv = this.storage.getAssessmentScores(assessment);

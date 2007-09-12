@@ -66,6 +66,15 @@ public interface SubmissionStorage
 	List<SubmissionImpl> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort);
 
 	/**
+	 * Check if this assessment is fully graded.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return TRUE if the assessment's complete submissions are all marked graded, FALSE if not.
+	 */
+	Boolean getAssessmentIsFullyGraded(Assessment assessment);
+
+	/**
 	 * Access all the submission scores to this assessment.
 	 * 
 	 * @param assessment

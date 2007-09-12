@@ -142,6 +142,24 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getAssessmentIsFullyGraded(Assessment assessment)
+	{
+		// check the submissions to this assessment
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			// if any for this assessment are complete and not graded, the assessment is not fully graded
+			if (submission.getAssessment().equals(assessment) && submission.getIsComplete() && (!submission.getIsGraded()))
+			{
+				return Boolean.FALSE;
+			}
+		}
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Float> getAssessmentScores(Assessment assessment)
 	{
 		List<Float> rv = new ArrayList<Float>();
