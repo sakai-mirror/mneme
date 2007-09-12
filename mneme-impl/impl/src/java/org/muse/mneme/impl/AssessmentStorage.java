@@ -68,9 +68,11 @@ public interface AssessmentStorage
 	 *        The context.
 	 * @param sort
 	 *        The sort specification.
-	 * @return The list of Assessments defined in the context, sorted..
+	 * @param publishedOnly
+	 *        if TRUE, return only published assessments, else return unpublished as well.
+	 * @return The list of Assessments defined in the context, sorted.
 	 */
-	List<Assessment> getContextAssessments(String context, AssessmentService.AssessmentsSort sort);
+	List<Assessment> getContextAssessments(String context, AssessmentService.AssessmentsSort sort, Boolean publishedOnly);
 
 	/**
 	 * Construct a new Assessment object.

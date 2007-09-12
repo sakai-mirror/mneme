@@ -342,9 +342,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Assessment> getContextAssessments(String context, AssessmentService.AssessmentsSort sort)
+	public List<Assessment> getContextAssessments(String context, AssessmentService.AssessmentsSort sort, Boolean publishedOnly)
 	{
-		return assessmentService.getContextAssessments(context, sort);
+		return assessmentService.getContextAssessments(context, sort, publishedOnly);
 	}
 
 	/**

@@ -158,7 +158,7 @@ public class TestsView extends ControllerImpl
 		}
 
 		// collect the assessments in this context
-		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext(), sort);
+		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext(), sort, Boolean.FALSE);
 		context.put("assessments", assessments);
 
 		// value holders for the selection checkboxes

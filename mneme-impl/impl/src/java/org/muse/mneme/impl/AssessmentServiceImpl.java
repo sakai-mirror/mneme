@@ -209,13 +209,15 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Assessment> getContextAssessments(String context, AssessmentsSort sort)
+	public List<Assessment> getContextAssessments(String context, AssessmentsSort sort, Boolean publishedOnly)
 	{
 		if (context == null) throw new IllegalArgumentException();
+		if (publishedOnly == null) throw new IllegalArgumentException();
+		if (sort == null) throw new IllegalArgumentException();
 
 		if (M_log.isDebugEnabled()) M_log.debug("getContextAssessments: " + context + " " + sort);
 
-		List<Assessment> rv = this.storage.getContextAssessments(context, sort);
+		List<Assessment> rv = this.storage.getContextAssessments(context, sort, publishedOnly);
 		return rv;
 	}
 

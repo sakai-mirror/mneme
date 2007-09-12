@@ -130,7 +130,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Assessment> getContextAssessments(String context, final AssessmentService.AssessmentsSort sort)
+	public List<Assessment> getContextAssessments(String context, final AssessmentService.AssessmentsSort sort, Boolean publishedOnly)
 	{
 		fakeIt();
 
@@ -140,6 +140,11 @@ public class AssessmentStorageSample implements AssessmentStorage
 		{
 			if (assessment.getContext().equals(context))
 			{
+				// filter out unpublished if requested
+				if (publishedOnly)
+				{
+					if (!assessment.getActive()) continue;
+				}
 				rv.add(new AssessmentImpl(assessment));
 			}
 		}

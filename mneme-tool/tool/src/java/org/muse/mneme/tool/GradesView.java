@@ -90,7 +90,7 @@ public class GradesView extends ControllerImpl
 		}
 		
 		// collect the assessments in this context
-		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext(), sort);
+		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext(), sort, Boolean.TRUE);
 		context.put("assessments", assessments);
 	
 		// render

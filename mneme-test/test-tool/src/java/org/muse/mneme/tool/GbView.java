@@ -139,7 +139,7 @@ public class GbView extends ControllerImpl
 		try
 		{
 			// get a list of the tests in the site
-			List<Assessment> tests = assessmentService.getContextAssessments(context, null);
+			List<Assessment> tests = assessmentService.getContextAssessments(context, null, Boolean.FALSE);
 
 			// for each one, update the gb
 			for (Assessment test : tests)

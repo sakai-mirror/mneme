@@ -62,14 +62,6 @@ public class TrueFalsePlugin implements QuestionPlugin
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getName()
-	{
-		return this.messages.getString("name");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public String getType()
 	{
 		return "mneme:TrueFalse";
