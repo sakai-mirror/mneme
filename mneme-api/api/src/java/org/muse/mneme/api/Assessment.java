@@ -29,6 +29,13 @@ import java.util.List;
 public interface Assessment
 {
 	/**
+	 * Get the submitable status for the assessment - this indicates if we are expecting submissions now.
+	 * 
+	 * @return The submitable status
+	 */
+	AcceptSubmitStatus getAcceptSubmitStatus();
+
+	/**
 	 * Access the special access settings.
 	 * 
 	 * @return The special access settings.

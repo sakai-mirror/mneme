@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.AcceptSubmitStatus;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentDates;
@@ -133,6 +134,29 @@ public class AssessmentImpl implements Assessment
 		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
 		if ((this.id == null) || (((AssessmentImpl) obj).id == null)) return false;
 		return this.id.equals(((AssessmentImpl) obj).id);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AcceptSubmitStatus getAcceptSubmitStatus()
+	{
+		// TODO: also consider archive
+		if (!this.active) return AcceptSubmitStatus.closed;
+
+		Date now = new Date();
+
+		// before open date, we are future (not yet open)
+		if ((this.dates.getOpenDate() != null) && (now.before(this.dates.getOpenDate()))) return AcceptSubmitStatus.future;
+
+		// after accept until date, we are closed
+		if ((this.dates.getAcceptUntilDate() != null) && (now.after(this.dates.getAcceptUntilDate()))) return AcceptSubmitStatus.closed;
+
+		// after due date, we are past_due
+		if ((this.dates.getDueDate() != null) && (now.after(this.dates.getDueDate()))) return AcceptSubmitStatus.past_due;
+
+		// otherwise, we are open
+		return AcceptSubmitStatus.open;
 	}
 
 	/**
