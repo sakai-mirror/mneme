@@ -55,6 +55,43 @@
 				</navigation>
 			</container>
 		</navigationBar>
+
+		<entityDisplay>
+			<rows>
+				<row title="actions">
+					<container>
+						<navigation title="mark-all-submissions" style="LINK">
+							<icon icon="/icons/checkon.gif" style="LEFT" />
+							<destination template="/" />
+						</navigation>
+					</container>
+				</row>
+				<row>
+					<container>
+						<entityDisplay>
+							<rows>
+								<row title="adjust-scores">
+									<container>
+										<textEdit model="" rows="1" cols="4" />
+									</container>
+								</row>
+							</rows>
+						</entityDisplay>
+					</container>
+				</row>
+				<row>
+					<container>
+						<text selector="add-comments" />
+					</container>
+				</row>
+				<row>
+					<container>
+						<textEdit model="" rows="5" cols="40" />
+					</container>
+				</row>
+			</rows>
+		</entityDisplay>
+
 		
 	</container>
 </interface>

@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
@@ -71,6 +72,16 @@ public class GradeAssessmentView extends ControllerImpl
 		// get Assessment submissions
 		List submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.TRUE, null, null);
 		context.put("submissions", submissions);
+
+		Integer maxSubmissions = 0;
+		if (submissions != null) maxSubmissions = submissions.size();
+
+		String pagingParameter = "1-30";
+		// paging
+		Paging paging = uiService.newPaging();
+		paging.setMaxItems(maxSubmissions);
+		paging.setCurrentAndSize(pagingParameter);
+		context.put("paging", paging);
 
 		uiService.render(ui, context);
 	}
