@@ -115,7 +115,7 @@
 					</title>
 					<model type="date" ref="submission.submittedDate" />
 					<entityIncluded>
-						<decision model="submission.isComplete"/>
+						<decision model="submission.isComplete" />
 					</entityIncluded>
 				</modelColumn>
 				<modelColumn>
@@ -156,11 +156,16 @@
 			<container>
 				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
 					<icon icon="/icons/save.png" style="LEFT" />
-					<destination template="/grades" />
+					<destination template="/grade_assessment/{0}/{1}">
+						<model ref="gradesSortCode" />
+						<model ref="assessment.id" />
+					</destination>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/grades" />
+					<destination template="/grades/{0}">
+						<model ref="gradesSortCode" />
+					</destination>
 				</navigation>
 			</container>
 		</navigationBar>

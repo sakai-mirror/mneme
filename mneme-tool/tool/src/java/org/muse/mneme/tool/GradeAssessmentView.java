@@ -35,6 +35,7 @@ import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.util.Web;
 
 /**
  * The /grading view for the mneme tool.
@@ -66,6 +67,10 @@ public class GradeAssessmentView extends ControllerImpl
 		if (params.length != 4) throw new IllegalArgumentException();
 		
 		 //TODO: add check for user permission to access the assessments for grading
+		
+		//grades sort parameter is in params array at index 2
+		String gradesSortCode = params[2];
+		context.put("gradesSortCode", gradesSortCode);
 
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
@@ -102,7 +107,13 @@ public class GradeAssessmentView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		throw new IllegalArgumentException();
+		if (params.length != 4) throw new IllegalArgumentException();
+		
+		//read form
+		String destination = this.uiService.decode(req, context);
+		
+		destination = "/grades/" + params[2];
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));		
 	}
 
 	/**
