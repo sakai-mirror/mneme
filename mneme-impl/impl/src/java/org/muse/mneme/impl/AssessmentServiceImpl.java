@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.PolicyException;
@@ -164,7 +165,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		rv.setContext(context);
 
 		// save
-		saveAssessment(rv);
+		save(rv);
 
 		return rv;
 	}
@@ -270,7 +271,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		AssessmentImpl rv = this.storage.newAssessment();
 		rv.setContext(context);
-		saveAssessment(rv);
+		save(rv);
 
 		return rv;
 	}
@@ -302,7 +303,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void saveAssessment(Assessment assessment) throws AssessmentPermissionException
+	public void saveAssessment(Assessment assessment) throws AssessmentPermissionException, AssessmentPolicyException
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 
@@ -311,21 +312,10 @@ public class AssessmentServiceImpl implements AssessmentService
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
 
-		// if the assessment is new (i.e. no id), set the createdBy information, if not already set
-		if ((assessment.getId() == null) && (assessment.getCreatedBy().getUserId() == null))
-		{
-			assessment.getCreatedBy().setDate(new Date());
-			assessment.getCreatedBy().setUserId(sessionManager.getCurrentSessionUserId());
-		}
+		// check for changes not allowed if live
+		if ((assessment.getIsLive()) && ((AssessmentImpl) assessment).getIsLiveChanged()) throw new AssessmentPolicyException();
 
-		// update last modified information
-		assessment.getModifiedBy().setDate(new Date());
-		assessment.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
-
-		this.storage.saveAssessment((AssessmentImpl) assessment);
-
-		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_EDIT, getAssessmentReference(assessment.getId()), true));
+		save(assessment);
 	}
 
 	/**
@@ -449,10 +439,33 @@ public class AssessmentServiceImpl implements AssessmentService
 	 */
 	protected Boolean satisfyAssessmentRemovalPolicy(Assessment assessment)
 	{
-		// TODO: removal policy
-		// assessment must have no completed submissions
-		if (assessment.getSubmissionCounts().getCompleted() > 0) return Boolean.FALSE;
+		// live tests may not be deleted
+		if (assessment.getIsLive()) return Boolean.FALSE;
 
 		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void save(Assessment assessment)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("save: " + assessment.getId());
+
+		// if the assessment is new (i.e. no id), set the createdBy information, if not already set
+		if ((assessment.getId() == null) && (assessment.getCreatedBy().getUserId() == null))
+		{
+			assessment.getCreatedBy().setDate(new Date());
+			assessment.getCreatedBy().setUserId(sessionManager.getCurrentSessionUserId());
+		}
+
+		// update last modified information
+		assessment.getModifiedBy().setDate(new Date());
+		assessment.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
+
+		this.storage.saveAssessment((AssessmentImpl) assessment);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_EDIT, getAssessmentReference(assessment.getId()), true));
 	}
 }

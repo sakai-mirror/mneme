@@ -274,4 +274,13 @@ public interface SubmissionStorage
 	 * @return TRUE if the submission with this id exists, FALSE if not.
 	 */
 	Boolean submissionExists(String id);
+
+	/**
+	 * Check if any submissions in any state exist for this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return TRUE if there are any submissions to the assesment.
+	 */
+	Boolean submissionsExist(Assessment assessment);
 }

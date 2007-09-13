@@ -45,9 +45,7 @@ import org.muse.mneme.api.SubmissionCounts;
 import org.muse.mneme.api.SubmissionService;
 
 /**
- * <p>
  * AssessmentImpl implements Assessment
- * </p>
  */
 public class AssessmentImpl implements Assessment
 {
@@ -72,7 +70,7 @@ public class AssessmentImpl implements Assessment
 
 	protected Integer numSubmissionsAllowed = Integer.valueOf(1);
 
-	protected AssessmentParts parts = null;
+	protected AssessmentPartsImpl parts = null;
 
 	protected transient PoolService poolService = null;
 
@@ -229,6 +227,15 @@ public class AssessmentImpl implements Assessment
 	{
 		// TODO: we may want to compute this on read -ggolden
 		return this.submissionService.getAssessmentIsFullyReleased(this);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsLive()
+	{
+		// TODO: we may want to compute this on read -ggolden
+		return this.submissionService.submissionsExist(this);
 	}
 
 	/**
@@ -473,6 +480,16 @@ public class AssessmentImpl implements Assessment
 	{
 		if (type == null) throw new IllegalArgumentException();
 		this.type = type;
+	}
+
+	/**
+	 * Check if any changes have been made that are not allowed if the test is live.
+	 * 
+	 * @return TRUE if any changes that are not allowed if live have been made, FALSE if not.
+	 */
+	protected Boolean getIsLiveChanged()
+	{
+		return this.parts.liveChanged;
 	}
 
 	/**

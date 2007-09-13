@@ -293,6 +293,15 @@ public interface SubmissionService
 	void saveSubmission(Submission submission) throws AssessmentPermissionException;
 
 	/**
+	 * Check if any submissions in any state exist for this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return TRUE if there are any submissions to the assesment.
+	 */
+	Boolean submissionsExist(Assessment assessment);
+
+	/**
 	 * Enter or update an answer to a question of an incomplete submission to an assessment. Auto grade. Updated realated info (such as the
 	 * submission's score).<br />
 	 * Complete the submission if indicated.

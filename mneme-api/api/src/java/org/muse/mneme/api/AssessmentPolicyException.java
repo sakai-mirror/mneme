@@ -19,10 +19,11 @@
  *
  **********************************************************************************/
 
-package org.muse.mneme.tool;
+package org.muse.mneme.api;
 
-/** Our errors. */
-enum Errors
+/**
+ * AssessmentPolicyException is thrown to indicate a policy violation.
+ */
+public class AssessmentPolicyException extends Exception
 {
-	closed, invalid, invalidpost, linear, over, password, policy, unauthorized, unexpected, unknown, upload
 }

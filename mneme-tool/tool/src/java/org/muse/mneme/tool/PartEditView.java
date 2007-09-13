@@ -32,14 +32,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.PopulatingSet;
+import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.api.PopulatingSet.Factory;
 import org.muse.ambrosia.api.PopulatingSet.Id;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.ambrosia.api.Paging;
-import org.muse.ambrosia.api.Values;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
@@ -395,6 +396,12 @@ public class PartEditView extends ControllerImpl
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+		catch (AssessmentPolicyException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
 			return;
 		}
 

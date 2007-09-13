@@ -38,6 +38,7 @@ import org.muse.ambrosia.api.PopulatingSet.Id;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
@@ -200,8 +201,9 @@ public class TestsView extends ControllerImpl
 		String destination = uiService.decode(req, context);
 		if (destination != null)
 		{
-			// Save date changes regardless of where user goes
-			saveDates(req, res, context);
+			// save date changes regardless of where user goes
+			if (!saveDates(req, res, context)) return;
+
 			// for an add
 			if (destination.startsWith("/test_add"))
 			{
@@ -303,7 +305,7 @@ public class TestsView extends ControllerImpl
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
-	private void saveDates(HttpServletRequest req, HttpServletResponse res, Context context) throws IOException
+	private boolean saveDates(HttpServletRequest req, HttpServletResponse res, Context context) throws IOException
 	{
 		PopulatingSet assessments = null;
 		final AssessmentService assessmentService = this.assessmentService;
@@ -337,9 +339,17 @@ public class TestsView extends ControllerImpl
 			{
 				// redirect to error
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-				return;
+				return false;
+			}
+			catch (AssessmentPolicyException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+				return false;
 			}
 		}
+		
+		return true;
 	}
 
 	/**

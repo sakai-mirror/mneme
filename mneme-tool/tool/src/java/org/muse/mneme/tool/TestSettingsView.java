@@ -32,6 +32,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.sakaiproject.util.Web;
 
@@ -149,6 +150,13 @@ public class TestSettingsView extends ControllerImpl
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 				return;
 			}
+			catch (AssessmentPolicyException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+				return;
+			}
+
 			path.append("/tests/" + params[2]);
 			// redirect to the next destination
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));

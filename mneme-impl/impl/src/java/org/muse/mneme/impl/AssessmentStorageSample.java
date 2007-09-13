@@ -328,7 +328,13 @@ public class AssessmentStorageSample implements AssessmentStorage
 			}
 		}
 
-		this.assessments.put(assessment.getId(), new AssessmentImpl(assessment));
+		// save a copy
+		AssessmentImpl copy = new AssessmentImpl(assessment);
+
+		// clear the changed flag
+		copy.parts.liveChanged = Boolean.FALSE;
+
+		this.assessments.put(assessment.getId(), copy);
 	}
 
 	/**

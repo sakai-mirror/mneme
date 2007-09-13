@@ -154,6 +154,8 @@ public interface AssessmentService
 	 *        The assessment to save.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to edit this assessment.
+	 * @throws AssessmentPolicyException
+	 *         if the changes are not allowed to be saved due to policy violation.
 	 */
-	void saveAssessment(Assessment assessment) throws AssessmentPermissionException;
+	void saveAssessment(Assessment assessment) throws AssessmentPermissionException, AssessmentPolicyException;
 }

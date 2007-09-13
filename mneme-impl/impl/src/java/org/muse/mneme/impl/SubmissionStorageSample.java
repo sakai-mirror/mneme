@@ -517,4 +517,19 @@ public class SubmissionStorageSample implements SubmissionStorage
 	{
 		return Boolean.FALSE;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean submissionsExist(Assessment assessment)
+	{
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			if (submission.getAssessment().equals(assessment))
+			{
+				return Boolean.TRUE;
+			}
+		}
+		return Boolean.FALSE;
+	}
 }

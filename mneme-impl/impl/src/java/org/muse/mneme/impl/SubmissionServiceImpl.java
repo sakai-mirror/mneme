@@ -905,6 +905,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean submissionsExist(Assessment assessment)
+	{
+		return this.storage.submissionsExist(assessment);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void submitAnswer(Answer answer, Boolean completeAnswer, Boolean completeSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException
 	{

@@ -58,6 +58,16 @@
 		</section>
 		<section>
 			<container>
+				<alert selector="error-policy" />
+			</container>
+			<included>
+				<decision type="hasValue">
+					<model ref="policy" />
+				</decision>
+			</included>
+		</section>
+		<section>
+			<container>
 				<alert selector="error-unexpected" />
 			</container>
 			<included>

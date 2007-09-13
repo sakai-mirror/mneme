@@ -35,6 +35,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
@@ -541,7 +542,7 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void saveAssessment(Assessment assessment) throws AssessmentPermissionException
+	public void saveAssessment(Assessment assessment) throws AssessmentPermissionException, AssessmentPolicyException
 	{
 		assessmentService.saveAssessment(assessment);
 	}
@@ -656,6 +657,14 @@ public class MnemeServiceImpl implements MnemeService
 	public void setSubmissionService(SubmissionService service)
 	{
 		submissionService = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean submissionsExist(Assessment assessment)
+	{
+		return this.submissionService.submissionsExist(assessment);
 	}
 
 	/**

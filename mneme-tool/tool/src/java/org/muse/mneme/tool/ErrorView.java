@@ -104,6 +104,12 @@ public class ErrorView extends ControllerImpl
 				break;
 			}
 
+			case policy:
+			{
+				context.put("policy", Boolean.TRUE);
+				break;
+			}
+
 			case unexpected:
 			{
 				context.put("unexpected", Boolean.TRUE);

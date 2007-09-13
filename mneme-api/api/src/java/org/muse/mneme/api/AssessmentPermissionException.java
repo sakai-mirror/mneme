@@ -22,9 +22,7 @@
 package org.muse.mneme.api;
 
 /**
- * <p>
- * AssessmentPermissionException is thrown it indicate a lack of permission for an assessment service access.
- * </p>
+ * AssessmentPermissionException is thrown to indicate a lack of permission for an assessment service access.
  */
 public class AssessmentPermissionException extends Exception
 {

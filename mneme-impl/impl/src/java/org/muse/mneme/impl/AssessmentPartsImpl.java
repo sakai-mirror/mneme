@@ -43,6 +43,9 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 	protected Boolean continuousNumbering = Boolean.FALSE;
 
+	/** Track any changes that cannot be made to live tests. */
+	protected transient Boolean liveChanged = Boolean.FALSE;
+
 	protected List<Part> parts = new ArrayList<Part>();
 
 	protected PoolService poolService = null;
@@ -93,6 +96,9 @@ public class AssessmentPartsImpl implements AssessmentParts
 		this.parts.add(rv);
 		((PartImpl) rv).initContainer(this.parts);
 
+		// this is a change that cannot be made to live tests
+		this.liveChanged = Boolean.TRUE;
+
 		return rv;
 	}
 
@@ -107,6 +113,9 @@ public class AssessmentPartsImpl implements AssessmentParts
 		// add it to the list
 		this.parts.add(rv);
 		((PartImpl) rv).initContainer(this.parts);
+
+		// this is a change that cannot be made to live tests
+		this.liveChanged = Boolean.TRUE;
 
 		return rv;
 	}
@@ -229,6 +238,9 @@ public class AssessmentPartsImpl implements AssessmentParts
 	{
 		this.parts.remove(part);
 		((PartImpl) part).initContainer(null);
+
+		// this is a change that cannot be made to live tests
+		this.liveChanged = Boolean.TRUE;
 	}
 
 	/**
@@ -275,8 +287,25 @@ public class AssessmentPartsImpl implements AssessmentParts
 			}
 		}
 
+		// see if the new list and the old line up - i.e. no changes
+		boolean changed = false;
+		for (int i = 0; i < newParts.size(); i++)
+		{
+			if (!this.parts.get(i).equals(newParts.get(i)))
+			{
+				changed = true;
+				break;
+			}
+		}
+
+		// ignore if no changes
+		if (!changed) return;
+
 		// take the new list
 		this.parts = newParts;
+
+		// this is a change that cannot be made to live tests
+		this.liveChanged = Boolean.TRUE;
 	}
 
 	/**
@@ -302,6 +331,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		this.showPresentation = other.showPresentation;
 		this.questionService = other.questionService;
 		this.poolService = other.poolService;
+		this.liveChanged = other.liveChanged;
 
 		for (Part part : other.parts)
 		{

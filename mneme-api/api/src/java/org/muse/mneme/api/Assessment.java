@@ -92,6 +92,13 @@ public interface Assessment
 	Boolean getIsFullyReleased();
 
 	/**
+	 * Check if the assessment is live; i.e. has at least one started submission.
+	 * 
+	 * @return TRUE if the assessment is live, FALSE if not.
+	 */
+	Boolean getIsLive();
+
+	/**
 	 * Are multiple submissions allowed?
 	 * 
 	 * @return TRUE if multiple submissions are allowed, FALSE if not.

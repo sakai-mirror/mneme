@@ -35,6 +35,7 @@ import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.AssessmentService;
@@ -263,6 +264,13 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
+		catch (AssessmentPolicyException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+			return;
+		}
+
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
