@@ -180,9 +180,9 @@
 						</selectionColumn>
 						<orderColumn>
 							<value>
-								<model type="text" ref="part.id" />
+								<model ref="part.id" />
 							</value>
-							<model ref="assessment.partOrder" />
+							<model ref="assessment.parts.order" />
 						</orderColumn>
 						<modelColumn>
 							<title>

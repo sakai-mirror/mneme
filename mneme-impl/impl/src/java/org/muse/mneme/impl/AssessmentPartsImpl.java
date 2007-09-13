@@ -22,10 +22,11 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.muse.mneme.api.AssessmentParts;
-import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
@@ -38,6 +39,8 @@ import org.muse.mneme.api.QuestionService;
  */
 public class AssessmentPartsImpl implements AssessmentParts
 {
+	protected transient AssessmentImpl assessment = null;
+
 	protected Boolean continuousNumbering = Boolean.FALSE;
 
 	protected List<Part> parts = new ArrayList<Part>();
@@ -47,8 +50,6 @@ public class AssessmentPartsImpl implements AssessmentParts
 	protected QuestionService questionService = null;
 
 	protected Boolean showPresentation = Boolean.FALSE;
-
-	protected transient AssessmentImpl assessment = null;
 
 	/**
 	 * Construct.
@@ -237,6 +238,45 @@ public class AssessmentPartsImpl implements AssessmentParts
 	{
 		if (setting == null) throw new IllegalArgumentException();
 		this.continuousNumbering = setting;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setOrder(String[] partIds)
+	{
+		if (partIds == null) throw new IllegalArgumentException();
+		List<String> ids = new ArrayList(Arrays.asList(partIds));
+
+		// remove anything from the new list not in our parts
+		for (Iterator i = ids.iterator(); i.hasNext();)
+		{
+			String id = (String) i.next();
+			Part part = getPart(id);
+			if (part == null)
+			{
+				i.remove();
+			}
+		}
+
+		// start with these
+		List<Part> newParts = new ArrayList<Part>();
+		for (String id : ids)
+		{
+			newParts.add(getPart(id));
+		}
+
+		// pick up the rest
+		for (Part part : this.parts)
+		{
+			if (!ids.contains(part.getId()))
+			{
+				newParts.add(part);
+			}
+		}
+
+		// take the new list
+		this.parts = newParts;
 	}
 
 	/**

@@ -135,6 +135,16 @@ public interface AssessmentParts
 	void setContinuousNumbering(Boolean setting);
 
 	/**
+	 * Reorder the existing parts to match this order.<br />
+	 * Any parts not listed remain in their order following this list.<br />
+	 * Any prats in the list not matching existing parts are ignored.
+	 * 
+	 * @param partIds
+	 *        A list of the part ids in order.
+	 */
+	void setOrder(String[] partIds);
+
+	/**
 	 * Set the show-presentation setting; this controlls the display of each part's presentation.
 	 * 
 	 * @param setting
