@@ -119,6 +119,45 @@
 					</title>
 					<model ref="submission.userId" missing="no-username" />
 				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="submission-finished" />
+					</title>
+					<model type="date" ref="submission.submittedDate" />
+					<entityIncluded>
+						<decision model="submission.isComplete"/>
+					</entityIncluded>
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="submission-status" />
+					</title>
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="submission-tries" />
+					</title>
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="submission-time-limit" />
+					</title>
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="submission-score" />
+					</title>
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="submission-adjust" />
+					</title>
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="submission-final" />
+					</title>
+				</modelColumn>
 			</columns>
 		</entityList>
 
