@@ -148,10 +148,13 @@ public class AssessmentImpl implements Assessment
 		if ((this.dates.getOpenDate() != null) && (now.before(this.dates.getOpenDate()))) return AcceptSubmitStatus.future;
 
 		// after accept until date, we are closed
-		if ((this.dates.getAcceptUntilDate() != null) && (now.after(this.dates.getAcceptUntilDate()))) return AcceptSubmitStatus.closed;
+		if ((this.dates.getAcceptUntilDate() != null) && (now.after(this.dates.getAcceptUntilDate())) ||
+			(this.dates.getAcceptUntilDate() == null && (this.dates.getDueDate() != null && now.after(this.dates.getDueDate()))))
+			return AcceptSubmitStatus.closed;
 
-		// after due date, we are past_due
-		if ((this.dates.getDueDate() != null) && (now.after(this.dates.getDueDate()))) return AcceptSubmitStatus.past_due;
+		// after due date and before accept until, we are past_due
+		if ((this.dates.getDueDate() != null) && (now.after(this.dates.getDueDate())) && (this.dates.getAcceptUntilDate() != null)
+				&& (now.before(this.dates.getAcceptUntilDate()))) return AcceptSubmitStatus.past_due;
 
 		// otherwise, we are open
 		return AcceptSubmitStatus.open;

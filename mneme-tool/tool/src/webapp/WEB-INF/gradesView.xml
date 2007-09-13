@@ -27,7 +27,7 @@
 <beans>
 
 	<bean id="org.muse.mneme.tool.GradesView" class="org.muse.mneme.tool.GradesView" init-method="init" destroy-method="destroy" singleton="true"
-		depends-on="FormatAssesmentType">
+		depends-on="FormatAssesmentType, FormatGradeStatus">
 
 		<property name="ui">
 			<ref bean="org.muse.ambrosia.api.UiService" />
@@ -69,5 +69,19 @@
 		<property name="toolId">
 			<value>sakai.mneme</value>
 		</property>
-	</bean>	
+	</bean>
+
+	<bean id="FormatGradeStatus" class="org.muse.mneme.tool.FormatGradeStatusDelegate" init-method="init" destroy-method="destroy" singleton="true">
+
+		<property name="ui">
+			<ref bean="org.muse.ambrosia.api.UiService" />
+		</property>
+
+		<property name="id">
+			<value>FormatGradeStatus</value>
+		</property>
+		<property name="toolId">
+			<value>sakai.mneme</value>
+		</property>
+	</bean>
 </beans>

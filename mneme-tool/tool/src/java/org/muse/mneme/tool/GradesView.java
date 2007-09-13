@@ -75,24 +75,25 @@ public class GradesView extends ControllerImpl
 
 		// default sort is type ascending
 		AssessmentService.AssessmentsSort sort = AssessmentService.AssessmentsSort.type_a;
-		context.put("sort_column",'0');
-		context.put("sort_direction",'A');
-		
+		context.put("sort_column", '0');
+		context.put("sort_direction", 'A');
+
 		if (params.length == 3)
 		{
 			sortCode = params[2];
 			if (sortCode != null && sortCode.length() == 2)
 			{
-				context.put("sort_column",sortCode.charAt(0));
-				context.put("sort_direction",sortCode.charAt(1));
+				context.put("sort_column", sortCode.charAt(0));
+				context.put("sort_direction", sortCode.charAt(1));
 				sort = findSortCode(sortCode);
 			}
 		}
-		
+
 		// collect the assessments in this context
-		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext(), sort, Boolean.TRUE);
+		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext(), sort,
+				Boolean.TRUE);
 		context.put("assessments", assessments);
-	
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -126,11 +127,11 @@ public class GradesView extends ControllerImpl
 		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
 		{
 			sort = AssessmentService.AssessmentsSort.ddate_d;
-		}		
-		
+		}
+
 		return sort;
 	}
-	
+
 	/**
 	 * Final initialization, once all dependencies are set.
 	 */
@@ -144,13 +145,13 @@ public class GradesView extends ControllerImpl
 	 * {@inheritDoc}
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
-	{		
+	{
 		// read the form
 		String destination = uiService.decode(req, context);
-	
+
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
-	
+
 	/**
 	 * Set the AssessmentService.
 	 * 

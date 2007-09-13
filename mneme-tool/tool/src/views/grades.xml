@@ -2,26 +2,26 @@
 <!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
-/**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/views/grades.xml $
- * $Id: grades.xml 11732 2007-09-11 22:25:02Z maheshwarirashmi@foothill.edu $
- ***********************************************************************************
- *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- **********************************************************************************/
+	/**********************************************************************************
+	* $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/views/grades.xml $
+	* $Id: grades.xml 11732 2007-09-11 22:25:02Z maheshwarirashmi@foothill.edu $
+	***********************************************************************************
+	*
+	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* 
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	* 
+	*      http://www.apache.org/licenses/LICENSE-2.0
+	* 
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*
+	**********************************************************************************/
 -->
 
 <interface>
@@ -32,13 +32,13 @@
 	</modeContainer>
 	<header>
 		<message selector="grading-header">
-			<model type="icon" icon="/icons/grade.png" />		
+			<model type="icon" icon="/icons/grade.png" />
 		</message>
 	</header>
 	<title>
 		<message selector="grading-title" />
 	</title>
-	<container>		
+	<container>
 
 		<!-- the list of assessments -->
 		<entityList style="FLAT">
@@ -49,7 +49,7 @@
 				<message selector="no-assessments" />
 			</emptyTitle>
 			<columns>
-				<modelColumn>				
+				<modelColumn>
 					<model ref="assessment.type" delegate="FormatAssesmentType" tool="sakai.mneme" />
 					<sort submit="TRUE">
 						<active>
@@ -67,7 +67,7 @@
 							<destination template="/grades/0D" />
 						</desc>
 					</sort>
-				</modelColumn>	
+				</modelColumn>
 				<modelColumn>
 					<title>
 						<message selector="assessment-view" />
@@ -82,11 +82,11 @@
 							</destination>
 						</navigation>
 					</navigations>
-				</modelColumn>			
+				</modelColumn>
 				<column>
 					<title>
 						<message selector="assessment-title" />
-					</title>					
+					</title>
 					<container>
 						<navigation style="LINK" submit="TRUE">
 							<title>
@@ -162,33 +162,33 @@
 					<title>
 						<message selector="grade" />
 					</title>
-					<navigations>	
-					<navigation style="LINK" submit="TRUE">
+					<navigations>
+						<navigation style="LINK" submit="TRUE">
 							<icon icon="/icons/grade.png" />
-							<destination template="/grades_class_list/{0}{1}/{2}">
+							<destination template="/grade_assessment/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
-					</navigations>					
+					</navigations>
 				</modelColumn>
 				<modelColumn>
 					<title>
 						<message selector="grade_status" />
-					</title>					
-					<model ref="assessment.acceptSubmitStatus" />
+					</title>
+					<model ref="assessment.acceptSubmitStatus" delegate="FormatGradeStatus" tool="sakai.mneme" />
 				</modelColumn>
 				<modelColumn>
 					<title>
 						<message selector="newSubmissions" />
-					</title>		
-					<model type="icon" icon="/icons/bullet_green.png" />	 
+					</title>
+					<model type="icon" icon="/icons/bullet_green.png" />
 					<entityIncluded>
-						<decision model="assessment.isFullyReleased" reversed="TRUE"/>						
+						<decision model="assessment.isFullyReleased" reversed="TRUE" />
 					</entityIncluded>
 				</modelColumn>
 			</columns>
-		</entityList>	
+		</entityList>
 	</container>
 </interface>
