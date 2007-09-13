@@ -112,7 +112,7 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="save-title" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
+				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
 					<icon icon="/icons/save.png" style="LEFT" />
 					<destination template="/pool_properties/{0}/{1}">
 						<model ref="poolsSortCode" />

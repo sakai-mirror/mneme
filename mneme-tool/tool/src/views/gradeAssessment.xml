@@ -92,6 +92,49 @@
 			</rows>
 		</entityDisplay>
 
-		
+		<entityList style="FLAT">
+			<iterator name="submission" model="submissions" />
+			<emptyTitle>
+				<message selector="no-submissions" />
+			</emptyTitle>
+
+			<!--selection>
+				<selectionChoices>
+				<selectionChoice value="1" selector="Level-1" />
+				<selectionChoice value="2" selector="Level-2" />
+				<selectionChoice value="3" selector="Level-3" />
+				<selectionChoice value="4" selector="Level-4" />
+				<selectionChoice value="5" selector="Level-5" />
+				</selectionChoices>
+				</selection-->
+			<pager paging="paging">
+				<destination template="/" />
+			</pager>
+			<columns>
+				<modelColumn>
+					<title>
+						<message selector="submission-username">
+							<model type="userInfo" selector="DISPLAYNAME" ref="submission.userId" />
+						</message>
+					</title>
+					<model ref="submission.userId" missing="no-username" />
+				</modelColumn>
+			</columns>
+		</entityList>
+
+		<!--bottom navigation-->
+		<navigationBar width="100%">
+			<container>
+				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
+					<icon icon="/icons/save.png" style="LEFT" />
+					<destination template="/grades" />
+				</navigation>
+				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
+					<icon icon="/icons/cancel.gif" style="LEFT" />
+					<destination template="/grades" />
+				</navigation>
+			</container>
+		</navigationBar>
+
 	</container>
 </interface>

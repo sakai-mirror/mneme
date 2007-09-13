@@ -64,6 +64,8 @@ public class GradeAssessmentView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if (params.length != 4) throw new IllegalArgumentException();
+		
+		 //TODO: add check for user permission to access the assessments for grading
 
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
