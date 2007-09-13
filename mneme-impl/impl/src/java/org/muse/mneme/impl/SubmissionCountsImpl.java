@@ -65,7 +65,7 @@ public class SubmissionCountsImpl implements SubmissionCounts
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer getGraded()
+	public Integer getReleased()
 	{
 		return this.graded;
 	}
@@ -81,7 +81,7 @@ public class SubmissionCountsImpl implements SubmissionCounts
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer getUngraded()
+	public Integer getUnreleased()
 	{
 		return this.ungraded;
 	}
@@ -98,7 +98,7 @@ public class SubmissionCountsImpl implements SubmissionCounts
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setGraded(Integer count)
+	public void setReleased(Integer count)
 	{
 		if (count == null) throw new IllegalArgumentException();
 		this.graded = count;
@@ -116,7 +116,7 @@ public class SubmissionCountsImpl implements SubmissionCounts
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setUngraded(Integer count)
+	public void setUnreleased(Integer count)
 	{
 		if (count == null) throw new IllegalArgumentException();
 		this.ungraded = count;

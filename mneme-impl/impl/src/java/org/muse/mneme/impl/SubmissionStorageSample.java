@@ -221,25 +221,25 @@ public class SubmissionStorageSample implements SubmissionStorage
 		SubmissionCounts rv = new SubmissionCountsImpl();
 
 		int completed = 0;
-		int graded = 0;
+		int released = 0;
 		int inProgress = 0;
-		int unGraded = 0;
+		int unReleased = 0;
 
 		for (SubmissionImpl submission : this.submissions.values())
 		{
 			if (submission.getAssessment().equals(assessment))
 			{
 				if (submission.getIsComplete()) completed++;
-				if (submission.getIsComplete() && submission.getIsReleased()) graded++;
-				if (submission.getIsComplete() && (!submission.getIsReleased())) unGraded++;
+				if (submission.getIsComplete() && submission.getIsReleased()) released++;
+				if (submission.getIsComplete() && (!submission.getIsReleased())) unReleased++;
 				if ((!submission.getIsComplete()) && submission.getIsStarted()) inProgress++;
 			}
 		}
 
 		rv.setCompleted(completed);
-		rv.setGraded(graded);
+		rv.setReleased(released);
 		rv.setInProgress(inProgress);
-		rv.setUngraded(unGraded);
+		rv.setUnreleased(unReleased);
 
 		return rv;
 	}

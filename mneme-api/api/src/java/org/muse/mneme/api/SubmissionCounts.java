@@ -27,18 +27,11 @@ package org.muse.mneme.api;
 public interface SubmissionCounts
 {
 	/**
-	 * Access how many submissions are completed (graded or not).
+	 * Access how many submissions are completed (released or not).
 	 * 
-	 * @return The number of completed (graded or not) submissions.
+	 * @return The number of completed (released or not) submissions.
 	 */
 	Integer getCompleted();
-
-	/**
-	 * Access how many submissions are completed and graded.
-	 * 
-	 * @return The number of completed, but not yet graded submissions.
-	 */
-	Integer getGraded();
 
 	/**
 	 * Access how many submissions are in-progress.
@@ -48,11 +41,18 @@ public interface SubmissionCounts
 	Integer getInProgress();
 
 	/**
-	 * Access how many submissions are completed, but not yet graded.
+	 * Access how many submissions are completed and released.
 	 * 
-	 * @return The number of completed, but not yet graded submissions.
+	 * @return The number of completed and released submissions.
 	 */
-	Integer getUngraded();
+	Integer getReleased();
+
+	/**
+	 * Access how many submissions are completed, but not yet released.
+	 * 
+	 * @return The number of completed, but not yet released submissions.
+	 */
+	Integer getUnreleased();
 
 	/**
 	 * Set how many submissions are completed (graded or not).
@@ -63,14 +63,6 @@ public interface SubmissionCounts
 	void setCompleted(Integer count);
 
 	/**
-	 * Set how many submissions are completed and graded.
-	 * 
-	 * @param count
-	 *        The count.
-	 */
-	void setGraded(Integer count);
-
-	/**
 	 * Set how many submissions are in-progress.
 	 * 
 	 * @param count
@@ -79,10 +71,18 @@ public interface SubmissionCounts
 	void setInProgress(Integer count);
 
 	/**
+	 * Set how many submissions are completed and released.
+	 * 
+	 * @param count
+	 *        The count.
+	 */
+	void setReleased(Integer count);
+
+	/**
 	 * Set how many submissions are completed, but not yet graded.
 	 * 
 	 * @param count
 	 *        The count.
 	 */
-	void setUngraded(Integer count);
+	void setUnreleased(Integer count);
 }
