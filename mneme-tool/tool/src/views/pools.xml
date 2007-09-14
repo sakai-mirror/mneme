@@ -74,18 +74,6 @@
 					</value>
 					<model ref="poolids.values" />
 					<entityActions>
-						<navigation selectRequirement="SINGLE" selectRequirementMessage="add-failed-requirements" submit="TRUE" style="LINK" description="add-question-description">
-							<title>
-								<message selector="add-question-title">
-									<model ref="type.typeName" />
-								</message>
-							</title>
-							<destination template="ADDQ:{0}">
-								<model ref="type.type" />
-							</destination>
-							<iterator name="type" model="questionTypes" />
-							<icon icon="/icons/document_add.png" style="LEFT" />
-						</navigation>
 						<navigation selectRequirement="MULTIPLE" selectRequirementMessage="combine-failed-requirements" title="combine-title" style="LINK" description="combine-description" disabled="FALSE"
 							submit="TRUE">
 							<icon icon="/icons/combine_pools.png" style="LEFT" />
@@ -94,10 +82,6 @@
 								<model ref="sort_direction" />
 								<model ref="pagingParameter" />
 							</destination>
-						</navigation>
-						<navigation selectRequirement="SOME" selectRequirementMessage="export-failed-requirements" destination="/" title="import-export-title" style="LINK"
-							description="import-export-description" submit="TRUE">
-							<icon icon="/icons/import_export.png" style="LEFT" />
 						</navigation>
 						<navigation selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements" title="delete-title" style="LINK" description="delete-description" submit="TRUE">
 							<icon icon="/icons/delete.png" style="LEFT" />
