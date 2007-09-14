@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<!--
+	/**********************************************************************************
+	* $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/webapp/WEB-INF/selectQuestionTyeView.xml $
+	* $Id: selectQuestionTyeView.xml 11577 2007-08-28 05:39:09Z ggolden@umich.edu $
+	***********************************************************************************
+	*
+	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* 
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	* 
+	*      http://www.apache.org/licenses/LICENSE-2.0
+	* 
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*
+	**********************************************************************************/
+-->
+
+<beans>
+
+	<bean id="org.muse.mneme.tool.SelectQuestionType"
+		class="org.muse.mneme.tool.SelectQuestionType" init-method="init"
+		destroy-method="destroy" singleton="true">
+
+		<property name="ui">
+			<ref bean="org.muse.ambrosia.api.UiService" />
+		</property>
+		<property name="toolId">
+			<value>sakai.mneme</value>
+		</property>
+		<property name="path">
+			<value>select_question_type</value>
+		</property>
+		<property name="bundle">
+			<value>selectQuestionType</value>
+		</property>
+		<property name="shared">
+			<value>mneme</value>
+		</property>
+		<property name="components">
+			<value>selectQuestionType.xml</value>
+		</property>
+	</bean>
+
+</beans>

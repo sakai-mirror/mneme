@@ -62,21 +62,28 @@
 				<message selector="no-questions" />
 			</emptyTitle>
 			<entityActions>
-				<navigation submit="TRUE" style="LINK" description="add-question-description">
+				<navigation submit="TRUE" style="LINK"
+					description="add-question-description">
 					<title>
 						<message selector="add-question-title">
 							<model ref="type.typeName" />
 						</message>
 					</title>
-					<destination template="ADDQ:{0}">
-						<model ref="type.type" />
+					<destination
+						template="/select_question_type/{0}/{1}/{2}/{3}{4}/{5}">
+						<model ref="poolsSortCode" />
+						<model ref="poolsPagingParameter" />
+						<model ref="pool.id" />
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
+						<model ref="pagingParameter" />
 					</destination>
-					<iterator name="type" model="questionTypes" />
-					<icon icon="/icons/document_add.png" style="LEFT" />
+					<icon icon="/icons/add_qst.png" style="LEFT" />
 				</navigation>
 			</entityActions>
 			<pager paging="paging">
-				<destination template="/pool_edit/{0}/{1}/{2}/{3}{4}/{5}">
+				<destination
+					template="/pool_edit/{0}/{1}/{2}/{3}{4}/{5}">
 					<model ref="poolsSortCode" />
 					<model ref="poolsPagingParameter" />
 					<model ref="pool.id" />
@@ -92,9 +99,15 @@
 					</value>
 					<model ref="questionids.values" />
 					<entityActions>
-						<navigation title="move-to-pool" selectRequirement="SOME" selectRequirementMessage="move-failed-requirements" style="LINK" description="move-to-pool-description" disabled="FALSE" submit="TRUE">
-							<icon icon="/icons/page_go.png" style="LEFT" />
-							<destination template="/question_move/{0}/{1}/{2}/{3}{4}/{5}">
+						<navigation title="move-to-pool"
+							selectRequirement="SOME"
+							selectRequirementMessage="move-failed-requirements" style="LINK"
+							description="move-to-pool-description" disabled="FALSE"
+							submit="TRUE">
+							<icon icon="/icons/page_go.png"
+								style="LEFT" />
+							<destination
+								template="/question_move/{0}/{1}/{2}/{3}{4}/{5}">
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
 								<model ref="pool.id" />
@@ -103,9 +116,13 @@
 								<model ref="pagingParameter" />
 							</destination>
 						</navigation>
-						<navigation title="copy-to-pool" selectRequirement="SOME" selectRequirementMessage="copy-failed-requirements" style="LINK" description="copy-to-pool-description" submit="TRUE">
+						<navigation title="copy-to-pool"
+							selectRequirement="SOME"
+							selectRequirementMessage="copy-failed-requirements" style="LINK"
+							description="copy-to-pool-description" submit="TRUE">
 							<icon icon="/icons/copy.png" style="LEFT" />
-							<destination template="/question_copy/{0}/{1}/{2}/{3}{4}/{5}">
+							<destination
+								template="/question_copy/{0}/{1}/{2}/{3}{4}/{5}">
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
 								<model ref="pool.id" />
@@ -114,9 +131,13 @@
 								<model ref="pagingParameter" />
 							</destination>
 						</navigation>
-						<navigation title="delete-title" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements" style="LINK" description="delete-description" submit="TRUE">
+						<navigation title="delete-title"
+							selectRequirement="SOME"
+							selectRequirementMessage="delete-failed-requirements"
+							style="LINK" description="delete-description" submit="TRUE">
 							<icon icon="/icons/delete.png" style="LEFT" />
-							<destination template="/questions_delete/{0}/{1}/{2}/{3}{4}/{5}">
+							<destination
+								template="/questions_delete/{0}/{1}/{2}/{3}{4}/{5}">
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
 								<model ref="pool.id" />
@@ -132,10 +153,12 @@
 						<!--This should be limited to ??? characters with ... at the end -->
 						<message selector="question-description" />
 					</title>
-					<model ref="question.description" missing="no-title" />
+					<model ref="question.description"
+						missing="no-title" />
 					<entityNavigations>
 						<navigation>
-							<destination template="/question_edit/{0}">
+							<destination
+								template="/question_edit/{0}">
 								<model ref="question.id" />
 							</destination>
 						</navigation>
@@ -148,14 +171,17 @@
 					<model ref="question.typeName" />
 					<sort>
 						<active>
-							<compareDecision model="sort_column" constant="0" />
+							<compareDecision model="sort_column"
+								constant="0" />
 						</active>
 						<direction>
-							<compareDecision model="sort_direction" constant="A" />
+							<compareDecision model="sort_direction"
+								constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/pool_edit/{0}/{1}/{2}/0A">
+							<destination
+								template="/pool_edit/{0}/{1}/{2}/0A">
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
 								<model ref="pool.id" />
@@ -163,7 +189,8 @@
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/pool_edit/{0}/{1}/{2}/0D">
+							<destination
+								template="/pool_edit/{0}/{1}/{2}/0D">
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
 								<model ref="pool.id" />
@@ -178,7 +205,8 @@
 					<navigations>
 						<navigation style="LINK" submit="TRUE">
 							<icon icon="/icons/copy.png" style="LEFT" />
-							<destination template="/question_duplicate/{0}/{1}/{2}/{3}">
+							<destination
+								template="/question_duplicate/{0}/{1}/{2}/{3}">
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
 								<model ref="pool.id" />
@@ -193,7 +221,8 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="return" style="BUTTON" submit="FALSE">
+				<navigation title="return" style="BUTTON"
+					submit="FALSE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<!--destination template="/pools" /-->
 					<destination template="/pools/{0}/{1}">

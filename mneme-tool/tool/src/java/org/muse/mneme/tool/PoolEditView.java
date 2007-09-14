@@ -277,7 +277,7 @@ public class PoolEditView extends ControllerImpl
 				}
 			}
 			// handle adding a question
-			else if (destination.startsWith("ADDQ:"))
+			else if (destination.startsWith("/select_question_type"))
 			{
 				Pool pool = this.poolService.getPool(params[4]);
 
@@ -287,10 +287,7 @@ public class PoolEditView extends ControllerImpl
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
 				}
-
-				// parse the type (after the : in the destination)
-				String type = StringUtil.splitFirst(destination, ":")[1];
-
+				
 				// check security
 				if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext(), null))
 				{
@@ -298,25 +295,6 @@ public class PoolEditView extends ControllerImpl
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 					return;
 				}
-
-				// create the question of the appropriate type (all the way to save)
-				Question newQuestion = null;
-				try
-				{
-					newQuestion = this.questionService.newQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, type);
-					this.questionService.saveQuestion(newQuestion, toolManager.getCurrentPlacement().getContext());
-				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
-
-				// form the destionation
-				// TODO: preserve sort / paging parameters
-				destination = "/question_edit/" + newQuestion.getId();
-
 				// redirect
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 				return;
