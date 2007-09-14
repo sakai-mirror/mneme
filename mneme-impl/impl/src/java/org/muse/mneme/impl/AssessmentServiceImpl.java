@@ -463,6 +463,10 @@ public class AssessmentServiceImpl implements AssessmentService
 		assessment.getModifiedBy().setDate(new Date());
 		assessment.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
 
+		// clear the live changed setting
+		((AssessmentImpl) assessment).clearIsLiveChanged();
+
+		// save
 		this.storage.saveAssessment((AssessmentImpl) assessment);
 
 		// event

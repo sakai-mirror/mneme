@@ -66,6 +66,9 @@ public class AssessmentImpl implements Assessment
 
 	protected String id = null;
 
+	/** Track any changes that cannot be made to live tests. */
+	protected transient Boolean liveChanged = Boolean.FALSE;
+
 	protected Attribution modifiedBy = new AttributionImpl();
 
 	protected Integer numSubmissionsAllowed = Integer.valueOf(1);
@@ -86,9 +89,9 @@ public class AssessmentImpl implements Assessment
 
 	protected AssessmentReview review = null;
 
-	protected transient Submission submissionContext = null;
-
 	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
+
+	protected transient Submission submissionContext = null;
 
 	protected transient SubmissionService submissionService = null;
 
@@ -148,13 +151,16 @@ public class AssessmentImpl implements Assessment
 		if ((this.dates.getOpenDate() != null) && (now.before(this.dates.getOpenDate()))) return AcceptSubmitStatus.future;
 
 		// after accept until date, we are closed
-		if ((this.dates.getAcceptUntilDate() != null) && (now.after(this.dates.getAcceptUntilDate())) ||
-			(this.dates.getAcceptUntilDate() == null && (this.dates.getDueDate() != null && now.after(this.dates.getDueDate()))))
-			return AcceptSubmitStatus.closed;
+		if ((this.dates.getAcceptUntilDate() != null) && (now.after(this.dates.getAcceptUntilDate()))) return AcceptSubmitStatus.closed;
+//		if ((this.dates.getAcceptUntilDate() != null) && (now.after(this.dates.getAcceptUntilDate())) ||
+//			(this.dates.getAcceptUntilDate() == null && (this.dates.getDueDate() != null && now.after(this.dates.getDueDate()))))
+//			return AcceptSubmitStatus.closed;
 
-		// after due date and before accept until, we are past_due
-		if ((this.dates.getDueDate() != null) && (now.after(this.dates.getDueDate())) && (this.dates.getAcceptUntilDate() != null)
-				&& (now.before(this.dates.getAcceptUntilDate()))) return AcceptSubmitStatus.past_due;
+		// after due date, we are past_due
+		if ((this.dates.getDueDate() != null) && (now.after(this.dates.getDueDate()))) return AcceptSubmitStatus.past_due;
+//		// after due date and before accept until, we are past_due
+//		if ((this.dates.getDueDate() != null) && (now.after(this.dates.getDueDate())) && (this.dates.getAcceptUntilDate() != null)
+//				&& (now.before(this.dates.getAcceptUntilDate()))) return AcceptSubmitStatus.past_due;
 
 		// otherwise, we are open
 		return AcceptSubmitStatus.open;
@@ -486,13 +492,21 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Clear the isLiveChanged setting.
+	 */
+	protected void clearIsLiveChanged()
+	{
+		this.liveChanged = Boolean.FALSE;
+	}
+
+	/**
 	 * Check if any changes have been made that are not allowed if the test is live.
 	 * 
 	 * @return TRUE if any changes that are not allowed if live have been made, FALSE if not.
 	 */
 	protected Boolean getIsLiveChanged()
 	{
-		return this.parts.liveChanged;
+		return this.liveChanged;
 	}
 
 	/**
@@ -533,6 +547,7 @@ public class AssessmentImpl implements Assessment
 		this.grading = new AssessmentGradingImpl((AssessmentGradingImpl) other.grading);
 		this.honorPledge = other.honorPledge;
 		this.id = other.id;
+		this.liveChanged = other.liveChanged;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy);
 		this.numSubmissionsAllowed = other.numSubmissionsAllowed;
 		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts);

@@ -43,9 +43,6 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 	protected Boolean continuousNumbering = Boolean.FALSE;
 
-	/** Track any changes that cannot be made to live tests. */
-	protected transient Boolean liveChanged = Boolean.FALSE;
-
 	protected List<Part> parts = new ArrayList<Part>();
 
 	protected PoolService poolService = null;
@@ -97,7 +94,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		((PartImpl) rv).initContainer(this.parts);
 
 		// this is a change that cannot be made to live tests
-		this.liveChanged = Boolean.TRUE;
+		this.assessment.liveChanged = Boolean.TRUE;
 
 		return rv;
 	}
@@ -115,7 +112,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		((PartImpl) rv).initContainer(this.parts);
 
 		// this is a change that cannot be made to live tests
-		this.liveChanged = Boolean.TRUE;
+		this.assessment.liveChanged = Boolean.TRUE;
 
 		return rv;
 	}
@@ -240,7 +237,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		((PartImpl) part).initContainer(null);
 
 		// this is a change that cannot be made to live tests
-		this.liveChanged = Boolean.TRUE;
+		this.assessment.liveChanged = Boolean.TRUE;
 	}
 
 	/**
@@ -257,7 +254,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 */
 	public void setOrder(String[] partIds)
 	{
-		if (partIds == null) throw new IllegalArgumentException();
+		if (partIds == null) return;
 		List<String> ids = new ArrayList(Arrays.asList(partIds));
 
 		// remove anything from the new list not in our parts
@@ -305,7 +302,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		this.parts = newParts;
 
 		// this is a change that cannot be made to live tests
-		this.liveChanged = Boolean.TRUE;
+		this.assessment.liveChanged = Boolean.TRUE;
 	}
 
 	/**
@@ -331,7 +328,6 @@ public class AssessmentPartsImpl implements AssessmentParts
 		this.showPresentation = other.showPresentation;
 		this.questionService = other.questionService;
 		this.poolService = other.poolService;
-		this.liveChanged = other.liveChanged;
 
 		for (Part part : other.parts)
 		{

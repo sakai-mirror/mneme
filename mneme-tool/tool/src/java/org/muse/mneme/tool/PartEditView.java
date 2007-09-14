@@ -22,7 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -172,7 +172,6 @@ public class PartEditView extends ControllerImpl
 
 		if (pagingParameter == null)
 		{
-			// TODO: other than 2 size!
 			pagingParameter = "1-30";
 		}
 
@@ -184,7 +183,9 @@ public class PartEditView extends ControllerImpl
 		context.put("paging", paging);
 		context.put("pagingParameter", pagingParameter);
 
-		// get the pool draw list - all the pools for the user (select, sort, page) crossed with this part's actual draws
+		// get the pool draw list
+		// - all the pools for the user (select, sort, page) crossed with this part's actual draws
+		// - these are virtual draws, not part of the DrawPart
 		List<PoolDraw> draws = part.getDrawsForPools(toolManager.getCurrentPlacement().getContext(), null, sort, null, paging.getCurrent(), paging
 				.getSize());
 
@@ -323,8 +324,8 @@ public class PartEditView extends ControllerImpl
 			{
 				public Object get(String id)
 				{
-					// add a draw to the part
-					PoolDraw draw = dpart.addPool(pservice.getPool(id), 0);
+					// add a virtual draw to the part, matching one from the DrawPart if there is one, else a new 0 count one.
+					PoolDraw draw = dpart.getVirtualDraw(pservice.getPool(id));
 					return draw;
 				}
 			}, new Id()
@@ -351,16 +352,11 @@ public class PartEditView extends ControllerImpl
 		// filter out draw part draws that are no questions
 		if (part instanceof DrawPart)
 		{
+			// apply the draws to the part
 			DrawPart dpart = (DrawPart) part;
-			for (Iterator i = dpart.getDraws().iterator(); i.hasNext();)
-			{
-				PoolDraw draw = (PoolDraw) i.next();
-				if (draw.getNumQuestions() == 0)
-				{
-					i.remove();
-				}
-			}
+			dpart.updateDraws(new ArrayList<PoolDraw>(draws.getSet()));
 		}
+
 		// process the ids into the destination for a redirect to the remove confirm view...
 		else
 		{

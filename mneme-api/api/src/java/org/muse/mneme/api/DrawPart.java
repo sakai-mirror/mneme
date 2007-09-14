@@ -46,7 +46,8 @@ public interface DrawPart extends Part
 	List<PoolDraw> getDraws();
 
 	/**
-	 * Get a list of draws for each pool specified - for those that are already in this part, set the non-null numQuestions.
+	 * Get a list of draws for each pool specified - for those that are already in this part, set the non-null numQuestions.<br />
+	 * The draws are virtual, not part of the DrawPart.
 	 * 
 	 * @param context
 	 *        The context.
@@ -65,10 +66,26 @@ public interface DrawPart extends Part
 	List<PoolDraw> getDrawsForPools(String context, String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
+	 * Get a virtal draw for this pool, set to the same count as one of our draws if we have one, else set to 0.<br />
+	 * The draw is virtual, not part of this DrawPart.
+	 * 
+	 * @return The virtual PoolDraw for this pool.
+	 */
+	PoolDraw getVirtualDraw(Pool pool);
+
+	/**
 	 * Remove a pool's draw from the part.
 	 * 
 	 * @param pool
 	 *        The pool to remove.
 	 */
 	void removePool(Pool pool);
+
+	/**
+	 * Apply these draws to the draws of the pool, adding, removing and changing counts as needed.
+	 * 
+	 * @param draws
+	 *        The virtual (unconnected to this part) draws to apply.
+	 */
+	void updateDraws(List<PoolDraw> draws);
 }

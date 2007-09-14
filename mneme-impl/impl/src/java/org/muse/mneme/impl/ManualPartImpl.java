@@ -74,6 +74,9 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	{
 		if (question == null) throw new IllegalArgumentException();
 		this.questionIds.add(question.getId());
+
+		// this is a change that cannot be made to live tests
+		this.assessment.liveChanged = Boolean.TRUE;
 	}
 
 	/**
@@ -184,6 +187,9 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	{
 		if (question == null) throw new IllegalArgumentException();
 		this.questionIds.remove(question.getId());
+
+		// this is a change that cannot be made to live tests
+		this.assessment.liveChanged = Boolean.TRUE;
 	}
 
 	/**
@@ -191,20 +197,40 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	 */
 	public void setQuestionOrder(String[] questionIds)
 	{
-		if (questionIds == null) throw new IllegalArgumentException();
+		if (questionIds == null) return;
 		List<String> ids = new ArrayList(Arrays.asList(questionIds));
 
+		// make a copy of our current list
+		List<String> current = new ArrayList<String>(this.questionIds);
+
 		// remove anything from the new list not in our questions
-		ids.retainAll(this.questionIds);
+		ids.retainAll(current);
 
-		// remove these from our list
-		this.questionIds.removeAll(ids);
+		// remove these from our current list
+		current.removeAll(ids);
 
-		// add to the end of the new list any remaining quesitions from our list
-		ids.addAll(this.questionIds);
+		// add to the end of the new list any remaining quesitions from our current list
+		ids.addAll(current);
+
+		// if the order is the same as when we started, ignore it.
+		boolean changed = false;
+		for (int i = 0; i < ids.size(); i++)
+		{
+			if (!this.questionIds.get(i).equals(ids.get(i)))
+			{
+				changed = true;
+				break;
+			}
+		}
+
+		// ignore if no changes
+		if (!changed) return;
 
 		// take the new list
 		this.questionIds = ids;
+
+		// this is a change that cannot be made to live tests
+		this.assessment.liveChanged = Boolean.TRUE;
 	}
 
 	/**

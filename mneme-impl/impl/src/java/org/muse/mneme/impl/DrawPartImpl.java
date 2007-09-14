@@ -80,17 +80,34 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 */
 	public PoolDraw addPool(Pool pool, Integer numQuestions)
 	{
-		PoolDraw rv = new PoolDrawImpl(this.poolService, pool, numQuestions);
-
 		// do we have this pool already?
-		if (this.pools.contains(rv))
+		for (PoolDraw already : this.pools)
 		{
-			this.pools.remove(rv);
+			if (already.getPool().equals(pool))
+			{
+				if (already.getNumQuestions().equals(numQuestions))
+				{
+					// no change, we are done
+					return already;
+				}
+
+				// change the count
+				already.setNumQuestions(numQuestions);
+
+				// this is a change that cannot be made to live tests
+				this.assessment.liveChanged = Boolean.TRUE;
+
+				return already;
+			}
 		}
 
 		// add this to the pools
+		PoolDraw rv = new PoolDrawImpl(this.poolService, pool, numQuestions);
 		pools.add(rv);
-		
+
+		// this is a change that cannot be made to live tests
+		this.assessment.liveChanged = Boolean.TRUE;
+
 		return rv;
 	}
 
@@ -105,14 +122,15 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<PoolDraw> getDrawsForPools(String context, String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<PoolDraw> getDrawsForPools(String context, String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum,
+			Integer pageSize)
 	{
 		// get all the pools we need
 		List<Pool> allPools = this.poolService.findPools(context, userId, sort, search, pageNum, pageSize);
 
 		List<PoolDraw> rv = new ArrayList<PoolDraw>();
 
-		// prepare draws
+		// prepare draws - virtual, not part of the DrawPart
 		for (Pool pool : allPools)
 		{
 			PoolDraw draw = new PoolDrawImpl(this.poolService, pool, 0);
@@ -206,9 +224,68 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
+	public PoolDraw getVirtualDraw(Pool pool)
+	{
+		PoolDraw rv = new PoolDrawImpl(this.poolService, pool, 0);
+		if (this.pools.contains(rv))
+		{
+			PoolDraw myDraw = this.pools.get(this.pools.indexOf(rv));
+			rv.setNumQuestions(myDraw.getNumQuestions());
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void removePool(Pool pool)
 	{
 		this.pools.remove(new PoolDrawImpl(this.poolService, pool, 0));
+
+		// this is a change that cannot be made to live tests
+		this.assessment.liveChanged = Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void updateDraws(List<PoolDraw> draws)
+	{
+		if (draws == null) throw new IllegalArgumentException();
+
+		for (PoolDraw draw : draws)
+		{
+			// do we have this pool already?
+			if (this.pools.contains(draw))
+			{
+				// if the new count is 0, remove it
+				if (draw.getNumQuestions() == 0)
+				{
+					removePool(draw.getPool());
+				}
+
+				else
+				{
+					// is our count different?
+					PoolDraw myDraw = this.pools.get(this.pools.indexOf(draw));
+					if (!myDraw.getNumQuestions().equals(draw.getNumQuestions()))
+					{
+						// update the count
+						myDraw.setNumQuestions(draw.getNumQuestions());
+
+						// this is a change that cannot be made to live tests
+						this.assessment.liveChanged = Boolean.TRUE;
+					}
+				}
+			}
+
+			// else we need a new one (if not 0 count)
+			else if (draw.getNumQuestions() > 0)
+			{
+				addPool(draw.getPool(), draw.getNumQuestions());
+			}
+		}
 	}
 
 	/**

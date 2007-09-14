@@ -331,9 +331,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 		// save a copy
 		AssessmentImpl copy = new AssessmentImpl(assessment);
 
-		// clear the changed flag
-		copy.parts.liveChanged = Boolean.FALSE;
-
 		this.assessments.put(assessment.getId(), copy);
 	}
 
