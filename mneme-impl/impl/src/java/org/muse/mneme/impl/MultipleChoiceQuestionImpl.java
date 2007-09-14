@@ -24,35 +24,72 @@ package org.muse.mneme.impl;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
+import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificQuestion;
-import org.muse.mneme.api.MultipleAnswerType;
 import org.sakaiproject.i18n.InternationalizedMessages;
 
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
- * MultipleChoiceQuestionImpl handles questions for the true/false question type.
+ * MultipleChoiceQuestionImpl handles questions for the multiple choice question type.
  */
 public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 {
-	/** The correct answer is one of the values */
-	protected String correctAnswer;
+	private class MultipleChoiceQuestionChoice
+	{
+		String id;
 
-	/** Value Selector pairs. The key is the value, the value is the selector */
-	protected Map<String, String> valueSelectors = new HashMap<String, String>();
+		String text;
+
+		public String getId()
+		{
+			return this.id;
+		}
+
+		public String getText()
+		{
+			return this.text;
+		}
+
+		public void setId(String id)
+		{
+			this.id = id;
+		}
+
+		public void setText(String text)
+		{
+			this.text = text;
+		}
+
+		public void MultipleChoiceQuestionChoice(String id, String text)
+		{
+			this.id = id;
+			this.text = text;
+		}
+	}
+
+	/** This hash set holds index numbers of the correct answers */
+	protected Set<Integer> correctAnswers = new HashSet<Integer>();
+
+	/** List of choices */
+	protected List<String> answerChoices = new ArrayList<String>();
 
 	protected InternationalizedMessages messages = null;
 
 	/** The question this is a helper for. */
 	protected transient Question question = null;
 
-	/** Single or multiple choice * */
-	protected MultipleAnswerType answerType = MultipleAnswerType.single;
+	/** TRUE means single correct answer, FALSE means multiple correct answers */
+	protected Boolean singleCorrect = Boolean.TRUE;
 
 	/** The correct answer: TRUE or FALSE. */
 	protected Boolean shuffleChoices = Boolean.FALSE;
@@ -84,10 +121,11 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	public MultipleChoiceQuestionImpl(Question question, MultipleChoiceQuestionImpl other)
 	{
 		this.question = question;
-		this.correctAnswer = other.correctAnswer;
-		this.answerType = other.answerType;
 		this.shuffleChoices = other.shuffleChoices;
 		this.messages = other.messages;
+		this.singleCorrect = other.singleCorrect;
+		this.answerChoices = other.answerChoices;
+		this.correctAnswers = other.correctAnswers;
 	}
 
 	/**
@@ -110,12 +148,34 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		}
 	}
 
+	public List<MultipleChoiceQuestionChoice> getChoices()
+	{
+		List<MultipleChoiceQuestionChoice> rv = new ArrayList<MultipleChoiceQuestionChoice>();
+		for (String choice : this.answerChoices)
+		{
+			// rv.add(new MultipleChoiceQuestionChoice(String.valueOf(this.answerChoices.indexOf(choice)), choice));
+			MultipleChoiceQuestionChoice mcqcObj = new MultipleChoiceQuestionChoice();
+			mcqcObj.setId(String.valueOf(this.answerChoices.indexOf(choice)));
+			mcqcObj.setText(choice);
+			rv.add(mcqcObj);
+		}
+
+		if (rv.isEmpty()) return null;
+
+		return rv;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String getAnswerKey()
 	{
-		return this.valueSelectors.get(this.correctAnswer);
+		// return this.valueSelectors.get(this.correctAnswers);
+		/*
+		 * Iterator itr = correctAnswers.iterator(); String answerKey[] = new String[correctAnswers.size()]; int i=0; while (itr.hasNext()) {
+		 * answerKey[i] = (String)this.answerChoices.get((String)itr.next().intValue()) ; i++; } return answerKey;
+		 */
+		return null;
 	}
 
 	/**
@@ -123,36 +183,48 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getAuthoringUi()
 	{
-		if (this.answerType.equals(MultipleAnswerType.single))
+		EntityList entityList = this.uiService.newEntityList();
+		if (this.singleCorrect)
 		{
-			Selection selection = this.uiService.newSelection();
-			selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer"));
-			for (Iterator iKeys = valueSelectors.entrySet().iterator(); iKeys.hasNext();)
-			{
-				Map.Entry e = (Map.Entry) iKeys.next();
-				selection.addSelection((String) e.getValue(), (String) e.getKey());
-			}
-			EntityDisplayRow row = this.uiService.newEntityDisplayRow();
-			row.setTitle("correct-answer");
-			row.add(selection);
-
-			EntityDisplay display = this.uiService.newEntityDisplay();
-			display.addRow(row);
-
-			return this.uiService.newFragment().setMessages(this.messages).add(display);
+			entityList.setStyle(EntityList.Style.form).setIterator(
+					this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice").addColumn(
+					this.uiService.newSelectionColumn().setSingle().setValueProperty(
+							this.uiService.newTextPropertyReference().setReference("choice.id")).setProperty(
+							this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"))).addColumn(
+					this.uiService.newEntityListColumn().add(
+							this.uiService.newTextEdit().setSize(5, 50)
+									.setProperty(this.uiService.newPropertyReference().setReference("choice.text"))));
 		}
 		else
-			return null;
+		{
+			entityList.setStyle(EntityList.Style.form).setIterator(
+					this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice").addColumn(
+					this.uiService.newSelectionColumn().setMultiple().setValueProperty(
+							this.uiService.newTextPropertyReference().setReference("choice.id")).setProperty(
+							this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"))).addColumn(
+					this.uiService.newEntityListColumn().add(
+							this.uiService.newTextEdit().setSize(10, 50).setProperty(
+									this.uiService.newPropertyReference().setReference("choice.text"))));
+		}
+
+		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
+		row.setTitle("correct-answer");
+		row.add(entityList);
+
+		EntityDisplay display = this.uiService.newEntityDisplay();
+		display.addRow(row);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(display);
 	}
 
 	/**
-	 * Access the correct answer as a string.
+	 * Access the correct answers as a set.
 	 * 
-	 * @return The correct answer.
+	 * @return The correct answers.
 	 */
-	public String getCorrectAnswer()
+	public Set getCorrectAnswers()
 	{
-		return this.correctAnswer.toString();
+		return this.correctAnswers;
 	}
 
 	/**
@@ -160,19 +232,33 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getDeliveryUi()
 	{
-		if (this.answerType.equals(MultipleAnswerType.single))
+		EntityList entityList = this.uiService.newEntityList();
+		if (this.singleCorrect)
 		{
-			Selection selection = this.uiService.newSelection();
-			selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
-			for (Iterator iKeys = valueSelectors.entrySet().iterator(); iKeys.hasNext();)
-			{
-				Map.Entry e = (Map.Entry) iKeys.next();
-				selection.addSelection((String) e.getValue(), (String) e.getKey());
-			}
-			return this.uiService.newFragment().setMessages(this.messages).add(selection);
+			entityList.setStyle(EntityList.Style.form).setIterator(
+					this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice").addColumn(
+					this.uiService.newSelectionColumn().setSingle().setValueProperty(
+							this.uiService.newTextPropertyReference().setReference("choice.id")).setProperty(
+							this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"))).addColumn(
+					this.uiService.newPropertyColumn().setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text")));
 		}
 		else
-			return null;
+		{
+			entityList.setStyle(EntityList.Style.form).setIterator(
+					this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice").addColumn(
+					this.uiService.newSelectionColumn().setMultiple().setValueProperty(
+							this.uiService.newTextPropertyReference().setReference("choice.id")).setProperty(
+							this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"))).addColumn(
+					this.uiService.newPropertyColumn().setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text")));
+		}
+		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
+		row.setTitle("correct-answer");
+		row.add(entityList);
+
+		EntityDisplay display = this.uiService.newEntityDisplay();
+		display.addRow(row);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(display);
 	}
 
 	/**
@@ -180,22 +266,36 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getReviewUi()
 	{
-		if (this.answerType.equals(MultipleAnswerType.single))
+		// Need to check with Glenn on how to set readonly
+		EntityList entityList = this.uiService.newEntityList();
+		if (this.singleCorrect)
 		{
-			Selection selection = this.uiService.newSelection();
-			selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
-			for (Iterator iKeys = valueSelectors.entrySet().iterator(); iKeys.hasNext();)
-			{
-				Map.Entry e = (Map.Entry) iKeys.next();
-				selection.addSelection((String) e.getValue(), (String) e.getKey());
-			}
-
-			selection.setReadOnly(this.uiService.newDecision().setProperty(this.uiService.newConstantPropertyReference().setValue("true")));
-
-			return this.uiService.newFragment().setMessages(this.messages).add(selection);
+			entityList.setStyle(EntityList.Style.form).setIterator(
+					this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice").addColumn(
+					this.uiService.newSelectionColumn().setSingle().setReadOnly(
+							this.uiService.newDecision().setProperty(this.uiService.newConstantPropertyReference().setValue("true")))
+							.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id")).setProperty(
+									this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"))).addColumn(
+					this.uiService.newPropertyColumn().setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text")));
 		}
 		else
-			return null;
+		{
+			entityList.setStyle(EntityList.Style.form).setIterator(
+					this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice").addColumn(
+					this.uiService.newSelectionColumn().setSingle().setReadOnly(
+							this.uiService.newDecision().setProperty(this.uiService.newConstantPropertyReference().setValue("true")))
+							.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id")).setProperty(
+									this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"))).addColumn(
+					this.uiService.newPropertyColumn().setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text")));
+		}
+		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
+		row.setTitle("correct-answer");
+		row.add(entityList);
+
+		EntityDisplay display = this.uiService.newEntityDisplay();
+		display.addRow(row);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(display);
 	}
 
 	/**
@@ -207,22 +307,11 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
-	 * Set the correct answer, as a Boolean string.
-	 * 
-	 * @param correctAnswer
-	 *        The correct answer.
-	 */
-	public void setCorrectAnswer(String correctAnswer)
-	{
-		this.correctAnswer = correctAnswer;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
-	public MultipleAnswerType getAnswerType()
+	public String getSingleCorrect()
 	{
-		return this.answerType;
+		return this.singleCorrect.toString();
 	}
 
 	/**
@@ -235,18 +324,28 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		return this.shuffleChoices.toString();
 	}
 
+	public void setAnswerChoices(List answerChoices)
+	{
+		this.answerChoices = answerChoices;
+	}
+
+	/**
+	 * Sets the correct answers.
+	 * 
+	 * @param correctAnswers
+	 *        The correct answers.
+	 */
+	public void setCorrectAnswers(Set correctAnswers)
+	{
+		this.correctAnswers = correctAnswers;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setAnswerType(MultipleAnswerType answerType)
+	public void setSingleCorrect(String singleCorrect)
 	{
-		if (answerType == null) throw new IllegalArgumentException();
-		this.answerType = answerType;
-	}
-
-	public void registerValueSelector(String value, String selector)
-	{
-		this.valueSelectors.put(value, selector);
+		this.singleCorrect = Boolean.valueOf(singleCorrect);
 	}
 
 	/**

@@ -25,16 +25,23 @@ import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificAnswer;
 
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
+
 /**
- * MultipleChoiceAnswerImpl handles answers for the true/false question type.
+ * MultipleChoiceAnswerImpl handles answers for the multiple choice question type.
  */
 public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 {
 	/** The answer this is a helper for. */
 	protected transient Answer answer = null;
 
-	/** The answer is stored as a Boolean: TRUE or FALSE; null if not answered. */
-	protected Boolean answerData = null;
+	/** The is the Integer HashSet that the user's answers are translated into. */
+	protected Set<Integer> answerData = new HashSet<Integer>();
+
+	/** The answers stored as an array */
+	protected String[] answers;
 
 	/** The auto score. */
 	protected Float autoScore = null;
@@ -102,18 +109,6 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	}
 
 	/**
-	 * Access the currently selected answer as a string.
-	 * 
-	 * @return The answer.
-	 */
-	public String getAnswer()
-	{
-		if (this.answerData == null) return null;
-
-		return this.answerData.toString();
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public Float getAutoScore()
@@ -143,22 +138,35 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Boolean getIsCorrect()
 	{
+		// Check with Glenn on how this would work with shuffle choices
 		if (this.answerData == null) return Boolean.FALSE;
 
 		Question question = answer.getQuestion();
-		Boolean correctAnswer = Boolean.valueOf(((MultipleChoiceQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswer());
-		return this.answerData.equals(correctAnswer);
+		return this.answerData.equals(((MultipleChoiceQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswers());
 	}
 
 	/**
-	 * Set the answer - any boolean string value will work.
+	 * Access the currently selected answer as a string.
 	 * 
-	 * @param answer
-	 *        The answer.
+	 * @return The answer.
 	 */
-	public void setAnswer(String answer)
+	public String[] getAnswers()
 	{
-		if ((answer == null) || (answer.trim().length() == 0)) return;
-		this.answerData = Boolean.valueOf(answer.trim());
+		if (this.answerData == null) return null;
+		return (String[]) answerData.toArray(new String[answerData.size()]);
+	}
+
+	/**
+	 * Set the answers
+	 * 
+	 * @param an
+	 *        array of strings
+	 */
+
+	public void setAnswers(String[] answers)
+	{
+		if ((answers == null) || (answers.length == 0)) return;
+		this.answerData = new HashSet(Arrays.asList(answers));
+
 	}
 }

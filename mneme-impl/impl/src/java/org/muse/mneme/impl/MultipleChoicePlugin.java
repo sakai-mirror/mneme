@@ -34,7 +34,7 @@ import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
- * MultipleChoicePlugin handles the true/false question type.
+ * MultipleChoicePlugin handles the multiple choice question type.
  */
 public class MultipleChoicePlugin implements QuestionPlugin
 {
@@ -57,14 +57,6 @@ public class MultipleChoicePlugin implements QuestionPlugin
 	public void destroy()
 	{
 		M_log.info("destroy()");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getName()
-	{
-		return this.messages.getString("name");
 	}
 
 	/**
