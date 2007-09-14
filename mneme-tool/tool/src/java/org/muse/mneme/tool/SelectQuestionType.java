@@ -1,6 +1,6 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/java/org/muse/mneme/tool/SelectQuestionType.java $
- * $Id: SelectQuestionType.java 11810 2007-09-06 22:30:17Z tannirumurthy@foothill.edu $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
  * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
