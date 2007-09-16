@@ -205,12 +205,7 @@ public class SubmissionImpl implements Submission
 		}
 
 		// are we past the hard end date?
-		boolean over = ((assessment.getDates().getAcceptUntilDate() != null) && (now.after(assessment.getDates().getAcceptUntilDate())));
-
-		// overdue, but still acceptable?
-		// Note: we make no distinction about this...
-		// boolean overdue = (assessment.getDates().getDueDate() != null) && now.after(assessment.getDates().getDueDate())
-		// && ((assessment.getDates().getAcceptUntilDate() == null) || (now.before(assessment.getDates().getAcceptUntilDate())));
+		boolean over = ((assessment.getDates().getSubmitUntilDate() != null) && (now.after(assessment.getDates().getSubmitUntilDate())));
 
 		// todo (not over, not started)
 		if ((getStartDate() == null) && !over)
@@ -291,8 +286,8 @@ public class SubmissionImpl implements Submission
 		// the end might be from a time limit, or because we are near the closed date
 		long endTime = 0;
 
-		// see if the assessment has a hard due date (w/ no late submissions accepted) or a retract date
-		Date closedDate = getAssessment().getDates().getAcceptUntilDate();
+		// see if the assessment has a hard submission cutoff date
+		Date closedDate = getAssessment().getDates().getSubmitUntilDate();
 		rv.time = closedDate;
 
 		// if we have a time limit, compute the end time based on that limit
@@ -698,12 +693,12 @@ public class SubmissionImpl implements Submission
 			rv = new Date(getStartDate().getTime() + a.getTimeLimit());
 		}
 
-		// for hard due date
-		if (a.getDates().getAcceptUntilDate() != null)
+		// for hard submit-until date
+		if (a.getDates().getSubmitUntilDate() != null)
 		{
-			if ((rv == null) || (a.getDates().getAcceptUntilDate().before(rv)))
+			if ((rv == null) || (a.getDates().getSubmitUntilDate().before(rv)))
 			{
-				rv = a.getDates().getAcceptUntilDate();
+				rv = a.getDates().getSubmitUntilDate();
 			}
 		}
 

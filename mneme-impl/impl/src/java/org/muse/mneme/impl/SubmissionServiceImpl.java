@@ -1159,7 +1159,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
-	 * Find the submissions that are open, timed, and well expired, or open and past a retract date or hard deadline
+	 * Find the submissions that are open, timed, and well expired, or open and past a submit-until date
 	 * 
 	 * @param grace
 	 *        The number of ms past the time limit that the submission's elapsed time must be to qualify
@@ -1191,16 +1191,16 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				}
 			}
 
-			// for past accept-until date
-			if (submission.getAssessment().getDates().getAcceptUntilDate() != null)
+			// for past submit-until date
+			if (submission.getAssessment().getDates().getSubmitUntilDate() != null)
 			{
-				if (asOf.getTime() > (submission.getAssessment().getDates().getAcceptUntilDate().getTime() + grace))
+				if (asOf.getTime() > (submission.getAssessment().getDates().getSubmitUntilDate().getTime() + grace))
 				{
 					selected = true;
 				}
 			}
 
-			// TODO: what about inactive?
+			// TODO: what about unpublished? archived?
 
 			if (selected) rv.add(submission);
 		}

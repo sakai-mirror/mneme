@@ -39,6 +39,13 @@ public class AssessmentDatesImpl implements AssessmentDates
 
 	/**
 	 * Construct.
+	 */
+	public AssessmentDatesImpl()
+	{
+	}
+
+	/**
+	 * Construct.
 	 * 
 	 * @param other
 	 *        The other to copy.
@@ -46,13 +53,6 @@ public class AssessmentDatesImpl implements AssessmentDates
 	public AssessmentDatesImpl(AssessmentDatesImpl other)
 	{
 		set(other);
-	}
-
-	/**
-	 * Construct.
-	 */
-	public AssessmentDatesImpl()
-	{
 	}
 
 	/**
@@ -94,12 +94,11 @@ public class AssessmentDatesImpl implements AssessmentDates
 	{
 		ExpirationImpl rv = new ExpirationImpl();
 
-		// see if the assessment has a hard due date
-		Date closedDate = getAcceptUntilDate();
-
-		// compute an end time based on the assessment's closed date
+		// see if the assessment has a hard due date (no submissions allowed)
+		Date closedDate = this.getSubmitUntilDate();
 		if (closedDate == null) return null;
 
+		// compute an end time based on the assessment's closed date
 		Date now = new Date();
 
 		// if we are past it already
@@ -133,6 +132,17 @@ public class AssessmentDatesImpl implements AssessmentDates
 	public Date getOpenDate()
 	{
 		return this.open;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Date getSubmitUntilDate()
+	{
+		// this is the acceptUntil date, if defined, or the due date.
+		Date closedDate = this.acceptUntil;
+		if (closedDate == null) closedDate = this.due;
+		return closedDate;
 	}
 
 	/**

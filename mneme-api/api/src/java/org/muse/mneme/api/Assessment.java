@@ -78,7 +78,7 @@ public interface Assessment
 	String getId();
 
 	/**
-	 * Check if the assessment is closed for submissions - inactive or past accept-until date.
+	 * Check if the assessment is closed for submissions - unpublished, archived, not yet open or past submit-until date.
 	 * 
 	 * @return TRUE if closed for submission, FALSE if not.
 	 */
@@ -106,7 +106,7 @@ public interface Assessment
 	Boolean getIsMultipleSubmissionsAllowed();
 
 	/**
-	 * Check if the assessment is open for submissions - active, past open date, before past accept-until date.
+	 * Check if the assessment is open for submissions - published, not archived, past open date, before submit-until date.
 	 * 
 	 * @param withGrace
 	 *        TRUE to consider the grace period, FALSE not to.

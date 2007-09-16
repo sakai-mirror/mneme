@@ -29,7 +29,8 @@ import java.util.Date;
 public interface AssessmentDates
 {
 	/**
-	 * Access the date after which submissions will not be accepted.
+	 * Access the date after which submissions will not be accepted.<br />
+	 * If null, no late submissions are accepted.
 	 * 
 	 * @return The date after which submissions will not be accepted, or null if there is none.
 	 */
@@ -58,11 +59,19 @@ public interface AssessmentDates
 	Expiration getExpiration();
 
 	/**
-	 * Access the open date. Only after this date (if defined) is the assessment open for submission.
+	 * Access the open date. Only after this date (if defined) is the assessment open for submission.<br />
+	 * If null, the test is open when it is published.
 	 * 
 	 * @return The assessment's open date, or null if there is none.
 	 */
 	Date getOpenDate();
+
+	/**
+	 * Access the date after which submissions are not allowed. Computed based on due and accept-until dates.
+	 * 
+	 * @return The date after which submissinos are not allowed.
+	 */
+	Date getSubmitUntilDate();
 
 	/**
 	 * Set the date after which submissions will not be accepted.

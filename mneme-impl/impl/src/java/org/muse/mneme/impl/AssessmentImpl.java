@@ -148,19 +148,22 @@ public class AssessmentImpl implements Assessment
 		Date now = new Date();
 
 		// before open date, we are future (not yet open)
-		if ((this.dates.getOpenDate() != null) && (now.before(this.dates.getOpenDate()))) return AcceptSubmitStatus.future;
+		if ((this.dates.getOpenDate() != null) && (now.before(this.dates.getOpenDate())))
+		{
+			return AcceptSubmitStatus.future;
+		}
 
-		// after accept until date, we are closed
-		if ((this.dates.getAcceptUntilDate() != null) && (now.after(this.dates.getAcceptUntilDate()))) return AcceptSubmitStatus.closed;
-//		if ((this.dates.getAcceptUntilDate() != null) && (now.after(this.dates.getAcceptUntilDate())) ||
-//			(this.dates.getAcceptUntilDate() == null && (this.dates.getDueDate() != null && now.after(this.dates.getDueDate()))))
-//			return AcceptSubmitStatus.closed;
+		// closed if we are after a defined getSubmitUntilDate
+		if ((this.dates.getSubmitUntilDate() != null) && (now.after(this.dates.getSubmitUntilDate())))
+		{
+			return AcceptSubmitStatus.closed;
+		}
 
-		// after due date, we are past_due
-		if ((this.dates.getDueDate() != null) && (now.after(this.dates.getDueDate()))) return AcceptSubmitStatus.past_due;
-//		// after due date and before accept until, we are past_due
-//		if ((this.dates.getDueDate() != null) && (now.after(this.dates.getDueDate())) && (this.dates.getAcceptUntilDate() != null)
-//				&& (now.before(this.dates.getAcceptUntilDate()))) return AcceptSubmitStatus.past_due;
+		// after due date, we are late
+		if ((this.dates.getDueDate() != null) && (now.after(this.dates.getDueDate())))
+		{
+			return AcceptSubmitStatus.late;
+		}
 
 		// otherwise, we are open
 		return AcceptSubmitStatus.open;
@@ -219,12 +222,15 @@ public class AssessmentImpl implements Assessment
 	 */
 	public Boolean getIsClosed()
 	{
+		// TODO: if archived, also return true
 		if (!this.published) return Boolean.TRUE;
 
-		if (this.dates.getAcceptUntilDate() == null) return Boolean.FALSE;
+		// if there is no end to submissions, we are never closed
+		if (this.dates.getSubmitUntilDate() == null) return Boolean.FALSE;
 
+		// we are closed if after the submit until date
 		Date now = new Date();
-		if (now.after(this.dates.getAcceptUntilDate())) return Boolean.TRUE;
+		if (now.after(this.dates.getSubmitUntilDate())) return Boolean.TRUE;
 
 		return Boolean.FALSE;
 	}
@@ -265,18 +271,19 @@ public class AssessmentImpl implements Assessment
 	 */
 	public Boolean getIsOpen(Boolean withGrace)
 	{
+		if (!this.published) return Boolean.FALSE;
+		// TODO: if archived, also return false
+
 		Date now = new Date();
 		long grace = withGrace ? MnemeService.GRACE : 0l;
 
-		if (!this.published) return Boolean.FALSE;
-
-		// if we have a release date and we are not there yet
+		// if we have an open date and we are not there yet
 		if ((this.dates.getOpenDate() != null) && (now.before(dates.getOpenDate()))) return Boolean.FALSE;
 
-		// if we have a retract date and we are past it, considering grace
-		if ((this.dates.getAcceptUntilDate() != null) && (now.getTime() > (this.dates.getAcceptUntilDate().getTime() + grace))) return Boolean.FALSE;
+		// if we have a submit-until date and we are past it, considering grace
+		if ((this.dates.getSubmitUntilDate() != null) && (now.getTime() > (this.dates.getSubmitUntilDate().getTime() + grace))) return Boolean.FALSE;
 
-		return true;
+		return Boolean.TRUE;
 	}
 
 	/**

@@ -28,5 +28,5 @@ package org.muse.mneme.api;
  */
 public enum AcceptSubmitStatus
 {
-	future, open, past_due, closed
+	future, open, late, closed
 }
