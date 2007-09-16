@@ -33,6 +33,8 @@ public class EvaluationImpl implements Evaluation
 
 	protected String comment = null;
 
+	protected Boolean evaluated = Boolean.FALSE;
+
 	protected Float score = null;
 
 	/**
@@ -72,6 +74,14 @@ public class EvaluationImpl implements Evaluation
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getEvaluated()
+	{
+		return this.evaluated;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Float getScore()
 	{
 		return this.score;
@@ -83,6 +93,15 @@ public class EvaluationImpl implements Evaluation
 	public void setComment(String comment)
 	{
 		this.comment = comment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setEvaluated(Boolean evaluated)
+	{
+		if (evaluated == null) throw new IllegalArgumentException();
+		this.evaluated = evaluated;
 	}
 
 	/**

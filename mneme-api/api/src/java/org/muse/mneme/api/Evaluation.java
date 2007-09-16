@@ -41,6 +41,13 @@ public interface Evaluation
 	String getComment();
 
 	/**
+	 * Access the evaluated flag.
+	 * 
+	 * @return TRUE if marked evaluated, FALSE if not.
+	 */
+	Boolean getEvaluated();
+
+	/**
 	 * Access the score.
 	 * 
 	 * @return The score.
@@ -54,6 +61,14 @@ public interface Evaluation
 	 *        The rich text (html) comment.
 	 */
 	void setComment(String comment);
+
+	/**
+	 * Set the evaluated flag.
+	 * 
+	 * @param Boolean
+	 *        TRUE if marked evaluated, FALSE if not.
+	 */
+	void setEvaluated(Boolean evaluated);
 
 	/**
 	 * Set the score.
