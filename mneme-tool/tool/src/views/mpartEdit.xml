@@ -73,19 +73,18 @@
 
 		<section title="select-questions-msg">
 			<container>
+				<!--  warn if live -->
+				<alert selector="live-warning-mpart">
+					<included>
+						<decision model="assessment.isLive" />
+					</included>
+				</alert>
+
 				<!-- the list of the selected questions -->
 				<entityList style="FLAT">
 					<emptyTitle>
 						<message selector="no-questions" />
 					</emptyTitle>
-					<!-- entity actions -->
-					<entityActions>
-						<navigation destination="/select_add_mpart_question" title="select-questions" style="LINK"
-							description="select-questions-description" submit="TRUE">
-							<icon icon="/icons/hand_select.png" style="LEFT" />
-						</navigation>
-
-					</entityActions>
 					<iterator name="question" model="part.questionsAsAuthored" />
 					<columns>
 						<selectionColumn multiple="TRUE">
@@ -94,12 +93,25 @@
 							</value>
 							<model ref="questionids.values" />
 							<entityActions>
+								<navigation destination="/select_add_mpart_question" title="select-questions" style="LINK"
+									description="select-questions-description" submit="TRUE">
+									<icon icon="/icons/hand_select.png" style="LEFT" />
+									<disabled>
+										<decision model="assessment.isLive" />
+									</disabled>
+								</navigation>
 								<navigation destination="/part_question_delete" selectRequirement="SOME"
 									selectRequirementMessage="remove-failed-requirements" title="remove-question" style="LINK" description="remove-question-description"
 									submit="TRUE">
 									<icon icon="/icons/page_delete.png" style="LEFT" />
+									<disabled>
+										<decision model="assessment.isLive" />
+									</disabled>
 								</navigation>
 							</entityActions>
+							<readOnly>
+								<decision model="assessment.isLive" />
+							</readOnly>
 						</selectionColumn>
 						<orderColumn>
 							<value>

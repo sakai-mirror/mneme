@@ -39,7 +39,6 @@ import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
-import org.muse.mneme.api.PolicyException;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
@@ -502,7 +501,7 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removeAssessment(Assessment assessment) throws AssessmentPermissionException, PolicyException
+	public void removeAssessment(Assessment assessment) throws AssessmentPermissionException, AssessmentPolicyException
 	{
 		assessmentService.removeAssessment(assessment);
 	}

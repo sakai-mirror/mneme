@@ -414,6 +414,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			p.addQuestion(this.questionService.getQuestion("q3"));
 			p.getPresentation().setText("This is part two.");
 
+			a.clearIsLiveChanged();
 			this.assessments.put(a.getId(), a);
 
 			//
@@ -459,6 +460,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			((PartImpl) p2).initId("p3");
 			p2.getPresentation().setText("This is part one.");
 
+			a.clearIsLiveChanged();
 			this.assessments.put(a.getId(), a);
 		}
 	}

@@ -142,10 +142,10 @@ public interface AssessmentService
 	 *        The assessment to remove.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to remove this assessment.
-	 * @throws PolicyException
+	 * @throws AssessmentPolicyException
 	 *         if the assessment may not be removed due to API policy.
 	 */
-	void removeAssessment(Assessment assessment) throws AssessmentPermissionException, PolicyException;
+	void removeAssessment(Assessment assessment) throws AssessmentPermissionException, AssessmentPolicyException;
 
 	/**
 	 * Save changes made to this assessment.

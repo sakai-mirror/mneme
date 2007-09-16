@@ -32,7 +32,6 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
-import org.muse.mneme.api.PolicyException;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
@@ -279,7 +278,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removeAssessment(Assessment assessment) throws AssessmentPermissionException, PolicyException
+	public void removeAssessment(Assessment assessment) throws AssessmentPermissionException, AssessmentPolicyException
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 
@@ -289,7 +288,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
 
 		// policy check
-		if (!satisfyAssessmentRemovalPolicy(assessment)) throw new PolicyException();
+		if (!satisfyAssessmentRemovalPolicy(assessment)) throw new AssessmentPolicyException();
 
 		// remove incomplete submissions
 		this.submissionService.removeIncompleteAssessmentSubmissions(assessment);

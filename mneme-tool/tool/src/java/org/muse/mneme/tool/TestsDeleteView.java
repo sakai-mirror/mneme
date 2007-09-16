@@ -33,6 +33,8 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
@@ -165,10 +167,17 @@ public class TestsDeleteView extends ControllerImpl
 					return;
 				}
 			}
-			catch (Exception e)
+			catch (AssessmentPermissionException e)
 			{
-				if (M_log.isErrorEnabled()) M_log.error(e.toString());
-				e.printStackTrace();
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+			catch (AssessmentPolicyException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+				return;
 			}
 		}
 		destination = "/tests/" + params[2];

@@ -74,6 +74,13 @@
 		</section>
 		<section title="part-pools-msg">
 			<container>
+				<!--  warn if live -->
+				<alert selector="live-warning-dpart">
+					<included>
+						<decision model="assessment.isLive" />
+					</included>
+				</alert>
+
 				<!-- the list of ALL pools, with those selected for this part checked and their "draw" filled in -->
 				<entityList style="FLAT">
 					<emptyTitle>
@@ -101,6 +108,9 @@
 								<countEdit>
 									<model ref="draw.numQuestions" />
 									<summary initialValue="part.numQuestions" title="part-num-questions" />
+									<readOnly>
+										<decision model="assessment.isLive" />
+									</readOnly>
 								</countEdit>
 							</container>
 						</column>

@@ -150,31 +150,51 @@
 		</section>
 		<section title="test-parts">
 			<container>
+				<!--  warn if live -->
+				<alert selector="live-warning-parts">
+					<included>
+						<decision model="assessment.isLive" />
+					</included>
+				</alert>
+
 				<!-- the list of parts -->
 				<entityList style="FLAT">
 					<iterator name="part" model="assessment.parts.parts" />
 					<emptyTitle>
 						<message selector="no-parts" />
 					</emptyTitle>
-					<entityActions>
-						<navigation destination="DRAW" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
-							<icon icon="/icons/hat_red.png" style="LEFT" />
-						</navigation>
-						<navigation destination="MANUAL" title="manual-draw" style="LINK" description="manual-draw-description" submit="TRUE">
-							<icon icon="/icons/hand_select.png" style="LEFT" />
-						</navigation>
-					</entityActions>
 					<columns>
 						<selectionColumn multiple="TRUE">
 							<value>
 								<model ref="part.id" />
 							</value>
+							<readOnly>
+								<decision model="assessment.isLive" />
+							</readOnly>
 							<model ref="ids.values" />
 							<!-- entity actions -->
 							<entityActions>
+								<!-- these two are not dependent, but put here for desired presentation order of actions -->
+								<navigation destination="DRAW" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
+									<icon icon="/icons/hat_red.png" style="LEFT" />
+									<disabled>
+										<decision model="assessment.isLive" />
+									</disabled>
+								</navigation>
+								<navigation destination="MANUAL" title="manual-draw" style="LINK" description="manual-draw-description"
+									submit="TRUE">
+									<icon icon="/icons/hand_select.png" style="LEFT" />
+									<disabled>
+										<decision model="assessment.isLive" />
+									</disabled>
+								</navigation>
+								<!-- delete is dependent, and desired to go last  -->
 								<navigation destination="/part_delete" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements"
 									title="delete-part" style="LINK" description="part-delete-description" submit="TRUE">
 									<icon icon="/icons/delete.png" style="LEFT" />
+									<disabled>
+										<decision model="assessment.isLive" />
+									</disabled>
 								</navigation>
 							</entityActions>
 						</selectionColumn>
