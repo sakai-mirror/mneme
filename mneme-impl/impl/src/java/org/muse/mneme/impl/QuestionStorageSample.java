@@ -39,7 +39,6 @@ import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
-import org.muse.mneme.api.MultipleAnswerType;
 
 /**
  * QuestionStorageSample defines a sample storage for questions.
