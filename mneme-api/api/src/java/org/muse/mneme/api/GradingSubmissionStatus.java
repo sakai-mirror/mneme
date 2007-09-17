@@ -22,9 +22,9 @@
 package org.muse.mneme.api;
 
 /**
- * SubmissionStatus enumerates different stages of the lifecycle of a submission.
+ * GradingSubmissionStatus enumerates a submission's lifecycle from a grading perspective.
  */
-public enum SubmissionStatus
+public enum GradingSubmissionStatus
 {
-	unstarted, in_progress, complete, graded
+	closed, evaluated, future, inProgress, notStarted, released, submitted
 }

@@ -104,7 +104,7 @@
 				<modelColumn>
 					<title>
 						<message selector="submission-username">
-							<model type="userInfo" selector="DISPLAYNAME" ref="submission.userId" />
+							<model type="userInfo" selector="SORTNAME" ref="submission.userId" />
 						</message>
 					</title>
 					<model ref="submission.userId" missing="no-username" />
@@ -122,6 +122,7 @@
 					<title>
 						<message selector="submission-status" />
 					</title>
+					<model ref="submission.gradingStatus" />
 				</modelColumn>
 				<modelColumn>
 					<title>

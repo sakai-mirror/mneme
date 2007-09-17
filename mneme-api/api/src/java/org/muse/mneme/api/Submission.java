@@ -109,6 +109,13 @@ public interface Submission
 	Question getFirstIncompleteQuestion();
 
 	/**
+	 * Access the submission's grading status.
+	 * 
+	 * @return The submissions's grading status.
+	 */
+	GradingSubmissionStatus getGradingStatus();
+
+	/**
 	 * Access the id of this submission.
 	 * 
 	 * @return The submission's id.
@@ -221,13 +228,6 @@ public interface Submission
 	 * @return the start date for this submission, or null if there is none.
 	 */
 	Date getStartDate();
-
-	/**
-	 * Access the submission's status.
-	 * 
-	 * @return The submissions's status.
-	 */
-	SubmissionStatus getStatus();
 
 	/**
 	 * Access the submission date for this submission.

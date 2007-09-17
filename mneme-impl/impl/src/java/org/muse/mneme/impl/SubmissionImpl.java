@@ -32,6 +32,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentSubmissionStatus;
 import org.muse.mneme.api.Expiration;
+import org.muse.mneme.api.GradingSubmissionStatus;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
@@ -39,7 +40,6 @@ import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionEvaluation;
-import org.muse.mneme.api.SubmissionStatus;
 import org.sakaiproject.tool.api.SessionManager;
 
 /**
@@ -377,6 +377,56 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public GradingSubmissionStatus getGradingStatus()
+	{
+		Date now = new Date();
+		Assessment assessment = getAssessment();
+
+		// not started yet: future or notStarted or closed
+		if (getStartDate() == null)
+		{
+			// if not open yet...
+			if ((assessment.getDates().getOpenDate() != null) && now.before(assessment.getDates().getOpenDate()))
+			{
+				return GradingSubmissionStatus.future;
+			}
+
+			// if closed for submission
+			if (assessment.getIsClosed())
+			{
+				return GradingSubmissionStatus.closed;
+			}
+
+			return GradingSubmissionStatus.notStarted;
+		}
+
+		// if in progress...
+		if (!getIsComplete())
+		{
+			return GradingSubmissionStatus.inProgress;
+		}
+
+		// complete: released, evaluated or submitted
+
+		// released?
+		if (getIsReleased())
+		{
+			return GradingSubmissionStatus.released;
+		}
+
+		// evaluated?
+		if (getEvaluation().getEvaluated())
+		{
+			return GradingSubmissionStatus.evaluated;
+		}
+
+		// submitted
+		return GradingSubmissionStatus.submitted;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getId()
 	{
 		return this.id;
@@ -608,24 +658,6 @@ public class SubmissionImpl implements Submission
 	public Date getStartDate()
 	{
 		return this.startDate;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public SubmissionStatus getStatus()
-	{
-		// if we have no start date, we are not yet started
-		if (this.startDate == null) return SubmissionStatus.unstarted;
-
-		// if not yet complete, we are in progress
-		if (!this.isComplete) return SubmissionStatus.in_progress;
-
-		// if not yet released, we are "just" complete
-		// TODO: this should probably be based on evaluated, not released
-		if (!this.released) return SubmissionStatus.complete;
-
-		return SubmissionStatus.graded;
 	}
 
 	/**
