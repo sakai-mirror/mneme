@@ -139,10 +139,6 @@ public class SelectQuestionType extends ControllerImpl
 				return;
 			}
 
-			// parse the type (after the : in the destination)
-			String type = StringUtil.splitFirst(selectedQuestionType, ":")[1];
-
-			// check security
 			if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext(), null))
 			{
 				// redirect to error
@@ -154,7 +150,7 @@ public class SelectQuestionType extends ControllerImpl
 			Question newQuestion = null;
 			try
 			{
-				newQuestion = this.questionService.newQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, type);
+				newQuestion = this.questionService.newQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, selectedQuestionType);
 				this.questionService.saveQuestion(newQuestion, toolManager.getCurrentPlacement().getContext());
 			}
 			catch (AssessmentPermissionException e)
