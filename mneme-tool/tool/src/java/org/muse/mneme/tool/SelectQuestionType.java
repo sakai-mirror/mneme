@@ -57,6 +57,15 @@ public class SelectQuestionType extends ControllerImpl
 	/** Dependency: mneme service. */
 	protected MnemeService mnemeService = null;
 	
+	/** Dependency: Pool service. */
+	protected PoolService poolService = null;
+
+	/** Dependency: Question service. */
+	protected QuestionService questionService = null;
+
+	/** Dependency: ToolManager */
+	protected ToolManager toolManager = null;
+	
 	/**
 	 * Shutdown.
 	 */
@@ -119,6 +128,51 @@ public class SelectQuestionType extends ControllerImpl
 		
 		String selectedQuestionType = value.getValue();
 		
+		if ((selectedQuestionType != null) && (destination.startsWith("/question_add")))
+		{
+			//pool id is in params array at index 4
+			Pool pool = this.poolService.getPool(params[4]);
+			if (pool == null)
+			{
+				// TODO: do this better!
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+
+			// parse the type (after the : in the destination)
+			String type = StringUtil.splitFirst(selectedQuestionType, ":")[1];
+
+			// check security
+			if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext(), null))
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+
+			// create the question of the appropriate type (all the way to save)
+			Question newQuestion = null;
+			try
+			{
+				newQuestion = this.questionService.newQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, type);
+				this.questionService.saveQuestion(newQuestion, toolManager.getCurrentPlacement().getContext());
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+
+			// form the destionation
+			// TODO: preserve sort / paging parameters
+			destination = "/question_edit/" + newQuestion.getId();
+
+			// redirect
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+		
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
 	}
 
@@ -128,5 +182,29 @@ public class SelectQuestionType extends ControllerImpl
 	public void setMnemeService(MnemeService mnemeService)
 	{
 		this.mnemeService = mnemeService;
+	}
+
+	/**
+	 * @param poolService the poolService to set
+	 */
+	public void setPoolService(PoolService poolService)
+	{
+		this.poolService = poolService;
+	}
+
+	/**
+	 * @param questionService the questionService to set
+	 */
+	public void setQuestionService(QuestionService questionService)
+	{
+		this.questionService = questionService;
+	}
+
+	/**
+	 * @param toolManager the toolManager to set
+	 */
+	public void setToolManager(ToolManager toolManager)
+	{
+		this.toolManager = toolManager;
 	}
 }
