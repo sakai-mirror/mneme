@@ -160,7 +160,13 @@
 				</column>
 				<modelColumn>
 					<title>
-						<message selector="grade" />
+						<message selector="grade_status" />
+					</title>					
+					<model type="enum" ref="assessment.acceptSubmitStatus" messageRoot="grade-status-" />					
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="newSubmissions" />
 					</title>
 					<navigations>
 						<navigation style="LINK" submit="TRUE">
@@ -172,18 +178,6 @@
 							</destination>
 						</navigation>
 					</navigations>
-				</modelColumn>
-				<modelColumn>
-					<title>
-						<message selector="grade_status" />
-					</title>
-					<model ref="assessment.acceptSubmitStatus" delegate="FormatGradeStatus" tool="sakai.mneme" />
-				</modelColumn>
-				<modelColumn>
-					<title>
-						<message selector="newSubmissions" />
-					</title>
-					<model type="icon" icon="/icons/bullet_green.png" />
 					<entityIncluded>
 						<decision model="assessment.isFullyReleased" reversed="TRUE" />
 					</entityIncluded>
