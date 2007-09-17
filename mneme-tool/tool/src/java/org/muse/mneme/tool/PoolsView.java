@@ -34,11 +34,9 @@ import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
@@ -53,9 +51,7 @@ public class PoolsView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(PoolsView.class);
 
-	/** Dependency: mneme service. */
-	protected MnemeService mnemeService = null;
-
+	
 	/** Dependency: Pool service. */
 	protected PoolService poolService = null;
 
@@ -179,10 +175,6 @@ public class PoolsView extends ControllerImpl
 		// for the checkboxes
 		Values values = this.uiService.newValues();
 		context.put("poolids", values);
-
-		// the question types
-		List<QuestionPlugin> questionTypes = this.mnemeService.getQuestionPlugins();
-		context.put("questionTypes", questionTypes);
 
 		// render
 		uiService.render(ui, context);
@@ -367,17 +359,6 @@ public class PoolsView extends ControllerImpl
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-	}
-
-	/**
-	 * Set the MnemeService.
-	 * 
-	 * @param service
-	 *        the MnemeService.
-	 */
-	public void setMnemeService(MnemeService sevice)
-	{
-		this.mnemeService = sevice;
 	}
 
 	/**

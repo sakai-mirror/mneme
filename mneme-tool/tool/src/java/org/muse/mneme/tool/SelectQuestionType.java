@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Paging;
+import org.muse.ambrosia.api.Value;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentPermissionException;
@@ -53,6 +54,9 @@ public class SelectQuestionType extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(SelectQuestionType.class);
 	
+	/** Dependency: mneme service. */
+	protected MnemeService mnemeService = null;
+	
 	/**
 	 * Shutdown.
 	 */
@@ -67,7 +71,25 @@ public class SelectQuestionType extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if (params.length != 7)	throw new IllegalArgumentException();
-
+		
+		StringBuilder prevDestinationParamPath = new StringBuilder();
+		prevDestinationParamPath.append(params[2]);
+		for (int i=3; i<7; i++)
+		{
+			prevDestinationParamPath.append("/");
+			prevDestinationParamPath.append(params[i]);
+		}
+		
+		context.put("prevDestinationParamPath", prevDestinationParamPath.toString());
+		
+		//the question types
+		List<QuestionPlugin> questionTypes = this.mnemeService.getQuestionPlugins();
+		context.put("questionTypes", questionTypes);
+		
+		//for the selected question type
+		Value value = this.uiService.newValue();
+		context.put("selectedQuestionType", value);
+		
 		// render
 		uiService.render(ui, context);
 	}
@@ -88,6 +110,23 @@ public class SelectQuestionType extends ControllerImpl
 	{
 		if (params.length != 7)	throw new IllegalArgumentException();
 		
+		//for the selected question type
+		Value value = this.uiService.newValue();
+		context.put("selectedQuestionType", value);
+		
+		//read the form
+		String destination = uiService.decode(req, context);
+		
+		String selectedQuestionType = value.getValue();
+		
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
+	}
+
+	/**
+	 * @param mnemeService the mnemeService to set
+	 */
+	public void setMnemeService(MnemeService mnemeService)
+	{
+		this.mnemeService = mnemeService;
 	}
 }
