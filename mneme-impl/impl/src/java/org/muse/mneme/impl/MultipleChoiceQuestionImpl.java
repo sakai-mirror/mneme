@@ -37,6 +37,7 @@ import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
+import org.muse.ambrosia.api.AutoColumn;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificQuestion;
@@ -139,7 +140,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			Object rv = super.clone();
 
 			// TODO|: ? nothing to deep copy
-			
+
 			// set the question
 			((MultipleChoiceQuestionImpl) rv).question = question;
 
@@ -156,7 +157,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getAnswerKey()
 	{
-		// return this.valueSelectors.get(this.correctAnswers);
 		/*
 		 * Iterator itr = correctAnswers.iterator(); String answerKey[] = new String[correctAnswers.size()]; int i=0; while (itr.hasNext()) {
 		 * answerKey[i] = (String)this.answerChoices.get((String)itr.next().intValue()) ; i++; } return answerKey;
@@ -185,6 +185,9 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		selCol.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
 		entityList.addColumn(selCol);
+
+		AutoColumn autoCol = this.uiService.newAutoColumn();
+		entityList.addColumn(autoCol);
 
 		EntityListColumn col = this.uiService.newEntityListColumn();
 		HtmlEdit edit = this.uiService.newHtmlEdit();
@@ -262,7 +265,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		{
 			rv[i++] = correct.toString();
 		}
-		
+
 		return rv;
 	}
 
@@ -298,6 +301,9 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
 		entityList.addColumn(selCol);
 
+		AutoColumn autoCol = this.uiService.newAutoColumn();
+		entityList.addColumn(autoCol);
+
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
 		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
 		entityList.addColumn(propCol);
@@ -327,6 +333,9 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
 		selCol.setReadOnly(this.uiService.newTrueDecision());
 		entityList.addColumn(selCol);
+
+		AutoColumn autoCol = this.uiService.newAutoColumn();
+		entityList.addColumn(autoCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
 		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
