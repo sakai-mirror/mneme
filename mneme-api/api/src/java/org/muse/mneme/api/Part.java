@@ -50,6 +50,13 @@ public interface Part
 	String getId();
 
 	/**
+	 * Check if the part is valid.
+	 * 
+	 * @return TRUE if the part is valid, FALSE if not.
+	 */
+	Boolean getIsValid();
+
+	/**
 	 * Access the last question. The order will be in a random order (if enabled) based on the current user.
 	 * 
 	 * @return The last question, or null if there are none.

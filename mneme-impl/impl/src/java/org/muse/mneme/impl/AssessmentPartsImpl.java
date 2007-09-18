@@ -136,6 +136,23 @@ public class AssessmentPartsImpl implements AssessmentParts
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsValid()
+	{
+		// we must have some parts defined
+		if (this.parts.isEmpty()) return Boolean.FALSE;
+
+		// each part must be valid
+		for (Part part : this.parts)
+		{
+			if (!part.getIsValid()) return Boolean.FALSE;
+		}
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer getNumQuestions()
 	{
 		int rv = 0;

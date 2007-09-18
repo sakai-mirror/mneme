@@ -289,6 +289,20 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsValid()
+	{
+		// dates valid
+		if (!this.dates.getIsValid()) return Boolean.FALSE;
+
+		// parts valid
+		if (!this.parts.getIsValid()) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Attribution getModifiedBy()
 	{
 		return modifiedBy;

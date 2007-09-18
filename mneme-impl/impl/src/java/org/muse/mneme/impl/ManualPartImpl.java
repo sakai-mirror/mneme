@@ -97,6 +97,17 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsValid()
+	{
+		// we must have questions
+		if (this.questionIds.isEmpty()) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Question getLastQuestion()
 	{
 		List<String> order = getQuestionOrder();

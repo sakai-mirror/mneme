@@ -162,6 +162,19 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsValid()
+	{
+		// we must have draws
+		if (this.pools.isEmpty()) return Boolean.FALSE;
+
+		// TODO: each pool must have enough questions to draw
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Question getLastQuestion()
 	{
 		List<String> order = getQuestionOrder();

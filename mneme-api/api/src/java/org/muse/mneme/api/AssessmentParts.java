@@ -57,6 +57,13 @@ public interface AssessmentParts
 	Part getFirst();
 
 	/**
+	 * Check if the assessment parts are valid; i.e. exist and all have >0 questions
+	 * 
+	 * @return TRUE if the assessment parts are valid, FALSE if not.
+	 */
+	Boolean getIsValid();
+
+	/**
 	 * Access the count of questions in all parts.
 	 * 
 	 * @return The count of questions in all parts.

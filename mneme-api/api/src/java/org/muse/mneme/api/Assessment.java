@@ -115,6 +115,13 @@ public interface Assessment
 	Boolean getIsOpen(Boolean withGrace);
 
 	/**
+	 * Check if the assessment is valid; i.e. has no inconsistencies in its definition.
+	 * 
+	 * @return TRUE if the assessment is valid, FALSE if not.
+	 */
+	Boolean getIsValid();
+
+	/**
 	 * Access the modified-by attribution (user and date).
 	 * 
 	 * @return The modified-by attribution.

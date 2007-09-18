@@ -59,6 +59,13 @@ public interface AssessmentDates
 	Expiration getExpiration();
 
 	/**
+	 * Check if the assessment dates are valid; i.e. has no inconsistencies in the definition.
+	 * 
+	 * @return TRUE if the assessment dates are valid, FALSE if not.
+	 */
+	Boolean getIsValid();
+
+	/**
 	 * Access the open date. Only after this date (if defined) is the assessment open for submission.<br />
 	 * If null, the test is open when it is published.
 	 * 
