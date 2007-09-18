@@ -60,8 +60,11 @@
 			<rows>
 				<row title="actions">
 					<container>
-						<navigation title="mark-all-submissions" style="LINK">
+						<navigation title="release-all-evaluated" style="LINK">
 							<icon icon="/icons/checkon.gif" style="LEFT" />
+							<destination template="/" />
+						</navigation>
+						<navigation title="release-all" style="LINK">
 							<destination template="/" />
 						</navigation>
 					</container>
@@ -70,7 +73,7 @@
 					<container>
 						<entityDisplay>
 							<rows>
-								<row title="adjust-scores">
+								<row title="adjust-submissions">
 									<container>
 										<textEdit model="" rows="1" cols="4" />
 									</container>
@@ -127,11 +130,6 @@
 				<modelColumn>
 					<title>
 						<message selector="submission-tries" />
-					</title>
-				</modelColumn>
-				<modelColumn>
-					<title>
-						<message selector="submission-time-limit" />
 					</title>
 				</modelColumn>
 				<modelColumn>
