@@ -70,6 +70,13 @@ public interface Pool
 	List<Question> findQuestions(String userId, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
+	 * Access all questions.
+	 * 
+	 * @return A List of question ids from the pool.
+	 */
+	List<String> getAllQuestionIds();
+
+	/**
 	 * Access the created-by (owner / date)
 	 * 
 	 * @return The pool's created-by.

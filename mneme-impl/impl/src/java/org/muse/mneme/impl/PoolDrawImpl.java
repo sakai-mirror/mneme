@@ -102,6 +102,14 @@ public class PoolDrawImpl implements PoolDraw
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<String> getAllQuestionIds()
+	{
+		return getPool().getAllQuestionIds();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer getNumQuestions()
 	{
 		return this.numQuestions;

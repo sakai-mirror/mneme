@@ -89,13 +89,18 @@ public interface AssessmentParts
 	Question getQuestion(String questionId);
 
 	/**
-	 * Access the questions across all sections. The order will be in section order, and in each section, random order (if enabled) based on the
-	 * current user.
+	 * Access the questions across all parts in delivery order.
 	 * 
-	 * @return The questions across all sections. The order will be in section order, and in each section, random order (if enabled) based on the
-	 *         current user. TODO: change to Question
+	 * @return The questions across all parts in delivery order.
 	 */
 	List<? extends Question> getQuestions();
+
+	/**
+	 * Access the questions across all parts in authored order.
+	 * 
+	 * @return The questions across all parts in authored order.
+	 */
+	List<? extends Question> getQuestionsAsAuthored();
 
 	/**
 	 * Access the show-presentation setting; this controlls the display of each part's presentation.

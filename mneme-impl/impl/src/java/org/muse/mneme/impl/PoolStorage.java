@@ -76,6 +76,15 @@ public interface PoolStorage
 	List<Pool> findPools(String context, String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
+	 * Access all questions.
+	 * 
+	 * @param pool
+	 *        The pool to draw from.
+	 * @return A List of question ids from the pool.
+	 */
+	List<String> getAllQuestionIds(Pool pool);
+
+	/**
 	 * Access a pool by id.
 	 * 
 	 * @param poolId

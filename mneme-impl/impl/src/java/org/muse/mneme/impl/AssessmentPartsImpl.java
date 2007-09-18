@@ -201,6 +201,20 @@ public class AssessmentPartsImpl implements AssessmentParts
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<? extends Question> getQuestionsAsAuthored()
+	{
+		List<Question> rv = new ArrayList<Question>();
+		for (Part part : this.parts)
+		{
+			rv.addAll(part.getQuestionsAsAuthored());
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getShowPresentation()
 	{
 		return this.showPresentation;

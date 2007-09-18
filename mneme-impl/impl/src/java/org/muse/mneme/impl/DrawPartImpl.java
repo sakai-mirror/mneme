@@ -210,6 +210,25 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<? extends Question> getQuestionsAsAuthored()
+	{
+		List<String> order = getQuestionOrderAsAuthored();
+		List<Question> rv = new ArrayList<Question>(order.size());
+		for (String id : order)
+		{
+			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(id);
+
+			// set the assessment, part context
+			question.initPartContext(this);
+			rv.add(question);
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Float getTotalPoints()
 	{
 		float total = 0f;
@@ -309,6 +328,23 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 
 		// randomize the questions in the copy
 		Collections.shuffle(rv, new Random(seed));
+
+		return rv;
+	}
+
+	/**
+	 * Get the list of questions as they should be presented for the submission context.
+	 * 
+	 * @return The list of questions as they should be presented for the submission context.
+	 */
+	protected List<String> getQuestionOrderAsAuthored()
+	{
+		// random draw from the pools, randomize the results
+		List<String> rv = new ArrayList<String>();
+		for (PoolDraw draw : this.pools)
+		{
+			rv.addAll(draw.getAllQuestionIds());
+		}
 
 		return rv;
 	}

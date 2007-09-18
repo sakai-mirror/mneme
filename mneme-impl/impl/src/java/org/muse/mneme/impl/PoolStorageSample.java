@@ -201,6 +201,16 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<String> getAllQuestionIds(Pool pool)
+	{
+		List<String> rv = this.questionService.getPoolQuestions(pool);
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public PoolImpl getPool(String poolId)
 	{
 		fakeIt();

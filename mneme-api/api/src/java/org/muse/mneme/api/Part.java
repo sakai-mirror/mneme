@@ -87,11 +87,18 @@ public interface Part
 	Question getQuestion(String questionId);
 
 	/**
-	 * Access the questions. The order will be in a random order (if enabled) based on the current user.
+	 * Access the questions in delivery order.
 	 * 
-	 * @return The questions. The order will be in a random order (if enabled) based on the current user.
+	 * @return The questions in delivery order.
 	 */
 	List<? extends Question> getQuestions();
+
+	/**
+	 * Access the questions in authored order.
+	 * 
+	 * @return The questions in authored order.
+	 */
+	List<? extends Question> getQuestionsAsAuthored();
 
 	/**
 	 * Access the title.

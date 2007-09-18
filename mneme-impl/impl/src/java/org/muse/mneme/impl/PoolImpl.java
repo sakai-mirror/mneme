@@ -121,6 +121,14 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<String> getAllQuestionIds()
+	{
+		return this.poolService.getAllQuestionIds(this);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Attribution getCreatedBy()
 	{
 		return this.createdBy;

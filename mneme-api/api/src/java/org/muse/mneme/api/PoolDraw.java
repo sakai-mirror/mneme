@@ -38,6 +38,13 @@ public interface PoolDraw
 	List<String> drawQuestionIds(long seed);
 
 	/**
+	 * Access all questions.
+	 * 
+	 * @return A List of question ids from the pool.
+	 */
+	List<String> getAllQuestionIds();
+
+	/**
 	 * Get the number of questions to draw from the pool.
 	 * 
 	 * @return The number of questions to draw from the pool.

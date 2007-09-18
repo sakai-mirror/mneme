@@ -417,6 +417,15 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	protected List<String> getAllQuestionIds(Pool pool)
+	{
+		List<String> rv = storage.getAllQuestionIds(pool);
+		return rv;
+	}
+
+	/**
 	 * Form an pool reference for this pool id.
 	 * 
 	 * @param poolId
