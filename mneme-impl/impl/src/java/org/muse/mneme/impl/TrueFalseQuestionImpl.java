@@ -77,14 +77,17 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object clone()
+	public Object clone(Question question)
 	{
 		try
 		{
 			// get an exact, bit-by-bit copy
-			Object rv = (TrueFalseQuestionImpl) super.clone();
+			Object rv = super.clone();
 
 			// nothing to deep copy
+			
+			// set the question
+			((TrueFalseQuestionImpl) rv).question = question;
 
 			return rv;
 		}

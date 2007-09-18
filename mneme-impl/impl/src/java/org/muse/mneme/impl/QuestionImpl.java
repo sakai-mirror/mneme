@@ -486,7 +486,7 @@ public class QuestionImpl implements Question
 
 	protected void set(QuestionImpl other)
 	{
-		if (other.questionHandler != null) this.questionHandler = (TypeSpecificQuestion) (other.questionHandler.clone());
+		if (other.questionHandler != null) this.questionHandler = (TypeSpecificQuestion) (other.questionHandler.clone(this));
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
 		this.deleted = other.deleted;
 		this.description = other.description;

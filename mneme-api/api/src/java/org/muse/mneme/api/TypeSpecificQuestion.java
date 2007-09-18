@@ -31,9 +31,11 @@ public interface TypeSpecificQuestion extends Cloneable
 	/**
 	 * Clone a copy
 	 * 
+	 * @param question
+	 *        the Question that the clone is for.
 	 * @return A copy.
 	 */
-	Object clone();
+	Object clone(Question question);
 
 	/**
 	 * Access the rich text (html) answer key that shows the correct answer to the question.

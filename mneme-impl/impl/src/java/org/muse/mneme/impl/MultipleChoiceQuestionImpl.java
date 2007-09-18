@@ -131,14 +131,17 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object clone()
+	public Object clone(Question question)
 	{
 		try
 		{
 			// get an exact, bit-by-bit copy
-			Object rv = (MultipleChoiceQuestionImpl) super.clone();
+			Object rv = super.clone();
 
 			// TODO|: ? nothing to deep copy
+			
+			// set the question
+			((MultipleChoiceQuestionImpl) rv).question = question;
 
 			return rv;
 		}
