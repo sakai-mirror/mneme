@@ -21,13 +21,12 @@
 
 package org.muse.mneme.impl;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificAnswer;
-
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
 
 /**
  * MultipleChoiceAnswerImpl handles answers for the multiple choice question type.
@@ -37,14 +36,15 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	/** The answer this is a helper for. */
 	protected transient Answer answer = null;
 
-	/** The is the Integer HashSet that the user's answers are translated into. */
+	/** The answers, as index references to the question's choices. */
 	protected Set<Integer> answerData = new HashSet<Integer>();
-
-	/** The answers stored as an array */
-	protected String[] answers;
 
 	/** The auto score. */
 	protected Float autoScore = null;
+
+	/** Set when the answer has been changed. */
+	// TODO: need to reset this at some point when stored... -ggolden
+	protected boolean changed = false;
 
 	/**
 	 * Construct.
@@ -68,8 +68,10 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	public MultipleChoiceAnswerImpl(Answer answer, MultipleChoiceAnswerImpl other)
 	{
 		this.answer = answer;
+		// TODO: deep!
 		this.answerData = other.answerData;
 		this.autoScore = other.autoScore;
+		this.changed = other.changed;
 	}
 
 	/**
@@ -109,6 +111,23 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	}
 
 	/**
+	 * Access the currently selected answer as a string.
+	 * 
+	 * @return The answer.
+	 */
+	public String[] getAnswers()
+	{
+		String[] rv = new String[answerData.size()];
+		int i = 0;
+		for (Integer answer : this.answerData)
+		{
+			rv[i++] = answer.toString();
+		}
+
+		return rv;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public Float getAutoScore()
@@ -121,7 +140,7 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Boolean getIsAnswered()
 	{
-		return this.answerData != null;
+		return !this.answerData.isEmpty();
 	}
 
 	/**
@@ -129,8 +148,7 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Boolean getIsChanged()
 	{
-		// TODO ???
-		return Boolean.TRUE;
+		return this.changed;
 	}
 
 	/**
@@ -138,35 +156,26 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Boolean getIsCorrect()
 	{
-		// Check with Glenn on how this would work with shuffle choices
-		if (this.answerData == null) return Boolean.FALSE;
-
+		// TODO: how to deal with partial correct for multi choice
 		Question question = answer.getQuestion();
-		return this.answerData.equals(((MultipleChoiceQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswers());
-	}
-
-	/**
-	 * Access the currently selected answer as a string.
-	 * 
-	 * @return The answer.
-	 */
-	public String[] getAnswers()
-	{
-		if (this.answerData == null) return null;
-		return (String[]) answerData.toArray(new String[answerData.size()]);
+		return this.answerData.equals(((MultipleChoiceQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswerSet());
 	}
 
 	/**
 	 * Set the answers
 	 * 
-	 * @param an
+	 * @param answers
 	 *        array of strings
 	 */
-
 	public void setAnswers(String[] answers)
 	{
+		// TODO: check if the answers to set exactly match the answers we already have. Don't set the changed flag if so.
+		this.answerData.clear();
 		if ((answers == null) || (answers.length == 0)) return;
-		this.answerData = new HashSet(Arrays.asList(answers));
-
+		for (String answer : answers)
+		{
+			this.answerData.add(Integer.valueOf(answer));
+		}
+		this.changed = true;
 	}
 }

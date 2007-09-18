@@ -205,7 +205,8 @@
 		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
 	</bean>
-        <bean id="org.muse.mneme.impl.MultipleChoicePlugin"
+
+	<bean id="org.muse.mneme.impl.MultipleChoicePlugin"
 		class="org.muse.mneme.impl.MultipleChoicePlugin"
 		init-method="init"
 		destroy-method="destroy"

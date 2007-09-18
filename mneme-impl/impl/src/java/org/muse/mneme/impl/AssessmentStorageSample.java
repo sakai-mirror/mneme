@@ -462,6 +462,44 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 			a.clearIsLiveChanged();
 			this.assessments.put(a.getId(), a);
+
+			//
+
+			a = newAssessment();
+			a.initId("a3");
+			a.setPublished(Boolean.TRUE);
+			a.setContext("mercury");
+			a.getCreatedBy().setUserId("admin");
+			a.setNumSubmissionsAllowed(5);
+			a.setQuestionGrouping(QuestionGrouping.question);
+			a.setRandomAccess(Boolean.TRUE);
+			// a.setTimeLimit(1200l * 1000l);
+			a.setTitle("assessment three");
+			a.setType(AssessmentType.test);
+			// a.getAccess().setPassword("password");
+			a.getCreatedBy().setUserId("admin");
+			a.getCreatedBy().setDate(now);
+			a.getModifiedBy().setUserId("admin");
+			a.getModifiedBy().setDate(now);
+			a.getGrading().setAutoRelease(Boolean.TRUE);
+			a.getGrading().setGradebookIntegration(Boolean.FALSE);
+			a.getGrading().setShowIdentities(Boolean.TRUE);
+			a.getPresentation().setText("This is assessment three.");
+			a.getReview().setShowCorrectAnswer(Boolean.TRUE);
+			a.getReview().setShowFeedback(Boolean.TRUE);
+			a.getReview().setTiming(ReviewTiming.submitted);
+			a.getSubmitPresentation().setText("Have a nice day!");
+			a.getParts().setContinuousNumbering(Boolean.TRUE);
+			a.getParts().setShowPresentation(Boolean.TRUE);
+
+			p = a.getParts().addManualPart();
+			p.addQuestion(this.questionService.getQuestion("q3"));
+			p.setTitle("Part one");
+			((PartImpl) p).initId("p4");
+			p2.getPresentation().setText("This is part 1.");
+
+			a.clearIsLiveChanged();
+			this.assessments.put(a.getId(), a);
 		}
 	}
 }
