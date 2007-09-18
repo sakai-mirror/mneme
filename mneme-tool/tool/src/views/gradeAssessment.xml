@@ -110,7 +110,20 @@
 							<model type="userInfo" selector="SORTNAME" ref="submission.userId" />
 						</message>
 					</title>
+					<entityNavigations>
+						<navigation destination="/">
+							<included>
+								<compareDecision model="submission.gradingStatus">
+									<constant value="released"/>
+									<constant value="submitted"/>
+									<constant value="closed"/>
+									<constant value="evaluated"/>
+								</compareDecision>
+							</included>
+						</navigation>
+					</entityNavigations>
 					<model ref="submission.userId" missing="no-username" />
+					
 				</modelColumn>
 				<modelColumn>
 					<title>
