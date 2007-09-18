@@ -27,7 +27,7 @@
 <beans>
 
 	<bean id="org.muse.mneme.tool.GradeAssessmentView" class="org.muse.mneme.tool.GradeAssessmentView" init-method="init" destroy-method="destroy"
-		singleton="true">
+		singleton="true" depends-on="SubmissionStatus">
 
 		<property name="ui">
 			<ref bean="org.muse.ambrosia.api.UiService" />
@@ -53,5 +53,17 @@
 		<property name="components">
 			<value>gradeAssessment.xml</value>
 		</property>
+	</bean>
+	
+	<bean id="SubmissionStatus"
+			class="org.muse.mneme.tool.SubmissionStatusDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>SubmissionStatus</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 </beans>

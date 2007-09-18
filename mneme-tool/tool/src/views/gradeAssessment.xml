@@ -125,7 +125,8 @@
 					<title>
 						<message selector="submission-status" />
 					</title>
-					<model type="enum" ref="submission.gradingStatus" messageRoot="grade-status-" />
+					<model type="html" ref="submission" delegate="SubmissionStatus" tool="sakai.mneme" />
+					<!--model type="enum" ref="submission.gradingStatus" messageRoot="grade-status-" /-->
 				</modelColumn>
 				<modelColumn>
 					<title>
