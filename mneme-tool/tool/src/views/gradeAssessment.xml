@@ -160,11 +160,23 @@
 								<message selector="nav-divider" />
 							</title>
 						</navigation>
-						<navigation style="LINK" disabled="TRUE">
+						<navigation style="LINK" disabled="TRUE" >
 							<title>
 								<message model="submission.assessment.numSubmissionsAllowed" />
 							</title>
 							<destination template="/" />
+						</navigation>
+						<navigation style="LINK">
+							<title>
+								<message selector="view-all"/>
+							</title>
+							<destination template="/" />
+							<included>
+								<compareDecision model="submission.siblingCount" reversed="TRUE">
+									<constant value="0" />
+									<constant value="1" />
+								</compareDecision>
+							</included>
 						</navigation>
 					</navigations>
 				</modelColumn>
