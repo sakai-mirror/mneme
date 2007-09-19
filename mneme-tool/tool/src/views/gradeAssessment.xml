@@ -148,6 +148,10 @@
 					<title>
 						<message selector="submission-tries" />
 					</title>
+					<message selector="format-submission-tries">
+						<model ref="submission.siblingCount" />
+						<model ref="submission.assessment.numSubmissionsAllowed" missing="infinite" />
+					</message>
 				</modelColumn>
 				<modelColumn>
 					<title>
@@ -159,8 +163,11 @@
 					<title>
 						<message selector="submission-adjust" />
 					</title>
-					<container>
+					<!--container>
 						<textEdit model="" rows="1" cols="4" />
+					</container-->
+					<container>
+						<floatEdit model="" rows="1" cols="4" />
 					</container>
 				</modelColumn>
 				<modelColumn>
