@@ -47,8 +47,14 @@ public interface MnemeService extends PoolService, QuestionService, SubmissionSe
 	/** The security function used to check if users can manage tests. */
 	static final String MANAGE_PERMISSION = "mneme.manage";
 
+	/** The security function used to check if users can manage pools. */
+	static final String POOL_MANAGE_PERMISSION = "mneme.pool.manage";
+
 	/** Event tracking event for changing a pool. */
-	static final String POOL_EDIT = "mneme.manage";
+	static final String POOL_EDIT = "mneme.pool.edit";
+
+	/** The security function to allow a user to share her pools in a context. */
+	static final String POOL_SHARE_PERMISSION = "mnene.pool.share";
 
 	/** The sub-type for pool in references (/mneme/pool/...) */
 	static final String POOL_TYPE = "pool";

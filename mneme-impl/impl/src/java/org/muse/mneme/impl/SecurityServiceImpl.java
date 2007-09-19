@@ -22,12 +22,14 @@
 package org.muse.mneme.impl;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.SecurityService;
+import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.site.api.SiteService;
 
 /**
@@ -38,6 +40,9 @@ public class SecurityServiceImpl implements SecurityService
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(SecurityServiceImpl.class);
 
+	/** Dependency: AuthzGroupService */
+	protected AuthzGroupService authzGroupService = null;
+
 	/** Dependency: SecurityService */
 	protected org.sakaiproject.authz.api.SecurityService securityService = null;
 
@@ -45,17 +50,7 @@ public class SecurityServiceImpl implements SecurityService
 	protected SiteService siteService = null;
 
 	/**
-	 * Check the security for this user doing this function withing this context.
-	 * 
-	 * @param userId
-	 *        the user id.
-	 * @param function
-	 *        the function.
-	 * @param context
-	 *        The context.
-	 * @param ref
-	 *        The entity reference.
-	 * @return true if the user has permission, false if not.
+	 * {@inheritDoc}
 	 */
 	public boolean checkSecurity(String userId, String function, String context)
 	{
@@ -66,13 +61,10 @@ public class SecurityServiceImpl implements SecurityService
 		// use the site ref for the security service (used to cache the security calls in the security service)
 		String siteRef = siteService.siteReference(context);
 
-		// form the azGroups for a context-as-implemented-by-site (Note the *lack* of direct dependency on Site, i.e. we stole the
-		// code!)
+		// form the azGroups for a context-as-implemented-by-site
 		Collection azGroups = new Vector(2);
 		azGroups.add(siteRef);
 		azGroups.add("!site.helper");
-
-		String rev = "/site/" + context;
 
 		boolean rv = securityService.unlock(userId, function, siteRef, azGroups);
 		return rv;
@@ -87,6 +79,22 @@ public class SecurityServiceImpl implements SecurityService
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Set<String> getUsersIsAllowed(String function, String context)
+	{
+		// form the azGroups for a context-as-implemented-by-site
+		Collection azGroups = new Vector(2);
+		azGroups.add(siteService.siteReference(context));
+		azGroups.add("!site.helper");
+
+		// get the user ids who can
+		Set userIds = authzGroupService.getUsersIsAllowed(function, azGroups);
+
+		return userIds;
+	}
+
+	/**
 	 * Final initialization, once all dependencies are set.
 	 */
 	public void init()
@@ -95,18 +103,7 @@ public class SecurityServiceImpl implements SecurityService
 	}
 
 	/**
-	 * Check security and throw if not satisfied
-	 * 
-	 * @param userId
-	 *        the user id.
-	 * @param function
-	 *        the function.
-	 * @param context
-	 *        The context.
-	 * @param ref
-	 *        The entity reference.
-	 * @throws AssessmentPermissionException
-	 *         if security is not satisfied.
+	 * {@inheritDoc}
 	 */
 	public void secure(String userId, String function, String context) throws AssessmentPermissionException
 	{
@@ -114,6 +111,17 @@ public class SecurityServiceImpl implements SecurityService
 		{
 			throw new AssessmentPermissionException(userId, function, context);
 		}
+	}
+
+	/**
+	 * Dependency: AuthzGroupService.
+	 * 
+	 * @param service
+	 *        The AuthzGroupService.
+	 */
+	public void setAuthzGroupService(AuthzGroupService service)
+	{
+		authzGroupService = service;
 	}
 
 	/**

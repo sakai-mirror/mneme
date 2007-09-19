@@ -106,14 +106,6 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowEditPool(Pool pool, String context, String userId)
-	{
-		return poolService.allowEditPool(pool, context, userId);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean allowEditQuestion(Question question, String context, String userId)
 	{
 		return questionService.allowEditQuestion(question, context, userId);
@@ -235,9 +227,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPools(String context, String userId, String search)
+	public Integer countPools(String context, String search)
 	{
-		return poolService.countPools(context, userId, search);
+		return poolService.countPools(context, search);
 	}
 
 	/**
@@ -293,9 +285,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String context, String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Pool> findPools(String context, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
-		return poolService.findPools(context, userId, sort, search, pageNum, pageSize);
+		return poolService.findPools(context, sort, search, pageNum, pageSize);
 	}
 
 	/**
@@ -403,9 +395,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getSubjects(String context, String userId)
+	public List<String> getSubjects(String context)
 	{
-		return this.poolService.getSubjects(context, userId);
+		return this.poolService.getSubjects(context);
 	}
 
 	/**
@@ -446,9 +438,11 @@ public class MnemeServiceImpl implements MnemeService
 			}
 
 			// register functions
-			functionManager.registerFunction(SUBMIT_PERMISSION);
-			functionManager.registerFunction(MANAGE_PERMISSION);
 			functionManager.registerFunction(GRADE_PERMISSION);
+			functionManager.registerFunction(MANAGE_PERMISSION);
+			functionManager.registerFunction(POOL_MANAGE_PERMISSION);
+			functionManager.registerFunction(POOL_SHARE_PERMISSION);
+			functionManager.registerFunction(SUBMIT_PERMISSION);
 
 			M_log.info("init()");
 		}

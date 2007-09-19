@@ -37,19 +37,6 @@ public interface PoolService
 	}
 
 	/**
-	 * Check if the current user is allowed to edit this pool from this context.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @param context
-	 *        The context.
-	 * @param userId
-	 *        The user (if null, the current user is used).
-	 * @return TRUE if the user is allowed, FALSE if not.
-	 */
-	Boolean allowEditPool(Pool pool, String context, String userId);
-
-	/**
 	 * Check if the current user is allowed to manage pools from this context.
 	 * 
 	 * @param context
@@ -61,25 +48,21 @@ public interface PoolService
 	Boolean allowManagePools(String context, String userId);
 
 	/**
-	 * Count the pools with this criteria.
+	 * Count the pools available to this context with this criteria.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @param userId
-	 *        the user id, (if null, the current user is used).
 	 * @param search
 	 *        The search criteria.
 	 * @return a list of pools that meet the criteria.
 	 */
-	Integer countPools(String context, String userId, String search);
+	Integer countPools(String context, String search);
 
 	/**
-	 * Locate a list of pools with this criteria.
+	 * Locate a list of pools accessible to this context with this criteria.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @param userId
-	 *        the user id, (if null, the current user is used).
 	 * @param sort
 	 *        The sort criteria.
 	 * @param search
@@ -90,7 +73,7 @@ public interface PoolService
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return a list of pools that meet the criteria.
 	 */
-	List<Pool> findPools(String context, String userId, FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<Pool> findPools(String context, FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Access a pool by id.
@@ -101,15 +84,13 @@ public interface PoolService
 	Pool getPool(String poolId);
 
 	/**
-	 * Get a list of all the subjects of all the pools accessible to the user.
+	 * Get a list of all the subjects of all the pools accessible to this context.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @param userId
-	 *        The user (if null, the current user is used).
-	 * @return a list of all the subjects of all the pools accessible to the user.
+	 * @return a list of all the subjects of all the pools accessible to the context.
 	 */
-	List<String> getSubjects(String context, String userId);
+	List<String> getSubjects(String context);
 
 	/**
 	 * Create a new pool.

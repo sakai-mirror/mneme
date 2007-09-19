@@ -86,7 +86,7 @@ public class PoolPropertiesView extends ControllerImpl
 		context.put("pool", pool);
 
 		// get the subjects
-		List<String> subjects = poolService.getSubjects(toolManager.getCurrentPlacement().getContext(), null);
+		List<String> subjects = poolService.getSubjects(toolManager.getCurrentPlacement().getContext());
 		context.put("subjects", subjects);
 
 		// render

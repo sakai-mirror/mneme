@@ -151,7 +151,7 @@ public class PoolsView extends ControllerImpl
 		}
 
 		// how many pools, total?
-		Integer maxPools = this.poolService.countPools(toolManager.getCurrentPlacement().getContext(), null, null);
+		Integer maxPools = this.poolService.countPools(toolManager.getCurrentPlacement().getContext(), null);
 
 		// default paging
 		if (pagingParameter == null)
@@ -168,7 +168,7 @@ public class PoolsView extends ControllerImpl
 		context.put("pagingParameter", pagingParameter);
 
 		// collect the pools to show
-		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, sort, null, paging.getCurrent(), paging
+		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), sort, null, paging.getCurrent(), paging
 				.getSize());
 		context.put("pools", pools);
 

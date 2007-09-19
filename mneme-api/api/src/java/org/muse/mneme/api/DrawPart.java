@@ -51,8 +51,6 @@ public interface DrawPart extends Part
 	 * 
 	 * @param context
 	 *        The context.
-	 * @param userId
-	 *        A user id - all the pools for this user will be included.
 	 * @param sort
 	 *        The sort criteria (from the PoolService).
 	 * @param search
@@ -63,7 +61,7 @@ public interface DrawPart extends Part
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return A list of draws for each pool.
 	 */
-	List<PoolDraw> getDrawsForPools(String context, String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<PoolDraw> getDrawsForPools(String context, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Get a virtal draw for this pool, set to the same count as one of our draws if we have one, else set to 0.<br />

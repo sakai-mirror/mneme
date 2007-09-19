@@ -105,28 +105,4 @@ public interface AssessmentStorage
 	 *        the assessment to save.
 	 */
 	void saveAssessment(AssessmentImpl assessment);
-
-	/**
-	 * Set the PoolService
-	 * 
-	 * @param service
-	 *        The PoolService.
-	 */
-	void setPoolService(PoolService service);
-
-	/**
-	 * Set the QuestionService
-	 * 
-	 * @param service
-	 *        The QuestionsService.
-	 */
-	void setQuestionService(QuestionService service);
-
-	/**
-	 * Set the SubmissionService
-	 * 
-	 * @param service
-	 *        The SubmissionService.
-	 */
-	void setSubmissionService(SubmissionService service);
 }

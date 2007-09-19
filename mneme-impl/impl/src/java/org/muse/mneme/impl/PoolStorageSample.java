@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,7 +58,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPools(String context, String userId, String search)
+	public Integer countPools(Set<String> userIds, String search)
 	{
 		fakeIt();
 
@@ -65,13 +66,13 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.deleted) && pool.getOwnerId().equals(userId))
+			if ((!pool.deleted) && userIds.contains(pool.getOwnerId()))
 			{
+				// TODO: search
+
 				count++;
 			}
 		}
-
-		// TODO: search
 
 		return count;
 	}
@@ -103,7 +104,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String context, String userId, final PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Pool> findPools(Set<String> userIds, final PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		fakeIt();
 
@@ -111,8 +112,10 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.deleted) && pool.getOwnerId().equals(userId))
+			if ((!pool.deleted) && userIds.contains(pool.getOwnerId()))
 			{
+				// TODO: search
+
 				rv.add(new PoolImpl(pool));
 			}
 		}
@@ -177,8 +180,6 @@ public class PoolStorageSample implements PoolStorage
 			}
 		});
 
-		// TODO: search
-
 		// page
 		if ((pageNum != null) && (pageSize != null))
 		{
@@ -218,12 +219,33 @@ public class PoolStorageSample implements PoolStorage
 		PoolImpl rv = this.pools.get(poolId);
 		if (rv == null)
 		{
+			// TODO: really make one if we don't have one?
 			rv = newPool();
 			rv.initId(poolId);
 		}
 		else
 		{
 			rv = new PoolImpl(rv);
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Pool> getPools(Set<String> userIds)
+	{
+		fakeIt();
+
+		List<Pool> rv = new ArrayList<Pool>();
+
+		for (PoolImpl pool : this.pools.values())
+		{
+			if ((!pool.deleted) && userIds.contains(pool.getOwnerId()))
+			{
+				rv.add(new PoolImpl(pool));
+			}
 		}
 
 		return rv;
@@ -241,7 +263,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getSubjects(String context, String userId)
+	public List<String> getSubjects(Set<String> userIds)
 	{
 		fakeIt();
 
@@ -249,7 +271,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.deleted) && pool.getOwnerId().equals(userId))
+			if ((!pool.deleted) && userIds.contains(pool.getOwnerId()))
 			{
 				if (pool.getSubject() != null)
 				{

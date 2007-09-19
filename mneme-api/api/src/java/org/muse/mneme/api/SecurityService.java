@@ -21,13 +21,15 @@
 
 package org.muse.mneme.api;
 
+import java.util.Set;
+
 /**
  * SecurityService provides extended security support for Mneme.
  */
 public interface SecurityService
 {
 	/**
-	 * Check the security for this user doing this function withing this context.
+	 * Check the security for this user doing this function within this context.
 	 * 
 	 * @param userId
 	 *        the user id.
@@ -40,6 +42,17 @@ public interface SecurityService
 	 * @return true if the user has permission, false if not.
 	 */
 	boolean checkSecurity(String userId, String function, String context);
+
+	/**
+	 * Get the list of user ids who can perform this function in this context.
+	 * 
+	 * @param function
+	 *        the function.
+	 * @param context
+	 *        The context.
+	 * @return The list of user ids who can perform this function in this context.
+	 */
+	Set<String> getUsersIsAllowed(String function, String context);
 
 	/**
 	 * Check security and throw if not satisfied

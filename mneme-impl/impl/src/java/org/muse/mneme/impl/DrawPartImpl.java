@@ -122,11 +122,11 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<PoolDraw> getDrawsForPools(String context, String userId, PoolService.FindPoolsSort sort, String search, Integer pageNum,
+	public List<PoolDraw> getDrawsForPools(String context, PoolService.FindPoolsSort sort, String search, Integer pageNum,
 			Integer pageSize)
 	{
 		// get all the pools we need
-		List<Pool> allPools = this.poolService.findPools(context, userId, sort, search, pageNum, pageSize);
+		List<Pool> allPools = this.poolService.findPools(context, sort, search, pageNum, pageSize);
 
 		List<PoolDraw> rv = new ArrayList<PoolDraw>();
 

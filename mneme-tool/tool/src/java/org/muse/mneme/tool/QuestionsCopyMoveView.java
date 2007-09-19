@@ -165,7 +165,7 @@ public class QuestionsCopyMoveView extends ControllerImpl
 
 		Pool pool = this.poolService.getPool(params[4]);
 
-		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), null, sort, null, null, null);
+		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), sort, null, null, null);
 		pools.remove(pool);
 		context.put("pools", pools);
 

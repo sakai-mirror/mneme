@@ -154,20 +154,4 @@ public interface QuestionStorage
 	 *        the question to save.
 	 */
 	void saveQuestion(QuestionImpl question);
-
-	/**
-	 * Set the PoolService
-	 * 
-	 * @param service
-	 *        The PoolService.
-	 */
-	void setPoolService(PoolService service);
-
-	/**
-	 * Set the QuestionService
-	 * 
-	 * @param service
-	 *        The QuestionsService.
-	 */
-	void setQuestionService(QuestionService service);
 }

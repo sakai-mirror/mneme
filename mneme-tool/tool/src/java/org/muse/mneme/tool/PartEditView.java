@@ -175,7 +175,7 @@ public class PartEditView extends ControllerImpl
 			pagingParameter = "1-30";
 		}
 
-		Integer maxPools = this.poolService.countPools(toolManager.getCurrentPlacement().getContext(), null, null);
+		Integer maxPools = this.poolService.countPools(toolManager.getCurrentPlacement().getContext(), null);
 
 		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxPools);
@@ -186,7 +186,7 @@ public class PartEditView extends ControllerImpl
 		// get the pool draw list
 		// - all the pools for the user (select, sort, page) crossed with this part's actual draws
 		// - these are virtual draws, not part of the DrawPart
-		List<PoolDraw> draws = part.getDrawsForPools(toolManager.getCurrentPlacement().getContext(), null, sort, null, paging.getCurrent(), paging
+		List<PoolDraw> draws = part.getDrawsForPools(toolManager.getCurrentPlacement().getContext(), sort, null, paging.getCurrent(), paging
 				.getSize());
 
 		context.put("draws", draws);

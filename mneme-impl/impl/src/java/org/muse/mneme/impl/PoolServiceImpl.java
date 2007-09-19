@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,25 +76,6 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowEditPool(Pool pool, String context, String userId)
-	{
-		if (pool == null) throw new IllegalArgumentException();
-		if (context == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
-
-		if (M_log.isDebugEnabled()) M_log.debug("allowEditPool: " + pool.getId() + ": " + userId);
-
-		// check permission - user must have MANAGE_PERMISSION in the context
-		boolean ok = securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context);
-
-		// TODO: other users allowed...
-		// TODO: or is this user based...
-		return ok;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean allowManagePools(String context, String userId)
 	{
 		if (context == null) throw new IllegalArgumentException();
@@ -101,11 +83,9 @@ public class PoolServiceImpl implements PoolService
 
 		if (M_log.isDebugEnabled()) M_log.debug("allowManagePools: " + context + ": " + userId);
 
-		// check permission - user must have MANAGE_PERMISSION in the context
-		boolean ok = securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context);
+		// check permission - user must have POOL_MANAGE_PERMISSION in the context
+		boolean ok = securityService.checkSecurity(userId, MnemeService.POOL_MANAGE_PERMISSION, context);
 
-		// TODO: other users allowed...
-		// TODO: or is this user based...
 		return ok;
 	}
 
@@ -121,7 +101,9 @@ public class PoolServiceImpl implements PoolService
 		if (M_log.isDebugEnabled()) M_log.debug("copyPool: " + context);
 
 		// security check
-		this.securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+		this.securityService.secure(userId, MnemeService.POOL_MANAGE_PERMISSION, context);
+
+		// TODO: check that the pool accessible to the context
 
 		// make a copy of the pool
 		PoolImpl rv = storage.newPool((PoolImpl) pool);
@@ -144,14 +126,20 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPools(String context, String userId, String search)
+	public Integer countPools(String context, String search)
 	{
 		if (context == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
-		if (M_log.isDebugEnabled()) M_log.debug("countPools: " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("countPools: context: " + context);
 
-		Integer rv = storage.countPools(context, userId, search);
+		// get the list of users in the context who share pools
+		Set<String> userIds = this.securityService.getUsersIsAllowed(MnemeService.POOL_SHARE_PERMISSION, context);
+
+		// TODO: temp. code
+		userIds.add("admin");
+		//
+
+		Integer rv = storage.countPools(userIds, search);
 		return rv;
 	}
 
@@ -166,15 +154,21 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String context, String userId, FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Pool> findPools(String context, FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		if (context == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 		if (sort == null) sort = PoolService.FindPoolsSort.title_a;
 
-		if (M_log.isDebugEnabled()) M_log.debug("findPools: " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("findPools: context: " + context);
 
-		List<Pool> rv = storage.findPools(context, userId, sort, search, pageNum, pageSize);
+		// get the list of users in the context who share pools
+		Set<String> userIds = this.securityService.getUsersIsAllowed(MnemeService.POOL_SHARE_PERMISSION, context);
+
+		// TODO: temp. code
+		userIds.add("admin");
+		//
+
+		List<Pool> rv = storage.findPools(userIds, sort, search, pageNum, pageSize);
 		return rv;
 	}
 
@@ -198,12 +192,20 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getSubjects(String context, String userId)
+	public List<String> getSubjects(String context)
 	{
 		if (context == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
-		return this.storage.getSubjects(context, userId);
+		if (M_log.isDebugEnabled()) M_log.debug("getSubjects: context: " + context);
+
+		// get the list of users in the context who share pools
+		Set<String> userIds = this.securityService.getUsersIsAllowed(MnemeService.POOL_SHARE_PERMISSION, context);
+
+		// TODO: temp. code
+		userIds.add("admin");
+		//
+
+		return this.storage.getSubjects(userIds);
 	}
 
 	/**
@@ -252,7 +254,9 @@ public class PoolServiceImpl implements PoolService
 		if (M_log.isDebugEnabled()) M_log.debug("newPool: " + context);
 
 		// security check
-		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+		securityService.secure(userId, MnemeService.POOL_MANAGE_PERMISSION, context);
+		
+		// TODO: change to another add based permission?
 
 		PoolImpl pool = storage.newPool();
 		pool.setOwnerId(userId);
@@ -272,7 +276,9 @@ public class PoolServiceImpl implements PoolService
 		if (M_log.isDebugEnabled()) M_log.debug("removePool: " + pool.getId());
 
 		// security check
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.POOL_MANAGE_PERMISSION, context);
+		// TODO: change to another delete based permission?
+		// TODO: check that the pool is assessible to the context?
 
 		// remove the questions from the pool
 		this.questionService.removePoolQuestions(pool, context);
@@ -294,7 +300,9 @@ public class PoolServiceImpl implements PoolService
 		if (M_log.isDebugEnabled()) M_log.debug("savePool: " + pool.getId());
 
 		// security check
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.POOL_MANAGE_PERMISSION, context);
+
+		// TODO: check that the pool is accessible to the context
 
 		// if the pool is new (i.e. no id), set the createdBy information, if not already set
 		if ((pool.getId() == null) && (pool.getCreatedBy().getUserId() == null))
@@ -391,23 +399,6 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
-	 * Count the questions in this pool with this criteria.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @param userId
-	 *        The user id (if null, the current user is used).
-	 * @param search
-	 *        The search criteria.
-	 * @return The questions in this pool with this criteria.
-	 */
-	protected Integer countQuestions(Pool pool, String userId, String search)
-	{
-		Integer rv = this.questionService.countQuestions(userId, pool, search);
-		return rv;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	protected List<String> drawQuestionIds(Pool pool, long seed, Integer numQuestions)
@@ -422,6 +413,28 @@ public class PoolServiceImpl implements PoolService
 	protected List<String> getAllQuestionIds(Pool pool)
 	{
 		List<String> rv = storage.getAllQuestionIds(pool);
+		return rv;
+	}
+
+	/**
+	 * Get all the pools available to the context.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return The pools available to the context.
+	 */
+	protected List<Pool> getContextPools(String context)
+	{
+		// get the list of users in the context who share pools
+		Set<String> userIds = this.securityService.getUsersIsAllowed(MnemeService.POOL_SHARE_PERMISSION, context);
+
+		// TODO: temp. code
+		userIds.add("admin");
+		//
+
+		// get all the pools for these users
+		List<Pool> rv = this.storage.getPools(userIds);
+
 		return rv;
 	}
 
@@ -448,29 +461,6 @@ public class PoolServiceImpl implements PoolService
 	protected Integer getPoolSize(Pool pool)
 	{
 		Integer rv = storage.getPoolSize((PoolImpl) pool);
-		return rv;
-	}
-
-	/**
-	 * Locate a list of questions in this pool with this criteria.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @param userId
-	 *        the user id (if null, the current user is used).
-	 * @param sort
-	 *        The sort criteria.
-	 * @param search
-	 *        The search criteria.
-	 * @param pageNum
-	 *        The page number (1 based) to display, or null to disable paging and get them all.
-	 * @param pageSize
-	 *        The number of items for the requested page, or null if we are not paging.
-	 * @return a list of questions that meet the criteria.
-	 */
-	protected List<Question> getQuestions(Pool pool, String userId, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
-	{
-		List<Question> rv = this.questionService.findQuestions(userId, pool, sort, search, pageNum, pageSize);
 		return rv;
 	}
 }

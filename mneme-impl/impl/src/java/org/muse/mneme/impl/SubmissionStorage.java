@@ -219,54 +219,6 @@ public interface SubmissionStorage
 	void saveSubmission(SubmissionImpl submission);
 
 	/**
-	 * Set the AssessmentService
-	 * 
-	 * @param service
-	 *        The AssessmentService.
-	 */
-	void setAssessmentService(AssessmentService service);
-
-	/**
-	 * Set the MnemeService
-	 * 
-	 * @param service
-	 *        The MnemeService.
-	 */
-	void setMnemeService(MnemeService service);
-
-	/**
-	 * Set the QuestionService
-	 * 
-	 * @param service
-	 *        The QuestionsService.
-	 */
-	void setQuestionService(QuestionService service);
-
-	/**
-	 * Set the SecurityService
-	 * 
-	 * @param service
-	 *        The SecurityService.
-	 */
-	void setSecurityService(SecurityService service);
-
-	/**
-	 * Set the SessionManager
-	 * 
-	 * @param service
-	 *        The SessionManager.
-	 */
-	void setSessionManager(SessionManager service);
-
-	/**
-	 * Set the SubmissionService
-	 * 
-	 * @param service
-	 *        The SubmissionService.
-	 */
-	void setSubmissionService(SubmissionServiceImpl service);
-
-	/**
 	 * Check if an submission by this id exists.
 	 * 
 	 * @param id
