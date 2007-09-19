@@ -51,7 +51,10 @@
 				</navigation>
 				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description">
 					<icon icon="/icons/grade_questions.png" style="LEFT" />
-					<destination template="/" />
+					<destination template="/grade_question/{0}/{1}">
+						<model ref="gradeSortCode" />
+						<model ref="assessment.id" />
+					</destination>
 				</navigation>
 			</container>
 		</navigationBar>
@@ -187,6 +190,5 @@
 				</navigation>
 			</container>
 		</navigationBar>
-
 	</container>
 </interface>
