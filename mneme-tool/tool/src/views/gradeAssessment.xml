@@ -117,16 +117,16 @@
 						<navigation destination="/">
 							<included>
 								<compareDecision model="submission.gradingStatus">
-									<constant value="released"/>
-									<constant value="submitted"/>
-									<constant value="closed"/>
-									<constant value="evaluated"/>
+									<constant value="released" />
+									<constant value="submitted" />
+									<constant value="closed" />
+									<constant value="evaluated" />
 								</compareDecision>
 							</included>
 						</navigation>
 					</entityNavigations>
 					<model ref="submission.userId" missing="no-username" />
-					
+
 				</modelColumn>
 				<modelColumn>
 					<title>
@@ -148,10 +148,25 @@
 					<title>
 						<message selector="submission-tries" />
 					</title>
-					<message selector="format-submission-tries">
-						<model ref="submission.siblingCount" />
-						<model ref="submission.assessment.numSubmissionsAllowed" missing="infinite" />
-					</message>
+					<navigations>
+						<navigation style="LINK">
+							<title>
+								<message model="submission.siblingCount" />
+							</title>
+							<destination template="/" />
+						</navigation>
+						<navigation>
+							<title>
+								<message selector="nav-divider" />
+							</title>
+						</navigation>
+						<navigation style="LINK" disabled="TRUE">
+							<title>
+								<message model="submission.assessment.numSubmissionsAllowed" />
+							</title>
+							<destination template="/" />
+						</navigation>
+					</navigations>
 				</modelColumn>
 				<modelColumn>
 					<title>
@@ -165,7 +180,7 @@
 					</title>
 					<!--container>
 						<textEdit model="" rows="1" cols="4" />
-					</container-->
+						</container-->
 					<container>
 						<floatEdit model="" rows="1" cols="4" />
 					</container>
