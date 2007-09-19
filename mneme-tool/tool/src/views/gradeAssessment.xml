@@ -150,16 +150,21 @@
 					<title>
 						<message selector="submission-score" />
 					</title>
+					<model ref="submission.answersAutoScore" />
 				</modelColumn>
 				<modelColumn>
 					<title>
 						<message selector="submission-adjust" />
 					</title>
+					<container>
+						<textEdit model="" rows="1" cols="4" />
+					</container>
 				</modelColumn>
 				<modelColumn>
 					<title>
 						<message selector="submission-final" />
 					</title>
+					<model ref="submission.totalScore" />
 				</modelColumn>
 			</columns>
 		</entityList>
