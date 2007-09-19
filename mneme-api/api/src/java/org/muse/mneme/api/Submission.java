@@ -137,6 +137,13 @@ public interface Submission
 	Boolean getIsComplete();
 
 	/**
+	 * Check if the submission is completed after the due date.
+	 * 
+	 * @return TRUE if the submission is completed after the due date, FALSE if not.
+	 */
+	Boolean getIsCompletedLate();
+
+	/**
 	 * Check if this the answer to this question has been marked "complete" - this is different than "fully answered" as in getIsAnswered().
 	 * 
 	 * @param question

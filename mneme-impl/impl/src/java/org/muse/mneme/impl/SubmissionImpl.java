@@ -467,6 +467,23 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsCompletedLate()
+	{
+		// must be completed
+		if (!getIsComplete()) return Boolean.FALSE;
+
+		// assessment must have accept until and due dates
+		if ((getAssessment().getDates().getAcceptUntilDate() == null) || (getAssessment().getDates().getDueDate() == null)) return Boolean.FALSE;
+
+		// if after the due date, we were completed late
+		if (getSubmittedDate().after(getAssessment().getDates().getDueDate())) return Boolean.TRUE;
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsCompleteQuestion(Question question)
 	{
 		if (question == null) throw new IllegalArgumentException();
