@@ -37,6 +37,7 @@ import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.SubmissionService;
 import org.muse.mneme.api.Question;
 import org.sakaiproject.util.Web;
+
 /**
  * The /grading view for the mneme tool.
  */
@@ -64,36 +65,47 @@ public class GradeQuestionView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 3) throw new IllegalArgumentException();
+		// if (params.length > 4) throw new IllegalArgumentException();
 
 		// get Assessment - assessment id is in params at index 3
-		Assessment assessment = this.assessmentService.getAssessment(params[2]);
+		Assessment assessment = this.assessmentService.getAssessment(params[3]);
 		context.put("assessment", assessment);
-		
-		//get Questions 
+
+		// get Questions
 		List questions = assessment.getParts().getQuestionsAsAuthored();
 		context.put("questions", questions);
-		
-		if(questions != null)
+
+		Question question = null;
+		if (questions != null)
 		{
-		// get First Question 
-		Question question = (Question)questions.get(0); 
-		context.put("selectedQuestion", question);		
-		
-		// get Answers for the first question 
-		//FindAssessmentSubmissionsSort.username_a 
-		List answers = this.submissionService.findSubmissionAnswers(assessment, question, null, Boolean.TRUE, null, null);
-		context.put("answers", answers);
+			if (params.length <= 4)
+			{
+				// get First Question
+				question = (Question) questions.get(0);
+				String destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + question.getId();
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
+			else
+			{
+				question = assessment.getParts().getQuestion(params[4]);
+			}
+			context.put("selectedQuestion", question);
 
-		Integer maxAnswers = 0;
-		if (answers != null) maxAnswers = answers.size();
+			// get Answers for the first question
+			// FindAssessmentSubmissionsSort.username_a
+			List answers = this.submissionService.findSubmissionAnswers(assessment, question, null, Boolean.TRUE, null, null);
+			context.put("answers", answers);
 
-		String pagingParameter = "1-30";
-		// paging
-		Paging paging = uiService.newPaging();
-		paging.setMaxItems(maxAnswers);
-		paging.setCurrentAndSize(pagingParameter);
-		context.put("paging", paging);
+			Integer maxAnswers = 0;
+			if (answers != null) maxAnswers = answers.size();
+
+			String pagingParameter = "1-30";
+			// paging
+			Paging paging = uiService.newPaging();
+			paging.setMaxItems(maxAnswers);
+			paging.setCurrentAndSize(pagingParameter);
+			context.put("paging", paging);
 		}
 		uiService.render(ui, context);
 	}
@@ -112,7 +124,7 @@ public class GradeQuestionView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		throw new IllegalArgumentException();	
+		throw new IllegalArgumentException();
 	}
 
 	/**
