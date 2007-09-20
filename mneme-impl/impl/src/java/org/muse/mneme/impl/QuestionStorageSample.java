@@ -462,6 +462,22 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getModifiedBy().setUserId("admin");
 			q.getModifiedBy().setDate(now);
 			questions.put(q.getId(), q);
+
+			q = newQuestion();
+			q.initType("mneme:LikertScale");
+			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
+			q.initId("q4");
+			q.setDescription("question four");
+			q.setRequireRationale(Boolean.TRUE);
+			q.setPool(poolService.getPool("b1"));
+			q.getCreatedBy().setUserId("admin");
+			q.getPresentation().setText("Is this needed?");
+			((LikertScaleQuestionImpl) q.getTypeSpecificQuestion()).setSelectedOption("2");
+			q.getCreatedBy().setUserId("admin");
+			q.getCreatedBy().setDate(now);
+			q.getModifiedBy().setUserId("admin");
+			q.getModifiedBy().setDate(now);
+			questions.put(q.getId(), q);
 		}
 	}
 }
