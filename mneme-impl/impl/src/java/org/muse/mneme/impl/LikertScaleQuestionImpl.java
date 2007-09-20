@@ -76,16 +76,6 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		}
 	}
 
-	/** List of choices */
-	private String answerOptions[][] = { {"Strongly Agree", "Agree", "Undecided", "Disagree", "Strongly Disagree"},
-			{"Excellent", "Good", "Poor", "Unacceptable"}, {"Above Average", "Average", "Below Average"}, {"Yes", "No"}, {"5", "4", "3", "2", "1"}};
-
-	/*
-	 * private String answerOptions[][] = {{{"Strongly Agree"} , {"Agree"} , {"Undecided"} , {"Disagree"} , {"Strongly Disagree"}}, {{"Excellent"} ,
-	 * {"Good"} , {"Poor"} , {"Unacceptable"}}, {{"Above Average"} , {"Average"} , {"Below Average"}}, {{"Yes"} , {"No"}}, {{"5"}, {"4"}, {"3"},
-	 * {"2"}, {"1"}} };
-	 */
-
 	/** This hash set holds index numbers of the correct answers */
 	protected Set<Integer> correctAnswers = new HashSet<Integer>();
 
@@ -202,18 +192,59 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	 */
 	public List<LikertScaleQuestionChoice> getOptions()
 	{
-		List<LikertScaleQuestionChoice> rv = new ArrayList<LikertScaleQuestionChoice>(this.answerOptions.length);
-		for (int i = 0; i < this.answerOptions.length; i++)
-		{
-			StringBuffer optionText = new StringBuffer();
-			for (int j = 0; j < this.answerOptions[i].length; j++)
-			{
-				optionText.append(this.answerOptions[i][j]);
-				optionText.append("/");
-			}
-			optionText.deleteCharAt(optionText.length() - 1);
-			rv.add(new LikertScaleQuestionChoice(String.valueOf(i), optionText.toString()));
-		}
+		List<LikertScaleQuestionChoice> rv = new ArrayList<LikertScaleQuestionChoice>(5);
+		StringBuffer optionText = new StringBuffer();
+		optionText.append(this.messages.getString("strongly-agree"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("agree"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("undecided"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("disagree"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("strongly-disagree"));
+
+		rv.add(new LikertScaleQuestionChoice("0", optionText.toString()));
+		optionText.setLength(0);
+
+		optionText.append(this.messages.getString("excellent"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("good"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("poor"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("unacceptable"));
+
+		rv.add(new LikertScaleQuestionChoice("1", optionText.toString()));
+		optionText.setLength(0);
+
+		optionText.append(this.messages.getString("above-average"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("average"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("below-average"));
+
+		rv.add(new LikertScaleQuestionChoice("2", optionText.toString()));
+		optionText.setLength(0);
+
+		optionText.append(this.messages.getString("yes"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("no"));
+
+		rv.add(new LikertScaleQuestionChoice("3", optionText.toString()));
+		optionText.setLength(0);
+
+		optionText.append(this.messages.getString("five"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("four"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("three"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("two"));
+		optionText.append("/");
+		optionText.append(this.messages.getString("one"));
+
+		rv.add(new LikertScaleQuestionChoice("4", optionText.toString()));
 
 		return rv;
 	}
@@ -226,12 +257,46 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	public List<LikertScaleQuestionChoice> getOptionValues()
 	{
 		int optionIndex = this.selectedOption.intValue();
-		List<LikertScaleQuestionChoice> rv = new ArrayList<LikertScaleQuestionChoice>(this.answerOptions[optionIndex].length);
-		for (int j = 0; j < this.answerOptions[optionIndex].length; j++)
+		List<LikertScaleQuestionChoice> rv = null;
+		if (optionIndex == 0)
 		{
-			rv.add(new LikertScaleQuestionChoice(String.valueOf(j), this.answerOptions[optionIndex][j]));
+			rv = new ArrayList<LikertScaleQuestionChoice>(5);
+			rv.add(new LikertScaleQuestionChoice("0", this.messages.getString("strongly-agree")));
+			rv.add(new LikertScaleQuestionChoice("1", this.messages.getString("agree")));
+			rv.add(new LikertScaleQuestionChoice("2", this.messages.getString("undecided")));
+			rv.add(new LikertScaleQuestionChoice("3", this.messages.getString("disagree")));
+			rv.add(new LikertScaleQuestionChoice("4", this.messages.getString("strongly-disagree")));
 		}
-
+		if (optionIndex == 1)
+		{
+			rv = new ArrayList<LikertScaleQuestionChoice>(4);
+			rv.add(new LikertScaleQuestionChoice("0", this.messages.getString("excellent")));
+			rv.add(new LikertScaleQuestionChoice("1", this.messages.getString("good")));
+			rv.add(new LikertScaleQuestionChoice("2", this.messages.getString("poor")));
+			rv.add(new LikertScaleQuestionChoice("3", this.messages.getString("unacceptable")));
+		}
+		if (optionIndex == 2)
+		{
+			rv = new ArrayList<LikertScaleQuestionChoice>(3);
+			rv.add(new LikertScaleQuestionChoice("0", this.messages.getString("above-average")));
+			rv.add(new LikertScaleQuestionChoice("1", this.messages.getString("average")));
+			rv.add(new LikertScaleQuestionChoice("2", this.messages.getString("below-average")));
+		}
+		if (optionIndex == 3)
+		{
+			rv = new ArrayList<LikertScaleQuestionChoice>(2);
+			rv.add(new LikertScaleQuestionChoice("0", this.messages.getString("yes")));
+			rv.add(new LikertScaleQuestionChoice("1", this.messages.getString("no")));
+		}
+		if (optionIndex == 4)
+		{
+			rv = new ArrayList<LikertScaleQuestionChoice>(5);
+			rv.add(new LikertScaleQuestionChoice("0", this.messages.getString("five")));
+			rv.add(new LikertScaleQuestionChoice("1", this.messages.getString("four")));
+			rv.add(new LikertScaleQuestionChoice("2", this.messages.getString("three")));
+			rv.add(new LikertScaleQuestionChoice("3", this.messages.getString("two")));
+			rv.add(new LikertScaleQuestionChoice("4", this.messages.getString("one")));
+		}
 		return rv;
 	}
 
