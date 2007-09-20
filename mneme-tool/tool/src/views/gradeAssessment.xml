@@ -160,22 +160,46 @@
 								<message selector="nav-divider" />
 							</title>
 						</navigation>
-						<navigation style="LINK" disabled="TRUE" >
+						<navigation style="LINK" disabled="TRUE">
 							<title>
 								<message model="submission.assessment.numSubmissionsAllowed" />
 							</title>
 							<destination template="/" />
 						</navigation>
-						<navigation style="LINK">
+						<navigation style="LINK" submit="FALSE">
 							<title>
-								<message selector="view-all"/>
+								<message selector="view-all" />
 							</title>
-							<destination template="/" />
+							<destination template="/grade_assessment/{0}/{1}/all">
+								<model ref="gradesSortCode" />
+								<model ref="assessment.id" />
+							</destination>
 							<included>
 								<compareDecision model="submission.siblingCount" reversed="TRUE">
 									<constant value="0" />
 									<constant value="1" />
 								</compareDecision>
+							</included>
+						</navigation>
+						<navigation style="LINK" submit="FALSE">
+							<title>
+								<message selector="close" />
+							</title>
+							<destination template="/grade_assessment/{0}/{1}">
+								<model ref="gradesSortCode" />
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<compareDecision model="official">
+									<constant value="FALSE" />
+								</compareDecision>
+								<andDecision model="submission.siblingCount">
+									<compareDecision model="submission.siblingCount" >
+									<constant value="0" />
+									<constant value="1" />
+								</compareDecision>
+									
+								</andDecision>
 							</included>
 						</navigation>
 					</navigations>

@@ -64,11 +64,11 @@ public class GradeAssessmentView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 4) throw new IllegalArgumentException();
-		
-		 //TODO: add check for user permission to access the assessments for grading
-		
-		//grades sort parameter is in params array at index 2
+		if (params.length != 4 && params.length != 5) throw new IllegalArgumentException();
+
+		// TODO: add check for user permission to access the assessments for grading
+
+		// grades sort parameter is in params array at index 2
 		String gradesSortCode = params[2];
 		context.put("gradesSortCode", gradesSortCode);
 
@@ -76,8 +76,26 @@ public class GradeAssessmentView extends ControllerImpl
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
 		context.put("assessment", assessment);
 
-		// get Assessment submissions
-		List submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.TRUE, null, null);
+		if (assessment == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		List submissions = null;
+		if (params.length == 5 && params[4].equalsIgnoreCase("all"))
+		{
+			// get all Assessment submissions
+			submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.FALSE, null, null);
+			context.put("official", "FALSE");
+		}
+		else
+		{
+			// get official Assessment submissions
+			submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.TRUE, null, null);
+			context.put("official", "TRUE");
+		}
 		context.put("submissions", submissions);
 
 		Integer maxSubmissions = 0;
@@ -108,12 +126,12 @@ public class GradeAssessmentView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if (params.length != 4) throw new IllegalArgumentException();
-		
-		//read form
+
+		// read form
 		String destination = this.uiService.decode(req, context);
-		
+
 		destination = "/grades/" + params[2];
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));		
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
