@@ -111,6 +111,9 @@
 									<readOnly>
 										<decision model="assessment.isLive" />
 									</readOnly>
+									<maxValue>
+										<model ref="draw.pool.numQuestions" />
+									</maxValue>
 								</countEdit>
 							</container>
 						</column>
