@@ -163,6 +163,12 @@ public class AssessmentServiceImpl implements AssessmentService
 		// set the context
 		rv.setContext(context);
 
+		// clear archived
+		rv.setArchived(Boolean.FALSE);
+
+		// start out unpublished
+		rv.setPublished(Boolean.FALSE);
+
 		// save
 		save(rv);
 
@@ -187,6 +193,19 @@ public class AssessmentServiceImpl implements AssessmentService
 	public void destroy()
 	{
 		M_log.info("destroy()");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Assessment> getArchivedAssessments(String context)
+	{
+		if (context == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getArchivedAssessments: " + context);
+
+		List<Assessment> rv = this.storage.getArchivedAssessments(context);
+		return rv;
 	}
 
 	/**

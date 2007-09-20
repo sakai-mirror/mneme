@@ -159,7 +159,8 @@ public class TestsView extends ControllerImpl
 		}
 
 		// collect the assessments in this context
-		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext(), sort, Boolean.FALSE);
+		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext(), sort,
+				Boolean.FALSE);
 		context.put("assessments", assessments);
 
 		// value holders for the selection checkboxes
@@ -238,7 +239,38 @@ public class TestsView extends ControllerImpl
 					return;
 				}
 			}
-			if (destination.trim().equalsIgnoreCase("/tests_delete"))
+
+			else if (destination.startsWith("/ARCHIVE"))
+			{
+				// archive these tests, here and now
+				String[] selectedTestIds = values.getValues();
+				for (String id : selectedTestIds)
+				{
+					Assessment assessment = this.assessmentService.getAssessment(id);
+					if (assessment != null)
+					{
+						assessment.setArchived(Boolean.TRUE);
+						try
+						{
+							this.assessmentService.saveAssessment(assessment);
+						}
+						catch (AssessmentPermissionException e)
+						{
+							// redirect to error
+							res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+							return;
+						}
+						catch (AssessmentPolicyException e)
+						{
+							// redirect to error
+							res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+							return;
+						}
+					}
+				}
+			}
+
+			else if (destination.trim().equalsIgnoreCase("/tests_delete"))
 			{
 				String[] selectedTestIds = values.getValues();
 				// delete the tests with ids
@@ -273,6 +305,7 @@ public class TestsView extends ControllerImpl
 					return;
 				}
 			}
+
 			else if (destination.trim().startsWith("/COPY"))
 			{
 				try
@@ -290,13 +323,14 @@ public class TestsView extends ControllerImpl
 					return;
 				}
 			}
+
 			else
 			{
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 				return;
 			}
-
 		}
+
 		if (params.length == 3)
 			destination = "/tests/" + params[2];
 		else
@@ -348,7 +382,7 @@ public class TestsView extends ControllerImpl
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 

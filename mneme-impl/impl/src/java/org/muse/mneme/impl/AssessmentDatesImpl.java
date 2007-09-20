@@ -33,24 +33,11 @@ public class AssessmentDatesImpl implements AssessmentDates
 {
 	protected Date acceptUntil = null;
 
+	protected Date archived = null;
+
 	protected Date due = null;
 
 	protected Date open = null;
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getIsValid()
-	{
-		// open, if defined, must be before acceptUntil and due, if defined
-		if ((this.open != null) && (this.due != null) && (!this.open.before(this.due))) return Boolean.FALSE;
-		if ((this.open != null) && (this.acceptUntil != null) && (!this.open.before(this.acceptUntil))) return Boolean.FALSE;
-
-		// due, if defined, must be not after acceptUntil, if defined
-		if ((this.due != null) && (this.acceptUntil != null) && (this.due.after(this.acceptUntil))) return Boolean.FALSE;
-
-		return Boolean.TRUE;
-	}
 
 	/**
 	 * Construct.
@@ -76,6 +63,14 @@ public class AssessmentDatesImpl implements AssessmentDates
 	public Date getAcceptUntilDate()
 	{
 		return this.acceptUntil;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Date getArchivedDate()
+	{
+		return this.archived;
 	}
 
 	/**
@@ -139,6 +134,21 @@ public class AssessmentDatesImpl implements AssessmentDates
 		rv.duration = new Long(tillExpires);
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsValid()
+	{
+		// open, if defined, must be before acceptUntil and due, if defined
+		if ((this.open != null) && (this.due != null) && (!this.open.before(this.due))) return Boolean.FALSE;
+		if ((this.open != null) && (this.acceptUntil != null) && (!this.open.before(this.acceptUntil))) return Boolean.FALSE;
+
+		// due, if defined, must be not after acceptUntil, if defined
+		if ((this.due != null) && (this.acceptUntil != null) && (this.due.after(this.acceptUntil))) return Boolean.FALSE;
+
+		return Boolean.TRUE;
 	}
 
 	/**

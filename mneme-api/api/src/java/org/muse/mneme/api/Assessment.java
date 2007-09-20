@@ -43,6 +43,13 @@ public interface Assessment
 	AssessmentAccess getAccess();
 
 	/**
+	 * Check if the assessment is archived.
+	 * 
+	 * @return TRUE if the assessment is archived, FALSE if not.
+	 */
+	Boolean getArchived();
+
+	/**
 	 * Access the context of this assessment.
 	 * 
 	 * @return The assessment's context string.
@@ -237,6 +244,14 @@ public interface Assessment
 	 * @return The asssessment type.
 	 */
 	AssessmentType getType();
+
+	/**
+	 * Set the assessment's archived setting.
+	 * 
+	 * @param archived
+	 *        The archived setting.
+	 */
+	void setArchived(Boolean archived);
 
 	/**
 	 * Set the context of this assessment.

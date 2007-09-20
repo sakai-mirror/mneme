@@ -89,7 +89,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(context))
+			if (assessment.getContext().equals(context) && !assessment.getArchived())
 			{
 				i++;
 			}
@@ -104,6 +104,36 @@ public class AssessmentStorageSample implements AssessmentStorage
 	public void destroy()
 	{
 		M_log.info("destroy()");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Assessment> getArchivedAssessments(String context)
+	{
+		fakeIt();
+
+		List<Assessment> rv = new ArrayList<Assessment>();
+
+		for (AssessmentImpl assessment : this.assessments.values())
+		{
+			if (assessment.getContext().equals(context) && assessment.getArchived())
+			{
+				rv.add(new AssessmentImpl(assessment));
+			}
+		}
+
+		// sort - archive date ascending
+		Collections.sort(rv, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				int rv = ((Assessment) arg0).getDates().getArchivedDate().compareTo(((Assessment) arg1).getDates().getArchivedDate());
+				return rv;
+			}
+		});
+
+		return rv;
 	}
 
 	/**
@@ -138,7 +168,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(context))
+			if (assessment.getContext().equals(context) && !assessment.getArchived())
 			{
 				// filter out unpublished if requested
 				if (publishedOnly)

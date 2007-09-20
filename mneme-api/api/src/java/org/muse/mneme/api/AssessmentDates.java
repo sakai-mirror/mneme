@@ -37,6 +37,13 @@ public interface AssessmentDates
 	Date getAcceptUntilDate();
 
 	/**
+	 * Access the date the assessment was archived.
+	 * 
+	 * @return The date the assessment was archived, or null if it is not archived.
+	 */
+	Date getArchivedDate();
+
+	/**
 	 * Access the due date. Submissions after this date are considered late, if they are accepted at all.
 	 * 
 	 * @return The assessment's due date, or null if there is none.

@@ -54,6 +54,8 @@ public class AssessmentImpl implements Assessment
 
 	protected AssessmentAccess access = new AssessmentAccessImpl();
 
+	protected Boolean archived = Boolean.FALSE;
+
 	protected String context = "";
 
 	protected Attribution createdBy = new AttributionImpl();
@@ -142,7 +144,7 @@ public class AssessmentImpl implements Assessment
 	 */
 	public AcceptSubmitStatus getAcceptSubmitStatus()
 	{
-		// TODO: also consider archive
+		if (this.archived) return AcceptSubmitStatus.closed;
 		if (!this.published) return AcceptSubmitStatus.closed;
 
 		Date now = new Date();
@@ -175,6 +177,14 @@ public class AssessmentImpl implements Assessment
 	public AssessmentAccess getAccess()
 	{
 		return this.access;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getArchived()
+	{
+		return this.archived;
 	}
 
 	/**
@@ -222,7 +232,7 @@ public class AssessmentImpl implements Assessment
 	 */
 	public Boolean getIsClosed()
 	{
-		// TODO: if archived, also return true
+		if (this.archived) return Boolean.TRUE;
 		if (!this.published) return Boolean.TRUE;
 
 		// if there is no end to submissions, we are never closed
@@ -271,8 +281,8 @@ public class AssessmentImpl implements Assessment
 	 */
 	public Boolean getIsOpen(Boolean withGrace)
 	{
+		if (this.archived) return Boolean.FALSE;
 		if (!this.published) return Boolean.FALSE;
-		// TODO: if archived, also return false
 
 		Date now = new Date();
 		long grace = withGrace ? MnemeService.GRACE : 0l;
@@ -436,6 +446,29 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setArchived(Boolean archived)
+	{
+		if (archived == null) throw new IllegalArgumentException();
+		if (this.archived == archived) return;
+
+		this.archived = archived;
+
+		// if now archived, set the date
+		if (this.archived)
+		{
+			((AssessmentDatesImpl) this.dates).archived = new Date();
+		}
+
+		// else clear it
+		else
+		{
+			((AssessmentDatesImpl) this.dates).archived = null;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setContext(String context)
 	{
 		if (context == null) context = "";
@@ -561,6 +594,7 @@ public class AssessmentImpl implements Assessment
 	protected void set(AssessmentImpl other)
 	{
 		this.access = new AssessmentAccessImpl((AssessmentAccessImpl) other.access);
+		this.archived = other.archived;
 		this.published = other.published;
 		this.context = other.context;
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);

@@ -326,6 +326,14 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<Assessment> getArchivedAssessments(String context)
+	{
+		return this.assessmentService.getArchivedAssessments(context);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Assessment getAssessment(String id)
 	{
 		return assessmentService.getAssessment(id);

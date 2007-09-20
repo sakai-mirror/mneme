@@ -81,7 +81,8 @@ public interface AssessmentService
 	Boolean allowRemoveAssessment(Assessment assessment, String userId);
 
 	/**
-	 * Create a new Assessment in the context that is a copy of another.
+	 * Create a new Assessment in the context that is a copy of another.<br />
+	 * The new assessment is non-archived and un-published.
 	 * 
 	 * @param context
 	 *        The context in which the assessment lives.
@@ -94,13 +95,22 @@ public interface AssessmentService
 	Assessment copyAssessment(String context, Assessment assessment) throws AssessmentPermissionException;
 
 	/**
-	 * Count the assessments in the context - all of them!
+	 * Count the assessments in the context - all of them that are not archived.
 	 * 
 	 * @param context
 	 *        The context.
 	 * @return The count of assessments in the context.
 	 */
 	Integer countAssessments(String context);
+
+	/**
+	 * Get all the archived assessments in the context.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return The List<Assesment> of all archived assesments in the context, or empty if there are none.
+	 */
+	List<Assessment> getArchivedAssessments(String context);
 
 	/**
 	 * Access an assessment by id.
@@ -112,7 +122,7 @@ public interface AssessmentService
 	Assessment getAssessment(String id);
 
 	/**
-	 * Get all the assessments for the context, sorted.
+	 * Get all the assessments for the context, sorted. Does not include archived assessments.
 	 * 
 	 * @param context
 	 *        The context.
@@ -120,7 +130,7 @@ public interface AssessmentService
 	 *        The sort specification.
 	 * @param publishedOnly
 	 *        if TRUE, return only published assessments, else return unpublished as well.
-	 * @return The List <Assessment> of all assessments in the context, sorteds, or empty if there are none.
+	 * @return The List<Assessment> of all assessments in the context, sorteds, or empty if there are none.
 	 */
 	List<Assessment> getContextAssessments(String context, AssessmentsSort sort, Boolean publishedOnly);
 

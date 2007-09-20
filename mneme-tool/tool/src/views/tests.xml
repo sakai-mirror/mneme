@@ -40,26 +40,6 @@
 	</title>
 	<container>
 
-		<!-- entity actions -->
-		<entityActionBar width="100%">
-			<container>
-				<navigation destination="/test_add/" title="add-test" style="LINK" description="add-test-description" submit="TRUE">
-					<icon icon="/icons/document_add.png" style="LEFT" />
-				</navigation>
-				<navigation destination="/tests_delete" title="delete-tests" style="LINK" description="delete-tests-description" submit="TRUE">
-					<icon icon="/icons/delete.png" style="LEFT" />
-				</navigation>
-				<navigation destination="/tests_archive" title="inactivate-tests" style="LINK" description="inactivate-tests-description"
-					submit="TRUE">
-					<icon icon="/icons/make_inactive.png" style="LEFT" />
-				</navigation>
-				<navigation destination="/test_import_export" title="import-export-tests" style="LINK" description="import-export-tests-description"
-					submit="TRUE">
-					<icon icon="/icons/import_export.png" style="LEFT" />
-				</navigation>
-			</container>
-		</entityActionBar>
-
 		<!-- the list of assessments -->
 		<entityList style="FLAT">
 			<iterator name="assessment">
@@ -115,6 +95,31 @@
 						<model type="text" ref="assessment.id" />
 					</value>
 					<model ref="ids.values" />
+					<entityActions>
+						<navigation destination="/test_add/" title="add-test" style="LINK" description="add-test-description" submit="TRUE">
+							<icon icon="/icons/document_add.png" style="LEFT" />
+						</navigation>
+						<navigation destination="/tests_delete" title="delete-tests" style="LINK" description="delete-tests-description" submit="TRUE"
+							selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements">
+							<icon icon="/icons/delete.png" style="LEFT" />
+						</navigation>
+						<navigation title="archive-tests" style="LINK" description="archive-tests-description" submit="TRUE" selectRequirement="SOME"
+							selectRequirementMessage="archive-failed-requirements">
+							<icon icon="/icons/make_inactive.png" style="LEFT" />
+							<destination template="/ARCHIVE/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+						<navigation destination="/tests_restore" title="restore-tests" style="LINK" description="restore-tests-description"
+							submit="TRUE">
+						</navigation>
+						<navigation destination="/test_import_export" title="import-export-tests" style="LINK"
+							description="import-export-tests-description" submit="TRUE">
+							<icon icon="/icons/import_export.png" style="LEFT" />
+						</navigation>
+					</entityActions>
 				</selectionColumn>
 				<column>
 					<title>

@@ -44,13 +44,22 @@ public interface AssessmentStorage
 	Boolean assessmentExists(String id);
 
 	/**
-	 * Count the assessments in a context.
+	 * Count the assessments in a context that are not archived.
 	 * 
 	 * @param context
 	 *        The context.
 	 * @return The count of assessment defined in a context.
 	 */
 	Integer countAssessments(String context);
+
+	/**
+	 * Get all the archived assessments in the context.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return The List<Assesment> of all archived assesments in the context, or empty if there are none.
+	 */
+	List<Assessment> getArchivedAssessments(String context);
 
 	/**
 	 * Access a assessment by id.
@@ -62,7 +71,7 @@ public interface AssessmentStorage
 	AssessmentImpl getAssessment(String id);
 
 	/**
-	 * Get all the assessments defined in this context, sorted.
+	 * Get all the assessments defined in this context, sorted. Does not include archived assessments.
 	 * 
 	 * @param context
 	 *        The context.
