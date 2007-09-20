@@ -188,6 +188,14 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean existsQuestion(String questionid)
+	{
+		return this.storage.existsQuestion(questionid);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Question> findQuestions(String userId, Pool pool, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("findQuestions: " + userId);

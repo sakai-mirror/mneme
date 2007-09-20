@@ -56,6 +56,15 @@ public interface PoolStorage
 	List<String> drawQuestionIds(Pool pool, long seed, Integer numQuestions);
 
 	/**
+	 * Check if a pool by this id exists.
+	 * 
+	 * @param poolId
+	 *        The pool id
+	 * @return TRUE if the pool with this id exists, FALSE if not.
+	 */
+	Boolean existsPool(String poolId);
+
+	/**
 	 * Find all the pools these users own that meet the criteria.
 	 * 
 	 * @param userIds
@@ -132,15 +141,6 @@ public interface PoolStorage
 	 * @return A pool object.
 	 */
 	PoolImpl newPool(PoolImpl pool);
-
-	/**
-	 * Check if a pool by this id exists.
-	 * 
-	 * @param poolId
-	 *        The pool id
-	 * @return TRUE if the pool with this id exists, FALSE if not.
-	 */
-	Boolean poolExists(String poolId);
 
 	/**
 	 * Remove a pool from storage.

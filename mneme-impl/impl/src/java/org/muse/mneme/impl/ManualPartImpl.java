@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.muse.mneme.api.ManualPart;
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 
@@ -102,6 +103,15 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		// we must have questions
 		if (this.questionIds.isEmpty()) return Boolean.FALSE;
 
+		// the questions must exist
+		for (String questionId : this.questionIds)
+		{
+			if (!this.questionService.existsQuestion(questionId))
+			{
+				return Boolean.FALSE;
+			}
+		}
+
 		return Boolean.TRUE;
 	}
 
@@ -125,7 +135,13 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	 */
 	public Integer getNumQuestions()
 	{
-		return this.questionIds.size();
+		int count = 0;
+		for (String id : this.questionIds)
+		{
+			if (this.questionService.existsQuestion(id)) count++;
+		}
+
+		return count;
 	}
 
 	/**
@@ -138,12 +154,14 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		for (String id : order)
 		{
 			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(id);
+			if (question != null)
+			{
+				// set the assessment, part and submission context
+				question.initSubmissionContext(this.assessment.getSubmissionContext());
+				question.initPartContext(this);
 
-			// set the assessment, part and submission context
-			question.initSubmissionContext(this.assessment.getSubmissionContext());
-			question.initPartContext(this);
-
-			rv.add(question);
+				rv.add(question);
+			}
 		}
 
 		return rv;
@@ -158,12 +176,14 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		for (String id : this.questionIds)
 		{
 			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(id);
+			if (question != null)
+			{
+				// set the assessment, part and submission context
+				question.initSubmissionContext(this.assessment.getSubmissionContext());
+				question.initPartContext(this);
 
-			// set the assessment, part and submission context
-			question.initSubmissionContext(this.assessment.getSubmissionContext());
-			question.initPartContext(this);
-
-			rv.add(question);
+				rv.add(question);
+			}
 		}
 
 		return rv;
@@ -185,7 +205,15 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		float total = 0f;
 		for (String id : this.questionIds)
 		{
-			total += this.questionService.getQuestion(id).getPool().getPoints();
+			Question question = this.questionService.getQuestion(id);
+			if (question != null)
+			{
+				Pool pool = question.getPool();
+				if (pool != null)
+				{
+					total += pool.getPoints();
+				}
+			}
 		}
 
 		return total;

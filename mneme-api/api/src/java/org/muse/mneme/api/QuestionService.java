@@ -96,6 +96,15 @@ public interface QuestionService
 	Integer countQuestions(String userId, Pool pool, String search);
 
 	/**
+	 * Check if a question exists.
+	 * 
+	 * @param questionId
+	 *        The question id.
+	 * @return TRUE if the question exists, FALSE if not.
+	 */
+	Boolean existsQuestion(String questionid);
+
+	/**
 	 * Locate a list of questions with this criteria.
 	 * 
 	 * @param userId

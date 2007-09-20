@@ -104,6 +104,20 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean existsPool(String poolId)
+	{
+		fakeIt();
+
+		PoolImpl pool = this.pools.get(poolId);
+		if (pool == null) return Boolean.FALSE;
+		if (pool.deleted) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Pool> findPools(Set<String> userIds, final PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		fakeIt();
@@ -217,17 +231,11 @@ public class PoolStorageSample implements PoolStorage
 		fakeIt();
 
 		PoolImpl rv = this.pools.get(poolId);
-		if (rv == null)
-		{
-			// TODO: really make one if we don't have one?
-			rv = newPool();
-			rv.initId(poolId);
-		}
-		else
-		{
-			rv = new PoolImpl(rv);
-		}
+		if (rv == null) return null;
+		if (rv.deleted) return null;
 
+		// return a copy
+		rv = new PoolImpl(rv);
 		return rv;
 	}
 
@@ -311,16 +319,6 @@ public class PoolStorageSample implements PoolStorage
 	public PoolImpl newPool(PoolImpl pool)
 	{
 		return new PoolImpl(pool);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean poolExists(String poolId)
-	{
-		fakeIt();
-
-		return (this.pools.get(poolId) != null);
 	}
 
 	/**

@@ -119,6 +119,20 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean existsQuestion(String id)
+	{
+		fakeIt();
+
+		QuestionImpl question = this.questions.get(id);
+		if (question == null) return Boolean.FALSE;
+		if (question.deleted) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Question> findQuestions(String userId, Pool pool, final QuestionService.FindQuestionsSort sort, String search, Integer pageNum,
 			Integer pageSize)
 	{
@@ -236,7 +250,7 @@ public class QuestionStorageSample implements QuestionStorage
 		List<String> rv = new ArrayList<String>();
 		for (QuestionImpl question : this.questions.values())
 		{
-			if (question.getPool().equals(pool))
+			if ((!question.deleted) && (question.getPool().equals(pool)))
 			{
 				rv.add(question.getId());
 			}
@@ -252,13 +266,12 @@ public class QuestionStorageSample implements QuestionStorage
 	{
 		fakeIt();
 
-		// if found, return a copy
 		QuestionImpl rv = this.questions.get(id);
-		if (rv != null)
-		{
-			rv = new QuestionImpl(rv);
-		}
+		if (rv == null) return null;
+		if (rv.deleted) return null;
 
+		// return a copy
+		rv = new QuestionImpl(rv);
 		return rv;
 	}
 
@@ -299,16 +312,6 @@ public class QuestionStorageSample implements QuestionStorage
 	{
 		QuestionImpl rv = new QuestionImpl(question);
 		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean questionExists(String id)
-	{
-		fakeIt();
-
-		return (this.questions.get(id) != null);
 	}
 
 	/**

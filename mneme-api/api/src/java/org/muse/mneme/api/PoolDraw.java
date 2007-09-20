@@ -59,6 +59,13 @@ public interface PoolDraw
 	Pool getPool();
 
 	/**
+	 * Access the pool id.
+	 * 
+	 * @return The pool id.
+	 */
+	String getPoolId();
+
+	/**
 	 * Set the number of questions to draw from the pool.
 	 * 
 	 * @param numQuestions

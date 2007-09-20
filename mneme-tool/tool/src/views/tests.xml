@@ -69,11 +69,10 @@
 				<message selector="no-assessments" />
 			</emptyTitle>
 			<columns>
-				<modelColumn>
+				<column>
 					<title>
 						<message selector="assessment-type" />
 					</title>
-					<model ref="assessment.type" delegate="FormatAssesmentType" tool="sakai.mneme" />
 					<sort submit="TRUE">
 						<active>
 							<compareDecision model="sort_column" constant="0" />
@@ -90,7 +89,27 @@
 							<destination template="/tests/0D" />
 						</desc>
 					</sort>
-				</modelColumn>
+					<navigations>
+						<navigation description="test-type">
+							<icon icon="/icons/test_type.png" style="LEFT" />
+							<included>
+								<compareDecision model="assessment.type" constant="test" />
+							</included>
+						</navigation>
+						<navigation description="survey-type">
+							<icon icon="/icons/survey_type.png" style="LEFT" />
+							<included>
+								<compareDecision model="assessment.type" constant="survey" />
+							</included>
+						</navigation>
+						<navigation description="assignment-type">
+							<icon icon="/icons/assignment_type.png" style="LEFT" />
+							<included>
+								<compareDecision model="assessment.type" constant="assignment" />
+							</included>
+						</navigation>
+					</navigations>
+				</column>
 				<selectionColumn multiple="TRUE">
 					<value>
 						<model type="text" ref="assessment.id" />
@@ -200,7 +219,7 @@
 						</dateEdit>
 					</container>
 				</column>
-				<modelColumn>
+				<column>
 					<title>
 						<message selector="assessment-active" />
 					</title>
@@ -220,19 +239,44 @@
 							<destination template="/tests/4D" />
 						</desc>
 					</sort>
-					<model ref="assessment.published" delegate="FormatAssesmentActive" tool="sakai.mneme" />
-					<entityNavigations>
-						<navigation submit="TRUE">
+					<navigations>
+						<navigation submit="TRUE" description="published-alt">
+							<icon icon="/icons/active.png" style="LEFT" />
 							<destination template="/test_publish/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
 							</destination>
+							<included>
+								<decision model="assessment.isValid" />
+								<decision model="assessment.published" />
+							</included>
 						</navigation>
-					</entityNavigations>
-				</modelColumn>
-
-
+						<navigation submit="TRUE" description="unpublished-alt">
+							<icon icon="/icons/deactivated.gif" style="LEFT" />
+							<destination template="/test_publish/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<decision model="assessment.isValid" />
+								<decision reversed="TRUE" model="assessment.published" />
+							</included>
+						</navigation>
+						<navigation submit="TRUE" description="invalid-alt">
+							<icon icon="/icons/warning.gif" style="LEFT" />
+							<destination template="/test_invalid/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<decision reversed="TRUE" model="assessment.isValid" />
+							</included>
+						</navigation>
+					</navigations>
+				</column>
 				<modelColumn>
 					<title>
 						<message selector="assessment-action" />

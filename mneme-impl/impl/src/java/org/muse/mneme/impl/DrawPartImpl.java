@@ -83,7 +83,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		// do we have this pool already?
 		for (PoolDraw already : this.pools)
 		{
-			if (already.getPool().equals(pool))
+			if (already.getPoolId().equals(pool.getId()))
 			{
 				if (already.getNumQuestions().equals(numQuestions))
 				{
@@ -122,8 +122,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<PoolDraw> getDrawsForPools(String context, PoolService.FindPoolsSort sort, String search, Integer pageNum,
-			Integer pageSize)
+	public List<PoolDraw> getDrawsForPools(String context, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		// get all the pools we need
 		List<Pool> allPools = this.poolService.findPools(context, sort, search, pageNum, pageSize);
@@ -167,7 +166,19 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		// we must have draws
 		if (this.pools.isEmpty()) return Boolean.FALSE;
 
-		// TODO: each pool must have enough questions to draw
+		// each pool must have enough questions to draw
+		for (PoolDraw draw : this.pools)
+		{
+			Pool pool = draw.getPool();
+			if (pool == null)
+			{
+				return Boolean.FALSE;
+			}
+			if (pool.getNumQuestions() < draw.getNumQuestions())
+			{
+				return Boolean.FALSE;
+			}
+		}
 
 		return Boolean.TRUE;
 	}
@@ -194,7 +205,11 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		int count = 0;
 		for (PoolDraw draw : this.pools)
 		{
-			count += draw.getNumQuestions();
+			Pool pool = draw.getPool();
+			if (pool != null)
+			{
+				count += draw.getNumQuestions();
+			}
 		}
 
 		return count;
@@ -210,11 +225,13 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		for (String id : order)
 		{
 			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(id);
-
-			// set the assessment, part and submission context
-			question.initSubmissionContext(this.assessment.getSubmissionContext());
-			question.initPartContext(this);
-			rv.add(question);
+			if (question != null)
+			{
+				// set the assessment, part and submission context
+				question.initSubmissionContext(this.assessment.getSubmissionContext());
+				question.initPartContext(this);
+				rv.add(question);
+			}
 		}
 
 		return rv;
@@ -230,10 +247,12 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		for (String id : order)
 		{
 			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(id);
-
-			// set the assessment, part context
-			question.initPartContext(this);
-			rv.add(question);
+			if (question != null)
+			{
+				// set the assessment, part context
+				question.initPartContext(this);
+				rv.add(question);
+			}
 		}
 
 		return rv;
@@ -247,7 +266,11 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		float total = 0f;
 		for (PoolDraw draw : this.pools)
 		{
-			total += (draw.getNumQuestions() * draw.getPool().getPoints());
+			Pool pool = draw.getPool();
+			if (pool != null)
+			{
+				total += (draw.getNumQuestions() * pool.getPoints());
+			}
 		}
 
 		return total;
@@ -288,34 +311,37 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 
 		for (PoolDraw draw : draws)
 		{
-			// do we have this pool already?
-			if (this.pools.contains(draw))
+			if (draw.getPool() != null)
 			{
-				// if the new count is 0, remove it
-				if (draw.getNumQuestions() == 0)
+				// do we have this pool already?
+				if (this.pools.contains(draw))
 				{
-					removePool(draw.getPool());
-				}
-
-				else
-				{
-					// is our count different?
-					PoolDraw myDraw = this.pools.get(this.pools.indexOf(draw));
-					if (!myDraw.getNumQuestions().equals(draw.getNumQuestions()))
+					// if the new count is 0, remove it
+					if (draw.getNumQuestions() == 0)
 					{
-						// update the count
-						myDraw.setNumQuestions(draw.getNumQuestions());
+						removePool(draw.getPool());
+					}
 
-						// this is a change that cannot be made to live tests
-						this.assessment.liveChanged = Boolean.TRUE;
+					else
+					{
+						// is our count different?
+						PoolDraw myDraw = this.pools.get(this.pools.indexOf(draw));
+						if (!myDraw.getNumQuestions().equals(draw.getNumQuestions()))
+						{
+							// update the count
+							myDraw.setNumQuestions(draw.getNumQuestions());
+
+							// this is a change that cannot be made to live tests
+							this.assessment.liveChanged = Boolean.TRUE;
+						}
 					}
 				}
-			}
 
-			// else we need a new one (if not 0 count)
-			else if (draw.getNumQuestions() > 0)
-			{
-				addPool(draw.getPool(), draw.getNumQuestions());
+				// else we need a new one (if not 0 count)
+				else if (draw.getNumQuestions() > 0)
+				{
+					addPool(draw.getPool(), draw.getNumQuestions());
+				}
 			}
 		}
 	}

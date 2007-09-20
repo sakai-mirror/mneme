@@ -154,6 +154,14 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean existsPool(String poolId)
+	{
+		return this.storage.existsPool(poolId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Pool> findPools(String context, FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		if (context == null) throw new IllegalArgumentException();
@@ -255,7 +263,7 @@ public class PoolServiceImpl implements PoolService
 
 		// security check
 		securityService.secure(userId, MnemeService.POOL_MANAGE_PERMISSION, context);
-		
+
 		// TODO: change to another add based permission?
 
 		PoolImpl pool = storage.newPool();

@@ -126,6 +126,14 @@ public class PoolDrawImpl implements PoolDraw
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getPoolId()
+	{
+		return this.poolId;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public int hashCode()
 	{
 		return this.poolId.hashCode();

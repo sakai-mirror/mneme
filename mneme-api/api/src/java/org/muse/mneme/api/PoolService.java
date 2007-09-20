@@ -48,6 +48,21 @@ public interface PoolService
 	Boolean allowManagePools(String context, String userId);
 
 	/**
+	 * Copy an existing pool creating a new pool.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @param userId
+	 *        the pool owner (if null, the currrent user is used)
+	 * @param pool
+	 *        The pool to copy.
+	 * @return The new pool as a copy of the old pool, complete with questions.
+	 * @throws AssessmentPermissionException
+	 *         if the current user is not allowed to create a new pool.
+	 */
+	Pool copyPool(String context, String userId, Pool pool) throws AssessmentPermissionException;
+
+	/**
 	 * Count the pools available to this context with this criteria.
 	 * 
 	 * @param context
@@ -57,6 +72,15 @@ public interface PoolService
 	 * @return a list of pools that meet the criteria.
 	 */
 	Integer countPools(String context, String search);
+
+	/**
+	 * Check if this pool exists.
+	 * 
+	 * @param poolId
+	 *        The pool ID.
+	 * @return TRUE if the pool exists, FALSE if not.
+	 */
+	Boolean existsPool(String poolId);
 
 	/**
 	 * Locate a list of pools accessible to this context with this criteria.
@@ -79,6 +103,7 @@ public interface PoolService
 	 * Access a pool by id.
 	 * 
 	 * @param poolId
+	 *        The pool ID.
 	 * @return The Pool with this id, or null if not found.
 	 */
 	Pool getPool(String poolId);
@@ -104,21 +129,6 @@ public interface PoolService
 	 *         if the current user is not allowed to create a new pool.
 	 */
 	Pool newPool(String context, String userId) throws AssessmentPermissionException;
-
-	/**
-	 * Copy an existing pool creating a new pool.
-	 * 
-	 * @param context
-	 *        The context.
-	 * @param userId
-	 *        the pool owner (if null, the currrent user is used)
-	 * @param pool
-	 *        The pool to copy.
-	 * @return The new pool as a copy of the old pool, complete with questions.
-	 * @throws AssessmentPermissionException
-	 *         if the current user is not allowed to create a new pool.
-	 */
-	Pool copyPool(String context, String userId, Pool pool) throws AssessmentPermissionException;
 
 	/**
 	 * Remove this pool.

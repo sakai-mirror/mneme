@@ -276,6 +276,22 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean existsPool(String poolId)
+	{
+		return this.poolService.existsPool(poolId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean existsQuestion(String questionid)
+	{
+		return this.questionService.existsQuestion(questionid);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Submission> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort, Boolean official, Integer pageNum,
 			Integer pageSize)
 	{

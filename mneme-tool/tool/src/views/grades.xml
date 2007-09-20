@@ -49,8 +49,27 @@
 				<message selector="no-assessments" />
 			</emptyTitle>
 			<columns>
-				<modelColumn>
-					<model ref="assessment.type" delegate="FormatAssesmentType" tool="sakai.mneme" />
+				<column>
+					<navigations>
+						<navigation description="test-type">
+							<icon icon="/icons/test_type.png" style="LEFT" />
+							<included>
+								<compareDecision model="assessment.type" constant="test" />
+							</included>
+						</navigation>
+						<navigation description="survey-type">
+							<icon icon="/icons/survey_type.png" style="LEFT" />
+							<included>
+								<compareDecision model="assessment.type" constant="survey" />
+							</included>
+						</navigation>
+						<navigation description="assignment-type">
+							<icon icon="/icons/assignment_type.png" style="LEFT" />
+							<included>
+								<compareDecision model="assessment.type" constant="assignment" />
+							</included>
+						</navigation>
+					</navigations>
 					<sort submit="TRUE">
 						<active>
 							<compareDecision model="sort_column" constant="0" />
@@ -67,7 +86,7 @@
 							<destination template="/grades/0D" />
 						</desc>
 					</sort>
-				</modelColumn>
+				</column>
 				<modelColumn>
 					<title>
 						<message selector="assessment-view" />

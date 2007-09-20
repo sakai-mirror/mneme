@@ -28,6 +28,7 @@ import org.muse.ambrosia.util.FormatDelegateImpl;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolDraw;
 
 /**
@@ -76,8 +77,12 @@ public class FormatPartSummaryDelegate extends FormatDelegateImpl
 			StringBuffer buf = new StringBuffer();
 			for (PoolDraw draw : p.getDraws())
 			{
-				buf.append(draw.getPool().getTitle());
-				buf.append(", ");
+				Pool pool = draw.getPool();
+				if (pool != null)
+				{
+					buf.append(pool.getTitle());
+					buf.append(", ");
+				}
 			}
 			if (buf.length() > 0) buf.setLength(buf.length()-2);
 			args[2] = buf.toString();

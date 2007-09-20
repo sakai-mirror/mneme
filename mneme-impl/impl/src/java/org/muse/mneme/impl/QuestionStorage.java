@@ -60,6 +60,15 @@ public interface QuestionStorage
 	Integer countQuestions(String userId, Pool pool, String search);
 
 	/**
+	 * Check if a question by this id exists.
+	 * 
+	 * @param id
+	 *        The question id
+	 * @return TRUE if the question with this id exists, FALSE if not.
+	 */
+	Boolean existsQuestion(String id);
+
+	/**
 	 * Find all the questions that meet the criteria.
 	 * 
 	 * @param userId
@@ -121,15 +130,6 @@ public interface QuestionStorage
 	 * @return A question object.
 	 */
 	QuestionImpl newQuestion(QuestionImpl question);
-
-	/**
-	 * Check if a question by this id exists.
-	 * 
-	 * @param id
-	 *        The question id
-	 * @return TRUE if the question with this id exists, FALSE if not.
-	 */
-	Boolean questionExists(String id);
 
 	/**
 	 * Remove all the questions that are in this pool
