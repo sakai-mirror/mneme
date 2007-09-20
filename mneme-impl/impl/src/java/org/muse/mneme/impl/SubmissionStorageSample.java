@@ -300,7 +300,9 @@ public class SubmissionStorageSample implements SubmissionStorage
 		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
 		for (SubmissionImpl submission : this.submissions.values())
 		{
-			if (submission.getAssessment().getContext().equals(context) && submission.getUserId().equals(userId))
+			// find those in the context for this user, filter out archived and un-published assessments
+			if (submission.getAssessment().getContext().equals(context) && submission.getUserId().equals(userId)
+					&& (!submission.getAssessment().getArchived()) && (submission.getAssessment().getPublished()))
 			{
 				rv.add(new SubmissionImpl(submission));
 			}

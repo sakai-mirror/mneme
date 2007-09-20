@@ -453,10 +453,11 @@ public class AssessmentImpl implements Assessment
 
 		this.archived = archived;
 
-		// if now archived, set the date
+		// if now archived, set the date, and un-publish
 		if (this.archived)
 		{
 			((AssessmentDatesImpl) this.dates).archived = new Date();
+			this.published = Boolean.FALSE;
 		}
 
 		// else clear it

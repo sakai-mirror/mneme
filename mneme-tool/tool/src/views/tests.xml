@@ -112,8 +112,12 @@
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
-						<navigation destination="/tests_restore" title="restore-tests" style="LINK" description="restore-tests-description"
-							submit="TRUE">
+						<navigation title="slash" style="LINK" />
+						<navigation title="restore-tests" style="LINK" description="restore-tests-description" submit="TRUE">
+							<destination template="/tests_restore/{0}{1}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+							</destination>
 						</navigation>
 						<navigation destination="/test_import_export" title="import-export-tests" style="LINK"
 							description="import-export-tests-description" submit="TRUE">

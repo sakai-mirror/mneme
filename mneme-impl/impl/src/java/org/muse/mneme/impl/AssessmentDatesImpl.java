@@ -205,5 +205,6 @@ public class AssessmentDatesImpl implements AssessmentDates
 		this.acceptUntil = other.acceptUntil;
 		this.due = other.due;
 		this.open = other.open;
+		this.archived = other.archived;
 	}
 }
