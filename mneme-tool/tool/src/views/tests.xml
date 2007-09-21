@@ -103,22 +103,26 @@
 							selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements">
 							<icon icon="/icons/delete.png" style="LEFT" />
 						</navigation>
-						<navigation title="archive-tests" style="LINK" description="archive-tests-description" submit="TRUE" selectRequirement="SOME"
-							selectRequirementMessage="archive-failed-requirements">
-							<icon icon="/icons/make_inactive.png" style="LEFT" />
-							<destination template="/ARCHIVE/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="assessment.id" />
-							</destination>
-						</navigation>
-						<navigation title="slash" style="LINK" />
-						<navigation title="restore-tests" style="LINK" description="restore-tests-description" submit="TRUE">
-							<destination template="/tests_restore/{0}{1}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-							</destination>
-						</navigation>
+						<container>
+							<container>
+								<navigation title="archive-tests" style="LINK" description="archive-tests-description" submit="TRUE"
+									selectRequirement="SOME" selectRequirementMessage="archive-failed-requirements">
+									<icon icon="/icons/make_inactive.png" style="LEFT" />
+									<destination template="/ARCHIVE/{0}{1}/{2}">
+										<model ref="sort_column" />
+										<model ref="sort_direction" />
+										<model ref="assessment.id" />
+									</destination>
+								</navigation>
+								<navigation title="slash" style="LINK" />
+								<navigation title="restore-tests" style="LINK" description="restore-tests-description" submit="TRUE">
+									<destination template="/tests_restore/{0}{1}">
+										<model ref="sort_column" />
+										<model ref="sort_direction" />
+									</destination>
+								</navigation>
+							</container>
+						</container>
 						<navigation destination="/test_import_export" title="import-export-tests" style="LINK"
 							description="import-export-tests-description" submit="TRUE">
 							<icon icon="/icons/import_export.png" style="LEFT" />
