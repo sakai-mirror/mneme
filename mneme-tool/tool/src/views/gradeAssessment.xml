@@ -132,11 +132,59 @@
 					<title>
 						<message selector="submission-finished" />
 					</title>
-					<model type="date" ref="submission.submittedDate" />
+					<!-- model type="date" ref="submission.submittedDate" /-->
+					<!--message selector="submission-finished-date">
+						<model type="date" ref="submission.submittedDate" />
+						</message-->
+					<navigations>
+						<navigation style="LINK" disabled="TRUE">
+							<title>
+								<message selector="submission-finished-date">
+									<model type="date" ref="submission.submittedDate" />
+								</message>
+							</title>
+							<destination template="/" />
+						</navigation>
+						<navigation style="LINK" disabled="TRUE">
+							<title>
+								<message selector="submission-finished-date-alert" />
+							</title>
+							<destination template="/" />
+							<included>
+								<decision model="submission.isCompletedLate" />
+							</included>
+						</navigation>
+					</navigations>
+
 					<entityIncluded>
 						<decision model="submission.isComplete" />
 					</entityIncluded>
 				</modelColumn>
+
+				<!--column>
+					<title>
+						<message selector="submission-finished" />
+					</title>
+					<container>
+						<text>
+							<message selector="submission-finished-date">
+								<model type="date" ref="submission.submittedDate" />
+							</message>
+						</text-->
+						<!--alert>
+							<message selector="submission-finished-date-alert">
+							< model type="date" ref="submission.submittedDate" >							
+							</message>
+							<included>
+							<decision model="submission.isCompletedLate" />
+							</included>
+							</alert-->
+					<!--/container>
+					<entityIncluded>
+						<decision model="submission.isComplete" />
+					</entityIncluded>
+				</column-->
+
 				<modelColumn>
 					<title>
 						<message selector="submission-status" />
@@ -194,11 +242,11 @@
 									<constant value="FALSE" />
 								</compareDecision>
 								<andDecision model="submission.siblingCount">
-									<compareDecision model="submission.siblingCount" >
-									<constant value="0" />
-									<constant value="1" />
-								</compareDecision>
-									
+									<compareDecision model="submission.siblingCount">
+										<constant value="0" />
+										<constant value="1" />
+									</compareDecision>
+
 								</andDecision>
 							</included>
 						</navigation>
