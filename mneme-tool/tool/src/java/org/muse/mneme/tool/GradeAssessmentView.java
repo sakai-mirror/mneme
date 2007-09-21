@@ -64,7 +64,7 @@ public class GradeAssessmentView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 4 && params.length != 5) throw new IllegalArgumentException();
+		if (params.length != 4 && params.length != 5 && params.length != 6) throw new IllegalArgumentException();
 
 		// TODO: add check for user permission to access the assessments for grading
 
@@ -76,6 +76,51 @@ public class GradeAssessmentView extends ControllerImpl
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
 		context.put("assessment", assessment);
 
+		// sort parameter - sort is in param array at index 4
+		String sortCode = null;
+		if (params.length > 4) sortCode = params[4];
+
+		// default sort is user name ascending
+		SubmissionService.FindAssessmentSubmissionsSort sort;
+		if (sortCode != null)
+		{
+			if (sortCode.trim().length() == 2)
+			{
+				context.put("sort_column", sortCode.charAt(0));
+				context.put("sort_direction", sortCode.charAt(1));
+
+				// 0 is title
+				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
+					sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
+				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+					sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
+				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+					sort = SubmissionService.FindAssessmentSubmissionsSort.status_a;
+				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+					sort = SubmissionService.FindAssessmentSubmissionsSort.status_d;
+				else
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+			}
+			else
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+		}
+		else
+		{
+			// default sort: user name ascending
+			sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
+
+			context.put("sort_column", '0');
+			context.put("sort_direction", 'A');
+		}
+
 		if (assessment == null)
 		{
 			// redirect to error
@@ -84,7 +129,7 @@ public class GradeAssessmentView extends ControllerImpl
 		}
 
 		List submissions = null;
-		if (params.length == 5 && params[4].equalsIgnoreCase("all"))
+		if (params.length == 6 && params[5].equalsIgnoreCase("all"))
 		{
 			// get all Assessment submissions
 			submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.FALSE, null, null);

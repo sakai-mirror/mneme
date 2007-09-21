@@ -126,7 +126,28 @@
 						</navigation>
 					</entityNavigations>
 					<model ref="submission.userId" missing="no-username" />
-
+					<sort>
+						<active>
+							<compareDecision model="sort_column" constant="0" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/grade_assessment/{0}/{1}/0A">
+								<model ref="gradesSortCode" />
+								<model ref="assessment.id" />
+							</destination>
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/grade_assessment/{0}/{1}/0D">
+								<model ref="gradesSortCode" />
+								<model ref="assessment.id" />
+							</destination>
+						</desc>
+					</sort>
 				</modelColumn>
 				<modelColumn>
 					<title>
@@ -163,27 +184,27 @@
 
 				<!--column>
 					<title>
-						<message selector="submission-finished" />
+					<message selector="submission-finished" />
 					</title>
 					<container>
-						<text>
-							<message selector="submission-finished-date">
-								<model type="date" ref="submission.submittedDate" />
-							</message>
-						</text-->
-						<!--alert>
-							<message selector="submission-finished-date-alert">
-							< model type="date" ref="submission.submittedDate" >							
-							</message>
-							<included>
-							<decision model="submission.isCompletedLate" />
-							</included>
-							</alert-->
-					<!--/container>
+					<text>
+					<message selector="submission-finished-date">
+					<model type="date" ref="submission.submittedDate" />
+					</message>
+					</text-->
+				<!--alert>
+					<message selector="submission-finished-date-alert">
+					< model type="date" ref="submission.submittedDate" >							
+					</message>
+					<included>
+					<decision model="submission.isCompletedLate" />
+					</included>
+					</alert-->
+				<!--/container>
 					<entityIncluded>
-						<decision model="submission.isComplete" />
+					<decision model="submission.isComplete" />
 					</entityIncluded>
-				</column-->
+					</column-->
 
 				<modelColumn>
 					<title>
@@ -191,6 +212,28 @@
 					</title>
 					<model type="html" ref="submission" delegate="SubmissionStatus" tool="sakai.mneme" />
 					<!--model type="enum" ref="submission.gradingStatus" messageRoot="grade-status-" /-->
+					<sort>
+						<active>
+							<compareDecision model="sort_column" constant="1" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/grade_assessment/{0}/{1}/1A">
+								<model ref="gradesSortCode" />
+								<model ref="assessment.id" />
+							</destination>
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/grade_assessment/{0}/{1}/1D">
+								<model ref="gradesSortCode" />
+								<model ref="assessment.id" />
+							</destination>
+						</desc>
+					</sort>
 				</modelColumn>
 				<modelColumn>
 					<title>
@@ -218,9 +261,11 @@
 							<title>
 								<message selector="view-all" />
 							</title>
-							<destination template="/grade_assessment/{0}/{1}/all">
+							<destination template="/grade_assessment/{0}/{1}/{2}{3}/all">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
 							</destination>
 							<included>
 								<compareDecision model="submission.siblingCount" reversed="TRUE">
@@ -233,9 +278,11 @@
 							<title>
 								<message selector="close" />
 							</title>
-							<destination template="/grade_assessment/{0}/{1}">
+							<destination template="/grade_assessment/{0}/{1}/{2}{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
 							</destination>
 							<included>
 								<compareDecision model="official">
