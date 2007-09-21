@@ -170,7 +170,7 @@ public class GradeAssessmentView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 4) throw new IllegalArgumentException();
+		if (params.length != 4 && params.length != 5 && params.length != 6) throw new IllegalArgumentException();
 
 		// read form
 		String destination = this.uiService.decode(req, context);
