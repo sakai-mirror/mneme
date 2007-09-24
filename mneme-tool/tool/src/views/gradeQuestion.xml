@@ -124,7 +124,7 @@
 				<modelColumn>
 					<title>
 						<message selector="submission-username">
-							<model type="userInfo" selector="DISPLAYNAME" ref="answer.submission.userId" />
+							<model type="userInfo" selector="SORTNAME" ref="answer.submission.userId" />
 						</message>
 					</title>
 					<model ref="answer.submission.userId" missing="no-username" />
@@ -138,7 +138,7 @@
 						<decision model="answer.isComplete" />
 					</entityIncluded>
 				</modelColumn>
-				<modelColumn>
+				<column>
 					<title>
 						<message selector="submission-answer" />
 					</title>
@@ -147,7 +147,16 @@
 							<rows>
 								<row>
 									<container>
-										<text selector="add-comments" />
+										<text selector="submission-user-answer" >
+											<message>
+												<model ref="answer.typeSpecificAnswer.answers" />
+											</message>												
+										</text>
+									</container>
+								</row>
+								<row>
+									<container>
+										<text selector="submission-comments" />
 									</container>
 								</row>
 								<row>
@@ -158,15 +167,30 @@
 							</rows>
 						</entityDisplay>
 					</container>
-				</modelColumn>
+				</column>
 				<modelColumn>
 					<title>
 						<message selector="submission-tries" />
 					</title>
-					<message selector="format-submission-tries">
-						<model ref="answer.submission.siblingCount" />
-						<model ref="answer.submission.assessment.numSubmissionsAllowed" missing="infinite" />
-					</message>
+					<navigations>
+						<navigation style="LINK">
+							<title>
+								<message model="answer.submission.siblingCount" />
+							</title>
+							<destination template="/" />
+						</navigation>
+						<navigation>
+							<title>
+								<message selector="nav-divider" />
+							</title>
+						</navigation>
+						<navigation style="LINK" disabled="TRUE">
+							<title>
+								<message model="answer.submission.assessment.numSubmissionsAllowed" />
+							</title>
+							<destination template="/" />
+						</navigation>
+					</navigations>
 				</modelColumn>
 				<modelColumn>
 					<title>
@@ -174,15 +198,14 @@
 					</title>
 					<model ref="answer.autoScore" />
 				</modelColumn>
-				<modelColumn>
+				<column>
 					<title>
 						<message selector="submission-adjust" />
 					</title>
 					<container>
 						<textEdit model="answer.evaluation.score" rows="1" cols="4" />
 					</container>
-
-				</modelColumn>
+				</column>
 				<modelColumn>
 					<title>
 						<message selector="submission-final" />
@@ -197,22 +220,16 @@
 			<container>
 				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
 					<icon icon="/icons/prev.gif" style="LEFT" />
-					<destination template="/" />
+					<destination template="PREV" />
 					<disabled>
-						<orDecision>
-							<andDecision>
-								<hasValueDecision model="selectedQuestion" />
-								<decision model="selectedQuestion.assessmentOrdering.isFirst" />
-							</andDecision>
-							<andDecision>
-								<hasValueDecision model="selectedQuestion.part" />
-								<decision model="selectedQuestion.part.ordering.isFirst" />
-							</andDecision>
-							<andDecision>
-								<hasValueDecision reversed="TRUE" model="selectedQuestion" />
-								<hasValueDecision reversed="TRUE" model="selectedQuestion.part" />
-							</andDecision>
-						</orDecision>
+						<andDecision>
+							<hasValueDecision model="selectedQuestion" />
+							<decision model="selectedQuestion.assessmentOrdering.isFirst" />
+						</andDecision>
+						<andDecision>
+							<hasValueDecision model="selectedQuestion.part" />
+							<decision model="selectedQuestion.part.ordering.isFirst" />
+						</andDecision>						
 					</disabled>
 				</navigation>
 				<navigation title="toc" accessKey="toc-access" description="toc-description" style="BUTTON" submit="TRUE">
@@ -222,36 +239,28 @@
 				<navigation title="next" accessKey="next-access" description="next-description" style="BUTTON" destination="NEXT" submit="TRUE"
 					default="TRUE">
 					<icon icon="/icons/next.gif" style="RIGHT" />
-					<destination template="/" />
-					<disabled>
-						<orDecision>
-							<andDecision>
-								<hasValueDecision model="selectedQuestion" />
-								<decision model="selectedQuestion.assessmentOrdering.isLast" />
-							</andDecision>
-							<andDecision>
-								<hasValueDecision model="selectedQuestion.part" />
-								<decision model="selectedQuestion.part.ordering.isLast" />
-							</andDecision>
-							<andDecision>
-								<hasValueDecision reversed="TRUE" model="selectedQuestion" />
-								<hasValueDecision reversed="TRUE" model="selectedQuestion.part" />
-							</andDecision>
-						</orDecision>
+					<destination template="NEXT" />
+					<disabled>					
+						<andDecision>							
+							<decision model="selectedQuestion.assessmentOrdering.isLast" />
+						</andDecision>
+						<andDecision>
+							<decision model="selectedQuestion.part.ordering.isLast" />
+						</andDecision>										
 					</disabled>
 				</navigation>
 				<divider />
 				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
 					<icon icon="/icons/save.png" style="LEFT" />
 					<destination template="/grade_question/{0}/{1}">
-						<model ref="gradesSortCode" />
+						<model ref="gradeSortCode" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 					<destination template="/grades/{0}">
-						<model ref="gradesSortCode" />
+						<model ref="gradeSortCode" />
 					</destination>
 				</navigation>
 			</container>
