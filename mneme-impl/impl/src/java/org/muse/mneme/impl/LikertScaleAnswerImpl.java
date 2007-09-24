@@ -21,15 +21,11 @@
 
 package org.muse.mneme.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.muse.mneme.api.Answer;
-import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificAnswer;
 
 /**
- * LikertScaleAnswerImpl handles answers for the multiple choice question type.
+ * LikertScaleAnswerImpl handles answers for the Likert question type.
  */
 public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 {
@@ -37,13 +33,12 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 	protected transient Answer answer = null;
 
 	/** The answer is the selected option value stored as an Integer. */
-	protected Integer answerData;
+	protected Integer answerData = null;
 
 	/** The auto score. */
 	protected Float autoScore = null;
 
 	/** Set when the answer has been changed. */
-	// TODO: need to reset this at some point when stored... -ggolden
 	protected boolean changed = false;
 
 	/**
@@ -88,6 +83,14 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 		{
 			this.autoScore = 0f;
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void clearIsChanged()
+	{
+		this.changed = false;
 	}
 
 	/**
@@ -151,7 +154,7 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Boolean getIsCorrect()
 	{
-		// TODO: how to deal with partial correct for multi choice
+		// TODO: Likert has no concept of correct...
 		return Boolean.TRUE;
 	}
 
@@ -164,7 +167,11 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 	public void setAnswer(String answer)
 	{
 		if ((answer == null) || (answer.trim().length() == 0)) return;
-		this.answerData = Integer.valueOf(answer.trim());
-	}
 
+		Integer i = Integer.valueOf(answer.trim());
+		if (i.equals(this.answerData)) return;
+
+		this.answerData = i;
+		this.changed = true;
+	}
 }

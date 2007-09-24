@@ -39,6 +39,9 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	/** The auto score. */
 	protected Float autoScore = null;
 
+	/** Set when the answer has been changed. */
+	protected boolean changed = false;
+
 	/**
 	 * Construct.
 	 * 
@@ -63,6 +66,7 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 		this.answer = answer;
 		this.answerData = other.answerData;
 		this.autoScore = other.autoScore;
+		this.changed = other.changed;
 	}
 
 	/**
@@ -79,6 +83,14 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 		{
 			this.autoScore = 0f;
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void clearIsChanged()
+	{
+		this.changed = false;
 	}
 
 	/**
@@ -134,8 +146,7 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Boolean getIsChanged()
 	{
-		// TODO ???
-		return Boolean.TRUE;
+		return this.changed;
 	}
 
 	/**
@@ -159,6 +170,12 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	public void setAnswer(String answer)
 	{
 		if ((answer == null) || (answer.trim().length() == 0)) return;
-		this.answerData = Boolean.valueOf(answer.trim());
+
+		// make a change only if the answer is different from what we are already set to
+		Boolean b = Boolean.valueOf(answer.trim());
+		if (b.equals(this.answerData)) return;
+
+		this.answerData = b;
+		this.changed = true;
 	}
 }

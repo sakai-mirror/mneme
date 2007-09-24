@@ -412,8 +412,8 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.getModifiedBy().setDate(now);
 			try
 			{
-				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("06/01/07"));
-				a.getDates().setDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("09/22/07"));
+				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("09/01/07"));
+				a.getDates().setDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("10/22/07"));
 			}
 			catch (ParseException e)
 			{
@@ -468,8 +468,8 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.getModifiedBy().setDate(now);
 			try
 			{
-				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("07/01/07"));
-				a.getDates().setDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("08/15/07"));
+				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("09/01/07"));
+				a.getDates().setDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("10/15/07"));
 			}
 			catch (ParseException e)
 			{
@@ -525,6 +525,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 			p = a.getParts().addManualPart();
 			p.addQuestion(this.questionService.getQuestion("q3"));
+			p.addQuestion(this.questionService.getQuestion("q4"));
 			p.setTitle("Part one");
 			((PartImpl) p).initId("p4");
 			p2.getPresentation().setText("This is part 1.");

@@ -43,7 +43,6 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	protected Float autoScore = null;
 
 	/** Set when the answer has been changed. */
-	// TODO: need to reset this at some point when stored... -ggolden
 	protected boolean changed = false;
 
 	/**
@@ -88,6 +87,14 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 		{
 			this.autoScore = 0f;
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void clearIsChanged()
+	{
+		this.changed = false;
 	}
 
 	/**
@@ -169,13 +176,17 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void setAnswers(String[] answers)
 	{
-		// TODO: check if the answers to set exactly match the answers we already have. Don't set the changed flag if so.
-		this.answerData.clear();
+		Set<Integer> s = new HashSet<Integer>();
 		if ((answers == null) || (answers.length == 0)) return;
 		for (String answer : answers)
 		{
-			this.answerData.add(Integer.valueOf(answer));
+			s.add(Integer.valueOf(answer));
 		}
+
+		// check if the answers to set exactly match the answers we already have. Don't set the changed flag if so.
+		if (s.equals(this.answerData)) return;
+
+		this.answerData = s;
 		this.changed = true;
 	}
 }

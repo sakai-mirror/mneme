@@ -34,6 +34,7 @@ import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.TypeSpecificAnswer;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * AnswerImpl implements Answer
@@ -45,6 +46,9 @@ public class AnswerImpl implements Answer
 	protected TypeSpecificAnswer answerHandler = null;
 
 	protected AnswerEvaluationImpl evaluation = new AnswerEvaluationImpl(this);
+
+	/** Set when there's a change in the generic part of the answer. */
+	protected boolean genericChanged = false;
 
 	protected String id = null;
 
@@ -149,7 +153,7 @@ public class AnswerImpl implements Answer
 	 */
 	public Boolean getIsChanged()
 	{
-		// TODO ???
+		if (this.genericChanged) return Boolean.TRUE;
 		if (this.answerHandler == null) return Boolean.FALSE;
 		return this.answerHandler.getIsChanged();
 	}
@@ -276,7 +280,10 @@ public class AnswerImpl implements Answer
 	public void setMarkedForReview(Boolean forReview)
 	{
 		if (forReview == null) throw new IllegalArgumentException();
+		if (this.markedForReview.equals(forReview)) return;
+
 		this.markedForReview = forReview;
+		this.genericChanged = true;
 	}
 
 	/**
@@ -284,7 +291,10 @@ public class AnswerImpl implements Answer
 	 */
 	public void setRationale(String rationale)
 	{
+		if (!StringUtil.different(this.rationale, rationale)) return;
+
 		this.rationale = rationale;
+		this.genericChanged = true;
 	}
 
 	/**
@@ -293,6 +303,15 @@ public class AnswerImpl implements Answer
 	public void setSubmittedDate(Date submitted)
 	{
 		this.submittedDate = submitted;
+	}
+
+	/**
+	 * Clear the is-changed flag(s).
+	 */
+	protected void clearIsChanged()
+	{
+		this.genericChanged = false;
+		this.answerHandler.clearIsChanged();
 	}
 
 	/**

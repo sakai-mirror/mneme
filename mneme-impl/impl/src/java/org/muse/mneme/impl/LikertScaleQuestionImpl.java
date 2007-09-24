@@ -22,29 +22,21 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
-import java.util.Set;
 
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.EntityList;
-import org.muse.ambrosia.api.EntityListColumn;
-import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.PropertyColumn;
-import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
-import org.muse.ambrosia.api.AutoColumn;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
 
 /**
- * LikertScaleQuestionImpl handles questions for the multiple choice question type.
+ * LikertScaleQuestionImpl handles questions for the Likert question type.
  */
 public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 {
@@ -76,17 +68,14 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		}
 	}
 
-	/** This hash set holds index numbers of the correct answers */
-	protected Set<Integer> correctAnswers = new HashSet<Integer>();
-
 	/** Our messages. */
 	protected transient InternationalizedMessages messages = null;
 
 	/** The question this is a helper for. */
 	protected transient Question question = null;
 
-	/** This is the value of the option selected by the instructor */
-	protected Integer selectedOption;
+	/** Which scale option to use for this question (0-agree 1-good 2-average 3-yes 4-numbers. */
+	protected Integer selectedOption = null;
 
 	/** Dependency: The UI service (Ambrosia). */
 	protected transient UiService uiService = null;
@@ -130,7 +119,7 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 			// get an exact, bit-by-bit copy
 			Object rv = super.clone();
 
-			// TODO|: ? nothing to deep copy
+			// TODO: ? nothing to deep copy
 
 			// set the question
 			((LikertScaleQuestionImpl) rv).question = question;
@@ -148,10 +137,6 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getAnswerKey()
 	{
-		/*
-		 * Iterator itr = correctAnswers.iterator(); String answerKey[] = new String[correctAnswers.size()]; int i=0; while (itr.hasNext()) {
-		 * answerKey[i] = (String)this.answerChoices.get((String)itr.next().intValue()) ; i++; } return answerKey;
-		 */
 		return null;
 	}
 
@@ -176,13 +161,37 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(propCol);
 
 		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
-		row.setTitle("answer");
+		row.setTitle("scale");
 		row.add(entityList);
 
 		EntityDisplay display = this.uiService.newEntityDisplay();
 		display.addRow(row);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(display);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getDeliveryUi()
+	{
+		EntityList entityList = this.uiService.newEntityList();
+		entityList.setStyle(EntityList.Style.form);
+		entityList
+				.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.optionValues"), "optionValue");
+
+		SelectionColumn selCol = this.uiService.newSelectionColumn();
+		selCol.setSingle();
+
+		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("optionValue.id"));
+		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
+		entityList.addColumn(selCol);
+
+		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("optionValue.text"));
+		entityList.addColumn(propCol);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
 	}
 
 	/**
@@ -195,53 +204,53 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		List<LikertScaleQuestionChoice> rv = new ArrayList<LikertScaleQuestionChoice>(5);
 		StringBuffer optionText = new StringBuffer();
 		optionText.append(this.messages.getString("strongly-agree"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("agree"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("undecided"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("disagree"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("strongly-disagree"));
 
 		rv.add(new LikertScaleQuestionChoice("0", optionText.toString()));
 		optionText.setLength(0);
 
 		optionText.append(this.messages.getString("excellent"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("good"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("poor"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("unacceptable"));
 
 		rv.add(new LikertScaleQuestionChoice("1", optionText.toString()));
 		optionText.setLength(0);
 
 		optionText.append(this.messages.getString("above-average"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("average"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("below-average"));
 
 		rv.add(new LikertScaleQuestionChoice("2", optionText.toString()));
 		optionText.setLength(0);
 
 		optionText.append(this.messages.getString("yes"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("no"));
 
 		rv.add(new LikertScaleQuestionChoice("3", optionText.toString()));
 		optionText.setLength(0);
 
 		optionText.append(this.messages.getString("five"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("four"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("three"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("two"));
-		optionText.append("/");
+		optionText.append(" / ");
 		optionText.append(this.messages.getString("one"));
 
 		rv.add(new LikertScaleQuestionChoice("4", optionText.toString()));
@@ -298,30 +307,6 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 			rv.add(new LikertScaleQuestionChoice("4", this.messages.getString("one")));
 		}
 		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Component getDeliveryUi()
-	{
-		EntityList entityList = this.uiService.newEntityList();
-		entityList.setStyle(EntityList.Style.form);
-		entityList
-				.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.optionValues"), "optionValue");
-
-		SelectionColumn selCol = this.uiService.newSelectionColumn();
-		selCol.setSingle();
-
-		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("optionValue.id"));
-		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
-		entityList.addColumn(selCol);
-
-		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("optionValue.text"));
-		entityList.addColumn(propCol);
-
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
 	}
 
 	/**

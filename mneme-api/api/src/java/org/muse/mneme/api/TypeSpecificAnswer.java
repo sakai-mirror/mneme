@@ -32,6 +32,11 @@ public interface TypeSpecificAnswer extends Cloneable
 	void autoScore();
 
 	/**
+	 * Clear the is changed flag.s
+	 */
+	void clearIsChanged();
+
+	/**
 	 * Clone a copy
 	 * 
 	 * @return A copy.
