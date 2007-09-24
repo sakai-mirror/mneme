@@ -231,7 +231,7 @@
 					<icons>
 						<icon icon="/icons/unanswered.png" message="toc-key-unanswered" />
 						<icon icon="/icons/markedforreview.png" message="toc-key-mark-for-review" />
-						<icon icon="/icons/missingrationale.png" message="toc-key-rationale" />
+						<icon icon="/icons/reason.png" message="toc-key-rationale" />
 					</icons>
 				</iconKey>
 			</container>

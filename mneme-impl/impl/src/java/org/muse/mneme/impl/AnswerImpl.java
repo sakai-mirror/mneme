@@ -62,7 +62,7 @@ public class AnswerImpl implements Answer
 
 	protected QuestionService questionService = null;
 
-	protected String rationale = null;
+	protected String reason = null;
 
 	protected Submission submission = null;
 
@@ -201,26 +201,9 @@ public class AnswerImpl implements Answer
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getQuestionFeedback()
+	public String getReason()
 	{
-		if (getIsCorrect())
-		{
-			// TODO: return the correct feedback
-		}
-		else
-		{
-			// TODO: return the incorrect feedback
-		}
-
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getRationale()
-	{
-		return this.rationale;
+		return this.reason;
 	}
 
 	/**
@@ -289,11 +272,11 @@ public class AnswerImpl implements Answer
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setRationale(String rationale)
+	public void setReason(String reason)
 	{
-		if (!StringUtil.different(this.rationale, rationale)) return;
+		if (!StringUtil.different(this.reason, reason)) return;
 
-		this.rationale = rationale;
+		this.reason = reason;
 		this.genericChanged = true;
 	}
 
@@ -386,7 +369,7 @@ public class AnswerImpl implements Answer
 		this.partId = other.partId;
 		this.questionId = other.questionId;
 		this.questionService = other.questionService;
-		this.rationale = other.rationale;
+		this.reason = other.reason;
 		this.submission = other.submission;
 		this.submittedDate = other.submittedDate;
 	}

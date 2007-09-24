@@ -55,6 +55,27 @@ public interface Question
 	String getDescription();
 
 	/**
+	 * Access the explain-reason setting.
+	 * 
+	 * @return TRUE if this question also collects "reason" from the user, FALSE if not.
+	 */
+	Boolean getExplainReason();
+
+	/**
+	 * Access the feedback (rich) text for the question.
+	 * 
+	 * @return The feedback text for the question, or null if there is none.
+	 */
+	String getFeedback();
+
+	/**
+	 * Access the hints (rich) text for the question.
+	 * 
+	 * @return The hints text for the question, or null if there is none.
+	 */
+	String getHints();
+
+	/**
 	 * Access the id of this question.
 	 * 
 	 * @return The question's id.
@@ -97,13 +118,6 @@ public interface Question
 	Presentation getPresentation();
 
 	/**
-	 * Access the require-rationale setting.
-	 * 
-	 * @return TRUE if this question also collects "rationale" from the user, FALSE if not.
-	 */
-	Boolean getRequireRationale();
-
-	/**
 	 * Access the question type.
 	 * 
 	 * @return The question type.
@@ -140,18 +154,34 @@ public interface Question
 	void setDescription(String description);
 
 	/**
+	 * Set the explain-reason setting.
+	 * 
+	 * @param explainReason
+	 *        TRUE if this question also collects "reason" from the user, FALSE if not.
+	 */
+	void setExplainReason(Boolean explainReason);
+
+	/**
+	 * Set the feedback (rich) text for the question.
+	 * 
+	 * @param feedback
+	 *        The feedback text for the question.
+	 */
+	void setFeedback(String feedback);
+
+	/**
+	 * Set the hints (rich) text for the question.
+	 * 
+	 * @param hints
+	 *        The hints text for the question.
+	 */
+	void setHints(String hints);
+
+	/**
 	 * Set the question pool that holds this question.
 	 * 
 	 * @param pool
 	 *        The question pool to hold this question.
 	 */
 	void setPool(Pool pool);
-
-	/**
-	 * Set the require-rationale setting.
-	 * 
-	 * @param rationale
-	 *        TRUE if this question also collects "rationale" from the user, FALSE if not.
-	 */
-	void setRequireRationale(Boolean rationale);
 }

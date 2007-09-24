@@ -232,14 +232,14 @@
 							</included>
 						</modelComponent>
 
-						<!-- rationale -->
+						<!-- reason -->
 						<textEdit title="question-rationale" rows="5" cols="40">
 							<readOnly>
 								<decision model="review" />
 							</readOnly>
-							<model ref="answer.rationale" />
+							<model ref="answer.reason" />
 							<included>
-								<decision model="answer.question.requireRationale" />
+								<decision model="answer.question.explainReason" />
 							</included>
 						</textEdit>
 
@@ -276,12 +276,13 @@
 						<text>
 							<message selector="question-feedback">
 								<model type="icon" icon="/icons/feedback.png" />
-								<model type="html" ref="answer.questionFeedback" />
+								<model type="html" ref="answer.question.feedback" />
 							</message>
 							<included>
 								<decision model="review" />
 								<decision model="answer.submission.mayReview" />
 								<decision model="answer.question.part.assessment.review.showCorrectAnswer" />
+								<hasValueDecision model="answer.question.feedback" />
 							</included>
 						</text>
 

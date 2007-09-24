@@ -66,15 +66,14 @@ public class FormatQuestionDecorationDelegate extends FormatDelegateImpl
 		// search for our answer without creating it, and if found check the answered and mark for review setting
 		boolean answered = false;
 		boolean markForReview = false;
-		boolean missingRationale = false;
+		boolean missingReason = false;
 		for (Answer answer : submission.getAnswers())
 		{
 			if (answer.getQuestion().equals(question))
 			{
 				answered = answer.getIsAnswered().booleanValue() && answer.getIsComplete().booleanValue();
 				markForReview = answer.getMarkedForReview().booleanValue();
-				missingRationale = ((question.getRequireRationale() != null) && (question.getRequireRationale().booleanValue()) && (StringUtil
-						.trimToNull(answer.getRationale()) == null));
+				missingReason = (question.getExplainReason() && (StringUtil.trimToNull(answer.getReason()) == null));
 				break;
 			}
 		}
@@ -94,9 +93,9 @@ public class FormatQuestionDecorationDelegate extends FormatDelegateImpl
 		}
 
 		// if rationale is needed and not present, use the no-rationale icon
-		else if (missingRationale)
+		else if (missingReason)
 		{
-			return "<img src=\"" + context.get("sakai.return.url") + "/icons/missingrationale.png\" alt=\""
+			return "<img src=\"" + context.get("sakai.return.url") + "/icons/reason.png\" alt=\""
 					+ context.getMessages().getString("toc-key-rationale") + "\" />";
 		}
 

@@ -98,18 +98,11 @@ public interface Answer
 	Question getQuestion();
 
 	/**
-	 * Access the appropriate assessment question level feedback for this answer, depending on the correctness of the answer.
+	 * Access the reason text, if any, provided as part of this answer.
 	 * 
-	 * @return The appropriate assessment question level feedback for this answer, depending on the correctness of the answer.
+	 * @return The answer's reason text, or null if there is none.
 	 */
-	String getQuestionFeedback();
-
-	/**
-	 * Access the rationale text, if any, provided as part of this answer.
-	 * 
-	 * @return The answer's rationale text, or null if there is none.
-	 */
-	String getRationale();
+	String getReason();
 
 	/**
 	 * Access the back pointer to the submission.
@@ -148,12 +141,12 @@ public interface Answer
 	void setMarkedForReview(Boolean forReview);
 
 	/**
-	 * Set the rationale text, if any, provided as part of this answer.
+	 * Set the reason text, if any, provided as part of this answer.
 	 * 
-	 * @param rationale
-	 *        The answer's rationale text, or null if there is none.
+	 * @param reason
+	 *        The answer's reason text, or null if there is none.
 	 */
-	void setRationale(String rationale);
+	void setReason(String reason);
 
 	/**
 	 * Set the latest time that this answer was submitted.

@@ -80,19 +80,44 @@
 					</container>
 				</row>
 
-				<row>
+				<row title="optional-settings">
 					<container>
-						<entityDisplay>
-							<rows>
-								<row title="question-rationale">
-									<container>
-										<selection>
-											<model ref="question.requireRationale" />
-										</selection>
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
+						<section>
+							<title>
+								<message selector="reason-title">
+									<model type="icon" icon="/icons/reason.png" />
+								</message>
+							</title>
+							<container>
+								<selection title="reason-description">
+									<model ref="question.explainReason" />
+								</selection>
+							</container>
+						</section>
+						<section>
+							<title>
+								<message selector="hints-title">
+									<model type="icon" icon="/icons/hints.png" />
+								</message>
+							</title>
+							<container>
+								<htmlEdit title="hints-description">
+									<model ref="question.hints" />
+								</htmlEdit>
+							</container>
+						</section>
+						<section>
+							<title>
+								<message selector="feedback-title">
+									<model type="icon" icon="/icons/feedback.png" />
+								</message>
+							</title>
+							<container>
+								<htmlEdit title="feedback-description">
+									<model ref="question.feedback" />
+								</htmlEdit>
+							</container>
+						</section>
 					</container>
 				</row>
 

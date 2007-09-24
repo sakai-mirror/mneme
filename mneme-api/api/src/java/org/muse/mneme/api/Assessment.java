@@ -296,7 +296,7 @@ public interface Assessment
 	/**
 	 * Set the require-honor-pledge setting.
 	 * 
-	 * @param rationale
+	 * @param honorPledge
 	 *        TRUE if this assessment requires an "honor pledge" from the user, FALSE if not.
 	 */
 	void setRequireHonorPledge(Boolean honorPledge);

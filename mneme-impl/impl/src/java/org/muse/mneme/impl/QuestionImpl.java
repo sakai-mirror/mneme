@@ -211,6 +211,12 @@ public class QuestionImpl implements Question
 
 	protected String description = null;
 
+	protected Boolean explainReason = null;
+
+	protected String feedback = null;
+
+	protected String hints = null;
+
 	protected String id = null;
 
 	protected AttributionImpl modifiedBy = new AttributionImpl();
@@ -228,8 +234,6 @@ public class QuestionImpl implements Question
 	protected TypeSpecificQuestion questionHandler = null;
 
 	protected transient QuestionService questionService = null;
-
-	protected Boolean requireRationale = null;
 
 	protected Submission submissionContext = null;
 
@@ -310,6 +314,30 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getExplainReason()
+	{
+		return this.explainReason;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getFeedback()
+	{
+		return this.feedback;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getHints()
+	{
+		return this.hints;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getId()
 	{
 		return this.id;
@@ -353,14 +381,6 @@ public class QuestionImpl implements Question
 	public Presentation getPresentation()
 	{
 		return this.presentation;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getRequireRationale()
-	{
-		return this.requireRationale;
 	}
 
 	/**
@@ -414,19 +434,35 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setPool(Pool pool)
+	public void setExplainReason(Boolean explainReason)
 	{
-		if (pool == null) throw new IllegalArgumentException();
-		this.poolId = pool.getId();
+		if (explainReason == null) throw new IllegalArgumentException();
+		this.explainReason = explainReason;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setRequireRationale(Boolean rationale)
+	public void setFeedback(String feedback)
 	{
-		if (rationale == null) throw new IllegalArgumentException();
-		this.requireRationale = rationale;
+		this.feedback = feedback;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setHints(String hints)
+	{
+		this.hints = hints;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setPool(Pool pool)
+	{
+		if (pool == null) throw new IllegalArgumentException();
+		this.poolId = pool.getId();
 	}
 
 	/**
@@ -490,13 +526,15 @@ public class QuestionImpl implements Question
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
 		this.deleted = other.deleted;
 		this.description = other.description;
+		this.explainReason = other.explainReason;
+		this.feedback = other.feedback;
+		this.hints = other.hints;
 		this.id = other.id;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy);
 		this.partContext = other.partContext;
 		this.poolId = other.poolId;
 		this.poolService = other.poolService;
 		this.presentation = new PresentationImpl(other.presentation);
-		this.requireRationale = other.requireRationale;
 		this.questionService = other.questionService;
 		this.submissionContext = other.submissionContext;
 		this.type = other.type;

@@ -410,7 +410,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q1");
 			q.setDescription("question one");
-			q.setRequireRationale(Boolean.TRUE);
+			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("True or False (one)?");
@@ -426,7 +426,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q2");
 			q.setDescription("question two");
-			q.setRequireRationale(Boolean.TRUE);
+			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("True or False (two)?");
@@ -442,7 +442,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q3");
 			q.setDescription("question three");
-			q.setRequireRationale(Boolean.TRUE);
+			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("Which value will it be?");
@@ -468,7 +468,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q4");
 			q.setDescription("question four");
-			q.setRequireRationale(Boolean.TRUE);
+			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("Is this needed?");
