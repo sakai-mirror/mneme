@@ -258,6 +258,27 @@
 							</included>
 						</selection>
 
+						<!-- hints TODO: make the section optional -->
+						<section title="question-hints">
+							<title>
+								<message selector="question-hints">
+									<model type="icon" icon="/icons/hints.png" />
+								</message>
+							</title>
+							<container>
+								<text>
+									<message>
+										<model type="html" ref="answer.question.hints" />
+									</message>
+								</text>
+							</container>
+							<included>
+								<decision reversed="TRUE" model="review" />
+								<decision model="answer.question.part.assessment.showHints" />
+								<hasValueDecision model="answer.question.hints" />
+							</included>
+						</section>
+
 						<!-- answer key -->
 						<text>
 							<message selector="question-answer-key">

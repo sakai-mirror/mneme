@@ -201,6 +201,13 @@ public interface Assessment
 	List<Float> getScores();
 
 	/**
+	 * Access the "show-hints" setting
+	 * 
+	 * @return TRUE to show authored hints, FALSE to ignore them.
+	 */
+	Boolean getShowHints();
+
+	/**
 	 * Access the submission that is referencing this assessment (so we can answer submission specific questions like question order).
 	 * <p>
 	 * Note: this will be null unless the assessment is accessed throught Submission.getAssessment().
@@ -300,6 +307,14 @@ public interface Assessment
 	 *        TRUE if this assessment requires an "honor pledge" from the user, FALSE if not.
 	 */
 	void setRequireHonorPledge(Boolean honorPledge);
+
+	/**
+	 * Set the "show-hints" setting
+	 * 
+	 * @param showHints
+	 *        TRUE to show authored hints, FALSE to ignore them.
+	 */
+	void setShowHints(Boolean showHints);
 
 	/**
 	 * Set the time limit for taking the assessment (ms).

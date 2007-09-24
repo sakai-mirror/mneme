@@ -93,6 +93,8 @@ public class AssessmentImpl implements Assessment
 
 	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
 
+	protected Boolean showHints = Boolean.TRUE;
+
 	protected transient Submission submissionContext = null;
 
 	protected transient SubmissionService submissionService = null;
@@ -393,6 +395,14 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getShowHints()
+	{
+		return this.showHints;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Submission getSubmissionContext()
 	{
 		return this.submissionContext;
@@ -523,6 +533,16 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setShowHints(Boolean showHints)
+	{
+		if (showHints == null) throw new IllegalArgumentException();
+
+		this.showHints = showHints;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setTimeLimit(Long limit)
 	{
 		this.timeLimit = limit;
@@ -613,6 +633,7 @@ public class AssessmentImpl implements Assessment
 		this.questionService = other.questionService;
 		this.randomAccess = other.randomAccess;
 		this.review = new AssessmentReviewImpl(this, (AssessmentReviewImpl) other.review);
+		this.showHints = other.showHints;
 		this.submissionContext = other.submissionContext;
 		// this.submissionCounts = new SubmissionCountsImpl((SubmissionCountsImpl) other.submissionCounts);
 		this.submissionService = other.submissionService;

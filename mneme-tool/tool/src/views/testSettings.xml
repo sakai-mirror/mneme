@@ -128,6 +128,21 @@
 						</entityDisplay>
 					</container>
 				</row>
+				<row title="hints-header">
+					<container>
+						<entityDisplay>
+							<rows>
+								<row title="hints-title">
+									<container>
+										<selection>
+											<model ref="assessment.showHints" />
+										</selection>
+									</container>
+								</row>
+							</rows>
+						</entityDisplay>
+					</container>
+				</row>
 				<row title="reviewOptions">
 					<container>
 						<entityDisplay>
