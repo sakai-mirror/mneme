@@ -78,15 +78,35 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void autoScore()
 	{
-		// full credit for correct answer, 0 for incorrect
-		if (getIsCorrect())
+		// partial credit for each correct answer, partial negative for each incorrect, floor at 0.
+
+		// count the number of correct answers
+		Question question = answer.getQuestion();
+		Set correctAnswers = ((MultipleChoiceQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswerSet();
+
+		// each correct / incorrect gets a part of the total points
+		float partial = (correctAnswers.size() > 0) ? question.getPool().getPoints() / correctAnswers.size() : 0f;
+
+		float total = 0f;
+		for (Integer answer : this.answerData)
 		{
-			this.autoScore = answer.getQuestion().getPool().getPoints();
+			// if this is one of the correct answers, give credit
+			if (correctAnswers.contains(answer))
+			{
+				total += partial;
+			}
+
+			// otherwise remove credit
+			else
+			{
+				total -= partial;
+			}
 		}
-		else
-		{
-			this.autoScore = 0f;
-		}
+
+		// floor at 0
+		if (total < 0f) total = 0f;
+
+		this.autoScore = total;
 	}
 
 	/**

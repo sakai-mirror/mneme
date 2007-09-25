@@ -170,16 +170,6 @@ public class AnswerImpl implements Answer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsCorrect()
-	{
-		if (this.answerHandler == null) return Boolean.FALSE;
-
-		return this.answerHandler.getIsCorrect();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean getMarkedForReview()
 	{
 		return this.markedForReview;

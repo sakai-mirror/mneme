@@ -74,15 +74,8 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void autoScore()
 	{
-		// full credit for correct answer, 0 for incorrect
-		if (getIsCorrect())
-		{
-			this.autoScore = answer.getQuestion().getPool().getPoints();
-		}
-		else
-		{
-			this.autoScore = 0f;
-		}
+		// full credit!
+		this.autoScore = answer.getQuestion().getPool().getPoints();
 	}
 
 	/**
@@ -147,15 +140,6 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 	public Boolean getIsChanged()
 	{
 		return this.changed;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getIsCorrect()
-	{
-		// TODO: Likert has no concept of correct...
-		return Boolean.TRUE;
 	}
 
 	/**

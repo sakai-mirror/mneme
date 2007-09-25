@@ -77,13 +77,6 @@ public interface Answer
 	Boolean getIsComplete();
 
 	/**
-	 * Check if the answer is correct or not.
-	 * 
-	 * @return TRUE if the answer is correct, FALSE if not, and null if the answer cannot be auto-scored.
-	 */
-	Boolean getIsCorrect();
-
-	/**
 	 * Access the "mark for review" setting for this answer.
 	 * 
 	 * @return The answer's "mark for review" setting; TRUE if the user has marked this answer for review, FALSE if not.

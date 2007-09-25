@@ -63,11 +63,4 @@ public interface TypeSpecificAnswer extends Cloneable
 	 * @return TRUE if changed, FALSE if not.
 	 */
 	Boolean getIsChanged();
-
-	/**
-	 * Check if the answer is correct or not.
-	 * 
-	 * @return TRUE if the answer is correct, FALSE if not, and null if the answer cannot be auto-scored.
-	 */
-	Boolean getIsCorrect();
 }

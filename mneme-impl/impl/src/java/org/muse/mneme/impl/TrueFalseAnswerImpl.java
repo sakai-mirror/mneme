@@ -74,8 +74,17 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void autoScore()
 	{
+		// correct?
+		boolean correct = false;
+		if (this.answerData != null)
+		{
+			Question question = this.answer.getQuestion();
+			Boolean correctAnswer = Boolean.valueOf(((TrueFalseQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswer());
+			correct = this.answerData.equals(correctAnswer);
+		}
+
 		// full credit for correct answer, 0 for incorrect
-		if (getIsCorrect())
+		if (correct)
 		{
 			this.autoScore = answer.getQuestion().getPool().getPoints();
 		}
@@ -147,18 +156,6 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	public Boolean getIsChanged()
 	{
 		return this.changed;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getIsCorrect()
-	{
-		if (this.answerData == null) return Boolean.FALSE;
-
-		Question question = answer.getQuestion();
-		Boolean correctAnswer = Boolean.valueOf(((TrueFalseQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswer());
-		return this.answerData.equals(correctAnswer);
 	}
 
 	/**
