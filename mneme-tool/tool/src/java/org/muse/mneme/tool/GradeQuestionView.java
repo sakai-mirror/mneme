@@ -37,6 +37,7 @@ import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.SubmissionService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.Answer;
 import org.sakaiproject.util.Web;
 
 /**
@@ -94,11 +95,23 @@ public class GradeQuestionView extends ControllerImpl
 			}
 			context.put("selectedQuestion", question);
 
-			// get Answers for the first question
 			// FindAssessmentSubmissionsSort.username_a
-			List answers = this.submissionService.findSubmissionAnswers(assessment, question, null, Boolean.TRUE, null, null);
+			SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
+			context.put("sort_column", '0');
+			context.put("sort_direction", 'A');
+			
+			if(params.length == 6) {
+				String sortCode = params[5];
+				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+					sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
+				context.put("sort_column", sortCode.charAt(0));
+				context.put("sort_direction", sortCode.charAt(1));
+			}
+			
+			// get Answers for the first question
+			List answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
 			context.put("answers", answers);
-
+			
 			Integer maxAnswers = 0;
 			if (answers != null) maxAnswers = answers.size();
 

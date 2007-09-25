@@ -97,16 +97,14 @@
 			<rows>
 				<row>
 					<container>
+						<!-- question presentation (text) -->
 						<text>
-							<message selector="question-text">
-								<model ref="selectedQuestion.description" />
+							<message>
+								<model type="html" ref="selectedQuestion.presentation.text" />
 							</message>
 						</text>
-						<text>
-							<message selector="question-answer-key">
-								<model ref="selectedQuestion.part.assessment.review.showCorrectAnswer" />
-							</message>
-						</text>
+						<!-- type-specific question viewing -->
+						<modelComponent model="selectedQuestion.typeSpecificQuestion.viewQuestionUi" />
 					</container>
 				</row>
 			</rows>
@@ -128,6 +126,30 @@
 						</message>
 					</title>
 					<model ref="answer.submission.userId" missing="no-username" />
+					<sort>
+						<active>
+							<compareDecision model="sort_column" constant="0" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/grade_question/{0}/{1}/{2}/0A">
+								<model ref="gradeSortCode" />
+								<model ref="assessment.id" />
+								<model ref="selectedQuestion.id" />
+							</destination>
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/grade_question/{0}/{1}/{2}/0D">
+								<model ref="gradeSortCode" />
+								<model ref="assessment.id" />
+								<model ref="selectedQuestion.id" />
+							</destination>
+						</desc>
+					</sort>
 				</modelColumn>
 				<modelColumn>
 					<title>
@@ -147,11 +169,8 @@
 							<rows>
 								<row>
 									<container>
-										<text selector="submission-user-answer" >
-											<message>
-												<model ref="answer.typeSpecificAnswer.answers" />
-											</message>												
-										</text>
+										<!-- Answer type-specific viewing -->
+										<modelComponent model="answer.question.typeSpecificQuestion.viewAnswerUi" />
 									</container>
 								</row>
 								<row>
@@ -252,9 +271,10 @@
 				<divider />
 				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
 					<icon icon="/icons/save.png" style="LEFT" />
-					<destination template="/grade_question/{0}/{1}">
+					<destination template="/grade_question/{0}/{1}/{2}">
 						<model ref="gradeSortCode" />
 						<model ref="assessment.id" />
+						<model ref="selectedQuestion.id" />
 					</destination>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
