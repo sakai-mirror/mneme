@@ -158,6 +158,7 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		selection.addSelection("true", "true");
 		selection.addSelection("false", "false");
 		selection.setReadOnly(this.uiService.newTrueDecision());
+		selection.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswer"));
 
 		return this.uiService.newFragment().setMessages(this.messages).add(selection);
 	}
@@ -175,12 +176,13 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewAnswerUi()
 	{
-		// TODO: just the answer and correct / incorrect markings, no distractors
+		// TODO: just the selected answer, no distractors
 		Selection selection = this.uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
 		selection.addSelection("true", "true");
 		selection.addSelection("false", "false");
 		selection.setReadOnly(this.uiService.newTrueDecision());
+		selection.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswer"));
 
 		return this.uiService.newFragment().setMessages(this.messages).add(selection);
 	}
@@ -195,8 +197,7 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		selection.addSelection("true", "true");
 		selection.addSelection("false", "false");
 		selection.setReadOnly(this.uiService.newTrueDecision());
-
-		// TODO: add correct mark (instead of radio buttons?)
+		selection.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswer"));
 
 		return this.uiService.newFragment().setMessages(this.messages).add(selection);
 	}
