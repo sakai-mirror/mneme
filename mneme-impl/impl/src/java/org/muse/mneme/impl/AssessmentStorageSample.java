@@ -443,6 +443,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			((PartImpl) p).initId("p2");
 			p.addQuestion(this.questionService.getQuestion("q3"));
 			p.addQuestion(this.questionService.getQuestion("q4"));
+			p.addQuestion(this.questionService.getQuestion("q5"));
 			p.getPresentation().setText("This is part two.");
 
 			a.clearIsLiveChanged();

@@ -479,6 +479,21 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getModifiedBy().setUserId("admin");
 			q.getModifiedBy().setDate(now);
 			questions.put(q.getId(), q);
+
+			q = newQuestion();
+			q.initType("mneme:FillBlanks");
+			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
+			q.initId("q5");
+			q.setDescription("question five");
+			q.setRequireRationale(Boolean.TRUE);
+			q.setPool(poolService.getPool("b1"));
+			q.getCreatedBy().setUserId("admin");
+			q.getPresentation().setText("Roses are {red}, violets are {blue}!");
+			q.getCreatedBy().setUserId("admin");
+			q.getCreatedBy().setDate(now);
+			q.getModifiedBy().setUserId("admin");
+			q.getModifiedBy().setDate(now);
+			questions.put(q.getId(), q);
 		}
 	}
 }
