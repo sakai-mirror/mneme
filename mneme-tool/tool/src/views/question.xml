@@ -218,6 +218,37 @@
 							</included>
 						</attachments>
 
+						<!-- hints -->
+						<overlay id="hints">
+							<container>
+								<text>
+									<message selector="question-hints">
+										<model type="icon" icon="/icons/hints.png" />
+									</message>
+								</text>
+								<text>
+									<message>
+										<model type="html" ref="answer.question.hints" />
+									</message>
+								</text>
+								<!-- hints toggle -->
+								<gap />
+								<toggle target="hints" title="hide-hints" description="hide-hints-description" style="LINK">
+									<icon icon="/icons/hints.png" style="LEFT" />
+									<included>
+										<decision reversed="TRUE" model="review" />
+										<decision model="answer.question.part.assessment.showHints" />
+										<hasValueDecision model="answer.question.hints" />
+									</included>
+								</toggle>
+							</container>
+							<included>
+								<decision reversed="TRUE" model="review" />
+								<decision model="answer.question.part.assessment.showHints" />
+								<hasValueDecision model="answer.question.hints" />
+							</included>
+						</overlay>
+
 						<!-- Question specific delivery -->
 						<modelComponent model="answer.question.typeSpecificQuestion.deliveryUi">
 							<included>
@@ -258,26 +289,15 @@
 							</included>
 						</selection>
 
-						<!-- hints TODO: make the section optional -->
-						<section title="question-hints">
-							<title>
-								<message selector="question-hints">
-									<model type="icon" icon="/icons/hints.png" />
-								</message>
-							</title>
-							<container>
-								<text>
-									<message>
-										<model type="html" ref="answer.question.hints" />
-									</message>
-								</text>
-							</container>
+						<!-- hints toggle -->
+						<toggle target="hints" title="show-hints" description="show-hints-description" style="LINK">
+							<icon icon="/icons/hints.png" style="LEFT" />
 							<included>
 								<decision reversed="TRUE" model="review" />
 								<decision model="answer.question.part.assessment.showHints" />
 								<hasValueDecision model="answer.question.hints" />
 							</included>
-						</section>
+						</toggle>
 
 						<!-- answer key -->
 						<text>

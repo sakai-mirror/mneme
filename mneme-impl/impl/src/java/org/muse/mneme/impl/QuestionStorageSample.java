@@ -419,6 +419,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");
 			q.getModifiedBy().setDate(now);
+			q.setHints("hints for question one<br />Hints are rich text.");
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
