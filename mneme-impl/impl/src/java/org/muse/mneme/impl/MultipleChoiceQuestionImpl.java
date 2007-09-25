@@ -370,6 +370,74 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		return this.messages.getString("name");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewAnswerUi()
+	{
+		// TODO: just the selected answer, no distractors, and add correct/incorrect marking
+		EntityList entityList = this.uiService.newEntityList();
+		entityList.setStyle(EntityList.Style.form);
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
+
+		SelectionColumn selCol = this.uiService.newSelectionColumn();
+		if (this.singleCorrect)
+		{
+			selCol.setSingle();
+		}
+		else
+		{
+			selCol.setMultiple();
+		}
+		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
+		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
+		selCol.setReadOnly(this.uiService.newTrueDecision());
+		entityList.addColumn(selCol);
+
+		AutoColumn autoCol = this.uiService.newAutoColumn();
+		entityList.addColumn(autoCol);
+
+		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		entityList.addColumn(propCol);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewQuestionUi()
+	{
+		// TODO: add correct/incorrect marking
+		EntityList entityList = this.uiService.newEntityList();
+		entityList.setStyle(EntityList.Style.form);
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesAsAuthored"), "choice");
+
+		SelectionColumn selCol = this.uiService.newSelectionColumn();
+		if (this.singleCorrect)
+		{
+			selCol.setSingle();
+		}
+		else
+		{
+			selCol.setMultiple();
+		}
+		selCol.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
+		selCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
+		selCol.setReadOnly(this.uiService.newTrueDecision());
+		entityList.addColumn(selCol);
+
+		AutoColumn autoCol = this.uiService.newAutoColumn();
+		entityList.addColumn(autoCol);
+
+		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		entityList.addColumn(propCol);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+	}
+
 	public void setAnswerChoices(List answerChoices)
 	{
 		this.answerChoices = answerChoices;

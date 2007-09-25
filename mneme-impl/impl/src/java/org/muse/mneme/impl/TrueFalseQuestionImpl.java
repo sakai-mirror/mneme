@@ -85,7 +85,7 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 			Object rv = super.clone();
 
 			// nothing to deep copy
-			
+
 			// set the question
 			((TrueFalseQuestionImpl) rv).question = question;
 
@@ -157,7 +157,7 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
 		selection.addSelection("true", "true");
 		selection.addSelection("false", "false");
-		selection.setReadOnly(this.uiService.newDecision().setProperty(this.uiService.newConstantPropertyReference().setValue("true")));
+		selection.setReadOnly(this.uiService.newTrueDecision());
 
 		return this.uiService.newFragment().setMessages(this.messages).add(selection);
 	}
@@ -168,6 +168,37 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	public String getTypeName()
 	{
 		return this.messages.getString("name");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewAnswerUi()
+	{
+		// TODO: just the answer and correct / incorrect markings, no distractors
+		Selection selection = this.uiService.newSelection();
+		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
+		selection.addSelection("true", "true");
+		selection.addSelection("false", "false");
+		selection.setReadOnly(this.uiService.newTrueDecision());
+
+		return this.uiService.newFragment().setMessages(this.messages).add(selection);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewQuestionUi()
+	{
+		Selection selection = this.uiService.newSelection();
+		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer"));
+		selection.addSelection("true", "true");
+		selection.addSelection("false", "false");
+		selection.setReadOnly(this.uiService.newTrueDecision());
+
+		// TODO: add correct mark (instead of radio buttons?)
+
+		return this.uiService.newFragment().setMessages(this.messages).add(selection);
 	}
 
 	/**
