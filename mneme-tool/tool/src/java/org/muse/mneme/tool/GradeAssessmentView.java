@@ -228,7 +228,7 @@ public class GradeAssessmentView extends ControllerImpl
 				{
 					try
 					{
-						float score = Float.parseFloat(submissionAdjustScore);
+						Float score = new Float(submissionAdjustScore);
 						if (assessment != null)
 							this.submissionService.evaluateSubmissions(assessment, submissionAdjustComments, score, Boolean.FALSE);
 						else
