@@ -204,6 +204,16 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		return null;
 	}
 
+	public Component getViewQuestionUi()
+	{
+		return null;
+	}
+
+	public Component getViewAnswerUi()
+	{
+		return null;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */

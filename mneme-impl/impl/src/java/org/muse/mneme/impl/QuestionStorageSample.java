@@ -485,7 +485,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q5");
 			q.setDescription("question five");
-			q.setRequireRationale(Boolean.TRUE);
+			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("Roses are {red}, violets are {blue}!");

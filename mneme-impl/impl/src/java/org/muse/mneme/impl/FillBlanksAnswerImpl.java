@@ -142,6 +142,14 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clearIsChanged()
+	{
+		this.changed = false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsCorrect()
 	{
 		/*
