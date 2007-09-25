@@ -31,10 +31,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Paging;
+import org.muse.ambrosia.api.Value;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
@@ -51,6 +55,12 @@ public class GradeAssessmentView extends ControllerImpl
 	/** Submission Service */
 	protected SubmissionService submissionService = null;
 
+	/** Dependency: ToolManager */
+	protected ToolManager toolManager = null;
+
+	/** Dependency: SessionManager */
+	protected SessionManager sessionManager = null;
+
 	/**
 	 * Shutdown.
 	 */
@@ -66,7 +76,13 @@ public class GradeAssessmentView extends ControllerImpl
 	{
 		if (params.length != 4 && params.length != 5 && params.length != 6) throw new IllegalArgumentException();
 
-		// TODO: add check for user permission to access the assessments for grading
+		// check for user permission to access the assessments for grading
+		if (this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
 
 		// grades sort parameter is in params array at index 2
 		String gradesSortCode = params[2];
@@ -153,6 +169,14 @@ public class GradeAssessmentView extends ControllerImpl
 		paging.setCurrentAndSize(pagingParameter);
 		context.put("paging", paging);
 
+		// for Adjust every student's test submission by
+		Value submissionAdjust = this.uiService.newValue();
+		context.put("submissionAdjust", submissionAdjust);
+
+		// for "Adjust every student's test submission by" comments
+		Value submissionAdjustComments = this.uiService.newValue();
+		context.put("submissionAdjustComments", submissionAdjustComments);
+
 		uiService.render(ui, context);
 	}
 
@@ -172,10 +196,66 @@ public class GradeAssessmentView extends ControllerImpl
 	{
 		if (params.length != 4 && params.length != 5 && params.length != 6) throw new IllegalArgumentException();
 
+		// check for user permission to access the assessments for grading
+		if (this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		// for Adjust every student's test submission by
+		Value submissionAdjustValue = this.uiService.newValue();
+		context.put("submissionAdjust", submissionAdjustValue);
+
+		// for "Adjust every student's test submission by" comments
+		Value submissionAdjustCommentsValue = this.uiService.newValue();
+		context.put("submissionAdjustComments", submissionAdjustCommentsValue);
+
 		// read form
 		String destination = this.uiService.decode(req, context);
 
-		destination = "/grades/" + params[2];
+		String submissionAdjustScore = submissionAdjustValue.getValue();
+		String submissionAdjustComments = submissionAdjustCommentsValue.getValue();
+
+		if (destination != null)
+		{
+			if (destination.startsWith("/grade_assessment_save"))
+			{
+				// get Assessment - assessment id is in params at index 3
+				Assessment assessment = this.assessmentService.getAssessment(params[3]);
+				if (submissionAdjustScore != null && submissionAdjustScore.trim().length() > 0)
+				{
+					try
+					{
+						float score = Float.parseFloat(submissionAdjustScore);
+						if (assessment != null)
+							this.submissionService.evaluateSubmissions(assessment, submissionAdjustComments, score, Boolean.FALSE);
+						else
+						{
+							// redirect to error
+							res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+							return;
+						}
+					}
+					catch (NumberFormatException e)
+					{
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
+						return;
+					}
+					catch (AssessmentPermissionException e)
+					{
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
+						return;
+					}
+				}
+				destination = destination.replace("grade_assessment_save", "grade_assessment");
+			}
+		}
+
+		//destination = "/grades/" + params[2];
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
@@ -195,5 +275,23 @@ public class GradeAssessmentView extends ControllerImpl
 	public void setSubmissionService(SubmissionService submissionService)
 	{
 		this.submissionService = submissionService;
+	}
+
+	/**
+	 * @param toolManager
+	 *        the toolManager to set
+	 */
+	public void setToolManager(ToolManager toolManager)
+	{
+		this.toolManager = toolManager;
+	}
+
+	/**
+	 * @param sessionManager
+	 *        the sessionManager to set
+	 */
+	public void setSessionManager(SessionManager sessionManager)
+	{
+		this.sessionManager = sessionManager;
 	}
 }

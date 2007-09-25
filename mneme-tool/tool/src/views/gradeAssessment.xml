@@ -78,7 +78,7 @@
 							<rows>
 								<row title="adjust-submissions">
 									<container>
-										<textEdit model="" rows="1" cols="4" />
+										<textEdit model="submissionAdjust.value" rows="1" cols="4" />
 									</container>
 								</row>
 							</rows>
@@ -92,7 +92,7 @@
 				</row>
 				<row>
 					<container>
-						<textEdit model="" rows="5" cols="40" />
+						<textEdit model="submissionAdjustComments.value" rows="5" cols="40" />
 					</container>
 				</row>
 			</rows>
@@ -305,17 +305,14 @@
 					</title>
 					<model ref="submission.answersAutoScore" />
 				</modelColumn>
-				<modelColumn>
+				<column>
 					<title>
 						<message selector="submission-adjust" />
 					</title>
-					<!--container>
-						<textEdit model="" rows="1" cols="4" />
-						</container-->
 					<container>
-						<floatEdit model="" rows="1" cols="4" />
+						<floatEdit model="" rows="1" cols="2" />
 					</container>
-				</modelColumn>
+				</column>
 				<modelColumn>
 					<title>
 						<message selector="submission-final" />
@@ -330,7 +327,7 @@
 			<container>
 				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
 					<icon icon="/icons/save.png" style="LEFT" />
-					<destination template="/grade_assessment/{0}/{1}">
+					<destination template="/grade_assessment_save/{0}/{1}">
 						<model ref="gradesSortCode" />
 						<model ref="assessment.id" />
 					</destination>
