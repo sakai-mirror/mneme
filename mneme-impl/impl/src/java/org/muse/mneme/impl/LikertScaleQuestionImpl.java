@@ -103,10 +103,10 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	 */
 	public LikertScaleQuestionImpl(Question question, LikertScaleQuestionImpl other)
 	{
-		// TODO: deep copy?
 		this.selectedOption = other.selectedOption;
 		this.messages = other.messages;
 		this.question = question;
+		this.uiService = other.uiService;
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 			// get an exact, bit-by-bit copy
 			Object rv = super.clone();
 
-			// TODO: ? nothing to deep copy
+			// nothing to deep copy
 
 			// set the question
 			((LikertScaleQuestionImpl) rv).question = question;

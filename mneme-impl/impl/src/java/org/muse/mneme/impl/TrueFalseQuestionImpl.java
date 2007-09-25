@@ -38,13 +38,13 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	/** The correct answer: TRUE or FALSE. */
 	protected Boolean correctAnswer = Boolean.TRUE;
 
-	protected InternationalizedMessages messages = null;
+	protected transient InternationalizedMessages messages = null;
 
 	/** The question this is a helper for. */
 	protected transient Question question = null;
 
 	/** Dependency: The UI service (Ambrosia). */
-	protected UiService uiService = null;
+	protected transient UiService uiService = null;
 
 	/**
 	 * Construct.
@@ -69,9 +69,10 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	 */
 	public TrueFalseQuestionImpl(Question question, TrueFalseQuestionImpl other)
 	{
-		this.question = question;
 		this.correctAnswer = other.correctAnswer;
 		this.messages = other.messages;
+		this.question = question;
+		this.uiService = other.uiService;
 	}
 
 	/**

@@ -40,7 +40,7 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	protected Float autoScore = null;
 
 	/** Set when the answer has been changed. */
-	protected boolean changed = false;
+	protected transient boolean changed = false;
 
 	/**
 	 * Construct.

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import org.muse.ambrosia.api.AutoColumn;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
@@ -37,7 +38,6 @@ import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
-import org.muse.ambrosia.api.AutoColumn;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificQuestion;
@@ -79,7 +79,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	/** List of choices */
 	protected List<String> answerChoices = new ArrayList<String>();
 
-	/** This hash set holds index numbers of the correct answers */
+	/** Index numbers of the correct answers */
 	protected Set<Integer> correctAnswers = new HashSet<Integer>();
 
 	/** Our messages. */
@@ -120,13 +120,13 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public MultipleChoiceQuestionImpl(Question question, MultipleChoiceQuestionImpl other)
 	{
-		// TODO: deep copy?
-		this.answerChoices = other.answerChoices;
-		this.correctAnswers = other.correctAnswers;
+		this.answerChoices = new ArrayList<String>(other.answerChoices);
+		this.correctAnswers = new HashSet<Integer>(other.correctAnswers);
 		this.messages = other.messages;
 		this.question = question;
 		this.shuffleChoices = other.shuffleChoices;
 		this.singleCorrect = other.singleCorrect;
+		this.uiService = other.uiService;
 	}
 
 	/**
@@ -139,7 +139,9 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			// get an exact, bit-by-bit copy
 			Object rv = super.clone();
 
-			// TODO|: ? nothing to deep copy
+			// deep copy these
+			((MultipleChoiceQuestionImpl) rv).answerChoices = new ArrayList<String>(this.answerChoices);
+			((MultipleChoiceQuestionImpl) rv).correctAnswers = new HashSet<Integer>(this.correctAnswers);
 
 			// set the question
 			((MultipleChoiceQuestionImpl) rv).question = question;

@@ -63,7 +63,6 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 	public LikertScaleAnswerImpl(Answer answer, LikertScaleAnswerImpl other)
 	{
 		this.answer = answer;
-		// TODO: deep!
 		this.answerData = other.answerData;
 		this.autoScore = other.autoScore;
 		this.changed = other.changed;

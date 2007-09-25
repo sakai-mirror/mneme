@@ -67,8 +67,7 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	public MultipleChoiceAnswerImpl(Answer answer, MultipleChoiceAnswerImpl other)
 	{
 		this.answer = answer;
-		// TODO: deep!
-		this.answerData = other.answerData;
+		this.answerData = new HashSet<Integer>(other.answerData);
 		this.autoScore = other.autoScore;
 		this.changed = other.changed;
 	}
@@ -127,7 +126,8 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 			// get an exact, bit-by-bit copy
 			Object rv = super.clone();
 
-			// nothing to deep copy
+			// deep copy
+			((MultipleChoiceAnswerImpl) rv).answerData = new HashSet<Integer>(this.answerData);
 
 			return rv;
 		}
@@ -176,16 +176,6 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	public Boolean getIsChanged()
 	{
 		return this.changed;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getIsCorrect()
-	{
-		// TODO: how to deal with partial correct for multi choice
-		Question question = answer.getQuestion();
-		return this.answerData.equals(((MultipleChoiceQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswerSet());
 	}
 
 	/**
