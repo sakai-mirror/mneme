@@ -310,7 +310,7 @@
 						<message selector="submission-adjust" />
 					</title>
 					<container>
-						<floatEdit model="" rows="1" cols="2" />
+						<floatEdit model="submission.evaluation.score"/>
 					</container>
 				</column>
 				<modelColumn>
