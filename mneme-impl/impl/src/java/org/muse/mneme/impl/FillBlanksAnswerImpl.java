@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
@@ -159,35 +160,57 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	{
 		Question question = answer.getQuestion();
 		List<String> correctAnswers = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswers();
-		if (this.answers.length != correctAnswers.size())
+		String[] correctAnswersArray = new String[correctAnswers.size()];
+		correctAnswersArray = (String[]) correctAnswers.toArray(correctAnswersArray);
+		Boolean caseSensitive = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCaseSensitive());
+		Boolean anyOrder = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getAnyOrder());
+
+		if (this.answers.length != correctAnswersArray.length)
+		{
 			return Boolean.FALSE;
+		}
 		else
 		{
-			boolean allCorrect = true;
-			for (int i = 0; i < this.answers.length; i++)
+			Boolean emptiesExist = checkEmptyAnswers(answers);
+			if (emptiesExist == Boolean.TRUE)
 			{
-				if (this.answers[i] != null)
+				return Boolean.FALSE;
+			}
+			boolean allCorrect = true;
+			// At this point, we can assume all answer entries are non-null and not empty
+			String[] answersArray = (String[]) this.answers.clone();
+			if (anyOrder == Boolean.TRUE)
+			{
+				Arrays.sort(correctAnswersArray);
+				Arrays.sort(answersArray);
+			}
+			for (int i = 0; i < answersArray.length; i++)
+			{
+				if (caseSensitive == Boolean.TRUE)
 				{
-					if (this.answers[i].trim().length() > 0)
+					if ((correctAnswersArray[i].trim()).equals(answersArray[i].trim()))
 					{
-						if (((String) correctAnswers.get(i)).equals(this.answers[i].trim()))
-						{
-							allCorrect = true;
-						}
-						else
-						{
-							allCorrect = false;
-						}
+						allCorrect = true;
 					}
 					else
 					{
-						return Boolean.FALSE;
+						allCorrect = false;
+						break;
 					}
 				}
 				else
 				{
-					return Boolean.FALSE;
+					if ((correctAnswersArray[i].trim()).equalsIgnoreCase(answersArray[i].trim()))
+					{
+						allCorrect = true;
+					}
+					else
+					{
+						allCorrect = false;
+						break;
+					}
 				}
+
 			}
 			if (allCorrect == true)
 			{
@@ -198,6 +221,28 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 				return Boolean.FALSE;
 			}
 		}
+	}
+
+	private Boolean checkEmptyAnswers(String[] answers)
+	{
+		Boolean emptiesExist = Boolean.FALSE;
+		for (int i = 0; i < this.answers.length; i++)
+		{
+			if (this.answers[i] == null)
+			{
+				emptiesExist = Boolean.TRUE;
+				return emptiesExist;
+			}
+			else
+			{
+				if (this.answers[i].trim().length() == 0)
+				{
+					emptiesExist = Boolean.TRUE;
+					return emptiesExist;
+				}
+			}
+		}
+		return emptiesExist;
 	}
 
 	public String getReviewText()
