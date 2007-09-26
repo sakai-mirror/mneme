@@ -217,7 +217,18 @@ public class GradeAssessmentView extends ControllerImpl
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
 
-		List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.TRUE, null, null);
+		List<Submission> submissions = null;
+
+		if (params.length == 6 && params[5].equalsIgnoreCase("all"))
+		{
+			// get all Assessment submissions
+			submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.FALSE, null, null);
+		}
+		else
+		{
+			// get official Assessment submissions
+			submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.TRUE, null, null);
+		}
 
 		context.put("submissions", submissions);
 
@@ -270,7 +281,8 @@ public class GradeAssessmentView extends ControllerImpl
 							try
 							{
 								// save submission
-								this.submissionService.evaluateSubmission(submission);
+								if (submission.getEvaluation().getScore() != null) 
+									this.submissionService.evaluateSubmission(submission);
 							}
 							catch (AssessmentPermissionException e)
 							{
