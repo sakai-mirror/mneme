@@ -186,12 +186,16 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 	public Component getViewQuestionUi()
 	{
-		return null;
+		Text txt = this.uiService.newText();
+		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.reviewText"));
+		return this.uiService.newFragment().setMessages(this.messages).add(txt);
 	}
 
 	public Component getViewAnswerUi()
 	{
-		return null;
+		Text txt = this.uiService.newText();
+		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.reviewText"));
+		return this.uiService.newFragment().setMessages(this.messages).add(txt);
 	}
 
 	/**

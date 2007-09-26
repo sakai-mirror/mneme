@@ -21,6 +21,9 @@
 
 package org.muse.mneme.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificAnswer;
@@ -154,12 +157,47 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Boolean getIsCorrect()
 	{
-		/*
-		 * if (this.answerData == null) return Boolean.FALSE; Question question = answer.getQuestion(); Boolean correctAnswer =
-		 * Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswer()); return
-		 * this.answerData.equals(correctAnswer);
-		 */
-		return Boolean.TRUE;
+		Question question = answer.getQuestion();
+		List<String> correctAnswers = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswers();
+		if (this.answers.length != correctAnswers.size())
+			return Boolean.FALSE;
+		else
+		{
+			boolean allCorrect = true;
+			for (int i = 0; i < this.answers.length; i++)
+			{
+				if (this.answers[i] != null)
+				{
+					if (this.answers[i].trim().length() > 0)
+					{
+						if (((String) correctAnswers.get(i)).equals(this.answers[i].trim()))
+						{
+							allCorrect = true;
+						}
+						else
+						{
+							allCorrect = false;
+						}
+					}
+					else
+					{
+						return Boolean.FALSE;
+					}
+				}
+				else
+				{
+					return Boolean.FALSE;
+				}
+			}
+			if (allCorrect == true)
+			{
+				return Boolean.TRUE;
+			}
+			else
+			{
+				return Boolean.FALSE;
+			}
+		}
 	}
 
 	public String getReviewText()
