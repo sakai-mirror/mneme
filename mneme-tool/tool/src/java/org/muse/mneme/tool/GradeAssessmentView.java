@@ -77,6 +77,10 @@ public class GradeAssessmentView extends ControllerImpl
 	{
 		if (params.length != 4 && params.length != 5 && params.length != 6) throw new IllegalArgumentException();
 
+		String saveDestination = context.getDestination();
+		saveDestination = saveDestination.replace(params[1], "grade_assessment_save");
+		context.put("saveDestination", saveDestination);
+
 		// check for user permission to access the assessments for grading
 		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId()))
 		{
@@ -97,46 +101,7 @@ public class GradeAssessmentView extends ControllerImpl
 		String sortCode = null;
 		if (params.length > 4) sortCode = params[4];
 
-		// default sort is user name ascending
-		SubmissionService.FindAssessmentSubmissionsSort sort;
-		if (sortCode != null)
-		{
-			if (sortCode.trim().length() == 2)
-			{
-				context.put("sort_column", sortCode.charAt(0));
-				context.put("sort_direction", sortCode.charAt(1));
-
-				// 0 is title
-				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
-					sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
-				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
-					sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
-				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
-					sort = SubmissionService.FindAssessmentSubmissionsSort.status_a;
-				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
-					sort = SubmissionService.FindAssessmentSubmissionsSort.status_d;
-				else
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
-				}
-			}
-			else
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
-			}
-		}
-		else
-		{
-			// default sort: user name ascending
-			sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
-
-			context.put("sort_column", '0');
-			context.put("sort_direction", 'A');
-		}
+		SubmissionService.FindAssessmentSubmissionsSort sort = getSort(context, sortCode);
 
 		if (assessment == null)
 		{
@@ -219,15 +184,21 @@ public class GradeAssessmentView extends ControllerImpl
 
 		List<Submission> submissions = null;
 
+		// sort parameter - sort is in param array at index 4
+		String sortCode = null;
+		if (params.length > 4) sortCode = params[4];
+
+		SubmissionService.FindAssessmentSubmissionsSort sort = getSort(context, sortCode);
+
 		if (params.length == 6 && params[5].equalsIgnoreCase("all"))
 		{
 			// get all Assessment submissions
-			submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.FALSE, null, null);
+			submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, null, null);
 		}
 		else
 		{
 			// get official Assessment submissions
-			submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.TRUE, null, null);
+			submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.TRUE, null, null);
 		}
 
 		context.put("submissions", submissions);
@@ -280,8 +251,8 @@ public class GradeAssessmentView extends ControllerImpl
 						{
 							try
 							{
-								// save submission
-								if (submission.getEvaluation().getScore() != null) 
+								// save submission //to adjust to zero after first adjustment user should provide zero
+								if (submission.getEvaluation().getScore() != null)
 									this.submissionService.evaluateSubmission(submission);
 							}
 							catch (AssessmentPermissionException e)
@@ -299,6 +270,56 @@ public class GradeAssessmentView extends ControllerImpl
 
 		// destination = "/grades/" + params[2];
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+	}
+
+	/**
+	 * get the sort based on sort code
+	 * 
+	 * @param context
+	 * @param sortCode
+	 *        sort code
+	 * @return SubmissionService.FindAssessmentSubmissionsSort
+	 */
+	private SubmissionService.FindAssessmentSubmissionsSort getSort(Context context, String sortCode)
+	{
+		// default sort is user name ascending
+		SubmissionService.FindAssessmentSubmissionsSort sort;
+		if (sortCode != null)
+		{
+			if (sortCode.trim().length() == 2)
+			{
+				context.put("sort_column", sortCode.charAt(0));
+				context.put("sort_direction", sortCode.charAt(1));
+
+				// 0 is title
+				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
+					sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
+				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+					sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
+				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+					sort = SubmissionService.FindAssessmentSubmissionsSort.status_a;
+				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+					sort = SubmissionService.FindAssessmentSubmissionsSort.status_d;
+				else
+				{
+					throw new IllegalArgumentException();
+				}
+			}
+			else
+			{
+				throw new IllegalArgumentException();
+			}
+		}
+		else
+		{
+			// default sort: user name ascending
+			sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
+
+			context.put("sort_column", '0');
+			context.put("sort_direction", 'A');
+		}
+
+		return sort;
 	}
 
 	/**
