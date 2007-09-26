@@ -168,7 +168,21 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		String parsedText = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getParsedText();
 		for (int i = 0; i < this.answers.length; i++)
 		{
-			parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + this.answers[i] + "</U>");
+			if (this.answers[i] != null)
+			{
+				if (this.answers[i].trim().length() > 0)
+				{
+					parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + this.answers[i] + "</U>");
+				}
+				else
+				{
+					parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + "____" + "</U>");
+				}
+			}
+			else
+			{
+				parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + "____" + "</U>");
+			}
 		}
 		this.reviewText = parsedText;
 		return this.reviewText;
