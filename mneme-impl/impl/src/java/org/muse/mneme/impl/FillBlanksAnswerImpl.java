@@ -4,13 +4,13 @@
  ***********************************************************************************
  *
  * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,6 +42,8 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	/** Set when the answer has been changed. */
 	// TODO: need to reset this at some point when stored... -ggolden
 	protected boolean changed = false;
+
+	protected String reviewText = null;
 
 	/**
 	 * Construct.
@@ -158,6 +160,19 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		 * this.answerData.equals(correctAnswer);
 		 */
 		return Boolean.TRUE;
+	}
+
+	public String getReviewText()
+	{
+		Question question = answer.getQuestion();
+		String parsedText = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getParsedText();
+		for (int i = 0; i < this.answers.length; i++)
+		{
+			parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + this.answers[i] + "</U>");
+		}
+		this.reviewText = parsedText;
+		return this.reviewText;
+
 	}
 
 	/**

@@ -4,13 +4,13 @@
  ***********************************************************************************
  *
  * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.FillIn;
+import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificQuestion;
@@ -173,35 +174,14 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 	}
 
-	private static String extractFIBTextArray(String alltext)
-	{
-		StringBuffer strBuf = new StringBuffer();
-
-		while (alltext.indexOf("{") > -1)
-		{
-			int alltextLeftIndex = alltext.indexOf("{");
-			int alltextRightIndex = alltext.indexOf("}");
-
-			String tmp = alltext.substring(0, alltextLeftIndex);
-			alltext = alltext.substring(alltextRightIndex + 1);
-			strBuf.append(tmp);
-			strBuf.append("{}");
-			// there are no more "}", exit loop
-			if (alltextRightIndex == -1)
-			{
-				break;
-			}
-		}
-		strBuf.append(alltext);
-		return strBuf.toString();
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
 	public Component getReviewUi()
 	{
-		return null;
+		Text txt = this.uiService.newText();
+		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.reviewText"));
+		return this.uiService.newFragment().setMessages(this.messages).add(txt);
 	}
 
 	public Component getViewQuestionUi()
@@ -250,6 +230,49 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	{
 		this.parsedText = extractFIBTextArray(this.question.getPresentation().getText());
 		return this.parsedText;
+	}
+
+	private static String extractFIBTextArray(String alltext)
+	{
+		StringBuffer strBuf = new StringBuffer();
+
+		while (alltext.indexOf("{") > -1)
+		{
+			int alltextLeftIndex = alltext.indexOf("{");
+			int alltextRightIndex = alltext.indexOf("}");
+
+			String tmp = alltext.substring(0, alltextLeftIndex);
+			alltext = alltext.substring(alltextRightIndex + 1);
+			strBuf.append(tmp);
+			strBuf.append("{}");
+			// there are no more "}", exit loop
+			if (alltextRightIndex == -1)
+			{
+				break;
+			}
+		}
+		strBuf.append(alltext);
+		return strBuf.toString();
+	}
+
+	public List<String> getCorrectAnswers()
+	{
+		String alltext = this.question.getPresentation().getText();
+		while (alltext.indexOf("{") > -1)
+		{
+			int alltextLeftIndex = alltext.indexOf("{");
+			int alltextRightIndex = alltext.indexOf("}");
+
+			String tmp = alltext.substring(alltextLeftIndex + 1, alltextRightIndex);
+			alltext = alltext.substring(alltextRightIndex + 1);
+			this.correctAnswers.add(tmp);
+			// there are no more "}", exit loop
+			if (alltextRightIndex == -1)
+			{
+				break;
+			}
+		}
+		return this.correctAnswers;
 	}
 
 	/**
