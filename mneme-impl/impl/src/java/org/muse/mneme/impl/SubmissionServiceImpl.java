@@ -367,6 +367,52 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
+	public void evaluateAnswers(List<Answer> answers) throws AssessmentPermissionException
+	{
+		if (answers == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("evaluateAnswers");
+
+		for (Answer answer : answers)
+		{
+			// security check
+			securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, answer.getSubmission().getAssessment()
+					.getContext());
+		}
+
+		// TODO: what to do? evaluation only... submission changes?
+		this.storage.saveAnswers(answers);
+
+		// TODO: events?
+		for (Answer answer : answers)
+		{
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(answer.getSubmission()
+					.getId()), true));
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void evaluateSubmission(Submission submission) throws AssessmentPermissionException
+	{
+		if (submission == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("evaluateSubmission: " + submission.getId());
+
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, submission.getAssessment().getContext());
+
+		// TODO: just the eval... what fields get changed (mod by, eval by?)
+		this.storage.saveSubmission((SubmissionImpl) submission);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markGraded) throws AssessmentPermissionException
 	{
 		// TODO:
@@ -740,37 +786,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public void saveSubmission(Submission submission) throws AssessmentPermissionException
-	{
-		if (submission == null) throw new IllegalArgumentException();
-
-		if (M_log.isDebugEnabled()) M_log.debug("saveSubmission: " + submission.getId());
-
-		// security check
-		// TODO: grade_permission?
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, submission.getAssessment().getContext());
-
-		// if the assessment is new (i.e. no id), set the createdBy information, if not already set
-		// TODO:???
-		// if ((submission.getId() == null) && (submission.getCreatedBy().getUserId() == null))
-		// {
-		// submission.getCreatedBy().setDate(new Date());
-		// submission.getCreatedBy().setUserId(sessionManager.getCurrentSessionUserId());
-		// }
-		//
-		// // update last modified information
-		// submission.getModifiedBy().setDate(new Date());
-		// submission.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
-
-		this.storage.saveSubmission((SubmissionImpl) submission);
-
-		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
-	}
-
-	/**
 	 * Dependency: AssessmentService.
 	 * 
 	 * @param service
@@ -1000,7 +1015,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 			// auto-score
 			answer.autoScore();
-			
+
 			// clear the changed
 			((AnswerImpl) answer).clearIsChanged();
 		}

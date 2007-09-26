@@ -268,6 +268,22 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public void evaluateAnswers(List<Answer> answers) throws AssessmentPermissionException
+	{
+		submissionService.evaluateAnswers(answers);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void evaluateSubmission(Submission submission) throws AssessmentPermissionException
+	{
+		submissionService.evaluateSubmission(submission);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markGraded) throws AssessmentPermissionException
 	{
 		this.evaluateSubmissions(assessment, comment, score, markGraded);
@@ -578,14 +594,6 @@ public class MnemeServiceImpl implements MnemeService
 	public void saveQuestion(Question question, String context) throws AssessmentPermissionException
 	{
 		questionService.saveQuestion(question, context);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void saveSubmission(Submission submission) throws AssessmentPermissionException
-	{
-		this.submissionService.saveSubmission(submission);
 	}
 
 	/**

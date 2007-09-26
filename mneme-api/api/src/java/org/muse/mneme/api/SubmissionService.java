@@ -152,6 +152,26 @@ public interface SubmissionService
 			AssessmentCompletedException;
 
 	/**
+	 * Record the evaluation changes made to these answers.
+	 * 
+	 * @param answers
+	 *        The List of Answers with their Evaluations.
+	 * @throws AssessmentPermissionException
+	 *         if the user does not have permission to evaluate these answers.
+	 */
+	void evaluateAnswers(List<Answer> answers) throws AssessmentPermissionException;
+
+	/**
+	 * Record the evaluation changes made to the overall submission and the submission's answers.
+	 * 
+	 * @param submission
+	 *        The submission
+	 * @throws AssessmentPermissionException
+	 *         if the user does not have permission to evaluate this submission.
+	 */
+	void evaluateSubmission(Submission submission) throws AssessmentPermissionException;
+
+	/**
 	 * Apply an evaluation to all the official completed submissions to this assessment.
 	 * 
 	 * @param assessment
@@ -283,16 +303,6 @@ public interface SubmissionService
 	void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException;
 
 	/**
-	 * Save changes made to this submission.
-	 * 
-	 * @param submission
-	 *        The submission to save.
-	 * @throws AssessmentPermissionException
-	 *         If the current user is not allowed to save this Submission.
-	 */
-	void saveSubmission(Submission submission) throws AssessmentPermissionException;
-
-	/**
 	 * Check if any submissions in any state exist for this assessment.
 	 * 
 	 * @param assessment
@@ -328,7 +338,7 @@ public interface SubmissionService
 	 * Complete the submission if indicated.
 	 * 
 	 * @param answers
-	 *        The List of SubmissionAnswerAnswer containing the submitters answer information to questions
+	 *        The List of Answers.
 	 * @param completeAnswers
 	 *        if TRUE, the answers are considerd answered and will be marked so.
 	 * @param completeSubmission
