@@ -327,9 +327,11 @@
 			<container>
 				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
 					<icon icon="/icons/save.png" style="LEFT" />
-					<destination template="/grade_assessment_save/{0}/{1}">
+					<destination template="/grade_assessment_save/{0}/{1}/{2}{3}">
 						<model ref="gradesSortCode" />
 						<model ref="assessment.id" />
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
 					</destination>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">

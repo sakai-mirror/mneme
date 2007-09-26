@@ -149,13 +149,13 @@ public class GradeAssessmentView extends ControllerImpl
 		if (params.length == 6 && params[5].equalsIgnoreCase("all"))
 		{
 			// get all Assessment submissions
-			submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.FALSE, null, null);
+			submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, null, null);
 			context.put("official", "FALSE");
 		}
 		else
 		{
 			// get official Assessment submissions
-			submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.TRUE, null, null);
+			submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.TRUE, null, null);
 			context.put("official", "TRUE");
 		}
 		context.put("submissions", submissions);
