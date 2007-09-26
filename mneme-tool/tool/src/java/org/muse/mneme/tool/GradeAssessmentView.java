@@ -270,7 +270,7 @@ public class GradeAssessmentView extends ControllerImpl
 							try
 							{
 								// save submission
-								this.submissionService.saveSubmission(submission);
+								this.submissionService.evaluateSubmission(submission);
 							}
 							catch (AssessmentPermissionException e)
 							{
