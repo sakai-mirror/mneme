@@ -36,6 +36,7 @@ import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
@@ -212,6 +213,14 @@ public class GradeAssessmentView extends ControllerImpl
 		Value submissionAdjustCommentsValue = this.uiService.newValue();
 		context.put("submissionAdjustComments", submissionAdjustCommentsValue);
 
+		// setup the model: the assessment
+		// get Assessment - assessment id is in params at index 3
+		Assessment assessment = this.assessmentService.getAssessment(params[3]);
+
+		List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, null, Boolean.TRUE, null, null);
+
+		context.put("submissions", submissions);
+
 		// read form
 		String destination = this.uiService.decode(req, context);
 
@@ -222,8 +231,7 @@ public class GradeAssessmentView extends ControllerImpl
 		{
 			if (destination.startsWith("/grade_assessment_save"))
 			{
-				// get Assessment - assessment id is in params at index 3
-				Assessment assessment = this.assessmentService.getAssessment(params[3]);
+				// save adjusted score for the assessment - global adjustment
 				if (submissionAdjustScore != null && submissionAdjustScore.trim().length() > 0)
 				{
 					try
@@ -251,11 +259,33 @@ public class GradeAssessmentView extends ControllerImpl
 						return;
 					}
 				}
+
+				// save adjusted score for each student's test submission
+				if (submissions != null && submissions.size() > 0)
+				{
+					for (Submission submission : submissions)
+					{
+						if (submission.getAssessment().equals(assessment))
+						{
+							try
+							{
+								// save submission
+								this.submissionService.saveSubmission(submission);
+							}
+							catch (AssessmentPermissionException e)
+							{
+								res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+								return;
+							}
+						}
+					}
+				}
+
 				destination = destination.replace("grade_assessment_save", "grade_assessment");
 			}
 		}
 
-		//destination = "/grades/" + params[2];
+		// destination = "/grades/" + params[2];
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
