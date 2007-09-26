@@ -420,6 +420,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getModifiedBy().setUserId("admin");
 			q.getModifiedBy().setDate(now);
 			q.setHints("hints for question one<br />Hints are rich text.");
+			q.setFeedback("feedback for question one");
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
@@ -436,6 +437,8 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");
 			q.getModifiedBy().setDate(now);
+			q.setHints("hints for question two.");
+			q.setFeedback("feedback for question two");
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
@@ -462,6 +465,8 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");
 			q.getModifiedBy().setDate(now);
+			q.setHints("hints for question three.");
+			q.setFeedback("feedback for question 3");
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
@@ -478,6 +483,8 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");
 			q.getModifiedBy().setDate(now);
+			q.setHints("hints for q 4.");
+			q.setFeedback("feedback for question 4");
 			questions.put(q.getId(), q);
 
 			q = newQuestion();

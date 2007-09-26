@@ -21,7 +21,9 @@
 
 package org.muse.mneme.impl;
 
+import org.muse.ambrosia.api.AndDecision;
 import org.muse.ambrosia.api.Component;
+import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.Selection;
@@ -160,6 +162,13 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		selection.addSelection("false", "false");
 		selection.setReadOnly(this.uiService.newTrueDecision());
 		selection.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswer"));
+
+		AndDecision and = this.uiService.newAndDecision();
+		Decision[] decisions = new Decision[2];
+		decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
+		decisions[1] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+		and.setRequirements(decisions);
+		selection.setCorrectDecision(and);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(selection);
 	}

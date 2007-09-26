@@ -28,8 +28,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import org.muse.ambrosia.api.AndDecision;
 import org.muse.ambrosia.api.AutoColumn;
 import org.muse.ambrosia.api.Component;
+import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.EntityList;
@@ -335,6 +337,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
 		selCol.setReadOnly(this.uiService.newTrueDecision());
 		selCol.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswers"));
+
+		AndDecision and = this.uiService.newAndDecision();
+		Decision[] decisions = new Decision[2];
+		decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
+		decisions[1] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+		and.setRequirements(decisions);
+		selCol.setCorrectDecision(and);
+
 		entityList.addColumn(selCol);
 
 		AutoColumn autoCol = this.uiService.newAutoColumn();

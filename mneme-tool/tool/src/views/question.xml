@@ -322,7 +322,7 @@
 							<included>
 								<decision model="review" />
 								<decision model="answer.submission.mayReview" />
-								<decision model="answer.question.part.assessment.review.showCorrectAnswer" />
+								<decision model="answer.question.part.assessment.review.showFeedback" />
 								<hasValueDecision model="answer.question.feedback" />
 							</included>
 						</text>
