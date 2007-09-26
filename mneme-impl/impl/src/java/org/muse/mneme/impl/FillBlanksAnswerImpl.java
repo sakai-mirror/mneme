@@ -24,6 +24,8 @@ package org.muse.mneme.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
@@ -164,6 +166,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		correctAnswersArray = (String[]) correctAnswers.toArray(correctAnswersArray);
 		Boolean caseSensitive = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCaseSensitive());
 		Boolean anyOrder = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getAnyOrder());
+		Boolean responseTextual = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getResponseTextual());
 
 		if (this.answers.length != correctAnswersArray.length)
 		{
@@ -186,9 +189,9 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 			}
 			for (int i = 0; i < answersArray.length; i++)
 			{
-				if (caseSensitive == Boolean.TRUE)
+				if (responseTextual == Boolean.TRUE)
 				{
-					if ((correctAnswersArray[i].trim()).equals(answersArray[i].trim()))
+					if (isFillInAnswerCorrect(correctAnswersArray[i].trim(), answersArray[i].trim(), caseSensitive.booleanValue()) == Boolean.TRUE)
 					{
 						allCorrect = true;
 					}
@@ -200,7 +203,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 				}
 				else
 				{
-					if ((correctAnswersArray[i].trim()).equalsIgnoreCase(answersArray[i].trim()))
+					if (isNumericAnswerCorrect(correctAnswersArray[i].trim(), answersArray[i].trim()) == Boolean.TRUE)
 					{
 						allCorrect = true;
 					}
@@ -210,6 +213,11 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 						break;
 					}
 				}
+				/*
+				 * if (caseSensitive == Boolean.TRUE) { if ((correctAnswersArray[i].trim()).equals(answersArray[i].trim())) { allCorrect = true; }
+				 * else { allCorrect = false; break; } } else { if ((correctAnswersArray[i].trim()).equalsIgnoreCase(answersArray[i].trim())) {
+				 * allCorrect = true; } else { allCorrect = false; break; } }
+				 */
 
 			}
 			if (allCorrect == true)
@@ -243,6 +251,107 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 			}
 		}
 		return emptiesExist;
+	}
+
+	/**
+	 * Figure out if a fill-in answer is correct.
+	 * 
+	 * @param answer
+	 *        The given answer.
+	 * @param correct
+	 *        The correct answer pattern (with option bars and wild cards).
+	 * @param caseSensitive
+	 *        if we should be case sensitive.
+	 * @return true if the answer is correct, false if not
+	 */
+	private boolean isFillInAnswerCorrect(String answer, String correct, boolean caseSensitive)
+	{
+		// get the set of valid answers from the correct answer pattern (each one may have wild cards)
+		String[] valid = correct.split("\\|");
+		for (String test : valid)
+		{
+			// prepare the test as a regex, quoting all non-wildcards, changing the wildcard "*" into a regex ".+"
+			StringBuffer regex = new StringBuffer();
+			String[] parts = test.replaceAll("\\*", "|*|").split("\\|");
+			for (String part : parts)
+			{
+				if ("*".equals(part))
+				{
+					regex.append(".+");
+				}
+				else
+				{
+					regex.append(Pattern.quote(part));
+				}
+			}
+			Pattern p = Pattern.compile(regex.toString(), ((!caseSensitive) ? Pattern.CASE_INSENSITIVE : 0));
+
+			// test
+			Matcher m = p.matcher(answer);
+			boolean result = m.matches();
+
+			if (result) return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Figure out if a fill-in numeric answer is correct.
+	 * 
+	 * @param answer
+	 *        The given answer.
+	 * @param correct
+	 *        The correct answer pattern (with option bars).
+	 * @return true if the answer is correct, false if not
+	 */
+	private boolean isNumericAnswerCorrect(String answer, String correct)
+	{
+		try
+		{
+			// allow dot or comma for decimal point
+			answer = answer.replace(',', '.');
+			correct = correct.replace(',', '.');
+
+			// answer needs to become a float (allow dot or comma for decimal point)
+			float answerValue = Float.parseFloat(answer);
+
+			// form the range of correct answers
+			Float[] range = new Float[2];
+
+			// if there's a bar in the correct pattern, split and use the first two as the range
+			if (correct.indexOf("|") != -1)
+			{
+				String[] parts = correct.split("\\|");
+				range[0] = Float.parseFloat(parts[0]);
+				range[1] = Float.parseFloat(parts[1]);
+
+				// make sure [0] <= [1]
+				if (range[0].floatValue() > range[1].floatValue())
+				{
+					Float hold = range[0];
+					range[0] = range[1];
+					range[1] = hold;
+				}
+			}
+
+			// otherwise use the single value for both sides of the range
+			else
+			{
+				range[0] = range[1] = Float.parseFloat(correct);
+			}
+
+			// test
+			if ((answerValue >= range[0].floatValue()) && (answerValue <= range[1].floatValue()))
+			{
+				return true;
+			}
+		}
+		catch (NumberFormatException e)
+		{
+		}
+
+		return false;
 	}
 
 	public String getReviewText()
