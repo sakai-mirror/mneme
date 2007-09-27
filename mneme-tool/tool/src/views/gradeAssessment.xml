@@ -126,7 +126,7 @@
 						</navigation>
 					</entityNavigations>
 					<model ref="submission.userId" missing="no-username" />
-					<sort>
+					<sort submit="TRUE">
 						<active>
 							<compareDecision model="sort_column" constant="0" />
 						</active>
@@ -214,7 +214,7 @@
 					</title>
 					<model type="html" ref="submission" delegate="SubmissionStatus" tool="sakai.mneme" />
 					<!--model type="enum" ref="submission.gradingStatus" messageRoot="grade-status-" /-->
-					<sort>
+					<sort submit="TRUE">
 						<active>
 							<compareDecision model="sort_column" constant="1" />
 						</active>
@@ -288,8 +288,9 @@
 								<model ref="sort_direction" />
 							</destination>
 							<included>
-								<compareDecision model="official">
-									<constant value="TRUE" />
+								<compareDecision model="submission.siblingCount" reversed="TRUE">
+									<constant value="0" />
+									<constant value="1" />
 								</compareDecision>
 							</included>
 						</navigation>
@@ -307,6 +308,12 @@
 								<compareDecision model="official">
 									<constant value="FALSE" />
 								</compareDecision>
+								<andDecision model="submission.siblingCount">
+									<compareDecision model="submission.siblingCount">
+										<constant value="0" />
+										<constant value="1" />
+									</compareDecision>
+								</andDecision>
 							</included>
 						</navigation>
 					</navigations>
