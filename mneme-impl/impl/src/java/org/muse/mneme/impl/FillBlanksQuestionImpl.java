@@ -60,7 +60,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	/** TRUE means response is textual, FALSE means response is numeric */
 	protected Boolean responseTextual = Boolean.TRUE;
 
-	/** This variable contains the parsed presentation text of the question */
+	/** This variable contains the parsed presentation text of the question with {} */
 	protected String parsedText = null;
 
 	/**
