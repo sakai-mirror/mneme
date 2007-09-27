@@ -93,7 +93,7 @@ public class GradeQuestionView extends ControllerImpl
 			{
 				question = assessment.getParts().getQuestion(params[4]);
 			}
-			context.put("selectedQuestion", question);
+			context.put("question", question);
 
 			// FindAssessmentSubmissionsSort.username_a
 			SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;

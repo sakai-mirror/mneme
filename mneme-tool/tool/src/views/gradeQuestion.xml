@@ -91,7 +91,7 @@
 			<title>
 				<message selector="submission-question" />
 				<message selector="submission-question-pts">
-					<model ref="selectedQuestion.pool.points" />
+					<model ref="question.pool.points" />
 				</message>
 			</title>
 			<rows>
@@ -100,11 +100,11 @@
 						<!-- question presentation (text) -->
 						<text>
 							<message>
-								<model type="html" ref="selectedQuestion.presentation.text" />
+								<model type="html" ref="question.presentation.text" />
 							</message>
 						</text>
 						<!-- type-specific question viewing -->
-						<modelComponent model="selectedQuestion.typeSpecificQuestion.viewQuestionUi" />
+						<modelComponent model="question.typeSpecificQuestion.viewQuestionUi" />
 					</container>
 				</row>
 			</rows>
@@ -138,7 +138,7 @@
 							<destination template="/grade_question/{0}/{1}/{2}/0A">
 								<model ref="gradeSortCode" />
 								<model ref="assessment.id" />
-								<model ref="selectedQuestion.id" />
+								<model ref="question.id" />
 							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
@@ -146,7 +146,7 @@
 							<destination template="/grade_question/{0}/{1}/{2}/0D">
 								<model ref="gradeSortCode" />
 								<model ref="assessment.id" />
-								<model ref="selectedQuestion.id" />
+								<model ref="question.id" />
 							</destination>
 						</desc>
 					</sort>
@@ -242,12 +242,12 @@
 					<destination template="PREV" />
 					<disabled>
 						<andDecision>
-							<hasValueDecision model="selectedQuestion" />
-							<decision model="selectedQuestion.assessmentOrdering.isFirst" />
+							<hasValueDecision model="question" />
+							<decision model="question.assessmentOrdering.isFirst" />
 						</andDecision>
 						<andDecision>
-							<hasValueDecision model="selectedQuestion.part" />
-							<decision model="selectedQuestion.part.ordering.isFirst" />
+							<hasValueDecision model="question.part" />
+							<decision model="question.part.ordering.isFirst" />
 						</andDecision>						
 					</disabled>
 				</navigation>
@@ -261,10 +261,10 @@
 					<destination template="NEXT" />
 					<disabled>					
 						<andDecision>							
-							<decision model="selectedQuestion.assessmentOrdering.isLast" />
+							<decision model="question.assessmentOrdering.isLast" />
 						</andDecision>
 						<andDecision>
-							<decision model="selectedQuestion.part.ordering.isLast" />
+							<decision model="question.part.ordering.isLast" />
 						</andDecision>										
 					</disabled>
 				</navigation>
@@ -274,7 +274,7 @@
 					<destination template="/grade_question/{0}/{1}/{2}">
 						<model ref="gradeSortCode" />
 						<model ref="assessment.id" />
-						<model ref="selectedQuestion.id" />
+						<model ref="question.id" />
 					</destination>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
