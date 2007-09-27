@@ -81,15 +81,60 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void autoScore()
 	{
-		// full credit for correct answer, 0 for incorrect
-		if (getIsCorrect())
+		// partial credit for each correct answer, partial negative for each incorrect, floor at 0.
+
+		// count the number of correct answers
+		Question question = answer.getQuestion();
+		List<String> correctAnswers = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswers();
+		String[] correctAnswersArray = new String[correctAnswers.size()];
+		correctAnswersArray = (String[]) correctAnswers.toArray(correctAnswersArray);
+		Boolean caseSensitive = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCaseSensitive());
+		Boolean anyOrder = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getAnyOrder());
+		Boolean responseTextual = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getResponseTextual());
+
+		// each correct / incorrect gets a part of the total points
+		float partial = (correctAnswers.size() > 0) ? question.getPool().getPoints() / correctAnswers.size() : 0f;
+
+		float total = 0f;
+		// At this point, we can assume all answer entries are non-null and not empty
+		String[] answersArray = (String[]) this.answers.clone();
+		if (anyOrder == Boolean.TRUE)
 		{
-			this.autoScore = answer.getQuestion().getPool().getPoints();
+			Arrays.sort(correctAnswersArray);
+			Arrays.sort(answersArray);
 		}
-		else
+		for (int i = 0; i < correctAnswersArray.length; i++)
 		{
-			this.autoScore = 0f;
+			if (answersArray[i] != null)
+			{
+				if (answersArray[i].trim().length() > 0)
+				{
+					if (responseTextual == Boolean.TRUE)
+					{
+						if (isFillInAnswerCorrect(correctAnswersArray[i].trim(), answersArray[i].trim(), caseSensitive.booleanValue()))
+						{
+							total += partial;
+						}
+					}
+					else
+					{
+						if (isNumericAnswerCorrect(correctAnswersArray[i].trim(), answersArray[i].trim()))
+						{
+							total += partial;
+						}
+					}
+				}
+			}
 		}
+
+		// floor at 0
+		if (total < 0f) total = 0f;
+
+		this.autoScore = total;
+		/*
+		 * // full credit for correct answer, 0 for incorrect if (getIsCorrect()) { this.autoScore = answer.getQuestion().getPool().getPoints(); }
+		 * else { this.autoScore = 0f; }
+		 */
 	}
 
 	/**
@@ -153,104 +198,6 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	public void clearIsChanged()
 	{
 		this.changed = false;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getIsCorrect()
-	{
-		Question question = answer.getQuestion();
-		List<String> correctAnswers = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswers();
-		String[] correctAnswersArray = new String[correctAnswers.size()];
-		correctAnswersArray = (String[]) correctAnswers.toArray(correctAnswersArray);
-		Boolean caseSensitive = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCaseSensitive());
-		Boolean anyOrder = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getAnyOrder());
-		Boolean responseTextual = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getResponseTextual());
-
-		if (this.answers.length != correctAnswersArray.length)
-		{
-			return Boolean.FALSE;
-		}
-		else
-		{
-			Boolean emptiesExist = checkEmptyAnswers(answers);
-			if (emptiesExist == Boolean.TRUE)
-			{
-				return Boolean.FALSE;
-			}
-			boolean allCorrect = true;
-			// At this point, we can assume all answer entries are non-null and not empty
-			String[] answersArray = (String[]) this.answers.clone();
-			if (anyOrder == Boolean.TRUE)
-			{
-				Arrays.sort(correctAnswersArray);
-				Arrays.sort(answersArray);
-			}
-			for (int i = 0; i < answersArray.length; i++)
-			{
-				if (responseTextual == Boolean.TRUE)
-				{
-					if (isFillInAnswerCorrect(correctAnswersArray[i].trim(), answersArray[i].trim(), caseSensitive.booleanValue()) == Boolean.TRUE)
-					{
-						allCorrect = true;
-					}
-					else
-					{
-						allCorrect = false;
-						break;
-					}
-				}
-				else
-				{
-					if (isNumericAnswerCorrect(correctAnswersArray[i].trim(), answersArray[i].trim()) == Boolean.TRUE)
-					{
-						allCorrect = true;
-					}
-					else
-					{
-						allCorrect = false;
-						break;
-					}
-				}
-				/*
-				 * if (caseSensitive == Boolean.TRUE) { if ((correctAnswersArray[i].trim()).equals(answersArray[i].trim())) { allCorrect = true; }
-				 * else { allCorrect = false; break; } } else { if ((correctAnswersArray[i].trim()).equalsIgnoreCase(answersArray[i].trim())) {
-				 * allCorrect = true; } else { allCorrect = false; break; } }
-				 */
-
-			}
-			if (allCorrect == true)
-			{
-				return Boolean.TRUE;
-			}
-			else
-			{
-				return Boolean.FALSE;
-			}
-		}
-	}
-
-	private Boolean checkEmptyAnswers(String[] answers)
-	{
-		Boolean emptiesExist = Boolean.FALSE;
-		for (int i = 0; i < this.answers.length; i++)
-		{
-			if (this.answers[i] == null)
-			{
-				emptiesExist = Boolean.TRUE;
-				return emptiesExist;
-			}
-			else
-			{
-				if (this.answers[i].trim().length() == 0)
-				{
-					emptiesExist = Boolean.TRUE;
-					return emptiesExist;
-				}
-			}
-		}
-		return emptiesExist;
 	}
 
 	/**
