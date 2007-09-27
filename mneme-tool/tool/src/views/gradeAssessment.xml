@@ -135,7 +135,7 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_assessment/{0}/{1}/0A/{2}">
+							<destination template="/grade_assessment_save/{0}/{1}/0A/{2}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="view" />
@@ -143,7 +143,7 @@
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_assessment/{0}/{1}/0D/{2}">
+							<destination template="/grade_assessment_save/{0}/{1}/0D/{2}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="view" />
@@ -223,7 +223,7 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_assessment/{0}/{1}/1A/{2}">
+							<destination template="/grade_assessment_save/{0}/{1}/1A/{2}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="view" />
@@ -231,7 +231,7 @@
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_assessment/{0}/{1}/1D/{2}">
+							<destination template="/grade_assessment_save/{0}/{1}/1D/{2}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="view" />
