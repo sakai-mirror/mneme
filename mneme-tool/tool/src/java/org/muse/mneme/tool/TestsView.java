@@ -167,6 +167,9 @@ public class TestsView extends ControllerImpl
 		Values values = this.uiService.newValues();
 		context.put("ids", values);
 
+		// disable the tool navigation to this view
+		context.put("disableTests", Boolean.TRUE);
+
 		// render
 		uiService.render(ui, context);
 	}

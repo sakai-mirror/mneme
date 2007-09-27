@@ -2,43 +2,59 @@
 <!DOCTYPE fragment SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
-	/**********************************************************************************
-	* $URL$
-	* $Id$
-	***********************************************************************************
-	*
-	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
-	* 
-	* Licensed under the Apache License, Version 2.0 (the "License");
-	* you may not use this file except in compliance with the License.
-	* You may obtain a copy of the License at
-	* 
-	*      http://www.apache.org/licenses/LICENSE-2.0
-	* 
-	* Unless required by applicable law or agreed to in writing, software
-	* distributed under the License is distributed on an "AS IS" BASIS,
-	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	* See the License for the specific language governing permissions and
-	* limitations under the License.
-	*
-	**********************************************************************************/
+/**********************************************************************************
+* $URL$
+* $Id$
+***********************************************************************************
+*
+* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*      http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+**********************************************************************************/
 -->
 
 <fragment>
 	<container>
 		<modeBar>
 			<container>
+				<navigation destination="/pools" title="pools-nav-title" style="LINK" accessKey="pools-nav-access-key"
+					description="pools-nav-description" submit="TRUE">
+					<disabled>
+						<hasValueDecision model="disablePools" />
+					</disabled>
+				</navigation>
+				<divider />
 				<navigation destination="/tests" title="test-manager-nav-title" style="LINK" accessKey="test-manager-nav-access-key"
-					description="test-manager-nav-description" />
+					description="test-manager-nav-description" submit="TRUE">
+					<disabled>
+						<hasValueDecision model="disableTests" />
+					</disabled>
+				</navigation>
 				<divider />
 				<navigation destination="/grades" title="grading-nav-title" style="LINK" accessKey="grading-nav-access-key"
-					description="grading-nav-description" />
-				<divider />
-				<navigation destination="/pools" title="pools-nav-title" style="LINK" accessKey="pools-nav-access-key"
-					description="pools-nav-description" />
+					description="grading-nav-description" submit="TRUE">
+					<disabled>
+						<hasValueDecision model="disableGrades" />
+					</disabled>
+				</navigation>
 				<divider />
 				<navigation destination="/list" title="student-view-nav-title" style="LINK" accessKey="student-view-nav-access-key"
-					description="student-view-nav-description" />
+					description="student-view-nav-description" submit="TRUE">
+					<disabled>
+						<hasValueDecision model="disableList" />
+					</disabled>
+				</navigation>
 			</container>
 		</modeBar>
 	</container>

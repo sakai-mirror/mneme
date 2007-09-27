@@ -176,6 +176,9 @@ public class PoolsView extends ControllerImpl
 		Values values = this.uiService.newValues();
 		context.put("poolids", values);
 
+		// disable the tool navigation to this view
+		context.put("disablePools", Boolean.TRUE);
+
 		// render
 		uiService.render(ui, context);
 	}

@@ -94,6 +94,9 @@ public class GradesView extends ControllerImpl
 				Boolean.TRUE);
 		context.put("assessments", assessments);
 
+		// disable the tool navigation to this view
+		context.put("disableGrades", Boolean.TRUE);
+
 		// render
 		uiService.render(ui, context);
 	}
