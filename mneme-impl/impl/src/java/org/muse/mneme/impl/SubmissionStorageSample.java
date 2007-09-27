@@ -38,7 +38,6 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionCounts;
 import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
 import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 import org.sakaiproject.tool.api.SessionManager;
@@ -228,37 +227,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 		{
 			rv = new SubmissionImpl(rv);
 		}
-
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public SubmissionCounts getSubmissionCounts(Assessment assessment)
-	{
-		SubmissionCounts rv = new SubmissionCountsImpl();
-
-		int completed = 0;
-		int released = 0;
-		int inProgress = 0;
-		int unReleased = 0;
-
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			if (submission.getAssessment().equals(assessment))
-			{
-				if (submission.getIsComplete()) completed++;
-				if (submission.getIsComplete() && submission.getIsReleased()) released++;
-				if (submission.getIsComplete() && (!submission.getIsReleased())) unReleased++;
-				if ((!submission.getIsComplete()) && submission.getIsStarted()) inProgress++;
-			}
-		}
-
-		rv.setCompleted(completed);
-		rv.setReleased(released);
-		rv.setInProgress(inProgress);
-		rv.setUnreleased(unReleased);
 
 		return rv;
 	}

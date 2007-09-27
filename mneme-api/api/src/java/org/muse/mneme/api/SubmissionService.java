@@ -264,15 +264,6 @@ public interface SubmissionService
 	Submission getSubmission(String id);
 
 	/**
-	 * Access the assessment's submission count.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 * @return The assessment's submission count.
-	 */
-	SubmissionCounts getSubmissionCounts(Assessment assessment);
-
-	/**
 	 * TODO: rename find... Find the submissions to assignments in this context made by this user. Consider:
 	 * <ul>
 	 * <li>published assessments</li>

@@ -42,7 +42,6 @@ import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCompletedException;
-import org.muse.mneme.api.SubmissionCounts;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.db.api.SqlService;
@@ -643,14 +642,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		SubmissionImpl submission = this.storage.getSubmission(id);
 
 		return submission;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public SubmissionCounts getSubmissionCounts(Assessment assessment)
-	{
-		return this.storage.getSubmissionCounts(assessment);
 	}
 
 	/**

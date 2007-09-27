@@ -41,7 +41,6 @@ import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionCounts;
 import org.muse.mneme.api.SubmissionService;
 
 /**
@@ -406,14 +405,6 @@ public class AssessmentImpl implements Assessment
 	public Submission getSubmissionContext()
 	{
 		return this.submissionContext;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public SubmissionCounts getSubmissionCounts()
-	{
-		return this.submissionService.getSubmissionCounts(this);
 	}
 
 	/**
