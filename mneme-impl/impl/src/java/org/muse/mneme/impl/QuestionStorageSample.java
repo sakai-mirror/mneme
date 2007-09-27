@@ -495,7 +495,8 @@ public class QuestionStorageSample implements QuestionStorage
 			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
-			q.getPresentation().setText("Roses are {red}, violets are {blue}!");
+			q.getPresentation().setText("His shirt was {gr*}.");
+			((FillBlanksQuestionImpl) q.getTypeSpecificQuestion()).setResponseTextual("true");
 			q.getCreatedBy().setUserId("admin");
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");

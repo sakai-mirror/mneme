@@ -42,6 +42,8 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	/** String array of user answers */
 	protected String[] answers;
 
+	protected List<Boolean> entryCorrects = new ArrayList<Boolean>();
+
 	/** The auto score. */
 	protected Float autoScore = null;
 
@@ -113,16 +115,26 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 				{
 					if (responseTextual == Boolean.TRUE)
 					{
-						if (isFillInAnswerCorrect(correctAnswersArray[i].trim(), answersArray[i].trim(), caseSensitive.booleanValue()))
+						if (isFillInAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
 						{
 							total += partial;
+							this.entryCorrects.add(Boolean.TRUE);
+						}
+						else
+						{
+							this.entryCorrects.add(Boolean.FALSE);
 						}
 					}
 					else
 					{
-						if (isNumericAnswerCorrect(correctAnswersArray[i].trim(), answersArray[i].trim()))
+						if (isNumericAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim()))
 						{
 							total += partial;
+							this.entryCorrects.add(Boolean.TRUE);
+						}
+						else
+						{
+							this.entryCorrects.add(Boolean.FALSE);
 						}
 					}
 				}
@@ -327,6 +339,14 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		this.reviewText = parsedText;
 		return this.reviewText;
 
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Boolean> getEntryCorrects()
+	{
+		return this.entryCorrects;
 	}
 
 	/**
