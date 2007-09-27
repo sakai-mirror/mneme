@@ -31,9 +31,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Paging;
+import org.muse.ambrosia.api.Value;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.SubmissionService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
@@ -85,7 +87,7 @@ public class GradeQuestionView extends ControllerImpl
 			{
 				// get First Question
 				question = (Question) questions.get(0);
-				String destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + question.getId();
+				String destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + question.getId() +"/0A";
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 				return;
 			}
@@ -99,17 +101,30 @@ public class GradeQuestionView extends ControllerImpl
 			SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
 			context.put("sort_column", '0');
 			context.put("sort_direction", 'A');
-			
-			if(params.length == 6) {
+
+			if (params.length >= 6)
+			{
 				String sortCode = params[5];
-				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
-					sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
+				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
 				context.put("sort_column", sortCode.charAt(0));
 				context.put("sort_direction", sortCode.charAt(1));
 			}
+
+			List answers = null;
+			if (params.length >= 7)
+			{
+				String viewAll = params[6];
+				// get Answers for the first question
+				answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
+				context.put("official", "FALSE");
+			}
+			else
+			{
+				// get Answers for the first question
+				answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
+				context.put("official", "TRUE");
+			}
 			
-			// get Answers for the first question
-			List answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
 			context.put("answers", answers);
 			
 			Integer maxAnswers = 0;
@@ -139,10 +154,11 @@ public class GradeQuestionView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		//read form
+
+		// read form
 		String destination = this.uiService.decode(req, context);
-		
-	  if (destination.equals("NEXT"))
+
+		if (destination.equals("NEXT"))
 		{
 			Assessment assessment = this.assessmentService.getAssessment(params[3]);
 			// get Questions
@@ -160,8 +176,8 @@ public class GradeQuestionView extends ControllerImpl
 			{
 				Part next = question.getPart().getOrdering().getNext();
 				// otherwise choose the first question of the next part
-				destination =  "/grade_question/" + params[2] + "/" + params[3] + "/" + next.getFirstQuestion().getId();
-			}			
+				destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + next.getFirstQuestion().getId();
+			}
 		}
 
 		if (destination.equals("PREV"))
@@ -185,6 +201,58 @@ public class GradeQuestionView extends ControllerImpl
 			{
 				destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + prev.getLastQuestion().getId();
 			}
+		}
+
+		if (destination.startsWith("/grade_question"))
+		{
+			// get Assessment - assessment id is in params at index 3
+			Assessment assessment = this.assessmentService.getAssessment(params[3]);
+			Question question = assessment.getParts().getQuestion(params[4]);
+
+			// FindAssessmentSubmissionsSort.username_a
+			SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
+
+			if (params.length >= 6)
+			{
+				String sortCode = params[5];
+				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
+			}
+			
+			List answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
+			context.put("answers", answers);
+			context.put("official", "TRUE");
+			
+			try
+			{
+				this.submissionService.evaluateAnswers(answers);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
+				return;
+			}
+		}
+		
+		if(destination.equals("VIEW_ALL"))
+		{		
+			// get Assessment - assessment id is in params at index 3
+			Assessment assessment = this.assessmentService.getAssessment(params[3]);
+			Question question = assessment.getParts().getQuestion(params[4]);
+			destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + params[4];
+			
+			// FindAssessmentSubmissionsSort.username_a
+			SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
+			if (params.length == 6)
+			{
+				String sortCode = params[5];
+				destination = destination + "/" + params[5];
+				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
+			}
+			List answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
+			context.put("answers", answers);
+			context.put("official", "FALSE");
+			destination = destination + "/all";
 		}
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}

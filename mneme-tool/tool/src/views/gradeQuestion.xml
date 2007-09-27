@@ -60,36 +60,64 @@
 			</container>
 		</navigationBar>
 
-		<entityDisplay>
-			<rows>
-				<row title="actions">
-					<container>
-						<entityDisplay>
-							<rows>
-								<row title="adjust-scores">
-									<container>
-										<textEdit model="" rows="1" cols="4" />
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
-					</container>
-				</row>
-				<row>
-					<container>
-						<text selector="add-comments" />
-					</container>
-				</row>
-				<row>
-					<container>
-						<textEdit model="" rows="5" cols="40" />
-					</container>
-				</row>
-			</rows>
-		</entityDisplay>
+		<navigationBar width="100%">
+			<container>
+				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
+					<icon icon="/icons/prev.gif" style="LEFT" />
+					<destination template="PREV" />
+					<disabled>
+						<andDecision>
+							<hasValueDecision model="selectedQuestion" />
+							<decision model="selectedQuestion.assessmentOrdering.isFirst" />
+						</andDecision>
+						<andDecision>
+							<hasValueDecision model="selectedQuestion.part" />
+							<decision model="selectedQuestion.part.ordering.isFirst" />
+						</andDecision>
+					</disabled>
+				</navigation>
+				<navigation title="toc" accessKey="toc-access" description="toc-description" style="BUTTON" submit="TRUE">
+					<icon icon="/icons/contents.gif" style="LEFT" />
+					<destination template="/" />
+				</navigation>
+				<navigation title="next" accessKey="next-access" description="next-description" style="BUTTON" destination="NEXT" submit="TRUE"
+					default="TRUE">
+					<icon icon="/icons/next.gif" style="RIGHT" />
+					<destination template="NEXT" />
+					<disabled>
+						<andDecision>
+							<decision model="selectedQuestion.assessmentOrdering.isLast" />
+						</andDecision>
+						<andDecision>
+							<decision model="selectedQuestion.part.ordering.isLast" />
+						</andDecision>
+					</disabled>
+				</navigation>
+				<divider />
+				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
+					<icon icon="/icons/save.png" style="LEFT" />
+					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}">
+						<model ref="gradeSortCode" />
+						<model ref="assessment.id" />
+						<model ref="selectedQuestion.id" />
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
+					</destination>
+				</navigation>
+				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
+					<icon icon="/icons/cancel.gif" style="LEFT" />
+					<destination template="/grades/{0}">
+						<model ref="gradeSortCode" />
+					</destination>
+				</navigation>
+				<divider />
+				<pager paging="paging">
+					<destination template="/" />
+				</pager>
+			</container>
+		</navigationBar>
 		<entityDisplay>
 			<title>
-				<message selector="submission-question" />
 				<message selector="submission-question-pts">
 					<model ref="question.pool.points" />
 				</message>
@@ -115,9 +143,7 @@
 			<emptyTitle>
 				<message selector="no-submissions" />
 			</emptyTitle>
-			<pager paging="paging">
-				<destination template="/" />
-			</pager>
+			
 			<columns>
 				<modelColumn>
 					<title>
@@ -125,6 +151,18 @@
 							<model type="userInfo" selector="SORTNAME" ref="answer.submission.userId" />
 						</message>
 					</title>
+					<entityNavigations>
+						<navigation destination="/">
+							<included>
+								<compareDecision model="answer.submission.gradingStatus">
+									<constant value="released" />
+									<constant value="submitted" />
+									<constant value="closed" />
+									<constant value="evaluated" />
+								</compareDecision>
+							</included>
+						</navigation>
+					</entityNavigations>
 					<model ref="answer.submission.userId" missing="no-username" />
 					<sort>
 						<active>
@@ -180,7 +218,7 @@
 								</row>
 								<row>
 									<container>
-										<textEdit model="answer.evaluation.comment" rows="2" cols="20" />
+										<htmlEdit model="answer.evaluation.comment" rows="2" cols="20" />
 									</container>
 								</row>
 							</rows>
@@ -197,7 +235,23 @@
 								<message model="answer.submission.siblingCount" />
 							</title>
 							<destination template="/" />
+							<included>
+								<compareDecision model="official">
+									<constant value="TRUE" />
+								</compareDecision>
+							</included>
 						</navigation>
+						<navigation style="LINK">
+							<title>
+								<message selector="showCountOne" />
+							</title>
+							<destination template="/" />
+							<included>
+								<compareDecision model="official">
+									<constant value="FALSE" />
+								</compareDecision>
+							</included>
+						</navigation>						
 						<navigation>
 							<title>
 								<message selector="nav-divider" />
@@ -208,6 +262,41 @@
 								<message model="answer.submission.assessment.numSubmissionsAllowed" />
 							</title>
 							<destination template="/" />
+						</navigation>
+						<navigation style="LINK" submit="TRUE">
+							<title>
+								<message selector="view-all" />
+							</title>
+							<destination template="VIEW_ALL" />
+							<included>
+								<compareDecision model="answer.submission.siblingCount" reversed="TRUE">
+									<constant value="0" />
+									<constant value="1" />
+								</compareDecision>
+							</included>
+						</navigation>
+						<navigation style="LINK" submit="FALSE">
+							<title>
+								<message selector="close" />
+							</title>
+							<destination template="/grade_question/{0}/{1}/{2}/{3}{4}">
+								<model ref="gradeSortCode" />
+								<model ref="assessment.id" />
+								<model ref="question.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+							</destination>
+							<included>
+								<compareDecision model="official">
+									<constant value="FALSE" />
+								</compareDecision>
+								<andDecision model="answer.submission.siblingCount">
+									<compareDecision model="answer.submission.siblingCount">
+										<constant value="0" />
+										<constant value="1" />
+									</compareDecision>
+								</andDecision>
+							</included>
 						</navigation>
 					</navigations>
 				</modelColumn>
@@ -271,10 +360,12 @@
 				<divider />
 				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
 					<icon icon="/icons/save.png" style="LEFT" />
-					<destination template="/grade_question/{0}/{1}/{2}">
+					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}">
 						<model ref="gradeSortCode" />
 						<model ref="assessment.id" />
 						<model ref="question.id" />
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
 					</destination>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
@@ -283,6 +374,10 @@
 						<model ref="gradeSortCode" />
 					</destination>
 				</navigation>
+				<divider />
+				<pager paging="paging">
+					<destination template="/" />
+				</pager>
 			</container>
 		</navigationBar>
 	</container>
