@@ -135,16 +135,18 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_assessment/{0}/{1}/0A">
+							<destination template="/grade_assessment/{0}/{1}/0A/{2}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
+								<model ref="view" />
 							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_assessment/{0}/{1}/0D">
+							<destination template="/grade_assessment/{0}/{1}/0D/{2}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
+								<model ref="view" />
 							</destination>
 						</desc>
 					</sort>
@@ -221,16 +223,18 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_assessment/{0}/{1}/1A">
+							<destination template="/grade_assessment/{0}/{1}/1A/{2}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
+								<model ref="view" />
 							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_assessment/{0}/{1}/1D">
+							<destination template="/grade_assessment/{0}/{1}/1D/{2}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
+								<model ref="view" />
 							</destination>
 						</desc>
 					</sort>
@@ -253,7 +257,7 @@
 						</navigation>
 						<navigation style="LINK">
 							<title>
-								<message selector="showCountOne"/>
+								<message selector="showCountOne" />
 							</title>
 							<destination template="/" />
 							<included>
@@ -318,7 +322,7 @@
 						<message selector="submission-adjust" />
 					</title>
 					<container>
-						<floatEdit model="submission.evaluation.score" cols="2"/>
+						<floatEdit model="submission.evaluation.score" cols="2" />
 					</container>
 				</column>
 				<modelColumn>
