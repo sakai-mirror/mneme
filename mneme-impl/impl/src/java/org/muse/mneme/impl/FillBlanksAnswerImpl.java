@@ -99,25 +99,48 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		float partial = (correctAnswers.size() > 0) ? question.getPool().getPoints() / correctAnswers.size() : 0f;
 
 		float total = 0f;
-		// At this point, we can assume all answer entries are non-null and not empty
 		String[] answersArray = (String[]) this.answers.clone();
-		// If order doesn't matter, sort the arrays so they are easier to compare
 		if (anyOrder == Boolean.TRUE)
 		{
-			Arrays.sort(correctAnswersArray);
-			Arrays.sort(answersArray);
-		}
-		for (int i = 0; i < correctAnswersArray.length; i++)
-		{
-			if (answersArray[i] != null)
+			for (int j = 0; j < answersArray.length; j++)
 			{
-				if (answersArray[i].trim().length() > 0)
+				boolean foundCorrect = false;
+				if (answersArray[j] != null)
 				{
-					if (responseTextual == Boolean.TRUE)
+					if (answersArray[j].trim().length() > 0)
 					{
-						if (isFillInAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
+						for (int i = 0; i < correctAnswersArray.length; i++)
 						{
-							total += partial;
+
+							if (responseTextual == Boolean.TRUE)
+							{
+								if (isFillInAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
+								{
+									total += partial;
+									foundCorrect = true;
+									break;
+								}
+								else
+								{
+									foundCorrect = false;
+								}
+							}
+							else
+							{
+								if (isNumericAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim()))
+								{
+									total += partial;
+									foundCorrect = true;
+									break;
+								}
+								else
+								{
+									foundCorrect = false;
+								}
+							}
+						}
+						if (foundCorrect)
+						{
 							this.entryCorrects.add(Boolean.TRUE);
 						}
 						else
@@ -125,16 +148,40 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 							this.entryCorrects.add(Boolean.FALSE);
 						}
 					}
-					else
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0; i < correctAnswersArray.length; i++)
+			{
+				if (answersArray[i] != null)
+				{
+					if (answersArray[i].trim().length() > 0)
 					{
-						if (isNumericAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim()))
+						if (responseTextual == Boolean.TRUE)
 						{
-							total += partial;
-							this.entryCorrects.add(Boolean.TRUE);
+							if (isFillInAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
+							{
+								total += partial;
+								this.entryCorrects.add(Boolean.TRUE);
+							}
+							else
+							{
+								this.entryCorrects.add(Boolean.FALSE);
+							}
 						}
 						else
 						{
-							this.entryCorrects.add(Boolean.FALSE);
+							if (isNumericAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim()))
+							{
+								total += partial;
+								this.entryCorrects.add(Boolean.TRUE);
+							}
+							else
+							{
+								this.entryCorrects.add(Boolean.FALSE);
+							}
 						}
 					}
 				}
