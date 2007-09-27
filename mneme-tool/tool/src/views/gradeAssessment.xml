@@ -245,6 +245,22 @@
 								<message model="submission.siblingCount" />
 							</title>
 							<destination template="/" />
+							<included>
+								<compareDecision model="official">
+									<constant value="TRUE" />
+								</compareDecision>
+							</included>
+						</navigation>
+						<navigation style="LINK">
+							<title>
+								<message selector="showCountOne"/>
+							</title>
+							<destination template="/" />
+							<included>
+								<compareDecision model="official">
+									<constant value="FALSE" />
+								</compareDecision>
+							</included>
 						</navigation>
 						<navigation>
 							<title>
@@ -268,9 +284,8 @@
 								<model ref="sort_direction" />
 							</destination>
 							<included>
-								<compareDecision model="submission.siblingCount" reversed="TRUE">
-									<constant value="0" />
-									<constant value="1" />
+								<compareDecision model="official">
+									<constant value="TRUE" />
 								</compareDecision>
 							</included>
 						</navigation>
@@ -288,13 +303,6 @@
 								<compareDecision model="official">
 									<constant value="FALSE" />
 								</compareDecision>
-								<andDecision model="submission.siblingCount">
-									<compareDecision model="submission.siblingCount">
-										<constant value="0" />
-										<constant value="1" />
-									</compareDecision>
-
-								</andDecision>
 							</included>
 						</navigation>
 					</navigations>
