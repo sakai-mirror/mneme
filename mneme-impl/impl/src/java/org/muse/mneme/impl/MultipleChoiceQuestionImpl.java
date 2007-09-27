@@ -161,11 +161,28 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getAnswerKey()
 	{
-		/*
-		 * Iterator itr = correctAnswers.iterator(); String answerKey[] = new String[correctAnswers.size()]; int i=0; while (itr.hasNext()) {
-		 * answerKey[i] = (String)this.answerChoices.get((String)itr.next().intValue()) ; i++; } return answerKey;
-		 */
-		return null;
+		StringBuffer rv = new StringBuffer();
+		// get the choices as would be presented in delivery
+		List<MultipleChoiceQuestionChoice> choices = getChoices();
+
+		// that's the A, B, C order, so find each correct one
+		for (Integer correctIndex : this.correctAnswers)
+		{
+			int i = 0;
+			for (MultipleChoiceQuestionChoice choice : choices)
+			{
+				if (choice.id.equals(correctIndex.toString()))
+				{
+					// TODO: hard coding our A, B, Cs?
+					rv.append((char) ('A' + i));
+					rv.append(",");
+				}
+				i++;
+			}
+		}
+
+		if (rv.length() > 0) rv.setLength(rv.length() - 1);
+		return rv.toString();
 	}
 
 	/**
@@ -227,8 +244,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		// get the list in order
 		List<MultipleChoiceQuestionChoice> rv = getChoicesAsAuthored();
 
-		// shuffle them
-		if (this.shuffleChoices)
+		// shuffle them if desired (and we are in a submission context)
+		if (this.shuffleChoices && (this.question.getPart().getAssessment().getSubmissionContext() != null))
 		{
 			// set the seed based on the submissionid and the question id
 			long seed = (this.question.getPart().getAssessment().getSubmissionContext().getId() + this.question.getId()).hashCode();
@@ -341,7 +358,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		AndDecision and = this.uiService.newAndDecision();
 		Decision[] decisions = new Decision[2];
 		decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
-		decisions[1] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+		decisions[1] = this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
 		and.setRequirements(decisions);
 		selCol.setCorrectDecision(and);
 
