@@ -25,17 +25,11 @@ import java.util.List;
 
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.AssessmentService;
-import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.QuestionService;
-import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCounts;
 import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
 import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
-import org.sakaiproject.tool.api.SessionManager;
 
 /**
  * SubmissionStorage defines the storage interface for Submissions.
@@ -54,8 +48,7 @@ public interface SubmissionStorage
 	Integer countCompleteSubmissions(Assessment assessment, String userId);
 
 	/**
-	 * Find the submissions to the assignment made by all users.<br />
-	 * If a user has not yet submitted, an empty one for that user is included. <br />
+	 * Get the official complete submissions to the assignment made by all users.
 	 * 
 	 * @param assessment
 	 *        The assessment.
@@ -63,7 +56,7 @@ public interface SubmissionStorage
 	 *        The sort order.
 	 * @return A sorted List<Submission> of the submissions for the assessment.
 	 */
-	List<SubmissionImpl> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort);
+	List<SubmissionImpl> getAssessmentCompleteSubmissions(Assessment assessment);
 
 	/**
 	 * Check if the completed submissions to this assessment are all released.
@@ -82,6 +75,18 @@ public interface SubmissionStorage
 	 * @return A list of the submission scores to this assessment.
 	 */
 	List<Float> getAssessmentScores(Assessment assessment);
+
+	/**
+	 * Get the submissions to the assignment made by all users.<br />
+	 * If a user has not yet submitted, an empty one for that user is included.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param sort
+	 *        The sort order.
+	 * @return A sorted List<Submission> of the submissions for the assessment.
+	 */
+	List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort);
 
 	/**
 	 * Get all the in-progress (open) submissions (all users, all assessments, all contexts).
@@ -211,12 +216,28 @@ public interface SubmissionStorage
 	void saveAnswers(List<Answer> answers);
 
 	/**
+	 * Save evaluationchanges made to these answers.
+	 * 
+	 * @param answers
+	 *        the answers with evaluations to save.
+	 */
+	void saveAnswersEvaluation(List<Answer> answers);
+
+	/**
 	 * Save changes made to this submission.
 	 * 
 	 * @param submission
 	 *        the submission to save.
 	 */
 	void saveSubmission(SubmissionImpl submission);
+
+	/**
+	 * Save evaluation changes made to this submission.
+	 * 
+	 * @param submission
+	 *        the submission with evaluation changes to save.
+	 */
+	void saveSubmissionEvaluation(SubmissionImpl submission);
 
 	/**
 	 * Check if an submission by this id exists.

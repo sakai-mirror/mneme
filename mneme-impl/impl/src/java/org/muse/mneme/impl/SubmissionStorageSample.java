@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -98,44 +99,18 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<SubmissionImpl> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort)
+	public List<SubmissionImpl> getAssessmentCompleteSubmissions(Assessment assessment)
 	{
 		// collect the submissions to this assessment
 		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
 		for (SubmissionImpl submission : this.submissions.values())
 		{
-			if (submission.getAssessment().equals(assessment))
+			if (submission.getIsComplete() && submission.getAssessment().equals(assessment))
 			{
 				rv.add(new SubmissionImpl(submission));
 			}
 		}
 
-		// TODO: get all possible users who can submit
-		List<String> userIds = new ArrayList<String>();
-
-		// if any user is not represented in the submissions we found, add an empty submission
-		for (String userId : userIds)
-		{
-			boolean found = false;
-			for (Submission s : rv)
-			{
-				if (s.getUserId().equals(userId))
-				{
-					found = true;
-					break;
-				}
-			}
-
-			if (!found)
-			{
-				SubmissionImpl s = newSubmission();
-				s.initUserId(userId);
-				s.initAssessmentId(assessment.getId());
-				rv.add(s);
-			}
-		}
-
-		// TODO: sort
 		return rv;
 	}
 
@@ -164,6 +139,50 @@ public class SubmissionStorageSample implements SubmissionStorage
 	{
 		List<Float> rv = new ArrayList<Float>();
 
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort)
+	{
+		// collect the submissions to this assessment
+		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			if (submission.getAssessment().equals(assessment))
+			{
+				rv.add(new SubmissionImpl(submission));
+			}
+		}
+
+		// get all possible users who can submit
+		Set<String> userIds = this.securityService.getUsersIsAllowed(MnemeService.SUBMIT_PERMISSION, assessment.getContext());
+
+		// if any user is not represented in the submissions we found, add an empty submission
+		for (String userId : userIds)
+		{
+			boolean found = false;
+			for (Submission s : rv)
+			{
+				if (s.getUserId().equals(userId))
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				SubmissionImpl s = newSubmission();
+				s.initUserId(userId);
+				s.initAssessmentId(assessment.getId());
+				rv.add(s);
+			}
+		}
+
+		// TODO: sort
 		return rv;
 	}
 
@@ -434,6 +453,26 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void saveAnswersEvaluation(List<Answer> answers)
+	{
+		for (Answer a : answers)
+		{
+			// find the submission
+			SubmissionImpl s = this.submissions.get(a.getSubmission().getId());
+			if (s != null)
+			{
+				AnswerImpl oldAnswer = (AnswerImpl) s.getAnswer(a.getQuestion());
+				if (oldAnswer != null)
+				{
+					oldAnswer.evaluation.set(((AnswerImpl) a).evaluation);
+				}
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void saveSubmission(SubmissionImpl submission)
 	{
 		// assign an id
@@ -461,6 +500,32 @@ public class SubmissionStorageSample implements SubmissionStorage
 			SubmissionImpl s = new SubmissionImpl(submission);
 			s.clearAnswers();
 			this.submissions.put(submission.getId(), s);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void saveSubmissionEvaluation(SubmissionImpl submission)
+	{
+		// has to be an existing saved submission
+		if (submission.getId() == null) throw new IllegalArgumentException();
+
+		// we must already have the submission
+		SubmissionImpl old = this.submissions.get(submission.getId());
+		if (old == null) throw new IllegalArgumentException();
+		
+		// update the submission evaluation
+		old.evaluation.set(submission.evaluation);
+		
+		// update the answer evaluations
+		for (Answer answer : submission.getAnswers())
+		{
+			AnswerImpl oldAnswer = (AnswerImpl) old.getAnswer(answer.getQuestion());
+			if (oldAnswer != null)
+			{
+				oldAnswer.evaluation.set(((AnswerImpl) answer).evaluation); 
+			}
 		}
 	}
 

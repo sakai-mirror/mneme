@@ -148,7 +148,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// user must have grade permission in the context of the assessment for this submission
 		if (!securityService.checkSecurity(userId, MnemeService.GRADE_PERMISSION, context)) return Boolean.FALSE;
 
-		return Boolean.FALSE;
+		return Boolean.TRUE;
 	}
 
 	/**
@@ -162,12 +162,12 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (M_log.isDebugEnabled()) M_log.debug("allowEvaluate: " + submission.getId() + ": " + userId);
 
 		// the submission must be complete
-		if (!submission.getIsComplete()) return Boolean.TRUE;
+		if (!submission.getIsComplete()) return Boolean.FALSE;
 
 		// user must have grade permission in the context of the assessment for this submission
 		if (!securityService.checkSecurity(userId, MnemeService.GRADE_PERMISSION, submission.getAssessment().getContext())) return Boolean.FALSE;
 
-		return Boolean.FALSE;
+		return Boolean.TRUE;
 	}
 
 	/**
@@ -373,22 +373,28 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		if (M_log.isDebugEnabled()) M_log.debug("evaluateAnswers");
 
+		Date now = new Date();
+		String userId = sessionManager.getCurrentSessionUserId();
+
 		for (Answer answer : answers)
 		{
 			// security check
 			securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, answer.getSubmission().getAssessment()
 					.getContext());
+
+			// TODO: events?
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(answer.getSubmission()
+					.getId()), true));
+			
+			// set the attribution
+			answer.getEvaluation().getAttribution().setDate(now);
+			answer.getEvaluation().getAttribution().setUserId(userId);
 		}
 
 		// TODO: what to do? evaluation only... submission changes?
-		this.storage.saveAnswers(answers);
+		this.storage.saveAnswersEvaluation(answers);
 
-		// TODO: events?
-		for (Answer answer : answers)
-		{
-			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(answer.getSubmission()
-					.getId()), true));
-		}
+		// TODO: record in gb
 	}
 
 	/**
@@ -396,6 +402,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	public void evaluateSubmission(Submission submission) throws AssessmentPermissionException
 	{
+		Date now = new Date();
+		String userId = sessionManager.getCurrentSessionUserId();
+
 		if (submission == null) throw new IllegalArgumentException();
 
 		if (M_log.isDebugEnabled()) M_log.debug("evaluateSubmission: " + submission.getId());
@@ -404,30 +413,67 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, submission.getAssessment().getContext());
 
 		// TODO: just the eval... what fields get changed (mod by, eval by?)
-		this.storage.saveSubmission((SubmissionImpl) submission);
+		this.storage.saveSubmissionEvaluation((SubmissionImpl) submission);
+
+		// set the attribution
+		submission.getEvaluation().getAttribution().setDate(now);
+		submission.getEvaluation().getAttribution().setUserId(userId);
+
+		// TODO: attribution for answers?
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
+
+		// TODO: record in gb
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markGraded) throws AssessmentPermissionException
+	public void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markEvaluated) throws AssessmentPermissionException
 	{
-		// TODO:
+		Date now = new Date();
+		String userId = sessionManager.getCurrentSessionUserId();
 
-		// for each submission to this assessment
+		// get the completed submissions to this assessment
+		List<SubmissionImpl> submissions = this.storage.getAssessmentCompleteSubmissions(assessment);
 
-		// only for completed ones
+		// TODO: only for the "official" one ? submissions = officialize(submissions);
 
-		// only for the "official" one
+		for (SubmissionImpl submission : submissions)
+		{
+			// if there's a comment to set, append it
+			if (comment != null)
+			{
+				submission.evaluation.setComment(submission.evaluation.getComment() + comment);
+			}
 
-		// get the evaluation
+			// if there's a score to set, add it
+			if (score != null)
+			{
+				float total = score;
+				if (submission.evaluation.getScore() != null)
+				{
+					total += submission.evaluation.getScore();
+				}
+				submission.evaluation.setScore(total);
+			}
 
-		// set it
+			// if we are to mark as evaluated, do so
+			if (markEvaluated != null)
+			{
+				submission.evaluation.setEvaluated(markEvaluated);
+			}
 
-		// save the submission
+			// set the attribution
+			submission.evaluation.getAttribution().setDate(now);
+			submission.evaluation.getAttribution().setUserId(userId);
+
+			// save the submission
+			this.storage.saveSubmissionEvaluation(submission);
+			
+			// TODO: record in gb
+		}
 	}
 
 	/**
@@ -445,7 +491,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// read all the submissions for this user in the context, with all the assessment and submission data we need
 		// each assessment is covered with at least one - if there are no submission yet for a user, an empty submission is included
-		List<SubmissionImpl> all = this.storage.findAssessmentSubmissions(assessment, sort);
+		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, sort);
 
 		// see if any needs to be completed based on time limit or dates
 		checkAutoComplete(all, asOf);
@@ -506,7 +552,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// read all the submissions for this user in the context, with all the assessment and submission data we need
 		// each assessment is covered with at least one - if there are no submission yet for a user, an empty submission is included
-		List<SubmissionImpl> all = this.storage.findAssessmentSubmissions(assessment, sort);
+		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, sort);
 
 		// see if any needs to be completed based on time limit or dates
 		checkAutoComplete(all, asOf);

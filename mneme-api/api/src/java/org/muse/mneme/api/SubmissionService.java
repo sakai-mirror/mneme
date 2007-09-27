@@ -180,12 +180,12 @@ public interface SubmissionService
 	 *        The overall comment. If null, no change to comment is made.
 	 * @param score
 	 *        The overall score adjustment. If null, no change to score is made.
-	 * @param markGraded
-	 *        If TRUE, mark them all as graded, otherwise no change to graded is made.
+	 * @param markEvaluated
+	 *        If TRUE, mark them all as evaluated, otherwise no change to evaluated is made.
 	 * @throws AssessmentPermissionException
 	 *         If the current user is not allowed to save this Submission.
 	 */
-	void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markGraded) throws AssessmentPermissionException;
+	void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markEvaluated) throws AssessmentPermissionException;
 
 	/**
 	 * Find the submissions to the assignment made by all users.<br />
