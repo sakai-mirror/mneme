@@ -277,11 +277,11 @@
 							</title>
 							<destination template="/" />
 						</navigation>
-						<navigation style="LINK" submit="FALSE">
+						<navigation style="LINK" submit="TRUE">
 							<title>
 								<message selector="view-all" />
 							</title>
-							<destination template="/grade_assessment/{0}/{1}/{2}{3}/all">
+							<destination template="/grade_assessment_save/{0}/{1}/{2}{3}/all">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="sort_column" />
@@ -294,11 +294,11 @@
 								</compareDecision>
 							</included>
 						</navigation>
-						<navigation style="LINK" submit="FALSE">
+						<navigation style="LINK" submit="TRUE">
 							<title>
 								<message selector="close" />
 							</title>
-							<destination template="/grade_assessment/{0}/{1}/{2}{3}">
+							<destination template="/grade_assessment_save/{0}/{1}/{2}{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="sort_column" />
