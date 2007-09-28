@@ -86,6 +86,48 @@
 			</rows>
 		</entityDisplay>
 
+		<section>
+			<iterator name="answer" model="submission.answers" />
+			<container>
+				<entityDisplay>
+					<rows>
+						<row>
+							<container>
+								<!-- question presentation (text) -->
+								<text>
+									<message>
+										<model type="html" ref="answer.question.presentation.text" />
+									</message>
+								</text>
+								<!-- type-specific question viewing -->
+								<modelComponent model="answer.question.typeSpecificQuestion.viewQuestionUi" />
+							</container>
+						</row>
+						<row>
+							<container>
+								<!-- Answer type-specific viewing -->
+								<modelComponent model="answer.question.typeSpecificQuestion.viewAnswerUi" />
+							</container>
+						</row>
+						<row>
+							<container>
+								<text>
+									<message selector="submission-comments">
+										<model type="icon" icon="/icons/note.png" />
+									</message>
+								</text>
+							</container>
+						</row>
+						<row>
+							<container>
+								<htmlEdit model="answer.evaluation.comment" rows="2" cols="20" />
+							</container>
+						</row>
+					</rows>
+				</entityDisplay>
+			</container>
+		</section>
+
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
