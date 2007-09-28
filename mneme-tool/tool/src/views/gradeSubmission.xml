@@ -23,7 +23,6 @@
 	*
 	**********************************************************************************/
 -->
-
 <interface>
 
 	<!--mode bar-->
@@ -40,5 +39,75 @@
 		<message selector="grading-submission-title" />
 	</title>
 
-	<container></container>
+	<container>
+		<!--top navigation-->
+		<navigationBar width="100%">
+			<container>
+				<navigation title="list" style="BUTTON" accessKey="list-access" description="list-description" submit="TRUE">
+					<icon icon="/icons/contents.gif" style="LEFT" />
+					<destination template="/grade_submission_save/{0}">
+						<model ref="destinationPath" />
+					</destination>
+				</navigation>
+				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
+					<icon icon="/icons/save.png" style="LEFT" />
+					<destination template="/grade_submission_save/{0}">
+						<model ref="destinationPath" />
+					</destination>
+				</navigation>
+				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
+					<icon icon="/icons/cancel.gif" style="LEFT" />
+					<destination template="/grade_assessment/{0}">
+						<model ref="destinationPath" />
+					</destination>
+				</navigation>
+			</container>
+		</navigationBar>
+
+		<entityDisplay>
+			<rows>
+				<row title="submission-username">
+					<model type="userInfo" selector="SORTNAME" ref="submission.userId" />
+				</row>
+				<row title="submitted">
+					<model type="date" ref="submission.submittedDate" />
+				</row>
+				<row title="released">
+					<model ref="submission.isReleased" />
+				</row>
+				<row>
+					<title>
+						<message selector="total-grade">
+							<model type="icon" icon="/icons/grade.png" />
+						</message>
+					</title>
+					<model ref="submission.totalScore" />
+				</row>
+			</rows>
+		</entityDisplay>
+
+		<!--bottom navigation-->
+		<navigationBar width="100%">
+			<container>
+				<navigation title="list" style="BUTTON" accessKey="list-access" description="list-description" submit="TRUE">
+					<icon icon="/icons/contents.gif" style="LEFT" />
+					<destination template="/grade_submission_save/{0}">
+						<model ref="destinationPath" />
+					</destination>
+				</navigation>
+				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
+					<icon icon="/icons/save.png" style="LEFT" />
+					<destination template="/grade_submission_save/{0}">
+						<model ref="destinationPath" />
+					</destination>
+				</navigation>
+				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
+					<icon icon="/icons/cancel.gif" style="LEFT" />
+					<destination template="/grade_assessment/{0}">
+						<model ref="destinationPath" />
+					</destination>
+				</navigation>
+			</container>
+		</navigationBar>
+	</container>
 </interface>

@@ -55,7 +55,10 @@ public class GradeSubmissionView extends ControllerImpl
 
 	/** Submission Service */
 	protected SubmissionService submissionService = null;
-
+	
+	/** Dependency: ToolManager */
+	protected ToolManager toolManager = null;
+	
 	/**
 	 * Shutdown.
 	 */
@@ -70,16 +73,36 @@ public class GradeSubmissionView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if (params.length != 4 && params.length != 5 && params.length != 6 && params.length != 7) throw new IllegalArgumentException();
-		
-		//get Assessment - assessment id is in params at index 3
+		//check for user permission to access the assessments for grading
+		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
 		context.put("assessment", assessment);
-		
-		//submission id is in params array at index 6
-		Submission submission = this.submissionService.getSubmission(params[6]);
-			
 
+		// submission id is in params array at index 6
+		Submission submission = this.submissionService.getSubmission(params[6]);
+		context.put("submission", submission);
+		
+		//check for user permission to access the submission for grading
+		if (!this.submissionService.allowEvaluate(submission))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		// destination path for grade submission
+		String destinationPath = context.getDestination();
+		destinationPath = destinationPath.substring(destinationPath.indexOf("/", 1) + 1, destinationPath.lastIndexOf("/"));
+		context.put("destinationPath", destinationPath);
 		uiService.render(ui, context);
+
 	}
 
 	/**
@@ -96,7 +119,7 @@ public class GradeSubmissionView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 4 && params.length != 5 && params.length != 6) throw new IllegalArgumentException();
+		if (params.length != 4 && params.length != 5 && params.length != 6 && params.length != 7) throw new IllegalArgumentException();
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
 	}
@@ -117,5 +140,13 @@ public class GradeSubmissionView extends ControllerImpl
 	public void setSubmissionService(SubmissionService submissionService)
 	{
 		this.submissionService = submissionService;
+	}
+
+	/**
+	 * @param toolManager the toolManager to set
+	 */
+	public void setToolManager(ToolManager toolManager)
+	{
+		this.toolManager = toolManager;
 	}
 }
