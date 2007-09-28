@@ -77,10 +77,6 @@ public class GradeAssessmentView extends ControllerImpl
 	{
 		if (params.length != 4 && params.length != 5 && params.length != 6) throw new IllegalArgumentException();
 
-		String saveDestination = context.getDestination();
-		saveDestination = saveDestination.replace(params[1], "grade_assessment_save");
-		context.put("saveDestination", saveDestination);
-
 		// check for user permission to access the assessments for grading
 		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId()))
 		{
@@ -144,6 +140,27 @@ public class GradeAssessmentView extends ControllerImpl
 		// for "Adjust every student's test submission by" comments
 		Value submissionAdjustComments = this.uiService.newValue();
 		context.put("submissionAdjustComments", submissionAdjustComments);
+
+		// destination path for grade submission
+		String destinationPath = context.getDestination();
+		destinationPath = destinationPath.substring(destinationPath.indexOf("/", 1) + 1);
+		if (params.length == 4)
+		{
+			StringBuilder buildPath = new StringBuilder();
+			buildPath.append(destinationPath);
+			buildPath.append( "/");
+			buildPath.append(context.get("sort_column"));
+			buildPath.append(context.get("sort_direction"));
+			buildPath.append( "/");
+			buildPath.append( "highest");
+			//destinationPath = destinationPath + "/" + context.get("sort_column") + context.get("sort_direction") + "/" + "highest";
+			destinationPath = buildPath.toString();
+		}
+		else if (params.length == 5)
+		{
+			destinationPath = destinationPath + "/" + sortCode + "/" + "highest";
+		}
+		context.put("destinationPath", destinationPath);
 
 		uiService.render(ui, context);
 	}
@@ -254,8 +271,7 @@ public class GradeAssessmentView extends ControllerImpl
 							try
 							{
 								// save submission //to adjust to zero after first adjustment user should provide zero
-								if (submission.getEvaluation().getScore() != null)
-									this.submissionService.evaluateSubmission(submission);
+								if (submission.getEvaluation().getScore() != null) this.submissionService.evaluateSubmission(submission);
 							}
 							catch (AssessmentPermissionException e)
 							{

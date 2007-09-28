@@ -114,7 +114,11 @@
 						</message>
 					</title>
 					<entityNavigations>
-						<navigation destination="/">
+						<navigation>
+							<destination template="/grade_submission/{0}/{1}">
+								<model ref="destinationPath" />
+								<model ref="submission.id" />
+							</destination>
 							<included>
 								<compareDecision model="submission.gradingStatus">
 									<constant value="released" />
@@ -346,8 +350,8 @@
 			<container>
 				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
 					<icon icon="/icons/save.png" style="LEFT" />
-					<destination template="{0}">
-						<model ref="saveDestination" />
+					<destination template="/grade_assessment_save/{0}">
+						<model ref="destinationPath" />
 					</destination>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
