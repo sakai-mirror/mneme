@@ -34,6 +34,8 @@ import org.muse.mneme.api.QuestionService.FindQuestionsSort;
  */
 public class PoolImpl implements Pool
 {
+	protected String context = "";
+
 	protected Attribution createdBy = new AttributionImpl();
 
 	/** Start of the versioning thing. */
@@ -46,8 +48,6 @@ public class PoolImpl implements Pool
 	protected String id = null;
 
 	protected Attribution modifiedBy = new AttributionImpl();
-
-	protected String ownerId = null;
 
 	protected Float points = Float.valueOf(0f);
 
@@ -85,14 +85,6 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countQuestions(String userId, String search)
-	{
-		return this.questionService.countQuestions(userId, this, search);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public List<String> drawQuestionIds(long seed, Integer numQuestions)
 	{
 		return this.poolService.drawQuestionIds(this, seed, numQuestions);
@@ -113,9 +105,9 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findQuestions(String userId, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Question> findQuestions(FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
-		return this.questionService.findQuestions(userId, this, sort, search, pageNum, pageSize);
+		return this.questionService.findQuestions(this, sort, search, pageNum, pageSize);
 	}
 
 	/**
@@ -124,6 +116,14 @@ public class PoolImpl implements Pool
 	public List<String> getAllQuestionIds()
 	{
 		return this.poolService.getAllQuestionIds(this);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getContext()
+	{
+		return this.context;
 	}
 
 	/**
@@ -177,14 +177,6 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getOwnerId()
-	{
-		return this.ownerId;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Float getPoints()
 	{
 		return this.points;
@@ -225,6 +217,15 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setContext(String context)
+	{
+		if (context == null) context = "";
+		this.context = context;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setDescription(String description)
 	{
 		this.description = description;
@@ -236,14 +237,6 @@ public class PoolImpl implements Pool
 	public void setDifficulty(Integer difficulty)
 	{
 		this.difficulty = difficulty;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setOwnerId(String ownerId)
-	{
-		this.ownerId = ownerId;
 	}
 
 	/**
@@ -284,12 +277,12 @@ public class PoolImpl implements Pool
 	protected void set(PoolImpl other)
 	{
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
+		this.context = other.context;
 		this.deleted = other.deleted;
 		this.description = other.description;
 		this.difficulty = other.difficulty;
 		this.id = other.id;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy);
-		this.ownerId = other.ownerId;
 		this.points = other.points;
 		this.poolService = other.poolService;
 		this.subject = other.subject;

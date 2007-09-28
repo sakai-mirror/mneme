@@ -90,8 +90,7 @@ public class PoolEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if ((params.length != 4) && (params.length != 5) && (params.length != 6) && (params.length != 7))
-			throw new IllegalArgumentException();
+		if ((params.length != 4) && (params.length != 5) && (params.length != 6) && (params.length != 7)) throw new IllegalArgumentException();
 
 		// pools - sort at index 2, paging at index 3. pool id at index 4. Move pool_edit sort to index 5, paging to index 6
 		// pools sort parameter is in param array at index 2
@@ -103,8 +102,8 @@ public class PoolEditView extends ControllerImpl
 		String poolsPagingParameter = null;
 		poolsPagingParameter = params[3];
 		context.put("poolsPagingParameter", poolsPagingParameter);
-		
-		//setup the model: the selected pool - pool id is at index 4
+
+		// setup the model: the selected pool - pool id is at index 4
 		Pool pool = this.poolService.getPool(params[4]);
 		context.put("pool", pool);
 
@@ -159,8 +158,8 @@ public class PoolEditView extends ControllerImpl
 			// TODO: other than 2 size!
 			pagingParameter = "1-30";
 		}
-		// total questions passed userid as parameter as countQuestions is not fetching data with out userid
-		Integer maxQuestions = this.questionService.countQuestions(sessionManager.getCurrentSessionUserId(), pool, null);
+		// total questions
+		Integer maxQuestions = this.questionService.countQuestions(pool, null);
 
 		// paging
 		Paging paging = uiService.newPaging();
@@ -169,9 +168,8 @@ public class PoolEditView extends ControllerImpl
 		context.put("paging", paging);
 		context.put("pagingParameter", pagingParameter);
 
-		// get questions -- passed userid as parameter as findQuestions is not fetching data with out userid
-		List<Question> questions = questionService.findQuestions(sessionManager.getCurrentSessionUserId(), pool, sort, null, paging.getCurrent(),
-				paging.getSize());
+		// get questions
+		List<Question> questions = questionService.findQuestions(pool, sort, null, paging.getCurrent(), paging.getSize());
 		context.put("questions", questions);
 
 		// the question types
@@ -243,9 +241,8 @@ public class PoolEditView extends ControllerImpl
 					Question question = this.questionService.getQuestion(destinationParams[5]);
 
 					if (pool != null && question != null)
-						this.questionService.copyQuestion(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId(),
-								pool, question);
-					
+						this.questionService.copyQuestion(question, pool);
+
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
 					return;
 				}
@@ -287,9 +284,9 @@ public class PoolEditView extends ControllerImpl
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
 				}
-				
+
 				// check security
-				if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext(), null))
+				if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 				{
 					// redirect to error
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -305,7 +302,7 @@ public class PoolEditView extends ControllerImpl
 				return;
 			}
 		}
-	
+
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 
 	}

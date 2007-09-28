@@ -76,7 +76,7 @@ public class ListView extends ControllerImpl
 		}
 
 		// check security
-		if (!assessmentService.allowListDeliveryAssessment(toolManager.getCurrentPlacement().getContext(), null))
+		if (!assessmentService.allowListDeliveryAssessment(toolManager.getCurrentPlacement().getContext()))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));

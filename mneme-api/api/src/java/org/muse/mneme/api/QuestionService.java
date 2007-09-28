@@ -37,25 +37,17 @@ public interface QuestionService
 	}
 
 	/**
-	 * Check if the current user is allowed to edit this question from this context.
+	 * Check if the current user is allowed to edit this question.
 	 * 
 	 * @param question
 	 *        The question.
-	 * @param context
-	 *        The context.
-	 * @param userId
-	 *        The user (if null, the current user is used).
 	 * @return TRUE if the user is allowed, FALSE if not.
 	 */
-	Boolean allowEditQuestion(Question question, String context, String userId);
+	Boolean allowEditQuestion(Question question);
 
 	/**
 	 * Create a new question that is a copy of each question in the pool.
 	 * 
-	 * @param context
-	 *        The current context.
-	 * @param userId
-	 *        The user to own the questions.
 	 * @param source
 	 *        The pool of questions to copy.
 	 * @param destination
@@ -63,37 +55,42 @@ public interface QuestionService
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to create a new question.
 	 */
-	void copyPoolQuestions(String context, String userId, Pool source, Pool destination) throws AssessmentPermissionException;
+	void copyPoolQuestions(Pool source, Pool destination) throws AssessmentPermissionException;
 
 	/**
 	 * Create a new question as a copy of another.
 	 * 
-	 * @param context
-	 *        The current context.
-	 * @param userId
-	 *        The user to own the question.
-	 * @param pool
-	 *        The pool where the question will live.
 	 * @param question
 	 *        The question to copy.
+	 * @param pool
+	 *        The pool where the question will live (or null to keep it in the same pool).
 	 * @return The new question.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to create a new question.
 	 */
-	Question copyQuestion(String context, String userId, Pool pool, Question questions) throws AssessmentPermissionException;
+	Question copyQuestion(Question question, Pool pool) throws AssessmentPermissionException;
 
 	/**
 	 * Count the questions with this criteria.
 	 * 
-	 * @param userId
-	 *        The user id (if null, the current user is used).
 	 * @param pool
-	 *        The pool criteria - get questions from this pool only, or if null, across all accessible pools.
+	 *        The pool criteria - count questions from this pool only.
 	 * @param search
 	 *        The search criteria.
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countQuestions(String userId, Pool pool, String search);
+	Integer countQuestions(Pool pool, String search);
+
+	/**
+	 * Count the questions with this criteria.
+	 * 
+	 * @param context
+	 *        The context - count questions from all pools in this context.
+	 * @param search
+	 *        The search criteria.
+	 * @return The questions in this pool with this criteria.
+	 */
+	Integer countQuestions(String context, String search);
 
 	/**
 	 * Check if a question exists.
@@ -107,10 +104,8 @@ public interface QuestionService
 	/**
 	 * Locate a list of questions with this criteria.
 	 * 
-	 * @param userId
-	 *        the user id (if null, the current user is used).
 	 * @param pool
-	 *        The pool criteria - get questions from this pool only, or if null, across all accessible pools.
+	 *        The pool criteria - get questions from this pool only.
 	 * @param sort
 	 *        The sort criteria.
 	 * @param search
@@ -121,7 +116,24 @@ public interface QuestionService
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return a list of questions that meet the criteria.
 	 */
-	List<Question> findQuestions(String userId, Pool pool, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
+
+	/**
+	 * Locate a list of questions with this criteria.
+	 * 
+	 * @param context
+	 *        The context - get questions from all pools in the context.
+	 * @param sort
+	 *        The sort criteria.
+	 * @param search
+	 *        The search criteria.
+	 * @param pageNum
+	 *        The page number (1 based) to display, or null to disable paging and get them all.
+	 * @param pageSize
+	 *        The number of items for the requested page, or null if we are not paging.
+	 * @return a list of questions that meet the criteria.
+	 */
+	List<Question> findQuestions(String context, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Access a question by id.
@@ -135,10 +147,6 @@ public interface QuestionService
 	/**
 	 * Move a question from one pool to another.
 	 * 
-	 * @param context
-	 *        The current context.
-	 * @param userId
-	 *        The user asking for the move (if null, the current user is used).
 	 * @param question
 	 *        The question to move.
 	 * @param pool
@@ -146,58 +154,48 @@ public interface QuestionService
 	 * @throws AssessmentPermissionException
 	 *         If the current user is not allowed to make changes to this question or pool.
 	 */
-	void moveQuestion(String context, String userId, Question question, Pool pool) throws AssessmentPermissionException;
+	void moveQuestion(Question question, Pool pool) throws AssessmentPermissionException;
 
 	/**
 	 * Create a new question.
 	 * 
-	 * @param context
-	 *        The current context.
-	 * @param userId
-	 *        The user to own the question.
-	 * @param The
-	 *        pool where the question will live.
+	 * @param pool
+	 *        The pool where the question will live.
 	 * @param type
 	 *        The question type.
 	 * @return The new question.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to create a new question.
 	 */
-	Question newQuestion(String context, String userId, Pool pool, String type) throws AssessmentPermissionException;
+	Question newQuestion(Pool pool, String type) throws AssessmentPermissionException;
 
 	/**
 	 * Remove all the questions that are in this pool
 	 * 
 	 * @param pool
 	 *        The pool.
-	 * @param context
-	 *        The current context.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to remove these questions.
 	 */
-	void removePoolQuestions(Pool pool, String context) throws AssessmentPermissionException;
+	void removePoolQuestions(Pool pool) throws AssessmentPermissionException;
 
 	/**
 	 * Remove this question.
 	 * 
 	 * @param question
 	 *        The question to remove.
-	 * @param context
-	 *        The current context.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to edit this question.
 	 */
-	void removeQuestion(Question question, String context) throws AssessmentPermissionException;
+	void removeQuestion(Question question) throws AssessmentPermissionException;
 
 	/**
 	 * Save changes made to this question.
 	 * 
 	 * @param question
 	 *        The question to save.
-	 * @param context
-	 *        The current context.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to edit this question.
 	 */
-	void saveQuestion(Question question, String context) throws AssessmentPermissionException;
+	void saveQuestion(Question question) throws AssessmentPermissionException;
 }

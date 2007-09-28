@@ -82,7 +82,7 @@ public class MnemeServlet extends AmbrosiaServlet
 	protected String getDefaultView()
 	{
 		// if the user can manage, start in /tests
-		if (this.assessmentService.allowManageAssessments(this.toolManager.getCurrentPlacement().getContext(), null))
+		if (this.assessmentService.allowManageAssessments(this.toolManager.getCurrentPlacement().getContext()))
 		{
 			return "tests";
 		}

@@ -130,7 +130,7 @@ public class PoolsDeleteView extends ControllerImpl
 				{
 					try
 					{
-						this.poolService.removePool(pool, toolManager.getCurrentPlacement().getContext());
+						this.poolService.removePool(pool);
 					}
 					catch (AssessmentPermissionException e)
 					{

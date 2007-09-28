@@ -122,7 +122,7 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 			pagingParameter = "1-2";
 		}
 
-		Integer maxQuestions = this.questionService.countQuestions(sessionManager.getCurrentSessionUserId(), null, null);
+		Integer maxQuestions = this.questionService.countQuestions(this.toolManager.getCurrentPlacement().getContext(), null);
 
 		paging.setMaxItems(maxQuestions);
 		paging.setCurrentAndSize(pagingParameter);
@@ -148,7 +148,7 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 			context.put("sort_direction", 'A');
 		}
 		// get questions
-		List<Question> questions = questionService.findQuestions(sessionManager.getCurrentSessionUserId(), null, sort, null, paging.getCurrent(),
+		List<Question> questions = questionService.findQuestions(this.toolManager.getCurrentPlacement().getContext(), sort, null, paging.getCurrent(),
 				paging.getSize());
 
 		context.put("questions", questions);

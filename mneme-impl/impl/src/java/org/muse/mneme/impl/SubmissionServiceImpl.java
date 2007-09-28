@@ -110,10 +110,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowCompleteSubmission(Submission submission, String userId)
+	public Boolean allowCompleteSubmission(Submission submission)
 	{
 		if (submission == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		String userId = sessionManager.getCurrentSessionUserId();
 		Assessment assessment = submission.getAssessment();
 		if (assessment == null) throw new IllegalArgumentException();
 
@@ -137,10 +137,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowEvaluate(String context, String userId)
+	public Boolean allowEvaluate(String context)
 	{
 		if (context == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		String userId = sessionManager.getCurrentSessionUserId();
 
 		if (M_log.isDebugEnabled()) M_log.debug("allowEvaluate_context: " + context + ": " + userId);
 
@@ -153,10 +153,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowEvaluate(Submission submission, String userId)
+	public Boolean allowEvaluate(Submission submission)
 	{
 		if (submission == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		String userId = sessionManager.getCurrentSessionUserId();
 
 		if (M_log.isDebugEnabled()) M_log.debug("allowEvaluate: " + submission.getId() + ": " + userId);
 
@@ -172,10 +172,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowReviewSubmission(Submission submission, String userId)
+	public Boolean allowReviewSubmission(Submission submission)
 	{
 		if (submission == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		String userId = sessionManager.getCurrentSessionUserId();
 		Assessment assessment = submission.getAssessment();
 		if (assessment == null) throw new IllegalArgumentException();
 
@@ -195,10 +195,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowSubmit(Assessment assessment, String userId)
+	public Boolean allowSubmit(Assessment assessment)
 	{
 		if (assessment == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		String userId = sessionManager.getCurrentSessionUserId();
 
 		if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: " + assessment.getId() + ": " + userId);
 
@@ -312,11 +312,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Submission enterSubmission(Assessment a, String userId) throws AssessmentPermissionException, AssessmentClosedException,
-			AssessmentCompletedException
+	public Submission enterSubmission(Assessment a) throws AssessmentPermissionException, AssessmentClosedException, AssessmentCompletedException
 	{
 		if (a == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		String userId = sessionManager.getCurrentSessionUserId();
 		Assessment assessment = assessmentService.getAssessment(a.getId());
 		Date asOf = new Date();
 
@@ -384,7 +383,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// TODO: events?
 			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(answer.getSubmission()
 					.getId()), true));
-			
+
 			// set the attribution
 			answer.getEvaluation().getAttribution().setDate(now);
 			answer.getEvaluation().getAttribution().setUserId(userId);
@@ -470,7 +469,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 			// save the submission
 			this.storage.saveSubmissionEvaluation(submission);
-			
+
 			// TODO: record in gb
 		}
 	}

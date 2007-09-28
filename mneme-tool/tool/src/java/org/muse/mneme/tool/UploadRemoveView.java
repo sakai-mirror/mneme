@@ -99,7 +99,7 @@ public class UploadRemoveView extends ControllerImpl
 			return;
 		}
 
-		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
+		if (!assessmentService.allowCompleteSubmission(submission))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -178,7 +178,7 @@ public class UploadRemoveView extends ControllerImpl
 			return;
 		}
 
-		if (!assessmentService.allowCompleteSubmission(submission, null).booleanValue())
+		if (!assessmentService.allowCompleteSubmission(submission))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));

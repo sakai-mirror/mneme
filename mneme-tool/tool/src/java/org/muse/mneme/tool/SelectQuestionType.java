@@ -139,7 +139,7 @@ public class SelectQuestionType extends ControllerImpl
 				return;
 			}
 
-			if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext(), null))
+			if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 			{
 				// redirect to error
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -150,8 +150,8 @@ public class SelectQuestionType extends ControllerImpl
 			Question newQuestion = null;
 			try
 			{
-				newQuestion = this.questionService.newQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, selectedQuestionType);
-				this.questionService.saveQuestion(newQuestion, toolManager.getCurrentPlacement().getContext());
+				newQuestion = this.questionService.newQuestion(pool, selectedQuestionType);
+				this.questionService.saveQuestion(newQuestion);
 			}
 			catch (AssessmentPermissionException e)
 			{

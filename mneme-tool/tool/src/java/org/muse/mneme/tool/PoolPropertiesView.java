@@ -115,7 +115,7 @@ public class PoolPropertiesView extends ControllerImpl
 
 				if (pool.getSubject() == null) pool.setSubject("");
 
-				this.poolService.savePool(pool, toolManager.getCurrentPlacement().getContext());
+				this.poolService.savePool(pool);
 			}
 			catch (AssessmentPermissionException e)
 			{

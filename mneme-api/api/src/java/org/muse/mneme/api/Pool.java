@@ -31,17 +31,6 @@ import org.muse.mneme.api.QuestionService.FindQuestionsSort;
 public interface Pool
 {
 	/**
-	 * Count the questions in this pool with this criteria.
-	 * 
-	 * @param userId
-	 *        The user id (if null, the current user is used).
-	 * @param search
-	 *        The search criteria.
-	 * @return The questions in this pool with this criteria.
-	 */
-	Integer countQuestions(String userId, String search);
-
-	/**
 	 * Draw questions based on this random seed.
 	 * 
 	 * @param seed
@@ -55,8 +44,6 @@ public interface Pool
 	/**
 	 * Locate a list of questions in this pool with this criteria.
 	 * 
-	 * @param userId
-	 *        the user id (if null, the current user is used).
 	 * @param sort
 	 *        The sort criteria.
 	 * @param search
@@ -67,7 +54,7 @@ public interface Pool
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return a list of questions that meet the criteria.
 	 */
-	List<Question> findQuestions(String userId, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<Question> findQuestions(FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Access all questions.
@@ -75,6 +62,13 @@ public interface Pool
 	 * @return A List of question ids from the pool.
 	 */
 	List<String> getAllQuestionIds();
+
+	/**
+	 * Access the context of this pool.
+	 * 
+	 * @return The pool's context string.
+	 */
+	String getContext();
 
 	/**
 	 * Access the created-by (owner / date)
@@ -146,6 +140,14 @@ public interface Pool
 	 * @return The pool's version.
 	 */
 	String getVersion();
+
+	/**
+	 * Set the context of this pool.
+	 * 
+	 * @param context
+	 *        The pool's context string.
+	 */
+	void setContext(String context);
 
 	/**
 	 * Set the description of the pool.

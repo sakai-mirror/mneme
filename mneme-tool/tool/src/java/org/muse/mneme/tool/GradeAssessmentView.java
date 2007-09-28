@@ -78,7 +78,7 @@ public class GradeAssessmentView extends ControllerImpl
 		if (params.length != 4 && params.length != 5 && params.length != 6) throw new IllegalArgumentException();
 
 		// check for user permission to access the assessments for grading
-		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId()))
+		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -182,7 +182,7 @@ public class GradeAssessmentView extends ControllerImpl
 		if (params.length != 4 && params.length != 5 && params.length != 6) throw new IllegalArgumentException();
 
 		// check for user permission to access the assessments for grading
-		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId()))
+		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));

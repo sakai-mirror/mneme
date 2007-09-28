@@ -84,7 +84,7 @@ public class PartsDeleteView extends ControllerImpl
 		if (params.length > 4 && params[4] != null && params[4].length() != 0)
 		{
 			// security check
-			if (!assessmentService.allowRemoveAssessment(assessment, null))
+			if (!assessmentService.allowRemoveAssessment(assessment))
 			{
 				// redirect to error
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -155,7 +155,7 @@ public class PartsDeleteView extends ControllerImpl
 		if (selectedPartIds != null && selectedPartIds.length != 0)
 		{
 			// security check
-			if (!assessmentService.allowRemoveAssessment(assessment, null))
+			if (!assessmentService.allowRemoveAssessment(assessment))
 			{
 				// redirect to error
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));

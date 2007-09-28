@@ -49,15 +49,15 @@ public interface QuestionStorage
 	/**
 	 * Count the questions with this criteria.
 	 * 
-	 * @param userId
-	 *        The user id.
+	 * @param context
+	 *        The context criteria - count questions from all pools in the context, or if null, use pool.
 	 * @param pool
-	 *        The pool criteria - get questions from this pool only, or if null, across all accessible pools.
+	 *        The pool criteria - count questions from this pool only, or if null, use context.
 	 * @param search
 	 *        The search criteria.
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countQuestions(String userId, Pool pool, String search);
+	Integer countQuestions(String context, Pool pool, String search);
 
 	/**
 	 * Check if a question by this id exists.
@@ -71,10 +71,10 @@ public interface QuestionStorage
 	/**
 	 * Find all the questions that meet the criteria.
 	 * 
-	 * @param userId
-	 *        the user id.
+	 * @param context
+	 *        The context criteria - get questions from all pools in the context, or if null, use pool.
 	 * @param pool
-	 *        The pool criteria - get questions from this pool only, or if null, across all accessible pools.
+	 *        The pool criteria - get questions from this pool only, or if null, use context.
 	 * @param sort
 	 *        The sort criteria.
 	 * @param search
@@ -85,7 +85,7 @@ public interface QuestionStorage
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return a list of pools that meet the criteria.
 	 */
-	List<Question> findQuestions(String userId, Pool pool, QuestionService.FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<Question> findQuestions(String context, Pool pool, QuestionService.FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Find all the questions in the pool

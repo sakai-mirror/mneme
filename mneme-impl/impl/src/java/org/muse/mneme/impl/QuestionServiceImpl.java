@@ -80,19 +80,17 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowEditQuestion(Question question, String context, String userId)
+	public Boolean allowEditQuestion(Question question)
 	{
 		if (question == null) throw new IllegalArgumentException();
-		if (context == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		String userId = sessionManager.getCurrentSessionUserId();
 
-		if (M_log.isDebugEnabled()) M_log.debug("allowEditQuestion: " + question.getId() + ": " + context + ": " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("allowEditQuestion: " + question.getId());
 
 		// check permission - user must have MANAGE_PERMISSION in the context
-		boolean ok = securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context);
+		boolean ok = securityService.checkSecurity(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getPool()
+				.getContext());
 
-		// TODO: other users allowed...
-		// TODO: or is this user based...
 		return ok;
 	}
 
@@ -117,18 +115,18 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void copyPoolQuestions(String context, String userId, Pool source, Pool destination) throws AssessmentPermissionException
+	public void copyPoolQuestions(Pool source, Pool destination) throws AssessmentPermissionException
 	{
-		if (context == null) throw new IllegalArgumentException();
 		if (source == null) throw new IllegalArgumentException();
 		if (destination == null) throw new IllegalArgumentException();
 		if (source.equals(destination)) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
-		if (M_log.isDebugEnabled()) M_log.debug("copyPoolQuestions: " + context + ": " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("copyPoolQuestions: source: " + source.getId() + " destination: " + destination.getId());
+
+		String userId = sessionManager.getCurrentSessionUserId();
 
 		// security check
-		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, destination.getContext());
 
 		this.storage.copyPoolQuestions(userId, source, destination);
 	}
@@ -136,32 +134,34 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Question copyQuestion(String context, String userId, Pool pool, Question question) throws AssessmentPermissionException
+	public Question copyQuestion(Question question, Pool pool) throws AssessmentPermissionException
 	{
-		if (context == null) throw new IllegalArgumentException();
 		if (question == null) throw new IllegalArgumentException();
 		if (pool == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
-		if (M_log.isDebugEnabled()) M_log.debug("copyQuestion: " + context + ": " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("copyQuestion: " + question.getId());
 
 		// security check
-		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+		String destinationContext = (pool != null) ? pool.getContext() : question.getPool().getContext();
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, destinationContext);
 
 		QuestionImpl rv = this.storage.newQuestion((QuestionImpl) question);
 
 		// clear the id to make it new
 		rv.id = null;
 
-		// set the new created info
-		rv.getCreatedBy().setUserId(userId);
-		rv.getCreatedBy().setDate(new Date());
+		// TODO: set the new created info ??
+		// rv.getCreatedBy().setUserId(sessionManager.getCurrentSessionUserId());
+		// rv.getCreatedBy().setDate(new Date());
 
-		// set the new pool
-		rv.setPool(pool);
+		// set the new pool, if needed
+		if (pool != null)
+		{
+			rv.setPool(pool);
+		}
 
 		// save
-		saveQuestion(rv, context);
+		saveQuestion(rv);
 
 		return rv;
 	}
@@ -169,10 +169,25 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countQuestions(String userId, Pool pool, String search)
+	public Integer countQuestions(Pool pool, String search)
 	{
-		if (M_log.isDebugEnabled()) M_log.debug("findQuestions: " + userId);
-		Integer rv = this.storage.countQuestions(userId, pool, search);
+		if (pool == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("countQuestions");
+		Integer rv = this.storage.countQuestions(null, pool, search);
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countQuestions(String context, String search)
+	{
+		if (context == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("countQuestions");
+		Integer rv = this.storage.countQuestions(context, null, search);
 
 		return rv;
 	}
@@ -196,10 +211,25 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findQuestions(String userId, Pool pool, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
-		if (M_log.isDebugEnabled()) M_log.debug("findQuestions: " + userId);
-		List<Question> rv = this.storage.findQuestions(userId, pool, sort, search, pageNum, pageSize);
+		if (pool == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("findQuestions");
+		List<Question> rv = this.storage.findQuestions(null, pool, sort, search, pageNum, pageSize);
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Question> findQuestions(String context, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
+	{
+		if (context == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("findQuestions");
+		List<Question> rv = this.storage.findQuestions(context, null, sort, search, pageNum, pageSize);
 
 		return rv;
 	}
@@ -259,19 +289,18 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void moveQuestion(String context, String userId, Question question, Pool pool) throws AssessmentPermissionException
+	public void moveQuestion(Question question, Pool pool) throws AssessmentPermissionException
 	{
-		if (context == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 		if (question == null) throw new IllegalArgumentException();
 		if (pool == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("moveQuestion: " + context + ": " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("moveQuestion: " + question.getId() + " to pool: " + pool.getId());
 
 		// security check
-		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getPool().getContext());
+		// TODO: also check the pool?
 
-		// allow this, do nothing
+		// if to the same pool, do nothing
 		if (question.getPool().equals(pool)) return;
 
 		// do the move
@@ -281,15 +310,14 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Question newQuestion(String context, String userId, Pool pool, String type) throws AssessmentPermissionException
+	public Question newQuestion(Pool pool, String type) throws AssessmentPermissionException
 	{
-		if (context == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		if (M_log.isDebugEnabled()) M_log.debug("newQuestion: pool: " + pool.getId() + " tyrpe: " + type);
 
-		if (M_log.isDebugEnabled()) M_log.debug("newQuestion: " + context + ": " + userId);
+		String userId = sessionManager.getCurrentSessionUserId();
 
 		// security check
-		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, pool.getContext());
 
 		QuestionImpl question = this.storage.newQuestion();
 		question.setPool(pool);
@@ -315,7 +343,7 @@ public class QuestionServiceImpl implements QuestionService
 			M_log.warn("newQuestion: no plugin for type: " + type);
 		}
 
-		saveQuestion(question, context);
+		saveQuestion(question);
 
 		return question;
 	}
@@ -323,14 +351,14 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removePoolQuestions(Pool pool, String context) throws AssessmentPermissionException
+	public void removePoolQuestions(Pool pool) throws AssessmentPermissionException
 	{
 		if (pool == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("removePoolQuestions: " + pool.getId() + ": " + context);
+		if (M_log.isDebugEnabled()) M_log.debug("removePoolQuestions: " + pool.getId());
 
 		// security check
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, pool.getContext());
 
 		this.storage.removePoolQuestions(pool);
 
@@ -340,15 +368,14 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removeQuestion(Question question, String context) throws AssessmentPermissionException
+	public void removeQuestion(Question question) throws AssessmentPermissionException
 	{
 		if (question == null) throw new IllegalArgumentException();
-		if (context == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("removeQuestion: " + question.getId() + ": " + context);
+		if (M_log.isDebugEnabled()) M_log.debug("removeQuestion: " + question.getId());
 
 		// security check
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getPool().getContext());
 
 		this.storage.removeQuestion((QuestionImpl) question);
 
@@ -359,15 +386,14 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void saveQuestion(Question question, String context) throws AssessmentPermissionException
+	public void saveQuestion(Question question) throws AssessmentPermissionException
 	{
 		if (question == null) throw new IllegalArgumentException();
-		if (context == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: " + question.getId() + ": " + context);
+		if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: " + question.getId());
 
 		// security check
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getPool().getContext());
 
 		// if the question is new (i.e. no id), set the createdBy information, if not already set
 		if ((question.getId() == null) && (question.getCreatedBy().getUserId() == null))

@@ -22,7 +22,6 @@
 package org.muse.mneme.impl;
 
 import java.util.List;
-import java.util.Set;
 
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
@@ -33,15 +32,15 @@ import org.muse.mneme.api.PoolService;
 public interface PoolStorage
 {
 	/**
-	 * Count the pools available to these users with this criteria.
+	 * Count the pools in this context that meet this criteria.
 	 * 
-	 * @param userIds
-	 *        The set of user ids.
+	 * @param context
+	 *        The context.
 	 * @param search
 	 *        The search criteria.
 	 * @return a list of pools that meet the criteria.
 	 */
-	Integer countPools(Set<String> userIds, String search);
+	Integer countPools(String context, String search);
 
 	/**
 	 * Draw a set of questions from the pool.
@@ -65,10 +64,10 @@ public interface PoolStorage
 	Boolean existsPool(String poolId);
 
 	/**
-	 * Find all the pools these users own that meet the criteria.
+	 * Find all the pools in this context that meet the criteria.
 	 * 
-	 * @param userIds
-	 *        The set of user ids.
+	 * @param context
+	 *        The context.
 	 * @param sort
 	 *        The sort criteria.
 	 * @param search
@@ -77,9 +76,9 @@ public interface PoolStorage
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
-	 * @return The list of pools the user has access to.
+	 * @return The list of pools that meet the criteria.
 	 */
-	List<Pool> findPools(Set<String> userIds, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<Pool> findPools(String context, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Access all questions.
@@ -100,13 +99,13 @@ public interface PoolStorage
 	PoolImpl getPool(String poolId);
 
 	/**
-	 * Access all pools owned by these users.
+	 * Access all pools in the context.
 	 * 
-	 * @param userIds
-	 *        The user ids.
-	 * @return The List of Pools owned by these users.
+	 * @param context
+	 *        The context.
+	 * @return The List of Pools in the context.
 	 */
-	List<Pool> getPools(Set<String> userIds);
+	List<Pool> getPools(String context);
 
 	/**
 	 * Count the questions in a pool.
@@ -118,13 +117,13 @@ public interface PoolStorage
 	Integer getPoolSize(PoolImpl pool);
 
 	/**
-	 * Get a list of all the subjects of all the pools owned by these users.
+	 * Get a list of all the subjects of all the pools in this context.
 	 * 
-	 * @param userIds
-	 *        The user ids.
-	 * @return a list of all the subjects of all the pools accessible to the user.
+	 * @param context
+	 *        The context.
+	 * @return a list of all the subjects of all the pools in the context.
 	 */
-	List<String> getSubjects(Set<String> userIds);
+	List<String> getSubjects(String context);
 
 	/**
 	 * Construct a new pool object.

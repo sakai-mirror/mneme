@@ -92,17 +92,21 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countQuestions(String userId, Pool pool, String search)
+	public Integer countQuestions(String context, Pool pool, String search)
 	{
+		if (context == null && pool == null) throw new IllegalArgumentException();
+		if (context != null && pool != null) throw new IllegalArgumentException();
+
 		// TODO: search
 
 		int count = 0;
 		for (QuestionImpl question : this.questions.values())
 		{
-			if ((!question.deleted) && question.getCreatedBy().getUserId().equals(userId) && ((pool == null) || (question.getPool().equals(pool))))
-			{
-				count++;
-			}
+			if (question.deleted) continue;
+			if ((pool != null) && (!question.getPool().equals(pool))) continue;
+			if ((context != null) && (!question.getPool().getContext().equals(context))) continue;
+
+			count++;
 		}
 
 		return count;
@@ -133,9 +137,12 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findQuestions(String userId, Pool pool, final QuestionService.FindQuestionsSort sort, String search, Integer pageNum,
+	public List<Question> findQuestions(String context, Pool pool, final QuestionService.FindQuestionsSort sort, String search, Integer pageNum,
 			Integer pageSize)
 	{
+		if (context == null && pool == null) throw new IllegalArgumentException();
+		if (context != null && pool != null) throw new IllegalArgumentException();
+
 		fakeIt();
 
 		// TODO: search
@@ -143,10 +150,11 @@ public class QuestionStorageSample implements QuestionStorage
 		List<Question> rv = new ArrayList<Question>();
 		for (QuestionImpl question : this.questions.values())
 		{
-			if ((!question.deleted) && question.getCreatedBy().getUserId().equals(userId) && ((pool == null) || (question.getPool().equals(pool))))
-			{
-				rv.add(new QuestionImpl(question));
-			}
+			if (question.deleted) continue;
+			if ((pool != null) && (!question.getPool().equals(pool))) continue;
+			if ((context != null) && (!question.getPool().getContext().equals(context))) continue;
+
+			rv.add(new QuestionImpl(question));
 		}
 
 		// sort

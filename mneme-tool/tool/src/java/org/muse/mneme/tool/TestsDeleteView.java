@@ -89,7 +89,7 @@ public class TestsDeleteView extends ControllerImpl
 				assessment = this.assessmentService.getAssessment(selectTestId);
 				if (assessment != null)
 				{
-					if (this.assessmentService.allowRemoveAssessment(assessment, sessionManager.getCurrentSessionUserId()))
+					if (this.assessmentService.allowRemoveAssessment(assessment))
 					{
 						assessments.add(assessment);
 					}
@@ -154,7 +154,7 @@ public class TestsDeleteView extends ControllerImpl
 						Assessment assessment = this.assessmentService.getAssessment(selectedTestId);
 						if (assessment != null)
 						{
-							if (this.assessmentService.allowRemoveAssessment(assessment, sessionManager.getCurrentSessionUserId()))
+							if (this.assessmentService.allowRemoveAssessment(assessment))
 							{
 								this.assessmentService.removeAssessment(assessment);
 								// path.append(selectedTestId);

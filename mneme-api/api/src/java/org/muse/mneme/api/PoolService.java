@@ -37,33 +37,29 @@ public interface PoolService
 	}
 
 	/**
-	 * Check if the current user is allowed to manage pools from this context.
+	 * Check if the current user is allowed to manage pools in this context.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @param userId
-	 *        The user (if null, the current user is used).
 	 * @return TRUE if the user is allowed, FALSE if not.
 	 */
-	Boolean allowManagePools(String context, String userId);
+	Boolean allowManagePools(String context);
 
 	/**
 	 * Copy an existing pool creating a new pool.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @param userId
-	 *        the pool owner (if null, the currrent user is used)
 	 * @param pool
 	 *        The pool to copy.
 	 * @return The new pool as a copy of the old pool, complete with questions.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to create a new pool.
 	 */
-	Pool copyPool(String context, String userId, Pool pool) throws AssessmentPermissionException;
+	Pool copyPool(Pool pool) throws AssessmentPermissionException;
 
 	/**
-	 * Count the pools available to this context with this criteria.
+	 * Count the pools in this context with this criteria.
 	 * 
 	 * @param context
 	 *        The context.
@@ -83,7 +79,7 @@ public interface PoolService
 	Boolean existsPool(String poolId);
 
 	/**
-	 * Locate a list of pools accessible to this context with this criteria.
+	 * Locate a list of pools in this context with this criteria.
 	 * 
 	 * @param context
 	 *        The context.
@@ -109,11 +105,11 @@ public interface PoolService
 	Pool getPool(String poolId);
 
 	/**
-	 * Get a list of all the subjects of all the pools accessible to this context.
+	 * Get a list of all the subjects of all the pools in this context.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @return a list of all the subjects of all the pools accessible to the context.
+	 * @return a list of all the subjects of all the pools in the context.
 	 */
 	List<String> getSubjects(String context);
 
@@ -122,35 +118,29 @@ public interface PoolService
 	 * 
 	 * @param context
 	 *        The context.
-	 * @param userId
-	 *        the pool owner (if null, the currrent user is used)
 	 * @return The new pool.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to create a new pool.
 	 */
-	Pool newPool(String context, String userId) throws AssessmentPermissionException;
+	Pool newPool(String context) throws AssessmentPermissionException;
 
 	/**
 	 * Remove this pool.
 	 * 
 	 * @param pool
 	 *        The pool to remove.
-	 * @param context
-	 *        The context.
 	 * @throws AssessmentPermissionException
-	 *         if the current user is not allowed to edit this pool.
+	 *         if the current user is not allowed to manage this pool.
 	 */
-	void removePool(Pool pool, String context) throws AssessmentPermissionException;
+	void removePool(Pool pool) throws AssessmentPermissionException;
 
 	/**
 	 * Save changes made to this pool.
 	 * 
 	 * @param pool
 	 *        The pool to save.
-	 * @param context
-	 *        The context.
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to edit this pool.
 	 */
-	void savePool(Pool pool, String context) throws AssessmentPermissionException;
+	void savePool(Pool pool) throws AssessmentPermissionException;
 }

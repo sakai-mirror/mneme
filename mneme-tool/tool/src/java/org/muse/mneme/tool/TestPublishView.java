@@ -80,7 +80,7 @@ public class TestPublishView extends ControllerImpl
 		}
 
 		// security check
-		if (!assessmentService.allowEditAssessment(assessment, null))
+		if (!assessmentService.allowEditAssessment(assessment))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -126,7 +126,7 @@ public class TestPublishView extends ControllerImpl
 		}
 
 		// security check
-		if (!assessmentService.allowEditAssessment(assessment, null))
+		if (!assessmentService.allowEditAssessment(assessment))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));

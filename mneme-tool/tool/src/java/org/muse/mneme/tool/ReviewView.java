@@ -88,7 +88,7 @@ public class ReviewView extends ControllerImpl
 			return;
 		}
 
-		if (!assessmentService.allowReviewSubmission(submission, null))
+		if (!assessmentService.allowReviewSubmission(submission))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));

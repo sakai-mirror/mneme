@@ -85,10 +85,10 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowEditAssessment(Assessment assessment, String userId)
+	public Boolean allowEditAssessment(Assessment assessment)
 	{
 		if (assessment == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		String userId = sessionManager.getCurrentSessionUserId();
 
 		if (M_log.isDebugEnabled()) M_log.debug("allowEditAssessment: " + assessment.getId() + ": " + userId);
 
@@ -101,10 +101,10 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowListDeliveryAssessment(String context, String userId)
+	public Boolean allowListDeliveryAssessment(String context)
 	{
 		if (context == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		String userId = sessionManager.getCurrentSessionUserId();
 
 		if (M_log.isDebugEnabled()) M_log.debug("allowListDeliveryAssessment: " + context + ": " + userId);
 
@@ -117,10 +117,10 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowManageAssessments(String context, String userId)
+	public Boolean allowManageAssessments(String context)
 	{
 		if (context == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		String userId = sessionManager.getCurrentSessionUserId();
 
 		if (M_log.isDebugEnabled()) M_log.debug("allowManageAssessments: " + context + ": " + userId);
 
@@ -133,10 +133,12 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowRemoveAssessment(Assessment assessment, String userId)
+	public Boolean allowRemoveAssessment(Assessment assessment)
 	{
+		if (assessment == null) throw new IllegalArgumentException();
+
 		// user must have manage permission
-		if (!this.allowManageAssessments(assessment.getContext(), userId)) return Boolean.FALSE;
+		if (!this.allowManageAssessments(assessment.getContext())) return Boolean.FALSE;
 
 		// check policy
 		return satisfyAssessmentRemovalPolicy(assessment);
@@ -216,9 +218,6 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (id == null) throw new IllegalArgumentException();
 
 		if (M_log.isDebugEnabled()) M_log.debug("idAssessment: " + id);
-
-		// TODO: check to see if id is a valid existing assessment?
-		// this.storage.assesmentExists(id);
 
 		AssessmentImpl rv = this.storage.getAssessment(id);
 

@@ -75,7 +75,7 @@ public class FinalReviewView extends ControllerImpl
 			return;
 		}
 
-		if (!assessmentService.allowCompleteSubmission(submission, null))
+		if (!assessmentService.allowCompleteSubmission(submission))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));

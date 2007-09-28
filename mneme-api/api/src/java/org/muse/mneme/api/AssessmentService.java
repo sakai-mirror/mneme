@@ -41,44 +41,36 @@ public interface AssessmentService
 	 * 
 	 * @param assessment
 	 *        The assessment.
-	 * @param userId
-	 *        The user (if null, the current user is used).
 	 * @return TRUE if the user is allowed, FALSE if not.
 	 */
-	Boolean allowEditAssessment(Assessment assessment, String userId);
+	Boolean allowEditAssessment(Assessment assessment);
 
 	/**
 	 * Check if the user is allowed to list delivery assessments in this context.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @param userId
-	 *        The user (if null, the current user is used).
 	 * @return TRUE if the user is allowed to list delivery assessments in this context, FALSE if not.
 	 */
-	Boolean allowListDeliveryAssessment(String context, String userId);
+	Boolean allowListDeliveryAssessment(String context);
 
 	/**
 	 * Check if the user is allowed to manage assessments in this context.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @param userId
-	 *        The user (if null, the current user is used).
 	 * @return TRUE if the user is allowed to manage assessments in this context, FALSE if not.
 	 */
-	Boolean allowManageAssessments(String context, String userId);
+	Boolean allowManageAssessments(String context);
 
 	/**
 	 * Check if the assessment may be removed at this time by this user.
 	 * 
 	 * @param assessment
 	 *        The assessment.
-	 * @param userId
-	 *        The user (if null, the current user is used).
 	 * @return TRUE if the assessment may be removed by this user, FALSE if not.
 	 */
-	Boolean allowRemoveAssessment(Assessment assessment, String userId);
+	Boolean allowRemoveAssessment(Assessment assessment);
 
 	/**
 	 * Create a new Assessment in the context that is a copy of another.<br />

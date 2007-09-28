@@ -101,7 +101,7 @@ public class TestsRestoreView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// security check
-		if (!assessmentService.allowManageAssessments(this.toolManager.getCurrentPlacement().getContext(), null))
+		if (!assessmentService.allowManageAssessments(this.toolManager.getCurrentPlacement().getContext()))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));

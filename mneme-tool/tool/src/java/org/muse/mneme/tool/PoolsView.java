@@ -236,7 +236,7 @@ public class PoolsView extends ControllerImpl
 				try
 				{
 					// create new pool and redirect to pool properties
-					Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId());
+					Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext());
 
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination + "/" + newPool.getId())));
 					return;
@@ -253,15 +253,14 @@ public class PoolsView extends ControllerImpl
 				try
 				{
 					// create new pool and redirect to pool properties
-					Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId());
+					Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext());
 
 					if (selectedPoolIds != null && (selectedPoolIds.length > 0))
 					{
 						for (String selectedPoolId : selectedPoolIds)
 						{
 							Pool sourcePool = this.poolService.getPool(selectedPoolId);
-							this.questionService.copyPoolQuestions(toolManager.getCurrentPlacement().getContext(), sessionManager
-									.getCurrentSessionUserId(), sourcePool, newPool);
+							this.questionService.copyPoolQuestions(sourcePool, newPool);
 						}
 
 						destination = destination.replace("COMBINE", "pool_properties");
@@ -288,7 +287,7 @@ public class PoolsView extends ControllerImpl
 				{
 					Pool pool = this.poolService.getPool(destination.substring(destination.lastIndexOf("/") + 1));
 					if (pool != null)
-						this.poolService.copyPool(toolManager.getCurrentPlacement().getContext(), sessionManager.getCurrentSessionUserId(), pool);
+						this.poolService.copyPool(pool);
 					
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
 					return;
@@ -325,7 +324,7 @@ public class PoolsView extends ControllerImpl
 				String type = StringUtil.splitFirst(destination, ":")[1];
 
 				// check security
-				if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext(), null))
+				if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 				{
 					// redirect to error
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -336,8 +335,8 @@ public class PoolsView extends ControllerImpl
 				Question newQuestion = null;
 				try
 				{
-					newQuestion = this.questionService.newQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, type);
-					this.questionService.saveQuestion(newQuestion, toolManager.getCurrentPlacement().getContext());
+					newQuestion = this.questionService.newQuestion(pool, type);
+					this.questionService.saveQuestion(newQuestion);
 				}
 				catch (AssessmentPermissionException e)
 				{

@@ -93,7 +93,7 @@ public class EnterView extends ControllerImpl
 		}
 
 		// security check (submissions count / allowed check)
-		if (!submissionService.allowSubmit(assessment, null).booleanValue())
+		if (!submissionService.allowSubmit(assessment))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -200,7 +200,7 @@ public class EnterView extends ControllerImpl
 		Submission submission = null;
 		try
 		{
-			submission = submissionService.enterSubmission(assessment, null);
+			submission = submissionService.enterSubmission(assessment);
 		}
 		catch (AssessmentClosedException e)
 		{

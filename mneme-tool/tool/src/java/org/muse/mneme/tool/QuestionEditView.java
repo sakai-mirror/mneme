@@ -86,7 +86,7 @@ public class QuestionEditView extends ControllerImpl
 		if (question == null) throw new IllegalArgumentException();
 
 		// check security
-		if (!this.questionService.allowEditQuestion(question, toolManager.getCurrentPlacement().getContext(), null))
+		if (!this.questionService.allowEditQuestion(question))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -122,7 +122,7 @@ public class QuestionEditView extends ControllerImpl
 		// save
 		try
 		{
-			this.questionService.saveQuestion(question, toolManager.getCurrentPlacement().getContext());
+			this.questionService.saveQuestion(question);
 		}
 		catch (AssessmentPermissionException e)
 		{

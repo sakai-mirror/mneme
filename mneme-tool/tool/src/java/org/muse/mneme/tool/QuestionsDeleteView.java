@@ -132,7 +132,7 @@ public class QuestionsDeleteView extends ControllerImpl
 				{
 					try
 					{
-						this.questionService.removeQuestion(question, toolManager.getCurrentPlacement().getContext());
+						this.questionService.removeQuestion(question);
 					}
 					catch (AssessmentPermissionException e)
 					{

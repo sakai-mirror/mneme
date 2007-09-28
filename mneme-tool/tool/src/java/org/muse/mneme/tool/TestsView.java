@@ -190,7 +190,7 @@ public class TestsView extends ControllerImpl
 	{
 
 		// security check
-		if (!assessmentService.allowManageAssessments(this.toolManager.getCurrentPlacement().getContext(), null))
+		if (!assessmentService.allowManageAssessments(this.toolManager.getCurrentPlacement().getContext()))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));

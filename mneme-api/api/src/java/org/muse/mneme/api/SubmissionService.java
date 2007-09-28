@@ -52,22 +52,18 @@ public interface SubmissionService
 	 * 
 	 * @param submission
 	 *        The submission.
-	 * @param userId
-	 *        The user taking the assessment (if null, the current user is used).
 	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
 	 */
-	Boolean allowCompleteSubmission(Submission submission, String userId);
+	Boolean allowCompleteSubmission(Submission submission);
 
 	/**
 	 * Check if the current user is allowed to evaluate (grade) submissions in the context.<br />
 	 * 
 	 * @param context
 	 *        The context.
-	 * @param userId
-	 *        The user (if null, the current user is used).
 	 * @return TRUE if the user is allowed to evaluate submissions in the context, FALSE if not.
 	 */
-	Boolean allowEvaluate(String context, String userId);
+	Boolean allowEvaluate(String context);
 
 	/**
 	 * Check if the current user is allowed to evaluate (grade) this submission.<br />
@@ -75,11 +71,9 @@ public interface SubmissionService
 	 * 
 	 * @param submission
 	 *        The submission.
-	 * @param userId
-	 *        The user (if null, the current user is used).
 	 * @return TRUE if the user is allowed to evaluate the submission, FALSE if not.
 	 */
-	Boolean allowEvaluate(Submission submission, String userId);
+	Boolean allowEvaluate(Submission submission);
 
 	/**
 	 * Check if the current user is allowed to review this submission.<br />
@@ -88,11 +82,9 @@ public interface SubmissionService
 	 * 
 	 * @param submission
 	 *        The submission.
-	 * @param userId
-	 *        The user taking the assessment (if null, the current user is used).
 	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
 	 */
-	Boolean allowReviewSubmission(Submission submission, String userId);
+	Boolean allowReviewSubmission(Submission submission);
 
 	/**
 	 * Check if the current user is allowed to submit to the assessment.<br />
@@ -101,11 +93,9 @@ public interface SubmissionService
 	 * 
 	 * @param assessment
 	 *        The assessment.
-	 * @param userId
-	 *        The user taking the assessment (if null, the current user is used).
 	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
 	 */
-	Boolean allowSubmit(Assessment assessment, String userId);
+	Boolean allowSubmit(Assessment assessment);
 
 	/**
 	 * Complete this submission. Use this instead of submitAnswer() when there's no answer information to also update.
@@ -138,8 +128,6 @@ public interface SubmissionService
 	 * 
 	 * @param assessment
 	 *        The published assessment to submit to.
-	 * @param userId
-	 *        The user taking the assessment (if null, the current user is used).
 	 * @return The submission (found or created), or null if this was unsuccessful.
 	 * @throws AssessmentPermissionException
 	 *         if the user does not have permission to submit to this assessment.
@@ -148,8 +136,7 @@ public interface SubmissionService
 	 * @throws AssessmentCompletedException
 	 *         if an assessment has been submitted to by the user the maximum number of times.
 	 */
-	Submission enterSubmission(Assessment assessment, String userId) throws AssessmentPermissionException, AssessmentClosedException,
-			AssessmentCompletedException;
+	Submission enterSubmission(Assessment assessment) throws AssessmentPermissionException, AssessmentClosedException, AssessmentCompletedException;
 
 	/**
 	 * Record the evaluation changes made to these answers.
@@ -264,7 +251,7 @@ public interface SubmissionService
 	Submission getSubmission(String id);
 
 	/**
-	 * TODO: rename find... Find the submissions to assignments in this context made by this user. Consider:
+	 * Get the submissions to assignments in this context made by this user. Consider:
 	 * <ul>
 	 * <li>published assessments</li>
 	 * <li>assessments in this context</li>

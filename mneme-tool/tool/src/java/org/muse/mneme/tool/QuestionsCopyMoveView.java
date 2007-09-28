@@ -221,11 +221,11 @@ public class QuestionsCopyMoveView extends ControllerImpl
 					// which function to perform
 					if (path.startsWith("question_copy"))
 					{
-						this.questionService.copyQuestion(toolManager.getCurrentPlacement().getContext(), null, pool, question);
+						this.questionService.copyQuestion(question, pool);
 					}
 					else if (path.startsWith("question_move"))
 					{
-						this.questionService.moveQuestion(toolManager.getCurrentPlacement().getContext(), null, question, pool);
+						this.questionService.moveQuestion(question, pool);
 					}
 				}
 			}

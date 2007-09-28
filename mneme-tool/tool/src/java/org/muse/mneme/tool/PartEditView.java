@@ -117,7 +117,7 @@ public class PartEditView extends ControllerImpl
 		}
 
 		// security check
-		if (!assessmentService.allowEditAssessment(assessment, null))
+		if (!assessmentService.allowEditAssessment(assessment))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -301,7 +301,7 @@ public class PartEditView extends ControllerImpl
 		}
 
 		// security check
-		if (!assessmentService.allowEditAssessment(assessment, null))
+		if (!assessmentService.allowEditAssessment(assessment))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));

@@ -412,7 +412,7 @@ public class QuestionView extends ControllerImpl
 		// put in the selector
 		context.put("questionSelector", questionSelector);
 
-		if (!assessmentService.allowCompleteSubmission(submission, null))
+		if (!assessmentService.allowCompleteSubmission(submission))
 		{
 			return Errors.unauthorized;
 		}

@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,7 +57,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPools(Set<String> userIds, String search)
+	public Integer countPools(String context, String search)
 	{
 		fakeIt();
 
@@ -66,10 +65,9 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.deleted) && userIds.contains(pool.getOwnerId()))
+			if ((!pool.deleted) && pool.getContext().equals(context))
 			{
 				// TODO: search
-
 				count++;
 			}
 		}
@@ -118,7 +116,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(Set<String> userIds, final PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Pool> findPools(String context, final PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		fakeIt();
 
@@ -126,10 +124,9 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.deleted) && userIds.contains(pool.getOwnerId()))
+			if ((!pool.deleted) && pool.getContext().equals(context))
 			{
 				// TODO: search
-
 				rv.add(new PoolImpl(pool));
 			}
 		}
@@ -242,7 +239,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> getPools(Set<String> userIds)
+	public List<Pool> getPools(String context)
 	{
 		fakeIt();
 
@@ -250,7 +247,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.deleted) && userIds.contains(pool.getOwnerId()))
+			if ((!pool.deleted) && pool.getId().equals(context))
 			{
 				rv.add(new PoolImpl(pool));
 			}
@@ -271,7 +268,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getSubjects(Set<String> userIds)
+	public List<String> getSubjects(String context)
 	{
 		fakeIt();
 
@@ -279,7 +276,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.deleted) && userIds.contains(pool.getOwnerId()))
+			if ((!pool.deleted) && pool.getContext().equals(context))
 			{
 				if (pool.getSubject() != null)
 				{
@@ -383,7 +380,10 @@ public class PoolStorageSample implements PoolStorage
 			pool.initId("b1");
 			pool.setDescription("description");
 			pool.setDifficulty(5);
-			pool.setOwnerId("admin");
+			pool.createdBy.setUserId("admin");
+			pool.createdBy.setDate(now);
+			pool.modifiedBy.setUserId("admin");
+			pool.modifiedBy.setDate(now);
 			pool.setPoints(10f);
 			pool.setSubject("subject");
 			pool.setTitle("title");
@@ -391,13 +391,17 @@ public class PoolStorageSample implements PoolStorage
 			pool.getCreatedBy().setDate(now);
 			pool.getModifiedBy().setUserId("admin");
 			pool.getModifiedBy().setDate(now);
+			pool.setContext("mercury");
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
 			pool.initId("b2");
 			pool.setDescription("description 2");
 			pool.setDifficulty(5);
-			pool.setOwnerId("admin");
+			pool.createdBy.setUserId("admin");
+			pool.createdBy.setDate(now);
+			pool.modifiedBy.setUserId("admin");
+			pool.modifiedBy.setDate(now);
 			pool.setPoints(10f);
 			pool.setSubject("subject 2");
 			pool.setTitle("title 2");
@@ -405,13 +409,17 @@ public class PoolStorageSample implements PoolStorage
 			pool.getCreatedBy().setDate(now);
 			pool.getModifiedBy().setUserId("admin");
 			pool.getModifiedBy().setDate(now);
+			pool.setContext("mercury");
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
 			pool.initId("b3");
 			pool.setDescription("description 3");
 			pool.setDifficulty(3);
-			pool.setOwnerId("admin");
+			pool.createdBy.setUserId("admin");
+			pool.createdBy.setDate(now);
+			pool.modifiedBy.setUserId("admin");
+			pool.modifiedBy.setDate(now);
 			pool.setPoints(7f);
 			pool.setSubject("subject 3");
 			pool.setTitle("title 3");
@@ -419,13 +427,17 @@ public class PoolStorageSample implements PoolStorage
 			pool.getCreatedBy().setDate(now);
 			pool.getModifiedBy().setUserId("admin");
 			pool.getModifiedBy().setDate(now);
+			pool.setContext("mercury");
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
 			pool.initId("b4");
 			pool.setDescription("description 4");
 			pool.setDifficulty(3);
-			pool.setOwnerId("admin");
+			pool.createdBy.setUserId("admin");
+			pool.createdBy.setDate(now);
+			pool.modifiedBy.setUserId("admin");
+			pool.modifiedBy.setDate(now);
 			pool.setPoints(7f);
 			pool.setSubject("subject 4");
 			pool.setTitle("title 4");
@@ -433,13 +445,17 @@ public class PoolStorageSample implements PoolStorage
 			pool.getCreatedBy().setDate(now);
 			pool.getModifiedBy().setUserId("admin");
 			pool.getModifiedBy().setDate(now);
+			pool.setContext("mercury");
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
 			pool.initId("b5");
 			pool.setDescription("description 5");
 			pool.setDifficulty(1);
-			pool.setOwnerId("admin");
+			pool.createdBy.setUserId("admin");
+			pool.createdBy.setDate(now);
+			pool.modifiedBy.setUserId("admin");
+			pool.modifiedBy.setDate(now);
 			pool.setPoints(3f);
 			pool.setSubject("subject 5");
 			pool.setTitle("title 5");
@@ -447,6 +463,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.getCreatedBy().setDate(now);
 			pool.getModifiedBy().setUserId("admin");
 			pool.getModifiedBy().setDate(now);
+			pool.setContext("mercury");
 			this.pools.put(pool.getId(), pool);
 		}
 	}
