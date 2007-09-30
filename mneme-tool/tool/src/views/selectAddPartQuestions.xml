@@ -24,7 +24,6 @@
 	**********************************************************************************/
 -->
 
-
 <interface title="select-add-title">
 	<!--mode bar-->
 	<modeContainer>
@@ -46,13 +45,13 @@
 						<message selector="no-questions" />
 					</emptyTitle>
 					<pager paging="paging">
-						<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}{4}/{5}">
+						<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/{4}{5}">
 							<model ref="testsortcode" />
 							<model ref="assessmentId" />
 							<model ref="partId" />
+							<model type="paging" ref="paging" />
 							<model ref="sort_column" />
 							<model ref="sort_direction" />
-							<model type="paging" ref="paging" />
 						</destination>
 					</pager>
 					<iterator name="question" model="questions" />
@@ -65,9 +64,9 @@
 						</selectionColumn>
 						<modelColumn>
 							<title>
-								<message selector="question-subject" />
+								<message selector="question-pool-title" />
 							</title>
-							<model ref="question.pool.subject" />
+							<model ref="question.pool.title" missing="no-title" />
 							<sort>
 								<active>
 									<compareDecision model="sort_column" constant="1" />
@@ -87,38 +86,6 @@
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
 									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/1D">
-										<model ref="testsortcode" />
-										<model ref="assessmentId" />
-										<model ref="partId" />
-										<model ref="pagingParameter" />
-									</destination>
-								</desc>
-							</sort>
-						</modelColumn>
-						<modelColumn>
-							<title>
-								<message selector="question-pool-title" />
-							</title>
-							<model ref="question.pool.title" missing="no-title" />
-							<sort>
-								<active>
-									<compareDecision model="sort_column" constant="2" />
-								</active>
-								<direction>
-									<compareDecision model="sort_direction" constant="A" />
-								</direction>
-								<asc icon="/icons/sortascending.gif">
-									<message selector="asc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/2A">
-										<model ref="testsortcode" />
-										<model ref="assessmentId" />
-										<model ref="partId" />
-										<model ref="pagingParameter" />
-									</destination>
-								</asc>
-								<desc icon="/icons/sortdescending.gif">
-									<message selector="desc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/2D">
 										<model ref="testsortcode" />
 										<model ref="assessmentId" />
 										<model ref="partId" />
@@ -192,14 +159,14 @@
 							<model ref="question.pool.points" />
 							<sort>
 								<active>
-									<compareDecision model="sort_column" constant="3" />
+									<compareDecision model="sort_column" constant="2" />
 								</active>
 								<direction>
 									<compareDecision model="sort_direction" constant="A" />
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/3A">
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/2A">
 										<model ref="testsortcode" />
 										<model ref="assessmentId" />
 										<model ref="partId" />
@@ -208,7 +175,7 @@
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/3D">
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/2D">
 										<model ref="testsortcode" />
 										<model ref="assessmentId" />
 										<model ref="partId" />

@@ -85,10 +85,6 @@ public class PoolPropertiesView extends ControllerImpl
 		Pool pool = this.poolService.getPool(params[4]);
 		context.put("pool", pool);
 
-		// get the subjects
-		List<String> subjects = poolService.getSubjects(toolManager.getCurrentPlacement().getContext());
-		context.put("subjects", subjects);
-
 		// render
 		uiService.render(ui, context);
 	}
@@ -102,32 +98,30 @@ public class PoolPropertiesView extends ControllerImpl
 
 		// setup the model: the selected pool
 		Pool pool = this.poolService.getPool(params[4]);
-		context.put("pool", pool);
-
-		// read the form
-		String destination = uiService.decode(req, context);
-
-		if (pool != null)
+		if (pool == null)
 		{
-			try
-			{
-				if (pool.getTitle() == null) pool.setTitle("");
-
-				if (pool.getSubject() == null) pool.setSubject("");
-
-				this.poolService.savePool(pool);
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-				return;
-			}
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
 		}
 
+		// read the form
+		context.put("pool", pool);
+		String destination = uiService.decode(req, context);
+
+		try
+		{
+			this.poolService.savePool(pool);
+		}
+		catch (AssessmentPermissionException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+	
 		destination = "/pools/" + params[2] + "/" + params[3];
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-
 	}
 
 	/**

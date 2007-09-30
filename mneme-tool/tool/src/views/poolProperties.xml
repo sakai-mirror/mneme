@@ -41,27 +41,12 @@
 	</title>
 	<container>
 		<section>
-			<!--title highlighted="TRUE">
-				<message selector="pool-id">
-				<model ref="pool.id" />
-				</message>
-				</title-->
 			<container>
 				<entityDisplay>
 					<rows>
-						<row title="pool-id">
-							<container>
-								<text model="pool.id" />
-							</container>
-						</row>
 						<row title="pool-title">
 							<container>
 								<textEdit model="pool.title" rows="1" cols="25" />
-							</container>
-						</row>
-						<row title="pool-subject">
-							<container>
-								<textEdit model="pool.subject" rows="1" cols="25" options="subjects" />
 							</container>
 						</row>
 						<row title="pool-description">
@@ -88,7 +73,31 @@
 										<selectionChoice value="5" selector="Level-5" />
 									</selectionChoices>
 								</selection>
-								<text selector="pool-difficulty-note" />
+							</container>
+						</row>
+						<row title="id">
+							<container>
+								<text model="pool.id" />
+							</container>
+						</row>
+						<row title="history">
+							<container>
+								<text>
+									<message selector="history-createText">
+										<model type="userInfo" selector="DISPLAYNAME" ref="pool.createdBy.userId" />
+										<model type="date" ref="pool.createdBy.date" />
+									</message>
+								</text>
+							</container>
+						</row>
+						<row>
+							<container>
+								<text>
+									<message selector="history-modifyText">
+										<model type="userInfo" selector="DISPLAYNAME" ref="pool.modifiedBy.userId" />
+										<model type="date" ref="pool.modifiedBy.date" />
+									</message>
+								</text>
 							</container>
 						</row>
 					</rows>

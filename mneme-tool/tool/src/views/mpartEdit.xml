@@ -121,12 +121,6 @@
 						</orderColumn>
 						<modelColumn>
 							<title>
-								<message selector="question-subject" />
-							</title>
-							<model ref="question.pool.subject" />
-						</modelColumn>
-						<modelColumn>
-							<title>
 								<message selector="question-pool-title" />
 							</title>
 							<model ref="question.pool.title" missing="no-title" />

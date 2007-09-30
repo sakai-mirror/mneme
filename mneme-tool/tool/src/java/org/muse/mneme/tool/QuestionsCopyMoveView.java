@@ -122,21 +122,12 @@ public class QuestionsCopyMoveView extends ControllerImpl
 				context.put("sort_column", sortCode.charAt(0));
 				context.put("sort_direction", sortCode.charAt(1));
 
-				// 0 is subject
+				// 0 is title
 				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
-				{
-					sort = PoolService.FindPoolsSort.subject_a;
-				}
-				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
-				{
-					sort = PoolService.FindPoolsSort.subject_d;
-				}
-				// 1 is title
-				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
 				{
 					sort = PoolService.FindPoolsSort.title_a;
 				}
-				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
 				{
 					sort = PoolService.FindPoolsSort.title_d;
 				}
@@ -159,7 +150,7 @@ public class QuestionsCopyMoveView extends ControllerImpl
 			// default sort: title ascending
 			sort = PoolService.FindPoolsSort.title_a;
 
-			context.put("sort_column", '1');
+			context.put("sort_column", '0');
 			context.put("sort_direction", 'A');
 		}
 

@@ -139,20 +139,6 @@ public class PoolStorageSample implements PoolStorage
 				int rv = 0;
 				switch (sort)
 				{
-					case subject_a:
-					{
-						String s0 = StringUtil.trimToZero(((Pool) arg0).getSubject());
-						String s1 = StringUtil.trimToZero(((Pool) arg1).getSubject());
-						rv = s0.compareTo(s1);
-						break;
-					}
-					case subject_d:
-					{
-						String s0 = StringUtil.trimToZero(((Pool) arg0).getSubject());
-						String s1 = StringUtil.trimToZero(((Pool) arg1).getSubject());
-						rv = -1 * s0.compareTo(s1);
-						break;
-					}
 					case title_a:
 					{
 						String s0 = StringUtil.trimToZero(((Pool) arg0).getTitle());
@@ -266,35 +252,6 @@ public class PoolStorageSample implements PoolStorage
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public List<String> getSubjects(String context)
-	{
-		fakeIt();
-
-		List<String> rv = new ArrayList<String>();
-
-		for (PoolImpl pool : this.pools.values())
-		{
-			if ((!pool.deleted) && pool.getContext().equals(context))
-			{
-				if (pool.getSubject() != null)
-				{
-					if (!rv.contains(pool.getSubject()))
-					{
-						rv.add(pool.getSubject());
-					}
-				}
-			}
-		}
-
-		// sort
-		Collections.sort(rv);
-
-		return rv;
-	}
-
-	/**
 	 * Final initialization, once all dependencies are set.
 	 */
 	public void init()
@@ -385,7 +342,6 @@ public class PoolStorageSample implements PoolStorage
 			pool.modifiedBy.setUserId("admin");
 			pool.modifiedBy.setDate(now);
 			pool.setPoints(10f);
-			pool.setSubject("subject");
 			pool.setTitle("title");
 			pool.getCreatedBy().setUserId("admin");
 			pool.getCreatedBy().setDate(now);
@@ -403,7 +359,6 @@ public class PoolStorageSample implements PoolStorage
 			pool.modifiedBy.setUserId("admin");
 			pool.modifiedBy.setDate(now);
 			pool.setPoints(10f);
-			pool.setSubject("subject 2");
 			pool.setTitle("title 2");
 			pool.getCreatedBy().setUserId("admin");
 			pool.getCreatedBy().setDate(now);
@@ -421,7 +376,6 @@ public class PoolStorageSample implements PoolStorage
 			pool.modifiedBy.setUserId("admin");
 			pool.modifiedBy.setDate(now);
 			pool.setPoints(7f);
-			pool.setSubject("subject 3");
 			pool.setTitle("title 3");
 			pool.getCreatedBy().setUserId("admin");
 			pool.getCreatedBy().setDate(now);
@@ -439,7 +393,6 @@ public class PoolStorageSample implements PoolStorage
 			pool.modifiedBy.setUserId("admin");
 			pool.modifiedBy.setDate(now);
 			pool.setPoints(7f);
-			pool.setSubject("subject 4");
 			pool.setTitle("title 4");
 			pool.getCreatedBy().setUserId("admin");
 			pool.getCreatedBy().setDate(now);
@@ -457,7 +410,6 @@ public class PoolStorageSample implements PoolStorage
 			pool.modifiedBy.setUserId("admin");
 			pool.modifiedBy.setDate(now);
 			pool.setPoints(3f);
-			pool.setSubject("subject 5");
 			pool.setTitle("title 5");
 			pool.getCreatedBy().setUserId("admin");
 			pool.getCreatedBy().setDate(now);

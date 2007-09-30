@@ -33,7 +33,7 @@ public interface QuestionService
 	 */
 	enum FindQuestionsSort
 	{
-		description_a, description_d, pool_difficulty_a, pool_difficulty_d, pool_points_a, pool_points_d, pool_subject_a, pool_subject_d, pool_title_a, pool_title_d, type_a, type_d;
+		description_a, description_d, pool_difficulty_a, pool_difficulty_d, pool_points_a, pool_points_d, pool_title_a, pool_title_d, type_a, type_d;
 	}
 
 	/**

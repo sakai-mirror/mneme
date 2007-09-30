@@ -100,7 +100,6 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		context.put("assessmentTitle", assessment.getTitle());
 
 		ManualPart part = (ManualPart) assessment.getParts().getPart(params[4]);
-
 		if (part == null)
 		{
 			// redirect to error
@@ -110,16 +109,16 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		context.put("partTitle", part.getTitle());
 
 		String pagingParameter = null;
-		if (params.length == 7)
+		if (params.length >= 6)
 		{
-			pagingParameter = params[6];
+			pagingParameter = params[5];
 		}
 		Paging paging = uiService.newPaging();
 
 		// paging
 		if (pagingParameter == null)
 		{
-			pagingParameter = "1-2";
+			pagingParameter = "1-30";
 		}
 
 		Integer maxQuestions = this.questionService.countQuestions(this.toolManager.getCurrentPlacement().getContext(), null);
@@ -132,9 +131,9 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		// default sort: title ascending
 		QuestionService.FindQuestionsSort sort = QuestionService.FindQuestionsSort.type_a;
 		String sortCode = null;
-		if (params.length > 5)
+		if (params.length >= 7)
 		{
-			sortCode = params[5];
+			sortCode = params[6];
 			if (sortCode != null && sortCode.length() == 2)
 			{
 				context.put("sort_column", sortCode.charAt(0));
@@ -160,7 +159,7 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		uiService.render(ui, context);
 	}
 
-	private QuestionService.FindQuestionsSort findQuestionSortCode(String sortCode)
+	protected QuestionService.FindQuestionsSort findQuestionSortCode(String sortCode)
 	{
 		QuestionService.FindQuestionsSort sort = QuestionService.FindQuestionsSort.type_a;
 		// 0 is question type
@@ -172,30 +171,21 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		{
 			sort = QuestionService.FindQuestionsSort.type_d;
 		}
-		// 1 is pool subject
+		// 1 is pool title
 		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
-		{
-			sort = QuestionService.FindQuestionsSort.pool_subject_a;
-		}
-		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
-		{
-			sort = QuestionService.FindQuestionsSort.pool_subject_d;
-		}
-		// 2 is pool title
-		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
 		{
 			sort = QuestionService.FindQuestionsSort.pool_title_a;
 		}
-		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
 		{
 			sort = QuestionService.FindQuestionsSort.pool_title_d;
 		}
-		// 3 is pool points
-		else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'A'))
+		// 2 is pool points
+		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
 		{
 			sort = QuestionService.FindQuestionsSort.pool_points_a;
 		}
-		else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'D'))
+		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
 		{
 			sort = QuestionService.FindQuestionsSort.pool_points_d;
 		}

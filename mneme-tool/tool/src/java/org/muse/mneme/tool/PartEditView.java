@@ -146,7 +146,7 @@ public class PartEditView extends ControllerImpl
 
 		// find sort param
 		String sortCode = null;
-		PoolService.FindPoolsSort sort = PoolService.FindPoolsSort.subject_a;
+		PoolService.FindPoolsSort sort = PoolService.FindPoolsSort.title_a;
 		char sortCol = '0';
 		char sortDir = 'A';
 
@@ -215,31 +215,22 @@ public class PartEditView extends ControllerImpl
 
 	private PoolService.FindPoolsSort findSortCode(String sortCode)
 	{
-		PoolService.FindPoolsSort sort = PoolService.FindPoolsSort.subject_a;
-		// 0 is subject
+		PoolService.FindPoolsSort sort = PoolService.FindPoolsSort.title_a;
+		// 0 is title
 		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
-		{
-			sort = PoolService.FindPoolsSort.subject_a;
-		}
-		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
-		{
-			sort = PoolService.FindPoolsSort.subject_d;
-		}
-		// 1 is title
-		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
 		{
 			sort = PoolService.FindPoolsSort.title_a;
 		}
-		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
 		{
 			sort = PoolService.FindPoolsSort.title_d;
 		}
-		// 2 is points
-		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
+		// 1 is points
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
 		{
 			sort = PoolService.FindPoolsSort.points_a;
 		}
-		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
 		{
 			sort = PoolService.FindPoolsSort.points_d;
 		}

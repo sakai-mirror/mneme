@@ -450,14 +450,6 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getSubjects(String context)
-	{
-		return this.poolService.getSubjects(context);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Submission getSubmission(String id)
 	{
 		return submissionService.getSubmission(id);

@@ -33,7 +33,7 @@ public interface PoolService
 	 */
 	enum FindPoolsSort
 	{
-		points_a, points_d, subject_a, subject_d, title_a, title_d
+		points_a, points_d, title_a, title_d
 	}
 
 	/**
@@ -103,15 +103,6 @@ public interface PoolService
 	 * @return The Pool with this id, or null if not found.
 	 */
 	Pool getPool(String poolId);
-
-	/**
-	 * Get a list of all the subjects of all the pools in this context.
-	 * 
-	 * @param context
-	 *        The context.
-	 * @return a list of all the subjects of all the pools in the context.
-	 */
-	List<String> getSubjects(String context);
 
 	/**
 	 * Create a new pool.

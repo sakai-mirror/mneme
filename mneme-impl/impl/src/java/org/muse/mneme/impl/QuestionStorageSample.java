@@ -71,7 +71,7 @@ public class QuestionStorageSample implements QuestionStorage
 		List<QuestionImpl> questions = new ArrayList<QuestionImpl>(this.questions.values());
 		for (QuestionImpl question : questions)
 		{
-			if (question.getPool().equals(source))
+			if (!question.deleted && question.getPool().equals(source))
 			{
 				QuestionImpl q = new QuestionImpl(question);
 				q.setPool(destination);
@@ -167,12 +167,12 @@ public class QuestionStorageSample implements QuestionStorage
 				{
 					case type_a:
 					{
-						rv = ((Question) arg0).getType().compareTo(((Question) arg1).getTypeName());
+						rv = ((Question) arg0).getTypeName().compareTo(((Question) arg1).getTypeName());
 						break;
 					}
 					case type_d:
 					{
-						rv = -1 * ((Question) arg0).getType().compareTo(((Question) arg1).getTypeName());
+						rv = -1 * ((Question) arg0).getTypeName().compareTo(((Question) arg1).getTypeName());
 						break;
 					}
 					case description_a:
@@ -203,16 +203,6 @@ public class QuestionStorageSample implements QuestionStorage
 					case pool_points_d:
 					{
 						rv = -1 * ((Question) arg0).getPool().getPoints().compareTo(((Question) arg1).getPool().getPoints());
-						break;
-					}
-					case pool_subject_a:
-					{
-						rv = ((Question) arg0).getPool().getSubject().compareTo(((Question) arg1).getPool().getSubject());
-						break;
-					}
-					case pool_subject_d:
-					{
-						rv = -1 * ((Question) arg0).getPool().getSubject().compareTo(((Question) arg1).getPool().getSubject());
 						break;
 					}
 					case pool_title_a:
@@ -330,7 +320,7 @@ public class QuestionStorageSample implements QuestionStorage
 		for (Iterator i = this.questions.values().iterator(); i.hasNext();)
 		{
 			QuestionImpl question = (QuestionImpl) i.next();
-			if (question.getPool().equals(pool))
+			if (!question.deleted && question.getPool().equals(pool))
 			{
 				question.deleted = Boolean.TRUE;
 			}

@@ -121,13 +121,6 @@ public interface Pool
 	Float getPoints();
 
 	/**
-	 * Access the subject of the pool.
-	 * 
-	 * @return The subject of the pool.
-	 */
-	String getSubject();
-
-	/**
 	 * Access the title of the pool.
 	 * 
 	 * @return The title of the pool.
@@ -172,14 +165,6 @@ public interface Pool
 	 *        The number of points for each question in this pool.
 	 */
 	void setPoints(Float points);
-
-	/**
-	 * Set the subject of the pool.
-	 * 
-	 * @param subject
-	 *        The subject of the pool.
-	 */
-	void setSubject(String subject);
 
 	/**
 	 * Set the title of the pool.

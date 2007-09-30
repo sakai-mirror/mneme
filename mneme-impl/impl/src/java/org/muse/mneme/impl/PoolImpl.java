@@ -55,8 +55,6 @@ public class PoolImpl implements Pool
 
 	protected transient QuestionService questionService = null;
 
-	protected String subject = null;
-
 	protected String title = null;
 
 	// TODO: version
@@ -185,14 +183,6 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getSubject()
-	{
-		return this.subject;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public String getTitle()
 	{
 		return this.title;
@@ -250,14 +240,6 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setSubject(String subject)
-	{
-		this.subject = subject;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void setTitle(String title)
 	{
 		this.title = title;
@@ -285,7 +267,6 @@ public class PoolImpl implements Pool
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy);
 		this.points = other.points;
 		this.poolService = other.poolService;
-		this.subject = other.subject;
 		this.title = other.title;
 		this.version = other.version;
 	}

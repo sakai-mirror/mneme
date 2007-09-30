@@ -170,18 +170,6 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public List<String> getSubjects(String context)
-	{
-		if (context == null) throw new IllegalArgumentException();
-
-		if (M_log.isDebugEnabled()) M_log.debug("getSubjects: context: " + context);
-
-		return this.storage.getSubjects(context);
-	}
-
-	/**
 	 * Final initialization, once all dependencies are set.
 	 */
 	public void init()

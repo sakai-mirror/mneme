@@ -32,7 +32,6 @@
 	<header>
 		<message selector="pool-edit-header">
 			<model type="icon" icon="/icons/basket_add.png" />
-			<model ref="pool.subject" missing="no-subject" />
 			<model ref="pool.title" missing="no-title" />
 		</message>
 	</header>

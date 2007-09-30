@@ -117,15 +117,6 @@ public interface PoolStorage
 	Integer getPoolSize(PoolImpl pool);
 
 	/**
-	 * Get a list of all the subjects of all the pools in this context.
-	 * 
-	 * @param context
-	 *        The context.
-	 * @return a list of all the subjects of all the pools in the context.
-	 */
-	List<String> getSubjects(String context);
-
-	/**
 	 * Construct a new pool object.
 	 * 
 	 * @return A pool object.
