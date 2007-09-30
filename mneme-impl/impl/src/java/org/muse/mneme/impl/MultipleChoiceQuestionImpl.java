@@ -56,6 +56,12 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 
 		protected String text;
 
+		public MultipleChoiceQuestionChoice(MultipleChoiceQuestionChoice other)
+		{
+			this.id = other.id;
+			this.text = other.text;
+		}
+
 		public MultipleChoiceQuestionChoice(String id, String text)
 		{
 			this.id = id;
@@ -79,7 +85,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/** List of choices */
-	protected List<String> answerChoices = new ArrayList<String>();
+	protected List<MultipleChoiceQuestionChoice> answerChoices = new ArrayList<MultipleChoiceQuestionChoice>();
 
 	/** Index numbers of the correct answers */
 	protected Set<Integer> correctAnswers = new HashSet<Integer>();
@@ -122,7 +128,11 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public MultipleChoiceQuestionImpl(Question question, MultipleChoiceQuestionImpl other)
 	{
-		this.answerChoices = new ArrayList<String>(other.answerChoices);
+		this.answerChoices = new ArrayList<MultipleChoiceQuestionChoice>(other.answerChoices.size());
+		for (MultipleChoiceQuestionChoice choice : other.answerChoices)
+		{
+			this.answerChoices.add(new MultipleChoiceQuestionChoice(choice));
+		}
 		this.correctAnswers = new HashSet<Integer>(other.correctAnswers);
 		this.messages = other.messages;
 		this.question = question;
@@ -142,7 +152,12 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			Object rv = super.clone();
 
 			// deep copy these
-			((MultipleChoiceQuestionImpl) rv).answerChoices = new ArrayList<String>(this.answerChoices);
+			((MultipleChoiceQuestionImpl) rv).answerChoices = new ArrayList<MultipleChoiceQuestionChoice>(this.answerChoices.size());
+			for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+			{
+				((MultipleChoiceQuestionImpl) rv).answerChoices.add(new MultipleChoiceQuestionChoice(choice));
+			}
+
 			((MultipleChoiceQuestionImpl) rv).correctAnswers = new HashSet<Integer>(this.correctAnswers);
 
 			// set the question
@@ -258,19 +273,13 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
-	 * Access the choices as an entity (MultipleChoiceQuestionChoice) list in as-authored order.
+	 * Access the actual choices as authored.  The choices in  the list can be altered, changing the question definition.
 	 * 
-	 * @return The choices as an entity (MultipleChoiceQuestionChoice) list in as-authored order.
+	 * @return The choices as authored.
 	 */
 	public List<MultipleChoiceQuestionChoice> getChoicesAsAuthored()
 	{
-		List<MultipleChoiceQuestionChoice> rv = new ArrayList<MultipleChoiceQuestionChoice>(this.answerChoices.size());
-		for (String choice : this.answerChoices)
-		{
-			rv.add(new MultipleChoiceQuestionChoice(String.valueOf(this.answerChoices.indexOf(choice)), choice));
-		}
-
-		return rv;
+		return this.answerChoices;
 	}
 
 	/**
@@ -471,9 +480,20 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
 	}
 
-	public void setAnswerChoices(List answerChoices)
+	/**
+	 * Set the entire set of choices to these values.
+	 * 
+	 * @param choices
+	 *        The choice values.
+	 */
+	public void setAnswerChoices(List<String> choices)
 	{
-		this.answerChoices = answerChoices;
+		this.answerChoices = new ArrayList<MultipleChoiceQuestionChoice>(choices.size());
+		int i = 0;
+		for (String choice : choices)
+		{
+			this.answerChoices.add(new MultipleChoiceQuestionChoice(Integer.toString(i++), choice));
+		}
 	}
 
 	/**
