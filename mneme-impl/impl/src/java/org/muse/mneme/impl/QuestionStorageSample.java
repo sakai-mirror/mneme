@@ -445,13 +445,14 @@ public class QuestionStorageSample implements QuestionStorage
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("Which value will it be?");
-			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).setSingleCorrect("TRUE");
+			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).setSingleCorrect("FALSE");
 			List<String> answerChoices = new ArrayList<String>();
 			answerChoices.add("This is the first item");
 			answerChoices.add("This is the second item");
 			answerChoices.add("This is the third item");
 			answerChoices.add("This is the fourth item");
 			Set<Integer> correctAnswers = new HashSet<Integer>();
+			correctAnswers.add(new Integer(1));
 			correctAnswers.add(new Integer(1));
 			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).setAnswerChoices(answerChoices);
 			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).setShuffleChoices("TRUE");
@@ -495,6 +496,28 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");
 			q.getModifiedBy().setDate(now);
+			questions.put(q.getId(), q);
+
+			q = newQuestion();
+			q.initType("mneme:Match");
+			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
+			q.initId("q6");
+			q.setExplainReason(Boolean.TRUE);
+			q.setPool(poolService.getPool("b1"));
+			q.getCreatedBy().setUserId("admin");
+			q.getPresentation().setText("Match the following");
+			answerChoices = new ArrayList<String>();
+			answerChoices.add("Match first item");
+			answerChoices.add("Match second item");
+			answerChoices.add("Match third item");
+			answerChoices.add("Match fourth item");
+			((MatchQuestionImpl) q.getTypeSpecificQuestion()).setAnswerChoices(answerChoices);
+			q.getCreatedBy().setUserId("admin");
+			q.getCreatedBy().setDate(now);
+			q.getModifiedBy().setUserId("admin");
+			q.getModifiedBy().setDate(now);
+			q.setHints("hints for question six.");
+			q.setFeedback("feedback for question 6");
 			questions.put(q.getId(), q);
 		}
 	}

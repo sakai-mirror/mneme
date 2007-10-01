@@ -248,5 +248,15 @@
 			<ref bean="org.muse.ambrosia.api.UiService" />
 		</property>
 	</bean>		
+	<bean id="org.muse.mneme.impl.MatchPlugin"
+		class="org.muse.mneme.impl.MatchPlugin"
+		init-method="init"
+		destroy-method="destroy"
+		singleton="true">
 
+ 		<property name="bundle"><value>mnemeMatch</value></property>
+
+		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+	</bean>
 </beans>
