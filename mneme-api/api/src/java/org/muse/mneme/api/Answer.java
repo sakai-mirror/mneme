@@ -36,7 +36,7 @@ public interface Answer
 	/**
 	 * Access the answer's automatic scoring value - the sum of the auto scores of the entries.
 	 * 
-	 * @return The answer's auto-score.
+	 * @return The answer's auto-score, or null if the answer's question type does not auto-score.
 	 */
 	Float getAutoScore();
 
@@ -148,4 +148,12 @@ public interface Answer
 	 *        The answer's submitted date.
 	 */
 	void setSubmittedDate(Date submitted);
+
+	/**
+	 * Set the total score of the answer. The Evaluation will be adjusted so that this becomes the total score given the current answer auto score.
+	 * 
+	 * @param score
+	 *        The new total score desired for the answer.
+	 */
+	void setTotalScore(Float score);
 }

@@ -279,6 +279,22 @@ public class AnswerImpl implements Answer
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public void setTotalScore(Float score)
+	{
+		float total = score.floatValue();
+
+		// adjust to remove the current auto score
+		if (getAutoScore() != null)
+		{
+			total -= getAutoScore().floatValue();
+		}
+
+		this.evaluation.setScore(total);
+	}
+
+	/**
 	 * Clear the is-changed flag(s).
 	 */
 	protected void clearIsChanged()

@@ -79,7 +79,7 @@ public class SubmissionImpl implements Submission
 	protected Date submittedDate = null;
 
 	/** This is a pre-compute for the total score (trust me!), to be used if set and we don't have the answers & evaluations. */
-	protected transient Float totalScore = null;
+	//protected transient Float totalScore = null;
 
 	protected String userId = null;
 
@@ -691,10 +691,10 @@ public class SubmissionImpl implements Submission
 	public Float getTotalScore()
 	{
 		// Note: treat this as getGrade() - later make getGrade() and let this always return the score, graded or not -ggolden
-		if (!getIsReleased()) return new Float(0);
+		// if (!getIsReleased()) return new Float(0);
 
 		// if our special "total score" is set, use this, otherwise we compute
-		if (this.totalScore != null) return this.totalScore;
+		// if (this.totalScore != null) return this.totalScore;
 
 		// add the answer auto scores, the answer evaluations, (these are combined into the answer total scores) and the overall
 		// evaluation
@@ -797,6 +797,26 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public void setTotalScore(Float score)
+	{
+		float total = score.floatValue();
+
+		// add the score from the answers
+		float answerTotal = 0;
+		for (Answer answer : answers)
+		{
+			answerTotal += answer.getTotalScore();
+		}
+
+		// adjust to remove the current auto score
+		total -= answerTotal;
+
+		this.evaluation.setScore(total);
+	}
+
+	/**
 	 * Clear all answer information.
 	 */
 	protected void clearAnswers()
@@ -880,10 +900,10 @@ public class SubmissionImpl implements Submission
 	 * @param score
 	 *        The total score pre-compute.
 	 */
-	protected void initTotalScore(Float score)
-	{
-		this.totalScore = score;
-	}
+//	protected void initTotalScore(Float score)
+//	{
+//		this.totalScore = score;
+//	}
 
 	/**
 	 * Initialize the user id property.
@@ -955,7 +975,7 @@ public class SubmissionImpl implements Submission
 		this.startDate = other.startDate;
 		this.submissionService = other.submissionService;
 		this.submittedDate = other.submittedDate;
-		this.totalScore = other.totalScore;
+		// this.totalScore = other.totalScore;
 		this.userId = other.userId;
 	}
 }

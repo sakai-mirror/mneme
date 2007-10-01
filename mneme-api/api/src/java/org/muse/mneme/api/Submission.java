@@ -296,4 +296,13 @@ public interface Submission
 	 *        the submission date for this submission.
 	 */
 	void setSubmittedDate(Date submittedDate);
+
+	/**
+	 * Set the total score of the submission. The Evaluation will be adjusted so that this becomes the total score given the current answer auto
+	 * scores and evaluations.
+	 * 
+	 * @param score
+	 *        The new total score desired for the submission.
+	 */
+	void setTotalScore(Float score);
 }
