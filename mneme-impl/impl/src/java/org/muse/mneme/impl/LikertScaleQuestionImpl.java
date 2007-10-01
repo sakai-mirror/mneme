@@ -24,11 +24,13 @@ package org.muse.mneme.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.muse.ambrosia.api.CompareDecision;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.PropertyColumn;
+import org.muse.ambrosia.api.PropertyReference;
 import org.muse.ambrosia.api.SelectionColumn;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
@@ -378,11 +380,18 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewAnswerUi()
 	{
-		// TODO: just the selected answer
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
 		entityList
 				.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.optionValues"), "optionValue");
+
+		// include each choice only if the choice has been selected by the user
+		PropertyReference entityIncludedProperty = this.uiService.newPropertyReference().setReference("optionValue.id");
+		PropertyReference entityIncludedComparison = this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer");
+		CompareDecision entityIncludedDecision = this.uiService.newCompareDecision();
+		entityIncludedDecision.setProperty(entityIncludedProperty);
+		entityIncludedDecision.setEqualsProperty(entityIncludedComparison);
+		entityList.setEntityIncluded(entityIncludedDecision);
 
 		SelectionColumn selCol = this.uiService.newSelectionColumn();
 		selCol.setSingle();
