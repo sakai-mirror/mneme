@@ -32,8 +32,7 @@
 	</modeContainer>
 	<header>
 		<message selector="grading-assessment-header">
-			<model type="icon" icon="/icons/grade.png" />
-			<model ref="assessment.title" />
+			<model type="icon" icon="/icons/grade.png" />			
 		</message>
 	</header>
 	<title>
@@ -41,6 +40,16 @@
 	</title>
 
 	<container>
+	<text>
+		<message selector="assessment-title">
+			<model ref="assessment.title" />
+		</message>
+		</text>
+		<text>
+		<message selector="assessment-total-points">
+			<model ref="assessment.parts.totalPoints" />
+		</message>
+		</text>
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
@@ -197,6 +206,15 @@
 					<entityIncluded>
 						<decision model="answer.isComplete" />
 					</entityIncluded>
+					<container>
+						<text>
+							<included>
+								<decision model="answer.submission.isCompletedLate" reversed="TRUE" />
+							</included>
+							<message selector="submission-finished-date-alert">							
+							</message>
+						</text>
+					</container>
 				</modelColumn>
 				<column>
 					<title>
@@ -308,18 +326,12 @@
 				</modelColumn>
 				<column>
 					<title>
-						<message selector="submission-adjust" />
-					</title>
-					<container>
-						<textEdit model="answer.evaluation.score" rows="1" cols="4" />
-					</container>
-				</column>
-				<modelColumn>
-					<title>
 						<message selector="submission-final" />
 					</title>
-					<model ref="answer.totalScore" />
-				</modelColumn>
+					<container>
+						<textEdit model="answer.totalScore" rows="1" cols="4" />
+					</container>					
+				</column>
 			</columns>
 		</entityList>
 
