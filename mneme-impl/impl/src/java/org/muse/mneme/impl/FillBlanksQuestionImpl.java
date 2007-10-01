@@ -21,18 +21,20 @@
 
 package org.muse.mneme.impl;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.muse.ambrosia.api.AndDecision;
+import org.muse.ambrosia.api.AttachmentsEdit;
 import org.muse.ambrosia.api.Component;
+import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
-import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.FillIn;
+import org.muse.ambrosia.api.HtmlEdit;
+import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.UiService;
-import org.muse.ambrosia.api.AndDecision;
-import org.muse.ambrosia.api.Decision;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
@@ -42,48 +44,22 @@ import org.sakaiproject.i18n.InternationalizedMessages;
  */
 public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 {
-	private static String extractFIBTextArray(String alltext)
-	{
-		StringBuffer strBuf = new StringBuffer();
-
-		while (alltext.indexOf("{") > -1)
-		{
-			int alltextLeftIndex = alltext.indexOf("{");
-			int alltextRightIndex = alltext.indexOf("}");
-
-			String tmp = alltext.substring(0, alltextLeftIndex);
-			alltext = alltext.substring(alltextRightIndex + 1);
-			strBuf.append(tmp);
-			strBuf.append("{}");
-			// there are no more "}", exit loop
-			if (alltextRightIndex == -1)
-			{
-				break;
-			}
-		}
-		strBuf.append(alltext);
-		return strBuf.toString();
-	}
-
 	/** TRUE means any order is ok, FALSE means it is not */
 	protected Boolean anyOrder = Boolean.FALSE;
 
 	/** TRUE means answer is case sensitive, FALSE means it is not */
 	protected Boolean caseSensitive = Boolean.FALSE;
 
-	/** The correct answers. */
-	protected List<String> correctAnswers = new ArrayList<String>();
-
 	protected InternationalizedMessages messages = null;
-
-	/** This variable contains the parsed presentation text of the question with {} */
-	protected String parsedText = null;
 
 	/** The question this is a helper for. */
 	protected transient Question question = null;
 
 	/** TRUE means response is textual, FALSE means response is numeric */
 	protected Boolean responseTextual = Boolean.TRUE;
+
+	/** The question text. */
+	protected String text = null;
 
 	/** Dependency: The UI service (Ambrosia). */
 	protected UiService uiService = null;
@@ -111,12 +87,13 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	 */
 	public FillBlanksQuestionImpl(Question question, FillBlanksQuestionImpl other)
 	{
-		this.question = question;
-		this.correctAnswers = other.correctAnswers;
-		this.messages = other.messages;
-		this.caseSensitive = other.caseSensitive;
 		this.anyOrder = other.anyOrder;
+		this.caseSensitive = other.caseSensitive;
+		this.messages = other.messages;
+		this.question = question;
 		this.responseTextual = other.responseTextual;
+		this.text = other.text;
+		this.uiService = other.uiService;
 	}
 
 	/**
@@ -174,6 +151,20 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		EntityDisplay display = this.uiService.newEntityDisplay();
 
 		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
+		row.setTitle("question");
+		HtmlEdit text = uiService.newHtmlEdit();
+		text.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.text"));
+		row.add(text);
+		display.addRow(row);
+
+		row = this.uiService.newEntityDisplayRow();
+		row.setTitle("attachments");
+		AttachmentsEdit attachments = uiService.newAttachmentsEdit();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
+		row.add(attachments);
+		display.addRow(row);
+
+		row = this.uiService.newEntityDisplayRow();
 		row.setTitle("case-sensitive");
 		Selection selection = uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.caseSensitive"));
@@ -211,7 +202,9 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 	public List<String> getCorrectAnswers()
 	{
-		String alltext = this.question.getPresentation().getText();
+		List<String> correctAnswers = new ArrayList<String>();
+
+		String alltext = getText();
 		while (alltext.indexOf("{") > -1)
 		{
 			int alltextLeftIndex = alltext.indexOf("{");
@@ -219,14 +212,16 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 			String tmp = alltext.substring(alltextLeftIndex + 1, alltextRightIndex);
 			alltext = alltext.substring(alltextRightIndex + 1);
-			this.correctAnswers.add(tmp);
+			correctAnswers.add(tmp);
+
 			// there are no more "}", exit loop
 			if (alltextRightIndex == -1)
 			{
 				break;
 			}
 		}
-		return this.correctAnswers;
+
+		return correctAnswers;
 	}
 
 	/**
@@ -244,8 +239,8 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 	public String getParsedText()
 	{
-		this.parsedText = extractFIBTextArray(this.question.getPresentation().getText());
-		return this.parsedText;
+		String parsedText = extractFIBTextArray(getText());
+		return parsedText;
 	}
 
 	/**
@@ -276,7 +271,16 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		fillIn.setCorrect(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.entryCorrects"));
 
 		return this.uiService.newFragment().setMessages(this.messages).add(fillIn);
+	}
 
+	/**
+	 * Access the question text.
+	 * 
+	 * @return The quesion text.
+	 */
+	public String getText()
+	{
+		return this.text;
 	}
 
 	/**
@@ -287,17 +291,32 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		return this.messages.getString("name");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getUseQuestionPresentation()
+	{
+		// we suppress the question presentation, using our own fields to capture the question.
+		return Boolean.FALSE;
+	}
+
 	public Component getViewAnswerUi()
 	{
-		Text txt = this.uiService.newText();
-		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.reviewText"));
-		return this.uiService.newFragment().setMessages(this.messages).add(txt);
+		FillIn fillIn = this.uiService.newFillIn();
+		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.parsedText"));
+		fillIn.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
+		fillIn.setWidth(20);
+		fillIn.setCorrectDecision(this.uiService.newTrueDecision());
+		fillIn.setReadOnly(this.uiService.newTrueDecision());
+		fillIn.setCorrect(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.entryCorrects"));
+
+		return this.uiService.newFragment().setMessages(this.messages).add(fillIn);
 	}
 
 	public Component getViewQuestionUi()
 	{
 		Text txt = this.uiService.newText();
-		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.reviewText"));
+		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.text"));
 		return this.uiService.newFragment().setMessages(this.messages).add(txt);
 	}
 
@@ -326,6 +345,17 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * Set the question text.
+	 * 
+	 * @param text
+	 *        The question text.
+	 */
+	public void setText(String text)
+	{
+		this.text = text;
+	}
+
+	/**
 	 * Set the UI service.
 	 * 
 	 * @param service
@@ -334,5 +364,28 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	public void setUi(UiService service)
 	{
 		this.uiService = service;
+	}
+
+	protected String extractFIBTextArray(String alltext)
+	{
+		StringBuffer strBuf = new StringBuffer();
+
+		while (alltext.indexOf("{") > -1)
+		{
+			int alltextLeftIndex = alltext.indexOf("{");
+			int alltextRightIndex = alltext.indexOf("}");
+
+			String tmp = alltext.substring(0, alltextLeftIndex);
+			alltext = alltext.substring(alltextRightIndex + 1);
+			strBuf.append(tmp);
+			strBuf.append("{}");
+			// there are no more "}", exit loop
+			if (alltextRightIndex == -1)
+			{
+				break;
+			}
+		}
+		strBuf.append(alltext);
+		return strBuf.toString();
 	}
 }

@@ -78,6 +78,13 @@ public interface TypeSpecificQuestion extends Cloneable
 	String getTypeName();
 
 	/**
+	 * Check if this type uses the generic question presentation.
+	 * 
+	 * @return TRUE to use the generic question presentation for this type, FALSE to not.
+	 */
+	Boolean getUseQuestionPresentation();
+
+	/**
 	 * Access the user interface component for question view of this question type.
 	 * 
 	 * @return The user interface component for question view of this question type.

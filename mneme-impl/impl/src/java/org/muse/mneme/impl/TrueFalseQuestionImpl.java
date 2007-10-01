@@ -173,7 +173,8 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		AndDecision and = this.uiService.newAndDecision();
 		Decision[] decisions = new Decision[2];
 		decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
-		decisions[1] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+		decisions[1] = this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
 		and.setRequirements(decisions);
 		selection.setCorrectDecision(and);
 
@@ -186,6 +187,14 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	public String getTypeName()
 	{
 		return this.messages.getString("name");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getUseQuestionPresentation()
+	{
+		return Boolean.TRUE;
 	}
 
 	/**
@@ -214,7 +223,7 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		selection.addSelection("true", "true");
 		selection.addSelection("false", "false");
 		selection.setReadOnly(this.uiService.newTrueDecision());
-		selection.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswer"));
+		selection.setCorrect(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer"));
 
 		return this.uiService.newFragment().setMessages(this.messages).add(selection);
 	}

@@ -360,6 +360,14 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getUseQuestionPresentation()
+	{
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Component getViewAnswerUi()
 	{
 		// TODO: just the selected answer

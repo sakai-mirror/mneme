@@ -71,6 +71,9 @@
 							</rows>
 						</entityDisplay>
 					</container>
+					<included>
+						<decision model="question.typeSpecificQuestion.useQuestionPresentation" />
+					</included>
 				</row>
 
 				<!-- question specific -->
