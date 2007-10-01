@@ -261,7 +261,8 @@ public class GradeAssessmentView extends ControllerImpl
 					}
 				}
 
-				// save adjusted score for each student's test submission
+				/*
+				// save Final score for each student's submission
 				if (submissions != null && submissions.size() > 0)
 				{
 					for (Submission submission : submissions)
@@ -281,6 +282,7 @@ public class GradeAssessmentView extends ControllerImpl
 						}
 					}
 				}
+				*/
 
 				destination = destination.replace("grade_assessment_save", "grade_assessment");
 			}

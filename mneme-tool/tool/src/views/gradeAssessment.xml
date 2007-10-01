@@ -41,6 +41,21 @@
 	</title>
 
 	<container>
+		<entityDisplay>
+			<rows>
+				<row>
+					<title>
+						<message selector="assessment-title">
+							<model ref="assessment.title" />
+						</message>
+					</title>
+				</row>
+				<row title="total-score">
+					<model ref="assessment.Parts.totalPoints" />
+				</row>
+			</rows>
+		</entityDisplay>
+
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
@@ -328,18 +343,13 @@
 					</title>
 					<model ref="submission.answersAutoScore" />
 				</modelColumn>
-				<column>
-					<title>
-						<message selector="submission-adjust" />
-					</title>
-					<container>
-						<floatEdit model="submission.evaluation.score" cols="2" />
-					</container>
-				</column>
 				<modelColumn>
 					<title>
 						<message selector="submission-final" />
 					</title>
+					<!--container>
+						<floatEdit model="submission.evaluation.score" cols="2" />
+					</container-->
 					<model ref="submission.totalScore" />
 				</modelColumn>
 			</columns>
