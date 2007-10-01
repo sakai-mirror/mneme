@@ -21,15 +21,24 @@
 
 package org.muse.mneme.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.muse.ambrosia.api.AndDecision;
+import org.muse.ambrosia.api.CompareDecision;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
+import org.muse.ambrosia.api.EntityList;
+import org.muse.ambrosia.api.PropertyColumn;
+import org.muse.ambrosia.api.PropertyReference;
 import org.muse.ambrosia.api.Selection;
+import org.muse.ambrosia.api.SelectionColumn;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificQuestion;
+import org.muse.mneme.impl.MultipleChoiceQuestionImpl.MultipleChoiceQuestionChoice;
 import org.sakaiproject.i18n.InternationalizedMessages;
 
 /**
@@ -37,6 +46,35 @@ import org.sakaiproject.i18n.InternationalizedMessages;
  */
 public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 {
+	public class TrueFalseQuestionChoice
+	{
+		protected String id;
+
+		protected String text;
+
+		public TrueFalseQuestionChoice(MultipleChoiceQuestionChoice other)
+		{
+			this.id = other.id;
+			this.text = other.text;
+		}
+
+		public TrueFalseQuestionChoice(String id, String text)
+		{
+			this.id = id;
+			this.text = text;
+		}
+
+		public String getId()
+		{
+			return this.id;
+		}
+
+		public String getText()
+		{
+			return this.text;
+		}
+	}
+
 	/** The correct answer: TRUE or FALSE. */
 	protected Boolean correctAnswer = Boolean.TRUE;
 
@@ -136,6 +174,21 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * Access the choices as an entity (TrueFalseQuestionChoice) list.
+	 * 
+	 * @return The choices as an entity (TrueFalseQuestionChoice) list.
+	 */
+	public List<TrueFalseQuestionChoice> getChoices()
+	{
+		// get the list in order
+		List<TrueFalseQuestionChoice> rv = new ArrayList<TrueFalseQuestionChoice>(2);
+		rv.add(new TrueFalseQuestionChoice("true", this.messages.getString("true")));
+		rv.add(new TrueFalseQuestionChoice("false", this.messages.getString("false")));
+
+		return rv;
+	}
+
+	/**
 	 * Access the correct answer as a string.
 	 * 
 	 * @return The correct answer.
@@ -210,15 +263,42 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewAnswerUi()
 	{
-		// TODO: just the selected answer, no distractors
-		Selection selection = this.uiService.newSelection();
-		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
-		selection.addSelection("true", "true");
-		selection.addSelection("false", "false");
-		selection.setReadOnly(this.uiService.newTrueDecision());
-		selection.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswer"));
+		EntityList entityList = this.uiService.newEntityList();
+		entityList.setStyle(EntityList.Style.form);
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
+		entityList.setEmptyTitle("no-answers");
 
-		return this.uiService.newFragment().setMessages(this.messages).add(selection);
+		// include each choice only if the choice has been selected by the user
+		PropertyReference entityIncludedProperty = this.uiService.newPropertyReference().setReference("choice.id");
+		PropertyReference entityIncludedComparison = this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer");
+		CompareDecision entityIncludedDecision = this.uiService.newCompareDecision();
+		entityIncludedDecision.setProperty(entityIncludedProperty);
+		entityIncludedDecision.setEqualsProperty(entityIncludedComparison);
+		entityList.setEntityIncluded(entityIncludedDecision);
+
+		SelectionColumn selCol = this.uiService.newSelectionColumn();
+		selCol.setSingle();
+		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
+		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
+		selCol.setReadOnly(this.uiService.newTrueDecision());
+		selCol.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswer"));
+		entityList.addColumn(selCol);
+
+		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		entityList.addColumn(propCol);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+
+		// // TODO: just the selected answer, no distractors
+		// Selection selection = this.uiService.newSelection();
+		// selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
+		// selection.addSelection("true", "true");
+		// selection.addSelection("false", "false");
+		// selection.setReadOnly(this.uiService.newTrueDecision());
+		// selection.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswer"));
+		//
+		// return this.uiService.newFragment().setMessages(this.messages).add(selection);
 	}
 
 	/**
