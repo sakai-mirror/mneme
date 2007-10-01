@@ -47,7 +47,7 @@
 				<message selector="no-pools" />
 			</emptyTitle>
 			<columns>
-				<selectionColumn multiple="FALSE">
+				<selectionColumn multiple="FALSE" id="SELECTION">
 					<value>
 						<model type="text" ref="pool.id" />
 					</value>
@@ -109,7 +109,8 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="continue-title" style="BUTTON" accessKey="continue-access" description="continue-description" submit="TRUE">
+				<navigation title="continue-title" style="BUTTON" accessKey="continue-access" description="continue-description" submit="TRUE"
+					selectRequirement="SINGLE" selectRequirementId="SELECTION" selectRequirementMessage="continue-failed-requirements">
 					<destination template="{0}">
 						<model ref="saveDestination" />
 					</destination>
