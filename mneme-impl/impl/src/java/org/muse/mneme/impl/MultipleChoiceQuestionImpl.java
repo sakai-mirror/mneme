@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.muse.ambrosia.api.AndDecision;
 import org.muse.ambrosia.api.AutoColumn;
+import org.muse.ambrosia.api.CompareDecision;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.EntityDisplay;
@@ -39,6 +40,7 @@ import org.muse.ambrosia.api.EntityListColumn;
 import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.OrderColumn;
 import org.muse.ambrosia.api.PropertyColumn;
+import org.muse.ambrosia.api.PropertyReference;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
 import org.muse.ambrosia.api.UiService;
@@ -615,10 +617,19 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewAnswerUi()
 	{
-		// TODO: just the selected answer, no distractors, and add correct/incorrect marking
+		// TODO: just the selected answer, no distractors
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
-		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choicesAsAuthored"), "choice");
+		entityList.setEmptyTitle("no-answers");
+
+		// include each choice only if the choice has been selected by the user
+		PropertyReference entityIncludedProperty = this.uiService.newPropertyReference().setReference("choice.id");
+		PropertyReference entityIncludedComparison = this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers");
+		CompareDecision entityIncludedDecision = this.uiService.newCompareDecision();
+		entityIncludedDecision.setProperty(entityIncludedProperty);
+		entityIncludedDecision.setEqualsProperty(entityIncludedComparison);
+		entityList.setEntityIncluded(entityIncludedDecision);
 
 		SelectionColumn selCol = this.uiService.newSelectionColumn();
 		if (this.singleCorrect)
@@ -635,7 +646,9 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		selCol.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswers"));
 		entityList.addColumn(selCol);
 
+		// use the choice id instead of the entity list row number for the auto col (since we removed stuff).
 		AutoColumn autoCol = this.uiService.newAutoColumn();
+		autoCol.setProperty(this.uiService.newPropertyReference().setReference("choice.id"));
 		entityList.addColumn(autoCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
