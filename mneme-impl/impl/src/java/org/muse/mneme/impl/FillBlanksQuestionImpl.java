@@ -131,8 +131,16 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getAnswerKey()
 	{
-		// return this.correctAnswer ? this.messages.getString("true") : this.messages.getString("false");
-		return null;
+		StringBuffer answerKey = new StringBuffer();
+		List<String> correctAnswers = getCorrectAnswers();
+
+		for (String correctAnswer : correctAnswers)
+		{
+			answerKey.append(correctAnswer);
+			answerKey.append(",");
+		}
+		answerKey.deleteCharAt(answerKey.length() - 1);
+		return answerKey.toString();
 	}
 
 	/**
