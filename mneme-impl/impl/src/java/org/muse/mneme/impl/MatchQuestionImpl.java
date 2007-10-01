@@ -301,7 +301,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		List<MatchQuestionChoice> rv = new ArrayList<MatchQuestionChoice>(this.answerChoices.size());
 		for (String choice : this.answerChoices)
 		{
-			rv.add(new MatchQuestionChoice(String.valueOf(this.answerChoices.indexOf(choice)), choice));
+			rv.add(new MatchQuestionChoice(String.valueOf(this.answerChoices.indexOf(choice)), choice, choice));
 		}
 
 		return rv;
