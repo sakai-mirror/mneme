@@ -37,6 +37,7 @@ import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.EntityListColumn;
 import org.muse.ambrosia.api.HtmlEdit;
+import org.muse.ambrosia.api.OrderColumn;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
@@ -52,12 +53,18 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 {
 	public class MultipleChoiceQuestionChoice
 	{
+		protected Boolean correct = Boolean.FALSE;
+
+		protected Boolean deleted = Boolean.FALSE;
+
 		protected String id;
 
 		protected String text;
 
 		public MultipleChoiceQuestionChoice(MultipleChoiceQuestionChoice other)
 		{
+			this.correct = other.correct;
+			this.deleted = other.deleted;
 			this.id = other.id;
 			this.text = other.text;
 		}
@@ -66,6 +73,16 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		{
 			this.id = id;
 			this.text = text;
+		}
+
+		public Boolean getCorrect()
+		{
+			return this.correct;
+		}
+
+		public Boolean getDeleted()
+		{
+			return this.deleted;
 		}
 
 		public String getId()
@@ -78,6 +95,16 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			return this.text;
 		}
 
+		public void setCorrect(Boolean correct)
+		{
+			this.correct = correct;
+		}
+
+		public void setDeleted(Boolean deleted)
+		{
+			this.deleted = deleted;
+		}
+
 		public void setText(String text)
 		{
 			this.text = text;
@@ -87,11 +114,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	/** List of choices */
 	protected List<MultipleChoiceQuestionChoice> answerChoices = new ArrayList<MultipleChoiceQuestionChoice>();
 
-	/** Index numbers of the correct answers */
-	protected Set<Integer> correctAnswers = new HashSet<Integer>();
-
 	/** Our messages. */
 	protected transient InternationalizedMessages messages = null;
+
+	/** A request for more choices. */
+	protected transient Integer moreChoices = null;
+
+	/** A new choice order - the ids. */
+	protected transient String[] newOrder = null;
 
 	/** The question this is a helper for. */
 	protected transient Question question = null;
@@ -133,7 +163,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		{
 			this.answerChoices.add(new MultipleChoiceQuestionChoice(choice));
 		}
-		this.correctAnswers = new HashSet<Integer>(other.correctAnswers);
 		this.messages = other.messages;
 		this.question = question;
 		this.shuffleChoices = other.shuffleChoices;
@@ -158,8 +187,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 				((MultipleChoiceQuestionImpl) rv).answerChoices.add(new MultipleChoiceQuestionChoice(choice));
 			}
 
-			((MultipleChoiceQuestionImpl) rv).correctAnswers = new HashSet<Integer>(this.correctAnswers);
-
 			// set the question
 			((MultipleChoiceQuestionImpl) rv).question = question;
 
@@ -174,26 +201,108 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public void consolidate()
+	{
+		// apply the new order
+		if (this.newOrder != null)
+		{
+			List newChoices = new ArrayList<MultipleChoiceQuestionChoice>();
+			int i = 0;
+			for (String id : this.newOrder)
+			{
+				int index = Integer.parseInt(id);
+				MultipleChoiceQuestionChoice choice = this.answerChoices.get(index);
+
+				// new position
+				choice.id = Integer.toString(i++);
+				newChoices.add(choice);
+			}
+			this.newOrder = null;
+			this.answerChoices = newChoices;
+		}
+
+		// rebuild choices, removing the deleted ones
+		List newChoices = new ArrayList<MultipleChoiceQuestionChoice>();
+		int i = 0;
+		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+		{
+			// ignore deleted choices
+			if (!choice.getDeleted())
+			{
+				// new position
+				choice.id = Integer.toString(i++);
+				newChoices.add(choice);
+			}
+		}
+
+		// make sure there's only one correct if we are single select
+		if (this.singleCorrect)
+		{
+			boolean seenCorrect = false;
+			for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+			{
+				if (!seenCorrect)
+				{
+					if (choice.getCorrect())
+					{
+						seenCorrect = true;
+					}
+				}
+				else
+				{
+					if (choice.getCorrect())
+					{
+						choice.setCorrect(Boolean.FALSE);
+					}
+				}
+			}
+
+			// make sure we have at least one
+			if (!seenCorrect)
+			{
+				if (!this.answerChoices.isEmpty())
+				{
+					this.answerChoices.get(0).setCorrect(Boolean.TRUE);
+				}
+			}
+		}
+
+		this.answerChoices = newChoices;
+
+		// any more choices?
+		if (this.moreChoices != null)
+		{
+			i = this.answerChoices.size();
+			for (int count = 0; count < this.moreChoices; count++)
+			{
+				this.answerChoices.add(new MultipleChoiceQuestionChoice(Integer.toString(i++), ""));
+			}
+
+			this.moreChoices = null;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getAnswerKey()
 	{
 		StringBuffer rv = new StringBuffer();
+
 		// get the choices as would be presented in delivery
 		List<MultipleChoiceQuestionChoice> choices = getChoices();
 
 		// that's the A, B, C order, so find each correct one
-		for (Integer correctIndex : this.correctAnswers)
+		int i = 0;
+		for (MultipleChoiceQuestionChoice choice : choices)
 		{
-			int i = 0;
-			for (MultipleChoiceQuestionChoice choice : choices)
+			if (choice.getCorrect())
 			{
-				if (choice.id.equals(correctIndex.toString()))
-				{
-					// TODO: hard coding our A, B, Cs?
-					rv.append((char) ('A' + i));
-					rv.append(",");
-				}
-				i++;
+				// TODO: hard coding our A, B, Cs?
+				rv.append((char) ('A' + i));
+				rv.append(",");
 			}
+			i++;
 		}
 
 		if (rv.length() > 0) rv.setLength(rv.length() - 1);
@@ -205,9 +314,25 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getAuthoringUi()
 	{
+		EntityDisplay display = this.uiService.newEntityDisplay();
+
+		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
+		Selection selection = uiService.newSelection();
+		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.singleCorrect"));
+		selection.addSelection("single-choice", "true");
+		selection.addSelection("multiple-select", "false");
+		row.add(selection);
+		row.setTitle("answer");
+		display.addRow(row);
+
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesAsAuthored"), "choice");
+
+		OrderColumn orderCol = this.uiService.newOrderColumn();
+		orderCol.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
+		orderCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choiceOrder"));
+		entityList.addColumn(orderCol);
 
 		SelectionColumn selCol = this.uiService.newSelectionColumn();
 		if (this.singleCorrect)
@@ -220,6 +345,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		}
 		selCol.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
+		selCol.setTitle("correct");
 		entityList.addColumn(selCol);
 
 		AutoColumn autoCol = this.uiService.newAutoColumn();
@@ -229,19 +355,40 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		HtmlEdit edit = this.uiService.newHtmlEdit();
 		edit.setSize(5, 50);
 		edit.setProperty(this.uiService.newPropertyReference().setReference("choice.text"));
+		col.setTitle("choice");
 		col.add(edit);
 		entityList.addColumn(col);
 
-		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
-		row.setTitle("answer");
+		col = this.uiService.newEntityListColumn();
+		selection = this.uiService.newSelection();
+		selection.setTitle("delete");
+		selection.setProperty(this.uiService.newPropertyReference().setReference("choice.deleted"));
+		col.add(selection);
+		entityList.addColumn(col);
+
+		row = this.uiService.newEntityDisplayRow();
+		row.setTitle("choices");
 		row.add(entityList);
 
-		EntityDisplay display = this.uiService.newEntityDisplay();
+		display.addRow(row);
+
+		row = this.uiService.newEntityDisplayRow();
+		selection = uiService.newSelection();
+		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.moreChoices"));
+		selection.addSelection("none", "0");
+		selection.addSelection("one", "1");
+		selection.addSelection("two", "2");
+		selection.addSelection("three", "3");
+		selection.addSelection("four", "4");
+		selection.addSelection("five", "5");
+		selection.setOrientation(Selection.Orientation.dropdown);
+		row.add(selection);
+		row.setTitle("more-choices");
 		display.addRow(row);
 
 		row = this.uiService.newEntityDisplayRow();
 		row.setTitle("shuffle");
-		Selection selection = uiService.newSelection();
+		selection = uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.shuffleChoices"));
 		row.add(selection);
 		display.addRow(row);
@@ -273,12 +420,19 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
-	 * Access the actual choices as authored.  The choices in  the list can be altered, changing the question definition.
+	 * Access the actual choices as authored. The choices in the list can be altered, changing the question definition.
 	 * 
 	 * @return The choices as authored.
 	 */
 	public List<MultipleChoiceQuestionChoice> getChoicesAsAuthored()
 	{
+		// if we have no choices yet, start with 4
+		if (this.answerChoices.isEmpty())
+		{
+			setMoreChoices("4");
+			consolidate();
+		}
+
 		return this.answerChoices;
 	}
 
@@ -289,11 +443,22 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String[] getCorrectAnswers()
 	{
-		String[] rv = new String[this.correctAnswers.size()];
-		int i = 0;
-		for (Integer correct : this.correctAnswers)
+		// count the corrrect answers
+		int count = 0;
+		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
 		{
-			rv[i++] = correct.toString();
+			if (choice.getCorrect()) count++;
+		}
+
+		// collect them into an array
+		String[] rv = new String[count];
+		int i = 0;
+		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+		{
+			if (choice.getCorrect())
+			{
+				rv[i++] = choice.getId();
+			}
 		}
 
 		return rv;
@@ -304,9 +469,18 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 * 
 	 * @return The correct answers.
 	 */
-	public Set getCorrectAnswerSet()
+	public Set<Integer> getCorrectAnswerSet()
 	{
-		return this.correctAnswers;
+		Set rv = new HashSet<Integer>();
+		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+		{
+			if (choice.getCorrect())
+			{
+				rv.add(Integer.valueOf(choice.getId()));
+			}
+		}
+
+		return rv;
 	}
 
 	/**
@@ -339,6 +513,16 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(propCol);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+	}
+
+	/**
+	 * The "getter" for the moreChoices - always set to 0.
+	 * 
+	 * @return The initial '0" value for the more choices.
+	 */
+	public String getMoreChoices()
+	{
+		return "0";
 	}
 
 	/**
@@ -497,6 +681,18 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * Set the choice order
+	 * 
+	 * @param ids
+	 *        The ids of the choices in proper order.
+	 */
+	public void setChoiceOrder(String[] ids)
+	{
+		// save this for consolidate
+		this.newOrder = ids;
+	}
+
+	/**
 	 * Sets the correct answers.
 	 * 
 	 * @param correctAnswers
@@ -504,11 +700,23 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setCorrectAnswers(String[] correctAnswers)
 	{
-		this.correctAnswers.clear();
+		// clear the correct markings
+		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+		{
+			choice.setCorrect(Boolean.FALSE);
+		}
+
 		if (correctAnswers == null) return;
+
+		// mark each one given
 		for (String answer : correctAnswers)
 		{
-			this.correctAnswers.add(Integer.valueOf(answer));
+			int index = Integer.parseInt(answer);
+			MultipleChoiceQuestionChoice choice = this.answerChoices.get(index);
+			if (choice != null)
+			{
+				choice.setCorrect(Boolean.TRUE);
+			}
 		}
 	}
 
@@ -518,11 +726,37 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 * @param correctAnswers
 	 *        The correct answers.
 	 */
-	public void setCorrectAnswerSet(Set<Integer> answers)
+	public void setCorrectAnswerSet(Set<Integer> correctAnswers)
 	{
-		this.correctAnswers.clear();
-		if (answers == null) return;
-		this.correctAnswers.addAll(answers);
+		// clear the correct markings
+		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+		{
+			choice.setCorrect(Boolean.FALSE);
+		}
+
+		if (correctAnswers == null) return;
+
+		// mark each one given
+		for (Integer answer : correctAnswers)
+		{
+			MultipleChoiceQuestionChoice choice = this.answerChoices.get(answer.intValue());
+			if (choice != null)
+			{
+				choice.setCorrect(Boolean.TRUE);
+			}
+		}
+	}
+
+	/**
+	 * Set a request for more choices.
+	 * 
+	 * @param more
+	 *        The number of more choices requested.
+	 */
+	public void setMoreChoices(String more)
+	{
+		// defer to consolidate
+		this.moreChoices = Integer.valueOf(more);
 	}
 
 	/**

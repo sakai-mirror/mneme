@@ -128,7 +128,7 @@ public class SelectQuestionType extends ControllerImpl
 		
 		String selectedQuestionType = value.getValue();
 		
-		if ((selectedQuestionType != null) && (destination.startsWith("/question_add")))
+		if ((selectedQuestionType != null) && (destination.startsWith("CREATE")))
 		{
 			//pool id is in params array at index 4
 			Pool pool = this.poolService.getPool(params[4]);
@@ -151,7 +151,6 @@ public class SelectQuestionType extends ControllerImpl
 			try
 			{
 				newQuestion = this.questionService.newQuestion(pool, selectedQuestionType);
-				this.questionService.saveQuestion(newQuestion);
 			}
 			catch (AssessmentPermissionException e)
 			{
@@ -161,8 +160,8 @@ public class SelectQuestionType extends ControllerImpl
 			}
 
 			// form the destionation
-			// TODO: preserve sort / paging parameters
-			destination = "/question_edit/" + newQuestion.getId();
+			destination = destination.replaceFirst("CREATE", "/question_edit");
+			destination += "/" + newQuestion.getId();
 
 			// redirect
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));

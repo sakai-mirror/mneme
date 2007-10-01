@@ -139,7 +139,13 @@
 					<model ref="question.description" missing="no-title" />
 					<entityNavigations>
 						<navigation>
-							<destination template="/question_edit/{0}">
+							<destination template="/question_edit/{0}/{1}/{2}/{3}{4}/{5}/{6}">
+								<model ref="poolsSortCode" />
+								<model ref="poolsPagingParameter" />
+								<model ref="pool.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="pagingParameter" />
 								<model ref="question.id" />
 							</destination>
 						</navigation>

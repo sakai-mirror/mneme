@@ -103,6 +103,13 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public void consolidate()
+	{
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getAnswerKey()
 	{
 		return this.correctAnswer ? this.messages.getString("true") : this.messages.getString("false");

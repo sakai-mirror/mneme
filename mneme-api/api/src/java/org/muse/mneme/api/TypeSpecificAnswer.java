@@ -22,7 +22,7 @@
 package org.muse.mneme.api;
 
 /**
- * TypeSpecificAnswer defines the plug-in answer handles for a question type.
+ * TypeSpecificAnswer defines the plug-in answer handler for a question type.
  */
 public interface TypeSpecificAnswer extends Cloneable
 {

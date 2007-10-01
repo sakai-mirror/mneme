@@ -24,7 +24,7 @@ package org.muse.mneme.api;
 import org.muse.ambrosia.api.Component;
 
 /**
- * TypeSpecificAnswer defines the plug-in answer handles for a question type.
+ * TypeSpecificQuestion defines the plug-in question handler for a question type.
  */
 public interface TypeSpecificQuestion extends Cloneable
 {
@@ -36,6 +36,11 @@ public interface TypeSpecificQuestion extends Cloneable
 	 * @return A copy.
 	 */
 	Object clone(Question question);
+
+	/**
+	 * Consolidate the question, such as after editing and before save.
+	 */
+	void consolidate();
 
 	/**
 	 * Access the rich text (html) answer key that shows the correct answer to the question.

@@ -135,6 +135,13 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public void consolidate()
+	{
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getAnswerKey()
 	{
 		return null;
@@ -383,8 +390,7 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	{
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
-		entityList
-				.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.optionValues"), "optionValue");
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.optionValues"), "optionValue");
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
 		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("optionValue.text"));

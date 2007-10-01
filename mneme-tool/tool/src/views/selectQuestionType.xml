@@ -70,7 +70,7 @@
 		<navigationBar width="100%">
 			<container>
 				<navigation title="continue-title" style="BUTTON" accessKey="continue-access" description="continue-description" submit="TRUE">
-					<destination template="/question_add/{0}">
+					<destination template="CREATE/{0}">
 						<model ref="prevDestinationParamPath" />
 					</destination>
 				</navigation>

@@ -81,7 +81,7 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 
 		// count the number of correct answers
 		Question question = answer.getQuestion();
-		Set correctAnswers = ((MultipleChoiceQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswerSet();
+		Set<Integer> correctAnswers = ((MultipleChoiceQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswerSet();
 
 		// each correct / incorrect gets a part of the total points
 		float partial = (correctAnswers.size() > 0) ? question.getPool().getPoints() / correctAnswers.size() : 0f;

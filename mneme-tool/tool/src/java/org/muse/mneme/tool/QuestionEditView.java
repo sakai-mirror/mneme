@@ -35,6 +35,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -76,12 +77,15 @@ public class QuestionEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// 1 parameter - qid
-		// TODO: possible other sort / page preservation parameters
-		if ((params.length != 3)) throw new IllegalArgumentException();
-		String questionId = params[2];
+		// [2] pool_sort / [3] pool_page / [4] pool_id / [5] question_sort / [6] question_page / [7] question_id
+		if ((params.length != 8)) throw new IllegalArgumentException();
+		String questionId = params[7];
+		
+		// put the extra parameters all together
+		String extras = StringUtil.unsplit(params, 2, 5, "/");
+		context.put("extras", extras);
 
-		// setup the model: the selected pool - pool id is at index 4
+		// get the question to work on
 		Question question = this.questionService.getQuestion(questionId);
 		if (question == null) throw new IllegalArgumentException();
 
@@ -104,12 +108,11 @@ public class QuestionEditView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// 1 parameter - qid
-		// TODO: possible other sort / page preservation parameters
-		if ((params.length != 3)) throw new IllegalArgumentException();
-		String questionId = params[2];
+		// [2] pool_sort / [3] pool_page / [4] pool_id / [5] question_sort / [6] question_page / [7] question_id
+		if ((params.length != 8)) throw new IllegalArgumentException();
+		String questionId = params[7];
 
-		// setup the model: the selected pool - pool id is at index 4
+		// get the question to work on
 		Question question = this.questionService.getQuestion(questionId);
 		if (question == null) throw new IllegalArgumentException();
 
@@ -118,6 +121,9 @@ public class QuestionEditView extends ControllerImpl
 
 		// read form
 		String destination = this.uiService.decode(req, context);
+
+		// consolidate the question
+		question.getTypeSpecificQuestion().consolidate();
 
 		// save
 		try

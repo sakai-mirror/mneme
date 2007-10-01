@@ -42,28 +42,51 @@ import org.sakaiproject.i18n.InternationalizedMessages;
  */
 public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 {
+	private static String extractFIBTextArray(String alltext)
+	{
+		StringBuffer strBuf = new StringBuffer();
+
+		while (alltext.indexOf("{") > -1)
+		{
+			int alltextLeftIndex = alltext.indexOf("{");
+			int alltextRightIndex = alltext.indexOf("}");
+
+			String tmp = alltext.substring(0, alltextLeftIndex);
+			alltext = alltext.substring(alltextRightIndex + 1);
+			strBuf.append(tmp);
+			strBuf.append("{}");
+			// there are no more "}", exit loop
+			if (alltextRightIndex == -1)
+			{
+				break;
+			}
+		}
+		strBuf.append(alltext);
+		return strBuf.toString();
+	}
+
+	/** TRUE means any order is ok, FALSE means it is not */
+	protected Boolean anyOrder = Boolean.FALSE;
+
+	/** TRUE means answer is case sensitive, FALSE means it is not */
+	protected Boolean caseSensitive = Boolean.FALSE;
+
 	/** The correct answers. */
 	protected List<String> correctAnswers = new ArrayList<String>();
 
 	protected InternationalizedMessages messages = null;
 
+	/** This variable contains the parsed presentation text of the question with {} */
+	protected String parsedText = null;
+
 	/** The question this is a helper for. */
 	protected transient Question question = null;
-
-	/** Dependency: The UI service (Ambrosia). */
-	protected UiService uiService = null;
-
-	/** TRUE means answer is case sensitive, FALSE means it is not */
-	protected Boolean caseSensitive = Boolean.FALSE;
-
-	/** TRUE means any order is ok, FALSE means it is not */
-	protected Boolean anyOrder = Boolean.FALSE;
 
 	/** TRUE means response is textual, FALSE means response is numeric */
 	protected Boolean responseTextual = Boolean.TRUE;
 
-	/** This variable contains the parsed presentation text of the question with {} */
-	protected String parsedText = null;
+	/** Dependency: The UI service (Ambrosia). */
+	protected UiService uiService = null;
 
 	/**
 	 * Construct.
@@ -122,10 +145,25 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public void consolidate()
+	{
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getAnswerKey()
 	{
 		// return this.correctAnswer ? this.messages.getString("true") : this.messages.getString("false");
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getAnyOrder()
+	{
+		return this.anyOrder.toString();
 	}
 
 	/**
@@ -166,112 +204,9 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public Component getDeliveryUi()
-	{
-		FillIn fillIn = this.uiService.newFillIn();
-		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.parsedText")).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers")).setWidth(20);
-
-		return this.uiService.newFragment().setMessages(this.messages).add(fillIn);
-
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Component getReviewUi()
-	{
-		FillIn fillIn = this.uiService.newFillIn();
-		AndDecision and = this.uiService.newAndDecision();
-		Decision[] decisions = new Decision[2];
-		decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
-		decisions[1] = this.uiService.newDecision().setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
-		and.setRequirements(decisions);
-		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.parsedText"));
-		fillIn.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
-		fillIn.setWidth(20);
-		fillIn.setCorrectDecision(and);
-		fillIn.setReadOnly(this.uiService.newTrueDecision());
-		fillIn.setCorrect(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.entryCorrects"));
-
-		return this.uiService.newFragment().setMessages(this.messages).add(fillIn);
-
-	}
-
-	public Component getViewQuestionUi()
-	{
-		Text txt = this.uiService.newText();
-		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.reviewText"));
-		return this.uiService.newFragment().setMessages(this.messages).add(txt);
-	}
-
-	public Component getViewAnswerUi()
-	{
-		Text txt = this.uiService.newText();
-		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.reviewText"));
-		return this.uiService.newFragment().setMessages(this.messages).add(txt);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getTypeName()
-	{
-		return this.messages.getString("name");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public String getCaseSensitive()
 	{
 		return this.caseSensitive.toString();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getAnyOrder()
-	{
-		return this.anyOrder.toString();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getResponseTextual()
-	{
-		return this.responseTextual.toString();
-	}
-
-	public String getParsedText()
-	{
-		this.parsedText = extractFIBTextArray(this.question.getPresentation().getText());
-		return this.parsedText;
-	}
-
-	private static String extractFIBTextArray(String alltext)
-	{
-		StringBuffer strBuf = new StringBuffer();
-
-		while (alltext.indexOf("{") > -1)
-		{
-			int alltextLeftIndex = alltext.indexOf("{");
-			int alltextRightIndex = alltext.indexOf("}");
-
-			String tmp = alltext.substring(0, alltextLeftIndex);
-			alltext = alltext.substring(alltextRightIndex + 1);
-			strBuf.append(tmp);
-			strBuf.append("{}");
-			// there are no more "}", exit loop
-			if (alltextRightIndex == -1)
-			{
-				break;
-			}
-		}
-		strBuf.append(alltext);
-		return strBuf.toString();
 	}
 
 	public List<String> getCorrectAnswers()
@@ -297,9 +232,73 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setCaseSensitive(String caseSensitive)
+	public Component getDeliveryUi()
 	{
-		this.caseSensitive = Boolean.valueOf(caseSensitive);
+		FillIn fillIn = this.uiService.newFillIn();
+		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.parsedText")).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers")).setWidth(20);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(fillIn);
+
+	}
+
+	public String getParsedText()
+	{
+		this.parsedText = extractFIBTextArray(this.question.getPresentation().getText());
+		return this.parsedText;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getResponseTextual()
+	{
+		return this.responseTextual.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getReviewUi()
+	{
+		FillIn fillIn = this.uiService.newFillIn();
+		AndDecision and = this.uiService.newAndDecision();
+		Decision[] decisions = new Decision[2];
+		decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
+		decisions[1] = this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+		and.setRequirements(decisions);
+		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.parsedText"));
+		fillIn.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
+		fillIn.setWidth(20);
+		fillIn.setCorrectDecision(and);
+		fillIn.setReadOnly(this.uiService.newTrueDecision());
+		fillIn.setCorrect(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.entryCorrects"));
+
+		return this.uiService.newFragment().setMessages(this.messages).add(fillIn);
+
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getTypeName()
+	{
+		return this.messages.getString("name");
+	}
+
+	public Component getViewAnswerUi()
+	{
+		Text txt = this.uiService.newText();
+		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.reviewText"));
+		return this.uiService.newFragment().setMessages(this.messages).add(txt);
+	}
+
+	public Component getViewQuestionUi()
+	{
+		Text txt = this.uiService.newText();
+		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.reviewText"));
+		return this.uiService.newFragment().setMessages(this.messages).add(txt);
 	}
 
 	/**
@@ -308,6 +307,14 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	public void setAnyOrder(String anyOrder)
 	{
 		this.anyOrder = Boolean.valueOf(anyOrder);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setCaseSensitive(String caseSensitive)
+	{
+		this.caseSensitive = Boolean.valueOf(caseSensitive);
 	}
 
 	/**
