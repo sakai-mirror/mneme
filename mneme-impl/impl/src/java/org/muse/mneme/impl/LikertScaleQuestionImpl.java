@@ -202,6 +202,14 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public String getDescription()
+	{
+		return this.question.getPresentation().getText();
+	}
+
+	/**
 	 * Access the options as an entity (LikertScaleQuestionChoice) list.
 	 * 
 	 * @return The options as an entity (LikertScaleQuestionChoice) list.

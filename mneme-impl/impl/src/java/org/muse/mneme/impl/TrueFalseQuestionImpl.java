@@ -161,6 +161,14 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getDescription()
+	{
+		return this.question.getPresentation().getText();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Component getReviewUi()
 	{
 		Selection selection = this.uiService.newSelection();

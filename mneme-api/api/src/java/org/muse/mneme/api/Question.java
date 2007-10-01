@@ -146,14 +146,6 @@ public interface Question
 	String getVersion();
 
 	/**
-	 * Set the description of the question.
-	 * 
-	 * @param description
-	 *        The description of the question.
-	 */
-	void setDescription(String description);
-
-	/**
 	 * Set the explain-reason setting.
 	 * 
 	 * @param explainReason

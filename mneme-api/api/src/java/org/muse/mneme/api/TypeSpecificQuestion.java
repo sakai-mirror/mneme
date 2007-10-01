@@ -64,6 +64,13 @@ public interface TypeSpecificQuestion extends Cloneable
 	Component getDeliveryUi();
 
 	/**
+	 * Access a description of the question.
+	 * 
+	 * @return A description of the question.
+	 */
+	String getDescription();
+
+	/**
 	 * Access the user interface component for review of this question type.
 	 * 
 	 * @return The user interface component for review of this question type.

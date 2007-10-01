@@ -209,8 +209,6 @@ public class QuestionImpl implements Question
 	/** Start of the versioning thing. */
 	protected Boolean deleted = Boolean.FALSE;
 
-	protected String description = null;
-
 	protected Boolean explainReason = null;
 
 	protected String feedback = null;
@@ -308,7 +306,7 @@ public class QuestionImpl implements Question
 	 */
 	public String getDescription()
 	{
-		return this.description;
+		return this.questionHandler.getDescription();
 	}
 
 	/**
@@ -426,14 +424,6 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setDescription(String description)
-	{
-		this.description = description;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void setExplainReason(Boolean explainReason)
 	{
 		if (explainReason == null) throw new IllegalArgumentException();
@@ -525,7 +515,6 @@ public class QuestionImpl implements Question
 		if (other.questionHandler != null) this.questionHandler = (TypeSpecificQuestion) (other.questionHandler.clone(this));
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
 		this.deleted = other.deleted;
-		this.description = other.description;
 		this.explainReason = other.explainReason;
 		this.feedback = other.feedback;
 		this.hints = other.hints;

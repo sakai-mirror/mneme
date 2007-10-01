@@ -237,6 +237,14 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDescription()
+	{
+		return getParsedText();
+	}
+
 	public String getParsedText()
 	{
 		String parsedText = extractFIBTextArray(getText());

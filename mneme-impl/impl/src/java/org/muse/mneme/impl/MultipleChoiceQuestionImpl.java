@@ -516,6 +516,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public String getDescription()
+	{
+		return this.question.getPresentation().getText();
+	}
+
+	/**
 	 * The "getter" for the moreChoices - always set to 0.
 	 * 
 	 * @return The initial '0" value for the more choices.

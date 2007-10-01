@@ -407,7 +407,6 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initType("mneme:TrueFalse");
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q1");
-			q.setDescription("question one");
 			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
@@ -425,7 +424,6 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initType("mneme:TrueFalse");
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q2");
-			q.setDescription("question two");
 			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
@@ -443,7 +441,6 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initType("mneme:MultipleChoice");
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q3");
-			q.setDescription("question three");
 			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
@@ -471,7 +468,6 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initType("mneme:LikertScale");
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q4");
-			q.setDescription("question four");
 			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
@@ -489,7 +485,6 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initType("mneme:FillBlanks");
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q5");
-			q.setDescription("question five");
 			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
