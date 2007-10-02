@@ -153,7 +153,7 @@ public class GradeSubmissionView extends ControllerImpl
 
 		}
 
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
