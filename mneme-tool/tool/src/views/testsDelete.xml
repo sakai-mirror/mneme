@@ -24,7 +24,7 @@
 	**********************************************************************************/
 -->
 
-<interface title="tests-delete-confirm-title" header="tests-delete-confirm-header">
+<interface title="delete-confirm-title" header="tests-delete-confirm-header">
 
 	<!--mode bar-->
 	<modeContainer>
