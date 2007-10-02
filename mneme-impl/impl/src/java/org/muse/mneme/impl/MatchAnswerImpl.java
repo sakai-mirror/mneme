@@ -29,7 +29,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificAnswer;
 
 /**
- * MatchAnswerImpl handles answers for the multiple choice question type.
+ * MatchAnswerImpl handles answers for the match question type.
  */
 public class MatchAnswerImpl implements TypeSpecificAnswer
 {

@@ -34,7 +34,7 @@ import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
- * MatchPlugin handles the multiple choice question type.
+ * MatchPlugin handles the match question type.
  */
 public class MatchPlugin implements QuestionPlugin
 {

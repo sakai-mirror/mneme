@@ -47,7 +47,7 @@ import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
 
 /**
- * MatchQuestionImpl handles questions for the multiple choice question type.
+ * MatchQuestionImpl handles questions for the match question type.
  */
 public class MatchQuestionImpl implements TypeSpecificQuestion
 {
