@@ -22,7 +22,6 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,10 +30,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentParts;
+import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
-import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.ToolManager;
@@ -118,6 +117,41 @@ public class GradeSubmissionView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if (params.length != 4 && params.length != 5 && params.length != 6 && params.length != 7) throw new IllegalArgumentException();
+
+		// submission id is in params array at index 6
+		Submission submission = this.submissionService.getSubmission(params[6]);
+		context.put("submission", submission);
+
+		context.put("submission", submission);
+
+		// read form
+		String destination = this.uiService.decode(req, context);
+
+		if (destination != null)
+		{
+			if (destination.startsWith("/grade_submission_save"))
+			{
+				try
+				{
+					// save submission
+					if (submission.getAnswers() != null)
+					{
+						for (Answer answer : submission.getAnswers())
+						{
+							this.submissionService.evaluateSubmission(submission);
+						}
+					}
+				}
+				catch (AssessmentPermissionException e)
+				{
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+				
+				destination = destination.replace("grade_submission_save", "grade_assessment");
+			}
+
+		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
 	}

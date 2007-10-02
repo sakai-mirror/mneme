@@ -88,78 +88,95 @@
 
 		<section>
 			<iterator name="answer" model="submission.answers" />
+
 			<container>
-				<section>
-					<title highlighted="TRUE">
-						<message selector="section-title">
-							<model ref="answer.question.assessmentOrdering.position" />
-							<model ref="answer.question.part.assessment.parts.NumQuestions" />
-							<model ref="answer.autoScore" />
-							<model ref="answer.question.pool.points" />
-						</message>
-					</title>
-
-					<container>
-						<!-- question presentation (text and attachments) -->
-						<text>
-							<message>
-								<model type="html" ref="answer.question.presentation.text" />
-							</message>
-						</text>
-
-						<attachments model="answer.question.presentation.attachments">
-							<included>
-								<hasValueDecision model="answer.question.presentation.attachments" />
-							</included>
-						</attachments>
-
-						<!-- Question specific review -->
-						<modelComponent model="answer.question.typeSpecificQuestion.reviewUi" />
-
-						<!-- answer key -->
-						<text>
-							<message selector="question-answer-key">
-								<model type="icon" icon="/icons/answer_key.png" />
-								<model type="html" ref="answer.question.answerKey" />
-							</message>
-							<included>
-								<hasValueDecision model="answer.question.answerKey" />
-							</included>
-						</text>
-
-						<!-- question feedback -->
-						<text>
-							<message selector="question-feedback">
-								<model type="icon" icon="/icons/feedback.png" />
-								<model type="html" ref="answer.question.feedback" />
-							</message>
-							<included>
-								<hasValueDecision model="answer.question.feedback" />
-							</included>
-						</text>
-
-						<!-- reason -->
-						<text>
-							<message selector="question-rationale">
-								<model type="icon" icon="/icons/reason.png" />
-								<model ref="answer.reason" />
-							</message>
-
-						</text>
-						<section>
+				<entityDisplay>
+					<rows>
+						<row>
+							<title highlighted="TRUE">
+								<message selector="question-number">
+									<model ref="answer.question.assessmentOrdering.position" />
+									<model ref="answer.question.part.assessment.parts.NumQuestions" />
+								</message>
+							</title>
 							<container>
+								<floatEdit model="answer.totalScore">
+									<title highlighted="TRUE">
+										<message selector="answer-points">
+											<model ref="answer.autoScore" />
+											<model ref="answer.question.pool.points" />
+										</message>
+									</title>
+								</floatEdit>
+							</container>
+						</row>
+
+						<row>
+							<container>
+								<!-- question presentation (text and attachments) -->
 								<text>
-									<message selector="submission-comments">
-										<model type="icon" icon="/icons/note.png" />
+									<message>
+										<model type="html" ref="answer.question.presentation.text" />
 									</message>
 								</text>
 
-								<textEdit model="answer.evaluation.comment" rows="5" cols="50" />
-							</container>
-						</section>
-					</container>
+								<attachments model="answer.question.presentation.attachments">
+									<included>
+										<hasValueDecision model="answer.question.presentation.attachments" />
+									</included>
+								</attachments>
 
-				</section>
+								<!-- Question specific review -->
+								<modelComponent model="answer.question.typeSpecificQuestion.reviewUi" />
+
+								<!-- answer key -->
+								<text>
+									<message selector="question-answer-key">
+										<model type="icon" icon="/icons/answer_key.png" />
+										<model type="html" ref="answer.question.answerKey" />
+									</message>
+									<included>
+										<hasValueDecision model="answer.question.answerKey" />
+									</included>
+								</text>
+
+								<!-- question feedback -->
+								<text>
+									<message selector="question-feedback">
+										<model type="icon" icon="/icons/feedback.png" />
+										<model type="html" ref="answer.question.feedback" />
+									</message>
+									<included>
+										<hasValueDecision model="answer.question.feedback" />
+									</included>
+								</text>
+
+								<!-- reason -->
+								<text>
+									<message selector="question-rationale">
+										<model type="icon" icon="/icons/reason.png" />
+										<model ref="answer.reason" />
+									</message>
+									<included>
+										<hasValueDecision model="answer.reason" />
+									</included>
+								</text>
+								<section>
+									<container>
+										<text>
+											<message selector="submission-comments">
+												<model type="icon" icon="/icons/note.png" />
+											</message>
+										</text>
+
+										<textEdit model="answer.evaluation.comment" rows="5" cols="50" />
+									</container>
+								</section>
+							</container>
+						</row>
+
+					</rows>
+				</entityDisplay>
 			</container>
 		</section>
 
