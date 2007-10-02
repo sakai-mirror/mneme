@@ -1,0 +1,282 @@
+/**********************************************************************************
+ * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ **********************************************************************************/
+
+package org.muse.mneme.impl;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
+import org.muse.ambrosia.api.AndDecision;
+import org.muse.ambrosia.api.AutoColumn;
+import org.muse.ambrosia.api.Component;
+import org.muse.ambrosia.api.Decision;
+import org.muse.ambrosia.api.EntityDisplay;
+import org.muse.ambrosia.api.EntityDisplayRow;
+import org.muse.ambrosia.api.EntityList;
+import org.muse.ambrosia.api.EntityListColumn;
+import org.muse.ambrosia.api.HtmlEdit;
+import org.muse.ambrosia.api.PropertyColumn;
+import org.muse.ambrosia.api.Selection;
+import org.muse.ambrosia.api.SelectionColumn;
+import org.muse.ambrosia.api.Text;
+import org.muse.ambrosia.api.OrderColumn;
+import org.muse.ambrosia.api.UiService;
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.TypeSpecificQuestion;
+import org.sakaiproject.i18n.InternationalizedMessages;
+
+/**
+ * EssayQuestionImpl handles questions for the essay question type.
+ */
+public class EssayQuestionImpl implements TypeSpecificQuestion
+{
+	/** Our messages. */
+	protected transient InternationalizedMessages messages = null;
+
+	/** The question this is a helper for. */
+	protected transient Question question = null;
+
+	/** Dependency: The UI service (Ambrosia). */
+	protected transient UiService uiService = null;
+
+	/** An enumerate type that declares the types of submissions */
+	private enum SubmissionType
+	{
+		inline, both, attachments;
+	}
+
+	/** Variable that holds the type of submission */
+	protected SubmissionType submissionType;
+
+	/** This property holds the model answer */
+	protected String modelAnswer = null;
+
+	/**
+	 * Construct.
+	 * 
+	 * @param uiService
+	 *        the UiService.
+	 * @param question
+	 *        The Question this is a helper for.
+	 */
+	public EssayQuestionImpl(InternationalizedMessages messages, UiService uiService, Question question)
+	{
+		this.messages = messages;
+		this.uiService = uiService;
+		this.question = question;
+	}
+
+	/**
+	 * Construct.
+	 * 
+	 * @param other
+	 *        The other to copy.
+	 */
+	public EssayQuestionImpl(Question question, EssayQuestionImpl other)
+	{
+		this.messages = other.messages;
+		this.question = question;
+		this.modelAnswer = modelAnswer;
+		this.uiService = other.uiService;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object clone(Question question)
+	{
+		try
+		{
+			// get an exact, bit-by-bit copy
+			Object rv = super.clone();
+
+			// set the question
+			((EssayQuestionImpl) rv).question = question;
+			((EssayQuestionImpl) rv).modelAnswer = modelAnswer;
+
+			return rv;
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void consolidate()
+	{
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getAnswerKey()
+	{
+		return getModelAnswer();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getAuthoringUi()
+	{
+		EntityDisplay display = this.uiService.newEntityDisplay();
+
+		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
+		Selection selection = uiService.newSelection();
+		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.submissionType"));
+		selection.addSelection("inline", "inline");
+		selection.addSelection("inline-attachments", "both");
+		selection.addSelection("attachments", "attachments");
+		row.add(selection);
+		row.setTitle("submission");
+		display.addRow(row);
+
+		row = this.uiService.newEntityDisplayRow();
+		row.setTitle("model-answer");
+		HtmlEdit edit = this.uiService.newHtmlEdit();
+		edit.setSize(5, 50);
+		edit.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
+		row.add(edit);
+		display.addRow(row);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(display);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getDeliveryUi()
+	{
+		EntityDisplay display = this.uiService.newEntityDisplay();
+		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
+		row.setTitle("answer");
+		HtmlEdit edit = this.uiService.newHtmlEdit();
+		edit.setSize(5, 50);
+		edit.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
+		row.add(edit);
+		display.addRow(row);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(display);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDescription()
+	{
+		return this.question.getPresentation().getText();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public SubmissionType getSubmissionType()
+	{
+		return this.submissionType;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getModelAnswer()
+	{
+		return this.modelAnswer;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getReviewUi()
+	{
+		Text txt = this.uiService.newText();
+		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
+		return this.uiService.newFragment().setMessages(this.messages).add(txt);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getTypeName()
+	{
+		return this.messages.getString("name");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getUseQuestionPresentation()
+	{
+		// we suppress the question presentation, using our own fields to capture the question.
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewAnswerUi()
+	{
+		Text txt = this.uiService.newText();
+		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
+		return this.uiService.newFragment().setMessages(this.messages).add(txt);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewQuestionUi()
+	{
+		Text txt = this.uiService.newText();
+		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+		return this.uiService.newFragment().setMessages(this.messages).add(txt);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setSubmissionType(SubmissionType setting)
+	{
+		if (setting == null) throw new IllegalArgumentException();
+		this.submissionType = setting;
+	}
+
+	public void setModelAnswer(String modelAnswer)
+	{
+		this.modelAnswer = modelAnswer;
+	}
+
+	/**
+	 * Set the UI service.
+	 * 
+	 * @param service
+	 *        The UI service.
+	 */
+	public void setUi(UiService service)
+	{
+		this.uiService = service;
+	}
+}
