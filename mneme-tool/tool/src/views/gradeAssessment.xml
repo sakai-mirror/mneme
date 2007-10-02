@@ -343,15 +343,14 @@
 					</title>
 					<model ref="submission.answersAutoScore" />
 				</modelColumn>
-				<modelColumn>
+				<column>
 					<title>
 						<message selector="submission-final" />
 					</title>
-					<!--container>
-						<floatEdit model="submission.evaluation.score" cols="2" />
-					</container-->
-					<model ref="submission.totalScore" />
-				</modelColumn>
+					<container>
+						<floatEdit model="submission.totalScore" cols="2" />
+					</container>
+				</column>
 			</columns>
 		</entityList>
 

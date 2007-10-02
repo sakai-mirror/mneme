@@ -148,12 +148,12 @@ public class GradeAssessmentView extends ControllerImpl
 		{
 			StringBuilder buildPath = new StringBuilder();
 			buildPath.append(destinationPath);
-			buildPath.append( "/");
+			buildPath.append("/");
 			buildPath.append(context.get("sort_column"));
 			buildPath.append(context.get("sort_direction"));
-			buildPath.append( "/");
-			buildPath.append( "highest");
-			//destinationPath = destinationPath + "/" + context.get("sort_column") + context.get("sort_direction") + "/" + "highest";
+			buildPath.append("/");
+			buildPath.append("highest");
+			// destinationPath = destinationPath + "/" + context.get("sort_column") + context.get("sort_direction") + "/" + "highest";
 			destinationPath = buildPath.toString();
 		}
 		else if (params.length == 5)
@@ -261,7 +261,6 @@ public class GradeAssessmentView extends ControllerImpl
 					}
 				}
 
-				/*
 				// save Final score for each student's submission
 				if (submissions != null && submissions.size() > 0)
 				{
@@ -272,7 +271,7 @@ public class GradeAssessmentView extends ControllerImpl
 							try
 							{
 								// save submission //to adjust to zero after first adjustment user should provide zero
-								if (submission.getEvaluation().getScore() != null) this.submissionService.evaluateSubmission(submission);
+								if (submission.getTotalScore() != null) this.submissionService.evaluateSubmission(submission);
 							}
 							catch (AssessmentPermissionException e)
 							{
@@ -282,7 +281,6 @@ public class GradeAssessmentView extends ControllerImpl
 						}
 					}
 				}
-				*/
 
 				destination = destination.replace("grade_assessment_save", "grade_assessment");
 			}
