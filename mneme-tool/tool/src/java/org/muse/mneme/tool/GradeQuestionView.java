@@ -157,52 +157,7 @@ public class GradeQuestionView extends ControllerImpl
 
 		// read form
 		String destination = this.uiService.decode(req, context);
-
-		if (destination.equals("NEXT"))
-		{
-			Assessment assessment = this.assessmentService.getAssessment(params[3]);
-			// get Questions
-			List questions = assessment.getParts().getQuestionsAsAuthored();
-			Question question = assessment.getParts().getQuestion(params[4]);
-
-			// find next of this question
-			// if the question is not the last of the part, go to the next quesiton
-			if (!question.getPartOrdering().getIsLast())
-			{
-				destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + question.getAssessmentOrdering().getNext().getId();
-			}
-			// if there's a next part
-			else if (!question.getPart().getOrdering().getIsLast())
-			{
-				Part next = question.getPart().getOrdering().getNext();
-				// otherwise choose the first question of the next part
-				destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + next.getFirstQuestion().getId();
-			}
-		}
-
-		if (destination.equals("PREV"))
-		{
-			Assessment assessment = this.assessmentService.getAssessment(params[3]);
-			// get Questions
-			List questions = assessment.getParts().getQuestionsAsAuthored();
-			Question question = assessment.getParts().getQuestion(params[4]);
-
-			// find next of this question
-			if (!question.getPartOrdering().getIsFirst())
-			{
-				destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + question.getAssessmentOrdering().getPrevious().getId();
-			}
-			// prev part
-			Part part = question.getPart();
-
-			// otherwise choose the last question of the prev part, if we have one
-			Part prev = part.getOrdering().getPrevious();
-			if (prev != null)
-			{
-				destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + prev.getLastQuestion().getId();
-			}
-		}
-
+	
 		if (destination.startsWith("/grade_question"))
 		{
 			// get Assessment - assessment id is in params at index 3

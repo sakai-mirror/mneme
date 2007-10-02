@@ -31,8 +31,8 @@
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
 	<header>
-		<message selector="grading-assessment-header">
-			<model type="icon" icon="/icons/grade.png" />			
+		<message selector="grading-assessment-header-question">
+			<model type="icon" icon="/icons/grade.png" />
 		</message>
 	</header>
 	<title>
@@ -40,15 +40,15 @@
 	</title>
 
 	<container>
-	<text>
-		<message selector="assessment-title">
-			<model ref="assessment.title" />
-		</message>
+		<text>
+			<message selector="assessment-title">
+				<model ref="assessment.title" />
+			</message>
 		</text>
 		<text>
-		<message selector="assessment-total-points">
-			<model ref="assessment.parts.totalPoints" />
-		</message>
+			<message selector="assessment-total-points">
+				<model ref="assessment.parts.totalPoints" />
+			</message>
 		</text>
 		<!--navigation-->
 		<navigationBar width="100%">
@@ -69,62 +69,6 @@
 			</container>
 		</navigationBar>
 
-		<navigationBar width="100%">
-			<container>
-				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
-					<icon icon="/icons/prev.gif" style="LEFT" />
-					<destination template="PREV" />
-					<disabled>
-						<andDecision>
-							<hasValueDecision model="selectedQuestion" />
-							<decision model="selectedQuestion.assessmentOrdering.isFirst" />
-						</andDecision>
-						<andDecision>
-							<hasValueDecision model="selectedQuestion.part" />
-							<decision model="selectedQuestion.part.ordering.isFirst" />
-						</andDecision>
-					</disabled>
-				</navigation>
-				<navigation title="toc" accessKey="toc-access" description="toc-description" style="BUTTON" submit="TRUE">
-					<icon icon="/icons/contents.gif" style="LEFT" />
-					<destination template="/" />
-				</navigation>
-				<navigation title="next" accessKey="next-access" description="next-description" style="BUTTON" destination="NEXT" submit="TRUE"
-					default="TRUE">
-					<icon icon="/icons/next.gif" style="RIGHT" />
-					<destination template="NEXT" />
-					<disabled>
-						<andDecision>
-							<decision model="selectedQuestion.assessmentOrdering.isLast" />
-						</andDecision>
-						<andDecision>
-							<decision model="selectedQuestion.part.ordering.isLast" />
-						</andDecision>
-					</disabled>
-				</navigation>
-				<divider />
-				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
-					<icon icon="/icons/save.png" style="LEFT" />
-					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}">
-						<model ref="gradeSortCode" />
-						<model ref="assessment.id" />
-						<model ref="selectedQuestion.id" />
-						<model ref="sort_column" />
-						<model ref="sort_direction" />
-					</destination>
-				</navigation>
-				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/grades/{0}">
-						<model ref="gradeSortCode" />
-					</destination>
-				</navigation>
-				<divider />
-				<pager paging="paging">
-					<destination template="/" />
-				</pager>
-			</container>
-		</navigationBar>
 		<entityDisplay>
 			<title>
 				<message selector="submission-question-pts">
@@ -147,12 +91,44 @@
 			</rows>
 		</entityDisplay>
 
+		<navigationBar width="100%">
+			<container>
+				<navigation title="toc" accessKey="toc-access" description="toc-description" style="BUTTON" submit="TRUE">
+					<icon icon="/icons/contents.gif" style="LEFT" />
+					<destination template="/grade_questions_list/{0}/{1}">
+						<model ref="gradeSortCode" />
+						<model ref="assessment.id" />
+					</destination>
+				</navigation>
+				<divider />
+				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
+					<icon icon="/icons/save.png" style="LEFT" />
+					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}">
+						<model ref="gradeSortCode" />
+						<model ref="assessment.id" />
+						<model ref="question.id" />
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
+					</destination>
+				</navigation>
+				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
+					<icon icon="/icons/cancel.gif" style="LEFT" />
+					<destination template="/grades/{0}">
+						<model ref="gradeSortCode" />
+					</destination>
+				</navigation>
+				<divider />
+				<pager paging="paging">
+					<destination template="/" />
+				</pager>
+			</container>
+		</navigationBar>
 		<entityList style="FLAT">
 			<iterator name="answer" model="answers" />
 			<emptyTitle>
 				<message selector="no-submissions" />
 			</emptyTitle>
-			
+
 			<columns>
 				<modelColumn>
 					<title>
@@ -211,8 +187,7 @@
 							<included>
 								<decision model="answer.submission.isCompletedLate" reversed="TRUE" />
 							</included>
-							<message selector="submission-finished-date-alert">							
-							</message>
+							<message selector="submission-finished-date-alert"></message>
 						</text>
 					</container>
 				</modelColumn>
@@ -269,7 +244,7 @@
 									<constant value="FALSE" />
 								</compareDecision>
 							</included>
-						</navigation>						
+						</navigation>
 						<navigation>
 							<title>
 								<message selector="nav-divider" />
@@ -322,7 +297,7 @@
 					<title>
 						<message selector="submission-score" />
 					</title>
-					<model ref="answer.autoScore" />
+					<model ref="answer.autoScore" missing="missing-auto-score" />
 				</modelColumn>
 				<column>
 					<title>
@@ -330,7 +305,7 @@
 					</title>
 					<container>
 						<textEdit model="answer.totalScore" rows="1" cols="4" />
-					</container>					
+					</container>
 				</column>
 			</columns>
 		</entityList>
@@ -338,36 +313,12 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
-					<icon icon="/icons/prev.gif" style="LEFT" />
-					<destination template="PREV" />
-					<disabled>
-						<andDecision>
-							<hasValueDecision model="question" />
-							<decision model="question.assessmentOrdering.isFirst" />
-						</andDecision>
-						<andDecision>
-							<hasValueDecision model="question.part" />
-							<decision model="question.part.ordering.isFirst" />
-						</andDecision>						
-					</disabled>
-				</navigation>
 				<navigation title="toc" accessKey="toc-access" description="toc-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/contents.gif" style="LEFT" />
-					<destination template="/" />
-				</navigation>
-				<navigation title="next" accessKey="next-access" description="next-description" style="BUTTON" destination="NEXT" submit="TRUE"
-					default="TRUE">
-					<icon icon="/icons/next.gif" style="RIGHT" />
-					<destination template="NEXT" />
-					<disabled>					
-						<andDecision>							
-							<decision model="question.assessmentOrdering.isLast" />
-						</andDecision>
-						<andDecision>
-							<decision model="question.part.ordering.isLast" />
-						</andDecision>										
-					</disabled>
+					<destination template="/grade_questions_list/{0}/{1}">
+						<model ref="gradeSortCode" />
+						<model ref="assessment.id" />
+					</destination>
 				</navigation>
 				<divider />
 				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
