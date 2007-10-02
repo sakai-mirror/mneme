@@ -229,9 +229,9 @@
 			<container>
 				<iconKey title="toc-key-title">
 					<icons>
-						<icon icon="/icons/unanswered.png" message="toc-key-unanswered" />
-						<icon icon="/icons/markedforreview.png" message="toc-key-mark-for-review" />
-						<icon icon="/icons/reason.png" message="toc-key-rationale" />
+						<icon icon="/icons/unanswered.png" message="format-question-decoration-unanswered" />
+						<icon icon="/icons/markedforreview.png" message="format-question-decoration-mark-for-review" />
+						<icon icon="/icons/reason.png" message="format-question-decoration-rationale" />
 					</icons>
 				</iconKey>
 			</container>

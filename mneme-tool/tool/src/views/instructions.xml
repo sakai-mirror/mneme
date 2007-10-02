@@ -119,14 +119,13 @@
 		</section>
 
 		<!-- for each part, part information -->
-		<!--  TODO: the entityIncluded can be changed to a section included since there's just one setting -ggolden -->
 		<section>
 			<iterator model="submission.assessment.parts.parts" name="part" />
 			<entityIncluded>
 				<decision model="submission.assessment.parts.showPresentation" />
 			</entityIncluded>
 			<title>
-				<message selector="instructions-section-title">
+				<message selector="instructions-part-title">
 					<model type="icon" icon="/icons/section.png" />
 					<model type="text" ref="part.ordering.position" />
 					<model type="text" ref="part.assessment.parts.size" />
@@ -162,7 +161,7 @@
 				</instructions>
 			</container>
 			<included>
-				<hasValueDecision reversed="TRUE" model="submission.assessment.randomAccess" />
+				<decision reversed="TRUE" model="submission.assessment.randomAccess" />
 			</included>
 		</section>
 

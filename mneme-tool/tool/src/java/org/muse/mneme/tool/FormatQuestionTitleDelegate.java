@@ -70,7 +70,7 @@ public class FormatQuestionTitleDelegate extends FormatDelegateImpl
 		QuestionScoreDelegate qs = new QuestionScoreDelegate();
 		args[2] = qs.format(context, value);
 
-		return context.getMessages().getFormattedMessage("question-question-title", args);
+		return context.getMessages().getFormattedMessage("format-question-title", args);
 	}
 
 	/**

@@ -82,21 +82,21 @@ public class FormatQuestionDecorationDelegate extends FormatDelegateImpl
 		if (!answered)
 		{
 			return "<img src=\"" + context.get("sakai.return.url") + "/icons/unanswered.png\" alt=\""
-					+ context.getMessages().getString("toc-key-unanswered") + "\" />";
+					+ context.getMessages().getString("format-question-decoration-unanswered") + "\" />";
 		}
 
 		// if mark for review, use that icon
 		else if (markForReview)
 		{
 			return "<img src=\"" + context.get("sakai.return.url") + "/icons/markedforreview.png\" alt=\""
-					+ context.getMessages().getString("toc-key-mark-for-review") + "\" />";
+					+ context.getMessages().getString("format-question-decoration-mark-for-review") + "\" />";
 		}
 
 		// if rationale is needed and not present, use the no-rationale icon
 		else if (missingReason)
 		{
 			return "<img src=\"" + context.get("sakai.return.url") + "/icons/reason.png\" alt=\""
-					+ context.getMessages().getString("toc-key-rationale") + "\" />";
+					+ context.getMessages().getString("format-question-decoration-rationale") + "\" />";
 		}
 
 		return null;

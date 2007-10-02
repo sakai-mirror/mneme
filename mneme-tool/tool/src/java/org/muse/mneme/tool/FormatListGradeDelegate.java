@@ -85,7 +85,7 @@ public class FormatListGradeDelegate extends FormatDelegateImpl
 			}
 			else
 			{
-				return context.getMessages().getString("list-not-graded");
+				return context.getMessages().getString("not-graded");
 			}
 		}
 

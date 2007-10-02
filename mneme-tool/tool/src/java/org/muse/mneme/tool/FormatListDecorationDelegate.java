@@ -70,51 +70,51 @@ public class FormatListDecorationDelegate extends FormatDelegateImpl
 			case future:
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/future.gif\" alt=\""
-						+ context.getMessages().getString("list-key-future") + "\" /><br /><span style=\"font-size:smaller\">"
-						+ context.getMessages().getString("list-key-future") + "</span>";
+						+ context.getMessages().getString("format-list-decoration-future") + "\" /><br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("format-list-decoration-future") + "</span>";
 			}
 
 			case ready:
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/begin.gif\" alt=\""
-						+ context.getMessages().getString("list-key-todo") + "\" /><br /><span style=\"font-size:smaller\">"
-						+ context.getMessages().getString("list-key-todo") + "</span>";
+						+ context.getMessages().getString("format-list-decoration-todo") + "\" /><br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("format-list-decoration-todo") + "</span>";
 			}
 
 			case inProgressAlert:
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/exit.gif\" alt=\""
-						+ context.getMessages().getString("list-key-inprogress") + "\" />" + "<img src=\"" + context.get("sakai.return.url")
-						+ "/icons/warning.gif\" alt=\"" + context.getMessages().getString("list-key-urgent") + "\" />"
-						+ "<br /><span style=\"font-size:smaller\">" + context.getMessages().getString("list-key-inprogress-urgent") + "</span>";
+						+ context.getMessages().getString("format-list-decoration-inprogress") + "\" />" + "<img src=\"" + context.get("sakai.return.url")
+						+ "/icons/warning.gif\" alt=\"" + context.getMessages().getString("format-list-decoration-urgent") + "\" />"
+						+ "<br /><span style=\"font-size:smaller\">" + context.getMessages().getString("format-list-decoration-inprogress-urgent") + "</span>";
 			}
 
 			case inProgress:
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/exit.gif\" alt=\""
-						+ context.getMessages().getString("list-key-inprogress") + "\" /><br /><span style=\"font-size:smaller\">"
-						+ context.getMessages().getString("list-key-inprogress") + "</span>";
+						+ context.getMessages().getString("format-list-decoration-inprogress") + "\" /><br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("format-list-decoration-inprogress") + "</span>";
 			}
 
 			case completeReady:
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/finish.gif\" alt=\""
-						+ context.getMessages().getString("list-key-complete") + "\" />" + "<img src=\"" + context.get("sakai.return.url")
-						+ "/icons/begin.gif\" alt=\"" + context.getMessages().getString("list-key-repeat") + "\" />"
-						+ "<br /><span style=\"font-size:smaller\">" + context.getMessages().getString("list-key-complete-repeat") + "</span>";
+						+ context.getMessages().getString("format-list-decoration-complete") + "\" />" + "<img src=\"" + context.get("sakai.return.url")
+						+ "/icons/begin.gif\" alt=\"" + context.getMessages().getString("format-list-decoration-repeat") + "\" />"
+						+ "<br /><span style=\"font-size:smaller\">" + context.getMessages().getString("format-list-decoration-complete-repeat") + "</span>";
 			}
 
 			case complete:
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/finish.gif\" alt=\""
-						+ context.getMessages().getString("list-key-complete") + "\" /><br /><span style=\"font-size:smaller\">"
-						+ context.getMessages().getString("list-key-complete") + "</span>";
+						+ context.getMessages().getString("format-list-decoration-complete") + "\" /><br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("format-list-decoration-complete") + "</span>";
 			}
 			case over:
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/cancel.gif\" alt=\""
-						+ context.getMessages().getString("list-key-overdue") + "\" /><br /><span style=\"font-size:smaller\">"
-						+ context.getMessages().getString("list-key-overdue") + "</span>";
+						+ context.getMessages().getString("format-list-decoration-overdue") + "\" /><br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("format-list-decoration-overdue") + "</span>";
 			}
 		}
 

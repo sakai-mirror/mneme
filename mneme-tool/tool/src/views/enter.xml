@@ -67,7 +67,7 @@
 				</instructions>
 			</container>
 			<included>
-				<hasValueDecision reversed="TRUE" model="assessment.randomAccess" />
+				<decision reversed="TRUE" model="assessment.randomAccess" />
 			</included>
 		</section>
 		<section>

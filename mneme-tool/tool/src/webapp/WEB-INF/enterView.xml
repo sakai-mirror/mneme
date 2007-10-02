@@ -34,7 +34,6 @@
 			depends-on="FormatScore">
 
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
- 		<!-- property name="assessmentService"--><!-- ref bean="org.muse.mneme.api.MnemeService"/--><!--  /property-->
  		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
  		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
  		<property name="toolId"><value>sakai.mneme</value></property>
