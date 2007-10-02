@@ -116,16 +116,6 @@
 						<!-- Question specific review -->
 						<modelComponent model="answer.question.typeSpecificQuestion.reviewUi" />
 
-
-						<!-- reason -->
-						<text>
-							<message selector="question-rationale">
-								<model type="icon" icon="/icons/building_edit.png" />
-								<model ref="answer.reason" />
-							</message>
-
-						</text>
-
 						<!-- answer key -->
 						<text>
 							<message selector="question-answer-key">
@@ -148,14 +138,25 @@
 							</included>
 						</text>
 
+						<!-- reason -->
 						<text>
-							<message selector="submission-comments">
-								<model type="icon" icon="/icons/note.png" />
+							<message selector="question-rationale">
+								<model type="icon" icon="/icons/reason.png" />
+								<model ref="answer.reason" />
 							</message>
+
 						</text>
+						<section>
+							<container>
+								<text>
+									<message selector="submission-comments">
+										<model type="icon" icon="/icons/note.png" />
+									</message>
+								</text>
 
-						<textEdit model="answer.evaluation.comment" rows="5" cols="50" />
-
+								<textEdit model="answer.evaluation.comment" rows="5" cols="50" />
+							</container>
+						</section>
 					</container>
 
 				</section>
