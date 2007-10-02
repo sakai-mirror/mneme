@@ -209,7 +209,7 @@ public class TestsView extends ControllerImpl
 			if (!saveDates(req, res, context)) return;
 
 			// for an add
-			if (destination.startsWith("/test_add"))
+			if (destination.startsWith("/assessment_add"))
 			{
 				StringBuffer path = new StringBuffer();
 				// create a new test
@@ -218,7 +218,7 @@ public class TestsView extends ControllerImpl
 					Assessment assessment = this.assessmentService.newAssessment(this.toolManager.getCurrentPlacement().getContext());
 
 					// redirect to edit for this assessment
-					path.append("/test_edit/");
+					path.append("/assessment_edit/");
 					// for sort code
 					if (params.length == 3)
 					{
@@ -273,7 +273,7 @@ public class TestsView extends ControllerImpl
 				}
 			}
 
-			else if (destination.trim().equalsIgnoreCase("/tests_delete"))
+			else if (destination.trim().equalsIgnoreCase("/assessments_delete"))
 			{
 				String[] selectedTestIds = values.getValues();
 				// delete the tests with ids
@@ -335,9 +335,9 @@ public class TestsView extends ControllerImpl
 		}
 
 		if (params.length == 3)
-			destination = "/tests/" + params[2];
+			destination = "/assessments/" + params[2];
 		else
-			destination = "/tests/";
+			destination = "/assessments/";
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}

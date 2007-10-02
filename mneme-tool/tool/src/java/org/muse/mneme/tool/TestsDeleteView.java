@@ -136,7 +136,7 @@ public class TestsDeleteView extends ControllerImpl
 
 		String destination = this.uiService.decode(req, context);
 
-		if (destination != null && (destination.trim().startsWith("/tests_delete")))
+		if (destination != null && (destination.trim().startsWith("/assessments_delete")))
 		{
 			StringBuffer path = new StringBuffer();
 			String separator = "+";
@@ -148,7 +148,7 @@ public class TestsDeleteView extends ControllerImpl
 				{
 					// path.append(destination);
 
-					path.append("/tests/" + params[2]);
+					path.append("/assessments/" + params[2]);
 					for (String selectedTestId : selectedTestIds)
 					{
 						Assessment assessment = this.assessmentService.getAssessment(selectedTestId);

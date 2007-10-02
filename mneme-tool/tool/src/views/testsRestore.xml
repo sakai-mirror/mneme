@@ -102,13 +102,13 @@
 			<container>
 				<navigation title="restore" accessKey="restore-access" description="restore-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/make_inactive.png" style="LEFT" />
-					<destination template="/tests/{0}">
+					<destination template="/assessments/{0}">
 						<model ref="sort" />
 					</destination>
 				</navigation>
 				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/tests/{0}">
+					<destination template="/assessments/{0}">
 						<model ref="sort" />
 					</destination>
 				</navigation>

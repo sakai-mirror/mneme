@@ -62,11 +62,11 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/tests/0A" />
+							<destination template="/assessments/0A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/tests/0D" />
+							<destination template="/assessments/0D" />
 						</desc>
 					</sort>
 					<navigations>
@@ -96,10 +96,10 @@
 					</value>
 					<model ref="ids.values" />
 					<entityActions>
-						<navigation destination="/test_add/" title="add-test" style="LINK" description="add-test-description" submit="TRUE">
+						<navigation destination="/assessment_add/" title="add-test" style="LINK" description="add-test-description" submit="TRUE">
 							<icon icon="/icons/document_add.png" style="LEFT" />
 						</navigation>
-						<navigation destination="/tests_delete" title="delete-tests" style="LINK" description="delete-tests-description" submit="TRUE"
+						<navigation destination="/assessments_delete" title="delete-tests" style="LINK" description="delete-tests-description" submit="TRUE"
 							selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements">
 							<icon icon="/icons/delete.png" style="LEFT" />
 						</navigation>
@@ -116,14 +116,14 @@
 								</navigation>
 								<navigation title="slash" style="LINK" />
 								<navigation title="restore-tests" style="LINK" description="restore-tests-description" submit="TRUE">
-									<destination template="/tests_restore/{0}{1}">
+									<destination template="/assessments_restore/{0}{1}">
 										<model ref="sort_column" />
 										<model ref="sort_direction" />
 									</destination>
 								</navigation>
 							</container>
 						</container>
-						<navigation destination="/test_import_export" title="import-export-tests" style="LINK"
+						<navigation destination="/assessment_import_export" title="import-export-tests" style="LINK"
 							description="import-export-tests-description" submit="TRUE">
 							<icon icon="/icons/import_export.png" style="LEFT" />
 						</navigation>
@@ -142,11 +142,11 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/tests/1A" />
+							<destination template="/assessments/1A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/tests/1D" />
+							<destination template="/assessments/1D" />
 						</desc>
 					</sort>
 					<container>
@@ -156,7 +156,7 @@
 									<model ref="assessment.title" missing="no-title" />
 								</message>
 							</title>
-							<destination template="/test_edit/{0}{1}/{2}">
+							<destination template="/assessment_edit/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
@@ -172,7 +172,7 @@
 					<navigations>
 						<navigation style="LINK" submit="TRUE">
 							<icon icon="/icons/preview.png" style="LEFT" />
-							<destination template="/test_preview/{0}{1}/{2}">
+							<destination template="/assessment_preview/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
@@ -193,11 +193,11 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/tests/2A" />
+							<destination template="/assessments/2A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/tests/2D" />
+							<destination template="/assessments/2D" />
 						</desc>
 					</sort>
 					<container>
@@ -219,11 +219,11 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/tests/3A" />
+							<destination template="/assessments/3A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/tests/3D" />
+							<destination template="/assessments/3D" />
 						</desc>
 					</sort>
 					<container>
@@ -245,17 +245,17 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/tests/4A" />
+							<destination template="/assessments/4A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/tests/4D" />
+							<destination template="/assessments/4D" />
 						</desc>
 					</sort>
 					<navigations>
 						<navigation submit="TRUE" description="published-alt">
 							<icon icon="/icons/active.png" style="LEFT" />
-							<destination template="/test_publish/{0}{1}/{2}">
+							<destination template="/assessment_publish/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
@@ -267,7 +267,7 @@
 						</navigation>
 						<navigation submit="TRUE" description="unpublished-alt">
 							<icon icon="/icons/deactivated.gif" style="LEFT" />
-							<destination template="/test_publish/{0}{1}/{2}">
+							<destination template="/assessment_publish/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
@@ -279,7 +279,7 @@
 						</navigation>
 						<navigation submit="TRUE" description="invalid-alt">
 							<icon icon="/icons/warning.gif" style="LEFT" />
-							<destination template="/test_invalid/{0}{1}/{2}">
+							<destination template="/assessment_invalid/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
@@ -297,7 +297,7 @@
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="settings">
 							<icon icon="/icons/settings.png" style="LEFT" />
-							<destination template="/test_settings/{0}{1}/{2}">
+							<destination template="/assessment_settings/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
@@ -305,7 +305,7 @@
 						</navigation>
 						<navigation style="LINK" submit="TRUE" description="access">
 							<icon icon="/icons/access.png" style="LEFT" />
-							<destination template="/test_access/{0}{1}/{2}">
+							<destination template="/assessment_access/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
@@ -326,10 +326,10 @@
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="100%">
 			<container>
-				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/tests">
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/assessments">
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
-				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON" destination="/tests">
+				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON" destination="/assessments">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 				</navigation>
 			</container>

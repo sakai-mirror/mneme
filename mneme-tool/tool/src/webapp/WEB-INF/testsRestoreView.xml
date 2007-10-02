@@ -37,7 +37,7 @@
  		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="path"><value>tests_restore</value></property>
+ 		<property name="path"><value>assessments_restore</value></property>
  		<property name="bundle"><value>testsRestore</value></property>
 		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>testsRestore.xml</value></property>

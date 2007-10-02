@@ -4,8 +4,8 @@
 
 	<tool
 			id="sakai.mneme"
-			title="Test Center"
-			description="Test Center"
+			title="Assessments Center"
+			description="Assessments Center"
 	>
 
 		<category name="course" />

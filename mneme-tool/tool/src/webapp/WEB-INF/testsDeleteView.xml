@@ -48,7 +48,7 @@
 			<value>sakai.mneme</value>
 		</property>
 		<property name="path">
-			<value>tests_delete</value>
+			<value>assessments_delete</value>
 		</property>
 		<property name="bundle">
 			<value>testsDelete</value>

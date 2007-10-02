@@ -37,7 +37,7 @@
  		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="path"><value>test_edit</value></property>
+ 		<property name="path"><value>assessment_edit</value></property>
  		<property name="bundle"><value>testEdit</value></property>
 		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>testEdit.xml</value></property>

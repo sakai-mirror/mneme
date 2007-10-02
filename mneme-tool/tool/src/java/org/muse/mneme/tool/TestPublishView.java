@@ -40,7 +40,7 @@ import org.muse.mneme.api.ManualPart;
 import org.sakaiproject.util.Web;
 
 /**
- * The /test_edit view for the mneme tool.
+ * The /??? view for the mneme tool.
  */
 public class TestPublishView extends ControllerImpl
 {
@@ -139,7 +139,7 @@ public class TestPublishView extends ControllerImpl
 		// read the form
 		String destination = uiService.decode(req, context);
 
-		if (destination != null && (destination.trim().startsWith("/tests")))
+		if (destination != null && (destination.trim().startsWith("/assessments")))
 		{
 			StringBuffer path = new StringBuffer();
 			// commit the save
@@ -161,7 +161,7 @@ public class TestPublishView extends ControllerImpl
 			}
 
 			// Retain the sort order
-			path.append("/tests/" + params[2]);
+			path.append("/assessments/" + params[2]);
 			// redirect to the next destination
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
 		}

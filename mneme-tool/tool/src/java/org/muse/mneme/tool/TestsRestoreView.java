@@ -40,7 +40,7 @@ import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
- * The /tests_restore view for the mneme tool.
+ * The /assessments_restore view for the mneme tool.
  */
 public class TestsRestoreView extends ControllerImpl
 {

@@ -40,7 +40,7 @@ import org.muse.mneme.api.ManualPart;
 import org.sakaiproject.util.Web;
 
 /**
- * The /test_edit view for the mneme tool.
+ * The /assessment_edit view for the mneme tool.
  */
 public class TestEditView extends ControllerImpl
 {

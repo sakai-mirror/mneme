@@ -35,7 +35,7 @@
 					</disabled>
 				</navigation>
 				<divider />
-				<navigation destination="/tests" title="test-manager-nav-title" style="LINK" accessKey="test-manager-nav-access-key"
+				<navigation destination="/assessments" title="test-manager-nav-title" style="LINK" accessKey="test-manager-nav-access-key"
 					description="test-manager-nav-description" submit="TRUE">
 					<disabled>
 						<hasValueDecision model="disableTests" />

@@ -94,7 +94,7 @@
 					<navigations>
 						<navigation style="LINK" submit="TRUE">
 							<icon icon="/icons/preview.png" style="LEFT" />
-							<destination template="/test_preview/{0}{1}/{2}">
+							<destination template="/assessment_preview/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />

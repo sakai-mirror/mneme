@@ -70,11 +70,11 @@
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="20em">
 			<container>
-				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/tests">
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/assessments">
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
 				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
-					<destination template="/tests/{0}">
+					<destination template="/assessments/{0}">
 						<model ref="sortcode" />
 					</destination>
 					<icon icon="/icons/cancel.gif" style="LEFT" />
