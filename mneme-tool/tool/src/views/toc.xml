@@ -250,7 +250,11 @@
 				<navigation title="finish-exam" accessKey="finish-exam-access" description="finish-exam-description" style="BUTTON" submit="TRUE"
 					id="finish">
 					<icon icon="/icons/finish.gif" style="LEFT" />
-					<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="finish-confirm" />
+					<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif">
+						<message selector="finish-confirm">
+							<model type="enum" messageRoot="assessment-type-" ref="submission.assessment.type" />
+						</message>
+					</confirm>
 					<destination template="/submitted/{0}" model="submission.id" />
 				</navigation>
 				<divider />

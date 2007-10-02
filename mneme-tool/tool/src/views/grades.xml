@@ -51,19 +51,19 @@
 			<columns>
 				<column>
 					<navigations>
-						<navigation description="test-type">
+						<navigation description="assessment-type-test">
 							<icon icon="/icons/test_type.png" style="LEFT" />
 							<included>
 								<compareDecision model="assessment.type" constant="test" />
 							</included>
 						</navigation>
-						<navigation description="survey-type">
+						<navigation description="assessment-type-survey">
 							<icon icon="/icons/survey_type.png" style="LEFT" />
 							<included>
 								<compareDecision model="assessment.type" constant="survey" />
 							</included>
 						</navigation>
-						<navigation description="assignment-type">
+						<navigation description="assessment-type-assignment">
 							<icon icon="/icons/assignment_type.png" style="LEFT" />
 							<included>
 								<compareDecision model="assessment.type" constant="assignment" />

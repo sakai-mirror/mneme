@@ -169,7 +169,11 @@
 				<navigation title="finish-exam" accessKey="finish-exam-access" description="finish-exam-description" style="BUTTON" submit="TRUE"
 					destination="SUBMIT" id="finish">
 					<icon icon="/icons/finish.gif" style="LEFT" />
-					<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="finish-confirm" />
+					<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif">
+					<message selector="finish-confirm">
+						<model type="enum" messageRoot="assessment-type-" ref="submission.assessment.type" />
+					</message>
+					</confirm>
 				</navigation>
 				<divider />
 				<navigation title="instructions" accessKey="instructions-access" description="instructions-description" style="LINK">
