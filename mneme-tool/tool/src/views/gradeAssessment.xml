@@ -71,6 +71,7 @@
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>
+
 			</container>
 		</navigationBar>
 
@@ -174,42 +175,58 @@
 					<title>
 						<message selector="submission-finished" />
 					</title>
-					<message selector="submission-finished-date-alert">
-						<model type="date" ref="submission.submittedDate" />						
-					</message>	
-					<entityIncluded>
-					<andDecision model="submission.isCompletedLate">
-						<compareDecision model="submission.isCompletedLate">
-							<constant value="TRUE" />
-						</compareDecision>	
-					</andDecision>
-						<andDecision model="submission.isComplete">
-									<compareDecision model="submission.isComplete">
-										<constant value="TRUE" />
-									</compareDecision>
-						</andDecision>						
-					</entityIncluded>	
-				</modelColumn>
-				<modelColumn>
-					<title>
-						<message selector="submission-finished" />
-					</title>	
-					<message selector="submission-finished-date">
+					<!-- model type="date" ref="submission.submittedDate" /-->
+					<!--message selector="submission-finished-date">
 						<model type="date" ref="submission.submittedDate" />
-					</message>						
-						<included>
-						<andDecision model="submission.isCompletedLate">
-						<compareDecision model="submission.isCompletedLate">
-							<constant value="FALSE" />
-						</compareDecision>	
-						</andDecision>
-						<andDecision model="submission.isComplete">
-									<compareDecision model="submission.isComplete">
-										<constant value="TRUE" />
-									</compareDecision>
-						</andDecision>						
-					</included>
+						</message-->
+					<navigations>
+						<navigation style="LINK" disabled="TRUE">
+							<title>
+								<message selector="submission-finished-date">
+									<model type="date" ref="submission.submittedDate" />
+								</message>
+							</title>
+							<destination template="/" />
+						</navigation>
+						<navigation style="LINK" disabled="TRUE">
+							<title>
+								<message selector="submission-finished-date-alert" />
+							</title>
+							<destination template="/" />
+							<included>
+								<decision model="submission.isCompletedLate" />
+							</included>
+						</navigation>
+					</navigations>
+
+					<entityIncluded>
+						<decision model="submission.isComplete" />
+					</entityIncluded>
 				</modelColumn>
+
+				<!--column>
+					<title>
+					<message selector="submission-finished" />
+					</title>
+					<container>
+					<text>
+					<message selector="submission-finished-date">
+					<model type="date" ref="submission.submittedDate" />
+					</message>
+					</text-->
+				<!--alert>
+					<message selector="submission-finished-date-alert">
+					< model type="date" ref="submission.submittedDate" >							
+					</message>
+					<included>
+					<decision model="submission.isCompletedLate" />
+					</included>
+					</alert-->
+				<!--/container>
+					<entityIncluded>
+					<decision model="submission.isComplete" />
+					</entityIncluded>
+					</column-->
 
 				<modelColumn>
 					<title>
