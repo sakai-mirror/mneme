@@ -30,15 +30,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Paging;
-import org.muse.ambrosia.api.Value;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentParts;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
-import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
@@ -55,10 +53,10 @@ public class GradeSubmissionView extends ControllerImpl
 
 	/** Submission Service */
 	protected SubmissionService submissionService = null;
-	
+
 	/** Dependency: ToolManager */
 	protected ToolManager toolManager = null;
-	
+
 	/**
 	 * Shutdown.
 	 */
@@ -73,7 +71,7 @@ public class GradeSubmissionView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if (params.length != 4 && params.length != 5 && params.length != 6 && params.length != 7) throw new IllegalArgumentException();
-		//check for user permission to access the assessments for grading
+		// check for user permission to access the assessments for grading
 		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
 		{
 			// redirect to error
@@ -88,8 +86,8 @@ public class GradeSubmissionView extends ControllerImpl
 		// submission id is in params array at index 6
 		Submission submission = this.submissionService.getSubmission(params[6]);
 		context.put("submission", submission);
-		
-		//check for user permission to access the submission for grading
+
+		// check for user permission to access the submission for grading
 		if (!this.submissionService.allowEvaluate(submission))
 		{
 			// redirect to error
@@ -143,7 +141,8 @@ public class GradeSubmissionView extends ControllerImpl
 	}
 
 	/**
-	 * @param toolManager the toolManager to set
+	 * @param toolManager
+	 *        the toolManager to set
 	 */
 	public void setToolManager(ToolManager toolManager)
 	{

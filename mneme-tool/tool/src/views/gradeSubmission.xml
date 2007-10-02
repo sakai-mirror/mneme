@@ -77,7 +77,7 @@
 				</row>
 				<row>
 					<title>
-						<message selector="total-grade">
+						<message selector="total-score">
 							<model type="icon" icon="/icons/grade.png" />
 						</message>
 					</title>
@@ -89,42 +89,79 @@
 		<section>
 			<iterator name="answer" model="submission.answers" />
 			<container>
-				<entityDisplay>
-					<rows>
-						<row>
-							<container>
-								<!-- question presentation (text) -->
-								<text>
-									<message>
-										<model type="html" ref="answer.question.presentation.text" />
-									</message>
-								</text>
-								<!-- type-specific question viewing -->
-								<modelComponent model="answer.question.typeSpecificQuestion.viewQuestionUi" />
-							</container>
-						</row>
-						<row>
-							<container>
-								<!-- Answer type-specific viewing -->
-								<modelComponent model="answer.question.typeSpecificQuestion.viewAnswerUi" />
-							</container>
-						</row>
-						<row>
-							<container>
-								<text>
-									<message selector="submission-comments">
-										<model type="icon" icon="/icons/note.png" />
-									</message>
-								</text>
-							</container>
-						</row>
-						<row>
-							<container>
-								<htmlEdit model="answer.evaluation.comment" rows="2" cols="20" />
-							</container>
-						</row>
-					</rows>
-				</entityDisplay>
+				<section>
+					<title highlighted="TRUE">
+						<message selector="section-title">
+							<model ref="answer.question.assessmentOrdering.position" />
+							<model ref="answer.question.part.assessment.parts.NumQuestions" />
+							<model ref="answer.autoScore" />
+							<model ref="answer.question.pool.points" />
+						</message>
+					</title>
+
+					<container>
+						<!-- question presentation (text and attachments) -->
+						<text>
+							<message>
+								<model type="html" ref="answer.question.presentation.text" />
+							</message>
+						</text>
+
+						<attachments model="answer.question.presentation.attachments">
+							<included>
+								<hasValueDecision model="answer.question.presentation.attachments" />
+							</included>
+						</attachments>
+
+						<!-- Question specific delivery -->
+						<modelComponent model="answer.question.typeSpecificQuestion.deliveryUi">
+							<included>
+								<decision reversed="TRUE" model="review" />
+							</included>
+						</modelComponent>
+
+						<!-- reason -->
+						<text>
+							<message selector="question-rationale">
+								<model type="icon" icon="/icons/building_edit.png" />
+								<model ref="answer.reason" />
+							</message>
+
+						</text>
+
+						<!-- answer key -->
+						<text>
+							<message selector="question-answer-key">
+								<model type="icon" icon="/icons/answer_key.png" />
+								<model type="html" ref="answer.question.answerKey" />
+							</message>
+							<included>
+								<hasValueDecision model="answer.question.answerKey" />
+							</included>
+						</text>
+
+						<!-- question feedback -->
+						<text>
+							<message selector="question-feedback">
+								<model type="icon" icon="/icons/feedback.png" />
+								<model type="html" ref="answer.question.feedback" />
+							</message>
+							<included>
+								<hasValueDecision model="answer.question.feedback" />
+							</included>
+						</text>
+
+						<text>
+							<message selector="submission-comments">
+								<model type="icon" icon="/icons/note.png" />
+							</message>
+						</text>
+
+						<textEdit model="answer.evaluation.comment" rows="5" cols="50" />
+
+					</container>
+
+				</section>
 			</container>
 		</section>
 
