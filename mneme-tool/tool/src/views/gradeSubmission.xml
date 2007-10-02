@@ -113,12 +113,9 @@
 							</included>
 						</attachments>
 
-						<!-- Question specific delivery -->
-						<modelComponent model="answer.question.typeSpecificQuestion.deliveryUi">
-							<included>
-								<decision reversed="TRUE" model="review" />
-							</included>
-						</modelComponent>
+						<!-- Question specific review -->
+						<modelComponent model="answer.question.typeSpecificQuestion.reviewUi" />
+
 
 						<!-- reason -->
 						<text>
