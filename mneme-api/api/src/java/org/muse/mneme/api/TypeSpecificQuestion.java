@@ -71,6 +71,13 @@ public interface TypeSpecificQuestion extends Cloneable
 	String getDescription();
 
 	/**
+	 * Access the rich text (html) model answer that shows an example answer to the question.
+	 * 
+	 * @return The model answer, or null if there is none.
+	 */
+	String getModelAnswer();
+
+	/**
 	 * Access the user interface component for review of this question type.
 	 * 
 	 * @return The user interface component for review of this question type.

@@ -526,6 +526,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public String getModelAnswer()
+	{
+		return null;
+	}
+
+	/**
 	 * The "getter" for the moreChoices - always set to 0.
 	 * 
 	 * @return The initial '0" value for the more choices.
@@ -619,7 +627,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	{
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
-		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choicesAsAuthored"), "choice");
+		entityList
+				.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choicesAsAuthored"), "choice");
 		entityList.setEmptyTitle("no-answers");
 
 		// include each choice only if the choice has been selected by the user

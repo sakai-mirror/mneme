@@ -53,13 +53,13 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 {
 	public class MatchQuestionChoice
 	{
+		protected String answer;
+
 		protected Boolean deleted = Boolean.FALSE;
 
 		protected String id;
 
 		protected String text;
-
-		protected String answer;
 
 		public MatchQuestionChoice(MatchQuestionChoice other)
 		{
@@ -74,6 +74,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 			this.id = id;
 			this.text = text;
 			this.answer = answer;
+		}
+
+		public String getAnswer()
+		{
+			return this.answer;
 		}
 
 		public Boolean getDeleted()
@@ -91,9 +96,9 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 			return this.text;
 		}
 
-		public String getAnswer()
+		public void setAnswer(String answer)
 		{
-			return this.answer;
+			this.answer = answer;
 		}
 
 		public void setDeleted(Boolean deleted)
@@ -104,11 +109,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		public void setText(String text)
 		{
 			this.text = text;
-		}
-
-		public void setAnswer(String answer)
-		{
-			this.answer = answer;
 		}
 	}
 
@@ -356,6 +356,22 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getDescription()
+	{
+		return this.question.getPresentation().getText();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getModelAnswer()
+	{
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Component getReviewUi()
 	{
 		EntityList entityList = this.uiService.newEntityList();
@@ -378,14 +394,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(propCol);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getDescription()
-	{
-		return this.question.getPresentation().getText();
 	}
 
 	/**

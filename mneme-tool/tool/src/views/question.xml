@@ -313,6 +313,20 @@
 							</included>
 						</text>
 
+						<!-- model answer -->
+						<text>
+							<message selector="question-model-answer">
+								<model type="icon" icon="/icons/model_answer.png" />
+								<model type="html" ref="answer.question.modelAnswer" />
+							</message>
+							<included>
+								<decision model="review" />
+								<decision model="answer.submission.mayReview" />
+								<decision model="answer.question.part.assessment.review.showCorrectAnswer" />
+								<hasValueDecision model="answer.question.modelAnswer" />
+							</included>
+						</text>
+
 						<!-- question feedback -->
 						<text>
 							<message selector="question-feedback">
@@ -326,22 +340,6 @@
 								<hasValueDecision model="answer.question.feedback" />
 							</included>
 						</text>
-
-						<!-- model answer -->
-						<!-- TODO: merge with answer key? -ggolden
-							<text>
-							<message selector="question-model-answer">
-							<model type="icon" icon="/icons/model_answer.png" />
-							<model type="html" ref="answer.question.part.answer.text" />
-							</message>
-							<included>
-							<decision model="review" />
-							<decision model="answer.submission.mayReview" />
-							<decision model="answer.question.part.assessment.review.showFeedback" />
-							<compareDecision model="answer.question.type" constant="essay" />
-							</included>
-							</text>
-						-->
 
 						<!-- evaluation -->
 						<section>

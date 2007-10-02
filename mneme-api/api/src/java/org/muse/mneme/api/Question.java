@@ -83,6 +83,13 @@ public interface Question
 	String getId();
 
 	/**
+	 * Access the rich text (html) model answer that shows an example answer to the question.
+	 * 
+	 * @return The model answer, or null if there is none.
+	 */
+	String getModelAnswer();
+
+	/**
 	 * Access the modified-by (owner / date created)
 	 * 
 	 * @return The modified-by for the question.

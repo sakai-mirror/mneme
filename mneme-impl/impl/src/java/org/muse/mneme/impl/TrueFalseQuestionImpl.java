@@ -222,6 +222,14 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getModelAnswer()
+	{
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Component getReviewUi()
 	{
 		Selection selection = this.uiService.newSelection();

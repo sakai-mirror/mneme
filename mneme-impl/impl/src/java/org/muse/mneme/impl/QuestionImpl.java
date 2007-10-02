@@ -344,6 +344,14 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getModelAnswer()
+	{
+		return this.questionHandler.getModelAnswer();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Attribution getModifiedBy()
 	{
 		return this.modifiedBy;
