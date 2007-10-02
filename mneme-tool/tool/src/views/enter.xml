@@ -25,6 +25,16 @@
 -->
 
 <interface>
+
+	<!--mode bar-->
+	<modeContainer>
+		<alias to="ToolModeFragment" toolId="sakai.mneme">
+			<included>
+				<hasValueDecision model="maintainer" />
+			</included>
+		</alias>
+	</modeContainer>
+
 	<title>
 		<message selector="enter-title">
 			<model ref="assessment.title" />
@@ -178,7 +188,7 @@
 		<gap />
 		<navigationBar width="70em" id="nav">
 			<container>
-				<navigation submit="TRUE" title="begin" style="BUTTON" accessKey="begin-access" description="begin-description">
+				<navigation destination="ENTER" submit="TRUE" title="begin" style="BUTTON" accessKey="begin-access" description="begin-description">
 					<icon icon="/icons/begin.gif" style="LEFT" />
 				</navigation>
 				<navigation destination="/list" title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">

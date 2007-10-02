@@ -38,6 +38,7 @@ import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
 import org.sakaiproject.event.api.EventTrackingService;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
@@ -53,6 +54,9 @@ public class ReviewView extends ControllerImpl
 
 	/** Event tracking service. */
 	protected EventTrackingService eventTrackingService = null;
+
+	/** tool manager reference. */
+	protected ToolManager toolManager = null;
 
 	/**
 	 * Shutdown.
@@ -113,6 +117,12 @@ public class ReviewView extends ControllerImpl
 		// in this special case, since there's no real action in the service to do this, we need to generate an event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_REVIEW, submission.getReference(), false));
 
+		// for the tool navigation
+		if (this.assessmentService.allowManageAssessments(toolManager.getCurrentPlacement().getContext()))
+		{
+			context.put("maintainer", Boolean.TRUE);
+		}
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -131,7 +141,11 @@ public class ReviewView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		throw new IllegalArgumentException();
+		// read form
+		String destination = this.uiService.decode(req, context);
+		
+		// go there
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
@@ -154,5 +168,16 @@ public class ReviewView extends ControllerImpl
 	public void setEventTrackingService(EventTrackingService service)
 	{
 		this.eventTrackingService = service;
+	}
+
+	/**
+	 * Set the tool manager.
+	 * 
+	 * @param manager
+	 *        The tool manager.
+	 */
+	public void setToolManager(ToolManager manager)
+	{
+		toolManager = manager;
 	}
 }

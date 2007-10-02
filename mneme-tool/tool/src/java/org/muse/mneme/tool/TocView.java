@@ -36,6 +36,7 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCompletedException;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
@@ -45,99 +46,6 @@ public class TocView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(TocView.class);
-
-	/** Assessment service. */
-	protected MnemeService assessmentService = null;
-
-	/**
-	 * Shutdown.
-	 */
-	public void destroy()
-	{
-		M_log.info("destroy()");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
-	{
-		// we need one parameter (sid)
-		if (params.length != 3)
-		{
-			throw new IllegalArgumentException();
-		}
-
-		String submissionId = params[2];
-
-		Submission submission = assessmentService.getSubmission(submissionId);
-		if (submission == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
-		if (!assessmentService.allowCompleteSubmission(submission))
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
-
-		// linear is not allowed in here
-		if (!submission.getAssessment().getRandomAccess())
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.linear + "/" + submissionId)));
-			return;
-		}
-
-		// collect information: the selected assessment (id the request)
-		context.put("submission", submission);
-
-		context.put("finalReview", Boolean.FALSE);
-
-		// render
-		uiService.render(ui, context);
-	}
-
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		super.init();
-		M_log.info("init()");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
-	{
-		// we need two parameters (sid/quesiton selector)
-		if (params.length != 3)
-		{
-			throw new IllegalArgumentException();
-		}
-
-		String submissionId = params[2];
-
-		// this post is from the timer, or the "submit" button, and completes the submission
-		submissionCompletePost(req, res, context, submissionId, this.uiService, this.assessmentService);
-	}
-
-	/**
-	 * Set the assessment service.
-	 * 
-	 * @param service
-	 *        The assessment service.
-	 */
-	public void setAssessmentService(MnemeService service)
-	{
-		this.assessmentService = service;
-	}
 
 	/**
 	 * Handle the many cases of a post that completes the submission
@@ -215,5 +123,128 @@ public class TocView extends ControllerImpl
 
 		// redirect to error
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+	}
+
+	/** Assessment service. */
+	protected MnemeService assessmentService = null;
+
+	/** tool manager reference. */
+	protected ToolManager toolManager = null;
+
+	/**
+	 * Shutdown.
+	 */
+	public void destroy()
+	{
+		M_log.info("destroy()");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
+	{
+		// we need one parameter (sid)
+		if (params.length != 3)
+		{
+			throw new IllegalArgumentException();
+		}
+
+		String submissionId = params[2];
+
+		Submission submission = assessmentService.getSubmission(submissionId);
+		if (submission == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		if (!assessmentService.allowCompleteSubmission(submission))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		// linear is not allowed in here
+		if (!submission.getAssessment().getRandomAccess())
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.linear + "/" + submissionId)));
+			return;
+		}
+
+		// collect information: the selected assessment (id the request)
+		context.put("submission", submission);
+
+		context.put("finalReview", Boolean.FALSE);
+
+		// for the tool navigation
+		if (this.assessmentService.allowManageAssessments(toolManager.getCurrentPlacement().getContext()))
+		{
+			context.put("maintainer", Boolean.TRUE);
+		}
+
+		// render
+		uiService.render(ui, context);
+	}
+
+	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		super.init();
+		M_log.info("init()");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
+	{
+		// we need two parameters (sid/quesiton selector)
+		if (params.length != 3)
+		{
+			throw new IllegalArgumentException();
+		}
+
+		// read form
+		String destination = this.uiService.decode(req, context);
+
+		// if other than the /submitted destination, just go there
+		if (!destination.startsWith("/submitted"))
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+
+		String submissionId = params[2];
+
+		// this post is from the timer, or the "submit" button, and completes the submission
+		submissionCompletePost(req, res, context, submissionId, this.uiService, this.assessmentService);
+	}
+
+	/**
+	 * Set the assessment service.
+	 * 
+	 * @param service
+	 *        The assessment service.
+	 */
+	public void setAssessmentService(MnemeService service)
+	{
+		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the tool manager.
+	 * 
+	 * @param manager
+	 *        The tool manager.
+	 */
+	public void setToolManager(ToolManager manager)
+	{
+		toolManager = manager;
 	}
 }

@@ -42,6 +42,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCompletedException;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
@@ -54,6 +55,9 @@ public class QuestionView extends ControllerImpl
 
 	/** Assessment service. */
 	protected MnemeService assessmentService = null;
+
+	/** tool manager reference. */
+	protected ToolManager toolManager = null;
 
 	/**
 	 * Shutdown.
@@ -112,6 +116,12 @@ public class QuestionView extends ControllerImpl
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + err + "/" + submissionId)));
 			return;
+		}
+
+		// for the tool navigation
+		if (this.assessmentService.allowManageAssessments(toolManager.getCurrentPlacement().getContext()))
+		{
+			context.put("maintainer", Boolean.TRUE);
 		}
 
 		// render
@@ -250,6 +260,17 @@ public class QuestionView extends ControllerImpl
 	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the tool manager.
+	 * 
+	 * @param manager
+	 *        The tool manager.
+	 */
+	public void setToolManager(ToolManager manager)
+	{
+		toolManager = manager;
 	}
 
 	/**

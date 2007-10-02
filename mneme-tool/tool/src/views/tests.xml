@@ -30,6 +30,7 @@
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
+
 	<header>
 		<message selector="tests-header">
 			<model type="icon" icon="/icons/folder_page.png" />

@@ -32,6 +32,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Submission;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
@@ -45,6 +46,9 @@ public class InstructionsView extends ControllerImpl
 
 	/** Assessment service. */
 	protected MnemeService assessmentService = null;
+
+	/** tool manager reference. */
+	protected ToolManager toolManager = null;
 
 	/**
 	 * Shutdown.
@@ -87,6 +91,12 @@ public class InstructionsView extends ControllerImpl
 		context.put("submission", submission);
 		context.put("destination", returnDestination);
 
+		// for the tool navigation
+		if (this.assessmentService.allowManageAssessments(toolManager.getCurrentPlacement().getContext()))
+		{
+			context.put("maintainer", Boolean.TRUE);
+		}
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -113,6 +123,16 @@ public class InstructionsView extends ControllerImpl
 
 		String submissionId = params[2];
 
+		// read form
+		String destination = this.uiService.decode(req, context);
+
+		// if other than the /submitted destination, just go there
+		if (!destination.startsWith("/submitted"))
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+
 		// this post is from the timer, and completes the submission
 		TocView.submissionCompletePost(req, res, context, submissionId, this.uiService, this.assessmentService);
 	}
@@ -126,5 +146,16 @@ public class InstructionsView extends ControllerImpl
 	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the tool manager.
+	 * 
+	 * @param manager
+	 *        The tool manager.
+	 */
+	public void setToolManager(ToolManager manager)
+	{
+		toolManager = manager;
 	}
 }

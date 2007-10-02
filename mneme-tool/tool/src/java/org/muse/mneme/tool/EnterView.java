@@ -41,6 +41,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
@@ -53,8 +54,12 @@ public class EnterView extends ControllerImpl
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
+
 	protected SubmissionService submissionService = null;
-	
+
+	/** tool manager reference. */
+	protected ToolManager toolManager = null;
+
 	/**
 	 * Shutdown.
 	 */
@@ -103,6 +108,12 @@ public class EnterView extends ControllerImpl
 		// collect information: the selected assessment (id the request)
 		context.put("assessment", assessment);
 
+		// for the tool navigation
+		if (this.assessmentService.allowManageAssessments(toolManager.getCurrentPlacement().getContext()))
+		{
+			context.put("maintainer", Boolean.TRUE);
+		}
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -143,6 +154,13 @@ public class EnterView extends ControllerImpl
 
 		// read form
 		String destination = this.uiService.decode(req, context);
+		
+		// if other than the ENTER destination, just go there
+		if (!destination.equals("ENTER"))
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
 
 		// process: enter the assessment for this user, find the submission id and starting question
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
@@ -175,13 +193,24 @@ public class EnterView extends ControllerImpl
 		this.assessmentService = service;
 	}
 
-	
 	/**
-	 * @param submissionService the submissionService to set
+	 * @param submissionService
+	 *        the submissionService to set
 	 */
 	public void setSubmissionService(SubmissionService submissionService)
 	{
 		this.submissionService = submissionService;
+	}
+
+	/**
+	 * Set the tool manager.
+	 * 
+	 * @param manager
+	 *        The tool manager.
+	 */
+	public void setToolManager(ToolManager manager)
+	{
+		toolManager = manager;
 	}
 
 	/**

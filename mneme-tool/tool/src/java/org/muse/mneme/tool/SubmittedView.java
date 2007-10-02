@@ -32,6 +32,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Submission;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
@@ -44,6 +45,9 @@ public class SubmittedView extends ControllerImpl
 
 	/** Assessment service. */
 	protected MnemeService assessmentService = null;
+
+	/** tool manager reference. */
+	protected ToolManager toolManager = null;
 
 	/**
 	 * Shutdown.
@@ -99,6 +103,12 @@ public class SubmittedView extends ControllerImpl
 
 		context.put("submission", submission);
 
+		// for the tool navigation
+		if (this.assessmentService.allowManageAssessments(toolManager.getCurrentPlacement().getContext()))
+		{
+			context.put("maintainer", Boolean.TRUE);
+		}
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -117,7 +127,11 @@ public class SubmittedView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		throw new IllegalArgumentException();
+		// read form
+		String destination = this.uiService.decode(req, context);
+		
+		// go there
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
@@ -129,5 +143,16 @@ public class SubmittedView extends ControllerImpl
 	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the tool manager.
+	 * 
+	 * @param manager
+	 *        The tool manager.
+	 */
+	public void setToolManager(ToolManager manager)
+	{
+		toolManager = manager;
 	}
 }

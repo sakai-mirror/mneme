@@ -34,6 +34,7 @@ import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.Submission;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
@@ -46,6 +47,9 @@ public class SectionInstructionView extends ControllerImpl
 
 	/** Assessment service. */
 	protected MnemeService assessmentService = null;
+
+	/** tool manager reference. */
+	protected ToolManager toolManager = null;
 
 	/**
 	 * Shutdown.
@@ -106,6 +110,12 @@ public class SectionInstructionView extends ControllerImpl
 		context.put("submission", submission);
 		context.put("part", part);
 
+		// for the tool navigation
+		if (this.assessmentService.allowManageAssessments(toolManager.getCurrentPlacement().getContext()))
+		{
+			context.put("maintainer", Boolean.TRUE);
+		}
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -130,6 +140,16 @@ public class SectionInstructionView extends ControllerImpl
 			throw new IllegalArgumentException();
 		}
 
+		// read form
+		String destination = this.uiService.decode(req, context);
+
+		// if other than the /submitted destination, just go there
+		if (!destination.startsWith("/submitted"))
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+
 		String submissionId = params[2];
 		String sectionId = params[3];
 
@@ -146,5 +166,16 @@ public class SectionInstructionView extends ControllerImpl
 	public void setAssessmentService(MnemeService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the tool manager.
+	 * 
+	 * @param manager
+	 *        The tool manager.
+	 */
+	public void setToolManager(ToolManager manager)
+	{
+		toolManager = manager;
 	}
 }

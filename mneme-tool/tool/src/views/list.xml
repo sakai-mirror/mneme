@@ -25,6 +25,16 @@
 -->
 
 <interface title="list-title" header="list-header">
+
+	<!--mode bar-->
+	<modeContainer>
+		<alias to="ToolModeFragment" toolId="sakai.mneme">
+			<included>
+				<hasValueDecision model="maintainer" />
+			</included>
+		</alias>
+	</modeContainer>
+
 	<container>
 		<entityList style="FLAT">
 			<iterator name="submission" model="submissions" />

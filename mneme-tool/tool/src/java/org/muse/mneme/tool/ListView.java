@@ -147,6 +147,15 @@ public class ListView extends ControllerImpl
 		List submissions = assessmentService.getUserContextSubmissions(toolManager.getCurrentPlacement().getContext(), null, sort);
 		context.put("submissions", submissions);
 
+		// disable the tool navigation to this view
+		context.put("disableList", Boolean.TRUE);
+
+		// for the tool navigation
+		if (this.assessmentService.allowManageAssessments(toolManager.getCurrentPlacement().getContext()))
+		{
+			context.put("maintainer", Boolean.TRUE);
+		}
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -165,7 +174,11 @@ public class ListView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		throw new IllegalArgumentException();
+		// read form
+		String destination = this.uiService.decode(req, context);
+		
+		// go there
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
