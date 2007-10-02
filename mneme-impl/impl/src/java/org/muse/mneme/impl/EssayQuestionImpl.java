@@ -97,8 +97,9 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	public EssayQuestionImpl(Question question, EssayQuestionImpl other)
 	{
 		this.messages = other.messages;
-		this.question = question;
-		this.modelAnswer = modelAnswer;
+		this.question = other.question;
+		this.modelAnswer = other.modelAnswer;
+		this.submissionType = other.submissionType;
 		this.uiService = other.uiService;
 	}
 
@@ -114,7 +115,6 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 
 			// set the question
 			((EssayQuestionImpl) rv).question = question;
-			((EssayQuestionImpl) rv).modelAnswer = modelAnswer;
 
 			return rv;
 		}
@@ -136,7 +136,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getAnswerKey()
 	{
-		return getModelAnswer();
+		return null;
 	}
 
 	/**
@@ -201,7 +201,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @return the modelAnswer (rich text)
 	 */
 	public String getModelAnswer()
 	{
