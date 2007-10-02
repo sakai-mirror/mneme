@@ -56,6 +56,8 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 	protected Map<String, AssessmentImpl> assessments = new HashMap<String, AssessmentImpl>();
 
+	protected boolean fakedAlready = false;
+
 	protected Object idGenerator = new Object();
 
 	protected long nextAssessmentId = 100;
@@ -144,12 +146,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 		fakeIt();
 
 		AssessmentImpl rv = this.assessments.get(id);
-		if (rv == null)
-		{
-			rv = newAssessment();
-			rv.initId(id);
-		}
-		else
+		if (rv != null)
 		{
 			rv = new AssessmentImpl(rv);
 		}
@@ -390,8 +387,10 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 	protected void fakeIt()
 	{
-		if (this.assessments.isEmpty())
+		if (!fakedAlready)
 		{
+			fakedAlready = true;
+
 			Date now = new Date();
 
 			AssessmentImpl a = newAssessment();

@@ -48,6 +48,8 @@ public class QuestionStorageSample implements QuestionStorage
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(QuestionStorageSample.class);
 
+	protected boolean fakedAlready = false;
+
 	protected Object idGenerator = new Object();
 
 	/** Dependency: MnemeService */
@@ -399,8 +401,10 @@ public class QuestionStorageSample implements QuestionStorage
 	protected void fakeIt()
 	{
 		// if we have not set up our questions, do so now
-		if (questions.isEmpty())
+		if (!fakedAlready)
 		{
+			fakedAlready = true;
+
 			Date now = new Date();
 
 			QuestionImpl q = newQuestion();
@@ -519,7 +523,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.setHints("hints for question six.");
 			q.setFeedback("feedback for question 6");
 			questions.put(q.getId(), q);
-			
+
 			q = newQuestion();
 			q.initType("mneme:Essay");
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
@@ -535,7 +539,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getModifiedBy().setDate(now);
 			q.setHints("hints for question seven.");
 			q.setFeedback("feedback for question 7");
-			questions.put(q.getId(), q);			
+			questions.put(q.getId(), q);
 		}
 	}
 }

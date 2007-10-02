@@ -44,6 +44,8 @@ public class PoolStorageSample implements PoolStorage
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(PoolStorageSample.class);
 
+	protected boolean fakedAlready = false;
+
 	protected Object idGenerator = new Object();
 
 	protected long nextId = 100;
@@ -318,7 +320,7 @@ public class PoolStorageSample implements PoolStorage
 	{
 		this.poolService = service;
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -329,8 +331,10 @@ public class PoolStorageSample implements PoolStorage
 
 	protected void fakeIt()
 	{
-		if (pools.isEmpty())
+		if (!fakedAlready)
 		{
+			fakedAlready = true;
+
 			Date now = new Date();
 
 			PoolImpl pool = newPool();

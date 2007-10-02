@@ -218,12 +218,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 	public SubmissionImpl getSubmission(String id)
 	{
 		SubmissionImpl rv = this.submissions.get(id);
-		if (rv == null)
-		{
-			rv = newSubmission();
-			rv.initId(id);
-		}
-		else
+		if (rv != null)
 		{
 			rv = new SubmissionImpl(rv);
 		}
