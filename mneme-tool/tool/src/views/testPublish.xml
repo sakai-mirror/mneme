@@ -33,7 +33,7 @@
 
 	<header>
 		<message selector="test-publish-header">
-			<model type="icon" icon="/icons/active.png" />
+			<model type="icon" icon="/icons/folder_page.png" />
 			<model ref="assessment.title" missing="no-title" />
 		</message>
 	</header>
