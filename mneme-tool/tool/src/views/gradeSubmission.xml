@@ -75,14 +75,14 @@
 				<row title="released">
 					<model ref="submission.isReleased" />
 				</row>
-				<row>
+				<!--row>
 					<title>
-						<message selector="total-score">
-							<model type="icon" icon="/icons/grade.png" />
-						</message>
+					<message selector="total-score">
+					<model type="icon" icon="/icons/grade.png" />
+					</message>
 					</title>
 					<model ref="submission.totalScore" />
-				</row>
+					</row-->
 			</rows>
 		</entityDisplay>
 
@@ -172,6 +172,41 @@
 										<textEdit model="answer.evaluation.comment" rows="5" cols="50" />
 									</container>
 								</section>
+							</container>
+						</row>
+					</rows>
+				</entityDisplay>
+			</container>
+		</section>
+
+		<section>
+			<container>
+				<entityDisplay>
+					<rows>
+						<row>
+							<title highlighted="TRUE">
+								<message selector="overall-comments">
+									<model type="icon" icon="/icons/note.png" />
+								</message>
+							</title>
+							<container>
+								<textEdit model="submission.evaluation.comment" rows="5" cols="50" />
+							</container>
+						</row>
+						<row>
+							<title highlighted="TRUE">
+								<message selector="graded-status">
+									<model type="icon" icon="/icons/note.png" />
+								</message>
+							</title>
+							<container>
+								<floatEdit model="submission.totalScore">
+									<title>
+										<message selector="final-score">
+											<model ref="submission.assessment.parts.totalPoints" />
+										</message>
+									</title>
+								</floatEdit>
 							</container>
 						</row>
 					</rows>
