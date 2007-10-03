@@ -137,7 +137,15 @@
 						</message>
 					</title>
 					<entityNavigations>
-						<navigation destination="/">
+						<navigation>
+							<destination template="/grade_submission/{0}/{1}/{2}/{3}{4}/{5}">
+								<model ref="gradeSortCode" />
+								<model ref="assessment.id" />
+								<model ref="question.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="answer.submission.id" />
+							</destination>
 							<included>
 								<compareDecision model="answer.submission.gradingStatus">
 									<constant value="released" />
