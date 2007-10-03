@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
+
+<!--
+/**********************************************************************************
+ * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ **********************************************************************************/
+-->
+
+<interface autoComplete="FALSE">
+
+	<!--mode bar-->
+	<modeContainer>
+		<alias to="ToolModeFragment" toolId="sakai.mneme" />
+	</modeContainer>
+
+	<!-- title & header-->
+	<title>
+		<message selector="assessment-preview-title">
+			<model ref="assessment.title" />
+		</message>
+	</title>
+	<header>
+		<message selector="assessment-preview-header">
+			<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+			<model ref="assessment.title" />
+		</message>
+	</header>
+
+	<container>
+
+		<!-- repeat the nav up top -->
+		<alias to="nav" />
+
+		<!-- test title, description and comments -->
+		<section>
+			<title>
+				<message selector="assessment-preview-assessment-title">
+					<model type="icon" icon="/icons/test.png" />
+					<model ref="assessment.title" />
+				</message>
+			</title>
+			<container>
+				<text>
+					<message>
+						<model type="html" ref="assessment.presentation.text" />
+					</message>
+				</text>
+				<attachments title="attachments" model="assessment.presentation.attachments">
+					<included>
+						<hasValueDecision model="assessment.presentation.attachments" />
+					</included>
+				</attachments>
+			</container>
+		</section>
+
+		<!-- iterating section for each answer -->
+		<section>
+			<iterator name="question">
+				<model ref="assessment.parts.questions" />
+			</iterator>
+
+			<!-- part title -->
+			<title>
+				<message selector="assessment-preview-part-title">
+					<model type="icon" icon="/icons/section.png" />
+					<model type="text" ref="question.part.ordering.position" />
+					<model type="text" ref="question.part.assessment.parts.size" />
+					<model type="text" ref="question.part.title" />
+				</message>
+				<included>
+					<decision model="question.partOrdering.isFirst" />
+					<decision model="question.part.assessment.parts.showPresentation" />
+				</included>
+			</title>
+
+			<container>
+
+				<!-- part presentation -->
+				<text model="question.part.presentation.text">
+					<included>
+						<decision model="question.partOrdering.isFirst" />
+						<decision model="question.part.assessment.parts.showPresentation" />
+					</included>
+				</text>
+				<attachments title="attachments" model="question.part.presentation.attachments">
+					<included>
+						<hasValueDecision model="question.part.presentation.attachments" />
+						<decision model="question.partOrdering.isFirst" />
+						<decision model="question.part.assessment.parts.showPresentation" />
+					</included>
+				</attachments>
+
+				<section>
+
+					<!-- question header -->
+					<title highlighted="TRUE">
+						<message>
+							<model type="html" ref="question" delegate="FormatQuestionTitle" tool="sakai.mneme" />
+						</message>
+					</title>
+
+					<container>
+
+						<!-- question presentation (text and attachments) -->
+						<text>
+							<message>
+								<model type="html" ref="question.presentation.text" />
+							</message>
+						</text>
+
+						<attachments model="question.presentation.attachments">
+							<included>
+								<hasValueDecision model="question.presentation.attachments" />
+							</included>
+						</attachments>
+
+						<!-- hints -->
+						<overlay id="hints">
+							<container>
+								<text>
+									<message selector="question-hints">
+										<model type="icon" icon="/icons/hints.png" />
+									</message>
+								</text>
+								<text>
+									<message>
+										<model type="html" ref="question.hints" />
+									</message>
+								</text>
+								<!-- hints toggle -->
+								<gap />
+								<toggle target="hints" title="hide-hints" description="hide-hints-description" style="LINK">
+									<icon icon="/icons/hints.png" style="LEFT" />
+									<included>
+										<decision reversed="TRUE" model="review" />
+										<decision model="question.part.assessment.showHints" />
+										<hasValueDecision model="question.hints" />
+									</included>
+								</toggle>
+							</container>
+							<included>
+								<decision model="question.part.assessment.showHints" />
+								<hasValueDecision model="question.hints" />
+							</included>
+						</overlay>
+
+						<!-- Question specific delivery -->
+						<modelComponent model="question.typeSpecificQuestion.viewQuestionUi" />
+
+						<!-- reason -->
+						<text>
+							<message selector="assessment-preview-rationale" />
+							<included>
+								<decision model="question.explainReason" />
+							</included>
+						</text>
+
+						<!-- mark for review -->
+						<selection title="question-mark-review" readOnly="TRUE">
+							<included>
+								<decision model="question.part.assessment.randomAccess" />
+							</included>
+						</selection>
+
+						<!-- hints toggle -->
+						<toggle target="hints" title="show-hints" description="show-hints-description" style="LINK">
+							<icon icon="/icons/hints.png" style="LEFT" />
+							<included>
+								<decision model="question.part.assessment.showHints" />
+								<hasValueDecision model="question.hints" />
+							</included>
+						</toggle>
+
+						<!-- answer key -->
+						<text>
+							<message selector="question-answer-key">
+								<model type="icon" icon="/icons/answer_key.png" />
+								<model type="html" ref="question.answerKey" />
+							</message>
+							<included>
+								<hasValueDecision model="question.answerKey" />
+							</included>
+						</text>
+
+						<!-- model answer -->
+						<htmlEdit rows="5" cols="40" readOnly="TRUE">
+							<title>
+								<message selector="question-model-answer">
+									<model type="icon" icon="/icons/model_answer.png" />
+								</message>
+							</title>
+							<model ref="question.modelAnswer" />
+							<included>
+								<hasValueDecision model="question.modelAnswer" />
+							</included>
+						</htmlEdit>
+
+						<!-- question feedback -->
+						<text>
+							<message selector="question-feedback">
+								<model type="icon" icon="/icons/feedback.png" />
+								<model type="html" ref="question.feedback" />
+							</message>
+							<included>
+								<hasValueDecision model="question.feedback" />
+							</included>
+						</text>
+
+					</container>
+				</section>
+			</container>
+		</section>
+
+		<gap />
+
+		<!-- nav bar -->
+		<navigationBar id="nav" width="70em">
+			<container>
+				<navigation title="return" accessKey="return-access" description="return-description" style="BUTTON">
+					<icon icon="/icons/return.png" style="LEFT" />
+					<destination template="/assessments/{0}">
+						<model ref="sort" />
+					</destination>
+				</navigation>
+			</container>
+		</navigationBar>
+
+	</container>
+</interface>

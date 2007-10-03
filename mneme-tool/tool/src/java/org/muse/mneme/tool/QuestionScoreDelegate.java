@@ -82,11 +82,26 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 		if (!(value instanceof Question)) return value.toString();
 		Question question = (Question) value;
 
+		Submission submission = null;
 		Object o = context.get("submission");
-		if (!(o instanceof Submission)) return value.toString();
-		Submission submission = (Submission) o;
-
-		Assessment assessment = submission.getAssessment();
+		if ((o != null) && (o instanceof Submission))
+		{
+			submission = (Submission) o;
+		}
+		
+		Assessment assessment = null;
+		if (submission != null)
+		{
+			assessment = submission.getAssessment();
+		}
+		else
+		{
+			o =  context.get("assessment");
+			if (o instanceof Assessment)
+			{
+				assessment = (Assessment) o;
+			}
+		}
 		if (assessment == null) return value.toString();
 
 		// use the {}/{} format if doing feedback, or just {} if not.
@@ -95,7 +110,7 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 		Boolean review = (Boolean) context.get("review");
 
 		// if we are doing review just now, and if we are needing review and it's set, and if the submission has been graded
-		if ((review != null) && review && submission.getIsReleased())
+		if ((review != null) && review && (submission != null) && submission.getIsReleased())
 		{
 			// if we are doing question score feedback
 			if (assessment.getReview().getShowCorrectAnswer())
