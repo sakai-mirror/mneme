@@ -29,15 +29,15 @@ import java.util.List;
 public interface SubmissionService
 {
 	/**
-	 * Sort options for findAssessmentSubmissionsSort()
+	 * Sort options for findAssessmentSubmissionsSort() status is GradingSubmissionStatus
 	 */
 	enum FindAssessmentSubmissionsSort
 	{
-		graded_a, graded_d, status_a, status_d, userName_a, userName_d
+		status_a, status_d, userName_a, userName_d, final_a, final_d
 	}
 
 	/**
-	 * Sort options for GetUserContextSubmissions()
+	 * Sort options for GetUserContextSubmissions() status is AssessmentSubmissionStatus
 	 */
 	enum GetUserContextSubmissionsSort
 	{

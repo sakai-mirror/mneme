@@ -487,8 +487,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		if (M_log.isDebugEnabled()) M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId());
 
-		// read all the submissions for this user in the context, with all the assessment and submission data we need
-		// each assessment is covered with at least one - if there are no submission yet for a user, an empty submission is included
+		// get the submissions to the assignment made by all users
+		// if a user has not yet submitted, an empty one for that user is included
 		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, sort);
 
 		// see if any needs to be completed based on time limit or dates
@@ -498,7 +498,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		List<Submission> rv = null;
 		if (official)
 		{
-			rv = officialize(all);
+			rv = officializeByUser(all);
 		}
 		else
 		{
@@ -508,10 +508,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// if sorting by status, do that sort
 		if (sort == FindAssessmentSubmissionsSort.status_a || sort == FindAssessmentSubmissionsSort.status_d)
 		{
-			rv = sortByStatus((sort == FindAssessmentSubmissionsSort.status_d), rv);
+			rv = sortByGradingSubmissionStatus((sort == FindAssessmentSubmissionsSort.status_d), rv);
 		}
-
-		// TODO: similar sort for "graded_a/_d status"
 
 		// page the results
 		if ((pageNum != null) && (pageSize != null))
@@ -559,7 +557,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		List<Submission> rv = null;
 		if (official)
 		{
-			rv = officialize(all);
+			rv = officializeByUser(all);
 		}
 		else
 		{
@@ -569,10 +567,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// if sorting by status, do that sort
 		if (sort == FindAssessmentSubmissionsSort.status_a || sort == FindAssessmentSubmissionsSort.status_d)
 		{
-			rv = sortByStatus((sort == FindAssessmentSubmissionsSort.status_d), rv);
+			rv = sortByGradingSubmissionStatus((sort == FindAssessmentSubmissionsSort.status_d), rv);
 		}
-
-		// TODO: similar sort for "graded_a/_d status"
 
 		// page the results
 		if ((pageNum != null) && (pageSize != null))
@@ -663,43 +659,43 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		checkAutoComplete(all, asOf);
 
 		// pick one for each assessment - the one in progress, or the official complete one
-		List<Submission> official = officialize(all);
+		List<Submission> official = officializeByAssessment(all);
 
-		// if sorting by due date, fix it so null due dates are LARGE not SMALL
-		if (sort == GetUserContextSubmissionsSort.dueDate_a || sort == GetUserContextSubmissionsSort.dueDate_d
-				|| sort == GetUserContextSubmissionsSort.status_a || sort == GetUserContextSubmissionsSort.status_d)
-		{
-			// pull out the null date entries
-			List<Submission> nulls = new ArrayList<Submission>();
-			for (Iterator i = official.iterator(); i.hasNext();)
-			{
-				Submission s = (Submission) i.next();
-				if (s.getAssessment().getDates().getDueDate() == null)
-				{
-					nulls.add(s);
-					i.remove();
-				}
-			}
-
-			// for ascending, treat the null dates as LARGE so put them at the end
-			if (sort == GetUserContextSubmissionsSort.dueDate_a)
-			{
-				official.addAll(nulls);
-			}
-
-			// for descending, (all status is first sorted date descending) treat the null dates as LARGE so put them at the beginning
-			else
-			{
-				nulls.addAll(official);
-				official.clear();
-				official.addAll(nulls);
-			}
-		}
+		// // if sorting by due date, fix it so null due dates are LARGE not SMALL
+		// if (sort == GetUserContextSubmissionsSort.dueDate_a || sort == GetUserContextSubmissionsSort.dueDate_d
+		// || sort == GetUserContextSubmissionsSort.status_a || sort == GetUserContextSubmissionsSort.status_d)
+		// {
+		// // pull out the null date entries
+		// List<Submission> nulls = new ArrayList<Submission>();
+		// for (Iterator i = official.iterator(); i.hasNext();)
+		// {
+		// Submission s = (Submission) i.next();
+		// if (s.getAssessment().getDates().getDueDate() == null)
+		// {
+		// nulls.add(s);
+		// i.remove();
+		// }
+		// }
+		//
+		// // for ascending, treat the null dates as LARGE so put them at the end
+		// if ((sort == GetUserContextSubmissionsSort.dueDate_a) || (sort == GetUserContextSubmissionsSort.status_d))
+		// {
+		// official.addAll(nulls);
+		// }
+		//
+		// // for descending, (all status is first sorted date descending) treat the null dates as LARGE so put them at the beginning
+		// else
+		// {
+		// nulls.addAll(official);
+		// official.clear();
+		// official.addAll(nulls);
+		// }
+		// }
 
 		// if sorting by status, do that sort
 		if (sort == GetUserContextSubmissionsSort.status_a || sort == GetUserContextSubmissionsSort.status_d)
 		{
-			official = sortByStatus((sort == GetUserContextSubmissionsSort.status_d), official);
+			official = sortByAssessmentSubmissionStatus((sort == GetUserContextSubmissionsSort.status_d), official);
 		}
 
 		return official;
@@ -1263,13 +1259,15 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
-	 * Clump a list of all submissions, which may include many from the same user, into a list of official ones with siblings.
+	 * Clump a list of all submissions from a user in a context, which may include many to the same assessment, into a list of official ones, with
+	 * siblings.<br />
+	 * Clumping is by assessment.
 	 * 
 	 * @param all
 	 *        The list of all submissions.
-	 * @return
+	 * @return The official submissions, with siblings for the others.
 	 */
-	protected List<Submission> officialize(List<SubmissionImpl> all)
+	protected List<Submission> officializeByAssessment(List<SubmissionImpl> all)
 	{
 		// pick one for each assessment - the one in progress, or the official complete one
 		List<Submission> official = new ArrayList<Submission>();
@@ -1318,7 +1316,125 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					// we should not get a second one that is unstarted
 					if (candidateSub.getStartDate() == null)
 					{
-						M_log.warn("getUserContextSubmissions: another unstarted for aid: " + aid + " sid:" + candidateSub.getId());
+						M_log.warn("officializeByAssessment: another unstarted for aid: " + aid + " sid:" + candidateSub.getId());
+						continue;
+					}
+
+					// count as a sibling
+					count++;
+
+					// track the in-progress one, if any
+					if ((candidateSub.getIsComplete() == null) || (!candidateSub.getIsComplete()))
+					{
+						inProgressSubmission = candidateSub;
+					}
+
+					// if not in progress, then see if it has the best score so far
+					else
+					{
+						if (bestSubmission == null)
+						{
+							bestSubmission = candidateSub;
+						}
+
+						// take the new one if it exceeds the best so far
+						else if (bestSubmission.getTotalScore().floatValue() < candidateSub.getTotalScore().floatValue())
+						{
+							bestSubmission = candidateSub;
+						}
+
+						// if we match the best, pick the latest submit date
+						else if (bestSubmission.getTotalScore().floatValue() == candidateSub.getTotalScore().floatValue())
+						{
+							if ((bestSubmission.getSubmittedDate() != null) && (candidateSub.getSubmittedDate() != null)
+									&& (bestSubmission.getSubmittedDate().before(candidateSub.getSubmittedDate())))
+							{
+								bestSubmission = candidateSub;
+							}
+						}
+					}
+				}
+			}
+
+			// pick the winner
+			SubmissionImpl winner = inProgressSubmission;
+			if (winner == null) winner = bestSubmission;
+			if (winner == null) winner = submission;
+
+			// set the winner's sibling count
+			winner.initSiblingCount(new Integer(count));
+
+			// set the winner's best
+			if (bestSubmission != null)
+			{
+				winner.initBest(bestSubmission);
+			}
+
+			// keep the winner
+			official.add(winner);
+		}
+
+		return official;
+	}
+
+	/**
+	 * Clump a list of all submissions to an assessment, which may include many from the same user, into a list of official ones, with siblings.<br />
+	 * Clumping is by user.
+	 * 
+	 * @param all
+	 *        The list of all submissions.
+	 * @return The official submissions, with siblings for the others.
+	 */
+	protected List<Submission> officializeByUser(List<SubmissionImpl> all)
+	{
+		// pick one for each user - the one in progress, or the official complete one
+		List<Submission> official = new ArrayList<Submission>();
+
+		while (all.size() > 0)
+		{
+			// take the first one out
+			SubmissionImpl submission = all.remove(0);
+
+			// count the submissions actually present in the list for this user
+			int count = 0;
+			if (submission.getStartDate() != null)
+			{
+				count++;
+			}
+
+			String uid = submission.getUserId();
+			SubmissionImpl bestSubmission = null;
+			SubmissionImpl inProgressSubmission = null;
+
+			// this one may be our best, or in progress, but only if it's started
+			if (submission.getStartDate() != null)
+			{
+				// if incomplete, record this as in progress
+				if (!submission.getIsComplete())
+				{
+					inProgressSubmission = submission;
+				}
+
+				// else, if complete, make it the best so far
+				else
+				{
+					bestSubmission = submission;
+				}
+			}
+
+			// remove all others with this one's user id - keeping track of the best score if complete
+			for (Iterator i = all.iterator(); i.hasNext();)
+			{
+				SubmissionImpl candidateSub = (SubmissionImpl) i.next();
+				if (candidateSub.getUserId().equals(uid))
+				{
+					// take this one out
+					i.remove();
+
+					// we should not get a second one that is unstarted
+					if (candidateSub.getStartDate() == null)
+					{
+						M_log.warn("officializeByUser: another unstarted for uid: " + uid + " sid:" + candidateSub.getId());
 						continue;
 					}
 
@@ -1433,15 +1549,15 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
-	 * Sort a list of submissions by their status.
+	 * Sort a list of submissions by their (AssessmentSubmissionStatus) status.
 	 * 
-	 * @param sort
-	 *        The sort (status_a or status_d)
+	 * @param descending
+	 *        true if descending, false if ascending
 	 * @param submissions
 	 *        The submission list to sort.
 	 * @return The sorted list of submissions.
 	 */
-	protected List<Submission> sortByStatus(boolean descending, List<Submission> submissions)
+	protected List<Submission> sortByAssessmentSubmissionStatus(boolean descending, List<Submission> submissions)
 	{
 		// the easy cases
 		if ((submissions == null) || (submissions.size() < 2)) return submissions;
@@ -1521,6 +1637,89 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		rv.addAll(ready);
 		rv.addAll(inProgress);
 		rv.addAll(inProgressAlert);
+
+		// reverse if descending
+		if (descending)
+		{
+			Collections.reverse(rv);
+		}
+
+		return rv;
+	}
+
+	/**
+	 * Sort a list of submissions by their (GradingSubmissionStatus) status.
+	 * 
+	 * @param descending
+	 *        true if descending, false if ascending
+	 * @param submissions
+	 *        The submission list to sort.
+	 * @return The sorted list of submissions.
+	 */
+	protected List<Submission> sortByGradingSubmissionStatus(boolean descending, List<Submission> submissions)
+	{
+		// the easy cases
+		if ((submissions == null) || (submissions.size() < 2)) return submissions;
+
+		List<Submission> rv = new ArrayList<Submission>();
+
+		// sort order (a) future, notStarted, inProgress, submitted, evaluated, released
+		List<Submission> future = new ArrayList<Submission>();
+		List<Submission> notStarted = new ArrayList<Submission>();
+		List<Submission> inProgress = new ArrayList<Submission>();
+		List<Submission> submitted = new ArrayList<Submission>();
+		List<Submission> evaluated = new ArrayList<Submission>();
+		List<Submission> released = new ArrayList<Submission>();
+
+		for (Submission s : submissions)
+		{
+			switch (s.getGradingStatus())
+			{
+				case future:
+				{
+					future.add(s);
+					break;
+				}
+
+				case notStarted:
+				{
+					notStarted.add(s);
+					break;
+				}
+
+				case inProgress:
+				{
+					inProgress.add(s);
+					break;
+				}
+
+				case submitted:
+				{
+					submitted.add(s);
+					break;
+				}
+
+				case evaluated:
+				{
+					evaluated.add(s);
+					break;
+				}
+
+				case released:
+				{
+					released.add(s);
+					break;
+				}
+			}
+		}
+
+		// order ascending
+		rv.addAll(future);
+		rv.addAll(notStarted);
+		rv.addAll(inProgress);
+		rv.addAll(submitted);
+		rv.addAll(evaluated);
+		rv.addAll(released);
 
 		// reverse if descending
 		if (descending)

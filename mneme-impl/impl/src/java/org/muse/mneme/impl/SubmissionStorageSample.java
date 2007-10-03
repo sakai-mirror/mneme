@@ -22,6 +22,8 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +43,7 @@ import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
 import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * SubmissionStorageSample defines sample storage for Submissions.
@@ -144,7 +147,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort)
+	public List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment, final FindAssessmentSubmissionsSort sort)
 	{
 		// collect the submissions to this assessment
 		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
@@ -181,7 +184,83 @@ public class SubmissionStorageSample implements SubmissionStorage
 			}
 		}
 
-		// TODO: sort
+		// sort
+		Collections.sort(rv, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				int rv = 0;
+				switch (sort)
+				{
+					case userName_a:
+					case status_a:
+					case status_d:
+					{
+						String id0 = ((Submission) arg0).getUserId();
+						String id1 = ((Submission) arg1).getUserId();
+						// TODO: sort by sort name, not id!
+						rv = id0.compareTo(id1);
+						break;
+					}
+					case userName_d:
+					{
+						String id0 = ((Submission) arg0).getUserId();
+						String id1 = ((Submission) arg1).getUserId();
+						// TODO: sort by sort name, not id!
+						rv = -1 * id0.compareTo(id1);
+						break;
+					}
+					case final_a:
+					{
+						Float final0 = ((Submission) arg0).getTotalScore();
+						Float final1 = ((Submission) arg1).getTotalScore();
+						// null sorts small
+						if ((final0 == null) && (final1 == null))
+						{
+							rv = 0;
+							break;
+						}
+						if (final0 == null)
+						{
+							rv = -1;
+							break;
+						}
+						if (final1 == null)
+						{
+							rv = 1;
+							break;
+						}
+						rv = final0.compareTo(final1);
+						break;
+					}
+					case final_d:
+					{
+						Float final0 = ((Submission) arg0).getTotalScore();
+						Float final1 = ((Submission) arg1).getTotalScore();
+						// null sorts small
+						if ((final0 == null) && (final1 == null))
+						{
+							rv = 0;
+							break;
+						}
+						if (final0 == null)
+						{
+							rv = 1;
+							break;
+						}
+						if (final1 == null)
+						{
+							rv = +1;
+							break;
+						}
+						rv = -1 * final0.compareTo(final1);
+						break;
+					}
+				}
+
+				return rv;
+			}
+		});
 		return rv;
 	}
 
@@ -277,7 +356,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<SubmissionImpl> getUserContextSubmissions(String context, String userId, GetUserContextSubmissionsSort sort)
+	public List<SubmissionImpl> getUserContextSubmissions(String context, String userId, final GetUserContextSubmissionsSort sort)
 	{
 		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
 		for (SubmissionImpl submission : this.submissions.values())
@@ -315,7 +394,81 @@ public class SubmissionStorageSample implements SubmissionStorage
 			}
 		}
 
-		// TODO: sort
+		// sort
+		// status sorts first by due date descending, then status final sorting is done in the service
+		Collections.sort(rv, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				int rv = 0;
+				switch (sort)
+				{
+					case title_a:
+					{
+						String s0 = StringUtil.trimToZero(((Submission) arg0).getAssessment().getTitle());
+						String s1 = StringUtil.trimToZero(((Submission) arg1).getAssessment().getTitle());
+						rv = s0.compareTo(s1);
+						break;
+					}
+					case title_d:
+					{
+						String s0 = StringUtil.trimToZero(((Submission) arg0).getAssessment().getTitle());
+						String s1 = StringUtil.trimToZero(((Submission) arg1).getAssessment().getTitle());
+						rv = -1 * s0.compareTo(s1);
+						break;
+					}
+					case dueDate_a:
+					{
+						// no due date sorts high
+						if (((Submission) arg0).getAssessment().getDates().getDueDate() == null)
+						{
+							if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
+							{
+								rv = 0;
+								break;
+							}
+							rv = 1;
+							break;
+						}
+						if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
+						{
+							rv = -1;
+							break;
+						}
+						rv = ((Submission) arg0).getAssessment().getDates().getDueDate().compareTo(
+								((Submission) arg1).getAssessment().getDates().getDueDate());
+						break;
+					}
+					case dueDate_d:
+					case status_a:
+					case status_d:
+					{
+						// no due date sorts high
+						if (((Submission) arg0).getAssessment().getDates().getDueDate() == null)
+						{
+							if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
+							{
+								rv = 0;
+								break;
+							}
+							rv = -1;
+							break;
+						}
+						if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
+						{
+							rv = 1;
+							break;
+						}
+						rv = -1
+								* ((Submission) arg0).getAssessment().getDates().getDueDate().compareTo(
+										((Submission) arg1).getAssessment().getDates().getDueDate());
+						break;
+					}
+				}
+
+				return rv;
+			}
+		});
 		return rv;
 	}
 
@@ -477,17 +630,17 @@ public class SubmissionStorageSample implements SubmissionStorage
 		// we must already have the submission
 		SubmissionImpl old = this.submissions.get(submission.getId());
 		if (old == null) throw new IllegalArgumentException();
-		
+
 		// update the submission evaluation
 		old.evaluation.set(submission.evaluation);
-		
+
 		// update the answer evaluations
 		for (Answer answer : submission.getAnswers())
 		{
 			AnswerImpl oldAnswer = (AnswerImpl) old.getAnswer(answer.getQuestion());
 			if (oldAnswer != null)
 			{
-				oldAnswer.evaluation.set(((AnswerImpl) answer).evaluation); 
+				oldAnswer.evaluation.set(((AnswerImpl) answer).evaluation);
 			}
 		}
 	}

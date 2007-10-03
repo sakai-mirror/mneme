@@ -391,11 +391,11 @@ public class SubmissionImpl implements Submission
 				return GradingSubmissionStatus.future;
 			}
 
-			// if closed for submission
-			if (assessment.getIsClosed())
-			{
-				return GradingSubmissionStatus.closed;
-			}
+//			// if closed for submission
+//			if (assessment.getIsClosed())
+//			{
+//				return GradingSubmissionStatus.closed;
+//			}
 
 			return GradingSubmissionStatus.notStarted;
 		}

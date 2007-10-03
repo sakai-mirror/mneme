@@ -26,5 +26,5 @@ package org.muse.mneme.api;
  */
 public enum GradingSubmissionStatus
 {
-	closed, evaluated, future, inProgress, notStarted, released, submitted
+	future, notStarted, inProgress, submitted, evaluated, released
 }
