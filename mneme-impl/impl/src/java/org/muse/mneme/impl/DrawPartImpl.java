@@ -356,7 +356,17 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		// set the seed based on the id of the submission context,
 		// so each submission has a different unique ordering,
 		// and the part id, so the randomization of questions in each part within the same submission differs
-		long seed = (this.assessment.getSubmissionContext().getId() + "_" + this.id).hashCode();
+		long seed = 0;
+		if (this.assessment.getSubmissionContext() != null)
+		{
+			seed = (this.assessment.getSubmissionContext().getId() + "_" + this.id).hashCode();
+		}
+		
+		// if no submission context, just the part id
+		else
+		{
+			seed = this.id.hashCode();
+		}
 
 		// random draw from the pools, randomize the results
 		List<String> rv = new ArrayList<String>();
