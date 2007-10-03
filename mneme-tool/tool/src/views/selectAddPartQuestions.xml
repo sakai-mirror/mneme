@@ -101,8 +101,7 @@
 							<navigations>
 								<navigation style="LINK">
 									<icon icon="/icons/preview.png" style="LEFT" />
-									<destination template="/question_preview/{0}/{1}">
-										<model ref="testsortcode" />
+									<destination template="/question_preview/{0}">
 										<model ref="question.id" />
 									</destination>
 								</navigation>

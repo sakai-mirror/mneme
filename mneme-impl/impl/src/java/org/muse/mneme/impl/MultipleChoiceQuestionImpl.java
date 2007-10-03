@@ -409,7 +409,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		List<MultipleChoiceQuestionChoice> rv = getChoicesAsAuthored();
 
 		// shuffle them if desired (and we are in a submission context)
-		if (this.shuffleChoices && (this.question.getPart().getAssessment().getSubmissionContext() != null))
+		if (this.shuffleChoices && (this.question.getPart() != null) && (this.question.getPart().getAssessment().getSubmissionContext() != null))
 		{
 			// set the seed based on the submissionid and the question id
 			long seed = (this.question.getPart().getAssessment().getSubmissionContext().getId() + this.question.getId()).hashCode();

@@ -456,7 +456,7 @@ public class QuestionStorageSample implements QuestionStorage
 			answerChoices.add("This is the third item");
 			answerChoices.add("This is the fourth item");
 			Set<Integer> correctAnswers = new HashSet<Integer>();
-			correctAnswers.add(new Integer(1));
+			correctAnswers.add(new Integer(0));
 			correctAnswers.add(new Integer(1));
 			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).setAnswerChoices(answerChoices);
 			((MultipleChoiceQuestionImpl) q.getTypeSpecificQuestion()).setShuffleChoices("TRUE");

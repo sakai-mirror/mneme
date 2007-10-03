@@ -150,7 +150,6 @@
 								<toggle target="hints" title="hide-hints" description="hide-hints-description" style="LINK">
 									<icon icon="/icons/hints.png" style="LEFT" />
 									<included>
-										<decision reversed="TRUE" model="review" />
 										<decision model="question.part.assessment.showHints" />
 										<hasValueDecision model="question.hints" />
 									</included>

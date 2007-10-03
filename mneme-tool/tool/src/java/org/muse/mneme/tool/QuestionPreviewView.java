@@ -30,24 +30,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentService;
-import org.sakaiproject.tool.api.ToolManager;
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.util.Web;
 
 /**
- * The /assessment_preview view for the mneme tool.
+ * The /question_preview view for the mneme tool.
  */
-public class AssessmentPreviewView extends ControllerImpl
+public class QuestionPreviewView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(AssessmentPreviewView.class);
+	private static Log M_log = LogFactory.getLog(QuestionPreviewView.class);
 
-	/** Assessment service. */
-	protected AssessmentService assessmentService = null;
-
-	/** tool manager reference. */
-	protected ToolManager toolManager = null;
+	/** Question service. */
+	protected QuestionService questionService = null;
 
 	/**
 	 * Shutdown.
@@ -62,18 +58,17 @@ public class AssessmentPreviewView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need two parameters (assessments sort / aid)
-		if (params.length != 4)
+		// we need one parameter (qid)
+		if (params.length != 3)
 		{
 			throw new IllegalArgumentException();
 		}
 
-		String sort = params[2];
-		String assessmentId = params[3];
+		String questionId = params[2];
 
-		Assessment assessment = assessmentService.getAssessment(assessmentId);
+		Question question = questionService.getQuestion(questionId);
 
-		if (assessment == null)
+		if (question == null)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
@@ -81,15 +76,14 @@ public class AssessmentPreviewView extends ControllerImpl
 		}
 
 		// security check
-		if (!assessmentService.allowEditAssessment(assessment))
+		if (!questionService.allowEditQuestion(question))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
-		context.put("assessment", assessment);
-		context.put("sort", sort);
+		context.put("question", question);
 
 		// render
 		uiService.render(ui, context);
@@ -123,24 +117,13 @@ public class AssessmentPreviewView extends ControllerImpl
 	}
 
 	/**
-	 * Set the assessment service.
+	 * Set the question service.
 	 * 
 	 * @param service
-	 *        The assessment service.
+	 *        The question service.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setQuestionService(QuestionService service)
 	{
-		this.assessmentService = service;
-	}
-
-	/**
-	 * Set the tool manager.
-	 * 
-	 * @param manager
-	 *        The tool manager.
-	 */
-	public void setToolManager(ToolManager manager)
-	{
-		toolManager = manager;
+		this.questionService = service;
 	}
 }
