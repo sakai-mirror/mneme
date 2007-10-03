@@ -106,21 +106,39 @@ public class GradeQuestionView extends ControllerImpl
 			{
 				String sortCode = params[5];
 				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
+				if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
+				if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
 				context.put("sort_column", sortCode.charAt(0));
 				context.put("sort_direction", sortCode.charAt(1));
 			}
 
 			List answers = null;
+			String pagingParameter = "1-30";
+			
 			if (params.length >= 7)
 			{
 				String viewAll = params[6];
-				// get Answers for the first question
-				answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
-				context.put("official", "FALSE");
+				// get Answers
+				if (viewAll.equals("all"))
+				{
+					answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
+					context.put("official", "FALSE");
+				}
+				else
+				{
+					// get Answers
+					answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
+					context.put("official", "TRUE");
+					pagingParameter = params[6];
+					if (pagingParameter == null)
+					{
+						pagingParameter = "1-30";
+					}
+				}
 			}
 			else
 			{
-				// get Answers for the first question
+				// get Answers
 				answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
 				context.put("official", "TRUE");
 			}
@@ -130,7 +148,7 @@ public class GradeQuestionView extends ControllerImpl
 			Integer maxAnswers = 0;
 			if (answers != null) maxAnswers = answers.size();
 
-			String pagingParameter = "1-30";
+			
 			// paging
 			Paging paging = uiService.newPaging();
 			paging.setMaxItems(maxAnswers);
@@ -198,11 +216,18 @@ public class GradeQuestionView extends ControllerImpl
 			
 			// FindAssessmentSubmissionsSort.username_a
 			SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
-			if (params.length == 6)
+			if (params.length >= 6)
 			{
 				String sortCode = params[5];
 				destination = destination + "/" + params[5];
 				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
+				if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
+				if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
+			}
+			else
+			{
+				//default sort code
+				destination = destination + "/0A" ;
 			}
 			List answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
 			context.put("answers", answers);

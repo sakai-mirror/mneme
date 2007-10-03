@@ -119,7 +119,14 @@
 				</navigation>
 				<divider />
 				<pager paging="paging">
-					<destination template="/" />
+					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
+						<model ref="gradeSortCode" />
+						<model ref="assessment.id" />
+						<model ref="question.id" />
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
+						<model type="paging" ref="paging" />
+					</destination>
 				</pager>
 			</container>
 		</navigationBar>
@@ -314,6 +321,30 @@
 					<container>
 						<textEdit model="answer.totalScore" rows="1" cols="4" />
 					</container>
+					<sort>
+						<active>
+							<compareDecision model="sort_column" constant="1" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/grade_question/{0}/{1}/{2}/1A">
+								<model ref="gradeSortCode" />
+								<model ref="assessment.id" />
+								<model ref="question.id" />
+							</destination>
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/grade_question/{0}/{1}/{2}/1D">
+								<model ref="gradeSortCode" />
+								<model ref="assessment.id" />
+								<model ref="question.id" />
+							</destination>
+						</desc>
+					</sort>
 				</column>
 			</columns>
 		</entityList>
@@ -347,7 +378,14 @@
 				</navigation>
 				<divider />
 				<pager paging="paging">
-					<destination template="/" />
+					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
+						<model ref="gradeSortCode" />
+						<model ref="assessment.id" />
+						<model ref="question.id" />
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
+						<model type="paging" ref="paging" />
+					</destination>
 				</pager>
 			</container>
 		</navigationBar>
