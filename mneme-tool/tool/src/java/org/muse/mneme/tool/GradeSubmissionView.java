@@ -122,8 +122,6 @@ public class GradeSubmissionView extends ControllerImpl
 		Submission submission = this.submissionService.getSubmission(params[6]);
 		context.put("submission", submission);
 
-		context.put("submission", submission);
-
 		// read form
 		String destination = this.uiService.decode(req, context);
 
@@ -136,10 +134,7 @@ public class GradeSubmissionView extends ControllerImpl
 					// save submission
 					if (submission.getAnswers() != null)
 					{
-						for (Answer answer : submission.getAnswers())
-						{
-							this.submissionService.evaluateSubmission(submission);
-						}
+						this.submissionService.evaluateSubmission(submission);
 					}
 				}
 				catch (AssessmentPermissionException e)

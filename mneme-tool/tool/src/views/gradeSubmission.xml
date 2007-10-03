@@ -72,9 +72,6 @@
 				<row title="submitted">
 					<model type="date" ref="submission.submittedDate" />
 				</row>
-				<row title="released">
-					<model ref="submission.isReleased" />
-				</row>
 			</rows>
 		</entityDisplay>
 
@@ -206,14 +203,18 @@
 						<!--Mark as evaluated but don't release to student-->
 						<row>
 							<container>
-								<selection title="mark-evaluated" model="" />
+								<selection title="mark-evaluated" >
+									<model ref="submission.evaluation.evaluated"/>
+								</selection>
 							</container>
 						</row>
 						
 						<!--Release scores and comments to student-->
 						<row>
 							<container>
-								<selection title="release-scores" model="" />
+								<selection title="release-scores" >
+									<model ref="submission.isReleased"/>
+								</selection>
 							</container>
 						</row>
 					</rows>
