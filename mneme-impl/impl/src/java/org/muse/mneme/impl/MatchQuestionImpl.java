@@ -118,6 +118,9 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	/** Index numbers of the correct answers */
 	protected Set<Integer> correctAnswers = new HashSet<Integer>();
 
+	/** String that holds the distractor choice */
+	protected String distractor;
+
 	/** Our messages. */
 	protected transient InternationalizedMessages messages = null;
 
@@ -283,8 +286,9 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		row = this.uiService.newEntityDisplayRow();
 		row.setTitle("distractor");
 		edit = this.uiService.newHtmlEdit();
+		edit.setTitle("distractor-description");
 		edit.setSize(5, 50);
-		edit.setProperty(this.uiService.newPropertyReference().setReference("question.distractor"));
+		edit.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.distractor"));
 		row.add(edit);
 		display.addRow(row);
 
@@ -332,6 +336,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	public Set getCorrectAnswerSet()
 	{
 		return this.correctAnswers;
+	}
+
+	public String getDistrator()
+	{
+		return this.distractor;
 	}
 
 	/**
@@ -485,6 +494,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		this.correctAnswers.clear();
 		if (answers == null) return;
 		this.correctAnswers.addAll(answers);
+	}
+
+	public void setDistractor(String distractor)
+	{
+		this.distractor = distractor;
 	}
 
 	/**
