@@ -75,14 +75,6 @@
 				<row title="released">
 					<model ref="submission.isReleased" />
 				</row>
-				<!--row>
-					<title>
-					<message selector="total-score">
-					<model type="icon" icon="/icons/grade.png" />
-					</message>
-					</title>
-					<model ref="submission.totalScore" />
-					</row-->
 			</rows>
 		</entityDisplay>
 
@@ -183,8 +175,9 @@
 			<container>
 				<entityDisplay>
 					<rows>
+						<!--Overall Comments-->
 						<row>
-							<title highlighted="TRUE">
+							<title>
 								<message selector="overall-comments">
 									<model type="icon" icon="/icons/note.png" />
 								</message>
@@ -193,8 +186,10 @@
 								<textEdit model="submission.evaluation.comment" rows="5" cols="50" />
 							</container>
 						</row>
+						
+						<!--Graded Status-->
 						<row>
-							<title highlighted="TRUE">
+							<title>
 								<message selector="graded-status" />
 							</title>
 							<container>
@@ -205,6 +200,20 @@
 										</message>
 									</title>
 								</floatEdit>
+							</container>
+						</row>
+						
+						<!--Mark as evaluated but don't release to student-->
+						<row>
+							<container>
+								<selection title="mark-evaluated" model="" />
+							</container>
+						</row>
+						
+						<!--Release scores and comments to student-->
+						<row>
+							<container>
+								<selection title="release-scores" model="" />
 							</container>
 						</row>
 					</rows>
