@@ -72,6 +72,20 @@
 				<row title="submitted">
 					<model type="date" ref="submission.submittedDate" />
 				</row>
+				<row title="released">
+					<container>
+						<entityDisplay>
+							<title>
+								<message selector="releasedIcon">
+									<model type="icon" icon="/icons/checkon.gif" />
+								</message>
+							</title>
+							<included>
+								<compareDecision model="submission.isReleased" constant="true" />
+							</included>
+						</entityDisplay>
+					</container>
+				</row>
 			</rows>
 		</entityDisplay>
 
