@@ -55,6 +55,7 @@
 				<message selector="assessment-preview-assessment-title">
 					<model type="icon" icon="/icons/test.png" />
 					<model ref="assessment.title" />
+					<model type="html" ref="assessment" delegate="SubmissionScore" tool="sakai.mneme" />
 				</message>
 			</title>
 			<container>

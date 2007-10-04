@@ -76,11 +76,22 @@ public class SubmissionScoreDelegate extends FormatDelegateImpl
 	 */
 	public String format(Context context, Object value)
 	{
+		// submission or assessment
 		if (value == null) return null;
-		if (!(value instanceof Submission)) return value.toString();
-		Submission submission = (Submission) value;
+		Submission submission = null;
+		Assessment assessment = null;
 
-		Assessment assessment = submission.getAssessment();
+		if (value instanceof Submission)
+		{
+			submission = (Submission) value;
+			assessment = submission.getAssessment();
+		}
+		
+		else if (value instanceof Assessment)
+		{
+			assessment = (Assessment) value;
+		}
+
 		if (assessment == null) return value.toString();
 
 		// use the {}/{} format if doing feedback, or just {} if not.
@@ -89,7 +100,7 @@ public class SubmissionScoreDelegate extends FormatDelegateImpl
 		Boolean review = (Boolean) context.get("review");
 
 		// if we are doing review and the submission has been graded
-		if ((review != null) && review && submission.getIsReleased())
+		if ((review != null) && review && (submission != null) && submission.getIsReleased())
 		{
 			// the total score
 			rv.append("<img src=\"" + context.get("sakai.return.url") + "/icons/grade.png\" alt=\"" + context.getMessages().getString("grade")
