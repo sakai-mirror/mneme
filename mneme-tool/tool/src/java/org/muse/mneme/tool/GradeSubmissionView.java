@@ -142,8 +142,26 @@ public class GradeSubmissionView extends ControllerImpl
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 					return;
 				}
-				
+
 				destination = destination.replace("grade_submission_save", "grade_assessment");
+			}
+			else if (destination.startsWith("NEXT") || destination.startsWith("PREV"))
+			{
+				try
+				{
+					// save submission
+					if (submission.getAnswers() != null)
+					{
+						this.submissionService.evaluateSubmission(submission);
+					}
+				}
+				catch (AssessmentPermissionException e)
+				{
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+
+				destination = context.getDestination();
 			}
 
 		}

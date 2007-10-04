@@ -43,12 +43,25 @@
 		<!--top navigation-->
 		<navigationBar width="100%">
 			<container>
+				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
+					<icon icon="/icons/previous.gif" style="LEFT" />
+					<destination template="PREV:grade_submission_save/{0}">
+						<model ref="destinationPath" />
+					</destination>
+				</navigation>
 				<navigation title="list" style="BUTTON" accessKey="list-access" description="list-description" submit="TRUE">
 					<icon icon="/icons/contents.gif" style="LEFT" />
 					<destination template="/grade_submission_save/{0}">
 						<model ref="destinationPath" />
 					</destination>
 				</navigation>
+				<navigation title="next" style="BUTTON" accessKey="next-access" description="next-description" submit="TRUE">
+					<icon icon="/icons/next.gif" style="LEFT" />
+					<destination template="NEXT:grade_submission_save/{0}">
+						<model ref="destinationPath" />
+					</destination>
+				</navigation>
+				<divider />
 				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
 					<icon icon="/icons/save.png" style="LEFT" />
 					<destination template="/grade_submission_save/{0}">
@@ -67,7 +80,7 @@
 		<entityDisplay>
 			<rows>
 				<row title="submission-username">
-					<model type="userInfo" selector="SORTNAME" ref="submission.userId" />
+					<model type="userInfo" selector="DISPLAYNAME" ref="submission.userId" />
 				</row>
 				<row title="submitted">
 					<model type="date" ref="submission.submittedDate" />
@@ -197,7 +210,7 @@
 								<textEdit model="submission.evaluation.comment" rows="5" cols="50" />
 							</container>
 						</row>
-						
+
 						<!--Graded Status-->
 						<row>
 							<title>
@@ -213,21 +226,21 @@
 								</floatEdit>
 							</container>
 						</row>
-						
+
 						<!--Mark as evaluated but don't release to student-->
 						<row>
 							<container>
-								<selection title="mark-evaluated" >
-									<model ref="submission.evaluation.evaluated"/>
+								<selection title="mark-evaluated">
+									<model ref="submission.evaluation.evaluated" />
 								</selection>
 							</container>
 						</row>
-						
+
 						<!--Release scores and comments to student-->
 						<row>
 							<container>
-								<selection title="release-scores" >
-									<model ref="submission.isReleased"/>
+								<selection title="release-scores">
+									<model ref="submission.isReleased" />
 								</selection>
 							</container>
 						</row>
@@ -239,12 +252,25 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
+				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
+					<icon icon="/icons/previous.gif" style="LEFT" />
+					<destination template="PREV:grade_submission_save/{0}">
+						<model ref="destinationPath" />
+					</destination>
+				</navigation>
 				<navigation title="list" style="BUTTON" accessKey="list-access" description="list-description" submit="TRUE">
 					<icon icon="/icons/contents.gif" style="LEFT" />
 					<destination template="/grade_submission_save/{0}">
 						<model ref="destinationPath" />
 					</destination>
 				</navigation>
+				<navigation title="next" style="BUTTON" accessKey="next-access" description="next-description" submit="TRUE">
+					<icon icon="/icons/next.gif" style="LEFT" />
+					<destination template="NEXT:grade_submission_save/{0}">
+						<model ref="destinationPath" />
+					</destination>
+				</navigation>
+				<divider />
 				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
 					<icon icon="/icons/save.png" style="LEFT" />
 					<destination template="/grade_submission_save/{0}">
