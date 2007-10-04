@@ -139,9 +139,7 @@
 			<columns>
 				<modelColumn>
 					<title>
-						<message selector="submission-username">
-							<model type="userInfo" selector="SORTNAME" ref="answer.submission.userId" />
-						</message>
+						<message selector="submission-username" />
 					</title>
 					<entityNavigations>
 						<navigation>
@@ -163,7 +161,7 @@
 							</included>
 						</navigation>
 					</entityNavigations>
-					<model ref="answer.submission.userId" missing="no-username" />
+					<model type="userInfo" selector="SORTNAME" ref="answer.submission.userId" missing="no-username" />
 					<sort>
 						<active>
 							<compareDecision model="sort_column" constant="0" />
