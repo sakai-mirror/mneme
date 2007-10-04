@@ -32,7 +32,7 @@
 	</modeContainer>
 	<header>
 		<message selector="testSettings-header">
-			<model type="icon" icon="/icons/preferences.png" />
+			<model type="icon" icon="/icons/folder_page.png" />
 		</message>
 	</header>
 	<title>
@@ -40,7 +40,12 @@
 	</title>
 
 	<container>
-
+<!--  warn if live -->
+				<alert selector="settings-warning">
+					<included>
+						<decision model="assessment.isLive" />
+					</included>
+				</alert>
 		<entityDisplay>
 			<rows>
 				<row title="title">

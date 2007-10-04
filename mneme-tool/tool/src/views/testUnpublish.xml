@@ -38,17 +38,17 @@
 		</message>
 	</header>
 	<container>
+	<!--  warn if live -->
+				<alert selector="unpublish-warning">
+					<included>
+						<decision model="assessment.isLive" />
+					</included>
+				</alert>
+	
 		<section>
 			<container>
 				<instructions>
 					<message selector="unpublish-instructions"></message>
-				</instructions>
-			</container>
-		</section>
-		<section>
-			<container>
-				<instructions>
-					<message selector="unpublish-warning"><model type="icon" icon="/icons/folder_page.png" /></message>
 				</instructions>
 			</container>
 		</section>
