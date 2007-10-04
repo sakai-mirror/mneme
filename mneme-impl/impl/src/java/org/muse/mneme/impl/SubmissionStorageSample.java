@@ -43,6 +43,9 @@ import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
 import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.UserDirectoryService;
+import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -72,6 +75,8 @@ public class SubmissionStorageSample implements SubmissionStorage
 	protected Map<String, SubmissionImpl> submissions = new HashMap<String, SubmissionImpl>();
 
 	protected SubmissionServiceImpl submissionService = null;
+
+	protected UserDirectoryService userDirectoryService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -197,16 +202,50 @@ public class SubmissionStorageSample implements SubmissionStorage
 					case status_d:
 					{
 						String id0 = ((Submission) arg0).getUserId();
+						try
+						{
+							User u = userDirectoryService.getUser(id0);
+							id0 = u.getSortName();
+						}
+						catch (UserNotDefinedException e)
+						{
+						}
+
 						String id1 = ((Submission) arg1).getUserId();
-						// TODO: sort by sort name, not id!
+						try
+						{
+							User u = userDirectoryService.getUser(id1);
+							id1 = u.getSortName();
+						}
+						catch (UserNotDefinedException e)
+						{
+						}
+
 						rv = id0.compareTo(id1);
 						break;
 					}
 					case userName_d:
 					{
 						String id0 = ((Submission) arg0).getUserId();
+						try
+						{
+							User u = userDirectoryService.getUser(id0);
+							id0 = u.getSortName();
+						}
+						catch (UserNotDefinedException e)
+						{
+						}
+
 						String id1 = ((Submission) arg1).getUserId();
-						// TODO: sort by sort name, not id!
+						try
+						{
+							User u = userDirectoryService.getUser(id1);
+							id1 = u.getSortName();
+						}
+						catch (UserNotDefinedException e)
+						{
+						}
+
 						rv = -1 * id0.compareTo(id1);
 						break;
 					}
@@ -713,6 +752,14 @@ public class SubmissionStorageSample implements SubmissionStorage
 	public void setSubmissionService(SubmissionServiceImpl service)
 	{
 		this.submissionService = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setUserDirectoryService(UserDirectoryService service)
+	{
+		this.userDirectoryService = service;
 	}
 
 	/**
