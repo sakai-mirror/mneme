@@ -274,7 +274,7 @@
 							</included>
 						</navigation>
 						<navigation description="invalid-alt">
-							<icon icon="/icons/warning.gif" style="LEFT" />
+							<icon icon="/icons/attention.png" style="LEFT" />
 							<included>
 								<decision reversed="TRUE" model="assessment.isValid" />
 							</included>
