@@ -2,26 +2,26 @@
 <!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
-/**********************************************************************************
- * $URL$
- * $Id$
- ***********************************************************************************
- *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- **********************************************************************************/
+	/**********************************************************************************
+	* $URL$
+	* $Id$
+	***********************************************************************************
+	*
+	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* 
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	* 
+	*      http://www.apache.org/licenses/LICENSE-2.0
+	* 
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*
+	**********************************************************************************/
 -->
 
 <interface>
@@ -256,7 +256,7 @@
 					<navigations>
 						<navigation submit="TRUE" description="published-alt">
 							<icon icon="/icons/active.png" style="LEFT" />
-							<destination template="/assessment_publish/{0}{1}/{2}">
+							<destination template="/assessment_unpublish/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
@@ -268,7 +268,7 @@
 						</navigation>
 						<navigation submit="TRUE" description="unpublished-alt">
 							<icon icon="/icons/deactivated.gif" style="LEFT" />
-							<destination template="/assessment_publish/{0}{1}/{2}">
+							<destination template="/assessment_settings/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
@@ -296,14 +296,6 @@
 						<message selector="assessment-action" />
 					</title>
 					<navigations>
-						<navigation style="LINK" submit="TRUE" description="settings">
-							<icon icon="/icons/settings.png" style="LEFT" />
-							<destination template="/assessment_settings/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="assessment.id" />
-							</destination>
-						</navigation>
 						<navigation style="LINK" submit="TRUE" description="access">
 							<icon icon="/icons/access.png" style="LEFT" />
 							<destination template="/assessment_access/{0}{1}/{2}">

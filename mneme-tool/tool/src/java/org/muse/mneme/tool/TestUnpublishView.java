@@ -4,13 +4,13 @@
  ***********************************************************************************
  *
  * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,20 +29,23 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.DrawPart;
+import org.muse.mneme.api.ManualPart;
 import org.sakaiproject.util.Web;
 
 /**
- * The /assessment_settings view for the mneme tool.
+ * The /??? view for the mneme tool.
  */
-public class TestSettingsView extends ControllerImpl
+public class TestUnpublishView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(TestSettingsView.class);
+	private static Log M_log = LogFactory.getLog(TestUnpublishView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
@@ -60,12 +63,12 @@ public class TestSettingsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a single parameter (aid)
 		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
+		// The last parameter is the assessment id
 		String assessmentId = params[3];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
@@ -86,6 +89,7 @@ public class TestSettingsView extends ControllerImpl
 
 		// collect information: the selected assessment
 		context.put("assessment", assessment);
+		// The sort code is in this parameter
 		context.put("sortcode", params[2]);
 
 		// render
@@ -106,7 +110,6 @@ public class TestSettingsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a single parameter (aid)
 		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
@@ -142,7 +145,7 @@ public class TestSettingsView extends ControllerImpl
 			// commit the save
 			try
 			{
-				assessment.setPublished(Boolean.TRUE);
+				assessment.setPublished(Boolean.FALSE);
 				this.assessmentService.saveAssessment(assessment);
 			}
 			catch (AssessmentPermissionException e)
@@ -158,6 +161,7 @@ public class TestSettingsView extends ControllerImpl
 				return;
 			}
 
+			// Retain the sort order
 			path.append("/assessments/" + params[2]);
 			// redirect to the next destination
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
