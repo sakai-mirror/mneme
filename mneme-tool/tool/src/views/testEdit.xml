@@ -52,31 +52,6 @@
 								</textEdit>
 							</container>
 						</row>
-						<row title="test-Id">
-							<container>
-								<text model="assessment.id" />
-							</container>
-						</row>
-						<row title="history">
-							<container>
-								<text>
-									<message selector="history-createText">
-										<model type="userInfo" selector="DISPLAYNAME" ref="assessment.createdBy.UserId" />
-										<model type="date" ref="assessment.createdBy.date" />
-									</message>
-								</text>
-							</container>
-						</row>
-						<row>
-							<container>
-								<text>
-									<message selector="history-modifyText">
-										<model type="userInfo" selector="DISPLAYNAME" ref="assessment.modifiedBy.UserId" />
-										<model type="date" ref="assessment.modifiedBy.date" />
-									</message>
-								</text>
-							</container>
-						</row>
 						<row title="type">
 							<container>
 								<selection>
@@ -87,36 +62,6 @@
 										<selectionChoice value="survey" selector="assessment-type-survey" />
 									</selectionChoices>
 								</selection>
-							</container>
-						</row>
-						<row title="dates">
-							<container>
-								<entityDisplay>
-									<rows>
-										<row title="open-date">
-											<container>
-												<dateEdit>
-													<model ref="assessment.dates.openDate" type="date" />
-												</dateEdit>
-											</container>
-										</row>
-										<row title="due-date">
-											<container>
-												<dateEdit>
-													<model ref="assessment.dates.dueDate" type="date" />
-												</dateEdit>
-											</container>
-										</row>
-										<row title="test-acceptUntilDate">
-											<container>
-												<dateEdit>
-													<model ref="assessment.dates.acceptUntilDate" type="date" />
-												</dateEdit>
-												<instructions selector="test-acceptUntilDateMsg" />
-											</container>
-										</row>
-									</rows>
-								</entityDisplay>
 							</container>
 						</row>
 						<row title="test-instructions">
@@ -135,13 +80,6 @@
 										</row>
 									</rows>
 								</entityDisplay>
-							</container>
-						</row>
-						<row title="honor-pledge">
-							<container>
-								<selection>
-									<model ref="assessment.requireHonorPledge" />
-								</selection>
 							</container>
 						</row>
 					</rows>
@@ -267,6 +205,34 @@
 				</navigation>
 			</container>
 		</navigationBar>
-
+		<entityDisplay>
+			<rows>
+				<row title="test-Id">
+					<container>
+						<text model="assessment.id" />
+					</container>
+				</row>
+				<row title="history">
+					<container>
+						<text>
+							<message selector="history-createText">
+								<model type="userInfo" selector="DISPLAYNAME" ref="assessment.createdBy.UserId" />
+								<model type="date" ref="assessment.createdBy.date" />
+							</message>
+						</text>
+					</container>
+				</row>
+				<row>
+					<container>
+						<text>
+							<message selector="history-modifyText">
+								<model type="userInfo" selector="DISPLAYNAME" ref="assessment.modifiedBy.UserId" />
+								<model type="date" ref="assessment.modifiedBy.date" />
+							</message>
+						</text>
+					</container>
+				</row>
+			</rows>
+		</entityDisplay>
 	</container>
 </interface>
