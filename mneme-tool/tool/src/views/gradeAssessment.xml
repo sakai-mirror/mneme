@@ -120,7 +120,10 @@
 				<message selector="no-submissions" />
 			</emptyTitle>
 			<pager paging="paging">
-				<destination template="/" />
+				<destination template="/grade_assessment_save/{0}/{1}">
+					<model ref="destinationPath" />
+					<model type="paging" ref="paging" />
+				</destination>
 			</pager>
 			<columns>
 				<modelColumn>
@@ -153,17 +156,19 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_assessment_save/{0}/{1}/0A/{2}">
+							<destination template="/grade_assessment_save/{0}/{1}/0A/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
+								<model ref="pagingParameter" />
 								<model ref="view" />
 							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_assessment_save/{0}/{1}/0D/{2}">
+							<destination template="/grade_assessment_save/{0}/{1}/0D/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
+								<model ref="pagingParameter" />
 								<model ref="view" />
 							</destination>
 						</desc>
@@ -241,17 +246,19 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_assessment_save/{0}/{1}/1A/{2}">
+							<destination template="/grade_assessment_save/{0}/{1}/1A/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
+								<model ref="pagingParameter" />
 								<model ref="view" />
 							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_assessment_save/{0}/{1}/1D/{2}">
+							<destination template="/grade_assessment_save/{0}/{1}/1D/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
+								<model ref="pagingParameter" />
 								<model ref="view" />
 							</destination>
 						</desc>
@@ -299,11 +306,12 @@
 							<title>
 								<message selector="view-all" />
 							</title>
-							<destination template="/grade_assessment_save/{0}/{1}/{2}{3}/all">
+							<destination template="/grade_assessment_save/{0}/{1}/{2}{3}/{4}/all">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
+								<model ref="pagingParameter" />
 							</destination>
 							<included>
 								<compareDecision model="submission.siblingCount" reversed="TRUE">
@@ -316,11 +324,12 @@
 							<title>
 								<message selector="close" />
 							</title>
-							<destination template="/grade_assessment_save/{0}/{1}/{2}{3}">
+							<destination template="/grade_assessment_save/{0}/{1}/{2}{3}/{4}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
+								<model ref="pagingParameter" />
 							</destination>
 							<included>
 								<compareDecision model="official">
