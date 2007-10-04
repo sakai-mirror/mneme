@@ -45,8 +45,10 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 	 *        The score to format.
 	 * @return The formatted score
 	 */
-	protected static String formatScore(float score)
+	protected static String formatScore(Float score)
 	{
+		if (score == null) return "-";
+	
 		// round to a single place
 		String rv = Float.toString(Math.round(score * 100.0f) / 100.0f);
 
@@ -116,14 +118,14 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 			if (assessment.getReview().getShowCorrectAnswer())
 			{
 				// the auto-scores for this answered question
-				float score = 0;
+				Float score = null;
 
-				// find the section answer to this question (don't create it!)
+				// find the answer to this question (don't create it!)
 				for (Answer answer : submission.getAnswers())
 				{
 					if (answer.getQuestion().equals(question))
 					{
-						score = answer.getTotalScore().floatValue();
+						score = answer.getTotalScore();
 						break;
 					}
 				}

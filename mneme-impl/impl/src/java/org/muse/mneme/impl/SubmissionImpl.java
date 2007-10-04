@@ -808,7 +808,10 @@ public class SubmissionImpl implements Submission
 		float answerTotal = 0;
 		for (Answer answer : answers)
 		{
-			answerTotal += answer.getTotalScore();
+			Float answerScore = answer.getTotalScore();
+			if (answerScore == null) answerScore = Float.valueOf(0f);
+
+			answerTotal += answerScore;
 		}
 
 		// adjust to remove the current auto score
