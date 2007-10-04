@@ -217,6 +217,9 @@ public class AnswerImpl implements Answer
 	 */
 	public Float getTotalScore()
 	{
+		// if no auto nor evaluation, we have no score
+		if ((getAutoScore() == null) && (this.evaluation.getScore() == null)) return null;
+
 		float rv = 0f;
 		if (getAutoScore() != null)
 		{

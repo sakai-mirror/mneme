@@ -147,7 +147,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment, final FindAssessmentSubmissionsSort sort)
+	public List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment, final FindAssessmentSubmissionsSort sort, final Question question)
 	{
 		// collect the submissions to this assessment
 		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
@@ -212,8 +212,19 @@ public class SubmissionStorageSample implements SubmissionStorage
 					}
 					case final_a:
 					{
-						Float final0 = ((Submission) arg0).getTotalScore();
-						Float final1 = ((Submission) arg1).getTotalScore();
+						Float final0 = null;
+						Float final1 = null;
+						if (question != null)
+						{
+							final0 = ((Submission) arg0).getAnswer(question).getTotalScore();
+							final1 = ((Submission) arg1).getAnswer(question).getTotalScore();
+						}
+						else
+						{
+							final0 = ((Submission) arg0).getTotalScore();
+							final1 = ((Submission) arg1).getTotalScore();
+						}
+
 						// null sorts small
 						if ((final0 == null) && (final1 == null))
 						{
@@ -235,8 +246,19 @@ public class SubmissionStorageSample implements SubmissionStorage
 					}
 					case final_d:
 					{
-						Float final0 = ((Submission) arg0).getTotalScore();
-						Float final1 = ((Submission) arg1).getTotalScore();
+						Float final0 = null;
+						Float final1 = null;
+						if (question != null)
+						{
+							final0 = ((Submission) arg0).getAnswer(question).getTotalScore();
+							final1 = ((Submission) arg1).getAnswer(question).getTotalScore();
+						}
+						else
+						{
+							final0 = ((Submission) arg0).getTotalScore();
+							final1 = ((Submission) arg1).getTotalScore();
+						}
+
 						// null sorts small
 						if ((final0 == null) && (final1 == null))
 						{

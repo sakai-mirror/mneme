@@ -112,9 +112,10 @@ public interface Answer
 	Date getSubmittedDate();
 
 	/**
-	 * Access the total score of the answer - the total of the auto score and the evaluation score.
+	 * Access the total score of the answer - the total of the auto score and the evaluation score.<br />
+	 * Returns null if there is no auto score and no evaluation score.
 	 * 
-	 * @return The total score of the answer.
+	 * @return The total score of the answer, or null if there is none.
 	 */
 	Float getTotalScore();
 

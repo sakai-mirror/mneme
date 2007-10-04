@@ -79,8 +79,7 @@ public class SubmissionImpl implements Submission
 	protected Date submittedDate = null;
 
 	/** This is a pre-compute for the total score (trust me!), to be used if set and we don't have the answers & evaluations. */
-	//protected transient Float totalScore = null;
-
+	// protected transient Float totalScore = null;
 	protected String userId = null;
 
 	/**
@@ -391,11 +390,11 @@ public class SubmissionImpl implements Submission
 				return GradingSubmissionStatus.future;
 			}
 
-//			// if closed for submission
-//			if (assessment.getIsClosed())
-//			{
-//				return GradingSubmissionStatus.closed;
-//			}
+			// // if closed for submission
+			// if (assessment.getIsClosed())
+			// {
+			// return GradingSubmissionStatus.closed;
+			// }
 
 			return GradingSubmissionStatus.notStarted;
 		}
@@ -702,7 +701,9 @@ public class SubmissionImpl implements Submission
 
 		for (Answer answer : answers)
 		{
-			total += answer.getTotalScore();
+			Float score = answer.getTotalScore();
+			if (score == null) score = Float.valueOf(0f);
+			total += score;
 		}
 
 		if (this.evaluation.getScore() != null)
@@ -900,11 +901,10 @@ public class SubmissionImpl implements Submission
 	 * @param score
 	 *        The total score pre-compute.
 	 */
-//	protected void initTotalScore(Float score)
-//	{
-//		this.totalScore = score;
-//	}
-
+	// protected void initTotalScore(Float score)
+	// {
+	// this.totalScore = score;
+	// }
 	/**
 	 * Initialize the user id property.
 	 * 

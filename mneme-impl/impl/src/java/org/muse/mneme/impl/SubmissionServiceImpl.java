@@ -489,7 +489,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// get the submissions to the assignment made by all users
 		// if a user has not yet submitted, an empty one for that user is included
-		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, sort);
+		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, sort, null);
 
 		// see if any needs to be completed based on time limit or dates
 		checkAutoComplete(all, asOf);
@@ -536,6 +536,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	public List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Boolean official,
 			Integer pageNum, Integer pageSize)
 	{
+		// TODO: the sort on final score needs to be on the selected question, not on the full submission!
+		
 		// TODO: review the efficiency of this method! -ggolden
 
 		if (assessment == null) throw new IllegalArgumentException();
@@ -548,7 +550,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// read all the submissions for this user in the context, with all the assessment and submission data we need
 		// each assessment is covered with at least one - if there are no submission yet for a user, an empty submission is included
-		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, sort);
+		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, sort, question);
 
 		// see if any needs to be completed based on time limit or dates
 		checkAutoComplete(all, asOf);

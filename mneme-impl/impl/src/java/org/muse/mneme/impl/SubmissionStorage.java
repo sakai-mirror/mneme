@@ -83,9 +83,11 @@ public interface SubmissionStorage
 	 *        The assessment.
 	 * @param sort
 	 *        The sort order.
+	 * @param question
+	 *        An optional question, to use for sort-by-score (the score would be for this question in the submission, not the overall).
 	 * @return A sorted List<Submission> of the submissions for the assessment.
 	 */
-	List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort);
+	List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort, Question question);
 
 	/**
 	 * Get all the in-progress (open) submissions (all users, all assessments, all contexts).

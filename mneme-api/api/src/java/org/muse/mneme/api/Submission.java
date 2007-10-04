@@ -247,7 +247,7 @@ public interface Submission
 	 * Access the total score of the submission - the total of the auto scores from the answers and the evaluation scores from the answers and
 	 * overall.
 	 * 
-	 * @return The total score of the submission.
+	 * @return The total score of the submission (if no scores are auto-generated or evaluated, this returns 0).
 	 */
 	Float getTotalScore();
 
