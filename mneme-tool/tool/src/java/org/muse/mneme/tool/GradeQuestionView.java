@@ -87,7 +87,7 @@ public class GradeQuestionView extends ControllerImpl
 			{
 				// get First Question
 				question = (Question) questions.get(0);
-				String destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + question.getId() +"/0A";
+				String destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + question.getId() + "/0A";
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 				return;
 			}
@@ -114,7 +114,7 @@ public class GradeQuestionView extends ControllerImpl
 
 			List answers = null;
 			String pagingParameter = "1-30";
-			
+
 			if (params.length >= 7)
 			{
 				String viewAll = params[6];
@@ -142,13 +142,10 @@ public class GradeQuestionView extends ControllerImpl
 				answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
 				context.put("official", "TRUE");
 			}
-			
 			context.put("answers", answers);
-			
 			Integer maxAnswers = 0;
 			if (answers != null) maxAnswers = answers.size();
 
-			
 			// paging
 			Paging paging = uiService.newPaging();
 			paging.setMaxItems(maxAnswers);
@@ -175,7 +172,7 @@ public class GradeQuestionView extends ControllerImpl
 
 		// read form
 		String destination = this.uiService.decode(req, context);
-	
+
 		if (destination.startsWith("/grade_question"))
 		{
 			// get Assessment - assessment id is in params at index 3
@@ -189,12 +186,14 @@ public class GradeQuestionView extends ControllerImpl
 			{
 				String sortCode = params[5];
 				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
+				if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
+				if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
 			}
-			
+
 			List answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
 			context.put("answers", answers);
 			context.put("official", "TRUE");
-			
+
 			try
 			{
 				this.submissionService.evaluateAnswers(answers);
@@ -206,14 +205,14 @@ public class GradeQuestionView extends ControllerImpl
 				return;
 			}
 		}
-		
-		if(destination.equals("VIEW_ALL"))
-		{		
+
+		if (destination.equals("VIEW_ALL"))
+		{
 			// get Assessment - assessment id is in params at index 3
 			Assessment assessment = this.assessmentService.getAssessment(params[3]);
 			Question question = assessment.getParts().getQuestion(params[4]);
 			destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + params[4];
-			
+
 			// FindAssessmentSubmissionsSort.username_a
 			SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
 			if (params.length >= 6)
@@ -227,7 +226,7 @@ public class GradeQuestionView extends ControllerImpl
 			else
 			{
 				//default sort code
-				destination = destination + "/0A" ;
+				destination = destination + "/0A";
 			}
 			List answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
 			context.put("answers", answers);
