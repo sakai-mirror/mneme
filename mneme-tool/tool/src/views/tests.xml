@@ -254,8 +254,43 @@
 						</desc>
 					</sort>
 					<navigations>
-						<navigation submit="TRUE" description="published-alt">
+						<navigation style="LINK" submit="TRUE" description="published-alt">
 							<icon icon="/icons/active.png" style="LEFT" />
+							<destination template="/assessment_settings/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<decision model="assessment.isValid" />
+								<decision model="assessment.published" />
+							</included>
+						</navigation>
+						<navigation description="unpublished-alt">
+							<icon icon="/icons/deactivated.gif" style="LEFT" />
+							<included>
+								<decision model="assessment.isValid" />
+								<decision reversed="TRUE" model="assessment.published" />
+							</included>
+						</navigation>
+						<navigation description="invalid-alt">
+							<icon icon="/icons/warning.gif" style="LEFT" />
+							<included>
+								<decision reversed="TRUE" model="assessment.isValid" />
+							</included>
+						</navigation>
+					</navigations>
+				</column>
+	<column>
+					<title>
+						<message selector="assessment-publish" />
+					</title>
+					<navigations>
+						<navigation style="LINK" submit="TRUE" description="published-alt">
+							<title>
+								<message selector="unpublish">
+								</message>
+							</title>
 							<destination template="/assessment_unpublish/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
@@ -266,8 +301,11 @@
 								<decision model="assessment.published" />
 							</included>
 						</navigation>
-						<navigation submit="TRUE" description="unpublished-alt">
-							<icon icon="/icons/deactivated.gif" style="LEFT" />
+						<navigation style="LINK" submit="TRUE" description="unpublished-alt">
+							<title>
+								<message selector="publish">
+								</message>
+							</title>
 							<destination template="/assessment_settings/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
@@ -278,19 +316,8 @@
 								<decision reversed="TRUE" model="assessment.published" />
 							</included>
 						</navigation>
-						<navigation submit="TRUE" description="invalid-alt">
-							<icon icon="/icons/warning.gif" style="LEFT" />
-							<destination template="/assessment_invalid/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="assessment.id" />
-							</destination>
-							<included>
-								<decision reversed="TRUE" model="assessment.isValid" />
-							</included>
-						</navigation>
 					</navigations>
-				</column>
+				</column>				
 				<modelColumn>
 					<title>
 						<message selector="assessment-action" />
