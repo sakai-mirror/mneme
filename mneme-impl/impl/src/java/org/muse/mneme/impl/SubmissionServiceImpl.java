@@ -502,6 +502,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 		else
 		{
+			rv  = new ArrayList<Submission>(all.size());
 			rv.addAll(all);
 		}
 
@@ -563,6 +564,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 		else
 		{
+			rv  = new ArrayList<Submission>(all.size());
 			rv.addAll(all);
 		}
 
