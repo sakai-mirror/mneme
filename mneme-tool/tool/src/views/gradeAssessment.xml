@@ -174,62 +174,32 @@
 						</desc>
 					</sort>
 				</modelColumn>
-				<modelColumn>
+				<column>
 					<title>
 						<message selector="submission-finished" />
 					</title>
-					<!-- model type="date" ref="submission.submittedDate" /-->
-					<!--message selector="submission-finished-date">
-						<model type="date" ref="submission.submittedDate" />
-						</message-->
-					<navigations>
-						<navigation style="LINK" disabled="TRUE">
-							<title>
-								<message selector="submission-finished-date">
-									<model type="date" ref="submission.submittedDate" />
-								</message>
-							</title>
-							<destination template="/" />
-						</navigation>
-						<navigation style="LINK" disabled="TRUE">
-							<title>
-								<message selector="submission-finished-date-alert" />
-							</title>
-							<destination template="/" />
+					<container>
+						<text>
+							<message>
+								<model type="date" ref="submission.submittedDate" />
+							</message>
+							<included>
+								<decision reversed="TRUE" model="submission.isCompletedLate" />
+							</included>
+						</text>
+						<text>
+							<message selector="submission-finished-date-late">
+								<model type="date" ref="submission.submittedDate" />
+							</message>
 							<included>
 								<decision model="submission.isCompletedLate" />
 							</included>
-						</navigation>
-					</navigations>
-
+						</text>
+					</container>
 					<entityIncluded>
 						<decision model="submission.isComplete" />
 					</entityIncluded>
-				</modelColumn>
-
-				<!--column>
-					<title>
-					<message selector="submission-finished" />
-					</title>
-					<container>
-					<text>
-					<message selector="submission-finished-date">
-					<model type="date" ref="submission.submittedDate" />
-					</message>
-					</text-->
-				<!--alert>
-					<message selector="submission-finished-date-alert">
-					< model type="date" ref="submission.submittedDate" >							
-					</message>
-					<included>
-					<decision model="submission.isCompletedLate" />
-					</included>
-					</alert-->
-				<!--/container>
-					<entityIncluded>
-					<decision model="submission.isComplete" />
-					</entityIncluded>
-					</column-->
+				</column>
 
 				<modelColumn>
 					<title>
