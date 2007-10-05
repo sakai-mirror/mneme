@@ -294,7 +294,7 @@
 							<title>
 								<message selector="close" />
 							</title>
-							<destination template="/grade_assessment_save/{0}/{1}/{2}{3}/{4}">
+							<destination template="/grade_assessment_save/{0}/{1}/{2}{3}/{4}/highest">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="sort_column" />

@@ -131,94 +131,6 @@ public class GradeSubmissionView extends ControllerImpl
 	}
 
 	/**
-	 * parse for previous and next
-	 * @param context
-	 * @param submission
-	 * @param submissions
-	 */
-	private void parsePreviousNext(Context context, Submission submission, List<Submission> submissions)
-	{
-		//prev and next
-		if (submissions != null)
-		{
-			Submission submissionPresent = null;
-			for (int i = 0; i < submissions.size(); i++)
-			{
-				submissionPresent = submissions.get(i);
-				if (submissionPresent.getId().equals(submission.getId()))
-				{
-					if (i == 0 && (i == submissions.size() - 1))
-					{
-						context.put("prevSubmission", "");
-						context.put("nextSubmission", "");
-					}
-					else
-					{
-						//current is first submission
-						if (i == 0)
-						{
-							Submission submissionNext = null;
-							// loop for next submission
-							for (int j = i; j < submissions.size(); j++)
-							{
-								submissionNext = submissions.get(j);
-								if (submissionNext.getIsComplete())
-								{
-									context.put("nextSubmission", submissionNext);
-									break;
-								}
-							}
-						}
-						//current is last submission
-						else if (i == submissions.size() - 1)
-						{
-							Submission submissionPrev = null;
-							// loop for prev submission
-							for (int j = i; j >= 0; j--)
-							{
-								submissionPrev = submissions.get(j);
-								if (submissionPrev.getIsComplete())
-								{
-									context.put("prevSubmission", submissionPrev);
-									break;
-								}
-							}
-						}
-						//current is somewhere between first and last
-						else
-						{
-							Submission submissionNext = null;
-							// loop for next submission
-							for (int j = i; j < submissions.size(); j++)
-							{
-								submissionNext = submissions.get(j);
-								if (submissionNext.getIsComplete())
-								{
-									context.put("nextSubmission", submissionNext);
-									break;
-								}
-							}
-							
-							Submission submissionPrev = null;
-							// loop for prev submission
-							for (int j = i; j >= 0; j--)
-							{
-								submissionPrev = submissions.get(j);
-								if (submissionPrev.getIsComplete())
-								{
-									context.put("prevSubmission", submissionPrev);
-									break;
-								}
-							}
-						}
-					}
-					break;
-				}
-			}
-		}
-	}
-
-	/**
 	 * Final initialization, once all dependencies are set.
 	 */
 	public void init()
@@ -262,7 +174,7 @@ public class GradeSubmissionView extends ControllerImpl
 
 				destination = destination.replace("grade_submission_save", "grade_assessment");
 			}
-			else if (destination.startsWith("NEXT") || destination.startsWith("PREV"))
+			else if (destination.startsWith("/NEXT") || destination.startsWith("/PREV"))
 			{
 				try
 				{
@@ -278,7 +190,8 @@ public class GradeSubmissionView extends ControllerImpl
 					return;
 				}
 
-				destination = context.getDestination();
+				destination = destination.replace("NEXT:", "");
+				destination = destination.replace("PREV:", "");
 			}
 
 		}
@@ -328,6 +241,95 @@ public class GradeSubmissionView extends ControllerImpl
 		}
 
 		return sort;
+	}
+
+	/**
+	 * parse for previous and next
+	 * 
+	 * @param context
+	 * @param submission
+	 * @param submissions
+	 */
+	private void parsePreviousNext(Context context, Submission submission, List<Submission> submissions)
+	{
+		// prev and next
+		if (submissions != null)
+		{
+			Submission submissionPresent = null;
+			for (int i = 0; i < submissions.size(); i++)
+			{
+				submissionPresent = submissions.get(i);
+				if (submissionPresent.getId().equals(submission.getId()))
+				{
+					if (i == 0 && (i == submissions.size() - 1))
+					{
+						context.put("prevSubmission", "");
+						context.put("nextSubmission", "");
+					}
+					else
+					{
+						// current is first submission
+						if (i == 0)
+						{
+							Submission submissionNext = null;
+							// loop for next submission
+							for (int j = i + 1; j < submissions.size(); j++)
+							{
+								submissionNext = submissions.get(j);
+								if (submissionNext.getIsComplete())
+								{
+									context.put("nextSubmission", submissionNext);
+									break;
+								}
+							}
+						}
+						// current is last submission
+						else if (i == submissions.size() - 1)
+						{
+							Submission submissionPrev = null;
+							// loop for prev submission
+							for (int j = i - 1; j >= 0; j--)
+							{
+								submissionPrev = submissions.get(j);
+								if (submissionPrev.getIsComplete())
+								{
+									context.put("prevSubmission", submissionPrev);
+									break;
+								}
+							}
+						}
+						// current is somewhere between first and last
+						else
+						{
+							Submission submissionNext = null;
+							// loop for next submission
+							for (int j = i + 1; j < submissions.size(); j++)
+							{
+								submissionNext = submissions.get(j);
+								if (submissionNext.getIsComplete())
+								{
+									context.put("nextSubmission", submissionNext);
+									break;
+								}
+							}
+
+							Submission submissionPrev = null;
+							// loop for prev submission
+							for (int j = i - 1; j >= 0; j--)
+							{
+								submissionPrev = submissions.get(j);
+								if (submissionPrev.getIsComplete())
+								{
+									context.put("prevSubmission", submissionPrev);
+									break;
+								}
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
 	}
 
 	/**
