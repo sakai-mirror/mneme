@@ -148,6 +148,19 @@
 											<model ref="answer.question.pool.points" />
 										</message>
 									</title>
+									<included>
+										<compareDecision model="answer.question.type" constant="mneme:Essay" reversed="TRUE" />
+									</included>
+								</floatEdit>
+								<floatEdit model="answer.totalScore">
+									<title highlighted="TRUE">
+										<message selector="answer-points-essay-type">
+											<model ref="answer.question.pool.points" />
+										</message>
+									</title>
+									<included>
+										<compareDecision model="answer.question.type" constant="mneme:Essay" />
+									</included>
 								</floatEdit>
 							</container>
 						</row>
