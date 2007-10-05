@@ -554,6 +554,14 @@ public class AssessmentImpl implements Assessment
 	public void setType(AssessmentType type)
 	{
 		if (type == null) throw new IllegalArgumentException();
+		if (this.type == type) return;
+
+		if (this.type == AssessmentType.survey)
+		{
+			// this is a change that cannot be made to live tests
+			this.liveChanged = Boolean.TRUE;
+		}
+
 		this.type = type;
 	}
 

@@ -74,7 +74,10 @@
 		<section title="select-questions-msg">
 			<container>
 				<!--  warn if live -->
-				<alert selector="live-warning-mpart">
+				<alert>
+					<message selector="live-warning-mpart">
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+					</message>
 					<included>
 						<decision model="assessment.isLive" />
 					</included>
@@ -117,6 +120,9 @@
 							<value>
 								<model type="text" ref="question.id" />
 							</value>
+							<included>
+								<decision reversed="TRUE" model="assessment.isLive" />
+							</included>
 							<model ref="part.questionOrder" />
 						</orderColumn>
 						<modelColumn>

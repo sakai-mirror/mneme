@@ -75,7 +75,10 @@
 		<section title="part-pools-msg">
 			<container>
 				<!--  warn if live -->
-				<alert selector="live-warning-dpart">
+				<alert>
+					<message selector="live-warning-dpart">
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+					</message>
 					<included>
 						<decision model="assessment.isLive" />
 					</included>

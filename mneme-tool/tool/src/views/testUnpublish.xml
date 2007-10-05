@@ -38,13 +38,16 @@
 		</message>
 	</header>
 	<container>
-	<!--  warn if live -->
-				<alert selector="unpublish-warning">
-					<included>
-						<decision model="assessment.isLive" />
-					</included>
-				</alert>
-	
+		<!--  warn if live -->
+		<alert>
+			<message selector="unpublish-warning">
+				<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+			</message>
+			<included>
+				<decision model="assessment.isLive" />
+			</included>
+		</alert>
+
 		<section>
 			<container>
 				<instructions>
@@ -55,7 +58,8 @@
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="20em">
 			<container>
-				<navigation title="unpublish" accessKey="unpublish-access" description="unpublish-description" style="BUTTON" submit="TRUE" destination="/assessments">
+				<navigation title="unpublish" accessKey="unpublish-access" description="unpublish-description" style="BUTTON" submit="TRUE"
+					destination="/assessments">
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
 				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">

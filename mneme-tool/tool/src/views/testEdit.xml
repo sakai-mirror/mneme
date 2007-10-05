@@ -54,6 +54,16 @@
 						</row>
 						<row title="type">
 							<container>
+								<!--  warn if live -->
+								<alert>
+									<message selector="live-warning-survey">
+										<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+									</message>
+									<included>
+										<decision model="assessment.isLive" />
+										<compareDecision model="assessment.type" constant="survey" />
+									</included>
+								</alert>
 								<selection>
 									<model ref="assessment.type" />
 									<selectionChoices>
@@ -61,6 +71,10 @@
 										<selectionChoice value="assignment" selector="assessment-type-assignment" />
 										<selectionChoice value="survey" selector="assessment-type-survey" />
 									</selectionChoices>
+									<readOnly>
+										<decision model="assessment.isLive" />
+										<compareDecision model="assessment.type" constant="survey" />
+									</readOnly>
 								</selection>
 							</container>
 						</row>
@@ -89,7 +103,10 @@
 		<section title="test-parts">
 			<container>
 				<!--  warn if live -->
-				<alert selector="live-warning-parts">
+				<alert>
+					<message selector="live-warning-parts">
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+					</message>
 					<included>
 						<decision model="assessment.isLive" />
 					</included>
@@ -141,6 +158,9 @@
 								<model ref="part.id" />
 							</value>
 							<model ref="assessment.parts.order" />
+							<included>
+								<decision reversed="TRUE" model="assessment.isLive" />
+							</included>
 						</orderColumn>
 						<modelColumn>
 							<title>
