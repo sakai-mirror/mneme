@@ -44,7 +44,10 @@
 		<navigationBar width="100%">
 			<container>
 				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
-					<icon icon="/icons/previous.gif" style="LEFT" />
+					<disabled>
+						<hasValueDecision model="prevSubmission" reversed="TRUE"/>
+					</disabled>
+					<icon icon="/icons/previous.png" style="LEFT" />
 					<destination template="PREV:grade_submission_save/{0}">
 						<model ref="destinationPath" />
 					</destination>
@@ -56,7 +59,10 @@
 					</destination>
 				</navigation>
 				<navigation title="next" style="BUTTON" accessKey="next-access" description="next-description" submit="TRUE">
-					<icon icon="/icons/next.gif" style="LEFT" />
+					<disabled>
+						<hasValueDecision model="nextSubmission" reversed="TRUE"/>
+					</disabled>
+					<icon icon="/icons/next.png" style="LEFT" />
 					<destination template="NEXT:grade_submission_save/{0}">
 						<model ref="destinationPath" />
 					</destination>
@@ -253,7 +259,7 @@
 		<navigationBar width="100%">
 			<container>
 				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
-					<icon icon="/icons/previous.gif" style="LEFT" />
+					<icon icon="/icons/previous.png" style="LEFT" />
 					<destination template="PREV:grade_submission_save/{0}">
 						<model ref="destinationPath" />
 					</destination>
@@ -265,7 +271,7 @@
 					</destination>
 				</navigation>
 				<navigation title="next" style="BUTTON" accessKey="next-access" description="next-description" submit="TRUE">
-					<icon icon="/icons/next.gif" style="LEFT" />
+					<icon icon="/icons/next.png" style="LEFT" />
 					<destination template="NEXT:grade_submission_save/{0}">
 						<model ref="destinationPath" />
 					</destination>
