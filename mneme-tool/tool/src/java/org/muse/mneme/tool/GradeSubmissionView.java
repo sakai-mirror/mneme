@@ -112,6 +112,32 @@ public class GradeSubmissionView extends ControllerImpl
 			return;
 		}
 
+		parsePreviousNext(context, submission, submissions);
+
+		// check for user permission to access the submission for grading
+		if (!this.submissionService.allowEvaluate(submission))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		// destination path for grade submission
+		String destinationPath = context.getDestination();
+		destinationPath = destinationPath.substring(destinationPath.indexOf("/", 1) + 1, destinationPath.lastIndexOf("/"));
+		context.put("destinationPath", destinationPath);
+		uiService.render(ui, context);
+
+	}
+
+	/**
+	 * parse for previous and next
+	 * @param context
+	 * @param submission
+	 * @param submissions
+	 */
+	private void parsePreviousNext(Context context, Submission submission, List<Submission> submissions)
+	{
 		//prev and next
 		if (submissions != null)
 		{
@@ -190,21 +216,6 @@ public class GradeSubmissionView extends ControllerImpl
 				}
 			}
 		}
-
-		// check for user permission to access the submission for grading
-		if (!this.submissionService.allowEvaluate(submission))
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
-
-		// destination path for grade submission
-		String destinationPath = context.getDestination();
-		destinationPath = destinationPath.substring(destinationPath.indexOf("/", 1) + 1, destinationPath.lastIndexOf("/"));
-		context.put("destinationPath", destinationPath);
-		uiService.render(ui, context);
-
 	}
 
 	/**

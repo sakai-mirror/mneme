@@ -48,8 +48,9 @@
 						<hasValueDecision model="prevSubmission" reversed="TRUE"/>
 					</disabled>
 					<icon icon="/icons/previous.png" style="LEFT" />
-					<destination template="PREV:grade_submission_save/{0}">
+					<destination template="PREV:grade_submission_save/{0}/{1}">
 						<model ref="destinationPath" />
+						<model ref="prevSubmission.id" />
 					</destination>
 				</navigation>
 				<navigation title="list" style="BUTTON" accessKey="list-access" description="list-description" submit="TRUE">
@@ -259,6 +260,9 @@
 		<navigationBar width="100%">
 			<container>
 				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
+					<disabled>
+						<hasValueDecision model="prevSubmission" reversed="TRUE"/>
+					</disabled>
 					<icon icon="/icons/previous.png" style="LEFT" />
 					<destination template="PREV:grade_submission_save/{0}">
 						<model ref="destinationPath" />
@@ -271,6 +275,9 @@
 					</destination>
 				</navigation>
 				<navigation title="next" style="BUTTON" accessKey="next-access" description="next-description" submit="TRUE">
+					<disabled>
+						<hasValueDecision model="nextSubmission" reversed="TRUE"/>
+					</disabled>
 					<icon icon="/icons/next.png" style="LEFT" />
 					<destination template="NEXT:grade_submission_save/{0}">
 						<model ref="destinationPath" />
