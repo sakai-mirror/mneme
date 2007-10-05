@@ -325,6 +325,32 @@
 					<title>
 						<message selector="submission-final" />
 					</title>
+					<sort submit="TRUE">
+						<active>
+							<compareDecision model="sort_column" constant="2" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/grade_assessment_save/{0}/{1}/2A/{2}/{3}">
+								<model ref="gradesSortCode" />
+								<model ref="assessment.id" />
+								<model ref="pagingParameter" />
+								<model ref="view" />
+							</destination>
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/grade_assessment_save/{0}/{1}/2D/{2}/{3}">
+								<model ref="gradesSortCode" />
+								<model ref="assessment.id" />
+								<model ref="pagingParameter" />
+								<model ref="view" />
+							</destination>
+						</desc>
+					</sort>
 					<container>
 						<floatEdit model="submission.totalScore" cols="2" />
 					</container>

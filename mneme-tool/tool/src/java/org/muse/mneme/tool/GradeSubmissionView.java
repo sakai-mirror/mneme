@@ -224,6 +224,10 @@ public class GradeSubmissionView extends ControllerImpl
 					sort = SubmissionService.FindAssessmentSubmissionsSort.status_a;
 				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
 					sort = SubmissionService.FindAssessmentSubmissionsSort.status_d;
+				else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
+					sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
+				else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
+					sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
 				else
 				{
 					throw new IllegalArgumentException();
