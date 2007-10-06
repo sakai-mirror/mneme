@@ -63,6 +63,8 @@ public class AssessmentImpl implements Assessment
 
 	protected AssessmentGrading grading = new AssessmentGradingImpl();
 
+	protected Boolean historical = Boolean.FALSE;
+
 	protected Boolean honorPledge = Boolean.FALSE;
 
 	protected String id = null;
@@ -88,9 +90,9 @@ public class AssessmentImpl implements Assessment
 
 	protected Boolean randomAccess = Boolean.TRUE;
 
-	protected AssessmentReview review = null;
-
 	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
+
+	protected AssessmentReview review = null;
 
 	protected Boolean showHints = Boolean.TRUE;
 
@@ -584,6 +586,14 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Set this assessment to be "historical" - used only for history by submissions.
+	 */
+	protected void initHistorical()
+	{
+		this.historical = Boolean.TRUE;
+	}
+
+	/**
 	 * Initialize the id property.
 	 * 
 	 * @param id
@@ -606,6 +616,16 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Check the historical setting of the assessment.
+	 * 
+	 * @return TRUE if the assessment is used only for submission historical access, FALSE if it is a current assessment.
+	 */
+	protected Boolean isHistorical()
+	{
+		return this.historical;
+	}
+
+	/**
 	 * Set as a copy of another.
 	 * 
 	 * @param other
@@ -620,6 +640,7 @@ public class AssessmentImpl implements Assessment
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
 		this.dates = new AssessmentDatesImpl((AssessmentDatesImpl) other.dates);
 		this.grading = new AssessmentGradingImpl((AssessmentGradingImpl) other.grading);
+		this.historical = other.historical;
 		this.honorPledge = other.honorPledge;
 		this.id = other.id;
 		this.liveChanged = other.liveChanged;

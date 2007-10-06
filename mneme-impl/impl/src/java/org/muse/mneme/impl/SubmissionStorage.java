@@ -170,6 +170,15 @@ public interface SubmissionStorage
 	List<String> getUsersSubmitted(Assessment assessment);
 
 	/**
+	 * Check if any submission has a dependency for history on this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return TRUE if there are any submissions dependent for history on this assessment, FALSE if not.
+	 */
+	Boolean historicalDependencyExists(Assessment assessment);
+
+	/**
 	 * Construct a new Answer object.
 	 * 
 	 * @return A new Answer object.
@@ -248,4 +257,14 @@ public interface SubmissionStorage
 	 * @return TRUE if there are any submissions to the assesment.
 	 */
 	Boolean submissionsExist(Assessment assessment);
+
+	/**
+	 * Switch any submissions with a historical dependency on the assessment to this new assessment.
+	 * 
+	 * @param assessment
+	 *        The current dependent assessment.
+	 * @param newAssessmentId
+	 *        The new assessment to switch to.
+	 */
+	void switchHistoricalDependency(Assessment assessment, Assessment newAssessment);
 }

@@ -52,7 +52,7 @@ public class SubmissionImpl implements Submission
 
 	protected List<AnswerImpl> answers = new ArrayList<AnswerImpl>();
 
-	protected String assessmentId = null;
+	protected SubmissionAssessmentImpl assessment = null;
 
 	protected transient AssessmentService assessmentService = null;
 
@@ -93,6 +93,7 @@ public class SubmissionImpl implements Submission
 		this.submissionService = submissionService;
 		this.sessionManager = sessionManager;
 
+		this.assessment = new SubmissionAssessmentImpl(null, null, this, this.assessmentService);
 		this.evaluation = new SubmissionEvaluationImpl(this);
 	}
 
@@ -179,14 +180,7 @@ public class SubmissionImpl implements Submission
 	 */
 	public Assessment getAssessment()
 	{
-		// TODO: cache the actual assessment for the thread, to avoid the real assessment cache's copy-out policy
-
-		AssessmentImpl assessment = (AssessmentImpl) this.assessmentService.getAssessment(this.assessmentId);
-
-		// set the submision context
-		assessment.initSubmissionContext(this);
-
-		return assessment;
+		return this.assessment;
 	}
 
 	/**
@@ -856,7 +850,7 @@ public class SubmissionImpl implements Submission
 	 */
 	protected String getAssessmentId()
 	{
-		return this.assessmentId;
+		return this.assessment.getId();
 	}
 
 	/**
@@ -865,9 +859,10 @@ public class SubmissionImpl implements Submission
 	 * @param id
 	 *        The assessment id property.
 	 */
-	protected void initAssessmentId(String id)
+	protected void initAssessmentIds(String main, String presentation)
 	{
-		this.assessmentId = id;
+		this.assessment.mainAssessmentId = main;
+		this.assessment.historicalAssessmentId = presentation;
 	}
 
 	/**
@@ -965,10 +960,10 @@ public class SubmissionImpl implements Submission
 	 */
 	protected void setMain(SubmissionImpl other)
 	{
-		this.assessmentId = other.assessmentId;
+		this.assessment = new SubmissionAssessmentImpl(other.assessment, this);
 		this.assessmentService = other.assessmentService;
 		this.bestSubmissionId = other.bestSubmissionId;
-		this.evaluation = new SubmissionEvaluationImpl(other.evaluation);
+		this.evaluation = new SubmissionEvaluationImpl(other.evaluation, this);
 		this.released = other.released;
 		this.id = other.id;
 		this.isComplete = other.isComplete;

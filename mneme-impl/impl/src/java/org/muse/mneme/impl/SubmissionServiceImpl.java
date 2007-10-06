@@ -347,7 +347,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// make a new submission
 		SubmissionImpl submission = this.storage.newSubmission();
-		submission.initAssessmentId(assessment.getId());
+		submission.initAssessmentIds(assessment.getId(), assessment.getId());
 		submission.initUserId(userId);
 		submission.setIsComplete(Boolean.FALSE);
 		submission.setStartDate(asOf);
@@ -502,7 +502,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 		else
 		{
-			rv  = new ArrayList<Submission>(all.size());
+			rv = new ArrayList<Submission>(all.size());
 			rv.addAll(all);
 		}
 
@@ -538,7 +538,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			Integer pageNum, Integer pageSize)
 	{
 		// TODO: the sort on final score needs to be on the selected question, not on the full submission!
-		
+
 		// TODO: review the efficiency of this method! -ggolden
 
 		if (assessment == null) throw new IllegalArgumentException();
@@ -564,7 +564,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 		else
 		{
-			rv  = new ArrayList<Submission>(all.size());
+			rv = new ArrayList<Submission>(all.size());
 			rv.addAll(all);
 		}
 
@@ -1263,6 +1263,18 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
+	 * Check if any submission has a dependency for history on this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return TRUE if there are any submissions dependent for history on this assessment, FALSE if not.
+	 */
+	protected Boolean historicalDependencyExists(Assessment assessment)
+	{
+		return this.storage.historicalDependencyExists(assessment);
+	}
+
+	/**
 	 * Clump a list of all submissions from a user in a context, which may include many to the same assessment, into a list of official ones, with
 	 * siblings.<br />
 	 * Clumping is by assessment.
@@ -1759,5 +1771,18 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		checkerThread.interrupt();
 
 		checkerThread = null;
+	}
+
+	/**
+	 * Switch any submissions with a historical dependency on the assessment to this new assessment.
+	 * 
+	 * @param assessment
+	 *        The current dependent assessment.
+	 * @param newAssessmentId
+	 *        The new assessment to switch to.
+	 */
+	protected void switchHistoricalDependency(Assessment assessment, Assessment newAssessment)
+	{
+		this.storage.switchHistoricalDependency(assessment, newAssessment);
 	}
 }

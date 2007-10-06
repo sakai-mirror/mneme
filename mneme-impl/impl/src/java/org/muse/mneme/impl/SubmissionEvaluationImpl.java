@@ -49,9 +49,9 @@ public class SubmissionEvaluationImpl extends EvaluationImpl implements Submissi
 	 * @param other
 	 *        The other to copy.
 	 */
-	public SubmissionEvaluationImpl(SubmissionEvaluationImpl other)
+	public SubmissionEvaluationImpl(SubmissionEvaluationImpl other, Submission submission)
 	{
-		this(other.submission);
+		this(submission);
 		set(other);
 	}
 

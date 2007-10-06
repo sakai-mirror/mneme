@@ -80,7 +80,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	protected Map<String, AssessmentStorage> storgeOptions;
 
 	/** Dependency: SubmissionService */
-	protected SubmissionService submissionService = null;
+	protected SubmissionServiceImpl submissionService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -431,7 +431,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	 */
 	public void setSubmissionService(SubmissionService service)
 	{
-		submissionService = service;
+		submissionService = (SubmissionServiceImpl) service;
 	}
 
 	/**
@@ -469,6 +469,14 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("save: " + assessment.getId());
 
+		// is there a change that needs to generate history?
+		// TODO: how to tell?
+		boolean historyNeeded = true;
+
+		// get the current assessment for history
+		AssessmentImpl current = null;
+		if (historyNeeded) current = this.storage.getAssessment(assessment.getId());
+
 		// if the assessment is new (i.e. no id), set the createdBy information, if not already set
 		if ((assessment.getId() == null) && (assessment.getCreatedBy().getUserId() == null))
 		{
@@ -485,6 +493,21 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// save
 		this.storage.saveAssessment((AssessmentImpl) assessment);
+
+		// if there are any history dependencies on this changed assessment, we need to store the history version
+		if (historyNeeded && (current != null))
+		{
+			if (this.submissionService.historicalDependencyExists(assessment))
+			{
+				// get a new id on the old and save it
+				current.initId(null);
+				current.initHistorical();
+				this.storage.saveAssessment(current);
+
+				// swap all historical dependencies to the new
+				this.submissionService.switchHistoricalDependency(assessment, current);
+			}
+		}
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_EDIT, getAssessmentReference(assessment.getId()), true));

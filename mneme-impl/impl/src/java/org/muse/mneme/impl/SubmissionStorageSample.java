@@ -184,7 +184,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 			{
 				SubmissionImpl s = newSubmission();
 				s.initUserId(userId);
-				s.initAssessmentId(assessment.getId());
+				s.initAssessmentIds(assessment.getId(), assessment.getId());
 				rv.add(s);
 			}
 		}
@@ -450,7 +450,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 			{
 				SubmissionImpl s = newSubmission();
 				s.initUserId(userId);
-				s.initAssessmentId(a.getId());
+				s.initAssessmentIds(a.getId(), a.getId());
 				rv.add(s);
 			}
 		}
@@ -548,6 +548,22 @@ public class SubmissionStorageSample implements SubmissionStorage
 		}
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean historicalDependencyExists(Assessment assessment)
+	{
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			SubmissionAssessmentImpl subAsmnt = (SubmissionAssessmentImpl) submission.getAssessment();
+			if (subAsmnt.historicalAssessmentId.equals(assessment.getId()))
+			{
+				return Boolean.TRUE;
+			}
+		}
+		return Boolean.FALSE;
 	}
 
 	/**
@@ -783,5 +799,20 @@ public class SubmissionStorageSample implements SubmissionStorage
 			}
 		}
 		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchHistoricalDependency(Assessment assessment, Assessment newAssessment)
+	{
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			SubmissionAssessmentImpl subAsmnt = (SubmissionAssessmentImpl) submission.getAssessment();
+			if (subAsmnt.historicalAssessmentId.equals(assessment.getId()))
+			{
+				subAsmnt.historicalAssessmentId = newAssessment.getId();
+			}
+		}
 	}
 }

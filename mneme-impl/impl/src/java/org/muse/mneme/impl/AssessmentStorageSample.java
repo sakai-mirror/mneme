@@ -91,7 +91,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(context) && !assessment.getArchived())
+			if (assessment.getContext().equals(context) && !assessment.getArchived() && !assessment.isHistorical())
 			{
 				i++;
 			}
@@ -143,6 +143,8 @@ public class AssessmentStorageSample implements AssessmentStorage
 	 */
 	public AssessmentImpl getAssessment(String id)
 	{
+		if (id == null) return null;
+
 		fakeIt();
 
 		AssessmentImpl rv = this.assessments.get(id);
@@ -165,7 +167,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(context) && !assessment.getArchived())
+			if (assessment.getContext().equals(context) && !assessment.getArchived() && !assessment.isHistorical())
 			{
 				// filter out unpublished if requested
 				if (publishedOnly)
@@ -329,6 +331,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 		fakeIt();
 
 		// assign an id
+		boolean idsNeeded = false;
 		if (assessment.getId() == null)
 		{
 			long id = 0;
@@ -338,12 +341,13 @@ public class AssessmentStorageSample implements AssessmentStorage
 				this.nextAssessmentId++;
 			}
 			assessment.initId("a" + Long.toString(id));
+			idsNeeded = true;
 		}
 
-		// assign part ids
+		// assign part ids (based on if we are assigning new ids)
 		for (Part part : assessment.getParts().getParts())
 		{
-			if (part.getId() == null)
+			if (idsNeeded)
 			{
 				long id = 0;
 				synchronized (this.idGenerator)
