@@ -22,6 +22,7 @@
 package org.muse.mneme.impl;
 
 import org.muse.mneme.api.AssessmentGrading;
+import org.muse.mneme.api.Changeable;
 
 /**
  * AssessmentGradingImpl implements AssessmentGrading
@@ -32,14 +33,9 @@ public class AssessmentGradingImpl implements AssessmentGrading
 
 	protected Boolean gradebookIntegration = Boolean.FALSE;
 
-	protected Boolean showIdentities = Boolean.FALSE;
+	protected transient Changeable owner = null;
 
-	/**
-	 * Construct.
-	 */
-	public AssessmentGradingImpl()
-	{
-	}
+	protected Boolean showIdentities = Boolean.FALSE;
 
 	/**
 	 * Construct.
@@ -47,9 +43,18 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AssessmentGradingImpl(AssessmentGradingImpl other)
+	public AssessmentGradingImpl(AssessmentGradingImpl other, Changeable owner)
 	{
+		this(owner);
 		set(other);
+	}
+
+	/**
+	 * Construct.
+	 */
+	public AssessmentGradingImpl(Changeable owner)
+	{
+		this.owner = owner;
 	}
 
 	/**
@@ -82,7 +87,11 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	public void setAutoRelease(Boolean setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
+		if (this.autoRelease.equals(setting)) return;
+
 		this.autoRelease = setting;
+
+		this.owner.setChanged();
 	}
 
 	/**
@@ -91,7 +100,11 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	public void setGradebookIntegration(Boolean setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
+		if (this.gradebookIntegration.equals(setting)) return;
+
 		this.gradebookIntegration = setting;
+
+		this.owner.setChanged();
 	}
 
 	/**
@@ -100,7 +113,11 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	public void setShowIdentities(Boolean setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
+		if (this.showIdentities.equals(setting)) return;
+
 		this.showIdentities = setting;
+
+		this.owner.setChanged();
 	}
 
 	/**

@@ -204,7 +204,7 @@ public class QuestionImpl implements Question
 
 	protected MyAssessmentOrdering assessmentOrdering = new MyAssessmentOrdering(this);
 
-	protected AttributionImpl createdBy = new AttributionImpl();
+	protected AttributionImpl createdBy = new AttributionImpl(null);
 
 	/** Start of the versioning thing. */
 	protected Boolean deleted = Boolean.FALSE;
@@ -217,7 +217,7 @@ public class QuestionImpl implements Question
 
 	protected String id = null;
 
-	protected AttributionImpl modifiedBy = new AttributionImpl();
+	protected AttributionImpl modifiedBy = new AttributionImpl(null);
 
 	protected Part partContext = null;
 
@@ -227,7 +227,7 @@ public class QuestionImpl implements Question
 
 	protected transient PoolService poolService = null;
 
-	protected PresentationImpl presentation = new PresentationImpl();
+	protected PresentationImpl presentation = new PresentationImpl(null);
 
 	protected TypeSpecificQuestion questionHandler = null;
 
@@ -521,17 +521,17 @@ public class QuestionImpl implements Question
 	protected void set(QuestionImpl other)
 	{
 		if (other.questionHandler != null) this.questionHandler = (TypeSpecificQuestion) (other.questionHandler.clone(this));
-		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
+		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy, null);
 		this.deleted = other.deleted;
 		this.explainReason = other.explainReason;
 		this.feedback = other.feedback;
 		this.hints = other.hints;
 		this.id = other.id;
-		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy);
+		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, null);
 		this.partContext = other.partContext;
 		this.poolId = other.poolId;
 		this.poolService = other.poolService;
-		this.presentation = new PresentationImpl(other.presentation);
+		this.presentation = new PresentationImpl(other.presentation, null);
 		this.questionService = other.questionService;
 		this.submissionContext = other.submissionContext;
 		this.type = other.type;

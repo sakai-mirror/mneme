@@ -37,8 +37,6 @@ import org.muse.mneme.api.QuestionService;
  */
 public abstract class PartImpl implements Part
 {
-	private static Log M_log = LogFactory.getLog(PartImpl.class);
-
 	public class MyOrdering implements Ordering<Part>
 	{
 		protected PartImpl part = null;
@@ -124,13 +122,15 @@ public abstract class PartImpl implements Part
 		}
 	}
 
+	private static Log M_log = LogFactory.getLog(PartImpl.class);
+
 	protected transient AssessmentImpl assessment = null;
 
 	protected String id = null;
 
 	protected MyOrdering ordering = new MyOrdering(this);
 
-	protected PresentationImpl presentation = new PresentationImpl();
+	protected PresentationImpl presentation = null;
 
 	protected QuestionService questionService = null;
 
@@ -148,6 +148,7 @@ public abstract class PartImpl implements Part
 	{
 		this.assessment = assessment;
 		this.questionService = questionService;
+		this.presentation = new PresentationImpl(assessment);
 	}
 
 	/**
@@ -156,8 +157,9 @@ public abstract class PartImpl implements Part
 	 * @param other
 	 *        The other to copy.
 	 */
-	public PartImpl(PartImpl other)
+	public PartImpl(PartImpl other, AssessmentImpl assessment)
 	{
+		this.assessment = assessment;
 		set(other);
 	}
 
@@ -251,7 +253,11 @@ public abstract class PartImpl implements Part
 	 */
 	public void setTitle(String title)
 	{
+		if (!Different.different(this.title, title)) return;
+
 		this.title = title;
+
+		this.assessment.setChanged();
 	}
 
 	/**
@@ -302,9 +308,8 @@ public abstract class PartImpl implements Part
 	 */
 	protected void set(PartImpl other)
 	{
-		this.assessment = other.assessment;
 		this.id = other.id;
-		this.presentation = new PresentationImpl(other.presentation);
+		this.presentation = new PresentationImpl(other.presentation, this.assessment);
 		this.questionService = other.questionService;
 		this.title = other.title;
 	}

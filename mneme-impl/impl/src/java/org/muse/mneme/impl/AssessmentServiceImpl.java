@@ -324,6 +324,9 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 
+		// if no changes have been made, ignore this
+		if (!assessment.getChanged()) return;
+
 		if (M_log.isDebugEnabled()) M_log.debug("saveAssessment: " + assessment.getId());
 
 		// security check
@@ -488,8 +491,8 @@ public class AssessmentServiceImpl implements AssessmentService
 		assessment.getModifiedBy().setDate(new Date());
 		assessment.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
 
-		// clear the live changed setting
-		((AssessmentImpl) assessment).clearIsLiveChanged();
+		// clear the changed settings
+		((AssessmentImpl) assessment).clearChanged();
 
 		// save
 		this.storage.saveAssessment((AssessmentImpl) assessment);

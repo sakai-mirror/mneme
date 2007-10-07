@@ -45,7 +45,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * Construct.
 	 * 
-	 * @param assessmentId
+	 * @param assessment
 	 *        The assessment this is the parts for.
 	 * @param questionService
 	 *        The QuestionService.
@@ -63,10 +63,12 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 * 
 	 * @param other
 	 *        The other to copy.
+	 * @param assessment
+	 *        The assessment this is the parts for.
 	 */
-	public DrawPartImpl(DrawPartImpl other)
+	public DrawPartImpl(DrawPartImpl other, AssessmentImpl assessment)
 	{
-		super(other);
+		super(other, assessment);
 		this.pools = new ArrayList<PoolDraw>(other.pools.size());
 		for (PoolDraw draw : other.pools)
 		{
@@ -96,6 +98,8 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 
 				// this is a change that cannot be made to live tests
 				this.assessment.liveChanged = Boolean.TRUE;
+				
+				this.assessment.setChanged();
 
 				return already;
 			}
@@ -107,6 +111,8 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
+
+		this.assessment.setChanged();
 
 		return rv;
 	}
@@ -300,6 +306,8 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
+
+		this.assessment.setChanged();
 	}
 
 	/**
@@ -333,6 +341,8 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 
 							// this is a change that cannot be made to live tests
 							this.assessment.liveChanged = Boolean.TRUE;
+
+							this.assessment.setChanged();
 						}
 					}
 				}
@@ -361,7 +371,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		{
 			seed = (this.assessment.getSubmissionContext().getId() + "_" + this.id).hashCode();
 		}
-		
+
 		// if no submission context, just the part id
 		else
 		{

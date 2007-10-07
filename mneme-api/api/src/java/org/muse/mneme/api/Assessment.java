@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Assessment models organizations of questions in parts.
  */
-public interface Assessment
+public interface Assessment extends Changeable
 {
 	/**
 	 * Get the submitable status for the assessment - this indicates if we are expecting submissions now.

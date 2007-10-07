@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.Presentation;
 
 /**
@@ -33,13 +34,16 @@ public class PresentationImpl implements Presentation
 {
 	protected List<String> attachments = new ArrayList<String>();
 
+	protected transient Changeable owner = null;
+
 	protected String text = null;
 
 	/**
 	 * Construct.
 	 */
-	public PresentationImpl()
+	public PresentationImpl(Changeable owner)
 	{
+		this.owner = owner;
 	}
 
 	/**
@@ -48,8 +52,9 @@ public class PresentationImpl implements Presentation
 	 * @param other
 	 *        The other to copy.
 	 */
-	public PresentationImpl(PresentationImpl other)
+	public PresentationImpl(PresentationImpl other, Changeable owner)
 	{
+		this(owner);
 		set(other);
 	}
 
@@ -90,7 +95,10 @@ public class PresentationImpl implements Presentation
 	 */
 	public void removeAttachment(String reference)
 	{
+		// TODO: is there really a change here?
 		this.attachments.remove(reference);
+
+		if (this.owner != null) this.owner.setChanged();
 	}
 
 	/**
@@ -98,7 +106,11 @@ public class PresentationImpl implements Presentation
 	 */
 	public void setText(String text)
 	{
+		if (!Different.different(this.text, text)) return;
+
 		this.text = text;
+
+		if (this.owner != null) this.owner.setChanged();
 	}
 
 	/**

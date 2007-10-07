@@ -23,7 +23,6 @@ package org.muse.mneme.impl;
 
 import java.util.Date;
 
-import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentReview;
 import org.muse.mneme.api.ReviewTiming;
 
@@ -32,7 +31,7 @@ import org.muse.mneme.api.ReviewTiming;
  */
 public class AssessmentReviewImpl implements AssessmentReview
 {
-	protected transient Assessment assessment = null;
+	protected transient AssessmentImpl assessment = null;
 
 	protected Date date = null;
 
@@ -48,7 +47,7 @@ public class AssessmentReviewImpl implements AssessmentReview
 	 * @param assessment
 	 *        The assessment this belongs to.
 	 */
-	public AssessmentReviewImpl(Assessment assessment)
+	public AssessmentReviewImpl(AssessmentImpl assessment)
 	{
 		this.assessment = assessment;
 	}
@@ -61,10 +60,10 @@ public class AssessmentReviewImpl implements AssessmentReview
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AssessmentReviewImpl(Assessment assessment, AssessmentReviewImpl other)
+	public AssessmentReviewImpl(AssessmentImpl assessment, AssessmentReviewImpl other)
 	{
+		this(assessment);
 		set(other);
-		this.assessment = assessment;
 	}
 
 	/**
@@ -139,7 +138,11 @@ public class AssessmentReviewImpl implements AssessmentReview
 	 */
 	public void setDate(Date date)
 	{
+		if (!Different.different(this.date, date)) return;
+
 		this.date = date;
+
+		this.assessment.setChanged();
 	}
 
 	/**
@@ -148,7 +151,11 @@ public class AssessmentReviewImpl implements AssessmentReview
 	public void setShowCorrectAnswer(Boolean setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
+		if (this.showCorrectAnswer.equals(setting)) return;
+
 		this.showCorrectAnswer = setting;
+
+		this.assessment.setChanged();
 	}
 
 	/**
@@ -157,7 +164,11 @@ public class AssessmentReviewImpl implements AssessmentReview
 	public void setShowFeedback(Boolean setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
+		if (this.showFeedback.equals(setting)) return;
+
 		this.showFeedback = setting;
+
+		this.assessment.setChanged();
 	}
 
 	/**
@@ -166,7 +177,11 @@ public class AssessmentReviewImpl implements AssessmentReview
 	public void setTiming(ReviewTiming setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
+		if (this.timing.equals(setting)) return;
+
 		this.timing = setting;
+
+		this.assessment.setChanged();
 	}
 
 	/**

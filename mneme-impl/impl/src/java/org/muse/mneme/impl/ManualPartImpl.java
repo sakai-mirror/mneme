@@ -59,10 +59,12 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	 * 
 	 * @param other
 	 *        The other to copy.
+	 * @param assessment
+	 *        The assessment this is the parts for.
 	 */
-	public ManualPartImpl(ManualPartImpl other)
+	public ManualPartImpl(ManualPartImpl other, AssessmentImpl assessment)
 	{
-		super(other);
+		super(other, assessment);
 		this.questionIds = new ArrayList<String>(other.questionIds.size());
 		this.questionIds.addAll(other.questionIds);
 		this.randomize = other.randomize;
@@ -74,10 +76,13 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	public void addQuestion(Question question)
 	{
 		if (question == null) throw new IllegalArgumentException();
+		// TODO: do we already have this?  ignore it?
 		this.questionIds.add(question.getId());
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
+
+		this.assessment.setChanged();
 	}
 
 	/**
@@ -225,10 +230,13 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	public void removeQuestion(Question question)
 	{
 		if (question == null) throw new IllegalArgumentException();
+		// TODO: is there really a change here?
 		this.questionIds.remove(question.getId());
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
+
+		this.assessment.setChanged();
 	}
 
 	/**
@@ -270,6 +278,8 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
+
+		this.assessment.setChanged();
 	}
 
 	/**
@@ -278,7 +288,11 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	public void setRandomize(Boolean setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
+		if (this.randomize.equals(setting)) return;
+
 		this.randomize = setting;
+
+		this.assessment.setChanged();
 	}
 
 	/**

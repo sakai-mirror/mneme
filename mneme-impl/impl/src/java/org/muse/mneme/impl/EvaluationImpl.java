@@ -29,7 +29,7 @@ import org.muse.mneme.api.Evaluation;
  */
 public class EvaluationImpl implements Evaluation
 {
-	protected AttributionImpl attribution = new AttributionImpl();
+	protected AttributionImpl attribution = new AttributionImpl(null);
 
 	protected String comment = null;
 
@@ -120,7 +120,7 @@ public class EvaluationImpl implements Evaluation
 	 */
 	protected void set(EvaluationImpl other)
 	{
-		this.attribution = new AttributionImpl(other.attribution);
+		this.attribution = new AttributionImpl(other.attribution, null);
 		this.comment = other.comment;
 		this.score = other.score;
 	}

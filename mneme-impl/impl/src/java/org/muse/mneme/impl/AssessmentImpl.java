@@ -35,6 +35,7 @@ import org.muse.mneme.api.AssessmentParts;
 import org.muse.mneme.api.AssessmentReview;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Attribution;
+import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Presentation;
@@ -51,19 +52,25 @@ public class AssessmentImpl implements Assessment
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(AssessmentImpl.class);
 
-	protected AssessmentAccess access = new AssessmentAccessImpl();
+	protected AssessmentAccess access = null;
 
 	protected Boolean archived = Boolean.FALSE;
 
+	/** Track any changes at all. */
+	protected transient Boolean changed = Boolean.FALSE;
+
 	protected String context = "";
 
-	protected Attribution createdBy = new AttributionImpl();
+	protected Attribution createdBy = null;
 
 	protected AssessmentDates dates = null;
 
-	protected AssessmentGrading grading = new AssessmentGradingImpl();
+	protected AssessmentGrading grading = null;
 
 	protected Boolean historical = Boolean.FALSE;
+
+	/** Track any changes that need history. */
+	protected transient Boolean historyChanged = Boolean.FALSE;
 
 	protected Boolean honorPledge = Boolean.FALSE;
 
@@ -72,7 +79,7 @@ public class AssessmentImpl implements Assessment
 	/** Track any changes that cannot be made to live tests. */
 	protected transient Boolean liveChanged = Boolean.FALSE;
 
-	protected Attribution modifiedBy = new AttributionImpl();
+	protected Attribution modifiedBy = null;
 
 	protected Integer numSubmissionsAllowed = Integer.valueOf(1);
 
@@ -80,7 +87,7 @@ public class AssessmentImpl implements Assessment
 
 	protected transient PoolService poolService = null;
 
-	protected Presentation presentation = new PresentationImpl();
+	protected Presentation presentation = null;
 
 	protected Boolean published = Boolean.FALSE;
 
@@ -100,7 +107,7 @@ public class AssessmentImpl implements Assessment
 
 	protected transient SubmissionService submissionService = null;
 
-	protected Presentation submitPresentation = new PresentationImpl();
+	protected Presentation submitPresentation = null;
 
 	protected Long timeLimit = null;
 
@@ -117,9 +124,15 @@ public class AssessmentImpl implements Assessment
 		this.submissionService = submissionService;
 		this.questionService = questionService;
 
-		this.dates = new AssessmentDatesImpl();
+		this.access = new AssessmentAccessImpl(this);
+		this.createdBy = new AttributionImpl(this);
+		this.dates = new AssessmentDatesImpl(this);
+		this.grading = new AssessmentGradingImpl(this);
+		this.modifiedBy = new AttributionImpl(this);
 		this.parts = new AssessmentPartsImpl(this, questionService, poolService);
+		this.presentation = new PresentationImpl(this);
 		this.review = new AssessmentReviewImpl(this);
+		this.submitPresentation = new PresentationImpl(this);
 	}
 
 	/**
@@ -188,6 +201,14 @@ public class AssessmentImpl implements Assessment
 	public Boolean getArchived()
 	{
 		return this.archived;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getChanged()
+	{
+		return this.changed;
 	}
 
 	/**
@@ -452,7 +473,7 @@ public class AssessmentImpl implements Assessment
 	public void setArchived(Boolean archived)
 	{
 		if (archived == null) throw new IllegalArgumentException();
-		if (this.archived == archived) return;
+		if (this.archived.equals(archived)) return;
 
 		this.archived = archived;
 
@@ -468,6 +489,16 @@ public class AssessmentImpl implements Assessment
 		{
 			((AssessmentDatesImpl) this.dates).archived = null;
 		}
+
+		setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setChanged()
+	{
+		this.changed = Boolean.TRUE;
 	}
 
 	/**
@@ -476,7 +507,11 @@ public class AssessmentImpl implements Assessment
 	public void setContext(String context)
 	{
 		if (context == null) context = "";
+		if (this.context.equals(context)) return;
+
 		this.context = context;
+
+		setChanged();
 	}
 
 	/**
@@ -484,7 +519,11 @@ public class AssessmentImpl implements Assessment
 	 */
 	public void setNumSubmissionsAllowed(Integer count)
 	{
+		if (!Different.different(count, this.numSubmissionsAllowed)) return;
+
 		this.numSubmissionsAllowed = count;
+
+		setChanged();
 	}
 
 	/**
@@ -493,7 +532,11 @@ public class AssessmentImpl implements Assessment
 	public void setPublished(Boolean published)
 	{
 		if (published == null) throw new IllegalArgumentException();
+		if (this.published.equals(published)) return;
+
 		this.published = published;
+
+		setChanged();
 	}
 
 	/**
@@ -502,7 +545,11 @@ public class AssessmentImpl implements Assessment
 	public void setQuestionGrouping(QuestionGrouping value)
 	{
 		if (value == null) throw new IllegalArgumentException();
+		if (this.questionGrouping.equals(value)) return;
+
 		this.questionGrouping = value;
+
+		setChanged();
 	}
 
 	/**
@@ -511,7 +558,11 @@ public class AssessmentImpl implements Assessment
 	public void setRandomAccess(Boolean setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
+		if (this.randomAccess.equals(setting)) return;
+
 		this.randomAccess = setting;
+
+		setChanged();
 	}
 
 	/**
@@ -520,7 +571,11 @@ public class AssessmentImpl implements Assessment
 	public void setRequireHonorPledge(Boolean honorPledge)
 	{
 		if (honorPledge == null) throw new IllegalArgumentException();
+		if (this.honorPledge.equals(honorPledge)) return;
+
 		this.honorPledge = honorPledge;
+
+		setChanged();
 	}
 
 	/**
@@ -529,8 +584,11 @@ public class AssessmentImpl implements Assessment
 	public void setShowHints(Boolean showHints)
 	{
 		if (showHints == null) throw new IllegalArgumentException();
+		if (this.showHints.equals(showHints)) return;
 
 		this.showHints = showHints;
+
+		setChanged();
 	}
 
 	/**
@@ -538,7 +596,11 @@ public class AssessmentImpl implements Assessment
 	 */
 	public void setTimeLimit(Long limit)
 	{
+		if (!Different.different(this.timeLimit, limit)) return;
+
 		this.timeLimit = limit;
+
+		setChanged();
 	}
 
 	/**
@@ -547,7 +609,11 @@ public class AssessmentImpl implements Assessment
 	public void setTitle(String title)
 	{
 		if (title == null) title = "";
+		if (this.title.equals(title)) return;
+
 		this.title = title;
+
+		setChanged();
 	}
 
 	/**
@@ -556,7 +622,7 @@ public class AssessmentImpl implements Assessment
 	public void setType(AssessmentType type)
 	{
 		if (type == null) throw new IllegalArgumentException();
-		if (this.type == type) return;
+		if (this.type.equals(type)) return;
 
 		if (this.type == AssessmentType.survey)
 		{
@@ -565,14 +631,28 @@ public class AssessmentImpl implements Assessment
 		}
 
 		this.type = type;
+
+		setChanged();
 	}
 
 	/**
-	 * Clear the isLiveChanged setting.
+	 * Clear the changed settings.
 	 */
-	protected void clearIsLiveChanged()
+	protected void clearChanged()
 	{
+		this.changed = Boolean.FALSE;
+		this.historyChanged = Boolean.FALSE;
 		this.liveChanged = Boolean.FALSE;
+	}
+
+	/**
+	 * Check if there were any changes that need to generate history.
+	 * 
+	 * @return TRUE if there were history changes, FALSE if not.
+	 */
+	protected Boolean getHistoryChanged()
+	{
+		return this.historyChanged;
 	}
 
 	/**
@@ -633,22 +713,24 @@ public class AssessmentImpl implements Assessment
 	 */
 	protected void set(AssessmentImpl other)
 	{
-		this.access = new AssessmentAccessImpl((AssessmentAccessImpl) other.access);
+		this.access = new AssessmentAccessImpl((AssessmentAccessImpl) other.access, this);
 		this.archived = other.archived;
-		this.published = other.published;
+		this.changed = other.changed;
 		this.context = other.context;
-		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
-		this.dates = new AssessmentDatesImpl((AssessmentDatesImpl) other.dates);
-		this.grading = new AssessmentGradingImpl((AssessmentGradingImpl) other.grading);
+		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy, this);
+		this.dates = new AssessmentDatesImpl((AssessmentDatesImpl) other.dates, this);
+		this.grading = new AssessmentGradingImpl((AssessmentGradingImpl) other.grading, this);
 		this.historical = other.historical;
+		this.historyChanged = other.historyChanged;
 		this.honorPledge = other.honorPledge;
 		this.id = other.id;
 		this.liveChanged = other.liveChanged;
-		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy);
+		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this);
 		this.numSubmissionsAllowed = other.numSubmissionsAllowed;
 		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts);
 		this.poolService = other.poolService;
-		this.presentation = new PresentationImpl((PresentationImpl) other.presentation);
+		this.presentation = new PresentationImpl((PresentationImpl) other.presentation, this);
+		this.published = other.published;
 		this.questionGrouping = other.questionGrouping;
 		this.questionService = other.questionService;
 		this.randomAccess = other.randomAccess;
@@ -657,7 +739,7 @@ public class AssessmentImpl implements Assessment
 		this.submissionContext = other.submissionContext;
 		// this.submissionCounts = new SubmissionCountsImpl((SubmissionCountsImpl) other.submissionCounts);
 		this.submissionService = other.submissionService;
-		this.submitPresentation = new PresentationImpl((PresentationImpl) other.submitPresentation);
+		this.submitPresentation = new PresentationImpl((PresentationImpl) other.submitPresentation, this);
 		this.timeLimit = other.timeLimit;
 		this.title = other.title;
 		this.type = other.type;

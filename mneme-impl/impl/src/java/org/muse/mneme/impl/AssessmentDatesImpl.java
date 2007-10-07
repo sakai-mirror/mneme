@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.Date;
 
 import org.muse.mneme.api.AssessmentDates;
+import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.Expiration;
 
 /**
@@ -39,12 +40,7 @@ public class AssessmentDatesImpl implements AssessmentDates
 
 	protected Date open = null;
 
-	/**
-	 * Construct.
-	 */
-	public AssessmentDatesImpl()
-	{
-	}
+	protected transient Changeable owner = null;
 
 	/**
 	 * Construct.
@@ -52,9 +48,18 @@ public class AssessmentDatesImpl implements AssessmentDates
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AssessmentDatesImpl(AssessmentDatesImpl other)
+	public AssessmentDatesImpl(AssessmentDatesImpl other, Changeable owner)
 	{
+		this(owner);
 		set(other);
+	}
+
+	/**
+	 * Construct.
+	 */
+	public AssessmentDatesImpl(Changeable owner)
+	{
+		this.owner = owner;
 	}
 
 	/**
@@ -175,7 +180,11 @@ public class AssessmentDatesImpl implements AssessmentDates
 	 */
 	public void setAcceptUntilDate(Date date)
 	{
+		if (!Different.different(this.acceptUntil, date)) return;
+
 		this.acceptUntil = date;
+
+		this.owner.setChanged();
 	}
 
 	/**
@@ -183,7 +192,11 @@ public class AssessmentDatesImpl implements AssessmentDates
 	 */
 	public void setDueDate(Date date)
 	{
+		if (!Different.different(this.due, date)) return;
+
 		this.due = date;
+
+		this.owner.setChanged();
 	}
 
 	/**
@@ -191,7 +204,11 @@ public class AssessmentDatesImpl implements AssessmentDates
 	 */
 	public void setOpenDate(Date date)
 	{
+		if (!Different.different(this.open, date)) return;
+
 		this.open = date;
+
+		this.owner.setChanged();
 	}
 
 	/**
@@ -203,8 +220,8 @@ public class AssessmentDatesImpl implements AssessmentDates
 	protected void set(AssessmentDatesImpl other)
 	{
 		this.acceptUntil = other.acceptUntil;
+		this.archived = other.archived;
 		this.due = other.due;
 		this.open = other.open;
-		this.archived = other.archived;
 	}
 }

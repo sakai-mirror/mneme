@@ -341,13 +341,15 @@ public class AssessmentStorageSample implements AssessmentStorage
 				this.nextAssessmentId++;
 			}
 			assessment.initId("a" + Long.toString(id));
+			
+			// we will generate new ids for parts even if they have old ones (for making copies of assessments)
 			idsNeeded = true;
 		}
 
-		// assign part ids (based on if we are assigning new ids)
+		// assign part ids
 		for (Part part : assessment.getParts().getParts())
 		{
-			if (idsNeeded)
+			if (idsNeeded || (part.getId() == null))
 			{
 				long id = 0;
 				synchronized (this.idGenerator)
@@ -450,7 +452,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			p.addQuestion(this.questionService.getQuestion("q7"));
 			p.getPresentation().setText("This is part two.");
 
-			a.clearIsLiveChanged();
+			a.clearChanged();
 			this.assessments.put(a.getId(), a);
 
 			//
@@ -496,7 +498,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			((PartImpl) p2).initId("p3");
 			p2.getPresentation().setText("This is part one.");
 
-			a.clearIsLiveChanged();
+			a.clearChanged();
 			this.assessments.put(a.getId(), a);
 
 			//
@@ -533,9 +535,9 @@ public class AssessmentStorageSample implements AssessmentStorage
 			p.addQuestion(this.questionService.getQuestion("q4"));
 			p.setTitle("Part one");
 			((PartImpl) p).initId("p4");
-			p2.getPresentation().setText("This is part 1.");
+			p.getPresentation().setText("This is part 1.");
 
-			a.clearIsLiveChanged();
+			a.clearChanged();
 			this.assessments.put(a.getId(), a);
 		}
 	}

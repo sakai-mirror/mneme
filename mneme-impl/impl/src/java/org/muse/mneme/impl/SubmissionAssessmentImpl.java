@@ -460,4 +460,20 @@ public class SubmissionAssessmentImpl implements Assessment
 		this.historicalAssessmentId = other.historicalAssessmentId;
 		this.submission = submission;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getChanged()
+	{
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setChanged()
+	{
+		throw new IllegalArgumentException();
+	}
 }

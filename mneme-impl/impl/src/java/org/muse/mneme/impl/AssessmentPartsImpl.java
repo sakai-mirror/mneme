@@ -96,6 +96,8 @@ public class AssessmentPartsImpl implements AssessmentParts
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
+		this.assessment.setChanged();
+
 		return rv;
 	}
 
@@ -113,6 +115,8 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
+
+		this.assessment.setChanged();
 
 		return rv;
 	}
@@ -269,6 +273,8 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
+
+		this.assessment.setChanged();
 	}
 
 	/**
@@ -277,7 +283,11 @@ public class AssessmentPartsImpl implements AssessmentParts
 	public void setContinuousNumbering(Boolean setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
+		if (this.continuousNumbering.equals(setting)) return;
+
 		this.continuousNumbering = setting;
+
+		this.assessment.setChanged();
 	}
 
 	/**
@@ -334,6 +344,8 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
+
+		this.assessment.setChanged();
 	}
 
 	/**
@@ -342,7 +354,11 @@ public class AssessmentPartsImpl implements AssessmentParts
 	public void setShowPresentation(Boolean setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
+		if (this.showPresentation.equals(setting)) return;
+
 		this.showPresentation = setting;
+
+		this.assessment.setChanged();
 	}
 
 	/**
@@ -364,14 +380,14 @@ public class AssessmentPartsImpl implements AssessmentParts
 		{
 			if (part instanceof ManualPartImpl)
 			{
-				PartImpl newPart = new ManualPartImpl((ManualPartImpl) part);
+				PartImpl newPart = new ManualPartImpl((ManualPartImpl) part, this.assessment);
 				newPart.initContainer(this.parts);
 				newPart.initAssessment(this.assessment);
 				this.parts.add(newPart);
 			}
 			else if (part instanceof DrawPartImpl)
 			{
-				PartImpl newPart = new DrawPartImpl((DrawPartImpl) part);
+				PartImpl newPart = new DrawPartImpl((DrawPartImpl) part, this.assessment);
 				newPart.initContainer(this.parts);
 				newPart.initAssessment(this.assessment);
 				this.parts.add(newPart);

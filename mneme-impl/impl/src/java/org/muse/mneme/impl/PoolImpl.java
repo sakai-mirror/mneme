@@ -36,7 +36,7 @@ public class PoolImpl implements Pool
 {
 	protected String context = "";
 
-	protected Attribution createdBy = new AttributionImpl();
+	protected Attribution createdBy = new AttributionImpl(null);
 
 	/** Start of the versioning thing. */
 	protected Boolean deleted = Boolean.FALSE;
@@ -47,7 +47,7 @@ public class PoolImpl implements Pool
 
 	protected String id = null;
 
-	protected Attribution modifiedBy = new AttributionImpl();
+	protected Attribution modifiedBy = new AttributionImpl(null);
 
 	protected Float points = Float.valueOf(0f);
 
@@ -258,13 +258,13 @@ public class PoolImpl implements Pool
 
 	protected void set(PoolImpl other)
 	{
-		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy);
+		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy, null);
 		this.context = other.context;
 		this.deleted = other.deleted;
 		this.description = other.description;
 		this.difficulty = other.difficulty;
 		this.id = other.id;
-		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy);
+		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, null);
 		this.points = other.points;
 		this.poolService = other.poolService;
 		this.title = other.title;

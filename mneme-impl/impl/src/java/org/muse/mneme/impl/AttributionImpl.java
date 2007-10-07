@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.Date;
 
 import org.muse.mneme.api.Attribution;
+import org.muse.mneme.api.Changeable;
 
 /**
  * AttributionImpl implements Attribution
@@ -32,14 +33,9 @@ public class AttributionImpl implements Attribution
 {
 	protected Date date = null;
 
-	protected String userId = null;
+	protected transient Changeable owner = null;
 
-	/**
-	 * Construct.
-	 */
-	public AttributionImpl()
-	{
-	}
+	protected String userId = null;
 
 	/**
 	 * Construct.
@@ -47,9 +43,18 @@ public class AttributionImpl implements Attribution
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AttributionImpl(AttributionImpl other)
+	public AttributionImpl(AttributionImpl other, Changeable owner)
 	{
+		this(owner);
 		set(other);
+	}
+
+	/**
+	 * Construct.
+	 */
+	public AttributionImpl(Changeable owner)
+	{
+		this.owner = owner;
 	}
 
 	/**
@@ -60,8 +65,9 @@ public class AttributionImpl implements Attribution
 	 * @param userId
 	 *        The user id.
 	 */
-	public AttributionImpl(Date date, String userId)
+	public AttributionImpl(Date date, String userId, Changeable owner)
 	{
+		this(owner);
 		this.date = date;
 		this.userId = userId;
 	}
@@ -87,7 +93,11 @@ public class AttributionImpl implements Attribution
 	 */
 	public void setDate(Date date)
 	{
+		if (!Different.different(this.date, date)) return;
+
 		this.date = date;
+
+		if (this.owner != null) this.owner.setChanged();
 	}
 
 	/**
@@ -95,7 +105,10 @@ public class AttributionImpl implements Attribution
 	 */
 	public void setUserId(String userId)
 	{
+		if (!Different.different(this.userId, userId)) return;
 		this.userId = userId;
+
+		if (this.owner != null) this.owner.setChanged();
 	}
 
 	/**
