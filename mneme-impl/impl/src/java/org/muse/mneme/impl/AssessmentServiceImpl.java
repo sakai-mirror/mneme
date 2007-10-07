@@ -325,7 +325,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (assessment == null) throw new IllegalArgumentException();
 
 		// if no changes have been made, ignore this
-		if (!assessment.getChanged()) return;
+		if (!assessment.getIsChanged()) return;
 
 		if (M_log.isDebugEnabled()) M_log.debug("saveAssessment: " + assessment.getId());
 
@@ -473,8 +473,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (M_log.isDebugEnabled()) M_log.debug("save: " + assessment.getId());
 
 		// is there a change that needs to generate history?
-		// TODO: how to tell?
-		boolean historyNeeded = true;
+		boolean historyNeeded = ((AssessmentImpl) assessment).getHistoryChanged();
 
 		// get the current assessment for history
 		AssessmentImpl current = null;

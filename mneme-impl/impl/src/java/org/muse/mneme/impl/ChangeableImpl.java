@@ -19,27 +19,58 @@
  *
  **********************************************************************************/
 
-package org.muse.mneme.api;
+package org.muse.mneme.impl;
+
+import org.muse.mneme.api.Changeable;
 
 /**
- * Something that tracks changes.
+ * ChangelableImpl implements Changeable
  */
-public interface Changeable
+public class ChangeableImpl implements Changeable
 {
-	/**
-	 * Clear the changed flag.
-	 */
-	void clearChanged();
+	/** Track any changes at all. */
+	protected transient Boolean changed = Boolean.FALSE;
 
 	/**
-	 * Check if changed.
+	 * Construct.
+	 */
+	public ChangeableImpl()
+	{
+
+	}
+
+	/**
+	 * Construct from another.
 	 * 
-	 * @return TRUE if changed, FALSE if not.
+	 * @param other
+	 *        The other to copy.
 	 */
-	Boolean getChanged();
+	public ChangeableImpl(Changeable other)
+	{
+		this.changed = other.getChanged();
+	}
 
 	/**
-	 * Set that the object has been changed.
+	 * {@inheritDoc}
 	 */
-	void setChanged();
+	public void clearChanged()
+	{
+		this.changed = Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getChanged()
+	{
+		return this.changed;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setChanged()
+	{
+		this.changed = Boolean.TRUE;
+	}
 }

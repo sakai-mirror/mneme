@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.Ordering;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Presentation;
@@ -130,6 +131,8 @@ public abstract class PartImpl implements Part
 
 	protected MyOrdering ordering = new MyOrdering(this);
 
+	protected transient Changeable owner = null;
+
 	protected PresentationImpl presentation = null;
 
 	protected QuestionService questionService = null;
@@ -144,11 +147,12 @@ public abstract class PartImpl implements Part
 	 * @param questionService
 	 *        The QuestionService.
 	 */
-	public PartImpl(AssessmentImpl assessment, QuestionService questionService)
+	public PartImpl(AssessmentImpl assessment, QuestionService questionService, Changeable owner)
 	{
+		this.owner = owner;
 		this.assessment = assessment;
 		this.questionService = questionService;
-		this.presentation = new PresentationImpl(assessment);
+		this.presentation = new PresentationImpl(this.owner);
 	}
 
 	/**
@@ -157,8 +161,9 @@ public abstract class PartImpl implements Part
 	 * @param other
 	 *        The other to copy.
 	 */
-	public PartImpl(PartImpl other, AssessmentImpl assessment)
+	public PartImpl(PartImpl other, AssessmentImpl assessment, Changeable owner)
 	{
+		this.owner = owner;
 		this.assessment = assessment;
 		set(other);
 	}
@@ -257,7 +262,7 @@ public abstract class PartImpl implements Part
 
 		this.title = title;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**
@@ -309,7 +314,7 @@ public abstract class PartImpl implements Part
 	protected void set(PartImpl other)
 	{
 		this.id = other.id;
-		this.presentation = new PresentationImpl(other.presentation, this.assessment);
+		this.presentation = new PresentationImpl(other.presentation, this.owner);
 		this.questionService = other.questionService;
 		this.title = other.title;
 	}

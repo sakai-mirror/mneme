@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolDraw;
@@ -52,9 +53,9 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 * @param poolService
 	 *        The PoolService.
 	 */
-	public DrawPartImpl(AssessmentImpl assessment, QuestionService questionService, PoolService poolService)
+	public DrawPartImpl(AssessmentImpl assessment, QuestionService questionService, PoolService poolService, Changeable owner)
 	{
-		super(assessment, questionService);
+		super(assessment, questionService, owner);
 		this.poolService = poolService;
 	}
 
@@ -66,9 +67,9 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 * @param assessment
 	 *        The assessment this is the parts for.
 	 */
-	public DrawPartImpl(DrawPartImpl other, AssessmentImpl assessment)
+	public DrawPartImpl(DrawPartImpl other, AssessmentImpl assessment, Changeable owner)
 	{
-		super(other, assessment);
+		super(other, assessment, owner);
 		this.pools = new ArrayList<PoolDraw>(other.pools.size());
 		for (PoolDraw draw : other.pools)
 		{
@@ -98,8 +99,8 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 
 				// this is a change that cannot be made to live tests
 				this.assessment.liveChanged = Boolean.TRUE;
-				
-				this.assessment.setChanged();
+
+				this.owner.setChanged();
 
 				return already;
 			}
@@ -112,7 +113,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 
 		return rv;
 	}
@@ -307,7 +308,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**
@@ -342,7 +343,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 							// this is a change that cannot be made to live tests
 							this.assessment.liveChanged = Boolean.TRUE;
 
-							this.assessment.setChanged();
+							this.owner.setChanged();
 						}
 					}
 				}

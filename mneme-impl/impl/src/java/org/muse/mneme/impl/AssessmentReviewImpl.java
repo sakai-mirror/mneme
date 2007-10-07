@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.Date;
 
 import org.muse.mneme.api.AssessmentReview;
+import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.ReviewTiming;
 
 /**
@@ -34,6 +35,8 @@ public class AssessmentReviewImpl implements AssessmentReview
 	protected transient AssessmentImpl assessment = null;
 
 	protected Date date = null;
+
+	protected Changeable owner = null;
 
 	protected Boolean showCorrectAnswer = Boolean.FALSE;
 
@@ -46,10 +49,13 @@ public class AssessmentReviewImpl implements AssessmentReview
 	 * 
 	 * @param assessment
 	 *        The assessment this belongs to.
+	 * @param other
+	 *        The other to copy.
 	 */
-	public AssessmentReviewImpl(AssessmentImpl assessment)
+	public AssessmentReviewImpl(AssessmentImpl assessment, AssessmentReviewImpl other, Changeable owner)
 	{
-		this.assessment = assessment;
+		this(assessment, owner);
+		set(other);
 	}
 
 	/**
@@ -57,13 +63,11 @@ public class AssessmentReviewImpl implements AssessmentReview
 	 * 
 	 * @param assessment
 	 *        The assessment this belongs to.
-	 * @param other
-	 *        The other to copy.
 	 */
-	public AssessmentReviewImpl(AssessmentImpl assessment, AssessmentReviewImpl other)
+	public AssessmentReviewImpl(AssessmentImpl assessment, Changeable owner)
 	{
-		this(assessment);
-		set(other);
+		this.assessment = assessment;
+		this.owner = owner;
 	}
 
 	/**
@@ -142,7 +146,7 @@ public class AssessmentReviewImpl implements AssessmentReview
 
 		this.date = date;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**
@@ -155,7 +159,7 @@ public class AssessmentReviewImpl implements AssessmentReview
 
 		this.showCorrectAnswer = setting;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**
@@ -168,7 +172,7 @@ public class AssessmentReviewImpl implements AssessmentReview
 
 		this.showFeedback = setting;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**
@@ -181,7 +185,7 @@ public class AssessmentReviewImpl implements AssessmentReview
 
 		this.timing = setting;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**

@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
@@ -49,9 +50,9 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	 * @param questionService
 	 *        The QuestionService.
 	 */
-	public ManualPartImpl(AssessmentImpl assessment, QuestionService questionService)
+	public ManualPartImpl(AssessmentImpl assessment, QuestionService questionService, Changeable owner)
 	{
-		super(assessment, questionService);
+		super(assessment, questionService, owner);
 	}
 
 	/**
@@ -62,9 +63,9 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	 * @param assessment
 	 *        The assessment this is the parts for.
 	 */
-	public ManualPartImpl(ManualPartImpl other, AssessmentImpl assessment)
+	public ManualPartImpl(ManualPartImpl other, AssessmentImpl assessment, Changeable owner)
 	{
-		super(other, assessment);
+		super(other, assessment, owner);
 		this.questionIds = new ArrayList<String>(other.questionIds.size());
 		this.questionIds.addAll(other.questionIds);
 		this.randomize = other.randomize;
@@ -76,13 +77,13 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	public void addQuestion(Question question)
 	{
 		if (question == null) throw new IllegalArgumentException();
-		// TODO: do we already have this?  ignore it?
+		// TODO: do we already have this? ignore it?
 		this.questionIds.add(question.getId());
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**
@@ -236,7 +237,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**
@@ -279,7 +280,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**
@@ -292,7 +293,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 
 		this.randomize = setting;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**

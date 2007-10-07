@@ -49,11 +49,11 @@ public class SubmissionAssessmentImpl implements Assessment
 
 	protected AssessmentService assessmentService = null;
 
-	/** The assessment id the submission is part of, also used for getting submission-global settings. */
-	protected String mainAssessmentId = null;
-
 	/** The assessment id that the parts, presentation and properties come from. */
 	protected String historicalAssessmentId = null;
+
+	/** The assessment id the submission is part of, also used for getting submission-global settings. */
+	protected String mainAssessmentId = null;
 
 	protected SubmissionImpl submission = null;
 
@@ -146,6 +146,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	public String getId()
 	{
 		return getMainAssessment().getId();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsChanged()
+	{
+		return Boolean.FALSE;
 	}
 
 	/**
@@ -302,6 +310,9 @@ public class SubmissionAssessmentImpl implements Assessment
 		return getHistoricalAssessment().getSubmitPresentation();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public Long getTimeLimit()
 	{
 		return getHistoricalAssessment().getTimeLimit();
@@ -420,20 +431,6 @@ public class SubmissionAssessmentImpl implements Assessment
 	}
 
 	/**
-	 * Access the main assessment.
-	 * 
-	 * @return The main assessment.
-	 */
-	protected Assessment getMainAssessment()
-	{
-		// TODO: cache the actual assessment for the thread, to avoid the real assessment cache's copy-out policy
-
-		AssessmentImpl rv = (AssessmentImpl) this.assessmentService.getAssessment(this.mainAssessmentId);
-		rv.initSubmissionContext(this.submission);
-		return rv;
-	}
-
-	/**
 	 * Access the historical assessment.
 	 * 
 	 * @return The historical assessment.
@@ -443,6 +440,20 @@ public class SubmissionAssessmentImpl implements Assessment
 		// TODO: cache the actual assessment for the thread, to avoid the real assessment cache's copy-out policy
 
 		AssessmentImpl rv = (AssessmentImpl) this.assessmentService.getAssessment(this.historicalAssessmentId);
+		rv.initSubmissionContext(this.submission);
+		return rv;
+	}
+
+	/**
+	 * Access the main assessment.
+	 * 
+	 * @return The main assessment.
+	 */
+	protected Assessment getMainAssessment()
+	{
+		// TODO: cache the actual assessment for the thread, to avoid the real assessment cache's copy-out policy
+
+		AssessmentImpl rv = (AssessmentImpl) this.assessmentService.getAssessment(this.mainAssessmentId);
 		rv.initSubmissionContext(this.submission);
 		return rv;
 	}
@@ -459,21 +470,5 @@ public class SubmissionAssessmentImpl implements Assessment
 		this.mainAssessmentId = other.mainAssessmentId;
 		this.historicalAssessmentId = other.historicalAssessmentId;
 		this.submission = submission;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getChanged()
-	{
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setChanged()
-	{
-		throw new IllegalArgumentException();
 	}
 }

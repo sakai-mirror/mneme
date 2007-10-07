@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.muse.mneme.api.AssessmentParts;
+import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
@@ -43,6 +44,8 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 	protected Boolean continuousNumbering = Boolean.FALSE;
 
+	protected Changeable owner = null;
+
 	protected List<Part> parts = new ArrayList<Part>();
 
 	protected PoolService poolService = null;
@@ -57,8 +60,9 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AssessmentPartsImpl(AssessmentImpl assessment, AssessmentPartsImpl other)
+	public AssessmentPartsImpl(AssessmentImpl assessment, AssessmentPartsImpl other, Changeable owner)
 	{
+		this.owner = owner;
 		set(assessment, other);
 	}
 
@@ -74,8 +78,9 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 * @param poolService
 	 *        The PoolService.
 	 */
-	public AssessmentPartsImpl(AssessmentImpl assessment, QuestionService questionService, PoolService poolService)
+	public AssessmentPartsImpl(AssessmentImpl assessment, QuestionService questionService, PoolService poolService, Changeable owner)
 	{
+		this.owner = owner;
 		this.assessment = assessment;
 		this.questionService = questionService;
 		this.poolService = poolService;
@@ -87,7 +92,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	public DrawPart addDrawPart()
 	{
 		// create the new part
-		DrawPart rv = new DrawPartImpl(this.assessment, this.questionService, this.poolService);
+		DrawPart rv = new DrawPartImpl(this.assessment, this.questionService, this.poolService, this.owner);
 
 		// add it to the list
 		this.parts.add(rv);
@@ -96,7 +101,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 
 		return rv;
 	}
@@ -107,7 +112,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	public ManualPart addManualPart()
 	{
 		// create the new part
-		ManualPart rv = new ManualPartImpl(this.assessment, this.questionService);
+		ManualPart rv = new ManualPartImpl(this.assessment, this.questionService, this.owner);
 
 		// add it to the list
 		this.parts.add(rv);
@@ -116,7 +121,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 
 		return rv;
 	}
@@ -274,7 +279,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**
@@ -287,7 +292,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 		this.continuousNumbering = setting;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**
@@ -345,7 +350,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**
@@ -358,7 +363,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 		this.showPresentation = setting;
 
-		this.assessment.setChanged();
+		this.owner.setChanged();
 	}
 
 	/**
@@ -380,14 +385,14 @@ public class AssessmentPartsImpl implements AssessmentParts
 		{
 			if (part instanceof ManualPartImpl)
 			{
-				PartImpl newPart = new ManualPartImpl((ManualPartImpl) part, this.assessment);
+				PartImpl newPart = new ManualPartImpl((ManualPartImpl) part, this.assessment, this.owner);
 				newPart.initContainer(this.parts);
 				newPart.initAssessment(this.assessment);
 				this.parts.add(newPart);
 			}
 			else if (part instanceof DrawPartImpl)
 			{
-				PartImpl newPart = new DrawPartImpl((DrawPartImpl) part, this.assessment);
+				PartImpl newPart = new DrawPartImpl((DrawPartImpl) part, this.assessment, this.owner);
 				newPart.initContainer(this.parts);
 				newPart.initAssessment(this.assessment);
 				this.parts.add(newPart);

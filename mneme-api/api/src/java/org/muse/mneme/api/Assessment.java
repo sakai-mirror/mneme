@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * Assessment models organizations of questions in parts.
  */
-public interface Assessment extends Changeable
+public interface Assessment
 {
 	/**
 	 * Get the submitable status for the assessment - this indicates if we are expecting submissions now.
@@ -83,6 +83,13 @@ public interface Assessment extends Changeable
 	 * @return The assessment's id.
 	 */
 	String getId();
+
+	/**
+	 * Check if the assessment has been changed.
+	 * 
+	 * @return TRUE if changed, FALSE if not.
+	 */
+	Boolean getIsChanged();
 
 	/**
 	 * Check if the assessment is closed for submissions - unpublished, archived, not yet open or past submit-until date.
