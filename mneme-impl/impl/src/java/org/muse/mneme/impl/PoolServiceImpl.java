@@ -257,13 +257,23 @@ public class PoolServiceImpl implements PoolService
 	{
 		if (pool == null) throw new IllegalArgumentException();
 
+		if (!((PoolImpl) pool).getChanged()) return;
+
 		if (M_log.isDebugEnabled()) M_log.debug("savePool: " + pool.getId());
 
 		String userId = sessionManager.getCurrentSessionUserId();
-		Date now = new Date();
 
 		// security check
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, pool.getContext());
+
+		// TODO: is there a change that needs to generate history?
+		boolean historyNeeded = /* ((PoolImpl) pool).getHistoryChanged(); */Boolean.FALSE;
+
+		// get the current pool for history
+		PoolImpl current = null;
+		if (historyNeeded) current = this.storage.getPool(pool.getId());
+
+		Date now = new Date();
 
 		// if the pool is new (i.e. no id), set the createdBy information, if not already set
 		if ((pool.getId() == null) && (pool.getCreatedBy().getUserId() == null))
@@ -273,10 +283,30 @@ public class PoolServiceImpl implements PoolService
 		}
 
 		// update last modified information
-		pool.getModifiedBy().setDate(new Date());
+		pool.getModifiedBy().setDate(now);
 		pool.getModifiedBy().setUserId(userId);
 
+		// clear the changed settings
+		((PoolImpl) pool).clearChanged();
+
+		// save
 		storage.savePool((PoolImpl) pool);
+
+		// if there are any history dependencies on this changed pool, we need to store the history version
+		if (historyNeeded && (current != null))
+		{
+			// TODO:
+			if (/* this.assessmentService.liveDependencyExists(pool) */false)
+			{
+				// get a new id on the old and save it
+				current.initId(null);
+				current.initHistorical();
+				this.storage.savePool(current);
+
+				// TODO: swap all historical dependencies to the new
+				// this.assessmentService.switchLiveDependency(pool, current);
+			}
+		}
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));

@@ -479,15 +479,17 @@ public class AssessmentServiceImpl implements AssessmentService
 		AssessmentImpl current = null;
 		if (historyNeeded) current = this.storage.getAssessment(assessment.getId());
 
+		Date now = new Date();
+
 		// if the assessment is new (i.e. no id), set the createdBy information, if not already set
 		if ((assessment.getId() == null) && (assessment.getCreatedBy().getUserId() == null))
 		{
-			assessment.getCreatedBy().setDate(new Date());
+			assessment.getCreatedBy().setDate(now);
 			assessment.getCreatedBy().setUserId(sessionManager.getCurrentSessionUserId());
 		}
 
 		// update last modified information
-		assessment.getModifiedBy().setDate(new Date());
+		assessment.getModifiedBy().setDate(now);
 		assessment.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
 
 		// clear the changed settings

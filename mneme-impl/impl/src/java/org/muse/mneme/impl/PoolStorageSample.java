@@ -90,7 +90,16 @@ public class PoolStorageSample implements PoolStorage
 	 */
 	public List<String> drawQuestionIds(Pool pool, long seed, Integer numQuestions)
 	{
-		List<String> rv = this.questionService.getPoolQuestions(pool);
+		List<String> rv = null;
+
+		if (((PoolImpl) pool).getQuestionIds() != null)
+		{
+			rv = new ArrayList<String>(((PoolImpl) pool).getQuestionIds());
+		}
+		else
+		{
+			rv = this.questionService.getPoolQuestions(pool);
+		}
 
 		// randomize the questions in the copy
 		Collections.shuffle(rv, new Random(seed));
@@ -203,7 +212,16 @@ public class PoolStorageSample implements PoolStorage
 	 */
 	public List<String> getAllQuestionIds(Pool pool)
 	{
-		List<String> rv = this.questionService.getPoolQuestions(pool);
+		List<String> rv = null;
+
+		if ((pool != null) && ((PoolImpl) pool).getQuestionIds() != null)
+		{
+			rv = new ArrayList<String>(((PoolImpl) pool).getQuestionIds());
+		}
+		else
+		{
+			rv = this.questionService.getPoolQuestions(pool);
+		}
 
 		return rv;
 	}
@@ -249,8 +267,18 @@ public class PoolStorageSample implements PoolStorage
 	 */
 	public Integer getPoolSize(PoolImpl pool)
 	{
-		List<String> rv = this.questionService.getPoolQuestions(pool);
-		return rv.size();
+		Integer rv = null;
+
+		if (((PoolImpl) pool).getQuestionIds() != null)
+		{
+			rv = ((PoolImpl) pool).getQuestionIds().size();
+		}
+		else
+		{
+			rv = this.questionService.getPoolQuestions(pool).size();
+		}
+
+		return rv;
 	}
 
 	/**
@@ -320,7 +348,7 @@ public class PoolStorageSample implements PoolStorage
 	{
 		this.poolService = service;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -352,6 +380,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.getModifiedBy().setUserId("admin");
 			pool.getModifiedBy().setDate(now);
 			pool.setContext("mercury");
+			pool.changed.clearChanged();
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
@@ -369,6 +398,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.getModifiedBy().setUserId("admin");
 			pool.getModifiedBy().setDate(now);
 			pool.setContext("mercury");
+			pool.changed.clearChanged();
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
@@ -386,6 +416,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.getModifiedBy().setUserId("admin");
 			pool.getModifiedBy().setDate(now);
 			pool.setContext("mercury");
+			pool.changed.clearChanged();
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
@@ -403,6 +434,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.getModifiedBy().setUserId("admin");
 			pool.getModifiedBy().setDate(now);
 			pool.setContext("mercury");
+			pool.changed.clearChanged();
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
@@ -420,6 +452,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.getModifiedBy().setUserId("admin");
 			pool.getModifiedBy().setDate(now);
 			pool.setContext("mercury");
+			pool.changed.clearChanged();
 			this.pools.put(pool.getId(), pool);
 		}
 	}
