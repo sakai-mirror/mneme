@@ -259,7 +259,7 @@ public class GradeAssessmentView extends ControllerImpl
 
 				try
 				{
-					saveData(assessment, submissions, submissionAdjustScore, submissionAdjustComments);
+					saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments);
 				}
 				catch (AssessmentPermissionException e)
 				{
@@ -275,7 +275,7 @@ public class GradeAssessmentView extends ControllerImpl
 			{
 				try
 				{
-					saveData(assessment, submissions, submissionAdjustScore, submissionAdjustComments);
+					saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments);
 				}
 				catch (AssessmentPermissionException e)
 				{
@@ -294,7 +294,7 @@ public class GradeAssessmentView extends ControllerImpl
 	}
 
 	/**
-	 * save data
+	 * adjust scores
 	 * @param assessment assessment
 	 * @param submissions submissions
 	 * @param submissionAdjustScore submission Adjust Score
@@ -302,9 +302,10 @@ public class GradeAssessmentView extends ControllerImpl
 	 * @return true if data is saved 
 	 * @throws IOException
 	 */
-	private boolean saveData(Assessment assessment, List<Submission> submissions, String submissionAdjustScore, String submissionAdjustComments)
+	private boolean saveScores(Assessment assessment, List<Submission> submissions, String submissionAdjustScore, String submissionAdjustComments)
 			throws NumberFormatException, AssessmentPermissionException
 	{
+		boolean adjustScore = false;
 		// save adjusted score for the assessment - global adjustment
 		if (submissionAdjustScore != null && submissionAdjustScore.trim().length() > 0)
 		{
@@ -312,6 +313,7 @@ public class GradeAssessmentView extends ControllerImpl
 			{
 				Float score = new Float(submissionAdjustScore);
 				this.submissionService.evaluateSubmissions(assessment, submissionAdjustComments, score, Boolean.FALSE);
+				adjustScore = true;
 			}
 			catch (NumberFormatException e)
 			{
@@ -320,7 +322,7 @@ public class GradeAssessmentView extends ControllerImpl
 		}
 
 		// save Final score for each student's submission
-		if (submissions != null && submissions.size() > 0)
+		if (!adjustScore  && submissions != null && submissions.size() > 0)
 		{
 			for (Submission submission : submissions)
 			{
