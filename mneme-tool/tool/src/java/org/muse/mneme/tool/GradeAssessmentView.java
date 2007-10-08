@@ -267,9 +267,7 @@ public class GradeAssessmentView extends ControllerImpl
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
 				}catch (NumberFormatException ne){
-					//redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
+					if (M_log.isWarnEnabled()) M_log.warn(ne);
 				}
 				destination = destination.replace("grade_assessment_save", "grade_assessment");
 			}
@@ -285,9 +283,7 @@ public class GradeAssessmentView extends ControllerImpl
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
 				}catch (NumberFormatException ne){
-					//redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
+					if (M_log.isWarnEnabled()) M_log.warn(ne);
 				}
 				destination = destination.replace("NAV:", "");
 			}
