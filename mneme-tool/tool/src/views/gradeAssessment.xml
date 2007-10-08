@@ -131,8 +131,8 @@
 						<message selector="submission-username" />
 					</title>
 					<entityNavigations>
-						<navigation>
-							<destination template="/grade_submission/{0}/{1}">
+						<navigation style="LINK" submit="TRUE">
+							<destination template="/NAV:grade_submission/{0}/{1}">
 								<model ref="destinationPath" />
 								<model ref="submission.id" />
 							</destination>
@@ -239,22 +239,28 @@
 						<message selector="submission-tries" />
 					</title>
 					<navigations>
-						<navigation style="LINK">
+						<navigation style="LINK" submit="TRUE">
 							<title>
 								<message model="submission.siblingCount" />
 							</title>
-							<destination template="/" />
+							<destination template="/NAV:grade_submission/{0}/{1}">
+								<model ref="destinationPath" />
+								<model ref="submission.id" />
+							</destination>
 							<included>
 								<compareDecision model="official">
 									<constant value="TRUE" />
 								</compareDecision>
 							</included>
 						</navigation>
-						<navigation style="LINK">
+						<navigation style="LINK" submit="TRUE">
 							<title>
 								<message selector="showCountOne" />
 							</title>
-							<destination template="/" />
+							<destination template="/NAV:grade_submission/{0}/{1}">
+								<model ref="destinationPath" />
+								<model ref="submission.id" />
+							</destination>
 							<included>
 								<compareDecision model="official">
 									<constant value="FALSE" />

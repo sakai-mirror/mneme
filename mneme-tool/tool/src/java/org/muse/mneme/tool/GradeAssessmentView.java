@@ -119,19 +119,19 @@ public class GradeAssessmentView extends ControllerImpl
 		{
 			pagingParameter = "1-30";
 		}
-		
-		//TODO: size To be replaced with another method
+
+		// TODO: size To be replaced with another method
 		List submissionSizeList = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, null, null);
 		Integer maxSubmissions = 0;
 		maxSubmissions = submissionSizeList.size();
-		
+
 		// paging
 		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxSubmissions);
 		paging.setCurrentAndSize(pagingParameter);
 		context.put("paging", paging);
 		context.put("pagingParameter", pagingParameter);
-		
+
 		List submissions = null;
 		if (params.length == 7 && params[6].equalsIgnoreCase("all"))
 		{
@@ -148,7 +148,7 @@ public class GradeAssessmentView extends ControllerImpl
 			context.put("view", "highest");
 		}
 		context.put("submissions", submissions);
-		
+
 		if (submissions != null) maxSubmissions = submissions.size();
 		paging.setMaxItems(maxSubmissions);
 		context.put("paging", paging);
@@ -248,64 +248,94 @@ public class GradeAssessmentView extends ControllerImpl
 
 		if (destination != null)
 		{
+			if (assessment == null)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
 			if (destination.startsWith("/grade_assessment_save"))
 			{
-				// save adjusted score for the assessment - global adjustment
-				if (submissionAdjustScore != null && submissionAdjustScore.trim().length() > 0)
-				{
-					try
-					{
-						Float score = new Float(submissionAdjustScore);
-						if (assessment != null)
-							this.submissionService.evaluateSubmissions(assessment, submissionAdjustComments, score, Boolean.FALSE);
-						else
-						{
-							// redirect to error
-							res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-							return;
-						}
-					}
-					catch (NumberFormatException e)
-					{
-						// redirect to error
-						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
-						return;
-					}
-					catch (AssessmentPermissionException e)
-					{
-						// redirect to error
-						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
-						return;
-					}
-				}
 
-				// save Final score for each student's submission
-				if (submissions != null && submissions.size() > 0)
+				try
 				{
-					for (Submission submission : submissions)
-					{
-						if (submission.getAssessment().equals(assessment))
-						{
-							try
-							{
-								// save submission //to adjust to zero after first adjustment user should provide zero
-								if (submission.getTotalScore() != null) this.submissionService.evaluateSubmission(submission);
-							}
-							catch (AssessmentPermissionException e)
-							{
-								res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-								return;
-							}
-						}
-					}
+					saveData(assessment, submissions, submissionAdjustScore, submissionAdjustComments);
 				}
-
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}catch (NumberFormatException ne){
+					//redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
 				destination = destination.replace("grade_assessment_save", "grade_assessment");
+			}
+			else if (destination.startsWith("/NAV"))
+			{
+				try
+				{
+					saveData(assessment, submissions, submissionAdjustScore, submissionAdjustComments);
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}catch (NumberFormatException ne){
+					//redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+				destination = destination.replace("NAV:", "");
 			}
 		}
 
 		// destination = "/grades/" + params[2];
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+	}
+
+	/**
+	 * save data
+	 * @param assessment assessment
+	 * @param submissions submissions
+	 * @param submissionAdjustScore submission Adjust Score
+	 * @param submissionAdjustComments submission Adjust Comments
+	 * @return true if data is saved 
+	 * @throws IOException
+	 */
+	private boolean saveData(Assessment assessment, List<Submission> submissions, String submissionAdjustScore, String submissionAdjustComments)
+			throws NumberFormatException, AssessmentPermissionException
+	{
+		// save adjusted score for the assessment - global adjustment
+		if (submissionAdjustScore != null && submissionAdjustScore.trim().length() > 0)
+		{
+			try
+			{
+				Float score = new Float(submissionAdjustScore);
+				this.submissionService.evaluateSubmissions(assessment, submissionAdjustComments, score, Boolean.FALSE);
+			}
+			catch (NumberFormatException e)
+			{
+				throw e;
+			}
+		}
+
+		// save Final score for each student's submission
+		if (submissions != null && submissions.size() > 0)
+		{
+			for (Submission submission : submissions)
+			{
+				if (submission.getAssessment().equals(assessment))
+				{
+					// save submission //to adjust to zero after first adjustment user should provide zero
+					if (submission.getTotalScore() != null) this.submissionService.evaluateSubmission(submission);
+				}
+			}
+		}
+		return true;
 	}
 
 	/**
