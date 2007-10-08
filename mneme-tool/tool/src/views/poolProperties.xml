@@ -33,7 +33,7 @@
 
 	<header>
 		<message selector="pools-add-header">
-			<model type="icon" icon="/icons/document_add.png" />
+			<model type="icon" icon="/icons/edit.png" />
 		</message>
 	</header>
 	<title>
