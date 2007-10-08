@@ -37,7 +37,6 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
@@ -65,8 +64,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 	protected long nextAnswerId = 100;
 
 	protected long nextSubmissionId = 100;
-
-	protected QuestionService questionService = null;
 
 	protected SecurityService securityService = null;
 
@@ -579,7 +576,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 	 */
 	public AnswerImpl newAnswer()
 	{
-		return new AnswerImpl(mnemeService, questionService);
+		return new AnswerImpl(mnemeService);
 	}
 
 	/**
@@ -736,14 +733,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 	public void setMnemeService(MnemeService service)
 	{
 		this.mnemeService = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setQuestionService(QuestionService service)
-	{
-		this.questionService = service;
 	}
 
 	/**

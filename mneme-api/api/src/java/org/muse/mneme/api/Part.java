@@ -29,6 +29,25 @@ import java.util.List;
 public interface Part
 {
 	/**
+	 * Check if the part depends on this pool.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @return TRUE if the part depends on this pool, FALSE if not.
+	 */
+	Boolean dependsOn(Pool pool);
+
+	/**
+	 * Change any part references that are from to to.
+	 * 
+	 * @param from
+	 *        The from pool.
+	 * @param to
+	 *        The to pool.
+	 */
+	void switchPool(Pool from, Pool to);
+
+	/**
 	 * Access the back pointer to the assessment.
 	 * 
 	 * @return The back pointer to the assessment.
@@ -98,7 +117,7 @@ public interface Part
 	 * 
 	 * @return The questions in delivery order.
 	 */
-	List<? extends Question> getQuestions();
+	List<Question> getQuestions();
 
 	/**
 	 * Access the questions in authored order.

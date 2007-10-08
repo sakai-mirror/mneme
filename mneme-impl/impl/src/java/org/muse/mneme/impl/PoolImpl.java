@@ -309,15 +309,18 @@ public class PoolImpl implements Pool
 
 	/**
 	 * Set this assessment to be "historical" - used only for history by submissions.
+	 * 
+	 * @param current
+	 *        The current pool this was made from.
 	 */
-	protected void initHistorical()
+	protected void initHistorical(Pool current)
 	{
 		if (this.historical) return;
 
 		this.historical = Boolean.TRUE;
 
 		// suck in the current question manifest
-		this.questionIds = this.getAllQuestionIds();
+		this.questionIds = current.getAllQuestionIds();
 	}
 
 	/**
@@ -339,6 +342,7 @@ public class PoolImpl implements Pool
 		this.deleted = other.deleted;
 		this.description = other.description;
 		this.difficulty = other.difficulty;
+		this.historical = other.historical;
 		this.id = other.id;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
 		this.points = other.points;

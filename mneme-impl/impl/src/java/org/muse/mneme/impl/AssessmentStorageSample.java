@@ -39,6 +39,7 @@ import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
@@ -300,6 +301,29 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean liveDependencyExists(Pool pool)
+	{
+		for (AssessmentImpl assessment : this.assessments.values())
+		{
+			if (assessment.getContext().equals(pool.getContext()) && assessment.getIsLive())
+			{
+				// if the asssessment's parts use this pool
+				for (Part part : assessment.getParts().getParts())
+				{
+					if (part.dependsOn(pool))
+					{
+						return Boolean.TRUE;
+					}
+				}
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public AssessmentImpl newAssessment()
 	{
 		return new AssessmentImpl(this.poolService, this.questionService, this.submissionService);
@@ -341,7 +365,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 				this.nextAssessmentId++;
 			}
 			assessment.initId("a" + Long.toString(id));
-			
+
 			// we will generate new ids for parts even if they have old ones (for making copies of assessments)
 			idsNeeded = true;
 		}
@@ -389,6 +413,27 @@ public class AssessmentStorageSample implements AssessmentStorage
 	public void setSubmissionService(SubmissionService service)
 	{
 		this.submissionService = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchLiveDependency(Pool from, Pool to)
+	{
+		for (AssessmentImpl assessment : this.assessments.values())
+		{
+			if (assessment.getContext().equals(from.getContext()) && assessment.getIsLive())
+			{
+				// if the asssessment's parts use this pool
+				for (Part part : assessment.getParts().getParts())
+				{
+					if (part.dependsOn(from))
+					{
+						part.switchPool(from, to);
+					}
+				}
+			}
+		}
 	}
 
 	protected void fakeIt()

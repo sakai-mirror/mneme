@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SubmissionService;
@@ -84,6 +85,15 @@ public interface AssessmentStorage
 	List<Assessment> getContextAssessments(String context, AssessmentService.AssessmentsSort sort, Boolean publishedOnly);
 
 	/**
+	 * Check if any live tests have any dependency on this pool.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @return TRUE if any live tests have a dependency on this pool, FALSE if not.
+	 */
+	Boolean liveDependencyExists(Pool pool);
+
+	/**
 	 * Construct a new Assessment object.
 	 * 
 	 * @return A new Assessment object.
@@ -114,4 +124,14 @@ public interface AssessmentStorage
 	 *        the assessment to save.
 	 */
 	void saveAssessment(AssessmentImpl assessment);
+
+	/**
+	 * Change any live assessments that are dependent on the from pool to become dependent instead on the to pool
+	 * 
+	 * @param from
+	 *        The from pool.
+	 * @param to
+	 *        The to pool.
+	 */
+	void switchLiveDependency(Pool from, Pool to);
 }

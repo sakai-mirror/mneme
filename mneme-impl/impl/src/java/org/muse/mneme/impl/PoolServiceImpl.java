@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
@@ -46,6 +47,8 @@ public class PoolServiceImpl implements PoolService
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(PoolServiceImpl.class);
+
+	protected AssessmentService assessmentService = null;
 
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
@@ -295,21 +298,31 @@ public class PoolServiceImpl implements PoolService
 		// if there are any history dependencies on this changed pool, we need to store the history version
 		if (historyNeeded && (current != null))
 		{
-			// TODO:
-			if (/* this.assessmentService.liveDependencyExists(pool) */false)
+			if (this.assessmentService.liveDependencyExists(pool))
 			{
 				// get a new id on the old and save it
 				current.initId(null);
-				current.initHistorical();
+				current.initHistorical(pool);
 				this.storage.savePool(current);
 
-				// TODO: swap all historical dependencies to the new
-				// this.assessmentService.switchLiveDependency(pool, current);
+				// swap all historical dependencies to the new
+				this.assessmentService.switchLiveDependency(pool, current);
 			}
 		}
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
+	}
+
+	/**
+	 * Set the AssessmentService.
+	 * 
+	 * @param service
+	 *        the AssessmentService.
+	 */
+	public void setAssessmentService(AssessmentService service)
+	{
+		this.assessmentService = service;
 	}
 
 	/**

@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -217,11 +218,20 @@ public abstract class PartImpl implements Part
 	 */
 	public Question getQuestion(String questionId)
 	{
-		// get the actual list of questions
-		List<String> questions = getQuestionOrder();
+		// get the actual list of question picks
+		List<PoolPick> questions = getQuestionPickOrder();
 
 		// make sure this is one of our questions
-		if (!questions.contains(questionId)) return null;
+		PoolPick found = null;
+		for (PoolPick pick : questions)
+		{
+			if (pick.getQuestionId().equals(questionId))
+			{
+				found = pick;
+				break;
+			}
+		}
+		if (found == null) return null;
 
 		QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(questionId);
 		if (question == null)
@@ -230,11 +240,36 @@ public abstract class PartImpl implements Part
 			return null;
 		}
 
-		// set the assessment, part and submission context
+		// set the question contexts
 		question.initSubmissionContext(this.assessment.getSubmissionContext());
 		question.initPartContext(this);
+		question.initPoolContext(found.getPoolId());
 
 		return question;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Question> getQuestions()
+	{
+		List<PoolPick> order = getQuestionPickOrder();
+		List<Question> rv = new ArrayList<Question>(order.size());
+		for (PoolPick pick : order)
+		{
+			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(pick.getQuestionId());
+			if (question != null)
+			{
+				// set the question contexts
+				question.initSubmissionContext(this.assessment.getSubmissionContext());
+				question.initPartContext(this);
+				question.initPoolContext(pick.getPoolId());
+
+				rv.add(question);
+			}
+		}
+
+		return rv;
 	}
 
 	/**
@@ -266,11 +301,11 @@ public abstract class PartImpl implements Part
 	}
 
 	/**
-	 * Get the list of questions as they should be presented for the submission context.
+	 * Get the list of question picks as they should be presented for the submission context.
 	 * 
-	 * @return The list of questions as they should be presented for the submission context.
+	 * @return The list of question picks as they should be presented for the submission context.
 	 */
-	protected abstract List<String> getQuestionOrder();
+	protected abstract List<PoolPick> getQuestionPickOrder();
 
 	/**
 	 * Establish the assessment.
@@ -303,6 +338,31 @@ public abstract class PartImpl implements Part
 	protected void initId(String id)
 	{
 		this.id = id;
+	}
+
+	/**
+	 * Compute a seed based on the submission or part for randomization.
+	 * 
+	 * @return The seed based on the submission or part for randomization.
+	 */
+	protected long seed()
+	{
+		// set the seed based on the id of the submission context,
+		// so each submission has a different unique ordering,
+		// and the part id, so the randomization of questions in each part within the same submission differs
+		long seed = 0;
+		if (this.assessment.getSubmissionContext() != null)
+		{
+			seed = (this.assessment.getSubmissionContext().getId() + "_" + this.id).hashCode();
+		}
+
+		// if no submission context, just the part id
+		else
+		{
+			seed = this.id.hashCode();
+		}
+
+		return seed;
 	}
 
 	/**

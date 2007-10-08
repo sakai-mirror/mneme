@@ -22,7 +22,6 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -38,7 +37,7 @@ import org.muse.mneme.api.QuestionService;
  */
 public class ManualPartImpl extends PartImpl implements ManualPart
 {
-	protected List<String> questionIds = new ArrayList<String>();
+	protected List<PoolPick> questions = new ArrayList<PoolPick>();
 
 	protected Boolean randomize = Boolean.FALSE;
 
@@ -66,8 +65,8 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	public ManualPartImpl(ManualPartImpl other, AssessmentImpl assessment, Changeable owner)
 	{
 		super(other, assessment, owner);
-		this.questionIds = new ArrayList<String>(other.questionIds.size());
-		this.questionIds.addAll(other.questionIds);
+		this.questions = new ArrayList<PoolPick>(other.questions.size());
+		this.questions.addAll(other.questions);
 		this.randomize = other.randomize;
 	}
 
@@ -78,7 +77,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	{
 		if (question == null) throw new IllegalArgumentException();
 		// TODO: do we already have this? ignore it?
-		this.questionIds.add(question.getId());
+		this.questions.add(new PoolPick(question.getId()));
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
@@ -89,14 +88,41 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean dependsOn(Pool pool)
+	{
+		for (PoolPick pick : this.questions)
+		{
+			if (pool.getId().equals(pick.getPoolId()))
+			{
+				return Boolean.TRUE;
+			}
+
+			Question question = this.questionService.getQuestion(pick.getQuestionId());
+			if (question != null)
+			{
+				if (question.getPool().equals(pool))
+				{
+					return Boolean.TRUE;
+				}
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Question getFirstQuestion()
 	{
-		List<String> order = getQuestionOrder();
-		QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(order.get(0));
+		List<PoolPick> order = getQuestionPickOrder();
+		PoolPick pick = order.get(0);
+		QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(pick.getQuestionId());
 
 		// set the assessment, part and submission context
 		question.initSubmissionContext(this.assessment.getSubmissionContext());
 		question.initPartContext(this);
+		question.initPoolContext(pick.getPoolId());
 
 		return question;
 	}
@@ -107,12 +133,12 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	public Boolean getIsValid()
 	{
 		// we must have questions
-		if (this.questionIds.isEmpty()) return Boolean.FALSE;
+		if (this.questions.isEmpty()) return Boolean.FALSE;
 
 		// the questions must exist
-		for (String questionId : this.questionIds)
+		for (PoolPick pick : this.questions)
 		{
-			if (!this.questionService.existsQuestion(questionId))
+			if (!this.questionService.existsQuestion(pick.getQuestionId()))
 			{
 				return Boolean.FALSE;
 			}
@@ -126,12 +152,14 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	 */
 	public Question getLastQuestion()
 	{
-		List<String> order = getQuestionOrder();
-		QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(order.get(order.size() - 1));
+		List<PoolPick> order = getQuestionPickOrder();
+		PoolPick pick = order.get(order.size() - 1);
+		QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(pick.getQuestionId());
 
 		// set the assessment, part and submission context
 		question.initSubmissionContext(this.assessment.getSubmissionContext());
 		question.initPartContext(this);
+		question.initPoolContext(pick.getPoolId());
 
 		return question;
 	}
@@ -142,9 +170,9 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	public Integer getNumQuestions()
 	{
 		int count = 0;
-		for (String id : this.questionIds)
+		for (PoolPick pick : this.questions)
 		{
-			if (this.questionService.existsQuestion(id)) count++;
+			if (this.questionService.existsQuestion(pick.getQuestionId())) count++;
 		}
 
 		return count;
@@ -153,40 +181,18 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<? extends Question> getQuestions()
-	{
-		List<String> order = getQuestionOrder();
-		List<Question> rv = new ArrayList<Question>(order.size());
-		for (String id : order)
-		{
-			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(id);
-			if (question != null)
-			{
-				// set the assessment, part and submission context
-				question.initSubmissionContext(this.assessment.getSubmissionContext());
-				question.initPartContext(this);
-
-				rv.add(question);
-			}
-		}
-
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public List<? extends Question> getQuestionsAsAuthored()
 	{
-		List<Question> rv = new ArrayList<Question>(this.questionIds.size());
-		for (String id : this.questionIds)
+		List<Question> rv = new ArrayList<Question>(this.questions.size());
+		for (PoolPick pick : this.questions)
 		{
-			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(id);
+			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(pick.getQuestionId());
 			if (question != null)
 			{
 				// set the assessment, part and submission context
 				question.initSubmissionContext(this.assessment.getSubmissionContext());
 				question.initPartContext(this);
+				question.initPoolContext(pick.getPoolId());
 
 				rv.add(question);
 			}
@@ -209,11 +215,12 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	public Float getTotalPoints()
 	{
 		float total = 0f;
-		for (String id : this.questionIds)
+		for (PoolPick pick : this.questions)
 		{
-			Question question = this.questionService.getQuestion(id);
+			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(pick.getQuestionId());
 			if (question != null)
 			{
+				question.initPoolContext(pick.getPoolId());
 				Pool pool = question.getPool();
 				if (pool != null)
 				{
@@ -231,13 +238,26 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	public void removeQuestion(Question question)
 	{
 		if (question == null) throw new IllegalArgumentException();
-		// TODO: is there really a change here?
-		this.questionIds.remove(question.getId());
 
-		// this is a change that cannot be made to live tests
-		this.assessment.liveChanged = Boolean.TRUE;
+		PoolPick remove = null;
+		for (PoolPick pick : this.questions)
+		{
+			if (pick.getQuestionId().equals(question.getId()))
+			{
+				remove = pick;
+				break;
+			}
+		}
 
-		this.owner.setChanged();
+		if (remove != null)
+		{
+			this.questions.remove(remove);
+
+			// this is a change that cannot be made to live tests
+			this.assessment.liveChanged = Boolean.TRUE;
+
+			this.owner.setChanged();
+		}
 	}
 
 	/**
@@ -246,10 +266,15 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	public void setQuestionOrder(String[] questionIds)
 	{
 		if (questionIds == null) return;
-		List<String> ids = new ArrayList(Arrays.asList(questionIds));
+
+		List<PoolPick> ids = new ArrayList<PoolPick>();
+		for (String id : questionIds)
+		{
+			ids.add(new PoolPick(id));
+		}
 
 		// make a copy of our current list
-		List<String> current = new ArrayList<String>(this.questionIds);
+		List<PoolPick> current = new ArrayList<PoolPick>(this.questions);
 
 		// remove anything from the new list not in our questions
 		ids.retainAll(current);
@@ -264,7 +289,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		boolean changed = false;
 		for (int i = 0; i < ids.size(); i++)
 		{
-			if (!this.questionIds.get(i).equals(ids.get(i)))
+			if (!this.questions.get(i).equals(ids.get(i)))
 			{
 				changed = true;
 				break;
@@ -275,7 +300,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		if (!changed) return;
 
 		// take the new list
-		this.questionIds = ids;
+		this.questions = ids;
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
@@ -297,24 +322,45 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	}
 
 	/**
-	 * Get the list of questions as they should be presented for the submission context.
-	 * 
-	 * @return The list of questions as they should be presented for the submission context.
+	 * {@inheritDoc}
 	 */
-	protected List<String> getQuestionOrder()
+	public void switchPool(Pool from, Pool to)
 	{
-		if ((!this.randomize) || (this.assessment == null) || (this.assessment.getSubmissionContext() == null)) return this.questionIds;
+		for (PoolPick pick : this.questions)
+		{
+			if (from.getId().equals(pick.getPoolId()))
+			{
+				pick.setPool(to.getId());
+			}
 
-		// set the seed based on the id of the submission context,
-		// so each submission has a different unique ordering,
-		// and the part id, so the randomization of questions in each part within the same submission differs
-		long seed = (this.assessment.getSubmissionContext() + "_" + this.id).hashCode();
+			else if (pick.getPoolId() == null)
+			{
+				Question question = this.questionService.getQuestion(pick.getQuestionId());
+				if (question != null)
+				{
+					if (question.getPool().equals(from))
+					{
+						pick.setPool(to.getId());
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Get the list of question picks as they should be presented for the submission context.
+	 * 
+	 * @return The list of question picks as they should be presented for the submission context.
+	 */
+	protected List<PoolPick> getQuestionPickOrder()
+	{
+		if ((!this.randomize) || (this.assessment == null) || (this.assessment.getSubmissionContext() == null)) return this.questions;
 
 		// copy the questions
-		List<String> rv = new ArrayList<String>(this.questionIds);
+		List<PoolPick> rv = new ArrayList<PoolPick>(this.questions);
 
 		// randomize the questions in the copy
-		Collections.shuffle(rv, new Random(seed));
+		Collections.shuffle(rv, new Random(seed()));
 
 		return rv;
 	}

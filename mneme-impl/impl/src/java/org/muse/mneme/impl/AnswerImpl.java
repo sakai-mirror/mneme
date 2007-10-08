@@ -31,7 +31,6 @@ import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
-import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.TypeSpecificAnswer;
 import org.sakaiproject.util.StringUtil;
@@ -60,8 +59,6 @@ public class AnswerImpl implements Answer
 
 	protected String questionId = null;
 
-	protected QuestionService questionService = null;
-
 	protected String reason = null;
 
 	protected Submission submission = null;
@@ -83,12 +80,11 @@ public class AnswerImpl implements Answer
 	 * Construct.
 	 * 
 	 * @param mnemeService
-	 * @param questionService
+	 *        The MnemeService
 	 */
-	public AnswerImpl(MnemeService mnemeService, QuestionService questionService)
+	public AnswerImpl(MnemeService mnemeService)
 	{
 		this.mnemeService = mnemeService;
-		this.questionService = questionService;
 	}
 
 	/**
@@ -180,10 +176,8 @@ public class AnswerImpl implements Answer
 	 */
 	public Question getQuestion()
 	{
-		QuestionImpl q = (QuestionImpl) this.questionService.getQuestion(this.questionId);
 		Part p = getSubmission().getAssessment().getParts().getPart(this.partId);
-		q.initPartContext(p);
-		q.initSubmissionContext(this.submission);
+		Question q = p.getQuestion(this.questionId);
 
 		return q;
 	}
@@ -377,7 +371,6 @@ public class AnswerImpl implements Answer
 		this.mnemeService = other.mnemeService;
 		this.partId = other.partId;
 		this.questionId = other.questionId;
-		this.questionService = other.questionService;
 		this.reason = other.reason;
 		this.submission = other.submission;
 		this.submittedDate = other.submittedDate;

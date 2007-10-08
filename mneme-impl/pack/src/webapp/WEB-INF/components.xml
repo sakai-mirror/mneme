@@ -48,6 +48,7 @@
 		destroy-method="destroy"
 		singleton="true">
 
+		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 
@@ -143,7 +144,6 @@
 
 		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
 		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
-		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
 		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
 		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>

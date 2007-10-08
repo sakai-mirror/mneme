@@ -121,6 +121,22 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean dependsOn(Pool pool)
+	{
+		for (PoolDraw draw : this.pools)
+		{
+			if (draw.getPoolId().equals(pool.getId()))
+			{
+				return Boolean.TRUE;
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<PoolDraw> getDraws()
 	{
 		return this.pools;
@@ -156,12 +172,13 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 */
 	public Question getFirstQuestion()
 	{
-		List<String> order = getQuestionOrder();
-		QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(order.get(0));
+		List<PoolPick> order = getQuestionPickOrder();
+		QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(order.get(0).getQuestionId());
 
 		// set the assessment, part and submission context
 		question.initSubmissionContext(this.assessment.getSubmissionContext());
 		question.initPartContext(this);
+		question.initPoolContext(order.get(0).getPoolId());
 		return question;
 	}
 
@@ -195,12 +212,14 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 */
 	public Question getLastQuestion()
 	{
-		List<String> order = getQuestionOrder();
-		QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(order.get(order.size() - 1));
+		List<PoolPick> order = getQuestionPickOrder();
+		QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(order.get(order.size() - 1).getQuestionId());
 
 		// set the assessment, part and submission context
 		question.initSubmissionContext(this.assessment.getSubmissionContext());
 		question.initPartContext(this);
+		question.initPoolContext(order.get(order.size() - 1).getPoolId());
+
 		return question;
 	}
 
@@ -225,40 +244,26 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<? extends Question> getQuestions()
+	public List<Question> getQuestionsAsAuthored()
 	{
-		List<String> order = getQuestionOrder();
-		List<Question> rv = new ArrayList<Question>(order.size());
-		for (String id : order)
-		{
-			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(id);
-			if (question != null)
-			{
-				// set the assessment, part and submission context
-				question.initSubmissionContext(this.assessment.getSubmissionContext());
-				question.initPartContext(this);
-				rv.add(question);
-			}
-		}
+		List<Question> rv = new ArrayList<Question>();
 
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public List<? extends Question> getQuestionsAsAuthored()
-	{
-		List<String> order = getQuestionOrderAsAuthored();
-		List<Question> rv = new ArrayList<Question>(order.size());
-		for (String id : order)
+		for (PoolDraw draw : this.pools)
 		{
-			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(id);
-			if (question != null)
+			List<String> ids = draw.getAllQuestionIds();
+
+			for (String id : ids)
 			{
-				// set the assessment, part context
-				question.initPartContext(this);
-				rv.add(question);
+				QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(id);
+				if (question != null)
+				{
+					// set the assessment, part and submission context
+					question.initSubmissionContext(this.assessment.getSubmissionContext());
+					question.initPartContext(this);
+					question.initPoolContext(draw.getPoolId());
+
+					rv.add(question);
+				}
 			}
 		}
 
@@ -314,6 +319,20 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
+	public void switchPool(Pool from, Pool to)
+	{
+		for (PoolDraw draw : this.pools)
+		{
+			if (draw.getPoolId().equals(from.getId()))
+			{
+				draw.setPool(to);
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void updateDraws(List<PoolDraw> draws)
 	{
 		if (draws == null) throw new IllegalArgumentException();
@@ -358,53 +377,26 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	}
 
 	/**
-	 * Get the list of questions as they should be presented for the submission context.
-	 * 
-	 * @return The list of questions as they should be presented for the submission context.
+	 * {@inheritDoc}
 	 */
-	protected List<String> getQuestionOrder()
+	protected List<PoolPick> getQuestionPickOrder()
 	{
-		// set the seed based on the id of the submission context,
-		// so each submission has a different unique ordering,
-		// and the part id, so the randomization of questions in each part within the same submission differs
-		long seed = 0;
-		if (this.assessment.getSubmissionContext() != null)
-		{
-			seed = (this.assessment.getSubmissionContext().getId() + "_" + this.id).hashCode();
-		}
-
-		// if no submission context, just the part id
-		else
-		{
-			seed = this.id.hashCode();
-		}
+		long seed = seed();
 
 		// random draw from the pools, randomize the results
-		List<String> rv = new ArrayList<String>();
+		List<PoolPick> rv = new ArrayList<PoolPick>();
 		for (PoolDraw draw : this.pools)
 		{
-			rv.addAll(draw.drawQuestionIds(seed));
+			List<String> draws = draw.drawQuestionIds(seed);
+			for (String id : draws)
+			{
+				PoolPick pick = new PoolPick(id, draw.getPoolId());
+				rv.add(pick);
+			}
 		}
 
 		// randomize the questions in the copy
 		Collections.shuffle(rv, new Random(seed));
-
-		return rv;
-	}
-
-	/**
-	 * Get the list of questions as they should be presented for the submission context.
-	 * 
-	 * @return The list of questions as they should be presented for the submission context.
-	 */
-	protected List<String> getQuestionOrderAsAuthored()
-	{
-		// random draw from the pools, randomize the results
-		List<String> rv = new ArrayList<String>();
-		for (PoolDraw draw : this.pools)
-		{
-			rv.addAll(draw.getAllQuestionIds());
-		}
 
 		return rv;
 	}

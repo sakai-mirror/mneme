@@ -141,8 +141,8 @@ public class QuestionImpl implements Question
 		{
 			if (question.partContext == null) return true;
 
-			List<String> questions = ((PartImpl) question.getPart()).getQuestionOrder();
-			if (question.getId().equals(questions.get(0))) return true;
+			List<PoolPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
+			if (question.getId().equals(questions.get(0).getQuestionId())) return true;
 
 			return false;
 		}
@@ -154,8 +154,8 @@ public class QuestionImpl implements Question
 		{
 			if (question.partContext == null) return true;
 
-			List<String> questions = ((PartImpl) question.getPart()).getQuestionOrder();
-			if (question.getId().equals(questions.get(questions.size() - 1))) return true;
+			List<PoolPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
+			if (question.getId().equals(questions.get(questions.size() - 1).getQuestionId())) return true;
 
 			return false;
 		}
@@ -167,11 +167,20 @@ public class QuestionImpl implements Question
 		{
 			if (question.partContext == null) return null;
 
-			List<String> questions = ((PartImpl) question.getPart()).getQuestionOrder();
-			int index = questions.indexOf(question.getId());
+			List<PoolPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
+			int index = 0;
+			for (PoolPick pick : questions)
+			{
+				if (pick.getQuestionId().equals(question.getId()))
+				{
+					break;
+				}
+				index++;
+			}
 			if (index == questions.size() - 1) return null;
 
-			return question.questionService.getQuestion(questions.get(index + 1));
+			// TODO: set the question context (pool? from question?)
+			return question.questionService.getQuestion(questions.get(index + 1).getQuestionId());
 		}
 
 		/**
@@ -181,8 +190,16 @@ public class QuestionImpl implements Question
 		{
 			if (question.partContext == null) return new Integer(1);
 
-			List<String> questions = ((PartImpl) question.getPart()).getQuestionOrder();
-			int index = questions.indexOf(question.getId());
+			List<PoolPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
+			int index = 0;
+			for (PoolPick pick : questions)
+			{
+				if (pick.getQuestionId().equals(question.getId()))
+				{
+					break;
+				}
+				index++;
+			}
 
 			return index + 1;
 		}
@@ -194,11 +211,20 @@ public class QuestionImpl implements Question
 		{
 			if (question.partContext == null) return null;
 
-			List<String> questions = ((PartImpl) question.getPart()).getQuestionOrder();
-			int index = questions.indexOf(question.getId());
+			List<PoolPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
+			int index = 0;
+			for (PoolPick pick : questions)
+			{
+				if (pick.getQuestionId().equals(question.getId()))
+				{
+					break;
+				}
+				index++;
+			}
 			if (index == 0) return null;
 
-			return question.questionService.getQuestion(questions.get(index - 1));
+			// TODO: set context (pool? from question?)
+			return question.questionService.getQuestion(questions.get(index - 1).getQuestionId());
 		}
 	}
 
@@ -222,6 +248,8 @@ public class QuestionImpl implements Question
 	protected Part partContext = null;
 
 	protected MyPartOrdering partOrdering = new MyPartOrdering(this);
+
+	protected String poolContext = null;
 
 	protected String poolId = null;
 
@@ -378,6 +406,11 @@ public class QuestionImpl implements Question
 	 */
 	public Pool getPool()
 	{
+		if (this.poolContext != null)
+		{
+			return this.poolService.getPool(this.poolContext);
+		}
+
 		return this.poolService.getPool(this.poolId);
 	}
 
@@ -486,6 +519,17 @@ public class QuestionImpl implements Question
 	}
 
 	/**
+	 * Initialize the pool context for this question.
+	 * 
+	 * @param poolId
+	 *        The pool id.
+	 */
+	protected void initPoolContext(String poolId)
+	{
+		this.poolContext = poolId;
+	}
+
+	/**
 	 * Initialize the submission context for this question - the submission this question instance was created to support.
 	 * 
 	 * @param submission
@@ -529,6 +573,7 @@ public class QuestionImpl implements Question
 		this.id = other.id;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, null);
 		this.partContext = other.partContext;
+		this.poolContext = other.poolContext;
 		this.poolId = other.poolId;
 		this.poolService = other.poolService;
 		this.presentation = new PresentationImpl(other.presentation, null);

@@ -32,6 +32,7 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
@@ -277,6 +278,14 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean liveDependencyExists(Pool pool)
+	{
+		return this.storage.liveDependencyExists(pool);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Assessment newAssessment(String context) throws AssessmentPermissionException
 	{
 		if (context == null) throw new IllegalArgumentException();
@@ -435,6 +444,14 @@ public class AssessmentServiceImpl implements AssessmentService
 	public void setSubmissionService(SubmissionService service)
 	{
 		submissionService = (SubmissionServiceImpl) service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchLiveDependency(Pool from, Pool to)
+	{
+		this.storage.switchLiveDependency(from, to);
 	}
 
 	/**
