@@ -33,15 +33,14 @@
 
 	<header>
 		<message selector="testEdit-header">
-			<model type="icon" icon="/icons/document_add.png" />
-			<model ref="assessment.title" missing="no-title" />
+			<model type="icon" icon="/icons/edit.png" />
 		</message>
 	</header>
 	<title>
 		<message selector="testEdit-title" />
 	</title>
 	<container>
-		<section title="test-properties">
+		<section>
 			<container>
 				<entityDisplay>
 					<rows>
@@ -100,7 +99,7 @@
 				</entityDisplay>
 			</container>
 		</section>
-		<section title="test-parts">
+		<section>
 			<container>
 				<!--  warn if live -->
 				<alert>
