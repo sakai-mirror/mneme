@@ -73,7 +73,7 @@ public class QuestionStorageSample implements QuestionStorage
 		List<QuestionImpl> questions = new ArrayList<QuestionImpl>(this.questions.values());
 		for (QuestionImpl question : questions)
 		{
-			if (!question.deleted && question.getPool().equals(source))
+			if (!question.deleted && !question.isHistorical() && question.getPool().equals(source))
 			{
 				QuestionImpl q = new QuestionImpl(question);
 				q.setPool(destination);
@@ -105,6 +105,7 @@ public class QuestionStorageSample implements QuestionStorage
 		for (QuestionImpl question : this.questions.values())
 		{
 			if (question.deleted) continue;
+			if (question.isHistorical()) continue;
 			if ((pool != null) && (!question.getPool().equals(pool))) continue;
 			if ((context != null) && (!question.getPool().getContext().equals(context))) continue;
 
@@ -153,6 +154,7 @@ public class QuestionStorageSample implements QuestionStorage
 		for (QuestionImpl question : this.questions.values())
 		{
 			if (question.deleted) continue;
+			if (question.isHistorical()) continue;
 			if ((pool != null) && (!question.getPool().equals(pool))) continue;
 			if ((context != null) && (!question.getPool().getContext().equals(context))) continue;
 
@@ -250,7 +252,7 @@ public class QuestionStorageSample implements QuestionStorage
 		List<String> rv = new ArrayList<String>();
 		for (QuestionImpl question : this.questions.values())
 		{
-			if ((!question.deleted) && (question.getPool().equals(pool)))
+			if ((!question.deleted) && (!question.isHistorical()) && (question.getPool().equals(pool)))
 			{
 				rv.add(question.getId());
 			}

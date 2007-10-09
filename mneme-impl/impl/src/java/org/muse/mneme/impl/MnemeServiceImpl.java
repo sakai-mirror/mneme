@@ -492,14 +492,6 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean liveDependencyExists(Pool pool)
-	{
-		return assessmentService.liveDependencyExists(pool);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void moveQuestion(Question question, Pool pool) throws AssessmentPermissionException
 	{
 		questionService.moveQuestion(question, pool);
@@ -713,14 +705,6 @@ public class MnemeServiceImpl implements MnemeService
 			AssessmentClosedException, SubmissionCompletedException
 	{
 		submissionService.submitAnswers(answers, completeAnswers, completeSubmission);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void switchLiveDependency(Pool from, Pool to)
-	{
-		assessmentService.switchLiveDependency(from, to);
 	}
 
 	/**

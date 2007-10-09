@@ -30,6 +30,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.Ordering;
 import org.muse.mneme.api.Part;
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
@@ -301,6 +302,26 @@ public abstract class PartImpl implements Part
 	}
 
 	/**
+	 * Check if the part depends on this pool.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @param directOnly
+	 *        If true, check only direct dependencies, else check direct or indirect.
+	 * @return TRUE if the part depends on this pool, FALSE if not.
+	 */
+	protected abstract Boolean dependsOn(Pool pool, boolean directOnly);
+
+	/**
+	 * Check if the part depends on this question directly.
+	 * 
+	 * @param question
+	 *        The question.
+	 * @return TRUE if the part depends on this question directly, FALSE if not.
+	 */
+	protected abstract Boolean dependsOn(Question question);
+
+	/**
 	 * Get the list of question picks as they should be presented for the submission context.
 	 * 
 	 * @return The list of question picks as they should be presented for the submission context.
@@ -378,4 +399,16 @@ public abstract class PartImpl implements Part
 		this.questionService = other.questionService;
 		this.title = other.title;
 	}
+
+	/**
+	 * Change any part references that are from to to.
+	 * 
+	 * @param from
+	 *        The from pool.
+	 * @param to
+	 *        The to pool.
+	 * @param directOnly
+	 *        if true, switch only for direct (draw) dependencies, else switch those as well as (manual) question dependencies.
+	 */
+	protected abstract void switchPool(Pool from, Pool to, boolean directOnly);
 }

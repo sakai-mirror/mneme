@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Question;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -92,9 +93,9 @@ public class PoolStorageSample implements PoolStorage
 	{
 		List<String> rv = null;
 
-		if (((PoolImpl) pool).getQuestionIds() != null)
+		if (((PoolImpl) pool).getFrozenManifest() != null)
 		{
-			rv = new ArrayList<String>(((PoolImpl) pool).getQuestionIds());
+			rv = new ArrayList<String>(((PoolImpl) pool).getFrozenManifest());
 		}
 		else
 		{
@@ -214,9 +215,9 @@ public class PoolStorageSample implements PoolStorage
 	{
 		List<String> rv = null;
 
-		if ((pool != null) && ((PoolImpl) pool).getQuestionIds() != null)
+		if ((pool != null) && ((PoolImpl) pool).getFrozenManifest() != null)
 		{
-			rv = new ArrayList<String>(((PoolImpl) pool).getQuestionIds());
+			rv = new ArrayList<String>(((PoolImpl) pool).getFrozenManifest());
 		}
 		else
 		{
@@ -269,9 +270,9 @@ public class PoolStorageSample implements PoolStorage
 	{
 		Integer rv = null;
 
-		if (((PoolImpl) pool).getQuestionIds() != null)
+		if (((PoolImpl) pool).getFrozenManifest() != null)
 		{
-			rv = ((PoolImpl) pool).getQuestionIds().size();
+			rv = ((PoolImpl) pool).getFrozenManifest().size();
 		}
 		else
 		{
@@ -355,6 +356,25 @@ public class PoolStorageSample implements PoolStorage
 	public void setQuestionService(QuestionServiceImpl service)
 	{
 		this.questionService = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchManifests(Question from, Question to)
+	{
+		for (PoolImpl pool : this.pools.values())
+		{
+			if ((!pool.deleted) && pool.getContext().equals(from.getPool().getContext()) && pool.getFrozenManifest() != null)
+			{
+				List<String> manifest = pool.getFrozenManifest();
+				int index = manifest.indexOf(from.getId());
+				if (index != -1)
+				{
+					manifest.set(index, to.getId());
+				}
+			}
+		}
 	}
 
 	protected void fakeIt()

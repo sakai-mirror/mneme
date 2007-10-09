@@ -127,15 +127,6 @@ public interface AssessmentService
 	List<Assessment> getContextAssessments(String context, AssessmentsSort sort, Boolean publishedOnly);
 
 	/**
-	 * Check if any live assessments have any dependency on this pool.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @return TRUE if any live assessments have a dependency on this pool, FALSE if not.
-	 */
-	Boolean liveDependencyExists(Pool pool);
-
-	/**
 	 * Create a new Assessment in the context.
 	 * 
 	 * @param context
@@ -169,14 +160,4 @@ public interface AssessmentService
 	 *         if the changes are not allowed to be saved due to policy violation.
 	 */
 	void saveAssessment(Assessment assessment) throws AssessmentPermissionException, AssessmentPolicyException;
-
-	/**
-	 * Change any live assessments that are dependent on the from pool to become dependent instead on the to pool
-	 * 
-	 * @param from
-	 *        The from pool.
-	 * @param to
-	 *        The to pool.
-	 */
-	void switchLiveDependency(Pool from, Pool to);
 }

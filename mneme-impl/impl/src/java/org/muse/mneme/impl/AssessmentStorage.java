@@ -26,9 +26,7 @@ import java.util.List;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.Pool;
-import org.muse.mneme.api.PoolService;
-import org.muse.mneme.api.QuestionService;
-import org.muse.mneme.api.SubmissionService;
+import org.muse.mneme.api.Question;
 
 /**
  * AssessmentStorage defines the storage interface for Assessments.
@@ -89,9 +87,20 @@ public interface AssessmentStorage
 	 * 
 	 * @param pool
 	 *        The pool.
+	 * @param directOnly
+	 *        if true, check only for direct (draw) dependencies, else use those as well as (manual) question dependencies.
 	 * @return TRUE if any live tests have a dependency on this pool, FALSE if not.
 	 */
-	Boolean liveDependencyExists(Pool pool);
+	Boolean liveDependencyExists(Pool pool, boolean directOnly);
+
+	/**
+	 * Check if any live assessments have any direct dependency on this question.
+	 * 
+	 * @param question
+	 *        The question.
+	 * @return TRUE if any live assessments have a direct dependency on this question, FALSE if not.
+	 */
+	Boolean liveDependencyExists(Question question);
 
 	/**
 	 * Construct a new Assessment object.
@@ -132,6 +141,18 @@ public interface AssessmentStorage
 	 *        The from pool.
 	 * @param to
 	 *        The to pool.
+	 * @param directOnly
+	 *        if true, switch only direct (draw) dependencies, else seitch those as well as (manual) question dependencies.
 	 */
-	void switchLiveDependency(Pool from, Pool to);
+	void switchLiveDependency(Pool from, Pool to, boolean directOnly);
+
+	/**
+	 * Change any live assessments that are directly dependent on the from question to become dependent instead on the to question
+	 * 
+	 * @param from
+	 *        The from question.
+	 * @param to
+	 *        The to question.
+	 */
+	void switchLiveDependency(Question from, Question to);
 }

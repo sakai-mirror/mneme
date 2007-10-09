@@ -28,10 +28,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.sakaiproject.db.api.SqlService;
@@ -48,7 +48,7 @@ public class PoolServiceImpl implements PoolService
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(PoolServiceImpl.class);
 
-	protected AssessmentService assessmentService = null;
+	protected AssessmentServiceImpl assessmentService = null;
 
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
@@ -298,7 +298,7 @@ public class PoolServiceImpl implements PoolService
 		// if there are any history dependencies on this changed pool, we need to store the history version
 		if (historyNeeded && (current != null))
 		{
-			if (this.assessmentService.liveDependencyExists(pool))
+			if (this.assessmentService.liveDependencyExists(pool, false))
 			{
 				// get a new id on the old and save it
 				current.initId(null);
@@ -306,7 +306,7 @@ public class PoolServiceImpl implements PoolService
 				this.storage.savePool(current);
 
 				// swap all historical dependencies to the new
-				this.assessmentService.switchLiveDependency(pool, current);
+				this.assessmentService.switchLiveDependency(pool, current, false);
 			}
 		}
 
@@ -320,7 +320,7 @@ public class PoolServiceImpl implements PoolService
 	 * @param service
 	 *        the AssessmentService.
 	 */
-	public void setAssessmentService(AssessmentService service)
+	public void setAssessmentService(AssessmentServiceImpl service)
 	{
 		this.assessmentService = service;
 	}
@@ -403,6 +403,68 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
+	 * Create a historical record of this pool.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @param directOnly
+	 *        if TRUE, do it only if / for direct pool use (draw), else for all (manual and draw).
+	 */
+	protected void createHistory(Pool pool, boolean directOnly)
+	{
+		if (pool == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("manifestChanged: " + pool.getId());
+
+		// get the current pool for history
+		PoolImpl current = this.storage.getPool(pool.getId());
+
+		// get a new id on the old and save it
+		current.initId(null);
+		current.initHistorical(pool);
+		this.storage.savePool(current);
+
+		// swap all historical dependencies to the new
+		this.assessmentService.switchLiveDependency(pool, current, false);
+
+		// event
+		// eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
+	}
+
+	/**
+	 * Create a historical record of this pool, if needed for live assessment dependencies.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @param directOnly
+	 *        if TRUE, do it only if / for direct pool use (draw), else for all (manual and draw).
+	 */
+	protected void createHistoryIfNeeded(Pool pool, boolean directOnly)
+	{
+		if (pool == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("createHistoryIfNeeded: " + pool.getId());
+
+		// if there are any history dependencies on this changed pool, we need to store the history version
+		if (this.assessmentService.liveDependencyExists(pool, false))
+		{
+			// get the current pool for history
+			PoolImpl current = this.storage.getPool(pool.getId());
+
+			// get a new id on the old and save it
+			current.initId(null);
+			current.initHistorical(pool);
+			this.storage.savePool(current);
+
+			// swap all historical dependencies to the new
+			this.assessmentService.switchLiveDependency(pool, current, false);
+		}
+
+		// event
+		// eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	protected List<String> drawQuestionIds(Pool pool, long seed, Integer numQuestions)
@@ -461,5 +523,21 @@ public class PoolServiceImpl implements PoolService
 	{
 		Integer rv = storage.getPoolSize((PoolImpl) pool);
 		return rv;
+	}
+
+	/**
+	 * Switch any pool with a frozen manifest that references from to reference to.
+	 * 
+	 * @param from
+	 *        The from question.
+	 * @param to
+	 *        The to question.
+	 */
+	protected void switchManifests(Question from, Question to)
+	{
+		if (from == null) throw new IllegalArgumentException();
+		if (to == null) throw new IllegalArgumentException();
+
+		this.storage.switchManifests(from, to);
 	}
 }

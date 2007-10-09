@@ -804,4 +804,26 @@ public class SubmissionStorageSample implements SubmissionStorage
 			}
 		}
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchLiveDependency(Question from, Question to)
+	{
+		// for all submissions in the context
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			if (submission.getAssessment().getContext().equals(from.getPool().getContext()))
+			{
+				// check the answers
+				for (Answer answer : submission.getAnswers())
+				{
+					if (((AnswerImpl) answer).questionId.equals(from.getId()))
+					{
+						((AnswerImpl) answer).questionId = to.getId();
+					}
+				}
+			}
+		}
+	}
 }

@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Question;
 
 /**
  * PoolStorage defines the storage interface for Pools.
@@ -147,4 +148,14 @@ public interface PoolStorage
 	 *        the pool to save.
 	 */
 	void savePool(PoolImpl pool);
+
+	/**
+	 * Switch any pool with a frozen manifest that references from to reference to.
+	 * 
+	 * @param from
+	 *        The from question.
+	 * @param to
+	 *        The to question.
+	 */
+	void switchManifests(Question from, Question to);
 }

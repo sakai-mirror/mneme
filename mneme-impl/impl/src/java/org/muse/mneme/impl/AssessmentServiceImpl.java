@@ -34,6 +34,7 @@ import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.SubmissionService;
@@ -278,14 +279,6 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean liveDependencyExists(Pool pool)
-	{
-		return this.storage.liveDependencyExists(pool);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Assessment newAssessment(String context) throws AssessmentPermissionException
 	{
 		if (context == null) throw new IllegalArgumentException();
@@ -447,14 +440,6 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public void switchLiveDependency(Pool from, Pool to)
-	{
-		this.storage.switchLiveDependency(from, to);
-	}
-
-	/**
 	 * Form an assessment reference for this assessment id.
 	 * 
 	 * @param assessmentId
@@ -465,6 +450,32 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		String ref = MnemeService.REFERENCE_ROOT + "/" + MnemeService.ASSESSMENT_TYPE + "/" + assessmentId;
 		return ref;
+	}
+
+	/**
+	 * Check if any live assessments have any dependency on this pool.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @param directOnly
+	 *        if TRUE, check only direct use of the pool, if FALSE check indirect as well.
+	 * @return TRUE if any live assessments have a dependency on this pool, FALSE if not.
+	 */
+	protected Boolean liveDependencyExists(Pool pool, Boolean directOnly)
+	{
+		return this.storage.liveDependencyExists(pool, directOnly);
+	}
+
+	/**
+	 * Check if any live assessments have any direct dependency on this question.
+	 * 
+	 * @param question
+	 *        The question.
+	 * @return TRUE if any live assessments have a direct dependency on this question, FALSE if not.
+	 */
+	protected Boolean liveDependencyExists(Question question)
+	{
+		return this.storage.liveDependencyExists(question);
 	}
 
 	/**
@@ -532,5 +543,33 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_EDIT, getAssessmentReference(assessment.getId()), true));
+	}
+
+	/**
+	 * Change any live assessments that are dependent on the from pool to become dependent instead on the to pool
+	 * 
+	 * @param from
+	 *        The from pool.
+	 * @param to
+	 *        The to pool.
+	 * @param directOnly
+	 *        if true, switch only direct (draw) dependencies, else seitch those as well as (manual) question dependencies.
+	 */
+	protected void switchLiveDependency(Pool from, Pool to, boolean directOnly)
+	{
+		this.storage.switchLiveDependency(from, to, directOnly);
+	}
+
+	/**
+	 * Change any live assessments that are directly dependent on the from question to become dependent instead on the to question
+	 * 
+	 * @param from
+	 *        The from question.
+	 * @param to
+	 *        The to question.
+	 */
+	protected void switchLiveDependency(Question from, Question to)
+	{
+		this.storage.switchLiveDependency(from, to);
 	}
 }

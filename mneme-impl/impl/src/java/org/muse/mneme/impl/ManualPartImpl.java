@@ -88,31 +88,6 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean dependsOn(Pool pool)
-	{
-		for (PoolPick pick : this.questions)
-		{
-			if (pool.getId().equals(pick.getPoolId()))
-			{
-				return Boolean.TRUE;
-			}
-
-			Question question = this.questionService.getQuestion(pick.getQuestionId());
-			if (question != null)
-			{
-				if (question.getPool().equals(pool))
-				{
-					return Boolean.TRUE;
-				}
-			}
-		}
-
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Question getFirstQuestion()
 	{
 		List<PoolPick> order = getQuestionPickOrder();
@@ -324,8 +299,73 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	/**
 	 * {@inheritDoc}
 	 */
-	public void switchPool(Pool from, Pool to)
+	protected Boolean dependsOn(Pool pool, boolean directOnly)
 	{
+		// manual part dependencies are all indirect
+		if (directOnly) return Boolean.FALSE;
+
+		for (PoolPick pick : this.questions)
+		{
+			if (pool.getId().equals(pick.getPoolId()))
+			{
+				return Boolean.TRUE;
+			}
+
+			Question question = this.questionService.getQuestion(pick.getQuestionId());
+			if (question != null)
+			{
+				if (question.getPool().equals(pool))
+				{
+					return Boolean.TRUE;
+				}
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected Boolean dependsOn(Question question)
+	{
+		for (PoolPick pick : this.questions)
+		{
+			if (pick.getQuestionId().equals(question.getId()))
+			{
+				return Boolean.TRUE;
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * Get the list of question picks as they should be presented for the submission context.
+	 * 
+	 * @return The list of question picks as they should be presented for the submission context.
+	 */
+	protected List<PoolPick> getQuestionPickOrder()
+	{
+		if ((!this.randomize) || (this.assessment == null) || (this.assessment.getSubmissionContext() == null)) return this.questions;
+
+		// copy the questions
+		List<PoolPick> rv = new ArrayList<PoolPick>(this.questions);
+
+		// randomize the questions in the copy
+		Collections.shuffle(rv, new Random(seed()));
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void switchPool(Pool from, Pool to, boolean directOnly)
+	{
+		// manual part dependencies are all indirect
+		if (directOnly) return;
+
 		for (PoolPick pick : this.questions)
 		{
 			if (from.getId().equals(pick.getPoolId()))
@@ -348,20 +388,16 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	}
 
 	/**
-	 * Get the list of question picks as they should be presented for the submission context.
-	 * 
-	 * @return The list of question picks as they should be presented for the submission context.
+	 * {@inheritDoc}
 	 */
-	protected List<PoolPick> getQuestionPickOrder()
+	protected void switchQuestion(Question from, Question to)
 	{
-		if ((!this.randomize) || (this.assessment == null) || (this.assessment.getSubmissionContext() == null)) return this.questions;
-
-		// copy the questions
-		List<PoolPick> rv = new ArrayList<PoolPick>(this.questions);
-
-		// randomize the questions in the copy
-		Collections.shuffle(rv, new Random(seed()));
-
-		return rv;
+		for (PoolPick pick : this.questions)
+		{
+			if (from.getId().equals(pick.getQuestionId()))
+			{
+				pick.setQuestion(to.getId());
+			}
+		}
 	}
 }

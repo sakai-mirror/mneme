@@ -241,6 +241,8 @@ public class QuestionImpl implements Question
 
 	protected String hints = null;
 
+	protected Boolean historical = Boolean.FALSE;
+
 	protected String id = null;
 
 	protected AttributionImpl modifiedBy = new AttributionImpl(null);
@@ -497,6 +499,14 @@ public class QuestionImpl implements Question
 	}
 
 	/**
+	 * Set this assessment to be "historical" - used only for history by submissions.
+	 */
+	protected void initHistorical()
+	{
+		this.historical = Boolean.TRUE;
+	}
+
+	/**
 	 * Initialize the id.
 	 * 
 	 * @param id
@@ -562,6 +572,16 @@ public class QuestionImpl implements Question
 		this.questionHandler = questionHandler;
 	}
 
+	/**
+	 * Check the historical setting of the assessment.
+	 * 
+	 * @return TRUE if the assessment is used only for submission historical access, FALSE if it is a current assessment.
+	 */
+	protected Boolean isHistorical()
+	{
+		return this.historical;
+	}
+
 	protected void set(QuestionImpl other)
 	{
 		if (other.questionHandler != null) this.questionHandler = (TypeSpecificQuestion) (other.questionHandler.clone(this));
@@ -570,6 +590,7 @@ public class QuestionImpl implements Question
 		this.explainReason = other.explainReason;
 		this.feedback = other.feedback;
 		this.hints = other.hints;
+		this.historical = other.historical;
 		this.id = other.id;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, null);
 		this.partContext = other.partContext;

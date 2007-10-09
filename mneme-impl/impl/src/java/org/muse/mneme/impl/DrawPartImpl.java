@@ -121,22 +121,6 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean dependsOn(Pool pool)
-	{
-		for (PoolDraw draw : this.pools)
-		{
-			if (draw.getPoolId().equals(pool.getId()))
-			{
-				return Boolean.TRUE;
-			}
-		}
-
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public List<PoolDraw> getDraws()
 	{
 		return this.pools;
@@ -319,20 +303,6 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
-	public void switchPool(Pool from, Pool to)
-	{
-		for (PoolDraw draw : this.pools)
-		{
-			if (draw.getPoolId().equals(from.getId()))
-			{
-				draw.setPool(to);
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void updateDraws(List<PoolDraw> draws)
 	{
 		if (draws == null) throw new IllegalArgumentException();
@@ -379,6 +349,31 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
+	protected Boolean dependsOn(Pool pool, boolean directOnly)
+	{
+		// draw part dependencies are all direct
+		for (PoolDraw draw : this.pools)
+		{
+			if (draw.getPoolId().equals(pool.getId()))
+			{
+				return Boolean.TRUE;
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected Boolean dependsOn(Question question)
+	{
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	protected List<PoolPick> getQuestionPickOrder()
 	{
 		long seed = seed();
@@ -399,5 +394,19 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		Collections.shuffle(rv, new Random(seed));
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void switchPool(Pool from, Pool to, boolean directOnly)
+	{
+		for (PoolDraw draw : this.pools)
+		{
+			if (draw.getPoolId().equals(from.getId()))
+			{
+				draw.setPool(to);
+			}
+		}
 	}
 }

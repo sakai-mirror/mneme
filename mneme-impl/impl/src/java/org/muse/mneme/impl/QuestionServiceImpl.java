@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
-import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
@@ -50,6 +49,9 @@ public class QuestionServiceImpl implements QuestionService
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(QuestionServiceImpl.class);
 
+	/** Dependency: AssessmentService */
+	protected AssessmentServiceImpl assessmentService = null;
+
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
 
@@ -57,7 +59,7 @@ public class QuestionServiceImpl implements QuestionService
 	protected MnemeService mnemeService = null;
 
 	/** Dependency: PoolService */
-	protected PoolService poolService = null;
+	protected PoolServiceImpl poolService = null;
 
 	/** Dependency: SecurityService */
 	protected SecurityService securityService = null;
@@ -76,6 +78,9 @@ public class QuestionServiceImpl implements QuestionService
 
 	/** Map of registered QuestionStorage options. */
 	protected Map<String, QuestionStorage> storgeOptions;
+
+	/** Dependency: SubmissionService */
+	protected SubmissionServiceImpl submissionService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -128,6 +133,9 @@ public class QuestionServiceImpl implements QuestionService
 		// security check
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, destination.getContext());
 
+		// before anything changes, move to history if needed
+		this.poolService.createHistoryIfNeeded(destination, false);
+
 		this.storage.copyPoolQuestions(userId, source, destination);
 	}
 
@@ -144,6 +152,9 @@ public class QuestionServiceImpl implements QuestionService
 		// security check
 		String destinationContext = (pool != null) ? pool.getContext() : question.getPool().getContext();
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, destinationContext);
+
+		// before anything changes, move to history if needed
+		this.poolService.createHistoryIfNeeded(pool, false);
 
 		QuestionImpl rv = this.storage.newQuestion((QuestionImpl) question);
 
@@ -303,6 +314,10 @@ public class QuestionServiceImpl implements QuestionService
 		// if to the same pool, do nothing
 		if (question.getPool().equals(pool)) return;
 
+		// before anything changes, move to history if needed
+		this.poolService.createHistoryIfNeeded(question.getPool(), false);
+		this.poolService.createHistoryIfNeeded(pool, false);
+
 		// do the move
 		this.storage.moveQuestion(question, pool);
 	}
@@ -318,6 +333,9 @@ public class QuestionServiceImpl implements QuestionService
 
 		// security check
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, pool.getContext());
+
+		// before anything changes, move to history if needed
+		this.poolService.createHistoryIfNeeded(pool, false);
 
 		QuestionImpl question = this.storage.newQuestion();
 		question.setPool(pool);
@@ -360,6 +378,9 @@ public class QuestionServiceImpl implements QuestionService
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, pool.getContext());
 
+		// before anything changes, move to history if needed
+		this.poolService.createHistoryIfNeeded(pool, false);
+
 		this.storage.removePoolQuestions(pool);
 
 		// TODO: events?
@@ -376,6 +397,9 @@ public class QuestionServiceImpl implements QuestionService
 
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getPool().getContext());
+
+		// before anything changes, move to history if needed
+		this.poolService.createHistoryIfNeeded(question.getPool(), false);
 
 		this.storage.removeQuestion((QuestionImpl) question);
 
@@ -406,10 +430,67 @@ public class QuestionServiceImpl implements QuestionService
 		question.getModifiedBy().setDate(new Date());
 		question.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
 
+		// see if the question has been moved from its current pool
+		QuestionImpl current = this.storage.getQuestion(question.getId());
+		if ((current != null) && (!current.getPool().equals(question.getPool())))
+		{
+			// before anything changes, move to history if needed
+			this.poolService.createHistoryIfNeeded(current.getPool(), false);
+			this.poolService.createHistoryIfNeeded(question.getPool(), false);
+		}
+
+		// deal with direct dependencies on this question from live assessments
+		if (this.assessmentService.liveDependencyExists(question))
+		{
+			// get a new id on the old and save it as history
+			current.initId(null);
+			current.initHistorical();
+			this.storage.saveQuestion(current);
+
+			// switch the manual uses of this question in tests to the history
+			this.assessmentService.switchLiveDependency(question, current);
+		}
+
+		// deal with (draw-only direct) dependencies to this question's pool from live assessments
+		if (this.assessmentService.liveDependencyExists(question.getPool(), true))
+		{
+			// generate history if needed
+			if (!current.isHistorical())
+			{
+				current.initId(null);
+				current.initHistorical();
+				this.storage.saveQuestion(current);
+			}
+
+			this.poolService.createHistory(current.getPool(), true);
+		}
+
+		// if we made history
+		if (current.isHistorical())
+		{
+			// update any frozen manifest pools
+			this.poolService.switchManifests(question, current);
+
+			// switch any use of this question in a submission to the history
+			this.submissionService.switchLiveDependency(question, current);
+		}
+
+		// save
 		this.storage.saveQuestion((QuestionImpl) question);
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
+	}
+
+	/**
+	 * Dependency: AssessmentService.
+	 * 
+	 * @param service
+	 *        The AssessmentService.
+	 */
+	public void setAssessmentService(AssessmentServiceImpl service)
+	{
+		assessmentService = service;
 	}
 
 	/**
@@ -440,7 +521,7 @@ public class QuestionServiceImpl implements QuestionService
 	 * @param service
 	 *        The PoolService.
 	 */
-	public void setPoolService(PoolService service)
+	public void setPoolService(PoolServiceImpl service)
 	{
 		poolService = service;
 	}
@@ -498,6 +579,17 @@ public class QuestionServiceImpl implements QuestionService
 	public void setStorageKey(String key)
 	{
 		this.storageKey = key;
+	}
+
+	/**
+	 * Dependency: SubmissionService.
+	 * 
+	 * @param service
+	 *        The SubmissionService.
+	 */
+	public void setSubmissionService(SubmissionServiceImpl service)
+	{
+		submissionService = service;
 	}
 
 	/**

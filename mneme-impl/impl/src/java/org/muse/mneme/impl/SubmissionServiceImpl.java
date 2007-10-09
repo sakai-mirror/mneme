@@ -1785,4 +1785,18 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	{
 		this.storage.switchHistoricalDependency(assessment, newAssessment);
 	}
+
+	/**
+	 * Change any submissions that are directly dependent on the from question to become dependent instead on the to question
+	 * 
+	 * @param from
+	 *        The from question.
+	 * @param to
+	 *        The to question.
+	 */
+	protected void switchLiveDependency(Question from, Question to)
+	{
+		this.storage.switchLiveDependency(from, to);
+	}
+
 }
