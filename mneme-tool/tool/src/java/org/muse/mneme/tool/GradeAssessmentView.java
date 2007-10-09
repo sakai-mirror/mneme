@@ -305,21 +305,6 @@ public class GradeAssessmentView extends ControllerImpl
 	private boolean saveScores(Assessment assessment, List<Submission> submissions, String submissionAdjustScore, String submissionAdjustComments)
 			throws NumberFormatException, AssessmentPermissionException
 	{
-		// save adjusted score for the assessment - global adjustment
-		if (submissionAdjustScore != null && submissionAdjustScore.trim().length() > 0)
-		{
-			try
-			{
-				Float score = new Float(submissionAdjustScore);
-				this.submissionService.evaluateSubmissions(assessment, submissionAdjustComments, score, Boolean.FALSE);
-				return true;
-			}
-			catch (NumberFormatException e)
-			{
-				throw e;
-			}
-		}
-
 		// save Final score for each student's submission
 		if (submissions != null && submissions.size() > 0)
 		{
@@ -330,6 +315,20 @@ public class GradeAssessmentView extends ControllerImpl
 					// save submission //to adjust to zero after first adjustment user should provide zero
 					if (submission.getTotalScore() != null) this.submissionService.evaluateSubmission(submission);
 				}
+			}
+		}
+		
+		//save adjusted score for the assessment - global adjustment
+		if (submissionAdjustScore != null && submissionAdjustScore.trim().length() > 0)
+		{
+			try
+			{
+				Float score = new Float(submissionAdjustScore);
+				this.submissionService.evaluateSubmissions(assessment, submissionAdjustComments, score, Boolean.FALSE);
+			}
+			catch (NumberFormatException e)
+			{
+				throw e;
 			}
 		}
 		return true;
