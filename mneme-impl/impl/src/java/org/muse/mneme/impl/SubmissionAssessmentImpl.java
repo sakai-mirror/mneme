@@ -27,7 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AcceptSubmitStatus;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentAccess;
+import org.muse.mneme.api.AssessmentPassword;
 import org.muse.mneme.api.AssessmentDates;
 import org.muse.mneme.api.AssessmentGrading;
 import org.muse.mneme.api.AssessmentParts;
@@ -95,9 +95,9 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public AssessmentAccess getAccess()
+	public AssessmentPassword getPassword()
 	{
-		return getMainAssessment().getAccess();
+		return getMainAssessment().getPassword();
 	}
 
 	/**

@@ -182,7 +182,7 @@
 				<password title="enter-password" model="password.value" />
 			</container>
 			<included>
-				<hasValueDecision model="assessment.access.password" />
+				<hasValueDecision model="assessment.password.password" />
 			</included>
 		</section>
 		<gap />

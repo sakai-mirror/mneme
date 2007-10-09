@@ -22,9 +22,9 @@
 package org.muse.mneme.api;
 
 /**
- * AssessmentAccess contain the details of the special access to an assessment.
+ * AssessmentPassword models passwords on assessments.
  */
-public interface AssessmentAccess
+public interface AssessmentPassword
 {
 	/**
 	 * Check if the provided password (clear text) matches the defined password for the assessment.

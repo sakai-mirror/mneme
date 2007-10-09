@@ -36,13 +36,6 @@ public interface Assessment
 	AcceptSubmitStatus getAcceptSubmitStatus();
 
 	/**
-	 * Access the special access settings.
-	 * 
-	 * @return The special access settings.
-	 */
-	AssessmentAccess getAccess();
-
-	/**
 	 * Check if the assessment is archived.
 	 * 
 	 * @return TRUE if the assessment is archived, FALSE if not.
@@ -155,6 +148,13 @@ public interface Assessment
 	 * @return The assessment part information.
 	 */
 	AssessmentParts getParts();
+
+	/**
+	 * Access the password.
+	 * 
+	 * @return The password.
+	 */
+	AssessmentPassword getPassword();
 
 	/**
 	 * Access the assessment's presentation; the rich tet and attachments that describe the assessment.

@@ -21,13 +21,13 @@
 
 package org.muse.mneme.impl;
 
-import org.muse.mneme.api.AssessmentAccess;
+import org.muse.mneme.api.AssessmentPassword;
 import org.muse.mneme.api.Changeable;
 
 /**
- * AssessmentAccessImpl implements AssessmentAccess
+ * AssessmentPasswordImpl implements AssessmentPassword
  */
-public class AssessmentAccessImpl implements AssessmentAccess
+public class AssessmentPasswordImpl implements AssessmentPassword
 {
 	protected transient Changeable owner = null;
 
@@ -39,7 +39,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AssessmentAccessImpl(AssessmentAccessImpl other, Changeable owner)
+	public AssessmentPasswordImpl(AssessmentPasswordImpl other, Changeable owner)
 	{
 		this(owner);
 		set(other);
@@ -48,7 +48,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	/**
 	 * Construct.
 	 */
-	public AssessmentAccessImpl(Changeable owner)
+	public AssessmentPasswordImpl(Changeable owner)
 	{
 		this.owner = owner;
 	}
@@ -88,7 +88,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 * @param other
 	 *        The other to copy.
 	 */
-	protected void set(AssessmentAccessImpl other)
+	protected void set(AssessmentPasswordImpl other)
 	{
 		this.password = other.password;
 	}

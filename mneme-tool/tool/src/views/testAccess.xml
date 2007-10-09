@@ -108,7 +108,7 @@
 				<row title="pword">
 					<container>
 						<textEdit rows="1" cols="16">
-							<model ref="assessment.access.password" />
+							<model ref="assessment.password.password" />
 						</textEdit>
 						<text>
 							<message selector="optional"></message>

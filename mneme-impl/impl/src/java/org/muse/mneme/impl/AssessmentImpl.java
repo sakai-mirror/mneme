@@ -28,10 +28,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AcceptSubmitStatus;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentDates;
 import org.muse.mneme.api.AssessmentGrading;
 import org.muse.mneme.api.AssessmentParts;
+import org.muse.mneme.api.AssessmentPassword;
 import org.muse.mneme.api.AssessmentReview;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Attribution;
@@ -50,8 +50,6 @@ public class AssessmentImpl implements Assessment
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(AssessmentImpl.class);
-
-	protected AssessmentAccess access = null;
 
 	protected Boolean archived = Boolean.FALSE;
 
@@ -83,6 +81,8 @@ public class AssessmentImpl implements Assessment
 	protected Integer numSubmissionsAllowed = Integer.valueOf(1);
 
 	protected AssessmentPartsImpl parts = null;
+
+	protected AssessmentPassword password = null;
 
 	protected transient PoolService poolService = null;
 
@@ -123,12 +123,12 @@ public class AssessmentImpl implements Assessment
 		this.submissionService = submissionService;
 		this.questionService = questionService;
 
-		this.access = new AssessmentAccessImpl(this.changed);
 		this.createdBy = new AttributionImpl(this.changed);
 		this.dates = new AssessmentDatesImpl(this.changed);
 		this.grading = new AssessmentGradingImpl(this.changed);
 		this.modifiedBy = new AttributionImpl(this.changed);
 		this.parts = new AssessmentPartsImpl(this, questionService, poolService, this.historyChanged);
+		this.password = new AssessmentPasswordImpl(this.changed);
 		this.presentation = new PresentationImpl(this.historyChanged);
 		this.review = new AssessmentReviewImpl(this, this.changed);
 		this.submitPresentation = new PresentationImpl(this.historyChanged);
@@ -184,14 +184,6 @@ public class AssessmentImpl implements Assessment
 
 		// otherwise, we are open
 		return AcceptSubmitStatus.open;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public AssessmentAccess getAccess()
-	{
-		return this.access;
 	}
 
 	/**
@@ -355,6 +347,14 @@ public class AssessmentImpl implements Assessment
 	public AssessmentParts getParts()
 	{
 		return this.parts;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentPassword getPassword()
+	{
+		return this.password;
 	}
 
 	/**
@@ -714,7 +714,6 @@ public class AssessmentImpl implements Assessment
 	 */
 	protected void set(AssessmentImpl other)
 	{
-		this.access = new AssessmentAccessImpl((AssessmentAccessImpl) other.access, this.changed);
 		this.archived = other.archived;
 		this.changed = new ChangeableImpl(other.changed);
 		this.context = other.context;
@@ -729,6 +728,7 @@ public class AssessmentImpl implements Assessment
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
 		this.numSubmissionsAllowed = other.numSubmissionsAllowed;
 		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts, this.historyChanged);
+		this.password = new AssessmentPasswordImpl((AssessmentPasswordImpl) other.password, this.changed);
 		this.poolService = other.poolService;
 		this.presentation = new PresentationImpl((PresentationImpl) other.presentation, this.historyChanged);
 		this.published = other.published;

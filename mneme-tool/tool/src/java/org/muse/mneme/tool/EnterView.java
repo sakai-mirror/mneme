@@ -172,7 +172,7 @@ public class EnterView extends ControllerImpl
 		}
 
 		// check password
-		if ((assessment.getAccess().getPassword() != null) && (!assessment.getAccess().checkPassword(value.getValue())))
+		if ((assessment.getPassword().getPassword() != null) && (!assessment.getPassword().checkPassword(value.getValue())))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.password)));
