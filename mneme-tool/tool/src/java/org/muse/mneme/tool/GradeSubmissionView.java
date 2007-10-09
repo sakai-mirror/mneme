@@ -80,39 +80,60 @@ public class GradeSubmissionView extends ControllerImpl
 			return;
 		}
 
+		boolean fromGradeByQuestion = false;
+
+		if (context.getPreviousDestination().startsWith("/grade_question")) fromGradeByQuestion = true;
+
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
 		context.put("assessment", assessment);
 
-		// submission id is in params array at index 7
-		Submission submission = this.submissionService.getSubmission(params[7]);
-		context.put("submission", submission);
+		Submission submission = null;
 
-		List<Submission> submissions = null;
-		/*
-		 * for previous and next - get submissions based on grade_assessment sort & view. sort is at index 4 and view is at index 6 in params
-		 */
-		if (params[6].equalsIgnoreCase("all"))
+		if (fromGradeByQuestion)
 		{
-			SubmissionService.FindAssessmentSubmissionsSort sort = getSort(context, params[4]);
-			// get all Assessment submissions
-			submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, null, null);
-
-		}
-		else if (params[6].equalsIgnoreCase("highest"))
-		{
-			SubmissionService.FindAssessmentSubmissionsSort sort = getSort(context, params[4]);
-			// get official Assessment submissions
-			submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.TRUE, null, null);
+			String submissionId = context.getDestination().substring(context.getDestination().lastIndexOf("/") + 1);
+			submission = this.submissionService.getSubmission(submissionId);
+			context.put("fromGradeByQuestion", "TRUE");
 		}
 		else
 		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
+			// submission id is in params array at index 7
+			submission = this.submissionService.getSubmission(params[7]);
+			context.put("fromGradeByQuestion", "FALSE");
 		}
 
-		parsePreviousNext(context, submission, submissions);
+		context.put("submission", submission);
+
+		List<Submission> submissions = null;
+
+		if (!fromGradeByQuestion)
+		{
+			/*
+			 * for previous and next - get submissions based on grade_assessment sort & view. sort is at index 4 and view is at index 6 in params
+			 */
+			if (params[6].equalsIgnoreCase("all"))
+			{
+				SubmissionService.FindAssessmentSubmissionsSort sort = getSort(context, params[4]);
+				// get all Assessment submissions
+				submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, null, null);
+
+			}
+			else if (params[6].equalsIgnoreCase("highest"))
+			{
+				SubmissionService.FindAssessmentSubmissionsSort sort = getSort(context, params[4]);
+				// get official Assessment submissions
+				submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.TRUE, null, null);
+			}
+			else
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+			
+			parsePreviousNext(context, submission, submissions);
+		}
 
 		// check for user permission to access the submission for grading
 		if (!this.submissionService.allowEvaluate(submission))
@@ -127,7 +148,6 @@ public class GradeSubmissionView extends ControllerImpl
 		destinationPath = destinationPath.substring(destinationPath.indexOf("/", 1) + 1, destinationPath.lastIndexOf("/"));
 		context.put("destinationPath", destinationPath);
 		uiService.render(ui, context);
-
 	}
 
 	/**
@@ -147,8 +167,8 @@ public class GradeSubmissionView extends ControllerImpl
 		if (params.length != 4 && params.length != 5 && params.length != 6 && params.length != 7 && params.length != 8)
 			throw new IllegalArgumentException();
 
-		// submission id is in params array at index 7
-		Submission submission = this.submissionService.getSubmission(params[7]);
+		// submission id is in params array at last index
+		Submission submission = this.submissionService.getSubmission(params[params.length - 1]);
 		context.put("submission", submission);
 
 		// read form
@@ -192,8 +212,22 @@ public class GradeSubmissionView extends ControllerImpl
 
 				destination = destination.replace("NEXT:", "");
 				destination = destination.replace("PREV:", "");
+			}else if (destination.startsWith("/grade_question"))
+			{
+				try
+				{
+					// save submission
+					if (submission.getAnswers() != null)
+					{
+						this.submissionService.evaluateSubmission(submission);
+					}
+				}
+				catch (AssessmentPermissionException e)
+				{
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
 			}
-
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
