@@ -36,11 +36,9 @@ import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
-import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
-import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -51,7 +49,6 @@ public class PoolsView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(PoolsView.class);
 
-	
 	/** Dependency: Pool service. */
 	protected PoolService poolService = null;
 
@@ -147,7 +144,6 @@ public class PoolsView extends ControllerImpl
 		// default paging
 		if (pagingParameter == null)
 		{
-			// TODO: other than 2 size!
 			pagingParameter = "1-30";
 		}
 
@@ -206,7 +202,7 @@ public class PoolsView extends ControllerImpl
 				// delete the pools
 				if (selectedPoolIds != null && (selectedPoolIds.length > 0))
 				{
-					StringBuffer path = new StringBuffer();
+					StringBuilder path = new StringBuilder();
 					String separator = "+";
 
 					path.append(destination);
@@ -217,7 +213,6 @@ public class PoolsView extends ControllerImpl
 						path.append(selectedPoolId);
 						path.append(separator);
 					}
-
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
 					return;
 				}
@@ -277,9 +272,8 @@ public class PoolsView extends ControllerImpl
 				try
 				{
 					Pool pool = this.poolService.getPool(destination.substring(destination.lastIndexOf("/") + 1));
-					if (pool != null)
-						this.poolService.copyPool(pool);
-					
+					if (pool != null) this.poolService.copyPool(pool);
+
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
 					return;
 				}
@@ -289,60 +283,6 @@ public class PoolsView extends ControllerImpl
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 					return;
 				}
-			}
-
-			// handle adding a question
-			else if (destination.startsWith("ADDQ:"))
-			{
-				// require one pool selected
-				if ((selectedPoolIds == null) || (selectedPoolIds.length != 1))
-				{
-					// TODO: do this better!
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
-				}
-
-				Pool pool = this.poolService.getPool(selectedPoolIds[0]);
-				if (pool == null)
-				{
-					// TODO: do this better!
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
-				}
-
-				// parse the type (after the : in the destination)
-				String type = StringUtil.splitFirst(destination, ":")[1];
-
-				// check security
-				if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
-
-				// create the question of the appropriate type (all the way to save)
-				Question newQuestion = null;
-				try
-				{
-					newQuestion = this.questionService.newQuestion(pool, type);
-					this.questionService.saveQuestion(newQuestion);
-				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
-
-				// form the destionation
-				// TODO: preserve sort / paging parameters
-				destination = "/question_edit/" + newQuestion.getId();
-
-				// redirect
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
 			}
 			else
 			{
