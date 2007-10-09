@@ -33,6 +33,7 @@ import org.muse.mneme.api.AssessmentGrading;
 import org.muse.mneme.api.AssessmentParts;
 import org.muse.mneme.api.AssessmentReview;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.AssessmentSpecialAccess;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Attribution;
 import org.muse.mneme.api.Presentation;
@@ -90,14 +91,6 @@ public class SubmissionAssessmentImpl implements Assessment
 	public AcceptSubmitStatus getAcceptSubmitStatus()
 	{
 		return getMainAssessment().getAcceptSubmitStatus();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public AssessmentPassword getPassword()
-	{
-		return getMainAssessment().getPassword();
 	}
 
 	/**
@@ -232,6 +225,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public AssessmentPassword getPassword()
+	{
+		return getMainAssessment().getPassword();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Presentation getPresentation()
 	{
 		return getHistoricalAssessment().getPresentation();
@@ -291,6 +292,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	public Boolean getShowHints()
 	{
 		return getHistoricalAssessment().getShowHints();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentSpecialAccess getSpecialAccess()
+	{
+		return getMainAssessment().getSpecialAccess();
 	}
 
 	/**

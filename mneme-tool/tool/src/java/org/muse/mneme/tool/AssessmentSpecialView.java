@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentAccess;
@@ -38,14 +39,14 @@ import org.muse.mneme.api.AssessmentService;
 import org.sakaiproject.util.Web;
 
 /**
- * The /assessment_access view for the mneme tool.
+ * The /asssessment_special view for the mneme tool.
  */
-public class TestAccessView extends ControllerImpl
+public class AssessmentSpecialView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(TestSettingsView.class);
+	private static Log M_log = LogFactory.getLog(AssessmentSpecialView.class);
 
-	/** Assessment service. */
+	/** Dependency: Assessment service. */
 	protected AssessmentService assessmentService = null;
 
 	/**
@@ -61,27 +62,18 @@ public class TestAccessView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need 3 parameters: sort, aid, access id
-		if (params.length != 5)
+		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
+
+		// sort parameter for return view
 		String sort = params[2];
-		String assessmentId = params[3];
-		String accessId = params[4];
 
-		// get the assessment
-		Assessment assessment = assessmentService.getAssessment(assessmentId);
+		// assessment id parameter
+		String aid = params[3];
+		Assessment assessment = assessmentService.getAssessment(aid);
 		if (assessment == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
-		// get the access
-		AssessmentAccess access = assessment.getSpecialAccess().getAccess(accessId);
-		if (access == null)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
@@ -96,10 +88,13 @@ public class TestAccessView extends ControllerImpl
 			return;
 		}
 
-		// setup the model
+		// collect information: the selected assessment
 		context.put("assessment", assessment);
-		context.put("access", access);
 		context.put("sort", sort);
+
+		// for the checkboxes
+		Values values = this.uiService.newValues();
+		context.put("ids", values);
 
 		// render
 		uiService.render(ui, context);
@@ -119,27 +114,18 @@ public class TestAccessView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need 3 parameters: sort, aid, access id
-		if (params.length != 5)
+		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
+
+		// sort parameter for return view
 		String sort = params[2];
-		String assessmentId = params[3];
-		String accessId = params[4];
 
-		// get the assessment
-		Assessment assessment = assessmentService.getAssessment(assessmentId);
+		// assessment id parameter
+		String aid = params[3];
+		Assessment assessment = assessmentService.getAssessment(aid);
 		if (assessment == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
-		// get the access
-		AssessmentAccess access = assessment.getSpecialAccess().getAccess(accessId);
-		if (access == null)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
@@ -154,31 +140,77 @@ public class TestAccessView extends ControllerImpl
 			return;
 		}
 
-		// setup the model
-		context.put("access", access);
+		// for the ids selected for delete
+		Values values = this.uiService.newValues();
+		context.put("ids", values);
 
-		// read the form
-		String destination = uiService.decode(req, context);
+		// read form
+		String destination = this.uiService.decode(req, context);
 
-		// save
-		try
+		if ("DEL".equals(destination))
 		{
-			this.assessmentService.saveAssessment(assessment);
-		}
-		catch (AssessmentPermissionException e)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
-		catch (AssessmentPolicyException e)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
-			return;
+			// delete the selected ids
+			String[] ids = values.getValues();
+			if (ids != null && (ids.length > 0))
+			{
+				for (String id : ids)
+				{
+					AssessmentAccess access = assessment.getSpecialAccess().getAccess(id);
+					if (access != null)
+					{
+						assessment.getSpecialAccess().removeAccess(access);
+					}
+				}
+			}
+
+			// save
+			try
+			{
+				this.assessmentService.saveAssessment(assessment);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+			catch (AssessmentPolicyException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+				return;
+			}
+
+			destination = context.getDestination();
 		}
 
-		// redirect to the next destination
+		// deal with add
+		else if ("ADD".equals(destination))
+		{
+			AssessmentAccess access = assessment.getSpecialAccess().addAccess();
+
+			// save
+			try
+			{
+				this.assessmentService.saveAssessment(assessment);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+			catch (AssessmentPolicyException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+				return;
+			}
+
+			// go edit it
+			destination = "/assessment_access/" + sort + "/" + aid + "/" + access.getId();
+		}
+
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

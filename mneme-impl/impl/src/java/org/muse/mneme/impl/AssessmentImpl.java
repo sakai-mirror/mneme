@@ -33,6 +33,7 @@ import org.muse.mneme.api.AssessmentGrading;
 import org.muse.mneme.api.AssessmentParts;
 import org.muse.mneme.api.AssessmentPassword;
 import org.muse.mneme.api.AssessmentReview;
+import org.muse.mneme.api.AssessmentSpecialAccess;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Attribution;
 import org.muse.mneme.api.MnemeService;
@@ -96,11 +97,13 @@ public class AssessmentImpl implements Assessment
 
 	protected Boolean randomAccess = Boolean.TRUE;
 
-	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
-
 	protected AssessmentReview review = null;
 
+	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
+
 	protected Boolean showHints = Boolean.TRUE;
+
+	protected AssessmentSpecialAccess specialAccess = null;
 
 	protected transient Submission submissionContext = null;
 
@@ -131,6 +134,7 @@ public class AssessmentImpl implements Assessment
 		this.password = new AssessmentPasswordImpl(this.changed);
 		this.presentation = new PresentationImpl(this.historyChanged);
 		this.review = new AssessmentReviewImpl(this, this.changed);
+		this.specialAccess = new AssessmentSpecialAccessImpl(this.changed);
 		this.submitPresentation = new PresentationImpl(this.historyChanged);
 	}
 
@@ -419,6 +423,14 @@ public class AssessmentImpl implements Assessment
 	public Boolean getShowHints()
 	{
 		return this.showHints;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentSpecialAccess getSpecialAccess()
+	{
+		return this.specialAccess;
 	}
 
 	/**
@@ -741,6 +753,7 @@ public class AssessmentImpl implements Assessment
 		// this.submissionCounts = new SubmissionCountsImpl((SubmissionCountsImpl) other.submissionCounts);
 		this.submissionService = other.submissionService;
 		this.submitPresentation = new PresentationImpl((PresentationImpl) other.submitPresentation, this.historyChanged);
+		this.specialAccess = new AssessmentSpecialAccessImpl((AssessmentSpecialAccessImpl) other.specialAccess, this.changed);
 		this.timeLimit = other.timeLimit;
 		this.title = other.title;
 		this.type = other.type;

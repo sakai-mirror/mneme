@@ -325,7 +325,7 @@
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="access">
 							<icon icon="/icons/access.png" style="LEFT" />
-							<destination template="/assessment_access/{0}{1}/{2}">
+							<destination template="/assessment_special/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />

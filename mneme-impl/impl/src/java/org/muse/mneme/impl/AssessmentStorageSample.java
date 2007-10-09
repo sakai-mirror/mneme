@@ -34,6 +34,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.DrawPart;
@@ -65,6 +66,8 @@ public class AssessmentStorageSample implements AssessmentStorage
 	protected long nextAssessmentId = 100;
 
 	protected long nextPartId = 100;
+
+	protected long nextAccessId = 100;
 
 	protected PoolService poolService = null;
 
@@ -406,6 +409,21 @@ public class AssessmentStorageSample implements AssessmentStorage
 					this.nextPartId++;
 				}
 				((PartImpl) part).initId("p" + Long.toString(id));
+			}
+		}
+
+		// assign special access ids
+		for (AssessmentAccess access : assessment.getSpecialAccess().getAccess())
+		{
+			if (idsNeeded || (access.getId() == null))
+			{
+				long id = 0;
+				synchronized (this.idGenerator)
+				{
+					id = this.nextAccessId;
+					this.nextAccessId++;
+				}
+				((AssessmentAccessImpl) access).initId("x" + Long.toString(id));
 			}
 		}
 

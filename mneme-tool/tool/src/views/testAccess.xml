@@ -2,26 +2,26 @@
 <!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
-/**********************************************************************************
- * $URL$
- * $Id$
- ***********************************************************************************
- *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- **********************************************************************************/
+	/**********************************************************************************
+	* $URL$
+	* $Id$
+	***********************************************************************************
+	*
+	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* 
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	* 
+	*      http://www.apache.org/licenses/LICENSE-2.0
+	* 
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*
+	**********************************************************************************/
 -->
 
 <interface>
@@ -30,29 +30,24 @@
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
+
+	<!--  title & header -->
+	<title>
+		<message selector="testAccess-title">
+			<model ref="assessment.title" missing="no-title" />
+		</message>
+	</title>
 	<header>
 		<message selector="testAccess-header">
 			<model type="icon" icon="/icons/access.png" />
+			<model ref="assessment.title" missing="no-title" />
 		</message>
 	</header>
-	<title>
-		<message selector="testAccess-title" />
-	</title>
 
 	<container>
 
 		<entityDisplay>
 			<rows>
-				<row title="id">
-					<container>
-						<text model="assessment.id" />
-					</container>
-				</row>
-				<row title="title">
-					<container>
-						<text model="assessment.title" />
-					</container>
-				</row>
 				<row title="dates">
 					<container>
 						<entityDisplay>
@@ -60,25 +55,22 @@
 								<row title="open-date">
 									<container>
 										<dateEdit>
-											<model ref="assessment.dates.openDate" type="date" />
+											<model ref="access.dates.openDate" type="date" />
 										</dateEdit>
 									</container>
 								</row>
 								<row title="due-date">
 									<container>
 										<dateEdit>
-											<model ref="assessment.dates.dueDate" type="date" />
+											<model ref="access.dates.dueDate" type="date" />
 										</dateEdit>
 									</container>
 								</row>
 								<row title="accept-until">
 									<container>
 										<dateEdit>
-											<model ref="assessment.dates.acceptUntilDate" type="date" />
+											<model ref="access.dates.acceptUntilDate" type="date" />
 										</dateEdit>
-										<text>
-											<message selector="late-message"></message>
-										</text>
 									</container>
 								</row>
 							</rows>
@@ -87,32 +79,43 @@
 				</row>
 				<row title="timeLimit">
 					<container>
-						<durationEdit>
-							<model ref="assessment.timeLimit" type="duration" />
-						</durationEdit>
-						<text>
-							<message selector="time-limit-optional"></message>
-						</text>
+						<selection orientation="VERTICAL">
+							<model ref="access.hasTimeLimit" />
+							<selectionChoices>
+								<selectionChoice value="false" selector="no-time-limit" />
+								<selectionChoice value="true" selector="time-limit">
+									<container>
+										<durationEdit>
+											<model ref="access.timeLimit" type="duration" />
+										</durationEdit>
+									</container>
+								</selectionChoice>
+							</selectionChoices>
+						</selection>
 					</container>
 				</row>
 				<row title="allowTries">
 					<container>
-						<countEdit rows="1" cols="6">
-							<model ref="assessment.numSubmissionsAllowed" type="count" />
-						</countEdit>
-						<text>
-							<message selector="tries-optional"></message>
-						</text>
+						<selection orientation="VERTICAL">
+							<model ref="access.hasTries" />
+							<selectionChoices>
+								<selectionChoice value="false" selector="no-tries" />
+								<selectionChoice value="true" selector="tries">
+									<container>
+										<countEdit>
+											<model ref="access.tries" type="count" />
+										</countEdit>
+									</container>
+								</selectionChoice>
+							</selectionChoices>
+						</selection>
 					</container>
 				</row>
-				<row title="pword">
+				<row title="password">
 					<container>
 						<textEdit rows="1" cols="16">
-							<model ref="assessment.password.password" />
+							<model ref="access.password.password" />
 						</textEdit>
-						<text>
-							<message selector="optional"></message>
-						</text>
 					</container>
 				</row>
 			</rows>
@@ -121,17 +124,32 @@
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="100%">
 			<container>
-				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/assessments">
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
+					<destination template="/assessment_special/{0}/{1}">
+						<model ref="sort" />
+						<model ref="assessment.id" />
+					</destination>
 				</navigation>
 				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
-					<destination template="/assessments/{0}">
-						<model ref="sortcode" />
-					</destination>
 					<icon icon="/icons/cancel.gif" style="LEFT" />
+					<destination template="/assessment_special/{0}/{1}">
+						<model ref="sort" />
+						<model ref="assessment.id" />
+					</destination>
 				</navigation>
 			</container>
 		</navigationBar>
+
+		<entityDisplay>
+			<rows>
+				<row title="id">
+					<container>
+						<text model="assessment.id" />
+					</container>
+				</row>
+			</rows>
+		</entityDisplay>
 
 	</container>
 </interface>

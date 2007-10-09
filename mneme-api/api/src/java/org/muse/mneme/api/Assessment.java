@@ -215,6 +215,13 @@ public interface Assessment
 	Boolean getShowHints();
 
 	/**
+	 * Access the set of special access definitions for the assessment.
+	 * 
+	 * @return The set of special access definitions for the assessment.
+	 */
+	AssessmentSpecialAccess getSpecialAccess();
+
+	/**
 	 * Access the submission that is referencing this assessment (so we can answer submission specific questions like question order).
 	 * <p>
 	 * Note: this will be null unless the assessment is accessed throught Submission.getAssessment().
@@ -234,7 +241,7 @@ public interface Assessment
 	/**
 	 * Access the time limit for taking the assessment (ms).
 	 * 
-	 * @return The assessment's time limit, or null for umlimited.
+	 * @return The time limit for taking the assessment (ms), or null if it is untimed.
 	 */
 	Long getTimeLimit();
 
