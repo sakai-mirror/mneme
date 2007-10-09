@@ -184,7 +184,18 @@ public class PoolsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// throw new IllegalArgumentException();
+		if ((params.length != 2) && (params.length != 3) && (params.length != 4))
+		{
+			throw new IllegalArgumentException();
+		}
+		
+		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		{
+			//redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+		
 		// for the selected pools to delete
 		Values values = this.uiService.newValues();
 		context.put("poolids", values);
