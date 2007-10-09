@@ -170,9 +170,15 @@ public class GradeSubmissionView extends ControllerImpl
 		// submission id is in params array at last index
 		Submission submission = this.submissionService.getSubmission(params[params.length - 1]);
 		context.put("submission", submission);
+		
+		if (submission == null){
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
 
 		// read form
 		String destination = this.uiService.decode(req, context);
+		
 
 		if (destination != null)
 		{
@@ -180,11 +186,7 @@ public class GradeSubmissionView extends ControllerImpl
 			{
 				try
 				{
-					// save submission
-					if (submission.getAnswers() != null)
-					{
-						this.submissionService.evaluateSubmission(submission);
-					}
+					saveGradedSubmission(submission);
 				}
 				catch (AssessmentPermissionException e)
 				{
@@ -198,11 +200,7 @@ public class GradeSubmissionView extends ControllerImpl
 			{
 				try
 				{
-					// save submission
-					if (submission.getAnswers() != null)
-					{
-						this.submissionService.evaluateSubmission(submission);
-					}
+					saveGradedSubmission(submission);
 				}
 				catch (AssessmentPermissionException e)
 				{
@@ -216,11 +214,7 @@ public class GradeSubmissionView extends ControllerImpl
 			{
 				try
 				{
-					// save submission
-					if (submission.getAnswers() != null)
-					{
-						this.submissionService.evaluateSubmission(submission);
-					}
+					saveGradedSubmission(submission);
 				}
 				catch (AssessmentPermissionException e)
 				{
@@ -231,6 +225,20 @@ public class GradeSubmissionView extends ControllerImpl
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+	}
+
+	/**
+	 * save Graded Submission
+	 * @param submission
+	 * @throws AssessmentPermissionException
+	 */
+	private void saveGradedSubmission(Submission submission) throws AssessmentPermissionException
+	{
+		// save submission
+		if (submission.getAnswers() != null)
+		{
+			this.submissionService.evaluateSubmission(submission);
+		}
 	}
 
 	/**
