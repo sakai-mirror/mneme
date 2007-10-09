@@ -153,6 +153,9 @@
 							</entityActions>
 						</selectionColumn>
 						<orderColumn>
+							<title>
+								<message selector="part-order" />
+							</title>
 							<value>
 								<model ref="part.id" />
 							</value>

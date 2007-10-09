@@ -32,12 +32,13 @@
 	<header>
 		<message selector="partEdit-header">
 			<model type="icon" icon="/icons/edit.png" />
+			<model ref="part.ordering.position" />
 			<model ref="assessment.title" missing="no-title" />
 		</message>
 	</header>
 
 	<container>
-		<section title="properties">
+		<section>
 			<container>
 				<entityDisplay>
 					<rows>
@@ -117,6 +118,9 @@
 							</readOnly>
 						</selectionColumn>
 						<orderColumn>
+							<title>
+								<message selector="question-order" />
+							</title>
 							<value>
 								<model type="text" ref="question.id" />
 							</value>
@@ -170,15 +174,18 @@
 						</modelColumn>
 					</columns>
 				</entityList>
-
+				<text>
+			<message selector="num-questions">
+				<model ref="part.numQuestions" />
+			</message>
+		</text>
 			</container>
 		</section>
 
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="100%">
 			<container>
-				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
-					<icon icon="/icons/return.png" style="LEFT" />
+				<navigation title="continue" accessKey="continue-access" description="continue-description" style="BUTTON" submit="TRUE">
 					<destination template="/assessment_edit/{0}/{1}">
 						<model ref="testsortcode" />
 						<model ref="assessment.id" />

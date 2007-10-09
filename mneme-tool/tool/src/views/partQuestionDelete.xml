@@ -54,11 +54,6 @@
 							</emptyTitle>
 							<columns>
 								<modelColumn>
-									<title>
-										<message selector="delete-part-ques-title">
-											<model ref="part.title" missing="no-title"></model>
-										</message>
-									</title>
 									<model ref="partQuestion.description" missing="no-description" />
 								</modelColumn>
 							</columns>
