@@ -190,7 +190,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<? extends Part> getParts()
+	public List<Part> getParts()
 	{
 		return this.parts;
 	}

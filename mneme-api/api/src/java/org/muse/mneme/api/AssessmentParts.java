@@ -84,7 +84,7 @@ public interface AssessmentParts
 	 * 
 	 * @return A List of the parts.
 	 */
-	List<? extends Part> getParts();
+	List<Part> getParts();
 
 	/**
 	 * Access one of the questions, by question id.
