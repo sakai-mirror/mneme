@@ -22,10 +22,10 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.muse.mneme.api.AssessmentAccess;
-import org.muse.mneme.api.AssessmentDates;
 import org.muse.mneme.api.AssessmentPassword;
 import org.muse.mneme.api.Changeable;
 
@@ -34,9 +34,25 @@ import org.muse.mneme.api.Changeable;
  */
 public class AssessmentAccessImpl implements AssessmentAccess
 {
-	protected AssessmentDatesImpl dates = null;
+	protected Date acceptUntilDate = null;
+
+	protected Date dueDate = null;
 
 	protected String id = null;
+
+	protected Date openDate = null;
+
+	protected Boolean overrideAcceptUntilDate = Boolean.FALSE;
+
+	protected Boolean overrideDueDate = Boolean.FALSE;
+
+	protected Boolean overrideOpenDate = Boolean.FALSE;
+
+	protected Boolean overridePassword = Boolean.FALSE;
+
+	protected Boolean overrideTimeLimit = Boolean.FALSE;
+
+	protected Boolean overrideTries = Boolean.FALSE;
 
 	protected Changeable owner = null;
 
@@ -75,7 +91,6 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	public AssessmentAccessImpl(Changeable owner)
 	{
 		this.owner = owner;
-		this.dates = new AssessmentDatesImpl(owner);
 		this.password = new AssessmentPasswordImpl(owner);
 	}
 
@@ -94,9 +109,17 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	/**
 	 * {@inheritDoc}
 	 */
-	public AssessmentDates getDates()
+	public Date getAcceptUntilDate()
 	{
-		return this.dates;
+		return this.acceptUntilDate;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Date getDueDate()
+	{
+		return this.dueDate;
 	}
 
 	/**
@@ -121,6 +144,62 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	public String getId()
 	{
 		return this.id;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Date getOpenDate()
+	{
+		return this.openDate;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getOverrideAcceptUntilDate()
+	{
+		return this.overrideAcceptUntilDate;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getOverrideDueDate()
+	{
+		return this.overrideDueDate;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getOverrideOpenDate()
+	{
+		return this.overrideOpenDate;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getOverridePassword()
+	{
+		return this.overridePassword;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getOverrideTimeLimit()
+	{
+		return this.overrideTimeLimit;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getOverrideTries()
+	{
+		return this.overrideTries;
 	}
 
 	/**
@@ -174,6 +253,30 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setAcceptUntilDate(Date date)
+	{
+		if (!Different.different(date, this.acceptUntilDate)) return;
+
+		this.acceptUntilDate = date;
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setDueDate(Date date)
+	{
+		if (!Different.different(date, this.dueDate)) return;
+
+		this.dueDate = date;
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setHasTimeLimit(Boolean hasTimeLimit)
 	{
 		if (hasTimeLimit == null) throw new IllegalArgumentException();
@@ -199,6 +302,96 @@ public class AssessmentAccessImpl implements AssessmentAccess
 
 			this.owner.setChanged();
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setOpenDate(Date date)
+	{
+		if (!Different.different(date, this.openDate)) return;
+
+		this.openDate = date;
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setOverrideAcceptUntilDate(Boolean override)
+	{
+		if (override == null) throw new IllegalArgumentException();
+		if (override.equals(this.overrideAcceptUntilDate)) return;
+
+		this.overrideAcceptUntilDate = override;
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setOverrideDueDate(Boolean override)
+	{
+		if (override == null) throw new IllegalArgumentException();
+		if (override.equals(this.overrideDueDate)) return;
+
+		this.overrideDueDate = override;
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setOverrideOpenDate(Boolean override)
+	{
+		if (override == null) throw new IllegalArgumentException();
+		if (override.equals(this.overrideOpenDate)) return;
+
+		this.overrideOpenDate = override;
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setOverridePassword(Boolean override)
+	{
+		if (override == null) throw new IllegalArgumentException();
+		if (override.equals(this.overridePassword)) return;
+
+		this.overridePassword = override;
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setOverrideTimeLimit(Boolean override)
+	{
+		if (override == null) throw new IllegalArgumentException();
+		if (override.equals(this.overrideTimeLimit)) return;
+
+		this.overrideTimeLimit = override;
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setOverrideTries(Boolean override)
+	{
+		if (override == null) throw new IllegalArgumentException();
+		if (override.equals(this.overrideTries)) return;
+
+		this.overrideTries = override;
+
+		this.owner.setChanged();
 	}
 
 	/**
@@ -259,8 +452,16 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	protected void set(AssessmentAccessImpl other)
 	{
-		this.dates = new AssessmentDatesImpl(other.dates, this.owner);
+		this.acceptUntilDate = other.acceptUntilDate;
+		this.dueDate = other.dueDate;
 		this.id = other.id;
+		this.openDate = other.openDate;
+		this.overrideAcceptUntilDate = other.overrideAcceptUntilDate;
+		this.overrideDueDate = other.overrideDueDate;
+		this.overrideOpenDate = other.overrideOpenDate;
+		this.overridePassword = other.overridePassword;
+		this.overrideTimeLimit = other.overrideTimeLimit;
+		this.overrideTries = other.overrideTries;
 		this.password = new AssessmentPasswordImpl(other.password, this.owner);
 		this.timeLimit = other.timeLimit;
 		this.tries = other.tries;

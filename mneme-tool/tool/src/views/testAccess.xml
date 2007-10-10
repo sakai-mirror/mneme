@@ -65,23 +65,53 @@
 							<rows>
 								<row title="open-date">
 									<container>
-										<dateEdit>
-											<model ref="access.dates.openDate" type="date" />
-										</dateEdit>
+										<selection orientation="HORIZONTAL">
+											<model ref="access.overrideOpenDate" />
+											<selectionChoices>
+												<selectionChoice value="false" selector="from-test" />
+												<selectionChoice value="true" selector="from-special">
+													<container>
+														<dateEdit>
+															<model ref="access.openDate" type="date" />
+														</dateEdit>
+													</container>
+												</selectionChoice>
+											</selectionChoices>
+										</selection>
 									</container>
 								</row>
 								<row title="due-date">
 									<container>
-										<dateEdit>
-											<model ref="access.dates.dueDate" type="date" />
-										</dateEdit>
+										<selection orientation="HORIZONTAL">
+											<model ref="access.overrideDueDate" />
+											<selectionChoices>
+												<selectionChoice value="false" selector="from-test" />
+												<selectionChoice value="true" selector="from-special">
+													<container>
+														<dateEdit>
+															<model ref="access.dueDate" type="date" />
+														</dateEdit>
+													</container>
+												</selectionChoice>
+											</selectionChoices>
+										</selection>
 									</container>
 								</row>
 								<row title="accept-until">
 									<container>
-										<dateEdit>
-											<model ref="access.dates.acceptUntilDate" type="date" />
-										</dateEdit>
+										<selection orientation="HORIZONTAL">
+											<model ref="access.overrideAcceptUntilDate" />
+											<selectionChoices>
+												<selectionChoice value="false" selector="from-test" />
+												<selectionChoice value="true" selector="from-special">
+													<container>
+														<dateEdit>
+															<model ref="access.acceptUntilDate" type="date" />
+														</dateEdit>
+													</container>
+												</selectionChoice>
+											</selectionChoices>
+										</selection>
 									</container>
 								</row>
 							</rows>
@@ -90,15 +120,25 @@
 				</row>
 				<row title="timeLimit">
 					<container>
-						<selection orientation="VERTICAL">
-							<model ref="access.hasTimeLimit" />
+						<selection orientation="HORIZONTAL">
+							<model ref="access.overrideTimeLimit" />
 							<selectionChoices>
-								<selectionChoice value="false" selector="no-time-limit" />
-								<selectionChoice value="true" selector="time-limit">
+								<selectionChoice value="false" selector="from-test" />
+								<selectionChoice value="true" selector="from-special">
 									<container>
-										<durationEdit>
-											<model ref="access.timeLimit" type="duration" />
-										</durationEdit>
+										<selection orientation="VERTICAL">
+											<model ref="access.hasTimeLimit" />
+											<selectionChoices>
+												<selectionChoice value="false" selector="no-time-limit" />
+												<selectionChoice value="true" selector="time-limit">
+													<container>
+														<durationEdit>
+															<model ref="access.timeLimit" type="duration" />
+														</durationEdit>
+													</container>
+												</selectionChoice>
+											</selectionChoices>
+										</selection>
 									</container>
 								</selectionChoice>
 							</selectionChoices>
@@ -107,18 +147,28 @@
 				</row>
 				<row title="allowTries">
 					<container>
-						<selection orientation="VERTICAL">
-							<model ref="access.hasTriesLimit" />
+						<selection orientation="HORIZONTAL">
+							<model ref="access.overrideTries" />
 							<selectionChoices>
-								<selectionChoice value="false" selector="no-tries" />
-								<selectionChoice value="true" selector="tries">
+								<selectionChoice value="false" selector="from-test" />
+								<selectionChoice value="true" selector="from-special">
 									<container>
-										<countEdit>
-											<model ref="access.tries" type="count" />
-											<minValue>
-												<model type="constant" value="1" />
-											</minValue>
-										</countEdit>
+										<selection orientation="VERTICAL">
+											<model ref="access.hasTriesLimit" />
+											<selectionChoices>
+												<selectionChoice value="false" selector="no-tries" />
+												<selectionChoice value="true" selector="tries">
+													<container>
+														<countEdit>
+															<model ref="access.tries" type="count" />
+															<minValue>
+																<model type="constant" value="1" />
+															</minValue>
+														</countEdit>
+													</container>
+												</selectionChoice>
+											</selectionChoices>
+										</selection>
 									</container>
 								</selectionChoice>
 							</selectionChoices>
@@ -127,9 +177,19 @@
 				</row>
 				<row title="password">
 					<container>
-						<textEdit rows="1" cols="16">
-							<model ref="access.password.password" />
-						</textEdit>
+						<selection orientation="HORIZONTAL">
+							<model ref="access.overridePassword" />
+							<selectionChoices>
+								<selectionChoice value="false" selector="from-test" />
+								<selectionChoice value="true" selector="from-special">
+									<container>
+										<textEdit rows="1" cols="16">
+											<model ref="access.password.password" />
+										</textEdit>
+									</container>
+								</selectionChoice>
+							</selectionChoices>
+						</selection>
 					</container>
 				</row>
 			</rows>

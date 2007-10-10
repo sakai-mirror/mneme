@@ -89,19 +89,19 @@
 					<title>
 						<message selector="open" />
 					</title>
-					<model ref="access.dates.openDate" type="date" twoLine="TRUE" missing="dash" />
+					<model ref="access.openDate" type="date" twoLine="TRUE" missing="dash" />
 				</modelColumn>
 				<modelColumn>
 					<title>
 						<message selector="due" />
 					</title>
-					<model ref="access.dates.dueDate" type="date" twoLine="TRUE" missing="dash" />
+					<model ref="access.dueDate" type="date" twoLine="TRUE" missing="dash" />
 				</modelColumn>
 				<modelColumn>
 					<title>
 						<message selector="accept-until" />
 					</title>
-					<model ref="access.dates.acceptUntilDate" type="date" twoLine="TRUE" missing="dash" />
+					<model ref="access.acceptUntilDate" type="date" twoLine="TRUE" missing="dash" />
 				</modelColumn>
 				<modelColumn>
 					<title>

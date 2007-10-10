@@ -21,6 +21,7 @@
 
 package org.muse.mneme.api;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,11 +30,19 @@ import java.util.List;
 public interface AssessmentAccess
 {
 	/**
-	 * Access the special availability dates for the assessment.
+	 * Access the date after which submissions will not be accepted.<br />
+	 * If null, no late submissions are accepted.
 	 * 
-	 * @return The special availability dates for the assessment.
+	 * @return The date after which submissions will not be accepted, or null if there is none.
 	 */
-	AssessmentDates getDates();
+	Date getAcceptUntilDate();
+
+	/**
+	 * Access the due date. Submissions after this date are considered late, if they are accepted at all.
+	 * 
+	 * @return The due date, or null if there is none.
+	 */
+	Date getDueDate();
 
 	/**
 	 * Check if we have a time limmit.
@@ -55,6 +64,56 @@ public interface AssessmentAccess
 	 * @return The id.
 	 */
 	String getId();
+
+	/**
+	 * Access the open date. Only after this date (if defined) is the assessment open for submission.<br />
+	 * If null, the test is open when it is published.
+	 * 
+	 * @return The assessment's open date, or null if there is none.
+	 */
+	Date getOpenDate();
+
+	/**
+	 * Check if we override the AcceptUntil date.
+	 * 
+	 * @return TRUE if we override the AcceptUntil date, FALSE if not.
+	 */
+	Boolean getOverrideAcceptUntilDate();
+
+	/**
+	 * Check if we override the due date.
+	 * 
+	 * @return TRUE if we override the due date, FALSE if not.
+	 */
+	Boolean getOverrideDueDate();
+
+	/**
+	 * Check if we override the open date.
+	 * 
+	 * @return TRUE if we override the open date, FALSE if not.
+	 */
+	Boolean getOverrideOpenDate();
+
+	/**
+	 * Check if we override the password.
+	 * 
+	 * @return TRUE if we override the password, FALSE if not.
+	 */
+	Boolean getOverridePassword();
+
+	/**
+	 * Check if we override the TimeLimit.
+	 * 
+	 * @return TRUE if we override the TimeLimit, FALSE if not.
+	 */
+	Boolean getOverrideTimeLimit();
+
+	/**
+	 * Check if we override the Tries.
+	 * 
+	 * @return TRUE if we override the Tries, FALSE if not.
+	 */
+	Boolean getOverrideTries();
 
 	/**
 	 * Access the special password.
@@ -94,6 +153,20 @@ public interface AssessmentAccess
 	Boolean isForUser(String userId);
 
 	/**
+	 * Set the accept until date.
+	 * 
+	 * @apram date The accept until date, or null if there is none.
+	 */
+	void setAcceptUntilDate(Date date);
+
+	/**
+	 * Set the due date.
+	 * 
+	 * @apram date The due date, or null if there is none.
+	 */
+	void setDueDate(Date date);
+
+	/**
 	 * An alternate way to clear the time limit if set to false.
 	 * 
 	 * @param hasTimeLimit
@@ -108,6 +181,61 @@ public interface AssessmentAccess
 	 *        if FALSE, clear the tries.
 	 */
 	void setHasTriesLimit(Boolean hasTriesLimit);
+
+	/**
+	 * Set the open date.
+	 * 
+	 * @apram date The open date, or null if there is none.
+	 */
+	void setOpenDate(Date date);
+
+	/**
+	 * Set the override of the AcceptUntil date.
+	 * 
+	 * @param override
+	 *        TRUE to override the AcceptUntil date, FALSE to not.
+	 */
+	void setOverrideAcceptUntilDate(Boolean override);
+
+	/**
+	 * Set the override of the due date.
+	 * 
+	 * @param override
+	 *        TRUE to override the due date, FALSE to not.
+	 */
+	void setOverrideDueDate(Boolean override);
+
+	/**
+	 * Set the override of the open date.
+	 * 
+	 * @param override
+	 *        TRUE to override the open date, FALSE to not.
+	 */
+	void setOverrideOpenDate(Boolean override);
+
+	/**
+	 * Set the override of the password.
+	 * 
+	 * @param override
+	 *        TRUE to override the password, FALSE to not.
+	 */
+	void setOverridePassword(Boolean override);
+
+	/**
+	 * Set the override of the TimeLimit.
+	 * 
+	 * @param override
+	 *        TRUE to override the TimeLimit, FALSE to not.
+	 */
+	void setOverrideTimeLimit(Boolean override);
+
+	/**
+	 * Set the override of the Tries.
+	 * 
+	 * @param override
+	 *        TRUE to override the Tries, FALSE to not.
+	 */
+	void setOverrideTries(Boolean override);
 
 	/**
 	 * Set the time limit for taking the assessment (ms).
