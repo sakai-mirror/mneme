@@ -91,6 +91,13 @@ public class PoolEditView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if ((params.length != 4) && (params.length != 5) && (params.length != 6) && (params.length != 7)) throw new IllegalArgumentException();
+		
+		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		{
+			//redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
 
 		// pools - sort at index 2, paging at index 3. pool id at index 4. Move pool_edit sort to index 5, paging to index 6
 		// pools sort parameter is in param array at index 2
@@ -190,6 +197,13 @@ public class PoolEditView extends ControllerImpl
 	{
 		if ((params.length != 3) && (params.length != 4) && (params.length != 5) && (params.length != 6) && (params.length != 7))
 			throw new IllegalArgumentException();
+		
+		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		{
+			//redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
 
 		String poolsSortCode = null;
 		if (params.length > 2) poolsSortCode = params[2];

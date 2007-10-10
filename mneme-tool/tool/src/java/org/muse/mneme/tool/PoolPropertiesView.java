@@ -74,6 +74,13 @@ public class PoolPropertiesView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if (params.length != 5) throw new IllegalArgumentException();
+		
+		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		{
+			//redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
 
 		// pools - sort at index 2, paging at index 3. pool id at index 4
 		// pools sort parameter is in param array at index 2
@@ -95,6 +102,13 @@ public class PoolPropertiesView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if (params.length != 5) throw new IllegalArgumentException();
+		
+		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		{
+			//redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
 
 		// setup the model: the selected pool
 		Pool pool = this.poolService.getPool(params[4]);

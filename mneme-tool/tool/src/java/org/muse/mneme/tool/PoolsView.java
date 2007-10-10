@@ -78,6 +78,13 @@ public class PoolsView extends ControllerImpl
 		{
 			throw new IllegalArgumentException();
 		}
+		
+		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		{
+			//redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
 
 		// sort parameter
 		String sortCode = null;

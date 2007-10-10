@@ -72,6 +72,7 @@ public class GradeSubmissionView extends ControllerImpl
 	{
 		if (params.length != 4 && params.length != 5 && params.length != 6 && params.length != 7 && params.length != 8)
 			throw new IllegalArgumentException();
+		
 		// check for user permission to access the assessments for grading
 		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
 		{
@@ -166,6 +167,14 @@ public class GradeSubmissionView extends ControllerImpl
 	{
 		if (params.length != 4 && params.length != 5 && params.length != 6 && params.length != 7 && params.length != 8)
 			throw new IllegalArgumentException();
+		
+		//check for user permission to access the assessments for grading
+		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
 
 		// submission id is in params array at last index
 		Submission submission = this.submissionService.getSubmission(params[params.length - 1]);
