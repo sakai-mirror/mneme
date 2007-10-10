@@ -49,6 +49,7 @@ import org.muse.mneme.api.SubmissionCompletedException;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.authz.api.FunctionManager;
 import org.sakaiproject.db.api.SqlService;
+import org.sakaiproject.user.api.User;
 
 /**
  * MnemeServiceImpl implements MnemeService
@@ -453,6 +454,14 @@ public class MnemeServiceImpl implements MnemeService
 	public Submission getSubmission(String id)
 	{
 		return submissionService.getSubmission(id);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<User> getSubmitUsers(String context)
+	{
+		return assessmentService.getSubmitUsers(context);
 	}
 
 	/**

@@ -23,6 +23,8 @@ package org.muse.mneme.api;
 
 import java.util.List;
 
+import org.sakaiproject.user.api.User;
+
 /**
  * Assessment models organizations of questions in parts.
  */
@@ -237,6 +239,13 @@ public interface Assessment
 	 * @return The presentation to show after submit.
 	 */
 	Presentation getSubmitPresentation();
+
+	/**
+	 * Get a list of Users who can submit.
+	 * 
+	 * @return a List of Users who can submit.
+	 */
+	List<User> getSubmitUsers();
 
 	/**
 	 * Access the time limit for taking the assessment (ms).

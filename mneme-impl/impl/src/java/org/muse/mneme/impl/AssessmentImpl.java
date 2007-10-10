@@ -33,6 +33,7 @@ import org.muse.mneme.api.AssessmentGrading;
 import org.muse.mneme.api.AssessmentParts;
 import org.muse.mneme.api.AssessmentPassword;
 import org.muse.mneme.api.AssessmentReview;
+import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentSpecialAccess;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Attribution;
@@ -43,6 +44,7 @@ import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.user.api.User;
 
 /**
  * AssessmentImpl implements Assessment
@@ -53,6 +55,8 @@ public class AssessmentImpl implements Assessment
 	private static Log M_log = LogFactory.getLog(AssessmentImpl.class);
 
 	protected Boolean archived = Boolean.FALSE;
+
+	protected transient AssessmentService assessmentService = null;
 
 	/** Track any changes at all. */
 	protected transient ChangeableImpl changed = new ChangeableImpl();
@@ -97,9 +101,9 @@ public class AssessmentImpl implements Assessment
 
 	protected Boolean randomAccess = Boolean.TRUE;
 
-	protected AssessmentReview review = null;
-
 	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
+
+	protected AssessmentReview review = null;
 
 	protected Boolean showHints = Boolean.TRUE;
 
@@ -120,8 +124,10 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * Construct
 	 */
-	public AssessmentImpl(PoolService poolService, QuestionService questionService, SubmissionService submissionService)
+	public AssessmentImpl(AssessmentService assessmentService, PoolService poolService, QuestionService questionService,
+			SubmissionService submissionService)
 	{
+		this.assessmentService = assessmentService;
 		this.poolService = poolService;
 		this.submissionService = submissionService;
 		this.questionService = questionService;
@@ -449,6 +455,14 @@ public class AssessmentImpl implements Assessment
 		return this.submitPresentation;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<User> getSubmitUsers()
+	{
+		return this.assessmentService.getSubmitUsers(this.getContext());
+	}
+
 	public Long getTimeLimit()
 	{
 		return this.timeLimit;
@@ -727,6 +741,7 @@ public class AssessmentImpl implements Assessment
 	protected void set(AssessmentImpl other)
 	{
 		this.archived = other.archived;
+		this.assessmentService = other.assessmentService;
 		this.changed = new ChangeableImpl(other.changed);
 		this.context = other.context;
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy, this.changed);

@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +43,8 @@ import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.UserDirectoryService;
 
 /**
  * AssessmentServiceImpl implements AssessmentService.
@@ -83,6 +86,8 @@ public class AssessmentServiceImpl implements AssessmentService
 
 	/** Dependency: SubmissionService */
 	protected SubmissionServiceImpl submissionService = null;
+
+	protected UserDirectoryService userDirectoryService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -239,6 +244,21 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		List<Assessment> rv = this.storage.getContextAssessments(context, sort, publishedOnly);
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<User> getSubmitUsers(String context)
+	{
+		// ge the ids
+		Set<String> ids = this.securityService.getUsersIsAllowed(MnemeService.SUBMIT_PERMISSION, context);
+
+		// turn into users
+		List<User> users = this.userDirectoryService.getUsers(ids);
+
+		// TODO: sort!
+		return users;
 	}
 
 	/**
@@ -437,6 +457,17 @@ public class AssessmentServiceImpl implements AssessmentService
 	public void setSubmissionService(SubmissionService service)
 	{
 		submissionService = (SubmissionServiceImpl) service;
+	}
+
+	/**
+	 * Dependency: UserDirectoryService.
+	 * 
+	 * @param service
+	 *        The UserDirectoryService.
+	 */
+	public void setUserDirectoryService(UserDirectoryService service)
+	{
+		userDirectoryService = service;
 	}
 
 	/**

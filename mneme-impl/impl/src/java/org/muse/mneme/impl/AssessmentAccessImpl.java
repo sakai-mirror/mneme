@@ -255,7 +255,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setUsers(List userIds)
+	public void setUsers(List<String> userIds)
 	{
 		// TODO: change tracking
 		this.userIds.clear();

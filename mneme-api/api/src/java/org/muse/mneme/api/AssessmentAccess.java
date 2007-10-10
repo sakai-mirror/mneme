@@ -138,5 +138,5 @@ public interface AssessmentAccess
 	 * @param userIds
 	 *        The List of user ids for which this access applies.
 	 */
-	void setUsers(List userIds);
+	void setUsers(List<String> userIds);
 }

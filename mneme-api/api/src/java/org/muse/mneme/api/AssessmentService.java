@@ -23,6 +23,8 @@ package org.muse.mneme.api;
 
 import java.util.List;
 
+import org.sakaiproject.user.api.User;
+
 /**
  * AssessmentService manages assessments (tests, surveys, assignments, etc).
  */
@@ -125,6 +127,15 @@ public interface AssessmentService
 	 * @return The List<Assessment> of all assessments in the context, sorteds, or empty if there are none.
 	 */
 	List<Assessment> getContextAssessments(String context, AssessmentsSort sort, Boolean publishedOnly);
+
+	/**
+	 * Get a list of Users who can submit in this context.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return a List of Users who can submit in this context.
+	 */
+	List<User> getSubmitUsers(String context);
 
 	/**
 	 * Create a new Assessment in the context.

@@ -59,15 +59,17 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 	protected Map<String, AssessmentImpl> assessments = new HashMap<String, AssessmentImpl>();
 
+	protected AssessmentService assessmentService = null;
+
 	protected boolean fakedAlready = false;
 
 	protected Object idGenerator = new Object();
 
+	protected long nextAccessId = 100;
+
 	protected long nextAssessmentId = 100;
 
 	protected long nextPartId = 100;
-
-	protected long nextAccessId = 100;
 
 	protected PoolService poolService = null;
 
@@ -353,7 +355,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	 */
 	public AssessmentImpl newAssessment()
 	{
-		return new AssessmentImpl(this.poolService, this.questionService, this.submissionService);
+		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService);
 	}
 
 	/**
@@ -434,7 +436,21 @@ public class AssessmentStorageSample implements AssessmentStorage
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Set the AssessmentService.
+	 * 
+	 * @param service
+	 *        The AssessmentService.
+	 */
+	public void setAssessmentService(AssessmentService service)
+	{
+		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the PoolService.
+	 * 
+	 * @param service
+	 *        The PoolService.
 	 */
 	public void setPoolService(PoolService service)
 	{
@@ -442,7 +458,10 @@ public class AssessmentStorageSample implements AssessmentStorage
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Set the QuestionService.
+	 * 
+	 * @param service
+	 *        The QuestionService.
 	 */
 	public void setQuestionService(QuestionService service)
 	{
@@ -450,7 +469,10 @@ public class AssessmentStorageSample implements AssessmentStorage
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Set the SubmissionService.
+	 * 
+	 * @param service
+	 *        The SubmissionService.
 	 */
 	public void setSubmissionService(SubmissionService service)
 	{

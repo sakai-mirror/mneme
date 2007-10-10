@@ -27,10 +27,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AcceptSubmitStatus;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentPassword;
 import org.muse.mneme.api.AssessmentDates;
 import org.muse.mneme.api.AssessmentGrading;
 import org.muse.mneme.api.AssessmentParts;
+import org.muse.mneme.api.AssessmentPassword;
 import org.muse.mneme.api.AssessmentReview;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentSpecialAccess;
@@ -39,6 +39,7 @@ import org.muse.mneme.api.Attribution;
 import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.Submission;
+import org.sakaiproject.user.api.User;
 
 /**
  * SubmissionAssessmentImpl implements Assessment, and implements a submission's dual connection to assessment defintions.
@@ -317,6 +318,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	public Presentation getSubmitPresentation()
 	{
 		return getHistoricalAssessment().getSubmitPresentation();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<User> getSubmitUsers()
+	{
+		return this.getMainAssessment().getSubmitUsers();
 	}
 
 	/**

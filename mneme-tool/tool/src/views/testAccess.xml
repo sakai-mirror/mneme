@@ -48,6 +48,17 @@
 
 		<entityDisplay>
 			<rows>
+				<row title="users">
+					<container>
+						<selection orientation="DROPDOWN" height="5">
+							<singleSelect>
+								<decision type="true" reversed="TRUE" />
+							</singleSelect>
+							<model ref="access.users" />
+							<selectionModel name="user" model="assessment.submitUsers" value="user.id" display="user.sortName" />
+						</selection>
+					</container>
+				</row>
 				<row title="dates">
 					<container>
 						<entityDisplay>
@@ -145,7 +156,7 @@
 			<rows>
 				<row title="id">
 					<container>
-						<text model="assessment.id" />
+						<text model="access.id" />
 					</container>
 				</row>
 			</rows>
