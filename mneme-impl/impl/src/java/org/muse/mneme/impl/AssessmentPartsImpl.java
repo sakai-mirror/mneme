@@ -213,7 +213,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<? extends Question> getQuestions()
+	public List<Question> getQuestions()
 	{
 		List<Question> rv = new ArrayList<Question>();
 		for (Part part : this.parts)
@@ -227,7 +227,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<? extends Question> getQuestionsAsAuthored()
+	public List<Question> getQuestionsAsAuthored()
 	{
 		List<Question> rv = new ArrayList<Question>();
 		for (Part part : this.parts)

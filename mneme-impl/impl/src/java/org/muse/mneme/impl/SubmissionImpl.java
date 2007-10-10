@@ -50,7 +50,7 @@ public class SubmissionImpl implements Submission
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(SubmissionImpl.class);
 
-	protected List<AnswerImpl> answers = new ArrayList<AnswerImpl>();
+	protected List<Answer> answers = new ArrayList<Answer>();
 
 	protected SubmissionAssessmentImpl assessment = null;
 
@@ -139,11 +139,11 @@ public class SubmissionImpl implements Submission
 	{
 		if (question == null) return null;
 
-		AnswerImpl answer = findAnswer(question.getId());
-		if (answer != null) return answer;
+		Answer rv = findAnswer(question.getId());
+		if (rv != null) return rv;
 
 		// not found, add one
-		answer = this.submissionService.storage.newAnswer();
+		AnswerImpl answer = this.submissionService.storage.newAnswer();
 		answer.initSubmission(this);
 		answer.initQuestion(question);
 		this.answers.add(answer);
@@ -154,7 +154,7 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<? extends Answer> getAnswers()
+	public List<Answer> getAnswers()
 	{
 		return this.answers;
 	}
@@ -166,7 +166,7 @@ public class SubmissionImpl implements Submission
 	{
 		// count the answer auto scores
 		float total = 0;
-		for (AnswerImpl answer : this.answers)
+		for (Answer answer : this.answers)
 		{
 			// add it up
 			total += answer.getAutoScore().floatValue();
@@ -438,7 +438,7 @@ public class SubmissionImpl implements Submission
 		{
 			for (Question question : part.getQuestions())
 			{
-				AnswerImpl answer = this.findAnswer(question.getId());
+				Answer answer = this.findAnswer(question.getId());
 				if (answer == null) return Boolean.FALSE;
 				if (answer.getSubmittedDate() == null) return Boolean.FALSE;
 				if ((answer.getIsAnswered() == null) || (!answer.getIsAnswered().booleanValue())) return Boolean.FALSE;
@@ -481,7 +481,7 @@ public class SubmissionImpl implements Submission
 	{
 		if (question == null) throw new IllegalArgumentException();
 
-		AnswerImpl answer = findAnswer(question.getId());
+		Answer answer = findAnswer(question.getId());
 		if ((answer != null) && (answer.getIsComplete().booleanValue()))
 		{
 			return true;
@@ -829,12 +829,12 @@ public class SubmissionImpl implements Submission
 	 *        The question id.
 	 * @return The existing answer in the submission for this question id, or null if not found.
 	 */
-	protected AnswerImpl findAnswer(String questionId)
+	protected Answer findAnswer(String questionId)
 	{
 		// find the answer to this assessment question
-		for (AnswerImpl answer : this.answers)
+		for (Answer answer : this.answers)
 		{
-			if (answer.questionId.equals(questionId))
+			if (((AnswerImpl) answer).questionId.equals(questionId))
 			{
 				return answer;
 			}
@@ -942,9 +942,9 @@ public class SubmissionImpl implements Submission
 	protected void set(SubmissionImpl other)
 	{
 		this.answers.clear();
-		for (AnswerImpl answer : other.answers)
+		for (Answer answer : other.answers)
 		{
-			AnswerImpl a = new AnswerImpl(answer);
+			AnswerImpl a = new AnswerImpl((AnswerImpl) answer);
 			a.initSubmission(this);
 			this.answers.add(a);
 		}

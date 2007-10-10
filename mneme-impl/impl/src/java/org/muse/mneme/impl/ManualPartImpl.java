@@ -156,7 +156,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<? extends Question> getQuestionsAsAuthored()
+	public List<Question> getQuestionsAsAuthored()
 	{
 		List<Question> rv = new ArrayList<Question>(this.questions.size());
 		for (PoolPick pick : this.questions)

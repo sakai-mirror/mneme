@@ -100,14 +100,14 @@ public interface AssessmentParts
 	 * 
 	 * @return The questions across all parts in delivery order.
 	 */
-	List<? extends Question> getQuestions();
+	List<Question> getQuestions();
 
 	/**
 	 * Access the questions across all parts in authored order.
 	 * 
 	 * @return The questions across all parts in authored order.
 	 */
-	List<? extends Question> getQuestionsAsAuthored();
+	List<Question> getQuestionsAsAuthored();
 
 	/**
 	 * Access the show-presentation setting; this controlls the display of each part's presentation.

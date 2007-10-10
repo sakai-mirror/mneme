@@ -41,7 +41,7 @@ public interface ManualPart extends Part
 	 * 
 	 * @return The questions. The order will be in authored order.
 	 */
-	List<? extends Question> getQuestionsAsAuthored();
+	List<Question> getQuestionsAsAuthored();
 
 	/**
 	 * Access the randomize flag.

@@ -105,7 +105,7 @@ public interface Part
 	 * 
 	 * @return The questions in authored order.
 	 */
-	List<? extends Question> getQuestionsAsAuthored();
+	List<Question> getQuestionsAsAuthored();
 
 	/**
 	 * Access the title.

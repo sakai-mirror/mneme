@@ -50,7 +50,7 @@ public interface Submission
 	 * 
 	 * @return The submission's answers.
 	 */
-	List<? extends Answer> getAnswers();
+	List<Answer> getAnswers();
 
 	/**
 	 * Access the sum of all auto score's for this answers of this submission.
@@ -186,7 +186,7 @@ public interface Submission
 
 	/**
 	 * Check if the submission may be started for an nth attempt - the user must have permission, the submission must be a complete, the sibling count
-	 * must be < the assessment's limit, and the assessment must be open.
+	 * must be fewer than the assessment's tries limit, and the assessment must be open.
 	 * 
 	 * @return TRUE if the submission may be started, FALSE if not.
 	 */
