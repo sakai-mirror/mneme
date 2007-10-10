@@ -40,10 +40,6 @@
 	</title>
 
 	<container>
-		<!--text>
-			<message selector="pool-list-page-nav" />
-			</text-->
-
 		<!-- the list of pools -->
 		<entityList style="FLAT">
 			<iterator name="pool" model="pools" />
@@ -115,9 +111,6 @@
 					</sort>
 					<entityNavigations>
 						<navigation>
-							<!--destination template="/pool_edit/{0}">
-								<model ref="pool.id" />
-								</destination-->
 							<destination template="/pool_edit/{0}{1}/{2}/{3}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
@@ -158,9 +151,6 @@
 					<navigations>
 						<navigation style="LINK">
 							<icon icon="/icons/edit.png" style="LEFT" />
-							<!--destination template="/pool_properties/{0}">
-								<model ref="pool.id" />
-								</destination-->
 							<destination template="/pool_properties/{0}{1}/{2}/{3}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />

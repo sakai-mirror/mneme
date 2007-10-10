@@ -295,11 +295,6 @@ public class PoolsView extends ControllerImpl
 					return;
 				}
 			}
-			else
-			{
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
