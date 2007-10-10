@@ -100,8 +100,8 @@
 						<navigation destination="/assessment_add/" title="add-test" style="LINK" description="add-test-description" submit="TRUE">
 							<icon icon="/icons/document_add.png" style="LEFT" />
 						</navigation>
-						<navigation destination="/assessments_delete" title="delete-tests" style="LINK" description="delete-tests-description" submit="TRUE"
-							selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements">
+						<navigation destination="/assessments_delete" title="delete-tests" style="LINK" description="delete-tests-description"
+							submit="TRUE" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements">
 							<icon icon="/icons/delete.png" style="LEFT" />
 						</navigation>
 						<container>
@@ -235,7 +235,7 @@
 				</column>
 				<column>
 					<title>
-						<message selector="assessment-active" />
+						<message selector="assessment-publish" />
 					</title>
 					<sort submit="TRUE">
 						<active>
@@ -267,30 +267,32 @@
 							</included>
 						</navigation>
 						<navigation description="unpublished-alt">
-							<icon icon="/icons/deactivated.gif" style="LEFT" />
+							<title>
+								<message selector="dash" />
+							</title>
 							<included>
 								<decision model="assessment.isValid" />
 								<decision reversed="TRUE" model="assessment.published" />
 							</included>
 						</navigation>
 						<navigation description="invalid-alt">
-							<icon icon="/icons/attention.png" style="LEFT" />
+							<title>
+								<message selector="dash" />
+							</title>
 							<included>
 								<decision reversed="TRUE" model="assessment.isValid" />
 							</included>
 						</navigation>
 					</navigations>
 				</column>
-	<column>
+
+				<modelColumn>
 					<title>
-						<message selector="assessment-publish" />
+						<message selector="assessment-action" />
 					</title>
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="published-alt">
-							<title>
-								<message selector="unpublish">
-								</message>
-							</title>
+							<icon icon="/icons/publish_rmv.png" style="LEFT" />
 							<destination template="/assessment_unpublish/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
@@ -302,10 +304,7 @@
 							</included>
 						</navigation>
 						<navigation style="LINK" submit="TRUE" description="unpublished-alt">
-							<title>
-								<message selector="publish">
-								</message>
-							</title>
+							<icon icon="/icons/publish_new.png" style="LEFT" />
 							<destination template="/assessment_settings/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
@@ -316,13 +315,17 @@
 								<decision reversed="TRUE" model="assessment.published" />
 							</included>
 						</navigation>
-					</navigations>
-				</column>				
-				<modelColumn>
-					<title>
-						<message selector="assessment-action" />
-					</title>
-					<navigations>
+						<navigation style="LINK" submit="TRUE" description="invalid-alt">
+							<icon icon="/icons/attention.jpg" style="LEFT" />
+							<destination template="/assessment_invalid/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<decision reversed="TRUE" model="assessment.isValid" />
+							</included>
+						</navigation>
 						<navigation style="LINK" submit="TRUE" description="access">
 							<icon icon="/icons/access.png" style="LEFT" />
 							<destination template="/assessment_special/{0}{1}/{2}">
@@ -346,7 +349,8 @@
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="100%">
 			<container>
-				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/assessments">
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE"
+					destination="/assessments">
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
 				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON" destination="/assessments">
