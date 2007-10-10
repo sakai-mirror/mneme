@@ -232,7 +232,10 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	{
 		// TODO: change tracking
 		this.userIds.clear();
-		this.userIds.addAll(userIds);
+		if (userIds != null)
+		{
+			this.userIds.addAll(userIds);
+		}
 
 		this.owner.setChanged();
 	}
