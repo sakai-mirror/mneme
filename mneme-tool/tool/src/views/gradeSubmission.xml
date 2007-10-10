@@ -53,7 +53,7 @@
 						<model ref="prevSubmission.id" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE"/>
+						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
 					</included>
 				</navigation>
 				<navigation title="list" style="BUTTON" accessKey="list-access" description="list-description" submit="TRUE">
@@ -62,7 +62,7 @@
 						<model ref="destinationPath" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE"/>
+						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
 					</included>
 				</navigation>
 				<navigation title="next" style="BUTTON" accessKey="next-access" description="next-description" submit="TRUE">
@@ -75,7 +75,7 @@
 						<model ref="nextSubmission.id" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE"/>
+						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
 					</included>
 				</navigation>
 				<divider />
@@ -85,7 +85,7 @@
 						<model ref="destinationPath" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE"/>
+						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
 					</included>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
@@ -94,7 +94,7 @@
 						<model ref="destinationPath" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE"/>
+						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
 					</included>
 				</navigation>
 				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
@@ -103,7 +103,7 @@
 						<model ref="sakai_prev_destination" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="TRUE"/>
+						<compareDecision model="fromGradeByQuestion" constant="TRUE" />
 					</included>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
@@ -112,7 +112,7 @@
 						<model ref="sakai_prev_destination" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="TRUE"/>
+						<compareDecision model="fromGradeByQuestion" constant="TRUE" />
 					</included>
 				</navigation>
 			</container>
@@ -213,8 +213,36 @@
 									</included>
 								</attachments>
 
-								<!-- Question specific review -->
-								<modelComponent model="answer.question.typeSpecificQuestion.reviewUi" />
+								<!-- submission title -->
+								<section>
+									<container>
+										<text>
+											<message selector="submission" />
+											<included>
+												<compareDecision model="answer.question.type" constant="mneme:Essay" reversed="TRUE" />
+											</included>
+										</text>
+									</container>
+								</section>
+
+								<!-- answer -->
+								<modelComponent model="answer.question.typeSpecificQuestion.reviewUi">
+									<included>
+										<compareDecision model="answer.question.type" constant="mneme:Essay" reversed="TRUE" />
+									</included>
+								</modelComponent>
+
+								<!-- essay answer-->
+								<htmlEdit rows="10" cols="80" readOnly="TRUE">
+									<title>
+
+										<message selector="essay-answer" />
+									</title>
+									<model ref="answer.typeSpecificAnswer.answerData" />
+									<included>
+										<compareDecision model="answer.question.type" constant="mneme:Essay" />
+									</included>
+								</htmlEdit>
 
 								<!-- answer key -->
 								<text>
@@ -227,6 +255,21 @@
 									</included>
 								</text>
 
+								<!-- model answer for essay -->
+								<section>
+									<container>
+										<text>
+											<message selector="view-model-answer">
+												<model type="icon" icon="/icons/answer_key.png" />
+												<!--model ref="answer.question.modelAnswer" /-->
+											</message>
+										</text>
+									</container>
+									<included>
+										<compareDecision model="answer.question.type" constant="mneme:Essay" />
+									</included>
+								</section>
+
 								<!-- question feedback -->
 								<text>
 									<message selector="question-feedback">
@@ -235,6 +278,7 @@
 									</message>
 									<included>
 										<hasValueDecision model="answer.question.feedback" />
+										<compareDecision model="answer.question.type" constant="mneme:Essay" reversed="TRUE"/>
 									</included>
 								</text>
 
@@ -248,6 +292,7 @@
 										<hasValueDecision model="answer.reason" />
 									</included>
 								</text>
+
 								<section>
 									<container>
 										<text>
@@ -333,7 +378,7 @@
 						<model ref="prevSubmission.id" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE"/>
+						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
 					</included>
 				</navigation>
 				<navigation title="list" style="BUTTON" accessKey="list-access" description="list-description" submit="TRUE">
@@ -342,7 +387,7 @@
 						<model ref="destinationPath" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE"/>
+						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
 					</included>
 				</navigation>
 				<navigation title="next" style="BUTTON" accessKey="next-access" description="next-description" submit="TRUE">
@@ -355,7 +400,7 @@
 						<model ref="nextSubmission.id" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE"/>
+						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
 					</included>
 				</navigation>
 				<divider />
@@ -365,7 +410,7 @@
 						<model ref="destinationPath" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE"/>
+						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
 					</included>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
@@ -374,7 +419,7 @@
 						<model ref="destinationPath" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE"/>
+						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
 					</included>
 				</navigation>
 				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
@@ -383,7 +428,7 @@
 						<model ref="sakai_prev_destination" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="TRUE"/>
+						<compareDecision model="fromGradeByQuestion" constant="TRUE" />
 					</included>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
@@ -392,7 +437,7 @@
 						<model ref="sakai_prev_destination" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="TRUE"/>
+						<compareDecision model="fromGradeByQuestion" constant="TRUE" />
 					</included>
 				</navigation>
 			</container>
