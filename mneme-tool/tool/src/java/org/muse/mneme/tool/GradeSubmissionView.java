@@ -70,9 +70,8 @@ public class GradeSubmissionView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 4 && params.length != 5 && params.length != 6 && params.length != 7 && params.length != 8)
-			throw new IllegalArgumentException();
-		
+		if (params.length != 7 && params.length != 8) throw new IllegalArgumentException();
+
 		// check for user permission to access the assessments for grading
 		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
 		{
@@ -88,6 +87,13 @@ public class GradeSubmissionView extends ControllerImpl
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
 		context.put("assessment", assessment);
+
+		if (assessment == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
 
 		Submission submission = null;
 
@@ -132,7 +138,7 @@ public class GradeSubmissionView extends ControllerImpl
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 				return;
 			}
-			
+
 			parsePreviousNext(context, submission, submissions);
 		}
 
@@ -165,10 +171,9 @@ public class GradeSubmissionView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 4 && params.length != 5 && params.length != 6 && params.length != 7 && params.length != 8)
-			throw new IllegalArgumentException();
-		
-		//check for user permission to access the assessments for grading
+		if (params.length != 7 && params.length != 8) throw new IllegalArgumentException();
+
+		// check for user permission to access the assessments for grading
 		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
 		{
 			// redirect to error
@@ -179,15 +184,15 @@ public class GradeSubmissionView extends ControllerImpl
 		// submission id is in params array at last index
 		Submission submission = this.submissionService.getSubmission(params[params.length - 1]);
 		context.put("submission", submission);
-		
-		if (submission == null){
+
+		if (submission == null)
+		{
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
 
 		// read form
 		String destination = this.uiService.decode(req, context);
-		
 
 		if (destination != null)
 		{
@@ -219,7 +224,8 @@ public class GradeSubmissionView extends ControllerImpl
 
 				destination = destination.replace("NEXT:", "");
 				destination = destination.replace("PREV:", "");
-			}else if (destination.startsWith("/grade_question"))
+			}
+			else if (destination.startsWith("/grade_question"))
 			{
 				try
 				{
@@ -238,6 +244,7 @@ public class GradeSubmissionView extends ControllerImpl
 
 	/**
 	 * save Graded Submission
+	 * 
 	 * @param submission
 	 * @throws AssessmentPermissionException
 	 */
