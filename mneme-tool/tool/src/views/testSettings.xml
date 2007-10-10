@@ -49,248 +49,253 @@
 				<decision model="assessment.isLive" />
 			</included>
 		</alert>
-		<entityDisplay>
-			<rows>
-				<row title="settings"></row>
-				<row title="title">
-					<container>
-						<text>
-							<message>
-								<model ref="assessment.title" missing="no-title" />
-							</message>
-						</text>
-					</container>
-				</row>
+		<section title="settings">
+			<container>
+				<entityDisplay>
+					<rows>
+						<row title="title">
+							<container>
+								<text>
+									<message>
+										<model ref="assessment.title" missing="no-title" />
+									</message>
+								</text>
+							</container>
+						</row>
+						<row title="id">
+							<container>
+								<text model="assessment.id" />
+							</container>
+						</row>
+						<row title="dates">
+							<container>
+								<entityDisplay>
+									<rows>
+										<row title="open-date">
+											<container>
+												<dateEdit>
+													<model ref="assessment.dates.openDate" type="date" />
+												</dateEdit>
+											</container>
+										</row>
+										<row title="due-date">
+											<container>
+												<dateEdit>
+													<model ref="assessment.dates.dueDate" type="date" />
+												</dateEdit>
+											</container>
+										</row>
+										<row title="test-acceptUntilDate">
+											<container>
+												<dateEdit>
+													<model ref="assessment.dates.acceptUntilDate" type="date" />
+												</dateEdit>
+											</container>
+										</row>
+									</rows>
+								</entityDisplay>
+							</container>
+						</row>
+						<row title="allowTries">
+							<container>
+								<selection orientation="VERTICAL">
+									<model ref="assessment.hasTriesLimit" />
+									<selectionChoices>
+										<selectionChoice value="false" selector="type-unlimited" />
+										<selectionChoice value="true" selector="type-number">
+											<container>
+												<countEdit>
+													<model ref="assessment.tries" type="count" />
+													<minValue>
+														<model type="constant" value="1" />
+													</minValue>
+												</countEdit>
+											</container>
+										</selectionChoice>
+									</selectionChoices>
+								</selection>
+							</container>
+						</row>
+						<row title="reviewOptions">
+							<container>
+								<entityDisplay>
+									<rows>
+										<row title="showReview">
+											<container>
+												<selection orientation="VERTICAL">
+													<model ref="assessment.review.timing" />
+													<selectionChoices>
+														<selectionChoice value="submitted" selector="type-submitted" />
+														<selectionChoice value="graded" selector="type-graded" />
+														<selectionChoice value="date" selector="type-date">
+															<container>
+																<dateEdit>
+																	<model ref="assessment.review.date" type="date" />
+																</dateEdit>
+															</container>
+														</selectionChoice>
+														<selectionChoice value="never" selector="type-never" />
+													</selectionChoices>
+												</selection>
+											</container>
+										</row>
+										<row title="showAnswerKey">
+											<container>
+												<selection>
+													<model ref="assessment.review.showCorrectAnswer" />
+												</selection>
+											</container>
+										</row>
+										<row title="showFeedback">
+											<container>
+												<selection>
+													<model ref="assessment.review.showFeedback" />
+												</selection>
+											</container>
+										</row>
+									</rows>
+								</entityDisplay>
+							</container>
+						</row>
+						<row title="gradeOptions">
+							<container>
+								<entityDisplay>
+									<rows>
+										<row title="studentid">
+											<container>
+												<selection>
+													<model ref="assessment.grading.showIdentities" />
+												</selection>
+											</container>
+										</row>
+										<row title="releasegrades">
+											<container>
+												<selection orientation="VERTICAL">
+													<model ref="assessment.grading.autoRelease" />
+													<selectionChoices>
+														<selectionChoice value="true" selector="type-auto" />
+														<selectionChoice value="false" selector="type-manual" />
+													</selectionChoices>
+												</selection>
+											</container>
+										</row>
+										<row title="sendgbook">
+											<container>
+												<selection>
+													<model ref="assessment.grading.gradebookIntegration" />
+												</selection>
+											</container>
+										</row>
+									</rows>
+								</entityDisplay>
+							</container>
+						</row>
+					</rows>
+				</entityDisplay>
+			</container>
+		</section>
 
-				<row title="id">
-					<container>
-						<text model="assessment.id" />
-					</container>
-				</row>
-				<row title="dates">
-					<container>
-						<entityDisplay>
-							<rows>
-								<row title="open-date">
-									<container>
-										<dateEdit>
-											<model ref="assessment.dates.openDate" type="date" />
-										</dateEdit>
-									</container>
-								</row>
-								<row title="due-date">
-									<container>
-										<dateEdit>
-											<model ref="assessment.dates.dueDate" type="date" />
-										</dateEdit>
-									</container>
-								</row>
-								<row title="test-acceptUntilDate">
-									<container>
-										<dateEdit>
-											<model ref="assessment.dates.acceptUntilDate" type="date" />
-										</dateEdit>
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
-					</container>
-				</row>
-				<row title="allowTries">
-					<container>
-						<countEdit rows="1" cols="8">
-							<model ref="assessment.numSubmissionsAllowed" type="count" />
-						</countEdit>
-						<selection orientation="VERTICAL">
-							<model ref="assessment.isMultipleSubmissionsAllowed" />
-							<selectionChoices>
-								<selectionChoice value="true" selector="type-unlimited" />
-							</selectionChoices>
-						</selection>
-					</container>
-				</row>
-				<row title="reviewOptions">
-					<container>
-						<entityDisplay>
-							<rows>
-								<row title="showReview">
-									<container>
-										<selection orientation="VERTICAL">
-											<model ref="assessment.review.timing" />
-											<selectionChoices>
-												<selectionChoice value="submitted" selector="type-submitted" />
-												<selectionChoice value="graded" selector="type-graded" />
-												<selectionChoice value="date" selector="type-date">
-													<container>
-														<dateEdit>
-															<model ref="assessment.review.date" type="date" />
-														</dateEdit>
-													</container>
-												</selectionChoice>
-												<selectionChoice value="never" selector="type-never" />
-											</selectionChoices>
-										</selection>
-									</container>
-								</row>
-								<row title="showAnswerKey">
-									<container>
-										<selection>
-											<model ref="assessment.review.showCorrectAnswer" />
-										</selection>
-									</container>
-								</row>
-								<row title="showFeedback">
-									<container>
-										<selection>
-											<model ref="assessment.review.showFeedback" />
-										</selection>
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
-					</container>
-				</row>
-				<row title="gradeOptions">
-					<container>
-						<entityDisplay>
-							<rows>
-								<row title="studentid">
-									<container>
-										<selection>
-											<model ref="assessment.grading.showIdentities" />
-										</selection>
-									</container>
-								</row>
-								<row title="releasegrades">
-									<container>
-										<selection orientation="VERTICAL">
-											<model ref="assessment.grading.autoRelease" />
-											<selectionChoices>
-												<selectionChoice value="true" selector="type-auto" />
-												<selectionChoice value="false" selector="type-manual" />
-											</selectionChoices>
-										</selection>
-									</container>
-								</row>
-								<row title="sendgbook">
-									<container>
-										<selection>
-											<model ref="assessment.grading.gradebookIntegration" />
-										</selection>
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
-					</container>
-				</row>
-				<row title="presentation"></row>
-				<row title="timed-settings">
-					<container>
-						<entityDisplay>
-							<rows>
-								<row title="timed">
-									<container>
-										<selection>
-											<model ref="assessment.multipleSubmissionsAllowed" />
-										</selection>
-									</container>
-								</row>
-								<row title="limit">
-									<container>
-										<durationEdit>
-											<model ref="assessment.timeLimit" type="duration" />
-										</durationEdit>
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
-					</container>
-				</row>
-				<row title="honor-pledge">
-					<container>
-						<entityDisplay>
-							<rows>
-								<row title="require-users">
-									<container>
-										<selection>
-											<model ref="assessment.requireHonorPledge" />
-										</selection>
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
-					</container>
-				</row>
-				<row title="hints-header">
-					<container>
-						<entityDisplay>
-							<rows>
-								<row title="hints-title">
-									<container>
-										<selection>
-											<model ref="assessment.showHints" />
-										</selection>
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
-					</container>
-				</row>
-				<row title="nav">
-					<container>
-						<selection orientation="VERTICAL">
-							<model ref="assessment.randomAccess" />
-							<selectionChoices>
-								<selectionChoice value="true" selector="type-flex" />
-								<selectionChoice value="false" selector="type-strict" />
-							</selectionChoices>
-						</selection>
-					</container>
-				</row>
-
-
-				<row title="layout">
-					<container>
-						<selection orientation="VERTICAL">
-							<model ref="assessment.questionGrouping" />
-							<selectionChoices>
-								<selectionChoice value="question" selector="type-question" />
-								<selectionChoice value="part" selector="type-part" />
-								<selectionChoice value="assessment" selector="type-assessment" />
-							</selectionChoices>
-						</selection>
-					</container>
-				</row>
-				<row title="partSettings">
-
-					<container>
-						<selection>
-							<model ref="assessment.parts.continuousNumbering" />
-							<selectionChoices>
-								<selectionChoice value="true" selector="type-continuous" />
-								<selectionChoice value="false" selector="type-restart" />
-							</selectionChoices>
-						</selection>
-					</container>
-
-				</row>
-
-
-
-				<row title="submitMessage">
-					<container>
-						<textEdit model="assessment.submitPresentation.text" />
-					</container>
-				</row>
-				<row>
-					<container>
-						<instructions>
-							<message selector="save-publish-instructions"></message>
-						</instructions>
-					</container>
-				</row>
-			</rows>
-		</entityDisplay>
+		<section title="presentation">
+			<container>
+				<entityDisplay>
+					<rows>
+						<row title="timed-settings">
+							<container>
+								<selection orientation="VERTICAL">
+									<model ref="assessment.hasTimeLimit" />
+									<selectionChoices>
+										<selectionChoice value="false" selector="no-time-limit" />
+										<selectionChoice value="true" selector="time-limit">
+											<container>
+												<durationEdit>
+													<model ref="assessment.timeLimit" type="duration" />
+												</durationEdit>
+											</container>
+										</selectionChoice>
+									</selectionChoices>
+								</selection>
+							</container>
+						</row>
+						<row title="honor-pledge">
+							<container>
+								<entityDisplay>
+									<rows>
+										<row title="require-users">
+											<container>
+												<selection>
+													<model ref="assessment.requireHonorPledge" />
+												</selection>
+											</container>
+										</row>
+									</rows>
+								</entityDisplay>
+							</container>
+						</row>
+						<row title="hints-header">
+							<container>
+								<entityDisplay>
+									<rows>
+										<row title="hints-title">
+											<container>
+												<selection>
+													<model ref="assessment.showHints" />
+												</selection>
+											</container>
+										</row>
+									</rows>
+								</entityDisplay>
+							</container>
+						</row>
+						<row title="nav">
+							<container>
+								<selection orientation="VERTICAL">
+									<model ref="assessment.randomAccess" />
+									<selectionChoices>
+										<selectionChoice value="true" selector="type-flex" />
+										<selectionChoice value="false" selector="type-strict" />
+									</selectionChoices>
+								</selection>
+							</container>
+						</row>
+						<row title="layout">
+							<container>
+								<selection orientation="VERTICAL">
+									<model ref="assessment.questionGrouping" />
+									<selectionChoices>
+										<selectionChoice value="question" selector="type-question" />
+										<selectionChoice value="part" selector="type-part" />
+										<selectionChoice value="assessment" selector="type-assessment" />
+									</selectionChoices>
+								</selection>
+							</container>
+						</row>
+						<row title="partSettings">
+							<container>
+								<selection>
+									<model ref="assessment.parts.continuousNumbering" />
+									<selectionChoices>
+										<selectionChoice value="true" selector="type-continuous" />
+										<selectionChoice value="false" selector="type-restart" />
+									</selectionChoices>
+								</selection>
+							</container>
+						</row>
+						<row title="submitMessage">
+							<container>
+								<textEdit model="assessment.submitPresentation.text" />
+							</container>
+						</row>
+						<row>
+							<container>
+								<instructions>
+									<message selector="save-publish-instructions"></message>
+								</instructions>
+							</container>
+						</row>
+					</rows>
+				</entityDisplay>
+			</container>
+		</section>
 
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="70em">

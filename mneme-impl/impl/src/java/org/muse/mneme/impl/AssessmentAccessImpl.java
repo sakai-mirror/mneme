@@ -110,7 +110,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getHasTries()
+	public Boolean getHasTriesLimit()
 	{
 		return Boolean.valueOf(this.tries != null);
 	}
@@ -216,11 +216,11 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setHasTries(Boolean hasTries)
+	public void setHasTriesLimit(Boolean hasTriesLimit)
 	{
-		if (hasTries == null) throw new IllegalArgumentException();
+		if (hasTriesLimit == null) throw new IllegalArgumentException();
 
-		if ((!hasTries) && (this.tries != null))
+		if ((!hasTriesLimit) && (this.tries != null))
 		{
 			this.tries = null;
 

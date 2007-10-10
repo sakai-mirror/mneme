@@ -283,7 +283,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			M_log.debug("countRemainingSubmissions: assessment: " + assessment.getId() + " userId: " + userId + " asOf: " + asOf);
 
 		// check the assessment's max submissions
-		Integer allowed = assessment.getNumSubmissionsAllowed();
+		Integer allowed = assessment.getTries();
 
 		// if unlimited, send back a null to indicate this.
 		if (allowed == null) return null;

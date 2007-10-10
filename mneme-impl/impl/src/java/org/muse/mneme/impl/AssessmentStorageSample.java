@@ -537,7 +537,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.setPublished(Boolean.TRUE);
 			a.setContext("mercury");
 			a.getCreatedBy().setUserId("admin");
-			a.setNumSubmissionsAllowed(1);
+			a.setTries(1);
 			a.setQuestionGrouping(QuestionGrouping.question);
 			a.setRandomAccess(Boolean.TRUE);
 			a.setTimeLimit(1200l * 1000l);
@@ -595,7 +595,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.setPublished(Boolean.TRUE);
 			a.setContext("mercury");
 			a.getCreatedBy().setUserId("admin");
-			a.setNumSubmissionsAllowed(5);
+			a.setTries(5);
 			a.setQuestionGrouping(QuestionGrouping.question);
 			a.setRandomAccess(Boolean.TRUE);
 			// a.setTimeLimit(1200l * 1000l);
@@ -641,7 +641,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.setPublished(Boolean.TRUE);
 			a.setContext("mercury");
 			a.getCreatedBy().setUserId("admin");
-			a.setNumSubmissionsAllowed(5);
+			a.setTries(5);
 			a.setQuestionGrouping(QuestionGrouping.question);
 			a.setRandomAccess(Boolean.TRUE);
 			// a.setTimeLimit(1200l * 1000l);

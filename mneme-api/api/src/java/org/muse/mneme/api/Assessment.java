@@ -73,6 +73,27 @@ public interface Assessment
 	AssessmentGrading getGrading();
 
 	/**
+	 * Are multiple submissions allowed?
+	 * 
+	 * @return TRUE if multiple submissions are allowed, FALSE if not.
+	 */
+	Boolean getHasMultipleTries();
+
+	/**
+	 * Check if we have a time limmit.
+	 * 
+	 * @return TRUE if a time limit is defined, FALSE if not.
+	 */
+	Boolean getHasTimeLimit();
+
+	/**
+	 * Check if we have a tries limit.
+	 * 
+	 * @return TRUE if a tries limit is defined, FALSE if not.
+	 */
+	Boolean getHasTriesLimit();
+
+	/**
 	 * Access the id of this assessment.
 	 * 
 	 * @return The assessment's id.
@@ -108,13 +129,6 @@ public interface Assessment
 	Boolean getIsLive();
 
 	/**
-	 * Are multiple submissions allowed?
-	 * 
-	 * @return TRUE if multiple submissions are allowed, FALSE if not.
-	 */
-	Boolean getIsMultipleSubmissionsAllowed();
-
-	/**
 	 * Check if the assessment is open for submissions - published, not archived, past open date, before submit-until date.
 	 * 
 	 * @param withGrace
@@ -136,13 +150,6 @@ public interface Assessment
 	 * @return The modified-by attribution.
 	 */
 	Attribution getModifiedBy();
-
-	/**
-	 * Access the number of submissions allowed, if not unlimited.
-	 * 
-	 * @return The number of submissions allowed, or null if unlimited.
-	 */
-	Integer getNumSubmissionsAllowed();
 
 	/**
 	 * Access the assessment part information.
@@ -262,6 +269,13 @@ public interface Assessment
 	String getTitle();
 
 	/**
+	 * Access the number of submissions allowed, if not unlimited.
+	 * 
+	 * @return The number of submissions allowed, or null if unlimited.
+	 */
+	Integer getTries();
+
+	/**
 	 * Access the assessment type.
 	 * 
 	 * @return The asssessment type.
@@ -285,12 +299,20 @@ public interface Assessment
 	void setContext(String context);
 
 	/**
-	 * Set the number of submissions allowed for limited submissions.
+	 * An alternate way to clear the time limit if set to false.
 	 * 
-	 * @param count
-	 *        The number of submissions allowed, or null to make it unlimited.
+	 * @param hasTimeLimit
+	 *        if FALSE, clear the time limit.
 	 */
-	void setNumSubmissionsAllowed(Integer count);
+	void setHasTimeLimit(Boolean hasTimeLimit);
+
+	/**
+	 * An alternate way to clear the tries limit if set to false.
+	 * 
+	 * @param hasTriesLimit
+	 *        if FALSE, clear the tries.
+	 */
+	void setHasTriesLimit(Boolean hasTriesLimit);
 
 	/**
 	 * Set the assessment's published setting.
@@ -347,6 +369,14 @@ public interface Assessment
 	 *        The assessment's title.
 	 */
 	void setTitle(String title);
+
+	/**
+	 * Set the number of submissions allowed for limited submissions.
+	 * 
+	 * @param count
+	 *        The number of submissions allowed, or null to make it unlimited.
+	 */
+	void setTries(Integer count);
 
 	/**
 	 * Set the type of this assessment.

@@ -223,7 +223,7 @@ public class SubmissionImpl implements Submission
 		{
 			// if there are fewer sibs than allowed, add the todo image as well
 			if (!over && (getSiblingCount() != null)
-					&& ((assessment.getNumSubmissionsAllowed() == null) || (getSiblingCount().intValue() < assessment.getNumSubmissionsAllowed())))
+					&& ((assessment.getTries() == null) || (getSiblingCount().intValue() < assessment.getTries())))
 			{
 				return AssessmentSubmissionStatus.completeReady;
 			}
@@ -541,7 +541,7 @@ public class SubmissionImpl implements Submission
 				.getContext())) return Boolean.FALSE;
 
 		// under limit
-		if ((getAssessment().getNumSubmissionsAllowed() != null) && (this.getSiblingCount() >= getAssessment().getNumSubmissionsAllowed()))
+		if ((getAssessment().getTries() != null) && (this.getSiblingCount() >= getAssessment().getTries()))
 			return Boolean.FALSE;
 
 		return Boolean.TRUE;
@@ -564,8 +564,8 @@ public class SubmissionImpl implements Submission
 		if (!getAssessment().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
 
 		// under limit
-		if ((getAssessment().getNumSubmissionsAllowed() != null)
-				&& (this.getSiblingCount().intValue() >= getAssessment().getNumSubmissionsAllowed().intValue())) return Boolean.FALSE;
+		if ((getAssessment().getTries() != null)
+				&& (this.getSiblingCount().intValue() >= getAssessment().getTries().intValue())) return Boolean.FALSE;
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
 		if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()

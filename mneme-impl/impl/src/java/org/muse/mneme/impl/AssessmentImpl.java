@@ -83,8 +83,6 @@ public class AssessmentImpl implements Assessment
 
 	protected Attribution modifiedBy = null;
 
-	protected Integer numSubmissionsAllowed = Integer.valueOf(1);
-
 	protected AssessmentPartsImpl parts = null;
 
 	protected AssessmentPassword password = null;
@@ -101,9 +99,9 @@ public class AssessmentImpl implements Assessment
 
 	protected Boolean randomAccess = Boolean.TRUE;
 
-	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
-
 	protected AssessmentReview review = null;
+
+	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
 
 	protected Boolean showHints = Boolean.TRUE;
 
@@ -118,6 +116,8 @@ public class AssessmentImpl implements Assessment
 	protected Long timeLimit = null;
 
 	protected String title = "";
+
+	protected Integer tries = Integer.valueOf(1);
 
 	protected AssessmentType type = AssessmentType.test;
 
@@ -239,6 +239,35 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasMultipleTries()
+	{
+		if ((getTries() == null) || (getTries() > 1))
+		{
+			return Boolean.TRUE;
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasTimeLimit()
+	{
+		return Boolean.valueOf(this.timeLimit != null);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasTriesLimit()
+	{
+		return Boolean.valueOf(this.tries != null);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getId()
 	{
 		return this.id;
@@ -291,19 +320,6 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsMultipleSubmissionsAllowed()
-	{
-		if ((getNumSubmissionsAllowed() == null) || (getNumSubmissionsAllowed() > 1))
-		{
-			return Boolean.TRUE;
-		}
-
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean getIsOpen(Boolean withGrace)
 	{
 		if (this.archived) return Boolean.FALSE;
@@ -341,14 +357,6 @@ public class AssessmentImpl implements Assessment
 	public Attribution getModifiedBy()
 	{
 		return modifiedBy;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Integer getNumSubmissionsAllowed()
-	{
-		return this.numSubmissionsAllowed;
 	}
 
 	/**
@@ -479,6 +487,14 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Integer getTries()
+	{
+		return this.tries;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public AssessmentType getType()
 	{
 		return this.type;
@@ -534,13 +550,31 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setNumSubmissionsAllowed(Integer count)
+	public void setHasTimeLimit(Boolean hasTimeLimit)
 	{
-		if (!Different.different(count, this.numSubmissionsAllowed)) return;
+		if (hasTimeLimit == null) throw new IllegalArgumentException();
 
-		this.numSubmissionsAllowed = count;
+		if ((!hasTimeLimit) && (this.timeLimit != null))
+		{
+			this.timeLimit = null;
 
-		this.changed.setChanged();
+			this.changed.setChanged();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setHasTriesLimit(Boolean hasTriesLimit)
+	{
+		if (hasTriesLimit == null) throw new IllegalArgumentException();
+
+		if ((!hasTriesLimit) && (this.tries != null))
+		{
+			this.tries = null;
+
+			this.changed.setChanged();
+		}
 	}
 
 	/**
@@ -629,6 +663,18 @@ public class AssessmentImpl implements Assessment
 		if (this.title.equals(title)) return;
 
 		this.title = title;
+
+		this.changed.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setTries(Integer count)
+	{
+		if (!Different.different(count, this.tries)) return;
+
+		this.tries = count;
 
 		this.changed.setChanged();
 	}
@@ -753,7 +799,6 @@ public class AssessmentImpl implements Assessment
 		this.id = other.id;
 		this.liveChanged = other.liveChanged;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
-		this.numSubmissionsAllowed = other.numSubmissionsAllowed;
 		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts, this.historyChanged);
 		this.password = new AssessmentPasswordImpl((AssessmentPasswordImpl) other.password, this.changed);
 		this.poolService = other.poolService;
@@ -771,6 +816,7 @@ public class AssessmentImpl implements Assessment
 		this.specialAccess = new AssessmentSpecialAccessImpl((AssessmentSpecialAccessImpl) other.specialAccess, this.changed);
 		this.timeLimit = other.timeLimit;
 		this.title = other.title;
+		this.tries = other.tries;
 		this.type = other.type;
 	}
 }

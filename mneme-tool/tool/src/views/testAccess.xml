@@ -108,7 +108,7 @@
 				<row title="allowTries">
 					<container>
 						<selection orientation="VERTICAL">
-							<model ref="access.hasTries" />
+							<model ref="access.hasTriesLimit" />
 							<selectionChoices>
 								<selectionChoice value="false" selector="no-tries" />
 								<selectionChoice value="true" selector="tries">

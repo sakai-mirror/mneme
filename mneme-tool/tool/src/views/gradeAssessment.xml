@@ -274,7 +274,7 @@
 						</navigation>
 						<navigation style="LINK" disabled="TRUE">
 							<title>
-								<message model="submission.assessment.numSubmissionsAllowed" />
+								<message model="submission.assessment.tries" />
 							</title>
 							<destination template="/" />
 						</navigation>

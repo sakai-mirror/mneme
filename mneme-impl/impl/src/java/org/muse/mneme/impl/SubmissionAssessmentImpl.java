@@ -137,6 +137,22 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasTimeLimit()
+	{
+		return getHistoricalAssessment().getHasTimeLimit();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasTriesLimit()
+	{
+		return getMainAssessment().getHasTriesLimit();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getId()
 	{
 		return getMainAssessment().getId();
@@ -177,9 +193,9 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsMultipleSubmissionsAllowed()
+	public Boolean getHasMultipleTries()
 	{
-		return getMainAssessment().getIsMultipleSubmissionsAllowed();
+		return getMainAssessment().getHasMultipleTries();
 	}
 
 	/**
@@ -205,14 +221,6 @@ public class SubmissionAssessmentImpl implements Assessment
 	public Attribution getModifiedBy()
 	{
 		return getMainAssessment().getModifiedBy();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Integer getNumSubmissionsAllowed()
-	{
-		return getMainAssessment().getNumSubmissionsAllowed();
 	}
 
 	/**
@@ -347,6 +355,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Integer getTries()
+	{
+		return getMainAssessment().getTries();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public AssessmentType getType()
 	{
 		return getMainAssessment().getType();
@@ -379,10 +395,17 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setNumSubmissionsAllowed(Integer count)
+	public void setHasTimeLimit(Boolean hasTimeLimit)
 	{
 		throw new IllegalArgumentException();
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setHasTriesLimit(Boolean hasTries)
+	{
+		throw new IllegalArgumentException();	}
 
 	/**
 	 * {@inheritDoc}
@@ -436,6 +459,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	 * {@inheritDoc}
 	 */
 	public void setTitle(String title)
+	{
+		throw new IllegalArgumentException();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setTries(Integer count)
 	{
 		throw new IllegalArgumentException();
 	}

@@ -47,7 +47,7 @@ public interface AssessmentAccess
 	 * 
 	 * @return TRUE if a tries limit is defined, FALSE if not.
 	 */
-	Boolean getHasTries();
+	Boolean getHasTriesLimit();
 
 	/**
 	 * Access the id.
@@ -111,10 +111,10 @@ public interface AssessmentAccess
 	/**
 	 * An alternate way to clear the tries limit if set to false.
 	 * 
-	 * @param hasTries
+	 * @param hasTriesLimit
 	 *        if FALSE, clear the tries.
 	 */
-	void setHasTries(Boolean hasTries);
+	void setHasTriesLimit(Boolean hasTriesLimit);
 
 	/**
 	 * Set the time limit for taking the assessment (ms).

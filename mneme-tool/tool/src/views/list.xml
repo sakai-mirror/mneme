@@ -251,7 +251,7 @@
 						<text>
 							<message selector="list-format-tries">
 								<model ref="submission.siblingCount" />
-								<model ref="submission.assessment.numSubmissionsAllowed" missing="infinite" />
+								<model ref="submission.assessment.tries" missing="infinite" />
 							</message>
 						</text>
 					</container>

@@ -119,7 +119,7 @@
 				</instructions>
 			</container>
 			<included>
-				<decision model="assessment.isMultipleSubmissionsAllowed" />
+				<decision model="assessment.hasMultipleTries" />
 			</included>
 		</section>
 		<section>
