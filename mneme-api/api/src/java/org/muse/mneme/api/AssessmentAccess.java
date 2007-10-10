@@ -85,13 +85,6 @@ public interface AssessmentAccess
 	List<String> getUsers();
 
 	/**
-	 * Access the list of users in human readable form.
-	 * 
-	 * @return The list of users in human readable form.
-	 */
-	String getUsersDisplay();
-
-	/**
 	 * Check if this access applies to this user.
 	 * 
 	 * @param userId

@@ -158,33 +158,6 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getUsersDisplay()
-	{
-		// TODO: need user display or sort names!
-
-		StringBuilder rv = new StringBuilder();
-		for (String id : this.userIds)
-		{
-			rv.append(id);
-			rv.append(", ");
-		}
-
-		if (rv.length() > 0)
-		{
-			rv.setLength(rv.length() - 2);
-		}
-		
-		else
-		{
-			rv.append("-");
-		}
-
-		return rv.toString();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public int hashCode()
 	{
 		return this.id == null ? "null".hashCode() : this.id.hashCode();

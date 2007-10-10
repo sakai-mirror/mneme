@@ -115,6 +115,9 @@
 									<container>
 										<countEdit>
 											<model ref="access.tries" type="count" />
+											<minValue>
+												<model type="constant" value="1" />
+											</minValue>
 										</countEdit>
 									</container>
 								</selectionChoice>

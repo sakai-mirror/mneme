@@ -74,7 +74,7 @@
 					<title>
 						<message selector="access-users" />
 					</title>
-					<model ref="access.usersDisplay" />
+					<model ref="access.users" type="userInfo" selector="SORTNAME" />
 					<entityNavigations>
 						<navigation>
 							<destination template="/assessment_access/{0}/{1}/{2}">
