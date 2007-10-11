@@ -269,8 +269,8 @@ public class PoolServiceImpl implements PoolService
 		// security check
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, pool.getContext());
 
-		// TODO: is there a change that needs to generate history?
-		boolean historyNeeded = /* ((PoolImpl) pool).getHistoryChanged(); */Boolean.FALSE;
+		// generate history for any change
+		boolean historyNeeded = true;
 
 		// get the current pool for history
 		PoolImpl current = null;
