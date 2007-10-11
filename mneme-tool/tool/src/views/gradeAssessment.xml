@@ -321,12 +321,33 @@
 						</navigation>
 					</navigations>
 				</modelColumn>
-				<modelColumn>
+				<column>
 					<title>
 						<message selector="submission-score" />
 					</title>
-					<model ref="submission.answersAutoScore" />
-				</modelColumn>
+					<container>
+						<text model="submission.answersAutoScore">
+							<included>
+								<compareDecision model="submission.gradingStatus">
+									<constant value="released" />
+									<constant value="submitted" />
+									<constant value="closed" />
+									<constant value="evaluated" />
+								</compareDecision>
+							</included>
+						</text>
+						<text selector="missing-auto-score">
+							<included>
+								<compareDecision model="submission.gradingStatus" reversed="TRUE">
+									<constant value="released" />
+									<constant value="submitted" />
+									<constant value="closed" />
+									<constant value="evaluated" />
+								</compareDecision>
+							</included>
+						</text>
+					</container>
+				</column>
 				<column>
 					<title>
 						<message selector="submission-final" />
@@ -358,7 +379,26 @@
 						</desc>
 					</sort>
 					<container>
-						<floatEdit model="submission.totalScore" cols="2" />
+						<floatEdit model="submission.totalScore" cols="2">
+							<included>
+								<compareDecision model="submission.gradingStatus">
+									<constant value="released" />
+									<constant value="submitted" />
+									<constant value="closed" />
+									<constant value="evaluated" />
+								</compareDecision>
+							</included>
+						</floatEdit>
+						<floatEdit model="" cols="2">
+							<included>
+								<compareDecision model="submission.gradingStatus" reversed="TRUE">
+									<constant value="released" />
+									<constant value="submitted" />
+									<constant value="closed" />
+									<constant value="evaluated" />
+								</compareDecision>
+							</included>
+						</floatEdit>
 					</container>
 				</column>
 			</columns>
