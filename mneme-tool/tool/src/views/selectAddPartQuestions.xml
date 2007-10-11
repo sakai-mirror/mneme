@@ -32,11 +32,15 @@
 	<header>
 		<message selector="select-add-header">
 			<model type="icon" icon="/icons/hand_select.png" />
-			<model ref="assessment.title" missing="no-title" />
-			<model ref="partTitle" missing="no-title" />
 		</message>
 	</header>
 	<container>
+		<text>
+			<message selector="select-add-to">
+				<model ref="partTitle" missing="no-title" />
+				<model ref="assessmentTitle" missing="no-title" />
+			</message>
+		</text>
 		<section>
 			<container>
 				<!-- the list of the selected questions -->
@@ -66,7 +70,7 @@
 								<message>
 									<model type="icon" icon="/icons/cancel.gif" />
 								</message>
-							</entityIncluded>
+							</entityIncluded>							
 						</selectionColumn>
 						<modelColumn>
 							<title>
@@ -155,7 +159,7 @@
 							<title>
 								<message selector="question-difficulty" />
 							</title>
-							<model ref="question.pool.difficulty" />
+							<model ref="question.pool.difficulty" />							
 						</modelColumn>
 						<modelColumn>
 							<title>
