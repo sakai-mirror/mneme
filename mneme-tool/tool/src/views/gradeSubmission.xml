@@ -255,19 +255,46 @@
 								</text>
 
 								<!-- model answer for essay -->
-								<section>
+								<overlay id="model-answer">
 									<container>
 										<text>
-											<message selector="view-model-answer">
+											<message selector="essay-model-answer">
 												<model type="icon" icon="/icons/answer_key.png" />
-												<!--model ref="answer.question.modelAnswer" /-->
 											</message>
 										</text>
+										<text>
+											<message>
+												<model type="html" ref="answer.question.modelAnswer" />
+											</message>
+										</text>
+										<!-- model answer for essay toggle -->
+										<gap />
+										<toggle target="model-answer" title="hide-model-answer" description="" style="LINK">
+											<icon icon="/icons/answer_key.png" style="LEFT" />
+											<included>
+												<compareDecision model="answer.question.type" constant="mneme:Essay" />
+											</included>
+										</toggle>
 									</container>
 									<included>
 										<compareDecision model="answer.question.type" constant="mneme:Essay" />
 									</included>
-								</section>
+								</overlay>
+
+
+								<!-- model answer for essay toggle -->
+								<toggle target="model-answer" title="show-model-answer" description="" style="LINK">
+									<icon icon="/icons/answer_key.png" style="LEFT" />
+									<included>
+										<compareDecision model="answer.question.type" constant="mneme:Essay" />
+									</included>
+								</toggle>
+
+
+
+
+
+
 
 								<!-- question feedback -->
 								<text>
@@ -277,7 +304,7 @@
 									</message>
 									<included>
 										<hasValueDecision model="answer.question.feedback" />
-										<compareDecision model="answer.question.type" constant="mneme:Essay" reversed="TRUE"/>
+										<compareDecision model="answer.question.type" constant="mneme:Essay" reversed="TRUE" />
 									</included>
 								</text>
 
