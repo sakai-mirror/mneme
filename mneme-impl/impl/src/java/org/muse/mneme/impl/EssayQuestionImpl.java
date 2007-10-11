@@ -31,6 +31,7 @@ import java.util.Set;
 import org.muse.ambrosia.api.AndDecision;
 import org.muse.ambrosia.api.AutoColumn;
 import org.muse.ambrosia.api.Component;
+import org.muse.ambrosia.api.Container;
 import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
@@ -40,6 +41,8 @@ import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
+import org.muse.ambrosia.api.Overlay;
+import org.muse.ambrosia.api.Toggle;
 import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.OrderColumn;
 import org.muse.ambrosia.api.UiService;
@@ -250,9 +253,19 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewQuestionUi()
 	{
-		Text txt = this.uiService.newText();
-		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
-		return this.uiService.newFragment().setMessages(this.messages).add(txt);
+		Container cont = this.uiService.newContainer();
+		Overlay ovly = this.uiService.newOverlay();
+
+		ovly.setId("modelanswer");
+		ovly.add(this.uiService.newText().setText("modelAnswer"));
+		ovly.add(this.uiService.newText().setText(null,
+				this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer")));
+		ovly.add(this.uiService.newGap());
+		ovly.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
+		cont.add(ovly);
+		cont.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("view-model-answer"));
+
+		return this.uiService.newFragment().setMessages(this.messages).add(cont);
 	}
 
 	/**
