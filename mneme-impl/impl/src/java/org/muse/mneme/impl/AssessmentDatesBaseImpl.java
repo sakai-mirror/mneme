@@ -23,14 +23,24 @@ package org.muse.mneme.impl;
 
 import java.util.Date;
 
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentDates;
 import org.muse.mneme.api.Expiration;
+import org.muse.mneme.api.MnemeService;
 
 /**
  * AssessmentDatesBasempl implements logic for AssessmentDates.
  */
 public abstract class AssessmentDatesBaseImpl implements AssessmentDates
 {
+	/** Link back to the assessment, to get at published and archived settings. */
+	protected Assessment assessessment = null;
+
+	public AssessmentDatesBaseImpl(Assessment assessment)
+	{
+		this.assessessment = assessment;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -84,6 +94,44 @@ public abstract class AssessmentDatesBaseImpl implements AssessmentDates
 		rv.duration = new Long(tillExpires);
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsClosed()
+	{
+		if (this.assessessment.getArchived()) return Boolean.TRUE;
+		if (!this.assessessment.getPublished()) return Boolean.TRUE;
+
+		// if there is no end to submissions, we are never closed
+		if (getSubmitUntilDate() == null) return Boolean.FALSE;
+
+		// we are closed if after the submit until date
+		Date now = new Date();
+		if (now.after(getSubmitUntilDate())) return Boolean.TRUE;
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsOpen(Boolean withGrace)
+	{
+		if (this.assessessment.getArchived()) return Boolean.TRUE;
+		if (!this.assessessment.getPublished()) return Boolean.TRUE;
+
+		Date now = new Date();
+		long grace = withGrace ? MnemeService.GRACE : 0l;
+
+		// if we have an open date and we are not there yet
+		if ((getOpenDate() != null) && (now.before(getOpenDate()))) return Boolean.FALSE;
+
+		// if we have a submit-until date and we are past it, considering grace
+		if ((getSubmitUntilDate() != null) && (now.getTime() > (getSubmitUntilDate().getTime() + grace))) return Boolean.FALSE;
+
+		return Boolean.TRUE;
 	}
 
 	/**

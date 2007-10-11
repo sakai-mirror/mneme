@@ -131,7 +131,7 @@ public class SubmissionAssessmentImpl implements Assessment
 			if (special.getOverrideAcceptUntilDate() || special.getOverrideDueDate() || special.getOverrideOpenDate())
 			{
 				// return a special dates impl that knows how to override
-				return new AssessmentDatesOverrideImpl(getMainAssessment().getDates(), special);
+				return new AssessmentDatesOverrideImpl(getMainAssessment(), special);
 			}
 		}
 
@@ -144,6 +144,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	public AssessmentGrading getGrading()
 	{
 		return getMainAssessment().getGrading();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasMultipleTries()
+	{
+		return getMainAssessment().getHasMultipleTries();
 	}
 
 	/**
@@ -203,7 +211,7 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public Boolean getIsClosed()
 	{
-		return getMainAssessment().getIsClosed();
+		return getDates().getIsClosed();
 	}
 
 	/**
@@ -225,17 +233,9 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getHasMultipleTries()
-	{
-		return getMainAssessment().getHasMultipleTries();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean getIsOpen(Boolean withGrace)
 	{
-		return getMainAssessment().getIsOpen(withGrace);
+		return getDates().getIsOpen(withGrace);
 	}
 
 	/**

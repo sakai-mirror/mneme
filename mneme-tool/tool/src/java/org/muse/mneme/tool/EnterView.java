@@ -90,7 +90,7 @@ public class EnterView extends ControllerImpl
 		}
 
 		// check for closed
-		if (assessment.getIsClosed().booleanValue())
+		if (assessment.getDates().getIsClosed().booleanValue())
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.closed)));

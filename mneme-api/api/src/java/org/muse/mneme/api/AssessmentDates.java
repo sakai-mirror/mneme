@@ -66,6 +66,22 @@ public interface AssessmentDates
 	Expiration getExpiration();
 
 	/**
+	 * Check if the assessment is closed for submissions - unpublished, archived, not yet open or past submit-until date.
+	 * 
+	 * @return TRUE if closed for submission, FALSE if not.
+	 */
+	Boolean getIsClosed();
+
+	/**
+	 * Check if the assessment is open for submissions - published, not archived, past open date, before submit-until date.
+	 * 
+	 * @param withGrace
+	 *        TRUE to consider the grace period, FALSE not to.
+	 * @return TRUE if open for submission, FALSE if not.
+	 */
+	Boolean getIsOpen(Boolean withGrace);
+
+	/**
 	 * Check if the assessment dates are valid; i.e. has no inconsistencies in the definition.
 	 * 
 	 * @return TRUE if the assessment dates are valid, FALSE if not.

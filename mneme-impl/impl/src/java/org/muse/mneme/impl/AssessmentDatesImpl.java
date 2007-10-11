@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.Date;
 
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentDates;
 import org.muse.mneme.api.Changeable;
 
@@ -47,17 +48,18 @@ public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements Asse
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AssessmentDatesImpl(AssessmentDatesImpl other, Changeable owner)
+	public AssessmentDatesImpl(Assessment assessment, AssessmentDatesImpl other, Changeable owner)
 	{
-		this(owner);
+		this(assessment, owner);
 		set(other);
 	}
 
 	/**
 	 * Construct.
 	 */
-	public AssessmentDatesImpl(Changeable owner)
+	public AssessmentDatesImpl(Assessment assessment, Changeable owner)
 	{
+		super(assessment);
 		this.owner = owner;
 	}
 

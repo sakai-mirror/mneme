@@ -129,7 +129,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (!securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, assessment.getContext())) return Boolean.FALSE;
 
 		// the assessment must be currently open for submission (with a grace period to allow completion near closing time)
-		if (!assessment.getIsOpen(Boolean.TRUE)) return Boolean.FALSE;
+		if (!assessment.getDates().getIsOpen(Boolean.TRUE)) return Boolean.FALSE;
 
 		return Boolean.TRUE;
 	}
@@ -206,7 +206,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (!securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, assessment.getContext())) return Boolean.FALSE;
 
 		// the assessment must be currently open for submission
-		if (!assessment.getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
+		if (!assessment.getDates().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
 
 		// if the user has a submission in progress, this is good
 		if (this.storage.getSubmissionInProgress(assessment, userId) != null) return Boolean.TRUE;
@@ -243,7 +243,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		securityService.secure(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, assessment.getContext());
 
 		// the assessment must be currently open for submission (with the grace period to support completion near closing time)
-		if (!assessment.getIsOpen(Boolean.TRUE)) throw new AssessmentClosedException();
+		if (!assessment.getDates().getIsOpen(Boolean.TRUE)) throw new AssessmentClosedException();
 
 		if (M_log.isDebugEnabled()) M_log.debug("completeSubmission: submission: " + submission.getId());
 
@@ -325,7 +325,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		securityService.secure(userId, MnemeService.SUBMIT_PERMISSION, assessment.getContext());
 
 		// the assessment must be currently open for submission
-		if (!assessment.getIsOpen(Boolean.FALSE)) throw new AssessmentClosedException();
+		if (!assessment.getDates().getIsOpen(Boolean.FALSE)) throw new AssessmentClosedException();
 
 		// use the one in progress if
 		Submission submissionInProgress = this.storage.getSubmissionInProgress(assessment, userId);
@@ -1029,7 +1029,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		securityService.secure(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, assessment.getContext());
 
 		// the assessment must be currently open for submission (with the grace period to support completion near closing time)
-		if (!assessment.getIsOpen(Boolean.TRUE)) throw new AssessmentClosedException();
+		if (!assessment.getDates().getIsOpen(Boolean.TRUE)) throw new AssessmentClosedException();
 
 		Date asOf = new Date();
 

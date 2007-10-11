@@ -133,7 +133,7 @@ public class AssessmentImpl implements Assessment
 		this.questionService = questionService;
 
 		this.createdBy = new AttributionImpl(this.changed);
-		this.dates = new AssessmentDatesImpl(this.changed);
+		this.dates = new AssessmentDatesImpl(this, this.changed);
 		this.grading = new AssessmentGradingImpl(this.changed);
 		this.modifiedBy = new AttributionImpl(this.changed);
 		this.parts = new AssessmentPartsImpl(this, questionService, poolService, this.historyChanged);
@@ -284,24 +284,6 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsClosed()
-	{
-		if (this.archived) return Boolean.TRUE;
-		if (!this.published) return Boolean.TRUE;
-
-		// if there is no end to submissions, we are never closed
-		if (this.dates.getSubmitUntilDate() == null) return Boolean.FALSE;
-
-		// we are closed if after the submit until date
-		Date now = new Date();
-		if (now.after(this.dates.getSubmitUntilDate())) return Boolean.TRUE;
-
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean getIsFullyReleased()
 	{
 		// TODO: we may want to compute this on read -ggolden
@@ -315,26 +297,6 @@ public class AssessmentImpl implements Assessment
 	{
 		// TODO: we may want to compute this on read -ggolden
 		return this.submissionService.submissionsExist(this);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getIsOpen(Boolean withGrace)
-	{
-		if (this.archived) return Boolean.FALSE;
-		if (!this.published) return Boolean.FALSE;
-
-		Date now = new Date();
-		long grace = withGrace ? MnemeService.GRACE : 0l;
-
-		// if we have an open date and we are not there yet
-		if ((this.dates.getOpenDate() != null) && (now.before(dates.getOpenDate()))) return Boolean.FALSE;
-
-		// if we have a submit-until date and we are past it, considering grace
-		if ((this.dates.getSubmitUntilDate() != null) && (now.getTime() > (this.dates.getSubmitUntilDate().getTime() + grace))) return Boolean.FALSE;
-
-		return Boolean.TRUE;
 	}
 
 	/**
@@ -791,7 +753,7 @@ public class AssessmentImpl implements Assessment
 		this.changed = new ChangeableImpl(other.changed);
 		this.context = other.context;
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy, this.changed);
-		this.dates = new AssessmentDatesImpl((AssessmentDatesImpl) other.dates, this.changed);
+		this.dates = new AssessmentDatesImpl(this, (AssessmentDatesImpl) other.dates, this.changed);
 		this.grading = new AssessmentGradingImpl((AssessmentGradingImpl) other.grading, this.changed);
 		this.historical = other.historical;
 		this.historyChanged = new ChangeableImpl(other.historyChanged);

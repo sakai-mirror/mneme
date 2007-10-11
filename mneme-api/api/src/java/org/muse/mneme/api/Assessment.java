@@ -108,13 +108,6 @@ public interface Assessment
 	Boolean getIsChanged();
 
 	/**
-	 * Check if the assessment is closed for submissions - unpublished, archived, not yet open or past submit-until date.
-	 * 
-	 * @return TRUE if closed for submission, FALSE if not.
-	 */
-	Boolean getIsClosed();
-
-	/**
 	 * Check if all the completed submissions to this assessment have been released.
 	 * 
 	 * @return TRUE if all completed submissions (so far) to this assessment have been released, FALSE if not.
@@ -127,15 +120,6 @@ public interface Assessment
 	 * @return TRUE if the assessment is live, FALSE if not.
 	 */
 	Boolean getIsLive();
-
-	/**
-	 * Check if the assessment is open for submissions - published, not archived, past open date, before submit-until date.
-	 * 
-	 * @param withGrace
-	 *        TRUE to consider the grace period, FALSE not to.
-	 * @return TRUE if open for submission, FALSE if not.
-	 */
-	Boolean getIsOpen(Boolean withGrace);
 
 	/**
 	 * Check if the assessment is valid; i.e. has no inconsistencies in its definition.

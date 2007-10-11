@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.Date;
 
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentDates;
 
@@ -41,9 +42,10 @@ public class AssessmentDatesOverrideImpl extends AssessmentDatesBaseImpl impleme
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AssessmentDatesOverrideImpl(AssessmentDates main, AssessmentAccess access)
+	public AssessmentDatesOverrideImpl(Assessment main, AssessmentAccess access)
 	{
-		this.main = main;
+		super(main);
+		this.main = main.getDates();
 		this.access = access;
 	}
 
