@@ -97,7 +97,7 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
-		context.put("assessmentTitle", assessment.getTitle());
+		context.put("assessment", assessment);
 
 		ManualPart part = (ManualPart) assessment.getParts().getPart(params[4]);
 		if (part == null)
@@ -155,6 +155,7 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		// for the checkboxes
 		Values values = this.uiService.newValues();
 		context.put("questionids", values);
+
 		// render
 		uiService.render(ui, context);
 	}

@@ -32,7 +32,7 @@
 	<header>
 		<message selector="select-add-header">
 			<model type="icon" icon="/icons/hand_select.png" />
-			<model ref="assessmentTitle" missing="no-title" />
+			<model ref="assessment.title" missing="no-title" />
 			<model ref="partTitle" missing="no-title" />
 		</message>
 	</header>
@@ -61,6 +61,12 @@
 								<model type="text" ref="question.id" />
 							</value>
 							<model ref="questionids.values" />
+							<entityIncluded>
+								<decision reversed = "TRUE" model="question.id" delegate="QuestionReferencedDecision" tool="sakai.mneme" />
+								<message>
+									<model type="icon" icon="/icons/cancel.gif" />
+								</message>
+							</entityIncluded>
 						</selectionColumn>
 						<modelColumn>
 							<title>

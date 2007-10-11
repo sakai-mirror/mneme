@@ -26,17 +26,35 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.util.DecisionDelegateImpl;
-import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
-import org.sakaiproject.util.StringUtil;
 
 /**
  * The "AnswerFeedbackDecision" decision delegate for the mneme tool.
  */
-public class AnswerFeedbackDecisionDelegate extends DecisionDelegateImpl
+public class QuestionReferencedDecisionDelegate extends DecisionDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(AnswerFeedbackDecisionDelegate.class);
+	private static Log M_log = LogFactory.getLog(QuestionReferencedDecisionDelegate.class);
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean decide(Decision decision, Context context, Object focus)
+	{
+		// focus is the question id
+		if (focus == null) return false;
+		if (!(focus instanceof String)) return false;
+		String questionId = (String) focus;
+
+		// get the assessment
+		Assessment assessment = (Assessment) context.get("assessment");
+		if (assessment == null) return false;
+
+		// if the question can be found in the assessment, it is referenced
+		if (assessment.getParts().getQuestion(questionId) != null) return true;
+
+		return false;
+	}
 
 	/**
 	 * Shutdown.
@@ -44,34 +62,6 @@ public class AnswerFeedbackDecisionDelegate extends DecisionDelegateImpl
 	public void destroy()
 	{
 		M_log.info("destroy()");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean decide(Decision decision, Context context, Object focus)
-	{
-//		// focus is the AssessmentAnswer
-//		if (focus == null) return false;
-//		if (!(focus instanceof AssessmentAnswer)) return false;
-//
-//		AssessmentAnswer answer = (AssessmentAnswer) focus;
-//		AssessmentQuestion question = answer.getPart().getQuestion();
-//		Assessment assessment = question.getSection().getAssessment();
-//
-//		if (!assessment.getFeedbackNow()) return false;
-//		if (!assessment.getFeedbackShowAnswerFeedback()) return false;
-//
-//		if (!((question.getType() == QuestionType.multipleChoice) || (question.getType() == QuestionType.multipleCorrect))) return false;
-//
-//		// for multipleChoice, this must be the answer selected by the entry of the submission answer
-//		if (question.getType() == QuestionType.multipleChoice)
-//		{
-//			Answer submissionAnswer = (Answer) context.get("answer");
-//			if (!StringUtil.contains(submissionAnswer.getEntryAnswerIds(), answer.getId())) return false;
-//		}
-//
-		return true;
 	}
 
 	/**

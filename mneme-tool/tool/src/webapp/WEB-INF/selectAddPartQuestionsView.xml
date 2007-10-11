@@ -27,7 +27,7 @@
 <beans>
 
 	<bean id="org.muse.mneme.tool.SelectAddPartQuestionsView" class="org.muse.mneme.tool.SelectAddPartQuestionsView" init-method="init"
-		destroy-method="destroy" singleton="true">
+		destroy-method="destroy" singleton="true" depends-on="QuestionReferencedDecisionDelegate">
 
 		<property name="ui">
 			<ref bean="org.muse.ambrosia.api.UiService" />
@@ -63,6 +63,18 @@
 		<property name="components">
 			<value>selectAddPartQuestions.xml</value>
 		</property>
+	</bean>
+
+	<bean id="QuestionReferencedDecisionDelegate"
+			class="org.muse.mneme.tool.QuestionReferencedDecisionDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>QuestionReferencedDecision</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 
 </beans>
