@@ -199,6 +199,15 @@
 										<hasValueDecision model="answer.question.presentation.attachments" />
 									</included>
 								</attachments>
+								
+								<!-- submission title -->
+								<section>
+									<container>
+										<text>
+											<message selector="submission" />
+										</text>
+									</container>
+								</section>
 
 								<!-- Question specific review -->
 								<modelComponent model="answer.question.typeSpecificQuestion.reviewUi" />
@@ -235,6 +244,7 @@
 										<hasValueDecision model="answer.reason" />
 									</included>
 								</text>
+								
 								<section>
 									<container>
 										<text>
