@@ -251,7 +251,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	public Component getViewQuestionUi()
 	{
 		Text txt = this.uiService.newText();
-		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
 		return this.uiService.newFragment().setMessages(this.messages).add(txt);
 	}
 
