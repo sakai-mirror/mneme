@@ -76,23 +76,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 	protected UserDirectoryService userDirectoryService = null;
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public Integer countCompleteSubmissions(Assessment assessment, String userId)
-	{
-		int i = 0;
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			if (submission.getAssessment().equals(assessment) && submission.getUserId().equals(userId) && submission.getIsComplete())
-			{
-				i++;
-			}
-		}
-
-		return i;
-	}
-
-	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -384,22 +367,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public SubmissionImpl getSubmissionInProgress(Assessment assessment, String userId)
-	{
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			if (submission.getAssessment().equals(assessment) && submission.getUserId().equals(userId) && !submission.getIsComplete())
-			{
-				return new SubmissionImpl(submission);
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Float getSubmissionScore(Submission submission)
 	{
 		SubmissionImpl s = getSubmission(submission.getId());
@@ -409,6 +376,34 @@ public class SubmissionStorageSample implements SubmissionStorage
 		}
 
 		return 0f;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<SubmissionImpl> getUserAssessmentSubmissions(Assessment assessment, String userId)
+	{
+		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			// find those to this assessment for this user, filter out archived and un-published assessments
+			if (submission.getAssessment().equals(assessment) && submission.getUserId().equals(userId) && (!submission.getAssessment().getArchived())
+					&& (submission.getAssessment().getPublished()))
+			{
+				rv.add(new SubmissionImpl(submission));
+			}
+		}
+
+		// if we didn't get one, invent one
+		if (rv.isEmpty())
+		{
+			SubmissionImpl s = newSubmission();
+			s.initUserId(userId);
+			s.initAssessmentIds(assessment.getId(), assessment.getId());
+			rv.add(s);
+		}
+
+		return rv;
 	}
 
 	/**

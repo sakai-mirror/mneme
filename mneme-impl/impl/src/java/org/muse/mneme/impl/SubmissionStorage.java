@@ -36,17 +36,6 @@ import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 public interface SubmissionStorage
 {
 	/**
-	 * Count the completed submissions by this user to this assessment.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 * @param userId
-	 *        The user.
-	 * @return The count of completed submissions by this user to this assessment.
-	 */
-	Integer countCompleteSubmissions(Assessment assessment, String userId);
-
-	/**
 	 * Get the official complete submissions to the assignment made by all users.
 	 * 
 	 * @param assessment
@@ -126,17 +115,6 @@ public interface SubmissionStorage
 	Float getSubmissionHighestScore(Assessment assessment, String userId);
 
 	/**
-	 * Find the submission in-progress for this user to this assessment.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 * @param userId
-	 *        The user id.
-	 * @return The submission in-progress for this user to this assessment, or null if there is not one.
-	 */
-	SubmissionImpl getSubmissionInProgress(Assessment assessment, String userId);
-
-	/**
 	 * Access this submission's total score.
 	 * 
 	 * @param submission
@@ -144,6 +122,19 @@ public interface SubmissionStorage
 	 * @return The total score for this submission.
 	 */
 	Float getSubmissionScore(Submission submissionImpl);
+
+	/**
+	 * Get the submission to the assignment made by this user.<br />
+	 * Returns the official submission, or one in progress, or a blank one if not yet started.<br />
+	 * The sibling count is set.
+	 * 
+	 * @param assessment
+	 *        The assessment to use.
+	 * @param userId
+	 *        The user id - if null, use the current user.
+	 * @return The user's submission for this assessment.
+	 */
+	List<SubmissionImpl> getUserAssessmentSubmissions(Assessment assessment, String userId);
 
 	/**
 	 * Get all the submissions by this user in this context, sorted.<br />

@@ -36,7 +36,6 @@ import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
-import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.Submission;
@@ -81,6 +80,7 @@ public class EnterView extends ControllerImpl
 
 		String assessmentId = params[2];
 
+		// get the assessment
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
@@ -89,8 +89,17 @@ public class EnterView extends ControllerImpl
 			return;
 		}
 
+		// get the submissions from the user to this assessment
+		Submission submission = submissionService.getUserAssessmentSubmission(assessment, null);
+		if (submission == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
 		// check for closed
-		if (assessment.getDates().getIsClosed().booleanValue())
+		if (submission.getAssessment().getDates().getIsClosed().booleanValue())
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.closed)));
@@ -98,7 +107,7 @@ public class EnterView extends ControllerImpl
 		}
 
 		// security check (submissions count / allowed check)
-		if (!submissionService.allowSubmit(assessment))
+		if (!submissionService.allowSubmit(submission))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -106,7 +115,7 @@ public class EnterView extends ControllerImpl
 		}
 
 		// collect information: the selected assessment (id the request)
-		context.put("assessment", assessment);
+		context.put("assessment", submission.getAssessment());
 
 		// for the tool navigation
 		if (this.assessmentService.allowManageAssessments(toolManager.getCurrentPlacement().getContext()))
@@ -154,7 +163,7 @@ public class EnterView extends ControllerImpl
 
 		// read form
 		String destination = this.uiService.decode(req, context);
-		
+
 		// if other than the ENTER destination, just go there
 		if (!destination.equals("ENTER"))
 		{
@@ -171,15 +180,25 @@ public class EnterView extends ControllerImpl
 			return;
 		}
 
+		// get the submissions from the user to this assessment
+		Submission submission = submissionService.getUserAssessmentSubmission(assessment, null);
+		if (submission == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
 		// check password
-		if ((assessment.getPassword().getPassword() != null) && (!assessment.getPassword().checkPassword(value.getValue())))
+		if ((submission.getAssessment().getPassword().getPassword() != null)
+				&& (!submission.getAssessment().getPassword().checkPassword(value.getValue())))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.password)));
 			return;
 		}
 
-		enterSubmission(req, res, assessment);
+		enterSubmission(req, res, submission);
 	}
 
 	/**
@@ -220,16 +239,16 @@ public class EnterView extends ControllerImpl
 	 *        Servlet request.
 	 * @param res
 	 *        Servlet response.
-	 * @param assessment
-	 *        The assessment to take.
+	 * @param submission
+	 *        The submission set for the user to the assessment so far.
 	 * @throws IOException
 	 */
-	protected void enterSubmission(HttpServletRequest req, HttpServletResponse res, Assessment assessment) throws IOException
+	protected void enterSubmission(HttpServletRequest req, HttpServletResponse res, Submission submission) throws IOException
 	{
-		Submission submission = null;
+		Submission enterSubmission = null;
 		try
 		{
-			submission = submissionService.enterSubmission(assessment);
+			enterSubmission = submissionService.enterSubmission(submission);
 		}
 		catch (AssessmentClosedException e)
 		{
@@ -241,14 +260,14 @@ public class EnterView extends ControllerImpl
 		{
 		}
 
-		if (submission == null)
+		if (enterSubmission == null)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
-		redirectToQuestion(req, res, submission, false, true);
+		redirectToQuestion(req, res, enterSubmission, false, true);
 	}
 
 	/**

@@ -33,7 +33,7 @@ public interface SubmissionService
 	 */
 	enum FindAssessmentSubmissionsSort
 	{
-		status_a, status_d, userName_a, userName_d, final_a, final_d
+		final_a, final_d, status_a, status_d, userName_a, userName_d
 	}
 
 	/**
@@ -91,11 +91,11 @@ public interface SubmissionService
 	 * If the user has a submission in progress, this returns true.<br />
 	 * Otherwise, the assessment must be open, the user must have submit permission, and not yet submitted the max.
 	 * 
-	 * @param assessment
-	 *        The assessment.
+	 * @param submission
+	 *        The current submission set for this user to the assessment (getUserAssessmentSubmission).
 	 * @return TRUE if the user is allowed to add an assessment in this context, FALSE if not.
 	 */
-	Boolean allowSubmit(Assessment assessment);
+	Boolean allowSubmit(Submission submission);
 
 	/**
 	 * Complete this submission. Use this instead of submitAnswer() when there's no answer information to also update.
@@ -112,22 +112,10 @@ public interface SubmissionService
 	void completeSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException, SubmissionCompletedException;
 
 	/**
-	 * Check how many additional submissions are allowed to this assessment by this user.<br />
-	 * If the user has no permission to submit, has submitted the maximum, or the assessment is closed for submissions as of this time, return 0.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 * @param userId
-	 *        The user id.
-	 * @return The count of remaining submissions allowed for this user to this assessment, or null if submissions are unlimited.
-	 */
-	Integer countRemainingSubmissions(Assessment assessment, String userId);
-
-	/**
 	 * Start an end-user in taking an assessment. If there is an incomplete submission already, re-enter that, else create a new one.
 	 * 
-	 * @param assessment
-	 *        The published assessment to submit to.
+	 * @param submission
+	 *        The current submission set for this user to the assessment (getUserAssessmentSubmission).
 	 * @return The submission (found or created), or null if this was unsuccessful.
 	 * @throws AssessmentPermissionException
 	 *         if the user does not have permission to submit to this assessment.
@@ -136,7 +124,7 @@ public interface SubmissionService
 	 * @throws AssessmentCompletedException
 	 *         if an assessment has been submitted to by the user the maximum number of times.
 	 */
-	Submission enterSubmission(Assessment assessment) throws AssessmentPermissionException, AssessmentClosedException, AssessmentCompletedException;
+	Submission enterSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException, AssessmentCompletedException;
 
 	/**
 	 * Record the evaluation changes made to these answers.
@@ -249,6 +237,19 @@ public interface SubmissionService
 	 * @return The submission object, or null if not found.
 	 */
 	Submission getSubmission(String id);
+
+	/**
+	 * Get the submission to the assignment made by this user.<br />
+	 * Returns the official submission, or one in progress, or a blank one if not yet started.<br />
+	 * The sibling count is set.
+	 * 
+	 * @param assessment
+	 *        The assessment to use.
+	 * @param userId
+	 *        The user id - if null, use the current user.
+	 * @return The user's submission for this assessment.
+	 */
+	Submission getUserAssessmentSubmission(Assessment assessment, String userId);
 
 	/**
 	 * Get the submissions to assignments in this context made by this user. Consider:

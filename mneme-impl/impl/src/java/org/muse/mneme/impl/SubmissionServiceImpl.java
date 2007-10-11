@@ -195,24 +195,24 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowSubmit(Assessment assessment)
+	public Boolean allowSubmit(Submission submission)
 	{
-		if (assessment == null) throw new IllegalArgumentException();
+		if (submission == null) throw new IllegalArgumentException();
 		String userId = sessionManager.getCurrentSessionUserId();
 
-		if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: " + assessment.getId() + ": " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: " + submission.getAssessment().getId() + ": " + userId);
 
 		// user must have submit permission inthe context of the assessment for this submission
-		if (!securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, assessment.getContext())) return Boolean.FALSE;
+		if (!securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, submission.getAssessment().getContext())) return Boolean.FALSE;
 
 		// the assessment must be currently open for submission
-		if (!assessment.getDates().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
+		if (!submission.getAssessment().getDates().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
 
 		// if the user has a submission in progress, this is good
-		if (this.storage.getSubmissionInProgress(assessment, userId) != null) return Boolean.TRUE;
+		if (submission.getIsStarted() && (!submission.getIsComplete())) return Boolean.TRUE;
 
 		// if the user can submit a new one, this is good
-		Integer remaining = countRemainingSubmissions(assessment, userId);
+		Integer remaining = countRemainingSubmissions(submission);
 		if ((remaining == null) || (remaining > 0)) return Boolean.TRUE;
 
 		return Boolean.FALSE;
@@ -271,34 +271,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public Integer countRemainingSubmissions(Assessment assessment, String userId)
-	{
-		if (assessment == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
-		Date asOf = new Date();
-
-		if (M_log.isDebugEnabled())
-			M_log.debug("countRemainingSubmissions: assessment: " + assessment.getId() + " userId: " + userId + " asOf: " + asOf);
-
-		// check the assessment's max submissions
-		Integer allowed = assessment.getTries();
-
-		// if unlimited, send back a null to indicate this.
-		if (allowed == null) return null;
-
-		// get a count of completed submissions by this user to the assessment
-		Integer completed = this.storage.countCompleteSubmissions(assessment, userId);
-
-		// how many tries left?
-		Integer remaining = allowed - completed;
-		if (remaining < 0) remaining = 0;
-
-		return remaining;
-	}
-
-	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -312,54 +284,53 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Submission enterSubmission(Assessment a) throws AssessmentPermissionException, AssessmentClosedException, AssessmentCompletedException
+	public Submission enterSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException,
+			AssessmentCompletedException
 	{
-		if (a == null) throw new IllegalArgumentException();
-		String userId = sessionManager.getCurrentSessionUserId();
-		Assessment assessment = assessmentService.getAssessment(a.getId());
+		if (submission == null) throw new IllegalArgumentException();
 		Date asOf = new Date();
 
-		if (M_log.isDebugEnabled()) M_log.debug("enterSubmission: assessment: " + assessment.getId() + " user: " + userId + " asOf: " + asOf);
+		if (M_log.isDebugEnabled())
+			M_log.debug("enterSubmission: assessment: " + submission.getAssessment().getId() + " user: " + submission.getUserId() + " asOf: " + asOf);
 
 		// user must have SUBMIT_PERMISSION in the context of the assessment
-		securityService.secure(userId, MnemeService.SUBMIT_PERMISSION, assessment.getContext());
+		securityService.secure(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, submission.getAssessment().getContext());
 
 		// the assessment must be currently open for submission
-		if (!assessment.getDates().getIsOpen(Boolean.FALSE)) throw new AssessmentClosedException();
+		if (!submission.getAssessment().getDates().getIsOpen(Boolean.FALSE)) throw new AssessmentClosedException();
 
 		// use the one in progress if
-		Submission submissionInProgress = this.storage.getSubmissionInProgress(assessment, userId);
-		if (submissionInProgress != null)
+		if (submission.getIsStarted() && (!submission.getIsComplete()))
 		{
 			// event track it (not a modify event)
-			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_CONTINUE, getSubmissionReference(submissionInProgress
-					.getId()), false));
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_CONTINUE, getSubmissionReference(submission.getId()),
+					false));
 
-			return submissionInProgress;
+			return submission;
 		}
 
 		// the user must be able to create a new submission
-		Integer remaining = countRemainingSubmissions(assessment, userId);
+		Integer remaining = countRemainingSubmissions(submission);
 		if ((remaining != null) && (remaining == 0)) throw new AssessmentCompletedException();
 
 		// TODO: it is possible to make too many submissions for the assessment. If this method is entered concurrently for the same user and
 		// assessment, the previous count check might fail.
 
 		// make a new submission
-		SubmissionImpl submission = this.storage.newSubmission();
-		submission.initAssessmentIds(assessment.getId(), assessment.getId());
-		submission.initUserId(userId);
-		submission.setIsComplete(Boolean.FALSE);
-		submission.setStartDate(asOf);
-		submission.setSubmittedDate(asOf);
+		SubmissionImpl rv = this.storage.newSubmission();
+		rv.initAssessmentIds(submission.getAssessment().getId(), submission.getAssessment().getId());
+		rv.initUserId(submission.getUserId());
+		rv.setIsComplete(Boolean.FALSE);
+		rv.setStartDate(asOf);
+		rv.setSubmittedDate(asOf);
 
 		// store the new submission, setting the id
-		this.storage.saveSubmission(submission);
+		this.storage.saveSubmission(rv);
 
 		// event track it
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_ENTER, getSubmissionReference(submission.getId()), true));
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_ENTER, getSubmissionReference(rv.getId()), true));
 
-		return submission;
+		return rv;
 	}
 
 	/**
@@ -641,6 +612,37 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		SubmissionImpl submission = this.storage.getSubmission(id);
 
 		return submission;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Submission getUserAssessmentSubmission(Assessment assessment, String userId)
+	{
+		if (assessment == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		Date asOf = new Date();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getUserAssessmentSubmission: assessment: " + assessment.getId() + " userId: " + userId);
+
+		// read all the submissions for this user to this assessment, with all the assessment and submission data we need
+		// each assessment is covered with at least one - if there are no submission yet for an assessment, an empty submission is returned
+		List<SubmissionImpl> all = this.storage.getUserAssessmentSubmissions(assessment, userId);
+
+		// see if any needs to be completed based on time limit or dates
+		checkAutoComplete(all, asOf);
+
+		// pick one for each assessment - the one in progress, or the official complete one
+		List<Submission> official = officializeByAssessment(all);
+
+		// pick the one that is official (since there's only one assessment)
+		if (official.size() == 1)
+		{
+			return official.get(0);
+		}
+
+		// TODO: we don't really want to return null
+		return null;
 	}
 
 	/**
@@ -1198,6 +1200,40 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				autoCompleteSubmission(over, submission);
 			}
 		}
+	}
+
+	/**
+	 * Check how many additional submissions are allowed to this assessment by this user.<br />
+	 * If the user has no permission to submit, has submitted the maximum, or the assessment is closed for submissions as of this time, return 0.
+	 * 
+	 * @param submission
+	 *        The submission.
+	 * @return The count of remaining submissions allowed for this user to this assessment, or null if submissions are unlimited.
+	 */
+	protected Integer countRemainingSubmissions(Submission submission)
+	{
+		if (submission == null) throw new IllegalArgumentException();
+		Date asOf = new Date();
+
+		if (M_log.isDebugEnabled())
+			M_log.debug("countRemainingSubmissions: assessment: " + submission.getAssessment().getId() + " userId: " + submission.getUserId()
+					+ " asOf: " + asOf);
+
+		// check the assessment's max submissions
+		Integer allowed = submission.getAssessment().getTries();
+
+		// if unlimited, send back a null to indicate this.
+		if (allowed == null) return null;
+
+		// get a count of completed submissions by this user to the assessment
+		int completed = submission.getSiblingCount();
+		if (submission.getIsStarted() && (!submission.getIsComplete())) completed--;
+
+		// how many tries left?
+		int remaining = allowed - completed;
+		if (remaining < 0) remaining = 0;
+
+		return Integer.valueOf(remaining);
 	}
 
 	/**
@@ -1798,5 +1834,4 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	{
 		this.storage.switchLiveDependency(from, to);
 	}
-
 }

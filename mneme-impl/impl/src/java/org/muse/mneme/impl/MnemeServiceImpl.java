@@ -170,9 +170,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean allowSubmit(Assessment assessment)
+	public Boolean allowSubmit(Submission submission)
 	{
-		return submissionService.allowSubmit(assessment);
+		return submissionService.allowSubmit(submission);
 	}
 
 	/**
@@ -249,14 +249,6 @@ public class MnemeServiceImpl implements MnemeService
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public Integer countRemainingSubmissions(Assessment assessment, String userId)
-	{
-		return submissionService.countRemainingSubmissions(assessment, userId);
-	}
-
-	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -267,10 +259,10 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Submission enterSubmission(Assessment assessment) throws AssessmentPermissionException, AssessmentClosedException,
+	public Submission enterSubmission(Submission submission) throws AssessmentPermissionException, AssessmentClosedException,
 			AssessmentCompletedException
 	{
-		return submissionService.enterSubmission(assessment);
+		return submissionService.enterSubmission(submission);
 	}
 
 	/**
@@ -462,6 +454,14 @@ public class MnemeServiceImpl implements MnemeService
 	public List<User> getSubmitUsers(String context)
 	{
 		return assessmentService.getSubmitUsers(context);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Submission getUserAssessmentSubmission(Assessment assessment, String userId)
+	{
+		return submissionService.getUserAssessmentSubmission(assessment, userId);
 	}
 
 	/**
