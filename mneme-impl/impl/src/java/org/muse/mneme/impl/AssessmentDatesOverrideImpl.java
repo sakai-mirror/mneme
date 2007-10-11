@@ -23,23 +23,17 @@ package org.muse.mneme.impl;
 
 import java.util.Date;
 
+import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentDates;
-import org.muse.mneme.api.Changeable;
 
 /**
- * AssessmentDatesImpl implements AssessmentDates
+ * AssessmentDatesOverrideImpl implements AssessmentDates, merging a main dates impl with an AssesmentAccess impl.
  */
-public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements AssessmentDates
+public class AssessmentDatesOverrideImpl extends AssessmentDatesBaseImpl implements AssessmentDates
 {
-	protected Date acceptUntil = null;
+	protected AssessmentAccess access = null;
 
-	protected Date archived = null;
-
-	protected Date due = null;
-
-	protected Date open = null;
-
-	protected transient Changeable owner = null;
+	protected AssessmentDates main = null;
 
 	/**
 	 * Construct.
@@ -47,18 +41,10 @@ public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements Asse
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AssessmentDatesImpl(AssessmentDatesImpl other, Changeable owner)
+	public AssessmentDatesOverrideImpl(AssessmentDates main, AssessmentAccess access)
 	{
-		this(owner);
-		set(other);
-	}
-
-	/**
-	 * Construct.
-	 */
-	public AssessmentDatesImpl(Changeable owner)
-	{
-		this.owner = owner;
+		this.main = main;
+		this.access = access;
 	}
 
 	/**
@@ -66,7 +52,12 @@ public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements Asse
 	 */
 	public Date getAcceptUntilDate()
 	{
-		return this.acceptUntil;
+		if ((this.access != null) && (this.access.getOverrideAcceptUntilDate()))
+		{
+			return this.access.getAcceptUntilDate();
+		}
+
+		return this.main.getAcceptUntilDate();
 	}
 
 	/**
@@ -74,7 +65,7 @@ public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements Asse
 	 */
 	public Date getArchivedDate()
 	{
-		return this.archived;
+		return this.main.getArchivedDate();
 	}
 
 	/**
@@ -82,7 +73,12 @@ public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements Asse
 	 */
 	public Date getDueDate()
 	{
-		return this.due;
+		if ((this.access != null) && (this.access.getOverrideDueDate()))
+		{
+			return this.access.getDueDate();
+		}
+
+		return this.main.getDueDate();
 	}
 
 	/**
@@ -90,7 +86,12 @@ public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements Asse
 	 */
 	public Date getOpenDate()
 	{
-		return this.open;
+		if ((this.access != null) && (this.access.getOverrideOpenDate()))
+		{
+			return this.access.getOpenDate();
+		}
+
+		return this.main.getOpenDate();
 	}
 
 	/**
@@ -98,11 +99,7 @@ public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements Asse
 	 */
 	public void setAcceptUntilDate(Date date)
 	{
-		if (!Different.different(this.acceptUntil, date)) return;
-
-		this.acceptUntil = date;
-
-		this.owner.setChanged();
+		throw new IllegalArgumentException();
 	}
 
 	/**
@@ -110,11 +107,7 @@ public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements Asse
 	 */
 	public void setDueDate(Date date)
 	{
-		if (!Different.different(this.due, date)) return;
-
-		this.due = date;
-
-		this.owner.setChanged();
+		throw new IllegalArgumentException();
 	}
 
 	/**
@@ -122,24 +115,6 @@ public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements Asse
 	 */
 	public void setOpenDate(Date date)
 	{
-		if (!Different.different(this.open, date)) return;
-
-		this.open = date;
-
-		this.owner.setChanged();
-	}
-
-	/**
-	 * Set as a copy of another.
-	 * 
-	 * @param other
-	 *        The other to copy.
-	 */
-	protected void set(AssessmentDatesImpl other)
-	{
-		this.acceptUntil = other.acceptUntil;
-		this.archived = other.archived;
-		this.due = other.due;
-		this.open = other.open;
+		throw new IllegalArgumentException();
 	}
 }

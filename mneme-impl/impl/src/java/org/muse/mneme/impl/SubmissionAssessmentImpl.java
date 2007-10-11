@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AcceptSubmitStatus;
 import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentDates;
 import org.muse.mneme.api.AssessmentGrading;
 import org.muse.mneme.api.AssessmentParts;
@@ -123,6 +124,17 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public AssessmentDates getDates()
 	{
+		// this might be overridden in the main assessment's special access
+		AssessmentAccess special = getMainAssessment().getSpecialAccess().getUserAccess(this.submission.getUserId());
+		if (special != null)
+		{
+			if (special.getOverrideAcceptUntilDate() || special.getOverrideDueDate() || special.getOverrideOpenDate())
+			{
+				// return a special dates impl that knows how to override
+				return new AssessmentDatesOverrideImpl(getMainAssessment().getDates(), special);
+			}
+		}
+
 		return getMainAssessment().getDates();
 	}
 
@@ -139,6 +151,16 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public Boolean getHasTimeLimit()
 	{
+		// this might be overridden in the main assessment's special access
+		AssessmentAccess special = getMainAssessment().getSpecialAccess().getUserAccess(this.submission.getUserId());
+		if (special != null)
+		{
+			if (special.getOverrideTimeLimit())
+			{
+				return special.getHasTimeLimit();
+			}
+		}
+
 		return getHistoricalAssessment().getHasTimeLimit();
 	}
 
@@ -147,6 +169,16 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public Boolean getHasTriesLimit()
 	{
+		// this might be overridden in the main assessment's special access
+		AssessmentAccess special = getMainAssessment().getSpecialAccess().getUserAccess(this.submission.getUserId());
+		if (special != null)
+		{
+			if (special.getOverrideTries())
+			{
+				return special.getHasTriesLimit();
+			}
+		}
+
 		return getMainAssessment().getHasTriesLimit();
 	}
 
@@ -236,6 +268,16 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public AssessmentPassword getPassword()
 	{
+		// this might be overridden in the main assessment's special access
+		AssessmentAccess special = getMainAssessment().getSpecialAccess().getUserAccess(this.submission.getUserId());
+		if (special != null)
+		{
+			if (special.getOverridePassword())
+			{
+				return special.getPassword();
+			}
+		}
+
 		return getMainAssessment().getPassword();
 	}
 
@@ -341,6 +383,16 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public Long getTimeLimit()
 	{
+		// this might be overridden in the main assessment's special access
+		AssessmentAccess special = getMainAssessment().getSpecialAccess().getUserAccess(this.submission.getUserId());
+		if (special != null)
+		{
+			if (special.getOverrideTimeLimit())
+			{
+				return special.getTimeLimit();
+			}
+		}
+
 		return getHistoricalAssessment().getTimeLimit();
 	}
 
@@ -357,6 +409,16 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public Integer getTries()
 	{
+		// this might be overridden in the main assessment's special access
+		AssessmentAccess special = getMainAssessment().getSpecialAccess().getUserAccess(this.submission.getUserId());
+		if (special != null)
+		{
+			if (special.getOverrideTries())
+			{
+				return special.getTries();
+			}
+		}
+
 		return getMainAssessment().getTries();
 	}
 
@@ -405,7 +467,8 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public void setHasTriesLimit(Boolean hasTries)
 	{
-		throw new IllegalArgumentException();	}
+		throw new IllegalArgumentException();
+	}
 
 	/**
 	 * {@inheritDoc}
