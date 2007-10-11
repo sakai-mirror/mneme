@@ -181,19 +181,6 @@
 											<model ref="answer.question.pool.points" />
 										</message>
 									</title>
-									<included>
-										<compareDecision model="answer.question.type" constant="mneme:Essay" reversed="TRUE" />
-									</included>
-								</floatEdit>
-								<floatEdit model="answer.totalScore">
-									<title highlighted="TRUE">
-										<message selector="answer-points-essay-type">
-											<model ref="answer.question.pool.points" />
-										</message>
-									</title>
-									<included>
-										<compareDecision model="answer.question.type" constant="mneme:Essay" />
-									</included>
 								</floatEdit>
 							</container>
 						</row>
@@ -213,35 +200,8 @@
 									</included>
 								</attachments>
 
-								<!-- submission title -->
-								<section>
-									<container>
-										<text>
-											<message selector="submission" />
-											<included>
-												<compareDecision model="answer.question.type" constant="mneme:Essay" reversed="TRUE" />
-											</included>
-										</text>
-									</container>
-								</section>
-
-								<!-- answer -->
-								<modelComponent model="answer.question.typeSpecificQuestion.reviewUi">
-									<included>
-										<compareDecision model="answer.question.type" constant="mneme:Essay" reversed="TRUE" />
-									</included>
-								</modelComponent>
-
-								<!-- essay answer-->
-								<htmlEdit rows="10" cols="80" readOnly="FALSE">
-									<title>
-										<message selector="submission" />
-									</title>
-									<model ref="answer.typeSpecificAnswer.answerData" />
-									<included>
-										<compareDecision model="answer.question.type" constant="mneme:Essay" />
-									</included>
-								</htmlEdit>
+								<!-- Question specific review -->
+								<modelComponent model="answer.question.typeSpecificQuestion.reviewUi" />
 
 								<!-- answer key -->
 								<text>
@@ -254,48 +214,6 @@
 									</included>
 								</text>
 
-								<!-- model answer for essay -->
-								<overlay id="model-answer">
-									<container>
-										<text>
-											<message selector="essay-model-answer">
-												<model type="icon" icon="/icons/answer_key.png" />
-											</message>
-										</text>
-										<text>
-											<message>
-												<model type="html" ref="answer.question.modelAnswer" />
-											</message>
-										</text>
-										<!-- model answer for essay toggle -->
-										<gap />
-										<toggle target="model-answer" title="hide-model-answer" description="" style="LINK">
-											<icon icon="/icons/answer_key.png" style="LEFT" />
-											<included>
-												<compareDecision model="answer.question.type" constant="mneme:Essay" />
-											</included>
-										</toggle>
-									</container>
-									<included>
-										<compareDecision model="answer.question.type" constant="mneme:Essay" />
-									</included>
-								</overlay>
-
-
-								<!-- model answer for essay toggle -->
-								<toggle target="model-answer" title="show-model-answer" description="" style="LINK">
-									<icon icon="/icons/answer_key.png" style="LEFT" />
-									<included>
-										<compareDecision model="answer.question.type" constant="mneme:Essay" />
-									</included>
-								</toggle>
-
-
-
-
-
-
-
 								<!-- question feedback -->
 								<text>
 									<message selector="question-feedback">
@@ -304,7 +222,6 @@
 									</message>
 									<included>
 										<hasValueDecision model="answer.question.feedback" />
-										<compareDecision model="answer.question.type" constant="mneme:Essay" reversed="TRUE" />
 									</included>
 								</text>
 
@@ -318,7 +235,6 @@
 										<hasValueDecision model="answer.reason" />
 									</included>
 								</text>
-
 								<section>
 									<container>
 										<text>
