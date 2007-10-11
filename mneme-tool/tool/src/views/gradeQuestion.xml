@@ -77,14 +77,8 @@
 			</title>
 			<rows>
 				<row>
+					<!-- type-specific question viewing -->
 					<container>
-						<!-- question presentation (text) -->
-						<text>
-							<message>
-								<model type="html" ref="question.presentation.text" />
-							</message>
-						</text>
-						<!-- type-specific question viewing -->
 						<modelComponent model="question.typeSpecificQuestion.viewQuestionUi" />
 					</container>
 				</row>
@@ -187,7 +181,7 @@
 						</desc>
 					</sort>
 				</modelColumn>
-					<column>
+				<column>
 					<title>
 						<message selector="submission-finished" />
 					</title>
@@ -315,12 +309,18 @@
 						</navigation>
 					</navigations>
 				</modelColumn>
-				<modelColumn>
+				<column>
 					<title>
 						<message selector="submission-score" />
 					</title>
-					<model ref="answer.autoScore" missing="missing-auto-score" />
-				</modelColumn>
+					<container>
+						<text>						
+							<message selector="auto-score">
+								<model ref="answer.autoScore" missing="missing-auto-score" />
+							</message>
+						</text>						
+					</container>
+				</column>
 				<column>
 					<title>
 						<message selector="submission-final" />
