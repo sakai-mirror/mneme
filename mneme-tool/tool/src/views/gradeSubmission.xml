@@ -233,10 +233,9 @@
 								</modelComponent>
 
 								<!-- essay answer-->
-								<htmlEdit rows="10" cols="80" readOnly="TRUE">
+								<htmlEdit rows="10" cols="80" readOnly="FALSE">
 									<title>
-
-										<message selector="essay-answer" />
+										<message selector="submission" />
 									</title>
 									<model ref="answer.typeSpecificAnswer.answerData" />
 									<included>
