@@ -39,9 +39,6 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	/** The String answer as entered by the user. */
 	protected String answerData;
 
-	/** The auto score. */
-	protected Float autoScore = null;
-
 	/** Set when the answer has been changed. */
 	protected boolean changed = false;
 
@@ -67,7 +64,6 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	public EssayAnswerImpl(Answer answer, EssayAnswerImpl other)
 	{
 		this.answer = answer;
-		this.autoScore = other.autoScore;
 		this.answerData = other.answerData;
 		this.changed = other.changed;
 	}
@@ -77,7 +73,7 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void autoScore()
 	{
-		this.autoScore = 0f;
+		// thre is no auto scoring for essays
 	}
 
 	/**
@@ -122,7 +118,8 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Float getAutoScore()
 	{
-		return this.autoScore;
+		// there is no auto scoring for essays
+		return null;
 	}
 
 	/**

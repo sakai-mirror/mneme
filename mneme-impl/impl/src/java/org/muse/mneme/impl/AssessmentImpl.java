@@ -268,6 +268,14 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasUnscoredSubmissions()
+	{
+		return this.submissionService.getAssessmentHasUnscoredSubmissions(this);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getId()
 	{
 		return this.id;

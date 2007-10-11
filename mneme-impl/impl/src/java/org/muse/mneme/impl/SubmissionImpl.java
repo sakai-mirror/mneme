@@ -168,8 +168,11 @@ public class SubmissionImpl implements Submission
 		float total = 0;
 		for (Answer answer : this.answers)
 		{
-			// add it up
-			total += answer.getAutoScore().floatValue();
+			Float auto = answer.getAutoScore();
+			if (auto != null)
+			{
+				total += auto.floatValue();
+			}
 		}
 
 		return new Float(total);

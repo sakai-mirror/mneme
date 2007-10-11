@@ -366,6 +366,14 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getAssessmentHasUnscoredSubmissions(Assessment assessment)
+	{
+		return submissionService.getAssessmentHasUnscoredSubmissions(assessment);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getAssessmentIsFullyReleased(Assessment assessment)
 	{
 		return this.submissionService.getAssessmentIsFullyReleased(assessment);

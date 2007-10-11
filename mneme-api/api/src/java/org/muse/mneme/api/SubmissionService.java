@@ -202,6 +202,15 @@ public interface SubmissionService
 			Integer pageNum, Integer pageSize);
 
 	/**
+	 * Check if there are any completed submissions that have any null scores for answers for this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return TRUE if there are unscored submissions to this assessment, FALSE if not.
+	 */
+	Boolean getAssessmentHasUnscoredSubmissions(Assessment assessment);
+
+	/**
 	 * Check if this assessment's completed submissions are all released.
 	 * 
 	 * @param assessment

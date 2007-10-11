@@ -193,6 +193,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasUnscoredSubmissions()
+	{
+		return getMainAssessment().getHasUnscoredSubmissions();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getId()
 	{
 		return getMainAssessment().getId();

@@ -198,7 +198,7 @@
 						</navigation>
 					</navigations>
 					<entityIncluded>
-						<decision model="assessment.isFullyReleased" reversed="TRUE" />
+						<decision model="assessment.hasUnscoredSubmissions" />
 					</entityIncluded>
 				</modelColumn>
 			</columns>

@@ -104,12 +104,36 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getAssessmentHasUnscoredSubmissions(Assessment assessment)
+	{
+		// check the submissions to this assessment
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			// if any for this assessment are complete and not released, the assessment is not fully released
+			if (submission.getAssessment().equals(assessment) && submission.getIsComplete())
+			{
+				for (Answer answer : submission.getAnswers())
+				{
+					if (answer.getTotalScore() == null)
+					{
+						return Boolean.TRUE;
+					}
+				}
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getAssessmentIsFullyReleased(Assessment assessment)
 	{
 		// check the submissions to this assessment
 		for (SubmissionImpl submission : this.submissions.values())
 		{
-			// if any for this assessment are complete and not released, the assessment is not fully graded
+			// if any for this assessment are complete and not released, the assessment is not fully released
 			if (submission.getAssessment().equals(assessment) && submission.getIsComplete() && (!submission.getIsReleased()))
 			{
 				return Boolean.FALSE;
