@@ -177,7 +177,7 @@
 								<floatEdit model="answer.totalScore">
 									<title highlighted="TRUE">
 										<message selector="answer-points">
-											<model ref="answer.autoScore" />
+											<model ref="answer.autoScore" missing="missing-auto-score"/>
 											<model ref="answer.question.pool.points" />
 										</message>
 									</title>
