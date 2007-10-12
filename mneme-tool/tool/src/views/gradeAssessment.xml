@@ -119,10 +119,11 @@
 			<emptyTitle>
 				<message selector="no-submissions" />
 			</emptyTitle>
-			<pager paging="paging">
-				<destination template="/grade_assessment_save/{0}/{1}">
-					<model ref="destinationPath" />
+			<pager paging="paging" submit="TRUE">
+				<destination template="/grade_assessment_save/{0}/{1}/{2}">
+					<model ref="pagingDestinationPath" />
 					<model type="paging" ref="paging" />
+					<model ref="view" />
 				</destination>
 			</pager>
 			<columns>

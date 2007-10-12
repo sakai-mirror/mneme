@@ -133,7 +133,8 @@ public class GradeAssessmentView extends ControllerImpl
 			context.put("pagingParameter", pagingParameter);
 
 			// get all Assessment submissions
-			List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, paging.getCurrent(), paging.getSize());
+			List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, paging.getCurrent(),
+					paging.getSize());
 			context.put("submissions", submissions);
 			context.put("official", "FALSE");
 			context.put("view", "all");
@@ -151,7 +152,8 @@ public class GradeAssessmentView extends ControllerImpl
 			context.put("pagingParameter", pagingParameter);
 
 			// get official Assessment submissions
-			List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.TRUE, paging.getCurrent(), paging.getSize());
+			List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.TRUE, paging.getCurrent(),
+					paging.getSize());
 			context.put("submissions", submissions);
 			context.put("official", "TRUE");
 			context.put("view", "highest");
@@ -183,6 +185,24 @@ public class GradeAssessmentView extends ControllerImpl
 			destinationPath = buildPath.toString();
 		}
 		context.put("destinationPath", destinationPath);
+
+		String pagingDestinationPath = null;
+		StringBuilder buildPath = new StringBuilder();
+		buildPath.append(params[2]);
+		buildPath.append("/");
+		buildPath.append(params[3]);
+		buildPath.append("/");
+		if (params.length == 4)
+		{
+			buildPath.append(context.get("sort_column"));
+			buildPath.append(context.get("sort_direction"));
+		}
+		else
+			buildPath.append(params[4]);
+
+		pagingDestinationPath = buildPath.toString();
+
+		context.put("pagingDestinationPath", pagingDestinationPath);
 
 		uiService.render(ui, context);
 	}
@@ -270,7 +290,9 @@ public class GradeAssessmentView extends ControllerImpl
 					// redirect to error
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
-				}catch (NumberFormatException ne){
+				}
+				catch (NumberFormatException ne)
+				{
 					if (M_log.isWarnEnabled()) M_log.warn(ne);
 				}
 				destination = destination.replace("grade_assessment_save", "grade_assessment");
@@ -286,7 +308,9 @@ public class GradeAssessmentView extends ControllerImpl
 					// redirect to error
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 					return;
-				}catch (NumberFormatException ne){
+				}
+				catch (NumberFormatException ne)
+				{
 					if (M_log.isWarnEnabled()) M_log.warn(ne);
 				}
 				destination = destination.replace("NAV:", "");
@@ -299,11 +323,16 @@ public class GradeAssessmentView extends ControllerImpl
 
 	/**
 	 * adjust scores
-	 * @param assessment assessment
-	 * @param submissions submissions
-	 * @param submissionAdjustScore submission Adjust Score
-	 * @param submissionAdjustComments submission Adjust Comments
-	 * @return true if data is saved 
+	 * 
+	 * @param assessment
+	 *        assessment
+	 * @param submissions
+	 *        submissions
+	 * @param submissionAdjustScore
+	 *        submission Adjust Score
+	 * @param submissionAdjustComments
+	 *        submission Adjust Comments
+	 * @return true if data is saved
 	 * @throws IOException
 	 */
 	private boolean saveScores(Assessment assessment, List<Submission> submissions, String submissionAdjustScore, String submissionAdjustComments)
@@ -321,8 +350,8 @@ public class GradeAssessmentView extends ControllerImpl
 				}
 			}
 		}
-		
-		//save adjusted score for the assessment - global adjustment
+
+		// save adjusted score for the assessment - global adjustment
 		if (submissionAdjustScore != null && submissionAdjustScore.trim().length() > 0)
 		{
 			try
