@@ -85,9 +85,6 @@
 							<iterator name="question" model="part.questionsAsAuthored"></iterator>
 							<columns>
 								<column>
-									<title>
-										<message selector="question-list-new" />
-									</title>
 									<navigations>
 										<navigation style="LINK" submit="FALSE">
 											<icon icon="/icons/grade.png" />
@@ -99,13 +96,10 @@
 										</navigation>
 									</navigations>
 									<entityIncluded>
-										<decision model="assessment.isFullyReleased" reversed="TRUE" />
+										<decision model="question.hasUnscoredSubmissions" />
 									</entityIncluded>
 								</column>
 								<column>
-									<title>
-										<message selector="question-list-title" />
-									</title>
 									<navigations>
 										<navigation style="LINK" submit="FALSE">
 											<title>

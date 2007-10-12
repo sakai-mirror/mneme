@@ -32,6 +32,7 @@ import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.SubmissionService;
 import org.muse.mneme.api.TypeSpecificQuestion;
 
 /**
@@ -265,6 +266,8 @@ public class QuestionImpl implements Question
 
 	protected Submission submissionContext = null;
 
+	protected transient SubmissionService submissionService = null;
+
 	protected String type = null;
 
 	protected String version = "only";
@@ -276,11 +279,14 @@ public class QuestionImpl implements Question
 	 *        the PoolService.
 	 * @param questionService
 	 *        The QuestionService.
+	 * @param submissionService
+	 *        The SubmissionService.
 	 */
-	public QuestionImpl(PoolService poolService, QuestionService questionService)
+	public QuestionImpl(PoolService poolService, QuestionService questionService, SubmissionService submissionService)
 	{
 		this.poolService = poolService;
 		this.questionService = questionService;
+		this.submissionService = submissionService;
 	}
 
 	/**
@@ -353,6 +359,19 @@ public class QuestionImpl implements Question
 	public String getFeedback()
 	{
 		return this.feedback;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasUnscoredSubmissions()
+	{
+		if (this.partContext != null)
+		{
+			return this.submissionService.getAssessmentQuestionHasUnscoredSubmissions(this.partContext.getAssessment(), this);
+		}
+		
+		return Boolean.FALSE;
 	}
 
 	/**
@@ -600,6 +619,7 @@ public class QuestionImpl implements Question
 		this.presentation = new PresentationImpl(other.presentation, null);
 		this.questionService = other.questionService;
 		this.submissionContext = other.submissionContext;
+		this.submissionService = other.submissionService;
 		this.type = other.type;
 		this.version = other.version;
 	}

@@ -590,6 +590,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
+	{
+		return this.storage.getAssessmentQuestionHasUnscoredSubmissions(assessment, question);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Float> getAssessmentScores(Assessment assessment)
 	{
 		List<Float> rv = this.storage.getAssessmentScores(assessment);

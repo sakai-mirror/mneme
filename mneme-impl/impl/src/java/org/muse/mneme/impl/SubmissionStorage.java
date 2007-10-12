@@ -63,6 +63,13 @@ public interface SubmissionStorage
 	Boolean getAssessmentIsFullyReleased(Assessment assessment);
 
 	/**
+	 * Check if there are any completed submissions that have any null scores for answers to this question for this assessment.
+	 * 
+	 * @return TRUE if there are unscored submissions to this assessment, FALSE if not.
+	 */
+	Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question);
+
+	/**
 	 * Access all the submission scores to this assessment.
 	 * 
 	 * @param assessment

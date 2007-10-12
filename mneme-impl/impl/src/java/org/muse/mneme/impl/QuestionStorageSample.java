@@ -39,6 +39,7 @@ import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.SubmissionService;
 
 /**
  * QuestionStorageSample defines a sample storage for questions.
@@ -64,6 +65,9 @@ public class QuestionStorageSample implements QuestionStorage
 
 	/** Dependency: QuestionService */
 	protected QuestionService questionService = null;
+
+	/** Dependency: SubmissionService */
+	protected SubmissionService submissionService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -303,7 +307,7 @@ public class QuestionStorageSample implements QuestionStorage
 	 */
 	public QuestionImpl newQuestion()
 	{
-		QuestionImpl rv = new QuestionImpl(poolService, questionService);
+		QuestionImpl rv = new QuestionImpl(poolService, questionService, submissionService);
 		return rv;
 	}
 
@@ -398,6 +402,17 @@ public class QuestionStorageSample implements QuestionStorage
 	public void setQuestionService(QuestionService service)
 	{
 		this.questionService = service;
+	}
+
+	/**
+	 * Dependency: SubmissionService.
+	 * 
+	 * @param service
+	 *        The SubmissionService.
+	 */
+	public void setSubmissionService(SubmissionService service)
+	{
+		this.submissionService = service;
 	}
 
 	protected void fakeIt()

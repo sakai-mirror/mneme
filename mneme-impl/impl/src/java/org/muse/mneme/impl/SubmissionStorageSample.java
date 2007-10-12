@@ -146,6 +146,30 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
+	{
+		// check the submissions to this assessment
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			// if any for this assessment are complete and not released, the assessment is not fully released
+			if (submission.getAssessment().equals(assessment) && submission.getIsComplete())
+			{
+				for (Answer answer : submission.getAnswers())
+				{
+					if ((answer.getQuestion().equals(question)) && (answer.getTotalScore() == null))
+					{
+						return Boolean.TRUE;
+					}
+				}
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Float> getAssessmentScores(Assessment assessment)
 	{
 		List<Float> rv = new ArrayList<Float>();

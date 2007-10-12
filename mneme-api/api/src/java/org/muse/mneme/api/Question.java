@@ -69,6 +69,14 @@ public interface Question
 	String getFeedback();
 
 	/**
+	 * Check if there are any completed submissions to this question's assessment (if in context) <br />
+	 * that have any null scores for answers to this quesiton.
+	 * 
+	 * @return TRUE if there are unscored submissions to this assessment, FALSE if not.
+	 */
+	Boolean getHasUnscoredSubmissions();
+
+	/**
 	 * Access the hints (rich) text for the question.
 	 * 
 	 * @return The hints text for the question, or null if there is none.
