@@ -52,7 +52,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 	protected QuestionService questionService = null;
 
-	protected Boolean showPresentation = Boolean.FALSE;
+	protected Boolean showPresentation = Boolean.TRUE;
 
 	/**
 	 * Construct.

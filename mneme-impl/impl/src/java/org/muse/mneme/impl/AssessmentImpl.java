@@ -103,7 +103,7 @@ public class AssessmentImpl implements Assessment
 
 	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
 
-	protected Boolean showHints = Boolean.TRUE;
+	protected Boolean showHints = Boolean.FALSE;
 
 	protected AssessmentSpecialAccess specialAccess = null;
 
