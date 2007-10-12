@@ -227,6 +227,14 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Integer countAssessmentSubmissions(Assessment assessment, Boolean official)
+	{
+		return submissionService.countAssessmentSubmissions(assessment, official);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer countPools(String context, String search)
 	{
 		return poolService.countPools(context, search);
@@ -246,6 +254,14 @@ public class MnemeServiceImpl implements MnemeService
 	public Integer countQuestions(String context, String search)
 	{
 		return questionService.countQuestions(context, search);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countSubmissionAnswers(Assessment assessment, Question question, Boolean official)
+	{
+		return submissionService.countSubmissionAnswers(assessment, question, official);
 	}
 
 	/**

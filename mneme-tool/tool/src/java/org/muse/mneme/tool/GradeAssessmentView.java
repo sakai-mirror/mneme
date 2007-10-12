@@ -120,38 +120,42 @@ public class GradeAssessmentView extends ControllerImpl
 			pagingParameter = "1-30";
 		}
 
-		// TODO: size To be replaced with another method
-		List submissionSizeList = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, null, null);
-		Integer maxSubmissions = 0;
-		maxSubmissions = submissionSizeList.size();
-
-		// paging
-		Paging paging = uiService.newPaging();
-		paging.setMaxItems(maxSubmissions);
-		paging.setCurrentAndSize(pagingParameter);
-		context.put("paging", paging);
-		context.put("pagingParameter", pagingParameter);
-
-		List submissions = null;
 		if (params.length == 7 && params[6].equalsIgnoreCase("all"))
 		{
+			// get the size
+			Integer maxSubmissions = this.submissionService.countAssessmentSubmissions(assessment, Boolean.FALSE);
+
+			// paging
+			Paging paging = uiService.newPaging();
+			paging.setMaxItems(maxSubmissions);
+			paging.setCurrentAndSize(pagingParameter);
+			context.put("paging", paging);
+			context.put("pagingParameter", pagingParameter);
+
 			// get all Assessment submissions
-			submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, paging.getCurrent(), paging.getSize());
+			List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, paging.getCurrent(), paging.getSize());
+			context.put("submissions", submissions);
 			context.put("official", "FALSE");
 			context.put("view", "all");
 		}
 		else
 		{
+			// get the size
+			Integer maxSubmissions = this.submissionService.countAssessmentSubmissions(assessment, Boolean.TRUE);
+
+			// paging
+			Paging paging = uiService.newPaging();
+			paging.setMaxItems(maxSubmissions);
+			paging.setCurrentAndSize(pagingParameter);
+			context.put("paging", paging);
+			context.put("pagingParameter", pagingParameter);
+
 			// get official Assessment submissions
-			submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.TRUE, paging.getCurrent(), paging.getSize());
+			List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.TRUE, paging.getCurrent(), paging.getSize());
+			context.put("submissions", submissions);
 			context.put("official", "TRUE");
 			context.put("view", "highest");
 		}
-		context.put("submissions", submissions);
-
-		if (submissions != null) maxSubmissions = submissions.size();
-		paging.setMaxItems(maxSubmissions);
-		context.put("paging", paging);
 
 		// for Adjust every student's test submission by
 		Value submissionAdjust = this.uiService.newValue();

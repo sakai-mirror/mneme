@@ -271,6 +271,82 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countAssessmentSubmissions(Assessment assessment, Boolean official)
+	{
+		// TODO: review the efficiency of this method! -ggolden
+
+		if (assessment == null) throw new IllegalArgumentException();
+		if (official == null) throw new IllegalArgumentException();
+		Date asOf = new Date();
+
+		if (M_log.isDebugEnabled()) M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId());
+
+		// get the submissions to the assignment made by all possible submitters
+		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, FindAssessmentSubmissionsSort.status_a, null);
+
+		// see if any needs to be completed based on time limit or dates
+		checkAutoComplete(all, asOf);
+
+		// pick one for each assessment - the one in progress, or the official complete one (if official)
+		List<Submission> rv = null;
+		if (official)
+		{
+			rv = officializeByUser(all);
+		}
+		else
+		{
+			rv = new ArrayList<Submission>(all.size());
+			rv.addAll(all);
+		}
+
+		return rv.size();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countSubmissionAnswers(Assessment assessment, Question question, Boolean official)
+	{
+		// TODO: review the efficiency of this method! -ggolden
+
+		if (assessment == null) throw new IllegalArgumentException();
+		if (question == null) throw new IllegalArgumentException();
+		if (official == null) throw new IllegalArgumentException();
+		Date asOf = new Date();
+
+		if (M_log.isDebugEnabled()) M_log.debug("countSubmissionAnswers: assessment: " + assessment.getId());
+
+		// read all the submissions for this assessment from all possible submitters
+		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, FindAssessmentSubmissionsSort.status_a, question);
+
+		// see if any needs to be completed based on time limit or dates
+		checkAutoComplete(all, asOf);
+
+		// pick one for each assessment - the one in progress, or the official complete one (if official)
+		List<Submission> rv = null;
+		if (official)
+		{
+			rv = officializeByUser(all);
+		}
+		else
+		{
+			rv = new ArrayList<Submission>(all.size());
+			rv.addAll(all);
+		}
+
+		// pull out the one answer we want
+		List<Answer> answers = new ArrayList<Answer>();
+		for (Submission s : rv)
+		{
+			answers.add(s.getAnswer(question));
+		}
+
+		return answers.size();
+	}
+
+	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -458,8 +534,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		if (M_log.isDebugEnabled()) M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId());
 
-		// get the submissions to the assignment made by all users
-		// if a user has not yet submitted, an empty one for that user is included
+		// get the submissions to the assignment made by all possible submitters
 		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, sort, null);
 
 		// see if any needs to be completed based on time limit or dates
@@ -520,8 +595,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		if (M_log.isDebugEnabled()) M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId());
 
-		// read all the submissions for this user in the context, with all the assessment and submission data we need
-		// each assessment is covered with at least one - if there are no submission yet for a user, an empty submission is included
+		// read all the submissions for this assessment from all possible submitters
 		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, sort, question);
 
 		// see if any needs to be completed based on time limit or dates

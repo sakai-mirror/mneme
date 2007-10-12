@@ -183,11 +183,26 @@ public interface SubmissionService
 			Integer pageSize);
 
 	/**
+	 * Count the submissions to the assignment made by all users.<br />
+	 * If a user has not yet submitted, an empty one for that user is included. <br />
+	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param official
+	 *        if TRUE, clump multiple submissions by the same user behind the best one, else include all.
+	 * @return A sorted List<Submission> of the submissions for the assessment.
+	 */
+	Integer countAssessmentSubmissions(Assessment assessment, Boolean official);
+
+	/**
 	 * Find the submission answers to the assignment and question made by all users.<br />
 	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one.
 	 * 
 	 * @param assessment
 	 *        The assessment.
+	 * @param question
+	 *        The question.
 	 * @param sort
 	 *        The sort order.
 	 * @param official
@@ -200,6 +215,20 @@ public interface SubmissionService
 	 */
 	List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Boolean official,
 			Integer pageNum, Integer pageSize);
+
+	/**
+	 * Count the submission answers to the assignment and question made by all users.<br />
+	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param question
+	 *        The question.
+	 * @param official
+	 *        if TRUE, clump multiple submissions by the same user behind the best one, else include all.
+	 * @return A sorted List<Answer> of the answers.
+	 */
+	Integer countSubmissionAnswers(Assessment assessment, Question question, Boolean official);
 
 	/**
 	 * Check if there are any completed submissions that have any null scores for answers for this assessment.
