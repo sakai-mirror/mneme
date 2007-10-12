@@ -275,14 +275,6 @@
 								<decision reversed="TRUE" model="assessment.published" />
 							</included>
 						</navigation>
-						<navigation description="invalid-alt">
-							<title>
-								<message selector="dash" />
-							</title>
-							<included>
-								<decision reversed="TRUE" model="assessment.isValid" />
-							</included>
-						</navigation>
 					</navigations>
 				</column>
 
