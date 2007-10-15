@@ -22,6 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +36,8 @@ import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.Part;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.ToolManager;
@@ -111,6 +114,19 @@ public class GradeSubmissionView extends ControllerImpl
 		}
 
 		context.put("submission", submission);
+
+		// collect all the answers for grading
+		List<Answer> answers = new ArrayList<Answer>();
+		for (Part part : submission.getAssessment().getParts().getParts())
+		{
+			for (Question question : part.getQuestions())
+			{
+				Answer answer = submission.getAnswer(question);
+				answers.add(answer);
+			}
+		}
+
+		context.put("answers", answers);
 
 		List<Submission> submissions = null;
 

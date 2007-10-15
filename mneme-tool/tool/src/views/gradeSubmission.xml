@@ -161,8 +161,7 @@
 		</entityDisplay>
 
 		<section>
-			<iterator name="answer" model="submission.answers" />
-
+			<iterator name="answer" model="answers" />
 			<container>
 				<entityDisplay>
 					<rows>
@@ -177,7 +176,7 @@
 								<floatEdit model="answer.totalScore">
 									<title highlighted="TRUE">
 										<message selector="answer-points">
-											<model ref="answer.autoScore" missing="missing-auto-score"/>
+											<model ref="answer.autoScore" missing="missing-auto-score" />
 											<model ref="answer.question.pool.points" />
 										</message>
 									</title>
@@ -199,7 +198,7 @@
 										<hasValueDecision model="answer.question.presentation.attachments" />
 									</included>
 								</attachments>
-								
+
 								<!-- submission title -->
 								<section>
 									<container>
@@ -244,7 +243,7 @@
 										<hasValueDecision model="answer.reason" />
 									</included>
 								</text>
-								
+
 								<section>
 									<container>
 										<text>
