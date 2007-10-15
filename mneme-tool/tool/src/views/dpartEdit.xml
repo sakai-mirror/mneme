@@ -201,7 +201,11 @@
 						</modelColumn>
 					</columns>
 				</entityList>
-
+				<text>
+					<message selector="total-points">
+						<model ref="part.totalPoints" />
+					</message>
+				</text>
 			</container>
 		</section>
 

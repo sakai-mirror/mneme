@@ -79,7 +79,17 @@
 				<row>
 					<!-- type-specific question viewing -->
 					<container>
+						<text>
+							<message>
+								<model type="html" ref="question.presentation.text" />
+							</message>
+						</text>
 						<modelComponent model="question.typeSpecificQuestion.viewQuestionUi" />
+						<attachments model="question.presentation.attachments">
+							<included>
+								<hasValueDecision model="question.presentation.attachments" />
+							</included>
+						</attachments>
 					</container>
 				</row>
 			</rows>
@@ -379,8 +389,9 @@
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/grades/{0}">
+					<destination template="/grade_questions_list/{0}/{1}">
 						<model ref="gradeSortCode" />
+						<model ref="assessment.id" />
 					</destination>
 				</navigation>
 				<divider />

@@ -175,10 +175,15 @@
 					</columns>
 				</entityList>
 				<text>
-			<message selector="num-questions">
-				<model ref="part.numQuestions" />
-			</message>
-		</text>
+					<message selector="num-questions">
+						<model ref="part.numQuestions" />
+					</message>
+				</text>
+				<text>
+					<message selector="total-points">
+						<model ref="part.totalPoints" />
+					</message>
+				</text>
 			</container>
 		</section>
 

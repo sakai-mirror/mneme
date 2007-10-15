@@ -199,14 +199,12 @@
 
 		<text>
 			<message selector="assessment-points">
-				<model type="icon" icon="/icons/grade.png" />
 				<model ref="assessment.parts.totalPoints" />
 			</message>
 		</text>
 
 		<text>
 			<message selector="assessment-questions">
-				<model type="icon" icon="/icons/basket_add.png" />
 				<model ref="assessment.parts.numQuestions" />
 			</message>
 		</text>
