@@ -26,5 +26,17 @@ package org.muse.mneme.api;
  */
 public enum AssessmentType
 {
-	test, survey, assignment
+	test(1), survey(2), assignment(0);
+
+	private final int sortOrder;
+
+	private AssessmentType(int sortOrder)
+	{
+		this.sortOrder = Integer.valueOf(sortOrder);
+	}
+
+	public Integer getSortValue()
+	{
+		return sortOrder;			
+	}
 }

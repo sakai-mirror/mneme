@@ -219,12 +219,12 @@ public class AssessmentStorageSample implements AssessmentStorage
 					}
 					case type_a:
 					{
-						rv = ((Assessment) arg0).getType().toString().compareTo(((Assessment) arg1).getType().toString());
+						rv = ((Assessment) arg0).getType().getSortValue().compareTo(((Assessment) arg1).getType().getSortValue());
 						break;
 					}
 					case type_d:
 					{
-						rv = -1 * ((Assessment) arg0).getType().toString().compareTo(((Assessment) arg1).getType().toString());
+						rv = -1 * ((Assessment) arg0).getType().getSortValue().compareTo(((Assessment) arg1).getType().getSortValue());
 						break;
 					}
 					case odate_a:
