@@ -50,72 +50,76 @@ import org.sakaiproject.i18n.InternationalizedMessages;
  * MatchQuestionImpl handles questions for the match question type.
  */
 public class MatchQuestionImpl implements TypeSpecificQuestion
-{	public class MatchQuestionChoice
 {
-	protected String answer;
-
-	protected Boolean deleted = Boolean.FALSE;
-
-	protected String id;
-
-	protected String text;
-
-	public MatchQuestionChoice(MatchQuestionChoice other)
+	public class MatchQuestionChoice
 	{
-		this.deleted = other.deleted;
-		this.id = other.id;
-		this.text = other.text;
-		this.answer = other.answer;
-	}
+		protected String answer;
 
-	public MatchQuestionChoice(String id, String text, String answer)
-	{
-		this.id = id;
-		this.text = text;
-		this.answer = answer;
-	}
+		protected Boolean deleted = Boolean.FALSE;
 
-	public String getAnswer()
-	{
-		return this.answer;
-	}
+		protected String id;
 
-	public Boolean getDeleted()
-	{
-		return this.deleted;
-	}
+		protected String text;
 
-	public String getId()
-	{
-		return this.id;
-	}
+		public MatchQuestionChoice(MatchQuestionChoice other)
+		{
+			this.deleted = other.deleted;
+			this.id = other.id;
+			this.text = other.text;
+			this.answer = other.answer;
+		}
 
-	public String getText()
-	{
-		return this.text;
-	}
+		public MatchQuestionChoice(String id, String text, String answer)
+		{
+			this.id = id;
+			this.text = text;
+			this.answer = answer;
+		}
 
-	public void setAnswer(String answer)
-	{
-		this.answer = answer;
-	}
+		public String getAnswer()
+		{
+			return this.answer;
+		}
 
-	public void setDeleted(Boolean deleted)
-	{
-		this.deleted = deleted;
-	}
+		public Boolean getDeleted()
+		{
+			return this.deleted;
+		}
 
-	public void setText(String text)
-	{
-		this.text = text;
+		public String getId()
+		{
+			return this.id;
+		}
+
+		public String getText()
+		{
+			return this.text;
+		}
+
+		public void setAnswer(String answer)
+		{
+			this.answer = answer;
+		}
+
+		public void setDeleted(Boolean deleted)
+		{
+			this.deleted = deleted;
+		}
+
+		public void setText(String text)
+		{
+			this.text = text;
+		}
 	}
-}
 
 	/** List of choices */
 	protected List<String> answerChoices = new ArrayList<String>();
 
 	/** Index numbers of the correct answers */
 	protected Set<Integer> correctAnswers = new HashSet<Integer>();
+
+	/** A request for more choices. */
+	protected transient Integer moreChoices = null;
 
 	/** String that holds the distractor choice */
 	protected String distractor;
@@ -301,7 +305,15 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public List<MatchQuestionChoice> getChoices()
 	{
+		if (this.answerChoices.size() == 0)
+		{
+			answerChoices.add("");
+			answerChoices.add("");
+			answerChoices.add("");
+			answerChoices.add("");
+		}
 		List<MatchQuestionChoice> rv = new ArrayList<MatchQuestionChoice>(this.answerChoices.size());
+
 		for (String choice : this.answerChoices)
 		{
 			rv.add(new MatchQuestionChoice(String.valueOf(this.answerChoices.indexOf(choice)), choice, choice));
@@ -364,7 +376,17 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		return this.question.getPresentation().getText();
 	}
 
-	public String getDistrator()
+	/**
+	 * The "getter" for the moreChoices - always set to 0.
+	 * 
+	 * @return The initial '0" value for the more choices.
+	 */
+	public String getMoreChoices()
+	{
+		return "0";
+	}
+
+	public String getDistractor()
 	{
 		return this.distractor;
 	}
@@ -413,12 +435,12 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
-		 * {@inheritDoc}
-		 */
-		public Boolean getUseFeedback()
-		{
-			return Boolean.TRUE;
-		}
+	 * {@inheritDoc}
+	 */
+	public Boolean getUseFeedback()
+	{
+		return Boolean.TRUE;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -517,6 +539,18 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		this.correctAnswers.clear();
 		if (answers == null) return;
 		this.correctAnswers.addAll(answers);
+	}
+
+	/**
+	 * Set a request for more choices.
+	 * 
+	 * @param more
+	 *        The number of more choices requested.
+	 */
+	public void setMoreChoices(String more)
+	{
+		// defer to consolidate
+		this.moreChoices = Integer.valueOf(more);
 	}
 
 	public void setDistractor(String distractor)

@@ -208,9 +208,19 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getReviewUi()
 	{
-		Text txt = this.uiService.newText();
-		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
-		return this.uiService.newFragment().setMessages(this.messages).add(txt);
+		Container cont = this.uiService.newContainer();
+		Overlay ovly = this.uiService.newOverlay();
+
+		ovly.setId("modelanswer");
+		ovly.add(this.uiService.newText().setText("modelAnswer"));
+		ovly.add(this.uiService.newText().setText(null,
+				this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.modelAnswer")));
+		ovly.add(this.uiService.newGap());
+		ovly.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
+		cont.add(ovly);
+		cont.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("view-model-answer").setIcon("/icons/answer_key2.png", null));
+
+		return this.uiService.newFragment().setMessages(this.messages).add(cont);
 	}
 
 	/**
@@ -287,7 +297,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		ovly.add(this.uiService.newGap());
 		ovly.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
 		cont.add(ovly);
-		cont.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("view-model-answer").setIcon("/icons/answer_key2.png",null));
+		cont.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("view-model-answer").setIcon("/icons/answer_key2.png", null));
 
 		return this.uiService.newFragment().setMessages(this.messages).add(cont);
 	}
