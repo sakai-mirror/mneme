@@ -43,8 +43,10 @@ public class SubmissionScoreDelegate extends FormatDelegateImpl
 	 *        The score to format.
 	 * @return The formatted score
 	 */
-	protected static String formatScore(float score)
+	protected static String formatScore(Float score)
 	{
+		if (score == null) return "-";
+
 		// round to a single place
 		String rv = Float.toString(Math.round(score * 100.0f) / 100.0f);
 
@@ -86,7 +88,7 @@ public class SubmissionScoreDelegate extends FormatDelegateImpl
 			submission = (Submission) value;
 			assessment = submission.getAssessment();
 		}
-		
+
 		else if (value instanceof Assessment)
 		{
 			assessment = (Assessment) value;

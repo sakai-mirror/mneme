@@ -80,7 +80,7 @@ public interface SubmissionStorage
 
 	/**
 	 * Get the submissions to the assignment made by all users.<br />
-	 * If a user has not yet submitted, an empty one for that user is included.
+	 * If a user has not yet submitted, a phantom one for that user is included.
 	 * 
 	 * @param assessment
 	 *        The assessment.
@@ -222,7 +222,7 @@ public interface SubmissionStorage
 	void saveAnswers(List<Answer> answers);
 
 	/**
-	 * Save evaluationchanges made to these answers.
+	 * Save evaluation changes made to these answers.
 	 * 
 	 * @param answers
 	 *        the answers with evaluations to save.

@@ -246,7 +246,7 @@ public class GradeAssessmentView extends ControllerImpl
 		// setup the model: the assessment
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
-		
+
 		PopulatingSet submissions = null;
 		final SubmissionService submissionService = this.submissionService;
 		submissions = uiService.newPopulatingSet(new Factory()
@@ -350,19 +350,25 @@ public class GradeAssessmentView extends ControllerImpl
 			}
 		}
 
-		// save adjusted score for the assessment - global adjustment
-		if (submissionAdjustScore != null && submissionAdjustScore.trim().length() > 0)
+		// parse the score
+		Float score = null;
+		if (submissionAdjustScore != null)
 		{
 			try
 			{
-				Float score = new Float(submissionAdjustScore);
-				this.submissionService.evaluateSubmissions(assessment, submissionAdjustComments, score, Boolean.FALSE);
+				score = new Float(submissionAdjustScore);
 			}
 			catch (NumberFormatException e)
 			{
-				throw e;
 			}
 		}
+
+		// save adjusted score for the assessment - global adjustment
+		if ((submissionAdjustComments != null) || (score != null))
+		{
+			this.submissionService.evaluateSubmissions(assessment, submissionAdjustComments, score, Boolean.FALSE);
+		}
+
 		return true;
 	}
 

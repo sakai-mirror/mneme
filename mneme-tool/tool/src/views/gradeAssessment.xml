@@ -382,26 +382,7 @@
 						</desc>
 					</sort>
 					<container>
-						<floatEdit model="submission.totalScore" cols="2">
-							<included>
-								<compareDecision model="submission.gradingStatus">
-									<constant value="released" />
-									<constant value="submitted" />
-									<constant value="closed" />
-									<constant value="evaluated" />
-								</compareDecision>
-							</included>
-						</floatEdit>
-						<floatEdit model="" cols="2">
-							<included>
-								<compareDecision model="submission.gradingStatus" reversed="TRUE">
-									<constant value="released" />
-									<constant value="submitted" />
-									<constant value="closed" />
-									<constant value="evaluated" />
-								</compareDecision>
-							</included>
-						</floatEdit>
+						<floatEdit model="submission.totalScore" cols="2" />
 					</container>
 				</column>
 			</columns>

@@ -40,6 +40,7 @@ import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionEvaluation;
+import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.SessionManager;
 
 /**
@@ -684,26 +685,35 @@ public class SubmissionImpl implements Submission
 	 */
 	public Float getTotalScore()
 	{
-		// Note: treat this as getGrade() - later make getGrade() and let this always return the score, graded or not -ggolden
-		// if (!getIsReleased()) return new Float(0);
+		// phantoms don't have a total score
+		if (getIsPhantom()) return null;
 
-		// if our special "total score" is set, use this, otherwise we compute
-		// if (this.totalScore != null) return this.totalScore;
-
-		// add the answer auto scores, the answer evaluations, (these are combined into the answer total scores) and the overall
-		// evaluation
+		// add up the scores from the answers, checking if any answer total scores are null
 		float total = 0;
-
+		boolean hasNullAnswerTotalScore = false;
 		for (Answer answer : answers)
 		{
 			Float score = answer.getTotalScore();
-			if (score == null) score = Float.valueOf(0f);
-			total += score;
+			if (score == null)
+			{
+				hasNullAnswerTotalScore = true;
+			}
+			else
+			{
+				total += score;
+			}
 		}
 
+		// add in the submission evaluation score if set
 		if (this.evaluation.getScore() != null)
 		{
 			total += this.evaluation.getScore().floatValue();
+		}
+
+		// if there's no submission evaluation score, and any answer total scores are null, we have no total score
+		else
+		{
+			if (hasNullAnswerTotalScore) return null;
 		}
 
 		return new Float(total);
@@ -797,21 +807,35 @@ public class SubmissionImpl implements Submission
 	 */
 	public void setTotalScore(Float score)
 	{
-		float total = score.floatValue();
+		if (score == null) return;
 
-		// add the score from the answers
-		float answerTotal = 0;
+		// the current answer total score
+		float curAnswerScore = 0;
 		for (Answer answer : answers)
 		{
 			Float answerScore = answer.getTotalScore();
-			if (answerScore == null) answerScore = Float.valueOf(0f);
-
-			answerTotal += answerScore;
+			if (answerScore != null)
+			{
+				curAnswerScore += score;
+			}
 		}
 
-		// adjust to remove the current auto score
-		total -= answerTotal;
+		// the current total score, including the answer total and any current evaluation
+		float curTotalScore = curAnswerScore;
+		if (this.evaluation.getScore() != null)
+		{
+			curTotalScore += this.evaluation.getScore().floatValue();
+		}
 
+		float total = score.floatValue();
+
+		// only for a change
+		if (curTotalScore == total) return;
+
+		// adjust to remove the current answer score
+		total -= curAnswerScore;
+
+		// set this as the new total score
 		this.evaluation.setScore(total);
 	}
 
@@ -852,6 +876,16 @@ public class SubmissionImpl implements Submission
 	protected String getAssessmentId()
 	{
 		return this.assessment.getId();
+	}
+
+	/**
+	 * Check if the submission is a phantom.
+	 * 
+	 * @return TRUE if the submission is phantom, FALSE if not.
+	 */
+	protected Boolean getIsPhantom()
+	{
+		return this.id.startsWith(SubmissionService.PHANTOM_PREFIX);
 	}
 
 	/**

@@ -280,6 +280,8 @@ public class AnswerImpl implements Answer
 	 */
 	public void setTotalScore(Float score)
 	{
+		if (score == null) return;
+
 		float total = score.floatValue();
 
 		// adjust to remove the current auto score

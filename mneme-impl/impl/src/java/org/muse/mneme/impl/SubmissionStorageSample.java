@@ -39,6 +39,7 @@ import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.SubmissionService;
 import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
 import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 import org.sakaiproject.tool.api.SessionManager;
@@ -213,6 +214,10 @@ public class SubmissionStorageSample implements SubmissionStorage
 				SubmissionImpl s = newSubmission();
 				s.initUserId(userId);
 				s.initAssessmentIds(assessment.getId(), assessment.getId());
+
+				// set the id so we know it is a phantom
+				s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
+
 				rv.add(s);
 			}
 		}
@@ -385,6 +390,24 @@ public class SubmissionStorageSample implements SubmissionStorage
 	 */
 	public SubmissionImpl getSubmission(String id)
 	{
+		// recognize phantom ids
+		if (id.startsWith(SubmissionService.PHANTOM_PREFIX))
+		{
+			// split out the phantom id parts: [1] the aid, [2] the uid
+			String[] idParts = StringUtil.split(id, "/");
+			String aid = idParts[1];
+			String userId = idParts[2];
+
+			// create a phantom
+			SubmissionImpl s = newSubmission();
+			s.initUserId(userId);
+			s.initAssessmentIds(aid, aid);
+			s.initId(id);
+
+			return s;
+		}
+
+		// for real submissions
 		SubmissionImpl rv = this.submissions.get(id);
 		if (rv != null)
 		{
@@ -673,6 +696,9 @@ public class SubmissionStorageSample implements SubmissionStorage
 				((AnswerImpl) a).initId("n" + Long.toString(id));
 			}
 
+			// clear the evaluation changed
+			((EvaluationImpl) a.getEvaluation()).clearIsChanged();
+
 			// find the submission
 			SubmissionImpl s = this.submissions.get(a.getSubmission().getId());
 			if (s != null)
@@ -720,6 +746,15 @@ public class SubmissionStorageSample implements SubmissionStorage
 			submission.initId("s" + Long.toString(id));
 		}
 
+		else if (submission.getId().startsWith(SubmissionService.PHANTOM_PREFIX))
+		{
+			// lets not save phanton submissions
+			throw new IllegalArgumentException();
+		}
+
+		// clear the submission evaluation changed
+		((EvaluationImpl) submission.getEvaluation()).clearIsChanged();
+
 		// if we have this already, update ONLY the main information, not the answers
 		SubmissionImpl old = this.submissions.get(submission.getId());
 		if (old != null)
@@ -741,6 +776,12 @@ public class SubmissionStorageSample implements SubmissionStorage
 	 */
 	public void saveSubmissionEvaluation(SubmissionImpl submission)
 	{
+		if (submission.getId().startsWith(SubmissionService.PHANTOM_PREFIX))
+		{
+			// lets not save phanton submissions
+			throw new IllegalArgumentException();
+		}
+
 		// has to be an existing saved submission
 		if (submission.getId() == null) throw new IllegalArgumentException();
 
@@ -750,16 +791,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 
 		// update the submission evaluation
 		old.evaluation.set(submission.evaluation);
-
-		// update the answer evaluations
-		for (Answer answer : submission.getAnswers())
-		{
-			AnswerImpl oldAnswer = (AnswerImpl) old.getAnswer(answer.getQuestion());
-			if (oldAnswer != null)
-			{
-				oldAnswer.evaluation.set(((AnswerImpl) answer).evaluation);
-			}
-		}
 	}
 
 	/**

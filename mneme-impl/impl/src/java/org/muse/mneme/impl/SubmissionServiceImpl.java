@@ -415,29 +415,55 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	public void evaluateAnswers(List<Answer> answers) throws AssessmentPermissionException
 	{
 		if (answers == null) throw new IllegalArgumentException();
+		if (answers.isEmpty()) return;
 
 		if (M_log.isDebugEnabled()) M_log.debug("evaluateAnswers");
 
 		Date now = new Date();
 		String userId = sessionManager.getCurrentSessionUserId();
 
+		// check that all answers are to the same submission
+		Submission submission = answers.get(0).getSubmission();
 		for (Answer answer : answers)
 		{
-			// security check
-			securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, answer.getSubmission().getAssessment()
-					.getContext());
-
-			// TODO: events?
-			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(answer.getSubmission()
-					.getId()), true));
-
-			// set the attribution
-			answer.getEvaluation().getAttribution().setDate(now);
-			answer.getEvaluation().getAttribution().setUserId(userId);
+			if (!submission.equals(answer.getSubmission()))
+			{
+				throw new IllegalArgumentException();
+			}
 		}
 
-		// TODO: what to do? evaluation only... submission changes?
-		this.storage.saveAnswersEvaluation(answers);
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, submission.getAssessment().getContext());
+
+		// set the attribution for each answer
+		List<Answer> work = new ArrayList<Answer>(answers);
+		for (Iterator i = work.iterator(); i.hasNext();)
+		{
+			Answer answer = (Answer) i.next();
+
+			if (((EvaluationImpl) answer.getEvaluation()).getIsChanged())
+			{
+				// set attribution
+				answer.getEvaluation().getAttribution().setDate(now);
+				answer.getEvaluation().getAttribution().setUserId(userId);
+
+				// clear changed flag
+				((EvaluationImpl) answer.getEvaluation()).clearIsChanged();
+			}
+			else
+			{
+				i.remove();
+			}
+		}
+
+		// save the answers
+		if (!work.isEmpty())
+		{
+			this.storage.saveAnswersEvaluation(work);
+
+			// TODO: events? single event?
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
+		}
 
 		// TODO: record in gb
 	}
@@ -449,22 +475,95 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	{
 		Date now = new Date();
 		String userId = sessionManager.getCurrentSessionUserId();
-
 		if (submission == null) throw new IllegalArgumentException();
 
 		if (M_log.isDebugEnabled()) M_log.debug("evaluateSubmission: " + submission.getId());
 
+		// check for changes
+		boolean changed = ((EvaluationImpl) submission.getEvaluation()).getIsChanged();
+		if (!changed)
+		{
+			for (Answer answer : submission.getAnswers())
+			{
+				if (((EvaluationImpl) answer.getEvaluation()).getIsChanged())
+				{
+					changed = true;
+					break;
+				}
+			}
+		}
+		if (!changed) return;
+
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, submission.getAssessment().getContext());
 
-		// TODO: just the eval... what fields get changed (mod by, eval by?)
-		this.storage.saveSubmissionEvaluation((SubmissionImpl) submission);
-
 		// set the attribution
-		submission.getEvaluation().getAttribution().setDate(now);
-		submission.getEvaluation().getAttribution().setUserId(userId);
+		if (((EvaluationImpl) submission.getEvaluation()).getIsChanged())
+		{
+			submission.getEvaluation().getAttribution().setDate(now);
+			submission.getEvaluation().getAttribution().setUserId(userId);
+		}
 
-		// TODO: attribution for answers?
+		// if this is phantom, make the submission real
+		if (((SubmissionImpl) submission).getIsPhantom())
+		{
+			// make a new submission
+			SubmissionImpl temp = this.storage.newSubmission();
+			temp.initAssessmentIds(submission.getAssessment().getId(), submission.getAssessment().getId());
+			temp.initUserId(submission.getUserId());
+			temp.setIsComplete(Boolean.TRUE);
+			temp.setStartDate(now);
+			temp.setSubmittedDate(now);
+			temp.evaluation = (SubmissionEvaluationImpl) submission.getEvaluation();
+
+			// TODO: should we do this? if grade at submission
+			if (submission.getAssessment().getGrading().getAutoRelease())
+			{
+				temp.setIsReleased(Boolean.TRUE);
+			}
+
+			// store the new submission, setting the id
+			this.storage.saveSubmission(temp);
+
+			// TODO: which event? event track it
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_ENTER, getSubmissionReference(temp.getId()), true));
+
+			return;
+		}
+
+		// attribution for answers - remove any not changed so they are not saved
+		List<Answer> work = new ArrayList<Answer>(submission.getAnswers());
+		for (Iterator i = work.iterator(); i.hasNext();)
+		{
+			Answer answer = (Answer) i.next();
+
+			if (((EvaluationImpl) answer.getEvaluation()).getIsChanged())
+			{
+				// set attribution
+				answer.getEvaluation().getAttribution().setDate(now);
+				answer.getEvaluation().getAttribution().setUserId(userId);
+
+				// clear the changed flag
+				((EvaluationImpl) answer.getEvaluation()).clearIsChanged();
+			}
+
+			else
+			{
+				i.remove();
+			}
+		}
+
+		// save just evaluation stuff and answers
+		if (((EvaluationImpl) submission.getEvaluation()).getIsChanged())
+		{
+			((EvaluationImpl) submission.getEvaluation()).clearIsChanged();
+
+			this.storage.saveSubmissionEvaluation((SubmissionImpl) submission);
+		}
+		if (!work.isEmpty())
+		{
+			this.storage.saveAnswersEvaluation(work);
+		}
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
@@ -477,8 +576,12 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	public void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markEvaluated) throws AssessmentPermissionException
 	{
+		if ((comment == null) && (score == null) && (markEvaluated == null)) return;
 		Date now = new Date();
 		String userId = sessionManager.getCurrentSessionUserId();
+
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, assessment.getContext());
 
 		// get the completed submissions to this assessment
 		List<SubmissionImpl> submissions = this.storage.getAssessmentCompleteSubmissions(assessment);
@@ -490,7 +593,17 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// if there's a comment to set, append it
 			if (comment != null)
 			{
-				submission.evaluation.setComment(submission.evaluation.getComment() + comment);
+				String newComment = submission.evaluation.getComment();
+				if (newComment == null)
+				{
+					newComment = comment;
+				}
+				else
+				{
+					newComment += comment;
+				}
+
+				submission.evaluation.setComment(newComment);
 			}
 
 			// if there's a score to set, add it
@@ -510,13 +623,21 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				submission.evaluation.setEvaluated(markEvaluated);
 			}
 
-			// set the attribution
-			submission.evaluation.getAttribution().setDate(now);
-			submission.evaluation.getAttribution().setUserId(userId);
+			// save the submission evaluation (if changed)
+			if (((EvaluationImpl) submission.getEvaluation()).getIsChanged())
+			{
+				// set the attribution
+				submission.evaluation.getAttribution().setDate(now);
+				submission.evaluation.getAttribution().setUserId(userId);
 
-			// save the submission
-			this.storage.saveSubmissionEvaluation(submission);
+				// clear the changed flag
+				((EvaluationImpl) submission.getEvaluation()).clearIsChanged();
 
+				// save
+				this.storage.saveSubmissionEvaluation(submission);
+			}
+
+			// TODO: events?
 			// TODO: record in gb
 		}
 	}

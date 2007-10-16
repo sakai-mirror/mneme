@@ -22,6 +22,7 @@
 package org.muse.mneme.impl;
 
 import org.muse.mneme.api.Attribution;
+import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.Evaluation;
 
 /**
@@ -30,6 +31,9 @@ import org.muse.mneme.api.Evaluation;
 public class EvaluationImpl implements Evaluation
 {
 	protected AttributionImpl attribution = new AttributionImpl(null);
+
+	/** Track any changes. */
+	protected transient Changeable changed = new ChangeableImpl();
 
 	protected String comment = null;
 
@@ -92,7 +96,11 @@ public class EvaluationImpl implements Evaluation
 	 */
 	public void setComment(String comment)
 	{
+		if (!Different.different(this.comment, comment)) return;
+
 		this.comment = comment;
+
+		this.changed.setChanged();
 	}
 
 	/**
@@ -101,7 +109,11 @@ public class EvaluationImpl implements Evaluation
 	public void setEvaluated(Boolean evaluated)
 	{
 		if (evaluated == null) throw new IllegalArgumentException();
+		if (this.evaluated.equals(evaluated)) return;
+
 		this.evaluated = evaluated;
+
+		this.changed.setChanged();
 	}
 
 	/**
@@ -109,7 +121,29 @@ public class EvaluationImpl implements Evaluation
 	 */
 	public void setScore(Float score)
 	{
+		if (!Different.different(this.score, score)) return;
+
 		this.score = score;
+
+		this.changed.setChanged();
+	}
+
+	/**
+	 * Clear the is-changed flag.
+	 */
+	protected void clearIsChanged()
+	{
+		this.changed.clearChanged();
+	}
+
+	/**
+	 * Check if there was any change.
+	 * 
+	 * @return TRUE if changed, FALSE if not.
+	 */
+	protected Boolean getIsChanged()
+	{
+		return this.changed.getChanged();
 	}
 
 	/**
@@ -121,6 +155,7 @@ public class EvaluationImpl implements Evaluation
 	protected void set(EvaluationImpl other)
 	{
 		this.attribution = new AttributionImpl(other.attribution, null);
+		this.changed = new ChangeableImpl(other.changed);
 		this.comment = other.comment;
 		this.score = other.score;
 	}
