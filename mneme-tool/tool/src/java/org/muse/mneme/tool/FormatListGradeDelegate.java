@@ -44,8 +44,10 @@ public class FormatListGradeDelegate extends FormatDelegateImpl
 	 *        The score to format.
 	 * @return The formatted score
 	 */
-	protected static String formatScore(float score)
+	protected static String formatScore(Float score)
 	{
+		if (score == null) return "-";
+
 		// round to a single place
 		String rv = Float.toString(Math.round(score * 100.0f) / 100.0f);
 

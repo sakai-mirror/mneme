@@ -145,15 +145,7 @@ public class SubmissionImpl implements Submission
 		if (question == null) return null;
 
 		Answer rv = findAnswer(question.getId());
-		if (rv != null) return rv;
-
-		// not found, add one
-		AnswerImpl answer = this.submissionService.storage.newAnswer();
-		answer.initSubmission(this);
-		answer.initQuestion(question);
-		this.answers.add(answer);
-
-		return answer;
+		return rv;
 	}
 
 	/**
@@ -999,14 +991,18 @@ public class SubmissionImpl implements Submission
 	 */
 	protected void replaceAnswer(AnswerImpl answer)
 	{
-		// this needs to be an answer to this same submission
-		if (!answer.getSubmission().equals(this))
+		// preserve the (question) order
+		for (Answer current : this.answers)
 		{
-			M_log.warn("replaceAnswer: " + this.id + ": answer to another submission: " + answer.getSubmission().getId());
-			return;
+			if (((AnswerImpl) current).questionId.equals(answer.questionId))
+			{
+				((AnswerImpl) current).set(answer, this);
+				return;
+			}
 		}
-
-		this.answers.remove(answer);
+		
+		// add it
+		answer.initSubmission(this);
 		this.answers.add(answer);
 	}
 
@@ -1021,8 +1017,7 @@ public class SubmissionImpl implements Submission
 		this.answers.clear();
 		for (Answer answer : other.answers)
 		{
-			AnswerImpl a = new AnswerImpl((AnswerImpl) answer);
-			a.initSubmission(this);
+			AnswerImpl a = new AnswerImpl((AnswerImpl) answer, this);
 			this.answers.add(a);
 		}
 

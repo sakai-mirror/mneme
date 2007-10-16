@@ -71,9 +71,9 @@ public class AnswerImpl implements Answer
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AnswerImpl(AnswerImpl other)
+	public AnswerImpl(AnswerImpl other, Submission owner)
 	{
-		set(other);
+		set(other, owner);
 	}
 
 	/**
@@ -367,7 +367,7 @@ public class AnswerImpl implements Answer
 	 * @param other
 	 *        The other to copy.
 	 */
-	protected void set(AnswerImpl other)
+	protected void set(AnswerImpl other, Submission owner)
 	{
 		if (other.answerHandler != null) this.answerHandler = (TypeSpecificAnswer) (other.answerHandler.clone());
 		this.evaluation = new AnswerEvaluationImpl(other.evaluation);
@@ -377,7 +377,7 @@ public class AnswerImpl implements Answer
 		this.partId = other.partId;
 		this.questionId = other.questionId;
 		this.reason = other.reason;
-		this.submission = other.submission;
+		this.submission = owner;
 		this.submittedDate = other.submittedDate;
 	}
 }

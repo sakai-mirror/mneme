@@ -399,8 +399,17 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		rv.setSubmittedDate(asOf);
 
 		// store the new submission, setting the id
-		((SubmissionImpl) submission).clearIsChanged();
+		((SubmissionImpl) rv).clearIsChanged();
 		this.storage.saveSubmission(rv);
+
+		// populate the questions (need to first have the submission id set for the draws)
+		for (Question question : rv.getAssessment().getParts().getQuestions())
+		{
+			AnswerImpl answer = this.storage.newAnswer();
+			answer.initQuestion(question);
+			((SubmissionImpl) rv).replaceAnswer(answer);
+		}
+		this.storage.saveAnswers(rv.getAnswers());
 
 		// event track it
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_ENTER, getSubmissionReference(rv.getId()), true));
@@ -530,6 +539,15 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// store the new submission, setting the id
 			((SubmissionImpl) temp).clearIsChanged();
 			this.storage.saveSubmission(temp);
+
+			// populate the questions (need to first have the submission id set for the draws)
+			for (Question question : temp.getAssessment().getParts().getQuestions())
+			{
+				AnswerImpl answer = this.storage.newAnswer();
+				answer.initQuestion(question);
+				((SubmissionImpl) temp).replaceAnswer(answer);
+			}
+			this.storage.saveAnswers(temp.getAnswers());
 
 			// TODO: which event? event track it
 			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_ENTER, getSubmissionReference(temp.getId()), true));
