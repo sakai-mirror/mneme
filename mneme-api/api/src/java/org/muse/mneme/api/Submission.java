@@ -46,6 +46,15 @@ public interface Submission
 	Answer getAnswer(Question question);
 
 	/**
+	 * Find this answer in the submission.
+	 * 
+	 * @param answerId
+	 *        The answer ID.
+	 * @return The answer with this id that is part of the submission, or null if not found.
+	 */
+	Answer getAnswer(String answerId);
+
+	/**
 	 * Access the submission's answers.
 	 * 
 	 * @return The submission's answers.

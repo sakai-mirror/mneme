@@ -155,6 +155,22 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Answer getAnswer(String answerId)
+	{
+		for (Answer answer : this.answers)
+		{
+			if (answer.getId().equals(answerId))
+			{
+				return answer;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Answer> getAnswers()
 	{
 		return this.answers;
