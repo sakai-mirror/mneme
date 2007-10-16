@@ -124,10 +124,6 @@
 								</navigation>
 							</container>
 						</container>
-						<navigation destination="/assessment_import_export" title="import-export-tests" style="LINK"
-							description="import-export-tests-description" submit="TRUE">
-							<icon icon="/icons/import_export.png" style="LEFT" />
-						</navigation>
 					</entityActions>
 				</selectionColumn>
 				<column>
@@ -235,7 +231,7 @@
 				</column>
 				<column>
 					<title>
-						<message selector="assessment-publish" />
+						<message selector="assessment-status" />
 					</title>
 					<sort submit="TRUE">
 						<active>
@@ -283,7 +279,7 @@
 						<message selector="assessment-action" />
 					</title>
 					<navigations>
-						<navigation style="LINK" submit="TRUE" description="published-alt">
+						<navigation style="LINK" submit="TRUE" description="unpublished-alt">
 							<icon icon="/icons/publish_rmv.png" style="LEFT" />
 							<destination template="/assessment_unpublish/{0}{1}/{2}">
 								<model ref="sort_column" />
@@ -295,7 +291,7 @@
 								<decision model="assessment.published" />
 							</included>
 						</navigation>
-						<navigation style="LINK" submit="TRUE" description="unpublished-alt">
+						<navigation style="LINK" submit="TRUE" description="published-alt">
 							<icon icon="/icons/publish_new.png" style="LEFT" />
 							<destination template="/assessment_settings/{0}{1}/{2}">
 								<model ref="sort_column" />

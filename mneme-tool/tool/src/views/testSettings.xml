@@ -62,11 +62,6 @@
 								</text>
 							</container>
 						</row>
-						<row title="id">
-							<container>
-								<text model="assessment.id" />
-							</container>
-						</row>
 						<row title="dates">
 							<container>
 								<entityDisplay>
@@ -317,5 +312,15 @@
 			</container>
 		</navigationBar>
 
+
+		<entityDisplay>
+			<rows>
+				<row title="id">
+					<container>
+						<text model="assessment.id" />
+					</container>
+				</row>
+			</rows>
+		</entityDisplay>
 	</container>
 </interface>
