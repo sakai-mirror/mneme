@@ -572,17 +572,18 @@ public class AssessmentStorageSample implements AssessmentStorage
 			p.setTitle("Part one");
 			((PartImpl) p).initId("p1");
 			p.addQuestion(this.questionService.getQuestion("q1"));
-			p.addQuestion(this.questionService.getQuestion("q2"));
+			p.addQuestion(this.questionService.getQuestion("q3"));
+			p.addQuestion(this.questionService.getQuestion("q4"));
 			p.getPresentation().setText("This is part one.");
 
 			p = a.getParts().addManualPart();
 			p.setRandomize(Boolean.FALSE);
 			p.setTitle("Part two");
 			((PartImpl) p).initId("p2");
-			p.addQuestion(this.questionService.getQuestion("q3"));
-			p.addQuestion(this.questionService.getQuestion("q4"));
+
 			p.addQuestion(this.questionService.getQuestion("q5"));
 			p.addQuestion(this.questionService.getQuestion("q7"));
+			p.addQuestion(this.questionService.getQuestion("q8"));
 			p.getPresentation().setText("This is part two.");
 
 			a.clearChanged();

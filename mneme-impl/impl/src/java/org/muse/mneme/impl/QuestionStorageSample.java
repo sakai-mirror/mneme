@@ -557,6 +557,23 @@ public class QuestionStorageSample implements QuestionStorage
 			q.setHints("hints for question seven.");
 			q.setFeedback("feedback for question 7");
 			questions.put(q.getId(), q);
+
+			q = newQuestion();
+			q.initType("mneme:Nonsub");
+			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
+			q.initId("q8");
+			q.setExplainReason(Boolean.TRUE);
+			q.setPool(poolService.getPool("b1"));
+			q.getCreatedBy().setUserId("admin");
+			q.getPresentation().setText("Review tutorial 5 and put together a presentation.");
+			((NonsubQuestionImpl) q.getTypeSpecificQuestion()).setModelAnswer("Review attached sample.");
+			q.getCreatedBy().setUserId("admin");
+			q.getCreatedBy().setDate(now);
+			q.getModifiedBy().setUserId("admin");
+			q.getModifiedBy().setDate(now);
+			q.setHints("hints for question eight.");
+			q.setFeedback("feedback for question 8");
+			questions.put(q.getId(), q);
 		}
 	}
 }
