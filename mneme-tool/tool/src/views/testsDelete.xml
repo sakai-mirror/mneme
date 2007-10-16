@@ -101,7 +101,7 @@
 		<navigationBar width="100%">
 			<container>
 				<navigation title="delete-title" style="BUTTON" accessKey="delete-access" description="delete-description" submit="TRUE">
-					<icon icon="/icons/delete_confirm.gif" style="LEFT" />
+					<icon icon="/icons/delete.png" style="LEFT" />
 					<destination template="/assessments_delete/{0}">
 						<model ref="sortcode" />
 					</destination>

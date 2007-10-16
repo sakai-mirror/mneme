@@ -110,6 +110,7 @@ public class TestInvalidView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+
 		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
@@ -139,31 +140,11 @@ public class TestInvalidView extends ControllerImpl
 		// read the form
 		String destination = uiService.decode(req, context);
 
-		if (destination != null && (destination.trim().startsWith("/assessments")))
+		if (destination != null)
 		{
-			StringBuffer path = new StringBuffer();
-			// commit the save
-			try
-			{
-				this.assessmentService.saveAssessment(assessment);
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-				return;
-			}
-			catch (AssessmentPolicyException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
-				return;
-			}
 
-			// Retain the sort order
-			path.append("/assessments/" + params[2]);
 			// redirect to the next destination
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 		}
 	}
 
