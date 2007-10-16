@@ -243,11 +243,6 @@
 								<model ref="submission.siblingCount" />
 								<model ref="submission.assessment.tries" missing="infinite" />
 							</message>
-							<included>
-								<compareDecision model="official">
-									<constant value="TRUE" />
-								</compareDecision>
-							</included>
 						</text>
 					</container>
 					<navigations>
