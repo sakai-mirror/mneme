@@ -287,7 +287,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		ovly.add(this.uiService.newGap());
 		ovly.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
 		cont.add(ovly);
-		cont.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("view-model-answer"));
+		cont.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("view-model-answer").setIcon("/icons/answer_key2.png",null));
 
 		return this.uiService.newFragment().setMessages(this.messages).add(cont);
 	}

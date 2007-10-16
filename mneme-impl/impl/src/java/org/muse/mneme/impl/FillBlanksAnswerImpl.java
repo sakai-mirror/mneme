@@ -100,7 +100,8 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 
 		float total = 0f;
 		String[] answersArray = (String[]) this.answers.clone();
-		if (anyOrder == Boolean.TRUE)
+		//Any order only matters when there is more than one blank
+		if ((anyOrder == Boolean.TRUE)&&(correctAnswers.size() > 1))
 		{
 			for (int j = 0; j < answersArray.length; j++)
 			{
@@ -316,6 +317,8 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 			// allow dot or comma for decimal point
 			answer = answer.replace(',', '.');
 			correct = correct.replace(',', '.');
+			System.out.println("Answer is "+answer);
+			System.out.println("Correct is "+correct);
 
 			// answer needs to become a float (allow dot or comma for decimal point)
 			float answerValue = Float.parseFloat(answer);
