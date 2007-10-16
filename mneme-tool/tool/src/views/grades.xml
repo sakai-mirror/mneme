@@ -38,8 +38,9 @@
 	<title>
 		<message selector="grading-title" />
 	</title>
+	
 	<container>
-
+		<gap></gap>
 		<!-- the list of assessments -->
 		<entityList style="FLAT">
 			<iterator name="assessment">
@@ -50,6 +51,9 @@
 			</emptyTitle>
 			<columns>
 				<column>
+					<title>
+						<message selector="assessment-type" />
+					</title>
 					<navigations>
 						<navigation description="assessment-type-test">
 							<icon icon="/icons/test_type.png" style="LEFT" />
@@ -183,10 +187,7 @@
 					</title>					
 					<model type="enum" ref="assessment.acceptSubmitStatus" messageRoot="grade-status-" />					
 				</modelColumn>
-				<modelColumn>
-					<title>
-						<message selector="newSubmissions" />
-					</title>
+				<modelColumn>					
 					<navigations>
 						<navigation style="LINK" submit="TRUE">
 							<icon icon="/icons/grade.png" />

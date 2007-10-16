@@ -173,40 +173,27 @@ public class GradeQuestionView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// get Assessment - assessment id is in params at index 3
-		final Assessment assessment = this.assessmentService.getAssessment(params[3]);
-		Question question = assessment.getParts().getQuestion(params[4]);
-
-		// FindAssessmentSubmissionsSort.username_a
-		SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
-		if (params.length >= 6)
+		Assessment assessment = this.assessmentService.getAssessment(params[3]);
+		
+	 	PopulatingSet answers = null;
+		final SubmissionService submissionService = this.submissionService;
+		answers = uiService.newPopulatingSet(new Factory()
 		{
-			String sortCode = params[5];
-			if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
-			if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
-			if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
-		}
-
-		List answers = null;
-		if (params.length >= 7)
-		{
-			String viewAll = params[6];
-			// get Answers
-			if (viewAll.equals("all"))
+			public Object get(String id)
 			{
-				answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
-				context.put("official", "FALSE");
+				Answer answer = submissionService.getAnswer(id);
+				return answer;
 			}
-		}
-		else
+		}, new Id()
 		{
-			// get Answers
-			answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
-			context.put("official", "TRUE");
-
-		}
+			public String getId(Object o)
+			{
+				return ((Answer) o).getId();
+			}
+		});
 		context.put("answers", answers);
-
-		//read form
+		
+				//read form
 		String destination = this.uiService.decode(req, context);
 
 		//save evaluation
@@ -214,7 +201,7 @@ public class GradeQuestionView extends ControllerImpl
 		{
 			try
 			{
-				this.submissionService.evaluateAnswers(answers);
+				this.submissionService.evaluateAnswers(answers.getSet());
 			}
 			catch (AssessmentPermissionException e)
 			{
@@ -235,11 +222,27 @@ public class GradeQuestionView extends ControllerImpl
 			}
 			else
 				destination = destination + "/" + params[5];
-			answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
-			context.put("answers", answers);
+			
+			 Question question = assessment.getParts().getQuestion(params[4]);
+
+		// FindAssessmentSubmissionsSort.username_a
+		SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
+		if (params.length >= 6)
+		{
+			String sortCode = params[5];
+			if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
+			if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
+			if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
+		}
+		
+		List<Answer> answers_view = null;
+			 
+			answers_view = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
+			context.put("answers", answers_view);
 			context.put("official", "FALSE");
 			destination = destination + "/all";
 		}
+
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

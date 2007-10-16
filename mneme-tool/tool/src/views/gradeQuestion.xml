@@ -50,6 +50,7 @@
 				<model ref="assessment.parts.totalPoints" />
 			</message>
 		</text>
+		<gap></gap>		
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
@@ -60,6 +61,11 @@
 						<model ref="gradeSortCode" />
 						<model ref="assessment.id" />
 					</destination>
+				</navigation>
+				<navigation>
+					<title>
+						<message selector="nav-divider" />
+					</title>
 				</navigation>
 				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description"
 					submit="FALSE" disabled="TRUE">
@@ -135,7 +141,9 @@
 			</container>
 		</navigationBar>
 		<entityList style="FLAT">
-			<iterator name="answer" model="answers" />
+			<iterator name="answer">
+				<model ref="answers" indexRef="id" />
+			</iterator>
 			<emptyTitle>
 				<message selector="no-submissions" />
 			</emptyTitle>
@@ -237,51 +245,41 @@
 								</row>
 								<row>
 									<container>
-										<htmlEdit model="answer.evaluation.comment" rows="2" cols="20" />
+										<htmlEdit model="answer.evaluation.comment" rows="5" cols="40" />
 									</container>
 								</row>
 							</rows>
 						</entityDisplay>
 					</container>
 				</column>
-				<modelColumn>
+				<column>
 					<title>
 						<message selector="submission-tries" />
 					</title>
-					<navigations>
-						<navigation style="LINK">
-							<title>
-								<message model="answer.submission.siblingCount" />
-							</title>
-							<destination template="/" />
+					<container>
+						<text>
 							<included>
 								<compareDecision model="official">
 									<constant value="TRUE" />
 								</compareDecision>
 							</included>
-						</navigation>
-						<navigation style="LINK">
-							<title>
-								<message selector="showCountOne" />
-							</title>
-							<destination template="/" />
+							<message selector="format-submission-tries">
+								<model ref="answer.submission.siblingCount" />
+								<model ref="answer.submission.assessment.tries" />
+							</message>
+						</text>
+						<text>
 							<included>
 								<compareDecision model="official">
 									<constant value="FALSE" />
 								</compareDecision>
 							</included>
-						</navigation>
-						<navigation>
-							<title>
-								<message selector="nav-divider" />
-							</title>
-						</navigation>
-						<navigation style="LINK" disabled="TRUE">
-							<title>
-								<message model="answer.submission.assessment.tries" />
-							</title>
-							<destination template="/" />
-						</navigation>
+							<message selector="format-submission-tries-countone">
+								<model ref="answer.submission.assessment.tries" />
+							</message>
+						</text>
+					</container>
+					<navigations>
 						<navigation style="LINK" submit="TRUE">
 							<title>
 								<message selector="view-all" />
@@ -318,7 +316,7 @@
 							</included>
 						</navigation>
 					</navigations>
-				</modelColumn>
+				</column>
 				<column>
 					<title>
 						<message selector="submission-score" />
