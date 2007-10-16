@@ -96,6 +96,9 @@
 									<model ref="question.explainReason" />
 								</selection>
 							</container>
+							<included>
+								<decision model="question.typeSpecificQuestion.useReason" />
+							</included>
 						</section>
 						<section>
 							<title>
@@ -108,6 +111,9 @@
 									<model ref="question.hints" />
 								</htmlEdit>
 							</container>
+							<included>
+								<decision model="question.typeSpecificQuestion.useHints" />
+							</included>
 						</section>
 						<section>
 							<title>
@@ -120,9 +126,45 @@
 									<model ref="question.feedback" />
 								</htmlEdit>
 							</container>
+							<included>
+								<decision model="question.typeSpecificQuestion.useFeedback" />
+							</included>
 						</section>
 					</container>
 				</row>
+
+			</rows>
+		</entityDisplay>
+
+		<!-- navigation -->
+		<navigationBar id="nav" width="70em">
+			<container>
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
+					<destination template="/pool_edit/{0}">
+						<model ref="extras" />
+					</destination>
+					<icon icon="/icons/return.png" style="LEFT" />
+				</navigation>
+				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
+					<destination template="/pool_edit/{0}">
+						<model ref="extras" />
+					</destination>
+					<icon icon="/icons/cancel.gif" style="LEFT" />
+				</navigation>
+				<divider />
+				<navigation title="apply" accessKey="apply-access" description="apply-description" style="BUTTON" submit="TRUE">
+					<destination template="{0}">
+						<model ref="sakai_destination" />
+					</destination>
+					<!-- <icon icon="/icons/cancel.gif" style="LEFT" />  -->
+				</navigation>
+			</container>
+		</navigationBar>
+
+		<gap />
+
+		<entityDisplay>
+			<rows>
 
 				<row title="question-id">
 					<container>
@@ -160,32 +202,6 @@
 
 			</rows>
 		</entityDisplay>
-
-		<!-- navigation -->
-		<navigationBar id="nav" width="70em">
-			<container>
-				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
-					<destination template="/pool_edit/{0}">
-						<model ref="extras" />
-					</destination>
-					<icon icon="/icons/return.png" style="LEFT" />
-				</navigation>
-				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
-					<destination template="/pool_edit/{0}">
-						<model ref="extras" />
-					</destination>
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-				</navigation>
-				<divider />
-				<navigation title="apply" accessKey="apply-access" description="apply-description" style="BUTTON" submit="TRUE">
-					<destination template="{0}">
-						<model ref="sakai_destination" />
-					</destination>
-					<!-- <icon icon="/icons/cancel.gif" style="LEFT" />  -->
-				</navigation>
-			</container>
-		</navigationBar>
-
 	</container>
 
 </interface>

@@ -50,67 +50,66 @@ import org.sakaiproject.i18n.InternationalizedMessages;
  * MatchQuestionImpl handles questions for the match question type.
  */
 public class MatchQuestionImpl implements TypeSpecificQuestion
+{	public class MatchQuestionChoice
 {
-	public class MatchQuestionChoice
+	protected String answer;
+
+	protected Boolean deleted = Boolean.FALSE;
+
+	protected String id;
+
+	protected String text;
+
+	public MatchQuestionChoice(MatchQuestionChoice other)
 	{
-		protected String answer;
-
-		protected Boolean deleted = Boolean.FALSE;
-
-		protected String id;
-
-		protected String text;
-
-		public MatchQuestionChoice(MatchQuestionChoice other)
-		{
-			this.deleted = other.deleted;
-			this.id = other.id;
-			this.text = other.text;
-			this.answer = other.answer;
-		}
-
-		public MatchQuestionChoice(String id, String text, String answer)
-		{
-			this.id = id;
-			this.text = text;
-			this.answer = answer;
-		}
-
-		public String getAnswer()
-		{
-			return this.answer;
-		}
-
-		public Boolean getDeleted()
-		{
-			return this.deleted;
-		}
-
-		public String getId()
-		{
-			return this.id;
-		}
-
-		public String getText()
-		{
-			return this.text;
-		}
-
-		public void setAnswer(String answer)
-		{
-			this.answer = answer;
-		}
-
-		public void setDeleted(Boolean deleted)
-		{
-			this.deleted = deleted;
-		}
-
-		public void setText(String text)
-		{
-			this.text = text;
-		}
+		this.deleted = other.deleted;
+		this.id = other.id;
+		this.text = other.text;
+		this.answer = other.answer;
 	}
+
+	public MatchQuestionChoice(String id, String text, String answer)
+	{
+		this.id = id;
+		this.text = text;
+		this.answer = answer;
+	}
+
+	public String getAnswer()
+	{
+		return this.answer;
+	}
+
+	public Boolean getDeleted()
+	{
+		return this.deleted;
+	}
+
+	public String getId()
+	{
+		return this.id;
+	}
+
+	public String getText()
+	{
+		return this.text;
+	}
+
+	public void setAnswer(String answer)
+	{
+		this.answer = answer;
+	}
+
+	public void setDeleted(Boolean deleted)
+	{
+		this.deleted = deleted;
+	}
+
+	public void setText(String text)
+	{
+		this.text = text;
+	}
+}
 
 	/** List of choices */
 	protected List<String> answerChoices = new ArrayList<String>();
@@ -338,11 +337,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		return this.correctAnswers;
 	}
 
-	public String getDistrator()
-	{
-		return this.distractor;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -368,6 +362,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	public String getDescription()
 	{
 		return this.question.getPresentation().getText();
+	}
+
+	public String getDistrator()
+	{
+		return this.distractor;
 	}
 
 	/**
@@ -414,11 +413,35 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+		 * {@inheritDoc}
+		 */
+		public Boolean getUseFeedback()
+		{
+			return Boolean.TRUE;
+		}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getUseHints()
+	{
+		return Boolean.TRUE;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public Boolean getUseQuestionPresentation()
 	{
 		// we suppress the question presentation, using our own fields to capture the question.
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getUseReason()
+	{
 		return Boolean.TRUE;
 	}
 

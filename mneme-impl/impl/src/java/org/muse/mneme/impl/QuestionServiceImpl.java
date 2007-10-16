@@ -466,7 +466,7 @@ public class QuestionServiceImpl implements QuestionService
 		}
 
 		// if we made history
-		if (current.isHistorical())
+		if ((current != null) && current.isHistorical())
 		{
 			// update any frozen manifest pools
 			this.poolService.switchManifests(question, current);

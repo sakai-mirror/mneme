@@ -99,6 +99,27 @@ public interface TypeSpecificQuestion extends Cloneable
 	Boolean getUseQuestionPresentation();
 
 	/**
+	 * Check if this type uses the generic question hints.
+	 * 
+	 * @return TRUE to use the generic question hints for this type, FALSE to not.
+	 */
+	Boolean getUseHints();
+
+	/**
+	 * Check if this type uses the generic question reason.
+	 * 
+	 * @return TRUE to use the generic question reason for this type, FALSE to not.
+	 */
+	Boolean getUseReason();
+
+	/**
+	 * Check if this type uses the generic question feedback.
+	 * 
+	 * @return TRUE to use the generic question feedback for this type, FALSE to not.
+	 */
+	Boolean getUseFeedback();
+
+	/**
 	 * Access the user interface component for question view of this question type.
 	 * 
 	 * @return The user interface component for question view of this question type.

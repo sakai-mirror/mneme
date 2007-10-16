@@ -43,9 +43,8 @@ import org.sakaiproject.i18n.InternationalizedMessages;
  * FillBlanksQuestionImpl handles questions for the true/false question type.
  */
 public class FillBlanksQuestionImpl implements TypeSpecificQuestion
-{
-	/** TRUE means any order is ok, FALSE means it is not */
-	protected Boolean anyOrder = Boolean.FALSE;
+{	/** TRUE means any order is ok, FALSE means it is not */
+protected Boolean anyOrder = Boolean.FALSE;
 
 	/** TRUE means answer is case sensitive, FALSE means it is not */
 	protected Boolean caseSensitive = Boolean.FALSE;
@@ -316,12 +315,36 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+		 * {@inheritDoc}
+		 */
+		public Boolean getUseFeedback()
+		{
+			return Boolean.TRUE;
+		}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getUseHints()
+	{
+		return Boolean.TRUE;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public Boolean getUseQuestionPresentation()
 	{
 		// we suppress the question presentation, using our own fields to capture the question.
 		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getUseReason()
+	{
+		return Boolean.TRUE;
 	}
 
 	public Component getViewAnswerUi()

@@ -55,26 +55,26 @@ import org.sakaiproject.i18n.InternationalizedMessages;
  */
 public class EssayQuestionImpl implements TypeSpecificQuestion
 {
+	/** An enumerate type that declares the types of submissions */
+	public enum SubmissionType
+	{
+		attachments, both, inline;
+	}
+
 	/** Our messages. */
 	protected transient InternationalizedMessages messages = null;
+
+	/** This property holds the model answer */
+	protected String modelAnswer = null;
 
 	/** The question this is a helper for. */
 	protected transient Question question = null;
 
+	/** Variable that holds the type of submission */
+	protected SubmissionType submissionType = SubmissionType.both;
+
 	/** Dependency: The UI service (Ambrosia). */
 	protected transient UiService uiService = null;
-
-	/** An enumerate type that declares the types of submissions */
-	private enum SubmissionType
-	{
-		inline, both, attachments;
-	}
-
-	/** Variable that holds the type of submission */
-	protected SubmissionType submissionType;
-
-	/** This property holds the model answer */
-	protected String modelAnswer = null;
 
 	/**
 	 * Construct.
@@ -196,14 +196,6 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public SubmissionType getSubmissionType()
-	{
-		return this.submissionType;
-	}
-
-	/**
 	 * @return the modelAnswer (rich text)
 	 */
 	public String getModelAnswer()
@@ -224,9 +216,33 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public SubmissionType getSubmissionType()
+	{
+		return this.submissionType;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getTypeName()
 	{
 		return this.messages.getString("name");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getUseFeedback()
+	{
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getUseHints()
+	{
+		return Boolean.TRUE;
 	}
 
 	/**
@@ -236,6 +252,14 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	{
 		// we suppress the question presentation, using our own fields to capture the question.
 		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getUseReason()
+	{
+		return Boolean.FALSE;
 	}
 
 	/**
@@ -268,6 +292,11 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		return this.uiService.newFragment().setMessages(this.messages).add(cont);
 	}
 
+	public void setModelAnswer(String modelAnswer)
+	{
+		this.modelAnswer = modelAnswer;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -275,11 +304,6 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	{
 		if (setting == null) throw new IllegalArgumentException();
 		this.submissionType = setting;
-	}
-
-	public void setModelAnswer(String modelAnswer)
-	{
-		this.modelAnswer = modelAnswer;
 	}
 
 	/**
