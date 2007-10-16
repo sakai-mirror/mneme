@@ -832,7 +832,7 @@ public class SubmissionImpl implements Submission
 			Float answerScore = answer.getTotalScore();
 			if (answerScore != null)
 			{
-				curAnswerScore += score;
+				curAnswerScore += answerScore;
 			}
 		}
 
