@@ -161,7 +161,8 @@
 		</entityDisplay>
 
 		<section>
-			<iterator name="answer" model="answers" />
+			<iterator name="answer" model="submission.answers" />
+
 			<container>
 				<entityDisplay>
 					<rows>
