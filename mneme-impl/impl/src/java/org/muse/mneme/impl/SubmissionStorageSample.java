@@ -87,6 +87,25 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public Answer getAnswer(String answerId)
+	{
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			for (Answer answer : submission.getAnswers())
+			{
+				if (answer.getId().equals(answerId))
+				{
+					return answer;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<SubmissionImpl> getAssessmentCompleteSubmissions(Assessment assessment)
 	{
 		// collect the submissions to this assessment

@@ -234,6 +234,15 @@ public interface SubmissionService
 			Integer pageNum, Integer pageSize);
 
 	/**
+	 * Find this answer.
+	 * 
+	 * @param answerId
+	 *        The answer ID.
+	 * @return The answer with this id, or null if not found.
+	 */
+	Answer getAnswer(String answerId);
+
+	/**
 	 * Check if there are any completed submissions that have any null scores for answers for this assessment.
 	 * 
 	 * @param assessment

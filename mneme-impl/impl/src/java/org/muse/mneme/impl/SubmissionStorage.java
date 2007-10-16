@@ -36,6 +36,15 @@ import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 public interface SubmissionStorage
 {
 	/**
+	 * Get this answer.
+	 * 
+	 * @param id
+	 *        The answer id.
+	 * @return The Answer, or null if not found.s
+	 */
+	Answer getAnswer(String id);
+
+	/**
 	 * Get the official complete submissions to the assignment made by all users.
 	 * 
 	 * @param assessment

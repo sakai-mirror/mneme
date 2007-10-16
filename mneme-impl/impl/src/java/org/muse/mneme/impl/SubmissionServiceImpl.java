@@ -420,18 +420,18 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		Date now = new Date();
 		String userId = sessionManager.getCurrentSessionUserId();
 
-		// check that all answers are to the same submission
-		Submission submission = answers.get(0).getSubmission();
+		// check that all answers are to the same context
+		String context = answers.get(0).getSubmission().getAssessment().getContext();
 		for (Answer answer : answers)
 		{
-			if (!submission.equals(answer.getSubmission()))
+			if (!context.equals(answer.getSubmission().getAssessment().getContext()))
 			{
 				throw new IllegalArgumentException();
 			}
 		}
 
 		// security check
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, submission.getAssessment().getContext());
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, context);
 
 		// set the attribution for each answer
 		List<Answer> work = new ArrayList<Answer>(answers);
@@ -460,7 +460,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			this.storage.saveAnswersEvaluation(work);
 
 			// TODO: events? single event?
-			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
+			//eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
 		}
 
 		// TODO: record in gb
@@ -770,6 +770,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 
 		return answers;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Answer getAnswer(String answerId)
+	{
+		return this.storage.getAnswer(answerId);
 	}
 
 	/**
