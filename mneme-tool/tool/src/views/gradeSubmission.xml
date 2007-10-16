@@ -32,7 +32,6 @@
 	<header>
 		<message selector="grading-submission-header">
 			<model type="icon" icon="/icons/grade.png" />
-			<model ref="assessment.title" />
 		</message>
 	</header>
 	<title>
@@ -40,6 +39,17 @@
 	</title>
 
 	<container>
+		<text>
+			<message selector="assessment-title">
+				<model ref="assessment.title" />
+			</message>
+		</text>
+		<text>
+			<message selector="assessment-total-points">
+				<model ref="assessment.Parts.totalPoints" />
+			</message>
+		</text>
+
 		<!--top navigation-->
 		<navigationBar width="100%">
 			<container>
@@ -79,8 +89,8 @@
 					</included>
 				</navigation>
 				<divider />
-				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
-					<icon icon="/icons/save.png" style="LEFT" />
+				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
+					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/grade_submission_save/{0}">
 						<model ref="destinationPath" />
 					</destination>
@@ -97,8 +107,8 @@
 						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
 					</included>
 				</navigation>
-				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
-					<icon icon="/icons/save.png" style="LEFT" />
+				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
+					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="{0}">
 						<model ref="sakai_prev_destination" />
 					</destination>
@@ -356,8 +366,8 @@
 					</included>
 				</navigation>
 				<divider />
-				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
-					<icon icon="/icons/save.png" style="LEFT" />
+				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
+					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/grade_submission_save/{0}">
 						<model ref="destinationPath" />
 					</destination>
@@ -374,8 +384,8 @@
 						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
 					</included>
 				</navigation>
-				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
-					<icon icon="/icons/save.png" style="LEFT" />
+				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
+					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="{0}">
 						<model ref="sakai_prev_destination" />
 					</destination>
