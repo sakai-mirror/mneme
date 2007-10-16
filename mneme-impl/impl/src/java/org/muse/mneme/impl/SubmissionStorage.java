@@ -246,6 +246,14 @@ public interface SubmissionStorage
 	void saveSubmissionEvaluation(SubmissionImpl submission);
 
 	/**
+	 * Save changes made to this submission's released setting.
+	 * 
+	 * @param submission
+	 *        the submission to save.
+	 */
+	void saveSubmissionReleased(SubmissionImpl submission);
+
+	/**
 	 * Check if an submission by this id exists.
 	 * 
 	 * @param id

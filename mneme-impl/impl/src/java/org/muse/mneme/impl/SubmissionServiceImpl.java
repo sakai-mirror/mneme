@@ -258,13 +258,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 
 		// store the changes
+		((SubmissionImpl) submission).clearIsChanged();
 		this.storage.saveSubmission((SubmissionImpl) submission);
 
-		// record in the gradebook if so configured
-		if (assessment.getGrading().getGradebookIntegration() && submission.getIsReleased())
-		{
-			recordInGradebook(submission, true);
-		}
+		recordInGradebook(submission, true);
 
 		// event track it
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_COMPLETE, getSubmissionReference(submission.getId()), true));
@@ -401,6 +398,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		rv.setSubmittedDate(asOf);
 
 		// store the new submission, setting the id
+		((SubmissionImpl) submission).clearIsChanged();
 		this.storage.saveSubmission(rv);
 
 		// event track it
@@ -481,6 +479,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// check for changes
 		boolean changed = ((EvaluationImpl) submission.getEvaluation()).getIsChanged();
+		if (!changed) changed = ((SubmissionImpl) submission).getIsChanged();
 		if (!changed)
 		{
 			for (Answer answer : submission.getAnswers())
@@ -523,6 +522,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			}
 
 			// store the new submission, setting the id
+			((SubmissionImpl) temp).clearIsChanged();
 			this.storage.saveSubmission(temp);
 
 			// TODO: which event? event track it
@@ -553,7 +553,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			}
 		}
 
-		// save just evaluation stuff and answers
+		// save just evaluation stuff and answers and released
 		if (((EvaluationImpl) submission.getEvaluation()).getIsChanged())
 		{
 			((EvaluationImpl) submission.getEvaluation()).clearIsChanged();
@@ -565,10 +565,16 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			this.storage.saveAnswersEvaluation(work);
 		}
 
+		if (((SubmissionImpl) submission).getIsChanged())
+		{
+			((SubmissionImpl) submission).clearIsChanged();
+			this.storage.saveSubmissionReleased((SubmissionImpl) submission);
+		}
+
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
 
-		// TODO: record in gb
+		recordInGradebook(submission, true);
 	}
 
 	/**
@@ -1281,15 +1287,12 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			}
 		}
 
-		// TODO: save the answers, update the submission
+		// save the answers, update the submission
+		((SubmissionImpl) submission).clearIsChanged();
 		this.storage.saveSubmission((SubmissionImpl) submission);
 		this.storage.saveAnswers(answers);
 
-		// record in gradebook if needed
-		if (submission.getIsReleased() && assessment.getGrading().getGradebookIntegration())
-		{
-			recordInGradebook(submission, true);
-		}
+		recordInGradebook(submission, true);
 
 		// event track it (one for each answer)
 		for (Answer answer : answers)
@@ -1352,6 +1355,59 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
+	 * Record this submission in the gradebook.
+	 * 
+	 * @param submission
+	 *        The submission to record in the gradebook.
+	 * @param refresh
+	 *        if true, get the latest score from the db, if false, use the final score from the submission.
+	 */
+	protected void addToGradebook(Submission submission, boolean refresh)
+	{
+		if (submission == null) throw new IllegalArgumentException();
+
+		Assessment assessment = submission.getAssessment();
+
+		Double points = null;
+
+		// refresh from the database if requested
+		if (refresh)
+		{
+			// read the final score for this submission from the db
+			points = this.storage.getSubmissionScore(submission).doubleValue();
+		}
+		else
+		{
+			// use the score from the submission record
+			points = submission.getTotalScore().doubleValue();
+		}
+
+		// find the highest score recorded for this user and this assessment
+		Float highestScore = this.storage.getSubmissionHighestScore(assessment, submission.getUserId());
+		if ((highestScore != null) && (points.doubleValue() < highestScore.doubleValue()))
+		{
+			// if this submission's points is not highest, don't record this in GB
+			return;
+		}
+
+		// post it
+		try
+		{
+			gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(), submission.getUserId(), points);
+		}
+		catch (GradebookNotFoundException e)
+		{
+			// if there's no gradebook for this context, oh well...
+			M_log.warn("addToGradebook: (no gradebook for context): " + e);
+		}
+		catch (AssessmentNotFoundException e)
+		{
+			// if the assessment has not been registered in gb, this is a problem
+			M_log.warn("addToGradebook: (assessment has not been registered in context's gb): " + e);
+		}
+	}
+
+	/**
 	 * Mark the submission as auto-complete as of now.
 	 * 
 	 * @param asOf
@@ -1376,13 +1432,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			submission.setIsReleased(Boolean.TRUE);
 		}
 
+		((SubmissionImpl) submission).clearIsChanged();
 		this.storage.saveSubmission((SubmissionImpl) submission);
 
-		// record in the gradebook if so configured, using data only from the submission, no db refresh
-		if (submission.getIsReleased() && submission.getAssessment().getGrading().getGradebookIntegration())
-		{
-			recordInGradebook(submission, false);
-		}
+		recordInGradebook(submission, false);
 
 		// event track it
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_AUTO_COMPLETE, getSubmissionReference(submission.getId()),
@@ -1759,7 +1812,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
-	 * Record this submission in the gradebook.
+	 * Update the gradebook for ths submission.
 	 * 
 	 * @param submission
 	 *        The submission to record in the gradebook.
@@ -1768,46 +1821,15 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	protected void recordInGradebook(Submission submission, boolean refresh)
 	{
-		if (submission == null) throw new IllegalArgumentException();
-
-		Assessment assessment = submission.getAssessment();
-
-		Double points = null;
-
-		// refresh from the database if requested
-		if (refresh)
+		if (submission.getIsReleased() && submission.getAssessment().getGrading().getGradebookIntegration())
 		{
-			// read the final score for this submission from the db
-			points = this.storage.getSubmissionScore(submission).doubleValue();
+			addToGradebook(submission, refresh);
 		}
+
+		// TODO: remove from gb
 		else
 		{
-			// use the score from the submission record
-			points = submission.getTotalScore().doubleValue();
-		}
 
-		// find the highest score recorded for this user and this assessment
-		Float highestScore = this.storage.getSubmissionHighestScore(assessment, submission.getUserId());
-		if ((highestScore != null) && (points.doubleValue() < highestScore.doubleValue()))
-		{
-			// if this submission's points is not highest, don't record this in GB
-			return;
-		}
-
-		// post it
-		try
-		{
-			gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(), submission.getUserId(), points);
-		}
-		catch (GradebookNotFoundException e)
-		{
-			// if there's no gradebook for this context, oh well...
-			M_log.warn("recordInGradebook: (no gradebook for context): " + e);
-		}
-		catch (AssessmentNotFoundException e)
-		{
-			// if the assessment has not been registered in gb, this is a problem
-			M_log.warn("recordInGradebook: (assessment has not been registered in context's gb): " + e);
 		}
 	}
 

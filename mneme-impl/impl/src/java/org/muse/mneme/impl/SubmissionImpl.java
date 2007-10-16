@@ -31,6 +31,7 @@ import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentSubmissionStatus;
+import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.Expiration;
 import org.muse.mneme.api.GradingSubmissionStatus;
 import org.muse.mneme.api.MnemeService;
@@ -66,6 +67,9 @@ public class SubmissionImpl implements Submission
 	protected Boolean isComplete = Boolean.FALSE;
 
 	protected Boolean released = Boolean.FALSE;
+
+	/** Track changes. */
+	protected Changeable releasedChanged = new ChangeableImpl();
 
 	protected transient SecurityService securityService = null;
 
@@ -799,7 +803,11 @@ public class SubmissionImpl implements Submission
 	public void setIsReleased(Boolean released)
 	{
 		if (released == null) throw new IllegalArgumentException();
+		if (this.released.equals(released)) return;
+
 		this.released = released;
+
+		this.releasedChanged.setChanged();
 	}
 
 	/**
@@ -864,6 +872,14 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
+	 * Clear the changed flag(s).
+	 */
+	protected void clearIsChanged()
+	{
+		this.releasedChanged.clearChanged();
+	}
+
+	/**
 	 * Find an existing answer in the submission for this question id.
 	 * 
 	 * @param questionId
@@ -892,6 +908,16 @@ public class SubmissionImpl implements Submission
 	protected String getAssessmentId()
 	{
 		return this.assessment.getId();
+	}
+
+	/**
+	 * Check if there were any changes.
+	 * 
+	 * @return TRUE if any changes, FALSE if not.
+	 */
+	protected Boolean getIsChanged()
+	{
+		return this.releasedChanged.getChanged();
 	}
 
 	/**
@@ -1016,6 +1042,7 @@ public class SubmissionImpl implements Submission
 		this.bestSubmissionId = other.bestSubmissionId;
 		this.evaluation = new SubmissionEvaluationImpl(other.evaluation, this);
 		this.released = other.released;
+		this.releasedChanged = new ChangeableImpl(other.releasedChanged);
 		this.id = other.id;
 		this.isComplete = other.isComplete;
 		this.securityService = other.securityService;

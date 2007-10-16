@@ -157,6 +157,7 @@ public class EvaluationImpl implements Evaluation
 		this.attribution = new AttributionImpl(other.attribution, null);
 		this.changed = new ChangeableImpl(other.changed);
 		this.comment = other.comment;
+		this.evaluated = other.evaluated;
 		this.score = other.score;
 	}
 }

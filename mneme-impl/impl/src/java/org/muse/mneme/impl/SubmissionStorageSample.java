@@ -796,6 +796,28 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void saveSubmissionReleased(SubmissionImpl submission)
+	{
+		if (submission.getId().startsWith(SubmissionService.PHANTOM_PREFIX))
+		{
+			// lets not save phanton submissions
+			throw new IllegalArgumentException();
+		}
+
+		// has to be an existing saved submission
+		if (submission.getId() == null) throw new IllegalArgumentException();
+
+		// we must already have the submission
+		SubmissionImpl old = this.submissions.get(submission.getId());
+		if (old == null) throw new IllegalArgumentException();
+
+		// update the submission evaluation
+		old.released = submission.released;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
