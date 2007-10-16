@@ -115,7 +115,9 @@
 		</entityDisplay>
 
 		<entityList style="FLAT">
-			<iterator name="submission" model="submissions" />
+			<iterator name="submission">
+				<model ref="submissions" indexRef="id" />
+			</iterator>
 			<emptyTitle>
 				<message selector="no-submissions" />
 			</emptyTitle>

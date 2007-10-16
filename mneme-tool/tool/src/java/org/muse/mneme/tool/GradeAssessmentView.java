@@ -22,6 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +32,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Paging;
+import org.muse.ambrosia.api.PopulatingSet;
 import org.muse.ambrosia.api.Value;
+import org.muse.ambrosia.api.PopulatingSet.Factory;
+import org.muse.ambrosia.api.PopulatingSet.Id;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
@@ -242,25 +246,23 @@ public class GradeAssessmentView extends ControllerImpl
 		// setup the model: the assessment
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
-
-		List<Submission> submissions = null;
-
-		// sort parameter - sort is in param array at index 4
-		String sortCode = null;
-		if (params.length > 4) sortCode = params[4];
-
-		SubmissionService.FindAssessmentSubmissionsSort sort = getSort(context, sortCode);
-
-		if (params.length == 7 && params[6].equalsIgnoreCase("all"))
+		
+		PopulatingSet submissions = null;
+		final SubmissionService submissionService = this.submissionService;
+		submissions = uiService.newPopulatingSet(new Factory()
 		{
-			// get all Assessment submissions
-			submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, null, null);
-		}
-		else
+			public Object get(String id)
+			{
+				Submission submission = submissionService.getSubmission(id);
+				return submission;
+			}
+		}, new Id()
 		{
-			// get official Assessment submissions
-			submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.TRUE, null, null);
-		}
+			public String getId(Object o)
+			{
+				return ((Submission) o).getId();
+			}
+		});
 
 		context.put("submissions", submissions);
 
@@ -335,19 +337,16 @@ public class GradeAssessmentView extends ControllerImpl
 	 * @return true if data is saved
 	 * @throws IOException
 	 */
-	private boolean saveScores(Assessment assessment, List<Submission> submissions, String submissionAdjustScore, String submissionAdjustComments)
+	private boolean saveScores(Assessment assessment, PopulatingSet submissions, String submissionAdjustScore, String submissionAdjustComments)
 			throws NumberFormatException, AssessmentPermissionException
 	{
 		// save Final score for each student's submission
-		if (submissions != null && submissions.size() > 0)
+		if (submissions != null && submissions.getSet().size() > 0)
 		{
-			for (Submission submission : submissions)
+			for (Iterator i = submissions.getSet().iterator(); i.hasNext();)
 			{
-				if (submission.getAssessment().equals(assessment))
-				{
-					// save submission //to adjust to zero after first adjustment user should provide zero
-					if (submission.getTotalScore() != null) this.submissionService.evaluateSubmission(submission);
-				}
+				Submission submission = (Submission) i.next();
+				this.submissionService.evaluateSubmission(submission);
 			}
 		}
 
