@@ -58,6 +58,7 @@ public class SubmissionStatusDelegate extends FormatDelegateImpl
 		{
 			rv.append("<img src=\"" + context.get("sakai.return.url") + "/icons/checkon.gif\" alt=\"" + context.getMessages().getString("grade-status-released")
 					+ "\" />");
+			rv.append(" ");
 		}
 		rv.append(context.getMessages().getString("grade-status-"+ submission.getGradingStatus().toString()));
 

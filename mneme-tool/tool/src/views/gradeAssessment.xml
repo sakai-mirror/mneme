@@ -41,20 +41,16 @@
 	</title>
 
 	<container>
-		<entityDisplay>
-			<rows>
-				<row>
-					<title>
-						<message selector="assessment-title">
-							<model ref="assessment.title" />
-						</message>
-					</title>
-				</row>
-				<row title="total-score">
-					<model ref="assessment.Parts.totalPoints" />
-				</row>
-			</rows>
-		</entityDisplay>
+		<text>
+			<message selector="assessment-title">
+				<model ref="assessment.title" />
+			</message>
+		</text>
+		<text>
+			<message selector="assessment-total-points">
+				<model ref="assessment.Parts.totalPoints" />
+			</message>
+		</text>
 
 		<!--navigation-->
 		<navigationBar width="100%">
@@ -122,7 +118,7 @@
 				<message selector="no-submissions" />
 			</emptyTitle>
 			<pager paging="paging" submit="TRUE">
-				<destination template="/grade_assessment_save/{0}/{1}/{2}">
+				<destination template="/grade_assessment/{0}/{1}/{2}">
 					<model ref="pagingDestinationPath" />
 					<model type="paging" ref="paging" />
 					<model ref="view" />
@@ -159,7 +155,7 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_assessment_save/{0}/{1}/0A/{2}/{3}">
+							<destination template="/grade_assessment/{0}/{1}/0A/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="pagingParameter" />
@@ -168,7 +164,7 @@
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_assessment_save/{0}/{1}/0D/{2}/{3}">
+							<destination template="/grade_assessment/{0}/{1}/0D/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="pagingParameter" />
@@ -219,7 +215,7 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_assessment_save/{0}/{1}/1A/{2}/{3}">
+							<destination template="/grade_assessment/{0}/{1}/1A/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="pagingParameter" />
@@ -228,7 +224,7 @@
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_assessment_save/{0}/{1}/1D/{2}/{3}">
+							<destination template="/grade_assessment/{0}/{1}/1D/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="pagingParameter" />
@@ -237,55 +233,29 @@
 						</desc>
 					</sort>
 				</modelColumn>
-				<modelColumn>
+				<column>
 					<title>
 						<message selector="submission-tries" />
 					</title>
-					<navigations>
-						<navigation style="LINK" submit="TRUE">
-							<title>
-								<message model="submission.siblingCount" />
-							</title>
-							<destination template="/NAV:grade_submission/{0}/{1}">
-								<model ref="destinationPath" />
-								<model ref="submission.id" />
-							</destination>
+					<container>
+						<text>
+							<message selector="format-submission-tries">
+								<model ref="submission.siblingCount" />
+								<model ref="submission.assessment.tries" missing="infinite" />
+							</message>
 							<included>
 								<compareDecision model="official">
 									<constant value="TRUE" />
 								</compareDecision>
 							</included>
-						</navigation>
-						<navigation style="LINK" submit="TRUE">
-							<title>
-								<message selector="showCountOne" />
-							</title>
-							<destination template="/NAV:grade_submission/{0}/{1}">
-								<model ref="destinationPath" />
-								<model ref="submission.id" />
-							</destination>
-							<included>
-								<compareDecision model="official">
-									<constant value="FALSE" />
-								</compareDecision>
-							</included>
-						</navigation>
-						<navigation>
-							<title>
-								<message selector="nav-divider" />
-							</title>
-						</navigation>
-						<navigation style="LINK" disabled="TRUE">
-							<title>
-								<message model="submission.assessment.tries" />
-							</title>
-							<destination template="/" />
-						</navigation>
+						</text>
+					</container>
+					<navigations>
 						<navigation style="LINK" submit="TRUE">
 							<title>
 								<message selector="view-all" />
 							</title>
-							<destination template="/grade_assessment_save/{0}/{1}/{2}{3}/{4}/all">
+							<destination template="/grade_assessment/{0}/{1}/{2}{3}/{4}/all">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="sort_column" />
@@ -303,7 +273,7 @@
 							<title>
 								<message selector="close" />
 							</title>
-							<destination template="/grade_assessment_save/{0}/{1}/{2}{3}/{4}/highest">
+							<destination template="/grade_assessment/{0}/{1}/{2}{3}/{4}/highest">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="sort_column" />
@@ -323,7 +293,7 @@
 							</included>
 						</navigation>
 					</navigations>
-				</modelColumn>
+				</column>
 				<column>
 					<title>
 						<message selector="submission-score" />
@@ -364,7 +334,7 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_assessment_save/{0}/{1}/2A/{2}/{3}">
+							<destination template="/grade_assessment/{0}/{1}/2A/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="pagingParameter" />
@@ -373,7 +343,7 @@
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_assessment_save/{0}/{1}/2D/{2}/{3}">
+							<destination template="/grade_assessment/{0}/{1}/2D/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="pagingParameter" />
@@ -392,9 +362,9 @@
 		<navigationBar width="100%">
 			<container>
 				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
-					<icon icon="/icons/save.png" style="LEFT" />
+					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/grade_assessment_save/{0}">
-						<model ref="destinationPath" />
+						<model ref="gradesSortCode" />
 					</destination>
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">

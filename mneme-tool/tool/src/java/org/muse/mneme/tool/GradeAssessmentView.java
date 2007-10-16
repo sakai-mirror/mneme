@@ -297,7 +297,25 @@ public class GradeAssessmentView extends ControllerImpl
 				{
 					if (M_log.isWarnEnabled()) M_log.warn(ne);
 				}
-				destination = destination.replace("grade_assessment_save", "grade_assessment");
+				destination = destination.replace("grade_assessment_save", "grades");
+			}
+			if (destination.startsWith("/grade_assessment"))
+			{
+
+				try
+				{
+					saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments);
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+				catch (NumberFormatException ne)
+				{
+					if (M_log.isWarnEnabled()) M_log.warn(ne);
+				}
 			}
 			else if (destination.startsWith("/NAV"))
 			{
