@@ -21,6 +21,7 @@
 
 package org.muse.mneme.api;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -164,7 +165,7 @@ public interface SubmissionService
 	 * @throws AssessmentPermissionException
 	 *         if the user does not have permission to evaluate these answers.
 	 */
-	void evaluateAnswers(List<Answer> answers) throws AssessmentPermissionException;
+	void evaluateAnswers(Collection<Answer> answers) throws AssessmentPermissionException;
 
 	/**
 	 * Record the evaluation changes made to the overall submission and the submission's answers.

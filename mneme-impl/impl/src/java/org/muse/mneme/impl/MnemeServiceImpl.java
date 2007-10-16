@@ -22,6 +22,7 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -284,7 +285,7 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void evaluateAnswers(List<Answer> answers) throws AssessmentPermissionException
+	public void evaluateAnswers(Collection<Answer> answers) throws AssessmentPermissionException
 	{
 		submissionService.evaluateAnswers(answers);
 	}

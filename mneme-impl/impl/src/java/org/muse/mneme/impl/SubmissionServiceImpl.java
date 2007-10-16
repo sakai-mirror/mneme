@@ -22,6 +22,7 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -410,7 +411,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public void evaluateAnswers(List<Answer> answers) throws AssessmentPermissionException
+	public void evaluateAnswers(Collection<Answer> answers) throws AssessmentPermissionException
 	{
 		if (answers == null) throw new IllegalArgumentException();
 		if (answers.isEmpty()) return;
@@ -421,10 +422,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		String userId = sessionManager.getCurrentSessionUserId();
 
 		// check that all answers are to the same context
-		String context = answers.get(0).getSubmission().getAssessment().getContext();
+		String context = null;
 		for (Answer answer : answers)
 		{
-			if (!context.equals(answer.getSubmission().getAssessment().getContext()))
+			if (context == null)
+			{
+				context = answer.getSubmission().getAssessment().getContext();
+			}
+			else if (!context.equals(answer.getSubmission().getAssessment().getContext()))
 			{
 				throw new IllegalArgumentException();
 			}
@@ -460,7 +465,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			this.storage.saveAnswersEvaluation(work);
 
 			// TODO: events? single event?
-			//eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
+			// eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()),
+			// true));
 		}
 
 		// TODO: record in gb
