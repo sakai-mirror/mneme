@@ -24,7 +24,7 @@
 	**********************************************************************************/
 -->
 
-<interface title="delete-confirm-title" header="tests-delete-confirm-header">
+<interface title="delete-confirm-title" header="delete-confirm-header">
 
 	<!--mode bar-->
 	<modeContainer>
@@ -100,7 +100,8 @@
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="continue-title" style="BUTTON" accessKey="continue-access" description="continue-description" submit="TRUE">
+				<navigation title="delete-title" style="BUTTON" accessKey="delete-access" description="delete-description" submit="TRUE">
+					<icon icon="/icons/delete_confirm.gif" style="LEFT" />
 					<destination template="/assessments_delete/{0}">
 						<model ref="sortcode" />
 					</destination>
