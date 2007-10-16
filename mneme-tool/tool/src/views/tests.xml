@@ -251,7 +251,7 @@
 					</sort>
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="published-alt">
-							<icon icon="/icons/active.png" style="LEFT" />
+							<icon icon="/icons/publish_ok.png" style="LEFT" />
 							<destination template="/assessment_settings/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
