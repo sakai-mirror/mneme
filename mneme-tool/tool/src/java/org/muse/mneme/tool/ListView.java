@@ -148,7 +148,7 @@ public class ListView extends ControllerImpl
 		context.put("submissions", submissions);
 
 		// disable the tool navigation to this view
-		context.put("disableList", Boolean.TRUE);
+		context.put("disableDelivery", Boolean.TRUE);
 
 		// for the tool navigation
 		if (this.assessmentService.allowManageAssessments(toolManager.getCurrentPlacement().getContext()))

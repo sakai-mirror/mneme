@@ -49,10 +49,10 @@
 					</disabled>
 				</navigation>
 				<divider />
-				<navigation destination="/list" title="student-view-nav-title" style="LINK" accessKey="student-view-nav-access-key"
-					description="student-view-nav-description" submit="TRUE">
+				<navigation destination="/list" title="delivery-nav-title" style="LINK" accessKey="delivery-nav-access-key"
+					description="delivery-nav-description" submit="TRUE">
 					<disabled>
-						<hasValueDecision model="disableList" />
+						<hasValueDecision model="disableDelivery" />
 					</disabled>
 				</navigation>
 			</container>

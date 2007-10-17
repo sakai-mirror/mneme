@@ -316,6 +316,5 @@
 				</column>
 			</columns>
 		</entityList>
-		<instructions selector="list-highest-note" />
 	</container>
 </interface>
