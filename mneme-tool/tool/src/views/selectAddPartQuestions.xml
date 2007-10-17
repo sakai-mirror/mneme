@@ -68,7 +68,7 @@
 							<entityIncluded>
 								<decision reversed = "TRUE" model="question.id" delegate="QuestionReferencedDecision" tool="sakai.mneme" />
 								<message>
-									<model type="icon" icon="/icons/cancel.gif" />
+									<model type="icon" icon="/icons/checkon.gif" />
 								</message>
 							</entityIncluded>							
 						</selectionColumn>
@@ -121,7 +121,7 @@
 							<title>
 								<message selector="question-description" />
 							</title>
-							<model ref="question.description" />
+							<model ref="question.description" max="30"/>
 						</modelColumn>
 						<modelColumn>
 							<title>

@@ -196,16 +196,14 @@
 
 			</container>
 		</section>
-
-		<text>
-			<message selector="assessment-points">
-				<model ref="assessment.parts.totalPoints" />
-			</message>
-		</text>
-
 		<text>
 			<message selector="assessment-questions">
 				<model ref="assessment.parts.numQuestions" />
+			</message>
+		</text>
+		<text>
+			<message selector="assessment-points">
+				<model ref="assessment.parts.totalPoints" />
 			</message>
 		</text>
 		<!-- save / cancel nav bar -->
@@ -225,34 +223,22 @@
 				</navigation>
 			</container>
 		</navigationBar>
-		<entityDisplay>
-			<rows>
-				<row title="test-Id">
-					<container>
-						<text model="assessment.id" />
-					</container>
-				</row>
-				<row title="history">
-					<container>
-						<text>
-							<message selector="history-createText">
-								<model type="userInfo" selector="DISPLAYNAME" ref="assessment.createdBy.UserId" />
-								<model type="date" ref="assessment.createdBy.date" />
-							</message>
-						</text>
-					</container>
-				</row>
-				<row>
-					<container>
-						<text>
-							<message selector="history-modifyText">
-								<model type="userInfo" selector="DISPLAYNAME" ref="assessment.modifiedBy.UserId" />
-								<model type="date" ref="assessment.modifiedBy.date" />
-							</message>
-						</text>
-					</container>
-				</row>
-			</rows>
-		</entityDisplay>
+		<text>
+			<message selector="test-Id">
+				<model ref="assessment.id" />
+			</message>
+		</text>
+		<text>
+			<message selector="history-createText">
+				<model type="userInfo" selector="DISPLAYNAME" ref="assessment.createdBy.UserId" />
+				<model type="date" ref="assessment.createdBy.date" />
+			</message>
+		</text>
+		<text>
+			<message selector="history-modifyText">
+				<model type="userInfo" selector="DISPLAYNAME" ref="assessment.modifiedBy.UserId" />
+				<model type="date" ref="assessment.modifiedBy.date" />
+			</message>
+		</text>
 	</container>
 </interface>

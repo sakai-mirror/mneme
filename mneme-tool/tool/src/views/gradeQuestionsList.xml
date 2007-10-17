@@ -50,6 +50,7 @@
 				<model ref="assessment.parts.totalPoints" />
 			</message>
 		</text>
+		<gap/>
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
@@ -60,6 +61,11 @@
 						<model ref="gradeSortCode" />
 						<model ref="assessment.id" />
 					</destination>
+				</navigation>
+				<navigation>
+					<title>
+						<message selector="nav-divider" />
+					</title>
 				</navigation>
 				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description"
 					submit="FALSE" disabled="TRUE">
@@ -73,7 +79,7 @@
 			<iterator name="part" model="assessment.parts.parts" />
 			<container>
 				<section>
-					<title highlighted="TRUE">
+					<title>
 						<message selector="question-list-part-title">
 							<model ref="part.ordering.position" />
 							<model ref="assessment.parts.size" />

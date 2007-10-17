@@ -73,91 +73,71 @@ public class GradeQuestionView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// if (params.length > 4) throw new IllegalArgumentException();
-
 		context.put("gradeSortCode", params[2]);
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
 		context.put("assessment", assessment);
 
-		// get Questions
-		List questions = new ArrayList();	//assessment.getParts().getQuestionsAsAuthored();
-		context.put("questions", questions);
+		Question question = assessment.getParts().getQuestion(params[4]);
+		context.put("question", question);
 
-		Question question = null;
-		if (questions != null)
+		// FindAssessmentSubmissionsSort.username_a
+		SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
+		context.put("sort_column", '0');
+		context.put("sort_direction", 'A');
+
+		if (params.length >= 6)
 		{
-			if (params.length <= 4)
-			{
-				// get First Question
-				question = (Question) questions.get(0);
-				String destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + question.getId() + "/0A";
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-			else
-			{
-				question = assessment.getParts().getQuestion(params[4]);
-			}
-			context.put("question", question);
+			String sortCode = params[5];
+			if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
+			if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
+			if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
+			context.put("sort_column", sortCode.charAt(0));
+			context.put("sort_direction", sortCode.charAt(1));
+		}
 
-			// FindAssessmentSubmissionsSort.username_a
-			SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
-			context.put("sort_column", '0');
-			context.put("sort_direction", 'A');
+		List<Answer> answers = null;
+		String pagingParameter = "1-30";
 
-			if (params.length >= 6)
+		if (params.length >= 7)
+		{
+			String viewAll = params[6];
+			// get Answers
+			if (viewAll.equals("all"))
 			{
-				String sortCode = params[5];
-				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
-				if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
-				if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
-				context.put("sort_column", sortCode.charAt(0));
-				context.put("sort_direction", sortCode.charAt(1));
-			}
-
-			List answers = null;
-			String pagingParameter = "1-30";
-
-			if (params.length >= 7)
-			{
-				String viewAll = params[6];
-				// get Answers
-				if (viewAll.equals("all"))
-				{
-					answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
-					context.put("official", "FALSE");
-				}
-				else
-				{
-					// get Answers
-					answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
-					context.put("official", "TRUE");
-					pagingParameter = params[6];
-					if (pagingParameter == null)
-					{
-						pagingParameter = "1-30";
-					}
-				}
+				answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
+				context.put("official", "FALSE");
 			}
 			else
 			{
 				// get Answers
 				answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
 				context.put("official", "TRUE");
+				pagingParameter = params[6];
+				if (pagingParameter == null)
+				{
+					pagingParameter = "1-30";
+				}
 			}
-			context.put("answers", answers);
-			Integer maxAnswers = 0;
-			if (answers != null) maxAnswers = answers.size();
-
-			// paging
-			Paging paging = uiService.newPaging();
-			paging.setMaxItems(maxAnswers);
-			paging.setCurrentAndSize(pagingParameter);
-			context.put("paging", paging);
 		}
+		else
+		{
+			// get Answers
+			answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
+			context.put("official", "TRUE");
+		}
+		context.put("answers", answers);
+		Integer maxAnswers = 0;
+		if (answers != null) maxAnswers = answers.size();
+
+		// paging
+		Paging paging = uiService.newPaging();
+		paging.setMaxItems(maxAnswers);
+		paging.setCurrentAndSize(pagingParameter);
+		context.put("paging", paging);	
+		
 		uiService.render(ui, context);
-	}
+}
 
 	/**
 	 * Final initialization, once all dependencies are set.
@@ -175,7 +155,7 @@ public class GradeQuestionView extends ControllerImpl
 	{
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
-		
+
 	 	PopulatingSet answers = null;
 		final SubmissionService submissionService = this.submissionService;
 		answers = uiService.newPopulatingSet(new Factory()
@@ -193,11 +173,11 @@ public class GradeQuestionView extends ControllerImpl
 			}
 		});
 		context.put("answers", answers);
-		
-				//read form
+
+				// read form
 		String destination = this.uiService.decode(req, context);
 
-		//save evaluation
+		// save evaluation
 		if (destination.startsWith("/grade_question"))
 		{
 			try
@@ -223,7 +203,7 @@ public class GradeQuestionView extends ControllerImpl
 			}
 			else
 				destination = destination + "/" + params[5];
-			
+
 			 Question question = assessment.getParts().getQuestion(params[4]);
 
 		// FindAssessmentSubmissionsSort.username_a
@@ -235,9 +215,9 @@ public class GradeQuestionView extends ControllerImpl
 			if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
 			if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
 		}
-		
+
 		List<Answer> answers_view = null;
-			 
+
 			answers_view = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
 			context.put("answers", answers_view);
 			context.put("official", "FALSE");
