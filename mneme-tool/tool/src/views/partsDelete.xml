@@ -72,7 +72,8 @@
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="continue-title" style="BUTTON" accessKey="continue-access" description="continue-description" submit="TRUE">
+				<navigation title="delete-title" style="BUTTON" accessKey="delete-access" description="delete-description" submit="TRUE">
+					<icon icon="/icons/delete.png" style="LEFT" />
 					<destination template="/assessment_edit/{0}/{1}">
 						<model ref="testsortcode" />
 						<model ref="assessment.id" />
