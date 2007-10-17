@@ -43,6 +43,7 @@ import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.PropertyReference;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
+import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificQuestion;
@@ -331,10 +332,12 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		entityList.setStyle(EntityList.Style.form);
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesAsAuthored"), "choice");
 
-		OrderColumn orderCol = this.uiService.newOrderColumn();
-		orderCol.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
-		orderCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choiceOrder"));
-		entityList.addColumn(orderCol);
+		/*
+		 * OrderColumn orderCol = this.uiService.newOrderColumn();
+		 * orderCol.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
+		 * orderCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choiceOrder"));
+		 * entityList.addColumn(orderCol);
+		 */
 
 		SelectionColumn selCol = this.uiService.newSelectionColumn();
 		if (this.singleCorrect)
@@ -345,9 +348,10 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		{
 			selCol.setMultiple();
 		}
+		selCol.setLabel("correct");
 		selCol.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
-		selCol.setTitle("correct");
+		// selCol.setTitle("correct");
 		entityList.addColumn(selCol);
 
 		AutoColumn autoCol = this.uiService.newAutoColumn();
@@ -357,15 +361,15 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		HtmlEdit edit = this.uiService.newHtmlEdit();
 		edit.setSize(5, 50);
 		edit.setProperty(this.uiService.newPropertyReference().setReference("choice.text"));
-		col.setTitle("choice");
+		// col.setTitle("choice");
 		col.add(edit);
 		entityList.addColumn(col);
 
 		col = this.uiService.newEntityListColumn();
-		selection = this.uiService.newSelection();
-		selection.setTitle("delete");
-		selection.setProperty(this.uiService.newPropertyReference().setReference("choice.deleted"));
-		col.add(selection);
+		Navigation nav = this.uiService.newNavigation();
+		nav.setTitle("delete").setIcon("/icons/delete.png", Navigation.IconStyle.left).setStyle(Navigation.Style.link).setSubmit().setDestination(
+				null);
+		col.add(nav);
 		entityList.addColumn(col);
 
 		row = this.uiService.newEntityDisplayRow();
