@@ -77,7 +77,7 @@
 				</entityDisplay>
 			</container>
 		</section>
-		<section>
+		<section title="part-pools-msg">
 			<container>
 				<!--  warn if live -->
 				<alert>

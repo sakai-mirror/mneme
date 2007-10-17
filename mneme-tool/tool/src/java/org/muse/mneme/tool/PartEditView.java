@@ -47,6 +47,8 @@ import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 import org.springframework.core.io.ClassPathResource;
@@ -351,23 +353,24 @@ public class PartEditView extends ControllerImpl
 		// process the ids into the destination for a redirect to the remove confirm view...
 		else
 		{
-			if (destination.equals("/part_question_delete"))
+			if (destination.equals("DELETEQ"))
 			{
-				StringBuffer path = new StringBuffer("/part_question_delete/" + params[2] + "/" + assessment.getId() + "/" + part.getId() + "/");
 				// get the ids
 				String[] removeQuesIds = values.getValues();
 				if (removeQuesIds != null && removeQuesIds.length != 0)
 				{
 					// remove questions from part
-					String separator = "+";
-					path.append(removeQuesIds[0]);
-					for (int i = 1; i < removeQuesIds.length; i++)
+					for (String removeQuesId : removeQuesIds)
 					{
-						path.append(separator);
-						path.append(removeQuesIds[i]);
+						if (removeQuesId != null)
+						{
+							// remove question from part
+							Question question = part.getQuestion(removeQuesId);
+							((ManualPart)part).removeQuestion(question);	
+						}
 					}
 				}
-				destination = path.toString();
+				destination = new StringBuffer("/part_edit/" + params[2] + "/" + assessment.getId() + "/" + part.getId()).toString();
 			}
 			else if (destination.equals("/select_add_mpart_question"))
 			{
@@ -428,7 +431,7 @@ public class PartEditView extends ControllerImpl
 	{
 		this.poolService = service;
 	}
-
+	
 	/**
 	 * @param toolManager
 	 *        the toolManager to set
