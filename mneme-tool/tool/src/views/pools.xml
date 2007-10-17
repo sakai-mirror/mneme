@@ -149,7 +149,7 @@
 						<message selector="pool-edit" />
 					</title>
 					<navigations>
-						<navigation style="LINK">
+						<navigation style="LINK" description="pool-edit-description">
 							<icon icon="/icons/edit.png" style="LEFT" />
 							<destination template="/pool_properties/{0}{1}/{2}/{3}">
 								<model ref="sort_column" />
@@ -165,7 +165,7 @@
 						<message selector="pool-duplicate" />
 					</title>
 					<navigations>
-						<navigation style="LINK" submit="TRUE">
+						<navigation style="LINK" submit="TRUE" description="pool-duplicate-description">
 							<icon icon="/icons/copy.png" style="RIGHT" />
 							<destination template="/pool_duplicate/{0}">
 								<model ref="pool.id" />
