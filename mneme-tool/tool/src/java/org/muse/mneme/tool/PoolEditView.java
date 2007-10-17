@@ -130,11 +130,16 @@ public class PoolEditView extends ControllerImpl
 			{
 				context.put("sort_column", sortCode.charAt(0));
 				context.put("sort_direction", sortCode.charAt(1));
-
-				// 0 is title
+				
+				//1 is description
 				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
-					sort = QuestionService.FindQuestionsSort.type_a;
+					sort = QuestionService.FindQuestionsSort.description_a;
 				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+					sort = QuestionService.FindQuestionsSort.description_d;
+				// 1 is type
+				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+					sort = QuestionService.FindQuestionsSort.type_a;
+				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
 					sort = QuestionService.FindQuestionsSort.type_d;
 				else
 				{

@@ -133,10 +133,9 @@
 				</selectionColumn>
 				<modelColumn>
 					<title>
-						<!--This should be limited to ??? characters with ... at the end -->
 						<message selector="question-description" />
 					</title>
-					<model ref="question.description" missing="no-title" />
+					<model ref="question.description" missing="no-title" max="80"/>
 					<entityNavigations>
 						<navigation>
 							<destination template="/question_edit/{0}/{1}/{2}/{3}{4}/{5}/{6}">
@@ -150,12 +149,6 @@
 							</destination>
 						</navigation>
 					</entityNavigations>
-				</modelColumn>
-				<modelColumn>
-					<title>
-						<message selector="question-type" />
-					</title>
-					<model ref="question.typeName" />
 					<sort>
 						<active>
 							<compareDecision model="sort_column" constant="0" />
@@ -174,6 +167,36 @@
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
 							<destination template="/pool_edit/{0}/{1}/{2}/0D">
+								<model ref="poolsSortCode" />
+								<model ref="poolsPagingParameter" />
+								<model ref="pool.id" />
+							</destination>
+						</desc>
+					</sort>
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="question-type" />
+					</title>
+					<model ref="question.typeName" />
+					<sort>
+						<active>
+							<compareDecision model="sort_column" constant="1" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/pool_edit/{0}/{1}/{2}/1A">
+								<model ref="poolsSortCode" />
+								<model ref="poolsPagingParameter" />
+								<model ref="pool.id" />
+							</destination>
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/pool_edit/{0}/{1}/{2}/1D">
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
 								<model ref="pool.id" />
