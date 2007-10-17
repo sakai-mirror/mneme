@@ -71,14 +71,6 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public void autoScore()
-	{
-		// thre is no auto scoring for essays
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void clearIsChanged()
 	{
 		this.changed = false;

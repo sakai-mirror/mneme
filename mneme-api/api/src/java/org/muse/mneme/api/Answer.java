@@ -29,11 +29,6 @@ import java.util.Date;
 public interface Answer
 {
 	/**
-	 * Perform auto-scoring now.
-	 */
-	void autoScore();
-
-	/**
 	 * Access the answer's automatic scoring value - the sum of the auto scores of the entries.
 	 * 
 	 * @return The answer's auto-score, or null if the answer's question type does not auto-score.

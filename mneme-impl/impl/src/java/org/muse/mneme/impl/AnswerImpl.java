@@ -90,17 +90,6 @@ public class AnswerImpl implements Answer
 	/**
 	 * {@inheritDoc}
 	 */
-	public void autoScore()
-	{
-		if (this.answerHandler != null)
-		{
-			this.answerHandler.autoScore();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public boolean equals(Object obj)
 	{
 		// two AnswerImpls are equals if they have the same id
@@ -213,9 +202,6 @@ public class AnswerImpl implements Answer
 	{
 		// if no auto nor evaluation, we have no score
 		if ((getAutoScore() == null) && (this.evaluation.getScore() == null)) return null;
-		
-		// if not answered, we have no score
-		if (!getIsAnswered()) return null;
 
 		float rv = 0f;
 		if (getAutoScore() != null)

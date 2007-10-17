@@ -35,9 +35,6 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 	/** The answer is the selected option value stored as an Integer. */
 	protected Integer answerData = null;
 
-	/** The auto score. */
-	protected Float autoScore = null;
-
 	/** Set when the answer has been changed. */
 	protected boolean changed = false;
 
@@ -64,17 +61,7 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 	{
 		this.answer = answer;
 		this.answerData = other.answerData;
-		this.autoScore = other.autoScore;
 		this.changed = other.changed;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void autoScore()
-	{
-		// full credit!
-		this.autoScore = answer.getQuestion().getPool().getPoints();
 	}
 
 	/**
@@ -124,7 +111,7 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Float getAutoScore()
 	{
-		return this.autoScore;
+		return this.answer.getQuestion().getPool().getPoints();
 	}
 
 	/**

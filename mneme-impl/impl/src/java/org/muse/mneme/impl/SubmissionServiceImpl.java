@@ -1313,9 +1313,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				}
 			}
 
-			// auto-score
-			answer.autoScore();
-
 			// clear the changed
 			((AnswerImpl) answer).clearIsChanged();
 		}

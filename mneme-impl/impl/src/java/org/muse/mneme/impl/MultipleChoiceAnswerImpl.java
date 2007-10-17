@@ -39,9 +39,6 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	/** The answers, as index references to the question's choices. */
 	protected Set<Integer> answerData = new HashSet<Integer>();
 
-	/** The auto score. */
-	protected Float autoScore = null;
-
 	/** Set when the answer has been changed. */
 	protected boolean changed = false;
 
@@ -68,44 +65,7 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	{
 		this.answer = answer;
 		this.answerData = new HashSet<Integer>(other.answerData);
-		this.autoScore = other.autoScore;
 		this.changed = other.changed;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void autoScore()
-	{
-		// partial credit for each correct answer, partial negative for each incorrect, floor at 0.
-
-		// count the number of correct answers
-		Question question = answer.getQuestion();
-		Set<Integer> correctAnswers = ((MultipleChoiceQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswerSet();
-
-		// each correct / incorrect gets a part of the total points
-		float partial = (correctAnswers.size() > 0) ? question.getPool().getPoints() / correctAnswers.size() : 0f;
-
-		float total = 0f;
-		for (Integer answer : this.answerData)
-		{
-			// if this is one of the correct answers, give credit
-			if (correctAnswers.contains(answer))
-			{
-				total += partial;
-			}
-
-			// otherwise remove credit
-			else
-			{
-				total -= partial;
-			}
-		}
-
-		// floor at 0
-		if (total < 0f) total = 0f;
-
-		this.autoScore = total;
 	}
 
 	/**
@@ -140,6 +100,42 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Float getAutoScore()
+	{
+		// partial credit for each correct answer, partial negative for each incorrect, floor at 0.
+
+		// count the number of correct answers
+		Question question = answer.getQuestion();
+		Set<Integer> correctAnswers = ((MultipleChoiceQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswerSet();
+
+		// each correct / incorrect gets a part of the total points
+		float partial = (correctAnswers.size() > 0) ? question.getPool().getPoints() / correctAnswers.size() : 0f;
+
+		float total = 0f;
+		for (Integer answer : this.answerData)
+		{
+			// if this is one of the correct answers, give credit
+			if (correctAnswers.contains(answer))
+			{
+				total += partial;
+			}
+
+			// otherwise remove credit
+			else
+			{
+				total -= partial;
+			}
+		}
+
+		// floor at 0
+		if (total < 0f) total = 0f;
+
+		return total;
+	}
+
+	/**
 	 * Access the currently selected answer as a string.
 	 * 
 	 * @return The answer.
@@ -154,14 +150,6 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 		}
 
 		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Float getAutoScore()
-	{
-		return this.autoScore;
 	}
 
 	/**

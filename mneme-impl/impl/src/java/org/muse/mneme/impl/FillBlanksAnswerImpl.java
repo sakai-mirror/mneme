@@ -42,14 +42,10 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	/** String array of user answers */
 	protected String[] answers;
 
-	protected List<Boolean> entryCorrects = new ArrayList<Boolean>();
-
-	/** The auto score. */
-	protected Float autoScore = null;
-
 	/** Set when the answer has been changed. */
-	// TODO: need to reset this at some point when stored... -ggolden
 	protected boolean changed = false;
+
+	protected List<Boolean> entryCorrects = new ArrayList<Boolean>();
 
 	protected String reviewText = null;
 
@@ -75,13 +71,42 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	public FillBlanksAnswerImpl(Answer answer, FillBlanksAnswerImpl other)
 	{
 		this.answer = answer;
-		this.autoScore = other.autoScore;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void autoScore()
+	public void clearIsChanged()
+	{
+		this.changed = false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object clone(Answer answer)
+	{
+		try
+		{
+			// get an exact, bit-by-bit copy
+			Object rv = super.clone();
+
+			// nothing to deep copy
+
+			((FillBlanksAnswerImpl) rv).answer = answer;
+
+			return rv;
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getAutoScore()
 	{
 		// partial credit for each correct answer, 0 for each incorrect, floor at 0.
 
@@ -192,29 +217,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		// floor at 0
 		if (total < 0f) total = 0f;
 
-		this.autoScore = total;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Object clone(Answer answer)
-	{
-		try
-		{
-			// get an exact, bit-by-bit copy
-			Object rv = super.clone();
-
-			// nothing to deep copy
-
-			((FillBlanksAnswerImpl) rv).answer = answer;
-
-			return rv;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			return null;
-		}
+		return total;
 	}
 
 	/**
@@ -230,9 +233,9 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Float getAutoScore()
+	public List<Boolean> getEntryCorrects()
 	{
-		return this.autoScore;
+		return this.entryCorrects;
 	}
 
 	/**
@@ -253,11 +256,47 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @return a string containing the user's answers in it, and blank if there was no answer
 	 */
-	public void clearIsChanged()
+	public String getReviewText()
 	{
-		this.changed = false;
+		Question question = answer.getQuestion();
+		String parsedText = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getParsedText();
+		for (int i = 0; i < this.answers.length; i++)
+		{
+			if (this.answers[i] != null)
+			{
+				if (this.answers[i].trim().length() > 0)
+				{
+					parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + this.answers[i] + "</U>");
+				}
+				else
+				{
+					parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + "____" + "</U>");
+				}
+			}
+			else
+			{
+				parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + "____" + "</U>");
+			}
+		}
+		this.reviewText = parsedText;
+		return this.reviewText;
+
+	}
+
+	/**
+	 * Set the answers
+	 * 
+	 * @param answers
+	 *        array of strings
+	 */
+	public void setAnswers(String[] answers)
+	{
+		// TODO: check order of answers. Don't set the changed flag if so.
+		if ((answers == null) || (answers.length == 0)) return;
+		this.answers = answers;
+		this.changed = true;
 	}
 
 	/**
@@ -361,57 +400,5 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		}
 
 		return false;
-	}
-
-	/**
-	 * @return a string containing the user's answers in it, and blank if there was no answer
-	 */
-	public String getReviewText()
-	{
-		Question question = answer.getQuestion();
-		String parsedText = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getParsedText();
-		for (int i = 0; i < this.answers.length; i++)
-		{
-			if (this.answers[i] != null)
-			{
-				if (this.answers[i].trim().length() > 0)
-				{
-					parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + this.answers[i] + "</U>");
-				}
-				else
-				{
-					parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + "____" + "</U>");
-				}
-			}
-			else
-			{
-				parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + "____" + "</U>");
-			}
-		}
-		this.reviewText = parsedText;
-		return this.reviewText;
-
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public List<Boolean> getEntryCorrects()
-	{
-		return this.entryCorrects;
-	}
-
-	/**
-	 * Set the answers
-	 * 
-	 * @param answers
-	 *        array of strings
-	 */
-	public void setAnswers(String[] answers)
-	{
-		// TODO: check order of answers. Don't set the changed flag if so.
-		if ((answers == null) || (answers.length == 0)) return;
-		this.answers = answers;
-		this.changed = true;
 	}
 }

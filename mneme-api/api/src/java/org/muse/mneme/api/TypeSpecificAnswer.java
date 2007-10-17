@@ -27,11 +27,6 @@ package org.muse.mneme.api;
 public interface TypeSpecificAnswer extends Cloneable
 {
 	/**
-	 * Perform auto-scoring now.
-	 */
-	void autoScore();
-
-	/**
 	 * Clear the is changed flag.s
 	 */
 	void clearIsChanged();

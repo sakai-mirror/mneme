@@ -36,9 +36,6 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	/** The answer is stored as a Boolean: TRUE or FALSE; null if not answered. */
 	protected Boolean answerData = null;
 
-	/** The auto score. */
-	protected Float autoScore = null;
-
 	/** Set when the answer has been changed. */
 	protected transient boolean changed = false;
 
@@ -65,33 +62,7 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	{
 		this.answer = answer;
 		this.answerData = other.answerData;
-		this.autoScore = other.autoScore;
 		this.changed = other.changed;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void autoScore()
-	{
-		// correct?
-		boolean correct = false;
-		if (this.answerData != null)
-		{
-			Question question = this.answer.getQuestion();
-			Boolean correctAnswer = Boolean.valueOf(((TrueFalseQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswer());
-			correct = this.answerData.equals(correctAnswer);
-		}
-
-		// full credit for correct answer, 0 for incorrect
-		if (correct)
-		{
-			this.autoScore = answer.getQuestion().getPool().getPoints();
-		}
-		else
-		{
-			this.autoScore = 0f;
-		}
 	}
 
 	/**
@@ -125,6 +96,29 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Float getAutoScore()
+	{
+		// correct?
+		boolean correct = false;
+		if (this.answerData != null)
+		{
+			Question question = this.answer.getQuestion();
+			Boolean correctAnswer = Boolean.valueOf(((TrueFalseQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswer());
+			correct = this.answerData.equals(correctAnswer);
+		}
+
+		// full credit for correct answer, 0 for incorrect
+		if (correct)
+		{
+			return answer.getQuestion().getPool().getPoints();
+		}
+
+		return 0f;
+	}
+
+	/**
 	 * Access the currently selected answer as a string.
 	 * 
 	 * @return The answer.
@@ -134,14 +128,6 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 		if (this.answerData == null) return null;
 
 		return this.answerData.toString();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Float getAutoScore()
-	{
-		return this.autoScore;
 	}
 
 	/**

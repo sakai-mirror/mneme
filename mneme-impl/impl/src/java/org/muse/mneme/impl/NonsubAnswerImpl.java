@@ -67,14 +67,6 @@ public class NonsubAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public void autoScore()
-	{
-		// thre is no auto scoring for Nonsubs
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void clearIsChanged()
 	{
 		this.changed = false;
