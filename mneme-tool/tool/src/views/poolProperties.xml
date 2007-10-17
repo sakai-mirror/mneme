@@ -74,31 +74,6 @@
 						</selection>
 					</container>
 				</row>
-				<row title="history">
-					<container>
-						<text>
-							<message selector="history-createText">
-								<model type="userInfo" selector="DISPLAYNAME" ref="pool.createdBy.userId" />
-								<model type="date" ref="pool.createdBy.date" />
-							</message>
-						</text>
-					</container>
-				</row>
-				<row>
-					<container>
-						<text>
-							<message selector="history-modifyText">
-								<model type="userInfo" selector="DISPLAYNAME" ref="pool.modifiedBy.userId" />
-								<model type="date" ref="pool.modifiedBy.date" />
-							</message>
-						</text>
-					</container>
-				</row>
-				<row title="pool-id">
-					<container>
-						<text model="pool.id" />
-					</container>
-				</row>
 			</rows>
 		</entityDisplay>
 
@@ -107,7 +82,7 @@
 		<navigationBar width="100%">
 			<container>
 				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
-					<icon icon="/icons/save.png" style="LEFT" />
+					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/pool_properties/{0}/{1}">
 						<model ref="poolsSortCode" />
 						<model ref="poolsPagingParameter" />
@@ -121,5 +96,23 @@
 				</navigation>
 			</container>
 		</navigationBar>
+
+		<text>
+			<message selector="id">
+				<model ref="pool.id" />
+			</message>
+		</text>
+		<text>
+			<message selector="history-createText">
+				<model type="userInfo" selector="DISPLAYNAME" ref="pool.createdBy.userId" />
+				<model type="date" ref="pool.createdBy.date" />
+			</message>
+		</text>
+		<text>
+			<message selector="history-modifyText">
+				<model type="userInfo" selector="DISPLAYNAME" ref="pool.modifiedBy.userId" />
+				<model type="date" ref="pool.modifiedBy.date" />
+			</message>
+		</text>
 	</container>
 </interface>
