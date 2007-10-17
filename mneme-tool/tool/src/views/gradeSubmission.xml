@@ -305,18 +305,13 @@
 							</container>
 						</row>
 
-						<!--Mark as evaluated but don't release to student-->
 						<row>
 							<container>
+								<!--Mark as evaluated but don't release to student-->
 								<selection title="mark-evaluated">
 									<model ref="submission.evaluation.evaluated" />
 								</selection>
-							</container>
-						</row>
-
-						<!--Release scores and comments to student-->
-						<row>
-							<container>
+								<!--Release scores and comments to student-->
 								<selection title="release-scores">
 									<model ref="submission.isReleased" />
 								</selection>
