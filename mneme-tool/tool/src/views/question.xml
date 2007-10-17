@@ -273,7 +273,12 @@
 						</modelComponent>
 
 						<!-- reason -->
-						<textEdit title="question-rationale" rows="5" cols="40">
+						<textEdit rows="5" cols="40">
+							<title>
+								<message selector="question-rationale">
+									<model type="icon" icon="/icons/reason.png" />
+								</message>
+							</title>
 							<readOnly>
 								<decision model="review" />
 							</readOnly>
