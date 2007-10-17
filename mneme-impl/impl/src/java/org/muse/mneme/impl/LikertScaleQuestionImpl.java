@@ -269,16 +269,17 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		optionText.setLength(0);
 
 		optionText.append(this.messages.getString("five"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("four"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("three"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("two"));
-		optionText.append(" / ");
+		optionText.append("-->");
 		optionText.append(this.messages.getString("one"));
 
 		rv.add(new LikertScaleQuestionChoice("4", optionText.toString()));
+		optionText.setLength(0);
+
+		optionText.append(this.messages.getString("it-rocks"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("it-sucks"));
+
+		rv.add(new LikertScaleQuestionChoice("5", optionText.toString()));
 
 		return rv;
 	}
@@ -388,7 +389,7 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Boolean getUseHints()
 	{
-		return Boolean.TRUE;
+		return Boolean.FALSE;
 	}
 
 	/**
