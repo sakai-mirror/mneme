@@ -52,26 +52,41 @@
 			<columns>
 				<column>
 					<title>
-						<message selector="assessment-type" />
+						<message selector="assessment-view" />
 					</title>
 					<navigations>
-						<navigation description="assessment-type-test">
+						<navigation description="assessment-type-test" style="LINK" submit="TRUE">
 							<icon icon="/icons/test_type.png" style="LEFT" />
 							<included>
 								<compareDecision model="assessment.type" constant="test" />
 							</included>
+							<destination template="/assessment_preview/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
 						</navigation>
-						<navigation description="assessment-type-survey">
+						<navigation description="assessment-type-survey" style="LINK" submit="TRUE">
 							<icon icon="/icons/survey_type.png" style="LEFT" />
 							<included>
 								<compareDecision model="assessment.type" constant="survey" />
 							</included>
+							<destination template="/assessment_preview/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
 						</navigation>
-						<navigation description="assessment-type-assignment">
+						<navigation description="assessment-type-assignment" style="LINK" submit="TRUE">
 							<icon icon="/icons/assignment_type.png" style="LEFT" />
 							<included>
 								<compareDecision model="assessment.type" constant="assignment" />
 							</included>
+							<destination template="/assessment_preview/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
 						</navigation>
 					</navigations>
 					<sort submit="TRUE">
@@ -90,22 +105,7 @@
 							<destination template="/grades/0D" />
 						</desc>
 					</sort>
-				</column>
-				<modelColumn>
-					<title>
-						<message selector="assessment-view" />
-					</title>
-					<navigations>
-						<navigation style="LINK" submit="TRUE">
-							<icon icon="/icons/preview.png" style="LEFT" />
-							<destination template="/assessment_preview/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="assessment.id" />
-							</destination>
-						</navigation>
-					</navigations>
-				</modelColumn>
+				</column>			
 				<column>
 					<title>
 						<message selector="assessment-title" />
