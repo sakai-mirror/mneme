@@ -156,7 +156,7 @@
 							<title>
 								<message selector="question-description" />
 							</title>
-							<model ref="question.description" max="30"/>
+							<model type="text" ref="question.description" max="60"/>
 						</modelColumn>
 						<modelColumn>
 							<title>
