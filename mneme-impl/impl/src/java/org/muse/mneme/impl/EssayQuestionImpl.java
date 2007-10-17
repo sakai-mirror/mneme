@@ -38,6 +38,7 @@ import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.EntityListColumn;
 import org.muse.ambrosia.api.HtmlEdit;
+import org.muse.ambrosia.api.AttachmentsEdit;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
@@ -176,13 +177,26 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	public Component getDeliveryUi()
 	{
 		EntityDisplay display = this.uiService.newEntityDisplay();
-		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
-		row.setTitle("answer");
-		HtmlEdit edit = this.uiService.newHtmlEdit();
-		edit.setSize(5, 50);
-		edit.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
-		row.add(edit);
-		display.addRow(row);
+		EntityDisplayRow row = null;
+
+		if ((this.submissionType == SubmissionType.inline) || (this.submissionType == SubmissionType.both))
+		{
+			row = this.uiService.newEntityDisplayRow();
+			row.setTitle("answer");
+			HtmlEdit edit = this.uiService.newHtmlEdit();
+			edit.setSize(5, 50);
+			edit.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
+			row.add(edit);
+			display.addRow(row);
+		}
+		if ((this.submissionType == SubmissionType.attachments) || (this.submissionType == SubmissionType.both))
+		{
+			row = this.uiService.newEntityDisplayRow();
+			row.setTitle("attachments-title");
+			AttachmentsEdit edit = this.uiService.newAttachmentsEdit();
+			row.add(edit);
+			display.addRow(row);
+		}
 
 		return this.uiService.newFragment().setMessages(this.messages).add(display);
 	}
