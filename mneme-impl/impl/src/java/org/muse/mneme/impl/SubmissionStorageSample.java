@@ -36,6 +36,7 @@ import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
@@ -82,6 +83,45 @@ public class SubmissionStorageSample implements SubmissionStorage
 	public void destroy()
 	{
 		M_log.info("destroy()");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Question> findPartQuestions(Part part)
+	{
+		List<Question> rv = new ArrayList<Question>();
+
+		// check the submissions to this assessment
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			// TODO: only for complete? && submission.getIsComplete()
+			if (submission.getAssessment().equals(part.getAssessment()))
+			{
+				for (Answer answer : submission.getAnswers())
+				{
+					if (answer.getQuestion().getPart().equals(part))
+					{
+						if (!rv.contains((QuestionImpl) answer.getQuestion()))
+						{
+							rv.add(new QuestionImpl((QuestionImpl) answer.getQuestion()));
+						}
+					}
+				}
+			}
+		}
+
+		// sort by question text
+		Collections.sort(rv, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				int rv = ((QuestionImpl) arg0).getDescription().compareToIgnoreCase(((QuestionImpl) arg1).getDescription());
+				return rv;
+			}
+		});
+
+		return rv;
 	}
 
 	/**
@@ -490,6 +530,10 @@ public class SubmissionStorageSample implements SubmissionStorage
 			SubmissionImpl s = newSubmission();
 			s.initUserId(userId);
 			s.initAssessmentIds(assessment.getId(), assessment.getId());
+
+			// set the id so we know it is a phantom
+			s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
+
 			rv.add(s);
 		}
 
@@ -533,6 +577,10 @@ public class SubmissionStorageSample implements SubmissionStorage
 				SubmissionImpl s = newSubmission();
 				s.initUserId(userId);
 				s.initAssessmentIds(a.getId(), a.getId());
+
+				// set the id so we know it is a phantom
+				s.initId(SubmissionService.PHANTOM_PREFIX + a.getId() + "/" + userId);
+
 				rv.add(s);
 			}
 		}

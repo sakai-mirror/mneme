@@ -105,7 +105,7 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object clone()
+	public Object clone(Answer answer)
 	{
 		try
 		{
@@ -113,6 +113,8 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 			Object rv = super.clone();
 
 			// nothing to deep copy
+
+			((TrueFalseAnswerImpl) rv).answer = answer;
 
 			return rv;
 		}

@@ -119,7 +119,7 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object clone()
+	public Object clone(Answer answer)
 	{
 		try
 		{
@@ -128,6 +128,8 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 
 			// deep copy
 			((MultipleChoiceAnswerImpl) rv).answerData = new HashSet<Integer>(this.answerData);
+
+			((MultipleChoiceAnswerImpl) rv).answer = answer;
 
 			return rv;
 		}

@@ -34,6 +34,7 @@ import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.SubmissionService;
 
 /**
  * PartImpl implements Part
@@ -139,6 +140,8 @@ public abstract class PartImpl implements Part
 
 	protected QuestionService questionService = null;
 
+	protected SubmissionService submissionService = null;
+
 	protected String title = null;
 
 	/**
@@ -149,11 +152,12 @@ public abstract class PartImpl implements Part
 	 * @param questionService
 	 *        The QuestionService.
 	 */
-	public PartImpl(AssessmentImpl assessment, QuestionService questionService, Changeable owner)
+	public PartImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, Changeable owner)
 	{
 		this.owner = owner;
 		this.assessment = assessment;
 		this.questionService = questionService;
+		this.submissionService = submissionService;
 		this.presentation = new PresentationImpl(this.owner);
 	}
 
@@ -271,6 +275,14 @@ public abstract class PartImpl implements Part
 		}
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Question> getQuestionsUsed()
+	{
+		return this.submissionService.findPartQuestions(this);
 	}
 
 	/**
@@ -397,6 +409,7 @@ public abstract class PartImpl implements Part
 		this.id = other.id;
 		this.presentation = new PresentationImpl(other.presentation, this.owner);
 		this.questionService = other.questionService;
+		this.submissionService = other.submissionService;
 		this.title = other.title;
 	}
 

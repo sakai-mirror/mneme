@@ -87,7 +87,7 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object clone()
+	public Object clone(Answer answer)
 	{
 		try
 		{
@@ -96,6 +96,8 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 
 			// deep copy
 			((EssayAnswerImpl) rv).answerData = this.answerData;
+
+			((EssayAnswerImpl) rv).answer = answer;
 
 			return rv;
 		}

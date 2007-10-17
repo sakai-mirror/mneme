@@ -31,6 +31,7 @@ import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.SubmissionService;
 
 /**
  * ManualPartImpl implements ManualPart
@@ -49,9 +50,9 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	 * @param questionService
 	 *        The QuestionService.
 	 */
-	public ManualPartImpl(AssessmentImpl assessment, QuestionService questionService, Changeable owner)
+	public ManualPartImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, Changeable owner)
 	{
-		super(assessment, questionService, owner);
+		super(assessment, questionService, submissionService, owner);
 	}
 
 	/**

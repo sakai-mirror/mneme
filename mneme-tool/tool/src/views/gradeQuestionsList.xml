@@ -82,7 +82,7 @@
 					</title>
 					<container>
 						<entityList>
-							<iterator name="question" model="part.questionsAsAuthored"></iterator>
+							<iterator name="question" model="part.questionsUsed"></iterator>
 							<columns>
 								<column>
 									<navigations>

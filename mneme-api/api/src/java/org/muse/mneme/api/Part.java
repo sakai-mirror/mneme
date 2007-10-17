@@ -49,6 +49,7 @@ public interface Part
 	 */
 	String getId();
 
+
 	/**
 	 * Check if the part is valid.
 	 * 
@@ -101,11 +102,12 @@ public interface Part
 	List<Question> getQuestions();
 
 	/**
-	 * Access the questions in authored order.
+	 * Access the questions that have been used for this part in any submissions. <br />
+	 * Order by question description.
 	 * 
-	 * @return The questions in authored order.
+	 * @return The questions that have been used for this part in any submissions
 	 */
-	List<Question> getQuestionsAsAuthored();
+	List<Question> getQuestionsUsed();
 
 	/**
 	 * Access the title.

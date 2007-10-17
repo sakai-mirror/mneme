@@ -39,9 +39,11 @@ public interface TypeSpecificAnswer extends Cloneable
 	/**
 	 * Clone a copy
 	 * 
+	 * @param the
+	 *        answer that the copy is for.
 	 * @return A copy.
 	 */
-	Object clone();
+	Object clone(Answer answer);
 
 	/**
 	 * Access the answer's automatic score.

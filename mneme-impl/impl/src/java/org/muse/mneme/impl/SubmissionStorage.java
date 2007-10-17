@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
@@ -35,6 +36,16 @@ import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
  */
 public interface SubmissionStorage
 {
+	/**
+	 * Find the questions that have been used in submissions in this assessment part.<br />
+	 * Order by question description.
+	 * 
+	 * @param part
+	 *        The assessment part.
+	 * @return A List of Questions found used by submissions to this assessment part.
+	 */
+	List<Question> findPartQuestions(Part part);
+
 	/**
 	 * Get this answer.
 	 * 

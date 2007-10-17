@@ -369,7 +369,7 @@ public class AnswerImpl implements Answer
 	 */
 	protected void set(AnswerImpl other, Submission owner)
 	{
-		if (other.answerHandler != null) this.answerHandler = (TypeSpecificAnswer) (other.answerHandler.clone());
+		if (other.answerHandler != null) this.answerHandler = (TypeSpecificAnswer) (other.answerHandler.clone(this));
 		this.evaluation = new AnswerEvaluationImpl(other.evaluation);
 		this.id = other.id;
 		this.markedForReview = other.markedForReview;

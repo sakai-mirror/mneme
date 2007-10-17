@@ -214,6 +214,16 @@ public interface SubmissionService
 			Integer pageSize);
 
 	/**
+	 * Find the questions that have been used in submissions in this assessment part.<br />
+	 * Order by question description.
+	 * 
+	 * @param part
+	 *        The assessment part.
+	 * @return A List of Questions found used by submissions to this assessment part.
+	 */
+	List<Question> findPartQuestions(Part part);
+
+	/**
 	 * Find the submission answers to the assignment and question made by all users.<br />
 	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one.
 	 * 

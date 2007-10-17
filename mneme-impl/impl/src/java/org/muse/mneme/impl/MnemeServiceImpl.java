@@ -40,6 +40,7 @@ import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
@@ -329,6 +330,14 @@ public class MnemeServiceImpl implements MnemeService
 			Integer pageSize)
 	{
 		return this.submissionService.findAssessmentSubmissions(assessment, sort, official, pageNum, pageSize);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Question> findPartQuestions(Part part)
+	{
+		return submissionService.findPartQuestions(part);
 	}
 
 	/**

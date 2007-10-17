@@ -198,7 +198,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object clone()
+	public Object clone(Answer answer)
 	{
 		try
 		{
@@ -206,6 +206,8 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 			Object rv = super.clone();
 
 			// nothing to deep copy
+
+			((FillBlanksAnswerImpl) rv).answer = answer;
 
 			return rv;
 		}

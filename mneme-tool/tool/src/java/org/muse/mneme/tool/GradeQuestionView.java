@@ -22,6 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -80,7 +81,7 @@ public class GradeQuestionView extends ControllerImpl
 		context.put("assessment", assessment);
 
 		// get Questions
-		List questions = assessment.getParts().getQuestionsAsAuthored();
+		List questions = new ArrayList();	//assessment.getParts().getQuestionsAsAuthored();
 		context.put("questions", questions);
 
 		Question question = null;

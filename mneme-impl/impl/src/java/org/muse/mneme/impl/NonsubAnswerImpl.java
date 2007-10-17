@@ -83,12 +83,14 @@ public class NonsubAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object clone()
+	public Object clone(Answer answer)
 	{
 		try
 		{
 			// get an exact, bit-by-bit copy
 			Object rv = super.clone();
+
+			((NonsubAnswerImpl) rv).answer = answer;
 
 			return rv;
 		}
@@ -98,7 +100,6 @@ public class NonsubAnswerImpl implements TypeSpecificAnswer
 		}
 	}
 
-	
 	/**
 	 * {@inheritDoc}
 	 */

@@ -119,7 +119,7 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object clone()
+	public Object clone(Answer answer)
 	{
 		try
 		{
@@ -128,6 +128,8 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 
 			// deep copy
 			((MatchAnswerImpl) rv).answerData = new HashSet<Integer>(this.answerData);
+
+			((MatchAnswerImpl) rv).answer = answer;
 
 			return rv;
 		}

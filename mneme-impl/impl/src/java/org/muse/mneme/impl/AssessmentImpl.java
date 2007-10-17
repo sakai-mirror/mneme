@@ -136,7 +136,7 @@ public class AssessmentImpl implements Assessment
 		this.dates = new AssessmentDatesImpl(this, this.changed);
 		this.grading = new AssessmentGradingImpl(this.changed);
 		this.modifiedBy = new AttributionImpl(this.changed);
-		this.parts = new AssessmentPartsImpl(this, questionService, poolService, this.historyChanged);
+		this.parts = new AssessmentPartsImpl(this, questionService, submissionService, poolService, this.historyChanged);
 		this.password = new AssessmentPasswordImpl(this.changed);
 		this.presentation = new PresentationImpl(this.historyChanged);
 		this.review = new AssessmentReviewImpl(this, this.changed);

@@ -34,6 +34,7 @@ import org.muse.mneme.api.Part;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.SubmissionService;
 
 /**
  * AssessmentPartsImpl implements AssessmentParts
@@ -51,6 +52,8 @@ public class AssessmentPartsImpl implements AssessmentParts
 	protected PoolService poolService = null;
 
 	protected QuestionService questionService = null;
+
+	protected SubmissionService submissionService = null;
 
 	protected Boolean showPresentation = Boolean.TRUE;
 
@@ -78,11 +81,12 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 * @param poolService
 	 *        The PoolService.
 	 */
-	public AssessmentPartsImpl(AssessmentImpl assessment, QuestionService questionService, PoolService poolService, Changeable owner)
+	public AssessmentPartsImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, PoolService poolService, Changeable owner)
 	{
 		this.owner = owner;
 		this.assessment = assessment;
 		this.questionService = questionService;
+		this.submissionService = submissionService;
 		this.poolService = poolService;
 	}
 
@@ -92,7 +96,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	public DrawPart addDrawPart()
 	{
 		// create the new part
-		DrawPart rv = new DrawPartImpl(this.assessment, this.questionService, this.poolService, this.owner);
+		DrawPart rv = new DrawPartImpl(this.assessment, this.questionService, this.submissionService, this.poolService, this.owner);
 
 		// add it to the list
 		this.parts.add(rv);
@@ -112,7 +116,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	public ManualPart addManualPart()
 	{
 		// create the new part
-		ManualPart rv = new ManualPartImpl(this.assessment, this.questionService, this.owner);
+		ManualPart rv = new ManualPartImpl(this.assessment, this.questionService, this.submissionService, this.owner);
 
 		// add it to the list
 		this.parts.add(rv);
@@ -219,20 +223,6 @@ public class AssessmentPartsImpl implements AssessmentParts
 		for (Part part : this.parts)
 		{
 			rv.addAll(part.getQuestions());
-		}
-
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public List<Question> getQuestionsAsAuthored()
-	{
-		List<Question> rv = new ArrayList<Question>();
-		for (Part part : this.parts)
-		{
-			rv.addAll(part.getQuestionsAsAuthored());
 		}
 
 		return rv;
@@ -379,6 +369,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		this.parts = new ArrayList<Part>(other.parts.size());
 		this.showPresentation = other.showPresentation;
 		this.questionService = other.questionService;
+		this.submissionService = other.submissionService;
 		this.poolService = other.poolService;
 
 		for (Part part : other.parts)

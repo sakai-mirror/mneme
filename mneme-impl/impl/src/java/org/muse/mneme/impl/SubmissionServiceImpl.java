@@ -38,6 +38,7 @@ import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
@@ -731,6 +732,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<Question> findPartQuestions(Part part)
+	{
+		return this.storage.findPartQuestions(part);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Boolean official,
 			Integer pageNum, Integer pageSize)
 	{
@@ -790,7 +799,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		List<Answer> answers = new ArrayList<Answer>();
 		for (Submission s : rv)
 		{
-			answers.add(s.getAnswer(question));
+			Answer a = s.getAnswer(question);
+			if (a != null)
+			{
+				answers.add(a);
+			}
 		}
 
 		return answers;
@@ -1477,6 +1490,26 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
+	 * Check if the candidate has a better score than the best so far.
+	 * 
+	 * @param bestSubmission
+	 *        The best so far.
+	 * @param candidateSub
+	 *        The candidate.
+	 * @return true if the candidate is better, false if not.
+	 */
+	protected boolean candidateBetter(SubmissionImpl bestSubmission, SubmissionImpl candidateSub)
+	{
+		Float best = bestSubmission.getTotalScore();
+		Float candidate = candidateSub.getTotalScore();
+		if ((best == null) && (candidate == null)) return false;
+		if (candidate == null) return false;
+		if (best == null) return true;
+		if (best.floatValue() < candidate.floatValue()) return true;
+		return false;
+	}
+
+	/**
 	 * Check a list of submissions to see if they need to be auto-completed.
 	 * 
 	 * @param submissions
@@ -1686,13 +1719,15 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 						}
 
 						// take the new one if it exceeds the best so far
-						else if (bestSubmission.getTotalScore().floatValue() < candidateSub.getTotalScore().floatValue())
+						else if (candidateBetter(bestSubmission, candidateSub))
+						// else if (bestSubmission.getTotalScore().floatValue() < candidateSub.getTotalScore().floatValue())
 						{
 							bestSubmission = candidateSub;
 						}
 
 						// if we match the best, pick the latest submit date
-						else if (bestSubmission.getTotalScore().floatValue() == candidateSub.getTotalScore().floatValue())
+						else if (sameScores(bestSubmission, candidateSub))
+						// else if (bestSubmission.getTotalScore().floatValue() == candidateSub.getTotalScore().floatValue())
 						{
 							if ((bestSubmission.getSubmittedDate() != null) && (candidateSub.getSubmittedDate() != null)
 									&& (bestSubmission.getSubmittedDate().before(candidateSub.getSubmittedDate())))
@@ -1804,13 +1839,15 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 						}
 
 						// take the new one if it exceeds the best so far
-						else if (bestSubmission.getTotalScore().floatValue() < candidateSub.getTotalScore().floatValue())
+						else if (candidateBetter(bestSubmission, candidateSub))
+//						else if (bestSubmission.getTotalScore().floatValue() < candidateSub.getTotalScore().floatValue())
 						{
 							bestSubmission = candidateSub;
 						}
 
 						// if we match the best, pick the latest submit date
-						else if (bestSubmission.getTotalScore().floatValue() == candidateSub.getTotalScore().floatValue())
+						else if (sameScores(bestSubmission, candidateSub))
+//						else if (bestSubmission.getTotalScore().floatValue() == candidateSub.getTotalScore().floatValue())
 						{
 							if ((bestSubmission.getSubmittedDate() != null) && (candidateSub.getSubmittedDate() != null)
 									&& (bestSubmission.getSubmittedDate().before(candidateSub.getSubmittedDate())))
@@ -1863,6 +1900,25 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		{
 
 		}
+	}
+
+	/**
+	 * Check if the candidate has a better score than the best so far.
+	 * 
+	 * @param bestSubmission
+	 *        The best so far.
+	 * @param candidateSub
+	 *        The candidate.
+	 * @return true if the candidate is better, false if not.
+	 */
+	protected boolean sameScores(SubmissionImpl bestSubmission, SubmissionImpl candidateSub)
+	{
+		Float best = bestSubmission.getTotalScore();
+		Float candidate = candidateSub.getTotalScore();
+		if ((best == null) && (candidate == null)) return true;
+		if ((candidate == null) || (best == null)) return false;
+		if (best.floatValue() == candidate.floatValue()) return true;
+		return false;
 	}
 
 	/**

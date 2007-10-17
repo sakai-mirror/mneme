@@ -33,6 +33,7 @@ import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.SubmissionService;
 
 /**
  * DrawPartImpl implements DrawPart
@@ -53,9 +54,9 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 * @param poolService
 	 *        The PoolService.
 	 */
-	public DrawPartImpl(AssessmentImpl assessment, QuestionService questionService, PoolService poolService, Changeable owner)
+	public DrawPartImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, PoolService poolService, Changeable owner)
 	{
-		super(assessment, questionService, owner);
+		super(assessment, questionService, submissionService, owner);
 		this.poolService = poolService;
 	}
 
@@ -223,35 +224,6 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		}
 
 		return count;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public List<Question> getQuestionsAsAuthored()
-	{
-		List<Question> rv = new ArrayList<Question>();
-
-		for (PoolDraw draw : this.pools)
-		{
-			List<String> ids = draw.getAllQuestionIds();
-
-			for (String id : ids)
-			{
-				QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(id);
-				if (question != null)
-				{
-					// set the assessment, part and submission context
-					question.initSubmissionContext(this.assessment.getSubmissionContext());
-					question.initPartContext(this);
-					question.initPoolContext(draw.getPoolId());
-
-					rv.add(question);
-				}
-			}
-		}
-
-		return rv;
 	}
 
 	/**
