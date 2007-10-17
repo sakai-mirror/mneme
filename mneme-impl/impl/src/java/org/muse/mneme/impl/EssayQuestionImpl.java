@@ -71,7 +71,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	protected transient Question question = null;
 
 	/** Variable that holds the type of submission */
-	protected SubmissionType submissionType = SubmissionType.both;
+	protected SubmissionType submissionType = SubmissionType.inline;
 
 	/** Dependency: The UI service (Ambrosia). */
 	protected transient UiService uiService = null;
