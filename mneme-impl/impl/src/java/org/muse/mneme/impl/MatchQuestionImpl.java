@@ -40,6 +40,7 @@ import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
+import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.OrderColumn;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
@@ -235,11 +236,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		entityList.setStyle(EntityList.Style.form);
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice");
 
-		OrderColumn orderCol = this.uiService.newOrderColumn();
-		orderCol.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
-		orderCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choiceOrder"));
-		entityList.addColumn(orderCol);
-
 		AutoColumn autoCol = this.uiService.newAutoColumn();
 		entityList.addColumn(autoCol);
 
@@ -255,15 +251,15 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		edit = this.uiService.newHtmlEdit();
 		edit.setSize(5, 25);
 		edit.setProperty(this.uiService.newPropertyReference().setReference("choice.answer"));
-		col.setTitle("answer");
+		col.setTitle("match");
 		col.add(edit);
 		entityList.addColumn(col);
 
 		col = this.uiService.newEntityListColumn();
-		Selection selection = this.uiService.newSelection();
-		selection.setTitle("delete");
-		selection.setProperty(this.uiService.newPropertyReference().setReference("choice.deleted"));
-		col.add(selection);
+		Navigation nav = this.uiService.newNavigation();
+		nav.setTitle("delete").setIcon("/icons/delete.png", Navigation.IconStyle.left).setStyle(Navigation.Style.link).setSubmit().setDestination(
+				null);
+		col.add(nav);
 		entityList.addColumn(col);
 
 		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
@@ -273,7 +269,16 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		display.addRow(row);
 
 		row = this.uiService.newEntityDisplayRow();
-		selection = uiService.newSelection();
+		row.setTitle("distractor");
+		edit = this.uiService.newHtmlEdit();
+		edit.setTitle("distractor-description");
+		edit.setSize(5, 50);
+		edit.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.distractor"));
+		row.add(edit);
+		display.addRow(row);
+
+		row = this.uiService.newEntityDisplayRow();
+		Selection selection = uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.moreChoices"));
 		selection.addSelection("none", "0");
 		selection.addSelection("one", "1");
@@ -284,15 +289,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		selection.setOrientation(Selection.Orientation.dropdown);
 		row.add(selection);
 		row.setTitle("more-choices");
-		display.addRow(row);
-
-		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("distractor");
-		edit = this.uiService.newHtmlEdit();
-		edit.setTitle("distractor-description");
-		edit.setSize(5, 50);
-		edit.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.distractor"));
-		row.add(edit);
 		display.addRow(row);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(display);
@@ -464,7 +460,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Boolean getUseReason()
 	{
-		return Boolean.TRUE;
+		return Boolean.FALSE;
 	}
 
 	/**
