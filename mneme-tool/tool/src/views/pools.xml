@@ -146,7 +146,7 @@
 				</modelColumn>
 				<modelColumn>
 					<title>
-						<message selector="pool-action" />
+						<message selector="pool-edit" />
 					</title>
 					<navigations>
 						<navigation style="LINK">
@@ -158,6 +158,13 @@
 								<model ref="pool.id" />
 							</destination>
 						</navigation>
+					</navigations>
+				</modelColumn>
+				<modelColumn>
+					<title>
+						<message selector="pool-duplicate" />
+					</title>
+					<navigations>
 						<navigation style="LINK" submit="TRUE">
 							<icon icon="/icons/copy.png" style="RIGHT" />
 							<destination template="/pool_duplicate/{0}">
