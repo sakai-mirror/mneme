@@ -183,7 +183,6 @@ public class NonsubQuestionImpl implements TypeSpecificQuestion
 		return null;
 	}
 
-	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -197,7 +196,7 @@ public class NonsubQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Boolean getUseFeedback()
 	{
-		return Boolean.TRUE;
+		return Boolean.FALSE;
 	}
 
 	/**
@@ -205,7 +204,7 @@ public class NonsubQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Boolean getUseHints()
 	{
-		return Boolean.TRUE;
+		return Boolean.FALSE;
 	}
 
 	/**
@@ -250,7 +249,7 @@ public class NonsubQuestionImpl implements TypeSpecificQuestion
 		ovly.add(this.uiService.newGap());
 		ovly.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
 		cont.add(ovly);
-		cont.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("view-model-answer").setIcon("/icons/answer_key2.png",null));
+		cont.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("view-model-answer").setIcon("/icons/answer_key2.png", null));
 
 		return this.uiService.newFragment().setMessages(this.messages).add(cont);
 	}
