@@ -56,7 +56,7 @@
 				<row title="pool-points">
 					<container>
 						<floatEdit>
-							<model ref="pool.points" type="float" max="" />
+							<model ref="pool.points" type="float" />
 						</floatEdit>
 					</container>
 				</row>
