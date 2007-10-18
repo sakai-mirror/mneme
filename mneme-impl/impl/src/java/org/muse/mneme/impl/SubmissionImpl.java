@@ -700,17 +700,12 @@ public class SubmissionImpl implements Submission
 		// phantoms don't have a total score
 		if (getIsPhantom()) return null;
 
-		// add up the scores from the answers, checking if any answer total scores are null
+		// add up the scores from the answers
 		float total = 0;
-		boolean hasNullAnswerTotalScore = false;
 		for (Answer answer : answers)
 		{
 			Float score = answer.getTotalScore();
-			if (score == null)
-			{
-				hasNullAnswerTotalScore = true;
-			}
-			else
+			if (score != null)
 			{
 				total += score;
 			}
@@ -720,12 +715,6 @@ public class SubmissionImpl implements Submission
 		if (this.evaluation.getScore() != null)
 		{
 			total += this.evaluation.getScore().floatValue();
-		}
-
-		// if there's no submission evaluation score, and any answer total scores are null, we have no total score
-		else
-		{
-			if (hasNullAnswerTotalScore) return null;
 		}
 
 		return new Float(total);
@@ -1000,7 +989,7 @@ public class SubmissionImpl implements Submission
 				return;
 			}
 		}
-		
+
 		// add it
 		answer.initSubmission(this);
 		this.answers.add(answer);

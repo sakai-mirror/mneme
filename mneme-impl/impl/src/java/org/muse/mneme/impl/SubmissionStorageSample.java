@@ -403,7 +403,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 						}
 						if (final1 == null)
 						{
-							rv = +1;
+							rv = -1;
 							break;
 						}
 						rv = -1 * final0.compareTo(final1);
