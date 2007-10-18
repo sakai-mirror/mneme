@@ -134,7 +134,7 @@
 					</title>
 					<entityNavigations>
 						<navigation style="LINK" submit="TRUE">
-							<destination template="/NAV:grade_submission/{0}/{1}">
+							<destination template="/grade_submission/{0}/{1}">
 								<model ref="destinationPath" />
 								<model ref="submission.id" />
 							</destination>

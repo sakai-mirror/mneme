@@ -298,7 +298,6 @@ public class GradeAssessmentView extends ControllerImpl
 		{
 			if (destination.startsWith("/grade_assessment_save"))
 				destination = destination.replace("grade_assessment_save", "grades");
-			else if (destination.startsWith("/NAV")) destination = destination.replace("NAV:", "");
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
