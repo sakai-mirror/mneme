@@ -135,7 +135,7 @@
 					<title>
 						<message selector="question-description" />
 					</title>
-					<model ref="question.description" missing="no-title" max="80"/>
+					<model type="text" ref="question.description" missing="no-title" max="60"/>
 					<entityNavigations>
 						<navigation>
 							<destination template="/question_edit/{0}/{1}/{2}/{3}{4}/{5}/{6}">
