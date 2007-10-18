@@ -37,8 +37,16 @@
 	</header>
 	<title>
 		<message selector="testSettings-title" />
+		<included>
+			<decision model="assessment.published" />
+		</included>
 	</title>
-
+	<title>
+		<message selector="testPublish-title" />
+		<included>
+			<decision reversed="TRUE" model="assessment.published" />
+		</included>
+	</title>
 	<container>
 		<!--  warn if live -->
 		<alert>
@@ -181,6 +189,13 @@
 												</selection>
 											</container>
 										</row>
+										<row title="password">
+											<container>
+												<textEdit>
+													<model ref="assessment.password.password" />
+												</textEdit>
+											</container>
+										</row>
 									</rows>
 								</entityDisplay>
 							</container>
@@ -295,13 +310,16 @@
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="70em">
 			<container>
-				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE"
+				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE"
 					destination="/assessments">
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
 				<navigation title="publish" accessKey="publish-access" description="publish-description" style="BUTTON" submit="TRUE"
 					destination="/assessments">
 					<icon icon="/icons/return.png" style="LEFT" />
+					<included>
+						<decision reversed="TRUE" model="assessment.published" />
+					</included>
 				</navigation>
 				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
 					<destination template="/assessments/{0}">

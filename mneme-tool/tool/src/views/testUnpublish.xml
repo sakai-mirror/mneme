@@ -38,23 +38,41 @@
 		</message>
 	</header>
 	<container>
-		<!--  warn if live -->
-		<alert>
-			<message selector="unpublish-warning">
-				<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
-			</message>
-			<included>
-				<decision model="assessment.isLive" />
-			</included>
-		</alert>
+		<entityDisplay>
+			<rows>
+				<row>
+					<container>
+						<text>
+							<message selector="test-unpublish-message1" />
+						</text>
+					</container>
+				</row>
+				<row>
+					<title>
+						<message selector="delete-show-icon">
+							<model type="icon" icon="/icons/warning.gif" />
+						</message>
+					</title>
+					<container>
+						<entityList style="FORM">
+							<iterator name="test" model="tests" />
+							<emptyTitle>
+								<message selector="no-tests" />
+							</emptyTitle>
+							<columns>
+								<modelColumn>
+									<model ref="test.title" missing="no-title" />
+								</modelColumn>
+							</columns>
 
-		<section>
-			<container>
-				<instructions>
-					<message selector="unpublish-instructions"></message>
-				</instructions>
-			</container>
-		</section>
+						</entityList>
+						<text>
+							<message selector="unpublish-instructions" />
+						</text>
+					</container>
+				</row>
+			</rows>
+		</entityDisplay>
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="20em">
 			<container>

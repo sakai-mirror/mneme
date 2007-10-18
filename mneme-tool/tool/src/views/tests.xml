@@ -104,6 +104,10 @@
 							submit="TRUE" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements">
 							<icon icon="/icons/delete.png" style="LEFT" />
 						</navigation>
+						<navigation destination="/assessment_unpublish" title="unpublish-tests" style="LINK" description="unpublish-tests-description"
+							submit="TRUE" selectRequirement="SOME" selectRequirementMessage="unpublish-failed-requirements">
+							<icon icon="/icons/publish_rmv.png" style="LEFT" />
+						</navigation>
 						<container>
 							<container>
 								<navigation title="archive-tests" style="LINK" description="archive-tests-description" submit="TRUE"
@@ -231,7 +235,7 @@
 				</column>
 				<column>
 					<title>
-						<message selector="assessment-status" />
+						<message selector="publish" />
 					</title>
 					<sort submit="TRUE">
 						<active>
@@ -263,35 +267,6 @@
 							</included>
 						</navigation>
 						<navigation description="unpublished-alt">
-							<title>
-								<message selector="dash" />
-							</title>
-							<included>
-								<decision model="assessment.isValid" />
-								<decision reversed="TRUE" model="assessment.published" />
-							</included>
-						</navigation>
-					</navigations>
-				</column>
-
-				<modelColumn>
-					<title>
-						<message selector="assessment-action" />
-					</title>
-					<navigations>
-						<navigation style="LINK" submit="TRUE" description="unpublished-alt">
-							<icon icon="/icons/publish_rmv.png" style="LEFT" />
-							<destination template="/assessment_unpublish/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="assessment.id" />
-							</destination>
-							<included>
-								<decision model="assessment.isValid" />
-								<decision model="assessment.published" />
-							</included>
-						</navigation>
-						<navigation style="LINK" submit="TRUE" description="published-alt">
 							<icon icon="/icons/publish_new.png" style="LEFT" />
 							<destination template="/assessment_settings/{0}{1}/{2}">
 								<model ref="sort_column" />
@@ -303,17 +278,13 @@
 								<decision reversed="TRUE" model="assessment.published" />
 							</included>
 						</navigation>
-						<navigation style="LINK" submit="TRUE" description="invalid-alt">
-							<icon icon="/icons/attention.jpg" style="LEFT" />
-							<destination template="/assessment_invalid/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="assessment.id" />
-							</destination>
-							<included>
-								<decision reversed="TRUE" model="assessment.isValid" />
-							</included>
-						</navigation>
+					</navigations>
+				</column>
+				<column>
+					<title>
+						<message selector="access" />
+					</title>
+					<navigations>
 						<navigation style="LINK" submit="TRUE" description="access">
 							<icon icon="/icons/access.png" style="LEFT" />
 							<destination template="/assessment_special/{0}{1}/{2}">
@@ -322,6 +293,13 @@
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
+					</navigations>
+				</column>
+				<column>
+					<title>
+						<message selector="copy" />
+					</title>
+					<navigations>
 						<navigation style="LINK" submit="TRUE" description="copy">
 							<icon icon="/icons/page_copy.png" style="LEFT" />
 							<destination template="/COPY/{0}{1}/{2}">
@@ -331,7 +309,8 @@
 							</destination>
 						</navigation>
 					</navigations>
-				</modelColumn>
+				</column>
+
 			</columns>
 		</entityList>
 		<!-- save / cancel nav bar -->

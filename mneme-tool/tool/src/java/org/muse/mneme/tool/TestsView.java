@@ -205,6 +205,7 @@ public class TestsView extends ControllerImpl
 		String destination = uiService.decode(req, context);
 		if (destination != null)
 		{
+			System.out.println("Dest is " + destination);
 			// save date changes regardless of where user goes
 			if (!saveDates(req, res, context)) return;
 
@@ -272,7 +273,41 @@ public class TestsView extends ControllerImpl
 					}
 				}
 			}
+			else if (destination.startsWith("/assessment_unpublish"))
+			{
+				String[] selectedTestIds = values.getValues();
+				// delete the tests with ids
+				StringBuffer path = new StringBuffer();
+				String separator = "+";
 
+				if (selectedTestIds != null && (selectedTestIds.length > 0))
+				{
+					path.append(destination);
+					path.append("/");
+
+					// for sort code
+					if (params.length == 3)
+					{
+						path.append(params[2]);
+						path.append("/");
+					}
+					else
+					{
+						// default sort - title ascending
+						path.append("1A");
+						path.append("/");
+					}
+					path.append(selectedTestIds[0]);
+					for (int i = 1; i < selectedTestIds.length; i++)
+					{
+						path.append(separator);
+						path.append(selectedTestIds[i]);
+					}
+					System.out.println("path is " + path.toString());
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
+					return;
+				}
+			}
 			else if (destination.trim().equalsIgnoreCase("/assessments_delete"))
 			{
 				String[] selectedTestIds = values.getValues();

@@ -22,6 +22,8 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,33 +65,39 @@ public class TestUnpublishView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 4)
+		String destination = this.uiService.decode(req, context);
+		if (params.length < 3) throw new IllegalArgumentException();
+
+		List<Assessment> assessments = new ArrayList<Assessment>(0);
+		List<Assessment> nodelAssessments = new ArrayList<Assessment>(0);
+
+		String selectedTestIds[] = params[3].split("\\+");
+
+		for (String selectTestId : selectedTestIds)
 		{
-			throw new IllegalArgumentException();
+			Assessment assessment = null;
+
+			if (selectTestId != null && selectTestId.trim().length() > 0)
+			{
+				// get the test and add to the list to show
+				assessment = this.assessmentService.getAssessment(selectTestId);
+				if (assessment != null)
+				{
+					/*
+					 * if (this.assessmentService.allowRemoveAssessment(assessment)) {
+					 */
+					assessments.add(assessment);
+					/*
+					 * } else { nodelAssessments.add(assessment); }
+					 */
+
+				}
+			}
 		}
 
-		// The last parameter is the assessment id
-		String assessmentId = params[3];
-
-		Assessment assessment = assessmentService.getAssessment(assessmentId);
-		if (assessment == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
-		// security check
-		if (!assessmentService.allowEditAssessment(assessment))
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
-
-		// collect information: the selected assessment
-		context.put("assessment", assessment);
-		// The sort code is in this parameter
+		context.put("tests", assessments);
+		// context.put("nodeltests", nodelAssessments);
+		// sort code
 		context.put("sortcode", params[2]);
 
 		// render
@@ -110,43 +118,39 @@ public class TestUnpublishView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 4)
-		{
-			throw new IllegalArgumentException();
-		}
+		if (params.length < 3) throw new IllegalArgumentException();
 
-		String assessmentId = params[3];
-
-		Assessment assessment = assessmentService.getAssessment(assessmentId);
-		if (assessment == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
-		// security check
-		if (!assessmentService.allowEditAssessment(assessment))
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
-
-		// setup the model: the selected assessment
-		context.put("assessment", assessment);
-
-		// read the form
-		String destination = uiService.decode(req, context);
+		String destination = this.uiService.decode(req, context);
 
 		if (destination != null && (destination.trim().startsWith("/assessments")))
 		{
 			StringBuffer path = new StringBuffer();
-			// commit the save
+			String separator = "+";
 			try
 			{
-				assessment.setPublished(Boolean.FALSE);
-				this.assessmentService.saveAssessment(assessment);
+				String selectedTestIds[] = params[3].split("\\+");
+
+				if (selectedTestIds != null && (selectedTestIds.length > 0))
+				{
+					// path.append(destination);
+
+					path.append("/assessments/" + params[2]);
+					for (String selectedTestId : selectedTestIds)
+					{
+						Assessment assessment = this.assessmentService.getAssessment(selectedTestId);
+						if (assessment != null)
+						{
+							assessment.setPublished(Boolean.FALSE);
+							this.assessmentService.saveAssessment(assessment);
+							// path.append(selectedTestId);
+							// path.append(separator);
+
+						}
+					}
+
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
+					return;
+				}
 			}
 			catch (AssessmentPermissionException e)
 			{
@@ -160,12 +164,9 @@ public class TestUnpublishView extends ControllerImpl
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
 				return;
 			}
-
-			// Retain the sort order
-			path.append("/assessments/" + params[2]);
-			// redirect to the next destination
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
 		}
+		destination = "/tests/" + params[2];
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
