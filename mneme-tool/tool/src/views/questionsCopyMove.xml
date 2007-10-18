@@ -83,7 +83,7 @@
 					<title>
 						<message selector="pool-description" />
 					</title>
-					<model ref="pool.description" />
+					<model type="text" ref="pool.description" max="60" />
 				</modelColumn>
 				<modelColumn>
 					<title>
