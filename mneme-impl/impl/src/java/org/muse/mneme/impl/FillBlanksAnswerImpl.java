@@ -124,71 +124,74 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		float partial = (correctAnswers.size() > 0) ? question.getPool().getPoints() / correctAnswers.size() : 0f;
 
 		float total = 0f;
-		String[] answersArray = (String[]) this.answers.clone();
-		// Any order only matters when there is more than one blank
-		if ((anyOrder == Boolean.TRUE) && (correctAnswers.size() > 1))
+		if (this.answers != null)
 		{
-			for (int j = 0; j < answersArray.length; j++)
+			String[] answersArray = (String[]) this.answers.clone();
+			// Any order only matters when there is more than one blank
+			if ((anyOrder == Boolean.TRUE) && (correctAnswers.size() > 1))
 			{
-				boolean foundCorrect = false;
-				if (answersArray[j] != null)
+				for (int j = 0; j < answersArray.length; j++)
 				{
-					if (answersArray[j].trim().length() > 0)
+					boolean foundCorrect = false;
+					if (answersArray[j] != null)
 					{
-						for (int i = 0; i < correctAnswersArray.length; i++)
+						if (answersArray[j].trim().length() > 0)
 						{
+							for (int i = 0; i < correctAnswersArray.length; i++)
+							{
 
-							if (responseTextual == Boolean.TRUE)
-							{
-								if (isFillInAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
+								if (responseTextual == Boolean.TRUE)
 								{
-									total += partial;
-									foundCorrect = true;
-									break;
+									if (isFillInAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
+									{
+										total += partial;
+										foundCorrect = true;
+										break;
+									}
+									else
+									{
+										foundCorrect = false;
+									}
 								}
 								else
 								{
-									foundCorrect = false;
-								}
-							}
-							else
-							{
-								if (isNumericAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim()))
-								{
-									total += partial;
-									foundCorrect = true;
-									break;
-								}
-								else
-								{
-									foundCorrect = false;
+									if (isNumericAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim()))
+									{
+										total += partial;
+										foundCorrect = true;
+										break;
+									}
+									else
+									{
+										foundCorrect = false;
+									}
 								}
 							}
 						}
 					}
 				}
 			}
-		}
-		else
-		{
-			for (int i = 0; i < correctAnswersArray.length; i++)
+			else
 			{
-				if (answersArray[i] != null)
+				for (int i = 0; i < correctAnswersArray.length; i++)
 				{
-					if (answersArray[i].trim().length() > 0)
+					if (answersArray[i] != null)
 					{
-						if (responseTextual == Boolean.TRUE)
+						if (answersArray[i].trim().length() > 0)
 						{
-							if (isFillInAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
+							if (responseTextual == Boolean.TRUE)
 							{
-								total += partial;
+								if (isFillInAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
+								{
+									total += partial;
+								}
 							}
-						}
-						else
-						{
-							if (isNumericAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim()))
+							else
 							{
-								total += partial;
+								if (isNumericAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim()))
+								{
+									total += partial;
+								}
 							}
 						}
 					}
@@ -197,7 +200,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		}
 
 		// floor at 0
-		if (total < 0f) total = 0f;
+		if (total <= 0f) total = 0f;
 
 		return total;
 	}
@@ -229,92 +232,94 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		Boolean anyOrder = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getAnyOrder());
 		Boolean responseTextual = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getResponseTextual());
 
-		String[] answersArray = (String[]) this.answers.clone();
-		// Any order only matters when there is more than one blank
-		if ((anyOrder == Boolean.TRUE) && (correctAnswers.size() > 1))
+		if (this.answers != null)
 		{
-			for (int j = 0; j < answersArray.length; j++)
+			String[] answersArray = (String[]) this.answers.clone();
+			// Any order only matters when there is more than one blank
+			if ((anyOrder == Boolean.TRUE) && (correctAnswers.size() > 1))
 			{
-				boolean foundCorrect = false;
-				if (answersArray[j] != null)
+				for (int j = 0; j < answersArray.length; j++)
 				{
-					if (answersArray[j].trim().length() > 0)
+					boolean foundCorrect = false;
+					if (answersArray[j] != null)
 					{
-						for (int i = 0; i < correctAnswersArray.length; i++)
+						if (answersArray[j].trim().length() > 0)
 						{
+							for (int i = 0; i < correctAnswersArray.length; i++)
+							{
 
+								if (responseTextual == Boolean.TRUE)
+								{
+									if (isFillInAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
+									{
+										foundCorrect = true;
+										break;
+									}
+									else
+									{
+										foundCorrect = false;
+									}
+								}
+								else
+								{
+									if (isNumericAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim()))
+									{
+										foundCorrect = true;
+										break;
+									}
+									else
+									{
+										foundCorrect = false;
+									}
+								}
+							}
+							if (foundCorrect)
+							{
+								this.entryCorrects.add(Boolean.TRUE);
+							}
+							else
+							{
+								this.entryCorrects.add(Boolean.FALSE);
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				for (int i = 0; i < correctAnswersArray.length; i++)
+				{
+					if (answersArray[i] != null)
+					{
+						if (answersArray[i].trim().length() > 0)
+						{
 							if (responseTextual == Boolean.TRUE)
 							{
-								if (isFillInAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
+								if (isFillInAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
 								{
-									foundCorrect = true;
-									break;
+									this.entryCorrects.add(Boolean.TRUE);
 								}
 								else
 								{
-									foundCorrect = false;
+									this.entryCorrects.add(Boolean.FALSE);
 								}
 							}
 							else
 							{
-								if (isNumericAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim()))
+								if (isNumericAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim()))
 								{
-									foundCorrect = true;
-									break;
+									this.entryCorrects.add(Boolean.TRUE);
 								}
 								else
 								{
-									foundCorrect = false;
+									this.entryCorrects.add(Boolean.FALSE);
 								}
-							}
-						}
-						if (foundCorrect)
-						{
-							this.entryCorrects.add(Boolean.TRUE);
-						}
-						else
-						{
-							this.entryCorrects.add(Boolean.FALSE);
-						}
-					}
-				}
-			}
-		}
-		else
-		{
-			for (int i = 0; i < correctAnswersArray.length; i++)
-			{
-				if (answersArray[i] != null)
-				{
-					if (answersArray[i].trim().length() > 0)
-					{
-						if (responseTextual == Boolean.TRUE)
-						{
-							if (isFillInAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
-							{
-								this.entryCorrects.add(Boolean.TRUE);
-							}
-							else
-							{
-								this.entryCorrects.add(Boolean.FALSE);
-							}
-						}
-						else
-						{
-							if (isNumericAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim()))
-							{
-								this.entryCorrects.add(Boolean.TRUE);
-							}
-							else
-							{
-								this.entryCorrects.add(Boolean.FALSE);
 							}
 						}
 					}
 				}
 			}
 		}
-
 		return this.entryCorrects;
 	}
 
@@ -342,22 +347,25 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	{
 		Question question = answer.getQuestion();
 		String parsedText = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getParsedText();
-		for (int i = 0; i < this.answers.length; i++)
+		if (this.answers != null)
 		{
-			if (this.answers[i] != null)
+			for (int i = 0; i < this.answers.length; i++)
 			{
-				if (this.answers[i].trim().length() > 0)
+				if (this.answers[i] != null)
 				{
-					parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + this.answers[i] + "</U>");
+					if (this.answers[i].trim().length() > 0)
+					{
+						parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + this.answers[i] + "</U>");
+					}
+					else
+					{
+						parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + "____" + "</U>");
+					}
 				}
 				else
 				{
 					parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + "____" + "</U>");
 				}
-			}
-			else
-			{
-				parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + "____" + "</U>");
 			}
 		}
 		this.reviewText = parsedText;
@@ -438,8 +446,6 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 			// allow dot or comma for decimal point
 			answer = answer.replace(',', '.');
 			correct = correct.replace(',', '.');
-			System.out.println("Answer is " + answer);
-			System.out.println("Correct is " + correct);
 
 			// answer needs to become a float (allow dot or comma for decimal point)
 			float answerValue = Float.parseFloat(answer);
