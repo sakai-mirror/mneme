@@ -320,6 +320,14 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 				}
 			}
 		}
+		else
+		{
+			// If all answers are blank, they each need to be marked incorrect
+			for (int i = 0; i < correctAnswersArray.length; i++)
+			{
+				this.entryCorrects.add(Boolean.FALSE);
+			}
+		}
 		return this.entryCorrects;
 	}
 
