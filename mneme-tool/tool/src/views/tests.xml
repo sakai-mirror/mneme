@@ -52,41 +52,30 @@
 			<columns>
 				<column>
 					<title>
-						<message selector="assessment-type" />
+						<message selector="access" />
 					</title>
-					<sort submit="TRUE">
-						<active>
-							<compareDecision model="sort_column" constant="0" />
-						</active>
-						<direction>
-							<compareDecision model="sort_direction" constant="A" />
-						</direction>
-						<asc icon="/icons/sortascending.gif">
-							<message selector="asc" />
-							<destination template="/assessments/0A" />
-						</asc>
-						<desc icon="/icons/sortdescending.gif">
-							<message selector="desc" />
-							<destination template="/assessments/0D" />
-						</desc>
-					</sort>
 					<navigations>
-						<navigation description="assessment-type-test">
-							<icon icon="/icons/test_type.png" style="LEFT" />
+						<navigation title="live" style="LINK" submit="TRUE" description="live-alt">
+							<icon icon="/icons/grade_student.png" style="LEFT" />
+							<destination template="/grade_assessment/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
 							<included>
-								<compareDecision model="assessment.type" constant="test" />
+								<decision model="assessment.isLive" />
+								<decision model="assessment.isValid" />
 							</included>
 						</navigation>
-						<navigation description="assessment-type-survey">
-							<icon icon="/icons/survey_type.png" style="LEFT" />
+						<navigation title="invalid" style="LINK" submit="TRUE" description="invalid-alt">
+							<icon icon="/icons/attention.jpg" style="LEFT" />
+							<destination template="/assessment_invalid/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
 							<included>
-								<compareDecision model="assessment.type" constant="survey" />
-							</included>
-						</navigation>
-						<navigation description="assessment-type-assignment">
-							<icon icon="/icons/assignment_type.png" style="LEFT" />
-							<included>
-								<compareDecision model="assessment.type" constant="assignment" />
+								<decision reversed="TRUE" model="assessment.isValid" />
 							</included>
 						</navigation>
 					</navigations>
@@ -170,14 +159,55 @@
 					<title>
 						<message selector="assessment-view" />
 					</title>
+					<sort submit="TRUE">
+						<active>
+							<compareDecision model="sort_column" constant="0" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/assessments/0A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/assessments/0D" />
+						</desc>
+					</sort>
 					<navigations>
-						<navigation style="LINK" submit="TRUE">
-							<icon icon="/icons/preview.png" style="LEFT" />
+						<navigation style="LINK" submit="TRUE" description="assessment-type-test">
+							<icon icon="/icons/test_type.png" style="LEFT" />
 							<destination template="/assessment_preview/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
 							</destination>
+							<included>
+								<compareDecision model="assessment.type" constant="test" />
+							</included>
+						</navigation>
+						<navigation style="LINK" submit="TRUE" description="assessment-type-survey">
+							<icon icon="/icons/survey_type.png" style="LEFT" />
+							<destination template="/assessment_preview/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<compareDecision model="assessment.type" constant="survey" />
+							</included>
+						</navigation>
+						<navigation style="LINK" submit="TRUE" description="assessment-type-assignment">
+							<icon icon="/icons/assignment_type.png" style="LEFT" />
+							<destination template="/assessment_preview/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<compareDecision model="assessment.type" constant="assignment" />
+							</included>
 						</navigation>
 					</navigations>
 				</modelColumn>
@@ -262,7 +292,6 @@
 								<model ref="assessment.id" />
 							</destination>
 							<included>
-								<decision model="assessment.isValid" />
 								<decision model="assessment.published" />
 							</included>
 						</navigation>
@@ -274,7 +303,6 @@
 								<model ref="assessment.id" />
 							</destination>
 							<included>
-								<decision model="assessment.isValid" />
 								<decision reversed="TRUE" model="assessment.published" />
 							</included>
 						</navigation>

@@ -33,11 +33,18 @@
 
 	<header>
 		<message selector="test-unpublish-header">
-			<model type="icon" icon="/icons/attention.jpg" />
-			<model ref="assessment.title" missing="no-title" />
+			<model type="icon" icon="/icons/folder_page.jpg" />
 		</message>
 	</header>
 	<container>
+		<alert>
+			<message selector="unpublish-warning">
+				<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+			</message>
+			<included>
+				<decision model="assessment.isLive" />
+			</included>
+		</alert>
 		<entityDisplay>
 			<rows>
 				<row>

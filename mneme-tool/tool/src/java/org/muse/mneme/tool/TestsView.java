@@ -205,7 +205,6 @@ public class TestsView extends ControllerImpl
 		String destination = uiService.decode(req, context);
 		if (destination != null)
 		{
-			System.out.println("Dest is " + destination);
 			// save date changes regardless of where user goes
 			if (!saveDates(req, res, context)) return;
 
@@ -303,7 +302,6 @@ public class TestsView extends ControllerImpl
 						path.append(separator);
 						path.append(selectedTestIds[i]);
 					}
-					System.out.println("path is " + path.toString());
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
 					return;
 				}
