@@ -247,6 +247,13 @@ public class GradeAssessmentView extends ControllerImpl
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
 
+		if (assessment == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
 		PopulatingSet submissions = null;
 		final SubmissionService submissionService = this.submissionService;
 		submissions = uiService.newPopulatingSet(new Factory()
@@ -272,72 +279,28 @@ public class GradeAssessmentView extends ControllerImpl
 		String submissionAdjustScore = submissionAdjustValue.getValue();
 		String submissionAdjustComments = submissionAdjustCommentsValue.getValue();
 
-		if (destination != null)
+		try
 		{
-			if (assessment == null)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
-			}
-			if (destination.startsWith("/grade_assessment_save"))
-			{
-
-				try
-				{
-					saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments);
-				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
-				}
-				catch (NumberFormatException ne)
-				{
-					if (M_log.isWarnEnabled()) M_log.warn(ne);
-				}
-				destination = destination.replace("grade_assessment_save", "grades");
-			}
-			if (destination.startsWith("/grade_assessment"))
-			{
-
-				try
-				{
-					saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments);
-				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
-				}
-				catch (NumberFormatException ne)
-				{
-					if (M_log.isWarnEnabled()) M_log.warn(ne);
-				}
-			}
-			else if (destination.startsWith("/NAV"))
-			{
-				try
-				{
-					saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments);
-				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
-				}
-				catch (NumberFormatException ne)
-				{
-					if (M_log.isWarnEnabled()) M_log.warn(ne);
-				}
-				destination = destination.replace("NAV:", "");
-			}
+			saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments);
+		}
+		catch (AssessmentPermissionException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+		catch (NumberFormatException ne)
+		{
+			if (M_log.isWarnEnabled()) M_log.warn(ne);
 		}
 
-		// destination = "/grades/" + params[2];
+		if (destination != null)
+		{
+			if (destination.startsWith("/grade_assessment_save"))
+				destination = destination.replace("grade_assessment_save", "grades");
+			else if (destination.startsWith("/NAV")) destination = destination.replace("NAV:", "");
+		}
+
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
@@ -370,19 +333,10 @@ public class GradeAssessmentView extends ControllerImpl
 
 		// parse the score
 		Float score = null;
-		if (submissionAdjustScore != null)
-		{
-			try
-			{
-				score = new Float(submissionAdjustScore);
-			}
-			catch (NumberFormatException e)
-			{
-			}
-		}
+		if (submissionAdjustScore != null) score = new Float(submissionAdjustScore);
 
 		// save adjusted score for the assessment - global adjustment
-		if ((submissionAdjustComments != null) || (score != null))
+		if (score != null)
 		{
 			this.submissionService.evaluateSubmissions(assessment, submissionAdjustComments, score, Boolean.FALSE);
 		}

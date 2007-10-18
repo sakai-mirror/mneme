@@ -31,7 +31,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
@@ -194,48 +193,27 @@ public class GradeSubmissionView extends ControllerImpl
 		// read form
 		String destination = this.uiService.decode(req, context);
 
+		// save graded submission
+		try
+		{
+			saveGradedSubmission(submission);
+		}
+		catch (AssessmentPermissionException e)
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
 		if (destination != null)
 		{
 			if (destination.startsWith("/grade_submission_save"))
 			{
-				try
-				{
-					saveGradedSubmission(submission);
-				}
-				catch (AssessmentPermissionException e)
-				{
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
-
 				destination = destination.replace("grade_submission_save", "grade_assessment");
 			}
 			else if (destination.startsWith("/NEXT") || destination.startsWith("/PREV"))
 			{
-				try
-				{
-					saveGradedSubmission(submission);
-				}
-				catch (AssessmentPermissionException e)
-				{
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
-
 				destination = destination.replace("NEXT:", "");
 				destination = destination.replace("PREV:", "");
-			}
-			else if (destination.startsWith("/grade_question"))
-			{
-				try
-				{
-					saveGradedSubmission(submission);
-				}
-				catch (AssessmentPermissionException e)
-				{
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
 			}
 		}
 
@@ -246,6 +224,7 @@ public class GradeSubmissionView extends ControllerImpl
 	 * save Graded Submission
 	 * 
 	 * @param submission
+	 *        submission to save
 	 * @throws AssessmentPermissionException
 	 */
 	private void saveGradedSubmission(Submission submission) throws AssessmentPermissionException
