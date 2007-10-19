@@ -110,7 +110,7 @@ public class MatchPlugin implements QuestionPlugin
 	 */
 	public TypeSpecificQuestion newQuestion(Question question)
 	{
-		return new MatchQuestionImpl(this.messages, this.uiService, question);
+		return new MatchQuestionImpl(this, this.messages, this.uiService, question);
 	}
 
 	/**

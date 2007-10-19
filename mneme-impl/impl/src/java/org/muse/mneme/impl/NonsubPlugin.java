@@ -110,7 +110,7 @@ public class NonsubPlugin implements QuestionPlugin
 	 */
 	public TypeSpecificQuestion newQuestion(Question question)
 	{
-		return new NonsubQuestionImpl(this.messages, this.uiService, question);
+		return new NonsubQuestionImpl(this, this.messages, this.uiService, question);
 	}
 
 	/**

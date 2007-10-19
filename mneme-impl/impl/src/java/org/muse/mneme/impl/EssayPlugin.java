@@ -110,7 +110,7 @@ public class EssayPlugin implements QuestionPlugin
 	 */
 	public TypeSpecificQuestion newQuestion(Question question)
 	{
-		return new EssayQuestionImpl(this.messages, this.uiService, question);
+		return new EssayQuestionImpl(this, this.messages, this.uiService, question);
 	}
 
 	/**

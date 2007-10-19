@@ -37,6 +37,7 @@ import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.muse.mneme.impl.MultipleChoiceQuestionImpl.MultipleChoiceQuestionChoice;
 import org.sakaiproject.i18n.InternationalizedMessages;
@@ -80,26 +81,13 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 
 	protected transient InternationalizedMessages messages = null;
 
+	protected transient QuestionPlugin plugin = null;
+
 	/** The question this is a helper for. */
 	protected transient Question question = null;
 
 	/** Dependency: The UI service (Ambrosia). */
 	protected transient UiService uiService = null;
-
-	/**
-	 * Construct.
-	 * 
-	 * @param uiService
-	 *        the UiService.
-	 * @param question
-	 *        The Question this is a helper for.
-	 */
-	public TrueFalseQuestionImpl(InternationalizedMessages messages, UiService uiService, Question question)
-	{
-		this.messages = messages;
-		this.uiService = uiService;
-		this.question = question;
-	}
 
 	/**
 	 * Construct.
@@ -113,6 +101,23 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		this.messages = other.messages;
 		this.question = question;
 		this.uiService = other.uiService;
+		this.plugin = other.plugin;
+	}
+
+	/**
+	 * Construct.
+	 * 
+	 * @param uiService
+	 *        the UiService.
+	 * @param question
+	 *        The Question this is a helper for.
+	 */
+	public TrueFalseQuestionImpl(QuestionPlugin plugin, InternationalizedMessages messages, UiService uiService, Question question)
+	{
+		this.plugin = plugin;
+		this.messages = messages;
+		this.uiService = uiService;
+		this.question = question;
 	}
 
 	/**
@@ -225,6 +230,14 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	public String getModelAnswer()
 	{
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public QuestionPlugin getPlugin()
+	{
+		return this.plugin;
 	}
 
 	/**

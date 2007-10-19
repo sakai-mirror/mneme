@@ -36,6 +36,7 @@ import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
 
@@ -43,8 +44,9 @@ import org.sakaiproject.i18n.InternationalizedMessages;
  * FillBlanksQuestionImpl handles questions for the true/false question type.
  */
 public class FillBlanksQuestionImpl implements TypeSpecificQuestion
-{	/** TRUE means any order is ok, FALSE means it is not */
-protected Boolean anyOrder = Boolean.FALSE;
+{
+	/** TRUE means any order is ok, FALSE means it is not */
+	protected Boolean anyOrder = Boolean.FALSE;
 
 	/** TRUE means answer is case sensitive, FALSE means it is not */
 	protected Boolean caseSensitive = Boolean.FALSE;
@@ -64,6 +66,16 @@ protected Boolean anyOrder = Boolean.FALSE;
 	protected UiService uiService = null;
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public QuestionPlugin getPlugin()
+	{
+		return this.plugin;
+	}
+
+	protected transient QuestionPlugin plugin = null;
+
+	/**
 	 * Construct.
 	 * 
 	 * @param uiService
@@ -71,8 +83,9 @@ protected Boolean anyOrder = Boolean.FALSE;
 	 * @param question
 	 *        The Question this is a helper for.
 	 */
-	public FillBlanksQuestionImpl(InternationalizedMessages messages, UiService uiService, Question question)
+	public FillBlanksQuestionImpl(QuestionPlugin plugin, InternationalizedMessages messages, UiService uiService, Question question)
 	{
+		this.plugin = plugin;
 		this.messages = messages;
 		this.uiService = uiService;
 		this.question = question;
@@ -93,6 +106,7 @@ protected Boolean anyOrder = Boolean.FALSE;
 		this.responseTextual = other.responseTextual;
 		this.text = other.text;
 		this.uiService = other.uiService;
+		this.plugin = other.plugin;
 	}
 
 	/**
@@ -315,12 +329,12 @@ protected Boolean anyOrder = Boolean.FALSE;
 	}
 
 	/**
-		 * {@inheritDoc}
-		 */
-		public Boolean getUseFeedback()
-		{
-			return Boolean.TRUE;
-		}
+	 * {@inheritDoc}
+	 */
+	public Boolean getUseFeedback()
+	{
+		return Boolean.TRUE;
+	}
 
 	/**
 	 * {@inheritDoc}

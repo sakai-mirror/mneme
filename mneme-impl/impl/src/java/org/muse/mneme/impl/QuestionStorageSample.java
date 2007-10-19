@@ -38,6 +38,7 @@ import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SubmissionService;
 
@@ -175,12 +176,29 @@ public class QuestionStorageSample implements QuestionStorage
 				{
 					case type_a:
 					{
-						rv = ((Question) arg0).getTypeName().compareTo(((Question) arg1).getTypeName());
+						// compare based on the localized type name
+						rv = -1
+								* ((Question) arg0).getTypeSpecificQuestion().getPlugin().getPopularity().compareTo(
+										((Question) arg1).getTypeSpecificQuestion().getPlugin().getPopularity());
+						if (rv == 0)
+						{
+							rv = ((Question) arg0).getTypeName().compareTo(((Question) arg1).getTypeName());
+						}
+
 						break;
 					}
 					case type_d:
 					{
-						rv = -1 * ((Question) arg0).getTypeName().compareTo(((Question) arg1).getTypeName());
+						// compare based on the localized type name
+						rv = -1
+								* ((Question) arg0).getTypeSpecificQuestion().getPlugin().getPopularity().compareTo(
+										((Question) arg1).getTypeSpecificQuestion().getPlugin().getPopularity());
+						if (rv == 0)
+						{
+							rv = ((Question) arg0).getTypeName().compareTo(((Question) arg1).getTypeName());
+						}
+
+						rv = -1 * rv;
 						break;
 					}
 					case description_a:

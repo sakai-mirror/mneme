@@ -78,6 +78,13 @@ public interface TypeSpecificQuestion extends Cloneable
 	String getModelAnswer();
 
 	/**
+	 * Access the plugin for this type.
+	 * 
+	 * @return The plugin for this type.
+	 */
+	QuestionPlugin getPlugin();
+
+	/**
 	 * Access the user interface component for review of this question type.
 	 * 
 	 * @return The user interface component for review of this question type.
@@ -92,11 +99,11 @@ public interface TypeSpecificQuestion extends Cloneable
 	String getTypeName();
 
 	/**
-	 * Check if this type uses the generic question presentation.
+	 * Check if this type uses the generic question feedback.
 	 * 
-	 * @return TRUE to use the generic question presentation for this type, FALSE to not.
+	 * @return TRUE to use the generic question feedback for this type, FALSE to not.
 	 */
-	Boolean getUseQuestionPresentation();
+	Boolean getUseFeedback();
 
 	/**
 	 * Check if this type uses the generic question hints.
@@ -106,18 +113,18 @@ public interface TypeSpecificQuestion extends Cloneable
 	Boolean getUseHints();
 
 	/**
+	 * Check if this type uses the generic question presentation.
+	 * 
+	 * @return TRUE to use the generic question presentation for this type, FALSE to not.
+	 */
+	Boolean getUseQuestionPresentation();
+
+	/**
 	 * Check if this type uses the generic question reason.
 	 * 
 	 * @return TRUE to use the generic question reason for this type, FALSE to not.
 	 */
 	Boolean getUseReason();
-
-	/**
-	 * Check if this type uses the generic question feedback.
-	 * 
-	 * @return TRUE to use the generic question feedback for this type, FALSE to not.
-	 */
-	Boolean getUseFeedback();
 
 	/**
 	 * Access the user interface component for question view of this question type.

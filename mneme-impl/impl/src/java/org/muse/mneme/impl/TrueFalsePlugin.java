@@ -110,7 +110,7 @@ public class TrueFalsePlugin implements QuestionPlugin
 	 */
 	public TypeSpecificQuestion newQuestion(Question question)
 	{
-		return new TrueFalseQuestionImpl(this.messages, this.uiService, question);
+		return new TrueFalseQuestionImpl(this, this.messages, this.uiService, question);
 	}
 
 	/**

@@ -110,7 +110,7 @@ public class FillBlanksPlugin implements QuestionPlugin
 	 */
 	public TypeSpecificQuestion newQuestion(Question question)
 	{
-		return new FillBlanksQuestionImpl(this.messages, this.uiService, question);
+		return new FillBlanksQuestionImpl(this, this.messages, this.uiService, question);
 	}
 
 	/**

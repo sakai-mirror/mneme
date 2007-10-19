@@ -34,6 +34,7 @@ import org.muse.ambrosia.api.PropertyReference;
 import org.muse.ambrosia.api.SelectionColumn;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
 
@@ -73,6 +74,8 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	/** Our messages. */
 	protected transient InternationalizedMessages messages = null;
 
+	protected transient QuestionPlugin plugin = null;
+
 	/** The question this is a helper for. */
 	protected transient Question question = null;
 
@@ -81,21 +84,6 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 
 	/** Dependency: The UI service (Ambrosia). */
 	protected transient UiService uiService = null;
-
-	/**
-	 * Construct.
-	 * 
-	 * @param uiService
-	 *        the UiService.
-	 * @param question
-	 *        The Question this is a helper for.
-	 */
-	public LikertScaleQuestionImpl(InternationalizedMessages messages, UiService uiService, Question question)
-	{
-		this.messages = messages;
-		this.uiService = uiService;
-		this.question = question;
-	}
 
 	/**
 	 * Construct.
@@ -109,6 +97,23 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		this.messages = other.messages;
 		this.question = question;
 		this.uiService = other.uiService;
+		this.plugin = other.plugin;
+	}
+
+	/**
+	 * Construct.
+	 * 
+	 * @param uiService
+	 *        the UiService.
+	 * @param question
+	 *        The Question this is a helper for.
+	 */
+	public LikertScaleQuestionImpl(QuestionPlugin plugin, InternationalizedMessages messages, UiService uiService, Question question)
+	{
+		this.plugin = plugin;
+		this.messages = messages;
+		this.uiService = uiService;
+		this.question = question;
 	}
 
 	/**
@@ -333,6 +338,14 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 			rv.add(new LikertScaleQuestionChoice("4", this.messages.getString("one")));
 		}
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public QuestionPlugin getPlugin()
+	{
+		return this.plugin;
 	}
 
 	/**

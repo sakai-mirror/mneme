@@ -44,6 +44,7 @@ import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.OrderColumn;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
 
@@ -119,35 +120,22 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	/** Index numbers of the correct answers */
 	protected Set<Integer> correctAnswers = new HashSet<Integer>();
 
-	/** A request for more choices. */
-	protected transient Integer moreChoices = null;
-
 	/** String that holds the distractor choice */
 	protected String distractor;
 
 	/** Our messages. */
 	protected transient InternationalizedMessages messages = null;
 
+	/** A request for more choices. */
+	protected transient Integer moreChoices = null;
+
+	protected transient QuestionPlugin plugin = null;
+
 	/** The question this is a helper for. */
 	protected transient Question question = null;
 
 	/** Dependency: The UI service (Ambrosia). */
 	protected transient UiService uiService = null;
-
-	/**
-	 * Construct.
-	 * 
-	 * @param uiService
-	 *        the UiService.
-	 * @param question
-	 *        The Question this is a helper for.
-	 */
-	public MatchQuestionImpl(InternationalizedMessages messages, UiService uiService, Question question)
-	{
-		this.messages = messages;
-		this.uiService = uiService;
-		this.question = question;
-	}
 
 	/**
 	 * Construct.
@@ -162,6 +150,23 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		this.messages = other.messages;
 		this.question = question;
 		this.uiService = other.uiService;
+		this.plugin = other.plugin;
+	}
+
+	/**
+	 * Construct.
+	 * 
+	 * @param uiService
+	 *        the UiService.
+	 * @param question
+	 *        The Question this is a helper for.
+	 */
+	public MatchQuestionImpl(QuestionPlugin plugin, InternationalizedMessages messages, UiService uiService, Question question)
+	{
+		this.plugin = plugin;
+		this.messages = messages;
+		this.uiService = uiService;
+		this.question = question;
 	}
 
 	/**
@@ -372,16 +377,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		return this.question.getPresentation().getText();
 	}
 
-	/**
-	 * The "getter" for the moreChoices - always set to 0.
-	 * 
-	 * @return The initial '0" value for the more choices.
-	 */
-	public String getMoreChoices()
-	{
-		return "0";
-	}
-
 	public String getDistractor()
 	{
 		return this.distractor;
@@ -393,6 +388,24 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	public String getModelAnswer()
 	{
 		return null;
+	}
+
+	/**
+	 * The "getter" for the moreChoices - always set to 0.
+	 * 
+	 * @return The initial '0" value for the more choices.
+	 */
+	public String getMoreChoices()
+	{
+		return "0";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public QuestionPlugin getPlugin()
+	{
+		return this.plugin;
 	}
 
 	/**
@@ -537,6 +550,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		this.correctAnswers.addAll(answers);
 	}
 
+	public void setDistractor(String distractor)
+	{
+		this.distractor = distractor;
+	}
+
 	/**
 	 * Set a request for more choices.
 	 * 
@@ -547,11 +565,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	{
 		// defer to consolidate
 		this.moreChoices = Integer.valueOf(more);
-	}
-
-	public void setDistractor(String distractor)
-	{
-		this.distractor = distractor;
 	}
 
 	/**

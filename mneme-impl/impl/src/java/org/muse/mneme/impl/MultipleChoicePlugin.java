@@ -110,7 +110,7 @@ public class MultipleChoicePlugin implements QuestionPlugin
 	 */
 	public TypeSpecificQuestion newQuestion(Question question)
 	{
-		return new MultipleChoiceQuestionImpl(this.messages, this.uiService, question);
+		return new MultipleChoiceQuestionImpl(this, this.messages, this.uiService, question);
 	}
 
 	/**

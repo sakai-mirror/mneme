@@ -110,7 +110,7 @@ public class LikertScalePlugin implements QuestionPlugin
 	 */
 	public TypeSpecificQuestion newQuestion(Question question)
 	{
-		return new LikertScaleQuestionImpl(this.messages, this.uiService, question);
+		return new LikertScaleQuestionImpl(this, this.messages, this.uiService, question);
 	}
 
 	/**
