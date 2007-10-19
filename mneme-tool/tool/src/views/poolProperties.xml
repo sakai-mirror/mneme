@@ -41,6 +41,9 @@
 	</title>
 
 	<container>
+		<navigationBar width="100%">
+			<container />
+		</navigationBar>
 		<entityDisplay>
 			<rows>
 				<row title="pool-title">
@@ -81,17 +84,11 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
+				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/pool_properties/{0}/{1}">
 						<model ref="poolsSortCode" />
 						<model ref="poolsPagingParameter" />
-					</destination>
-				</navigation>
-				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="{0}">
-						<model ref="sakai_prev_destination" />
 					</destination>
 				</navigation>
 			</container>
