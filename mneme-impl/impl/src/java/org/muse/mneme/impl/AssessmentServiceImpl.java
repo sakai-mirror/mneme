@@ -175,6 +175,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		// clear archived
 		rv.setArchived(Boolean.FALSE);
 
+		// clear out any special access
+		rv.getSpecialAccess().clear();
+
 		// start out unpublished
 		rv.setPublished(Boolean.FALSE);
 

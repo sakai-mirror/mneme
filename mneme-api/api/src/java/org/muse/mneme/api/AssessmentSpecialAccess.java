@@ -36,6 +36,11 @@ public interface AssessmentSpecialAccess
 	AssessmentAccess addAccess();
 
 	/**
+	 * Remove all special access.
+	 */
+	void clear();
+
+	/**
 	 * Access the special access defined for the assessment.
 	 * 
 	 * @return A List of the special access defined for the assessment.

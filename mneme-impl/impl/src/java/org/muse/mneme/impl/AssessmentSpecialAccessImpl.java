@@ -79,6 +79,18 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clear()
+	{
+		if (this.specialAccess.isEmpty()) return;
+
+		this.specialAccess.clear();
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<AssessmentAccess> getAccess()
 	{
 		return this.specialAccess;
