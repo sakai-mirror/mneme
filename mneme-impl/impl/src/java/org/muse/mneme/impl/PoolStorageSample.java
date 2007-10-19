@@ -155,14 +155,14 @@ public class PoolStorageSample implements PoolStorage
 					{
 						String s0 = StringUtil.trimToZero(((Pool) arg0).getTitle());
 						String s1 = StringUtil.trimToZero(((Pool) arg1).getTitle());
-						rv = s0.compareTo(s1);
+						rv = s0.compareToIgnoreCase(s1);
 						break;
 					}
 					case title_d:
 					{
 						String s0 = StringUtil.trimToZero(((Pool) arg0).getTitle());
 						String s1 = StringUtil.trimToZero(((Pool) arg1).getTitle());
-						rv = -1 * s0.compareTo(s1);
+						rv = -1 * s0.compareToIgnoreCase(s1);
 						break;
 					}
 					case points_a:

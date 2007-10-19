@@ -116,7 +116,9 @@ public class SubmissionStorageSample implements SubmissionStorage
 		{
 			public int compare(Object arg0, Object arg1)
 			{
-				int rv = ((QuestionImpl) arg0).getDescription().compareToIgnoreCase(((QuestionImpl) arg1).getDescription());
+				String s0 = StringUtil.trimToZero(((QuestionImpl) arg0).getDescription());
+				String s1 = StringUtil.trimToZero(((QuestionImpl) arg1).getDescription());
+				int rv = s0.compareToIgnoreCase(s1);
 				return rv;
 			}
 		});
@@ -313,7 +315,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 						{
 						}
 
-						rv = id0.compareTo(id1);
+						rv = id0.compareToIgnoreCase(id1);
 						break;
 					}
 					case userName_d:
@@ -338,7 +340,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 						{
 						}
 
-						rv = -1 * id0.compareTo(id1);
+						rv = -1 * id0.compareToIgnoreCase(id1);
 						break;
 					}
 					case final_a:
@@ -598,14 +600,14 @@ public class SubmissionStorageSample implements SubmissionStorage
 					{
 						String s0 = StringUtil.trimToZero(((Submission) arg0).getAssessment().getTitle());
 						String s1 = StringUtil.trimToZero(((Submission) arg1).getAssessment().getTitle());
-						rv = s0.compareTo(s1);
+						rv = s0.compareToIgnoreCase(s1);
 						break;
 					}
 					case title_d:
 					{
 						String s0 = StringUtil.trimToZero(((Submission) arg0).getAssessment().getTitle());
 						String s1 = StringUtil.trimToZero(((Submission) arg1).getAssessment().getTitle());
-						rv = -1 * s0.compareTo(s1);
+						rv = -1 * s0.compareToIgnoreCase(s1);
 						break;
 					}
 					case dueDate_a:

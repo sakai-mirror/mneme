@@ -207,14 +207,14 @@ public class AssessmentStorageSample implements AssessmentStorage
 					{
 						String s0 = StringUtil.trimToZero(((Assessment) arg0).getTitle());
 						String s1 = StringUtil.trimToZero(((Assessment) arg1).getTitle());
-						rv = s0.compareTo(s1);
+						rv = s0.compareToIgnoreCase(s1);
 						break;
 					}
 					case title_d:
 					{
 						String s0 = StringUtil.trimToZero(((Assessment) arg0).getTitle());
 						String s1 = StringUtil.trimToZero(((Assessment) arg1).getTitle());
-						rv = -1 * s0.compareTo(s1);
+						rv = -1 * s0.compareToIgnoreCase(s1);
 						break;
 					}
 					case type_a:

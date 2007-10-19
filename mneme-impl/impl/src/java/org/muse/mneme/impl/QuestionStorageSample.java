@@ -41,6 +41,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * QuestionStorageSample defines a sample storage for questions.
@@ -203,20 +204,17 @@ public class QuestionStorageSample implements QuestionStorage
 					}
 					case description_a:
 					{
-						String s0 = ((Question) arg0).getDescription();
-						if (s0 == null) s0 = "";
-						String s1 = ((Question) arg1).getDescription();
-						if (s1 == null) s1 = "";
-						rv = s0.compareTo(s1);
+						String s0 = StringUtil.trimToZero(((Question) arg0).getDescription());
+						String s1 = StringUtil.trimToZero(((Question) arg1).getDescription());
+						rv = s0.compareToIgnoreCase(s1);
 						break;
 					}
 					case description_d:
 					{
-						String s0 = ((Question) arg0).getDescription();
-						if (s0 == null) s0 = "";
-						String s1 = ((Question) arg1).getDescription();
+						String s0 = StringUtil.trimToZero(((Question) arg0).getDescription());
+						String s1 = StringUtil.trimToZero(((Question) arg1).getDescription());
 						if (s1 == null) s1 = "";
-						rv = -1 * (s0.compareTo(s1));
+						rv = -1 * (s0.compareToIgnoreCase(s1));
 						break;
 					}
 					case pool_difficulty_a:
@@ -241,20 +239,16 @@ public class QuestionStorageSample implements QuestionStorage
 					}
 					case pool_title_a:
 					{
-						String s0 = ((Question) arg0).getPool().getTitle();
-						if (s0 == null) s0 = "";
-						String s1 = ((Question) arg1).getPool().getTitle();
-						if (s1 == null) s1 = "";
-						rv = s0.compareTo(s1);
+						String s0 = StringUtil.trimToZero(((Question) arg0).getPool().getTitle());
+						String s1 = StringUtil.trimToZero(((Question) arg1).getPool().getTitle());
+						rv = s0.compareToIgnoreCase(s1);
 						break;
 					}
 					case pool_title_d:
 					{
-						String s0 = ((Question) arg0).getPool().getTitle();
-						if (s0 == null) s0 = "";
-						String s1 = ((Question) arg1).getPool().getTitle();
-						if (s1 == null) s1 = "";
-						rv = -1 * s0.compareTo(s1);
+						String s0 = StringUtil.trimToZero(((Question) arg0).getPool().getTitle());
+						String s1 = StringUtil.trimToZero(((Question) arg1).getPool().getTitle());
+						rv = -1 * s0.compareToIgnoreCase(s1);
 						break;
 					}
 				}
