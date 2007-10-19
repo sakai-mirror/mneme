@@ -38,11 +38,11 @@ public class AssessmentReviewImpl implements AssessmentReview
 
 	protected Changeable owner = null;
 
-	protected Boolean showCorrectAnswer = Boolean.FALSE;
+	protected Boolean showCorrectAnswer = Boolean.TRUE;
 
-	protected Boolean showFeedback = Boolean.FALSE;
+	protected Boolean showFeedback = Boolean.TRUE;
 
-	protected ReviewTiming timing = ReviewTiming.never;
+	protected ReviewTiming timing = ReviewTiming.submitted;
 
 	/**
 	 * Construct.

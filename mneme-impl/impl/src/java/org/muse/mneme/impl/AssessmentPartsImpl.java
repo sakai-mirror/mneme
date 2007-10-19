@@ -43,7 +43,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 {
 	protected transient AssessmentImpl assessment = null;
 
-	protected Boolean continuousNumbering = Boolean.FALSE;
+	protected Boolean continuousNumbering = Boolean.TRUE;
 
 	protected Changeable owner = null;
 

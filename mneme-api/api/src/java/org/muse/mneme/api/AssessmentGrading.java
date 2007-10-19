@@ -27,11 +27,11 @@ package org.muse.mneme.api;
 public interface AssessmentGrading
 {
 	/**
-	 * Check if grades are to be sent to the Gradebook application.
+	 * Check if student identities are invisible to the grader when grading.
 	 * 
-	 * @return TRUE if the assessment's grades are to be placed into the Gradebook, FALSE if not.
+	 * @return TRUE if student identities are invisible to the grader when grading, FALSE if not.
 	 */
-	Boolean getGradebookIntegration();
+	Boolean getAnonymous();
 
 	/**
 	 * Check if submissions are to be considered graded as soon as submitted (based only on the auto-scoring).
@@ -41,18 +41,18 @@ public interface AssessmentGrading
 	Boolean getAutoRelease();
 
 	/**
-	 * Check if student identities are visible to the grader when grading.
-	 * 
-	 * @return TRUE if student identities are visible to the grader when grading, FALSE if not.
-	 */
-	Boolean getShowIdentities();
-
-	/**
-	 * Set if grades are to be sent to the Gradebook application.
+	 * Check if grades are to be sent to the Gradebook application.
 	 * 
 	 * @return TRUE if the assessment's grades are to be placed into the Gradebook, FALSE if not.
 	 */
-	void setGradebookIntegration(Boolean setting);
+	Boolean getGradebookIntegration();
+
+	/**
+	 * Set if student identities are invisible to the grader when grading.
+	 * 
+	 * @return TRUE if student identities are invisible to the grader when grading, FALSE if not.
+	 */
+	void setAnonymous(Boolean setting);
 
 	/**
 	 * Set if submissions are to be considered graded as soon as submitted (based only on the auto-scoring).
@@ -62,9 +62,9 @@ public interface AssessmentGrading
 	void setAutoRelease(Boolean setting);
 
 	/**
-	 * Set if student identities are visible to the grader when grading.
+	 * Set if grades are to be sent to the Gradebook application.
 	 * 
-	 * @return TRUE if student identities are visible to the grader when grading, FALSE if not.
+	 * @return TRUE if the assessment's grades are to be placed into the Gradebook, FALSE if not.
 	 */
-	void setShowIdentities(Boolean setting);
+	void setGradebookIntegration(Boolean setting);
 }

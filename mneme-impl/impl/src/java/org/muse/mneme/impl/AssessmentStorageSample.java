@@ -558,7 +558,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			}
 			a.getGrading().setAutoRelease(Boolean.TRUE);
 			a.getGrading().setGradebookIntegration(Boolean.FALSE);
-			a.getGrading().setShowIdentities(Boolean.TRUE);
+			a.getGrading().setAnonymous(Boolean.TRUE);
 			a.getPresentation().setText("This is assessment one.");
 			a.getReview().setShowCorrectAnswer(Boolean.TRUE);
 			a.getReview().setShowFeedback(Boolean.TRUE);
@@ -617,7 +617,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			}
 			a.getGrading().setAutoRelease(Boolean.TRUE);
 			a.getGrading().setGradebookIntegration(Boolean.FALSE);
-			a.getGrading().setShowIdentities(Boolean.TRUE);
+			a.getGrading().setAnonymous(Boolean.TRUE);
 			a.getPresentation().setText("This is assessment two.");
 			a.getReview().setShowCorrectAnswer(Boolean.TRUE);
 			a.getReview().setShowFeedback(Boolean.TRUE);
@@ -655,7 +655,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.getModifiedBy().setDate(now);
 			a.getGrading().setAutoRelease(Boolean.TRUE);
 			a.getGrading().setGradebookIntegration(Boolean.FALSE);
-			a.getGrading().setShowIdentities(Boolean.TRUE);
+			a.getGrading().setAnonymous(Boolean.TRUE);
 			a.getPresentation().setText("This is assessment three.");
 			a.getReview().setShowCorrectAnswer(Boolean.TRUE);
 			a.getReview().setShowFeedback(Boolean.TRUE);

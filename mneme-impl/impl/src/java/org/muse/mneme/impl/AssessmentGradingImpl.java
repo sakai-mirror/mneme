@@ -29,13 +29,13 @@ import org.muse.mneme.api.Changeable;
  */
 public class AssessmentGradingImpl implements AssessmentGrading
 {
-	protected Boolean autoRelease = Boolean.FALSE;
+	protected Boolean anonymous = Boolean.FALSE;
+
+	protected Boolean autoRelease = Boolean.TRUE;
 
 	protected Boolean gradebookIntegration = Boolean.FALSE;
 
 	protected transient Changeable owner = null;
-
-	protected Boolean showIdentities = Boolean.FALSE;
 
 	/**
 	 * Construct.
@@ -60,6 +60,14 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getAnonymous()
+	{
+		return this.anonymous;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getAutoRelease()
 	{
 		return this.autoRelease;
@@ -76,9 +84,14 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getShowIdentities()
+	public void setAnonymous(Boolean setting)
 	{
-		return this.showIdentities;
+		if (setting == null) throw new IllegalArgumentException();
+		if (this.anonymous.equals(setting)) return;
+
+		this.anonymous = setting;
+
+		this.owner.setChanged();
 	}
 
 	/**
@@ -108,19 +121,6 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public void setShowIdentities(Boolean setting)
-	{
-		if (setting == null) throw new IllegalArgumentException();
-		if (this.showIdentities.equals(setting)) return;
-
-		this.showIdentities = setting;
-
-		this.owner.setChanged();
-	}
-
-	/**
 	 * Set as a copy of another.
 	 * 
 	 * @param other
@@ -130,6 +130,6 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	{
 		this.autoRelease = other.autoRelease;
 		this.gradebookIntegration = other.gradebookIntegration;
-		this.showIdentities = other.showIdentities;
+		this.anonymous = other.anonymous;
 	}
 }
