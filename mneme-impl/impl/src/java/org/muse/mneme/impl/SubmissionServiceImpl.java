@@ -541,6 +541,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			((SubmissionImpl) temp).clearIsChanged();
 			this.storage.saveSubmission(temp);
 
+			// preserve the evaluation score as the total score, even after adding in the questions
+			Float total = temp.getTotalScore();
+
 			// populate the questions (need to first have the submission id set for the draws)
 			for (Question question : temp.getAssessment().getParts().getQuestions())
 			{
@@ -549,6 +552,12 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				((SubmissionImpl) temp).replaceAnswer(answer);
 			}
 			this.storage.saveAnswers(temp.getAnswers());
+
+			temp.setTotalScore(total);
+			if (temp.getIsChanged())
+			{
+				this.storage.saveSubmission(temp);
+			}
 
 			// TODO: which event? event track it
 			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_ENTER, getSubmissionReference(temp.getId()), true));

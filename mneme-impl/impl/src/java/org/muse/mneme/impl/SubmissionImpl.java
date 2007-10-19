@@ -812,6 +812,7 @@ public class SubmissionImpl implements Submission
 	 */
 	public void setTotalScore(Float score)
 	{
+		// TODO: a null *might* be a way to remove the evaluation completely... -ggolden
 		if (score == null) return;
 
 		// the current answer total score
@@ -834,8 +835,8 @@ public class SubmissionImpl implements Submission
 
 		float total = score.floatValue();
 
-		// only for a change
-		if (curTotalScore == total) return;
+		// only for a change - or if there is no evaluation
+		if ((curTotalScore == total) && (this.evaluation.getScore() != null))return;
 
 		// adjust to remove the current answer score
 		total -= curAnswerScore;
@@ -858,6 +859,7 @@ public class SubmissionImpl implements Submission
 	protected void clearIsChanged()
 	{
 		this.releasedChanged.clearChanged();
+		this.evaluation.clearIsChanged();
 	}
 
 	/**
@@ -898,7 +900,7 @@ public class SubmissionImpl implements Submission
 	 */
 	protected Boolean getIsChanged()
 	{
-		return this.releasedChanged.getChanged();
+		return this.releasedChanged.getChanged() || this.evaluation.getIsChanged();
 	}
 
 	/**
