@@ -89,7 +89,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		{
 			if (already.getPoolId().equals(pool.getId()))
 			{
-				if (already.getNumQuestions().equals(numQuestions))
+				if (!Different.different(already.getNumQuestions(), numQuestions))
 				{
 					// no change, we are done
 					return already;
@@ -140,7 +140,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		// prepare draws - virtual, not part of the DrawPart
 		for (Pool pool : allPools)
 		{
-			PoolDraw draw = new PoolDrawImpl(this.poolService, pool, 0);
+			PoolDraw draw = new PoolDrawImpl(this.poolService, pool, null);
 			if (this.pools.contains(draw))
 			{
 				PoolDraw myDraw = this.pools.get(this.pools.indexOf(draw));
@@ -249,7 +249,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 */
 	public PoolDraw getVirtualDraw(Pool pool)
 	{
-		PoolDraw rv = new PoolDrawImpl(this.poolService, pool, 0);
+		PoolDraw rv = new PoolDrawImpl(this.poolService, pool, null);
 		if (this.pools.contains(rv))
 		{
 			PoolDraw myDraw = this.pools.get(this.pools.indexOf(rv));
@@ -264,7 +264,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 */
 	public void removePool(Pool pool)
 	{
-		this.pools.remove(new PoolDrawImpl(this.poolService, pool, 0));
+		this.pools.remove(new PoolDrawImpl(this.poolService, pool, null));
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
@@ -287,7 +287,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 				if (this.pools.contains(draw))
 				{
 					// if the new count is 0, remove it
-					if (draw.getNumQuestions() == 0)
+					if ((draw.getNumQuestions() == null) || (draw.getNumQuestions().equals(0)))
 					{
 						removePool(draw.getPool());
 					}
@@ -310,7 +310,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 				}
 
 				// else we need a new one (if not 0 count)
-				else if (draw.getNumQuestions() > 0)
+				else if ((draw.getNumQuestions() != null) && (draw.getNumQuestions() > 0))
 				{
 					addPool(draw.getPool(), draw.getNumQuestions());
 				}

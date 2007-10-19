@@ -75,7 +75,6 @@ public class PoolDrawImpl implements PoolDraw
 	{
 		this(poolService);
 		if (pool == null) throw new IllegalArgumentException();
-		if (numQuestions == null) throw new IllegalArgumentException();
 		this.poolId = pool.getId();
 		this.numQuestions = numQuestions;
 	}
@@ -144,7 +143,6 @@ public class PoolDrawImpl implements PoolDraw
 	 */
 	public void setNumQuestions(Integer numQuestions)
 	{
-		if (numQuestions == null) numQuestions = Integer.valueOf(0);
 		this.numQuestions = numQuestions;
 	}
 
