@@ -109,9 +109,9 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="save" style="BUTTON" accessKey="save" description="save-description" submit="TRUE"
+				<navigation title="ok" style="BUTTON" accessKey="ok-access" description="ok-description" submit="TRUE"
 					selectRequirement="SINGLE" selectRequirementId="SELECTION" selectRequirementMessage="save-failed-requirements">
-					<icon icon="/icons/return.png" style="LEFT" />
+					<icon icon="/icons/correct.png" style="LEFT" />
 					<destination template="{0}">
 						<model ref="saveDestination" />
 					</destination>
