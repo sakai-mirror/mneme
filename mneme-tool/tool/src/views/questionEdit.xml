@@ -158,6 +158,12 @@
 					</destination>
 					<!-- <icon icon="/icons/cancel.gif" style="LEFT" />  -->
 				</navigation>
+				<navigation title="add" accessKey="add-access" description="add-description" style="BUTTON" submit="TRUE">
+					<destination template="/select_question_type/{0}">
+						<model ref="extras" />
+					</destination>
+					<icon icon="/icons/add.png" style="LEFT" />
+				</navigation>
 			</container>
 		</navigationBar>
 
