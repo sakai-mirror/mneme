@@ -62,6 +62,15 @@ public class MatchPlugin implements QuestionPlugin
 	/**
 	 * {@inheritDoc}
 	 */
+	public Integer getPopularity()
+	{
+		// TODO Auto-generated method stub
+		return Integer.valueOf(50);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getType()
 	{
 		return "mneme:Match";

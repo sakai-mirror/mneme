@@ -95,8 +95,9 @@ public class SelectQuestionType extends ControllerImpl
 		List<QuestionPlugin> questionTypes = this.mnemeService.getQuestionPlugins();
 		context.put("questionTypes", questionTypes);
 		
-		//for the selected question type
+		//for the selected question type - pre-select the top of the list
 		Value value = this.uiService.newValue();
+		value.setValue(questionTypes.get(0).getType());
 		context.put("selectedQuestionType", value);
 		
 		// render

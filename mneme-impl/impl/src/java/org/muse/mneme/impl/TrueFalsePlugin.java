@@ -62,6 +62,15 @@ public class TrueFalsePlugin implements QuestionPlugin
 	/**
 	 * {@inheritDoc}
 	 */
+	public Integer getPopularity()
+	{
+		// TODO Auto-generated method stub
+		return Integer.valueOf(90);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getType()
 	{
 		return "mneme:TrueFalse";

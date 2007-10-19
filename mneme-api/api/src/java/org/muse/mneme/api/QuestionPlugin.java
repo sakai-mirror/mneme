@@ -27,6 +27,14 @@ package org.muse.mneme.api;
 public interface QuestionPlugin
 {
 	/**
+	 * Access the question type popularity - 0 for unpopular, 100 for most popular.<br />
+	 * Types are presented in popularity order.
+	 * 
+	 * @return The question type popularity, 0 .. 100
+	 */
+	Integer getPopularity();
+
+	/**
 	 * Access the question type string for this plugin.
 	 * 
 	 * @return The question type string for this plugin.

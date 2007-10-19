@@ -468,13 +468,17 @@ public class MnemeServiceImpl implements MnemeService
 	{
 		List<QuestionPlugin> rv = new ArrayList<QuestionPlugin>(this.questionPlugins.values());
 
-		// sort
+		// sort- popularity (desc), then localized type name (asc)
 		Collections.sort(rv, new Comparator()
 		{
 			public int compare(Object arg0, Object arg1)
 			{
 				// compare based on the localized type name
-				int rv = ((QuestionPlugin) arg0).getTypeName().compareTo(((QuestionPlugin) arg1).getTypeName());
+				int rv = -1 * ((QuestionPlugin) arg0).getPopularity().compareTo(((QuestionPlugin) arg1).getPopularity());
+				if (rv == 0)
+				{
+					rv = ((QuestionPlugin) arg0).getTypeName().compareTo(((QuestionPlugin) arg1).getTypeName());
+				}
 				return rv;
 			}
 		});
