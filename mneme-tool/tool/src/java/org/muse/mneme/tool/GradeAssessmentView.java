@@ -294,12 +294,6 @@ public class GradeAssessmentView extends ControllerImpl
 			if (M_log.isWarnEnabled()) M_log.warn(ne);
 		}
 
-		if (destination != null)
-		{
-			if (destination.startsWith("/grade_assessment_save"))
-				destination = destination.replace("grade_assessment_save", "grades");
-		}
-
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
