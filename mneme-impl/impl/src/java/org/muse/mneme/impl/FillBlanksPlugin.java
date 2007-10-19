@@ -64,7 +64,6 @@ public class FillBlanksPlugin implements QuestionPlugin
 	 */
 	public Integer getPopularity()
 	{
-		// TODO Auto-generated method stub
 		return Integer.valueOf(50);
 	}
 
