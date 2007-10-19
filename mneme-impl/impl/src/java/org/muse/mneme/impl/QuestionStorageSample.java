@@ -185,12 +185,20 @@ public class QuestionStorageSample implements QuestionStorage
 					}
 					case description_a:
 					{
-						rv = ((Question) arg0).getDescription().compareTo(((Question) arg1).getDescription());
+						String s0 = ((Question) arg0).getDescription();
+						if (s0 == null) s0 = "";
+						String s1 = ((Question) arg1).getDescription();
+						if (s1 == null) s1 = "";
+						rv = s0.compareTo(s1);
 						break;
 					}
 					case description_d:
 					{
-						rv = -1 * ((Question) arg0).getDescription().compareTo(((Question) arg1).getDescription());
+						String s0 = ((Question) arg0).getDescription();
+						if (s0 == null) s0 = "";
+						String s1 = ((Question) arg1).getDescription();
+						if (s1 == null) s1 = "";
+						rv = -1 * (s0.compareTo(s1));
 						break;
 					}
 					case pool_difficulty_a:
@@ -215,12 +223,20 @@ public class QuestionStorageSample implements QuestionStorage
 					}
 					case pool_title_a:
 					{
-						rv = ((Question) arg0).getPool().getTitle().compareTo(((Question) arg1).getPool().getTitle());
+						String s0 = ((Question) arg0).getPool().getTitle();
+						if (s0 == null) s0 = "";
+						String s1 = ((Question) arg1).getPool().getTitle();
+						if (s1 == null) s1 = "";
+						rv = s0.compareTo(s1);
 						break;
 					}
 					case pool_title_d:
 					{
-						rv = -1 * ((Question) arg0).getPool().getTitle().compareTo(((Question) arg1).getPool().getTitle());
+						String s0 = ((Question) arg0).getPool().getTitle();
+						if (s0 == null) s0 = "";
+						String s1 = ((Question) arg1).getPool().getTitle();
+						if (s1 == null) s1 = "";
+						rv = -1 * s0.compareTo(s1);
 						break;
 					}
 				}

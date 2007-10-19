@@ -62,7 +62,7 @@
 							</emptyTitle>
 							<columns>
 								<modelColumn>
-									<model ref="question.description" missing="no-description" />
+									<model type="text" ref="question.description" missing="no-title" stripHtml="TRUE" max="60"/>
 								</modelColumn>
 							</columns>
 						</entityList>
