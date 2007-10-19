@@ -204,19 +204,6 @@ public class GradeSubmissionView extends ControllerImpl
 			return;
 		}
 
-		if (destination != null)
-		{
-			if (destination.startsWith("/grade_submission_save"))
-			{
-				destination = destination.replace("grade_submission_save", "grade_assessment");
-			}
-			else if (destination.startsWith("/NEXT") || destination.startsWith("/PREV"))
-			{
-				destination = destination.replace("NEXT:", "");
-				destination = destination.replace("PREV:", "");
-			}
-		}
-
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
