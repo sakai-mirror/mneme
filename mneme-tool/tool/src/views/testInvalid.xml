@@ -37,20 +37,10 @@
 		</message>
 	</header>
 	<container>
-		<!--  warn if live -->
-		<alert>
-			<message selector="invalid-warning">
-				<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
-			</message>
-			<included>
-				<decision reversed="TRUE" model="assessment.isValid" />
-			</included>
-		</alert>
-
 		<section>
 			<container>
 				<text>
-					<message selector="title">
+					<message>
 						<model ref="assessment.title" missing="no-title" />
 					</message>
 				</text>
@@ -66,18 +56,11 @@
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="20em">
 			<container>
-				<navigation title="edit" accessKey="edit-access" description="edit-description" style="BUTTON" submit="TRUE">
-					<destination template="/assessment_edit/{0}/{1}">
-						<model ref="sortcode" />
-						<model ref="assessment.id" />
-					</destination>
-					<icon icon="/icons/edit.png" style="LEFT" />
-				</navigation>
-				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
+				<navigation title="return-title" accessKey="return-access" description="return-description" style="BUTTON" submit="TRUE">
 					<destination template="/assessments/{0}">
 						<model ref="sortcode" />
 					</destination>
-					<icon icon="/icons/cancel.gif" style="LEFT" />
+					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
 			</container>
 		</navigationBar>

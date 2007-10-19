@@ -353,9 +353,6 @@
 					destination="/assessments">
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
-				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON" destination="/assessments">
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-				</navigation>
 			</container>
 		</navigationBar>
 	</container>

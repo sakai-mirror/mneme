@@ -69,7 +69,9 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="continue-title" style="BUTTON" accessKey="continue-access" description="continue-description" submit="TRUE">
+				<navigation title="ok" style="BUTTON" accessKey="ok-access" description="ok-description" submit="TRUE">
+					<icon icon="/icons/correct.png" style="LEFT" />
+
 					<destination template="CREATE/{0}">
 						<model ref="prevDestinationParamPath" />
 					</destination>

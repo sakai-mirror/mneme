@@ -48,11 +48,18 @@
 		</included>
 	</title>
 	<container>
+		<section>
+			<container>
+				<text>
+					<message>
+						<model ref="assessment.title" missing="no-title" />
+					</message>
+				</text>
+			</container>
+		</section>
 		<!--  warn if live -->
 		<alert>
-			<message selector="live-settings-warning">
-				<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
-			</message>
+			<message selector="live-settings-warning"></message>
 			<included>
 				<decision model="assessment.isLive" />
 			</included>
@@ -61,15 +68,6 @@
 			<container>
 				<entityDisplay>
 					<rows>
-						<row title="title">
-							<container>
-								<text>
-									<message>
-										<model ref="assessment.title" missing="no-title" />
-									</message>
-								</text>
-							</container>
-						</row>
 						<row title="dates">
 							<container>
 								<entityDisplay>
@@ -104,7 +102,6 @@
 								<selection orientation="VERTICAL">
 									<model ref="assessment.hasTriesLimit" />
 									<selectionChoices>
-										<selectionChoice value="false" selector="type-unlimited" />
 										<selectionChoice value="true" selector="type-number">
 											<container>
 												<countEdit>
@@ -115,6 +112,8 @@
 												</countEdit>
 											</container>
 										</selectionChoice>
+										<selectionChoice value="false" selector="type-unlimited" />
+
 									</selectionChoices>
 								</selection>
 							</container>
@@ -295,12 +294,15 @@
 								<textEdit model="assessment.submitPresentation.text" />
 							</container>
 						</row>
-						<row>
+						<row title="publish">
 							<container>
-								<instructions>
-									<message selector="save-publish-instructions"></message>
-								</instructions>
+								<selection>
+									<model ref="assessment.published" />
+								</selection>
 							</container>
+							<included>
+								<decision reversed="TRUE" model="assessment.published" />
+							</included>
 						</row>
 					</rows>
 				</entityDisplay>
@@ -313,19 +315,6 @@
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE"
 					destination="/assessments">
 					<icon icon="/icons/return.png" style="LEFT" />
-				</navigation>
-				<navigation title="publish" accessKey="publish-access" description="publish-description" style="BUTTON" submit="TRUE"
-					destination="/assessments">
-					<icon icon="/icons/return.png" style="LEFT" />
-					<included>
-						<decision reversed="TRUE" model="assessment.published" />
-					</included>
-				</navigation>
-				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
-					<destination template="/assessments/{0}">
-						<model ref="sortcode" />
-					</destination>
-					<icon icon="/icons/cancel.gif" style="LEFT" />
 				</navigation>
 			</container>
 		</navigationBar>
