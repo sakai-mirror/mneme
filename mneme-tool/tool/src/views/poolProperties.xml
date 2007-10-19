@@ -56,7 +56,7 @@
 				<row title="pool-points">
 					<container>
 						<floatEdit>
-							<model ref="pool.points" type="float" />
+							<model ref="pool.pointsEdit" type="float" />
 						</floatEdit>
 					</container>
 				</row>

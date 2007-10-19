@@ -58,7 +58,7 @@ public class PoolImpl implements Pool
 
 	protected Attribution modifiedBy = null;
 
-	protected Float points = Float.valueOf(0f);
+	protected Float points = null;
 
 	protected transient PoolServiceImpl poolService = null;
 
@@ -189,6 +189,14 @@ public class PoolImpl implements Pool
 	 */
 	public Float getPoints()
 	{
+		return this.points == null ? Float.valueOf(0f) : this.points;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getPointsEdit()
+	{
 		return this.points;
 	}
 
@@ -260,7 +268,19 @@ public class PoolImpl implements Pool
 	public void setPoints(Float points)
 	{
 		if (points == null) throw new IllegalArgumentException();
-		if (this.points.equals(points)) return;
+		if (!Different.different(this.points, points)) return;
+
+		this.points = points;
+
+		this.changed.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setPointsEdit(Float points)
+	{
+		if (!Different.different(this.points, points)) return;
 
 		this.points = points;
 

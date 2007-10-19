@@ -116,9 +116,16 @@ public interface Pool
 	/**
 	 * Access the number of points for each question in this pool.
 	 * 
-	 * @return The number of points for each question in this pool.
+	 * @return The number of points for each question in this pool, or 0 if no points are set.
 	 */
 	Float getPoints();
+
+	/**
+	 * Access the number of points for each question in this pool.
+	 * 
+	 * @return The number of points for each question in this pool, or null if no points are set.
+	 */
+	Float getPointsEdit();
 
 	/**
 	 * Access the title of the pool.
@@ -165,6 +172,14 @@ public interface Pool
 	 *        The number of points for each question in this pool.
 	 */
 	void setPoints(Float points);
+
+	/**
+	 * Set the number of points for each question in this pool.
+	 * 
+	 * @param points
+	 *        The number of points for each question in this pool, or null to have none set.
+	 */
+	void setPointsEdit(Float points);
 
 	/**
 	 * Set the title of the pool.
