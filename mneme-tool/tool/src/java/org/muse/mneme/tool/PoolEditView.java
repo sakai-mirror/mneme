@@ -131,7 +131,7 @@ public class PoolEditView extends ControllerImpl
 				context.put("sort_column", sortCode.charAt(0));
 				context.put("sort_direction", sortCode.charAt(1));
 				
-				//1 is description
+				//0 is description
 				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
 					sort = QuestionService.FindQuestionsSort.description_a;
 				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
@@ -157,8 +157,8 @@ public class PoolEditView extends ControllerImpl
 		}
 		else
 		{
-			// default sort: title ascending
-			sort = QuestionService.FindQuestionsSort.type_a;
+			// default sort: description ascending
+			sort = QuestionService.FindQuestionsSort.description_a;
 
 			context.put("sort_column", '0');
 			context.put("sort_direction", 'A');
