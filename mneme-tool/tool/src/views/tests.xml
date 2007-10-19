@@ -51,12 +51,13 @@
 			</emptyTitle>
 			<columns>
 				<column>
-					<title>
-						<message selector="access" />
-					</title>
 					<navigations>
-						<navigation title="live" style="LINK" submit="TRUE" description="live-alt">
-							<icon icon="/icons/grade_student.png" style="LEFT" />
+						<navigation style="LINK" submit="TRUE" description="live-alt">
+							<title>
+								<message selector="live">
+									<model type="icon" icon="/icons/grade_student.png" />
+								</message>
+							</title>
 							<destination template="/grade_assessment/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
@@ -67,8 +68,12 @@
 								<decision model="assessment.isValid" />
 							</included>
 						</navigation>
-						<navigation title="invalid" style="LINK" submit="TRUE" description="invalid-alt">
-							<icon icon="/icons/attention.jpg" style="LEFT" />
+						<navigation style="LINK" submit="TRUE" description="invalid-alt">
+							<title>
+								<message selector="invalid">
+									<model type="icon" icon="/icons/attention.jpg" />
+								</message>
+							</title>
 							<destination template="/assessment_invalid/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
