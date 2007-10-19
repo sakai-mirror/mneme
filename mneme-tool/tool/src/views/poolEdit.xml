@@ -206,10 +206,10 @@
 				</modelColumn>
 				<modelColumn>
 					<title>
-						<message selector="question-action" />
+						<message selector="question-duplicate" />
 					</title>
 					<navigations>
-						<navigation style="LINK" submit="TRUE">
+						<navigation style="LINK" submit="TRUE" description="question-duplicate-description">
 							<icon icon="/icons/copy.png" style="LEFT" />
 							<destination template="/question_duplicate/{0}/{1}/{2}/{3}">
 								<model ref="poolsSortCode" />
