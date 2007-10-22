@@ -174,24 +174,21 @@ public class GradeQuestionView extends ControllerImpl
 		});
 		context.put("answers", answers);
 
-				// read form
+		// read form
 		String destination = this.uiService.decode(req, context);
 
 		// save evaluation
-		if (destination.startsWith("/grade_question"))
+		try
 		{
-			try
-			{
-				this.submissionService.evaluateAnswers(answers.getSet());
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
-				return;
-			}
+			this.submissionService.evaluateAnswers(answers.getSet());
 		}
-
+		catch (AssessmentPermissionException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
+			return;
+		}
+		
 		// open all submissions of a user
 		if (destination.equals("VIEW_ALL"))
 		{
@@ -199,31 +196,11 @@ public class GradeQuestionView extends ControllerImpl
 			if (params.length < 6)
 			{
 
-				destination = destination + "/0A";
+				destination = destination + "/0A/all";
 			}
-			else
-				destination = destination + "/" + params[5];
-
-			 Question question = assessment.getParts().getQuestion(params[4]);
-
-		// FindAssessmentSubmissionsSort.username_a
-		SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
-		if (params.length >= 6)
-		{
-			String sortCode = params[5];
-			if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
-			if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
-			if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
+			else destination = destination + "/" + params[5] + "/all";			
 		}
-
-		List<Answer> answers_view = null;
-
-			answers_view = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
-			context.put("answers", answers_view);
-			context.put("official", "FALSE");
-			destination = destination + "/all";
-		}
-
+		 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

@@ -193,7 +193,6 @@
 						</modelColumn>
 					</columns>
 				</entityList>
-
 			</container>
 		</section>
 		<text>
@@ -209,18 +208,12 @@
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="100%">
 			<container>
-				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
-					<destination template="/assessments/{0}">
-						<model ref="sortcode" />
-					</destination>
+				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
-				</navigation>
-				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
 					<destination template="/assessments/{0}">
 						<model ref="sortcode" />
-					</destination>
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-				</navigation>
+					</destination>					
+				</navigation>				
 			</container>
 		</navigationBar>
 		<text>

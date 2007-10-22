@@ -103,31 +103,6 @@
 
 		<navigationBar width="100%">
 			<container>
-				<navigation title="toc" accessKey="toc-access" description="toc-description" style="BUTTON" submit="TRUE">
-					<icon icon="/icons/contents.gif" style="LEFT" />
-					<destination template="/grade_questions_list/{0}/{1}">
-						<model ref="gradeSortCode" />
-						<model ref="assessment.id" />
-					</destination>
-				</navigation>
-				<divider />
-				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
-					<icon icon="/icons/save.png" style="LEFT" />
-					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}">
-						<model ref="gradeSortCode" />
-						<model ref="assessment.id" />
-						<model ref="question.id" />
-						<model ref="sort_column" />
-						<model ref="sort_direction" />
-					</destination>
-				</navigation>
-				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/grades/{0}">
-						<model ref="gradeSortCode" />
-					</destination>
-				</navigation>
-				<divider />
 				<pager paging="paging">
 					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
 						<model ref="gradeSortCode" />
@@ -154,7 +129,7 @@
 						<message selector="submission-username" />
 					</title>
 					<entityNavigations>
-						<navigation>
+						<navigation submit="TRUE">
 							<destination template="/grade_submission/{0}/{1}/{2}/{3}{4}/{5}">
 								<model ref="gradeSortCode" />
 								<model ref="assessment.id" />
@@ -258,24 +233,9 @@
 					</title>
 					<container>
 						<text>
-							<included>
-								<compareDecision model="official">
-									<constant value="TRUE" />
-								</compareDecision>
-							</included>
 							<message selector="format-submission-tries">
 								<model ref="answer.submission.siblingCount" />
-								<model ref="answer.submission.assessment.tries" />
-							</message>
-						</text>
-						<text>
-							<included>
-								<compareDecision model="official">
-									<constant value="FALSE" />
-								</compareDecision>
-							</included>
-							<message selector="format-submission-tries-countone">
-								<model ref="answer.submission.assessment.tries" />
+								<model ref="answer.submission.assessment.tries" missing="infinite" />
 							</message>
 						</text>
 					</container>
@@ -292,7 +252,7 @@
 								</compareDecision>
 							</included>
 						</navigation>
-						<navigation style="LINK" submit="FALSE">
+						<navigation style="LINK" submit="TRUE">
 							<title>
 								<message selector="close" />
 							</title>
@@ -367,31 +327,13 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="toc" accessKey="toc-access" description="toc-description" style="BUTTON" submit="TRUE">
-					<icon icon="/icons/contents.gif" style="LEFT" />
+				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
+					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/grade_questions_list/{0}/{1}">
 						<model ref="gradeSortCode" />
-						<model ref="assessment.id" />
+						<model ref="assessment.id" />						
 					</destination>
-				</navigation>
-				<divider />
-				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
-					<icon icon="/icons/save.png" style="LEFT" />
-					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}">
-						<model ref="gradeSortCode" />
-						<model ref="assessment.id" />
-						<model ref="question.id" />
-						<model ref="sort_column" />
-						<model ref="sort_direction" />
-					</destination>
-				</navigation>
-				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/grade_questions_list/{0}/{1}">
-						<model ref="gradeSortCode" />
-						<model ref="assessment.id" />
-					</destination>
-				</navigation>
+				</navigation>	
 				<divider />
 				<pager paging="paging">
 					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
