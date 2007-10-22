@@ -77,7 +77,7 @@
 			<container>
 				<navigation destination="/pools_delete" title="ok" style="BUTTON" accessKey="ok-access" description="ok-description"
 					submit="TRUE">
-					<icon icon="/icons/correct.png" style="LEFT" />
+					<icon icon="/icons/OK.png" style="LEFT" />
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />

@@ -111,7 +111,7 @@
 			<container>
 				<navigation title="ok" style="BUTTON" accessKey="ok-access" description="ok-description" submit="TRUE"
 					selectRequirement="SINGLE" selectRequirementId="SELECTION" selectRequirementMessage="save-failed-requirements">
-					<icon icon="/icons/correct.png" style="LEFT" />
+					<icon icon="/icons/OK.png" style="LEFT" />
 					<destination template="{0}">
 						<model ref="saveDestination" />
 					</destination>
