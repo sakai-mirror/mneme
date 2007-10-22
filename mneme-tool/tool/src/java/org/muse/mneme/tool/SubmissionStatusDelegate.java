@@ -56,7 +56,7 @@ public class SubmissionStatusDelegate extends FormatDelegateImpl
 		StringBuilder rv = new StringBuilder();
 		if (submission.getGradingStatus().equals(GradingSubmissionStatus.released))
 		{
-			rv.append("<img src=\"" + context.get("sakai.return.url") + "/icons/checkon.gif\" alt=\"" + context.getMessages().getString("grade-status-released")
+			rv.append("<img src=\"" + context.get("sakai.return.url") + "/icons/correct.png\" alt=\"" + context.getMessages().getString("grade-status-released")
 					+ "\" />");
 			rv.append(" ");
 		}

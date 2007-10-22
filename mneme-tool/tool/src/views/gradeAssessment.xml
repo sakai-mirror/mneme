@@ -51,7 +51,7 @@
 				<model ref="assessment.Parts.totalPoints" />
 			</message>
 		</text>
-
+		<gap></gap>
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
@@ -60,14 +60,18 @@
 					<icon icon="/icons/grade_student.png" style="LEFT" />
 					<destination template="/" />
 				</navigation>
- 				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description">
+				<navigation>
+					<title>
+						<message selector="nav-divider" />
+					</title>
+				</navigation>
+				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description">
 					<icon icon="/icons/grade_questions.png" style="LEFT" />
 					<destination template="/grade_questions_list/{0}/{1}">
 						<model ref="gradesSortCode" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>
-
 			</container>
 		</navigationBar>
 
@@ -76,10 +80,9 @@
 				<row title="actions">
 					<container>
 						<navigation title="release-all-evaluated" style="LINK">
-							<icon icon="/icons/checkon.gif" style="LEFT" />
 							<destination template="/" />
 						</navigation>
-						 <navigation title="divider" style="LINK" disabled="TRUE">
+						<navigation title="slash" style="LINK" disabled="TRUE">
 							<destination template="/" />
 						</navigation>
 						<navigation title="release-all" style="LINK">
@@ -351,6 +354,21 @@
 					</sort>
 					<container>
 						<floatEdit model="submission.totalScore" cols="2" />
+					</container>
+				</column>
+				<column>
+					<container>
+						<text>
+							<message>
+								<model type="icon" icon="/icons/grade.png" />
+							</message>
+							<included>
+								<decision model="submission.evaluation.evaluated" />
+								<andDecision>
+									<decision model="submission.isComplete" />
+								</andDecision>
+							</included>
+						</text>
 					</container>
 				</column>
 			</columns>
