@@ -173,103 +173,120 @@
 		<section>
 			<iterator name="answer" model="submission.answers" />
 
+			<!-- section title -->
+			<title>
+				<message selector="instructions-section-title">
+					<model type="icon" icon="/icons/section.png" />
+					<model type="text" ref="answer.question.part.ordering.position" />
+					<model type="text" ref="answer.question.part.assessment.parts.size" />
+					<model type="text" ref="answer.question.part.title" />
+					<model ref="answer.question.part" delegate="SectionScore" tool="sakai.mneme" />
+				</message>
+				<included>
+					<orDecision>
+						<decision model="answer.question.partOrdering.isFirst" />
+					</orDecision>
+					<decision model="answer.question.part.assessment.parts.showPresentation" />
+				</included>
+			</title>
+
+			<!--  <floatEdit model="answer.totalScore">
+				<title highlighted="TRUE">
+				<message selector="answer-points">
+				<model ref="answer.autoScore" missing="missing-auto-score" />
+				<model ref="answer.question.pool.points" />
+				</message>
+				</title>
+				</floatEdit> -->
+
 			<container>
-				<entityDisplay>
-					<rows>
-						<row>
-							<title highlighted="TRUE">
-								<message selector="question-number">
-									<model ref="answer.question.assessmentOrdering.position" />
-									<model ref="answer.question.part.assessment.parts.NumQuestions" />
-								</message>
-							</title>
-							<container>
-								<floatEdit model="answer.totalScore">
-									<title highlighted="TRUE">
-										<message selector="answer-points">
-											<model ref="answer.autoScore" missing="missing-auto-score" />
-											<model ref="answer.question.pool.points" />
-										</message>
-									</title>
-								</floatEdit>
-							</container>
-						</row>
 
-						<row>
-							<container>
-								<!-- question presentation (text and attachments) -->
-								<text>
-									<message>
-										<model type="html" ref="answer.question.presentation.text" />
-									</message>
-								</text>
+				<!-- part presentation -->
+				<text model="answer.question.part.presentation.text">
+					<included>
+						<decision model="answer.question.partOrdering.isFirst" />
+						<decision model="answer.question.part.assessment.parts.showPresentation" />
+					</included>
+				</text>
+				<attachments title="attachments" model="answer.question.part.presentation.attachments">
+					<included>
+						<hasValueDecision model="answer.question.part.presentation.attachments" />
+						<decision model="answer.question.partOrdering.isFirst" />
+						<decision model="answer.question.part.assessment.parts.showPresentation" />
+					</included>
+				</attachments>
 
-								<attachments model="answer.question.presentation.attachments">
-									<included>
-										<hasValueDecision model="answer.question.presentation.attachments" />
-									</included>
-								</attachments>
+				<section>
 
-								<!-- submission title -->
-								<section>
-									<container>
-										<text>
-											<message selector="submission" />
-										</text>
-									</container>
-								</section>
+					<!-- question header -->
+					<title highlighted="TRUE">
+						<message>
+							<model type="html" ref="answer.question" delegate="FormatQuestionTitle" tool="sakai.mneme" />
+						</message>
+					</title>
 
-								<!-- Question specific review -->
-								<modelComponent model="answer.question.typeSpecificQuestion.reviewUi" />
+					<container>
 
-								<!-- answer key -->
-								<text>
-									<message selector="question-answer-key">
-										<model type="icon" icon="/icons/answer_key.png" />
-										<model type="html" ref="answer.question.answerKey" />
-									</message>
-									<included>
-										<hasValueDecision model="answer.question.answerKey" />
-									</included>
-								</text>
+						<!-- question presentation (text and attachments) -->
+						<text>
+							<message>
+								<model type="html" ref="answer.question.presentation.text" />
+							</message>
+						</text>
 
-								<!-- question feedback -->
-								<text>
-									<message selector="question-feedback">
-										<model type="icon" icon="/icons/feedback.png" />
-										<model type="html" ref="answer.question.feedback" />
-									</message>
-									<included>
-										<hasValueDecision model="answer.question.feedback" />
-									</included>
-								</text>
+						<attachments model="answer.question.presentation.attachments">
+							<included>
+								<hasValueDecision model="answer.question.presentation.attachments" />
+							</included>
+						</attachments>
 
-								<!-- reason -->
-								<text>
-									<message selector="question-rationale">
-										<model type="icon" icon="/icons/reason.png" />
-										<model ref="answer.reason" />
-									</message>
-									<included>
-										<hasValueDecision model="answer.reason" />
-									</included>
-								</text>
+						<!-- Question specific review -->
+						<modelComponent model="answer.question.typeSpecificQuestion.reviewUi" />
 
-								<section>
-									<container>
-										<text>
-											<message selector="submission-comments">
-												<model type="icon" icon="/icons/note.png" />
-											</message>
-										</text>
+						<!-- answer key -->
+						<text>
+							<message selector="question-answer-key">
+								<model type="icon" icon="/icons/answer_key.png" />
+								<model type="html" ref="answer.question.answerKey" />
+							</message>
+							<included>
+								<hasValueDecision model="answer.question.answerKey" />
+							</included>
+						</text>
 
-										<textEdit model="answer.evaluation.comment" rows="5" cols="50" />
-									</container>
-								</section>
-							</container>
-						</row>
-					</rows>
-				</entityDisplay>
+						<!-- question feedback -->
+						<text>
+							<message selector="question-feedback">
+								<model type="icon" icon="/icons/feedback.png" />
+								<model type="html" ref="answer.question.feedback" />
+							</message>
+							<included>
+								<hasValueDecision model="answer.question.feedback" />
+							</included>
+						</text>
+
+						<!-- reason -->
+						<text>
+							<message selector="question-rationale">
+								<model type="icon" icon="/icons/reason.png" />
+								<model type="text" ref="answer.reason" />
+							</message>
+							<included>
+								<hasValueDecision model="answer.reason" />
+							</included>
+						</text>
+
+						<!-- evaluation -->
+						<text>
+							<message selector="submission-comments">
+								<model type="icon" icon="/icons/note.png" />
+							</message>
+						</text>
+
+						<htmlEdit model="answer.evaluation.comment" rows="5" cols="80" />
+
+					</container>
+				</section>
 			</container>
 		</section>
 

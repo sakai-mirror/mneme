@@ -111,6 +111,9 @@ public class GradeSubmissionView extends ControllerImpl
 
 		context.put("submission", submission);
 
+		// needed by some of the delegates to show the score
+		context.put("review", Boolean.TRUE);
+
 		List<Submission> submissions = null;
 
 		if (!fromGradeByQuestion)
