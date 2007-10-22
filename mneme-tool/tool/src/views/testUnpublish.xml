@@ -84,7 +84,7 @@
 		<navigationBar id="nav" width="20em">
 			<container>
 				<navigation title="ok" accessKey="ok-access" description="ok-description" style="BUTTON" submit="TRUE" destination="/assessments">
-					<icon icon="/icons/publish_ok.png" style="LEFT" />
+					<icon icon="/icons/OK.png" style="LEFT" />
 				</navigation>
 				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
 					<destination template="/assessments/{0}">

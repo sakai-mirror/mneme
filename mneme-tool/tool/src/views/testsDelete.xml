@@ -98,7 +98,7 @@
 		<navigationBar width="100%">
 			<container>
 				<navigation title="ok" style="BUTTON" accessKey="ok-access" description="ok-description" submit="TRUE">
-					<icon icon="/icons/correct.png" style="LEFT" />
+					<icon icon="/icons/OK.png" style="LEFT" />
 					<destination template="/assessments_delete/{0}">
 						<model ref="sortcode" />
 					</destination>
