@@ -142,7 +142,6 @@ public class TestSettingsView extends ControllerImpl
 			// commit the save
 			try
 			{
-				assessment.setPublished(Boolean.TRUE);
 				this.assessmentService.saveAssessment(assessment);
 			}
 			catch (AssessmentPermissionException e)
