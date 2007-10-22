@@ -236,8 +236,8 @@
 			<container>
 				<navigation title="return" accessKey="return-access" description="return-description" style="BUTTON">
 					<icon icon="/icons/return.png" style="LEFT" />
-					<destination template="/assessments/{0}">
-						<model ref="sort" />
+					<destination template="{0}">
+						<model ref="return" />
 					</destination>
 				</navigation>
 			</container>

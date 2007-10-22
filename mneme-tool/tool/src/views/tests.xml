@@ -183,10 +183,10 @@
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="assessment-type-test">
 							<icon icon="/icons/test_type.png" style="LEFT" />
-							<destination template="/assessment_preview/{0}{1}/{2}">
+							<destination template="/assessment_preview/{0}/assessments/{1}{2}">
+								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="assessment.id" />
 							</destination>
 							<included>
 								<compareDecision model="assessment.type" constant="test" />
@@ -194,10 +194,10 @@
 						</navigation>
 						<navigation style="LINK" submit="TRUE" description="assessment-type-survey">
 							<icon icon="/icons/survey_type.png" style="LEFT" />
-							<destination template="/assessment_preview/{0}{1}/{2}">
+							<destination template="/assessment_preview/{0}/assessments/{1}{2}">
+								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="assessment.id" />
 							</destination>
 							<included>
 								<compareDecision model="assessment.type" constant="survey" />
@@ -205,10 +205,10 @@
 						</navigation>
 						<navigation style="LINK" submit="TRUE" description="assessment-type-assignment">
 							<icon icon="/icons/assignment_type.png" style="LEFT" />
-							<destination template="/assessment_preview/{0}{1}/{2}">
+							<destination template="/assessment_preview/{0}/assessments/{1}{2}">
+								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="assessment.id" />
 							</destination>
 							<included>
 								<compareDecision model="assessment.type" constant="assignment" />

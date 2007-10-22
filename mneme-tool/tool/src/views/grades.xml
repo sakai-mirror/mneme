@@ -60,10 +60,10 @@
 							<included>
 								<compareDecision model="assessment.type" constant="test" />
 							</included>
-							<destination template="/assessment_preview/{0}{1}/{2}">
+							<destination template="/assessment_preview/{0}/grades/{1}{2}">
+								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="assessment.id" />
 							</destination>
 						</navigation>
 						<navigation description="assessment-type-survey" style="LINK" submit="TRUE">
@@ -71,10 +71,10 @@
 							<included>
 								<compareDecision model="assessment.type" constant="survey" />
 							</included>
-							<destination template="/assessment_preview/{0}{1}/{2}">
+							<destination template="/assessment_preview/{0}/grades/{1}{2}">
+								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="assessment.id" />
 							</destination>
 						</navigation>
 						<navigation description="assessment-type-assignment" style="LINK" submit="TRUE">
@@ -82,10 +82,10 @@
 							<included>
 								<compareDecision model="assessment.type" constant="assignment" />
 							</included>
-							<destination template="/assessment_preview/{0}{1}/{2}">
+							<destination template="/assessment_preview/{0}/grades/{1}{2}">
+								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="assessment.id" />
 							</destination>
 						</navigation>
 					</navigations>
