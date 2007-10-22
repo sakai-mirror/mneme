@@ -320,14 +320,10 @@
 		</navigationBar>
 
 
-		<entityDisplay>
-			<rows>
-				<row title="id">
-					<container>
-						<text model="assessment.id" />
-					</container>
-				</row>
-			</rows>
-		</entityDisplay>
+		<text>
+			<message selector="id">
+				<model ref="assessment.id" />
+			</message>
+		</text>
 	</container>
 </interface>
