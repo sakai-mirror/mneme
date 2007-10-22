@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentSpecialAccess;
 import org.muse.mneme.api.Changeable;
@@ -34,6 +35,8 @@ import org.muse.mneme.api.Changeable;
  */
 public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 {
+	protected transient Assessment assessment = null;
+
 	protected Changeable owner = null;
 
 	protected List<AssessmentAccess> specialAccess = new ArrayList<AssessmentAccess>();
@@ -46,10 +49,11 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 	 * @param owner
 	 *        The change reporting entity.
 	 */
-	public AssessmentSpecialAccessImpl(AssessmentSpecialAccessImpl other, Changeable owner)
+	public AssessmentSpecialAccessImpl(Assessment assessment, AssessmentSpecialAccessImpl other, Changeable owner)
 	{
 		this.owner = owner;
-		set(other);
+		this.assessment = assessment;
+		set(assessment, other);
 	}
 
 	/**
@@ -58,9 +62,10 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 	 * @param owner
 	 *        The change reporting entity.
 	 */
-	public AssessmentSpecialAccessImpl(Changeable owner)
+	public AssessmentSpecialAccessImpl(Assessment assessment, Changeable owner)
 	{
 		this.owner = owner;
+		this.assessment = assessment;
 	}
 
 	/**
@@ -68,7 +73,7 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 	 */
 	public AssessmentAccess addAccess()
 	{
-		AssessmentAccessImpl rv = new AssessmentAccessImpl(this.owner);
+		AssessmentAccessImpl rv = new AssessmentAccessImpl(this.assessment, this.owner);
 		this.specialAccess.add(rv);
 
 		this.owner.setChanged();
@@ -148,12 +153,12 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 	 * @param other
 	 *        The other to copy.
 	 */
-	protected void set(AssessmentSpecialAccessImpl other)
+	protected void set(Assessment assessment, AssessmentSpecialAccessImpl other)
 	{
 		this.specialAccess.clear();
 		for (AssessmentAccess access : other.specialAccess)
 		{
-			this.specialAccess.add(new AssessmentAccessImpl((AssessmentAccessImpl) access, this.owner));
+			this.specialAccess.add(new AssessmentAccessImpl(assessment, (AssessmentAccessImpl) access, this.owner));
 		}
 	}
 }

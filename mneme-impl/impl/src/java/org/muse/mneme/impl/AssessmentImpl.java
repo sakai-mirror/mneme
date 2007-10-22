@@ -140,7 +140,7 @@ public class AssessmentImpl implements Assessment
 		this.password = new AssessmentPasswordImpl(this.changed);
 		this.presentation = new PresentationImpl(this.historyChanged);
 		this.review = new AssessmentReviewImpl(this, this.changed);
-		this.specialAccess = new AssessmentSpecialAccessImpl(this.changed);
+		this.specialAccess = new AssessmentSpecialAccessImpl(this, this.changed);
 		this.submitPresentation = new PresentationImpl(this.historyChanged);
 	}
 
@@ -783,7 +783,7 @@ public class AssessmentImpl implements Assessment
 		// this.submissionCounts = new SubmissionCountsImpl((SubmissionCountsImpl) other.submissionCounts);
 		this.submissionService = other.submissionService;
 		this.submitPresentation = new PresentationImpl((PresentationImpl) other.submitPresentation, this.historyChanged);
-		this.specialAccess = new AssessmentSpecialAccessImpl((AssessmentSpecialAccessImpl) other.specialAccess, this.changed);
+		this.specialAccess = new AssessmentSpecialAccessImpl(this, (AssessmentSpecialAccessImpl) other.specialAccess, this.changed);
 		this.timeLimit = other.timeLimit;
 		this.title = other.title;
 		this.tries = other.tries;

@@ -65,53 +65,23 @@
 							<rows>
 								<row title="open-date">
 									<container>
-										<selection orientation="HORIZONTAL">
-											<model ref="access.overrideOpenDate" />
-											<selectionChoices>
-												<selectionChoice value="false" selector="from-test" />
-												<selectionChoice value="true" selector="from-special">
-													<container>
-														<dateEdit>
-															<model ref="access.openDate" type="date" />
-														</dateEdit>
-													</container>
-												</selectionChoice>
-											</selectionChoices>
-										</selection>
+										<dateEdit>
+											<model ref="access.openDate" type="date" />
+										</dateEdit>
 									</container>
 								</row>
 								<row title="due-date">
 									<container>
-										<selection orientation="HORIZONTAL">
-											<model ref="access.overrideDueDate" />
-											<selectionChoices>
-												<selectionChoice value="false" selector="from-test" />
-												<selectionChoice value="true" selector="from-special">
-													<container>
-														<dateEdit>
-															<model ref="access.dueDate" type="date" />
-														</dateEdit>
-													</container>
-												</selectionChoice>
-											</selectionChoices>
-										</selection>
+										<dateEdit>
+											<model ref="access.dueDate" type="date" />
+										</dateEdit>
 									</container>
 								</row>
 								<row title="accept-until">
 									<container>
-										<selection orientation="HORIZONTAL">
-											<model ref="access.overrideAcceptUntilDate" />
-											<selectionChoices>
-												<selectionChoice value="false" selector="from-test" />
-												<selectionChoice value="true" selector="from-special">
-													<container>
-														<dateEdit>
-															<model ref="access.acceptUntilDate" type="date" />
-														</dateEdit>
-													</container>
-												</selectionChoice>
-											</selectionChoices>
-										</selection>
+										<dateEdit>
+											<model ref="access.acceptUntilDate" type="date" />
+										</dateEdit>
 									</container>
 								</row>
 							</rows>
@@ -120,25 +90,15 @@
 				</row>
 				<row title="timeLimit">
 					<container>
-						<selection orientation="HORIZONTAL">
-							<model ref="access.overrideTimeLimit" />
+						<selection orientation="VERTICAL">
+							<model ref="access.hasTimeLimit" />
 							<selectionChoices>
-								<selectionChoice value="false" selector="from-test" />
-								<selectionChoice value="true" selector="from-special">
+								<selectionChoice value="false" selector="no-time-limit" />
+								<selectionChoice value="true" selector="time-limit">
 									<container>
-										<selection orientation="VERTICAL">
-											<model ref="access.hasTimeLimit" />
-											<selectionChoices>
-												<selectionChoice value="false" selector="no-time-limit" />
-												<selectionChoice value="true" selector="time-limit">
-													<container>
-														<durationEdit>
-															<model ref="access.timeLimit" type="duration" />
-														</durationEdit>
-													</container>
-												</selectionChoice>
-											</selectionChoices>
-										</selection>
+										<durationEdit>
+											<model ref="access.timeLimit" type="duration" />
+										</durationEdit>
 									</container>
 								</selectionChoice>
 							</selectionChoices>
@@ -147,28 +107,18 @@
 				</row>
 				<row title="allowTries">
 					<container>
-						<selection orientation="HORIZONTAL">
-							<model ref="access.overrideTries" />
+						<selection orientation="VERTICAL">
+							<model ref="access.hasTriesLimit" />
 							<selectionChoices>
-								<selectionChoice value="false" selector="from-test" />
-								<selectionChoice value="true" selector="from-special">
+								<selectionChoice value="false" selector="no-tries" />
+								<selectionChoice value="true" selector="tries">
 									<container>
-										<selection orientation="VERTICAL">
-											<model ref="access.hasTriesLimit" />
-											<selectionChoices>
-												<selectionChoice value="false" selector="no-tries" />
-												<selectionChoice value="true" selector="tries">
-													<container>
-														<countEdit>
-															<model ref="access.tries" type="count" />
-															<minValue>
-																<model type="constant" value="1" />
-															</minValue>
-														</countEdit>
-													</container>
-												</selectionChoice>
-											</selectionChoices>
-										</selection>
+										<countEdit>
+											<model ref="access.tries" type="count" />
+											<minValue>
+												<model type="constant" value="1" />
+											</minValue>
+										</countEdit>
 									</container>
 								</selectionChoice>
 							</selectionChoices>
@@ -177,19 +127,9 @@
 				</row>
 				<row title="password">
 					<container>
-						<selection orientation="HORIZONTAL">
-							<model ref="access.overridePassword" />
-							<selectionChoices>
-								<selectionChoice value="false" selector="from-test" />
-								<selectionChoice value="true" selector="from-special">
-									<container>
-										<textEdit rows="1" cols="16">
-											<model ref="access.password.password" />
-										</textEdit>
-									</container>
-								</selectionChoice>
-							</selectionChoices>
-						</selection>
+						<textEdit rows="1" cols="16">
+							<model ref="access.passwordValue" />
+						</textEdit>
 					</container>
 				</row>
 			</rows>
@@ -198,20 +138,22 @@
 		<!-- save / cancel nav bar -->
 		<navigationBar id="nav" width="100%">
 			<container>
-				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
+				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/assessment_special/{0}/{1}">
 						<model ref="sort" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>
-				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
+				<!--
+					<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 					<destination template="/assessment_special/{0}/{1}">
-						<model ref="sort" />
-						<model ref="assessment.id" />
+					<model ref="sort" />
+					<model ref="assessment.id" />
 					</destination>
-				</navigation>
+					</navigation>
+				-->
 			</container>
 		</navigationBar>
 

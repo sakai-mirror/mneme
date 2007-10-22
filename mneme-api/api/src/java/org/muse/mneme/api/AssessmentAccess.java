@@ -123,6 +123,13 @@ public interface AssessmentAccess
 	AssessmentPassword getPassword();
 
 	/**
+	 * Access the password text.
+	 * 
+	 * @return The password text.
+	 */
+	String getPasswordValue();
+
+	/**
 	 * Access the special time limit for taking the assessment (ms).
 	 * 
 	 * @return The special time limit for taking the assessment (ms), or null if it is untimed.
@@ -236,6 +243,14 @@ public interface AssessmentAccess
 	 *        TRUE to override the Tries, FALSE to not.
 	 */
 	void setOverrideTries(Boolean override);
+
+	/**
+	 * Set the password text.
+	 * 
+	 * @param password
+	 *        The password text.
+	 */
+	void setPasswordValue(String password);
 
 	/**
 	 * Set the time limit for taking the assessment (ms).

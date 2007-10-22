@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentPassword;
 import org.muse.mneme.api.Changeable;
@@ -35,6 +36,8 @@ import org.muse.mneme.api.Changeable;
 public class AssessmentAccessImpl implements AssessmentAccess
 {
 	protected Date acceptUntilDate = null;
+
+	protected transient Assessment assessment = null;
 
 	protected Date dueDate = null;
 
@@ -70,9 +73,10 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AssessmentAccessImpl(AssessmentAccessImpl other, Changeable owner)
+	public AssessmentAccessImpl(Assessment assessment, AssessmentAccessImpl other, Changeable owner)
 	{
 		this.owner = owner;
+		this.assessment = assessment;
 		set(other);
 	}
 
@@ -88,10 +92,11 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 * @param poolService
 	 *        The PoolService.
 	 */
-	public AssessmentAccessImpl(Changeable owner)
+	public AssessmentAccessImpl(Assessment assessment, Changeable owner)
 	{
 		this.owner = owner;
 		this.password = new AssessmentPasswordImpl(owner);
+		this.assessment = assessment;
 	}
 
 	/**
@@ -111,6 +116,8 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public Date getAcceptUntilDate()
 	{
+		if (!this.overrideAcceptUntilDate) return this.assessment.getDates().getAcceptUntilDate();
+
 		return this.acceptUntilDate;
 	}
 
@@ -119,6 +126,8 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public Date getDueDate()
 	{
+		if (!this.overrideDueDate) return this.assessment.getDates().getDueDate();
+
 		return this.dueDate;
 	}
 
@@ -127,6 +136,8 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public Boolean getHasTimeLimit()
 	{
+		if (!this.overrideTimeLimit) return this.assessment.getHasTimeLimit();
+
 		return Boolean.valueOf(this.timeLimit != null);
 	}
 
@@ -135,6 +146,8 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public Boolean getHasTriesLimit()
 	{
+		if (!this.overrideTries) return this.assessment.getHasTriesLimit();
+
 		return Boolean.valueOf(this.tries != null);
 	}
 
@@ -151,6 +164,8 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public Date getOpenDate()
 	{
+		if (!this.overrideOpenDate) return this.assessment.getDates().getOpenDate();
+
 		return this.openDate;
 	}
 
@@ -207,7 +222,19 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public AssessmentPassword getPassword()
 	{
+		if (!this.overridePassword) return this.assessment.getPassword();
+
 		return this.password;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getPasswordValue()
+	{
+		if (!this.overridePassword) return this.assessment.getPassword().getPassword();
+
+		return this.password.getPassword();
 	}
 
 	/**
@@ -215,6 +242,8 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public Long getTimeLimit()
 	{
+		if (!this.overrideTimeLimit) return this.assessment.getTimeLimit();
+
 		return this.timeLimit;
 	}
 
@@ -223,6 +252,8 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public Integer getTries()
 	{
+		if (!this.overrideTries) return this.assessment.getTries();
+
 		return this.tries;
 	}
 
@@ -255,9 +286,27 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public void setAcceptUntilDate(Date date)
 	{
-		if (!Different.different(date, this.acceptUntilDate)) return;
+		boolean override = false;
+		Date d = null;
 
-		this.acceptUntilDate = date;
+		// compute what we should have based on the new setting and the assessment setting
+		if (!Different.different(date, this.assessment.getDates().getAcceptUntilDate()))
+		{
+			override = false;
+			d = null;
+		}
+
+		else
+		{
+			override = true;
+			d = date;
+		}
+
+		// if we already have this, we are done
+		if (!Different.different(d, this.acceptUntilDate) && (override == this.overrideAcceptUntilDate)) return;
+
+		this.overrideAcceptUntilDate = override;
+		this.acceptUntilDate = d;
 
 		this.owner.setChanged();
 	}
@@ -267,9 +316,27 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public void setDueDate(Date date)
 	{
-		if (!Different.different(date, this.dueDate)) return;
+		boolean override = false;
+		Date d = null;
 
-		this.dueDate = date;
+		// compute what we should have based on the new setting and the assessment setting
+		if (!Different.different(date, this.assessment.getDates().getDueDate()))
+		{
+			override = false;
+			d = null;
+		}
+
+		else
+		{
+			override = true;
+			d = date;
+		}
+
+		// if we already have this, we are done
+		if (!Different.different(d, this.dueDate) && (override == this.overrideDueDate)) return;
+
+		this.overrideDueDate = override;
+		this.dueDate = d;
 
 		this.owner.setChanged();
 	}
@@ -281,12 +348,28 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	{
 		if (hasTimeLimit == null) throw new IllegalArgumentException();
 
-		if ((!hasTimeLimit) && (this.timeLimit != null))
-		{
-			this.timeLimit = null;
+		// ignore any positive setting - the negative ones are what count
+		if (hasTimeLimit) return;
 
-			this.owner.setChanged();
+		boolean override = false;
+
+		// check against the real assessment setting for a difference
+		if (this.assessment.getHasTimeLimit())
+		{
+			override = true;
 		}
+		else
+		{
+			override = false;
+		}
+
+		// check for a real difference
+		if (override == this.overrideTimeLimit) return;
+
+		this.overrideTimeLimit = override;
+		this.timeLimit = null;
+
+		this.owner.setChanged();
 	}
 
 	/**
@@ -296,12 +379,28 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	{
 		if (hasTriesLimit == null) throw new IllegalArgumentException();
 
-		if ((!hasTriesLimit) && (this.tries != null))
-		{
-			this.tries = null;
+		// ignore any positive setting - the negative ones are what count
+		if (hasTriesLimit) return;
 
-			this.owner.setChanged();
+		boolean override = false;
+
+		// check against the real assessment setting for a difference
+		if (this.assessment.getHasTriesLimit())
+		{
+			override = true;
 		}
+		else
+		{
+			override = false;
+		}
+
+		// check for a real difference
+		if (this.overrideTries == override) return;
+
+		this.overrideTries = override;
+		this.tries = null;
+
+		this.owner.setChanged();
 	}
 
 	/**
@@ -309,9 +408,27 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public void setOpenDate(Date date)
 	{
-		if (!Different.different(date, this.openDate)) return;
+		boolean override = false;
+		Date d = null;
 
-		this.openDate = date;
+		// compute what we should have based on the new setting and the assessment setting
+		if (!Different.different(date, this.assessment.getDates().getOpenDate()))
+		{
+			override = false;
+			d = null;
+		}
+
+		else
+		{
+			override = true;
+			d = date;
+		}
+
+		// if we already have this, we are done
+		if (!Different.different(d, this.openDate) && (override == this.overrideOpenDate)) return;
+
+		this.overrideOpenDate = override;
+		this.openDate = d;
 
 		this.owner.setChanged();
 	}
@@ -325,6 +442,10 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		if (override.equals(this.overrideAcceptUntilDate)) return;
 
 		this.overrideAcceptUntilDate = override;
+		if (!override)
+		{
+			this.acceptUntilDate = null;
+		}
 
 		this.owner.setChanged();
 	}
@@ -338,6 +459,10 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		if (override.equals(this.overrideDueDate)) return;
 
 		this.overrideDueDate = override;
+		if (!override)
+		{
+			this.dueDate = null;
+		}
 
 		this.owner.setChanged();
 	}
@@ -351,6 +476,10 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		if (override.equals(this.overrideOpenDate)) return;
 
 		this.overrideOpenDate = override;
+		if (!override)
+		{
+			this.openDate = null;
+		}
 
 		this.owner.setChanged();
 	}
@@ -364,6 +493,10 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		if (override.equals(this.overridePassword)) return;
 
 		this.overridePassword = override;
+		if (!override)
+		{
+			this.password = null;
+		}
 
 		this.owner.setChanged();
 	}
@@ -377,6 +510,10 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		if (override.equals(this.overrideTimeLimit)) return;
 
 		this.overrideTimeLimit = override;
+		if (!override)
+		{
+			this.timeLimit = null;
+		}
 
 		this.owner.setChanged();
 	}
@@ -390,6 +527,38 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		if (override.equals(this.overrideTries)) return;
 
 		this.overrideTries = override;
+		if (!override)
+		{
+			this.tries = null;
+		}
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setPasswordValue(String password)
+	{
+		boolean override = false;
+		String pw = null;
+
+		if (!Different.different(password, this.assessment.getPassword().getPassword()))
+		{
+			override = false;
+			pw = null;
+		}
+
+		else
+		{
+			override = true;
+			pw = password;
+		}
+
+		if (!Different.different(pw, this.password.getPassword()) && (override == this.overridePassword)) return;
+
+		this.overridePassword = override;
+		this.password.setPassword(pw);
 
 		this.owner.setChanged();
 	}
@@ -399,9 +568,25 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public void setTimeLimit(Long limit)
 	{
-		if (!Different.different(limit, this.timeLimit)) return;
+		boolean override = false;
+		Long tl = null;
 
-		this.timeLimit = limit;
+		if (!Different.different(limit, this.assessment.getTimeLimit()))
+		{
+			override = false;
+			tl = null;
+		}
+
+		else
+		{
+			override = true;
+			tl = limit;
+		}
+
+		if (!Different.different(tl, this.timeLimit) && (override == this.overrideTimeLimit)) return;
+
+		this.overrideTimeLimit = override;
+		this.timeLimit = tl;
 
 		this.owner.setChanged();
 	}
@@ -411,9 +596,25 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	 */
 	public void setTries(Integer count)
 	{
-		if (!Different.different(count, this.tries)) return;
+		boolean override = false;
+		Integer t = null;
 
-		this.tries = count;
+		if (!Different.different(count, this.assessment.getTries()))
+		{
+			override = false;
+			t = null;
+		}
+
+		else
+		{
+			override = true;
+			t = count;
+		}
+
+		if (!Different.different(t, this.tries) && (override == this.overrideTries)) return;
+
+		this.overrideTries = override;
+		this.tries = t;
 
 		this.owner.setChanged();
 	}
@@ -421,13 +622,33 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setUsers(List<String> userIds)
+	public void setUsers(List<String> newIds)
 	{
-		// TODO: change tracking
-		this.userIds.clear();
-		if (userIds != null)
+		// has anything changed?
+		if ((newIds == null) && this.userIds.isEmpty()) return;
+		boolean changed = false;
+		for (String newId : newIds)
 		{
-			this.userIds.addAll(userIds);
+			if (!this.userIds.contains(newId))
+			{
+				changed = true;
+				break;
+			}
+		}
+		for (String oldId : this.userIds)
+		{
+			if (!newIds.contains(oldId))
+			{
+				changed = true;
+				break;
+			}
+		}
+		if (!changed) return;
+
+		this.userIds.clear();
+		if (newIds != null)
+		{
+			this.userIds.addAll(newIds);
 		}
 
 		this.owner.setChanged();
@@ -462,7 +683,11 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		this.overridePassword = other.overridePassword;
 		this.overrideTimeLimit = other.overrideTimeLimit;
 		this.overrideTries = other.overrideTries;
-		this.password = new AssessmentPasswordImpl(other.password, this.owner);
+		this.password = null;
+		if (other.password != null)
+		{
+			this.password = new AssessmentPasswordImpl(other.password, this.owner);
+		}
 		this.timeLimit = other.timeLimit;
 		this.tries = other.tries;
 		this.userIds = new ArrayList<String>(other.userIds);
