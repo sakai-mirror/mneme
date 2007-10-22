@@ -176,7 +176,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 			{
 				for (Answer answer : submission.getAnswers())
 				{
-					if (answer.getTotalScore() == null)
+					if ((answer.getIsAnswered()) && (answer.getTotalScore() == null))
 					{
 						return Boolean.TRUE;
 					}
@@ -218,7 +218,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 			{
 				for (Answer answer : submission.getAnswers())
 				{
-					if ((answer.getQuestion().equals(question)) && (answer.getTotalScore() == null))
+					if ((answer.getQuestion().equals(question)) && (answer.getIsAnswered()) && (answer.getTotalScore() == null))
 					{
 						return Boolean.TRUE;
 					}

@@ -94,7 +94,7 @@ public interface Assessment
 	Boolean getHasTriesLimit();
 
 	/**
-	 * Check if there are any completed submissions that have any null scores for answers.
+	 * Check if there are any completed submissions that have any null scores for answered answers.
 	 * 
 	 * @return TRUE if there are unscored submissions to this assessment, FALSE if not.
 	 */

@@ -67,7 +67,7 @@ public interface SubmissionStorage
 	List<SubmissionImpl> getAssessmentCompleteSubmissions(Assessment assessment);
 
 	/**
-	 * Check if there are any completed submissions that have any null scores for answers for this assessment.
+	 * Check if there are any completed submissions that have any null scores for answered answers for this assessment.
 	 * 
 	 * @return TRUE if there are unscored submissions to this assessment, FALSE if not.
 	 */
@@ -83,7 +83,7 @@ public interface SubmissionStorage
 	Boolean getAssessmentIsFullyReleased(Assessment assessment);
 
 	/**
-	 * Check if there are any completed submissions that have any null scores for answers to this question for this assessment.
+	 * Check if there are any completed submissions that have any null scores for answered answers to this question for this assessment.
 	 * 
 	 * @return TRUE if there are unscored submissions to this assessment, FALSE if not.
 	 */

@@ -225,6 +225,7 @@ public interface SubmissionService
 
 	/**
 	 * Find the submission answers to the assignment and question made by all users.<br />
+	 * Answers must be marked as answered.<br />
 	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one.
 	 * 
 	 * @param assessment
@@ -254,7 +255,7 @@ public interface SubmissionService
 	Answer getAnswer(String answerId);
 
 	/**
-	 * Check if there are any completed submissions that have any null scores for answers for this assessment.
+	 * Check if there are any completed submissions that have any null scores for answered answers for this assessment.
 	 * 
 	 * @param assessment
 	 *        The assessment.
@@ -272,7 +273,7 @@ public interface SubmissionService
 	Boolean getAssessmentIsFullyReleased(Assessment assessment);
 
 	/**
-	 * Check if there are any completed submissions that have any null scores for answers to this question for this assessment.
+	 * Check if there are any completed submissions that have any null scores for answered answers to this question for this assessment.
 	 * 
 	 * @param assessment
 	 *        The assessment.

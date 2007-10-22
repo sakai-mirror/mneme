@@ -69,8 +69,7 @@ public interface Question
 	String getFeedback();
 
 	/**
-	 * Check if there are any completed submissions to this question's assessment (if in context) <br />
-	 * that have any null scores for answers to this quesiton.
+	 * Check if there are any completed submissions to this question's assessment that have any null scores for answered answers to this quesiton.
 	 * 
 	 * @return TRUE if there are unscored submissions to this assessment, FALSE if not.
 	 */

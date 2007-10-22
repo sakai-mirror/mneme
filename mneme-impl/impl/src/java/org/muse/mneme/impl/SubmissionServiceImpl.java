@@ -752,8 +752,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	public List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Boolean official,
 			Integer pageNum, Integer pageSize)
 	{
-		// TODO: the sort on final score needs to be on the selected question, not on the full submission!
-
 		// TODO: review the efficiency of this method! -ggolden
 
 		if (assessment == null) throw new IllegalArgumentException();
@@ -788,22 +786,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			rv = sortByGradingSubmissionStatus((sort == FindAssessmentSubmissionsSort.status_d), rv);
 		}
 
-		// page the results
-		if ((pageNum != null) && (pageSize != null))
-		{
-			// start at ((pageNum-1)*pageSize)
-			int start = ((pageNum - 1) * pageSize);
-			if (start < 0) start = 0;
-			if (start > rv.size()) start = rv.size() - 1;
-
-			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
-			int end = ((pageNum) * pageSize);
-			if (end < 0) end = 0;
-			if (end > rv.size()) end = rv.size();
-
-			rv = rv.subList(start, end);
-		}
-
 		// pull out the one answer we want
 		List<Answer> answers = new ArrayList<Answer>();
 		for (Submission s : rv)
@@ -811,8 +793,27 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			Answer a = s.getAnswer(question);
 			if (a != null)
 			{
-				answers.add(a);
+				if (a.getIsAnswered())
+				{
+					answers.add(a);
+				}
 			}
+		}
+
+		// page the results
+		if ((pageNum != null) && (pageSize != null))
+		{
+			// start at ((pageNum-1)*pageSize)
+			int start = ((pageNum - 1) * pageSize);
+			if (start < 0) start = 0;
+			if (start > answers.size()) start = answers.size() - 1;
+
+			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
+			int end = ((pageNum) * pageSize);
+			if (end < 0) end = 0;
+			if (end > answers.size()) end = answers.size();
+
+			answers = answers.subList(start, end);
 		}
 
 		return answers;
