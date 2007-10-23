@@ -154,18 +154,10 @@
 					</container>
 				</row>
 				<row title="released">
-					<container>
-						<entityDisplay>
-							<title>
-								<message selector="releasedIcon">
-									<model type="icon" icon="/icons/checkon.gif" />
-								</message>
-							</title>
-							<included>
-								<compareDecision model="submission.isReleased" constant="true" />
-							</included>
-						</entityDisplay>
-					</container>
+					<model type="icon" icon="/icons/active.png" />
+					<included>
+						<decision model="submission.isReleased" />
+					</included>
 				</row>
 			</rows>
 		</entityDisplay>

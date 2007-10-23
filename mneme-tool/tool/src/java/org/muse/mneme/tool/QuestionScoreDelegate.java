@@ -110,12 +110,15 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 		StringBuffer rv = new StringBuffer();
 
 		Boolean review = (Boolean) context.get("review");
+		if (review == null) review = Boolean.FALSE;
+		Boolean grading = (Boolean) context.get("grading");
+		if (grading == null) grading = Boolean.FALSE;
 
 		// if we are doing review just now, and if we are needing review and it's set, and if the submission has been graded
-		if ((review != null) && review && (submission != null) && submission.getIsReleased())
+		if ((review || grading) && (submission != null) && (submission.getIsReleased() || grading))
 		{
 			// if we are doing question score feedback
-			if (assessment.getReview().getShowCorrectAnswer())
+			if (assessment.getReview().getShowCorrectAnswer() || grading)
 			{
 				// the auto-scores for this answered question
 				Float score = null;
@@ -125,7 +128,14 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 				{
 					if (answer.getQuestion().equals(question))
 					{
-						score = answer.getTotalScore();
+						if (grading)
+						{
+							score = answer.getAutoScore();
+						}
+						else
+						{
+							score = answer.getTotalScore();
+						}
 						break;
 					}
 				}
