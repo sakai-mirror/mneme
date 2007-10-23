@@ -36,16 +36,16 @@
 			<model type="icon" icon="/icons/folder_page.png" />
 		</message>
 	</header>
+	<subHeader>
+		<container>
+			<text>
+				<message>
+					<model ref="assessment.title" missing="no-title" />
+				</message>
+			</text>
+		</container>
+	</subHeader>
 	<container>
-		<section>
-			<container>
-				<text>
-					<message>
-						<model ref="assessment.title" missing="no-title" />
-					</message>
-				</text>
-			</container>
-		</section>
 		<section>
 			<container>
 				<instructions>

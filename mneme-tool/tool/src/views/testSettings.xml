@@ -57,15 +57,6 @@
 		</included>
 	</title>
 	<container>
-		<!-- <section>
-			<container>
-			<text>
-			<message>
-			<model ref="assessment.title" missing="no-title" />
-			</message>
-			</text>
-			</container>
-			</section>-->
 		<!--  warn if live -->
 		<alert>
 			<message selector="live-settings-warning"></message>
