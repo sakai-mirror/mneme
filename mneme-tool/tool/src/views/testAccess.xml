@@ -112,6 +112,9 @@
 							</selectionChoices>
 						</selection>
 					</container>
+					<included>
+						<decision model="assessment.hasTimeLimit" />
+					</included>
 				</row>
 				<row title="allowTries">
 					<container>

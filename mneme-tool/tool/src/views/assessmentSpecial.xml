@@ -39,12 +39,17 @@
 	</title>
 	<header>
 		<message selector="special-header">
-			<model type="icon" icon="/icons/basket_add.png" />
-			<model ref="assessment.title" missing="no-title" />
+			<model type="icon" icon="/icons/access.png" />
 		</message>
 	</header>
 
 	<container>
+
+		<text>
+			<message>
+				<model ref="assessment.title" missing="no-title" />
+			</message>
+		</text>
 
 		<!-- the list of special access definitions -->
 		<entityList style="FLAT">
@@ -124,6 +129,9 @@
 						<decision model="access.overrideTimeLimit" />
 						<message selector="dash" />
 					</entityIncluded>
+					<included>
+						<decision model="assessment.hasTimeLimit" />
+					</included>
 				</modelColumn>
 				<modelColumn>
 					<title>
@@ -149,7 +157,7 @@
 		</entityList>
 
 		<!-- nav bar -->
-		<navigationBar id="nav" width="100%">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="return" accessKey="return-access" description="return-description" style="BUTTON" submit="TRUE">
 					<destination template="/assessments/{0}">
