@@ -320,10 +320,10 @@
 		</navigationBar>
 
 
-		<text>
+		<finePrint>
 			<message selector="id">
 				<model ref="assessment.id" />
 			</message>
-		</text>
+		</finePrint>
 	</container>
 </interface>
