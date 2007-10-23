@@ -35,6 +35,15 @@
 			<model type="icon" icon="/icons/folder_page.png" />
 		</message>
 	</header>
+	<subHeader>
+		<container>
+			<text>
+				<message>
+					<model ref="assessment.title" missing="no-title" />
+				</message>
+			</text>
+		</container>
+	</subHeader>
 	<title>
 		<message selector="testSettings-title" />
 		<included>
@@ -48,15 +57,15 @@
 		</included>
 	</title>
 	<container>
-		<section>
+		<!-- <section>
 			<container>
-				<text>
-					<message>
-						<model ref="assessment.title" missing="no-title" />
-					</message>
-				</text>
+			<text>
+			<message>
+			<model ref="assessment.title" missing="no-title" />
+			</message>
+			</text>
 			</container>
-		</section>
+			</section>-->
 		<!--  warn if live -->
 		<alert>
 			<message selector="live-settings-warning"></message>
