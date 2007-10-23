@@ -40,11 +40,19 @@
 	<header>
 		<message selector="testAccess-header">
 			<model type="icon" icon="/icons/access.png" />
-			<model ref="assessment.title" missing="no-title" />
 		</message>
 	</header>
 
 	<container>
+
+		<text>
+			<message>
+				<model ref="assessment.title" missing="no-title" />
+			</message>
+		</text>
+
+		<!-- top nav bar (empty, used as frame) -->
+		<navigationBar id="nav" />
 
 		<entityDisplay>
 			<rows>
@@ -136,7 +144,7 @@
 		</entityDisplay>
 
 		<!-- save / cancel nav bar -->
-		<navigationBar id="nav" width="100%">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
@@ -157,15 +165,7 @@
 			</container>
 		</navigationBar>
 
-		<entityDisplay>
-			<rows>
-				<row title="id">
-					<container>
-						<text model="access.id" />
-					</container>
-				</row>
-			</rows>
-		</entityDisplay>
+		<finePrint selector="id_display" model="access.id" />
 
 	</container>
 </interface>
