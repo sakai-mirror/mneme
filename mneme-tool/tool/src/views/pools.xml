@@ -175,6 +175,6 @@
 				</modelColumn>
 			</columns>
 		</entityList>
-
+		<navigationBar />
 	</container>
 </interface>
