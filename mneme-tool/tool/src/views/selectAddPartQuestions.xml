@@ -42,7 +42,7 @@
 			</message>
 		</text>
 		<section>
-			<container>
+			<container>			
 				<!-- the list of the selected questions -->
 				<entityList style="FLAT">
 					<emptyTitle>
@@ -200,7 +200,7 @@
 		</section>
 
 		<!-- save / cancel nav bar -->
-		<navigationBar id="nav" width="100%">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />

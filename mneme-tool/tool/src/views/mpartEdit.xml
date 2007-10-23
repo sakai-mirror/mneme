@@ -42,6 +42,7 @@
 				<model ref="assessment.title" missing="no-title" />
 			</message>
 		</text>
+		<navigationBar/>
 		<section>
 			<container>
 				<entityDisplay>
@@ -108,9 +109,8 @@
 										<decision model="assessment.isLive" />
 									</disabled>
 								</navigation>
-								<navigation destination="DELETEQ" selectRequirement="SOME"
-									selectRequirementMessage="remove-failed-requirements" title="remove-question" style="LINK" description="remove-question-description"
-									submit="TRUE">
+								<navigation destination="DELETEQ" selectRequirement="SOME" selectRequirementMessage="remove-failed-requirements"
+									title="remove-question" style="LINK" description="remove-question-description" submit="TRUE">
 									<icon icon="/icons/page_delete.png" style="LEFT" />
 									<disabled>
 										<decision model="assessment.isLive" />
@@ -156,7 +156,7 @@
 							<title>
 								<message selector="question-description" />
 							</title>
-							<model type="text" ref="question.description" max="60"/>
+							<model type="text" ref="question.description" max="60" />
 						</modelColumn>
 						<modelColumn>
 							<title>
@@ -192,7 +192,7 @@
 		</section>
 
 		<!-- save / cancel nav bar -->
-		<navigationBar id="nav" width="100%">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
@@ -203,6 +203,5 @@
 				</navigation>
 			</container>
 		</navigationBar>
-
 	</container>
 </interface>

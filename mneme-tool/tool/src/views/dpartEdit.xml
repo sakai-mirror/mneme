@@ -44,6 +44,7 @@
 				<model ref="assessment.title" missing="no-title" />
 			</message>
 		</text>
+		<navigationBar/>
 		<section>
 			<container>
 				<entityDisplay>
@@ -159,7 +160,7 @@
 							<title>
 								<message selector="pool-description" />
 							</title>
-							<model type="text" ref="draw.pool.description" max="60"/>
+							<model type="text" ref="draw.pool.description" max="60" />
 						</modelColumn>
 						<modelColumn>
 							<title>
@@ -214,7 +215,7 @@
 		</section>
 
 		<!-- save / cancel nav bar -->
-		<navigationBar id="nav" width="100%">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
@@ -222,7 +223,7 @@
 						<model ref="testsortcode" />
 						<model ref="assessment.id" />
 					</destination>
-				</navigation>			
+				</navigation>
 			</container>
 		</navigationBar>
 	</container>
