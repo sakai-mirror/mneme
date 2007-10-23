@@ -37,6 +37,12 @@ public interface Submission
 	Boolean completeIfOver();
 
 	/**
+	 * Process the total score set by setTotalScore.<br />
+	 * Call after all answer scores are set, or automatically when saved (SubmissionService.evaluateSubmission).
+	 */
+	void consolidateTotalScore();
+
+	/**
 	 * Find (or create) the answer for this question.
 	 * 
 	 * @param question

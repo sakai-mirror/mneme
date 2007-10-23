@@ -493,6 +493,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		if (M_log.isDebugEnabled()) M_log.debug("evaluateSubmission: " + submission.getId());
 
+		// consoliate the total score
+		submission.consolidateTotalScore();
+
 		// check for changes
 		boolean changed = ((EvaluationImpl) submission.getEvaluation()).getIsChanged();
 		if (!changed) changed = ((SubmissionImpl) submission).getIsChanged();
@@ -554,6 +557,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			this.storage.saveAnswers(temp.getAnswers());
 
 			temp.setTotalScore(total);
+			temp.consolidateTotalScore();
 			if (temp.getIsChanged())
 			{
 				this.storage.saveSubmission(temp);

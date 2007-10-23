@@ -227,6 +227,10 @@
 
 					<container>
 
+						<!-- temp -->
+						<floatEdit model="answer.totalScore" sumTo="total">
+						</floatEdit>
+
 						<!-- question presentation (text and attachments) -->
 						<text>
 							<message>
@@ -312,7 +316,7 @@
 								<message selector="graded-status" />
 							</title>
 							<container>
-								<floatEdit model="submission.totalScore">
+								<floatEdit id="total" model="submission.totalScore">
 									<title>
 										<message selector="final-score">
 											<model ref="submission.assessment.parts.totalPoints" />

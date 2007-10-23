@@ -83,6 +83,9 @@ public class SubmissionImpl implements Submission
 
 	protected Date submittedDate = null;
 
+	/** A value sent to setTotalScore before it is applied. */
+	protected transient Float totalScoreToBe = null;
+
 	/** This is a pre-compute for the total score (trust me!), to be used if set and we don't have the answers & evaluations. */
 	// protected transient Float totalScore = null;
 	protected String userId = null;
@@ -123,6 +126,45 @@ public class SubmissionImpl implements Submission
 		}
 
 		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void consolidateTotalScore()
+	{
+		if (this.totalScoreToBe == null) return;
+
+		// the current answer total score
+		float curAnswerScore = 0;
+		for (Answer answer : answers)
+		{
+			Float answerScore = answer.getTotalScore();
+			if (answerScore != null)
+			{
+				curAnswerScore += answerScore;
+			}
+		}
+
+		// the current total score, including the answer total and any current evaluation
+		float curTotalScore = curAnswerScore;
+		if (this.evaluation.getScore() != null)
+		{
+			curTotalScore += this.evaluation.getScore().floatValue();
+		}
+
+		float total = this.totalScoreToBe.floatValue();
+
+		// only for a change - or if there is no evaluation
+		if ((curTotalScore == total) && (this.evaluation.getScore() != null)) return;
+
+		// adjust to remove the current answer score
+		total -= curAnswerScore;
+
+		// set this as the new total score
+		this.evaluation.setScore(total);
+
+		this.totalScoreToBe = null;
 	}
 
 	/**
@@ -813,36 +855,7 @@ public class SubmissionImpl implements Submission
 	public void setTotalScore(Float score)
 	{
 		// TODO: a null *might* be a way to remove the evaluation completely... -ggolden
-		if (score == null) return;
-
-		// the current answer total score
-		float curAnswerScore = 0;
-		for (Answer answer : answers)
-		{
-			Float answerScore = answer.getTotalScore();
-			if (answerScore != null)
-			{
-				curAnswerScore += answerScore;
-			}
-		}
-
-		// the current total score, including the answer total and any current evaluation
-		float curTotalScore = curAnswerScore;
-		if (this.evaluation.getScore() != null)
-		{
-			curTotalScore += this.evaluation.getScore().floatValue();
-		}
-
-		float total = score.floatValue();
-
-		// only for a change - or if there is no evaluation
-		if ((curTotalScore == total) && (this.evaluation.getScore() != null))return;
-
-		// adjust to remove the current answer score
-		total -= curAnswerScore;
-
-		// set this as the new total score
-		this.evaluation.setScore(total);
+		this.totalScoreToBe = score;
 	}
 
 	/**
