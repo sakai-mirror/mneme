@@ -117,4 +117,12 @@ public class NonsubAnswerImpl implements TypeSpecificAnswer
 		return Boolean.TRUE;
 	}
 
+	/**
+	 * @return The answerData.
+	 */
+	public String getAnswerData()
+	{
+		return null;
+	}
+
 }
