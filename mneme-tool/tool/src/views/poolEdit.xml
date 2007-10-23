@@ -40,20 +40,23 @@
 		<message selector="pool-edit-title" />
 	</title>
 
+	<subHeader>
+		<container>
+			<text>
+				<message selector="point-value-text">
+					<model ref="pool.points" />
+				</message>
+			</text>
+			<text>
+				<message selector="difficult-level-text">
+					<model ref="pool.difficulty" />
+				</message>
+			</text>
+		</container>
+	</subHeader>
+
 	<container>
-		<text>
-			<message selector="point-value-text">
-				<model ref="pool.points" />
-			</message>
-		</text>
-		<text>
-			<message selector="difficult-level-text">
-				<model ref="pool.difficulty" />
-			</message>
-		</text>
-
 		<!--entity actions-->
-
 		<!-- the list of questions -->
 		<entityList style="FLAT">
 			<iterator name="question" model="questions" />
@@ -135,7 +138,7 @@
 					<title>
 						<message selector="question-description" />
 					</title>
-					<model type="text" ref="question.description" missing="no-title" stripHtml="TRUE" max="60"/>
+					<model type="text" ref="question.description" missing="no-title" stripHtml="TRUE" max="60" />
 					<entityNavigations>
 						<navigation>
 							<destination template="/question_edit/{0}/{1}/{2}/{3}{4}/{5}/{6}">
@@ -226,8 +229,7 @@
 		<!--bottom navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation title="return" style="BUTTON"
-					submit="FALSE">
+				<navigation title="return" style="BUTTON" submit="FALSE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<!--destination template="/pools" /-->
 					<destination template="/pools/{0}/{1}">

@@ -40,18 +40,22 @@
 		<message selector="grading-assessment-title" />
 	</title>
 
+	<subHeader>
+		<container>
+			<text>
+				<message selector="assessment-title">
+					<model ref="assessment.title" />
+				</message>
+			</text>
+			<text>
+				<message selector="assessment-total-points">
+					<model ref="assessment.Parts.totalPoints" />
+				</message>
+			</text>
+		</container>
+	</subHeader>
+
 	<container>
-		<text>
-			<message selector="assessment-title">
-				<model ref="assessment.title" />
-			</message>
-		</text>
-		<text>
-			<message selector="assessment-total-points">
-				<model ref="assessment.Parts.totalPoints" />
-			</message>
-		</text>
-		<gap></gap>
 		<!--navigation-->
 		<navigationBar>
 			<container>
@@ -80,7 +84,7 @@
 				<row title="actions">
 					<container>
 						<navigation title="release-all-evaluated" style="LINK" submit="TRUE">
-							<destination template="/RELEASEALLEVALUATED:grade_assessment/{0}/{1}/2D/{2}/{3}" >
+							<destination template="/RELEASEALLEVALUATED:grade_assessment/{0}/{1}/2D/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="pagingParameter" />
