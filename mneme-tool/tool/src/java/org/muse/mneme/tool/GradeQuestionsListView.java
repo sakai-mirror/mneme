@@ -42,6 +42,7 @@ import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Answer;
 import org.sakaiproject.util.Web;
+import org.sakaiproject.tool.api.ToolManager;
 
 /**
  * The /grading view for the mneme tool.
@@ -57,6 +58,9 @@ public class GradeQuestionsListView extends ControllerImpl
 	/** Submission Service */
 	protected SubmissionService submissionService = null;
 
+	/** Dependency: ToolManager */
+	protected ToolManager toolManager = null;
+	
 	/**
 	 * Shutdown.
 	 */
@@ -71,7 +75,14 @@ public class GradeQuestionsListView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// if (params.length > 4) throw new IllegalArgumentException();
-
+		// check for user permission to access the assessments for grading
+		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+		
 		context.put("gradeSortCode", params[2]);
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
@@ -94,7 +105,9 @@ public class GradeQuestionsListView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		return;
+		// read form
+		String destination = this.uiService.decode(req, context);
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));		
 	}
 
 	/**
@@ -113,5 +126,14 @@ public class GradeQuestionsListView extends ControllerImpl
 	public void setSubmissionService(SubmissionService submissionService)
 	{
 		this.submissionService = submissionService;
+	}
+	
+	/**
+	 * @param toolManager
+	 *        the toolManager to set
+	 */
+	public void setToolManager(ToolManager toolManager)
+	{
+		this.toolManager = toolManager;
 	}
 }

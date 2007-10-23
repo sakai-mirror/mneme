@@ -45,6 +45,7 @@ import org.sakaiproject.util.Web;
 import org.muse.ambrosia.api.PopulatingSet;
 import org.muse.ambrosia.api.PopulatingSet.Factory;
 import org.muse.ambrosia.api.PopulatingSet.Id;
+import org.sakaiproject.tool.api.ToolManager;
 
 /**
  * The /grading view for the mneme tool.
@@ -60,6 +61,9 @@ public class GradeQuestionView extends ControllerImpl
 	/** Submission Service */
 	protected SubmissionService submissionService = null;
 
+	/** Dependency: ToolManager */
+	protected ToolManager toolManager = null;
+	
 	/**
 	 * Shutdown.
 	 */
@@ -73,6 +77,14 @@ public class GradeQuestionView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// check for user permission to access the assessments for grading
+		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+		
 		context.put("gradeSortCode", params[2]);
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
@@ -153,6 +165,14 @@ public class GradeQuestionView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// check for user permission to access the assessments for grading
+		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+		
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
 
@@ -220,5 +240,14 @@ public class GradeQuestionView extends ControllerImpl
 	public void setSubmissionService(SubmissionService submissionService)
 	{
 		this.submissionService = submissionService;
+	}
+	
+	/**
+	 * @param toolManager
+	 *        the toolManager to set
+	 */
+	public void setToolManager(ToolManager toolManager)
+	{
+		this.toolManager = toolManager;
 	}
 }
