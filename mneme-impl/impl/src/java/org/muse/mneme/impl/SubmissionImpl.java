@@ -154,6 +154,7 @@ public class SubmissionImpl implements Submission
 		}
 
 		float total = this.totalScoreToBe.floatValue();
+		this.totalScoreToBe = null;
 
 		// only for a change - or if there is no evaluation
 		if ((curTotalScore == total) && (this.evaluation.getScore() != null)) return;
@@ -163,8 +164,6 @@ public class SubmissionImpl implements Submission
 
 		// set this as the new total score
 		this.evaluation.setScore(total);
-
-		this.totalScoreToBe = null;
 	}
 
 	/**
@@ -854,8 +853,20 @@ public class SubmissionImpl implements Submission
 	 */
 	public void setTotalScore(Float score)
 	{
-		// TODO: a null *might* be a way to remove the evaluation completely... -ggolden
-		this.totalScoreToBe = score;
+		// take a null to mean clear the evaluation adjustment
+		if (score == null)
+		{
+			if (!this.getIsPhantom() && this.getEvaluation().getScore() != null)
+			{
+				this.evaluation.setScore(null);
+			}
+		}
+
+		else
+		{
+			// save to process in consolidate
+			this.totalScoreToBe = score;
+		}
 	}
 
 	/**

@@ -269,17 +269,24 @@ public class AnswerImpl implements Answer
 	 */
 	public void setTotalScore(Float score)
 	{
-		if (score == null) return;
-
-		float total = score.floatValue();
-
-		// adjust to remove the current auto score
-		if (getAutoScore() != null)
+		// take a null to mean clear the evaluation adjustment
+		if (score == null)
 		{
-			total -= getAutoScore().floatValue();
+			this.evaluation.setScore(null);
 		}
 
-		this.evaluation.setScore(total);
+		else
+		{
+			float total = score.floatValue();
+	
+			// adjust to remove the current auto score
+			if (getAutoScore() != null)
+			{
+				total -= getAutoScore().floatValue();
+			}
+	
+			this.evaluation.setScore(total);
+		}
 	}
 
 	/**

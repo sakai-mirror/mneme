@@ -214,7 +214,7 @@
 							<model type="html" ref="answer.question" delegate="FormatQuestionTitle" tool="sakai.mneme" />
 							<model type="component">
 								<container>
-									<floatEdit model="answer.totalScore" sumTo="total" cols="6" />
+									<floatEdit model="answer.totalScore" default="answer.autoScore" sumTo="total" cols="6" />
 								</container>
 							</model>
 						</message>
