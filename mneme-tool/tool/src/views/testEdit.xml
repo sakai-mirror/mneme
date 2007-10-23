@@ -40,6 +40,7 @@
 		<message selector="testEdit-title" />
 	</title>
 	<container>
+		<navigationBar/>
 		<section>
 			<container>
 				<entityDisplay>
@@ -206,32 +207,32 @@
 			</message>
 		</text>
 		<!-- save / cancel nav bar -->
-		<navigationBar id="nav" width="100%">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/assessments/{0}">
 						<model ref="sortcode" />
-					</destination>					
-				</navigation>				
+					</destination>
+				</navigation>
 			</container>
 		</navigationBar>
-		<text>
+		<finePrint>
 			<message selector="test-Id">
 				<model ref="assessment.id" />
 			</message>
-		</text>
-		<text>
+		</finePrint>
+		<finePrint>
 			<message selector="history-createText">
 				<model type="userInfo" selector="DISPLAYNAME" ref="assessment.createdBy.UserId" />
 				<model type="date" ref="assessment.createdBy.date" />
 			</message>
-		</text>
-		<text>
+		</finePrint>
+		<finePrint>
 			<message selector="history-modifyText">
 				<model type="userInfo" selector="DISPLAYNAME" ref="assessment.modifiedBy.UserId" />
 				<model type="date" ref="assessment.modifiedBy.date" />
 			</message>
-		</text>
+		</finePrint>
 	</container>
 </interface>
