@@ -40,7 +40,7 @@
 	</title>
 	
 	<container>
-		<gap></gap>
+		<gap/>
 		<!-- the list of assessments -->
 		<entityList style="FLAT">
 			<iterator name="assessment">

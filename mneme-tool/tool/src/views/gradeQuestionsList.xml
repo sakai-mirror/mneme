@@ -52,7 +52,7 @@
 		</text>
 		<gap/>
 		<!--navigation-->
-		<navigationBar width="100%">
+		<navigationBar>
 			<container>
 				<navigation title="grade-submission-title" style="LINK" accessKey="grade-submission-access"
 					description="grade-submission-description">
@@ -127,7 +127,7 @@
 				</section>
 			</container>
 		</section>
-		<navigationBar width="100%">
+		<navigationBar>
 			<container>
 				<navigation title="grade-return-title" style="BUTTON" accessKey="grade-return-access" description="grade-return-description">
 					<icon icon="/icons/return.png" style="LEFT" />
