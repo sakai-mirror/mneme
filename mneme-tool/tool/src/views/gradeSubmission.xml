@@ -29,26 +29,33 @@
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
+
+	<title>
+		<message selector="grading-submission-title" />
+	</title>
+
 	<header>
 		<message selector="grading-submission-header">
 			<model type="icon" icon="/icons/grade.png" />
 		</message>
 	</header>
-	<title>
-		<message selector="grading-submission-title" />
-	</title>
+	
+	<subHeader>
+		<container>
+			<text>
+				<message selector="assessment-title">
+					<model ref="assessment.title" />
+				</message>
+			</text>
+			<text>
+				<message selector="assessment-total-points">
+					<model ref="assessment.Parts.totalPoints" />
+				</message>
+			</text>
+		</container>
+	</subHeader>
 
 	<container>
-		<text>
-			<message selector="assessment-title">
-				<model ref="assessment.title" />
-			</message>
-		</text>
-		<text>
-			<message selector="assessment-total-points">
-				<model ref="assessment.Parts.totalPoints" />
-			</message>
-		</text>
 
 		<!--top navigation-->
 		<navigationBar>
