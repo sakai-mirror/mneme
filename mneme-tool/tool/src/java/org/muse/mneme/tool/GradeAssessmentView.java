@@ -279,19 +279,61 @@ public class GradeAssessmentView extends ControllerImpl
 		String submissionAdjustScore = submissionAdjustValue.getValue();
 		String submissionAdjustComments = submissionAdjustCommentsValue.getValue();
 
-		try
+		// release all evaluated
+		if (destination.startsWith("/RELEASEALLEVALUATED:"))
 		{
-			saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments);
+			try
+			{
+				saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments, false, true);
+				destination = destination.replace("RELEASEALLEVALUATED:", "");
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+			catch (NumberFormatException ne)
+			{
+				if (M_log.isWarnEnabled()) M_log.warn(ne);
+			}
 		}
-		catch (AssessmentPermissionException e)
+		// release all
+		else if (destination.startsWith("/RELEASEALL:"))
 		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
+			try
+			{
+				saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments, true, false);
+				
+				destination = destination.replace("RELEASEALL:", "");
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+			catch (NumberFormatException ne)
+			{
+				if (M_log.isWarnEnabled()) M_log.warn(ne);
+			}
 		}
-		catch (NumberFormatException ne)
+		else
 		{
-			if (M_log.isWarnEnabled()) M_log.warn(ne);
+			try
+			{
+				saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments, false, false);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+			catch (NumberFormatException ne)
+			{
+				if (M_log.isWarnEnabled()) M_log.warn(ne);
+			}
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
@@ -311,15 +353,27 @@ public class GradeAssessmentView extends ControllerImpl
 	 * @return true if data is saved
 	 * @throws IOException
 	 */
-	private boolean saveScores(Assessment assessment, PopulatingSet submissions, String submissionAdjustScore, String submissionAdjustComments)
-			throws NumberFormatException, AssessmentPermissionException
+	private void saveScores(Assessment assessment, PopulatingSet submissions, String submissionAdjustScore, String submissionAdjustComments,
+			boolean releaseAll, boolean releaseEvaluated) throws NumberFormatException, AssessmentPermissionException
 	{
-		// save Final score for each student's submission
+		// save Final score for submission
 		if (submissions != null && submissions.getSet().size() > 0)
 		{
 			for (Iterator i = submissions.getSet().iterator(); i.hasNext();)
 			{
 				Submission submission = (Submission) i.next();
+				if (releaseEvaluated)
+				{
+					if (submission.getEvaluation().getEvaluated())
+					{
+						if (!submission.getIsReleased()) submission.setIsReleased(true);
+					}
+				}
+				if (releaseAll)
+				{
+					if (!submission.getIsReleased()) submission.setIsReleased(true);
+				}
+
 				this.submissionService.evaluateSubmission(submission);
 			}
 		}
@@ -333,8 +387,6 @@ public class GradeAssessmentView extends ControllerImpl
 		{
 			this.submissionService.evaluateSubmissions(assessment, submissionAdjustComments, score, Boolean.FALSE);
 		}
-
-		return true;
 	}
 
 	/**

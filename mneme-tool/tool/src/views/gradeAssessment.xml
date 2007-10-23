@@ -79,14 +79,24 @@
 			<rows>
 				<row title="actions">
 					<container>
-						<navigation title="release-all-evaluated" style="LINK">
-							<destination template="/" />
+						<navigation title="release-all-evaluated" style="LINK" submit="TRUE">
+							<destination template="/RELEASEALLEVALUATED:grade_assessment/{0}/{1}/2D/{2}/{3}" >
+								<model ref="gradesSortCode" />
+								<model ref="assessment.id" />
+								<model ref="pagingParameter" />
+								<model ref="view" />
+							</destination>
 						</navigation>
 						<navigation title="slash" style="LINK" disabled="TRUE">
 							<destination template="/" />
 						</navigation>
-						<navigation title="release-all" style="LINK">
-							<destination template="/" />
+						<navigation title="release-all" style="LINK" submit="TRUE">
+							<destination template="/RELEASEALL:grade_assessment/{0}/{1}/2D/{2}/{3}">
+								<model ref="gradesSortCode" />
+								<model ref="assessment.id" />
+								<model ref="pagingParameter" />
+								<model ref="view" />
+							</destination>
 						</navigation>
 					</container>
 				</row>
