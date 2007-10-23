@@ -30,14 +30,15 @@
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
-	
+
 	<header>
 		<message selector="delete-confirm-header">
 			<model type="icon" icon="/icons/delete.png" />
 		</message>
 	</header>
-	
+
 	<container>
+		<navigationBar />
 		<entityDisplay>
 			<rows>
 				<row>
@@ -75,8 +76,7 @@
 		<!--navigation-->
 		<navigationBar width="100%">
 			<container>
-				<navigation destination="/pools_delete" title="ok" style="BUTTON" accessKey="ok-access" description="ok-description"
-					submit="TRUE">
+				<navigation destination="/pools_delete" title="ok" style="BUTTON" accessKey="ok-access" description="ok-description" submit="TRUE">
 					<icon icon="/icons/OK.png" style="LEFT" />
 				</navigation>
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">

@@ -38,6 +38,7 @@
 	</header>
 
 	<container>
+		<navigationBar />
 		<entityDisplay>
 			<rows>
 				<row>
