@@ -41,9 +41,7 @@
 	</title>
 
 	<container>
-		<navigationBar width="100%">
-			<container />
-		</navigationBar>
+		<navigationBar />
 		<entityDisplay>
 			<rows>
 				<row title="pool-title">
@@ -58,9 +56,7 @@
 				</row>
 				<row title="pool-points">
 					<container>
-						<floatEdit>
-							<model ref="pool.pointsEdit" type="float" />
-						</floatEdit>
+						<floatEdit model="pool.pointsEdit" cols="6" />
 					</container>
 				</row>
 				<row title="pool-difficulty">
@@ -82,7 +78,7 @@
 
 
 		<!--bottom navigation-->
-		<navigationBar width="100%">
+		<navigationBar >
 			<container>
 				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
@@ -94,22 +90,22 @@
 			</container>
 		</navigationBar>
 
-		<text>
+		<finePrint>
 			<message selector="id">
 				<model ref="pool.id" />
 			</message>
-		</text>
-		<text>
+		</finePrint>
+		<finePrint>
 			<message selector="history-createText">
 				<model type="userInfo" selector="DISPLAYNAME" ref="pool.createdBy.userId" />
 				<model type="date" ref="pool.createdBy.date" />
 			</message>
-		</text>
-		<text>
+		</finePrint>
+		<finePrint>
 			<message selector="history-modifyText">
 				<model type="userInfo" selector="DISPLAYNAME" ref="pool.modifiedBy.userId" />
 				<model type="date" ref="pool.modifiedBy.date" />
 			</message>
-		</text>
+		</finePrint>
 	</container>
 </interface>

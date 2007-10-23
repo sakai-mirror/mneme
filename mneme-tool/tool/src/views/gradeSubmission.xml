@@ -51,7 +51,7 @@
 		</text>
 
 		<!--top navigation-->
-		<navigationBar width="100%">
+		<navigationBar>
 			<container>
 				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
 					<disabled>
@@ -190,15 +190,6 @@
 				</included>
 			</title>
 
-			<!--  <floatEdit model="answer.totalScore">
-				<title highlighted="TRUE">
-				<message selector="answer-points">
-				<model ref="answer.autoScore" missing="missing-auto-score" />
-				<model ref="answer.question.pool.points" />
-				</message>
-				</title>
-				</floatEdit> -->
-
 			<container>
 
 				<!-- part presentation -->
@@ -220,16 +211,17 @@
 
 					<!-- question header -->
 					<title highlighted="TRUE">
-						<message>
+						<message selector="question-header">
 							<model type="html" ref="answer.question" delegate="FormatQuestionTitle" tool="sakai.mneme" />
+							<model type="component">
+								<container>
+									<floatEdit model="answer.totalScore" sumTo="total" cols="6" />
+								</container>
+							</model>
 						</message>
 					</title>
 
 					<container>
-
-						<!-- temp -->
-						<floatEdit model="answer.totalScore" sumTo="total">
-						</floatEdit>
 
 						<!-- question presentation (text and attachments) -->
 						<text>
@@ -287,7 +279,7 @@
 							</message>
 						</text>
 
-						<htmlEdit model="answer.evaluation.comment" rows="5" cols="80" />
+						<htmlEdit model="answer.evaluation.comment" rows="5" cols="60" />
 
 					</container>
 				</section>
@@ -306,7 +298,7 @@
 								</message>
 							</title>
 							<container>
-								<textEdit model="submission.evaluation.comment" rows="5" cols="50" />
+								<textEdit model="submission.evaluation.comment" rows="5" cols="60" />
 							</container>
 						</row>
 
@@ -316,7 +308,7 @@
 								<message selector="graded-status" />
 							</title>
 							<container>
-								<floatEdit id="total" model="submission.totalScore">
+								<floatEdit id="total" model="submission.totalScore" cols="6">
 									<title>
 										<message selector="final-score">
 											<model ref="submission.assessment.parts.totalPoints" />
@@ -344,7 +336,7 @@
 		</section>
 
 		<!--bottom navigation-->
-		<navigationBar width="100%">
+		<navigationBar>
 			<container>
 				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
 					<disabled>
