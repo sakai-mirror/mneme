@@ -43,7 +43,18 @@
 		</message>
 	</header>
 
+	<subHeader>
+		<container>
+			<text model="question.pool.title" missing="no-title" />
+			<text selector="blank" />
+			<text selector="pool-points" model="question.pool.points" />
+			<text selector="pool-difficulty" model="question.pool.difficulty" />
+		</container>
+	</subHeader>
+
 	<container>
+
+		<navigationBar />
 
 		<entityDisplay>
 			<rows>
@@ -137,7 +148,7 @@
 		</entityDisplay>
 
 		<!-- navigation -->
-		<navigationBar id="nav" width="70em">
+		<navigationBar>
 			<container>
 				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
 					<destination template="/pool_edit/{0}">
@@ -167,47 +178,19 @@
 			</container>
 		</navigationBar>
 
-		<gap />
-
-		<entityDisplay>
-			<rows>
-
-				<row title="question-id">
-					<container>
-						<text model="question.id" />
-					</container>
-				</row>
-
-				<row title="question-version">
-					<container>
-						<text model="question.version" />
-					</container>
-				</row>
-
-				<row title="history">
-					<container>
-						<text>
-							<message selector="history-createText">
-								<model type="userInfo" selector="DISPLAYNAME" ref="question.createdBy.userId" />
-								<model type="date" ref="question.createdBy.date" />
-							</message>
-						</text>
-					</container>
-				</row>
-
-				<row>
-					<container>
-						<text>
-							<message selector="history-modifyText">
-								<model type="userInfo" selector="DISPLAYNAME" ref="question.modifiedBy.userId" />
-								<model type="date" ref="question.modifiedBy.date" />
-							</message>
-						</text>
-					</container>
-				</row>
-
-			</rows>
-		</entityDisplay>
+		<finePrint selector="id-display" model="question.id" />
+		<finePrint>
+			<message selector="history-createText">
+				<model type="userInfo" selector="DISPLAYNAME" ref="question.createdBy.userId" />
+				<model type="date" ref="question.createdBy.date" />
+			</message>
+		</finePrint>
+		<finePrint>
+			<message selector="history-modifyText">
+				<model type="userInfo" selector="DISPLAYNAME" ref="question.modifiedBy.userId" />
+				<model type="date" ref="question.modifiedBy.date" />
+			</message>
+		</finePrint>
 	</container>
 
 </interface>

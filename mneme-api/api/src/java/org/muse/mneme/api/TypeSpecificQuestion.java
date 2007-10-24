@@ -39,8 +39,12 @@ public interface TypeSpecificQuestion extends Cloneable
 
 	/**
 	 * Consolidate the question, such as after editing and before save.
+	 * 
+	 * @param destination
+	 *        The destination from the post.
+	 * @return null to stay at the current destination, or the destination to go to.
 	 */
-	void consolidate();
+	String consolidate(String destination);
 
 	/**
 	 * Access the rich text (html) answer key that shows the correct answer to the question.

@@ -135,8 +135,9 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public void consolidate()
+	public String consolidate(String destination)
 	{
+		return destination;
 	}
 
 	/**

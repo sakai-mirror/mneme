@@ -123,7 +123,7 @@ public class QuestionEditView extends ControllerImpl
 		String destination = this.uiService.decode(req, context);
 
 		// consolidate the question
-		question.getTypeSpecificQuestion().consolidate();
+		destination = question.getTypeSpecificQuestion().consolidate(destination);
 
 		// save
 		try
@@ -135,6 +135,12 @@ public class QuestionEditView extends ControllerImpl
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
+		}
+
+		// if destination became null, stay here
+		if (destination == null)
+		{
+			destination = context.getDestination();
 		}
 
 		// redirect

@@ -33,22 +33,23 @@ import org.muse.ambrosia.api.AutoColumn;
 import org.muse.ambrosia.api.CompareDecision;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Decision;
+import org.muse.ambrosia.api.Destination;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.EntityListColumn;
 import org.muse.ambrosia.api.HtmlEdit;
-import org.muse.ambrosia.api.OrderColumn;
+import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.PropertyReference;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
-import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * MultipleChoiceQuestionImpl handles questions for the multiple choice question type.
@@ -120,12 +121,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 
 	/** Our messages. */
 	protected transient InternationalizedMessages messages = null;
-
-	/** A request for more choices. */
-	protected transient Integer moreChoices = null;
-
-	/** A new choice order - the ids. */
-	protected transient String[] newOrder = null;
 
 	protected transient QuestionPlugin plugin = null;
 
@@ -209,37 +204,31 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public void consolidate()
+	public String consolidate(String destination)
 	{
-		// apply the new order
-		if (this.newOrder != null)
-		{
-			List newChoices = new ArrayList<MultipleChoiceQuestionChoice>();
-			int i = 0;
-			for (String id : this.newOrder)
-			{
-				int index = Integer.parseInt(id);
-				MultipleChoiceQuestionChoice choice = this.answerChoices.get(index);
+		boolean stayHere = false;
 
-				// new position
-				choice.id = Integer.toString(i++);
-				newChoices.add(choice);
-			}
-			this.newOrder = null;
-			this.answerChoices = newChoices;
-		}
-
-		// rebuild choices, removing the deleted ones
-		List newChoices = new ArrayList<MultipleChoiceQuestionChoice>();
-		int i = 0;
-		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+		// check for delete
+		if (destination.startsWith("DEL:"))
 		{
-			// ignore deleted choices
-			if (!choice.getDeleted())
+			stayHere = true;
+			String[] parts = StringUtil.split(destination, ":");
+			if (parts.length == 2)
 			{
-				// new position
-				choice.id = Integer.toString(i++);
-				newChoices.add(choice);
+				List newChoices = new ArrayList<MultipleChoiceQuestionChoice>();
+				int i = 0;
+				for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+				{
+					// ignore the deleted one
+					if (!choice.getId().equals(parts[1]))
+					{
+						// new position
+						choice.id = Integer.toString(i++);
+						newChoices.add(choice);
+					}
+				}
+
+				this.answerChoices = newChoices;
 			}
 		}
 
@@ -275,19 +264,30 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			}
 		}
 
-		this.answerChoices = newChoices;
-
-		// any more choices?
-		if (this.moreChoices != null)
+		// add more choices
+		if (destination.startsWith("ADD:"))
 		{
-			i = this.answerChoices.size();
-			for (int count = 0; count < this.moreChoices; count++)
+			stayHere = true;
+			String[] parts = StringUtil.split(destination, ":");
+			if (parts.length == 2)
 			{
-				this.answerChoices.add(new MultipleChoiceQuestionChoice(Integer.toString(i++), ""));
+				try
+				{
+					int more = Integer.parseInt(parts[1]);
+					int i = this.answerChoices.size();
+					for (int count = 0; count < more; count++)
+					{
+						this.answerChoices.add(new MultipleChoiceQuestionChoice(Integer.toString(i++), ""));
+					}
+				}
+				catch (NumberFormatException e)
+				{
+				}
 			}
-
-			this.moreChoices = null;
 		}
+
+		if (stayHere) return null;
+		return destination;
 	}
 
 	/**
@@ -337,13 +337,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		entityList.setStyle(EntityList.Style.form);
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesAsAuthored"), "choice");
 
-		/*
-		 * OrderColumn orderCol = this.uiService.newOrderColumn();
-		 * orderCol.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
-		 * orderCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choiceOrder"));
-		 * entityList.addColumn(orderCol);
-		 */
-
 		SelectionColumn selCol = this.uiService.newSelectionColumn();
 		if (this.singleCorrect)
 		{
@@ -372,8 +365,10 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 
 		col = this.uiService.newEntityListColumn();
 		Navigation nav = this.uiService.newNavigation();
+		Destination destination = this.uiService.newDestination();
+		destination.setDestination("DEL:{0}", this.uiService.newPropertyReference().setReference("choice.id"));
 		nav.setTitle("delete").setIcon("/icons/delete.png", Navigation.IconStyle.left).setStyle(Navigation.Style.link).setSubmit().setDestination(
-				null);
+				destination);
 		col.add(nav);
 		entityList.addColumn(col);
 
@@ -385,13 +380,13 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 
 		row = this.uiService.newEntityDisplayRow();
 		selection = uiService.newSelection();
-		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.moreChoices"));
-		selection.addSelection("none", "0");
-		selection.addSelection("one", "1");
-		selection.addSelection("two", "2");
-		selection.addSelection("three", "3");
-		selection.addSelection("four", "4");
-		selection.addSelection("five", "5");
+		// selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.moreChoices"));
+		selection.addSelection("none", "ADD:0");
+		selection.addSelection("one", "ADD:1");
+		selection.addSelection("two", "ADD:2");
+		selection.addSelection("three", "ADD:3");
+		selection.addSelection("four", "ADD:4");
+		selection.addSelection("five", "ADD:5");
 		selection.setOrientation(Selection.Orientation.dropdown);
 		row.add(selection);
 		row.setTitle("more-choices");
@@ -440,8 +435,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		// if we have no choices yet, start with 4
 		if (this.answerChoices.isEmpty())
 		{
-			setMoreChoices("4");
-			consolidate();
+			consolidate("ADD:4");
 		}
 
 		return this.answerChoices;
@@ -540,16 +534,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	public String getModelAnswer()
 	{
 		return null;
-	}
-
-	/**
-	 * The "getter" for the moreChoices - always set to 0.
-	 * 
-	 * @return The initial '0" value for the more choices.
-	 */
-	public String getMoreChoices()
-	{
-		return "0";
 	}
 
 	/**
@@ -759,18 +743,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
-	 * Set the choice order
-	 * 
-	 * @param ids
-	 *        The ids of the choices in proper order.
-	 */
-	public void setChoiceOrder(String[] ids)
-	{
-		// save this for consolidate
-		this.newOrder = ids;
-	}
-
-	/**
 	 * Sets the correct answers.
 	 * 
 	 * @param correctAnswers
@@ -823,18 +795,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 				choice.setCorrect(Boolean.TRUE);
 			}
 		}
-	}
-
-	/**
-	 * Set a request for more choices.
-	 * 
-	 * @param more
-	 *        The number of more choices requested.
-	 */
-	public void setMoreChoices(String more)
-	{
-		// defer to consolidate
-		this.moreChoices = Integer.valueOf(more);
 	}
 
 	/**
