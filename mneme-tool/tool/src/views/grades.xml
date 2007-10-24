@@ -38,9 +38,8 @@
 	<title>
 		<message selector="grading-title" />
 	</title>
-	
-	<container>
-		<gap/>
+	<subHeader/>		
+	<container>		
 		<!-- the list of assessments -->
 		<entityList style="FLAT">
 			<iterator name="assessment">

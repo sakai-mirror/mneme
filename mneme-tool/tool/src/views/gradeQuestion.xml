@@ -38,19 +38,21 @@
 	<title>
 		<message selector="grading-assessment-title" />
 	</title>
-
-	<container>
-		<text>
-			<message selector="assessment-title">
-				<model ref="assessment.title" />
-			</message>
-		</text>
-		<text>
-			<message selector="assessment-total-points">
-				<model ref="assessment.parts.totalPoints" />
-			</message>
-		</text>
-		<gap></gap>		
+	<subHeader>
+		<container>
+			<text>
+				<message selector="assessment-title">
+					<model ref="assessment.title" />
+				</message>
+			</text>
+			<text>
+				<message selector="assessment-total-points">
+					<model ref="assessment.Parts.totalPoints" />
+				</message>
+			</text>
+		</container>
+	</subHeader>
+	<container>			
 		<!--navigation-->
 		<navigationBar>
 			<container>

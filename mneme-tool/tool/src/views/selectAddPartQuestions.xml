@@ -34,13 +34,17 @@
 			<model type="icon" icon="/icons/hand_select.png" />
 		</message>
 	</header>
-	<container>
-		<text>
+	<subHeader>
+		<container>
+			<text>
 			<message selector="select-add-to">
 				<model ref="partTitle" missing="no-title" />
 				<model ref="assessmentTitle" missing="no-title" />
 			</message>
 		</text>
+		</container>
+	</subHeader>
+	<container>	
 		<section>
 			<container>			
 				<!-- the list of the selected questions -->

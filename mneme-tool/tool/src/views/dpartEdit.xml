@@ -37,13 +37,16 @@
 			<model ref="part.ordering.position" />			
 		</message>
 	</header>
-
+	<subHeader>
+		<container>
+			<text>
+				<message selector="assessment-title">
+					<model ref="assessment.title" missing="no-title" />
+				</message>
+			</text>
+		</container>
+	</subHeader>
 	<container>
-		<text>
-			<message selector="assessment-title">
-				<model ref="assessment.title" missing="no-title" />
-			</message>
-		</text>
 		<navigationBar/>
 		<section>
 			<container>
