@@ -41,12 +41,14 @@ import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
 import org.muse.ambrosia.api.Navigation;
+import org.muse.ambrosia.api.Destination;
 import org.muse.ambrosia.api.OrderColumn;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * MatchQuestionImpl handles questions for the match question type.
@@ -115,7 +117,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/** List of choices */
-	protected List<String> answerChoices = new ArrayList<String>();
+	protected List<MatchQuestionChoice> answerChoices = new ArrayList<MatchQuestionChoice>();
 
 	/** Index numbers of the correct answers */
 	protected Set<Integer> correctAnswers = new HashSet<Integer>();
@@ -145,7 +147,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public MatchQuestionImpl(Question question, MatchQuestionImpl other)
 	{
-		this.answerChoices = new ArrayList<String>(other.answerChoices);
+		this.answerChoices = new ArrayList<MatchQuestionChoice>(other.answerChoices.size());
+		for (MatchQuestionChoice choice : other.answerChoices)
+		{
+			this.answerChoices.add(new MatchQuestionChoice(choice));
+		}
 		this.correctAnswers = new HashSet<Integer>(other.correctAnswers);
 		this.messages = other.messages;
 		this.question = question;
@@ -180,7 +186,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 			Object rv = super.clone();
 
 			// deep copy these
-			((MatchQuestionImpl) rv).answerChoices = new ArrayList<String>(this.answerChoices);
+			((MatchQuestionImpl) rv).answerChoices = new ArrayList<MatchQuestionChoice>(this.answerChoices.size());
+			for (MatchQuestionChoice choice : this.answerChoices)
+			{
+				((MatchQuestionImpl) rv).answerChoices.add(new MatchQuestionChoice(choice));
+			}
 			((MatchQuestionImpl) rv).correctAnswers = new HashSet<Integer>(this.correctAnswers);
 
 			// set the question
@@ -199,6 +209,53 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String consolidate(String destination)
 	{
+		boolean stayHere = false;
+		// check for delete
+		if (destination.startsWith("DEL:"))
+		{
+			stayHere = true;
+			String[] parts = StringUtil.split(destination, ":");
+			if (parts.length == 2)
+			{
+				List newChoices = new ArrayList<MatchQuestionChoice>();
+				int i = 0;
+				for (MatchQuestionChoice choice : this.answerChoices)
+				{
+					// ignore the deleted one
+					if (!choice.getId().equals(parts[1]))
+					{
+						// new position
+						choice.id = Integer.toString(i++);
+						newChoices.add(choice);
+					}
+				}
+
+				this.answerChoices = newChoices;
+			}
+		}
+		// add more choices
+		if (destination.startsWith("ADD:"))
+		{
+			stayHere = true;
+			String[] parts = StringUtil.split(destination, ":");
+			if (parts.length == 2)
+			{
+				try
+				{
+					int more = Integer.parseInt(parts[1]);
+					int i = this.answerChoices.size();
+					for (int count = 0; count < more; count++)
+					{
+						this.answerChoices.add(new MatchQuestionChoice(Integer.toString(i++), "", ""));
+					}
+				}
+				catch (NumberFormatException e)
+				{
+				}
+			}
+		}
+
+		if (stayHere) return null;
 		return destination;
 	}
 
@@ -263,8 +320,10 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 
 		col = this.uiService.newEntityListColumn();
 		Navigation nav = this.uiService.newNavigation();
+		Destination destination = this.uiService.newDestination();
+		destination.setDestination("DEL:{0}", this.uiService.newPropertyReference().setReference("choice.id"));
 		nav.setTitle("delete").setIcon("/icons/delete.png", Navigation.IconStyle.left).setStyle(Navigation.Style.link).setSubmit().setDestination(
-				null);
+				destination);
 		col.add(nav);
 		entityList.addColumn(col);
 
@@ -286,13 +345,14 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		row = this.uiService.newEntityDisplayRow();
 		Selection selection = uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.moreChoices"));
-		selection.addSelection("none", "0");
-		selection.addSelection("one", "1");
-		selection.addSelection("two", "2");
-		selection.addSelection("three", "3");
-		selection.addSelection("four", "4");
-		selection.addSelection("five", "5");
+		selection.addSelection("none", "ADD:0");
+		selection.addSelection("one", "ADD:1");
+		selection.addSelection("two", "ADD:2");
+		selection.addSelection("three", "ADD:3");
+		selection.addSelection("four", "ADD:4");
+		selection.addSelection("five", "ADD:5");
 		selection.setOrientation(Selection.Orientation.dropdown);
+		selection.setSubmitValue();
 		row.add(selection);
 		row.setTitle("more-choices");
 		display.addRow(row);
@@ -309,19 +369,9 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	{
 		if (this.answerChoices.size() == 0)
 		{
-			answerChoices.add("");
-			answerChoices.add("");
-			answerChoices.add("");
-			answerChoices.add("");
+			consolidate("ADD:4");
 		}
-		List<MatchQuestionChoice> rv = new ArrayList<MatchQuestionChoice>(this.answerChoices.size());
-
-		for (String choice : this.answerChoices)
-		{
-			rv.add(new MatchQuestionChoice(String.valueOf(this.answerChoices.indexOf(choice)), choice, choice));
-		}
-
-		return rv;
+		return this.answerChoices;
 	}
 
 	/**
@@ -517,9 +567,14 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
 	}
 
-	public void setAnswerChoices(List answerChoices)
+	public void setAnswerChoices(List<String> choices)
 	{
-		this.answerChoices = answerChoices;
+		this.answerChoices = new ArrayList<MatchQuestionChoice>(choices.size());
+		int i = 0;
+		for (String choice : choices)
+		{
+			this.answerChoices.add(new MatchQuestionChoice(Integer.toString(i++), choice, choice));
+		}
 	}
 
 	/**
