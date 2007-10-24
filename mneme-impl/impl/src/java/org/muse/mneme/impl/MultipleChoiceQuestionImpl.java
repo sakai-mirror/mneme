@@ -286,6 +286,11 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			}
 		}
 
+		if (destination.startsWith("RESIZE"))
+		{
+			stayHere = true;
+		}
+
 		if (stayHere) return null;
 		return destination;
 	}
@@ -329,6 +334,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.singleCorrect"));
 		selection.addSelection("single-choice", "true");
 		selection.addSelection("multiple-select", "false");
+		selection.setDestination(this.uiService.newDestination().setDestination("RESIZE"));
 		row.add(selection);
 		row.setTitle("answer");
 		display.addRow(row);
@@ -380,7 +386,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 
 		row = this.uiService.newEntityDisplayRow();
 		selection = uiService.newSelection();
-		// selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.moreChoices"));
 		selection.addSelection("none", "ADD:0");
 		selection.addSelection("one", "ADD:1");
 		selection.addSelection("two", "ADD:2");
@@ -388,6 +393,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		selection.addSelection("four", "ADD:4");
 		selection.addSelection("five", "ADD:5");
 		selection.setOrientation(Selection.Orientation.dropdown);
+		selection.setSubmitValue();
 		row.add(selection);
 		row.setTitle("more-choices");
 		display.addRow(row);
