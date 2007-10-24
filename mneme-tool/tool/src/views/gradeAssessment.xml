@@ -83,24 +83,29 @@
 			<rows>
 				<row title="actions">
 					<container>
-						<navigation title="release-all-evaluated" style="LINK" submit="TRUE">
+						<navigation title="release-evaluated" style="LINK" submit="TRUE">
+							<icon icon="/icons/active.png" style="LEFT" />
 							<destination template="/RELEASEALLEVALUATED:grade_assessment/{0}/{1}/2D/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="pagingParameter" />
 								<model ref="view" />
 							</destination>
+							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-release-evaluated" />
 						</navigation>
-						<navigation title="slash" style="LINK" disabled="TRUE">
-							<destination template="/" />
-						</navigation>
+					</container>
+				</row>
+				<row>
+					<container>
 						<navigation title="release-all" style="LINK" submit="TRUE">
+							<icon icon="/icons/active.png" style="LEFT" />
 							<destination template="/RELEASEALL:grade_assessment/{0}/{1}/2D/{2}/{3}">
 								<model ref="gradesSortCode" />
 								<model ref="assessment.id" />
 								<model ref="pagingParameter" />
 								<model ref="view" />
 							</destination>
+							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-release-all" />
 						</navigation>
 					</container>
 				</row>
