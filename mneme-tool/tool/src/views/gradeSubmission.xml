@@ -139,6 +139,9 @@
 			<rows>
 				<row title="submission-username">
 					<model type="userInfo" selector="DISPLAYNAME" ref="submission.userId" />
+					<included>
+						<decision reversed="TRUE" model="assessment.grading.anonymous" />
+					</included>
 				</row>
 				<row title="submitted">
 					<container>

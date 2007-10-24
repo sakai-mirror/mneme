@@ -109,7 +109,7 @@ public class GradeAssessmentView extends ControllerImpl
 			pagingParameter = params[5];
 		}
 
-		SubmissionService.FindAssessmentSubmissionsSort sort = getSort(context, sortCode);
+		SubmissionService.FindAssessmentSubmissionsSort sort = getSort(assessment, context, sortCode);
 
 		if (assessment == null)
 		{
@@ -304,7 +304,7 @@ public class GradeAssessmentView extends ControllerImpl
 			try
 			{
 				saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments, true, false);
-				
+
 				destination = destination.replace("RELEASEALL:", "");
 			}
 			catch (AssessmentPermissionException e)
@@ -392,12 +392,14 @@ public class GradeAssessmentView extends ControllerImpl
 	/**
 	 * get the sort based on sort code
 	 * 
+	 * @param assessment
+	 *        The assessment.
 	 * @param context
 	 * @param sortCode
 	 *        sort code
 	 * @return SubmissionService.FindAssessmentSubmissionsSort
 	 */
-	private SubmissionService.FindAssessmentSubmissionsSort getSort(Context context, String sortCode)
+	private SubmissionService.FindAssessmentSubmissionsSort getSort(Assessment assessment, Context context, String sortCode)
 	{
 		// default sort is user name ascending
 		SubmissionService.FindAssessmentSubmissionsSort sort;
@@ -433,11 +435,19 @@ public class GradeAssessmentView extends ControllerImpl
 		}
 		else
 		{
-			// default sort: user name ascending
-			sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
-
-			context.put("sort_column", '0');
-			context.put("sort_direction", 'A');
+			// default sort: user name ascending for non anon, status for anon
+			if (assessment.getGrading().getAnonymous())
+			{
+				sort = SubmissionService.FindAssessmentSubmissionsSort.status_a;
+				context.put("sort_column", '1');
+				context.put("sort_direction", 'A');
+			}
+			else
+			{
+				sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
+				context.put("sort_column", '0');
+				context.put("sort_direction", 'A');
+			}
 		}
 
 		return sort;

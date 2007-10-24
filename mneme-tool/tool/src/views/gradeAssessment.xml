@@ -149,6 +149,9 @@
 					<title>
 						<message selector="submission-username" />
 					</title>
+					<included>
+						<decision reversed="TRUE" model="assessment.grading.anonymous" />
+					</included>
 					<entityNavigations>
 						<navigation style="LINK" submit="TRUE">
 							<destination template="/grade_submission/{0}/{1}">
@@ -193,6 +196,33 @@
 						</desc>
 					</sort>
 				</modelColumn>
+				<column>
+					<title>
+						<message selector="submission-username" />
+					</title>
+					<included>
+						<decision model="assessment.grading.anonymous" />
+					</included>
+					<entityNavigations>
+						<navigation style="LINK" submit="TRUE">
+							<destination template="/grade_submission/{0}/{1}">
+								<model ref="destinationPath" />
+								<model ref="submission.id" />
+							</destination>
+							<included>
+								<compareDecision model="submission.gradingStatus">
+									<constant value="released" />
+									<constant value="submitted" />
+									<constant value="closed" />
+									<constant value="evaluated" />
+								</compareDecision>
+							</included>
+						</navigation>
+					</entityNavigations>
+					<container>
+						<text selector="anonymous" />
+					</container>
+				</column>
 				<column>
 					<title>
 						<message selector="submission-finished" />
