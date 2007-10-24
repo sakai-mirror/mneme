@@ -528,7 +528,7 @@ public class AssessmentImpl implements Assessment
 		{
 			this.timeLimit = null;
 
-			this.historyChanged.setChanged();
+			this.changed.setChanged();
 		}
 	}
 
@@ -621,7 +621,7 @@ public class AssessmentImpl implements Assessment
 
 		this.timeLimit = limit;
 
-		this.historyChanged.setChanged();
+		this.changed.setChanged();
 	}
 
 	/**

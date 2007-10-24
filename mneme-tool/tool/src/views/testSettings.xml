@@ -64,7 +64,10 @@
 				<decision model="assessment.isLive" />
 			</included>
 		</alert>
-		<section title="settings">
+		<section>
+			<title highlighted="TRUE">
+				<message selector="settings" />
+			</title>
 			<container>
 				<entityDisplay>
 					<rows>
@@ -114,6 +117,23 @@
 										</selectionChoice>
 										<selectionChoice value="false" selector="type-unlimited" />
 
+									</selectionChoices>
+								</selection>
+							</container>
+						</row>
+						<row title="timed-settings">
+							<container>
+								<selection orientation="VERTICAL">
+									<model ref="assessment.hasTimeLimit" />
+									<selectionChoices>
+										<selectionChoice value="false" selector="no-time-limit" />
+										<selectionChoice value="true" selector="time-limit">
+											<container>
+												<durationEdit>
+													<model ref="assessment.timeLimit" type="duration" />
+												</durationEdit>
+											</container>
+										</selectionChoice>
 									</selectionChoices>
 								</selection>
 							</container>
@@ -204,27 +224,13 @@
 			</container>
 		</section>
 
-		<section title="presentation">
+		<section>
+			<title highlighted="TRUE">
+				<message selector="presentation" />
+			</title>
 			<container>
 				<entityDisplay>
 					<rows>
-						<row title="timed-settings">
-							<container>
-								<selection orientation="VERTICAL">
-									<model ref="assessment.hasTimeLimit" />
-									<selectionChoices>
-										<selectionChoice value="false" selector="no-time-limit" />
-										<selectionChoice value="true" selector="time-limit">
-											<container>
-												<durationEdit>
-													<model ref="assessment.timeLimit" type="duration" />
-												</durationEdit>
-											</container>
-										</selectionChoice>
-									</selectionChoices>
-								</selection>
-							</container>
-						</row>
 						<row title="honor-pledge">
 							<container>
 								<entityDisplay>

@@ -160,7 +160,7 @@ public class SubmissionAssessmentImpl implements Assessment
 	public Boolean getHasTimeLimit()
 	{
 		// if the main (historical) has no limit, we ignore any special access defined
-		if (!getHistoricalAssessment().getHasTimeLimit()) return Boolean.FALSE;
+		if (!getMainAssessment().getHasTimeLimit()) return Boolean.FALSE;
 
 		// this might be overridden in the main assessment's special access
 		AssessmentAccess special = getMainAssessment().getSpecialAccess().getUserAccess(this.submission.getUserId());
@@ -172,7 +172,7 @@ public class SubmissionAssessmentImpl implements Assessment
 			}
 		}
 
-		return getHistoricalAssessment().getHasTimeLimit();
+		return getMainAssessment().getHasTimeLimit();
 	}
 
 	/**
@@ -394,8 +394,8 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public Long getTimeLimit()
 	{
-		// if the main (historical) has no limit, we ignore any special access defined
-		if (!getHistoricalAssessment().getHasTimeLimit()) return null;
+		// if the main has no limit, we ignore any special access defined
+		if (!getMainAssessment().getHasTimeLimit()) return null;
 
 		// this might be overridden in the main assessment's special access
 		AssessmentAccess special = getMainAssessment().getSpecialAccess().getUserAccess(this.submission.getUserId());
@@ -407,7 +407,7 @@ public class SubmissionAssessmentImpl implements Assessment
 			}
 		}
 
-		return getHistoricalAssessment().getTimeLimit();
+		return getMainAssessment().getTimeLimit();
 	}
 
 	/**
