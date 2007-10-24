@@ -150,24 +150,11 @@
 		<!-- navigation -->
 		<navigationBar>
 			<container>
-				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
+				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<destination template="/pool_edit/{0}">
 						<model ref="extras" />
 					</destination>
 					<icon icon="/icons/return.png" style="LEFT" />
-				</navigation>
-				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
-					<destination template="/pool_edit/{0}">
-						<model ref="extras" />
-					</destination>
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-				</navigation>
-				<divider />
-				<navigation title="apply" accessKey="apply-access" description="apply-description" style="BUTTON" submit="TRUE">
-					<destination template="{0}">
-						<model ref="sakai_destination" />
-					</destination>
-					<!-- <icon icon="/icons/cancel.gif" style="LEFT" />  -->
 				</navigation>
 				<navigation title="add" accessKey="add-access" description="add-description" style="BUTTON" submit="TRUE">
 					<destination template="/select_question_type/{0}">
