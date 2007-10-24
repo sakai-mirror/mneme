@@ -83,28 +83,16 @@
 			<rows>
 				<row title="actions">
 					<container>
-						<navigation title="release-evaluated" style="LINK" submit="TRUE">
+						<navigation title="release-evaluated" style="LINK" submit="TRUE" destination="RELEASEEVALUATED">
 							<icon icon="/icons/active.png" style="LEFT" />
-							<destination template="/RELEASEALLEVALUATED:grade_assessment/{0}/{1}/2D/{2}/{3}">
-								<model ref="gradesSortCode" />
-								<model ref="assessment.id" />
-								<model ref="pagingParameter" />
-								<model ref="view" />
-							</destination>
 							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-release-evaluated" />
 						</navigation>
 					</container>
 				</row>
 				<row>
 					<container>
-						<navigation title="release-all" style="LINK" submit="TRUE">
+						<navigation title="release-all" style="LINK" submit="TRUE" destination="RELEASEALL">
 							<icon icon="/icons/active.png" style="LEFT" />
-							<destination template="/RELEASEALL:grade_assessment/{0}/{1}/2D/{2}/{3}">
-								<model ref="gradesSortCode" />
-								<model ref="assessment.id" />
-								<model ref="pagingParameter" />
-								<model ref="view" />
-							</destination>
 							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-release-all" />
 						</navigation>
 					</container>
@@ -426,6 +414,9 @@
 		<!--bottom navigation-->
 		<navigationBar>
 			<container>
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="SAVE">
+					<icon icon="/icons/save.png" style="LEFT" />
+				</navigation>
 				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/grades/{0}">

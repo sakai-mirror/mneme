@@ -44,6 +44,7 @@ import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -57,14 +58,14 @@ public class GradeAssessmentView extends ControllerImpl
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
 
+	/** Dependency: SessionManager */
+	protected SessionManager sessionManager = null;
+
 	/** Submission Service */
 	protected SubmissionService submissionService = null;
 
 	/** Dependency: ToolManager */
 	protected ToolManager toolManager = null;
-
-	/** Dependency: SessionManager */
-	protected SessionManager sessionManager = null;
 
 	/**
 	 * Shutdown.
@@ -246,7 +247,6 @@ public class GradeAssessmentView extends ControllerImpl
 		// setup the model: the assessment
 		// get Assessment - assessment id is in params at index 3
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
-
 		if (assessment == null)
 		{
 			// redirect to error
@@ -254,6 +254,7 @@ public class GradeAssessmentView extends ControllerImpl
 			return;
 		}
 
+		// for the final scores
 		PopulatingSet submissions = null;
 		final SubmissionService submissionService = this.submissionService;
 		submissions = uiService.newPopulatingSet(new Factory()
@@ -270,123 +271,106 @@ public class GradeAssessmentView extends ControllerImpl
 				return ((Submission) o).getId();
 			}
 		});
-
 		context.put("submissions", submissions);
 
 		// read form
 		String destination = this.uiService.decode(req, context);
 
-		String submissionAdjustScore = submissionAdjustValue.getValue();
-		String submissionAdjustComments = submissionAdjustCommentsValue.getValue();
+		// save any final scores
+		for (Iterator i = submissions.getSet().iterator(); i.hasNext();)
+		{
+			try
+			{
+				this.submissionService.evaluateSubmission((Submission) i.next());
+			}
+			catch (AssessmentPermissionException e)
+			{
+				M_log.warn("post: " + e);
+			}
+		}
+
+		// apply the global adjustments
+		String adjustScore = StringUtil.trimToNull(submissionAdjustValue.getValue());
+		String adjustComments = StringUtil.trimToNull(submissionAdjustCommentsValue.getValue());
+		if (adjustScore != null || adjustComments != null)
+		{
+			try
+			{
+				// parse the score
+				Float score = null;
+				if (adjustScore != null)
+				{
+					score = Float.parseFloat(adjustScore);
+				}
+
+				// apply (no release)
+				// TODO: remove the last param!
+				this.submissionService.evaluateSubmissions(assessment, adjustComments, score, Boolean.FALSE);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				M_log.warn("post: " + e);
+			}
+			catch (NumberFormatException e)
+			{
+			}
+		}
 
 		// release all evaluated
-		if (destination.startsWith("/RELEASEALLEVALUATED:"))
+		if (destination.equals("RELEASEEVALUATED"))
 		{
-			try
-			{
-				saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments, false, true);
-				destination = destination.replace("RELEASEALLEVALUATED:", "");
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
-			}
-			catch (NumberFormatException ne)
-			{
-				if (M_log.isWarnEnabled()) M_log.warn(ne);
-			}
+			// TODO:
+			destination = context.getDestination();
 		}
-		// release all
-		else if (destination.startsWith("/RELEASEALL:"))
-		{
-			try
-			{
-				saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments, true, false);
 
-				destination = destination.replace("RELEASEALL:", "");
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
-			}
-			catch (NumberFormatException ne)
-			{
-				if (M_log.isWarnEnabled()) M_log.warn(ne);
-			}
-		}
-		else
+		else if (destination.equals("RELEASEALL"))
 		{
-			try
-			{
-				saveScores(assessment, submissions, submissionAdjustScore, submissionAdjustComments, false, false);
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
-			}
-			catch (NumberFormatException ne)
-			{
-				if (M_log.isWarnEnabled()) M_log.warn(ne);
-			}
+			// TODO:
+			destination = context.getDestination();
+		}
+
+		else if (destination.equals("SAVE"))
+		{
+			destination = context.getDestination();
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
-	 * adjust scores
-	 * 
-	 * @param assessment
-	 *        assessment
-	 * @param submissions
-	 *        submissions
-	 * @param submissionAdjustScore
-	 *        submission Adjust Score
-	 * @param submissionAdjustComments
-	 *        submission Adjust Comments
-	 * @return true if data is saved
-	 * @throws IOException
+	 * @param assessmentService
+	 *        the assessmentService to set
 	 */
-	private void saveScores(Assessment assessment, PopulatingSet submissions, String submissionAdjustScore, String submissionAdjustComments,
-			boolean releaseAll, boolean releaseEvaluated) throws NumberFormatException, AssessmentPermissionException
+	public void setAssessmentService(AssessmentService assessmentService)
 	{
-		// save Final score for submission
-		if (submissions != null && submissions.getSet().size() > 0)
-		{
-			for (Iterator i = submissions.getSet().iterator(); i.hasNext();)
-			{
-				Submission submission = (Submission) i.next();
-				if (releaseEvaluated)
-				{
-					if (submission.getEvaluation().getEvaluated())
-					{
-						if (!submission.getIsReleased()) submission.setIsReleased(true);
-					}
-				}
-				if (releaseAll)
-				{
-					if (!submission.getIsReleased()) submission.setIsReleased(true);
-				}
+		this.assessmentService = assessmentService;
+	}
 
-				this.submissionService.evaluateSubmission(submission);
-			}
-		}
+	/**
+	 * @param sessionManager
+	 *        the sessionManager to set
+	 */
+	public void setSessionManager(SessionManager sessionManager)
+	{
+		this.sessionManager = sessionManager;
+	}
 
-		// parse the score
-		Float score = null;
-		if (submissionAdjustScore != null) score = new Float(submissionAdjustScore);
+	/**
+	 * @param submissionService
+	 *        the submissionService to set
+	 */
+	public void setSubmissionService(SubmissionService submissionService)
+	{
+		this.submissionService = submissionService;
+	}
 
-		// save adjusted score for the assessment - global adjustment
-		if (score != null)
-		{
-			this.submissionService.evaluateSubmissions(assessment, submissionAdjustComments, score, Boolean.FALSE);
-		}
+	/**
+	 * @param toolManager
+	 *        the toolManager to set
+	 */
+	public void setToolManager(ToolManager toolManager)
+	{
+		this.toolManager = toolManager;
 	}
 
 	/**
@@ -451,41 +435,5 @@ public class GradeAssessmentView extends ControllerImpl
 		}
 
 		return sort;
-	}
-
-	/**
-	 * @param assessmentService
-	 *        the assessmentService to set
-	 */
-	public void setAssessmentService(AssessmentService assessmentService)
-	{
-		this.assessmentService = assessmentService;
-	}
-
-	/**
-	 * @param submissionService
-	 *        the submissionService to set
-	 */
-	public void setSubmissionService(SubmissionService submissionService)
-	{
-		this.submissionService = submissionService;
-	}
-
-	/**
-	 * @param toolManager
-	 *        the toolManager to set
-	 */
-	public void setToolManager(ToolManager toolManager)
-	{
-		this.toolManager = toolManager;
-	}
-
-	/**
-	 * @param sessionManager
-	 *        the sessionManager to set
-	 */
-	public void setSessionManager(SessionManager sessionManager)
-	{
-		this.sessionManager = sessionManager;
 	}
 }
