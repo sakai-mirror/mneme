@@ -27,6 +27,7 @@ import java.util.List;
 import org.muse.ambrosia.api.AndDecision;
 import org.muse.ambrosia.api.AttachmentsEdit;
 import org.muse.ambrosia.api.Component;
+import org.muse.ambrosia.api.Container;
 import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
@@ -39,6 +40,8 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.muse.ambrosia.api.Overlay;
+import org.muse.ambrosia.api.Toggle;
 
 /**
  * FillBlanksQuestionImpl handles questions for the true/false question type.
@@ -177,6 +180,19 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		HtmlEdit text = uiService.newHtmlEdit();
 		text.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.text"));
 		row.add(text);
+		display.addRow(row);
+
+		row = this.uiService.newEntityDisplayRow();
+		Container cont = this.uiService.newContainer();
+		Overlay ovly = this.uiService.newOverlay();
+		ovly.setId("inst");
+		ovly.add(this.uiService.newText().setText("show-instructions"));
+		ovly.add(this.uiService.newText().setText("instructions"));
+		ovly.add(this.uiService.newGap());
+		ovly.add(this.uiService.newToggle().setTarget("inst").setTitle("hide-instructions"));
+		cont.add(ovly);
+		cont.add(this.uiService.newToggle().setTarget("inst").setTitle("show-instructions"));
+		row.add(cont);
 		display.addRow(row);
 
 		row = this.uiService.newEntityDisplayRow();
