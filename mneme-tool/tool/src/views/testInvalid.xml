@@ -46,6 +46,12 @@
 		</container>
 	</subHeader>
 	<container>
+		<alert>
+			<message selector="invalid-warning"></message>
+			<included>
+				<decision reversed="TRUE" model="assessment.isValid" />
+			</included>
+		</alert>
 		<section>
 			<container>
 				<instructions>

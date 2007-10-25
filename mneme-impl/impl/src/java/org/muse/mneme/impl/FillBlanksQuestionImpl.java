@@ -186,12 +186,12 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		Container cont = this.uiService.newContainer();
 		Overlay ovly = this.uiService.newOverlay();
 		ovly.setId("inst");
-		ovly.add(this.uiService.newText().setText("show-instructions"));
+		ovly.add(this.uiService.newText().setText("view-instructions"));
 		ovly.add(this.uiService.newText().setText("instructions"));
 		ovly.add(this.uiService.newGap());
 		ovly.add(this.uiService.newToggle().setTarget("inst").setTitle("hide-instructions"));
 		cont.add(ovly);
-		cont.add(this.uiService.newToggle().setTarget("inst").setTitle("show-instructions"));
+		cont.add(this.uiService.newToggle().setTarget("inst").setTitle("view-instructions").setIcon("/icons/test.png", null));
 		row.add(cont);
 		display.addRow(row);
 
