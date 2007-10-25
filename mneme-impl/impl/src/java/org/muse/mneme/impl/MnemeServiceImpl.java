@@ -302,9 +302,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markGraded) throws AssessmentPermissionException
+	public void evaluateSubmissions(Assessment assessment, String comment, Float score) throws AssessmentPermissionException
 	{
-		this.evaluateSubmissions(assessment, comment, score, markGraded);
+		this.evaluateSubmissions(assessment, comment, score);
 	}
 
 	/**
@@ -590,6 +590,14 @@ public class MnemeServiceImpl implements MnemeService
 	public void registerQuestionPlugin(QuestionPlugin plugin)
 	{
 		this.questionPlugins.put(plugin.getType(), plugin);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void releaseSubmissions(Assessment assessment, Boolean evaluatedOnly) throws AssessmentPermissionException
+	{
+		submissionService.releaseSubmissions(assessment, evaluatedOnly);
 	}
 
 	/**

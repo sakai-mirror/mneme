@@ -80,7 +80,8 @@ public class GradeAssessmentView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 4 && params.length != 5 && params.length != 6 && params.length != 7) throw new IllegalArgumentException();
+		// [2]sort for /grades, [3]aid |optional->| [4]our sort, [5]our page, [6]our all/highest
+		if ((params.length < 4) || params.length > 7) throw new IllegalArgumentException();
 
 		// check for user permission to access the assessments for grading
 		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
@@ -90,79 +91,53 @@ public class GradeAssessmentView extends ControllerImpl
 			return;
 		}
 
-		// grades sort parameter is in params array at index 2
+		// grades sort parameter
 		String gradesSortCode = params[2];
-		context.put("gradesSortCode", gradesSortCode);
+		context.put("sort_grades", gradesSortCode);
 
-		// get Assessment - assessment id is in params at index 3
+		// get Assessment
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
-		context.put("assessment", assessment);
-
-		// sort parameter - sort is in param array at index 4
-		String sortCode = null;
-		if (params.length > 4) sortCode = params[4];
-
-		// paging parameter
-		String pagingParameter = null;
-		if (params.length > 5)
-		{
-			// paging parameter is in param array at index 5
-			pagingParameter = params[5];
-		}
-
-		SubmissionService.FindAssessmentSubmissionsSort sort = getSort(assessment, context, sortCode);
-
 		if (assessment == null)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
+		context.put("assessment", assessment);
 
-		// default paging
+		// sort parameter
+		String sortCode = null;
+		if (params.length > 4) sortCode = params[4];
+		SubmissionService.FindAssessmentSubmissionsSort sort = getSort(assessment, context, sortCode);
+
+		// paging parameter
+		String pagingParameter = null;
+		if (params.length > 5) pagingParameter = params[5];
 		if (pagingParameter == null)
 		{
-			pagingParameter = "1-30";
+			// TODO: pagingParameter = "1-30";
+			pagingParameter = "1-3";
 		}
 
-		if (params.length == 7 && params[6].equalsIgnoreCase("all"))
-		{
-			// get the size
-			Integer maxSubmissions = this.submissionService.countAssessmentSubmissions(assessment, Boolean.FALSE);
+		// official or all
+		Boolean official = Boolean.TRUE;
+		if (params.length > 6 && params[6].equals("all")) official = Boolean.FALSE;
 
-			// paging
-			Paging paging = uiService.newPaging();
-			paging.setMaxItems(maxSubmissions);
-			paging.setCurrentAndSize(pagingParameter);
-			context.put("paging", paging);
-			context.put("pagingParameter", pagingParameter);
+		// get the size
+		Integer maxSubmissions = this.submissionService.countAssessmentSubmissions(assessment, official);
 
-			// get all Assessment submissions
-			List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, paging.getCurrent(),
-					paging.getSize());
-			context.put("submissions", submissions);
-			context.put("official", "FALSE");
-			context.put("view", "all");
-		}
-		else
-		{
-			// get the size
-			Integer maxSubmissions = this.submissionService.countAssessmentSubmissions(assessment, Boolean.TRUE);
+		// paging
+		Paging paging = uiService.newPaging();
+		paging.setMaxItems(maxSubmissions);
+		paging.setCurrentAndSize(pagingParameter);
+		context.put("paging", paging);
 
-			// paging
-			Paging paging = uiService.newPaging();
-			paging.setMaxItems(maxSubmissions);
-			paging.setCurrentAndSize(pagingParameter);
-			context.put("paging", paging);
-			context.put("pagingParameter", pagingParameter);
-
-			// get official Assessment submissions
-			List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.TRUE, paging.getCurrent(),
-					paging.getSize());
-			context.put("submissions", submissions);
-			context.put("official", "TRUE");
-			context.put("view", "highest");
-		}
+		// get all Assessment submissions
+		List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, official, paging.getCurrent(), paging
+				.getSize());
+		context.put("submissions", submissions);
+		context.put("official", official);
+		context.put("view", official ? "highest" : "all");
 
 		// for Adjust every student's test submission by
 		Value submissionAdjust = this.uiService.newValue();
@@ -171,43 +146,6 @@ public class GradeAssessmentView extends ControllerImpl
 		// for "Adjust every student's test submission by" comments
 		Value submissionAdjustComments = this.uiService.newValue();
 		context.put("submissionAdjustComments", submissionAdjustComments);
-
-		// destination path for grade submission
-		String destinationPath = context.getDestination();
-		destinationPath = destinationPath.substring(destinationPath.indexOf("/", 1) + 1);
-		if (params.length == 4)
-		{
-			StringBuilder buildPath = new StringBuilder();
-			buildPath.append(destinationPath);
-			buildPath.append("/");
-			buildPath.append(context.get("sort_column"));
-			buildPath.append(context.get("sort_direction"));
-			buildPath.append("/");
-			buildPath.append(pagingParameter);
-			buildPath.append("/");
-			buildPath.append("highest");
-			// destinationPath = destinationPath + "/" + context.get("sort_column") + context.get("sort_direction") + "/" + "highest";
-			destinationPath = buildPath.toString();
-		}
-		context.put("destinationPath", destinationPath);
-
-		String pagingDestinationPath = null;
-		StringBuilder buildPath = new StringBuilder();
-		buildPath.append(params[2]);
-		buildPath.append("/");
-		buildPath.append(params[3]);
-		buildPath.append("/");
-		if (params.length == 4)
-		{
-			buildPath.append(context.get("sort_column"));
-			buildPath.append(context.get("sort_direction"));
-		}
-		else
-			buildPath.append(params[4]);
-
-		pagingDestinationPath = buildPath.toString();
-
-		context.put("pagingDestinationPath", pagingDestinationPath);
 
 		uiService.render(ui, context);
 	}
@@ -226,7 +164,8 @@ public class GradeAssessmentView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 4 && params.length != 5 && params.length != 6 && params.length != 7) throw new IllegalArgumentException();
+		// [2]sort for /grades, [3]aid |optional->| [4]our sort, [5]our page, [6]our all/highest
+		if ((params.length < 4) || params.length > 7) throw new IllegalArgumentException();
 
 		// check for user permission to access the assessments for grading
 		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
@@ -304,8 +243,7 @@ public class GradeAssessmentView extends ControllerImpl
 				}
 
 				// apply (no release)
-				// TODO: remove the last param!
-				this.submissionService.evaluateSubmissions(assessment, adjustComments, score, Boolean.FALSE);
+				this.submissionService.evaluateSubmissions(assessment, adjustComments, score);
 			}
 			catch (AssessmentPermissionException e)
 			{
@@ -319,13 +257,29 @@ public class GradeAssessmentView extends ControllerImpl
 		// release all evaluated
 		if (destination.equals("RELEASEEVALUATED"))
 		{
-			// TODO:
+			try
+			{
+				this.submissionService.releaseSubmissions(assessment, Boolean.TRUE);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				M_log.warn("post: " + e);
+			}
+
 			destination = context.getDestination();
 		}
 
 		else if (destination.equals("RELEASEALL"))
 		{
-			// TODO:
+			try
+			{
+				this.submissionService.releaseSubmissions(assessment, Boolean.FALSE);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				M_log.warn("post: " + e);
+			}
+
 			destination = context.getDestination();
 		}
 
@@ -383,7 +337,7 @@ public class GradeAssessmentView extends ControllerImpl
 	 *        sort code
 	 * @return SubmissionService.FindAssessmentSubmissionsSort
 	 */
-	private SubmissionService.FindAssessmentSubmissionsSort getSort(Assessment assessment, Context context, String sortCode)
+	protected SubmissionService.FindAssessmentSubmissionsSort getSort(Assessment assessment, Context context, String sortCode)
 	{
 		// default sort is user name ascending
 		SubmissionService.FindAssessmentSubmissionsSort sort;

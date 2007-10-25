@@ -186,12 +186,10 @@ public interface SubmissionService
 	 *        The overall comment. If null, no change to comment is made.
 	 * @param score
 	 *        The overall score adjustment. If null, no change to score is made.
-	 * @param markEvaluated
-	 *        If TRUE, mark them all as evaluated, otherwise no change to evaluated is made.
 	 * @throws AssessmentPermissionException
 	 *         If the current user is not allowed to save this Submission.
 	 */
-	void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markEvaluated) throws AssessmentPermissionException;
+	void evaluateSubmissions(Assessment assessment, String comment, Float score) throws AssessmentPermissionException;
 
 	/**
 	 * Find the submissions to the assignment made by all users.<br />
@@ -343,6 +341,16 @@ public interface SubmissionService
 	 * @return A List<Submission> of the submissions that are the offical submissions for assessments in the context by this user, sorted.
 	 */
 	List<Submission> getUserContextSubmissions(String context, String userId, GetUserContextSubmissionsSort sort);
+
+	/**
+	 * Release all, or all evaluated, official completed submissions to this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param evaluatedOnly
+	 *        if TRUE, release only evaluated submissions, otherwise do them all.
+	 */
+	void releaseSubmissions(Assessment assessment, Boolean evaluatedOnly) throws AssessmentPermissionException;
 
 	/**
 	 * Remove all incomplete submissions to this assessment.

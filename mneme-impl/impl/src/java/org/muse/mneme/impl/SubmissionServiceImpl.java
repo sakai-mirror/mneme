@@ -618,9 +618,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public void evaluateSubmissions(Assessment assessment, String comment, Float score, Boolean markEvaluated) throws AssessmentPermissionException
+	public void evaluateSubmissions(Assessment assessment, String comment, Float score) throws AssessmentPermissionException
 	{
-		if ((comment == null) && (score == null) && (markEvaluated == null)) return;
+		if (assessment == null) throw new IllegalArgumentException();
+		if ((comment == null) && (score == null)) return;
 		Date now = new Date();
 		String userId = sessionManager.getCurrentSessionUserId();
 
@@ -659,12 +660,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					total += submission.evaluation.getScore();
 				}
 				submission.evaluation.setScore(total);
-			}
-
-			// if we are to mark as evaluated, do so
-			if (markEvaluated != null)
-			{
-				submission.evaluation.setEvaluated(markEvaluated);
 			}
 
 			// save the submission evaluation (if changed)
@@ -1021,6 +1016,42 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		catch (Throwable t)
 		{
 			M_log.warn("init(): ", t);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void releaseSubmissions(Assessment assessment, Boolean evaluatedOnly) throws AssessmentPermissionException
+	{
+		if (assessment == null) throw new IllegalArgumentException();
+		if (evaluatedOnly == null) throw new IllegalArgumentException();
+
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, assessment.getContext());
+
+		// get the completed submissions to this assessment
+		List<SubmissionImpl> submissions = this.storage.getAssessmentCompleteSubmissions(assessment);
+
+		// TODO: only for the "official" one ? submissions = officialize(submissions);
+
+		for (SubmissionImpl submission : submissions)
+		{
+			if ((evaluatedOnly) && !submission.evaluation.getEvaluated()) continue;
+
+			if (submission.getIsReleased()) continue;
+
+			// set as released
+			submission.setIsReleased(Boolean.TRUE);
+
+			// clear the changed flag
+			((SubmissionImpl) submission).clearIsChanged();
+
+			// save
+			this.storage.saveSubmission(submission);
+
+			// TODO: events?
+			// TODO: record in gb
 		}
 	}
 
@@ -1851,14 +1882,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 						// take the new one if it exceeds the best so far
 						else if (candidateBetter(bestSubmission, candidateSub))
-//						else if (bestSubmission.getTotalScore().floatValue() < candidateSub.getTotalScore().floatValue())
+						// else if (bestSubmission.getTotalScore().floatValue() < candidateSub.getTotalScore().floatValue())
 						{
 							bestSubmission = candidateSub;
 						}
 
 						// if we match the best, pick the latest submit date
 						else if (sameScores(bestSubmission, candidateSub))
-//						else if (bestSubmission.getTotalScore().floatValue() == candidateSub.getTotalScore().floatValue())
+						// else if (bestSubmission.getTotalScore().floatValue() == candidateSub.getTotalScore().floatValue())
 						{
 							if ((bestSubmission.getSubmittedDate() != null) && (candidateSub.getSubmittedDate() != null)
 									&& (bestSubmission.getSubmittedDate().before(candidateSub.getSubmittedDate())))
