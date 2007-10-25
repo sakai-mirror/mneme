@@ -316,13 +316,7 @@
 								<model type="paging" ref="paging" />
 							</destination>
 							<included>
-								<compareDecision model="official">
-									<constant value="FALSE" />
-								</compareDecision>
-								<compareDecision model="submission.siblingCount">
-									<constant value="0" />
-									<constant value="1" />
-								</compareDecision>
+								<decision model="official" reversed="TRUE" />
 							</included>
 						</navigation>
 					</navigations>
