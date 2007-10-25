@@ -53,13 +53,14 @@
 						<message selector="no-questions" />
 					</emptyTitle>
 					<pager paging="paging">
-						<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/{4}{5}">
+						<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}{4}/{5}/{6}">
 							<model ref="testsortcode" />
 							<model ref="assessmentId" />
 							<model ref="partId" />
-							<model type="paging" ref="paging" />
 							<model ref="sort_column" />
 							<model ref="sort_direction" />
+							<model type="paging" ref="paging" />
+							<model ref="view" />
 						</destination>
 					</pager>
 					<iterator name="question" model="questions" />
@@ -90,20 +91,22 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/1A">
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/1A/{3}/{4}">
 										<model ref="testsortcode" />
 										<model ref="assessmentId" />
 										<model ref="partId" />
-										<model ref="pagingParameter" />
+										<model type="paging" ref="paging" selector="FIRST" />
+										<model ref="view" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/1D">
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/1D/{3}/{4}">
 										<model ref="testsortcode" />
 										<model ref="assessmentId" />
 										<model ref="partId" />
-										<model ref="pagingParameter" />
+										<model type="paging" ref="paging" selector="FIRST" />
+										<model ref="view" />
 									</destination>
 								</desc>
 							</sort>
@@ -141,20 +144,22 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/0A">
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/0A/{3}/{4}">
 										<model ref="testsortcode" />
 										<model ref="assessmentId" />
 										<model ref="partId" />
-										<model ref="pagingParameter" />
+										<model type="paging" ref="paging" selector="FIRST" />
+										<model ref="view" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/0D">
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/0D/{3}/{4}">
 										<model ref="testsortcode" />
 										<model ref="assessmentId" />
 										<model ref="partId" />
-										<model ref="pagingParameter" />
+										<model type="paging" ref="paging" selector="FIRST" />
+										<model ref="view" />
 									</destination>
 								</desc>
 							</sort>
@@ -179,20 +184,22 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/2A">
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/2A/{3}/{4}">
 										<model ref="testsortcode" />
 										<model ref="assessmentId" />
 										<model ref="partId" />
-										<model ref="pagingParameter" />
+										<model type="paging" ref="paging" selector="FIRST" />
+										<model ref="view" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}/2D">
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/2D/{3}/{4}">
 										<model ref="testsortcode" />
 										<model ref="assessmentId" />
 										<model ref="partId" />
-										<model ref="pagingParameter" />
+										<model type="paging" ref="paging" selector="FIRST" />
+										<model ref="view" />
 									</destination>
 								</desc>
 							</sort>

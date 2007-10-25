@@ -85,7 +85,9 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		String destination = this.uiService.decode(req, context);
+		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page
+		if (params.length < 5 || params.length > 7)	throw new IllegalArgumentException();
+		
 		context.put("testsortcode", params[2]);
 		context.put("assessmentId", params[3]);
 		context.put("partId", params[4]);
@@ -107,11 +109,11 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 			return;
 		}
 		context.put("partTitle", part.getTitle());
-
+		
 		String pagingParameter = null;
-		if (params.length >= 6)
+		if (params.length >= 7)
 		{
-			pagingParameter = params[5];
+			pagingParameter = params[6];
 		}
 		Paging paging = uiService.newPaging();
 
@@ -131,9 +133,9 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		// default sort: title ascending
 		QuestionService.FindQuestionsSort sort = QuestionService.FindQuestionsSort.type_a;
 		String sortCode = null;
-		if (params.length >= 7)
+		if (params.length >= 6)
 		{
-			sortCode = params[6];
+			sortCode = params[5];
 			if (sortCode != null && sortCode.length() == 2)
 			{
 				context.put("sort_column", sortCode.charAt(0));
@@ -150,8 +152,8 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		List<Question> questions = questionService.findQuestions(this.toolManager.getCurrentPlacement().getContext(), sort, null, paging.getCurrent(),
 				paging.getSize());
 
-		context.put("questions", questions);
-
+		context.put("questions", questions);		
+		
 		// for the checkboxes
 		Values values = this.uiService.newValues();
 		context.put("questionids", values);
@@ -208,6 +210,9 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page
+		if (params.length < 5 || params.length > 7)	throw new IllegalArgumentException();
+		
 		Values values = this.uiService.newValues();
 		context.put("questionids", values);
 

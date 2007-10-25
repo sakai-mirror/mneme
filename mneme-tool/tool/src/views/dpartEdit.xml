@@ -99,13 +99,14 @@
 						<message selector="no-pools" />
 					</emptyTitle>
 					<pager paging="paging">
-						<destination template="/part_edit/{0}/{1}/{2}/{3}{4}/{5}">
+						<destination template="/part_edit/{0}/{1}/{2}/{3}{4}/{5}/{6}">
 							<model ref="testsortcode" />
 							<model ref="assessment.id" />
 							<model ref="part.id" />
 							<model ref="sort_column" />
 							<model ref="sort_direction" />
 							<model type="paging" ref="paging" />
+							<model ref="view" />							
 						</destination>
 					</pager>
 					<iterator name="draw">
@@ -143,18 +144,22 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/part_edit/{0}/{1}/{2}/0A">
+									<destination template="/part_edit/{0}/{1}/{2}/0A/{3}/{4}">
 										<model ref="testsortcode" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
+										<model type="paging" ref="paging" selector="FIRST" />
+										<model ref="view" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/part_edit/{0}/{1}/{2}/0D">
+									<destination template="/part_edit/{0}/{1}/{2}/0D/{3}/{4}">
 										<model ref="testsortcode" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
+										<model type="paging" ref="paging" selector="FIRST" />
+										<model ref="view" />
 									</destination>
 								</desc>
 							</sort>
@@ -185,18 +190,22 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/part_edit/{0}/{1}/{2}/1A">
+									<destination template="/part_edit/{0}/{1}/{2}/1A/{3}/{4}">
 										<model ref="testsortcode" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
+										<model type="paging" ref="paging" selector="FIRST" />
+										<model ref="view" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/part_edit/{0}/{1}/{2}/1D">
+									<destination template="/part_edit/{0}/{1}/{2}/1D/{3}/{4}">
 										<model ref="testsortcode" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
+										<model type="paging" ref="paging" selector="FIRST" />
+										<model ref="view" />
 									</destination>
 								</desc>
 							</sort>

@@ -88,12 +88,9 @@ public class PartEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a two, 3 or 4 parameters (testsort, aid, pid, sort, paging (dpart))
-		if (params.length != 5 && params.length != 6 && params.length != 7)
-		{
-			throw new IllegalArgumentException();
-		}
-
+		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page
+		if (params.length < 5 || params.length > 7)	throw new IllegalArgumentException();
+		
 		// Since we have two sorts here, we call this testsortcode
 		context.put("testsortcode", params[2]);
 		String assessmentId = params[3];
@@ -134,7 +131,7 @@ public class PartEditView extends ControllerImpl
 		else
 		{
 			getManual(assessment, (ManualPart) part, req, res, context, params);
-		}
+		}		
 	}
 
 	/**
@@ -268,12 +265,9 @@ public class PartEditView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a two, 3 or 4 parameters (aid, pid, sort, paging (dpart))
-		if (params.length != 5 && params.length != 6 && params.length != 7)
-		{
-			throw new IllegalArgumentException();
-		}
-
+		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page
+		if (params.length < 5 || params.length > 7)	throw new IllegalArgumentException();
+		
 		String assessmentId = params[3];
 		String partId = params[4];
 
@@ -304,7 +298,7 @@ public class PartEditView extends ControllerImpl
 		// setup the model: the selected assessment
 		context.put("assessment", assessment);
 		context.put("part", part);
-
+				
 		Values values = null;
 
 		// based on the part type...
@@ -347,7 +341,7 @@ public class PartEditView extends ControllerImpl
 		{
 			// apply the draws to the part
 			DrawPart dpart = (DrawPart) part;
-			dpart.updateDraws(new ArrayList<PoolDraw>(draws.getSet()));
+			dpart.updateDraws(new ArrayList<PoolDraw>(draws.getSet()));			
 		}
 
 		// process the ids into the destination for a redirect to the remove confirm view...
@@ -380,7 +374,7 @@ public class PartEditView extends ControllerImpl
 		// commit the save
 		try
 		{
-			this.assessmentService.saveAssessment(assessment);
+			this.assessmentService.saveAssessment(assessment);			
 		}
 		catch (AssessmentPermissionException e)
 		{
