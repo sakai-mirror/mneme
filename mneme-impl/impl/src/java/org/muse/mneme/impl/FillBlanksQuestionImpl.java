@@ -42,6 +42,7 @@ import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.muse.ambrosia.api.Overlay;
 import org.muse.ambrosia.api.Toggle;
+import org.muse.ambrosia.api.Navigation;
 
 /**
  * FillBlanksQuestionImpl handles questions for the true/false question type.
@@ -191,7 +192,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		ovly.add(this.uiService.newGap());
 		ovly.add(this.uiService.newToggle().setTarget("inst").setTitle("hide-instructions"));
 		cont.add(ovly);
-		cont.add(this.uiService.newToggle().setTarget("inst").setTitle("view-instructions").setIcon("/icons/test.png", null));
+		cont.add(this.uiService.newToggle().setTarget("inst").setTitle("view-instructions").setIcon("/icons/test.png", Navigation.IconStyle.left));
 		row.add(cont);
 		display.addRow(row);
 

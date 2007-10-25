@@ -50,6 +50,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.muse.ambrosia.api.Navigation;
 
 /**
  * NonsubQuestionImpl handles questions for the Nonsub question type.
@@ -263,7 +264,8 @@ public class NonsubQuestionImpl implements TypeSpecificQuestion
 		ovly.add(this.uiService.newGap());
 		ovly.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
 		cont.add(ovly);
-		cont.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("view-model-answer").setIcon("/icons/answer_key2.png", null));
+		cont.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("view-model-answer").setIcon("/icons/answer_key2.png",
+				Navigation.IconStyle.left));
 
 		return this.uiService.newFragment().setMessages(this.messages).add(cont);
 	}
