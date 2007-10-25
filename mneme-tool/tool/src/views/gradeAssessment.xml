@@ -63,7 +63,7 @@
 				<navigation title="grade-submission-title" style="LINK" description="grade-submission-description" submit="FALSE" disabled="TRUE">
 					<icon icon="/icons/grade_student.png" style="LEFT" />
 				</navigation>
-				<navigation disabled="TRUE" title="nav-divider" />
+				<navigation disabled="TRUE" title="bar" />
 				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description">
 					<icon icon="/icons/grade_questions.png" style="LEFT" />
 					<destination template="/grade_questions_list/{0}/{1}">
@@ -244,8 +244,8 @@
 					<title>
 						<message selector="submission-status" />
 					</title>
-					<model type="html" ref="submission" delegate="SubmissionStatus" tool="sakai.mneme" />
-					<!--model type="enum" ref="submission.gradingStatus" messageRoot="grade-status-" /-->
+					<!--<model type="html" ref="submission" delegate="SubmissionStatus" tool="sakai.mneme" />-->
+					<model type="enum" ref="submission.gradingStatus" messageRoot="grade-status-" />
 					<sort submit="TRUE">
 						<active>
 							<compareDecision model="sort_column" constant="1" />

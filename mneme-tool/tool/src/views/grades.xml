@@ -126,7 +126,7 @@
 				</column>
 				<column>
 					<title>
-						<message selector="assessment-odate" />
+						<message selector="assessment-odate"/>
 					</title>
 					<sort submit="TRUE">
 						<active>
@@ -147,7 +147,7 @@
 					<container>
 						<text>
 							<message selector="assessment-show-odate">
-								<model ref="assessment.dates.openDate" type="date" />
+								<model ref="assessment.dates.openDate" type="date" missing="dash" />
 							</message>
 						</text>
 					</container>
@@ -175,16 +175,16 @@
 					<container>
 						<text>
 							<message selector="assessment-show-ddate">
-								<model ref="assessment.dates.dueDate" type="date" />
+								<model ref="assessment.dates.dueDate" type="date" missing="dash" />
 							</message>
 						</text>
 					</container>
 				</column>
 				<modelColumn>
 					<title>
-						<message selector="grade_status" />
+						<message selector="submit_status" />
 					</title>					
-					<model type="enum" ref="assessment.acceptSubmitStatus" messageRoot="grade-status-" />					
+					<model type="enum" ref="assessment.acceptSubmitStatus" messageRoot="submit-status-" />					
 				</modelColumn>
 				<modelColumn>					
 					<navigations>
