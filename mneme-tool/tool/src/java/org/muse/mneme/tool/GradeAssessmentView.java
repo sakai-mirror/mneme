@@ -115,8 +115,7 @@ public class GradeAssessmentView extends ControllerImpl
 		if (params.length > 5) pagingParameter = params[5];
 		if (pagingParameter == null)
 		{
-			// TODO: pagingParameter = "1-30";
-			pagingParameter = "1-3";
+			pagingParameter = "1-30";
 		}
 
 		// official or all

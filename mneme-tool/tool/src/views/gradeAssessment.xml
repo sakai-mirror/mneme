@@ -172,7 +172,7 @@
 							<destination template="/grade_assessment/{0}/{1}/0A/{2}/{3}">
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
-								<model type="paging" ref="paging" />
+								<model type="paging" ref="paging" selector="FIRST" />
 								<model ref="view" />
 							</destination>
 						</asc>
@@ -181,7 +181,7 @@
 							<destination template="/grade_assessment/{0}/{1}/0D/{2}/{3}">
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
-								<model type="paging" ref="paging" />
+								<model type="paging" ref="paging" selector="FIRST" />
 								<model ref="view" />
 							</destination>
 						</desc>
@@ -258,7 +258,7 @@
 							<destination template="/grade_assessment/{0}/{1}/1A/{2}/{3}">
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
-								<model type="paging" ref="paging" />
+								<model type="paging" ref="paging" selector="FIRST" />
 								<model ref="view" />
 							</destination>
 						</asc>
@@ -267,7 +267,7 @@
 							<destination template="/grade_assessment/{0}/{1}/1D/{2}/{3}">
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
-								<model type="paging" ref="paging" />
+								<model type="paging" ref="paging" selector="FIRST" />
 								<model ref="view" />
 							</destination>
 						</desc>
@@ -348,7 +348,7 @@
 							<destination template="/grade_assessment/{0}/{1}/2A/{2}/{3}">
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
-								<model type="paging" ref="paging" />
+								<model type="paging" ref="paging" selector="FIRST" />
 								<model ref="view" />
 							</destination>
 						</asc>
@@ -357,7 +357,7 @@
 							<destination template="/grade_assessment/{0}/{1}/2D/{2}/{3}">
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
-								<model type="paging" ref="paging" />
+								<model type="paging" ref="paging" selector="FIRST" />
 								<model ref="view" />
 							</destination>
 						</desc>
