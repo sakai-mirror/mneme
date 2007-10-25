@@ -22,7 +22,6 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,16 +30,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
- * The /grading view for the mneme tool.
+ * The /grade_submission view for the mneme tool.
  */
 public class GradeSubmissionView extends ControllerImpl
 {
@@ -69,79 +68,14 @@ public class GradeSubmissionView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 7 && params.length != 8) throw new IllegalArgumentException();
+		// [2]sid, [3]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
+		if (params.length < 3) throw new IllegalArgumentException();
 
-		// check for user permission to access the assessments for grading
-		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
+		Submission submission = this.submissionService.getSubmission(params[2]);
+		if (submission == null)
 		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
-
-		boolean fromGradeByQuestion = false;
-
-		if (context.getPreviousDestination().startsWith("/grade_question")) fromGradeByQuestion = true;
-
-		// get Assessment - assessment id is in params at index 3
-		Assessment assessment = this.assessmentService.getAssessment(params[3]);
-		context.put("assessment", assessment);
-
-		if (assessment == null)
-		{
-			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
-		}
-
-		Submission submission = null;
-
-		if (fromGradeByQuestion)
-		{
-			String submissionId = context.getDestination().substring(context.getDestination().lastIndexOf("/") + 1);
-			submission = this.submissionService.getSubmission(submissionId);
-			context.put("fromGradeByQuestion", "TRUE");
-		}
-		else
-		{
-			// submission id is in params array at index 7
-			submission = this.submissionService.getSubmission(params[7]);
-			context.put("fromGradeByQuestion", "FALSE");
-		}
-
-		context.put("submission", submission);
-
-		// needed by some of the delegates to show the score
-		context.put("grading", Boolean.TRUE);
-
-		List<Submission> submissions = null;
-
-		if (!fromGradeByQuestion)
-		{
-			/*
-			 * for previous and next - get submissions based on grade_assessment sort & view. sort is at index 4 and view is at index 6 in params
-			 */
-			if (params[6].equalsIgnoreCase("all"))
-			{
-				SubmissionService.FindAssessmentSubmissionsSort sort = getSort(context, params[4]);
-				// get all Assessment submissions
-				submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.FALSE, null, null);
-
-			}
-			else if (params[6].equalsIgnoreCase("highest"))
-			{
-				SubmissionService.FindAssessmentSubmissionsSort sort = getSort(context, params[4]);
-				// get official Assessment submissions
-				submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, Boolean.TRUE, null, null);
-			}
-			else
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
-			}
-
-			parsePreviousNext(context, submission, submissions);
 		}
 
 		// check for user permission to access the submission for grading
@@ -152,10 +86,47 @@ public class GradeSubmissionView extends ControllerImpl
 			return;
 		}
 
-		// destination path for grade submission
-		String destinationPath = context.getDestination();
-		destinationPath = destinationPath.substring(destinationPath.indexOf("/", 1) + 1, destinationPath.lastIndexOf("/"));
-		context.put("destinationPath", destinationPath);
+		context.put("submission", submission);
+
+		// next and prev, based on the sort
+		String sortCode = "userName_a";
+		SubmissionService.FindAssessmentSubmissionsSort sort = null;
+		int destinationStartsAt = 4;
+		if (params.length > 3) sortCode = params[3];
+		try
+		{
+			sort = SubmissionService.FindAssessmentSubmissionsSort.valueOf(sortCode);
+		}
+		catch (IllegalArgumentException e)
+		{
+			// no sort, so it must be part of destination
+			destinationStartsAt = 3;
+		}
+		if (sort != null)
+		{
+			String[] nextPrev = submissionService.findNextPrevSubmissionIds(submission, sort, Boolean.TRUE);
+			if (nextPrev[0] != null) context.put("prev", nextPrev[0]);
+			if (nextPrev[1] != null) context.put("next", nextPrev[1]);
+
+			context.put("sort", sortCode);
+		}
+
+		String destination = null;
+		if (params.length > destinationStartsAt)
+		{
+			destination = "/" + StringUtil.unsplit(params, destinationStartsAt, params.length - destinationStartsAt, "/");
+		}
+
+		// if not specified, go to the main grade_assessment page for this assessment
+		else
+		{
+			destination = "/grade_assessment/0A/" + submission.getAssessment().getId();
+		}
+		context.put("return", destination);
+
+		// needed by some of the delegates to show the score
+		context.put("grading", Boolean.TRUE);
+
 		uiService.render(ui, context);
 	}
 
@@ -173,25 +144,25 @@ public class GradeSubmissionView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 7 && params.length != 8) throw new IllegalArgumentException();
+		// [2]sid, [3]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
+		if (params.length < 3) throw new IllegalArgumentException();
 
-		// check for user permission to access the assessments for grading
-		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
+		Submission submission = this.submissionService.getSubmission(params[2]);
+		if (submission == null)
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		// check for user permission to access the submission for grading
+		if (!this.submissionService.allowEvaluate(submission))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
-		// submission id is in params array at last index
-		Submission submission = this.submissionService.getSubmission(params[params.length - 1]);
 		context.put("submission", submission);
-
-		if (submission == null)
-		{
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
 
 		// read form
 		String destination = this.uiService.decode(req, context);
@@ -199,7 +170,7 @@ public class GradeSubmissionView extends ControllerImpl
 		// save graded submission
 		try
 		{
-			saveGradedSubmission(submission);
+			this.submissionService.evaluateSubmission(submission);
 		}
 		catch (AssessmentPermissionException e)
 		{
@@ -208,156 +179,6 @@ public class GradeSubmissionView extends ControllerImpl
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-	}
-
-	/**
-	 * save Graded Submission
-	 * 
-	 * @param submission
-	 *        submission to save
-	 * @throws AssessmentPermissionException
-	 */
-	private void saveGradedSubmission(Submission submission) throws AssessmentPermissionException
-	{
-		// save submission
-		this.submissionService.evaluateSubmission(submission);
-	}
-
-	/**
-	 * get the sort based on sort code
-	 * 
-	 * @param context
-	 * @param sortCode
-	 *        sort code
-	 * @return SubmissionService.FindAssessmentSubmissionsSort
-	 */
-	private SubmissionService.FindAssessmentSubmissionsSort getSort(Context context, String sortCode)
-	{
-		// default sort is user name ascending
-		SubmissionService.FindAssessmentSubmissionsSort sort;
-		if (sortCode != null)
-		{
-			if (sortCode.trim().length() == 2)
-			{
-				// 0 is title
-				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
-					sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
-				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
-					sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
-				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
-					sort = SubmissionService.FindAssessmentSubmissionsSort.status_a;
-				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
-					sort = SubmissionService.FindAssessmentSubmissionsSort.status_d;
-				else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
-					sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
-				else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
-					sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
-				else
-				{
-					throw new IllegalArgumentException();
-				}
-			}
-			else
-			{
-				throw new IllegalArgumentException();
-			}
-		}
-		else
-		{
-			// default sort: user name ascending
-			sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
-		}
-
-		return sort;
-	}
-
-	/**
-	 * parse for previous and next
-	 * 
-	 * @param context
-	 * @param submission
-	 * @param submissions
-	 */
-	private void parsePreviousNext(Context context, Submission submission, List<Submission> submissions)
-	{
-		// prev and next
-		if (submissions != null)
-		{
-			Submission submissionPresent = null;
-			for (int i = 0; i < submissions.size(); i++)
-			{
-				submissionPresent = submissions.get(i);
-				if (submissionPresent.getId().equals(submission.getId()))
-				{
-					if (i == 0 && (i == submissions.size() - 1))
-					{
-						context.put("prevSubmission", "");
-						context.put("nextSubmission", "");
-					}
-					else
-					{
-						// current is first submission
-						if (i == 0)
-						{
-							Submission submissionNext = null;
-							// loop for next submission
-							for (int j = i + 1; j < submissions.size(); j++)
-							{
-								submissionNext = submissions.get(j);
-								if (submissionNext.getIsComplete())
-								{
-									context.put("nextSubmission", submissionNext);
-									break;
-								}
-							}
-						}
-						// current is last submission
-						else if (i == submissions.size() - 1)
-						{
-							Submission submissionPrev = null;
-							// loop for prev submission
-							for (int j = i - 1; j >= 0; j--)
-							{
-								submissionPrev = submissions.get(j);
-								if (submissionPrev.getIsComplete())
-								{
-									context.put("prevSubmission", submissionPrev);
-									break;
-								}
-							}
-						}
-						// current is somewhere between first and last
-						else
-						{
-							Submission submissionNext = null;
-							// loop for next submission
-							for (int j = i + 1; j < submissions.size(); j++)
-							{
-								submissionNext = submissions.get(j);
-								if (submissionNext.getIsComplete())
-								{
-									context.put("nextSubmission", submissionNext);
-									break;
-								}
-							}
-
-							Submission submissionPrev = null;
-							// loop for prev submission
-							for (int j = i - 1; j >= 0; j--)
-							{
-								submissionPrev = submissions.get(j);
-								if (submissionPrev.getIsComplete())
-								{
-									context.put("prevSubmission", submissionPrev);
-									break;
-								}
-							}
-						}
-					}
-					break;
-				}
-			}
-		}
 	}
 
 	/**

@@ -122,6 +122,9 @@
 			<iterator name="submission">
 				<model ref="submissions" indexRef="id" />
 			</iterator>
+			<colorize color="#E8EEF6">
+				<compareDecision model="submission.userId" compare="view" />
+			</colorize>
 			<emptyTitle>
 				<message selector="no-submissions" />
 			</emptyTitle>
@@ -145,14 +148,14 @@
 					</included>
 					<entityNavigations>
 						<navigation style="LINK" submit="TRUE">
-							<destination template="/grade_submission/{0}/{1}/{2}{3}/{4}/{5}/{6}">
+							<destination template="/grade_submission/{0}/{1}/grade_assessment/{2}/{3}/{4}{5}/{6}">
+								<model ref="submission.id" />
+								<model ref="sort" />
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model type="paging" ref="paging" />
-								<model ref="view" />
-								<model ref="submission.id" />
 							</destination>
 							<included>
 								<decision model="submission.isComplete" />
@@ -290,25 +293,27 @@
 							<title>
 								<message selector="view-all" />
 							</title>
-							<destination template="/grade_assessment/{0}/{1}/{2}{3}/{4}/all">
+							<destination template="/grade_assessment/{0}/{1}/{2}{3}/{4}/{5}">
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 								<model type="paging" ref="paging" />
+								<model ref="submission.userId" />
 							</destination>
 							<included>
 								<compareDecision model="submission.siblingCount" reversed="TRUE">
 									<constant value="0" />
 									<constant value="1" />
 								</compareDecision>
+								<compareDecision reversed="TRUE" model="submission.userId" compare="view" />
 							</included>
 						</navigation>
 						<navigation style="LINK" submit="TRUE">
 							<title>
 								<message selector="close" />
 							</title>
-							<destination template="/grade_assessment/{0}/{1}/{2}{3}/{4}/highest">
+							<destination template="/grade_assessment/{0}/{1}/{2}{3}/{4}/official">
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
 								<model ref="sort_column" />
@@ -316,7 +321,8 @@
 								<model type="paging" ref="paging" />
 							</destination>
 							<included>
-								<decision model="official" reversed="TRUE" />
+								<compareDecision model="submission.userId" compare="view" />
+								<compareDecision model="submission.best.id" compare="submission.id" />
 							</included>
 						</navigation>
 					</navigations>

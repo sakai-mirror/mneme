@@ -118,15 +118,18 @@ public interface SubmissionService
 	/**
 	 * Count the submissions to the assignment made by all users.<br />
 	 * If a user has not yet submitted, a phantom one for that user is included. <br />
-	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one.
+	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one. <br />
+	 * Optionally when grouping leave one user's submissions all there un-clumped.
 	 * 
 	 * @param assessment
 	 *        The assessment.
 	 * @param official
 	 *        if TRUE, clump multiple submissions by the same user behind the best one, else include all.
+	 * @param allUid
+	 *        if set and official, leave this user's submissions all there un-clumped
 	 * @return A sorted List<Submission> of the submissions for the assessment.
 	 */
-	Integer countAssessmentSubmissions(Assessment assessment, Boolean official);
+	Integer countAssessmentSubmissions(Assessment assessment, Boolean official, String allUid);
 
 	/**
 	 * Count the submission answers to the assignment and question made by all users.<br />
@@ -194,7 +197,8 @@ public interface SubmissionService
 	/**
 	 * Find the submissions to the assignment made by all users.<br />
 	 * If a user has not yet submitted, a phantom one for that user is included. <br />
-	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one.
+	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one. <br />
+	 * Optionally when grouping leave one user's submissions all there un-clumped.
 	 * 
 	 * @param assessment
 	 *        The assessment.
@@ -202,14 +206,29 @@ public interface SubmissionService
 	 *        The sort order.
 	 * @param official
 	 *        if TRUE, clump multiple submissions by the same user behind the best one, else include all.
+	 * @param allUid
+	 *        if set and official, leave this user's submissions all there un-clumped
 	 * @param pageNum
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return A sorted List<Submission> of the submissions for the assessment.
 	 */
-	List<Submission> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort, Boolean official, Integer pageNum,
-			Integer pageSize);
+	List<Submission> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort, Boolean official, String allUid,
+			Integer pageNum, Integer pageSize);
+
+	/**
+	 * Find the previous and next submissions, from this one, to this one's assessment, based on the sort.
+	 * 
+	 * @param submission
+	 *        The current submission.
+	 * @param sort
+	 *        The sort.
+	 * @param official
+	 *        if TRUE, clump multiple submissions by the same user behind the best one, else include all.
+	 * @return [0], the previous id, or null, [1], the next id, or null.
+	 */
+	String[] findNextPrevSubmissionIds(Submission submission, FindAssessmentSubmissionsSort sort, Boolean official);
 
 	/**
 	 * Find the questions that have been used in submissions in this assessment part.<br />

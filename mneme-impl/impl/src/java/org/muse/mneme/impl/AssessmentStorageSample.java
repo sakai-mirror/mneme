@@ -537,7 +537,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.setPublished(Boolean.TRUE);
 			a.setContext("mercury");
 			a.getCreatedBy().setUserId("admin");
-			a.setTries(1);
+			a.setTries(3);
 			a.setQuestionGrouping(QuestionGrouping.question);
 			a.setRandomAccess(Boolean.TRUE);
 			a.setTimeLimit(1200l * 1000l);
@@ -556,13 +556,13 @@ public class AssessmentStorageSample implements AssessmentStorage
 			catch (ParseException e)
 			{
 			}
-			a.getGrading().setAutoRelease(Boolean.TRUE);
+			a.getGrading().setAutoRelease(Boolean.FALSE);
 			a.getGrading().setGradebookIntegration(Boolean.FALSE);
-			a.getGrading().setAnonymous(Boolean.TRUE);
+			a.getGrading().setAnonymous(Boolean.FALSE);
 			a.getPresentation().setText("This is assessment one.");
 			a.getReview().setShowCorrectAnswer(Boolean.TRUE);
 			a.getReview().setShowFeedback(Boolean.TRUE);
-			a.getReview().setTiming(ReviewTiming.submitted);
+			a.getReview().setTiming(ReviewTiming.graded);
 			a.getSubmitPresentation().setText("Thanks for all the fish!");
 			a.getParts().setContinuousNumbering(Boolean.TRUE);
 			a.getParts().setShowPresentation(Boolean.TRUE);

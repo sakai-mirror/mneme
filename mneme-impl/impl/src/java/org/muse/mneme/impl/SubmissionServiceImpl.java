@@ -272,7 +272,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countAssessmentSubmissions(Assessment assessment, Boolean official)
+	public Integer countAssessmentSubmissions(Assessment assessment, Boolean official, String allUid)
 	{
 		// TODO: review the efficiency of this method! -ggolden
 
@@ -292,7 +292,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		List<Submission> rv = null;
 		if (official)
 		{
-			rv = officializeByUser(all);
+			rv = officializeByUser(all, allUid);
 		}
 		else
 		{
@@ -327,7 +327,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		List<Submission> rv = null;
 		if (official)
 		{
-			rv = officializeByUser(all);
+			rv = officializeByUser(all, null);
 		}
 		else
 		{
@@ -684,8 +684,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Submission> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort, Boolean official, Integer pageNum,
-			Integer pageSize)
+	public List<Submission> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort, Boolean official, String allUid,
+			Integer pageNum, Integer pageSize)
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 		if (official == null) throw new IllegalArgumentException();
@@ -704,7 +704,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		List<Submission> rv = null;
 		if (official)
 		{
-			rv = officializeByUser(all);
+			rv = officializeByUser(all, allUid);
 		}
 		else
 		{
@@ -734,6 +734,18 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			rv = rv.subList(start, end);
 		}
 
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String[] findNextPrevSubmissionIds(Submission submission, FindAssessmentSubmissionsSort sort, Boolean official)
+	{
+		// TODO:
+		String[] rv = new String[2];
+		rv[0] = null;
+		rv[1] = null;
 		return rv;
 	}
 
@@ -771,7 +783,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		List<Submission> rv = null;
 		if (official)
 		{
-			rv = officializeByUser(all);
+			rv = officializeByUser(all, null);
 		}
 		else
 		{
@@ -1808,9 +1820,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 * 
 	 * @param all
 	 *        The list of all submissions.
+	 * @param allUid
+	 *        if set, leave this user's submissions all in there.
 	 * @return The official submissions, with siblings for the others.
 	 */
-	protected List<Submission> officializeByUser(List<SubmissionImpl> all)
+	protected List<Submission> officializeByUser(List<SubmissionImpl> all, String allUid)
 	{
 		// pick one for each user - the one in progress, or the official complete one
 		List<Submission> official = new ArrayList<Submission>();
@@ -1822,7 +1836,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 			// count the submissions actually present in the list for this user
 			int count = 0;
-			if (submission.getStartDate() != null)
+			if (submission.getIsStarted())
 			{
 				count++;
 			}
@@ -1832,7 +1846,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			SubmissionImpl inProgressSubmission = null;
 
 			// this one may be our best, or in progress, but only if it's started
-			if (submission.getStartDate() != null)
+			if (submission.getIsStarted())
 			{
 				// if incomplete, record this as in progress
 				if (!submission.getIsComplete())
@@ -1848,6 +1862,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			}
 
 			// remove all others with this one's user id - keeping track of the best score if complete
+			List<Submission> loosers = new ArrayList<Submission>();
 			for (Iterator i = all.iterator(); i.hasNext();)
 			{
 				SubmissionImpl candidateSub = (SubmissionImpl) i.next();
@@ -1857,7 +1872,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					i.remove();
 
 					// we should not get a second one that is unstarted
-					if (candidateSub.getStartDate() == null)
+					if (!candidateSub.getIsStarted())
 					{
 						M_log.warn("officializeByUser: another unstarted for uid: " + uid + " sid:" + candidateSub.getId());
 						continue;
@@ -1867,8 +1882,12 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					count++;
 
 					// track the in-progress one, if any
-					if ((candidateSub.getIsComplete() == null) || (!candidateSub.getIsComplete()))
+					if (!candidateSub.getIsComplete())
 					{
+						if (inProgressSubmission != null)
+						{
+							M_log.warn("officializeByUser: another inprogress for uid: " + uid + " sid:" + candidateSub.getId());
+						}
 						inProgressSubmission = candidateSub;
 					}
 
@@ -1884,6 +1903,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 						else if (candidateBetter(bestSubmission, candidateSub))
 						// else if (bestSubmission.getTotalScore().floatValue() < candidateSub.getTotalScore().floatValue())
 						{
+							loosers.add(bestSubmission);
 							bestSubmission = candidateSub;
 						}
 
@@ -1894,9 +1914,15 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 							if ((bestSubmission.getSubmittedDate() != null) && (candidateSub.getSubmittedDate() != null)
 									&& (bestSubmission.getSubmittedDate().before(candidateSub.getSubmittedDate())))
 							{
+								loosers.add(bestSubmission);
 								bestSubmission = candidateSub;
 							}
 						}
+					}
+
+					if ((bestSubmission != candidateSub) && (inProgressSubmission != candidateSub))
+					{
+						loosers.add(candidateSub);
 					}
 				}
 			}
@@ -1905,6 +1931,12 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			SubmissionImpl winner = inProgressSubmission;
 			if (winner == null) winner = bestSubmission;
 			if (winner == null) winner = submission;
+
+			// did our best become a looser?
+			if ((bestSubmission != null) && (winner != bestSubmission))
+			{
+				loosers.add(bestSubmission);
+			}
 
 			// set the winner's sibling count
 			winner.initSiblingCount(new Integer(count));
@@ -1917,6 +1949,21 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 			// keep the winner
 			official.add(winner);
+
+			// maybe keep the rest
+			if ((allUid != null) && (uid.equals(allUid)))
+			{
+				for (Submission looser : loosers)
+				{
+					if (bestSubmission != null)
+					{
+						((SubmissionImpl) looser).initBest(bestSubmission);
+						((SubmissionImpl) looser).initSiblingCount(new Integer(count));
+
+						official.add(looser);
+					}
+				}
+			}
 		}
 
 		return official;

@@ -64,7 +64,7 @@ public class AssessmentPreviewView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// we need an aid, then any number of parameters to form the return destination
-		if (params.length < 2)
+		if (params.length < 3)
 		{
 			throw new IllegalArgumentException();
 		}
@@ -72,7 +72,7 @@ public class AssessmentPreviewView extends ControllerImpl
 		String assessmentId = params[2];
 
 		String destination = null;
-		if (params.length > 2)
+		if (params.length > 3)
 		{
 			destination = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
 		}

@@ -52,7 +52,7 @@
 			</text>
 		</container>
 	</subHeader>
-	<container>			
+	<container>
 		<!--navigation-->
 		<navigationBar>
 			<container>
@@ -68,7 +68,6 @@
 				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description"
 					submit="FALSE" disabled="TRUE">
 					<icon icon="/icons/grade_questions.png" style="LEFT" />
-					<destination template="/" />
 				</navigation>
 			</container>
 		</navigationBar>
@@ -99,25 +98,20 @@
 			</rows>
 		</entityDisplay>
 
-		<navigationBar>
-			<container>
-				<pager paging="paging">
-					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}/{6}">
-						<model ref="gradeSortCode" />
-						<model ref="assessment.id" />
-						<model ref="question.id" />
-						<model ref="sort_column" />
-						<model ref="sort_direction" />
-						<model type="paging" ref="paging" />
-						<model ref="view" />
-					</destination>
-				</pager>
-			</container>
-		</navigationBar>
 		<entityList style="FLAT">
 			<iterator name="answer">
 				<model ref="answers" indexRef="id" />
 			</iterator>
+			<pager paging="paging">
+				<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
+					<model ref="gradeSortCode" />
+					<model ref="assessment.id" />
+					<model ref="question.id" />
+					<model ref="sort_column" />
+					<model ref="sort_direction" />
+					<model type="paging" ref="paging" />
+				</destination>
+			</pager>
 			<emptyTitle>
 				<message selector="no-submissions" />
 			</emptyTitle>
@@ -129,21 +123,17 @@
 					</title>
 					<entityNavigations>
 						<navigation submit="TRUE">
-							<destination template="/grade_submission/{0}/{1}/{2}/{3}{4}/{5}">
+							<destination template="/grade_submission/{0}/grade_question/{1}/{2}/{3}/{4}{5}/{6}">
+								<model ref="answer.submission.id" />
 								<model ref="gradeSortCode" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="answer.submission.id" />
+								<model type="paging" ref="paging" />
 							</destination>
 							<included>
-								<compareDecision model="answer.submission.gradingStatus">
-									<constant value="released" />
-									<constant value="submitted" />
-									<constant value="closed" />
-									<constant value="evaluated" />
-								</compareDecision>
+								<decision model="answer.submission.isComplete" />
 							</included>
 						</navigation>
 					</entityNavigations>
@@ -157,22 +147,20 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_question/{0}/{1}/{2}/0A/{3}/{4}">
+							<destination template="/grade_question/{0}/{1}/{2}/0A/{3}">
 								<model ref="gradeSortCode" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
 								<model type="paging" ref="paging" selector="FIRST" />
-								<model ref="view" />
 							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_question/{0}/{1}/{2}/0D/{3}/{4}">
+							<destination template="/grade_question/{0}/{1}/{2}/0D/{3}">
 								<model ref="gradeSortCode" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
 								<model type="paging" ref="paging" selector="FIRST" />
-								<model ref="view" />
 							</destination>
 						</desc>
 					</sort>
@@ -232,64 +220,14 @@
 				</column>
 				<column>
 					<title>
-						<message selector="submission-tries" />
-					</title>
-					<container>
-						<text>
-							<message selector="format-submission-tries">
-								<model ref="answer.submission.siblingCount" />
-								<model ref="answer.submission.assessment.tries" missing="infinite" />
-							</message>
-						</text>
-					</container>
-					<navigations>
-						<navigation style="LINK" submit="TRUE">
-							<title>
-								<message selector="view-all" />
-							</title>
-							<destination template="VIEW_ALL" />
-							<included>
-								<compareDecision model="answer.submission.siblingCount" reversed="TRUE">
-									<constant value="0" />
-									<constant value="1" />
-								</compareDecision>
-							</included>
-						</navigation>
-						<navigation style="LINK" submit="TRUE">
-							<title>
-								<message selector="close" />
-							</title>
-							<destination template="/grade_question/{0}/{1}/{2}/{3}{4}">
-								<model ref="gradeSortCode" />
-								<model ref="assessment.id" />
-								<model ref="question.id" />
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-							</destination>
-							<included>
-								<compareDecision model="official">
-									<constant value="FALSE" />
-								</compareDecision>
-								<andDecision model="answer.submission.siblingCount">
-									<compareDecision model="answer.submission.siblingCount">
-										<constant value="0" />
-										<constant value="1" />
-									</compareDecision>
-								</andDecision>
-							</included>
-						</navigation>
-					</navigations>
-				</column>
-				<column>
-					<title>
 						<message selector="submission-score" />
 					</title>
 					<container>
-						<text>						
+						<text>
 							<message selector="auto-score">
-								<model ref="answer.autoScore" missing="missing-auto-score" />
+								<model ref="answer.autoScore" missing="dash" />
 							</message>
-						</text>						
+						</text>
 					</container>
 				</column>
 				<column>
@@ -297,7 +235,7 @@
 						<message selector="submission-final" />
 					</title>
 					<container>
-						<floatEdit model="answer.totalScore" rows="1" cols="4" />
+						<floatEdit model="answer.totalScore" cols="6" />
 					</container>
 					<sort>
 						<active>
@@ -308,22 +246,20 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_question/{0}/{1}/{2}/1A/{3}/{4}">
+							<destination template="/grade_question/{0}/{1}/{2}/1A/{3}">
 								<model ref="gradeSortCode" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
 								<model type="paging" ref="paging" selector="FIRST" />
-								<model ref="view" />
 							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_question/{0}/{1}/{2}/1D/{3}/{4}">
+							<destination template="/grade_question/{0}/{1}/{2}/1D/{3}">
 								<model ref="gradeSortCode" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
 								<model type="paging" ref="paging" selector="FIRST" />
-								<model ref="view" />
 							</destination>
 						</desc>
 					</sort>
@@ -331,26 +267,25 @@
 			</columns>
 		</entityList>
 
-		<!--bottom navigation-->
+		<!--navigation-->
 		<navigationBar>
 			<container>
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/grade_questions_list/{0}/{1}">
 						<model ref="gradeSortCode" />
-						<model ref="assessment.id" />						
+						<model ref="assessment.id" />
 					</destination>
-				</navigation>	
+				</navigation>
 				<divider />
 				<pager paging="paging">
-					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}/{6}">
+					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
 						<model ref="gradeSortCode" />
 						<model ref="assessment.id" />
 						<model ref="question.id" />
 						<model ref="sort_column" />
 						<model ref="sort_direction" />
 						<model type="paging" ref="paging" />
-						<model ref="view" />
 					</destination>
 				</pager>
 			</container>

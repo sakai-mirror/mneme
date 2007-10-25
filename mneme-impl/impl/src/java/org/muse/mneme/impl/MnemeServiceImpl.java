@@ -229,9 +229,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countAssessmentSubmissions(Assessment assessment, Boolean official)
+	public Integer countAssessmentSubmissions(Assessment assessment, Boolean official, String allUid)
 	{
-		return submissionService.countAssessmentSubmissions(assessment, official);
+		return submissionService.countAssessmentSubmissions(assessment, official, allUid);
 	}
 
 	/**
@@ -326,10 +326,18 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Submission> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort, Boolean official, Integer pageNum,
-			Integer pageSize)
+	public List<Submission> findAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort, Boolean official, String allUid,
+			Integer pageNum, Integer pageSize)
 	{
-		return this.submissionService.findAssessmentSubmissions(assessment, sort, official, pageNum, pageSize);
+		return this.submissionService.findAssessmentSubmissions(assessment, sort, official, allUid, pageNum, pageSize);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String[] findNextPrevSubmissionIds(Submission submission, FindAssessmentSubmissionsSort sort, Boolean official)
+	{
+		return submissionService.findNextPrevSubmissionIds(submission, sort, official);
 	}
 
 	/**

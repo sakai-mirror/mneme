@@ -80,7 +80,7 @@ public class GradeAssessmentView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]sort for /grades, [3]aid |optional->| [4]our sort, [5]our page, [6]our all/highest
+		// [2]sort for /grades, [3]aid |optional->| [4]our sort, [5]our page, [6]our highest/al-for-uid
 		if ((params.length < 4) || params.length > 7) throw new IllegalArgumentException();
 
 		// check for user permission to access the assessments for grading
@@ -109,6 +109,7 @@ public class GradeAssessmentView extends ControllerImpl
 		String sortCode = null;
 		if (params.length > 4) sortCode = params[4];
 		SubmissionService.FindAssessmentSubmissionsSort sort = getSort(assessment, context, sortCode);
+		context.put("sort", sort.toString());
 
 		// paging parameter
 		String pagingParameter = null;
@@ -120,10 +121,14 @@ public class GradeAssessmentView extends ControllerImpl
 
 		// official or all
 		Boolean official = Boolean.TRUE;
-		if (params.length > 6 && params[6].equals("all")) official = Boolean.FALSE;
+		String allUid = "official";
+		if ((params.length > 6) && (!params[6].equals("official")))
+		{
+			allUid = params[6];
+		}
 
 		// get the size
-		Integer maxSubmissions = this.submissionService.countAssessmentSubmissions(assessment, official);
+		Integer maxSubmissions = this.submissionService.countAssessmentSubmissions(assessment, official ,allUid);
 
 		// paging
 		Paging paging = uiService.newPaging();
@@ -132,11 +137,9 @@ public class GradeAssessmentView extends ControllerImpl
 		context.put("paging", paging);
 
 		// get all Assessment submissions
-		List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, official, paging.getCurrent(), paging
-				.getSize());
+		List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, official, allUid, paging.getCurrent(), paging.getSize());
 		context.put("submissions", submissions);
-		context.put("official", official);
-		context.put("view", official ? "highest" : "all");
+		context.put("view", allUid);
 
 		// for Adjust every student's test submission by
 		Value submissionAdjust = this.uiService.newValue();

@@ -39,7 +39,7 @@
 			<model type="icon" icon="/icons/grade.png" />
 		</message>
 	</header>
-	
+
 	<subHeader>
 		<container>
 			<text>
@@ -57,83 +57,8 @@
 
 	<container>
 
-		<!--top navigation-->
-		<navigationBar>
-			<container>
-				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
-					<disabled>
-						<hasValueDecision model="prevSubmission" reversed="TRUE" />
-					</disabled>
-					<icon icon="/icons/previous.png" style="LEFT" />
-					<destination template="/grade_submission/{0}/{1}">
-						<model ref="destinationPath" />
-						<model ref="prevSubmission.id" />
-					</destination>
-					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
-					</included>
-				</navigation>
-				<navigation title="list" style="BUTTON" accessKey="list-access" description="list-description" submit="TRUE">
-					<icon icon="/icons/contents.gif" style="LEFT" />
-					<destination template="/grade_assessment/{0}">
-						<model ref="destinationPath" />
-					</destination>
-					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
-					</included>
-				</navigation>
-				<navigation title="next" style="BUTTON" accessKey="next-access" description="next-description" submit="TRUE">
-					<disabled>
-						<hasValueDecision model="nextSubmission" reversed="TRUE" />
-					</disabled>
-					<icon icon="/icons/next.png" style="LEFT" />
-					<destination template="/grade_submission/{0}/{1}">
-						<model ref="destinationPath" />
-						<model ref="nextSubmission.id" />
-					</destination>
-					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
-					</included>
-				</navigation>
-				<divider />
-				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
-					<icon icon="/icons/return.png" style="LEFT" />
-					<destination template="/grade_assessment/{0}">
-						<model ref="destinationPath" />
-					</destination>
-					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
-					</included>
-				</navigation>
-				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/grade_assessment/{0}">
-						<model ref="destinationPath" />
-					</destination>
-					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
-					</included>
-				</navigation>
-				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
-					<icon icon="/icons/return.png" style="LEFT" />
-					<destination template="{0}">
-						<model ref="sakai_prev_destination" />
-					</destination>
-					<included>
-						<compareDecision model="fromGradeByQuestion" constant="TRUE" />
-					</included>
-				</navigation>
-				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="{0}">
-						<model ref="sakai_prev_destination" />
-					</destination>
-					<included>
-						<compareDecision model="fromGradeByQuestion" constant="TRUE" />
-					</included>
-				</navigation>
-			</container>
-		</navigationBar>
+		<!-- repeat the nav up top -->
+		<alias to="nav" />
 
 		<entityDisplay>
 			<rows>
@@ -337,79 +262,41 @@
 			</container>
 		</section>
 
-		<!--bottom navigation-->
-		<navigationBar>
+		<!--navigation-->
+		<navigationBar id="nav">
 			<container>
 				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
 					<disabled>
-						<hasValueDecision model="prevSubmission" reversed="TRUE" />
+						<hasValueDecision model="prev" reversed="TRUE" />
 					</disabled>
 					<icon icon="/icons/previous.png" style="LEFT" />
-					<destination template="/grade_submission/{0}/{1}">
-						<model ref="destinationPath" />
-						<model ref="prevSubmission.id" />
+					<destination template="/grade_submission/{0}/{1}{2}">
+						<model ref="prev" />
+						<model ref="sort" />
+						<model ref="return" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
+						<hasValueDecision model="sort" />
 					</included>
 				</navigation>
-				<navigation title="list" style="BUTTON" accessKey="list-access" description="list-description" submit="TRUE">
-					<icon icon="/icons/contents.gif" style="LEFT" />
-					<destination template="/grade_assessment/{0}">
-						<model ref="destinationPath" />
+				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
+					<icon icon="/icons/return.png" style="LEFT" />
+					<destination template="{0}">
+						<model ref="return" />
 					</destination>
-					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
-					</included>
 				</navigation>
 				<navigation title="next" style="BUTTON" accessKey="next-access" description="next-description" submit="TRUE">
 					<disabled>
-						<hasValueDecision model="nextSubmission" reversed="TRUE" />
+						<hasValueDecision model="next" reversed="TRUE" />
 					</disabled>
 					<icon icon="/icons/next.png" style="LEFT" />
-					<destination template="/grade_submission/{0}/{1}">
-						<model ref="destinationPath" />
-						<model ref="nextSubmission.id" />
+					<destination template="/grade_submission/{0}/{1}{2}">
+						<model ref="next" />
+						<model ref="sort" />
+						<model ref="return" />
 					</destination>
 					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
-					</included>
-				</navigation>
-				<divider />
-				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
-					<icon icon="/icons/return.png" style="LEFT" />
-					<destination template="/grade_assessment/{0}">
-						<model ref="destinationPath" />
-					</destination>
-					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
-					</included>
-				</navigation>
-				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/grade_assessment/{0}">
-						<model ref="destinationPath" />
-					</destination>
-					<included>
-						<compareDecision model="fromGradeByQuestion" constant="FALSE" />
-					</included>
-				</navigation>
-				<navigation title="save" style="BUTTON" accessKey="save-access" description="save-description" submit="TRUE">
-					<icon icon="/icons/return.png" style="LEFT" />
-					<destination template="{0}">
-						<model ref="sakai_prev_destination" />
-					</destination>
-					<included>
-						<compareDecision model="fromGradeByQuestion" constant="TRUE" />
-					</included>
-				</navigation>
-				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="{0}">
-						<model ref="sakai_prev_destination" />
-					</destination>
-					<included>
-						<compareDecision model="fromGradeByQuestion" constant="TRUE" />
+						<hasValueDecision model="sort" />
 					</included>
 				</navigation>
 			</container>
