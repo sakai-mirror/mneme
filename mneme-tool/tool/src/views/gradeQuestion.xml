@@ -64,11 +64,7 @@
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>
-				<navigation>
-					<title>
-						<message selector="nav-divider" />
-					</title>
-				</navigation>
+				<navigation disabled="TRUE" title="bar" />
 				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description"
 					submit="FALSE" disabled="TRUE">
 					<icon icon="/icons/grade_questions.png" style="LEFT" />
@@ -106,13 +102,14 @@
 		<navigationBar>
 			<container>
 				<pager paging="paging">
-					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
+					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}/{6}">
 						<model ref="gradeSortCode" />
 						<model ref="assessment.id" />
 						<model ref="question.id" />
 						<model ref="sort_column" />
 						<model ref="sort_direction" />
 						<model type="paging" ref="paging" />
+						<model ref="view" />
 					</destination>
 				</pager>
 			</container>
@@ -160,18 +157,22 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_question/{0}/{1}/{2}/0A">
+							<destination template="/grade_question/{0}/{1}/{2}/0A/{3}/{4}">
 								<model ref="gradeSortCode" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
+								<model type="paging" ref="paging" selector="FIRST" />
+								<model ref="view" />
 							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_question/{0}/{1}/{2}/0D">
+							<destination template="/grade_question/{0}/{1}/{2}/0D/{3}/{4}">
 								<model ref="gradeSortCode" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
+								<model type="paging" ref="paging" selector="FIRST" />
+								<model ref="view" />
 							</destination>
 						</desc>
 					</sort>
@@ -307,18 +308,22 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_question/{0}/{1}/{2}/1A">
+							<destination template="/grade_question/{0}/{1}/{2}/1A/{3}/{4}">
 								<model ref="gradeSortCode" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
+								<model type="paging" ref="paging" selector="FIRST" />
+								<model ref="view" />
 							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_question/{0}/{1}/{2}/1D">
+							<destination template="/grade_question/{0}/{1}/{2}/1D/{3}/{4}">
 								<model ref="gradeSortCode" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
+								<model type="paging" ref="paging" selector="FIRST" />
+								<model ref="view" />
 							</destination>
 						</desc>
 					</sort>
@@ -338,13 +343,14 @@
 				</navigation>	
 				<divider />
 				<pager paging="paging">
-					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
+					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}/{6}">
 						<model ref="gradeSortCode" />
 						<model ref="assessment.id" />
 						<model ref="question.id" />
 						<model ref="sort_column" />
 						<model ref="sort_direction" />
 						<model type="paging" ref="paging" />
+						<model ref="view" />
 					</destination>
 				</pager>
 			</container>
