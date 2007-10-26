@@ -157,11 +157,14 @@ public class AssessmentImpl implements Assessment
 	 */
 	public boolean equals(Object obj)
 	{
-		// two AssessmentImpls are equals if they have the same id
+		// two Assessments are equals if they have the same id
 		if (this == obj) return true;
-		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
-		if ((this.id == null) || (((AssessmentImpl) obj).id == null)) return false;
-		return this.id.equals(((AssessmentImpl) obj).id);
+		if (obj == null) return false;
+		if (getId() == null) return false;
+		if (!(obj instanceof Assessment)) return false;
+		Assessment a = (Assessment) obj;
+		if (a.getId() == null) return false;
+		return this.getId().equals(a.getId());
 	}
 
 	/**

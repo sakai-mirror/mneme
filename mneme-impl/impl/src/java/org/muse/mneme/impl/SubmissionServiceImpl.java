@@ -744,21 +744,79 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] findNextPrevSubmissionIds(Submission submission, FindAssessmentSubmissionsSort sort, Boolean official)
+	public List<Question> findPartQuestions(Part part)
 	{
-		// TODO:
-		String[] rv = new String[2];
-		rv[0] = null;
-		rv[1] = null;
-		return rv;
+		return this.storage.findPartQuestions(part);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findPartQuestions(Part part)
+	public String[] findPrevNextSubmissionIds(Submission submission, FindAssessmentSubmissionsSort sort, Boolean official)
 	{
-		return this.storage.findPartQuestions(part);
+		// TODO: can we do this cheaper?
+		if (submission == null) throw new IllegalArgumentException();
+		if (official == null) throw new IllegalArgumentException();
+		if (sort == null) sort = FindAssessmentSubmissionsSort.userName_a;
+		Date asOf = new Date();
+
+		if (M_log.isDebugEnabled()) M_log.debug("findNextPrevSubmissionIds: submission: " + submission.getId());
+
+		// get the submissions to the assignment made by all possible submitters
+		// TODO: we don't really need them all... no phantoms!
+		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(submission.getAssessment(), sort, null);
+
+		// see if any needs to be completed based on time limit or dates
+		checkAutoComplete(all, asOf);
+
+		// pick one for each assessment - the one in progress, or the official complete one (if official)
+		List<Submission> working = null;
+		if (official)
+		{
+			working = officializeByUser(all, null);
+		}
+		else
+		{
+			working = new ArrayList<Submission>(all.size());
+			working.addAll(all);
+		}
+
+		// if sorting by status, do that sort
+		if (sort == FindAssessmentSubmissionsSort.status_a || sort == FindAssessmentSubmissionsSort.status_d)
+		{
+			working = sortByGradingSubmissionStatus((sort == FindAssessmentSubmissionsSort.status_d), working);
+		}
+
+		// find our submission
+		Submission prev = null;
+		Submission next = null;
+		boolean done = false;
+		for (Submission s : working)
+		{
+			// TODO: we should not have to filter these out...
+			if (((SubmissionImpl) s).getIsPhantom()) continue;
+			
+			if (done)
+			{
+				next = s;
+				break;
+			}
+
+			if (s.equals(submission))
+			{
+				done = true;
+			}
+			else
+			{
+				prev = s;
+			}
+		}
+
+		String[] rv = new String[2];
+		rv[0] = ((prev == null) ? null : prev.getId());
+		rv[1] = ((next == null) ? null : next.getId());
+
+		return rv;
 	}
 
 	/**

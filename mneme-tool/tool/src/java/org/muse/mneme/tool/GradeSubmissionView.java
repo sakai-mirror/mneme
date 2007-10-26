@@ -104,7 +104,7 @@ public class GradeSubmissionView extends ControllerImpl
 		}
 		if (sort != null)
 		{
-			String[] nextPrev = submissionService.findNextPrevSubmissionIds(submission, sort, Boolean.TRUE);
+			String[] nextPrev = submissionService.findPrevNextSubmissionIds(submission, sort, Boolean.TRUE);
 			if (nextPrev[0] != null) context.put("prev", nextPrev[0]);
 			if (nextPrev[1] != null) context.put("next", nextPrev[1]);
 

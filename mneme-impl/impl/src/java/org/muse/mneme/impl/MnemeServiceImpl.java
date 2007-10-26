@@ -335,14 +335,6 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] findNextPrevSubmissionIds(Submission submission, FindAssessmentSubmissionsSort sort, Boolean official)
-	{
-		return submissionService.findNextPrevSubmissionIds(submission, sort, official);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public List<Question> findPartQuestions(Part part)
 	{
 		return submissionService.findPartQuestions(part);
@@ -354,6 +346,14 @@ public class MnemeServiceImpl implements MnemeService
 	public List<Pool> findPools(String context, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		return poolService.findPools(context, sort, search, pageNum, pageSize);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String[] findPrevNextSubmissionIds(Submission submission, FindAssessmentSubmissionsSort sort, Boolean official)
+	{
+		return submissionService.findPrevNextSubmissionIds(submission, sort, official);
 	}
 
 	/**

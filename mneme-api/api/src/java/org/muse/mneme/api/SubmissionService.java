@@ -218,7 +218,18 @@ public interface SubmissionService
 			Integer pageNum, Integer pageSize);
 
 	/**
-	 * Find the previous and next submissions, from this one, to this one's assessment, based on the sort.
+	 * Find the questions that have been used in submissions in this assessment part.<br />
+	 * Order by question description.
+	 * 
+	 * @param part
+	 *        The assessment part.
+	 * @return A List of Questions found used by submissions to this assessment part.
+	 */
+	List<Question> findPartQuestions(Part part);
+
+	/**
+	 * Find the previous and next submissions, from this one, to this one's assessment, based on the sort.<br />
+	 * Real (not phantom) submissions only.
 	 * 
 	 * @param submission
 	 *        The current submission.
@@ -228,17 +239,7 @@ public interface SubmissionService
 	 *        if TRUE, clump multiple submissions by the same user behind the best one, else include all.
 	 * @return [0], the previous id, or null, [1], the next id, or null.
 	 */
-	String[] findNextPrevSubmissionIds(Submission submission, FindAssessmentSubmissionsSort sort, Boolean official);
-
-	/**
-	 * Find the questions that have been used in submissions in this assessment part.<br />
-	 * Order by question description.
-	 * 
-	 * @param part
-	 *        The assessment part.
-	 * @return A List of Questions found used by submissions to this assessment part.
-	 */
-	List<Question> findPartQuestions(Part part);
+	String[] findPrevNextSubmissionIds(Submission submission, FindAssessmentSubmissionsSort sort, Boolean official);
 
 	/**
 	 * Find the submission answers to the assignment and question made by all users.<br />
