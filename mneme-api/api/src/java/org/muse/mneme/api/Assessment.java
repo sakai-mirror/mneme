@@ -115,13 +115,6 @@ public interface Assessment
 	Boolean getIsChanged();
 
 	/**
-	 * Check if all the completed submissions to this assessment have been released.
-	 * 
-	 * @return TRUE if all completed submissions (so far) to this assessment have been released, FALSE if not.
-	 */
-	Boolean getIsFullyReleased();
-
-	/**
 	 * Check if the assessment is live; i.e. has at least one started submission.
 	 * 
 	 * @return TRUE if the assessment is live, FALSE if not.

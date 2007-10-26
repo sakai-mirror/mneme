@@ -292,15 +292,6 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsFullyReleased()
-	{
-		// TODO: we may want to compute this on read -ggolden
-		return this.submissionService.getAssessmentIsFullyReleased(this);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean getIsLive()
 	{
 		// TODO: we may want to compute this on read -ggolden

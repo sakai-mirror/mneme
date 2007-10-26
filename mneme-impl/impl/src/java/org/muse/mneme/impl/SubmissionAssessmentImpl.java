@@ -228,14 +228,6 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsFullyReleased()
-	{
-		return getMainAssessment().getIsFullyReleased();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean getIsLive()
 	{
 		return getMainAssessment().getIsLive();

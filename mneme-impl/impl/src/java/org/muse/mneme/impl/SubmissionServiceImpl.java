@@ -853,14 +853,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getAssessmentIsFullyReleased(Assessment assessment)
-	{
-		return this.storage.getAssessmentIsFullyReleased(assessment);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
 	{
 		return this.storage.getAssessmentQuestionHasUnscoredSubmissions(assessment, question);

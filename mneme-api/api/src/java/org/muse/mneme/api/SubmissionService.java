@@ -281,15 +281,6 @@ public interface SubmissionService
 	Boolean getAssessmentHasUnscoredSubmissions(Assessment assessment);
 
 	/**
-	 * Check if this assessment's completed submissions are all released.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 * @return TRUE if the assessment's completed submissions are all released, FALSE if not.
-	 */
-	Boolean getAssessmentIsFullyReleased(Assessment assessment);
-
-	/**
 	 * Check if there are any completed submissions that have any null scores for answered answers to this question for this assessment.
 	 * 
 	 * @param assessment
