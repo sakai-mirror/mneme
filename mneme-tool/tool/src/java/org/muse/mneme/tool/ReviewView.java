@@ -108,7 +108,10 @@ public class ReviewView extends ControllerImpl
 			for (Question question : part.getQuestions())
 			{
 				Answer answer = submission.getAnswer(question);
-				answers.add(answer);
+				if (answer != null)
+				{
+					answers.add(answer);
+				}
 			}
 		}
 
@@ -143,7 +146,7 @@ public class ReviewView extends ControllerImpl
 	{
 		// read form
 		String destination = this.uiService.decode(req, context);
-		
+
 		// go there
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}

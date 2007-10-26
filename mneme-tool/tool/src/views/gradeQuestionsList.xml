@@ -61,7 +61,7 @@
 					description="grade-submission-description">
 					<icon icon="/icons/grade_student.png" style="LEFT" />
 					<destination template="/grade_assessment/{0}/{1}">
-						<model ref="gradeSortCode" />
+						<model ref="sort_grades" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>
@@ -73,7 +73,6 @@
 				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description"
 					submit="FALSE" disabled="TRUE">
 					<icon icon="/icons/grade_questions.png" style="LEFT" />
-					<destination template="/" />
 				</navigation>
 			</container>
 		</navigationBar>
@@ -98,7 +97,7 @@
 										<navigation style="LINK" submit="FALSE">
 											<icon icon="/icons/grade.png" />
 											<destination template="/grade_question/{0}/{1}/{2}">
-												<model ref="gradeSortCode" />
+												<model ref="sort_grades" />
 												<model ref="assessment.id" />
 												<model ref="question.id" />
 											</destination>
@@ -117,7 +116,7 @@
 												</message>
 											</title>
 											<destination template="/grade_question/{0}/{1}/{2}">
-												<model ref="gradeSortCode" />
+												<model ref="sort_grades" />
 												<model ref="assessment.id" />
 												<model ref="question.id" />
 											</destination>
@@ -134,9 +133,8 @@
 			<container>
 				<navigation title="grade-return-title" style="BUTTON" accessKey="grade-return-access" description="grade-return-description">
 					<icon icon="/icons/return.png" style="LEFT" />
-					<destination template="/grade_assessment/{0}/{1}">
-						<model ref="gradeSortCode" />
-						<model ref="assessment.id" />
+					<destination template="/grades/{0}">
+						<model ref="sort_grades" />
 					</destination>
 				</navigation>
 			</container>

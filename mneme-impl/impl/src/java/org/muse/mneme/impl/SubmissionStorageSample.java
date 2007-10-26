@@ -349,8 +349,10 @@ public class SubmissionStorageSample implements SubmissionStorage
 						Float final1 = null;
 						if (question != null)
 						{
-							final0 = ((Submission) arg0).getAnswer(question).getTotalScore();
-							final1 = ((Submission) arg1).getAnswer(question).getTotalScore();
+							Answer a0 = ((Submission) arg0).getAnswer(question);
+							Answer a1 = ((Submission) arg1).getAnswer(question);
+							final0 = ((a0 == null) ? Float.valueOf(0f) : a0.getTotalScore());
+							final1 = ((a1 == null) ? Float.valueOf(0f) : a1.getTotalScore());
 						}
 						else
 						{
@@ -383,8 +385,10 @@ public class SubmissionStorageSample implements SubmissionStorage
 						Float final1 = null;
 						if (question != null)
 						{
-							final0 = ((Submission) arg0).getAnswer(question).getTotalScore();
-							final1 = ((Submission) arg1).getAnswer(question).getTotalScore();
+							Answer a0 = ((Submission) arg0).getAnswer(question);
+							Answer a1 = ((Submission) arg1).getAnswer(question);
+							final0 = ((a0 == null) ? Float.valueOf(0f) : a0.getTotalScore());
+							final1 = ((a1 == null) ? Float.valueOf(0f) : a1.getTotalScore());
 						}
 						else
 						{

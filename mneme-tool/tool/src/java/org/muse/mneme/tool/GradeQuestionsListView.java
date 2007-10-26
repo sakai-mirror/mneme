@@ -22,7 +22,6 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,19 +29,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Paging;
-import org.muse.ambrosia.api.Value;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentParts;
 import org.muse.mneme.api.AssessmentService;
-import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.SubmissionService;
-import org.muse.mneme.api.Part;
-import org.muse.mneme.api.Question;
-import org.muse.mneme.api.Answer;
-import org.sakaiproject.util.Web;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.Web;
 
 /**
  * The /grading view for the mneme tool.
@@ -60,7 +52,7 @@ public class GradeQuestionsListView extends ControllerImpl
 
 	/** Dependency: ToolManager */
 	protected ToolManager toolManager = null;
-	
+
 	/**
 	 * Shutdown.
 	 */
@@ -74,7 +66,9 @@ public class GradeQuestionsListView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// if (params.length > 4) throw new IllegalArgumentException();
+		// [2] grades view sort, [3] aid
+		if (params.length != 4) throw new IllegalArgumentException();
+
 		// check for user permission to access the assessments for grading
 		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
 		{
@@ -82,12 +76,19 @@ public class GradeQuestionsListView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
-		
-		context.put("gradeSortCode", params[2]);
-		// get Assessment - assessment id is in params at index 3
+
+		// grades view sort
+		context.put("sort_grades", params[2]);
+
+		// get assessment
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
+		if (assessment == null)
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
 		context.put("assessment", assessment);
-		
+
 		uiService.render(ui, context);
 	}
 
@@ -107,7 +108,9 @@ public class GradeQuestionsListView extends ControllerImpl
 	{
 		// read form
 		String destination = this.uiService.decode(req, context);
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));		
+
+		// go to the destination
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
@@ -127,7 +130,7 @@ public class GradeQuestionsListView extends ControllerImpl
 	{
 		this.submissionService = submissionService;
 	}
-	
+
 	/**
 	 * @param toolManager
 	 *        the toolManager to set

@@ -339,7 +339,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		List<Answer> answers = new ArrayList<Answer>();
 		for (Submission s : rv)
 		{
-			answers.add(s.getAnswer(question));
+			Answer a = s.getAnswer(question);
+			if (a != null)
+			{
+				answers.add(a);
+			}
 		}
 
 		return answers.size();

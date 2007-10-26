@@ -22,7 +22,6 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,20 +31,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Paging;
-import org.muse.ambrosia.api.Value;
-import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentService;
-import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.SubmissionService;
-import org.muse.mneme.api.Part;
-import org.muse.mneme.api.Question;
-import org.muse.mneme.api.Answer;
-import org.sakaiproject.util.Web;
 import org.muse.ambrosia.api.PopulatingSet;
 import org.muse.ambrosia.api.PopulatingSet.Factory;
 import org.muse.ambrosia.api.PopulatingSet.Id;
+import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.Answer;
+import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.Web;
 
 /**
  * The /grading view for the mneme tool.
@@ -63,7 +60,7 @@ public class GradeQuestionView extends ControllerImpl
 
 	/** Dependency: ToolManager */
 	protected ToolManager toolManager = null;
-	
+
 	/**
 	 * Shutdown.
 	 */
@@ -77,6 +74,9 @@ public class GradeQuestionView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// [2]grades sort code, [3]aid, [4]qid, |optional ->| [5]sort, [6]page
+		if (params.length < 5) throw new IllegalArgumentException();
+
 		// check for user permission to access the assessments for grading
 		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
 		{
@@ -84,72 +84,94 @@ public class GradeQuestionView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
-		
-		context.put("gradeSortCode", params[2]);
-		// get Assessment - assessment id is in params at index 3
+
+		// the sort for the grades view
+		context.put("sort_grades", params[2]);
+
+		// assessment
 		Assessment assessment = this.assessmentService.getAssessment(params[3]);
+		if (assessment == null)
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
 		context.put("assessment", assessment);
 
+		// question
 		Question question = assessment.getParts().getQuestion(params[4]);
+		if (question == null)
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
 		context.put("question", question);
 
-		// FindAssessmentSubmissionsSort.username_a
-		SubmissionService.FindAssessmentSubmissionsSort sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
-		context.put("sort_column", '0');
-		context.put("sort_direction", 'A');
-
-		if (params.length >= 6)
+		// sort code
+		String sortCode = null;
+		if (params.length > 5)
 		{
-			String sortCode = params[5];
-			if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
-			if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
-			if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D')) sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
-			context.put("sort_column", sortCode.charAt(0));
-			context.put("sort_direction", sortCode.charAt(1));
+			sortCode = params[5];
 		}
-
-		List<Answer> answers = null;
-		String pagingParameter = "1-30";
-
-		if (params.length >= 7)
+		if (sortCode == null)
 		{
-			String viewAll = params[6];
-			// get Answers
-			if (viewAll.equals("all"))
+			if (assessment.getGrading().getAnonymous())
 			{
-				answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, null, null);
-				context.put("official", "FALSE");
+				sortCode = "1A";
 			}
 			else
 			{
-				// get Answers
-				answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
-				context.put("official", "TRUE");
-				pagingParameter = params[6];
-				if (pagingParameter == null)
-				{
-					pagingParameter = "1-30";
-				}
+				sortCode = "0A";
 			}
 		}
-		else
+		
+		// parse into a sort
+		SubmissionService.FindAssessmentSubmissionsSort sort = null;
+		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
 		{
-			// get Answers
-			answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.TRUE, null, null);
-			context.put("official", "TRUE");
+			sort = SubmissionService.FindAssessmentSubmissionsSort.userName_a;
 		}
-		context.put("answers", answers);
-		Integer maxAnswers = 0;
-		if (answers != null) maxAnswers = answers.size();
+		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = SubmissionService.FindAssessmentSubmissionsSort.userName_d;
+		}
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = SubmissionService.FindAssessmentSubmissionsSort.final_a;
+		}
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = SubmissionService.FindAssessmentSubmissionsSort.final_d;
+		}
+		if (sort == null)
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+		context.put("sort_column", sortCode.charAt(0));
+		context.put("sort_direction", sortCode.charAt(1));
 
-		// paging
+		// get the size - from all submissions
+		Integer maxAnswers = this.submissionService.countSubmissionAnswers(assessment, question, Boolean.FALSE);
+
+		// paging parameter
+		String pagingParameter = null;
+		if (params.length > 6) pagingParameter = params[6];
+		if (pagingParameter == null)
+		{
+			pagingParameter = "1-30";
+		}
 		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxAnswers);
 		paging.setCurrentAndSize(pagingParameter);
-		context.put("paging", paging);	
-		
+		context.put("paging", paging);
+
+		// get the answers - from all submissions
+		List<Answer> answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, paging.getCurrent(), paging
+				.getSize());
+		context.put("answers", answers);
+
 		uiService.render(ui, context);
-}
+	}
 
 	/**
 	 * Final initialization, once all dependencies are set.
@@ -165,6 +187,9 @@ public class GradeQuestionView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// [2]grades sort code, [3]aid, [4]qid, |optional ->| [5]sort, [6]page
+		if (params.length < 5) throw new IllegalArgumentException();
+
 		// check for user permission to access the assessments for grading
 		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
 		{
@@ -172,13 +197,9 @@ public class GradeQuestionView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
-		
-		// get Assessment - assessment id is in params at index 3
-		Assessment assessment = this.assessmentService.getAssessment(params[3]);
 
-	 	PopulatingSet answers = null;
 		final SubmissionService submissionService = this.submissionService;
-		answers = uiService.newPopulatingSet(new Factory()
+		PopulatingSet answers = uiService.newPopulatingSet(new Factory()
 		{
 			public Object get(String id)
 			{
@@ -197,7 +218,7 @@ public class GradeQuestionView extends ControllerImpl
 		// read form
 		String destination = this.uiService.decode(req, context);
 
-		// save evaluation
+		// save
 		try
 		{
 			this.submissionService.evaluateAnswers(answers.getSet());
@@ -208,19 +229,7 @@ public class GradeQuestionView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unexpected)));
 			return;
 		}
-		
-		// open all submissions of a user
-		if (destination.equals("VIEW_ALL"))
-		{
-			destination = "/grade_question/" + params[2] + "/" + params[3] + "/" + params[4];
-			if (params.length < 6)
-			{
 
-				destination = destination + "/0A/all";
-			}
-			else destination = destination + "/" + params[5] + "/all";			
-		}
-		 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
@@ -241,7 +250,7 @@ public class GradeQuestionView extends ControllerImpl
 	{
 		this.submissionService = submissionService;
 	}
-	
+
 	/**
 	 * @param toolManager
 	 *        the toolManager to set

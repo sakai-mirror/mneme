@@ -60,7 +60,7 @@
 					description="grade-submission-description">
 					<icon icon="/icons/grade_student.png" style="LEFT" />
 					<destination template="/grade_assessment/{0}/{1}">
-						<model ref="gradeSortCode" />
+						<model ref="sort_grades" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>
@@ -104,7 +104,7 @@
 			</iterator>
 			<pager paging="paging">
 				<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
-					<model ref="gradeSortCode" />
+					<model ref="sort_grades" />
 					<model ref="assessment.id" />
 					<model ref="question.id" />
 					<model ref="sort_column" />
@@ -121,11 +121,14 @@
 					<title>
 						<message selector="submission-username" />
 					</title>
+					<included>
+						<decision reversed="TRUE" model="assessment.grading.anonymous" />
+					</included>
 					<entityNavigations>
 						<navigation submit="TRUE">
 							<destination template="/grade_submission/{0}/grade_question/{1}/{2}/{3}/{4}{5}/{6}">
 								<model ref="answer.submission.id" />
-								<model ref="gradeSortCode" />
+								<model ref="sort_grades" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
 								<model ref="sort_column" />
@@ -148,7 +151,7 @@
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
 							<destination template="/grade_question/{0}/{1}/{2}/0A/{3}">
-								<model ref="gradeSortCode" />
+								<model ref="sort_grades" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
 								<model type="paging" ref="paging" selector="FIRST" />
@@ -157,7 +160,7 @@
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
 							<destination template="/grade_question/{0}/{1}/{2}/0D/{3}">
-								<model ref="gradeSortCode" />
+								<model ref="sort_grades" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
 								<model type="paging" ref="paging" selector="FIRST" />
@@ -165,6 +168,33 @@
 						</desc>
 					</sort>
 				</modelColumn>
+				<column>
+					<title>
+						<message selector="submission-username" />
+					</title>
+					<included>
+						<decision model="assessment.grading.anonymous" />
+					</included>
+					<entityNavigations>
+						<navigation submit="TRUE">
+							<destination template="/grade_submission/{0}/grade_question/{1}/{2}/{3}/{4}{5}/{6}">
+								<model ref="answer.submission.id" />
+								<model ref="sort_grades" />
+								<model ref="assessment.id" />
+								<model ref="question.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model type="paging" ref="paging" />
+							</destination>
+							<included>
+								<decision model="answer.submission.isComplete" />
+							</included>
+						</navigation>
+					</entityNavigations>
+					<container>
+						<text selector="anonymous" />
+					</container>
+				</column>
 				<column>
 					<title>
 						<message selector="submission-finished" />
@@ -247,7 +277,7 @@
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
 							<destination template="/grade_question/{0}/{1}/{2}/1A/{3}">
-								<model ref="gradeSortCode" />
+								<model ref="sort_grades" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
 								<model type="paging" ref="paging" selector="FIRST" />
@@ -256,7 +286,7 @@
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
 							<destination template="/grade_question/{0}/{1}/{2}/1D/{3}">
-								<model ref="gradeSortCode" />
+								<model ref="sort_grades" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
 								<model type="paging" ref="paging" selector="FIRST" />
@@ -273,14 +303,14 @@
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/grade_questions_list/{0}/{1}">
-						<model ref="gradeSortCode" />
+						<model ref="sort_grades" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>
 				<divider />
 				<pager paging="paging">
 					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
-						<model ref="gradeSortCode" />
+						<model ref="sort_grades" />
 						<model ref="assessment.id" />
 						<model ref="question.id" />
 						<model ref="sort_column" />

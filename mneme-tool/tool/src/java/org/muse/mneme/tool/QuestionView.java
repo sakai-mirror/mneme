@@ -486,7 +486,10 @@ public class QuestionView extends ControllerImpl
 			for (Question question : part.getQuestions())
 			{
 				Answer answer = submission.getAnswer(question);
-				answers.add(answer);
+				if (answer != null)
+				{
+					answers.add(answer);
+				}
 			}
 
 			// tell the UI that we are doing single part

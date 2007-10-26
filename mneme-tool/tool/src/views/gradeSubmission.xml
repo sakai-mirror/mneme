@@ -44,12 +44,12 @@
 		<container>
 			<text>
 				<message selector="assessment-title">
-					<model ref="assessment.title" />
+					<model ref="submission.assessment.title" />
 				</message>
 			</text>
 			<text>
 				<message selector="assessment-total-points">
-					<model ref="assessment.Parts.totalPoints" />
+					<model ref="submission.assessment.Parts.totalPoints" />
 				</message>
 			</text>
 		</container>
@@ -65,7 +65,7 @@
 				<row title="submission-username">
 					<model type="userInfo" selector="DISPLAYNAME" ref="submission.userId" />
 					<included>
-						<decision reversed="TRUE" model="assessment.grading.anonymous" />
+						<decision reversed="TRUE" model="submission.assessment.grading.anonymous" />
 					</included>
 				</row>
 				<row title="submitted">
