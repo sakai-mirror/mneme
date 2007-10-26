@@ -476,6 +476,24 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasUnscoredAnswers()
+	{
+		if (!getIsComplete()) return Boolean.FALSE;
+
+		for (Answer answer : getAnswers())
+		{
+			if ((answer.getIsAnswered()) && (answer.getTotalScore() == null))
+			{
+				return Boolean.TRUE;
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getId()
 	{
 		return this.id;

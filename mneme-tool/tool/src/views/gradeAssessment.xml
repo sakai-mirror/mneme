@@ -372,12 +372,24 @@
 							<message>
 								<model type="icon" icon="/icons/grade.png" />
 							</message>
-							<included>
-								<decision reversed="TRUE" model="submission.evaluation.evaluated" />
-								<decision model="submission.isComplete" />
-							</included>
 						</text>
 					</container>
+					<entityNavigations>
+						<navigation style="LINK" submit="TRUE">
+							<destination template="/grade_submission/{0}/{1}/grade_assessment/{2}/{3}/{4}{5}/{6}">
+								<model ref="submission.id" />
+								<model ref="sort" />
+								<model ref="sort_grades" />
+								<model ref="assessment.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model type="paging" ref="paging" />
+							</destination>
+						</navigation>
+					</entityNavigations>
+					<entityIncluded>
+						<decision model="submission.hasUnscoredAnswers" />
+					</entityIncluded>
 				</column>
 			</columns>
 		</entityList>

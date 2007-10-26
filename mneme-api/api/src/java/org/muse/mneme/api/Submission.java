@@ -131,6 +131,13 @@ public interface Submission
 	GradingSubmissionStatus getGradingStatus();
 
 	/**
+	 * Check if there are any null scores for answered answers for this assessment (only if complete).
+	 * 
+	 * @return TRUE if there are unscored answers, FALSE if not.
+	 */
+	Boolean getHasUnscoredAnswers();
+
+	/**
 	 * Access the id of this submission.
 	 * 
 	 * @return The submission's id.
