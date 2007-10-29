@@ -67,8 +67,8 @@
 								<selection>
 									<model ref="assessment.type" />
 									<selectionChoices>
-										<selectionChoice value="test" selector="assessment-type-test" />
 										<selectionChoice value="assignment" selector="assessment-type-assignment" />
+										<selectionChoice value="test" selector="assessment-type-test" />									
 										<selectionChoice value="survey" selector="assessment-type-survey" />
 									</selectionChoices>
 									<readOnly>
