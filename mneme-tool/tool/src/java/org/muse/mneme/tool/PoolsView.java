@@ -290,7 +290,7 @@ public class PoolsView extends ControllerImpl
 				try
 				{
 					Pool pool = this.poolService.getPool(destination.substring(destination.lastIndexOf("/") + 1));
-					if (pool != null) this.poolService.copyPool(pool);
+					if (pool != null) this.poolService.copyPool(toolManager.getCurrentPlacement().getContext(), pool);
 
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
 					return;

@@ -91,10 +91,10 @@ public class PoolEditView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if ((params.length != 4) && (params.length != 5) && (params.length != 6) && (params.length != 7)) throw new IllegalArgumentException();
-		
+
 		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 		{
-			//redirect to error
+			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
@@ -130,8 +130,8 @@ public class PoolEditView extends ControllerImpl
 			{
 				context.put("sort_column", sortCode.charAt(0));
 				context.put("sort_direction", sortCode.charAt(1));
-				
-				//0 is description
+
+				// 0 is description
 				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
 					sort = QuestionService.FindQuestionsSort.description_a;
 				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
@@ -202,10 +202,10 @@ public class PoolEditView extends ControllerImpl
 	{
 		if ((params.length != 3) && (params.length != 4) && (params.length != 5) && (params.length != 6) && (params.length != 7))
 			throw new IllegalArgumentException();
-		
+
 		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 		{
-			//redirect to error
+			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
@@ -256,11 +256,13 @@ public class PoolEditView extends ControllerImpl
 				try
 				{
 					String destinationParams[] = destination.split("/");
-					Pool pool = this.poolService.getPool(destinationParams[4]);
 					Question question = this.questionService.getQuestion(destinationParams[5]);
 
-					if (pool != null && question != null)
-						this.questionService.copyQuestion(question, pool);
+					if (question != null)
+					{
+						// copy within the same pool
+						this.questionService.copyQuestion(question, null);
+					}
 
 					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
 					return;

@@ -82,14 +82,18 @@ public class QuestionStorageSample implements QuestionStorage
 			if (!question.deleted && !question.isHistorical() && question.getPool().equals(source))
 			{
 				QuestionImpl q = new QuestionImpl(question);
+				
+				// set the destination as the pool
 				q.setPool(destination);
 
 				// clear the id to make it new
 				q.id = null;
 
-				// set the new created info
+				// set the new created and modified info
 				q.getCreatedBy().setUserId(userId);
 				q.getCreatedBy().setDate(new Date());
+				q.getModifiedBy().setUserId(userId);
+				q.getModifiedBy().setDate(new Date());
 
 				// save
 				saveQuestion(q);

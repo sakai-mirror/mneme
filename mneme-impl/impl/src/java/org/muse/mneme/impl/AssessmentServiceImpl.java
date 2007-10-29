@@ -159,10 +159,13 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (context == null) throw new IllegalArgumentException();
 		if (assessment == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("copyAssessment: " + context);
+		if (M_log.isDebugEnabled()) M_log.debug("copyAssessment: context:" + context + " id: " + assessment.getId());
+
+		String userId = sessionManager.getCurrentSessionUserId();
+		Date now = new Date();
 
 		// security check
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
+		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
 
 		AssessmentImpl rv = this.storage.newAssessment((AssessmentImpl) assessment);
 
@@ -181,8 +184,20 @@ public class AssessmentServiceImpl implements AssessmentService
 		// start out unpublished
 		rv.setPublished(Boolean.FALSE);
 
+		// update created and last modified information
+		rv.getCreatedBy().setDate(now);
+		rv.getCreatedBy().setUserId(userId);
+		rv.getModifiedBy().setDate(now);
+		rv.getModifiedBy().setUserId(userId);
+
+		// clear the changed settings
+		rv.clearChanged();
+
 		// save
-		save(rv);
+		this.storage.saveAssessment(rv);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_EDIT, getAssessmentReference(rv.getId()), true));
 
 		return rv;
 	}

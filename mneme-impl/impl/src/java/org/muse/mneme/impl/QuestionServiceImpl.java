@@ -137,6 +137,8 @@ public class QuestionServiceImpl implements QuestionService
 		this.poolService.createHistoryIfNeeded(destination, false);
 
 		this.storage.copyPoolQuestions(userId, source, destination);
+
+		// TODO: event? events?
 	}
 
 	/**
@@ -145,25 +147,30 @@ public class QuestionServiceImpl implements QuestionService
 	public Question copyQuestion(Question question, Pool pool) throws AssessmentPermissionException
 	{
 		if (question == null) throw new IllegalArgumentException();
-		if (pool == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("copyQuestion: " + question.getId());
+		if (M_log.isDebugEnabled()) M_log.debug("copyQuestion: " + question.getId() + ((pool == null) ? "" : (" to pool: " + pool.getId())));
+
+		String userId = sessionManager.getCurrentSessionUserId();
+		Date now = new Date();
 
 		// security check
-		String destinationContext = (pool != null) ? pool.getContext() : question.getPool().getContext();
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, destinationContext);
+		Pool destination = (pool != null) ? pool : question.getPool();
+		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, destination.getContext());
 
-		// before anything changes, move to history if needed
-		this.poolService.createHistoryIfNeeded(pool, false);
+		// before anything changes, move the destination pool to history if needed
+		this.poolService.createHistoryIfNeeded(destination, false);
 
+		// create a copy of the question
 		QuestionImpl rv = this.storage.newQuestion((QuestionImpl) question);
 
 		// clear the id to make it new
 		rv.id = null;
 
-		// TODO: set the new created info ??
-		// rv.getCreatedBy().setUserId(sessionManager.getCurrentSessionUserId());
-		// rv.getCreatedBy().setDate(new Date());
+		// update created and last modified information
+		rv.getCreatedBy().setDate(now);
+		rv.getCreatedBy().setUserId(userId);
+		rv.getModifiedBy().setDate(now);
+		rv.getModifiedBy().setUserId(userId);
 
 		// set the new pool, if needed
 		if (pool != null)
@@ -172,7 +179,10 @@ public class QuestionServiceImpl implements QuestionService
 		}
 
 		// save
-		saveQuestion(rv);
+		this.storage.saveQuestion((QuestionImpl) rv);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(rv.getId()), true));
 
 		return rv;
 	}

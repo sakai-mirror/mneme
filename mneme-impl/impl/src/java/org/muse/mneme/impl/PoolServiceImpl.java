@@ -91,14 +91,18 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Pool copyPool(Pool pool) throws AssessmentPermissionException
+	public Pool copyPool(String context, Pool pool) throws AssessmentPermissionException
 	{
+		if (context == null) throw new IllegalArgumentException();
 		if (pool == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("copyPool: " + pool.getId());
+		if (M_log.isDebugEnabled()) M_log.debug("copyPool: context: " + context + " id: " + pool.getId());
+
+		String userId = sessionManager.getCurrentSessionUserId();
+		Date now = new Date();
 
 		// security check
-		this.securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, pool.getContext());
+		this.securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
 
 		// make a copy of the pool
 		PoolImpl rv = storage.newPool((PoolImpl) pool);
@@ -106,8 +110,23 @@ public class PoolServiceImpl implements PoolService
 		// clear the id to make it a new one
 		rv.id = null;
 
+		// set the context
+		rv.setContext(context);
+
+		// update created and last modified information
+		rv.getCreatedBy().setDate(now);
+		rv.getCreatedBy().setUserId(userId);
+		rv.getModifiedBy().setDate(now);
+		rv.getModifiedBy().setUserId(userId);
+
+		// clear the changed settings
+		((PoolImpl) rv).clearChanged();
+
 		// save
-		savePool(rv);
+		storage.savePool((PoolImpl) rv);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(rv.getId()), true));
 
 		// make a copy of the questions
 		this.questionService.copyPoolQuestions(pool, rv);

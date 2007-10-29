@@ -46,7 +46,7 @@ public interface PoolService
 	Boolean allowManagePools(String context);
 
 	/**
-	 * Copy an existing pool creating a new pool.
+	 * Copy an existing pool creating a new pool in the context.
 	 * 
 	 * @param context
 	 *        The context.
@@ -56,7 +56,7 @@ public interface PoolService
 	 * @throws AssessmentPermissionException
 	 *         if the current user is not allowed to create a new pool.
 	 */
-	Pool copyPool(Pool pool) throws AssessmentPermissionException;
+	Pool copyPool(String context, Pool pool) throws AssessmentPermissionException;
 
 	/**
 	 * Count the pools in this context with this criteria.

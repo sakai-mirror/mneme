@@ -197,9 +197,9 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Pool copyPool(Pool pool) throws AssessmentPermissionException
+	public Pool copyPool(String context, Pool pool) throws AssessmentPermissionException
 	{
-		return this.poolService.copyPool(pool);
+		return this.poolService.copyPool(context, pool);
 	}
 
 	/**
