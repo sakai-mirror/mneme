@@ -328,13 +328,13 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(col);
 
 		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
-		row.setTitle("choices");
+		row.setTitle("choices", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key2.png"));
 		row.add(entityList);
 
 		display.addRow(row);
 
 		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("distractor");
+		row.setTitle("distractor", this.uiService.newIconPropertyReference().setIcon("/icons/distractor_add.png"));
 		edit = this.uiService.newHtmlEdit();
 		edit.setTitle("distractor-description");
 		edit.setSize(5, 50);

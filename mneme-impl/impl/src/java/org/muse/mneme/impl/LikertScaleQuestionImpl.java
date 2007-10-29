@@ -176,7 +176,7 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(propCol);
 
 		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
-		row.setTitle("scale");
+		row.setTitle("scale", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key2.png"));
 		row.add(entityList);
 
 		EntityDisplay display = this.uiService.newEntityDisplay();

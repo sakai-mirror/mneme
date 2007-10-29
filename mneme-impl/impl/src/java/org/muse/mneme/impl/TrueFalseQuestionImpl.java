@@ -170,7 +170,8 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		selection.addSelection("false", "false");
 
 		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
-		row.setTitle("correct-answer");
+		row.setTitle("correct-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key2.png"));
+
 		row.add(selection);
 
 		EntityDisplay display = this.uiService.newEntityDisplay();

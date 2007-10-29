@@ -148,7 +148,8 @@ public class NonsubQuestionImpl implements TypeSpecificQuestion
 
 		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
 		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("model-answer");
+		row.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key2.png"));
+
 		HtmlEdit edit = this.uiService.newHtmlEdit();
 		edit.setSize(5, 50);
 		edit.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));

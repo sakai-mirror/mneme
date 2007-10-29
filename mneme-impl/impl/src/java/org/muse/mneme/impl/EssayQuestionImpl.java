@@ -47,6 +47,7 @@ import org.muse.ambrosia.api.Toggle;
 import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.OrderColumn;
 import org.muse.ambrosia.api.UiService;
+import org.muse.ambrosia.api.Message;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
@@ -168,7 +169,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		display.addRow(row);
 
 		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("model-answer");
+		row.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key2.png"));
 		HtmlEdit edit = this.uiService.newHtmlEdit();
 		edit.setSize(5, 50);
 		edit.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));

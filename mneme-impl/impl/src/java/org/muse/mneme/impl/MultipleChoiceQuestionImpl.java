@@ -336,7 +336,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		selection.addSelection("multiple-select", "false");
 		selection.setDestination(this.uiService.newDestination().setDestination("RESIZE"));
 		row.add(selection);
-		row.setTitle("answer");
+		row.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key2.png"));
 		display.addRow(row);
 
 		EntityList entityList = this.uiService.newEntityList();
