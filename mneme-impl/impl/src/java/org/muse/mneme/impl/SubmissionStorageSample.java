@@ -946,12 +946,25 @@ public class SubmissionStorageSample implements SubmissionStorage
 	 */
 	public void switchHistoricalDependency(Assessment assessment, Assessment newAssessment)
 	{
+		// map the old part ids to the new
+		Map<String, String> partIdMap = new HashMap<String, String>();
+		for (int i = 0; i < assessment.getParts().getParts().size(); i++)
+		{
+			partIdMap.put(assessment.getParts().getParts().get(i).getId(), newAssessment.getParts().getParts().get(i).getId());
+		}
+
 		for (SubmissionImpl submission : this.submissions.values())
 		{
 			SubmissionAssessmentImpl subAsmnt = (SubmissionAssessmentImpl) submission.getAssessment();
 			if (subAsmnt.historicalAssessmentId.equals(assessment.getId()))
 			{
 				subAsmnt.historicalAssessmentId = newAssessment.getId();
+
+				// switch all answer part ids in submission to newAssessment's new part ids
+				for (Answer answer : submission.getAnswers())
+				{
+					((AnswerImpl) answer).partId = partIdMap.get(((AnswerImpl) answer).partId);
+				}
 			}
 		}
 	}

@@ -426,19 +426,22 @@ public class QuestionServiceImpl implements QuestionService
 
 		if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: " + question.getId());
 
+		String userId = sessionManager.getCurrentSessionUserId();
+		Date now = new Date();
+
 		// security check
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getPool().getContext());
+		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, question.getPool().getContext());
 
 		// if the question is new (i.e. no id), set the createdBy information, if not already set
 		if ((question.getId() == null) && (question.getCreatedBy().getUserId() == null))
 		{
-			question.getCreatedBy().setDate(new Date());
-			question.getCreatedBy().setUserId(sessionManager.getCurrentSessionUserId());
+			question.getCreatedBy().setDate(now);
+			question.getCreatedBy().setUserId(userId);
 		}
 
 		// update last modified information
-		question.getModifiedBy().setDate(new Date());
-		question.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
+		question.getModifiedBy().setDate(now);
+		question.getModifiedBy().setUserId(userId);
 
 		// see if the question has been moved from its current pool
 		QuestionImpl current = this.storage.getQuestion(question.getId());
