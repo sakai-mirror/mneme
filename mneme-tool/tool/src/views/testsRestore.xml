@@ -101,7 +101,7 @@
 		<navigationBar id="nav" width="100%">
 			<container>
 				<navigation title="ok" accessKey="ok-access" description="ok-description" style="BUTTON" submit="TRUE">
-					<icon icon="/icons/make_inactive.png" style="LEFT" />
+					<icon icon="/icons/OK.png" style="LEFT" />
 					<destination template="/assessments/{0}">
 						<model ref="sort" />
 					</destination>
