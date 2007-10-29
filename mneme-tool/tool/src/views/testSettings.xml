@@ -300,7 +300,12 @@
 								<textEdit model="assessment.submitPresentation.text" />
 							</container>
 						</row>
-						<row title="publish">
+						<row>
+							<title>
+								<message selector="publish">
+									<model type="icon" icon="/icons/OK.png" />
+								</message>
+							</title>
 							<container>
 								<selection>
 									<model ref="assessment.published" />
