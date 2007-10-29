@@ -318,7 +318,7 @@
 						<message selector="access" />
 					</title>
 					<navigations>
-						<navigation style="LINK" submit="TRUE" description="access">
+						<navigation style="LINK" submit="TRUE" description="special-access">
 							<icon icon="/icons/access.png" style="LEFT" />
 							<destination template="/assessment_special/{0}{1}/{2}">
 								<model ref="sort_column" />
