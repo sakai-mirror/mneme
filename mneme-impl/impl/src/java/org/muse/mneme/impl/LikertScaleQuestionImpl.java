@@ -274,9 +274,9 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		rv.add(new LikertScaleQuestionChoice("3", optionText.toString()));
 		optionText.setLength(0);
 
-		optionText.append(this.messages.getString("five"));
+		optionText.append(this.messages.getString("five-highest"));
 		optionText.append("-->");
-		optionText.append(this.messages.getString("one"));
+		optionText.append(this.messages.getString("one-lowest"));
 
 		rv.add(new LikertScaleQuestionChoice("4", optionText.toString()));
 		optionText.setLength(0);

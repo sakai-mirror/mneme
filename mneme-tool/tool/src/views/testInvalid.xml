@@ -46,6 +46,7 @@
 		</container>
 	</subHeader>
 	<container>
+		<navigationBar />
 		<alert>
 			<message selector="invalid-warning"></message>
 			<included>
@@ -60,7 +61,7 @@
 			</container>
 		</section>
 		<!-- save / cancel nav bar -->
-		<navigationBar id="nav" width="20em">
+		<navigationBar id="nav" width="100%">
 			<container>
 				<navigation title="return-title" accessKey="return-access" description="return-description" style="BUTTON" submit="TRUE">
 					<destination template="/assessments/{0}">
