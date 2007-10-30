@@ -168,20 +168,20 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		// 0 is question type
 		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
 		{
-			sort = QuestionService.FindQuestionsSort.type_a;
+			sort = QuestionService.FindQuestionsSort.pool_title_a;
 		}
 		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
 		{
-			sort = QuestionService.FindQuestionsSort.type_d;
+			sort = QuestionService.FindQuestionsSort.pool_title_d;
 		}
 		// 1 is pool title
 		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
 		{
-			sort = QuestionService.FindQuestionsSort.pool_title_a;
+			sort = QuestionService.FindQuestionsSort.type_a;
 		}
 		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
 		{
-			sort = QuestionService.FindQuestionsSort.pool_title_d;
+			sort = QuestionService.FindQuestionsSort.type_d;
 		}
 		// 2 is pool points
 		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
