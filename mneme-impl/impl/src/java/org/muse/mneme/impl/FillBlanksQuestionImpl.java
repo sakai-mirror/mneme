@@ -203,9 +203,18 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		row.add(attachments);
 		display.addRow(row);
 
+		Selection selection = this.uiService.newSelection();
+		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.responseTextual"));
+		selection.addSelection("textual", "true");
+		selection.addSelection("numeric", "false");
+		row = this.uiService.newEntityDisplayRow();
+		row.setTitle("response");
+		row.add(selection);
+		display.addRow(row);
+
 		row = this.uiService.newEntityDisplayRow();
 		row.setTitle("case-sensitive");
-		Selection selection = uiService.newSelection();
+		selection = uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.caseSensitive"));
 		row.add(selection);
 		display.addRow(row);
@@ -214,16 +223,6 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		row.setTitle("any-order");
 		selection = uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.anyOrder"));
-		row.add(selection);
-		display.addRow(row);
-
-		selection = this.uiService.newSelection();
-		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.responseTextual"));
-		selection.addSelection("textual", "true");
-		selection.addSelection("numeric", "false");
-
-		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("response");
 		row.add(selection);
 		display.addRow(row);
 
@@ -450,26 +449,26 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		StringBuffer strBuf = new StringBuffer();
 
 		if (alltext != null)
-		{	
-		while (alltext.indexOf("{") > -1)
 		{
-			int alltextLeftIndex = alltext.indexOf("{");
-			int alltextRightIndex = alltext.indexOf("}");
-
-			String tmp = alltext.substring(0, alltextLeftIndex);
-			alltext = alltext.substring(alltextRightIndex + 1);
-			strBuf.append(tmp);
-			strBuf.append("{}");
-			// there are no more "}", exit loop
-			if (alltextRightIndex == -1)
+			while (alltext.indexOf("{") > -1)
 			{
-				break;
+				int alltextLeftIndex = alltext.indexOf("{");
+				int alltextRightIndex = alltext.indexOf("}");
+
+				String tmp = alltext.substring(0, alltextLeftIndex);
+				alltext = alltext.substring(alltextRightIndex + 1);
+				strBuf.append(tmp);
+				strBuf.append("{}");
+				// there are no more "}", exit loop
+				if (alltextRightIndex == -1)
+				{
+					break;
+				}
 			}
+			strBuf.append(alltext);
+			return strBuf.toString();
 		}
-		strBuf.append(alltext);
-		return strBuf.toString();
-		}
-		
+
 		return null;
 	}
 }
