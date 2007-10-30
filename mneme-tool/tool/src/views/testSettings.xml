@@ -303,7 +303,7 @@
 						<row>
 							<title>
 								<message selector="publish">
-									<model type="icon" icon="/icons/OK.png" />
+									<model type="icon" icon="/icons/OK_big.png" />
 								</message>
 							</title>
 							<container>
