@@ -84,7 +84,10 @@ public class PoolDrawImpl implements PoolDraw
 	 */
 	public List<String> drawQuestionIds(long seed)
 	{
-		return getPool().drawQuestionIds(seed, this.numQuestions);
+		Pool pool = getPool();
+		if (pool == null) return new ArrayList<String>();
+
+		return pool.drawQuestionIds(seed, this.numQuestions);
 	}
 
 	/**
@@ -103,7 +106,10 @@ public class PoolDrawImpl implements PoolDraw
 	 */
 	public List<String> getAllQuestionIds()
 	{
-		return getPool().getAllQuestionIds();
+		Pool pool = getPool();
+		if (pool == null) return new ArrayList<String>();
+
+		return pool.getAllQuestionIds();
 	}
 
 	/**
