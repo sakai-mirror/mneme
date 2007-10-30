@@ -338,6 +338,12 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 			rv.add(new LikertScaleQuestionChoice("3", this.messages.getString("two")));
 			rv.add(new LikertScaleQuestionChoice("4", this.messages.getString("one")));
 		}
+		if (optionIndex == 5)
+		{
+			rv = new ArrayList<LikertScaleQuestionChoice>(2);
+			rv.add(new LikertScaleQuestionChoice("0", this.messages.getString("it-rocks")));
+			rv.add(new LikertScaleQuestionChoice("1", this.messages.getString("it-sucks")));
+		}
 		return rv;
 	}
 
