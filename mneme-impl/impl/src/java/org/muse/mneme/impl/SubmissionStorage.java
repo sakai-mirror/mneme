@@ -265,6 +265,15 @@ public interface SubmissionStorage
 	void saveSubmissionReleased(SubmissionImpl submission);
 
 	/**
+	 * Check if there are any submissions that are dependent on this question.
+	 * 
+	 * @param question
+	 *        The question.
+	 * @return TRUE if there are submissions dependent on this question, FALSE if not.
+	 */
+	Boolean submissionsDependsOn(Question question);
+
+	/**
 	 * Check if an submission by this id exists.
 	 * 
 	 * @param id
@@ -291,7 +300,7 @@ public interface SubmissionStorage
 	 *        The new assessment to switch to.
 	 */
 	void switchHistoricalDependency(Assessment assessment, Assessment newAssessment);
-
+	
 	/**
 	 * Change any submissions that are directly dependent on the from question to become dependent instead on the to question
 	 * 

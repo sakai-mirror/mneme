@@ -127,6 +127,14 @@ public interface AssessmentStorage
 	void removeAssessment(AssessmentImpl assessment);
 
 	/**
+	 * Remove any direct dependencies on this question from all assessments.
+	 * 
+	 * @param question
+	 *        The question.
+	 */
+	void removeDependency(Question question);
+
+	/**
 	 * Save changes made to this assessment.
 	 * 
 	 * @param assessment

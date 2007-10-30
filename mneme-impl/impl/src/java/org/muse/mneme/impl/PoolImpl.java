@@ -171,6 +171,14 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsHistorical()
+	{
+		return this.historical;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Attribution getModifiedBy()
 	{
 		return this.modifiedBy;

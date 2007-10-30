@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -67,7 +68,10 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	{
 		super(other, assessment, owner);
 		this.questions = new ArrayList<PoolPick>(other.questions.size());
-		this.questions.addAll(other.questions);
+		for (PoolPick pick : other.questions)
+		{
+			this.questions.add(new PoolPick(pick));
+		}
 		this.randomize = other.randomize;
 	}
 
@@ -78,7 +82,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	{
 		if (question == null) throw new IllegalArgumentException();
 		// TODO: do we already have this? ignore it?
-		this.questions.add(new PoolPick(question.getId()));
+		this.questions.add(new PoolPick(this.questionService, question.getId()));
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
@@ -246,7 +250,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		List<PoolPick> ids = new ArrayList<PoolPick>();
 		for (String id : questionIds)
 		{
-			ids.add(new PoolPick(id));
+			ids.add(new PoolPick(this.questionService, id));
 		}
 
 		// make a copy of our current list
@@ -357,6 +361,23 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		Collections.shuffle(rv, new Random(seed()));
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void setOrig()
+	{
+		for (Iterator i = this.questions.iterator(); i.hasNext();)
+		{
+			PoolPick pick = (PoolPick) i.next();
+		
+			// if we cannot restore the orig. values, remove the pick
+			if (!pick.setOrig())
+			{
+				i.remove();
+			}
+		}
 	}
 
 	/**

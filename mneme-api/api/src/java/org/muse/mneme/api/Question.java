@@ -90,6 +90,13 @@ public interface Question
 	String getId();
 
 	/**
+	 * Check the historical setting of the question.
+	 * 
+	 * @return TRUE if the question is used only for historical access, FALSE if it is a current question.
+	 */
+	Boolean getIsHistorical();
+
+	/**
 	 * Access the rich text (html) model answer that shows an example answer to the question.
 	 * 
 	 * @return The model answer, or null if there is none.
@@ -151,13 +158,6 @@ public interface Question
 	 * @return The question's type-specific handler.
 	 */
 	TypeSpecificQuestion getTypeSpecificQuestion();
-
-	/**
-	 * Access the version of this question.
-	 * 
-	 * @return The question's version.
-	 */
-	String getVersion();
 
 	/**
 	 * Set the explain-reason setting.

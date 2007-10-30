@@ -118,6 +118,14 @@ public interface PoolStorage
 	Integer getPoolSize(PoolImpl pool);
 
 	/**
+	 * Check if any frozen manifests reference this question.
+	 * 
+	 * @param question The question.
+	 * @return TRUE if any frozen manifests reference the quesiton, FALSE if not.
+	 */
+	Boolean manifestDependsOn(Question question);
+
+	/**
 	 * Construct a new pool object.
 	 * 
 	 * @return A pool object.

@@ -414,6 +414,11 @@ public abstract class PartImpl implements Part
 	}
 
 	/**
+	 * Restore the part pool and question references to their original values.
+	 */
+	protected abstract void setOrig();
+
+	/**
 	 * Change any part references that are from to to.
 	 * 
 	 * @param from

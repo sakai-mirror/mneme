@@ -293,6 +293,27 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean manifestDependsOn(Question question)
+	{
+		for (PoolImpl pool : this.pools.values())
+		{
+			if ((!pool.deleted) && pool.getContext().equals(question.getPool().getContext()) && pool.getFrozenManifest() != null)
+			{
+				List<String> manifest = pool.getFrozenManifest();
+				int index = manifest.indexOf(question.getId());
+				if (index != -1)
+				{
+					return Boolean.TRUE;
+				}
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public PoolImpl newPool()
 	{
 		return new PoolImpl(this.poolService, this.questionService);

@@ -79,7 +79,7 @@ public class QuestionStorageSample implements QuestionStorage
 		List<QuestionImpl> questions = new ArrayList<QuestionImpl>(this.questions.values());
 		for (QuestionImpl question : questions)
 		{
-			if (!question.deleted && !question.isHistorical() && question.getPool().equals(source))
+			if (!question.getIsHistorical() && question.getPool().equals(source))
 			{
 				QuestionImpl q = new QuestionImpl(question);
 				
@@ -89,11 +89,13 @@ public class QuestionStorageSample implements QuestionStorage
 				// clear the id to make it new
 				q.id = null;
 
+				Date now = new Date();
+
 				// set the new created and modified info
 				q.getCreatedBy().setUserId(userId);
-				q.getCreatedBy().setDate(new Date());
+				q.getCreatedBy().setDate(now);
 				q.getModifiedBy().setUserId(userId);
-				q.getModifiedBy().setDate(new Date());
+				q.getModifiedBy().setDate(now);
 
 				// save
 				saveQuestion(q);
@@ -114,8 +116,7 @@ public class QuestionStorageSample implements QuestionStorage
 		int count = 0;
 		for (QuestionImpl question : this.questions.values())
 		{
-			if (question.deleted) continue;
-			if (question.isHistorical()) continue;
+			if (question.getIsHistorical()) continue;
 			if ((pool != null) && (!question.getPool().equals(pool))) continue;
 			if ((context != null) && (!question.getPool().getContext().equals(context))) continue;
 
@@ -142,7 +143,6 @@ public class QuestionStorageSample implements QuestionStorage
 
 		QuestionImpl question = this.questions.get(id);
 		if (question == null) return Boolean.FALSE;
-		if (question.deleted) return Boolean.FALSE;
 
 		return Boolean.TRUE;
 	}
@@ -163,8 +163,7 @@ public class QuestionStorageSample implements QuestionStorage
 		List<Question> rv = new ArrayList<Question>();
 		for (QuestionImpl question : this.questions.values())
 		{
-			if (question.deleted) continue;
-			if (question.isHistorical()) continue;
+			if (question.getIsHistorical()) continue;
 			if ((pool != null) && (!question.getPool().equals(pool))) continue;
 			if ((context != null) && (!question.getPool().getContext().equals(context))) continue;
 
@@ -288,7 +287,7 @@ public class QuestionStorageSample implements QuestionStorage
 		List<String> rv = new ArrayList<String>();
 		for (QuestionImpl question : this.questions.values())
 		{
-			if ((!question.deleted) && (!question.isHistorical()) && (question.getPool().equals(pool)))
+			if ((!question.getIsHistorical()) && (question.getPool().equals(pool)))
 			{
 				rv.add(question.getId());
 			}
@@ -306,7 +305,6 @@ public class QuestionStorageSample implements QuestionStorage
 
 		QuestionImpl rv = this.questions.get(id);
 		if (rv == null) return null;
-		if (rv.deleted) return null;
 
 		// return a copy
 		rv = new QuestionImpl(rv);
@@ -360,9 +358,9 @@ public class QuestionStorageSample implements QuestionStorage
 		for (Iterator i = this.questions.values().iterator(); i.hasNext();)
 		{
 			QuestionImpl question = (QuestionImpl) i.next();
-			if (!question.deleted && question.getPool().equals(pool))
+			if (question.getPool().equals(pool))
 			{
-				question.deleted = Boolean.TRUE;
+				i.remove();
 			}
 		}
 	}
@@ -372,13 +370,7 @@ public class QuestionStorageSample implements QuestionStorage
 	 */
 	public void removeQuestion(QuestionImpl question)
 	{
-		fakeIt();
-
-		QuestionImpl q = this.questions.get(question.getId());
-		if (q != null)
-		{
-			q.deleted = Boolean.TRUE;
-		}
+		QuestionImpl q = this.questions.remove(question.getId());
 	}
 
 	/**

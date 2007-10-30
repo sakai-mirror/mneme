@@ -33,6 +33,7 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
@@ -189,6 +190,12 @@ public class AssessmentServiceImpl implements AssessmentService
 		rv.getCreatedBy().setUserId(userId);
 		rv.getModifiedBy().setDate(now);
 		rv.getModifiedBy().setUserId(userId);
+
+		// set the parts to their original question and pool values
+		for (Part part : rv.getParts().getParts())
+		{
+			((PartImpl) part).setOrig();
+		}
 
 		// clear the changed settings
 		rv.clearChanged();
@@ -620,5 +627,16 @@ public class AssessmentServiceImpl implements AssessmentService
 	protected void switchLiveDependency(Question from, Question to)
 	{
 		this.storage.switchLiveDependency(from, to);
+	}
+
+	/**
+	 * Remove any direct dependencies on this question from all assessments.
+	 * 
+	 * @param question
+	 *        The question.
+	 */
+	protected void removeDependency(Question question)
+	{
+		this.storage.removeDependency(question);
 	}
 }

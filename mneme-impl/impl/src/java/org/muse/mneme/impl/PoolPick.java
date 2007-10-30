@@ -21,20 +21,28 @@
 
 package org.muse.mneme.impl;
 
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionService;
+
 /**
  * PoolPick models a question and a pool.
  */
 public class PoolPick
 {
+	protected String origQuestionId = null;
+
 	protected String poolId = null;
 
 	protected String questionId = null;
 
+	protected transient QuestionService questionService = null;
+
 	/**
 	 * Construct.
 	 */
-	public PoolPick()
+	public PoolPick(QuestionService questionService)
 	{
+		this.questionService = questionService;
 	}
 
 	/**
@@ -54,10 +62,12 @@ public class PoolPick
 	 * @param questionId
 	 *        The question id.
 	 */
-	public PoolPick(String questionId)
+	public PoolPick(QuestionService questionService, String questionId)
 	{
 		if (questionId == null) throw new IllegalArgumentException();
 		this.questionId = questionId;
+		this.origQuestionId = questionId;
+		this.questionService = questionService;
 	}
 
 	/**
@@ -66,12 +76,14 @@ public class PoolPick
 	 * @param questionId
 	 *        The question id.
 	 */
-	public PoolPick(String questionId, String poolId)
+	public PoolPick(QuestionService questionService, String questionId, String poolId)
 	{
 		if (questionId == null) throw new IllegalArgumentException();
 		if (poolId == null) throw new IllegalArgumentException();
 		this.questionId = questionId;
+		this.origQuestionId = questionId;
 		this.poolId = poolId;
+		this.questionService = questionService;
 	}
 
 	/**
@@ -110,6 +122,26 @@ public class PoolPick
 	}
 
 	/**
+	 * Restore the pool and question ids to their original values.
+	 * 
+	 * @return true if successful, false if not.
+	 */
+	public boolean setOrig()
+	{
+		// if no change
+		if (this.questionId.equals(this.origQuestionId) && this.poolId == null) return true;
+
+		// the question must exist, and be non-historical, and its pool must exist and be non-historical
+		Question q = this.questionService.getQuestion(this.origQuestionId);
+		if ((q == null) || (q.getIsHistorical()) || q.getPool().getIsHistorical()) return false;
+
+		// restore
+		this.poolId = null;
+		this.questionId = this.origQuestionId;
+		return true;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void setPool(String poolId)
@@ -123,6 +155,12 @@ public class PoolPick
 	public void setQuestion(String questionId)
 	{
 		this.questionId = questionId;
+
+		// set the orig only once
+		if (this.origQuestionId == null)
+		{
+			this.origQuestionId = questionId;
+		}
 	}
 
 	/**
@@ -133,7 +171,9 @@ public class PoolPick
 	 */
 	protected void set(PoolPick other)
 	{
+		this.origQuestionId = other.origQuestionId;
 		this.poolId = other.poolId;
 		this.questionId = other.questionId;
+		this.questionService = other.questionService;
 	}
 }

@@ -176,10 +176,10 @@ public class AssessmentStorageSample implements AssessmentStorage
 		{
 			if (assessment.getContext().equals(context) && !assessment.getArchived() && !assessment.isHistorical())
 			{
-				// filter out unpublished if requested
+				// filter out unpublished if requested (also ignoring invalid)
 				if (publishedOnly)
 				{
-					if (!assessment.getPublished()) continue;
+					if ((!assessment.getPublished()) || (!assessment.getIsValid())) continue;
 				}
 				rv.add(new AssessmentImpl(assessment));
 			}
@@ -517,6 +517,31 @@ public class AssessmentStorageSample implements AssessmentStorage
 						if (((ManualPartImpl) part).dependsOn(from))
 						{
 							((ManualPartImpl) part).switchQuestion(from, to);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeDependency(Question question)
+	{
+		for (AssessmentImpl assessment : this.assessments.values())
+		{
+			if (assessment.getContext().equals(question.getPool().getContext()))
+			{
+				// if the asssessment's manual parts use this question
+				for (Part part : assessment.getParts().getParts())
+				{
+					if (part instanceof ManualPart)
+					{
+						if (((ManualPartImpl) part).dependsOn(question))
+						{
+							((ManualPartImpl) part).removeQuestion(question);
+							assessment.clearChanged();
 						}
 					}
 				}

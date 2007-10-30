@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -54,7 +55,8 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 * @param poolService
 	 *        The PoolService.
 	 */
-	public DrawPartImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, PoolService poolService, Changeable owner)
+	public DrawPartImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, PoolService poolService,
+			Changeable owner)
 	{
 		super(assessment, questionService, submissionService, owner);
 		this.poolService = poolService;
@@ -357,7 +359,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 			List<String> draws = draw.drawQuestionIds(seed);
 			for (String id : draws)
 			{
-				PoolPick pick = new PoolPick(id, draw.getPoolId());
+				PoolPick pick = new PoolPick(this.questionService, id, draw.getPoolId());
 				rv.add(pick);
 			}
 		}
@@ -366,6 +368,23 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		Collections.shuffle(rv, new Random(seed));
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void setOrig()
+	{
+		for (Iterator i = this.pools.iterator(); i.hasNext();)
+		{
+			PoolDrawImpl draw = (PoolDrawImpl) i.next();
+
+			// if we cannot restore the orig. values, remove the draw
+			if (!draw.setOrig())
+			{
+				i.remove();
+			}
+		}
 	}
 
 	/**

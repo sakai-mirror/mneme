@@ -233,9 +233,6 @@ public class QuestionImpl implements Question
 
 	protected AttributionImpl createdBy = new AttributionImpl(null);
 
-	/** Start of the versioning thing. */
-	protected Boolean deleted = Boolean.FALSE;
-
 	protected Boolean explainReason = null;
 
 	protected String feedback = null;
@@ -269,8 +266,6 @@ public class QuestionImpl implements Question
 	protected transient SubmissionService submissionService = null;
 
 	protected String type = null;
-
-	protected String version = "only";
 
 	/**
 	 * Construct.
@@ -370,7 +365,7 @@ public class QuestionImpl implements Question
 		{
 			return this.submissionService.getAssessmentQuestionHasUnscoredSubmissions(this.partContext.getAssessment(), this);
 		}
-		
+
 		return Boolean.FALSE;
 	}
 
@@ -388,6 +383,14 @@ public class QuestionImpl implements Question
 	public String getId()
 	{
 		return this.id;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsHistorical()
+	{
+		return this.historical;
 	}
 
 	/**
@@ -465,14 +468,6 @@ public class QuestionImpl implements Question
 	public TypeSpecificQuestion getTypeSpecificQuestion()
 	{
 		return this.questionHandler;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getVersion()
-	{
-		return this.version;
 	}
 
 	/**
@@ -591,21 +586,10 @@ public class QuestionImpl implements Question
 		this.questionHandler = questionHandler;
 	}
 
-	/**
-	 * Check the historical setting of the assessment.
-	 * 
-	 * @return TRUE if the assessment is used only for submission historical access, FALSE if it is a current assessment.
-	 */
-	protected Boolean isHistorical()
-	{
-		return this.historical;
-	}
-
 	protected void set(QuestionImpl other)
 	{
 		if (other.questionHandler != null) this.questionHandler = (TypeSpecificQuestion) (other.questionHandler.clone(this));
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy, null);
-		this.deleted = other.deleted;
 		this.explainReason = other.explainReason;
 		this.feedback = other.feedback;
 		this.hints = other.hints;
@@ -621,6 +605,5 @@ public class QuestionImpl implements Question
 		this.submissionContext = other.submissionContext;
 		this.submissionService = other.submissionService;
 		this.type = other.type;
-		this.version = other.version;
 	}
 }

@@ -100,6 +100,13 @@ public interface Pool
 	String getId();
 
 	/**
+	 * Check if the pool is historical.
+	 * 
+	 * @return TRUE if the pool is historical, FALSE if not.
+	 */
+	Boolean getIsHistorical();
+
+	/**
 	 * Access the modified-by (owner / date)
 	 * 
 	 * @return The pool's modified-bt.

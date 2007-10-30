@@ -926,6 +926,30 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean submissionsDependsOn(Question question)
+	{
+		// for all submissions in the context
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			if (submission.getAssessment().getContext().equals(question.getPool().getContext()))
+			{
+				// check the answers
+				for (Answer answer : submission.getAnswers())
+				{
+					if (((AnswerImpl) answer).questionId.equals(question.getId()))
+					{
+						return Boolean.TRUE;
+					}
+				}
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean submissionExists(String id)
 	{
 		return Boolean.FALSE;
@@ -995,4 +1019,5 @@ public class SubmissionStorageSample implements SubmissionStorage
 			}
 		}
 	}
+
 }

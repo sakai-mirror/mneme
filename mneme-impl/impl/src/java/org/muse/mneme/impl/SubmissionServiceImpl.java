@@ -2274,6 +2274,18 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
+	 * Check if there are any submissions that are dependent on this question.
+	 * 
+	 * @param question
+	 *        The question.
+	 * @return TRUE if there are submissions dependent on this question, FALSE if not.
+	 */
+	protected Boolean submissionsDependsOn(Question question)
+	{
+		return this.storage.submissionsDependsOn(question);
+	}
+
+	/**
 	 * Switch any submissions with a historical dependency on the assessment to this new assessment.
 	 * 
 	 * @param assessment

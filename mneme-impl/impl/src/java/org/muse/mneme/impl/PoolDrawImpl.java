@@ -35,6 +35,8 @@ public class PoolDrawImpl implements PoolDraw
 {
 	protected Integer numQuestions = null;
 
+	protected String origPoolId = null;
+
 	protected String poolId = null;
 
 	protected PoolService poolService = null;
@@ -76,6 +78,7 @@ public class PoolDrawImpl implements PoolDraw
 		this(poolService);
 		if (pool == null) throw new IllegalArgumentException();
 		this.poolId = pool.getId();
+		this.origPoolId = pool.getId();
 		this.numQuestions = numQuestions;
 	}
 
@@ -159,6 +162,12 @@ public class PoolDrawImpl implements PoolDraw
 	{
 		if (pool == null) throw new IllegalArgumentException();
 		this.poolId = pool.getId();
+
+		// set the orig only once
+		if (this.origPoolId == null)
+		{
+			this.origPoolId = pool.getId();
+		}
 	}
 
 	/**
@@ -170,7 +179,27 @@ public class PoolDrawImpl implements PoolDraw
 	protected void set(PoolDrawImpl other)
 	{
 		this.numQuestions = other.numQuestions;
+		this.origPoolId = other.origPoolId;
 		this.poolId = other.poolId;
 		this.poolService = other.poolService;
+	}
+
+	/**
+	 * Restore the pool id to the original value.
+	 * 
+	 * @return true if successful, false if the orig pool is not available.
+	 */
+	protected boolean setOrig()
+	{
+		// if there has been no change, we are done.
+		if (this.poolId.equals(this.origPoolId)) return true;
+
+		// check that the orig pool is available
+		Pool pool = this.poolService.getPool(this.origPoolId);
+		if ((pool == null) || (pool.getIsHistorical())) return false;
+
+		// set it
+		this.poolId = this.origPoolId;
+		return true;
 	}
 }
