@@ -449,6 +449,8 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	{
 		StringBuffer strBuf = new StringBuffer();
 
+		if (alltext != null)
+		{	
 		while (alltext.indexOf("{") > -1)
 		{
 			int alltextLeftIndex = alltext.indexOf("{");
@@ -466,5 +468,8 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		}
 		strBuf.append(alltext);
 		return strBuf.toString();
+		}
+		
+		return null;
 	}
 }
