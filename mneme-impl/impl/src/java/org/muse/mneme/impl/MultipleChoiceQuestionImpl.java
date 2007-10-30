@@ -418,6 +418,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		// get the list in order
 		List<MultipleChoiceQuestionChoice> rv = getChoicesAsAuthored();
 
+		for (MultipleChoiceQuestionChoice choice : rv)
+		{
+			if ((choice.getText() == null) || (choice.getText().trim().length() == 0))
+			{
+				rv.remove(choice);
+			}
+		}
+
 		// shuffle them if desired (and we are in a submission context)
 		if (this.shuffleChoices && (this.question.getPart() != null) && (this.question.getPart().getAssessment().getSubmissionContext() != null))
 		{
