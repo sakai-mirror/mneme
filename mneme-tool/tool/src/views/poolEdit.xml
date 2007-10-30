@@ -134,6 +134,19 @@
 						</navigation>
 					</entityActions>
 				</selectionColumn>
+				<column>
+					<title>
+						<message selector="question-preview" />
+					</title>
+					<navigations>
+						<navigation style="LINK" submit="TRUE">
+							<icon icon="/icons/preview.png" style="LEFT" />
+							<destination template="/question_preview/{0}">
+								<model ref="question.id" />
+							</destination>
+						</navigation>
+					</navigations>
+				</column>
 				<modelColumn>
 					<title>
 						<message selector="question-description" />
