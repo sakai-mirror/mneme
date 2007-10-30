@@ -795,14 +795,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		{
 			// TODO: we should not have to filter these out...
 			if (((SubmissionImpl) s).getIsPhantom()) continue;
-			
+
 			if (done)
 			{
 				next = s;
 				break;
 			}
 
-			if (s.equals(submission))
+			if (s.getUserId().equals(submission.getUserId()))
 			{
 				done = true;
 			}

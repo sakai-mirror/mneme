@@ -100,11 +100,16 @@ public class SubmissionStorageSample implements SubmissionStorage
 			{
 				for (Answer answer : submission.getAnswers())
 				{
-					if (answer.getQuestion().getPart().equals(part))
+					// find the answers based on the part from their original, main, non-historical assessment part.
+					if (((AnswerImpl) answer).getOrigPartId().equals(part.getId()))
 					{
 						if (!rv.contains((QuestionImpl) answer.getQuestion()))
 						{
-							rv.add(new QuestionImpl((QuestionImpl) answer.getQuestion()));
+							// copy and set the part context to the main part (might have been historical)
+							QuestionImpl q = new QuestionImpl((QuestionImpl) answer.getQuestion());
+							q.initPartContext(part);
+
+							rv.add(q);
 						}
 					}
 				}
@@ -195,7 +200,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 		// check the submissions to this assessment
 		for (SubmissionImpl submission : this.submissions.values())
 		{
-			// if any for this assessment are complete and not released, the assessment is not fully released
+			// if any submissions that are for this assessment are complete and not released, the assessment is not fully released
 			if (submission.getAssessment().equals(assessment) && submission.getIsComplete())
 			{
 				for (Answer answer : submission.getAnswers())
@@ -963,7 +968,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 				// switch all answer part ids in submission to newAssessment's new part ids
 				for (Answer answer : submission.getAnswers())
 				{
-					((AnswerImpl) answer).partId = partIdMap.get(((AnswerImpl) answer).partId);
+					((AnswerImpl) answer).initPartId(partIdMap.get(((AnswerImpl) answer).getPartId()));
 				}
 			}
 		}

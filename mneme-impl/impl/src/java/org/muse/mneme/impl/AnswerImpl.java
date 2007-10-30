@@ -55,6 +55,12 @@ public class AnswerImpl implements Answer
 
 	protected MnemeService mnemeService = null;
 
+	/**
+	 * an answer could be changed from its original part it, if the assessment has gone historical and has new part ids. This always points to the
+	 * 'main' part id, the part in the main, not historical, assessment.
+	 */
+	protected String origIPartId = null;
+
 	protected String partId = null;
 
 	protected String questionId = null;
@@ -278,13 +284,13 @@ public class AnswerImpl implements Answer
 		else
 		{
 			float total = score.floatValue();
-	
+
 			// adjust to remove the current auto score
 			if (getAutoScore() != null)
 			{
 				total -= getAutoScore().floatValue();
 			}
-	
+
 			this.evaluation.setScore(total);
 		}
 	}
@@ -299,6 +305,26 @@ public class AnswerImpl implements Answer
 	}
 
 	/**
+	 * Access the original part id, which always refers to the main assessment's parts, even if we have gone historical.
+	 * 
+	 * @return The original part id.
+	 */
+	protected String getOrigPartId()
+	{
+		return this.origIPartId;
+	}
+
+	/**
+	 * Access the part id.
+	 * 
+	 * @return The part id.
+	 */
+	protected String getPartId()
+	{
+		return this.partId;
+	}
+
+	/**
 	 * Initialize the id.
 	 * 
 	 * @param id
@@ -310,6 +336,23 @@ public class AnswerImpl implements Answer
 	}
 
 	/**
+	 * Initialize the part id.
+	 * 
+	 * @param id
+	 *        The part id.
+	 */
+	protected void initPartId(String id)
+	{
+		this.partId = id;
+
+		// if we have not yet established the original part id, do so
+		if (this.origIPartId == null)
+		{
+			this.origIPartId = id;
+		}
+	}
+
+	/**
 	 * Initialize the question to which this is an answer.
 	 * 
 	 * @param question
@@ -318,7 +361,7 @@ public class AnswerImpl implements Answer
 	protected void initQuestion(Question question)
 	{
 		this.questionId = question.getId();
-		this.partId = question.getPart().getId();
+		initPartId(question.getPart().getId());
 
 		QuestionPlugin plugin = this.mnemeService.getQuestionPlugin(question.getType());
 		if (plugin != null)
@@ -365,6 +408,7 @@ public class AnswerImpl implements Answer
 		if (other.answerHandler != null) this.answerHandler = (TypeSpecificAnswer) (other.answerHandler.clone(this));
 		this.evaluation = new AnswerEvaluationImpl(other.evaluation);
 		this.id = other.id;
+		this.origIPartId = other.origIPartId;
 		this.markedForReview = other.markedForReview;
 		this.mnemeService = other.mnemeService;
 		this.partId = other.partId;
