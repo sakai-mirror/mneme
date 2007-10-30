@@ -98,40 +98,6 @@
 						</modelColumn>
 						<modelColumn>
 							<title>
-								<message selector="question-pool-title" />
-							</title>
-							<model ref="question.pool.title" missing="no-title" />
-							<sort>
-								<active>
-									<compareDecision model="sort_column" constant="0" />
-								</active>
-								<direction>
-									<compareDecision model="sort_direction" constant="A" />
-								</direction>
-								<asc icon="/icons/sortascending.gif">
-									<message selector="asc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/0A/{3}/{4}">
-										<model ref="testsortcode" />
-										<model ref="assessmentId" />
-										<model ref="partId" />
-										<model type="paging" ref="paging" selector="FIRST" />
-										<model ref="view" />
-									</destination>
-								</asc>
-								<desc icon="/icons/sortdescending.gif">
-									<message selector="desc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/0D/{3}/{4}">
-										<model ref="testsortcode" />
-										<model ref="assessmentId" />
-										<model ref="partId" />
-										<model type="paging" ref="paging" selector="FIRST" />
-										<model ref="view" />
-									</destination>
-								</desc>
-							</sort>
-						</modelColumn>
-						<modelColumn>
-							<title>
 								<message selector="question-type" />
 							</title>
 							<model ref="question.typeName" />
@@ -155,6 +121,40 @@
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
 									<destination template="/select_add_mpart_question/{0}/{1}/{2}/1D/{3}/{4}">
+										<model ref="testsortcode" />
+										<model ref="assessmentId" />
+										<model ref="partId" />
+										<model type="paging" ref="paging" selector="FIRST" />
+										<model ref="view" />
+									</destination>
+								</desc>
+							</sort>
+						</modelColumn>
+						<modelColumn>
+							<title>
+								<message selector="question-pool-title" />
+							</title>
+							<model ref="question.pool.title" missing="no-title" />
+							<sort>
+								<active>
+									<compareDecision model="sort_column" constant="0" />
+								</active>
+								<direction>
+									<compareDecision model="sort_direction" constant="A" />
+								</direction>
+								<asc icon="/icons/sortascending.gif">
+									<message selector="asc" />
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/0A/{3}/{4}">
+										<model ref="testsortcode" />
+										<model ref="assessmentId" />
+										<model ref="partId" />
+										<model type="paging" ref="paging" selector="FIRST" />
+										<model ref="view" />
+									</destination>
+								</asc>
+								<desc icon="/icons/sortdescending.gif">
+									<message selector="desc" />
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/0D/{3}/{4}">
 										<model ref="testsortcode" />
 										<model ref="assessmentId" />
 										<model ref="partId" />

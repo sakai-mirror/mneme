@@ -136,12 +136,6 @@
 							</included>
 							<model ref="part.questionOrder" />
 						</orderColumn>
-						<modelColumn>
-							<title>
-								<message selector="question-pool-title" />
-							</title>
-							<model ref="question.pool.title" missing="no-title" />
-						</modelColumn>
 						<column>
 							<title>
 								<message selector="question-preview" />
@@ -166,6 +160,12 @@
 								<message selector="question-type" />
 							</title>
 							<model ref="question.typeName" />
+						</modelColumn>
+						<modelColumn>
+							<title>
+								<message selector="question-pool-title" />
+							</title>
+							<model ref="question.pool.title" missing="no-title" />
 						</modelColumn>
 						<modelColumn>
 							<title>
