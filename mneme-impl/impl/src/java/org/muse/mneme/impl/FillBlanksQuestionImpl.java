@@ -33,6 +33,7 @@ import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.FillIn;
 import org.muse.ambrosia.api.HtmlEdit;
+import org.muse.ambrosia.api.OrDecision;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.UiService;
@@ -312,15 +313,23 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	{
 		FillIn fillIn = this.uiService.newFillIn();
 		AndDecision and = this.uiService.newAndDecision();
+
 		Decision[] decisions = new Decision[2];
 		decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
 		decisions[1] = this.uiService.newDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
 		and.setRequirements(decisions);
+		
+		OrDecision or = this.uiService.newOrDecision();
+		Decision[] decisionsOr = new Decision[2];
+		decisionsOr[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
+		decisionsOr[1] = and;
+		or.setOptions(decisionsOr);
+
 		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.parsedText"));
 		fillIn.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
 		fillIn.setWidth(20);
-		fillIn.setCorrectDecision(and);
+		fillIn.setCorrectDecision(or);
 		fillIn.setReadOnly(this.uiService.newTrueDecision());
 		fillIn.setCorrect(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.entryCorrects"));
 

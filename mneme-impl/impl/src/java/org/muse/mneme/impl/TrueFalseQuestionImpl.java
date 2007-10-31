@@ -31,6 +31,7 @@ import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.EntityList;
+import org.muse.ambrosia.api.OrDecision;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.PropertyReference;
 import org.muse.ambrosia.api.Selection;
@@ -255,12 +256,19 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		selection.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswer"));
 
 		AndDecision and = this.uiService.newAndDecision();
-		Decision[] decisions = new Decision[2];
-		decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
-		decisions[1] = this.uiService.newDecision().setProperty(
+		Decision[] decisionsAnd = new Decision[2];
+		decisionsAnd[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
+		decisionsAnd[1] = this.uiService.newDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
-		and.setRequirements(decisions);
-		selection.setCorrectDecision(and);
+		and.setRequirements(decisionsAnd);
+
+		OrDecision or = this.uiService.newOrDecision();
+		Decision[] decisionsOr = new Decision[2];
+		decisionsOr[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
+		decisionsOr[1] = and;
+		or.setOptions(decisionsOr);
+		
+		selection.setCorrectDecision(or);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(selection);
 	}

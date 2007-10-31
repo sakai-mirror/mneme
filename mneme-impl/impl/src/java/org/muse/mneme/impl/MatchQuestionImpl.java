@@ -37,6 +37,7 @@ import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.EntityListColumn;
 import org.muse.ambrosia.api.HtmlEdit;
+import org.muse.ambrosia.api.OrDecision;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
@@ -468,13 +469,20 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		entityList.setStyle(EntityList.Style.form);
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
 
-		/*
-		 * AndDecision and = this.uiService.newAndDecision(); Decision[] decisions = new Decision[2]; decisions[0] =
-		 * this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview")); decisions[1] =
-		 * this.uiService.newDecision().setProperty(
-		 * this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
-		 * and.setRequirements(decisions); selCol.setCorrectDecision(and); entityList.addColumn(selCol);
-		 */
+//		AndDecision and = this.uiService.newAndDecision();
+//		Decision[] decisions = new Decision[2];
+//		decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
+//		decisions[1] = this.uiService.newDecision().setProperty(
+//				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+//		and.setRequirements(decisions);
+//
+//		OrDecision or = this.uiService.newOrDecision();
+//		Decision[] decisionsOr = new Decision[2];
+//		decisionsOr[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
+//		decisionsOr[1] = and;
+//		or.setOptions(decisionsOr);
+//
+//		???.setCorrectDecision(or);
 
 		AutoColumn autoCol = this.uiService.newAutoColumn();
 		entityList.addColumn(autoCol);
