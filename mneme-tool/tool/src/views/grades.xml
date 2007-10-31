@@ -87,23 +87,7 @@
 								<model ref="sort_direction" />
 							</destination>
 						</navigation>
-					</navigations>
-					<sort submit="TRUE">
-						<active>
-							<compareDecision model="sort_column" constant="0" />
-						</active>
-						<direction>
-							<compareDecision model="sort_direction" constant="A" />
-						</direction>
-						<asc icon="/icons/sortascending.gif">
-							<message selector="asc" />
-							<destination template="/grades/0A" />
-						</asc>
-						<desc icon="/icons/sortdescending.gif">
-							<message selector="desc" />
-							<destination template="/grades/0D" />
-						</desc>
-					</sort>
+					</navigations>					
 				</column>			
 				<column>
 					<title>
@@ -158,18 +142,18 @@
 					</title>
 					<sort submit="TRUE">
 						<active>
-							<compareDecision model="sort_column" constant="2" />
+							<compareDecision model="sort_column" constant="0" />
 						</active>
 						<direction>
 							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grades/2A" />
+							<destination template="/grades/0A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grades/2D" />
+							<destination template="/grades/0D" />
 						</desc>
 					</sort>
 					<container>

@@ -74,7 +74,7 @@ public class GradesView extends ControllerImpl
 		String sortCode = null;
 
 		// default sort is type ascending
-		AssessmentService.AssessmentsSort sort = AssessmentService.AssessmentsSort.type_a;
+		AssessmentService.AssessmentsSort sort = AssessmentService.AssessmentsSort.ddate_a;
 		context.put("sort_column", '0');
 		context.put("sort_direction", 'A');
 
@@ -104,14 +104,15 @@ public class GradesView extends ControllerImpl
 	private AssessmentService.AssessmentsSort findSortCode(String sortCode)
 	{
 		AssessmentService.AssessmentsSort sort = null;
-		// 0 is title
+		
+		// 0 is ddate
 		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
 		{
-			sort = AssessmentService.AssessmentsSort.type_a;
+			sort = AssessmentService.AssessmentsSort.ddate_a;
 		}
 		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
 		{
-			sort = AssessmentService.AssessmentsSort.type_d;
+			sort = AssessmentService.AssessmentsSort.ddate_d;
 		}
 		// 1 is odate
 		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
@@ -121,16 +122,7 @@ public class GradesView extends ControllerImpl
 		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
 		{
 			sort = AssessmentService.AssessmentsSort.odate_d;
-		}
-		// 2 is ddate
-		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
-		{
-			sort = AssessmentService.AssessmentsSort.ddate_a;
-		}
-		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
-		{
-			sort = AssessmentService.AssessmentsSort.ddate_d;
-		}
+		}		
 
 		return sort;
 	}
