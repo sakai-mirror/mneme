@@ -419,14 +419,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		// get the list in order
 		List<MultipleChoiceQuestionChoice> rv = getChoicesAsAuthored();
 
-		for (MultipleChoiceQuestionChoice choice : rv)
-		{
-			if ((choice.getText() == null) || (choice.getText().trim().length() == 0))
-			{
-				rv.remove(choice);
-			}
-		}
-
 		// shuffle them if desired (and we are in a submission context)
 		if (this.shuffleChoices && (this.question.getPart() != null) && (this.question.getPart().getAssessment().getSubmissionContext() != null))
 		{
@@ -452,7 +444,17 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		{
 			consolidate("ADD:4");
 		}
+		List newChoices = new ArrayList<MultipleChoiceQuestionChoice>();
+		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+		{
+			// ignore the null ones
+			if ((choice.getText() != null) && (choice.getText().trim().length() > 0))
+			{
+				newChoices.add(choice);
+			}
+		}
 
+		this.answerChoices = newChoices;
 		return this.answerChoices;
 	}
 
@@ -588,7 +590,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		decisions[1] = this.uiService.newDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
 		and.setRequirements(decisions);
-		
+
 		OrDecision or = this.uiService.newOrDecision();
 		Decision[] decisionsOr = new Decision[2];
 		decisionsOr[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
