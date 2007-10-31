@@ -150,14 +150,6 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getAnswerKey()
-	{
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Component getAuthoringUi()
 	{
 		EntityList entityList = this.uiService.newEntityList();
@@ -215,14 +207,6 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	public String getDescription()
 	{
 		return this.question.getPresentation().getText();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getModelAnswer()
-	{
-		return null;
 	}
 
 	/**

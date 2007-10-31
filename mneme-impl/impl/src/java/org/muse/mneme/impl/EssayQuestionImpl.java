@@ -146,14 +146,6 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getAnswerKey()
-	{
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Component getAuthoringUi()
 	{
 		EntityDisplay display = this.uiService.newEntityDisplay();

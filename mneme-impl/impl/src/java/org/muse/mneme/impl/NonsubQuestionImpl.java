@@ -134,14 +134,6 @@ public class NonsubQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getAnswerKey()
-	{
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Component getAuthoringUi()
 	{
 		EntityDisplay display = this.uiService.newEntityDisplay();
@@ -173,14 +165,6 @@ public class NonsubQuestionImpl implements TypeSpecificQuestion
 	public String getDescription()
 	{
 		return this.question.getPresentation().getText();
-	}
-
-	/**
-	 * @return the modelAnswer (rich text)
-	 */
-	public String getModelAnswer()
-	{
-		return this.modelAnswer;
 	}
 
 	/**
