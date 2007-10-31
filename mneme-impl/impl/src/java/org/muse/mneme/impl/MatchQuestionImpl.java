@@ -129,9 +129,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	/** Our messages. */
 	protected transient InternationalizedMessages messages = null;
 
-	/** A request for more choices. */
-	protected transient Integer moreChoices = null;
-
 	protected transient QuestionPlugin plugin = null;
 
 	/** The question this is a helper for. */
@@ -345,7 +342,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 
 		row = this.uiService.newEntityDisplayRow();
 		Selection selection = uiService.newSelection();
-		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.moreChoices"));
 		selection.addSelection("none", "ADD:0");
 		selection.addSelection("one", "ADD:1");
 		selection.addSelection("two", "ADD:2");
@@ -443,16 +439,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
-	 * The "getter" for the moreChoices - always set to 0.
-	 * 
-	 * @return The initial '0" value for the more choices.
-	 */
-	public String getMoreChoices()
-	{
-		return "0";
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public QuestionPlugin getPlugin()
@@ -469,20 +455,20 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		entityList.setStyle(EntityList.Style.form);
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
 
-//		AndDecision and = this.uiService.newAndDecision();
-//		Decision[] decisions = new Decision[2];
-//		decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
-//		decisions[1] = this.uiService.newDecision().setProperty(
-//				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
-//		and.setRequirements(decisions);
-//
-//		OrDecision or = this.uiService.newOrDecision();
-//		Decision[] decisionsOr = new Decision[2];
-//		decisionsOr[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
-//		decisionsOr[1] = and;
-//		or.setOptions(decisionsOr);
-//
-//		???.setCorrectDecision(or);
+		// AndDecision and = this.uiService.newAndDecision();
+		// Decision[] decisions = new Decision[2];
+		// decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
+		// decisions[1] = this.uiService.newDecision().setProperty(
+		// this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+		// and.setRequirements(decisions);
+		//
+		// OrDecision or = this.uiService.newOrDecision();
+		// Decision[] decisionsOr = new Decision[2];
+		// decisionsOr[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
+		// decisionsOr[1] = and;
+		// or.setOptions(decisionsOr);
+		//
+		// ???.setCorrectDecision(or);
 
 		AutoColumn autoCol = this.uiService.newAutoColumn();
 		entityList.addColumn(autoCol);
@@ -617,18 +603,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	public void setDistractor(String distractor)
 	{
 		this.distractor = distractor;
-	}
-
-	/**
-	 * Set a request for more choices.
-	 * 
-	 * @param more
-	 *        The number of more choices requested.
-	 */
-	public void setMoreChoices(String more)
-	{
-		// defer to consolidate
-		this.moreChoices = Integer.valueOf(more);
 	}
 
 	/**
