@@ -151,9 +151,9 @@ public class TestsView extends ControllerImpl
 		else
 		{
 			// default sort: title ascending
-			sort = AssessmentService.AssessmentsSort.title_a;
+			sort = AssessmentService.AssessmentsSort.ddate_a;
 
-			context.put("sort_column", '1');
+			context.put("sort_column", '3');
 			context.put("sort_direction", 'A');
 
 		}
