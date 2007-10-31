@@ -223,8 +223,21 @@ public abstract class PartImpl implements Part
 	 */
 	public Question getQuestion(String questionId)
 	{
-		// get the actual list of question picks
-		List<PoolPick> questions = getQuestionPickOrder();
+		// collect the questions
+		List<PoolPick> questions = null;
+		
+		// if under a submission context, use the actual set of questions for this submission
+		if (this.assessment.getSubmissionContext() != null)
+		{
+			// get the actual list of question picks
+			questions = getQuestionPickOrder();
+		}
+		
+		// else use all possible questions
+		else
+		{
+			questions = getPossibleQuestionPicks();
+		}
 
 		// make sure this is one of our questions
 		PoolPick found = null;
@@ -332,6 +345,13 @@ public abstract class PartImpl implements Part
 	 * @return TRUE if the part depends on this question directly, FALSE if not.
 	 */
 	protected abstract Boolean dependsOn(Question question);
+
+	/**
+	 * Get the list of possible question picks.
+	 * 
+	 * @return The list of possible question picks.
+	 */
+	protected abstract List<PoolPick> getPossibleQuestionPicks();
 
 	/**
 	 * Get the list of question picks as they should be presented for the submission context.

@@ -430,9 +430,16 @@ public class QuestionImpl implements Question
 	 */
 	public Pool getPool()
 	{
+		// use the pool context if set
 		if (this.poolContext != null)
 		{
 			return this.poolService.getPool(this.poolContext);
+		}
+
+		// historical questions live in no pool
+		if (this.getIsHistorical())
+		{
+			return null;
 		}
 
 		return this.poolService.getPool(this.poolId);

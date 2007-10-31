@@ -348,6 +348,25 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
+	protected List<PoolPick> getPossibleQuestionPicks()
+	{
+		List<PoolPick> rv = new ArrayList<PoolPick>();
+		for (PoolDraw draw : this.pools)
+		{
+			List<String> draws = draw.getAllQuestionIds();
+			for (String id : draws)
+			{
+				PoolPick pick = new PoolPick(this.questionService, id, draw.getPoolId());
+				rv.add(pick);
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	protected List<PoolPick> getQuestionPickOrder()
 	{
 		long seed = seed();

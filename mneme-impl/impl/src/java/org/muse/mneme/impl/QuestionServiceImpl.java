@@ -648,6 +648,7 @@ public class QuestionServiceImpl implements QuestionService
 		// if we don't have one, or we are trying to delete history, that's bad!
 		if (current == null) throw new IllegalArgumentException();
 		if (current.getIsHistorical()) throw new IllegalArgumentException();
+		Pool currentPool = current.getPool();
 
 		// deal with direct dependencies on this question from live assessments
 		if (this.assessmentService.liveDependencyExists(question))
@@ -677,7 +678,7 @@ public class QuestionServiceImpl implements QuestionService
 		}
 
 		// deal with (draw-only direct) dependencies to this question's pool from live assessments
-		if (this.assessmentService.liveDependencyExists(current.getPool(), true))
+		if (this.assessmentService.liveDependencyExists(currentPool, true))
 		{
 			// make sure we have history
 			if (!current.getIsHistorical())
@@ -690,7 +691,7 @@ public class QuestionServiceImpl implements QuestionService
 			// lock down the pool's manifest
 			if (historyPool == null)
 			{
-				historyPool = this.poolService.createHistory(current.getPool(), true);
+				historyPool = this.poolService.createHistory(currentPool, true);
 			}
 		}
 
@@ -712,7 +713,9 @@ public class QuestionServiceImpl implements QuestionService
 			// set the history question's pool to historyPool, if we have one
 			if (historyPool != null)
 			{
-				this.storage.setPool(current, historyPool);
+				// set it to null, so that history questions have no pool
+				// TODO: this might not be what we want, but lets give it a try -golden
+				this.storage.setPool(current, /* historyPool */null);
 			}
 
 			// update any frozen manifest pools

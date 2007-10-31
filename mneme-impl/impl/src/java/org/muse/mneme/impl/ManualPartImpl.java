@@ -353,9 +353,15 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	}
 
 	/**
-	 * Get the list of question picks as they should be presented for the submission context.
-	 * 
-	 * @return The list of question picks as they should be presented for the submission context.
+	 * {@inheritDoc}
+	 */
+	protected List<PoolPick> getPossibleQuestionPicks()
+	{
+		return this.questions;
+	}
+
+	/**
+	 * {@inheritDoc}
 	 */
 	protected List<PoolPick> getQuestionPickOrder()
 	{
