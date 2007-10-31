@@ -75,11 +75,13 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if (params.length != 8 && params.length != 9) throw new IllegalArgumentException();
-		
+
 		String saveDestination = context.getDestination();
 
-		if (params.length == 9) context.put("saveDestination", saveDestination.substring(0, saveDestination.lastIndexOf("/")));
-		else context.put("saveDestination", context.getDestination());
+		if (params.length == 9)
+			context.put("saveDestination", saveDestination.substring(0, saveDestination.lastIndexOf("/")));
+		else
+			context.put("saveDestination", context.getDestination());
 
 		// pools sort param is in params array at index 2
 		context.put("poolsSortCode", params[2]);
@@ -219,6 +221,8 @@ public class QuestionsCopyMoveView extends ControllerImpl
 						this.questionService.moveQuestion(question, pool);
 					}
 				}
+
+				destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4] + "/" + params[5] + "/" + params[6];
 			}
 			catch (AssessmentPermissionException e)
 			{
@@ -226,18 +230,9 @@ public class QuestionsCopyMoveView extends ControllerImpl
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 				return;
 			}
-
-			if (params.length > 6) destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4] + "/" + params[5] + "/" + params[6];
-
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-			return;
 		}
-		else
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+		return;
 	}
 
 	/**
