@@ -226,26 +226,10 @@
 						<message selector="submission-answer" />
 					</title>
 					<container>
-						<entityDisplay>
-							<rows>
-								<row>
-									<container>
-										<!-- Answer type-specific viewing -->
-										<modelComponent model="answer.question.typeSpecificQuestion.viewAnswerUi" />
-									</container>
-								</row>
-								<row>
-									<container>
-										<text selector="submission-comments" />
-									</container>
-								</row>
-								<row>
-									<container>
-										<htmlEdit model="answer.evaluation.comment" rows="5" cols="40" />
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
+						<!-- Answer type-specific viewing -->
+						<modelComponent model="answer.question.typeSpecificQuestion.viewAnswerUi" />
+						<text selector="submission-comments" />
+						<htmlEdit model="answer.evaluation.comment" rows="5" cols="40" />
 					</container>
 				</column>
 				<column>
