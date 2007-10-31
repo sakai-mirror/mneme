@@ -34,6 +34,7 @@ import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.FillIn;
 import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.OrDecision;
+import org.muse.ambrosia.api.PropertyReference;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.UiService;
@@ -284,14 +285,6 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		return getParsedText();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getModelAnswer()
-	{
-		return null;
-	}
-
 	public String getParsedText()
 	{
 		String parsedText = extractFIBTextArray(getText());
@@ -333,7 +326,18 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		fillIn.setReadOnly(this.uiService.newTrueDecision());
 		fillIn.setCorrect(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.entryCorrects"));
 
-		return this.uiService.newFragment().setMessages(this.messages).add(fillIn);
+		Text answerKey = this.uiService.newText();
+		PropertyReference[] refs = new PropertyReference[2];
+		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
+		refs[1] = this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.answerKey");
+		answerKey.setText("answer-key", refs);
+
+		Decision[] orInc = new Decision[2];
+		orInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
+		orInc[1] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+		answerKey.setIncluded(this.uiService.newOrDecision().setOptions(orInc));
+
+		return this.uiService.newFragment().setMessages(this.messages).add(fillIn).add(answerKey);
 	}
 
 	/**
@@ -404,7 +408,14 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	{
 		Text txt = this.uiService.newText();
 		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.text"));
-		return this.uiService.newFragment().setMessages(this.messages).add(txt);
+
+		Text answerKey = this.uiService.newText();
+		PropertyReference[] refs = new PropertyReference[2];
+		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
+		refs[1] = this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
+		answerKey.setText("answer-key", refs);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(txt).add(answerKey);
 	}
 
 	/**

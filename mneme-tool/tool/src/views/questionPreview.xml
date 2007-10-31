@@ -111,30 +111,6 @@
 					</included>
 				</toggle>
 
-				<!-- answer key -->
-				<text>
-					<message selector="question-answer-key">
-						<model type="icon" icon="/icons/answer_key.png" />
-						<model type="html" ref="question.answerKey" />
-					</message>
-					<included>
-						<hasValueDecision model="question.answerKey" />
-					</included>
-				</text>
-
-				<!-- model answer -->
-				<htmlEdit rows="5" cols="40" readOnly="TRUE">
-					<title>
-						<message selector="question-model-answer">
-							<model type="icon" icon="/icons/model_answer.png" />
-						</message>
-					</title>
-					<model ref="question.modelAnswer" />
-					<included>
-						<hasValueDecision model="question.modelAnswer" />
-					</included>
-				</htmlEdit>
-
 				<!-- question feedback -->
 				<text>
 					<message selector="question-feedback">

@@ -313,39 +313,6 @@
 							</included>
 						</toggle>
 
-						<!-- answer key -->
-						<text>
-							<message selector="question-answer-key">
-								<model type="icon" icon="/icons/answer_key.png" />
-								<model type="html" ref="answer.question.answerKey" />
-							</message>
-							<included>
-								<decision model="review" />
-								<decision model="answer.submission.mayReview" />
-								<decision model="answer.question.part.assessment.review.showCorrectAnswer" />
-								<hasValueDecision model="answer.question.answerKey" />
-							</included>
-						</text>
-
-						<!-- model answer -->
-						<htmlEdit rows="5" cols="40">
-							<title>
-								<message selector="question-model-answer">
-									<model type="icon" icon="/icons/model_answer.png" />
-								</message>
-							</title>
-							<readOnly>
-								<decision model="review" />
-							</readOnly>
-							<model ref="answer.question.modelAnswer" />
-							<included>
-								<decision model="review" />
-								<decision model="answer.submission.mayReview" />
-								<decision model="answer.question.part.assessment.review.showCorrectAnswer" />
-								<hasValueDecision model="answer.question.modelAnswer" />
-							</included>
-						</htmlEdit>
-
 						<!-- question feedback -->
 						<text>
 							<message selector="question-feedback">

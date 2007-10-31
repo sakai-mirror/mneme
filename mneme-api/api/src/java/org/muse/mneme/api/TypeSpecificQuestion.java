@@ -47,13 +47,6 @@ public interface TypeSpecificQuestion extends Cloneable
 	String consolidate(String destination);
 
 	/**
-	 * Access the rich text (html) answer key that shows the correct answer to the question.
-	 * 
-	 * @return The answer key, or null if there is none.
-	 */
-	String getAnswerKey();
-
-	/**
 	 * Access the user interface component for authoring of this question type.
 	 * 
 	 * @return The user interface component for authoring of this question type.
@@ -73,13 +66,6 @@ public interface TypeSpecificQuestion extends Cloneable
 	 * @return A description of the question.
 	 */
 	String getDescription();
-
-	/**
-	 * Access the rich text (html) model answer that shows an example answer to the question.
-	 * 
-	 * @return The model answer, or null if there is none.
-	 */
-	String getModelAnswer();
 
 	/**
 	 * Access the plugin for this type.

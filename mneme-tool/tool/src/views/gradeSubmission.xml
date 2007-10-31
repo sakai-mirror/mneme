@@ -166,17 +166,6 @@
 						<!-- Question specific review -->
 						<modelComponent model="answer.question.typeSpecificQuestion.reviewUi" />
 
-						<!-- answer key -->
-						<text>
-							<message selector="question-answer-key">
-								<model type="icon" icon="/icons/answer_key.png" />
-								<model type="html" ref="answer.question.answerKey" />
-							</message>
-							<included>
-								<hasValueDecision model="answer.question.answerKey" />
-							</included>
-						</text>
-
 						<!-- question feedback -->
 						<text>
 							<message selector="question-feedback">

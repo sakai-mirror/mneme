@@ -310,15 +310,6 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getAnswerKey()
-	{
-		if (this.questionHandler == null) return null;
-		return this.questionHandler.getAnswerKey();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Ordering<Question> getAssessmentOrdering()
 	{
 		return this.assessmentOrdering;
@@ -391,14 +382,6 @@ public class QuestionImpl implements Question
 	public Boolean getIsHistorical()
 	{
 		return this.historical;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getModelAnswer()
-	{
-		return this.questionHandler.getModelAnswer();
 	}
 
 	/**

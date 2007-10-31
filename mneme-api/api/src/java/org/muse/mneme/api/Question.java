@@ -27,13 +27,6 @@ package org.muse.mneme.api;
 public interface Question
 {
 	/**
-	 * Access the rich text (html) answer key that shows the correct answer to the question.
-	 * 
-	 * @return The answer key, or null if there is none.
-	 */
-	String getAnswerKey();
-
-	/**
 	 * Access the ordering information within the context of an assessment, ordering within the entire assessment (counting all parts).
 	 * 
 	 * @return The ordering information within the assessment.
@@ -95,13 +88,6 @@ public interface Question
 	 * @return TRUE if the question is used only for historical access, FALSE if it is a current question.
 	 */
 	Boolean getIsHistorical();
-
-	/**
-	 * Access the rich text (html) model answer that shows an example answer to the question.
-	 * 
-	 * @return The model answer, or null if there is none.
-	 */
-	String getModelAnswer();
 
 	/**
 	 * Access the modified-by (owner / date created)
