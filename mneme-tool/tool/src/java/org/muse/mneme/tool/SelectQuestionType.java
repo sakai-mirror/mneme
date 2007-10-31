@@ -169,7 +169,7 @@ public class SelectQuestionType extends ControllerImpl
 			return;
 		}
 		
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
