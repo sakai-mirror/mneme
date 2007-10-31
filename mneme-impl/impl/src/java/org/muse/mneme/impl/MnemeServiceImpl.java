@@ -627,14 +627,6 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removePoolQuestions(Pool pool) throws AssessmentPermissionException
-	{
-		questionService.removePoolQuestions(pool);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void removeQuestion(Question question) throws AssessmentPermissionException
 	{
 		questionService.removeQuestion(question);

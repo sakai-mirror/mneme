@@ -82,7 +82,7 @@ public class QuestionStorageSample implements QuestionStorage
 			if (!question.getIsHistorical() && question.getPool().equals(source))
 			{
 				QuestionImpl q = new QuestionImpl(question);
-				
+
 				// set the destination as the pool
 				q.setPool(destination);
 
@@ -353,21 +353,6 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removePoolQuestions(Pool pool)
-	{
-		for (Iterator i = this.questions.values().iterator(); i.hasNext();)
-		{
-			QuestionImpl question = (QuestionImpl) i.next();
-			if (question.getPool().equals(pool))
-			{
-				i.remove();
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void removeQuestion(QuestionImpl question)
 	{
 		QuestionImpl q = this.questions.remove(question.getId());
@@ -404,6 +389,18 @@ public class QuestionStorageSample implements QuestionStorage
 	public void setMnemeService(MnemeService service)
 	{
 		this.mnemeService = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setPool(Question question, Pool pool)
+	{
+		QuestionImpl q = this.questions.get(question.getId());
+		if (q != null)
+		{
+			q.initPoolId((pool == null) ? null : pool.getId());
+		}
 	}
 
 	/**

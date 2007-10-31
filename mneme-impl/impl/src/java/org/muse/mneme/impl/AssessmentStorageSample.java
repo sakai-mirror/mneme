@@ -379,6 +379,56 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void removeDependency(Pool pool)
+	{
+		for (AssessmentImpl assessment : this.assessments.values())
+		{
+			if (assessment.getContext().equals(pool.getContext()))
+			{
+				// if the asssessment's draw parts use this question
+				for (Part part : assessment.getParts().getParts())
+				{
+					if (part instanceof DrawPart)
+					{
+						if (((DrawPartImpl) part).dependsOn(pool, Boolean.TRUE))
+						{
+							((DrawPartImpl) part).removePool(pool);
+							assessment.clearChanged();
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeDependency(Question question)
+	{
+		for (AssessmentImpl assessment : this.assessments.values())
+		{
+			if (assessment.getContext().equals(question.getPool().getContext()))
+			{
+				// if the asssessment's manual parts use this question
+				for (Part part : assessment.getParts().getParts())
+				{
+					if (part instanceof ManualPart)
+					{
+						if (((ManualPartImpl) part).dependsOn(question))
+						{
+							((ManualPartImpl) part).removeQuestion(question);
+							assessment.clearChanged();
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void saveAssessment(AssessmentImpl assessment)
 	{
 		fakeIt();
@@ -517,31 +567,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 						if (((ManualPartImpl) part).dependsOn(from))
 						{
 							((ManualPartImpl) part).switchQuestion(from, to);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void removeDependency(Question question)
-	{
-		for (AssessmentImpl assessment : this.assessments.values())
-		{
-			if (assessment.getContext().equals(question.getPool().getContext()))
-			{
-				// if the asssessment's manual parts use this question
-				for (Part part : assessment.getParts().getParts())
-				{
-					if (part instanceof ManualPart)
-					{
-						if (((ManualPartImpl) part).dependsOn(question))
-						{
-							((ManualPartImpl) part).removeQuestion(question);
-							assessment.clearChanged();
 						}
 					}
 				}

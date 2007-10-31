@@ -127,6 +127,14 @@ public interface AssessmentStorage
 	void removeAssessment(AssessmentImpl assessment);
 
 	/**
+	 * Remove any direct dependencies on this pool from all assessments.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 */
+	void removeDependency(Pool pool);
+
+	/**
 	 * Remove any direct dependencies on this question from all assessments.
 	 * 
 	 * @param question

@@ -170,16 +170,6 @@ public interface QuestionService
 	Question newQuestion(Pool pool, String type) throws AssessmentPermissionException;
 
 	/**
-	 * Remove all the questions that are in this pool
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @throws AssessmentPermissionException
-	 *         if the current user is not allowed to remove these questions.
-	 */
-	void removePoolQuestions(Pool pool) throws AssessmentPermissionException;
-
-	/**
 	 * Remove this question.
 	 * 
 	 * @param question

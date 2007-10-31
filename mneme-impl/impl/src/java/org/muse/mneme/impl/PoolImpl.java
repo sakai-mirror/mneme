@@ -42,9 +42,6 @@ public class PoolImpl implements Pool
 
 	protected Attribution createdBy = null;
 
-	/** Start of the versioning thing. */
-	protected Boolean deleted = Boolean.FALSE;
-
 	protected String description = null;
 
 	protected Integer difficulty = Integer.valueOf(3);
@@ -65,9 +62,6 @@ public class PoolImpl implements Pool
 	protected transient QuestionService questionService = null;
 
 	protected String title = null;
-
-	// TODO: version
-	protected String version = "only";
 
 	/**
 	 * Construct.
@@ -219,14 +213,6 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getVersion()
-	{
-		return this.version;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public int hashCode()
 	{
 		return getId() == null ? "null".hashCode() : this.getId().hashCode();
@@ -367,7 +353,6 @@ public class PoolImpl implements Pool
 		this.changed = new ChangeableImpl(other.changed);
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy, this.changed);
 		this.context = other.context;
-		this.deleted = other.deleted;
 		this.description = other.description;
 		this.difficulty = other.difficulty;
 		this.historical = other.historical;
@@ -381,6 +366,5 @@ public class PoolImpl implements Pool
 			this.frozenManifest = new ArrayList<String>(other.frozenManifest);
 		}
 		this.title = other.title;
-		this.version = other.version;
 	}
 }

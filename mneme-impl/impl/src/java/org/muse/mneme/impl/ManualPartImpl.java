@@ -311,17 +311,24 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 
 		for (PoolPick pick : this.questions)
 		{
-			if (pool.getId().equals(pick.getPoolId()))
+			// use the pick's pool as an override to the question's native pool, if set
+			if (pick.getPoolId() != null)
 			{
-				return Boolean.TRUE;
-			}
-
-			Question question = this.questionService.getQuestion(pick.getQuestionId());
-			if (question != null)
-			{
-				if (question.getPool().equals(pool))
+				if (pool.getId().equals(pick.getPoolId()))
 				{
 					return Boolean.TRUE;
+				}
+			}
+			else
+			{
+				Question question = this.questionService.getQuestion(pick.getQuestionId());
+				if (question != null)
+				{
+					Pool qp = question.getPool();
+					if ((qp != null) && (qp.equals(pool)))
+					{
+						return Boolean.TRUE;
+					}
 				}
 			}
 		}
@@ -371,7 +378,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		for (Iterator i = this.questions.iterator(); i.hasNext();)
 		{
 			PoolPick pick = (PoolPick) i.next();
-		
+
 			// if we cannot restore the orig. values, remove the pick
 			if (!pick.setOrig())
 			{

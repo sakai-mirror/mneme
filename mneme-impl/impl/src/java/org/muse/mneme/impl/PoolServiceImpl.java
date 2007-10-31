@@ -53,7 +53,7 @@ public class PoolServiceImpl implements PoolService
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
 
-	protected QuestionService questionService = null;
+	protected QuestionServiceImpl questionService = null;
 
 	/** Dependency: SecurityService */
 	protected SecurityService securityService = null;
@@ -276,8 +276,25 @@ public class PoolServiceImpl implements PoolService
 			this.assessmentService.switchLiveDependency(pool, current, false);
 		}
 
-		// remove the questions from the pool
-		this.questionService.removePoolQuestions(pool);
+		// remove each of our questions
+		List<String> qids = current.getAllQuestionIds();
+		for (String qid : qids)
+		{
+			Question q = this.questionService.getQuestion(qid);
+			if ((q != null) && (!q.getIsHistorical()))
+			{
+				// remove the questions
+				// use current as the history pool, if needed
+				// Note: will only be needed if there are live assessment pool dependencies,
+				// - in which case we have already made current into a historical pool.
+				this.questionService.removeQuestion(q, current);
+			}
+		}
+
+		// remove any assessment dependencies on this pool
+		// - any live dependencies have already been swapped tot the historical 'current',
+		// so these are all non-live and may be removed.
+		this.assessmentService.removeDependency(pool);
 
 		// remove the pool
 		storage.removePool((PoolImpl) pool);
@@ -302,12 +319,8 @@ public class PoolServiceImpl implements PoolService
 		// security check
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, pool.getContext());
 
-		// generate history for any change
-		boolean historyNeeded = true;
-
 		// get the current pool for history
-		PoolImpl current = null;
-		if (historyNeeded) current = this.storage.getPool(pool.getId());
+		PoolImpl current = this.storage.getPool(pool.getId());
 
 		Date now = new Date();
 
@@ -328,9 +341,10 @@ public class PoolServiceImpl implements PoolService
 		// save
 		storage.savePool((PoolImpl) pool);
 
-		// if there are any history dependencies on this changed pool, we need to store the history version
-		if (historyNeeded && (current != null))
+		if (current != null)
 		{
+			// if there are any history dependencies on this changed pool, we need to store the history version
+			// - draws or manual question selection.
 			if (this.assessmentService.liveDependencyExists(pool, false))
 			{
 				// get a new id on the old and save it
@@ -375,7 +389,7 @@ public class PoolServiceImpl implements PoolService
 	 * @param service
 	 *        The QuestionService.
 	 */
-	public void setQuestionService(QuestionService service)
+	public void setQuestionService(QuestionServiceImpl service)
 	{
 		this.questionService = service;
 	}
@@ -442,11 +456,12 @@ public class PoolServiceImpl implements PoolService
 	 *        The pool.
 	 * @param directOnly
 	 *        if TRUE, do it only if / for direct pool use (draw), else for all (manual and draw).
+	 * @return the history pool made.
 	 */
-	protected void createHistory(Pool pool, boolean directOnly)
+	protected Pool createHistory(Pool pool, boolean directOnly)
 	{
 		if (pool == null) throw new IllegalArgumentException();
-		if (((PoolImpl) pool).getIsHistorical()) return;
+		if (((PoolImpl) pool).getIsHistorical()) return pool;
 
 		if (M_log.isDebugEnabled()) M_log.debug("createHistory: " + pool.getId());
 
@@ -463,6 +478,8 @@ public class PoolServiceImpl implements PoolService
 
 		// event
 		// eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
+
+		return current;
 	}
 
 	/**

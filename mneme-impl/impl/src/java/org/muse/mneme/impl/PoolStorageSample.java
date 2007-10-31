@@ -68,7 +68,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.deleted) && (!pool.historical) && pool.getContext().equals(context))
+			if ((!pool.historical) && pool.getContext().equals(context))
 			{
 				// TODO: search
 				count++;
@@ -120,7 +120,6 @@ public class PoolStorageSample implements PoolStorage
 
 		PoolImpl pool = this.pools.get(poolId);
 		if (pool == null) return Boolean.FALSE;
-		if (pool.deleted) return Boolean.FALSE;
 
 		return Boolean.TRUE;
 	}
@@ -136,7 +135,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.deleted) && (!pool.historical) && pool.getContext().equals(context))
+			if ((!pool.historical) && pool.getContext().equals(context))
 			{
 				// TODO: search
 				rv.add(new PoolImpl(pool));
@@ -236,7 +235,6 @@ public class PoolStorageSample implements PoolStorage
 
 		PoolImpl rv = this.pools.get(poolId);
 		if (rv == null) return null;
-		if (rv.deleted) return null;
 
 		// return a copy
 		rv = new PoolImpl(rv);
@@ -254,7 +252,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.deleted) && (!pool.historical) && pool.getId().equals(context))
+			if ((!pool.historical) && pool.getId().equals(context))
 			{
 				rv.add(new PoolImpl(pool));
 			}
@@ -297,7 +295,7 @@ public class PoolStorageSample implements PoolStorage
 	{
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.deleted) && pool.getContext().equals(question.getPool().getContext()) && pool.getFrozenManifest() != null)
+			if (pool.getContext().equals(question.getPool().getContext()) && (pool.getFrozenManifest() != null))
 			{
 				List<String> manifest = pool.getFrozenManifest();
 				int index = manifest.indexOf(question.getId());
@@ -332,13 +330,7 @@ public class PoolStorageSample implements PoolStorage
 	 */
 	public void removePool(PoolImpl pool)
 	{
-		fakeIt();
-
-		PoolImpl p = this.pools.get(pool.getId());
-		if (p != null)
-		{
-			p.deleted = Boolean.TRUE;
-		}
+		PoolImpl p = this.pools.remove(pool.getId());
 	}
 
 	/**
@@ -386,7 +378,7 @@ public class PoolStorageSample implements PoolStorage
 	{
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.deleted) && pool.getContext().equals(from.getPool().getContext()) && pool.getFrozenManifest() != null)
+			if (pool.getContext().equals(from.getPool().getContext()) && (pool.getFrozenManifest() != null))
 			{
 				List<String> manifest = pool.getFrozenManifest();
 				int index = manifest.indexOf(from.getId());

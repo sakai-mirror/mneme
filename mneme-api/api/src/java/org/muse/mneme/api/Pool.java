@@ -142,13 +142,6 @@ public interface Pool
 	String getTitle();
 
 	/**
-	 * Access the version of this pool.
-	 * 
-	 * @return The pool's version.
-	 */
-	String getVersion();
-
-	/**
 	 * Set the context of this pool.
 	 * 
 	 * @param context

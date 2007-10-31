@@ -554,6 +554,17 @@ public class QuestionImpl implements Question
 	}
 
 	/**
+	 * Initialize the Pool id.
+	 * 
+	 * @param id
+	 *        The pool id.
+	 */
+	protected void initPoolId(String id)
+	{
+		this.poolId = id;
+	}
+
+	/**
 	 * Initialize the submission context for this question - the submission this question instance was created to support.
 	 * 
 	 * @param submission

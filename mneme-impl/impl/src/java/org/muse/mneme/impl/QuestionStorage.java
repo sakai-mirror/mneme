@@ -132,14 +132,6 @@ public interface QuestionStorage
 	QuestionImpl newQuestion(QuestionImpl question);
 
 	/**
-	 * Remove all the questions that are in this pool
-	 * 
-	 * @param pool
-	 *        The pool.
-	 */
-	void removePoolQuestions(Pool pool);
-
-	/**
 	 * Remove a question from storage.
 	 * 
 	 * @param question
@@ -154,4 +146,14 @@ public interface QuestionStorage
 	 *        the question to save.
 	 */
 	void saveQuestion(QuestionImpl question);
+
+	/**
+	 * Put this question into this pool
+	 * 
+	 * @param question
+	 *        The question.
+	 * @param pool
+	 *        The pool.
+	 */
+	void setPool(Question question, Pool pool);
 }

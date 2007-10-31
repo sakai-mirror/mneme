@@ -535,6 +535,28 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
+	 * Remove any direct dependencies on this pool from all assessments.
+	 * 
+	 * @param question
+	 *        The question.
+	 */
+	protected void removeDependency(Pool pool)
+	{
+		this.storage.removeDependency(pool);
+	}
+
+	/**
+	 * Remove any direct dependencies on this question from all assessments.
+	 * 
+	 * @param question
+	 *        The question.
+	 */
+	protected void removeDependency(Question question)
+	{
+		this.storage.removeDependency(question);
+	}
+
+	/**
 	 * Check if this assessment meets the delete policy.
 	 * 
 	 * @param assessment
@@ -627,16 +649,5 @@ public class AssessmentServiceImpl implements AssessmentService
 	protected void switchLiveDependency(Question from, Question to)
 	{
 		this.storage.switchLiveDependency(from, to);
-	}
-
-	/**
-	 * Remove any direct dependencies on this question from all assessments.
-	 * 
-	 * @param question
-	 *        The question.
-	 */
-	protected void removeDependency(Question question)
-	{
-		this.storage.removeDependency(question);
 	}
 }
