@@ -63,16 +63,6 @@
 			<emptyTitle>
 				<message selector="no-questions" />
 			</emptyTitle>
-			<pager paging="paging">
-				<destination template="/pool_edit/{0}/{1}/{2}/{3}{4}/{5}">
-					<model ref="poolsSortCode" />
-					<model ref="poolsPagingParameter" />
-					<model ref="pool.id" />
-					<model ref="sort_column" />
-					<model ref="sort_direction" />
-					<model type="paging" ref="paging" />
-				</destination>
-			</pager>
 			<columns>
 				<selectionColumn multiple="TRUE">
 					<value>
@@ -132,6 +122,16 @@
 								<model ref="pagingParameter" />
 							</destination>
 						</navigation>
+						<pager paging="paging">
+							<destination template="/pool_edit/{0}/{1}/{2}/{3}{4}/{5}">
+								<model ref="poolsSortCode" />
+								<model ref="poolsPagingParameter" />
+								<model ref="pool.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model type="paging" ref="paging" />
+							</destination>
+						</pager>
 					</entityActions>
 				</selectionColumn>
 				<column>
