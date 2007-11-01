@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -79,7 +80,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		public MultipleChoiceQuestionChoice(String id, String text)
 		{
 			this.id = id;
-			this.text = text;
+			setText(text);
 		}
 
 		public Boolean getCorrect()
@@ -114,7 +115,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 
 		public void setText(String text)
 		{
-			this.text = text;
+			this.text = ((text == null) ? "" : text.trim());
 		}
 	}
 
@@ -209,10 +210,12 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	public String consolidate(String destination)
 	{
 		boolean stayHere = false;
+		boolean removeBlanks = true;
 
 		// check for delete
 		if (destination.startsWith("DEL:"))
 		{
+			removeBlanks = false;
 			stayHere = true;
 			String[] parts = StringUtil.split(destination, ":");
 			if (parts.length == 2)
@@ -234,41 +237,10 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			}
 		}
 
-		// make sure there's only one correct if we are single select
-		if (this.singleCorrect)
-		{
-			boolean seenCorrect = false;
-			for (MultipleChoiceQuestionChoice choice : this.answerChoices)
-			{
-				if (!seenCorrect)
-				{
-					if (choice.getCorrect())
-					{
-						seenCorrect = true;
-					}
-				}
-				else
-				{
-					if (choice.getCorrect())
-					{
-						choice.setCorrect(Boolean.FALSE);
-					}
-				}
-			}
-
-			// make sure we have at least one
-			if (!seenCorrect)
-			{
-				if (!this.answerChoices.isEmpty())
-				{
-					this.answerChoices.get(0).setCorrect(Boolean.TRUE);
-				}
-			}
-		}
-
 		// add more choices
 		if (destination.startsWith("ADD:"))
 		{
+			removeBlanks = false;
 			stayHere = true;
 			String[] parts = StringUtil.split(destination, ":");
 			if (parts.length == 2)
@@ -290,7 +262,57 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 
 		if (destination.startsWith("RESIZE"))
 		{
+			removeBlanks = false;
 			stayHere = true;
+		}
+
+		// remove any blank choices unless we don't want to
+		if (removeBlanks)
+		{
+			List newChoices = new ArrayList<MultipleChoiceQuestionChoice>();
+			int i = 0;
+			for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+			{
+				// ignore the empty ones
+				if (choice.getText().length() > 0)
+				{
+					// new position
+					choice.id = Integer.toString(i++);
+					newChoices.add(choice);
+				}
+			}
+
+			this.answerChoices = newChoices;
+		}
+
+		// make sure there's only one correct if we are single select
+		boolean seenCorrect = false;
+		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+		{
+			if (!seenCorrect)
+			{
+				if (choice.getCorrect())
+				{
+					seenCorrect = true;
+				}
+			}
+			else
+			{
+				// make sure single correct has only one correct
+				if (choice.getCorrect() && this.singleCorrect)
+				{
+					choice.setCorrect(Boolean.FALSE);
+				}
+			}
+		}
+
+		// make sure we have at least one
+		if (!seenCorrect)
+		{
+			if (!this.answerChoices.isEmpty())
+			{
+				this.answerChoices.get(0).setCorrect(Boolean.TRUE);
+			}
 		}
 
 		if (stayHere) return null;
@@ -448,11 +470,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		List newChoices = new ArrayList<MultipleChoiceQuestionChoice>();
 		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
 		{
-			// ignore the null ones
-			if ((choice.getText() != null) && (choice.getText().trim().length() > 0))
-			{
-				newChoices.add(choice);
-			}
+			newChoices.add(choice);
 		}
 
 		this.answerChoices = newChoices;
