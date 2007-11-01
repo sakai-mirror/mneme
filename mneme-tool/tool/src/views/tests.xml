@@ -50,41 +50,7 @@
 				<message selector="no-assessments" />
 			</emptyTitle>
 			<columns>
-				<column>
-					<navigations>
-						<navigation style="LINK" submit="TRUE" description="live-alt">
-							<title>
-								<message selector="live">
-									<model type="icon" icon="/icons/grade_student.png" />
-								</message>
-							</title>
-							<destination template="/grade_assessment/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="assessment.id" />
-							</destination>
-							<included>
-								<decision model="assessment.isLive" />
-								<decision model="assessment.isValid" />
-							</included>
-						</navigation>
-						<navigation style="LINK" submit="TRUE" description="invalid-alt">
-							<title>
-								<message selector="invalid">
-									<model type="icon" icon="/icons/attention.jpg" />
-								</message>
-							</title>
-							<destination template="/assessment_invalid/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="assessment.id" />
-							</destination>
-							<included>
-								<decision reversed="TRUE" model="assessment.isValid" />
-							</included>
-						</navigation>
-					</navigations>
-				</column>
+
 				<selectionColumn multiple="TRUE">
 					<value>
 						<model type="text" ref="assessment.id" />
@@ -121,42 +87,6 @@
 
 					</entityActions>
 				</selectionColumn>
-				<column>
-					<title>
-						<message selector="assessment-title" />
-					</title>
-					<sort submit="TRUE">
-						<active>
-							<compareDecision model="sort_column" constant="1" />
-						</active>
-						<direction>
-							<compareDecision model="sort_direction" constant="A" />
-						</direction>
-						<asc icon="/icons/sortascending.gif">
-							<message selector="asc" />
-							<destination template="/assessments/1A" />
-						</asc>
-						<desc icon="/icons/sortdescending.gif">
-							<message selector="desc" />
-							<destination template="/assessments/1D" />
-						</desc>
-					</sort>
-					<container>
-						<navigation style="LINK" submit="TRUE">
-							<title>
-								<message>
-									<model ref="assessment.title" missing="no-title" />
-								</message>
-							</title>
-							<destination template="/assessment_edit/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="assessment.id" />
-							</destination>
-						</navigation>
-
-					</container>
-				</column>
 				<modelColumn>
 					<title>
 						<message selector="assessment-view" />
@@ -215,6 +145,43 @@
 				</modelColumn>
 				<column>
 					<title>
+						<message selector="assessment-title" />
+					</title>
+					<sort submit="TRUE">
+						<active>
+							<compareDecision model="sort_column" constant="1" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/assessments/1A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/assessments/1D" />
+						</desc>
+					</sort>
+					<container>
+						<navigation style="LINK" submit="TRUE">
+							<title>
+								<message>
+									<model ref="assessment.title" missing="no-title" />
+								</message>
+							</title>
+							<destination template="/assessment_edit/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+
+					</container>
+				</column>
+
+				<column>
+					<title>
 						<message selector="assessment-odate" />
 					</title>
 					<sort submit="TRUE">
@@ -264,6 +231,44 @@
 							<model ref="assessment.dates.dueDate" type="date" />
 						</dateEdit>
 					</container>
+				</column>
+				<column>
+					<title>
+						<message selector="assessment-status" />
+					</title>
+					<navigations>
+						<navigation style="LINK" submit="TRUE" description="live-alt">
+							<title>
+								<message selector="live">
+									<model type="icon" icon="/icons/grade_student.png" />
+								</message>
+							</title>
+							<destination template="/grade_assessment/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<decision model="assessment.isLive" />
+								<decision model="assessment.isValid" />
+							</included>
+						</navigation>
+						<navigation style="LINK" submit="TRUE" description="invalid-alt">
+							<title>
+								<message selector="invalid">
+									<model type="icon" icon="/icons/attention.jpg" />
+								</message>
+							</title>
+							<destination template="/assessment_invalid/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<decision reversed="TRUE" model="assessment.isValid" />
+							</included>
+						</navigation>
+					</navigations>
 				</column>
 				<column>
 					<title>
