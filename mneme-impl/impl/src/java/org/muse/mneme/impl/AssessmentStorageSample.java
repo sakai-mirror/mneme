@@ -633,7 +633,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 			p.addQuestion(this.questionService.getQuestion("q5"));
 			p.addQuestion(this.questionService.getQuestion("q7"));
-			p.addQuestion(this.questionService.getQuestion("q8"));
 			p.getPresentation().setText("This is part two.");
 
 			a.clearChanged();
