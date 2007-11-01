@@ -37,6 +37,7 @@
 		</message>
 	</header>
 	<container>
+	<navigationBar />
 		<alert>
 			<message selector="unpublish-warning">
 				<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
