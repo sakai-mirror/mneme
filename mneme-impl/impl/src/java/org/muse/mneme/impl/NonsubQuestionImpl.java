@@ -21,36 +21,19 @@
 
 package org.muse.mneme.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-
-import org.muse.ambrosia.api.AndDecision;
-import org.muse.ambrosia.api.AutoColumn;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Container;
-import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
-import org.muse.ambrosia.api.EntityList;
-import org.muse.ambrosia.api.EntityListColumn;
 import org.muse.ambrosia.api.HtmlEdit;
-import org.muse.ambrosia.api.PropertyColumn;
-import org.muse.ambrosia.api.Selection;
-import org.muse.ambrosia.api.SelectionColumn;
+import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.Overlay;
-import org.muse.ambrosia.api.Toggle;
 import org.muse.ambrosia.api.Text;
-import org.muse.ambrosia.api.OrderColumn;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
-import org.muse.ambrosia.api.Navigation;
 
 /**
  * NonsubQuestionImpl handles questions for the Nonsub question type.
@@ -165,6 +148,11 @@ public class NonsubQuestionImpl implements TypeSpecificQuestion
 	public String getDescription()
 	{
 		return this.question.getPresentation().getText();
+	}
+
+	public String getModelAnswer()
+	{
+		return this.modelAnswer;
 	}
 
 	/**
