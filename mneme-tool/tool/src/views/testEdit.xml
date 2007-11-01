@@ -217,22 +217,28 @@
 				</navigation>
 			</container>
 		</navigationBar>
-		<finePrint>
-			<message selector="test-Id">
-				<model ref="assessment.id" />
-			</message>
-		</finePrint>
-		<finePrint>
-			<message selector="history-createText">
-				<model type="userInfo" selector="DISPLAYNAME" ref="assessment.createdBy.UserId" />
-				<model type="date" ref="assessment.createdBy.date" />
-			</message>
-		</finePrint>
-		<finePrint>
-			<message selector="history-modifyText">
-				<model type="userInfo" selector="DISPLAYNAME" ref="assessment.modifiedBy.UserId" />
-				<model type="date" ref="assessment.modifiedBy.date" />
-			</message>
-		</finePrint>
 	</container>
+	
+	<footer>
+		<container>
+			<finePrint>
+				<message selector="test-Id">
+					<model ref="assessment.id" />
+				</message>
+			</finePrint>
+			<finePrint>
+				<message selector="history-createText">
+					<model type="userInfo" selector="DISPLAYNAME" ref="assessment.createdBy.UserId" />
+					<model type="date" ref="assessment.createdBy.date" />
+				</message>
+			</finePrint>
+			<finePrint>
+				<message selector="history-modifyText">
+					<model type="userInfo" selector="DISPLAYNAME" ref="assessment.modifiedBy.UserId" />
+					<model type="date" ref="assessment.modifiedBy.date" />
+				</message>
+			</finePrint>
+		</container>
+	</footer>
+
 </interface>

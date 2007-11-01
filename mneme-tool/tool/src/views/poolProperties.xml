@@ -90,22 +90,27 @@
 			</container>
 		</navigationBar>
 
-		<finePrint>
-			<message selector="id">
-				<model ref="pool.id" />
-			</message>
-		</finePrint>
-		<finePrint>
-			<message selector="history-createText">
-				<model type="userInfo" selector="DISPLAYNAME" ref="pool.createdBy.userId" />
-				<model type="date" ref="pool.createdBy.date" />
-			</message>
-		</finePrint>
-		<finePrint>
-			<message selector="history-modifyText">
-				<model type="userInfo" selector="DISPLAYNAME" ref="pool.modifiedBy.userId" />
-				<model type="date" ref="pool.modifiedBy.date" />
-			</message>
-		</finePrint>
 	</container>
+	
+	<footer>
+		<contaimer>
+			<finePrint>
+				<message selector="id">
+					<model ref="pool.id" />
+				</message>
+			</finePrint>
+			<finePrint>
+				<message selector="history-createText">
+					<model type="userInfo" selector="DISPLAYNAME" ref="pool.createdBy.userId" />
+					<model type="date" ref="pool.createdBy.date" />
+				</message>
+			</finePrint>
+			<finePrint>
+				<message selector="history-modifyText">
+					<model type="userInfo" selector="DISPLAYNAME" ref="pool.modifiedBy.userId" />
+					<model type="date" ref="pool.modifiedBy.date" />
+				</message>
+			</finePrint>
+		</contaimer>
+	</footer>
 </interface>

@@ -168,7 +168,12 @@
 			</container>
 		</navigationBar>
 
-		<finePrint selector="id_display" model="access.id" />
-
 	</container>
+	
+	<footer>
+		<container>
+			<finePrint selector="id_display" model="access.id" />
+		</container>
+	</footer>
+
 </interface>

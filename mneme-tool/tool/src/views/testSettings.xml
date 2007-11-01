@@ -330,11 +330,16 @@
 			</container>
 		</navigationBar>
 
-
-		<finePrint>
-			<message selector="id">
-				<model ref="assessment.id" />
-			</message>
-		</finePrint>
 	</container>
+	
+	<footer>
+		<container>
+			<finePrint>
+				<message selector="id">
+					<model ref="assessment.id" />
+				</message>
+			</finePrint>
+		</container>
+	</footer>
+
 </interface>
