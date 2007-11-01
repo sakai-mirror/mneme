@@ -38,7 +38,7 @@
 	<!-- header -->
 	<header>
 		<message selector="question-edit-header">
-			<model type="icon" icon="/icons/basket_add.png" />
+			<model type="icon" icon="/icons/edit.png" />
 			<model ref="question.description" missing="no-title" />
 		</message>
 	</header>
@@ -57,27 +57,19 @@
 	</subHeader>
 
 	<container>
-
 		<navigationBar />
-
 		<entityDisplay>
 			<rows>
-
 				<row title="question-type">
 					<container>
 						<text model="question.typeName" />
 					</container>
 				</row>
-
-				<row>
+				<row title="question-presentation">
 					<container>
+						<htmlEdit model="question.presentation.text" />
 						<entityDisplay>
 							<rows>
-								<row title="question-presentation">
-									<container>
-										<htmlEdit model="question.presentation.text" />
-									</container>
-								</row>
 								<row title="attachments">
 									<container>
 										<attachmentsEdit model="question.presentation.attachments" />
@@ -90,14 +82,15 @@
 						<decision model="question.typeSpecificQuestion.useQuestionPresentation" />
 					</included>
 				</row>
+			</rows>
+		</entityDisplay>
+		<!-- question specific -->
 
-				<!-- question specific -->
-				<row>
-					<container>
-						<modelComponent model="question.typeSpecificQuestion.authoringUi" />
-					</container>
-				</row>
+		<modelComponent model="question.typeSpecificQuestion.authoringUi" />
 
+		<!--  optional settings -->
+		<entityDisplay>
+			<rows>
 				<row title="optional-settings">
 					<container>
 						<section>
@@ -147,9 +140,9 @@
 						</section>
 					</container>
 				</row>
-
 			</rows>
 		</entityDisplay>
+
 
 		<!-- navigation -->
 		<navigationBar>
