@@ -420,7 +420,11 @@ public class QuestionServiceImpl implements QuestionService
 
 		// see if the question has been moved from its current pool
 		QuestionImpl current = this.storage.getQuestion(question.getId());
-		if ((current != null) && (!current.getPool().equals(question.getPool())))
+		if (current == null) throw new IllegalArgumentException();
+
+		Pool currentPool = ((current == null) ? null : current.getPool());
+
+		if ((current != null) && (!currentPool.equals(question.getPool())))
 		{
 			// TODO: I'm not completely sure of this - ggolden
 			// before anything changes, move to history if needed by assessments drawing from the pool
@@ -446,7 +450,7 @@ public class QuestionServiceImpl implements QuestionService
 		}
 
 		// deal with (draw-only, direct) dependencies to this question's pool from live assessments
-		if ((current != null) && (this.assessmentService.liveDependencyExists(current.getPool(), true)))
+		if ((current != null) && (this.assessmentService.liveDependencyExists(currentPool, true)))
 		{
 			// generate history if needed
 			if (!current.getIsHistorical())
@@ -458,7 +462,7 @@ public class QuestionServiceImpl implements QuestionService
 
 			// Note: if the question is moved to a new pool, the code above (createHistoryIfNeeded) will
 			// catch it, and we won't be in here, since there will then be no live dependencies on the pool -ggolden
-			this.poolService.createHistory(current.getPool(), true);
+			this.poolService.createHistory(currentPool, true);
 		}
 
 		// make history if any submissions reference this question
