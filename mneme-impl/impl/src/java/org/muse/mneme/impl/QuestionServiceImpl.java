@@ -420,7 +420,6 @@ public class QuestionServiceImpl implements QuestionService
 
 		// see if the question has been moved from its current pool
 		QuestionImpl current = this.storage.getQuestion(question.getId());
-		if (current == null) throw new IllegalArgumentException();
 
 		Pool currentPool = ((current == null) ? null : current.getPool());
 
