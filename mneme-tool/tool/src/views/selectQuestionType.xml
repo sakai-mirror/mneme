@@ -40,6 +40,7 @@
 	</title>
 
 	<container>
+	<navigationBar />
 		<entityDisplay>
 			<rows>
 				<row title="question-types">
