@@ -108,7 +108,7 @@
 						</navigation>
 					</container>
 				</column>
-				<column>
+				<column wrap="FALSE">
 					<title>
 						<message selector="assessment-odate"/>
 					</title>
@@ -136,7 +136,7 @@
 						</text>
 					</container>
 				</column>
-				<column>
+				<column wrap="FALSE">
 					<title>
 						<message selector="assessment-ddate" />
 					</title>

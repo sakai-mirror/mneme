@@ -217,7 +217,7 @@
 						<text selector="anonymous" />
 					</container>
 				</column>
-				<column>
+				<column wrap="FALSE">
 					<title>
 						<message selector="submission-finished" />
 					</title>
@@ -243,7 +243,7 @@
 						<decision model="submission.isComplete" />
 					</entityIncluded>
 				</column>
-				<modelColumn>
+				<modelColumn wrap="FALSE">
 					<title>
 						<message selector="submission-status" />
 					</title>
