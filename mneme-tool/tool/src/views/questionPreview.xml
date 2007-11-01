@@ -128,7 +128,7 @@
 		<gap />
 
 		<!-- nav bar -->
-		<navigationBar id="nav" width="70em">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="return" accessKey="return-access" description="return-description" style="BUTTON">
 					<icon icon="/icons/return.png" style="LEFT" />

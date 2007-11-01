@@ -61,7 +61,7 @@
 			</container>
 		</section>
 		<!-- save / cancel nav bar -->
-		<navigationBar id="nav" width="100%">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="return-title" accessKey="return-access" description="return-description" style="BUTTON" submit="TRUE">
 					<destination template="/assessments/{0}">

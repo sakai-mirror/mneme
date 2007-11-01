@@ -81,7 +81,7 @@
 			</rows>
 		</entityDisplay>
 		<!-- save / cancel nav bar -->
-		<navigationBar id="nav" width="100%">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="ok" accessKey="ok-access" description="ok-description" style="BUTTON" submit="TRUE" destination="/assessments">
 					<icon icon="/icons/OK.png" style="LEFT" />

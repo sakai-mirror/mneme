@@ -139,7 +139,7 @@
 		<gap />
 
 		<!-- question nav bar -->
-		<navigationBar id="nav" width="70em">
+		<navigationBar id="nav">
 			<included>
 				<decision reversed="TRUE" model="review" />
 			</included>

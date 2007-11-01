@@ -239,7 +239,7 @@
 
 		<gap />
 
-		<navigationBar width="70em" id="nav">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="continue" style="BUTTON" accessKey="continue-access" description="continue-description">
 					<icon icon="/icons/return.png" style="LEFT" />

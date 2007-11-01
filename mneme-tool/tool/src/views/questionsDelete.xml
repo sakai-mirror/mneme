@@ -73,7 +73,7 @@
 		</entityDisplay>
 
 		<!--navigation-->
-		<navigationBar width="100%">
+		<navigationBar>
 			<container>
 				<navigation destination="/questions_delete" title="ok" style="BUTTON" accessKey="ok-access"
 					description="ok-description" submit="TRUE">

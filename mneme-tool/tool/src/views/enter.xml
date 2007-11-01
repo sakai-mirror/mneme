@@ -186,7 +186,7 @@
 			</included>
 		</section>
 		<gap />
-		<navigationBar width="70em" id="nav">
+		<navigationBar id="nav">
 			<container>
 				<navigation destination="ENTER" submit="TRUE" title="begin" style="BUTTON" accessKey="begin-access" description="begin-description">
 					<icon icon="/icons/begin.gif" style="LEFT" />

@@ -240,7 +240,7 @@
 		</entityList>
 
 		<!--bottom navigation-->
-		<navigationBar width="100%">
+		<navigationBar>
 			<container>
 				<navigation title="return" style="BUTTON" submit="FALSE">
 					<icon icon="/icons/return.png" style="LEFT" />

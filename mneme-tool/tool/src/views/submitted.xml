@@ -64,7 +64,7 @@
 		<gap />
 
 		<!-- navigation -->
-		<navigationBar width="70em" id="nav">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="return" style="BUTTON" accessKey="return-access" description="return-description" default="TRUE"
 					destination="/list">

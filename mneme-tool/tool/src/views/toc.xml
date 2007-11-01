@@ -250,7 +250,7 @@
 		</section>
 
 		<!-- nav bar -->
-		<navigationBar id="nav" width="70em">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="save-exit" accessKey="save-exit-access" description="save-exit-description" style="BUTTON" destination="/list"
 					default="TRUE">

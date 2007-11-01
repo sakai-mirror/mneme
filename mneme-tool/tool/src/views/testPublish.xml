@@ -68,7 +68,7 @@
 			</container>
 		</section>
 		<!-- save / cancel nav bar -->
-		<navigationBar id="nav" width="20em">
+		<navigationBar id="nav">
 			<container>
 				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="/assessments">
 					<icon icon="/icons/return.png" style="LEFT" />
