@@ -80,7 +80,7 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	protected transient Question question = null;
 
 	/** Which scale option to use for this question (0-agree 1-good 2-average 3-yes 4-numbers. */
-	protected Integer selectedOption = null;
+	protected Integer selectedOption = new Integer(0);
 
 	/** Dependency: The UI service (Ambrosia). */
 	protected transient UiService uiService = null;
