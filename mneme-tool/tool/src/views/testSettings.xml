@@ -140,27 +140,26 @@
 						</row>
 						<row title="reviewOptions">
 							<container>
+
+
+								<selection orientation="VERTICAL">
+									<model ref="assessment.review.timing" />
+									<selectionChoices>
+										<selectionChoice value="submitted" selector="type-submitted" />
+										<selectionChoice value="graded" selector="type-graded" />
+										<selectionChoice value="date" selector="type-date">
+											<container>
+												<dateEdit>
+													<model ref="assessment.review.date" type="date" />
+												</dateEdit>
+											</container>
+										</selectionChoice>
+										<selectionChoice value="never" selector="type-never" />
+									</selectionChoices>
+								</selection>
+
 								<entityDisplay>
 									<rows>
-										<row title="showReview">
-											<container>
-												<selection orientation="VERTICAL">
-													<model ref="assessment.review.timing" />
-													<selectionChoices>
-														<selectionChoice value="submitted" selector="type-submitted" />
-														<selectionChoice value="graded" selector="type-graded" />
-														<selectionChoice value="date" selector="type-date">
-															<container>
-																<dateEdit>
-																	<model ref="assessment.review.date" type="date" />
-																</dateEdit>
-															</container>
-														</selectionChoice>
-														<selectionChoice value="never" selector="type-never" />
-													</selectionChoices>
-												</selection>
-											</container>
-										</row>
 										<row title="showAnswerKey">
 											<container>
 												<selection>
@@ -190,17 +189,19 @@
 												</selection>
 											</container>
 										</row>
-										<row title="releasegrades">
-											<container>
-												<selection orientation="VERTICAL">
-													<model ref="assessment.grading.autoRelease" />
-													<selectionChoices>
-														<selectionChoice value="true" selector="type-auto" />
-														<selectionChoice value="false" selector="type-manual" />
-													</selectionChoices>
-												</selection>
-											</container>
-										</row>
+									</rows>
+								</entityDisplay>
+
+								<selection orientation="VERTICAL">
+									<model ref="assessment.grading.autoRelease" />
+									<selectionChoices>
+										<selectionChoice value="true" selector="type-auto" />
+										<selectionChoice value="false" selector="type-manual" />
+									</selectionChoices>
+								</selection>
+
+								<entityDisplay>
+									<rows>
 										<row title="sendgbook">
 											<container>
 												<selection>
@@ -208,15 +209,19 @@
 												</selection>
 											</container>
 										</row>
-										<row title="password">
-											<container>
-												<textEdit rows="1" cols="16">
-													<model ref="assessment.password.password" />
-												</textEdit>
-											</container>
-										</row>
+
 									</rows>
 								</entityDisplay>
+							</container>
+						</row>
+						<row title="password">
+							<container>
+								<textEdit rows="1" cols="16">
+									<model ref="assessment.password.password" />
+								</textEdit>
+								<text>
+									<message selector="optional"></message>
+								</text>
 							</container>
 						</row>
 					</rows>
@@ -331,7 +336,7 @@
 		</navigationBar>
 
 	</container>
-	
+
 	<footer>
 		<container>
 			<finePrint>
