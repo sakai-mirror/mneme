@@ -52,7 +52,9 @@
 			</text>
 		</container>
 	</subHeader>
+
 	<container>
+
 		<!--navigation-->
 		<navigationBar>
 			<container>
@@ -72,31 +74,27 @@
 			</container>
 		</navigationBar>
 
-		<entityDisplay>
+		<section>
 			<title>
 				<message selector="submission-question-pts">
 					<model ref="question.pool.points" />
 				</message>
 			</title>
-			<rows>
-				<row>
-					<!-- type-specific question viewing -->
-					<container>
-						<text>
-							<message>
-								<model type="html" ref="question.presentation.text" />
-							</message>
-						</text>
-						<modelComponent model="question.typeSpecificQuestion.viewQuestionUi" />
-						<attachments model="question.presentation.attachments">
-							<included>
-								<hasValueDecision model="question.presentation.attachments" />
-							</included>
-						</attachments>
-					</container>
-				</row>
-			</rows>
-		</entityDisplay>
+			<container>
+				<!-- type-specific question viewing -->
+				<text>
+					<message>
+						<model type="html" ref="question.presentation.text" />
+					</message>
+				</text>
+				<attachments model="question.presentation.attachments">
+					<included>
+						<hasValueDecision model="question.presentation.attachments" />
+					</included>
+				</attachments>
+				<modelComponent model="question.typeSpecificQuestion.viewQuestionUi" />
+			</container>
+		</section>
 
 		<entityList style="FLAT">
 			<iterator name="answer">
