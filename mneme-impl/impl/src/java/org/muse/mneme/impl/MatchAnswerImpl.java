@@ -21,12 +21,16 @@
 
 package org.muse.mneme.impl;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.muse.ambrosia.api.UiService;
+import org.muse.ambrosia.api.Value;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificAnswer;
+import org.muse.mneme.impl.MatchQuestionImpl.MatchQuestionPair;
 
 /**
  * MatchAnswerImpl handles answers for the match question type.
@@ -36,22 +40,14 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	/** The answer this is a helper for. */
 	protected transient Answer answer = null;
 
-	/** The answers, as index references to the question's choices. */
-	//protected Set<Integer> answerData = new HashSet<Integer>();
+	/** The answers: a map between a pair id and a choice id (the choice is stored in the Value). */
+	protected Map<String, Value> answerData = new HashMap<String, Value>();
 
-	/** Set when the answer has been changed. */
-	protected boolean changed = false;
+	/** The answer before possible modification. */
+	protected Map<String, Value> priorAnswer = new HashMap<String, Value>();
 
-	/**
-	 * Construct.
-	 * 
-	 * @param answer
-	 *        The answer this is a helper for.
-	 */
-	public MatchAnswerImpl(Answer answer)
-	{
-		this.answer = answer;
-	}
+	/** Dependency: The UI service (Ambrosia). */
+	protected transient UiService uiService = null;
 
 	/**
 	 * Construct.
@@ -64,8 +60,32 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	public MatchAnswerImpl(Answer answer, MatchAnswerImpl other)
 	{
 		this.answer = answer;
-		//this.answerData = new HashSet<Integer>(other.answerData);
-		this.changed = other.changed;
+		this.answerData = new HashMap<String, Value>(other.answerData.size());
+		this.priorAnswer = new HashMap<String, Value>(other.answerData.size());
+		for (Map.Entry entry : other.answerData.entrySet())
+		{
+			Value v = this.uiService.newValue();
+			v.setValue(((Value) entry.getValue()).getValue());
+			this.answerData.put((String) entry.getKey(), v);
+
+			v = this.uiService.newValue();
+			v.setValue(((Value) entry.getValue()).getValue());
+			this.priorAnswer.put((String) entry.getKey(), v);
+		}
+
+		this.uiService = other.uiService;
+	}
+
+	/**
+	 * Construct.
+	 * 
+	 * @param answer
+	 *        The answer this is a helper for.
+	 */
+	public MatchAnswerImpl(Answer answer, UiService uiService)
+	{
+		this.answer = answer;
+		this.uiService = uiService;
 	}
 
 	/**
@@ -73,7 +93,7 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void clearIsChanged()
 	{
-		this.changed = false;
+		this.priorAnswer = new HashMap<String, Value>(this.answerData);
 	}
 
 	/**
@@ -87,7 +107,21 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 			Object rv = super.clone();
 
 			// deep copy
-			//((MatchAnswerImpl) rv).answerData = new HashSet<Integer>(this.answerData);
+			if (this.answerData != null)
+			{
+				((MatchAnswerImpl) rv).answerData = new HashMap<String, Value>(this.answerData.size());
+				((MatchAnswerImpl) rv).priorAnswer = new HashMap<String, Value>(this.answerData.size());
+				for (Map.Entry entry : this.answerData.entrySet())
+				{
+					Value v = this.uiService.newValue();
+					v.setValue(((Value) entry.getValue()).getValue());
+					((MatchAnswerImpl) rv).answerData.put((String) entry.getKey(), v);
+
+					v = this.uiService.newValue();
+					v.setValue(((Value) entry.getValue()).getValue());
+					((MatchAnswerImpl) rv).priorAnswer.put((String) entry.getKey(), v);
+				}
+			}
 
 			((MatchAnswerImpl) rv).answer = answer;
 
@@ -99,65 +133,72 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 		}
 	}
 
+	public Map<String, Value> getAnswer()
+	{
+		if (this.answerData.isEmpty())
+		{
+			// populate with null values for each pair
+			List<MatchQuestionPair> pairs = ((MatchQuestionImpl) this.answer.getQuestion().getTypeSpecificQuestion()).getPairs();
+			for (MatchQuestionPair pair : pairs)
+			{
+				this.answerData.put(pair.getId(), this.uiService.newValue());
+			}
+		}
+
+		return this.answerData;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public Float getAutoScore()
 	{
-		// partial credit for each correct answer, partial negative for each incorrect, floor at 0.
+		Question question = this.answer.getQuestion();
 
-		// count the number of correct answers
-//		Question question = answer.getQuestion();
-//		Set correctAnswers = /*((MatchQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswerSet()*/new HashSet();;
-//
-//		// each correct / incorrect gets a part of the total points
-//		float partial = (correctAnswers.size() > 0) ? question.getPool().getPoints() / correctAnswers.size() : 0f;
-//
+		// the defined pairs
+		List<MatchQuestionPair> pairs = ((MatchQuestionImpl) question.getTypeSpecificQuestion()).getPairs();
+
+		// each correct / incorrect uses a portion of the total points
+		float partial = (pairs.size() > 0) ? question.getPool().getPoints() / pairs.size() : 0f;
+
 		float total = 0f;
-//		for (Integer answer : this.answerData)
-//		{
-//			// if this is one of the correct answers, give credit
-//			if (correctAnswers.contains(answer))
-//			{
-//				total += partial;
-//			}
-//
-//			// otherwise remove credit
-//			else
-//			{
-//				total -= partial;
-//			}
-//		}
-//
-//		// floor at 0
-//		if (total < 0f) total = 0f;
+		for (MatchQuestionPair pair : pairs)
+		{
+			// get the answer for this pair
+			Value selection = this.answerData.get(pair.getId());
+			if (selection != null)
+			{
+				if (selection.getValue().equals(pair.getCorrectChoiceId()))
+				{
+					total += partial;
+				}
+				else
+				{
+					total -= partial;
+				}
+			}
+		}
+
+		// floor at 0
+		if (total < 0f) total = 0f;
 
 		return total;
 	}
-
-//	/**
-//	 * Access the currently selected answer as a string.
-//	 * 
-//	 * @return The answer.
-//	 */
-//	public String[] getAnswers()
-//	{
-//		String[] rv = new String[answerData.size()];
-//		int i = 0;
-//		for (Integer answer : this.answerData)
-//		{
-//			rv[i++] = answer.toString();
-//		}
-//
-//		return rv;
-//	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public Boolean getIsAnswered()
 	{
-		return /*!this.answerData.isEmpty();*/ Boolean.TRUE;
+		for (Object value : this.answerData.values())
+		{
+			if (((Value) value).getValue() != null)
+			{
+				return Boolean.TRUE;
+			}
+		}
+
+		return Boolean.FALSE;
 	}
 
 	/**
@@ -165,28 +206,13 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Boolean getIsChanged()
 	{
-		return this.changed;
-	}
+		if (this.answerData.size() != this.priorAnswer.size()) return Boolean.TRUE;
 
-	// /**
-	// * Set the answers
-	// *
-	// * @param answers
-	// * array of strings
-	// */
-	// public void setAnswers(String[] answers)
-	// {
-	// Set<Integer> s = new HashSet<Integer>();
-	// if ((answers == null) || (answers.length == 0)) return;
-	// for (String answer : answers)
-	// {
-	// s.add(Integer.valueOf(answer));
-	// }
-	//
-	// // check if the answers to set exactly match the answers we already have. Don't set the changed flag if so.
-	// if (s.equals(this.answerData)) return;
-	//
-	// this.answerData = s;
-	// this.changed = true;
-	//	}
+		for (Map.Entry entry : this.answerData.entrySet())
+		{
+			if (Different.different(entry.getValue(), this.priorAnswer.get(entry.getKey()))) return Boolean.TRUE;
+		}
+
+		return Boolean.FALSE;
+	}
 }

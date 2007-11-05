@@ -106,7 +106,7 @@ public class MatchPlugin implements QuestionPlugin
 	 */
 	public TypeSpecificAnswer newAnswer(Answer answer)
 	{
-		return new MatchAnswerImpl(answer);
+		return new MatchAnswerImpl(answer, this.uiService);
 	}
 
 	/**
