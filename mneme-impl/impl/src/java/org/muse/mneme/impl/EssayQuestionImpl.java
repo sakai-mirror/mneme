@@ -242,32 +242,39 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 
 		// TODO: add to the answerSection the uploaded links
 
-		// model answer
-		Text modelAnswer = this.uiService.newText();
-		modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.modelAnswer"));
+		if ((modelAnswer != null) && (modelAnswer.trim().length() > 0))
+		{
+			// model answer
+			Text modelAnswer = this.uiService.newText();
+			modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.modelAnswer"));
 
-		// section for the model answer
-		Section modelAnswerSection = this.uiService.newSection();
-		modelAnswerSection.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
-		modelAnswerSection.add(modelAnswer);
+			// section for the model answer
+			Section modelAnswerSection = this.uiService.newSection();
+			modelAnswerSection.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+			modelAnswerSection.add(modelAnswer);
 
-		// overlay for the model answer
-		Overlay modelAnswerOverlay = this.uiService.newOverlay();
-		modelAnswerOverlay.setId("modelanswer");
-		modelAnswerOverlay.add(modelAnswerSection);
-		modelAnswerOverlay.add(this.uiService.newGap());
-		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
+			// overlay for the model answer
+			Overlay modelAnswerOverlay = this.uiService.newOverlay();
+			modelAnswerOverlay.setId("modelanswer");
+			modelAnswerOverlay.add(modelAnswerSection);
+			modelAnswerOverlay.add(this.uiService.newGap());
+			modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
 
-		// control to show the model answer
-		Toggle showModelAnswer = this.uiService.newToggle();
-		showModelAnswer.setTarget("modelanswer");
-		showModelAnswer.setTitle("view-model-answer");
-		showModelAnswer.setIcon("/icons/answer_key.png", Navigation.IconStyle.left);
+			// control to show the model answer
+			Toggle showModelAnswer = this.uiService.newToggle();
+			showModelAnswer.setTarget("modelanswer");
+			showModelAnswer.setTitle("view-model-answer");
+			showModelAnswer.setIcon("/icons/answer_key.png", Navigation.IconStyle.left);
 
-		Section showModelAnswerSection = this.uiService.newSection();
-		showModelAnswerSection.add(modelAnswerOverlay).add(showModelAnswer);
+			Section showModelAnswerSection = this.uiService.newSection();
+			showModelAnswerSection.add(modelAnswerOverlay).add(showModelAnswer);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(answerSection).add(showModelAnswerSection);
+			return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(answerSection).add(showModelAnswerSection);
+		}
+		else
+		{
+			return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(answerSection);
+		}
 	}
 
 	/**
@@ -357,32 +364,39 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
 		typeSection.add(type);
 
-		// model answer
-		Text modelAnswer = this.uiService.newText();
-		modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
+		if ((modelAnswer != null) && (modelAnswer.trim().length() > 0))
+		{
+			// model answer
+			Text modelAnswer = this.uiService.newText();
+			modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
 
-		// section for the model answer
-		Section modelAnswerSection = this.uiService.newSection();
-		modelAnswerSection.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
-		modelAnswerSection.add(modelAnswer);
+			// section for the model answer
+			Section modelAnswerSection = this.uiService.newSection();
+			modelAnswerSection.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+			modelAnswerSection.add(modelAnswer);
 
-		// overlay for the model answer
-		Overlay modelAnswerOverlay = this.uiService.newOverlay();
-		modelAnswerOverlay.setId("modelanswer");
-		modelAnswerOverlay.add(modelAnswerSection);
-		modelAnswerOverlay.add(this.uiService.newGap());
-		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
+			// overlay for the model answer
+			Overlay modelAnswerOverlay = this.uiService.newOverlay();
+			modelAnswerOverlay.setId("modelanswer");
+			modelAnswerOverlay.add(modelAnswerSection);
+			modelAnswerOverlay.add(this.uiService.newGap());
+			modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
 
-		// control to show the model answer
-		Toggle showModelAnswer = this.uiService.newToggle();
-		showModelAnswer.setTarget("modelanswer");
-		showModelAnswer.setTitle("view-model-answer");
-		showModelAnswer.setIcon("/icons/answer_key.png", Navigation.IconStyle.left);
+			// control to show the model answer
+			Toggle showModelAnswer = this.uiService.newToggle();
+			showModelAnswer.setTarget("modelanswer");
+			showModelAnswer.setTitle("view-model-answer");
+			showModelAnswer.setIcon("/icons/answer_key.png", Navigation.IconStyle.left);
 
-		Section showModelAnswerSection = this.uiService.newSection();
-		showModelAnswerSection.add(modelAnswerOverlay).add(showModelAnswer);
+			Section showModelAnswerSection = this.uiService.newSection();
+			showModelAnswerSection.add(modelAnswerOverlay).add(showModelAnswer);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(typeSection).add(showModelAnswerSection);
+			return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(typeSection).add(showModelAnswerSection);
+		}
+		else
+		{
+			return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(typeSection);
+		}
 	}
 
 	public void setModelAnswer(String modelAnswer)
