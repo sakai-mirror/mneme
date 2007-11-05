@@ -93,18 +93,18 @@
 					</title>
 					<sort submit="TRUE">
 						<active>
-							<compareDecision model="sort_column" constant="0" />
+							<compareDecision model="sort_column" constant="4" />
 						</active>
 						<direction>
 							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/assessments/0A" />
+							<destination template="/assessments/4A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/assessments/0D" />
+							<destination template="/assessments/4D" />
 						</desc>
 					</sort>
 					<navigations>
@@ -149,18 +149,18 @@
 					</title>
 					<sort submit="TRUE">
 						<active>
-							<compareDecision model="sort_column" constant="1" />
+							<compareDecision model="sort_column" constant="2" />
 						</active>
 						<direction>
 							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/assessments/1A" />
+							<destination template="/assessments/2A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/assessments/1D" />
+							<destination template="/assessments/2D" />
 						</desc>
 					</sort>
 					<container>
@@ -186,18 +186,18 @@
 					</title>
 					<sort submit="TRUE">
 						<active>
-							<compareDecision model="sort_column" constant="2" />
+							<compareDecision model="sort_column" constant="1" />
 						</active>
 						<direction>
 							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/assessments/2A" />
+							<destination template="/assessments/1A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/assessments/2D" />
+							<destination template="/assessments/1D" />
 						</desc>
 					</sort>
 					<container>
@@ -212,18 +212,18 @@
 					</title>
 					<sort submit="TRUE">
 						<active>
-							<compareDecision model="sort_column" constant="3" />
+							<compareDecision model="sort_column" constant="0" />
 						</active>
 						<direction>
 							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/assessments/3A" />
+							<destination template="/assessments/0A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/assessments/3D" />
+							<destination template="/assessments/0D" />
 						</desc>
 					</sort>
 					<container>
@@ -232,7 +232,7 @@
 						</dateEdit>
 					</container>
 				</column>
-				<column>
+				<column centered="TRUE">
 					<title>
 						<message selector="assessment-status" />
 					</title>
@@ -270,24 +270,24 @@
 						</navigation>
 					</navigations>
 				</column>
-				<column>
+				<column centered="TRUE">
 					<title>
 						<message selector="publish" />
 					</title>
 					<sort submit="TRUE">
 						<active>
-							<compareDecision model="sort_column" constant="4" />
+							<compareDecision model="sort_column" constant="3" />
 						</active>
 						<direction>
 							<compareDecision model="sort_direction" constant="A" />
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/assessments/4A" />
+							<destination template="/assessments/3A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/assessments/4D" />
+							<destination template="/assessments/3D" />
 						</desc>
 					</sort>
 					<navigations>
@@ -315,7 +315,7 @@
 						</navigation>
 					</navigations>
 				</column>
-				<column>
+				<column centered="TRUE">
 					<title>
 						<message selector="access" />
 					</title>
@@ -330,7 +330,7 @@
 						</navigation>
 					</navigations>
 				</column>
-				<column>
+				<column centered="TRUE">
 					<title>
 						<message selector="copy" />
 					</title>
