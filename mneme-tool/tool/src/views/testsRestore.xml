@@ -33,7 +33,7 @@
 
 	<header>
 		<message selector="tests-restore-header">
-			<model type="icon" icon="/icons/make_inactive.png" />
+			<model type="icon" icon="/icons/restore.png" />
 		</message>
 	</header>
 
