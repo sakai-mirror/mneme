@@ -64,7 +64,7 @@ public class TaskPlugin implements QuestionPlugin
 	 */
 	public Integer getPopularity()
 	{
-		return Integer.valueOf(80);
+		return Integer.valueOf(40);
 	}
 
 	/**

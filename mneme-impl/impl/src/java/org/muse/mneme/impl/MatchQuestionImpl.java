@@ -22,35 +22,27 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
-import java.util.Set;
 
-import org.muse.ambrosia.api.AndDecision;
 import org.muse.ambrosia.api.AutoColumn;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Decision;
-import org.muse.ambrosia.api.EntityDisplay;
-import org.muse.ambrosia.api.EntityDisplayRow;
+import org.muse.ambrosia.api.Destination;
 import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.EntityListColumn;
 import org.muse.ambrosia.api.HtmlEdit;
-import org.muse.ambrosia.api.OrDecision;
+import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.PropertyReference;
+import org.muse.ambrosia.api.Section;
 import org.muse.ambrosia.api.Selection;
-import org.muse.ambrosia.api.SelectionColumn;
-import org.muse.ambrosia.api.Navigation;
-import org.muse.ambrosia.api.Destination;
-import org.muse.ambrosia.api.OrderColumn;
 import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.id.api.IdManager;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -58,39 +50,42 @@ import org.sakaiproject.util.StringUtil;
  */
 public class MatchQuestionImpl implements TypeSpecificQuestion
 {
-	public class MatchQuestionChoice
+	public class MatchQuestionPair
 	{
-		protected String answer;
+		protected String choice = null;
 
-		protected Boolean deleted = Boolean.FALSE;
+		/** Identifies the choice, different id than that used for the match. */
+		protected String choiceId = null;
 
-		protected String id;
+		/** Identifies the pair, also identifies the match. */
+		protected String id = null;
 
-		protected String text;
+		protected String match = null;
 
-		public MatchQuestionChoice(MatchQuestionChoice other)
+		public MatchQuestionPair(MatchQuestionPair other)
 		{
-			this.deleted = other.deleted;
+			setChoice(other.choice);
+			this.choiceId = other.choiceId;
 			this.id = other.id;
-			this.text = other.text;
-			this.answer = other.answer;
+			setMatch(other.match);
 		}
 
-		public MatchQuestionChoice(String id, String text, String answer)
+		public MatchQuestionPair(String choice, String match)
 		{
-			this.id = id;
-			this.text = text;
-			this.answer = answer;
+			setChoice(choice);
+			this.choiceId = idManager.createUuid();
+			this.id = idManager.createUuid();
+			setMatch(match);
 		}
 
-		public String getAnswer()
+		public String getChoice()
 		{
-			return this.answer;
+			return this.choice;
 		}
 
-		public Boolean getDeleted()
+		public String getChoiceId()
 		{
-			return this.deleted;
+			return this.choiceId;
 		}
 
 		public String getId()
@@ -98,38 +93,35 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 			return this.id;
 		}
 
-		public String getText()
+		public String getMatch()
 		{
-			return this.text;
+			return this.match;
 		}
 
-		public void setAnswer(String answer)
+		public void setChoice(String choice)
 		{
-			this.answer = answer;
+			this.choice = StringUtil.trimToNull(choice);
 		}
 
-		public void setDeleted(Boolean deleted)
+		public void setMatch(String match)
 		{
-			this.deleted = deleted;
-		}
-
-		public void setText(String text)
-		{
-			this.text = text;
+			this.match = StringUtil.trimToNull(match);
 		}
 	}
 
-	/** List of choices */
-	protected List<MatchQuestionChoice> answerChoices = new ArrayList<MatchQuestionChoice>();
-
 	/** Index numbers of the correct answers */
-	protected Set<Integer> correctAnswers = new HashSet<Integer>();
-
+	// protected Set<Integer> correctAnswers = new HashSet<Integer>();
 	/** String that holds the distractor choice */
-	protected String distractor;
+	protected MatchQuestionPair distractor = null;
+
+	/** Dependency: IdManager. */
+	protected IdManager idManager = null;
 
 	/** Our messages. */
 	protected transient InternationalizedMessages messages = null;
+
+	/** List of choices */
+	protected List<MatchQuestionPair> pairs = new ArrayList<MatchQuestionPair>();
 
 	protected transient QuestionPlugin plugin = null;
 
@@ -147,15 +139,17 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public MatchQuestionImpl(Question question, MatchQuestionImpl other)
 	{
-		this.answerChoices = new ArrayList<MatchQuestionChoice>(other.answerChoices.size());
-		for (MatchQuestionChoice choice : other.answerChoices)
+		if (other.distractor != null) this.distractor = new MatchQuestionPair(other.distractor);
+		this.pairs = new ArrayList<MatchQuestionPair>(other.pairs.size());
+		for (MatchQuestionPair choice : other.pairs)
 		{
-			this.answerChoices.add(new MatchQuestionChoice(choice));
+			this.pairs.add(new MatchQuestionPair(choice));
 		}
-		this.correctAnswers = new HashSet<Integer>(other.correctAnswers);
+		// this.correctAnswers = new HashSet<Integer>(other.correctAnswers);
 		this.messages = other.messages;
 		this.question = question;
 		this.uiService = other.uiService;
+		this.idManager = other.idManager;
 		this.plugin = other.plugin;
 	}
 
@@ -167,12 +161,26 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 * @param question
 	 *        The Question this is a helper for.
 	 */
-	public MatchQuestionImpl(QuestionPlugin plugin, InternationalizedMessages messages, UiService uiService, Question question)
+	public MatchQuestionImpl(QuestionPlugin plugin, InternationalizedMessages messages, UiService uiService, IdManager idManager, Question question)
 	{
+		this.idManager = idManager;
 		this.plugin = plugin;
 		this.messages = messages;
 		this.uiService = uiService;
 		this.question = question;
+	}
+
+	/**
+	 * Add a pair of choice - match.
+	 * 
+	 * @param choice
+	 *        The Choice.
+	 * @param match
+	 *        The Match.
+	 */
+	public void addPair(String choice, String match)
+	{
+		this.pairs.add(new MatchQuestionPair(choice, match));
 	}
 
 	/**
@@ -186,12 +194,13 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 			Object rv = super.clone();
 
 			// deep copy these
-			((MatchQuestionImpl) rv).answerChoices = new ArrayList<MatchQuestionChoice>(this.answerChoices.size());
-			for (MatchQuestionChoice choice : this.answerChoices)
+			((MatchQuestionImpl) rv).pairs = new ArrayList<MatchQuestionPair>(this.pairs.size());
+			for (MatchQuestionPair choice : this.pairs)
 			{
-				((MatchQuestionImpl) rv).answerChoices.add(new MatchQuestionChoice(choice));
+				((MatchQuestionImpl) rv).pairs.add(new MatchQuestionPair(choice));
 			}
-			((MatchQuestionImpl) rv).correctAnswers = new HashSet<Integer>(this.correctAnswers);
+			// ((MatchQuestionImpl) rv).correctAnswers = new HashSet<Integer>(this.correctAnswers);
+			if (this.distractor != null) ((MatchQuestionImpl) rv).distractor = new MatchQuestionPair(this.distractor);
 
 			// set the question
 			((MatchQuestionImpl) rv).question = question;
@@ -210,49 +219,69 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	public String consolidate(String destination)
 	{
 		boolean stayHere = false;
+		boolean removeBlanks = true;
+
 		// check for delete
 		if (destination.startsWith("DEL:"))
 		{
 			stayHere = true;
+			removeBlanks = false;
+
 			String[] parts = StringUtil.split(destination, ":");
 			if (parts.length == 2)
 			{
-				List newChoices = new ArrayList<MatchQuestionChoice>();
-				int i = 0;
-				for (MatchQuestionChoice choice : this.answerChoices)
+				List newChoices = new ArrayList<MatchQuestionPair>();
+				for (MatchQuestionPair pair : this.pairs)
 				{
 					// ignore the deleted one
-					if (!choice.getId().equals(parts[1]))
+					if (!pair.getId().equals(parts[1]))
 					{
-						// new position
-						choice.id = Integer.toString(i++);
-						newChoices.add(choice);
+						newChoices.add(pair);
 					}
 				}
 
-				this.answerChoices = newChoices;
+				this.pairs = newChoices;
 			}
 		}
+
 		// add more choices
 		if (destination.startsWith("ADD:"))
 		{
 			stayHere = true;
+			removeBlanks = false;
+
 			String[] parts = StringUtil.split(destination, ":");
 			if (parts.length == 2)
 			{
 				try
 				{
 					int more = Integer.parseInt(parts[1]);
-					int i = this.answerChoices.size();
+					int i = this.pairs.size();
 					for (int count = 0; count < more; count++)
 					{
-						this.answerChoices.add(new MatchQuestionChoice(Integer.toString(i++), "", ""));
+						this.pairs.add(new MatchQuestionPair("", ""));
 					}
 				}
 				catch (NumberFormatException e)
 				{
 				}
 			}
+		}
+
+		// remove blank pairs
+		if (removeBlanks)
+		{
+			List newChoices = new ArrayList<MatchQuestionPair>();
+			for (MatchQuestionPair pair : this.pairs)
+			{
+				// ignore the deleted one
+				if (!((pair.getChoice() == null) && (pair.getMatch() == null)))
+				{
+					newChoices.add(pair);
+				}
+			}
+
+			this.pairs = newChoices;
 		}
 
 		if (stayHere) return null;
@@ -264,27 +293,30 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getAnswerKey()
 	{
+		// what is A, B, C: choice order
+		// what is 1, 2, 3: match order
+
 		StringBuffer rv = new StringBuffer();
-		// get the choices as would be presented in delivery
-		List<MatchQuestionChoice> choices = getChoices();
-
-		// that's the A, B, C order, so find each correct one
-		for (Integer correctIndex : this.correctAnswers)
-		{
-			int i = 0;
-			for (MatchQuestionChoice choice : choices)
-			{
-				if (choice.id.equals(correctIndex.toString()))
-				{
-					// TODO: hard coding our A, B, Cs?
-					rv.append((char) ('A' + i));
-					rv.append(",");
-				}
-				i++;
-			}
-		}
-
-		if (rv.length() > 0) rv.setLength(rv.length() - 1);
+		// // get the choices as would be presented in delivery
+		// List<MatchQuestionPair> choices = getPairs();
+		//
+		// // that's the A, B, C order, so find each correct one
+		// for (Integer correctIndex : this.correctAnswers)
+		// {
+		// int i = 0;
+		// for (MatchQuestionPair choice : choices)
+		// {
+		// if (choice.id.equals(correctIndex.toString()))
+		// {
+		// // TODO: hard coding our A, B, Cs?
+		// rv.append((char) ('A' + i));
+		// rv.append(",");
+		// }
+		// i++;
+		// }
+		// }
+		//
+		// if (rv.length() > 0) rv.setLength(rv.length() - 1);
 		return rv.toString();
 	}
 
@@ -293,130 +325,118 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getAuthoringUi()
 	{
-		EntityDisplay display = this.uiService.newEntityDisplay();
-
-		EntityList entityList = this.uiService.newEntityList();
-		entityList.setStyle(EntityList.Style.form);
-		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice");
+		// list of choices
+		EntityList choices = this.uiService.newEntityList();
+		choices.setStyle(EntityList.Style.form);
+		choices.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.pairs"), "pair");
+		// .setIndexReference("id")
 
 		AutoColumn autoCol = this.uiService.newAutoColumn();
-		entityList.addColumn(autoCol);
+		choices.addColumn(autoCol);
 
 		EntityListColumn col = this.uiService.newEntityListColumn();
 		HtmlEdit edit = this.uiService.newHtmlEdit();
 		edit.setSize(5, 25);
-		edit.setProperty(this.uiService.newPropertyReference().setReference("choice.text"));
+		edit.setProperty(this.uiService.newPropertyReference().setReference("pair.choice"));
 		col.setTitle("choice");
 		col.add(edit);
-		entityList.addColumn(col);
+		choices.addColumn(col);
 
 		col = this.uiService.newEntityListColumn();
 		edit = this.uiService.newHtmlEdit();
 		edit.setSize(5, 25);
-		edit.setProperty(this.uiService.newPropertyReference().setReference("choice.answer"));
+		edit.setProperty(this.uiService.newPropertyReference().setReference("pair.match"));
 		col.setTitle("match");
 		col.add(edit);
-		entityList.addColumn(col);
+		choices.addColumn(col);
 
 		col = this.uiService.newEntityListColumn();
 		Navigation nav = this.uiService.newNavigation();
 		Destination destination = this.uiService.newDestination();
-		destination.setDestination("DEL:{0}", this.uiService.newPropertyReference().setReference("choice.id"));
+		destination.setDestination("DEL:{0}", this.uiService.newPropertyReference().setReference("pair.id"));
 		nav.setTitle("delete").setIcon("/icons/delete.png", Navigation.IconStyle.left).setStyle(Navigation.Style.link).setSubmit().setDestination(
 				destination);
 		col.add(nav);
-		entityList.addColumn(col);
+		choices.addColumn(col);
 
-		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
-		row.setTitle("choices", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key2.png"));
-		row.add(entityList);
+		HtmlEdit distractor = this.uiService.newHtmlEdit();
+		distractor.setTitle("distractor", this.uiService.newIconPropertyReference().setIcon("/icons/distractor_add.png"));
+		distractor.setSize(5, 25);
+		distractor.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.distractor"));
 
-		display.addRow(row);
+		Selection addMore = uiService.newSelection();
+		addMore.addSelection("none", "ADD:0");
+		addMore.addSelection("one", "ADD:1");
+		addMore.addSelection("two", "ADD:2");
+		addMore.addSelection("three", "ADD:3");
+		addMore.addSelection("four", "ADD:4");
+		addMore.addSelection("five", "ADD:5");
+		addMore.setOrientation(Selection.Orientation.dropdown);
+		addMore.setSubmitValue();
+		addMore.setTitle("more-choices");
 
-		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("distractor", this.uiService.newIconPropertyReference().setIcon("/icons/distractor_add.png"));
-		edit = this.uiService.newHtmlEdit();
-		edit.setTitle("distractor-description");
-		edit.setSize(5, 50);
-		edit.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.distractor"));
-		row.add(edit);
-		display.addRow(row);
+		Section choicesSection = this.uiService.newSection();
+		choicesSection.setTitle("choices", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		choicesSection.add(choices).add(distractor).add(addMore);
 
-		row = this.uiService.newEntityDisplayRow();
-		Selection selection = uiService.newSelection();
-		selection.addSelection("none", "ADD:0");
-		selection.addSelection("one", "ADD:1");
-		selection.addSelection("two", "ADD:2");
-		selection.addSelection("three", "ADD:3");
-		selection.addSelection("four", "ADD:4");
-		selection.addSelection("five", "ADD:5");
-		selection.setOrientation(Selection.Orientation.dropdown);
-		selection.setSubmitValue();
-		row.add(selection);
-		row.setTitle("more-choices");
-		display.addRow(row);
-
-		return this.uiService.newFragment().setMessages(this.messages).add(display);
+		return this.uiService.newFragment().setMessages(this.messages).add(choicesSection);
 	}
 
-	/**
-	 * Access the choices as an entity (MatchQuestionChoice) list in as-authored order.
-	 * 
-	 * @return The choices as an entity (MatchQuestionChoice) list in as-authored order.
-	 */
-	public List<MatchQuestionChoice> getChoices()
-	{
-		if (this.answerChoices.size() == 0)
-		{
-			consolidate("ADD:4");
-		}
-		return this.answerChoices;
-	}
+	// /**
+	// * Access the correct answers as an array.
+	// *
+	// * @return The correct answers.
+	// */
+	// public String[] getCorrectAnswers()
+	// {
+	// String[] rv = new String[this.correctAnswers.size()];
+	// int i = 0;
+	// for (Integer correct : this.correctAnswers)
+	// {
+	// rv[i++] = correct.toString();
+	// }
+	//
+	// return rv;
+	// }
 
-	/**
-	 * Access the correct answers as an array.
-	 * 
-	 * @return The correct answers.
-	 */
-	public String[] getCorrectAnswers()
-	{
-		String[] rv = new String[this.correctAnswers.size()];
-		int i = 0;
-		for (Integer correct : this.correctAnswers)
-		{
-			rv[i++] = correct.toString();
-		}
-
-		return rv;
-	}
-
-	/**
-	 * Access the correct answers as a set.
-	 * 
-	 * @return The correct answers.
-	 */
-	public Set getCorrectAnswerSet()
-	{
-		return this.correctAnswers;
-	}
+	// /**
+	// * Access the correct answers as a set.
+	// *
+	// * @return The correct answers.
+	// */
+	// public Set getCorrectAnswerSet()
+	// {
+	// return this.correctAnswers;
+	// }
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public Component getDeliveryUi()
 	{
-		EntityList entityList = this.uiService.newEntityList();
-		entityList.setStyle(EntityList.Style.form);
-		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
+//		EntityList entityList = this.uiService.newEntityList();
+//		entityList.setStyle(EntityList.Style.form);
+//		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.pairs"), "pair");
+//
+//		AutoColumn choiceAuto = this.uiService.newAutoColumn();
+//		entityList.addColumn(choiceAuto);
+//
+//		PropertyColumn choice = this.uiService.newPropertyColumn();
+//		choice.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
+//		entityList.addColumn(choice);
+//
+//		// match
+//
+//		AutoColumn matchAuto = this.uiService.newAutoColumn();
+//		entityList.addColumn(matchAuto);
+//
+//		PropertyColumn match = this.uiService.newPropertyColumn();
+//		match.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.match"));
+//		entityList.addColumn(match);
+		
+		Text text = this.uiService.newText().setText("tbd");
 
-		AutoColumn autoCol = this.uiService.newAutoColumn();
-		entityList.addColumn(autoCol);
-
-		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
-		entityList.addColumn(propCol);
-
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+		return this.uiService.newFragment().setMessages(this.messages).add(text);
 	}
 
 	/**
@@ -429,7 +449,22 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 
 	public String getDistractor()
 	{
-		return this.distractor;
+		if (this.distractor == null) return null;
+		return this.distractor.getChoice();
+	}
+
+	/**
+	 * Access the pairs as an entity (MatchQuestionChoice) list in as-authored order.
+	 * 
+	 * @return The pairs as an entity (MatchQuestionChoice) list in as-authored order.
+	 */
+	public List<MatchQuestionPair> getPairs()
+	{
+		if (this.pairs.size() == 0)
+		{
+			consolidate("ADD:4");
+		}
+		return this.pairs;
 	}
 
 	/**
@@ -445,45 +480,47 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getReviewUi()
 	{
-		EntityList entityList = this.uiService.newEntityList();
-		entityList.setStyle(EntityList.Style.form);
-		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
+//		EntityList entityList = this.uiService.newEntityList();
+//		entityList.setStyle(EntityList.Style.form);
+//		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
+//
+//		Text answerKey = this.uiService.newText();
+//		PropertyReference[] refs = new PropertyReference[2];
+//		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
+//		refs[1] = this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.answerKey");
+//		answerKey.setText("answer-key", refs);
+//
+//		// AndDecision and = this.uiService.newAndDecision();
+//		// Decision[] decisions = new Decision[2];
+//		// decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
+//		// decisions[1] = this.uiService.newDecision().setProperty(
+//		// this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+//		// and.setRequirements(decisions);
+//		//
+//		// OrDecision or = this.uiService.newOrDecision();
+//		// Decision[] decisionsOr = new Decision[2];
+//		// decisionsOr[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
+//		// decisionsOr[1] = and;
+//		// or.setOptions(decisionsOr);
+//		//
+//		// ???.setCorrectDecision(or);
+//
+//		Decision[] orInc = new Decision[2];
+//		orInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
+//		orInc[1] = this.uiService.newDecision().setProperty(
+//				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+//		answerKey.setIncluded(this.uiService.newOrDecision().setOptions(orInc));
+//
+//		AutoColumn autoCol = this.uiService.newAutoColumn();
+//		entityList.addColumn(autoCol);
+//
+//		PropertyColumn propCol = this.uiService.newPropertyColumn();
+//		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+//		entityList.addColumn(propCol);
 
-		Text answerKey = this.uiService.newText();
-		PropertyReference[] refs = new PropertyReference[2];
-		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
-		refs[1] = this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.answerKey");
-		answerKey.setText("answer-key", refs);
+		Text text = this.uiService.newText().setText("tbd");
 
-		// AndDecision and = this.uiService.newAndDecision();
-		// Decision[] decisions = new Decision[2];
-		// decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
-		// decisions[1] = this.uiService.newDecision().setProperty(
-		// this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
-		// and.setRequirements(decisions);
-		//
-		// OrDecision or = this.uiService.newOrDecision();
-		// Decision[] decisionsOr = new Decision[2];
-		// decisionsOr[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
-		// decisionsOr[1] = and;
-		// or.setOptions(decisionsOr);
-		//
-		// ???.setCorrectDecision(or);
-
-		Decision[] orInc = new Decision[2];
-		orInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
-		orInc[1] = this.uiService.newDecision().setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
-		answerKey.setIncluded(this.uiService.newOrDecision().setOptions(orInc));
-
-		AutoColumn autoCol = this.uiService.newAutoColumn();
-		entityList.addColumn(autoCol);
-
-		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
-		entityList.addColumn(propCol);
-
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList).add(answerKey);
+		return this.uiService.newFragment().setMessages(this.messages).add(text);
 	}
 
 	/**
@@ -532,19 +569,20 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewAnswerUi()
 	{
-		// TODO: just the selected answer, no distractors, and add correct/incorrect marking
-		EntityList entityList = this.uiService.newEntityList();
-		entityList.setStyle(EntityList.Style.form);
-		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
+//		// TODO: just the selected answer, no distractors, and add correct/incorrect marking
+//		EntityList entityList = this.uiService.newEntityList();
+//		entityList.setStyle(EntityList.Style.form);
+//		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
+//
+//		AutoColumn autoCol = this.uiService.newAutoColumn();
+//		entityList.addColumn(autoCol);
+//
+//		PropertyColumn propCol = this.uiService.newPropertyColumn();
+//		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+//		entityList.addColumn(propCol);
 
-		AutoColumn autoCol = this.uiService.newAutoColumn();
-		entityList.addColumn(autoCol);
-
-		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
-		entityList.addColumn(propCol);
-
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+		Text text = this.uiService.newText().setText("tbd");
+		return this.uiService.newFragment().setMessages(this.messages).add(text);
 	}
 
 	/**
@@ -552,69 +590,78 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewQuestionUi()
 	{
-		// TODO: add correct/incorrect marking
-		EntityList entityList = this.uiService.newEntityList();
-		entityList.setStyle(EntityList.Style.form);
-		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesAsAuthored"), "choice");
+//		// TODO: add correct/incorrect marking
+//		EntityList entityList = this.uiService.newEntityList();
+//		entityList.setStyle(EntityList.Style.form);
+//		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesAsAuthored"), "choice");
+//
+//		AutoColumn autoCol = this.uiService.newAutoColumn();
+//		entityList.addColumn(autoCol);
+//
+//		PropertyColumn propCol = this.uiService.newPropertyColumn();
+//		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+//		entityList.addColumn(propCol);
+//
+//		Text answerKey = this.uiService.newText();
+//		PropertyReference[] refs = new PropertyReference[2];
+//		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
+//		refs[1] = this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
+//		answerKey.setText("answer-key", refs);
 
-		AutoColumn autoCol = this.uiService.newAutoColumn();
-		entityList.addColumn(autoCol);
+		Text text = this.uiService.newText().setText("tbd");
 
-		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
-		entityList.addColumn(propCol);
-
-		Text answerKey = this.uiService.newText();
-		PropertyReference[] refs = new PropertyReference[2];
-		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
-		refs[1] = this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
-		answerKey.setText("answer-key", refs);
-
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList).add(answerKey);
+		return this.uiService.newFragment().setMessages(this.messages).add(text);
 	}
 
-	public void setAnswerChoices(List<String> choices)
-	{
-		this.answerChoices = new ArrayList<MatchQuestionChoice>(choices.size());
-		int i = 0;
-		for (String choice : choices)
-		{
-			this.answerChoices.add(new MatchQuestionChoice(Integer.toString(i++), choice, choice));
-		}
-	}
+	// public void setAnswerPairs(List<String> choices)
+	// {
+	// this.pairs = new ArrayList<MatchQuestionPair>(choices.size());
+	// int i = 0;
+	// for (String choice : choices)
+	// {
+	// this.pairs.add(new MatchQuestionPair(Integer.toString(i++), choice, choice));
+	// }
+	// }
 
-	/**
-	 * Sets the correct answers.
-	 * 
-	 * @param correctAnswers
-	 *        The correct answers.
-	 */
-	public void setCorrectAnswers(String[] correctAnswers)
-	{
-		this.correctAnswers.clear();
-		if (correctAnswers == null) return;
-		for (String answer : correctAnswers)
-		{
-			this.correctAnswers.add(Integer.valueOf(answer));
-		}
-	}
+	// /**
+	// * Sets the correct answers.
+	// *
+	// * @param correctAnswers
+	// * The correct answers.
+	// */
+	// public void setCorrectAnswers(String[] correctAnswers)
+	// {
+	// this.correctAnswers.clear();
+	// if (correctAnswers == null) return;
+	// for (String answer : correctAnswers)
+	// {
+	// this.correctAnswers.add(Integer.valueOf(answer));
+	// }
+	// }
 
-	/**
-	 * Sets the correct answers as a set.
-	 * 
-	 * @param correctAnswers
-	 *        The correct answers.
-	 */
-	public void setCorrectAnswerSet(Set<Integer> answers)
-	{
-		this.correctAnswers.clear();
-		if (answers == null) return;
-		this.correctAnswers.addAll(answers);
-	}
+	// /**
+	// * Sets the correct answers as a set.
+	// *
+	// * @param correctAnswers
+	// * The correct answers.
+	// */
+	// public void setCorrectAnswerSet(Set<Integer> answers)
+	// {
+	// this.correctAnswers.clear();
+	// if (answers == null) return;
+	// this.correctAnswers.addAll(answers);
+	// }
 
 	public void setDistractor(String distractor)
 	{
-		this.distractor = distractor;
+		if (this.distractor == null)
+		{
+			this.distractor = new MatchQuestionPair(distractor, null);
+		}
+		else
+		{
+			this.distractor.setChoice(distractor);
+		}
 	}
 
 	/**

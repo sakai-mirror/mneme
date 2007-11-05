@@ -37,7 +37,7 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	protected transient Answer answer = null;
 
 	/** The answers, as index references to the question's choices. */
-	protected Set<Integer> answerData = new HashSet<Integer>();
+	//protected Set<Integer> answerData = new HashSet<Integer>();
 
 	/** Set when the answer has been changed. */
 	protected boolean changed = false;
@@ -64,7 +64,7 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	public MatchAnswerImpl(Answer answer, MatchAnswerImpl other)
 	{
 		this.answer = answer;
-		this.answerData = new HashSet<Integer>(other.answerData);
+		//this.answerData = new HashSet<Integer>(other.answerData);
 		this.changed = other.changed;
 	}
 
@@ -87,7 +87,7 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 			Object rv = super.clone();
 
 			// deep copy
-			((MatchAnswerImpl) rv).answerData = new HashSet<Integer>(this.answerData);
+			//((MatchAnswerImpl) rv).answerData = new HashSet<Integer>(this.answerData);
 
 			((MatchAnswerImpl) rv).answer = answer;
 
@@ -107,57 +107,57 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 		// partial credit for each correct answer, partial negative for each incorrect, floor at 0.
 
 		// count the number of correct answers
-		Question question = answer.getQuestion();
-		Set correctAnswers = ((MatchQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswerSet();
-
-		// each correct / incorrect gets a part of the total points
-		float partial = (correctAnswers.size() > 0) ? question.getPool().getPoints() / correctAnswers.size() : 0f;
-
+//		Question question = answer.getQuestion();
+//		Set correctAnswers = /*((MatchQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswerSet()*/new HashSet();;
+//
+//		// each correct / incorrect gets a part of the total points
+//		float partial = (correctAnswers.size() > 0) ? question.getPool().getPoints() / correctAnswers.size() : 0f;
+//
 		float total = 0f;
-		for (Integer answer : this.answerData)
-		{
-			// if this is one of the correct answers, give credit
-			if (correctAnswers.contains(answer))
-			{
-				total += partial;
-			}
-
-			// otherwise remove credit
-			else
-			{
-				total -= partial;
-			}
-		}
-
-		// floor at 0
-		if (total < 0f) total = 0f;
+//		for (Integer answer : this.answerData)
+//		{
+//			// if this is one of the correct answers, give credit
+//			if (correctAnswers.contains(answer))
+//			{
+//				total += partial;
+//			}
+//
+//			// otherwise remove credit
+//			else
+//			{
+//				total -= partial;
+//			}
+//		}
+//
+//		// floor at 0
+//		if (total < 0f) total = 0f;
 
 		return total;
 	}
 
-	/**
-	 * Access the currently selected answer as a string.
-	 * 
-	 * @return The answer.
-	 */
-	public String[] getAnswers()
-	{
-		String[] rv = new String[answerData.size()];
-		int i = 0;
-		for (Integer answer : this.answerData)
-		{
-			rv[i++] = answer.toString();
-		}
-
-		return rv;
-	}
+//	/**
+//	 * Access the currently selected answer as a string.
+//	 * 
+//	 * @return The answer.
+//	 */
+//	public String[] getAnswers()
+//	{
+//		String[] rv = new String[answerData.size()];
+//		int i = 0;
+//		for (Integer answer : this.answerData)
+//		{
+//			rv[i++] = answer.toString();
+//		}
+//
+//		return rv;
+//	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public Boolean getIsAnswered()
 	{
-		return !this.answerData.isEmpty();
+		return /*!this.answerData.isEmpty();*/ Boolean.TRUE;
 	}
 
 	/**
@@ -168,25 +168,25 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 		return this.changed;
 	}
 
-	/**
-	 * Set the answers
-	 * 
-	 * @param answers
-	 *        array of strings
-	 */
-	public void setAnswers(String[] answers)
-	{
-		Set<Integer> s = new HashSet<Integer>();
-		if ((answers == null) || (answers.length == 0)) return;
-		for (String answer : answers)
-		{
-			s.add(Integer.valueOf(answer));
-		}
-
-		// check if the answers to set exactly match the answers we already have. Don't set the changed flag if so.
-		if (s.equals(this.answerData)) return;
-
-		this.answerData = s;
-		this.changed = true;
-	}
+	// /**
+	// * Set the answers
+	// *
+	// * @param answers
+	// * array of strings
+	// */
+	// public void setAnswers(String[] answers)
+	// {
+	// Set<Integer> s = new HashSet<Integer>();
+	// if ((answers == null) || (answers.length == 0)) return;
+	// for (String answer : answers)
+	// {
+	// s.add(Integer.valueOf(answer));
+	// }
+	//
+	// // check if the answers to set exactly match the answers we already have. Don't set the changed flag if so.
+	// if (s.equals(this.answerData)) return;
+	//
+	// this.answerData = s;
+	// this.changed = true;
+	//	}
 }

@@ -21,67 +21,16 @@
 
 package org.muse.mneme.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-
-import org.muse.ambrosia.api.AndDecision;
-import org.muse.ambrosia.api.AutoColumn;
-import org.muse.ambrosia.api.Component;
-import org.muse.ambrosia.api.Container;
-import org.muse.ambrosia.api.Decision;
-import org.muse.ambrosia.api.EntityDisplay;
-import org.muse.ambrosia.api.EntityDisplayRow;
-import org.muse.ambrosia.api.EntityList;
-import org.muse.ambrosia.api.EntityListColumn;
-import org.muse.ambrosia.api.HtmlEdit;
-import org.muse.ambrosia.api.AttachmentsEdit;
-import org.muse.ambrosia.api.PropertyColumn;
-import org.muse.ambrosia.api.Selection;
-import org.muse.ambrosia.api.SelectionColumn;
-import org.muse.ambrosia.api.Overlay;
-import org.muse.ambrosia.api.Toggle;
-import org.muse.ambrosia.api.Text;
-import org.muse.ambrosia.api.OrderColumn;
 import org.muse.ambrosia.api.UiService;
-import org.muse.ambrosia.api.Message;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
-import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
-import org.muse.ambrosia.api.Navigation;
 
 /**
  * TaskQuestionImpl handles questions for the Task question type.
  */
-public class TaskQuestionImpl implements TypeSpecificQuestion
+public class TaskQuestionImpl extends EssayQuestionImpl
 {
-	/** An enumerate type that declares the types of submissions */
-	public enum SubmissionType
-	{
-		attachments, both, inline, none;
-	}
-
-	/** Our messages. */
-	protected transient InternationalizedMessages messages = null;
-
-	/** This property holds the model answer */
-	protected String modelAnswer = null;
-
-	protected transient QuestionPlugin plugin = null;
-
-	/** The question this is a helper for. */
-	protected transient Question question = null;
-
-	/** Variable that holds the type of submission */
-	protected SubmissionType submissionType = SubmissionType.inline;
-
-	/** Dependency: The UI service (Ambrosia). */
-	protected transient UiService uiService = null;
-
 	/**
 	 * Construct.
 	 * 
@@ -90,12 +39,7 @@ public class TaskQuestionImpl implements TypeSpecificQuestion
 	 */
 	public TaskQuestionImpl(Question question, TaskQuestionImpl other)
 	{
-		this.messages = other.messages;
-		this.question = other.question;
-		this.modelAnswer = other.modelAnswer;
-		this.submissionType = other.submissionType;
-		this.uiService = other.uiService;
-		this.plugin = other.plugin;
+		super(question, other);
 	}
 
 	/**
@@ -108,10 +52,7 @@ public class TaskQuestionImpl implements TypeSpecificQuestion
 	 */
 	public TaskQuestionImpl(QuestionPlugin plugin, InternationalizedMessages messages, UiService uiService, Question question)
 	{
-		this.plugin = plugin;
-		this.messages = messages;
-		this.uiService = uiService;
-		this.question = question;
+		super(plugin, messages, uiService, question);
 	}
 
 	/**
@@ -133,222 +74,5 @@ public class TaskQuestionImpl implements TypeSpecificQuestion
 		{
 			return null;
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String consolidate(String destination)
-	{
-		return destination;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Component getAuthoringUi()
-	{
-		EntityDisplay display = this.uiService.newEntityDisplay();
-
-		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
-		Selection selection = uiService.newSelection();
-		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.submissionType"));
-		selection.addSelection("inline", "inline");
-		selection.addSelection("inline-attachments", "both");
-		selection.addSelection("attachments", "attachments");
-		selection.addSelection("nosub", "none");
-		row.add(selection);
-		row.setTitle("submission");
-		display.addRow(row);
-
-		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key2.png"));
-		HtmlEdit edit = this.uiService.newHtmlEdit();
-		edit.setSize(5, 50);
-		edit.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
-		row.add(edit);
-		display.addRow(row);
-
-		return this.uiService.newFragment().setMessages(this.messages).add(display);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Component getDeliveryUi()
-	{
-		EntityDisplay display = this.uiService.newEntityDisplay();
-		EntityDisplayRow row = null;
-
-		if ((this.submissionType == SubmissionType.inline) || (this.submissionType == SubmissionType.both))
-		{
-			row = this.uiService.newEntityDisplayRow();
-			row.setTitle("answer");
-			HtmlEdit edit = this.uiService.newHtmlEdit();
-			edit.setSize(5, 50);
-			edit.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
-			row.add(edit);
-			display.addRow(row);
-		}
-		if ((this.submissionType == SubmissionType.attachments) || (this.submissionType == SubmissionType.both))
-		{
-			row = this.uiService.newEntityDisplayRow();
-			row.setTitle("attachments-title");
-			AttachmentsEdit edit = this.uiService.newAttachmentsEdit();
-			row.add(edit);
-			display.addRow(row);
-		}
-
-		return this.uiService.newFragment().setMessages(this.messages).add(display);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getDescription()
-	{
-		return this.question.getPresentation().getText();
-	}
-
-	/**
-	 * @return the modelAnswer (rich text)
-	 */
-	public String getModelAnswer()
-	{
-		return this.modelAnswer;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public QuestionPlugin getPlugin()
-	{
-		return this.plugin;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Component getReviewUi()
-	{
-		Container cont = this.uiService.newContainer();
-		Overlay ovly = this.uiService.newOverlay();
-
-		ovly.setId("modelanswer");
-		ovly.add(this.uiService.newText().setText("modelAnswer"));
-		ovly.add(this.uiService.newText().setText(null,
-				this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.modelAnswer")));
-		ovly.add(this.uiService.newGap());
-		ovly.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
-		cont.add(ovly);
-		cont.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("view-model-answer").setIcon("/icons/answer_key2.png",
-				Navigation.IconStyle.left));
-
-		return this.uiService.newFragment().setMessages(this.messages).add(cont);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public SubmissionType getSubmissionType()
-	{
-		return this.submissionType;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getTypeName()
-	{
-		return this.messages.getString("name");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getUseFeedback()
-	{
-		return Boolean.TRUE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getUseHints()
-	{
-		return Boolean.TRUE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getUseQuestionPresentation()
-	{
-		// we suppress the question presentation, using our own fields to capture the question.
-		return Boolean.TRUE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getUseReason()
-	{
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Component getViewAnswerUi()
-	{
-		HtmlEdit txt = uiService.newHtmlEdit();
-		txt.setSize(5, 40);
-		txt.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
-		return this.uiService.newFragment().setMessages(this.messages).add(txt);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Component getViewQuestionUi()
-	{
-		Container cont = this.uiService.newContainer();
-		Overlay ovly = this.uiService.newOverlay();
-
-		ovly.setId("modelanswer");
-		ovly.add(this.uiService.newText().setText("modelAnswer"));
-		ovly.add(this.uiService.newText().setText(null,
-				this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer")));
-		ovly.add(this.uiService.newGap());
-		ovly.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
-		cont.add(ovly);
-		cont.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("view-model-answer").setIcon("/icons/answer_key2.png", null));
-
-		return this.uiService.newFragment().setMessages(this.messages).add(cont);
-	}
-
-	public void setModelAnswer(String modelAnswer)
-	{
-		this.modelAnswer = modelAnswer;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setSubmissionType(SubmissionType setting)
-	{
-		if (setting == null) throw new IllegalArgumentException();
-		this.submissionType = setting;
-	}
-
-	/**
-	 * Set the UI service.
-	 * 
-	 * @param service
-	 *        The UI service.
-	 */
-	public void setUi(UiService service)
-	{
-		this.uiService = service;
 	}
 }

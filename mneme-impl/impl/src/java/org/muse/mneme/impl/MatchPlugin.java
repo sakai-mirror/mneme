@@ -31,6 +31,7 @@ import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificAnswer;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.id.api.IdManager;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
@@ -42,6 +43,9 @@ public class MatchPlugin implements QuestionPlugin
 
 	/** Messages bundle name. */
 	protected String bundle = null;
+
+	/** Dependency: IdManager. */
+	protected IdManager idManager = null;
 
 	/** Localized messages. */
 	protected InternationalizedMessages messages = null;
@@ -110,7 +114,7 @@ public class MatchPlugin implements QuestionPlugin
 	 */
 	public TypeSpecificQuestion newQuestion(Question question)
 	{
-		return new MatchQuestionImpl(this, this.messages, this.uiService, question);
+		return new MatchQuestionImpl(this, this.messages, this.uiService, this.idManager, question);
 	}
 
 	/**
@@ -122,6 +126,17 @@ public class MatchPlugin implements QuestionPlugin
 	public void setBundle(String name)
 	{
 		this.bundle = name;
+	}
+
+	/**
+	 * Set the IdManager
+	 * 
+	 * @param IdManager
+	 *        The IdManager
+	 */
+	public void setIdManager(IdManager idManager)
+	{
+		this.idManager = idManager;
 	}
 
 	/**

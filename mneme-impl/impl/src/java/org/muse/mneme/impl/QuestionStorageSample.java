@@ -515,12 +515,11 @@ public class QuestionStorageSample implements QuestionStorage
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("Is this needed?");
-			((LikertScaleQuestionImpl) q.getTypeSpecificQuestion()).setSelectedOption("2");
+			((LikertScaleQuestionImpl) q.getTypeSpecificQuestion()).setScale("2");
 			q.getCreatedBy().setUserId("admin");
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");
 			q.getModifiedBy().setDate(now);
-			q.setHints("hints for q 4.");
 			q.setFeedback("feedback for question 4");
 			questions.put(q.getId(), q);
 
@@ -532,8 +531,6 @@ public class QuestionStorageSample implements QuestionStorage
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
 			((FillBlanksQuestionImpl) q.getTypeSpecificQuestion()).setText("Roses are {red} and violets are {blue}.");
-			((FillBlanksQuestionImpl) q.getTypeSpecificQuestion()).setResponseTextual("true");
-			((FillBlanksQuestionImpl) q.getTypeSpecificQuestion()).setAnyOrder("true");
 			q.getCreatedBy().setUserId("admin");
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");
@@ -544,16 +541,13 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initType("mneme:Match");
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q6");
-			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("Match the following");
-			answerChoices = new ArrayList<String>();
-			answerChoices.add("Match first item");
-			answerChoices.add("Match second item");
-			answerChoices.add("Match third item");
-			answerChoices.add("Match fourth item");
-			((MatchQuestionImpl) q.getTypeSpecificQuestion()).setAnswerChoices(answerChoices);
+			((MatchQuestionImpl) q.getTypeSpecificQuestion()).addPair("First choice", "First Match");
+			((MatchQuestionImpl) q.getTypeSpecificQuestion()).addPair("Second choice", "Second Match");
+			((MatchQuestionImpl) q.getTypeSpecificQuestion()).addPair("Third choice", "Third Match");
+			((MatchQuestionImpl) q.getTypeSpecificQuestion()).setDistractor("Distractor");
 			q.getCreatedBy().setUserId("admin");
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");
@@ -566,7 +560,6 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initType("mneme:Essay");
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q7");
-			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("Tell me a little bit about yourself.");
@@ -583,7 +576,6 @@ public class QuestionStorageSample implements QuestionStorage
 			q.initType("mneme:Task");
 			q.initTypeSpecificQuestion(mnemeService.getQuestionPlugin(q.getType()).newQuestion(q));
 			q.initId("q8");
-			q.setExplainReason(Boolean.TRUE);
 			q.setPool(poolService.getPool("b1"));
 			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("Do this presentation and discuss it in class.");

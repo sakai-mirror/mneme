@@ -253,7 +253,8 @@
 		<property name="ui">
 			<ref bean="org.muse.ambrosia.api.UiService" />
 		</property>
-	</bean>		
+	</bean>
+
 	<bean id="org.muse.mneme.impl.MatchPlugin"
 		class="org.muse.mneme.impl.MatchPlugin"
 		init-method="init"
@@ -264,7 +265,9 @@
 
 		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+ 		<property name="idManager"><ref bean="org.sakaiproject.id.api.IdManager"/></property>
 	</bean>
+
 	<bean id="org.muse.mneme.impl.EssayPlugin"
 		class="org.muse.mneme.impl.EssayPlugin"
 		init-method="init"
@@ -276,6 +279,7 @@
 		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
 	</bean>	
+
 	<bean id="org.muse.mneme.impl.TaskPlugin"
 		class="org.muse.mneme.impl.TaskPlugin"
 		init-method="init"

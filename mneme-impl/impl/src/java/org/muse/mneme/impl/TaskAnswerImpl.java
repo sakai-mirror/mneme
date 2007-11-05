@@ -21,27 +21,13 @@
 
 package org.muse.mneme.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.muse.mneme.api.Answer;
-import org.muse.mneme.api.Question;
-import org.muse.mneme.api.TypeSpecificAnswer;
 
 /**
  * TaskAnswerImpl handles answers for the Task question type.
  */
-public class TaskAnswerImpl implements TypeSpecificAnswer
+public class TaskAnswerImpl extends EssayAnswerImpl
 {
-	/** The answer this is a helper for. */
-	protected transient Answer answer = null;
-
-	/** The String answer as entered by the user. */
-	protected String answerData;
-
-	/** Set when the answer has been changed. */
-	protected boolean changed = false;
-
 	/**
 	 * Construct.
 	 * 
@@ -50,7 +36,7 @@ public class TaskAnswerImpl implements TypeSpecificAnswer
 	 */
 	public TaskAnswerImpl(Answer answer)
 	{
-		this.answer = answer;
+		super(answer);
 	}
 
 	/**
@@ -63,17 +49,7 @@ public class TaskAnswerImpl implements TypeSpecificAnswer
 	 */
 	public TaskAnswerImpl(Answer answer, TaskAnswerImpl other)
 	{
-		this.answer = answer;
-		this.answerData = other.answerData;
-		this.changed = other.changed;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void clearIsChanged()
-	{
-		this.changed = false;
+		super(answer, other);
 	}
 
 	/**
@@ -97,49 +73,5 @@ public class TaskAnswerImpl implements TypeSpecificAnswer
 		{
 			return null;
 		}
-	}
-
-	/**
-	 * @return The answerData.
-	 */
-	public String getAnswerData()
-	{
-		return this.answerData;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Float getAutoScore()
-	{
-		// there is no auto scoring for Tasks
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getIsAnswered()
-	{
-		return this.answerData != null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getIsChanged()
-	{
-		return this.changed;
-	}
-
-	/**
-	 * Set the answerData
-	 * 
-	 * @param answerData
-	 */
-	public void setAnswerData(String answerData)
-	{
-		this.answerData = answerData;
-		this.changed = true;
 	}
 }

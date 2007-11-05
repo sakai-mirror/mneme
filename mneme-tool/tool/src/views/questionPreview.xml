@@ -33,14 +33,10 @@
 
 	<!-- title & header-->
 	<title>
-		<message selector="question-preview-title">
-			<model ref="question.description" />
-		</message>
+		<message selector="question-preview-title" />
 	</title>
 	<header>
-		<message selector="question-preview-header">
-			<model ref="question.description" />
-		</message>
+		<message selector="question-preview-header" />
 	</header>
 
 	<container>
@@ -48,84 +44,83 @@
 		<!-- repeat the nav up top -->
 		<alias to="nav" />
 
-		<section>
+		<!-- Question specific delivery -->
+		<modelComponent model="question.typeSpecificQuestion.viewQuestionUi" />
 
+		<!-- hints -->
+		<overlay id="hints">
 			<container>
-
-				<!-- question presentation (text and attachments) -->
 				<text>
-					<message>
-						<model type="html" ref="question.presentation.text" />
+					<message selector="question-hints">
+						<model type="icon" icon="/icons/hints.png" />
 					</message>
 				</text>
-
-				<attachments model="question.presentation.attachments">
-					<included>
-						<hasValueDecision model="question.presentation.attachments" />
-					</included>
-				</attachments>
-
-				<!-- hints -->
-				<overlay id="hints">
-					<container>
-						<text>
-							<message selector="question-hints">
-								<model type="icon" icon="/icons/hints.png" />
-							</message>
-						</text>
-						<text>
-							<message>
-								<model type="html" ref="question.hints" />
-							</message>
-						</text>
-						<!-- hints toggle -->
-						<gap />
-						<toggle target="hints" title="hide-hints" description="hide-hints-description" style="LINK">
-							<icon icon="/icons/hints.png" style="LEFT" />
-							<included>
-								<hasValueDecision model="question.hints" />
-							</included>
-						</toggle>
-					</container>
-					<included>
-						<hasValueDecision model="question.hints" />
-					</included>
-				</overlay>
-
-				<!-- Question specific delivery -->
-				<modelComponent model="question.typeSpecificQuestion.viewQuestionUi" />
-
-				<!-- reason -->
 				<text>
-					<message selector="question-preview-rationale" />
-					<included>
-						<decision model="question.explainReason" />
-					</included>
+					<message>
+						<model type="html" ref="question.hints" />
+					</message>
 				</text>
-
 				<!-- hints toggle -->
-				<toggle target="hints" title="show-hints" description="show-hints-description" style="LINK">
+				<gap />
+				<toggle target="hints" title="hide-hints" description="hide-hints-description" style="LINK">
 					<icon icon="/icons/hints.png" style="LEFT" />
 					<included>
 						<hasValueDecision model="question.hints" />
 					</included>
 				</toggle>
-
-				<!-- question feedback -->
-				<text>
-					<message selector="question-feedback">
-						<model type="icon" icon="/icons/feedback.png" />
-						<model type="html" ref="question.feedback" />
-					</message>
-					<included>
-						<hasValueDecision model="question.feedback" />
-					</included>
-				</text>
-
 			</container>
+			<included>
+				<hasValueDecision model="question.hints" />
+			</included>
+		</overlay>
+
+		<!-- reason -->
+		<section>
+			<title>
+				<message selector="question-preview-reason-header">
+					<model type="icon" icon="/icons/reason.png" />
+				</message>
+			</title>
+			<container>
+				<text>
+					<message selector="question-preview-reason" />
+				</text>
+			</container>
+			<included>
+				<decision model="question.explainReason" />
+			</included>
 		</section>
 
-		<gap />
+		<!-- hints toggle -->
+		<section>
+			<container>
+				<toggle target="hints" title="show-hints" description="show-hints-description" style="LINK">
+					<icon icon="/icons/hints.png" style="LEFT" />
+				</toggle>
+			</container>
+			<included>
+				<hasValueDecision model="question.hints" />
+			</included>
+		</section>
+
+		<!-- question feedback -->
+		<section>
+			<title>
+				<message selector="question-feedback">
+					<model type="icon" icon="/icons/feedback.png" />
+				</message>
+			</title>
+			<container>
+				<text>
+					<message>
+						<model type="html" ref="question.feedback" />
+					</message>
+				</text>
+			</container>
+			<included>
+				<hasValueDecision model="question.feedback" />
+			</included>
+		</section>
 
 		<!-- nav bar -->
 		<navigationBar id="nav">

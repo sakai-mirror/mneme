@@ -57,92 +57,85 @@
 	</subHeader>
 
 	<container>
-		<navigationBar />
-		<entityDisplay>
-			<rows>
-				<row title="question-type">
-					<container>
-						<text model="question.typeName" />
-					</container>
-				</row>
-				<row title="question-presentation">
-					<container>
-						<htmlEdit model="question.presentation.text" />
-						<entityDisplay>
-							<rows>
-								<row title="attachments">
-									<container>
-										<attachmentsEdit model="question.presentation.attachments" />
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
-					</container>
-					<included>
-						<decision model="question.typeSpecificQuestion.useQuestionPresentation" />
-					</included>
-				</row>
-			</rows>
-		</entityDisplay>
-		<!-- question specific -->
+		<navigationBar>
+			<container>
+				<text model="question.typeName" />
+			</container>
+		</navigationBar>
 
+		<!-- generic presentation -->
+		<section title="question-presentation">
+			<container>
+				<htmlEdit model="question.presentation.text" />
+				<attachmentsEdit title="attachments" model="question.presentation.attachments" />
+			</container>
+			<included>
+				<decision model="question.typeSpecificQuestion.useQuestionPresentation" />
+			</included>
+		</section>
+
+		<!-- question specific -->
 		<modelComponent model="question.typeSpecificQuestion.authoringUi" />
 
-		<!--  optional settings -->
-		<entityDisplay>
-			<rows>
-				<row title="optional-settings">
-					<container>
-						<section>
-							<title>
-								<message selector="reason-title">
-									<model type="icon" icon="/icons/reason.png" />
-								</message>
-							</title>
-							<container>
-								<selection title="reason-description">
-									<model ref="question.explainReason" />
-								</selection>
-							</container>
-							<included>
-								<decision model="question.typeSpecificQuestion.useReason" />
-							</included>
-						</section>
-						<section>
-							<title>
-								<message selector="hints-title">
-									<model type="icon" icon="/icons/hints.png" />
-								</message>
-							</title>
-							<container>
-								<htmlEdit title="hints-description">
-									<model ref="question.hints" />
-								</htmlEdit>
-							</container>
-							<included>
-								<decision model="question.typeSpecificQuestion.useHints" />
-							</included>
-						</section>
-						<section>
-							<title>
-								<message selector="feedback-title">
-									<model type="icon" icon="/icons/feedback.png" />
-								</message>
-							</title>
-							<container>
-								<htmlEdit title="feedback-description">
-									<model ref="question.feedback" />
-								</htmlEdit>
-							</container>
-							<included>
-								<decision model="question.typeSpecificQuestion.useFeedback" />
-							</included>
-						</section>
-					</container>
-				</row>
-			</rows>
-		</entityDisplay>
+		<!--  generic reason -->
+		<section>
+			<title>
+				<message selector="question-author-reason-header">
+					<model type="icon" icon="/icons/reason.png" />
+				</message>
+			</title>
+			<container>
+				<selection>
+					<title>
+						<message selector="question-author-reason" />
+					</title>
+					<model ref="question.explainReason" />
+				</selection>
+			</container>
+			<included>
+				<decision model="question.typeSpecificQuestion.useReason" />
+			</included>
+		</section>
 
+		<!--  generic hints -->
+		<section>
+			<title>
+				<message selector="question-author-hints-header">
+					<model type="icon" icon="/icons/hints.png" />
+				</message>
+			</title>
+			<container>
+				<htmlEdit>
+					<title>
+						<message selector="question-author-hints" />
+					</title>
+					<model ref="question.hints" />
+				</htmlEdit>
+			</container>
+			<included>
+				<decision model="question.typeSpecificQuestion.useHints" />
+			</included>
+		</section>
+
+		<!--  generic feedback -->
+		<section>
+			<title>
+				<message selector="question-author-feedback-header">
+					<model type="icon" icon="/icons/feedback.png" />
+				</message>
+			</title>
+			<container>
+				<htmlEdit>
+					<title>
+						<message selector="question-author-feedback" />
+					</title>
+					<model ref="question.feedback" />
+				</htmlEdit>
+			</container>
+			<included>
+				<decision model="question.typeSpecificQuestion.useFeedback" />
+			</included>
+		</section>
 
 		<!-- navigation -->
 		<navigationBar>

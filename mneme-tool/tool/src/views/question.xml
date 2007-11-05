@@ -214,18 +214,19 @@
 
 					<container>
 
-						<!-- question presentation (text and attachments) -->
-						<text>
-							<message>
-								<model type="html" ref="answer.question.presentation.text" />
-							</message>
-						</text>
-
-						<attachments model="answer.question.presentation.attachments">
+						<!-- Question specific delivery -->
+						<modelComponent model="answer.question.typeSpecificQuestion.deliveryUi">
 							<included>
-								<hasValueDecision model="answer.question.presentation.attachments" />
+								<decision reversed="TRUE" model="review" />
 							</included>
-						</attachments>
+						</modelComponent>
+
+						<!-- Question specific review -->
+						<modelComponent model="answer.question.typeSpecificQuestion.reviewUi">
+							<included>
+								<decision model="review" />
+							</included>
+						</modelComponent>
 
 						<!-- hints -->
 						<overlay id="hints">
@@ -258,42 +259,62 @@
 							</included>
 						</overlay>
 
-						<!-- Question specific delivery -->
-						<modelComponent model="answer.question.typeSpecificQuestion.deliveryUi">
-							<included>
-								<decision reversed="TRUE" model="review" />
-							</included>
-						</modelComponent>
-
-						<!-- Question specific review -->
-						<modelComponent model="answer.question.typeSpecificQuestion.reviewUi">
-							<included>
-								<decision model="review" />
-							</included>
-						</modelComponent>
-
-						<!-- reason -->
-						<textEdit rows="5" cols="40">
+						<!-- reason for delivery -->
+						<section>
 							<title>
 								<message selector="question-rationale">
 									<model type="icon" icon="/icons/reason.png" />
 								</message>
 							</title>
-							<readOnly>
-								<decision model="review" />
-							</readOnly>
-							<model ref="answer.reason" />
+							<container>
+								<textEdit rows="5" cols="60">
+									<readOnly>
+										<decision model="review" />
+									</readOnly>
+									<model type="text" ref="answer.reason" />
+								</textEdit>
+							</container>
 							<included>
+								<decision reversed="TRUE" model="review" />
 								<decision model="answer.question.explainReason" />
 							</included>
-						</textEdit>
+						</section>
+
+						<!-- reason for review -->
+						<section>
+							<title>
+								<message selector="question-rationale">
+									<model type="icon" icon="/icons/reason.png" />
+								</message>
+							</title>
+							<container>
+								<text>
+									<message>
+										<model type="text" ref="answer.reason" />
+									</message>
+								</text>
+							</container>
+							<included>
+								<decision model="review" />
+								<hasValueDecision model="answer.reason" />
+							</included>
+						</section>
 
 						<!-- mark for review -->
-						<selection title="question-mark-review">
-							<readOnly>
-								<decision model="review" />
-							</readOnly>
-							<model ref="answer.markedForReview" />
+						<section>
+							<title>
+								<message selector="question-mark-review-header">
+									<model type="icon" icon="/icons/markedforreview.png" />
+								</message>
+							</title>
+							<container>
+								<selection title="question-mark-review">
+									<readOnly>
+										<decision model="review" />
+									</readOnly>
+									<model ref="answer.markedForReview" />
+								</selection>
+							</container>
 							<included>
 								<decision model="answer.question.part.assessment.randomAccess" />
 								<orDecision>
@@ -301,37 +322,53 @@
 									<decision model="answer.markedForReview" />
 								</orDecision>
 							</included>
-						</selection>
+						</section>
 
 						<!-- hints toggle -->
-						<toggle target="hints" title="show-hints" description="show-hints-description" style="LINK">
-							<icon icon="/icons/hints.png" style="LEFT" />
+						<section>
+							<container>
+								<toggle target="hints" title="show-hints" description="show-hints-description" style="LINK">
+									<icon icon="/icons/hints.png" style="LEFT" />
+								</toggle>
+							</container>
 							<included>
 								<decision reversed="TRUE" model="review" />
 								<decision model="answer.question.part.assessment.showHints" />
 								<hasValueDecision model="answer.question.hints" />
 							</included>
-						</toggle>
+						</section>
 
 						<!-- question feedback -->
-						<text>
-							<message selector="question-feedback">
-								<model type="icon" icon="/icons/feedback.png" />
-								<model type="html" ref="answer.question.feedback" />
-							</message>
+						<section>
+							<title>
+								<message selector="question-feedback">
+									<model type="icon" icon="/icons/feedback.png" />
+								</message>
+							</title>
+							<container>
+								<text>
+									<message>
+										<model type="html" ref="answer.question.feedback" />
+									</message>
+								</text>
+							</container>
 							<included>
 								<decision model="review" />
 								<decision model="answer.submission.mayReview" />
 								<decision model="answer.question.part.assessment.review.showFeedback" />
 								<hasValueDecision model="answer.question.feedback" />
 							</included>
-						</text>
+						</section>
 
 						<!-- evaluation -->
 						<section>
+							<title>
+								<message selector="question-evaluation">
+									<model type="icon" icon="/icons/note.png" />
+								</message>
+							</title>
 							<container>
 								<evaluation>
-									<icon icon="/icons/note.png" message="comments" />
 									<message selector="question-eval-question-comment">
 										<model type="text" ref="answer.evaluation.comment" />
 									</message>
@@ -347,8 +384,6 @@
 				</section>
 			</container>
 		</section>
-
-		<gap />
 
 		<!-- review nav bar -->
 		<navigationBar id="nav">

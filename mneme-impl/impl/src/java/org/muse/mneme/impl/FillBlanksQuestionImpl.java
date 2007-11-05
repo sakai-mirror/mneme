@@ -27,24 +27,24 @@ import java.util.List;
 import org.muse.ambrosia.api.AndDecision;
 import org.muse.ambrosia.api.AttachmentsEdit;
 import org.muse.ambrosia.api.Component;
-import org.muse.ambrosia.api.Container;
 import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.EntityDisplay;
 import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.FillIn;
 import org.muse.ambrosia.api.HtmlEdit;
+import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.OrDecision;
+import org.muse.ambrosia.api.Overlay;
 import org.muse.ambrosia.api.PropertyReference;
+import org.muse.ambrosia.api.Section;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.Text;
+import org.muse.ambrosia.api.Toggle;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
-import org.muse.ambrosia.api.Overlay;
-import org.muse.ambrosia.api.Toggle;
-import org.muse.ambrosia.api.Navigation;
 
 /**
  * FillBlanksQuestionImpl handles questions for the true/false question type.
@@ -59,6 +59,8 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 	protected InternationalizedMessages messages = null;
 
+	protected transient QuestionPlugin plugin = null;
+
 	/** The question this is a helper for. */
 	protected transient Question question = null;
 
@@ -70,32 +72,6 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 	/** Dependency: The UI service (Ambrosia). */
 	protected UiService uiService = null;
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public QuestionPlugin getPlugin()
-	{
-		return this.plugin;
-	}
-
-	protected transient QuestionPlugin plugin = null;
-
-	/**
-	 * Construct.
-	 * 
-	 * @param uiService
-	 *        the UiService.
-	 * @param question
-	 *        The Question this is a helper for.
-	 */
-	public FillBlanksQuestionImpl(QuestionPlugin plugin, InternationalizedMessages messages, UiService uiService, Question question)
-	{
-		this.plugin = plugin;
-		this.messages = messages;
-		this.uiService = uiService;
-		this.question = question;
-	}
 
 	/**
 	 * Construct.
@@ -113,6 +89,22 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		this.text = other.text;
 		this.uiService = other.uiService;
 		this.plugin = other.plugin;
+	}
+
+	/**
+	 * Construct.
+	 * 
+	 * @param uiService
+	 *        the UiService.
+	 * @param question
+	 *        The Question this is a helper for.
+	 */
+	public FillBlanksQuestionImpl(QuestionPlugin plugin, InternationalizedMessages messages, UiService uiService, Question question)
+	{
+		this.plugin = plugin;
+		this.messages = messages;
+		this.uiService = uiService;
+		this.question = question;
 	}
 
 	/**
@@ -157,9 +149,11 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		for (String correctAnswer : correctAnswers)
 		{
 			answerKey.append(correctAnswer);
-			answerKey.append(",");
+			answerKey.append(", ");
 		}
-		answerKey.deleteCharAt(answerKey.length() - 1);
+
+		if (answerKey.length() > 0) answerKey.setLength(answerKey.length() - 2);
+
 		return answerKey.toString();
 	}
 
@@ -176,60 +170,43 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getAuthoringUi()
 	{
-		EntityDisplay display = this.uiService.newEntityDisplay();
+		// question (with instructios)
+		HtmlEdit question = uiService.newHtmlEdit();
+		question.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.text"));
 
-		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
-		row.setTitle("question");
-		HtmlEdit text = uiService.newHtmlEdit();
-		text.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.text"));
-		row.add(text);
-		display.addRow(row);
+		Overlay instructions = this.uiService.newOverlay();
+		instructions.setId("instructions");
+		instructions.add(this.uiService.newText().setText("view-instructions"));
+		instructions.add(this.uiService.newText().setText("instructions"));
+		instructions.add(this.uiService.newGap());
+		instructions.add(this.uiService.newToggle().setTarget("instructions").setTitle("hide-instructions"));
 
-		row = this.uiService.newEntityDisplayRow();
-		Container cont = this.uiService.newContainer();
-		Overlay ovly = this.uiService.newOverlay();
-		ovly.setId("inst");
-		ovly.add(this.uiService.newText().setText("view-instructions"));
-		ovly.add(this.uiService.newText().setText("instructions"));
-		ovly.add(this.uiService.newGap());
-		ovly.add(this.uiService.newToggle().setTarget("inst").setTitle("hide-instructions"));
-		cont.add(ovly);
-		cont.add(this.uiService.newToggle().setTarget("inst").setTitle("view-instructions").setIcon("/icons/test.png", Navigation.IconStyle.left));
-		row.add(cont);
-		display.addRow(row);
+		Toggle viewInstructions = this.uiService.newToggle().setTarget("instructions").setTitle("view-instructions").setIcon("/icons/test.png",
+				Navigation.IconStyle.left);
 
-		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("attachments");
-		AttachmentsEdit attachments = uiService.newAttachmentsEdit();
-		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
-		row.add(attachments);
-		display.addRow(row);
+		Section questionSection = this.uiService.newSection();
+		questionSection.setTitle("question");
+		questionSection.add(question).add(instructions).add(viewInstructions);
 
-		Selection selection = this.uiService.newSelection();
-		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.responseTextual"));
-		selection.addSelection("textual", "true");
-		selection.addSelection("numeric", "false");
-		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("response");
-		row.add(selection);
-		display.addRow(row);
+		// answer options
+		Selection response = this.uiService.newSelection();
+		response.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.responseTextual"));
+		response.addSelection("textual", "true");
+		response.addSelection("numeric", "false");
 
-		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("case-sensitive");
-		selection = uiService.newSelection();
-		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.caseSensitive"));
-		row.add(selection);
-		display.addRow(row);
+		Selection caseSensitive = this.uiService.newSelection();
+		caseSensitive.setTitle("case-sensitive");
+		caseSensitive.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.caseSensitive"));
 
-		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("any-order");
-		selection = uiService.newSelection();
-		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.anyOrder"));
-		row.add(selection);
-		display.addRow(row);
+		Selection order = this.uiService.newSelection();
+		order.setTitle("any-order");
+		order.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.anyOrder"));
 
-		return this.uiService.newFragment().setMessages(this.messages).add(display);
+		Section answerSection = this.uiService.newSection();
+		answerSection.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		answerSection.add(response).add(caseSensitive).add(order);
 
+		return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(answerSection);
 	}
 
 	/**
@@ -240,6 +217,11 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		return this.caseSensitive.toString();
 	}
 
+	/**
+	 * Get the correct answers for the question.
+	 * 
+	 * @return A List containing each correct answer for the fill-ins in the question.
+	 */
 	public List<String> getCorrectAnswers()
 	{
 		List<String> correctAnswers = new ArrayList<String>();
@@ -270,11 +252,14 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	public Component getDeliveryUi()
 	{
 		FillIn fillIn = this.uiService.newFillIn();
-		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.parsedText")).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers")).setWidth(20);
+		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.questionText"))
+				.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers")).setWidth(20);
+		fillIn.setWidth(20);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(fillIn);
+		Section section = this.uiService.newSection();
+		section.add(fillIn);
 
+		return this.uiService.newFragment().setMessages(this.messages).add(section);
 	}
 
 	/**
@@ -282,13 +267,15 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getDescription()
 	{
-		return getParsedText();
+		return getQuestionText();
 	}
 
-	public String getParsedText()
+	/**
+	 * {@inheritDoc}
+	 */
+	public QuestionPlugin getPlugin()
 	{
-		String parsedText = extractFIBTextArray(getText());
-		return parsedText;
+		return this.plugin;
 	}
 
 	/**
@@ -304,22 +291,21 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getReviewUi()
 	{
-		FillIn fillIn = this.uiService.newFillIn();
 		AndDecision and = this.uiService.newAndDecision();
-
 		Decision[] decisions = new Decision[2];
 		decisions[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
 		decisions[1] = this.uiService.newDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
 		and.setRequirements(decisions);
-		
+
 		OrDecision or = this.uiService.newOrDecision();
 		Decision[] decisionsOr = new Decision[2];
 		decisionsOr[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
 		decisionsOr[1] = and;
 		or.setOptions(decisionsOr);
 
-		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.parsedText"));
+		FillIn fillIn = this.uiService.newFillIn();
+		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.questionText"));
 		fillIn.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
 		fillIn.setWidth(20);
 		fillIn.setCorrectDecision(or);
@@ -334,10 +320,17 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 		Decision[] orInc = new Decision[2];
 		orInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
-		orInc[1] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+		orInc[1] = this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
 		answerKey.setIncluded(this.uiService.newOrDecision().setOptions(orInc));
 
-		return this.uiService.newFragment().setMessages(this.messages).add(fillIn).add(answerKey);
+		Section first = this.uiService.newSection();
+		first.add(fillIn);
+
+		Section second = this.uiService.newSection();
+		second.add(answerKey);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second);
 	}
 
 	/**
@@ -394,7 +387,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	public Component getViewAnswerUi()
 	{
 		FillIn fillIn = this.uiService.newFillIn();
-		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.parsedText"));
+		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.questionText"));
 		fillIn.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
 		fillIn.setWidth(20);
 		fillIn.setCorrectDecision(this.uiService.newTrueDecision());
@@ -406,8 +399,10 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 	public Component getViewQuestionUi()
 	{
-		Text txt = this.uiService.newText();
-		txt.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.text"));
+		FillIn fillIn = this.uiService.newFillIn();
+		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.questionText"));
+		fillIn.setWidth(20);
+		fillIn.setReadOnly(this.uiService.newTrueDecision());
 
 		Text answerKey = this.uiService.newText();
 		PropertyReference[] refs = new PropertyReference[2];
@@ -415,7 +410,13 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		refs[1] = this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
 		answerKey.setText("answer-key", refs);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(txt).add(answerKey);
+		Section first = this.uiService.newSection();
+		first.add(fillIn);
+
+		Section second = this.uiService.newSection();
+		second.add(answerKey);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second);
 	}
 
 	/**
@@ -464,31 +465,37 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		this.uiService = service;
 	}
 
-	protected String extractFIBTextArray(String alltext)
+	/**
+	 * Produce a string of the question with the answers removed.
+	 * 
+	 * @return The question text with the answers removed.
+	 */
+	public String getQuestionText()
 	{
-		StringBuffer strBuf = new StringBuffer();
+		if (this.text == null) return null;
 
-		if (alltext != null)
+		String text = this.text;
+		StringBuffer rv = new StringBuffer();
+
+		while (text.indexOf("{") > -1)
 		{
-			while (alltext.indexOf("{") > -1)
-			{
-				int alltextLeftIndex = alltext.indexOf("{");
-				int alltextRightIndex = alltext.indexOf("}");
+			int left = text.indexOf("{");
+			int right = text.indexOf("}");
 
-				String tmp = alltext.substring(0, alltextLeftIndex);
-				alltext = alltext.substring(alltextRightIndex + 1);
-				strBuf.append(tmp);
-				strBuf.append("{}");
-				// there are no more "}", exit loop
-				if (alltextRightIndex == -1)
-				{
-					break;
-				}
+			String tmp = text.substring(0, left);
+			text = text.substring(right + 1);
+			rv.append(tmp);
+			rv.append("{}");
+
+			// there are no more "}", exit loop
+			if (right == -1)
+			{
+				break;
 			}
-			strBuf.append(alltext);
-			return strBuf.toString();
 		}
 
-		return null;
+		rv.append(text);
+
+		return rv.toString();
 	}
 }

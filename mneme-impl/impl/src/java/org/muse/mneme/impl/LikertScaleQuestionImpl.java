@@ -24,14 +24,16 @@ package org.muse.mneme.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.muse.ambrosia.api.Attachments;
 import org.muse.ambrosia.api.CompareDecision;
 import org.muse.ambrosia.api.Component;
-import org.muse.ambrosia.api.EntityDisplay;
-import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.PropertyReference;
+import org.muse.ambrosia.api.Section;
+import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
+import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
@@ -79,8 +81,8 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	/** The question this is a helper for. */
 	protected transient Question question = null;
 
-	/** Which scale option to use for this question (0-agree 1-good 2-average 3-yes 4-numbers. */
-	protected Integer selectedOption = new Integer(0);
+	/** Which scale option to use for this question (0-agree 1-good 2-average 3-yes 4-numbers 5-rocks/sucks) */
+	protected Integer scale = new Integer(0);
 
 	/** Dependency: The UI service (Ambrosia). */
 	protected transient UiService uiService = null;
@@ -93,7 +95,7 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	 */
 	public LikertScaleQuestionImpl(Question question, LikertScaleQuestionImpl other)
 	{
-		this.selectedOption = other.selectedOption;
+		this.scale = other.scale;
 		this.messages = other.messages;
 		this.question = question;
 		this.uiService = other.uiService;
@@ -152,136 +154,28 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getAuthoringUi()
 	{
-		EntityList entityList = this.uiService.newEntityList();
-		entityList.setStyle(EntityList.Style.form);
-		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.options"), "option");
+		// scale
+		Selection scale = uiService.newSelection();
+		scale.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.scale"));
+		scale.setSelectionModel(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.scales"), "scale", this.uiService
+				.newPropertyReference().setReference("scale.id"), this.uiService.newPropertyReference().setReference("scale.text"));
 
-		SelectionColumn selCol = this.uiService.newSelectionColumn();
-		selCol.setSingle();
+		// scale section
+		Section section = this.uiService.newSection();
+		section.setTitle("scale", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		section.add(scale);
 
-		selCol.setValueProperty(this.uiService.newPropertyReference().setReference("option.id"));
-		selCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.selectedOption"));
-		entityList.addColumn(selCol);
-
-		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("option.text"));
-		entityList.addColumn(propCol);
-
-		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
-		row.setTitle("scale", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key2.png"));
-		row.add(entityList);
-
-		EntityDisplay display = this.uiService.newEntityDisplay();
-		display.addRow(row);
-
-		return this.uiService.newFragment().setMessages(this.messages).add(display);
+		return this.uiService.newFragment().setMessages(this.messages).add(section);
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public Component getDeliveryUi()
-	{
-		EntityList entityList = this.uiService.newEntityList();
-		entityList.setStyle(EntityList.Style.form);
-		entityList
-				.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.optionValues"), "optionValue");
-
-		SelectionColumn selCol = this.uiService.newSelectionColumn();
-		selCol.setSingle();
-
-		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("optionValue.id"));
-		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
-		entityList.addColumn(selCol);
-
-		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("optionValue.text"));
-		entityList.addColumn(propCol);
-
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getDescription()
-	{
-		return this.question.getPresentation().getText();
-	}
-
-	/**
-	 * Access the options as an entity (LikertScaleQuestionChoice) list.
+	 * Access the selected scale choices as an entity (LikertScaleQuestionChoice) list.
 	 * 
-	 * @return The options as an entity (LikertScaleQuestionChoice) list.
+	 * @return The selected scale choices as an entity (LikertScaleQuestionChoice) list.
 	 */
-	public List<LikertScaleQuestionChoice> getOptions()
+	public List<LikertScaleQuestionChoice> getChoices()
 	{
-		List<LikertScaleQuestionChoice> rv = new ArrayList<LikertScaleQuestionChoice>(5);
-		StringBuffer optionText = new StringBuffer();
-		optionText.append(this.messages.getString("strongly-agree"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("agree"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("undecided"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("disagree"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("strongly-disagree"));
-
-		rv.add(new LikertScaleQuestionChoice("0", optionText.toString()));
-		optionText.setLength(0);
-
-		optionText.append(this.messages.getString("excellent"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("good"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("poor"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("unacceptable"));
-
-		rv.add(new LikertScaleQuestionChoice("1", optionText.toString()));
-		optionText.setLength(0);
-
-		optionText.append(this.messages.getString("above-average"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("average"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("below-average"));
-
-		rv.add(new LikertScaleQuestionChoice("2", optionText.toString()));
-		optionText.setLength(0);
-
-		optionText.append(this.messages.getString("yes"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("no"));
-
-		rv.add(new LikertScaleQuestionChoice("3", optionText.toString()));
-		optionText.setLength(0);
-
-		optionText.append(this.messages.getString("five-highest"));
-		optionText.append("-->");
-		optionText.append(this.messages.getString("one-lowest"));
-
-		rv.add(new LikertScaleQuestionChoice("4", optionText.toString()));
-		optionText.setLength(0);
-
-		optionText.append(this.messages.getString("it-rocks"));
-		optionText.append(" / ");
-		optionText.append(this.messages.getString("it-sucks"));
-
-		rv.add(new LikertScaleQuestionChoice("5", optionText.toString()));
-
-		return rv;
-	}
-
-	/**
-	 * Access the option values as an entity (LikertScaleQuestionChoice) list.
-	 * 
-	 * @return The option values as an entity (LikertScaleQuestionChoice) list.
-	 */
-	public List<LikertScaleQuestionChoice> getOptionValues()
-	{
-		int optionIndex = this.selectedOption.intValue();
+		int optionIndex = this.scale.intValue();
 		List<LikertScaleQuestionChoice> rv = null;
 		if (optionIndex == 0)
 		{
@@ -334,6 +228,47 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Component getDeliveryUi()
+	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("answer.question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.presentation.attachments")));
+
+		EntityList entityList = this.uiService.newEntityList();
+		entityList.setStyle(EntityList.Style.form);
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
+
+		SelectionColumn selCol = this.uiService.newSelectionColumn();
+		selCol.setSingle();
+		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
+		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
+		entityList.addColumn(selCol);
+
+		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		entityList.addColumn(propCol);
+
+		Section section = this.uiService.newSection();
+		section.add(question).add(attachments).add(entityList);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(section);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDescription()
+	{
+		return this.question.getPresentation().getText();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public QuestionPlugin getPlugin()
 	{
 		return this.plugin;
@@ -344,32 +279,115 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getReviewUi()
 	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("answer.question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.presentation.attachments")));
+
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
-		entityList
-				.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.optionValues"), "optionValue");
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
 
 		SelectionColumn selCol = this.uiService.newSelectionColumn();
 		selCol.setSingle();
 
-		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("optionValue.id"));
+		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
 		selCol.setReadOnly(this.uiService.newTrueDecision());
 		entityList.addColumn(selCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("optionValue.text"));
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
 		entityList.addColumn(propCol);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+		Section section = this.uiService.newSection();
+		section.add(question).add(attachments).add(entityList);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(section);
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Access the scale.
+	 * 
+	 * @return The scale.
 	 */
-	public String getSelectedOption()
+	public String getScale()
 	{
-		return this.selectedOption.toString();
+		return this.scale.toString();
+	}
+
+	/**
+	 * Access the scales as an entity (LikertScaleQuestionChoice) list.
+	 * 
+	 * @return The options as an entity (LikertScaleQuestionChoice) list.
+	 */
+	public List<LikertScaleQuestionChoice> getScales()
+	{
+		List<LikertScaleQuestionChoice> rv = new ArrayList<LikertScaleQuestionChoice>(5);
+		StringBuffer optionText = new StringBuffer();
+		optionText.append(this.messages.getString("strongly-agree"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("agree"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("undecided"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("disagree"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("strongly-disagree"));
+
+		rv.add(new LikertScaleQuestionChoice("0", optionText.toString()));
+		optionText.setLength(0);
+
+		optionText.append(this.messages.getString("excellent"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("good"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("poor"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("unacceptable"));
+
+		rv.add(new LikertScaleQuestionChoice("1", optionText.toString()));
+		optionText.setLength(0);
+
+		optionText.append(this.messages.getString("above-average"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("average"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("below-average"));
+
+		rv.add(new LikertScaleQuestionChoice("2", optionText.toString()));
+		optionText.setLength(0);
+
+		optionText.append(this.messages.getString("yes"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("no"));
+
+		rv.add(new LikertScaleQuestionChoice("3", optionText.toString()));
+		optionText.setLength(0);
+
+		optionText.append(this.messages.getString("five"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("four"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("three"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("two"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("one"));
+
+		rv.add(new LikertScaleQuestionChoice("4", optionText.toString()));
+		optionText.setLength(0);
+
+		optionText.append(this.messages.getString("it-rocks"));
+		optionText.append(" / ");
+		optionText.append(this.messages.getString("it-sucks"));
+
+		rv.add(new LikertScaleQuestionChoice("5", optionText.toString()));
+
+		return rv;
 	}
 
 	/**
@@ -419,11 +437,11 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	{
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
-		entityList
-				.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.optionValues"), "optionValue");
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
+		entityList.setEmptyTitle("no-answer");
 
 		// include each choice only if the choice has been selected by the user
-		PropertyReference entityIncludedProperty = this.uiService.newPropertyReference().setReference("optionValue.id");
+		PropertyReference entityIncludedProperty = this.uiService.newPropertyReference().setReference("choice.id");
 		PropertyReference entityIncludedComparison = this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer");
 		CompareDecision entityIncludedDecision = this.uiService.newCompareDecision();
 		entityIncludedDecision.setProperty(entityIncludedProperty);
@@ -432,14 +450,13 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 
 		SelectionColumn selCol = this.uiService.newSelectionColumn();
 		selCol.setSingle();
-
-		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("optionValue.id"));
+		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
 		selCol.setReadOnly(this.uiService.newTrueDecision());
 		entityList.addColumn(selCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("optionValue.text"));
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
 		entityList.addColumn(propCol);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
@@ -450,23 +467,44 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewQuestionUi()
 	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.presentation.attachments")));
+
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
-		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.optionValues"), "optionValue");
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice");
+
+		SelectionColumn selCol = this.uiService.newSelectionColumn();
+		selCol.setSingle();
+		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
+		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
+		selCol.setReadOnly(this.uiService.newTrueDecision());
+		entityList.addColumn(selCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("optionValue.text"));
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
 		entityList.addColumn(propCol);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+		Section section = this.uiService.newSection();
+		section.add(question).add(attachments).add(entityList);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(section);
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Set the scale
+	 * 
+	 * @param scale
+	 *        The scale number as a string.
 	 */
-	public void setSelectedOption(String selectedOption)
+	public void setScale(String scale)
 	{
-		this.selectedOption = Integer.valueOf(selectedOption);
+		this.scale = Integer.valueOf(scale);
 	}
 
 	/**

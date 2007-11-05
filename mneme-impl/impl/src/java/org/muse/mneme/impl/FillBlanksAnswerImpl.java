@@ -23,10 +23,11 @@ package org.muse.mneme.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificAnswer;
@@ -36,6 +37,9 @@ import org.muse.mneme.api.TypeSpecificAnswer;
  */
 public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 {
+	/** Our log. */
+	private static Log M_log = LogFactory.getLog(FillBlanksAnswerImpl.class);
+
 	/** The answer this is a helper for. */
 	protected transient Answer answer = null;
 
@@ -91,7 +95,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 			// get an exact, bit-by-bit copy
 			Object rv = super.clone();
 
-			// nothing to deep copy
+			// nothing to deep copy TODO: answers?
 
 			((FillBlanksAnswerImpl) rv).answer = answer;
 
@@ -101,108 +105,6 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		{
 			return null;
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Float getAutoScore()
-	{
-		// partial credit for each correct answer, 0 for each incorrect, floor at 0.
-
-		Question question = answer.getQuestion();
-		List<String> correctAnswers = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswers();
-		String[] correctAnswersArray = new String[correctAnswers.size()];
-		correctAnswersArray = (String[]) correctAnswers.toArray(correctAnswersArray);
-
-		// Get all other question properties
-		Boolean caseSensitive = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCaseSensitive());
-		Boolean anyOrder = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getAnyOrder());
-		Boolean responseTextual = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getResponseTextual());
-
-		// each correct gets a part of the total points
-		float partial = (correctAnswers.size() > 0) ? question.getPool().getPoints() / correctAnswers.size() : 0f;
-
-		float total = 0f;
-		if (this.answers != null)
-		{
-			String[] answersArray = (String[]) this.answers.clone();
-			// Any order only matters when there is more than one blank
-			if ((anyOrder == Boolean.TRUE) && (correctAnswers.size() > 1))
-			{
-				for (int j = 0; j < answersArray.length; j++)
-				{
-					boolean foundCorrect = false;
-					if (answersArray[j] != null)
-					{
-						if (answersArray[j].trim().length() > 0)
-						{
-							for (int i = 0; i < correctAnswersArray.length; i++)
-							{
-
-								if (responseTextual == Boolean.TRUE)
-								{
-									if (isFillInAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
-									{
-										total += partial;
-										foundCorrect = true;
-										break;
-									}
-									else
-									{
-										foundCorrect = false;
-									}
-								}
-								else
-								{
-									if (isNumericAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim()))
-									{
-										total += partial;
-										foundCorrect = true;
-										break;
-									}
-									else
-									{
-										foundCorrect = false;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				for (int i = 0; i < correctAnswersArray.length; i++)
-				{
-					if (answersArray[i] != null)
-					{
-						if (answersArray[i].trim().length() > 0)
-						{
-							if (responseTextual == Boolean.TRUE)
-							{
-								if (isFillInAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
-								{
-									total += partial;
-								}
-							}
-							else
-							{
-								if (isNumericAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim()))
-								{
-									total += partial;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		// floor at 0
-		if (total <= 0f) total = 0f;
-
-		return total;
 	}
 
 	/**
@@ -218,10 +120,87 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Boolean> getEntryCorrects()
+	public Float getAutoScore()
 	{
 		// partial credit for each correct answer, 0 for each incorrect, floor at 0.
+		List<Boolean> corrects = getEntryCorrects();
 
+		// each correct gets a part of the total points
+		float partial = (corrects.size() > 0) ? answer.getQuestion().getPool().getPoints() / corrects.size() : 0f;
+
+		float total = 0f;
+		for (Boolean correct : corrects)
+		{
+			if (correct) total += partial;
+		}
+
+		return new Float(total);
+	}
+
+	/**
+	 * Get an Boolean for each possible fill-in blank.
+	 * 
+	 * @return A list of Boolean, one for each possible fill-in blank, TRUE if the entry was made and is correct, FALSE if not.
+	 */
+	public List<Boolean> getEntryCorrects()
+	{
+		// this.answers has an entry for each blank - null or filled in. Or is null if we have not been answered.
+
+		// we need an answer for each fill-in. The correct answers will give us that size
+		Question question = answer.getQuestion();
+		List<String> correctAnswers = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswers();
+		int size = correctAnswers.size();
+
+		// Get all other question properties
+		boolean caseSensitive = Boolean.parseBoolean(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCaseSensitive());
+		boolean anyOrder = Boolean.parseBoolean(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getAnyOrder());
+		boolean textual = Boolean.parseBoolean(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getResponseTextual());
+
+		List<Boolean> rv = new ArrayList<Boolean>(size);
+
+		// if not answerd
+		if (this.answers == null)
+		{
+			for (int i = 0; i < size; i++)
+			{
+				rv.add(Boolean.FALSE);
+			}
+
+			return rv;
+		}
+
+		// we have answers
+		if (this.answers.length != size)
+		{
+			M_log.warn("getEntryCorrects: answers length: " + this.answers.length + " != correct answers length: " + size);
+		}
+
+		List<String> priorAnswers = new ArrayList<String>(size);
+		for (int i = 0; i < size; i++)
+		{
+			String answer = answers[i];
+			if (answer == null)
+			{
+				rv.add(Boolean.FALSE);
+			}
+			else
+			{
+				String correctAnswer = correctAnswers.get(i);
+				rv.add(answerCorrect(answer, correctAnswer, caseSensitive, anyOrder, textual, correctAnswers, priorAnswers));
+				priorAnswers.add(answer);
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * Get an Boolean for each possible fill-in blank.
+	 * 
+	 * @return A list of Boolean, one for each possible fill-in blank, TRUE if the entry was made and is correct, FALSE if not.
+	 */
+	public List<Boolean> getEntryCorrectsX()
+	{
 		Question question = answer.getQuestion();
 		List<String> correctAnswers = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswers();
 		String[] correctAnswersArray = new String[correctAnswers.size()];
@@ -349,39 +328,6 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	}
 
 	/**
-	 * @return a string containing the user's answers in it, and blank if there was no answer
-	 */
-	public String getReviewText()
-	{
-		Question question = answer.getQuestion();
-		String parsedText = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getParsedText();
-		if (this.answers != null)
-		{
-			for (int i = 0; i < this.answers.length; i++)
-			{
-				if (this.answers[i] != null)
-				{
-					if (this.answers[i].trim().length() > 0)
-					{
-						parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + this.answers[i] + "</U>");
-					}
-					else
-					{
-						parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + "____" + "</U>");
-					}
-				}
-				else
-				{
-					parsedText = parsedText.replaceFirst("\\{\\}", "<U>" + "____" + "</U>");
-				}
-			}
-		}
-		this.reviewText = parsedText;
-		return this.reviewText;
-
-	}
-
-	/**
 	 * Set the answers
 	 * 
 	 * @param answers
@@ -396,6 +342,80 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	}
 
 	/**
+	 * Check if this answer is correct.
+	 * 
+	 * @param answer
+	 *        The answer
+	 * @param correctPattern
+	 *        The corresponding correct answer pattern, if order matters.
+	 * @param caseSensitive
+	 *        if we are to be case sensitive.
+	 * @param anyOrder
+	 *        if order does not matter.
+	 * @param textual
+	 *        if the response is to be textual, not numeric.
+	 * @param correctAnswers
+	 *        The entire set of correct answer patterns.
+	 * @param priorAnswers
+	 *        The set of answers already processed.
+	 * @return TRUE if the answer is correct, FALSE if not.
+	 */
+	protected Boolean answerCorrect(String answer, String correctPattern, boolean caseSensitive, boolean anyOrder, boolean textual,
+			List<String> correctAnswers, List<String> priorAnswers)
+	{
+		if (!anyOrder)
+		{
+			// answer must match correctPattern
+			if (textual)
+			{
+				return isFillInAnswerCorrect(answer, correctPattern, caseSensitive);
+			}
+			else
+			{
+				return isNumericAnswerCorrect(answer, correctPattern);
+			}
+		}
+
+		else
+		{
+			// answer must not be one of the priors
+			for (String prior : priorAnswers)
+			{
+				if (caseSensitive)
+				{
+					if (prior.equals(answer)) return Boolean.FALSE;
+				}
+				else
+				{
+					if (prior.equalsIgnoreCase(answer)) return Boolean.FALSE;
+				}
+			}
+
+			// answer must match one of the correct answers
+			for (String pattern : correctAnswers)
+			{
+				// answer must match correctPattern
+				if (textual)
+				{
+					if (isFillInAnswerCorrect(answer, pattern, caseSensitive))
+					{
+						return Boolean.TRUE;
+					}
+				}
+				else
+				{
+					if (isNumericAnswerCorrect(answer, pattern))
+					{
+						return Boolean.TRUE;
+					}
+				}
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
 	 * Figure out if a fill-in answer is correct.
 	 * 
 	 * @param answer
@@ -406,7 +426,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	 *        if we should be case sensitive.
 	 * @return true if the answer is correct, false if not
 	 */
-	private boolean isFillInAnswerCorrect(String answer, String correct, boolean caseSensitive)
+	protected boolean isFillInAnswerCorrect(String answer, String correct, boolean caseSensitive)
 	{
 		// get the set of valid answers from the correct answer pattern (each one may have wild cards)
 		String[] valid = correct.split("\\|");
@@ -447,7 +467,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	 *        The correct answer pattern (with option bars).
 	 * @return true if the answer is correct, false if not
 	 */
-	private boolean isNumericAnswerCorrect(String answer, String correct)
+	protected boolean isNumericAnswerCorrect(String answer, String correct)
 	{
 		try
 		{

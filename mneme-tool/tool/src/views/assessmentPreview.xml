@@ -120,18 +120,8 @@
 
 					<container>
 
-						<!-- question presentation (text and attachments) -->
-						<text>
-							<message>
-								<model type="html" ref="question.presentation.text" />
-							</message>
-						</text>
-
-						<attachments model="question.presentation.attachments">
-							<included>
-								<hasValueDecision model="question.presentation.attachments" />
-							</included>
-						</attachments>
+						<!-- Question specific delivery -->
+						<modelComponent model="question.typeSpecificQuestion.viewQuestionUi" />
 
 						<!-- hints -->
 						<overlay id="hints">
@@ -162,50 +152,75 @@
 							</included>
 						</overlay>
 
-						<!-- Question specific delivery -->
-						<modelComponent model="question.typeSpecificQuestion.viewQuestionUi" />
-
 						<!-- reason -->
-						<text>
-							<message selector="assessment-preview-rationale" />
+						<section>
+							<title>
+								<message selector="assessment-preview-reason-header">
+									<model type="icon" icon="/icons/reason.png" />
+								</message>
+							</title>
+							<container>
+								<text>
+									<message selector="assessment-preview-reason" />
+								</text>
+							</container>
 							<included>
 								<decision model="question.explainReason" />
 							</included>
-						</text>
+						</section>
 
 						<!-- mark for review -->
-						<selection title="question-mark-review" readOnly="TRUE">
-							<included>
-								<decision model="question.part.assessment.randomAccess" />
-							</included>
-						</selection>
+						<section>
+							<title>
+								<message selector="question-mark-review-header">
+									<model type="icon" icon="/icons/markedforreview.png" />
+								</message>
+							</title>
+							<container>
+								<selection title="question-mark-review" readOnly="TRUE">
+									<included>
+										<decision model="question.part.assessment.randomAccess" />
+									</included>
+								</selection>
+							</container>
+						</section>
 
 						<!-- hints toggle -->
-						<toggle target="hints" title="show-hints" description="show-hints-description" style="LINK">
-							<icon icon="/icons/hints.png" style="LEFT" />
+						<section>
+							<container>
+								<toggle target="hints" title="show-hints" description="show-hints-description" style="LINK">
+									<icon icon="/icons/hints.png" style="LEFT" />
+								</toggle>
+							</container>
 							<included>
 								<decision model="question.part.assessment.showHints" />
 								<hasValueDecision model="question.hints" />
 							</included>
-						</toggle>
+						</section>
 
 						<!-- question feedback -->
-						<text>
-							<message selector="question-feedback">
-								<model type="icon" icon="/icons/feedback.png" />
-								<model type="html" ref="question.feedback" />
-							</message>
+						<section>
+							<title>
+								<message selector="question-feedback">
+									<model type="icon" icon="/icons/reason.png" />
+								</message>
+							</title>
+							<container>
+								<text>
+									<message>
+										<model type="html" ref="question.feedback" />
+									</message>
+								</text>
+							</container>
 							<included>
 								<hasValueDecision model="question.feedback" />
 							</included>
-						</text>
+						</section>
 
 					</container>
 				</section>
 			</container>
 		</section>
-
-		<gap />
 
 		<!-- nav bar -->
 		<navigationBar id="nav">

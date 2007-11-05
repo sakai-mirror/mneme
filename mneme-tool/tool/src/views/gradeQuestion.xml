@@ -82,16 +82,6 @@
 			</title>
 			<container>
 				<!-- type-specific question viewing -->
-				<text>
-					<message>
-						<model type="html" ref="question.presentation.text" />
-					</message>
-				</text>
-				<attachments model="question.presentation.attachments">
-					<included>
-						<hasValueDecision model="question.presentation.attachments" />
-					</included>
-				</attachments>
 				<modelComponent model="question.typeSpecificQuestion.viewQuestionUi" />
 			</container>
 		</section>
@@ -193,7 +183,7 @@
 						<text selector="anonymous" />
 					</container>
 				</column>
-				<column>
+				<column wrap="FALSE">
 					<title>
 						<message selector="submission-finished" />
 					</title>
@@ -226,8 +216,17 @@
 					<container>
 						<!-- Answer type-specific viewing -->
 						<modelComponent model="answer.question.typeSpecificQuestion.viewAnswerUi" />
-						<text selector="submission-comments" />
-						<htmlEdit model="answer.evaluation.comment" rows="5" cols="40" />
+						<!-- evaluation -->
+						<section>
+							<title>
+								<message selector="submission-evaluation">
+									<model type="icon" icon="/icons/note.png" />
+								</message>
+							</title>
+							<container>
+								<htmlEdit model="answer.evaluation.comment" rows="5" cols="40" />
+							</container>
+						</section>
 					</container>
 				</column>
 				<column>

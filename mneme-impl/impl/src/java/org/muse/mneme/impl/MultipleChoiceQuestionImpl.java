@@ -24,12 +24,12 @@ package org.muse.mneme.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 import org.muse.ambrosia.api.AndDecision;
+import org.muse.ambrosia.api.Attachments;
 import org.muse.ambrosia.api.AutoColumn;
 import org.muse.ambrosia.api.CompareDecision;
 import org.muse.ambrosia.api.Component;
@@ -44,6 +44,7 @@ import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.OrDecision;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.PropertyReference;
+import org.muse.ambrosia.api.Section;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
 import org.muse.ambrosia.api.Text;
@@ -63,8 +64,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	{
 		protected Boolean correct = Boolean.FALSE;
 
-		protected Boolean deleted = Boolean.FALSE;
-
 		protected String id;
 
 		protected String text;
@@ -72,7 +71,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		public MultipleChoiceQuestionChoice(MultipleChoiceQuestionChoice other)
 		{
 			this.correct = other.correct;
-			this.deleted = other.deleted;
 			this.id = other.id;
 			this.text = other.text;
 		}
@@ -88,11 +86,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			return this.correct;
 		}
 
-		public Boolean getDeleted()
-		{
-			return this.deleted;
-		}
-
 		public String getId()
 		{
 			return this.id;
@@ -106,11 +99,6 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		public void setCorrect(Boolean correct)
 		{
 			this.correct = correct;
-		}
-
-		public void setDeleted(Boolean deleted)
-		{
-			this.deleted = deleted;
 		}
 
 		public void setText(String text)
@@ -217,6 +205,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		{
 			removeBlanks = false;
 			stayHere = true;
+
 			String[] parts = StringUtil.split(destination, ":");
 			if (parts.length == 2)
 			{
@@ -242,6 +231,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		{
 			removeBlanks = false;
 			stayHere = true;
+
 			String[] parts = StringUtil.split(destination, ":");
 			if (parts.length == 2)
 			{
@@ -260,7 +250,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			}
 		}
 
-		if (destination.startsWith("RESIZE"))
+		if (destination.startsWith("STAY"))
 		{
 			removeBlanks = false;
 			stayHere = true;
@@ -351,85 +341,83 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getAuthoringUi()
 	{
-		EntityDisplay display = this.uiService.newEntityDisplay();
+		// single or multiple answers
+		Selection singleMultiple = uiService.newSelection();
+		singleMultiple.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.singleCorrect"));
+		singleMultiple.addSelection("single-choice", "true");
+		singleMultiple.addSelection("multiple-select", "false");
+		singleMultiple.setDestination(this.uiService.newDestination().setDestination("STAY"));
 
-		EntityDisplayRow row = this.uiService.newEntityDisplayRow();
-		Selection selection = uiService.newSelection();
-		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.singleCorrect"));
-		selection.addSelection("single-choice", "true");
-		selection.addSelection("multiple-select", "false");
-		selection.setDestination(this.uiService.newDestination().setDestination("RESIZE"));
-		row.add(selection);
-		row.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key2.png"));
-		display.addRow(row);
+		// answer options section
+		Section answer = this.uiService.newSection();
+		answer.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		answer.add(singleMultiple);
 
-		EntityList entityList = this.uiService.newEntityList();
-		entityList.setStyle(EntityList.Style.form);
-		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesAsAuthored"), "choice");
+		// listing of choices
+		EntityList choicesList = this.uiService.newEntityList();
+		choicesList.setStyle(EntityList.Style.form);
+		choicesList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesAsAuthored"), "choice");
 
-		SelectionColumn selCol = this.uiService.newSelectionColumn();
+		// selection column
+		SelectionColumn correct = this.uiService.newSelectionColumn();
 		if (this.singleCorrect)
 		{
-			selCol.setSingle();
+			correct.setSingle();
 		}
 		else
 		{
-			selCol.setMultiple();
+			correct.setMultiple();
 		}
-		selCol.setLabel("correct");
-		selCol.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
-		selCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
-		// selCol.setTitle("correct");
-		entityList.addColumn(selCol);
+		correct.setLabel("correct");
+		correct.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
+		correct.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
+		choicesList.addColumn(correct);
 
+		// A. B. C. column
 		AutoColumn autoCol = this.uiService.newAutoColumn();
-		entityList.addColumn(autoCol);
+		choicesList.addColumn(autoCol);
 
-		EntityListColumn col = this.uiService.newEntityListColumn();
+		// choice text column
+		EntityListColumn choiceText = this.uiService.newEntityListColumn();
 		HtmlEdit edit = this.uiService.newHtmlEdit();
 		edit.setSize(5, 50);
 		edit.setProperty(this.uiService.newPropertyReference().setReference("choice.text"));
-		// col.setTitle("choice");
-		col.add(edit);
-		entityList.addColumn(col);
+		choiceText.add(edit);
+		choicesList.addColumn(choiceText);
 
-		col = this.uiService.newEntityListColumn();
+		// delete nav column
+		EntityListColumn deleteCol = this.uiService.newEntityListColumn();
 		Navigation nav = this.uiService.newNavigation();
 		Destination destination = this.uiService.newDestination();
 		destination.setDestination("DEL:{0}", this.uiService.newPropertyReference().setReference("choice.id"));
 		nav.setTitle("delete").setIcon("/icons/delete.png", Navigation.IconStyle.left).setStyle(Navigation.Style.link).setSubmit().setDestination(
 				destination);
-		col.add(nav);
-		entityList.addColumn(col);
+		deleteCol.add(nav);
+		choicesList.addColumn(deleteCol);
 
-		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("choices");
-		row.add(entityList);
+		// add more choices control
+		Selection addMore = uiService.newSelection();
+		addMore.addSelection("none", "ADD:0");
+		addMore.addSelection("one", "ADD:1");
+		addMore.addSelection("two", "ADD:2");
+		addMore.addSelection("three", "ADD:3");
+		addMore.addSelection("four", "ADD:4");
+		addMore.addSelection("five", "ADD:5");
+		addMore.setOrientation(Selection.Orientation.dropdown);
+		addMore.setSubmitValue();
+		addMore.setTitle("more-choices");
 
-		display.addRow(row);
+		// shuffle choices
+		Selection shuffle = this.uiService.newSelection();
+		shuffle.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.shuffleChoices"));
+		shuffle.setTitle("shuffle");
 
-		row = this.uiService.newEntityDisplayRow();
-		selection = uiService.newSelection();
-		selection.addSelection("none", "ADD:0");
-		selection.addSelection("one", "ADD:1");
-		selection.addSelection("two", "ADD:2");
-		selection.addSelection("three", "ADD:3");
-		selection.addSelection("four", "ADD:4");
-		selection.addSelection("five", "ADD:5");
-		selection.setOrientation(Selection.Orientation.dropdown);
-		selection.setSubmitValue();
-		row.add(selection);
-		row.setTitle("more-choices");
-		display.addRow(row);
+		// choices section
+		Section choices = this.uiService.newSection();
+		choices.setTitle("choices");
+		choices.add(choicesList).add(addMore).add(shuffle);
 
-		row = this.uiService.newEntityDisplayRow();
-		row.setTitle("shuffle");
-		selection = uiService.newSelection();
-		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.shuffleChoices"));
-		row.add(selection);
-		display.addRow(row);
-
-		return this.uiService.newFragment().setMessages(this.messages).add(display);
+		return this.uiService.newFragment().setMessages(this.messages).add(answer).add(choices);
 	}
 
 	/**
@@ -529,6 +517,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getDeliveryUi()
 	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("answer.question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.presentation.attachments")));
+
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
@@ -553,7 +549,10 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
 		entityList.addColumn(propCol);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+		Section section = this.uiService.newSection();
+		section.add(question).add(attachments).add(entityList);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(section);
 	}
 
 	/**
@@ -577,6 +576,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getReviewUi()
 	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("answer.question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.presentation.attachments")));
+
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choices"), "choice");
@@ -631,7 +638,13 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
 		answerKey.setIncluded(this.uiService.newOrDecision().setOptions(orInc));
 
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList).add(answerKey);
+		Section first = this.uiService.newSection();
+		first.add(question).add(attachments).add(entityList);
+
+		Section second = this.uiService.newSection();
+		second.add(answerKey);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second);
 	}
 
 	/**
@@ -701,7 +714,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		entityList.setStyle(EntityList.Style.form);
 		entityList
 				.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.choicesAsAuthored"), "choice");
-		entityList.setEmptyTitle("no-answers");
+		entityList.setEmptyTitle("no-answer");
 
 		// include each choice only if the choice has been selected by the user
 		PropertyReference entityIncludedProperty = this.uiService.newPropertyReference().setReference("choice.id");
@@ -743,7 +756,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewQuestionUi()
 	{
-		// TODO: add correct/incorrect marking
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.presentation.attachments")));
+
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesAsAuthored"), "choice");
@@ -776,7 +796,13 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		refs[1] = this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
 		answerKey.setText("answer-key", refs);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList).add(answerKey);
+		Section first = this.uiService.newSection();
+		first.add(question).add(attachments).add(entityList);
+
+		Section second = this.uiService.newSection();
+		second.add(answerKey);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second);
 	}
 
 	/**

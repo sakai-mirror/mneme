@@ -233,7 +233,7 @@ public class QuestionImpl implements Question
 
 	protected AttributionImpl createdBy = new AttributionImpl(null);
 
-	protected Boolean explainReason = null;
+	protected Boolean explainReason = Boolean.FALSE;
 
 	protected String feedback = null;
 

@@ -64,7 +64,7 @@ public class FillBlanksPlugin implements QuestionPlugin
 	 */
 	public Integer getPopularity()
 	{
-		return Integer.valueOf(60);
+		return Integer.valueOf(70);
 	}
 
 	/**
