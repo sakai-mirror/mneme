@@ -548,7 +548,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		}
 
 		// add the distractor (need to be at the end of the rv, i.e. after that shuffle)
-		if (this.distractor != null)
+		if ((this.distractor != null) && (distractor.getChoice() != null))
 		{
 			choices.add(new MatchQuestionPair(this.distractor));
 			rv.add(new MatchQuestionPair(this.distractor));
