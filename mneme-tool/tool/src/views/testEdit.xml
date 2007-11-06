@@ -40,66 +40,44 @@
 		<message selector="testEdit-title" />
 	</title>
 	<container>
-		<navigationBar/>
+		<navigationBar />
+
 		<section>
 			<container>
-				<entityDisplay>
-					<rows>
-						<row title="test-title">
-							<container>
-								<textEdit rows="1" cols="25">
-									<model ref="assessment.title" />
-								</textEdit>
-							</container>
-						</row>
-						<row title="type">
-							<container>
-								<!--  warn if live -->
-								<alert>
-									<message selector="live-warning-survey">
-										<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
-									</message>
-									<included>
-										<decision model="assessment.isLive" />
-										<compareDecision model="assessment.type" constant="survey" />
-									</included>
-								</alert>
-								<selection>
-									<model ref="assessment.type" />
-									<selectionChoices>
-										<selectionChoice value="assignment" selector="assessment-type-assignment" />
-										<selectionChoice value="test" selector="assessment-type-test" />									
-										<selectionChoice value="survey" selector="assessment-type-survey" />
-									</selectionChoices>
-									<readOnly>
-										<decision model="assessment.isLive" />
-										<compareDecision model="assessment.type" constant="survey" />
-									</readOnly>
-								</selection>
-							</container>
-						</row>
-						<row title="test-instructions">
-							<container>
-								<entityDisplay>
-									<rows>
-										<row>
-											<container>
-												<htmlEdit model="assessment.presentation.text" />
-											</container>
-										</row>
-										<row title="attachments">
-											<container>
-												<attachmentsEdit model="assessment.presentation.attachments" />
-											</container>
-										</row>
-									</rows>
-								</entityDisplay>
-							</container>
-						</row>
-					</rows>
-				</entityDisplay>
+				<section>
+					<container>
+						<textEdit title="test-title" rows="1" cols="40">
+							<model ref="assessment.title" />
+						</textEdit>
+						<!--  warn if live -->
+						<alert>
+							<message selector="live-warning-survey">
+								<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+							</message>
+							<included>
+								<decision model="assessment.isLive" />
+								<compareDecision model="assessment.type" constant="survey" />
+							</included>
+						</alert>
+						<selection title="type">
+							<model ref="assessment.type" />
+							<selectionChoices>
+								<selectionChoice value="assignment" selector="assessment-type-assignment" />
+								<selectionChoice value="test" selector="assessment-type-test" />
+								<selectionChoice value="survey" selector="assessment-type-survey" />
+							</selectionChoices>
+							<readOnly>
+								<decision model="assessment.isLive" />
+								<compareDecision model="assessment.type" constant="survey" />
+							</readOnly>
+						</selection>
+						<htmlEdit title="test-instructions" model="assessment.presentation.text" />
+						<attachmentsEdit title="attachments" model="assessment.presentation.attachments" />
+					</container>
+				</section>
 			</container>
 		</section>
+
 		<section>
 			<container>
 				<!--  warn if live -->
@@ -194,20 +172,17 @@
 						</modelColumn>
 					</columns>
 				</entityList>
+				<text>
+					<message selector="assessment-totals">
+						<model ref="assessment.parts.numQuestions" />
+						<model ref="assessment.parts.totalPoints" />
+					</message>
+				</text>
 			</container>
 		</section>
-		<text>
-			<message selector="assessment-questions">
-				<model ref="assessment.parts.numQuestions" />
-			</message>
-		</text>
-		<text>
-			<message selector="assessment-points">
-				<model ref="assessment.parts.totalPoints" />
-			</message>
-		</text>
-		<!-- save / cancel nav bar -->
-		<navigationBar id="nav">
+
+		<!-- navigations -->
+		<navigationBar>
 			<container>
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
@@ -218,11 +193,11 @@
 			</container>
 		</navigationBar>
 	</container>
-	
+
 	<footer>
 		<container>
 			<finePrint>
-				<message selector="test-Id">
+				<message selector="id-display">
 					<model ref="assessment.id" />
 				</message>
 			</finePrint>
