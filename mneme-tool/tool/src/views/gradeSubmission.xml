@@ -43,7 +43,7 @@
 	<subHeader>
 		<container>
 			<text>
-				<message selector="assessment-title">
+				<message>
 					<model ref="submission.assessment.title" />
 				</message>
 			</text>
@@ -60,42 +60,42 @@
 		<!-- repeat the nav up top -->
 		<alias to="nav" />
 
-		<entityDisplay>
-			<rows>
-				<row title="submission-username">
-					<model type="userInfo" selector="DISPLAYNAME" ref="submission.userId" />
+		<section>
+			<container>
+				<text>
+					<message selector="submission-username">
+						<model type="userInfo" selector="DISPLAYNAME" ref="submission.userId" />
+					</message>
 					<included>
 						<decision reversed="TRUE" model="submission.assessment.grading.anonymous" />
 					</included>
-				</row>
-				<row title="submitted">
-					<container>
-						<text>
-							<message>
-								<model type="date" ref="submission.submittedDate" />
-							</message>
-							<included>
-								<decision reversed="TRUE" model="submission.isCompletedLate" />
-							</included>
-						</text>
-						<text>
-							<message selector="submission-finished-date-late">
-								<model type="date" ref="submission.submittedDate" />
-							</message>
-							<included>
-								<decision model="submission.isCompletedLate" />
-							</included>
-						</text>
-					</container>
-				</row>
-				<row title="released">
-					<model type="icon" icon="/icons/active.png" />
+				</text>
+				<text>
+					<message selector="submitted">
+						<model type="date" ref="submission.submittedDate" />
+					</message>
+					<included>
+						<decision reversed="TRUE" model="submission.isCompletedLate" />
+					</included>
+				</text>
+				<text>
+					<message selector="submission-late">
+						<model type="date" ref="submission.submittedDate" />
+					</message>
+					<included>
+						<decision model="submission.isCompletedLate" />
+					</included>
+				</text>
+				<text>
+					<message selector="released">
+						<model type="icon" icon="/icons/active.png" />
+					</message>
 					<included>
 						<decision model="submission.isReleased" />
 					</included>
-				</row>
-			</rows>
-		</entityDisplay>
+				</text>
+			</container>
+		</section>
 
 		<section>
 			<iterator name="answer" model="submission.answers" />
@@ -239,11 +239,17 @@
 				<section>
 					<container>
 						<!--mark as evaluated -->
-						<selection title="mark-evaluated">
+						<selection>
+							<selectionChoices>
+								<selectionChoice value="true" selector="mark-evaluated" />
+							</selectionChoices>
 							<model ref="submission.evaluation.evaluated" />
 						</selection>
 						<!-- release -->
-						<selection title="release-scores">
+						<selection>
+							<selectionChoices>
+								<selectionChoice value="true" selector="release-scores" />
+							</selectionChoices>
 							<model ref="submission.isReleased" />
 						</selection>
 					</container>
@@ -290,5 +296,6 @@
 				</navigation>
 			</container>
 		</navigationBar>
+
 	</container>
 </interface>

@@ -30,18 +30,21 @@
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
+
+	<title>
+		<message selector="grading-assessment-title" />
+	</title>
+
 	<header>
 		<message selector="grading-assessment-header">
 			<model type="icon" icon="/icons/grade.png" />
 		</message>
 	</header>
-	<title>
-		<message selector="grading-assessment-title" />
-	</title>
+
 	<subHeader>
 		<container>
 			<text>
-				<message selector="assessment-title">
+				<message>
 					<model ref="assessment.title" />
 				</message>
 			</text>
@@ -52,6 +55,7 @@
 			</text>
 		</container>
 	</subHeader>
+
 	<container>
 
 		<!--navigation-->
@@ -67,7 +71,7 @@
 				</navigation>
 				<navigation>
 					<title>
-						<message selector="nav-divider" />
+						<message selector="bar" />
 					</title>
 				</navigation>
 				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description"
@@ -79,56 +83,54 @@
 
 		<section>
 			<iterator name="part" model="assessment.parts.parts" />
+			<title>
+				<message selector="question-list-part-title">
+					<model ref="part.ordering.position" />
+					<model ref="assessment.parts.size" />
+					<model ref="part.title" />
+				</message>
+			</title>
 			<container>
-				<section>
-					<title>
-						<message selector="question-list-part-title">
-							<model ref="part.ordering.position" />
-							<model ref="assessment.parts.size" />
-							<model ref="part.title" />
-						</message>
-					</title>
-					<container>
-						<entityList>
-							<iterator name="question" model="part.questionsUsed"></iterator>
-							<columns>
-								<column>
-									<navigations>
-										<navigation style="LINK" submit="FALSE">
-											<icon icon="/icons/grade.png" />
-											<destination template="/grade_question/{0}/{1}/{2}">
-												<model ref="sort_grades" />
-												<model ref="assessment.id" />
-												<model ref="question.id" />
-											</destination>
-										</navigation>
-									</navigations>
-									<entityIncluded>
-										<decision model="question.hasUnscoredSubmissions" />
-									</entityIncluded>
-								</column>
-								<column>
-									<navigations>
-										<navigation style="LINK" submit="FALSE">
-											<title>
-												<message selector="question-text">
-													<model ref="question.description" />
-												</message>
-											</title>
-											<destination template="/grade_question/{0}/{1}/{2}">
-												<model ref="sort_grades" />
-												<model ref="assessment.id" />
-												<model ref="question.id" />
-											</destination>
-										</navigation>
-									</navigations>
-								</column>
-							</columns>
-						</entityList>
-					</container>
-				</section>
+				<entityList>
+					<iterator name="question" model="part.questionsUsed"></iterator>
+					<columns>
+						<column pixels="16">
+							<navigations>
+								<navigation style="LINK" submit="FALSE">
+									<icon icon="/icons/grade.png" />
+									<destination template="/grade_question/{0}/{1}/{2}">
+										<model ref="sort_grades" />
+										<model ref="assessment.id" />
+										<model ref="question.id" />
+									</destination>
+								</navigation>
+							</navigations>
+							<entityIncluded>
+								<decision model="question.hasUnscoredSubmissions" />
+							</entityIncluded>
+						</column>
+						<column>
+							<navigations>
+								<navigation style="LINK" submit="FALSE">
+									<title>
+										<message>
+											<model ref="question.description" />
+										</message>
+									</title>
+									<destination template="/grade_question/{0}/{1}/{2}">
+										<model ref="sort_grades" />
+										<model ref="assessment.id" />
+										<model ref="question.id" />
+									</destination>
+								</navigation>
+							</navigations>
+						</column>
+					</columns>
+				</entityList>
 			</container>
 		</section>
+
+		<!-- navigation -->
 		<navigationBar>
 			<container>
 				<navigation title="grade-return-title" style="BUTTON" accessKey="grade-return-access" description="grade-return-description">
@@ -139,5 +141,6 @@
 				</navigation>
 			</container>
 		</navigationBar>
+
 	</container>
 </interface>

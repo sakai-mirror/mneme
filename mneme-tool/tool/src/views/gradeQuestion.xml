@@ -36,12 +36,12 @@
 		</message>
 	</header>
 	<title>
-		<message selector="grading-assessment-title" />
+		<message selector="grading-questions-title" />
 	</title>
 	<subHeader>
 		<container>
 			<text>
-				<message selector="assessment-title">
+				<message>
 					<model ref="assessment.title" />
 				</message>
 			</text>

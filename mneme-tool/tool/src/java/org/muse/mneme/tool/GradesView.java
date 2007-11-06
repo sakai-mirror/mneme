@@ -123,6 +123,15 @@ public class GradesView extends ControllerImpl
 		{
 			sort = AssessmentService.AssessmentsSort.odate_d;
 		}		
+		// 2 is title
+		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = AssessmentService.AssessmentsSort.title_a;
+		}
+		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = AssessmentService.AssessmentsSort.title_d;
+		}		
 
 		return sort;
 	}

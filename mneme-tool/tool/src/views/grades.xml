@@ -93,6 +93,22 @@
 					<title>
 						<message selector="assessment-title" />
 					</title>
+					<sort submit="TRUE">
+						<active>
+							<compareDecision model="sort_column" constant="2" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/grades/2A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/grades/2D" />
+						</desc>
+					</sort>
 					<container>
 						<navigation style="LINK" submit="TRUE">
 							<title>
@@ -108,7 +124,7 @@
 						</navigation>
 					</container>
 				</column>
-				<column wrap="FALSE">
+				<modelColumn wrap="FALSE">
 					<title>
 						<message selector="assessment-odate"/>
 					</title>
@@ -128,15 +144,9 @@
 							<destination template="/grades/1D" />
 						</desc>
 					</sort>
-					<container>
-						<text>
-							<message selector="assessment-show-odate">
-								<model ref="assessment.dates.openDate" type="date" missing="dash" />
-							</message>
-						</text>
-					</container>
-				</column>
-				<column wrap="FALSE">
+					<model ref="assessment.dates.openDate" type="date" missing="dash" />
+				</modelColumn>
+				<modelColumn wrap="FALSE">
 					<title>
 						<message selector="assessment-ddate" />
 					</title>
@@ -156,14 +166,8 @@
 							<destination template="/grades/0D" />
 						</desc>
 					</sort>
-					<container>
-						<text>
-							<message selector="assessment-show-ddate">
-								<model ref="assessment.dates.dueDate" type="date" missing="dash" />
-							</message>
-						</text>
-					</container>
-				</column>
+					<model ref="assessment.dates.dueDate" type="date" missing="dash" />
+				</modelColumn>
 				<modelColumn>
 					<title>
 						<message selector="submit_status" />

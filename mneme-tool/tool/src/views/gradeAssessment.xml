@@ -30,20 +30,21 @@
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
-	<header>
-		<message selector="grading-assessment-header">
-			<model type="icon" icon="/icons/grade.png" />
-			<model ref="assessment.title" />
-		</message>
-	</header>
+	
 	<title>
 		<message selector="grading-assessment-title" />
 	</title>
 
+	<header>
+		<message selector="grading-assessment-header">
+			<model type="icon" icon="/icons/grade.png" />
+		</message>
+	</header>
+
 	<subHeader>
 		<container>
 			<text>
-				<message selector="assessment-title">
+				<message>
 					<model ref="assessment.title" />
 				</message>
 			</text>
@@ -74,49 +75,20 @@
 			</container>
 		</navigationBar>
 
-		<entityDisplay>
-			<rows>
-				<row title="actions">
-					<container>
-						<navigation title="release-evaluated" style="LINK" submit="TRUE" destination="RELEASEEVALUATED">
-							<icon icon="/icons/active.png" style="LEFT" />
-							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-release-evaluated" />
-						</navigation>
-					</container>
-				</row>
-				<row>
-					<container>
-						<navigation title="release-all" style="LINK" submit="TRUE" destination="RELEASEALL">
-							<icon icon="/icons/active.png" style="LEFT" />
-							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-release-all" />
-						</navigation>
-					</container>
-				</row>
-				<row>
-					<container>
-						<entityDisplay>
-							<rows>
-								<row title="adjust-submissions">
-									<container>
-										<floatEdit model="submissionAdjust.value" cols="6" />
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
-					</container>
-				</row>
-				<row>
-					<container>
-						<text selector="add-comments" />
-					</container>
-				</row>
-				<row>
-					<container>
-						<htmlEdit model="submissionAdjustComments.value" rows="5" cols="40" />
-					</container>
-				</row>
-			</rows>
-		</entityDisplay>
+		<section title="actions">
+			<container>
+				<navigation title="release-evaluated" style="LINK" submit="TRUE" destination="RELEASEEVALUATED">
+					<icon icon="/icons/active.png" style="LEFT" />
+					<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-release-evaluated" />
+				</navigation>
+				<navigation title="release-all" style="LINK" submit="TRUE" destination="RELEASEALL">
+					<icon icon="/icons/active.png" style="LEFT" />
+					<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-release-all" />
+				</navigation>
+				<floatEdit title="adjust-submissions" model="submissionAdjust.value" cols="6" />
+				<htmlEdit title="add-comments" model="submissionAdjustComments.value" rows="5" cols="40" />
+			</container>
+		</section>
 
 		<entityList style="FLAT">
 			<iterator name="submission">
@@ -394,7 +366,7 @@
 			</columns>
 		</entityList>
 
-		<!--bottom navigation-->
+		<!-- navigation-->
 		<navigationBar>
 			<container>
 				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
