@@ -89,8 +89,8 @@ public class PartEditView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page
-		if (params.length < 5 || params.length > 7)	throw new IllegalArgumentException();
-		
+		if (params.length < 5 || params.length > 7) throw new IllegalArgumentException();
+
 		// Since we have two sorts here, we call this testsortcode
 		context.put("testsortcode", params[2]);
 		String assessmentId = params[3];
@@ -131,7 +131,7 @@ public class PartEditView extends ControllerImpl
 		else
 		{
 			getManual(assessment, (ManualPart) part, req, res, context, params);
-		}		
+		}
 	}
 
 	/**
@@ -174,7 +174,7 @@ public class PartEditView extends ControllerImpl
 			pagingParameter = "1-30";
 		}
 
-		Integer maxPools = this.poolService.countPools(toolManager.getCurrentPlacement().getContext(), null);
+		Integer maxPools = countPools(assessment, part);
 
 		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxPools);
@@ -185,8 +185,7 @@ public class PartEditView extends ControllerImpl
 		// get the pool draw list
 		// - all the pools for the user (select, sort, page) crossed with this part's actual draws
 		// - these are virtual draws, not part of the DrawPart
-		List<PoolDraw> draws = part.getDrawsForPools(toolManager.getCurrentPlacement().getContext(), sort, null, paging.getCurrent(), paging
-				.getSize());
+		List<PoolDraw> draws = getDraws(assessment, part, sort, paging);
 
 		context.put("draws", draws);
 
@@ -210,31 +209,6 @@ public class PartEditView extends ControllerImpl
 
 		// render
 		uiService.render(ui2, context);
-	}
-
-	private PoolService.FindPoolsSort findSortCode(String sortCode)
-	{
-		PoolService.FindPoolsSort sort = PoolService.FindPoolsSort.title_a;
-		// 0 is title
-		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
-		{
-			sort = PoolService.FindPoolsSort.title_a;
-		}
-		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
-		{
-			sort = PoolService.FindPoolsSort.title_d;
-		}
-		// 1 is points
-		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
-		{
-			sort = PoolService.FindPoolsSort.points_a;
-		}
-		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
-		{
-			sort = PoolService.FindPoolsSort.points_d;
-		}
-
-		return sort;
 	}
 
 	/**
@@ -266,8 +240,8 @@ public class PartEditView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page
-		if (params.length < 5 || params.length > 7)	throw new IllegalArgumentException();
-		
+		if (params.length < 5 || params.length > 7) throw new IllegalArgumentException();
+
 		String assessmentId = params[3];
 		String partId = params[4];
 
@@ -298,7 +272,7 @@ public class PartEditView extends ControllerImpl
 		// setup the model: the selected assessment
 		context.put("assessment", assessment);
 		context.put("part", part);
-				
+
 		Values values = null;
 
 		// based on the part type...
@@ -341,7 +315,7 @@ public class PartEditView extends ControllerImpl
 		{
 			// apply the draws to the part
 			DrawPart dpart = (DrawPart) part;
-			dpart.updateDraws(new ArrayList<PoolDraw>(draws.getSet()));			
+			dpart.updateDraws(new ArrayList<PoolDraw>(draws.getSet()));
 		}
 
 		// process the ids into the destination for a redirect to the remove confirm view...
@@ -360,7 +334,7 @@ public class PartEditView extends ControllerImpl
 						{
 							// remove question from part
 							Question question = part.getQuestion(removeQuesId);
-							((ManualPart)part).removeQuestion(question);	
+							((ManualPart) part).removeQuestion(question);
 						}
 					}
 				}
@@ -374,7 +348,7 @@ public class PartEditView extends ControllerImpl
 		// commit the save
 		try
 		{
-			this.assessmentService.saveAssessment(assessment);			
+			this.assessmentService.saveAssessment(assessment);
 		}
 		catch (AssessmentPermissionException e)
 		{
@@ -425,7 +399,7 @@ public class PartEditView extends ControllerImpl
 	{
 		this.poolService = service;
 	}
-	
+
 	/**
 	 * @param toolManager
 	 *        the toolManager to set
@@ -433,5 +407,75 @@ public class PartEditView extends ControllerImpl
 	public void setToolManager(ToolManager toolManager)
 	{
 		this.toolManager = toolManager;
+	}
+
+	private PoolService.FindPoolsSort findSortCode(String sortCode)
+	{
+		PoolService.FindPoolsSort sort = PoolService.FindPoolsSort.title_a;
+		// 0 is title
+		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = PoolService.FindPoolsSort.title_a;
+		}
+		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = PoolService.FindPoolsSort.title_d;
+		}
+		// 1 is points
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = PoolService.FindPoolsSort.points_a;
+		}
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = PoolService.FindPoolsSort.points_d;
+		}
+
+		return sort;
+	}
+
+	/**
+	 * Get the count of pools. If the assessment is live, this counts all used pools, otherwise all pools in the context.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return The count of pools.
+	 */
+	protected Integer countPools(Assessment assessment, DrawPart part)
+	{
+		if (assessment.getIsLive())
+		{
+			return part.getDraws().size();
+		}
+
+		return this.poolService.countPools(toolManager.getCurrentPlacement().getContext(), null);
+	}
+
+	/**
+	 * Get the draw of pools. If the assessment is live, just get the used pools, else get that joined with all possible pools.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param part
+	 *        The draw part.
+	 * @param sort
+	 *        The sort.
+	 * @param paging
+	 *        Paging.
+	 * @return The draw of pools.
+	 */
+	protected List<PoolDraw> getDraws(Assessment assessment, DrawPart part, PoolService.FindPoolsSort sort, Paging paging)
+	{
+		if (assessment.getIsLive())
+		{
+			List<PoolDraw> draws = part.getDraws(sort, paging.getCurrent(), paging.getSize());
+			return draws;
+		}
+
+		// - all the pools for the user (select, sort, page) crossed with this part's actual draws
+		// - these are virtual draws, not part of the DrawPart
+		List<PoolDraw> draws = part.getDrawsForPools(toolManager.getCurrentPlacement().getContext(), sort, null, paging.getCurrent(), paging
+				.getSize());
+		return draws;
 	}
 }

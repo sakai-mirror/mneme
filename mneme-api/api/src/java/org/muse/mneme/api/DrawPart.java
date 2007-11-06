@@ -46,6 +46,13 @@ public interface DrawPart extends Part
 	List<PoolDraw> getDraws();
 
 	/**
+	 * Get all the pools and their counts, sorted and paged.
+	 * 
+	 * @return The List of draws.
+	 */
+	List<PoolDraw> getDraws(PoolService.FindPoolsSort sort, Integer pageNum, Integer pageSize);
+
+	/**
 	 * Get a list of draws for each pool specified - for those that are already in this part, set the non-null numQuestions.<br />
 	 * The draws are virtual, not part of the DrawPart.
 	 * 

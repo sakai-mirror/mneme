@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -35,6 +36,7 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * DrawPartImpl implements DrawPart
@@ -127,6 +129,81 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	public List<PoolDraw> getDraws()
 	{
 		return this.pools;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<PoolDraw> getDraws(final PoolService.FindPoolsSort sort, Integer pageNum, Integer pageSize)
+	{
+		List<PoolDraw> rv = new ArrayList<PoolDraw>(this.pools);
+
+		// sort
+		if (sort != null)
+		{
+			Collections.sort(rv, new Comparator()
+			{
+				public int compare(Object arg0, Object arg1)
+				{
+					int rv = 0;
+					switch (sort)
+					{
+						case title_a:
+						{
+							String s0 = StringUtil.trimToZero(((PoolDraw) arg0).getPool().getTitle());
+							String s1 = StringUtil.trimToZero(((PoolDraw) arg1).getPool().getTitle());
+							rv = s0.compareToIgnoreCase(s1);
+							break;
+						}
+						case title_d:
+						{
+							String s0 = StringUtil.trimToZero(((PoolDraw) arg0).getPool().getTitle());
+							String s1 = StringUtil.trimToZero(((PoolDraw) arg1).getPool().getTitle());
+							rv = -1 * s0.compareToIgnoreCase(s1);
+							break;
+						}
+						case points_a:
+						{
+							Float f0 = ((PoolDraw) arg0).getPool().getPoints();
+							if (f0 == null) f0 = Float.valueOf(0f);
+							Float f1 = ((PoolDraw) arg1).getPool().getPoints();
+							if (f1 == null) f1 = Float.valueOf(0f);
+							rv = f0.compareTo(f1);
+							break;
+						}
+						case points_d:
+						{
+							Float f0 = ((PoolDraw) arg0).getPool().getPoints();
+							if (f0 == null) f0 = Float.valueOf(0f);
+							Float f1 = ((PoolDraw) arg1).getPool().getPoints();
+							if (f1 == null) f1 = Float.valueOf(0f);
+							rv = -1 * f0.compareTo(f1);
+							break;
+						}
+					}
+
+					return rv;
+				}
+			});
+		}
+
+		// page
+		if ((pageNum != null) && (pageSize != null))
+		{
+			// start at ((pageNum-1)*pageSize)
+			int start = ((pageNum - 1) * pageSize);
+			if (start < 0) start = 0;
+			if (start > rv.size()) start = rv.size() - 1;
+
+			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
+			int end = ((pageNum) * pageSize);
+			if (end < 0) end = 0;
+			if (end > rv.size()) end = rv.size();
+
+			rv = rv.subList(start, end);
+		}
+
+		return rv;
 	}
 
 	/**
