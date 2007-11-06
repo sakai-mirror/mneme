@@ -617,6 +617,28 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		choice.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
 		entityList.addColumn(choice);
 
+		// correct / incorrect
+		Text correct = this.uiService.newText();
+		correct.setText(null, this.uiService.newIconPropertyReference().setIcon("!/ambrosia_library/icons/correct.png"));
+		correct.setIncluded(this.uiService.newCompareDecision().setEqualsProperty(
+				this.uiService.newPropertyReference().setReference("pair.correctChoiceId")).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
+						this.uiService.newPropertyReference().setReference("pair.id"))));
+
+		Text incorrect = this.uiService.newText();
+		incorrect.setText(null, this.uiService.newIconPropertyReference().setIcon("!/ambrosia_library/icons/incorrect.png"));
+		incorrect.setIncluded(this.uiService.newCompareDecision().setEqualsProperty(
+				this.uiService.newPropertyReference().setReference("pair.correctChoiceId")).setReversed().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
+						this.uiService.newPropertyReference().setReference("pair.id"))));
+		
+		EntityListColumn correctCol = this.uiService.newEntityListColumn();
+		correctCol.setWidth(16);
+		correctCol.setEntityIncluded(
+				this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("pair.match")), null);
+		correctCol.add(correct).add(incorrect);
+		entityList.addColumn(correctCol);
+
 		// match
 		Selection selection = this.uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
@@ -723,6 +745,28 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		choice.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
 		entityList.addColumn(choice);
 
+		// correct / incorrect
+		Text correct = this.uiService.newText();
+		correct.setText(null, this.uiService.newIconPropertyReference().setIcon("!/ambrosia_library/icons/correct.png"));
+		correct.setIncluded(this.uiService.newCompareDecision().setEqualsProperty(
+				this.uiService.newPropertyReference().setReference("pair.correctChoiceId")).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
+						this.uiService.newPropertyReference().setReference("pair.id"))));
+
+		Text incorrect = this.uiService.newText();
+		incorrect.setText(null, this.uiService.newIconPropertyReference().setIcon("!/ambrosia_library/icons/incorrect.png"));
+		incorrect.setIncluded(this.uiService.newCompareDecision().setEqualsProperty(
+				this.uiService.newPropertyReference().setReference("pair.correctChoiceId")).setReversed().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
+						this.uiService.newPropertyReference().setReference("pair.id"))));
+		
+		EntityListColumn correctCol = this.uiService.newEntityListColumn();
+		correctCol.setWidth(16);
+		correctCol.setEntityIncluded(
+				this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("pair.match")), null);
+		correctCol.add(correct).add(incorrect);
+		entityList.addColumn(correctCol);
+
 		// match
 		Selection selection = this.uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
@@ -761,7 +805,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		Section answerKeySection = this.uiService.newSection();
 		answerKeySection.add(answerKey);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(answerKeySection).add(matchSection);
+		return this.uiService.newFragment().setMessages(this.messages).add(matchSection).add(answerKeySection);
 	}
 
 	/**
