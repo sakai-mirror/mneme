@@ -184,10 +184,6 @@ public class PoolEditView extends ControllerImpl
 		List<Question> questions = questionService.findQuestions(pool, sort, null, paging.getCurrent(), paging.getSize());
 		context.put("questions", questions);
 
-		// the question types
-		List<QuestionPlugin> questionTypes = this.mnemeService.getQuestionPlugins();
-		context.put("questionTypes", questionTypes);
-
 		// for the checkboxes
 		Values values = this.uiService.newValues();
 		context.put("questionids", values);

@@ -86,9 +86,9 @@
 			</title>
 			<container>
 				<selection>
-					<title>
-						<message selector="question-author-reason" />
-					</title>
+					<selectionChoices>
+						<selectionChoice value="true" selector="question-author-reason" />
+					</selectionChoices>
 					<model ref="question.explainReason" />
 				</selection>
 			</container>

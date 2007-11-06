@@ -25,20 +25,23 @@
 -->
 
 <interface>
+
+	<!--mode bar-->
+	<modeContainer>
+		<alias to="ToolModeFragment" toolId="sakai.mneme" />
+	</modeContainer>
+
+	<title>
+		<message selector="questions-copy-move-title" />
+	</title>
+
 	<header>
 		<message selector="copy-move-header">
 			<model type="icon" ref="headerIcon" />
 			<model ref="headerText" />
 		</message>
 	</header>
-	<title>
-		<message selector="questions-copy-move-title" />
-	</title>
 
-	<!--mode bar-->
-	<modeContainer>
-		<alias to="ToolModeFragment" toolId="sakai.mneme" />
-	</modeContainer>
 	<container>
 		<!-- the list of pools -->
 		<entityList style="FLAT">
@@ -106,16 +109,17 @@
 			</columns>
 		</entityList>
 
-		<!--bottom navigation-->
+		<!--navigation-->
 		<navigationBar>
 			<container>
-				<navigation title="ok" style="BUTTON" accessKey="ok-access" description="ok-description" submit="TRUE"
-					selectRequirement="SINGLE" selectRequirementId="SELECTION" selectRequirementMessage="save-failed-requirements">
+				<navigation title="ok" style="BUTTON" accessKey="ok-access" description="ok-description" submit="TRUE" selectRequirement="SINGLE"
+					selectRequirementId="SELECTION" selectRequirementMessage="save-failed-requirements">
 					<icon icon="/icons/OK.png" style="LEFT" />
 					<destination template="{0}">
 						<model ref="saveDestination" />
 					</destination>
 				</navigation>
+				<divider />
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 					<destination template="/pool_edit/{0}/{1}/{2}/{3}/{4}">
@@ -128,5 +132,6 @@
 				</navigation>
 			</container>
 		</navigationBar>
+
 	</container>
 </interface>

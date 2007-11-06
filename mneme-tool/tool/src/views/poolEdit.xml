@@ -25,20 +25,22 @@
 -->
 
 <interface>
+
 	<!--mode bar-->
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
+
+	<title>
+		<message selector="pool-edit-title" />
+	</title>
+
 	<header>
 		<message selector="pool-edit-header">
 			<model type="icon" icon="/icons/basket_add.png" />
 			<model ref="pool.title" missing="no-title" />
 		</message>
 	</header>
-
-	<title>
-		<message selector="pool-edit-title" />
-	</title>
 
 	<subHeader>
 		<container>
@@ -56,7 +58,7 @@
 	</subHeader>
 
 	<container>
-		<!--entity actions-->
+
 		<!-- the list of questions -->
 		<entityList style="FLAT">
 			<iterator name="question" model="questions" />
@@ -70,12 +72,7 @@
 					</value>
 					<model ref="questionids.values" />
 					<entityActions>
-						<navigation submit="TRUE" style="LINK" description="add-question-description">
-							<title>
-								<message selector="add-question-title">
-									<model ref="type.typeName" />
-								</message>
-							</title>
+						<navigation submit="TRUE" style="LINK" title="add-question-title" description="add-question-description">
 							<destination template="/select_question_type/{0}/{1}/{2}/{3}{4}/{5}">
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
@@ -239,7 +236,7 @@
 			</columns>
 		</entityList>
 
-		<!--bottom navigation-->
+		<!--navigation-->
 		<navigationBar>
 			<container>
 				<navigation title="return" style="BUTTON" submit="FALSE">
@@ -252,5 +249,29 @@
 				</navigation>
 			</container>
 		</navigationBar>
+
 	</container>
+
+	<footer>
+		<container>
+			<finePrint>
+				<message selector="id-display">
+					<model ref="pool.id" />
+				</message>
+			</finePrint>
+			<finePrint>
+				<message selector="history-createText">
+					<model type="userInfo" selector="DISPLAYNAME" ref="pool.createdBy.UserId" />
+					<model type="date" ref="pool.createdBy.date" />
+				</message>
+			</finePrint>
+			<finePrint>
+				<message selector="history-modifyText">
+					<model type="userInfo" selector="DISPLAYNAME" ref="pool.modifiedBy.UserId" />
+					<model type="date" ref="pool.modifiedBy.date" />
+				</message>
+			</finePrint>
+		</container>
+	</footer>
+
 </interface>

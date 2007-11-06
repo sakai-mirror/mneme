@@ -54,10 +54,10 @@
 
 		<section>
 			<container>
-				<textEdit title="part-title" rows="1" cols="25">
+				<textEdit title="part-title" rows="1" cols="40">
 					<model ref="part.title" />
 				</textEdit>
-				<htmlEdit title="part-instructions" model="part.presentation.text" />
+				<htmlEdit title="part-instructions" model="part.presentation.text" rows="5" cols="40"/>
 				<attachmentsEdit title="attachments" model="part.presentation.attachments" />
 			</container>
 		</section>

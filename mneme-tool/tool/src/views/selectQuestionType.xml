@@ -30,53 +30,48 @@
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
+
+	<title>
+		<message selector="select-question-type-title" />
+	</title>
+
 	<header>
 		<message selector="select-question-type-header">
 			<model type="icon" icon="/icons/add_qst.png" />
 		</message>
 	</header>
-	<title>
-		<message selector="select-question-type-title" />
-	</title>
 
 	<container>
-	<navigationBar />
-		<entityDisplay>
-			<rows>
-				<row title="question-types">
-					<container>
-						<entityList>
-							<iterator name="questionType" model="questionTypes" />
-							<emptyTitle>
-								<message selector="no-question-types" />
-							</emptyTitle>
-							<columns>
-								<selectionColumn multiple="FALSE">
-									<value>
-										<model type="text" ref="questionType.Type" />
-									</value>
-									<model ref="selectedQuestionType.value" />
-								</selectionColumn>
-								<modelColumn>
-									<model ref="questionType.TypeName" />
-								</modelColumn>
-							</columns>
-						</entityList>
-					</container>
-				</row>
-			</rows>
-		</entityDisplay>
 
-		<!--bottom navigation-->
+		<navigationBar>
+			<container>
+				<text>
+					<message selector="question-types" />
+				</text>
+			</container>
+		</navigationBar>
+
+		<section>
+			<container>
+
+				<selection>
+					<model ref="selectedQuestionType.value" />
+					<selectionModel model="questionTypes" name="type" value="type.type" display="type.typeName"></selectionModel>
+				</selection>
+
+			</container>
+		</section>
+
+		<!--navigation-->
 		<navigationBar>
 			<container>
 				<navigation title="ok" style="BUTTON" accessKey="ok-access" description="ok-description" submit="TRUE">
 					<icon icon="/icons/OK.png" style="LEFT" />
-
 					<destination template="CREATE/{0}">
 						<model ref="prevDestinationParamPath" />
 					</destination>
 				</navigation>
+				<divider />
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 					<destination template="/pool_edit/{0}">
@@ -85,5 +80,6 @@
 				</navigation>
 			</container>
 		</navigationBar>
+
 	</container>
 </interface>

@@ -71,7 +71,7 @@
 								<compareDecision model="assessment.type" constant="survey" />
 							</readOnly>
 						</selection>
-						<htmlEdit title="test-instructions" model="assessment.presentation.text" />
+						<htmlEdit title="test-instructions" model="assessment.presentation.text" rows="5" cols="40" />
 						<attachmentsEdit title="attachments" model="assessment.presentation.attachments" />
 					</container>
 				</section>
