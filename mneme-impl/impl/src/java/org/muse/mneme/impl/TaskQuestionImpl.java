@@ -21,6 +21,15 @@
 
 package org.muse.mneme.impl;
 
+import org.muse.ambrosia.api.Attachments;
+import org.muse.ambrosia.api.Component;
+import org.muse.ambrosia.api.HtmlEdit;
+import org.muse.ambrosia.api.Navigation;
+import org.muse.ambrosia.api.Overlay;
+import org.muse.ambrosia.api.Section;
+import org.muse.ambrosia.api.Selection;
+import org.muse.ambrosia.api.Text;
+import org.muse.ambrosia.api.Toggle;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
@@ -74,5 +83,93 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 		{
 			return null;
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getAuthoringUi()
+	{
+		// submission type
+		Selection type = uiService.newSelection();
+		type.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.submissionType"));
+		type.addSelection("inline", "inline");
+		type.addSelection("inline-attachments", "both");
+		type.addSelection("attachments", "attachments");
+		type.addSelection("no-submission", "none");
+
+		Section typeSection = this.uiService.newSection();
+		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		typeSection.add(type);
+
+		// model answer
+		HtmlEdit modelAnswer = this.uiService.newHtmlEdit();
+		modelAnswer.setSize(5, 50);
+		modelAnswer.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
+
+		Section modelAnswerSection = this.uiService.newSection();
+		modelAnswerSection.setTitle("model-answer-edit", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		modelAnswerSection.add(modelAnswer);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(typeSection).add(modelAnswerSection);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewQuestionUi()
+	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.presentation.attachments")));
+
+		Section questionSection = this.uiService.newSection();
+		questionSection.add(question).add(attachments);
+
+		// submission type
+		Selection type = uiService.newSelection();
+		type.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.submissionType"));
+		type.addSelection("inline", "inline");
+		type.addSelection("inline-attachments", "both");
+		type.addSelection("attachments", "attachments");
+		type.addSelection("no-submission", "none");
+		type.setReadOnly(this.uiService.newTrueDecision());
+
+		Section typeSection = this.uiService.newSection();
+		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		typeSection.add(type);
+
+		// model answer
+		Text modelAnswer = this.uiService.newText();
+		modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
+
+		// section for the model answer
+		Section modelAnswerSection = this.uiService.newSection();
+		modelAnswerSection.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		modelAnswerSection.add(modelAnswer);
+
+		// overlay for the model answer
+		Overlay modelAnswerOverlay = this.uiService.newOverlay();
+		modelAnswerOverlay.setId("modelanswer");
+		modelAnswerOverlay.add(modelAnswerSection);
+		modelAnswerOverlay.add(this.uiService.newGap());
+		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
+
+		// control to show the model answer
+		Toggle showModelAnswer = this.uiService.newToggle();
+		showModelAnswer.setTarget("modelanswer");
+		showModelAnswer.setTitle("view-model-answer");
+		showModelAnswer.setIcon("/icons/answer_key.png", Navigation.IconStyle.left);
+
+		Section showModelAnswerSection = this.uiService.newSection();
+		showModelAnswerSection.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer")));
+		showModelAnswerSection.add(modelAnswerOverlay).add(showModelAnswer);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(typeSection).add(showModelAnswerSection);
 	}
 }

@@ -45,7 +45,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	/** An enumerate type that declares the types of submissions */
 	public enum SubmissionType
 	{
-		attachments, both, inline;
+		attachments, both, inline, none;
 	}
 
 	/** Our messages. */
