@@ -761,7 +761,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		Section answerKeySection = this.uiService.newSection();
 		answerKeySection.add(answerKey);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(matchSection).add(answerKeySection);
+		return this.uiService.newFragment().setMessages(this.messages).add(answerKeySection).add(matchSection);
 	}
 
 	/**
