@@ -34,55 +34,37 @@
 	<header>
 		<message selector="partEdit-header">
 			<model type="icon" icon="/icons/edit.png" />
-			<model ref="part.ordering.position" />			
+			<model ref="part.ordering.position" />
 		</message>
 	</header>
+
 	<subHeader>
 		<container>
 			<text>
-				<message selector="assessment-title">
+				<message>
 					<model ref="assessment.title" missing="no-title" />
 				</message>
 			</text>
 		</container>
 	</subHeader>
+
 	<container>
-		<navigationBar/>
+
+		<navigationBar />
+
 		<section>
 			<container>
-				<entityDisplay>
-					<rows>
-						<row title="part-title">
-							<container>
-								<textEdit rows="1" cols="25">
-									<model ref="part.title" />
-								</textEdit>
-							</container>
-						</row>
-						<row title="part-instructions">
-							<container>
-								<entityDisplay>
-									<rows>
-										<row>
-											<container>
-												<htmlEdit model="part.presentation.text" />
-											</container>
-										</row>
-										<row title="attachments">
-											<container>
-												<attachmentsEdit model="part.presentation.attachments" />
-											</container>
-										</row>
-									</rows>
-								</entityDisplay>
-							</container>
-						</row>
-					</rows>
-				</entityDisplay>
+				<textEdit title="part-title" rows="1" cols="25">
+					<model ref="part.title" />
+				</textEdit>
+				<htmlEdit title="part-instructions" model="part.presentation.text" />
+				<attachmentsEdit title="attachments" model="part.presentation.attachments" />
 			</container>
 		</section>
+
 		<section title="part-pools-msg">
 			<container>
+
 				<!--  warn if live -->
 				<alert>
 					<message selector="live-warning-dpart">
@@ -106,7 +88,7 @@
 							<model ref="sort_column" />
 							<model ref="sort_direction" />
 							<model type="paging" ref="paging" />
-							<model ref="view" />							
+							<model ref="view" />
 						</destination>
 					</pager>
 					<iterator name="draw">
@@ -120,7 +102,7 @@
 							<container>
 								<countEdit>
 									<model ref="draw.numQuestions" />
-									<summary initialValue="part.numQuestions" title="part-num-questions" />
+									<summary initialValue="part.numQuestions" title="total-questions" />
 									<readOnly>
 										<decision model="assessment.isLive" />
 									</readOnly>
@@ -132,7 +114,7 @@
 						</column>
 						<modelColumn>
 							<title>
-								<message selector="pool-title" />
+								<message selector="pool" />
 							</title>
 							<model ref="draw.pool.title" missing="no-title" />
 							<sort submit="TRUE">
@@ -166,21 +148,25 @@
 						</modelColumn>
 						<modelColumn>
 							<title>
-								<message selector="pool-description" />
+								<message selector="description" />
 							</title>
 							<model type="text" ref="draw.pool.description" max="60" />
 						</modelColumn>
 						<modelColumn>
 							<title>
-								<message selector="pool-questions" />
+								<message selector="questions" />
 							</title>
 							<model ref="draw.pool.numQuestions" />
 						</modelColumn>
 						<modelColumn>
 							<title>
-								<message selector="pool-points" />
+								<message selector="points" />
 							</title>
 							<model ref="draw.pool.points" />
+
+							<!--  TODO  -->
+							<summary initialValue="part.totalPoints" title="total-points" />
+
 							<sort submit="TRUE">
 								<active>
 									<compareDecision model="sort_column" constant="1" />
@@ -212,21 +198,17 @@
 						</modelColumn>
 						<modelColumn>
 							<title>
-								<message selector="pool-difficulty" />
+								<message selector="difficulty" />
 							</title>
 							<model ref="draw.pool.difficulty" />
 						</modelColumn>
 					</columns>
 				</entityList>
-				<text>
-					<message selector="total-points">
-						<model ref="part.totalPoints" />
-					</message>
-				</text>
+
 			</container>
 		</section>
 
-		<!-- save / cancel nav bar -->
+		<!-- navigation -->
 		<navigationBar id="nav">
 			<container>
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
@@ -238,5 +220,29 @@
 				</navigation>
 			</container>
 		</navigationBar>
+
 	</container>
+
+	<footer>
+		<container>
+			<finePrint>
+				<message selector="id-display">
+					<model ref="assessment.id" />
+				</message>
+			</finePrint>
+			<finePrint>
+				<message selector="history-createText">
+					<model type="userInfo" selector="DISPLAYNAME" ref="assessment.createdBy.UserId" />
+					<model type="date" ref="assessment.createdBy.date" />
+				</message>
+			</finePrint>
+			<finePrint>
+				<message selector="history-modifyText">
+					<model type="userInfo" selector="DISPLAYNAME" ref="assessment.modifiedBy.UserId" />
+					<model type="date" ref="assessment.modifiedBy.date" />
+				</message>
+			</finePrint>
+		</container>
+	</footer>
+
 </interface>

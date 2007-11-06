@@ -25,63 +25,46 @@
 -->
 
 <interface title="partEdit-title">
+
 	<!--mode bar-->
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
+
 	<header>
 		<message selector="partEdit-header">
 			<model type="icon" icon="/icons/edit.png" />
-			<model ref="part.ordering.position" />			
+			<model ref="part.ordering.position" />
 		</message>
 	</header>
+
 	<subHeader>
 		<container>
 			<text>
-				<message selector="assessment-title">
+				<message>
 					<model ref="assessment.title" missing="no-title" />
 				</message>
 			</text>
 		</container>
 	</subHeader>
-	<container>		
-		<navigationBar/>
+
+	<container>
+
+		<navigationBar />
+
 		<section>
 			<container>
-				<entityDisplay>
-					<rows>
-						<row title="part-title">
-							<container>
-								<textEdit rows="1" cols="25">
-									<model ref="part.title" />
-								</textEdit>
-							</container>
-						</row>
-						<row title="part-instructions">
-							<container>
-								<entityDisplay>
-									<rows>
-										<row>
-											<container>
-												<htmlEdit model="part.presentation.text" />
-											</container>
-										</row>
-										<row title="attachments">
-											<container>
-												<attachmentsEdit model="part.presentation.attachments" />
-											</container>
-										</row>
-									</rows>
-								</entityDisplay>
-							</container>
-						</row>
-					</rows>
-				</entityDisplay>
+				<textEdit title="part-title" rows="1" cols="25">
+					<model ref="part.title" />
+				</textEdit>
+				<htmlEdit title="part-instructions" model="part.presentation.text" />
+				<attachmentsEdit title="attachments" model="part.presentation.attachments" />
 			</container>
 		</section>
 
 		<section>
 			<container>
+
 				<!--  warn if live -->
 				<alert>
 					<message selector="live-warning-mpart">
@@ -151,7 +134,7 @@
 						</column>
 						<modelColumn>
 							<title>
-								<message selector="question-description" />
+								<message selector="description" />
 							</title>
 							<model type="text" ref="question.description" max="60" />
 						</modelColumn>
@@ -163,34 +146,32 @@
 						</modelColumn>
 						<modelColumn>
 							<title>
-								<message selector="question-pool-title" />
+								<message selector="pool" />
 							</title>
 							<model ref="question.pool.title" missing="no-title" />
 						</modelColumn>
 						<modelColumn>
 							<title>
-								<message selector="question-difficulty" />
+								<message selector="difficulty" />
 							</title>
 							<model ref="question.pool.difficulty" />
 						</modelColumn>
 						<modelColumn>
 							<title>
-								<message selector="question-points" />
+								<message selector="points" />
 							</title>
 							<model ref="question.pool.points" />
 						</modelColumn>
 					</columns>
 				</entityList>
+
 				<text>
-					<message selector="num-questions">
+					<message selector="totals">
 						<model ref="part.numQuestions" />
-					</message>
-				</text>
-				<text>
-					<message selector="total-points">
 						<model ref="part.totalPoints" />
 					</message>
 				</text>
+
 			</container>
 		</section>
 
@@ -206,5 +187,29 @@
 				</navigation>
 			</container>
 		</navigationBar>
+
 	</container>
+
+	<footer>
+		<container>
+			<finePrint>
+				<message selector="id-display">
+					<model ref="assessment.id" />
+				</message>
+			</finePrint>
+			<finePrint>
+				<message selector="history-createText">
+					<model type="userInfo" selector="DISPLAYNAME" ref="assessment.createdBy.UserId" />
+					<model type="date" ref="assessment.createdBy.date" />
+				</message>
+			</finePrint>
+			<finePrint>
+				<message selector="history-modifyText">
+					<model type="userInfo" selector="DISPLAYNAME" ref="assessment.modifiedBy.UserId" />
+					<model type="date" ref="assessment.modifiedBy.date" />
+				</message>
+			</finePrint>
+		</container>
+	</footer>
+
 </interface>

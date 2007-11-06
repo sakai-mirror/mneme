@@ -177,7 +177,10 @@
 								</message>
 							</title>
 							<container>
-								<selection title="question-mark-review" readOnly="TRUE">
+								<selection readOnly="TRUE">
+									<selectionChoices>
+										<selectionChoice value="true" selector="question-mark-review" />
+									</selectionChoices>
 									<included>
 										<decision model="question.part.assessment.randomAccess" />
 									</included>

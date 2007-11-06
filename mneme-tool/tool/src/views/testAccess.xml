@@ -37,142 +37,104 @@
 			<model ref="assessment.title" missing="no-title" />
 		</message>
 	</title>
+
 	<header>
 		<message selector="testAccess-header">
 			<model type="icon" icon="/icons/access.png" />
 		</message>
 	</header>
 
+	<subHeader>
+		<container>
+			<text>
+				<message>
+					<model ref="assessment.title" missing="no-title" />
+				</message>
+			</text>
+		</container>
+	</subHeader>
+
 	<container>
 
-		<text>
-			<message>
-				<model ref="assessment.title" missing="no-title" />
-			</message>
-		</text>
-
 		<!-- top nav bar (empty, used as frame) -->
-		<navigationBar id="nav" />
+		<navigationBar />
 
-		<entityDisplay>
-			<rows>
-				<row title="users">
-					<container>
-						<selection orientation="DROPDOWN" height="5">
-							<singleSelect>
-								<decision type="true" reversed="TRUE" />
-							</singleSelect>
-							<model ref="access.users" />
-							<selectionModel name="user" model="assessment.submitUsers" value="user.id" display="user.sortName" />
-						</selection>
-					</container>
-				</row>
-				<row title="dates">
-					<container>
-						<entityDisplay>
-							<rows>
-								<row title="open-date">
-									<container>
-										<dateEdit>
-											<model ref="access.openDate" type="date" />
-										</dateEdit>
-									</container>
-								</row>
-								<row title="due-date">
-									<container>
-										<dateEdit>
-											<model ref="access.dueDate" type="date" />
-										</dateEdit>
-									</container>
-								</row>
-								<row title="accept-until">
-									<container>
-										<dateEdit>
-											<model ref="access.acceptUntilDate" type="date" />
-										</dateEdit>
-									</container>
-								</row>
-							</rows>
-						</entityDisplay>
-					</container>
-				</row>
-				<row title="timeLimit">
-					<container>
-						<selection orientation="VERTICAL">
-							<model ref="access.hasTimeLimit" />
-							<selectionChoices>
-								<selectionChoice value="false" selector="no-time-limit" />
-								<selectionChoice value="true" selector="time-limit">
-									<container>
-										<durationEdit>
-											<model ref="access.timeLimit" type="duration" />
-										</durationEdit>
-									</container>
-								</selectionChoice>
-							</selectionChoices>
-						</selection>
-					</container>
+		<section>
+			<container>
+
+				<selection orientation="DROPDOWN" height="5" title="users">
+					<singleSelect>
+						<decision type="true" reversed="TRUE" />
+					</singleSelect>
+					<model ref="access.users" />
+					<selectionModel name="user" model="assessment.submitUsers" value="user.id" display="user.sortName" />
+				</selection>
+				<dateEdit title="open-date">
+					<model ref="access.openDate" type="date" />
+				</dateEdit>
+				<dateEdit title="due-date">
+					<model ref="access.dueDate" type="date" />
+				</dateEdit>
+				<dateEdit title="accept-until">
+					<model ref="access.acceptUntilDate" type="date" />
+				</dateEdit>
+				<selection title="timeLimit">
+					<model ref="access.hasTimeLimit" />
+					<selectionChoices>
+						<selectionChoice value="false" selector="no-time-limit" />
+						<selectionChoice value="true" selector="time-limit">
+							<container>
+								<durationEdit>
+									<model ref="access.timeLimit" type="duration" />
+								</durationEdit>
+							</container>
+						</selectionChoice>
+					</selectionChoices>
 					<included>
 						<decision model="assessment.hasTimeLimit" />
 					</included>
-				</row>
-				<row title="allowTries">
-					<container>
-						<selection orientation="VERTICAL">
-							<model ref="access.hasTriesLimit" />
-							<selectionChoices>
-								<selectionChoice value="false" selector="no-tries" />
-								<selectionChoice value="true" selector="tries">
-									<container>
-										<countEdit>
-											<model ref="access.tries" type="count" />
-											<minValue>
-												<model type="constant" value="1" />
-											</minValue>
-										</countEdit>
-									</container>
-								</selectionChoice>
-							</selectionChoices>
-						</selection>
-					</container>
-				</row>
-				<row title="password">
-					<container>
-						<textEdit rows="1" cols="16">
-							<model ref="access.passwordValue" />
-						</textEdit>
-					</container>
-				</row>
-			</rows>
-		</entityDisplay>
+				</selection>
+				<selection title="allowTries">
+					<model ref="access.hasTriesLimit" />
+					<selectionChoices>
+						<selectionChoice value="false" selector="no-tries" />
+						<selectionChoice value="true" selector="tries">
+							<container>
+								<countEdit>
+									<model ref="access.tries" type="count" />
+									<minValue>
+										<model type="constant" value="1" />
+									</minValue>
+								</countEdit>
+							</container>
+						</selectionChoice>
+					</selectionChoices>
+				</selection>
+				<textEdit title="password" rows="1" cols="16">
+					<model ref="access.passwordValue" />
+				</textEdit>
 
-		<!-- save / cancel nav bar -->
-		<navigationBar id="nav">
-			<container>
-				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
-					<icon icon="/icons/return.png" style="LEFT" />
-					<destination template="/assessment_special/{0}/{1}">
-						<model ref="sort" />
-						<model ref="assessment.id" />
-					</destination>
-				</navigation>
-				<!--
-					<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
-					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/assessment_special/{0}/{1}">
-					<model ref="sort" />
-					<model ref="assessment.id" />
-					</destination>
-					</navigation>
-				-->
+				<!-- navigation -->
+				<navigationBar id="nav">
+					<container>
+						<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
+							<icon icon="/icons/return.png" style="LEFT" />
+							<destination template="/assessment_special/{0}/{1}">
+								<model ref="sort" />
+								<model ref="assessment.id" />
+							</destination>
+						</navigation>
+					</container>
+				</navigationBar>
+
 			</container>
-		</navigationBar>
+		</section>
 
 	</container>
-	
+
 	<footer>
 		<container>
-			<finePrint selector="id_display" model="access.id" />
+			<finePrint selector="id-display" model="access.id" />
 		</container>
 	</footer>
 

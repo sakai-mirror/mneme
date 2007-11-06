@@ -43,13 +43,17 @@
 		</message>
 	</header>
 
-	<container>
+	<subHeader>
+		<container>
+			<text>
+				<message>
+					<model ref="assessment.title" missing="no-title" />
+				</message>
+			</text>
+		</container>
+	</subHeader>
 
-		<text>
-			<message>
-				<model ref="assessment.title" missing="no-title" />
-			</message>
-		</text>
+	<container>
 
 		<!-- the list of special access definitions -->
 		<entityList style="FLAT">

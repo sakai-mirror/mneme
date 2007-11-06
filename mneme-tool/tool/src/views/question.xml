@@ -308,7 +308,10 @@
 								</message>
 							</title>
 							<container>
-								<selection title="question-mark-review">
+								<selection>
+									<selectionChoices>
+										<selectionChoice value="true" selector="question-mark-review" />
+									</selectionChoices>
 									<readOnly>
 										<decision model="review" />
 									</readOnly>
