@@ -26,6 +26,10 @@
 
 <interface>
 
+	<title>
+		<message selector="tests-title" />
+	</title>
+
 	<!--mode bar-->
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
@@ -36,9 +40,7 @@
 			<model type="icon" icon="/icons/folder_page.png" />
 		</message>
 	</header>
-	<title>
-		<message selector="tests-title" />
-	</title>
+
 	<container>
 
 		<!-- the list of assessments -->
@@ -50,7 +52,6 @@
 				<message selector="no-assessments" />
 			</emptyTitle>
 			<columns>
-
 				<selectionColumn multiple="TRUE">
 					<value>
 						<model type="text" ref="assessment.id" />
@@ -84,7 +85,6 @@
 								<model ref="sort_direction" />
 							</destination>
 						</navigation>
-
 					</entityActions>
 				</selectionColumn>
 				<modelColumn>
@@ -176,7 +176,6 @@
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
-
 					</container>
 				</column>
 
@@ -348,14 +347,17 @@
 
 			</columns>
 		</entityList>
-		<!-- save / cancel nav bar -->
+
+		<!-- navigations -->
 		<navigationBar id="nav">
 			<container>
+				<divider />
 				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE"
 					destination="/assessments">
 					<icon icon="/icons/save.png" style="LEFT" />
 				</navigation>
 			</container>
 		</navigationBar>
+
 	</container>
 </interface>
