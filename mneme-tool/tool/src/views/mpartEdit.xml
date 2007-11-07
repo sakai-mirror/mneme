@@ -65,15 +65,15 @@
 		<section>
 			<container>
 
-				<!--  warn if live -->
-				<alert>
+				<!--  inform if live -->
+				<instructions>
 					<message selector="live-warning-mpart">
 						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 					</message>
 					<included>
 						<decision model="assessment.isLive" />
 					</included>
-				</alert>
+				</instructions>
 
 				<!-- the list of the selected questions -->
 				<entityList style="FLAT">

@@ -49,8 +49,8 @@
 						<textEdit title="test-title" rows="1" cols="40">
 							<model ref="assessment.title" />
 						</textEdit>
-						<!--  warn if live -->
-						<alert>
+						<!--  inform if live -->
+						<instructions>
 							<message selector="live-warning-survey">
 								<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 							</message>
@@ -58,7 +58,7 @@
 								<decision model="assessment.isLive" />
 								<compareDecision model="assessment.type" constant="survey" />
 							</included>
-						</alert>
+						</instructions>
 						<selection title="type">
 							<model ref="assessment.type" />
 							<selectionChoices>
@@ -80,15 +80,15 @@
 
 		<section>
 			<container>
-				<!--  warn if live -->
-				<alert>
+				<!--  inform if live -->
+				<instructions>
 					<message selector="live-warning-parts">
 						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 					</message>
 					<included>
 						<decision model="assessment.isLive" />
 					</included>
-				</alert>
+				</instructions>
 
 				<!-- the list of parts -->
 				<entityList style="FLAT">
