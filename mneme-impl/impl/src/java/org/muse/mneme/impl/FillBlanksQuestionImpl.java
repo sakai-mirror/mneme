@@ -195,11 +195,11 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		response.addSelection("numeric", "false");
 
 		Selection caseSensitive = this.uiService.newSelection();
-		caseSensitive.setTitle("case-sensitive");
+		caseSensitive.addSelection("case-sensitive", "true");
 		caseSensitive.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.caseSensitive"));
 
 		Selection order = this.uiService.newSelection();
-		order.setTitle("any-order");
+		order.addSelection("any-order", "true");
 		order.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.anyOrder"));
 
 		Section answerSection = this.uiService.newSection();

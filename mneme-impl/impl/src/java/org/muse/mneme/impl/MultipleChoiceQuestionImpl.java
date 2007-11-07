@@ -410,7 +410,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		// shuffle choices
 		Selection shuffle = this.uiService.newSelection();
 		shuffle.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.shuffleChoices"));
-		shuffle.setTitle("shuffle");
+		shuffle.addSelection("shuffle", "true");
 
 		// choices section
 		Section choices = this.uiService.newSection();
