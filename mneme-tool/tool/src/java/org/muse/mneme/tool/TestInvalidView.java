@@ -22,6 +22,8 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,14 +31,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
+import org.muse.mneme.api.Part;
 import org.sakaiproject.util.Web;
 
 /**
@@ -63,12 +63,13 @@ public class TestInvalidView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// sort code, aid
 		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
-		// The last parameter is the assessment id
+		String sortCode = params[2];
 		String assessmentId = params[3];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
@@ -87,10 +88,68 @@ public class TestInvalidView extends ControllerImpl
 			return;
 		}
 
-		// collect information: the selected assessment
+		// what is invalid?
+		StringBuilder msg = new StringBuilder();
+		msg.append("<ul>");
+		if (!assessment.getIsValid())
+		{
+			// could be dates
+			if (!assessment.getDates().getIsValid())
+			{
+				msg.append("<li>" + this.messages.getString("invalid-dates") + "</li>");
+			}
+
+			// could be parts
+			if (!assessment.getParts().getIsValid())
+			{
+				// if no parts
+				if (assessment.getParts().getParts().isEmpty())
+				{
+					msg.append("<li>" + this.messages.getString("invalid-parts") + "</li>");
+				}
+
+				// could be a specific part
+				int i = 0;
+				for (Part part : assessment.getParts().getParts())
+				{
+					i++;
+					if (!part.getIsValid())
+					{
+						Object args[] = new Object[1];
+						args[0] = part.getTitle();
+						if (args[0] == null) args[0] = Integer.toString(i);
+
+						if (part instanceof ManualPart)
+						{
+							// manual parts go invalid when they have no questions
+							msg.append("<li>" + this.messages.getFormattedMessage("invalid-mpart", args) + "</li>");
+						}
+						else if (part instanceof DrawPart)
+						{
+							// draw parts go invalid if they draw too much from a pool, or have no draws
+							if (((DrawPart) part).getDraws().isEmpty())
+							{
+								msg.append("<li>" + this.messages.getFormattedMessage("invalid-dpart-empty", args) + "</li>");
+							}
+							else
+							{
+								msg.append("<li>" + this.messages.getFormattedMessage("invalid-dpart", args) + "</li>");
+							}
+						}
+						else
+						{
+							msg.append("<li>" + this.messages.getFormattedMessage("invalid-part", args) + "</li>");
+						}
+					}
+				}
+			}
+		}
+
+		msg.append("</ul>");
+
+		context.put("message", msg.toString());
 		context.put("assessment", assessment);
-		// The sort code is in this parameter
-		context.put("sortcode", params[2]);
+		context.put("sortcode", sortCode);
 
 		// render
 		uiService.render(ui, context);
@@ -110,42 +169,16 @@ public class TestInvalidView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-
 		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
-		String assessmentId = params[3];
-
-		Assessment assessment = assessmentService.getAssessment(assessmentId);
-		if (assessment == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
-		// security check
-		if (!assessmentService.allowEditAssessment(assessment))
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
-
-		// setup the model: the selected assessment
-		context.put("assessment", assessment);
-
 		// read the form
 		String destination = uiService.decode(req, context);
 
-		if (destination != null)
-		{
-
-			// redirect to the next destination
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-		}
+		// redirect to the next destination
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**

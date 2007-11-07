@@ -170,8 +170,28 @@
 							</title>
 							<model ref="part.totalPoints" />
 						</modelColumn>
+						<column>
+							<entityIncluded>
+								<decision reversed="TRUE" model="part.isValid" />
+							</entityIncluded>
+							<container>
+								<text>
+									<message>
+										<model type="icon" icon="/icons/attention.jpg" />
+									</message>
+								</text>
+							</container>
+						</column>
 					</columns>
 				</entityList>
+				<text>
+					<message>
+						<model type="icon" icon="/icons/attention.jpg" />
+					</message>
+					<included>
+						<decision reversed="TRUE" model="assessment.parts.isValid" />
+					</included>
+				</text>
 				<text>
 					<message selector="assessment-totals">
 						<model ref="assessment.parts.numQuestions" />
