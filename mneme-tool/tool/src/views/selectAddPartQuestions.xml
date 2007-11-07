@@ -31,7 +31,7 @@
 	</modeContainer>
 	<header>
 		<message selector="select-add-header">
-			<model type="icon" icon="/icons/hand_select.png" />
+			<model type="icon" icon="/icons/add_manual.png" />
 		</message>
 	</header>
 	<subHeader>

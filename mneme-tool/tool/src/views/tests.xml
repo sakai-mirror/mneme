@@ -247,7 +247,7 @@
 							</included>
 						</navigation>
 						<navigation style="LINK" submit="TRUE" description="invalid-alt">
-							<icon icon="/icons/attention.jpg" style="LEFT" />
+							<icon icon="/icons/warning.png" style="LEFT" />
 							<destination template="/assessment_invalid/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />

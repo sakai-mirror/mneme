@@ -54,34 +54,46 @@
 				<message selector="no-assessments" />
 			</emptyTitle>
 			<columns>
-				<selectionColumn multiple="TRUE" pixels="20">
+				<selectionColumn multiple="TRUE">
 					<value>
 						<model type="text" ref="assessment.id" />
 					</value>
 					<model ref="ids.values" />
 				</selectionColumn>
-				<column pixels="20">
+				<modelColumn>
+					<title>
+						<message selector="assessment-view" />
+					</title>
 					<navigations>
-						<navigation description="assessment-type-test">
-							<icon icon="/icons/test_type.png" style="LEFT" />
+						<navigation style="LINK" submit="TRUE" description="assessment-type-test">
+							<icon icon="/icons/test_view.png" style="LEFT" />
+							<destination template="/assessment_preview/{0}/assessments_restore">
+								<model ref="assessment.id" />
+							</destination>
 							<included>
 								<compareDecision model="assessment.type" constant="test" />
 							</included>
 						</navigation>
-						<navigation description="assessment-type-survey">
-							<icon icon="/icons/survey_type.png" style="LEFT" />
+						<navigation style="LINK" submit="TRUE" description="assessment-type-survey">
+							<icon icon="/icons/survey_view.png" style="LEFT" />
+							<destination template="/assessment_preview/{0}/assessments_restore">
+								<model ref="assessment.id" />
+							</destination>
 							<included>
 								<compareDecision model="assessment.type" constant="survey" />
 							</included>
 						</navigation>
-						<navigation description="assessment-type-assignment">
-							<icon icon="/icons/assignment_type.png" style="LEFT" />
+						<navigation style="LINK" submit="TRUE" description="assessment-type-assignment">
+							<icon icon="/icons/assignment_view.png" style="LEFT" />
+							<destination template="/assessment_preview/{0}/assessments_restore">
+								<model ref="assessment.id" />
+							</destination>
 							<included>
 								<compareDecision model="assessment.type" constant="assignment" />
 							</included>
 						</navigation>
 					</navigations>
-				</column>
+				</modelColumn>
 				<modelColumn>
 					<title>
 						<message selector="assessment-title" />
@@ -106,6 +118,7 @@
 						<model ref="sort" />
 					</destination>
 				</navigation>
+				<divider />
 				<navigation title="cancel" accessKey="cancel-access" description="cancel-description" style="BUTTON">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 					<destination template="/assessments/{0}">

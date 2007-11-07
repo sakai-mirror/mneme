@@ -39,7 +39,7 @@
 
 	<header>
 		<message selector="invalid-header">
-			<model type="icon" icon="/icons/attention.jpg" />
+			<model type="icon" icon="/icons/warning.png" />
 			<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 		</message>
 	</header>

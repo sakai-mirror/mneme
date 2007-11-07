@@ -90,7 +90,7 @@
 							<entityActions>
 								<navigation destination="/select_add_mpart_question" title="select-questions" style="LINK"
 									description="select-questions-description" submit="TRUE">
-									<icon icon="/icons/hand_select.png" style="LEFT" />
+									<icon icon="/icons/add_manual.png" style="LEFT" />
 									<disabled>
 										<decision model="assessment.isLive" />
 									</disabled>

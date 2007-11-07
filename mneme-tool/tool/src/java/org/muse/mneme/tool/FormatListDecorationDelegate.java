@@ -85,7 +85,7 @@ public class FormatListDecorationDelegate extends FormatDelegateImpl
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/exit.gif\" alt=\""
 						+ context.getMessages().getString("format-list-decoration-inprogress") + "\" />" + "<img src=\"" + context.get("sakai.return.url")
-						+ "/icons/warning.gif\" alt=\"" + context.getMessages().getString("format-list-decoration-urgent") + "\" />"
+						+ "/icons/warning.png\" alt=\"" + context.getMessages().getString("format-list-decoration-urgent") + "\" />"
 						+ "<br /><span style=\"font-size:smaller\">" + context.getMessages().getString("format-list-decoration-inprogress-urgent") + "</span>";
 			}
 

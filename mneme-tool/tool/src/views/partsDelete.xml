@@ -48,7 +48,7 @@
 				<row>
 					<title>
 						<message selector="delete-show-icon">
-							<model type="icon" icon="/icons/warning.gif" />
+							<model type="icon" icon="/icons/warning.png" />
 						</message>
 					</title>
 					<container>
