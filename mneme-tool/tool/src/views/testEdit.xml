@@ -108,15 +108,15 @@
 							<!-- entity actions -->
 							<entityActions>
 								<!-- these two are not dependent, but put here for desired presentation order of actions -->
-								<navigation destination="DRAW" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
-									<icon icon="/icons/hat_red.png" style="LEFT" />
+								<navigation destination="MANUAL" title="manual-draw" style="LINK" description="manual-draw-description"
+									submit="TRUE">
+									<icon icon="/icons/hand_select.png" style="LEFT" />
 									<disabled>
 										<decision model="assessment.isLive" />
 									</disabled>
 								</navigation>
-								<navigation destination="MANUAL" title="manual-draw" style="LINK" description="manual-draw-description"
-									submit="TRUE">
-									<icon icon="/icons/hand_select.png" style="LEFT" />
+								<navigation destination="DRAW" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
+									<icon icon="/icons/hat_red.png" style="LEFT" />
 									<disabled>
 										<decision model="assessment.isLive" />
 									</disabled>
