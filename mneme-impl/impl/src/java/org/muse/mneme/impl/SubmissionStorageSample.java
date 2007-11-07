@@ -926,6 +926,14 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean submissionExists(String id)
+	{
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean submissionsDependsOn(Question question)
 	{
 		// for all submissions in the context
@@ -944,14 +952,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 			}
 		}
 
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean submissionExists(String id)
-	{
 		return Boolean.FALSE;
 	}
 

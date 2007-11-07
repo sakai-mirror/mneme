@@ -36,6 +36,7 @@ import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
  */
 public interface SubmissionStorage
 {
+
 	/**
 	 * Find the questions that have been used in submissions in this assessment part.<br />
 	 * Order by question description.
@@ -265,15 +266,6 @@ public interface SubmissionStorage
 	void saveSubmissionReleased(SubmissionImpl submission);
 
 	/**
-	 * Check if there are any submissions that are dependent on this question.
-	 * 
-	 * @param question
-	 *        The question.
-	 * @return TRUE if there are submissions dependent on this question, FALSE if not.
-	 */
-	Boolean submissionsDependsOn(Question question);
-
-	/**
 	 * Check if an submission by this id exists.
 	 * 
 	 * @param id
@@ -281,6 +273,15 @@ public interface SubmissionStorage
 	 * @return TRUE if the submission with this id exists, FALSE if not.
 	 */
 	Boolean submissionExists(String id);
+
+	/**
+	 * Check if there are any submissions that are dependent on this question.
+	 * 
+	 * @param question
+	 *        The question.
+	 * @return TRUE if there are submissions dependent on this question, FALSE if not.
+	 */
+	Boolean submissionsDependsOn(Question question);
 
 	/**
 	 * Check if any submissions in any state exist for this assessment.
@@ -300,7 +301,7 @@ public interface SubmissionStorage
 	 *        The new assessment to switch to.
 	 */
 	void switchHistoricalDependency(Assessment assessment, Assessment newAssessment);
-	
+
 	/**
 	 * Change any submissions that are directly dependent on the from question to become dependent instead on the to question
 	 * 

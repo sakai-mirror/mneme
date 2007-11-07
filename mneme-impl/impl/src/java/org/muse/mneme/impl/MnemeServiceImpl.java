@@ -440,6 +440,14 @@ public class MnemeServiceImpl implements MnemeService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Submission getNewUserAssessmentSubmission(Assessment assessment, String userId)
+	{
+		return submissionService.getNewUserAssessmentSubmission(assessment, userId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Pool getPool(String poolId)
 	{
 		return poolService.getPool(poolId);
@@ -508,14 +516,6 @@ public class MnemeServiceImpl implements MnemeService
 	public List<User> getSubmitUsers(String context)
 	{
 		return assessmentService.getSubmitUsers(context);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Submission getUserAssessmentSubmission(Assessment assessment, String userId)
-	{
-		return submissionService.getUserAssessmentSubmission(assessment, userId);
 	}
 
 	/**

@@ -302,6 +302,18 @@ public interface SubmissionService
 	List<Float> getAssessmentScores(Assessment assessment);
 
 	/**
+	 * Get either the in-progress submission, or a new one, to the assignment made by this user.<br />
+	 * The sibling count is set.
+	 * 
+	 * @param assessment
+	 *        The assessment to use.
+	 * @param userId
+	 *        The user id - if null, use the current user.
+	 * @return The user's submission for this assessment.
+	 */
+	Submission getNewUserAssessmentSubmission(Assessment assessment, String userId);
+
+	/**
 	 * Get the total scores for this question from all completed submissions to the question's assessment.
 	 * 
 	 * @param question
@@ -319,19 +331,6 @@ public interface SubmissionService
 	 * @return The submission object, or null if not found.
 	 */
 	Submission getSubmission(String id);
-
-	/**
-	 * Get the submission to the assignment made by this user.<br />
-	 * Returns the official submission, or one in progress, or a blank one if not yet started.<br />
-	 * The sibling count is set.
-	 * 
-	 * @param assessment
-	 *        The assessment to use.
-	 * @param userId
-	 *        The user id - if null, use the current user.
-	 * @return The user's submission for this assessment.
-	 */
-	Submission getUserAssessmentSubmission(Assessment assessment, String userId);
 
 	/**
 	 * Get the submissions to assignments in this context made by this user. Consider:

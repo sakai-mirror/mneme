@@ -204,7 +204,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: " + submission.getAssessment().getId() + ": " + userId);
 
-		// user must have submit permission inthe context of the assessment for this submission
+		// user must have submit permission in the context of the assessment for this submission
 		if (!securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, submission.getAssessment().getContext())) return Boolean.FALSE;
 
 		// the assessment must be currently open for submission
@@ -928,6 +928,44 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
+	public Submission getNewUserAssessmentSubmission(Assessment assessment, String userId)
+	{
+		if (assessment == null) throw new IllegalArgumentException();
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+		Date asOf = new Date();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getUserAssessmentSubmission: assessment: " + assessment.getId() + " userId: " + userId);
+
+		// read all the submissions for this user to this assessment, with all the assessment and submission data we need
+		// each assessment is covered with at least one - if there are no submission yet for an assessment, an empty submission is returned
+		List<SubmissionImpl> all = this.storage.getUserAssessmentSubmissions(assessment, userId);
+
+		// see if any needs to be completed based on time limit or dates
+		checkAutoComplete(all, asOf);
+
+		// pick one for each assessment - the one in progress, or the official complete one
+		List<Submission> official = officializeByAssessment(all);
+
+		if (official.size() == 1)
+		{
+			// if we end up with an unstarted or in-progress one, return that
+			Submission rv = official.get(0);
+			if (!rv.getIsComplete()) return rv;
+
+			// otherwise we need a new one
+			int count = rv.getSiblingCount();
+			rv = getPhantomSubmission(userId, assessment);
+			((SubmissionImpl) rv).initSiblingCount(count);
+			return rv;
+		}
+
+		// TODO: we don't really want to return null
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Float> getQuestionScores(Question question)
 	{
 		final List<Float> rv = this.storage.getQuestionScores(question);
@@ -949,37 +987,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		SubmissionImpl submission = this.storage.getSubmission(id);
 
 		return submission;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Submission getUserAssessmentSubmission(Assessment assessment, String userId)
-	{
-		if (assessment == null) throw new IllegalArgumentException();
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
-		Date asOf = new Date();
-
-		if (M_log.isDebugEnabled()) M_log.debug("getUserAssessmentSubmission: assessment: " + assessment.getId() + " userId: " + userId);
-
-		// read all the submissions for this user to this assessment, with all the assessment and submission data we need
-		// each assessment is covered with at least one - if there are no submission yet for an assessment, an empty submission is returned
-		List<SubmissionImpl> all = this.storage.getUserAssessmentSubmissions(assessment, userId);
-
-		// see if any needs to be completed based on time limit or dates
-		checkAutoComplete(all, asOf);
-
-		// pick one for each assessment - the one in progress, or the official complete one
-		List<Submission> official = officializeByAssessment(all);
-
-		// pick the one that is official (since there's only one assessment)
-		if (official.size() == 1)
-		{
-			return official.get(0);
-		}
-
-		// TODO: we don't really want to return null
-		return null;
 	}
 
 	/**
@@ -1671,6 +1678,27 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (remaining < 0) remaining = 0;
 
 		return Integer.valueOf(remaining);
+	}
+
+	/**
+	 * Create a phantom submission for this user and this assessment.
+	 * 
+	 * @param userId
+	 *        The user id.
+	 * @param assessment
+	 *        The assessment.
+	 * @return A phantom submission for this user and this assessment.
+	 */
+	protected SubmissionImpl getPhantomSubmission(String userId, Assessment assessment)
+	{
+		SubmissionImpl s = this.storage.newSubmission();
+		s.initUserId(userId);
+		s.initAssessmentIds(assessment.getId(), assessment.getId());
+
+		// set the id so we know it is a phantom
+		s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
+
+		return s;
 	}
 
 	/**

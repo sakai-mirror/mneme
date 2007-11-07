@@ -90,7 +90,7 @@ public class EnterView extends ControllerImpl
 		}
 
 		// get the submissions from the user to this assessment
-		Submission submission = submissionService.getUserAssessmentSubmission(assessment, null);
+		Submission submission = submissionService.getNewUserAssessmentSubmission(assessment, null);
 		if (submission == null)
 		{
 			// redirect to error
@@ -181,7 +181,7 @@ public class EnterView extends ControllerImpl
 		}
 
 		// get the submissions from the user to this assessment
-		Submission submission = submissionService.getUserAssessmentSubmission(assessment, null);
+		Submission submission = submissionService.getNewUserAssessmentSubmission(assessment, null);
 		if (submission == null)
 		{
 			// redirect to error
