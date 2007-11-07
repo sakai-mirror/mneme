@@ -237,14 +237,8 @@
 					</title>
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="live-alt">
-							<title>
-								<message selector="live">
-									<model type="icon" icon="/icons/grade_student.png" />
-								</message>
-							</title>
-							<destination template="/grade_assessment/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
+							<icon icon="/icons/grade_student.png" style="LEFT" />
+							<destination template="/grade_assessment/0A/{0}">
 								<model ref="assessment.id" />
 							</destination>
 							<included>
@@ -253,11 +247,7 @@
 							</included>
 						</navigation>
 						<navigation style="LINK" submit="TRUE" description="invalid-alt">
-							<title>
-								<message selector="invalid">
-									<model type="icon" icon="/icons/attention.jpg" />
-								</message>
-							</title>
+							<icon icon="/icons/attention.jpg" style="LEFT" />
 							<destination template="/assessment_invalid/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
