@@ -25,6 +25,7 @@ import org.muse.ambrosia.api.Attachments;
 import org.muse.ambrosia.api.AttachmentsEdit;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.HtmlEdit;
+import org.muse.ambrosia.api.Instructions;
 import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.Overlay;
 import org.muse.ambrosia.api.Section;
@@ -175,7 +176,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		// the text entry
 		HtmlEdit edit = this.uiService.newHtmlEdit();
 		edit.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
-		edit.setSize(5, 50);
+		edit.setSize(5, 60);
 		edit.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.inline.toString(), SubmissionType.both.toString())
 				.setProperty(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
 		edit.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
@@ -189,7 +190,13 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
 		answerSection.add(upload);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(answerSection);
+		// if no submission
+		Instructions noSub = this.uiService.newInstructions();
+		noSub.setText("no-submission");
+		noSub.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.none.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
+
+		return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(answerSection).add(noSub);
 	}
 
 	/**
@@ -240,6 +247,13 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		answerSection.add(answer);
 
 		// TODO: add to the answerSection the uploaded links
+
+		// if no submission
+		Instructions noSub = this.uiService.newInstructions();
+		noSub.setText("no-submission");
+		noSub.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.none.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
+		answerSection.add(noSub);
 
 		// model answer
 		Text modelAnswer = this.uiService.newText();
