@@ -78,7 +78,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		this.pools = new ArrayList<PoolDraw>(other.pools.size());
 		for (PoolDraw draw : other.pools)
 		{
-			this.pools.add(new PoolDrawImpl((PoolDrawImpl) draw));
+			this.pools.add(new PoolDrawImpl(this.assessment, (PoolDrawImpl) draw));
 		}
 		this.poolService = other.poolService;
 	}
@@ -112,7 +112,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		}
 
 		// add this to the pools
-		PoolDraw rv = new PoolDrawImpl(this.poolService, pool, numQuestions);
+		PoolDraw rv = new PoolDrawImpl(this.assessment, this.poolService, pool, numQuestions);
 		pools.add(rv);
 
 		// this is a change that cannot be made to live tests
@@ -219,7 +219,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		// prepare draws - virtual, not part of the DrawPart
 		for (Pool pool : allPools)
 		{
-			PoolDraw draw = new PoolDrawImpl(this.poolService, pool, null);
+			PoolDraw draw = new PoolDrawImpl(this.assessment, this.poolService, pool, null);
 			if (this.pools.contains(draw))
 			{
 				PoolDraw myDraw = this.pools.get(this.pools.indexOf(draw));
@@ -262,7 +262,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 			{
 				return Boolean.FALSE;
 			}
-			if (pool.getNumQuestions() < draw.getNumQuestions())
+			if (draw.getPoolNumAvailableQuestions() < draw.getNumQuestions())
 			{
 				return Boolean.FALSE;
 			}
@@ -328,7 +328,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 */
 	public PoolDraw getVirtualDraw(Pool pool)
 	{
-		PoolDraw rv = new PoolDrawImpl(this.poolService, pool, null);
+		PoolDraw rv = new PoolDrawImpl(this.assessment, this.poolService, pool, null);
 		if (this.pools.contains(rv))
 		{
 			PoolDraw myDraw = this.pools.get(this.pools.indexOf(rv));
@@ -343,7 +343,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 */
 	public void removePool(Pool pool)
 	{
-		this.pools.remove(new PoolDrawImpl(this.poolService, pool, null));
+		this.pools.remove(new PoolDrawImpl(this.assessment, this.poolService, pool, null));
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;

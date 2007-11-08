@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
@@ -33,6 +34,8 @@ import org.muse.mneme.api.PoolService;
  */
 public class PoolDrawImpl implements PoolDraw
 {
+	protected transient Assessment assessment = null;
+
 	protected Integer numQuestions = null;
 
 	protected String origPoolId = null;
@@ -47,8 +50,9 @@ public class PoolDrawImpl implements PoolDraw
 	 * @param other
 	 *        The other to copy.
 	 */
-	public PoolDrawImpl(PoolDrawImpl other)
+	public PoolDrawImpl(Assessment assessment, PoolDrawImpl other)
 	{
+		this.assessment = assessment;
 		set(other);
 	}
 
@@ -58,8 +62,9 @@ public class PoolDrawImpl implements PoolDraw
 	 * @param poolService
 	 *        The PoolService.
 	 */
-	public PoolDrawImpl(PoolService poolService)
+	public PoolDrawImpl(Assessment assessment, PoolService poolService)
 	{
+		this.assessment = assessment;
 		this.poolService = poolService;
 	}
 
@@ -73,9 +78,9 @@ public class PoolDrawImpl implements PoolDraw
 	 * @param numQuestions
 	 *        The number of questions to draw.
 	 */
-	public PoolDrawImpl(PoolService poolService, Pool pool, Integer numQuestions)
+	public PoolDrawImpl(Assessment assessment, PoolService poolService, Pool pool, Integer numQuestions)
 	{
-		this(poolService);
+		this(assessment, poolService);
 		if (pool == null) throw new IllegalArgumentException();
 		this.poolId = pool.getId();
 		this.origPoolId = pool.getId();
@@ -90,7 +95,22 @@ public class PoolDrawImpl implements PoolDraw
 		Pool pool = getPool();
 		if (pool == null) return new ArrayList<String>();
 
-		return pool.drawQuestionIds(seed, this.numQuestions);
+		// we need to overdraw by the number of manual questions this assessment uses from the pool
+		List<String> manualQuestionIds = ((AssessmentPartsImpl) this.assessment.getParts()).getPoolPicks(pool);
+
+		int size = this.numQuestions + manualQuestionIds.size();
+		List<String> rv = pool.drawQuestionIds(seed, size);
+
+		// we need to remove from rv any manual questions used in the assessment
+		rv.removeAll(manualQuestionIds);
+
+		// we need just our count
+		if (rv.size() > this.numQuestions)
+		{
+			rv = rv.subList(0, this.numQuestions);
+		}
+
+		return rv;
 	}
 
 	/**
@@ -137,6 +157,23 @@ public class PoolDrawImpl implements PoolDraw
 	public String getPoolId()
 	{
 		return this.poolId;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer getPoolNumAvailableQuestions()
+	{
+		Pool pool = getPool();
+		if (pool != null)
+		{
+			int size = pool.getNumQuestions();
+			size -= ((AssessmentPartsImpl) this.assessment.getParts()).countPoolPicks(pool);
+
+			return Integer.valueOf(size);
+		}
+
+		return 0;
 	}
 
 	/**

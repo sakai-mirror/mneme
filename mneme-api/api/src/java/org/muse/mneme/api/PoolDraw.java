@@ -66,6 +66,14 @@ public interface PoolDraw
 	String getPoolId();
 
 	/**
+	 * Get the number of questions available in the pool.<br />
+	 * The current pool size is reduced by the number of questions manually drawn from the pool in this assessment.
+	 * 
+	 * @return The number of questions available in the pool.
+	 */
+	Integer getPoolNumAvailableQuestions();
+
+	/**
 	 * Set the number of questions to draw from the pool.
 	 * 
 	 * @param numQuestions

@@ -108,7 +108,7 @@
 										<decision model="assessment.isLive" />
 									</readOnly>
 									<maxValue>
-										<model ref="draw.pool.numQuestions" />
+										<model ref="draw.poolNumAvailableQuestions" />
 									</maxValue>
 								</countEdit>
 							</container>

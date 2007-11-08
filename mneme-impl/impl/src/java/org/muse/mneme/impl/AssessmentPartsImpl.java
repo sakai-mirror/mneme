@@ -31,6 +31,7 @@ import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
@@ -53,9 +54,9 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 	protected QuestionService questionService = null;
 
-	protected SubmissionService submissionService = null;
-
 	protected Boolean showPresentation = Boolean.TRUE;
+
+	protected SubmissionService submissionService = null;
 
 	/**
 	 * Construct.
@@ -81,7 +82,8 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 * @param poolService
 	 *        The PoolService.
 	 */
-	public AssessmentPartsImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, PoolService poolService, Changeable owner)
+	public AssessmentPartsImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService,
+			PoolService poolService, Changeable owner)
 	{
 		this.owner = owner;
 		this.assessment = assessment;
@@ -159,6 +161,10 @@ public class AssessmentPartsImpl implements AssessmentParts
 		{
 			if (!part.getIsValid()) return Boolean.FALSE;
 		}
+
+		// TODO: we must only draw from a pool once across all draw parts
+
+		// TODO: we must pick a question only once each across all manual parts
 
 		return Boolean.TRUE;
 	}
@@ -354,6 +360,52 @@ public class AssessmentPartsImpl implements AssessmentParts
 		this.showPresentation = setting;
 
 		this.owner.setChanged();
+	}
+
+	/**
+	 * Count the number of question picks from this pool, from all parts.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @return The number of question picks from this pool, from all parts.
+	 */
+	protected int countPoolPicks(Pool pool)
+	{
+		int count = 0;
+
+		// only for manual parts
+		for (Part part : this.parts)
+		{
+			if (part instanceof ManualPartImpl)
+			{
+				count += ((ManualPartImpl) part).countPoolPicks(pool);
+			}
+		}
+
+		return count;
+	}
+
+	/**
+	 * Get the question ids that are manually selected from this pool, from all parts.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @return The question ids that are manually selected from this pool, from all parts.
+	 */
+	protected List<String> getPoolPicks(Pool pool)
+	{
+		List<String> rv = new ArrayList<String>();
+
+		// only for manual parts
+		for (Part part : this.parts)
+		{
+			if (part instanceof ManualPartImpl)
+			{
+				rv.addAll(((ManualPartImpl) part).getPoolPicks(pool));
+			}
+		}
+
+		return rv;
 	}
 
 	/**
