@@ -347,6 +347,11 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		singleMultiple.addSelection("single-choice", "true");
 		singleMultiple.addSelection("multiple-select", "false");
 		singleMultiple.setDestination(this.uiService.newDestination().setDestination("STAY"));
+		singleMultiple.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+
+		// answer section
+		Section answer = this.uiService.newSection();
+		answer.add(singleMultiple);
 
 		// listing of choices
 		EntityList choicesList = this.uiService.newEntityList();
@@ -409,10 +414,10 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 
 		// choices section
 		Section choices = this.uiService.newSection();
-		choices.setTitle("choices", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
-		choices.add(singleMultiple).add(choicesList).add(addMore).add(shuffle);
+		choices.setTitle("choices");
+		choices.add(choicesList).add(addMore).add(shuffle);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(choices);
+		return this.uiService.newFragment().setMessages(this.messages).add(answer).add(choices);
 	}
 
 	/**

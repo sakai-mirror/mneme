@@ -66,9 +66,8 @@
 			</title>
 			<container>
 
-				<section title="availability">
+				<section>
 					<container>
-
 						<dateEdit title="open-date">
 							<model ref="assessment.dates.openDate" type="date" />
 						</dateEdit>
@@ -115,13 +114,13 @@
 				</selection>
 
 				<section>
-					<title>
-						<message selector="reviewOptions">
-							<model type="icon" icon="/icons/markedforreview.png" />
-						</message>
-					</title>
 					<container>
 						<selection>
+							<title>
+								<message selector="reviewOptions">
+									<model type="icon" icon="/icons/markedforreview.png" />
+								</message>
+							</title>
 							<model ref="assessment.review.timing" />
 							<selectionChoices>
 								<selectionChoice value="submitted" selector="type-submitted" />
@@ -152,13 +151,13 @@
 				</section>
 
 				<section>
-					<title>
-						<message selector="gradeOptions">
-							<model type="icon" icon="/icons/grade.png" />
-						</message>
-					</title>
 					<container>
 						<selection>
+							<title>
+								<message selector="gradeOptions">
+									<model type="icon" icon="/icons/grade.png" />
+								</message>
+							</title>
 							<model ref="assessment.grading.autoRelease" />
 							<selectionChoices>
 								<selectionChoice value="true" selector="type-auto" />
