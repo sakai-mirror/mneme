@@ -110,7 +110,13 @@ public class AnswerImpl implements Answer
 	 */
 	public Float getAutoScore()
 	{
-		return this.answerHandler.getAutoScore();
+		Float score = this.answerHandler.getAutoScore();
+		if (score == null) return null;
+
+		// round
+		float newScore = Math.round(score * 100.0f) / 100.0f;
+		
+		return Float.valueOf(newScore);
 	}
 
 	/**

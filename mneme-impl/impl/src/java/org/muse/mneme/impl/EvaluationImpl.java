@@ -119,13 +119,28 @@ public class EvaluationImpl implements Evaluation
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setScore(Float score)
+	public void setScore(Float s)
 	{
-		if (!Different.different(this.score, score)) return;
+		if (s == null)
+		{
+			if (!Different.different(this.score, s)) return;
 
-		this.score = score;
+			this.score = s;
 
-		this.changed.setChanged();
+			this.changed.setChanged();
+		}
+
+		else
+		{
+			// round
+			float newScore = Math.round(s * 100.0f) / 100.0f;
+
+			if (!Different.different(this.score, newScore)) return;
+
+			this.score = newScore;
+
+			this.changed.setChanged();
+		}
 	}
 
 	/**
