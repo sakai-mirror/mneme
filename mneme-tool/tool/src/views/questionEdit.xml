@@ -64,9 +64,9 @@
 		</navigationBar>
 
 		<!-- generic presentation -->
-		<section title="question-presentation">
+		<section>
 			<container>
-				<htmlEdit model="question.presentation.text" />
+				<htmlEdit title="question-presentation" model="question.presentation.text" />
 				<attachmentsEdit title="attachments" model="question.presentation.attachments" />
 			</container>
 			<included>
@@ -79,13 +79,13 @@
 
 		<!--  generic reason -->
 		<section>
-			<title>
-				<message selector="question-author-reason-header">
-					<model type="icon" icon="/icons/reason.png" />
-				</message>
-			</title>
 			<container>
 				<selection>
+					<title>
+						<message selector="question-author-reason-header">
+							<model type="icon" icon="/icons/reason.png" />
+						</message>
+					</title>
 					<selectionChoices>
 						<selectionChoice value="true" selector="question-author-reason" />
 					</selectionChoices>
@@ -99,15 +99,12 @@
 
 		<!--  generic hints -->
 		<section>
-			<title>
-				<message selector="question-author-hints-header">
-					<model type="icon" icon="/icons/hints.png" />
-				</message>
-			</title>
 			<container>
 				<htmlEdit>
 					<title>
-						<message selector="question-author-hints" />
+						<message selector="question-author-hints">
+							<model type="icon" icon="/icons/hints.png" />
+						</message>
 					</title>
 					<model ref="question.hints" />
 				</htmlEdit>
@@ -119,15 +116,12 @@
 
 		<!--  generic feedback -->
 		<section>
-			<title>
-				<message selector="question-author-feedback-header">
-					<model type="icon" icon="/icons/feedback.png" />
-				</message>
-			</title>
 			<container>
 				<htmlEdit>
 					<title>
-						<message selector="question-author-feedback" />
+						<message selector="question-author-feedback">
+							<model type="icon" icon="/icons/feedback.png" />
+						</message>
 					</title>
 					<model ref="question.feedback" />
 				</htmlEdit>

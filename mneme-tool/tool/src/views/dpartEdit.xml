@@ -62,11 +62,11 @@
 			</container>
 		</section>
 
-		<section title="part-pools-msg">
+		<section>
 			<container>
 
 				<!-- the list of ALL pools, with those selected for this part checked and their "draw" filled in -->
-				<entityList style="FLAT">
+				<entityList style="FLAT" title="part-pools-msg">
 					<emptyTitle>
 						<message selector="no-pools" />
 					</emptyTitle>

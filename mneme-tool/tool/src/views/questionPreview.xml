@@ -76,13 +76,13 @@
 
 		<!-- reason -->
 		<section>
-			<title>
-				<message selector="question-preview-reason-header">
-					<model type="icon" icon="/icons/reason.png" />
-				</message>
-			</title>
 			<container>
 				<text>
+					<title>
+						<message selector="question-preview-reason-header">
+							<model type="icon" icon="/icons/reason.png" />
+						</message>
+					</title>
 					<message selector="question-preview-reason" />
 				</text>
 			</container>
@@ -105,13 +105,13 @@
 
 		<!-- question feedback -->
 		<section>
-			<title>
-				<message selector="question-feedback">
-					<model type="icon" icon="/icons/feedback.png" />
-				</message>
-			</title>
 			<container>
 				<text>
+					<title>
+						<message selector="question-feedback">
+							<model type="icon" icon="/icons/feedback.png" />
+						</message>
+					</title>
 					<message>
 						<model type="html" ref="question.feedback" />
 					</message>

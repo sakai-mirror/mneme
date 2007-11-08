@@ -137,18 +137,18 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		type.addSelection("inline", "inline");
 		type.addSelection("inline-attachments", "both");
 		type.addSelection("attachments", "attachments");
+		type.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 
 		Section typeSection = this.uiService.newSection();
-		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 		typeSection.add(type);
 
 		// model answer
 		HtmlEdit modelAnswer = this.uiService.newHtmlEdit();
 		modelAnswer.setSize(5, 50);
 		modelAnswer.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
+		modelAnswer.setTitle("model-answer-edit", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 
 		Section modelAnswerSection = this.uiService.newSection();
-		modelAnswerSection.setTitle("model-answer-edit", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 		modelAnswerSection.add(modelAnswer);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(typeSection).add(modelAnswerSection);
@@ -171,10 +171,10 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		questionSection.add(question).add(attachments);
 
 		Section answerSection = this.uiService.newSection();
-		answerSection.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 
 		// the text entry
 		HtmlEdit edit = this.uiService.newHtmlEdit();
+		edit.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 		edit.setSize(5, 50);
 		edit.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.inline.toString(), SubmissionType.both.toString())
 				.setProperty(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
@@ -233,9 +233,9 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		questionSection.add(question).add(attachments);
 
 		Section answerSection = this.uiService.newSection();
-		answerSection.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 
 		Text answer = this.uiService.newText();
+		answer.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 		answer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
 		answerSection.add(answer);
 
@@ -243,11 +243,11 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 
 		// model answer
 		Text modelAnswer = this.uiService.newText();
+		modelAnswer.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 		modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.modelAnswer"));
 
 		// section for the model answer
 		Section modelAnswerSection = this.uiService.newSection();
-		modelAnswerSection.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 		modelAnswerSection.add(modelAnswer);
 
 		// overlay for the model answer
@@ -353,18 +353,18 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		type.addSelection("inline-attachments", "both");
 		type.addSelection("attachments", "attachments");
 		type.setReadOnly(this.uiService.newTrueDecision());
+		type.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 
 		Section typeSection = this.uiService.newSection();
-		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 		typeSection.add(type);
 
 		// model answer
 		Text modelAnswer = this.uiService.newText();
 		modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
+		modelAnswer.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 
 		// section for the model answer
 		Section modelAnswerSection = this.uiService.newSection();
-		modelAnswerSection.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 		modelAnswerSection.add(modelAnswer);
 
 		// overlay for the model answer

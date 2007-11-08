@@ -97,18 +97,18 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 		type.addSelection("inline-attachments", "both");
 		type.addSelection("attachments", "attachments");
 		type.addSelection("no-submission", "none");
+		type.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 
 		Section typeSection = this.uiService.newSection();
-		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 		typeSection.add(type);
 
 		// model answer
 		HtmlEdit modelAnswer = this.uiService.newHtmlEdit();
 		modelAnswer.setSize(5, 50);
 		modelAnswer.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
+		modelAnswer.setTitle("model-answer-edit", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 
 		Section modelAnswerSection = this.uiService.newSection();
-		modelAnswerSection.setTitle("model-answer-edit", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 		modelAnswerSection.add(modelAnswer);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(typeSection).add(modelAnswerSection);
@@ -138,9 +138,9 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 		type.addSelection("attachments", "attachments");
 		type.addSelection("no-submission", "none");
 		type.setReadOnly(this.uiService.newTrueDecision());
+		type.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 
 		Section typeSection = this.uiService.newSection();
-		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 		typeSection.add(type);
 
 		// model answer

@@ -159,10 +159,10 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		scale.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.scale"));
 		scale.setSelectionModel(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.scales"), "scale", this.uiService
 				.newPropertyReference().setReference("scale.id"), this.uiService.newPropertyReference().setReference("scale.text"));
+		scale.setTitle("scale", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 
 		// scale section
 		Section section = this.uiService.newSection();
-		section.setTitle("scale", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 		section.add(scale);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(section);

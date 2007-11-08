@@ -154,13 +154,13 @@
 
 						<!-- reason -->
 						<section>
-							<title>
-								<message selector="assessment-preview-reason-header">
-									<model type="icon" icon="/icons/reason.png" />
-								</message>
-							</title>
 							<container>
 								<text>
+									<title>
+										<message selector="assessment-preview-reason-header">
+											<model type="icon" icon="/icons/reason.png" />
+										</message>
+									</title>
 									<message selector="assessment-preview-reason" />
 								</text>
 							</container>
@@ -171,13 +171,13 @@
 
 						<!-- mark for review -->
 						<section>
-							<title>
-								<message selector="question-mark-review-header">
-									<model type="icon" icon="/icons/markedforreview.png" />
-								</message>
-							</title>
 							<container>
 								<selection readOnly="TRUE">
+									<title>
+										<message selector="question-mark-review-header">
+											<model type="icon" icon="/icons/markedforreview.png" />
+										</message>
+									</title>
 									<selectionChoices>
 										<selectionChoice value="true" selector="question-mark-review" />
 									</selectionChoices>
@@ -203,13 +203,13 @@
 
 						<!-- question feedback -->
 						<section>
-							<title>
-								<message selector="question-feedback">
-									<model type="icon" icon="/icons/reason.png" />
-								</message>
-							</title>
 							<container>
 								<text>
+									<title>
+										<message selector="question-feedback">
+											<model type="icon" icon="/icons/reason.png" />
+										</message>
+									</title>
 									<message>
 										<model type="html" ref="question.feedback" />
 									</message>

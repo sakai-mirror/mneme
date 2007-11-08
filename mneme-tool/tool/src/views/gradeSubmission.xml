@@ -155,13 +155,13 @@
 
 						<!-- reason -->
 						<section>
-							<title>
-								<message selector="question-rationale">
-									<model type="icon" icon="/icons/reason.png" />
-								</message>
-							</title>
 							<container>
 								<text>
+									<title>
+										<message selector="question-rationale">
+											<model type="icon" icon="/icons/reason.png" />
+										</message>
+									</title>
 									<message>
 										<model type="text" ref="answer.reason" />
 									</message>
@@ -174,13 +174,13 @@
 
 						<!-- question feedback -->
 						<section>
-							<title>
-								<message selector="question-feedback">
-									<model type="icon" icon="/icons/feedback.png" />
-								</message>
-							</title>
 							<container>
 								<text>
+									<title>
+										<message selector="question-feedback">
+											<model type="icon" icon="/icons/feedback.png" />
+										</message>
+									</title>
 									<message>
 										<model type="html" ref="answer.question.feedback" />
 									</message>
@@ -193,13 +193,14 @@
 
 						<!-- evaluation -->
 						<section>
-							<title>
-								<message selector="question-evaluation">
-									<model type="icon" icon="/icons/note.png" />
-								</message>
-							</title>
 							<container>
-								<htmlEdit model="answer.evaluation.comment" rows="5" cols="60" />
+								<htmlEdit model="answer.evaluation.comment" rows="5" cols="60">
+									<title>
+										<message selector="question-evaluation">
+											<model type="icon" icon="/icons/note.png" />
+										</message>
+									</title>
+								</htmlEdit>
 							</container>
 						</section>
 
@@ -225,13 +226,14 @@
 
 				<!-- overall comments -->
 				<section>
-					<title>
-						<message selector="overall-comments">
-							<model type="icon" icon="/icons/note.png" />
-						</message>
-					</title>
 					<container>
-						<textEdit model="submission.evaluation.comment" rows="5" cols="60" />
+						<htmlEdit model="submission.evaluation.comment" rows="5" cols="60">
+							<title>
+								<message selector="overall-comments">
+									<model type="icon" icon="/icons/note.png" />
+								</message>
+							</title>
+						</htmlEdit>
 					</container>
 				</section>
 

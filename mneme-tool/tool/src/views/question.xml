@@ -133,9 +133,9 @@
 						<hasValueDecision model="submission.assessment.presentation.attachments" />
 					</included>
 				</attachments>
-				<section title="question-eval-overall-comment-title">
+				<section>
 					<container>
-						<evaluation>
+						<evaluation title="question-eval-overall-comment-title">
 							<icon icon="/icons/note.png" message="comments" />
 							<message selector="question-eval-overall-comment">
 								<model type="text" ref="submission.evaluation.comment" />
@@ -261,13 +261,13 @@
 
 						<!-- reason for delivery -->
 						<section>
-							<title>
-								<message selector="question-rationale">
-									<model type="icon" icon="/icons/reason.png" />
-								</message>
-							</title>
 							<container>
 								<textEdit rows="5" cols="60">
+									<title>
+										<message selector="question-rationale">
+											<model type="icon" icon="/icons/reason.png" />
+										</message>
+									</title>
 									<readOnly>
 										<decision model="review" />
 									</readOnly>
@@ -282,13 +282,13 @@
 
 						<!-- reason for review -->
 						<section>
-							<title>
-								<message selector="question-rationale">
-									<model type="icon" icon="/icons/reason.png" />
-								</message>
-							</title>
 							<container>
 								<text>
+									<title>
+										<message selector="question-rationale">
+											<model type="icon" icon="/icons/reason.png" />
+										</message>
+									</title>
 									<message>
 										<model type="text" ref="answer.reason" />
 									</message>
@@ -302,13 +302,13 @@
 
 						<!-- mark for review -->
 						<section>
-							<title>
-								<message selector="question-mark-review-header">
-									<model type="icon" icon="/icons/markedforreview.png" />
-								</message>
-							</title>
 							<container>
 								<selection>
+									<title>
+										<message selector="question-mark-review-header">
+											<model type="icon" icon="/icons/markedforreview.png" />
+										</message>
+									</title>
 									<selectionChoices>
 										<selectionChoice value="true" selector="question-mark-review" />
 									</selectionChoices>
@@ -343,13 +343,13 @@
 
 						<!-- question feedback -->
 						<section>
-							<title>
-								<message selector="question-feedback">
-									<model type="icon" icon="/icons/feedback.png" />
-								</message>
-							</title>
 							<container>
 								<text>
+									<title>
+										<message selector="question-feedback">
+											<model type="icon" icon="/icons/feedback.png" />
+										</message>
+									</title>
 									<message>
 										<model type="html" ref="answer.question.feedback" />
 									</message>
@@ -365,13 +365,13 @@
 
 						<!-- evaluation -->
 						<section>
-							<title>
-								<message selector="question-evaluation">
-									<model type="icon" icon="/icons/note.png" />
-								</message>
-							</title>
 							<container>
 								<evaluation>
+									<title>
+										<message selector="question-evaluation">
+											<model type="icon" icon="/icons/note.png" />
+										</message>
+									</title>
 									<message selector="question-eval-question-comment">
 										<model type="text" ref="answer.evaluation.comment" />
 									</message>

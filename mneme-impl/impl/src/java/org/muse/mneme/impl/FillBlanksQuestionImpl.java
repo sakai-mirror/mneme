@@ -173,6 +173,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		// question (with instructios)
 		HtmlEdit question = uiService.newHtmlEdit();
 		question.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.text"));
+		question.setTitle("question");
 
 		Overlay instructions = this.uiService.newOverlay();
 		instructions.setId("instructions");
@@ -185,7 +186,6 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 				Navigation.IconStyle.left);
 
 		Section questionSection = this.uiService.newSection();
-		questionSection.setTitle("question");
 		questionSection.add(question).add(instructions).add(viewInstructions);
 
 		// answer options
@@ -193,6 +193,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		response.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.responseTextual"));
 		response.addSelection("textual", "true");
 		response.addSelection("numeric", "false");
+		response.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
 
 		Selection caseSensitive = this.uiService.newSelection();
 		caseSensitive.addSelection("case-sensitive", "true");
@@ -203,7 +204,6 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		order.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.anyOrder"));
 
 		Section answerSection = this.uiService.newSection();
-		answerSection.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
 		answerSection.add(response).add(caseSensitive).add(order);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(answerSection);

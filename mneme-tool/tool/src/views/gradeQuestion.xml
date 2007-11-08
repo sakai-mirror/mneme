@@ -218,13 +218,14 @@
 						<modelComponent model="answer.question.typeSpecificQuestion.viewAnswerUi" />
 						<!-- evaluation -->
 						<section>
-							<title>
-								<message selector="submission-evaluation">
-									<model type="icon" icon="/icons/note.png" />
-								</message>
-							</title>
 							<container>
-								<htmlEdit model="answer.evaluation.comment" rows="5" cols="40" />
+								<htmlEdit model="answer.evaluation.comment" rows="5" cols="40">
+									<title>
+										<message selector="submission-evaluation">
+											<model type="icon" icon="/icons/note.png" />
+										</message>
+									</title>
+								</htmlEdit>
 							</container>
 						</section>
 					</container>
