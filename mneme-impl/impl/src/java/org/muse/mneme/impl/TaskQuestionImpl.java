@@ -108,7 +108,7 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 		modelAnswer.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
 
 		Section modelAnswerSection = this.uiService.newSection();
-		modelAnswerSection.setTitle("model-answer-edit", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		modelAnswerSection.setTitle("model-answer-edit", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 		modelAnswerSection.add(modelAnswer);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(typeSection).add(modelAnswerSection);
@@ -140,7 +140,7 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 		type.setReadOnly(this.uiService.newTrueDecision());
 
 		Section typeSection = this.uiService.newSection();
-		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 		typeSection.add(type);
 
 		// model answer
@@ -149,7 +149,7 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 
 		// section for the model answer
 		Section modelAnswerSection = this.uiService.newSection();
-		modelAnswerSection.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		modelAnswerSection.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 		modelAnswerSection.add(modelAnswer);
 
 		// overlay for the model answer
@@ -163,7 +163,7 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 		Toggle showModelAnswer = this.uiService.newToggle();
 		showModelAnswer.setTarget("modelanswer");
 		showModelAnswer.setTitle("view-model-answer");
-		showModelAnswer.setIcon("/icons/answer_key.png", Navigation.IconStyle.left);
+		showModelAnswer.setIcon("/icons/model_answer.png", Navigation.IconStyle.left);
 
 		Section showModelAnswerSection = this.uiService.newSection();
 		showModelAnswerSection.setIncluded(this.uiService.newHasValueDecision().setProperty(

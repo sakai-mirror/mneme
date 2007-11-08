@@ -80,15 +80,6 @@
 
 		<section>
 			<container>
-				<!--  inform if live -->
-				<instructions>
-					<message selector="live-warning-parts">
-						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
-					</message>
-					<included>
-						<decision model="assessment.isLive" />
-					</included>
-				</instructions>
 
 				<!-- the list of parts -->
 				<entityList style="FLAT">
@@ -107,27 +98,36 @@
 							<model ref="ids.values" />
 							<!-- entity actions -->
 							<entityActions>
+								<!--  inform if live -->
+								<instructions>
+									<message selector="live-warning-parts">
+										<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+									</message>
+									<included>
+										<decision model="assessment.isLive" />
+									</included>
+								</instructions>
 								<!-- these two are not dependent, but put here for desired presentation order of actions -->
 								<navigation destination="MANUAL" title="manual-draw" style="LINK" description="manual-draw-description"
 									submit="TRUE">
 									<icon icon="/icons/add_manual.png" style="LEFT" />
-									<disabled>
-										<decision model="assessment.isLive" />
-									</disabled>
+									<included>
+										<decision reversed="TRUE" model="assessment.isLive" />
+									</included>
 								</navigation>
 								<navigation destination="DRAW" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
 									<icon icon="/icons/add_random.png" style="LEFT" />
-									<disabled>
-										<decision model="assessment.isLive" />
-									</disabled>
+									<included>
+										<decision reversed="TRUE" model="assessment.isLive" />
+									</included>
 								</navigation>
 								<!-- delete is dependent, and desired to go last  -->
 								<navigation destination="/part_delete" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements"
 									title="delete-part" style="LINK" description="part-delete-description" submit="TRUE">
 									<icon icon="/icons/delete.png" style="LEFT" />
-									<disabled>
-										<decision model="assessment.isLive" />
-									</disabled>
+									<included>
+										<decision reversed="TRUE" model="assessment.isLive" />
+									</included>
 								</navigation>
 							</entityActions>
 						</selectionColumn>
