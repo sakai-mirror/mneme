@@ -139,7 +139,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		type.addSelection("attachments", "attachments");
 
 		Section typeSection = this.uiService.newSection();
-		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 		typeSection.add(type);
 
 		// model answer

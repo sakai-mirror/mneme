@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.muse.ambrosia.api.AndDecision;
 import org.muse.ambrosia.api.Attachments;
 import org.muse.ambrosia.api.AutoColumn;
 import org.muse.ambrosia.api.Component;
@@ -35,6 +36,7 @@ import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.EntityListColumn;
 import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.Navigation;
+import org.muse.ambrosia.api.OrDecision;
 import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.PropertyReference;
 import org.muse.ambrosia.api.Section;
@@ -637,6 +639,22 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		correctCol.setEntityIncluded(
 				this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("pair.match")), null);
 		correctCol.add(correct).add(incorrect);
+		
+		AndDecision and = this.uiService.newAndDecision();
+		Decision[] decisionsAnd = new Decision[2];
+		decisionsAnd[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
+		decisionsAnd[1] = this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+		and.setRequirements(decisionsAnd);
+
+		OrDecision or = this.uiService.newOrDecision();
+		Decision[] decisionsOr = new Decision[2];
+		decisionsOr[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
+		decisionsOr[1] = and;
+		or.setOptions(decisionsOr);
+
+		correctCol.setIncluded(or);
+
 		entityList.addColumn(correctCol);
 
 		// match

@@ -99,7 +99,7 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 		type.addSelection("no-submission", "none");
 
 		Section typeSection = this.uiService.newSection();
-		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		typeSection.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 		typeSection.add(type);
 
 		// model answer
