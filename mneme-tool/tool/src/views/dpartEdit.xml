@@ -97,6 +97,12 @@
 					</iterator>
 					<columns>
 						<column>
+							<entityIncluded>
+								<decision reversed = "TRUE" model="draw.pool.id" delegate="PoolReferencedDecision" tool="sakai.mneme" />
+								<message>
+									<model type="icon" icon="/icons/checkon.gif" />
+								</message>
+							</entityIncluded>							
 							<title>
 								<message selector="pool-draw" />
 							</title>

@@ -30,7 +30,8 @@
 			class="org.muse.mneme.tool.PartEditView"
 			init-method="init"
 			destroy-method="destroy"
-			singleton="true">
+			singleton="true"
+			depends-on="PoolReferencedDecisionDelegate">
 
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
   		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
@@ -43,6 +44,18 @@
  		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>dpartEdit.xml</value></property>
 		<property name="components2"><value>mpartEdit.xml</value></property>
+	</bean>
+
+	<bean id="PoolReferencedDecisionDelegate"
+			class="org.muse.mneme.tool.PoolReferencedDecisionDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>PoolReferencedDecision</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 
 </beans>

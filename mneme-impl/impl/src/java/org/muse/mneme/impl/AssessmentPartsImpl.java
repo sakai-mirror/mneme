@@ -32,6 +32,7 @@ import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
@@ -162,9 +163,41 @@ public class AssessmentPartsImpl implements AssessmentParts
 			if (!part.getIsValid()) return Boolean.FALSE;
 		}
 
-		// TODO: we must only draw from a pool once across all draw parts
+		// we must only draw from a pool once across all draw parts
+		List<String> poolIds = new ArrayList<String>();
+		for (Part part : this.parts)
+		{
+			if (part instanceof DrawPart)
+			{
+				for (PoolDraw draw : ((DrawPart) part).getDraws())
+				{
+					if (poolIds.contains(draw.getPoolId()))
+					{
+						return Boolean.FALSE;
+					}
 
-		// TODO: we must pick a question only once each across all manual parts
+					poolIds.add(draw.getPoolId());
+				}
+			}
+		}
+
+		// we must pick a question only once each across all manual parts
+		List<String> questionIds = new ArrayList<String>();
+		for (Part part : this.parts)
+		{
+			if (part instanceof ManualPart)
+			{
+				for (Question question : ((ManualPart) part).getQuestionsAsAuthored())
+				{
+					if (questionIds.contains(question.getId()))
+					{
+						return Boolean.FALSE;
+					}
+
+					questionIds.add(question.getId());
+				}
+			}
+		}
 
 		return Boolean.TRUE;
 	}
