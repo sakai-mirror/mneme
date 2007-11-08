@@ -27,9 +27,11 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.util.DecisionDelegateImpl;
 import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.ManualPart;
+import org.muse.mneme.api.Part;
 
 /**
- * The "AnswerFeedbackDecision" decision delegate for the mneme tool.
+ * The "QuestionReferencedDecision" decision delegate for the mneme tool.
  */
 public class QuestionReferencedDecisionDelegate extends DecisionDelegateImpl
 {
@@ -41,6 +43,8 @@ public class QuestionReferencedDecisionDelegate extends DecisionDelegateImpl
 	 */
 	public boolean decide(Decision decision, Context context, Object focus)
 	{
+		// true if the focus, a question id, is directly referenced by the "assessment" as a manual pick
+
 		// focus is the question id
 		if (focus == null) return false;
 		if (!(focus instanceof String)) return false;
@@ -51,7 +55,16 @@ public class QuestionReferencedDecisionDelegate extends DecisionDelegateImpl
 		if (assessment == null) return false;
 
 		// if the question can be found in the assessment, it is referenced
-		if (assessment.getParts().getQuestion(questionId) != null) return true;
+		for (Part part : assessment.getParts().getParts())
+		{
+			if (part instanceof ManualPart)
+			{
+				if (part.getQuestion(questionId) != null)
+				{
+					return true;
+				}
+			}
+		}
 
 		return false;
 	}
