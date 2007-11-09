@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import org.muse.ambrosia.api.Attachments;
 import org.muse.ambrosia.api.AttachmentsEdit;
 import org.muse.ambrosia.api.Component;
+import org.muse.ambrosia.api.Gap;
 import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.Instructions;
 import org.muse.ambrosia.api.Navigation;
@@ -256,20 +257,18 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		answerSection.add(noSub);
 
 		// model answer
-		Text modelAnswer = this.uiService.newText();
-		modelAnswer.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
-		modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.modelAnswer"));
+		Text modelAnswerTitle = this.uiService.newText();
+		modelAnswerTitle.setText("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 
-		// section for the model answer
-		Section modelAnswerSection = this.uiService.newSection();
-		modelAnswerSection.add(modelAnswer);
+		Text modelAnswer = this.uiService.newText();
+		modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.modelAnswer"));
 
 		// overlay for the model answer
 		Overlay modelAnswerOverlay = this.uiService.newOverlay();
 		modelAnswerOverlay.setId("modelanswer");
-		modelAnswerOverlay.add(modelAnswerSection);
-		modelAnswerOverlay.add(this.uiService.newGap());
-		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
+		modelAnswerOverlay.add(modelAnswerTitle).add(modelAnswer).add(this.uiService.newGap());
+		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer").setIcon("/icons/model_answer.png",
+				Navigation.IconStyle.left));
 
 		// control to show the model answer
 		Toggle showModelAnswer = this.uiService.newToggle();
@@ -373,20 +372,18 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		typeSection.add(type);
 
 		// model answer
+		Text modelAnswerTitle = this.uiService.newText();
+		modelAnswerTitle.setText("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
+
 		Text modelAnswer = this.uiService.newText();
 		modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
-		modelAnswer.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
-
-		// section for the model answer
-		Section modelAnswerSection = this.uiService.newSection();
-		modelAnswerSection.add(modelAnswer);
 
 		// overlay for the model answer
 		Overlay modelAnswerOverlay = this.uiService.newOverlay();
 		modelAnswerOverlay.setId("modelanswer");
-		modelAnswerOverlay.add(modelAnswerSection);
-		modelAnswerOverlay.add(this.uiService.newGap());
-		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
+		modelAnswerOverlay.add(modelAnswerTitle).add(modelAnswer).add(this.uiService.newGap());
+		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer").setIcon("/icons/model_answer.png",
+				Navigation.IconStyle.left));
 
 		// control to show the model answer
 		Toggle showModelAnswer = this.uiService.newToggle();
@@ -402,13 +399,22 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(typeSection).add(showModelAnswerSection);
 	}
 
+	/**
+	 * Set the model answer.
+	 * 
+	 * @param modelAnswer
+	 *        The model answer.
+	 */
 	public void setModelAnswer(String modelAnswer)
 	{
 		this.modelAnswer = modelAnswer;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Set the submission type
+	 * 
+	 * @param setting
+	 *        The submission type.
 	 */
 	public void setSubmissionType(SubmissionType setting)
 	{

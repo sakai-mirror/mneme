@@ -144,20 +144,18 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 		typeSection.add(type);
 
 		// model answer
+		Text modelAnswerTitle = this.uiService.newText();
+		modelAnswerTitle.setText("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
+
 		Text modelAnswer = this.uiService.newText();
 		modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
-
-		// section for the model answer
-		Section modelAnswerSection = this.uiService.newSection();
-		modelAnswerSection.setTitle("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
-		modelAnswerSection.add(modelAnswer);
 
 		// overlay for the model answer
 		Overlay modelAnswerOverlay = this.uiService.newOverlay();
 		modelAnswerOverlay.setId("modelanswer");
-		modelAnswerOverlay.add(modelAnswerSection);
-		modelAnswerOverlay.add(this.uiService.newGap());
-		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer"));
+		modelAnswerOverlay.add(modelAnswerTitle).add(modelAnswer).add(this.uiService.newGap());
+		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer").setIcon("/icons/model_answer.png",
+				Navigation.IconStyle.left));
 
 		// control to show the model answer
 		Toggle showModelAnswer = this.uiService.newToggle();
