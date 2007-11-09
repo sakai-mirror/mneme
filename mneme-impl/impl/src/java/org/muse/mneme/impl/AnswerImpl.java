@@ -213,17 +213,18 @@ public class AnswerImpl implements Answer
 	public Float getTotalScore()
 	{
 		// if no auto nor evaluation, we have no score
-		if ((getAutoScore() == null) && (this.evaluation.getScore() == null)) return null;
+		Float autoScore = getAutoScore();
+		if ((autoScore == null) && (this.evaluation.getScore() == null)) return null;
 
 		float rv = 0f;
-		if (getAutoScore() != null)
+		if (autoScore != null)
 		{
-			rv += getAutoScore();
+			rv += autoScore.floatValue();
 		}
 
 		if (this.evaluation.getScore() != null)
 		{
-			rv += this.evaluation.getScore();
+			rv += this.evaluation.getScore().floatValue();
 		}
 
 		return new Float(rv);

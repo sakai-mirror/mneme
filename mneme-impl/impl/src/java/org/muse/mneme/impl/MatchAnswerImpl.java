@@ -168,7 +168,8 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 			Value selection = this.answerData.get(pair.getId());
 			if (selection != null)
 			{
-				if (selection.getValue().equals(pair.getCorrectChoiceId()))
+				String value = selection.getValue();
+				if ((value != null) && value.equals(pair.getCorrectChoiceId()))
 				{
 					total += partial;
 				}
