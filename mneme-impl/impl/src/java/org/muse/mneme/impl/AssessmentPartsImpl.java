@@ -55,7 +55,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 	protected QuestionService questionService = null;
 
-	protected Boolean showPresentation = Boolean.TRUE;
+	protected Boolean showPresentation = null;
 
 	protected SubmissionService submissionService = null;
 
@@ -272,7 +272,17 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 */
 	public Boolean getShowPresentation()
 	{
-		return this.showPresentation;
+		if (this.showPresentation != null) return this.showPresentation;
+
+		// compute it by checking the continuous numbering and the parts titles and presentation text
+		if (!getContinuousNumbering()) return Boolean.TRUE;
+
+		for (Part part : this.parts)
+		{
+			if ((part.getTitle() != null) || (part.getPresentation().getText() != null)) return Boolean.TRUE;
+		}
+
+		return Boolean.FALSE;
 	}
 
 	/**
@@ -387,8 +397,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 */
 	public void setShowPresentation(Boolean setting)
 	{
-		if (setting == null) throw new IllegalArgumentException();
-		if (this.showPresentation.equals(setting)) return;
+		if (!Different.different(this.showPresentation, setting)) return;
 
 		this.showPresentation = setting;
 

@@ -108,7 +108,7 @@
 			<title>
 				<message selector="instructions-test-title">
 					<model type="icon" icon="/icons/test.png" />
-					<model ref="submission.assessment.title" />
+					<model ref="submission.assessment.title" missing="no-title" />
 					<model ref="submission.assessment.parts.totalPoints" delegate="FormatScore" tool="sakai.mneme" />
 				</message>
 			</title>
@@ -140,6 +140,11 @@
 					<model type="text" ref="part.assessment.parts.size" />
 					<model type="text" ref="part.title" />
 					<model ref="part" delegate="SectionScore" tool="sakai.mneme" />
+					<selectors>
+						<selector selector="instructions-part-title-no-title">
+							<hasValueDecision reversed="TRUE" model="part.title" />
+						</selector>
+					</selectors>
 				</message>
 			</title>
 			<container>

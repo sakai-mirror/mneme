@@ -160,14 +160,19 @@
 				<model ref="answers" />
 			</iterator>
 
-			<!-- section title -->
+			<!-- part title -->
 			<title>
-				<message selector="instructions-section-title">
+				<message selector="instructions-part-title">
 					<model type="icon" icon="/icons/section.png" />
 					<model type="text" ref="answer.question.part.ordering.position" />
 					<model type="text" ref="answer.question.part.assessment.parts.size" />
 					<model type="text" ref="answer.question.part.title" />
 					<model ref="answer.question.part" delegate="SectionScore" tool="sakai.mneme" />
+					<selectors>
+						<selector selector="instructions-part-title-no-title">
+							<hasValueDecision reversed="TRUE" model="answer.question.part.title" />
+						</selector>
+					</selectors>
 				</message>
 				<included>
 					<orDecision>

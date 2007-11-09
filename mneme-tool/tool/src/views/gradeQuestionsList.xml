@@ -88,6 +88,11 @@
 					<model ref="part.ordering.position" />
 					<model ref="assessment.parts.size" />
 					<model ref="part.title" />
+					<selectors>
+						<selector selector="question-list-part-title-no-title">
+							<hasValueDecision reversed="TRUE" model="part.title" />
+						</selector>
+					</selectors>
 				</message>
 			</title>
 			<container>

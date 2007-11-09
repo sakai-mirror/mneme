@@ -85,6 +85,11 @@
 					<model type="text" ref="question.part.ordering.position" />
 					<model type="text" ref="question.part.assessment.parts.size" />
 					<model type="text" ref="question.part.title" />
+					<selectors>
+						<selector selector="assessment-preview-part-title-no-title">
+							<hasValueDecision reversed="TRUE" model="question.part.title" />
+						</selector>
+					</selectors>
 				</message>
 				<included>
 					<decision model="question.partOrdering.isFirst" />

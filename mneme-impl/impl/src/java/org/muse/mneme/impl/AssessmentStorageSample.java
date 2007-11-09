@@ -614,8 +614,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.getReview().setShowFeedback(Boolean.TRUE);
 			a.getReview().setTiming(ReviewTiming.graded);
 			a.getSubmitPresentation().setText("Thanks for all the fish!");
-			a.getParts().setContinuousNumbering(Boolean.TRUE);
-			a.getParts().setShowPresentation(Boolean.TRUE);
 
 			ManualPart p = a.getParts().addManualPart();
 			p.setRandomize(Boolean.FALSE);
@@ -673,8 +671,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.getReview().setShowFeedback(Boolean.TRUE);
 			a.getReview().setTiming(ReviewTiming.submitted);
 			a.getSubmitPresentation().setText("Have a nice day!");
-			a.getParts().setContinuousNumbering(Boolean.TRUE);
-			a.getParts().setShowPresentation(Boolean.TRUE);
 
 			DrawPart p2 = a.getParts().addDrawPart();
 			p2.addPool(this.poolService.getPool("b1"), 2);
@@ -711,8 +707,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.getReview().setShowFeedback(Boolean.TRUE);
 			a.getReview().setTiming(ReviewTiming.submitted);
 			a.getSubmitPresentation().setText("Have a nice day!");
-			a.getParts().setContinuousNumbering(Boolean.TRUE);
-			a.getParts().setShowPresentation(Boolean.TRUE);
 
 			p = a.getParts().addManualPart();
 			p.addQuestion(this.questionService.getQuestion("q3"));

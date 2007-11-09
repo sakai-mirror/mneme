@@ -103,7 +103,9 @@ public interface AssessmentParts
 	List<Question> getQuestions();
 
 	/**
-	 * Access the show-presentation setting; this controlls the display of each part's presentation.
+	 * Access the show-presentation setting; this controlls the display of each part's presentation.<br />
+	 * If not specifically set, the value will be FALSE if all the parts are defined with no title and no<br />
+	 * descriptions, and if the continuous numbering is set to FALSE.
 	 * 
 	 * @return TRUE to show the part presentations, FALSE to not show them.
 	 */

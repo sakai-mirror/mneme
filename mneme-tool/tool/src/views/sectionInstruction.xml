@@ -108,12 +108,17 @@
 		<!-- section header -->
 		<section>
 			<title>
-				<message selector="instructions-section-title">
+				<message selector="instructions-part-title">
 					<model type="icon" icon="/icons/section.png" />
 					<model type="text" ref="part.ordering.position" />
 					<model type="text" ref="part.assessment.parts.size" />
 					<model type="text" ref="part.title" />
 					<model ref="part" delegate="SectionScore" tool="sakai.mneme" />
+					<selectors>
+						<selector selector="instructions-part-title-no-title">
+							<hasValueDecision reversed="TRUE" model="part.title" />
+						</selector>
+					</selectors>
 				</message>
 			</title>
 			<container>

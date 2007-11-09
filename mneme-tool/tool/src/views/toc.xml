@@ -109,6 +109,7 @@
 		<section>
 			<title>
 				<message selector="toc-section-title">
+					<model type="icon" icon="/icons/test.png" />
 					<model ref="submission.assessment.title" />
 					<model ref="submission.assessment" delegate="QuestionsAnswered" tool="sakai.mneme" />
 					<model ref="submission.assessment.parts.numQuestions" />
@@ -128,7 +129,7 @@
 				<entityList style="FORM">
 					<iterator name="question" model="submission.assessment.parts.questions" />
 
-					<!-- section title (click to instructions) -->
+					<!-- part title (click to instructions) -->
 					<headings>
 						<heading>
 							<decision model="submission.assessment.parts.showPresentation" />
@@ -136,11 +137,17 @@
 							<navigation style="LINK">
 								<title>
 									<message selector="toc-questions-title">
+										<model type="icon" icon="/icons/section.png" />
 										<model ref="question.part.ordering.position" />
 										<model ref="question.part.title" />
 										<model ref="question.part" delegate="QuestionsAnswered" tool="sakai.mneme" />
 										<model ref="question.part.numQuestions" />
 										<model ref="question.part" delegate="SectionScore" tool="sakai.mneme" />
+										<selectors>
+											<selector selector="toc-questions-title-no-title">
+												<hasValueDecision reversed="TRUE" model="question.part.title" />
+											</selector>
+										</selectors>
 									</message>
 								</title>
 								<disabled>
