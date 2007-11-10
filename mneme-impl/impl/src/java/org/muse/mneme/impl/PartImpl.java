@@ -401,12 +401,11 @@ public abstract class PartImpl implements Part
 	protected long seed()
 	{
 		// set the seed based on the id of the submission context,
-		// so each submission has a different unique ordering,
-		// and the part id, so the randomization of questions in each part within the same submission differs
+		// so each submission has a different unique ordering
 		long seed = 0;
 		if (this.assessment.getSubmissionContext() != null)
 		{
-			seed = (this.assessment.getSubmissionContext().getId() + "_" + this.id).hashCode();
+			seed = this.assessment.getSubmissionContext().getId().hashCode();
 		}
 
 		// if no submission context, just the part id
