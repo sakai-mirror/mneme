@@ -25,9 +25,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +37,6 @@ import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.util.StringUtil;
@@ -63,7 +61,7 @@ public class QuestionStorageSample implements QuestionStorage
 	/** Dependency: PoolService */
 	protected PoolService poolService = null;
 
-	protected Map<String, QuestionImpl> questions = new HashMap<String, QuestionImpl>();
+	protected Map<String, QuestionImpl> questions = new LinkedHashMap<String, QuestionImpl>();
 
 	/** Dependency: QuestionService */
 	protected QuestionService questionService = null;

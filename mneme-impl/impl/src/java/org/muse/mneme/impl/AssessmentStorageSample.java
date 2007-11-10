@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +57,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(AssessmentStorageSample.class);
 
-	protected Map<String, AssessmentImpl> assessments = new HashMap<String, AssessmentImpl>();
+	protected Map<String, AssessmentImpl> assessments = new LinkedHashMap<String, AssessmentImpl>();
 
 	protected AssessmentService assessmentService = null;
 

@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -51,7 +51,7 @@ public class PoolStorageSample implements PoolStorage
 
 	protected long nextId = 100;
 
-	protected Map<String, PoolImpl> pools = new HashMap<String, PoolImpl>();
+	protected Map<String, PoolImpl> pools = new LinkedHashMap<String, PoolImpl>();
 
 	protected PoolServiceImpl poolService = null;
 

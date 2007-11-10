@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +72,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 
 	protected SessionManager sessionManager = null;
 
-	protected Map<String, SubmissionImpl> submissions = new HashMap<String, SubmissionImpl>();
+	protected Map<String, SubmissionImpl> submissions = new LinkedHashMap<String, SubmissionImpl>();
 
 	protected SubmissionServiceImpl submissionService = null;
 
