@@ -94,7 +94,7 @@
 							<title>
 								<message selector="question-description" />
 							</title>
-							<model type="text" ref="question.description" max="60"/>
+							<model type="text" ref="question.description" missing="no-title" stripHtml="TRUE" max="60" />
 						</modelColumn>
 						<modelColumn>
 							<title>

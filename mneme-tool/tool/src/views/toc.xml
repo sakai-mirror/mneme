@@ -175,7 +175,7 @@
 						<modelColumn>
 							<message selector="toc-question-entry">
 								<model delegate="FormatQuestionNumber" tool="sakai.mneme" />
-								<model type="text" stripHtml="TRUE" max="60" ref="question.description" />
+								<model type="text" stripHtml="TRUE" max="60" ref="question.description" missing="no-title" />
 								<model delegate="QuestionScore" tool="sakai.mneme" />
 							</message>
 							<entityNavigations>
@@ -216,7 +216,7 @@
 						<modelColumn>
 							<message selector="toc-question-entry">
 								<model delegate="FormatQuestionNumber" tool="sakai.mneme" />
-								<model type="text" stripHtml="TRUE" max="60" ref="question.description" />
+								<model type="text" stripHtml="TRUE" max="60" ref="question.description" missing="no-title" />
 								<model delegate="QuestionScore" tool="sakai.mneme" />
 							</message>
 							<entityNavigations>

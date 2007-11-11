@@ -39,7 +39,6 @@
 	<header>
 		<message selector="question-edit-header">
 			<model type="icon" icon="/icons/edit.png" />
-			<model ref="question.description" missing="no-title" />
 		</message>
 	</header>
 

@@ -119,7 +119,7 @@
 								<navigation style="LINK" submit="FALSE">
 									<title>
 										<message>
-											<model ref="question.description" />
+											<model ref="question.description" type="text" missing="no-title" stripHtml="TRUE" max="60" />
 										</message>
 									</title>
 									<destination template="/grade_question/{0}/{1}/{2}">
