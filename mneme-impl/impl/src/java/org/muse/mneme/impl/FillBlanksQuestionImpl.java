@@ -25,11 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.muse.ambrosia.api.AndDecision;
-import org.muse.ambrosia.api.AttachmentsEdit;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Decision;
-import org.muse.ambrosia.api.EntityDisplay;
-import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.FillIn;
 import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.Navigation;
@@ -45,6 +42,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * FillBlanksQuestionImpl handles questions for the true/false question type.
@@ -279,6 +277,40 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * Produce a string of the question with the answers removed.
+	 * 
+	 * @return The question text with the answers removed.
+	 */
+	public String getQuestionText()
+	{
+		if (this.text == null) return null;
+
+		String text = this.text;
+		StringBuffer rv = new StringBuffer();
+
+		while (text.indexOf("{") > -1)
+		{
+			int left = text.indexOf("{");
+			int right = text.indexOf("}");
+
+			String tmp = text.substring(0, left);
+			text = text.substring(right + 1);
+			rv.append(tmp);
+			rv.append("{}");
+
+			// there are no more "}", exit loop
+			if (right == -1)
+			{
+				break;
+			}
+		}
+
+		rv.append(text);
+
+		return rv.toString();
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public String getResponseTextual()
@@ -424,7 +456,14 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setAnyOrder(String anyOrder)
 	{
-		this.anyOrder = Boolean.valueOf(anyOrder);
+		if (anyOrder == null) throw new IllegalArgumentException();
+
+		Boolean b = Boolean.valueOf(anyOrder);
+		if (!Different.different(b, this.anyOrder)) return;
+
+		this.anyOrder = b;
+
+		this.question.setChanged();
 	}
 
 	/**
@@ -432,7 +471,14 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setCaseSensitive(String caseSensitive)
 	{
-		this.caseSensitive = Boolean.valueOf(caseSensitive);
+		if (caseSensitive == null) throw new IllegalArgumentException();
+
+		Boolean b = Boolean.valueOf(caseSensitive);
+		if (!Different.different(b, this.caseSensitive)) return;
+
+		this.caseSensitive = b;
+
+		this.question.setChanged();
 	}
 
 	/**
@@ -440,7 +486,14 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setResponseTextual(String responseTextual)
 	{
-		this.responseTextual = Boolean.valueOf(responseTextual);
+		if (responseTextual == null) throw new IllegalArgumentException();
+
+		Boolean b = Boolean.valueOf(responseTextual);
+		if (!Different.different(b, this.responseTextual)) return;
+
+		this.responseTextual = b;
+
+		this.question.setChanged();
 	}
 
 	/**
@@ -451,7 +504,11 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setText(String text)
 	{
-		this.text = text;
+		if (!Different.different(this.text, text)) return;
+
+		this.text = StringUtil.trimToNull(text);
+
+		this.question.setChanged();
 	}
 
 	/**
@@ -463,39 +520,5 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	public void setUi(UiService service)
 	{
 		this.uiService = service;
-	}
-
-	/**
-	 * Produce a string of the question with the answers removed.
-	 * 
-	 * @return The question text with the answers removed.
-	 */
-	public String getQuestionText()
-	{
-		if (this.text == null) return null;
-
-		String text = this.text;
-		StringBuffer rv = new StringBuffer();
-
-		while (text.indexOf("{") > -1)
-		{
-			int left = text.indexOf("{");
-			int right = text.indexOf("}");
-
-			String tmp = text.substring(0, left);
-			text = text.substring(right + 1);
-			rv.append(tmp);
-			rv.append("{}");
-
-			// there are no more "}", exit loop
-			if (right == -1)
-			{
-				break;
-			}
-		}
-
-		rv.append(text);
-
-		return rv.toString();
 	}
 }

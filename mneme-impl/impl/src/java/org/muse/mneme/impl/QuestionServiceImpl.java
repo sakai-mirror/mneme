@@ -179,6 +179,7 @@ public class QuestionServiceImpl implements QuestionService
 		}
 
 		// save
+		((QuestionImpl) rv).clearChanged();
 		this.storage.saveQuestion((QuestionImpl) rv);
 
 		// event
@@ -399,6 +400,9 @@ public class QuestionServiceImpl implements QuestionService
 		if (question == null) throw new IllegalArgumentException();
 		if (((QuestionImpl) question).getIsHistorical()) throw new IllegalArgumentException();
 
+		// if no changes have been made, ignore this
+		if (!question.getIsChanged()) return;
+
 		if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: " + question.getId());
 
 		String userId = sessionManager.getCurrentSessionUserId();
@@ -442,6 +446,7 @@ public class QuestionServiceImpl implements QuestionService
 			// get a new id on the old and save it as history
 			current.initId(null);
 			current.initHistorical();
+			((QuestionImpl) current).clearChanged();
 			this.storage.saveQuestion(current);
 
 			// switch the manual uses of this question in tests to the history
@@ -456,6 +461,7 @@ public class QuestionServiceImpl implements QuestionService
 			{
 				current.initId(null);
 				current.initHistorical();
+				((QuestionImpl) current).clearChanged();
 				this.storage.saveQuestion(current);
 			}
 
@@ -469,6 +475,7 @@ public class QuestionServiceImpl implements QuestionService
 		{
 			current.initId(null);
 			current.initHistorical();
+			((QuestionImpl) current).clearChanged();
 			this.storage.saveQuestion(current);
 		}
 
@@ -477,6 +484,7 @@ public class QuestionServiceImpl implements QuestionService
 		{
 			current.initId(null);
 			current.initHistorical();
+			((QuestionImpl) current).clearChanged();
 			this.storage.saveQuestion(current);
 		}
 
@@ -492,6 +500,7 @@ public class QuestionServiceImpl implements QuestionService
 		}
 
 		// save
+		((QuestionImpl) question).clearChanged();
 		this.storage.saveQuestion((QuestionImpl) question);
 
 		// event
@@ -659,6 +668,7 @@ public class QuestionServiceImpl implements QuestionService
 			// get a new id on the old and save it as history
 			current.initId(null);
 			current.initHistorical();
+			((QuestionImpl) current).clearChanged();
 			this.storage.saveQuestion(current);
 
 			// switch the manual uses of this question in tests to the history
@@ -676,6 +686,7 @@ public class QuestionServiceImpl implements QuestionService
 			{
 				current.initId(null);
 				current.initHistorical();
+				((QuestionImpl) current).clearChanged();
 				this.storage.saveQuestion(current);
 			}
 		}
@@ -688,6 +699,7 @@ public class QuestionServiceImpl implements QuestionService
 			{
 				current.initId(null);
 				current.initHistorical();
+				((QuestionImpl) current).clearChanged();
 				this.storage.saveQuestion(current);
 			}
 
@@ -706,6 +718,7 @@ public class QuestionServiceImpl implements QuestionService
 			{
 				current.initId(null);
 				current.initHistorical();
+				((QuestionImpl) current).clearChanged();
 				this.storage.saveQuestion(current);
 			}
 		}

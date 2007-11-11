@@ -407,7 +407,11 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setModelAnswer(String modelAnswer)
 	{
+		if (!Different.different(modelAnswer, this.modelAnswer)) return;
+
 		this.modelAnswer = modelAnswer;
+
+		this.question.setChanged();
 	}
 
 	/**
@@ -419,7 +423,11 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	public void setSubmissionType(SubmissionType setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
+		if (!Different.different(setting, this.submissionType)) return;
+
 		this.submissionType = setting;
+
+		this.question.setChanged();
 	}
 
 	/**

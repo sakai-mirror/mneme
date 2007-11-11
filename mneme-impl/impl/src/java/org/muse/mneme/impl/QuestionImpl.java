@@ -231,6 +231,9 @@ public class QuestionImpl implements Question
 
 	protected MyAssessmentOrdering assessmentOrdering = new MyAssessmentOrdering(this);
 
+	/** Track changes. */
+	protected transient ChangeableImpl changed = new ChangeableImpl();
+
 	protected AttributionImpl createdBy = new AttributionImpl(null);
 
 	protected Boolean explainReason = Boolean.FALSE;
@@ -255,7 +258,7 @@ public class QuestionImpl implements Question
 
 	protected transient PoolService poolService = null;
 
-	protected PresentationImpl presentation = new PresentationImpl(null);
+	protected PresentationImpl presentation = null;
 
 	protected TypeSpecificQuestion questionHandler = null;
 
@@ -282,6 +285,7 @@ public class QuestionImpl implements Question
 		this.poolService = poolService;
 		this.questionService = questionService;
 		this.submissionService = submissionService;
+		this.presentation = new PresentationImpl(this.changed);
 	}
 
 	/**
@@ -379,6 +383,14 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsChanged()
+	{
+		return this.changed.getChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsHistorical()
 	{
 		return this.historical;
@@ -471,10 +483,22 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setChanged()
+	{
+		this.changed.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setExplainReason(Boolean explainReason)
 	{
 		if (explainReason == null) throw new IllegalArgumentException();
+		if (!Different.different(explainReason, this.explainReason)) return;
+
 		this.explainReason = explainReason;
+
+		this.changed.setChanged();
 	}
 
 	/**
@@ -482,7 +506,11 @@ public class QuestionImpl implements Question
 	 */
 	public void setFeedback(String feedback)
 	{
+		if (!Different.different(feedback, this.feedback)) return;
+
 		this.feedback = feedback;
+
+		this.changed.setChanged();
 	}
 
 	/**
@@ -490,7 +518,11 @@ public class QuestionImpl implements Question
 	 */
 	public void setHints(String hints)
 	{
+		if (!Different.different(hints, this.hints)) return;
+
 		this.hints = hints;
+
+		this.changed.setChanged();
 	}
 
 	/**
@@ -499,7 +531,19 @@ public class QuestionImpl implements Question
 	public void setPool(Pool pool)
 	{
 		if (pool == null) throw new IllegalArgumentException();
+		if (!Different.different(pool.getId(), this.poolId)) return;
+
 		this.poolId = pool.getId();
+
+		this.changed.setChanged();
+	}
+
+	/**
+	 * Clear the changed settings.
+	 */
+	protected void clearChanged()
+	{
+		this.changed.clearChanged();
 	}
 
 	/**
@@ -601,7 +645,7 @@ public class QuestionImpl implements Question
 		this.poolContext = other.poolContext;
 		this.poolId = other.poolId;
 		this.poolService = other.poolService;
-		this.presentation = new PresentationImpl(other.presentation, null);
+		this.presentation = new PresentationImpl(other.presentation, this.changed);
 		this.questionService = other.questionService;
 		this.submissionContext = other.submissionContext;
 		this.submissionService = other.submissionService;

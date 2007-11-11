@@ -83,6 +83,13 @@ public interface Question
 	String getId();
 
 	/**
+	 * Check if the question has been changed.
+	 * 
+	 * @return TRUE if changed, FALSE if not.
+	 */
+	Boolean getIsChanged();
+
+	/**
 	 * Check the historical setting of the question.
 	 * 
 	 * @return TRUE if the question is used only for historical access, FALSE if it is a current question.
@@ -144,6 +151,11 @@ public interface Question
 	 * @return The question's type-specific handler.
 	 */
 	TypeSpecificQuestion getTypeSpecificQuestion();
+
+	/**
+	 * Mark this question as changed.
+	 */
+	void setChanged();
 
 	/**
 	 * Set the explain-reason setting.

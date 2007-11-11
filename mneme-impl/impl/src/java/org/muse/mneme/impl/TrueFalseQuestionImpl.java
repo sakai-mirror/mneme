@@ -415,7 +415,14 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setCorrectAnswer(String correctAnswer)
 	{
-		this.correctAnswer = Boolean.valueOf(correctAnswer);
+		if (correctAnswer == null) throw new IllegalArgumentException();
+
+		Boolean b = Boolean.valueOf(correctAnswer);
+		if (!Different.different(b, this.correctAnswer)) return;
+
+		this.correctAnswer = b;
+
+		this.question.setChanged();
 	}
 
 	/**

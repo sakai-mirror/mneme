@@ -35,8 +35,6 @@ import org.muse.ambrosia.api.CompareDecision;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Decision;
 import org.muse.ambrosia.api.Destination;
-import org.muse.ambrosia.api.EntityDisplay;
-import org.muse.ambrosia.api.EntityDisplayRow;
 import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.EntityListColumn;
 import org.muse.ambrosia.api.HtmlEdit;
@@ -64,20 +62,24 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	{
 		protected Boolean correct = Boolean.FALSE;
 
-		protected String id;
+		protected String id = null;
 
-		protected String text;
+		protected Question myQuestion = null;
 
-		public MultipleChoiceQuestionChoice(MultipleChoiceQuestionChoice other)
+		protected String text = null;
+
+		public MultipleChoiceQuestionChoice(Question question, MultipleChoiceQuestionChoice other)
 		{
 			this.correct = other.correct;
 			this.id = other.id;
 			this.text = other.text;
+			this.myQuestion = question;
 		}
 
-		public MultipleChoiceQuestionChoice(String id, String text)
+		public MultipleChoiceQuestionChoice(Question question, String id, String text)
 		{
 			this.id = id;
+			this.myQuestion = question;
 			setText(text);
 		}
 
@@ -98,12 +100,22 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 
 		public void setCorrect(Boolean correct)
 		{
+			if (correct == null) throw new IllegalArgumentException();
+
+			if (!Different.different(correct, this.correct)) return;
+
 			this.correct = correct;
+
+			this.myQuestion.setChanged();
 		}
 
 		public void setText(String text)
 		{
-			this.text = ((text == null) ? "" : text.trim());
+			if (!Different.different(this.text, text)) return;
+
+			this.text = StringUtil.trimToNull(text);
+
+			this.myQuestion.setChanged();
 		}
 	}
 
@@ -138,7 +150,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		this.answerChoices = new ArrayList<MultipleChoiceQuestionChoice>(other.answerChoices.size());
 		for (MultipleChoiceQuestionChoice choice : other.answerChoices)
 		{
-			this.answerChoices.add(new MultipleChoiceQuestionChoice(choice));
+			this.answerChoices.add(new MultipleChoiceQuestionChoice(question, choice));
 		}
 		this.messages = other.messages;
 		this.question = question;
@@ -178,7 +190,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			((MultipleChoiceQuestionImpl) rv).answerChoices = new ArrayList<MultipleChoiceQuestionChoice>(this.answerChoices.size());
 			for (MultipleChoiceQuestionChoice choice : this.answerChoices)
 			{
-				((MultipleChoiceQuestionImpl) rv).answerChoices.add(new MultipleChoiceQuestionChoice(choice));
+				((MultipleChoiceQuestionImpl) rv).answerChoices.add(new MultipleChoiceQuestionChoice(question, choice));
 			}
 
 			// set the question
@@ -223,6 +235,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 				}
 
 				this.answerChoices = newChoices;
+
+				question.setChanged();
 			}
 		}
 
@@ -241,8 +255,10 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 					int i = this.answerChoices.size();
 					for (int count = 0; count < more; count++)
 					{
-						this.answerChoices.add(new MultipleChoiceQuestionChoice(Integer.toString(i++), ""));
+						this.answerChoices.add(new MultipleChoiceQuestionChoice(this.question, Integer.toString(i++), ""));
 					}
+
+					this.question.setChanged();
 				}
 				catch (NumberFormatException e)
 				{
@@ -261,18 +277,27 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		{
 			List newChoices = new ArrayList<MultipleChoiceQuestionChoice>();
 			int i = 0;
+			boolean removed = false;
 			for (MultipleChoiceQuestionChoice choice : this.answerChoices)
 			{
 				// ignore the empty ones
-				if (choice.getText().length() > 0)
+				if (choice.getText() != null)
 				{
 					// new position
 					choice.id = Integer.toString(i++);
 					newChoices.add(choice);
 				}
+				else
+				{
+					removed = true;
+				}
 			}
 
-			this.answerChoices = newChoices;
+			if (removed)
+			{
+				this.answerChoices = newChoices;
+				this.question.setChanged();
+			}
 		}
 
 		// make sure there's only one correct if we are single select
@@ -433,8 +458,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		// shuffle them if desired (and we are in a submission context)
 		if (this.shuffleChoices && (this.question.getPart() != null) && (this.question.getPart().getAssessment().getSubmissionContext() != null))
 		{
-			// set the seed based on the submission id 
-			long seed = this.question.getPart().getAssessment().getSubmissionContext().getId() .hashCode();
+			// set the seed based on the submission id
+			long seed = this.question.getPart().getAssessment().getSubmissionContext().getId().hashCode();
 
 			// mix up the answers
 			Collections.shuffle(rv, new Random(seed));
@@ -472,22 +497,12 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String[] getCorrectAnswers()
 	{
-		// count the corrrect answers
-		int count = 0;
-		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+		Set<Integer> corrects = getCorrectAnswerSet();
+		String[] rv = new String[corrects.size()];
+		int index = 0;
+		for (Integer correct : corrects)
 		{
-			if (choice.getCorrect()) count++;
-		}
-
-		// collect them into an array
-		String[] rv = new String[count];
-		int i = 0;
-		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
-		{
-			if (choice.getCorrect())
-			{
-				rv[i++] = choice.getId();
-			}
+			rv[index++] = correct.toString();
 		}
 
 		return rv;
@@ -813,12 +828,32 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setAnswerChoices(List<String> choices)
 	{
+		if (choices == null) throw new IllegalArgumentException();
+
+		// check for difference
+		if (choices.size() == this.answerChoices.size())
+		{
+			boolean different = false;
+			for (int i = 0; i < choices.size(); i++)
+			{
+				if (!choices.get(i).equals(this.answerChoices.get(i).getText()))
+				{
+					different = true;
+					break;
+				}
+			}
+
+			if (!different) return;
+		}
+
 		this.answerChoices = new ArrayList<MultipleChoiceQuestionChoice>(choices.size());
 		int i = 0;
 		for (String choice : choices)
 		{
-			this.answerChoices.add(new MultipleChoiceQuestionChoice(Integer.toString(i++), choice));
+			this.answerChoices.add(new MultipleChoiceQuestionChoice(this.question, Integer.toString(i++), choice));
 		}
+
+		this.question.setChanged();
 	}
 
 	/**
@@ -829,24 +864,17 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setCorrectAnswers(String[] correctAnswers)
 	{
-		// clear the correct markings
-		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+		// put them in a set
+		Set<Integer> corrects = new HashSet<Integer>();
+		if (correctAnswers != null)
 		{
-			choice.setCorrect(Boolean.FALSE);
-		}
-
-		if (correctAnswers == null) return;
-
-		// mark each one given
-		for (String answer : correctAnswers)
-		{
-			int index = Integer.parseInt(answer);
-			MultipleChoiceQuestionChoice choice = this.answerChoices.get(index);
-			if (choice != null)
+			for (String answer : correctAnswers)
 			{
-				choice.setCorrect(Boolean.TRUE);
+				corrects.add(Integer.valueOf(answer));
 			}
 		}
+
+		setCorrectAnswerSet(corrects);
 	}
 
 	/**
@@ -857,13 +885,17 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setCorrectAnswerSet(Set<Integer> correctAnswers)
 	{
+		if (correctAnswers == null) throw new IllegalArgumentException();
+
+		// check for difference
+		Set<Integer> current = getCorrectAnswerSet();
+		if (correctAnswers.equals(current)) return;
+
 		// clear the correct markings
 		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
 		{
 			choice.setCorrect(Boolean.FALSE);
 		}
-
-		if (correctAnswers == null) return;
 
 		// mark each one given
 		for (Integer answer : correctAnswers)
@@ -874,6 +906,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 				choice.setCorrect(Boolean.TRUE);
 			}
 		}
+
+		this.question.setChanged();
 	}
 
 	/**
@@ -884,7 +918,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setShuffleChoices(String shuffleChoices)
 	{
-		this.shuffleChoices = Boolean.valueOf(shuffleChoices);
+		if (shuffleChoices == null) throw new IllegalArgumentException();
+
+		Boolean b = Boolean.valueOf(shuffleChoices);
+		if (!Different.different(b, this.shuffleChoices)) return;
+
+		this.shuffleChoices = b;
+
+		this.question.setChanged();
 	}
 
 	/**
@@ -892,7 +933,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setSingleCorrect(String singleCorrect)
 	{
-		this.singleCorrect = Boolean.valueOf(singleCorrect);
+		if (singleCorrect == null) throw new IllegalArgumentException();
+
+		Boolean b = Boolean.valueOf(singleCorrect);
+		if (!Different.different(b, this.singleCorrect)) return;
+
+		this.singleCorrect = b;
+
+		this.question.setChanged();
 	}
 
 	/**

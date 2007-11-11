@@ -74,8 +74,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 
 		protected String matchLabel = null;
 
-		public MatchQuestionPair(MatchQuestionPair other)
+		protected Question myQuestion = null;
+
+		public MatchQuestionPair(Question question, MatchQuestionPair other)
 		{
+			this.myQuestion = question;
 			setChoice(other.choice);
 			this.choiceId = other.choiceId;
 			this.correctChoiceId = other.correctChoiceId;
@@ -85,8 +88,9 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 			this.matchLabel = other.matchLabel;
 		}
 
-		public MatchQuestionPair(String choice, String match, int index)
+		public MatchQuestionPair(Question question, String choice, String match, int index)
 		{
+			this.myQuestion = question;
 			setChoice(choice);
 			this.choiceId = idManager.createUuid();
 			this.correctChoiceId = this.choiceId;
@@ -134,12 +138,22 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 
 		public void setChoice(String choice)
 		{
-			this.choice = StringUtil.trimToNull(choice);
+			String c = StringUtil.trimToNull(choice);
+			if (!Different.different(c, this.choice)) return;
+
+			this.choice = c;
+
+			this.myQuestion.setChanged();
 		}
 
 		public void setMatch(String match)
 		{
-			this.match = StringUtil.trimToNull(match);
+			String m = StringUtil.trimToNull(match);
+			if (!Different.different(m, this.match)) return;
+
+			this.match = m;
+
+			this.myQuestion.setChanged();
 		}
 	}
 
@@ -179,11 +193,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public MatchQuestionImpl(Question question, MatchQuestionImpl other)
 	{
-		if (other.distractor != null) this.distractor = new MatchQuestionPair(other.distractor);
+		if (other.distractor != null) this.distractor = new MatchQuestionPair(this.question, other.distractor);
 		this.pairs = new ArrayList<MatchQuestionPair>(other.pairs.size());
 		for (MatchQuestionPair choice : other.pairs)
 		{
-			this.pairs.add(new MatchQuestionPair(choice));
+			this.pairs.add(new MatchQuestionPair(this.question, choice));
 		}
 		this.messages = other.messages;
 		this.question = question;
@@ -219,7 +233,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void addPair(String choice, String match)
 	{
-		this.pairs.add(new MatchQuestionPair(choice, match, this.pairs.size()));
+		this.pairs.add(new MatchQuestionPair(this.question, choice, match, this.pairs.size()));
 	}
 
 	/**
@@ -236,10 +250,10 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 			((MatchQuestionImpl) rv).pairs = new ArrayList<MatchQuestionPair>(this.pairs.size());
 			for (MatchQuestionPair choice : this.pairs)
 			{
-				((MatchQuestionImpl) rv).pairs.add(new MatchQuestionPair(choice));
+				((MatchQuestionImpl) rv).pairs.add(new MatchQuestionPair(this.question, choice));
 			}
 
-			if (this.distractor != null) ((MatchQuestionImpl) rv).distractor = new MatchQuestionPair(this.distractor);
+			if (this.distractor != null) ((MatchQuestionImpl) rv).distractor = new MatchQuestionPair(this.question, this.distractor);
 
 			// set the question
 			((MatchQuestionImpl) rv).question = question;
@@ -280,6 +294,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 				}
 
 				this.pairs = newChoices;
+				this.question.setChanged();
 			}
 		}
 
@@ -297,8 +312,9 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 					int more = Integer.parseInt(parts[1]);
 					for (int count = 0; count < more; count++)
 					{
-						this.pairs.add(new MatchQuestionPair(null, null, this.pairs.size()));
+						this.pairs.add(new MatchQuestionPair(this.question, null, null, this.pairs.size()));
 					}
+					this.question.setChanged();
 				}
 				catch (NumberFormatException e)
 				{
@@ -310,6 +326,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		if (removeBlanks)
 		{
 			List newChoices = new ArrayList<MatchQuestionPair>();
+			boolean anyRemoved = false;
 			for (MatchQuestionPair pair : this.pairs)
 			{
 				// ignore the deleted one
@@ -317,9 +334,17 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 				{
 					newChoices.add(pair);
 				}
+				else
+				{
+					anyRemoved = true;
+				}
 			}
 
-			this.pairs = newChoices;
+			if (anyRemoved)
+			{
+				this.pairs = newChoices;
+				this.question.setChanged();
+			}
 		}
 
 		if (stayHere) return null;
@@ -536,7 +561,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		List<MatchQuestionPair> rv = new ArrayList<MatchQuestionPair>(this.pairs.size());
 		for (MatchQuestionPair choice : this.pairs)
 		{
-			rv.add(new MatchQuestionPair(choice));
+			rv.add(new MatchQuestionPair(this.question, choice));
 		}
 
 		// shuffle once for the matchs
@@ -546,14 +571,14 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		List<MatchQuestionPair> choices = new ArrayList<MatchQuestionPair>(rv.size());
 		for (MatchQuestionPair choice : this.pairs)
 		{
-			choices.add(new MatchQuestionPair(choice));
+			choices.add(new MatchQuestionPair(this.question, choice));
 		}
 
 		// add the distractor (need to be at the end of the rv, i.e. after that shuffle)
 		if ((this.distractor != null) && (distractor.getChoice() != null))
 		{
-			choices.add(new MatchQuestionPair(this.distractor));
-			rv.add(new MatchQuestionPair(this.distractor));
+			choices.add(new MatchQuestionPair(this.question, this.distractor));
+			rv.add(new MatchQuestionPair(this.question, this.distractor));
 		}
 
 		Collections.shuffle(choices, sequence);
@@ -633,13 +658,13 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 				this.uiService.newPropertyReference().setReference("pair.correctChoiceId")).setReversed().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
 						this.uiService.newPropertyReference().setReference("pair.id"))));
-		
+
 		EntityListColumn correctCol = this.uiService.newEntityListColumn();
 		correctCol.setWidth(16);
-		correctCol.setEntityIncluded(
-				this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("pair.match")), null);
+		correctCol.setEntityIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("pair.match")), null);
 		correctCol.add(correct).add(incorrect);
-		
+
 		AndDecision and = this.uiService.newAndDecision();
 		Decision[] decisionsAnd = new Decision[2];
 		decisionsAnd[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
@@ -777,11 +802,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 				this.uiService.newPropertyReference().setReference("pair.correctChoiceId")).setReversed().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
 						this.uiService.newPropertyReference().setReference("pair.id"))));
-		
+
 		EntityListColumn correctCol = this.uiService.newEntityListColumn();
 		correctCol.setWidth(16);
-		correctCol.setEntityIncluded(
-				this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("pair.match")), null);
+		correctCol.setEntityIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("pair.match")), null);
 		correctCol.add(correct).add(incorrect);
 		entityList.addColumn(correctCol);
 
@@ -904,12 +929,14 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	{
 		if (this.distractor == null)
 		{
-			this.distractor = new MatchQuestionPair(distractor, null, 0);
+			this.distractor = new MatchQuestionPair(this.question, distractor, null, 0);
+			this.question.setChanged();
+			return;
 		}
-		else
-		{
-			this.distractor.setChoice(distractor);
-		}
+
+		if (!Different.different(distractor, this.distractor.getChoice())) return;
+		this.distractor.setChoice(distractor);
+		this.question.setChanged();
 	}
 
 	/**

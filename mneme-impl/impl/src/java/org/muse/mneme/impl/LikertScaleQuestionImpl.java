@@ -504,7 +504,14 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setScale(String scale)
 	{
-		this.scale = Integer.valueOf(scale);
+		if (scale == null) throw new IllegalArgumentException();
+		
+		Integer s = Integer.valueOf(scale);
+		if (!Different.different(this.scale, s)) return;
+
+		this.scale = s;
+
+		this.question.setChanged();
 	}
 
 	/**

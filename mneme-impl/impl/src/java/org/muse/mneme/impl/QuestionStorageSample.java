@@ -458,6 +458,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getModifiedBy().setDate(now);
 			q.setHints("hints for question one<br />Hints are rich text.");
 			q.setFeedback("feedback for question one");
+			q.clearChanged();
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
@@ -475,6 +476,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getModifiedBy().setDate(now);
 			q.setHints("hints for question two.");
 			q.setFeedback("feedback for question two");
+			q.clearChanged();
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
@@ -503,6 +505,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getModifiedBy().setDate(now);
 			q.setHints("hints for question three.");
 			q.setFeedback("feedback for question 3");
+			q.clearChanged();
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
@@ -519,6 +522,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getModifiedBy().setUserId("admin");
 			q.getModifiedBy().setDate(now);
 			q.setFeedback("feedback for question 4");
+			q.clearChanged();
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
@@ -533,6 +537,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");
 			q.getModifiedBy().setDate(now);
+			q.clearChanged();
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
@@ -552,6 +557,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getModifiedBy().setDate(now);
 			q.setHints("hints for question six.");
 			q.setFeedback("feedback for question 6");
+			q.clearChanged();
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
@@ -568,6 +574,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getModifiedBy().setDate(now);
 			q.setHints("hints for question seven.");
 			q.setFeedback("feedback for question 7");
+			q.clearChanged();
 			questions.put(q.getId(), q);
 
 			q = newQuestion();
@@ -584,6 +591,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getModifiedBy().setDate(now);
 			q.setHints("hints for question eight.");
 			q.setFeedback("feedback for question 8");
+			q.clearChanged();
 			questions.put(q.getId(), q);
 		}
 	}
