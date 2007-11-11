@@ -295,14 +295,6 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getTypeName()
-	{
-		return this.messages.getString("name");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean getUseFeedback()
 	{
 		return Boolean.TRUE;

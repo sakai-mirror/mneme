@@ -82,13 +82,6 @@ public interface TypeSpecificQuestion extends Cloneable
 	Component getReviewUi();
 
 	/**
-	 * Access the question type (human readable) string for this plugin.
-	 * 
-	 * @return The question type (human readable) string for this plugin.
-	 */
-	String getTypeName();
-
-	/**
 	 * Check if this type uses the generic question feedback.
 	 * 
 	 * @return TRUE to use the generic question feedback for this type, FALSE to not.

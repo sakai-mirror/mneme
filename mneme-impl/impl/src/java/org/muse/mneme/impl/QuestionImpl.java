@@ -461,7 +461,7 @@ public class QuestionImpl implements Question
 	 */
 	public String getTypeName()
 	{
-		return this.questionHandler.getTypeName();
+		return this.questionHandler.getPlugin().getTypeName();
 	}
 
 	/**
