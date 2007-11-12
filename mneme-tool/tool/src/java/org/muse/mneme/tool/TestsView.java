@@ -188,7 +188,6 @@ public class TestsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-
 		// security check
 		if (!assessmentService.allowManageAssessments(this.toolManager.getCurrentPlacement().getContext()))
 		{
@@ -197,12 +196,13 @@ public class TestsView extends ControllerImpl
 			return;
 		}
 
-		// throw new IllegalArgumentException();
 		// for the selected tests to delete
 		Values values = this.uiService.newValues();
 		context.put("ids", values);
+
 		// read the form
 		String destination = uiService.decode(req, context);
+		
 		if (destination != null)
 		{
 			// save date changes regardless of where user goes

@@ -72,6 +72,15 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clearOldMints()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void copyPoolQuestions(String userId, Pool source, Pool destination)
 	{
 		List<QuestionImpl> questions = new ArrayList<QuestionImpl>(this.questions.values());

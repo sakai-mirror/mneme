@@ -63,14 +63,14 @@ public class TestEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-
+		// sort, aid
 		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
-
+		String sort = params[2];
 		String assessmentId = params[3];
-
+		
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
@@ -89,7 +89,7 @@ public class TestEditView extends ControllerImpl
 
 		// collect information: the selected assessment
 		context.put("assessment", assessment);
-		context.put("sortcode", params[2]);
+		context.put("sortcode", sort);
 
 		// value holders for the selection checkboxes
 		Values values = this.uiService.newValues();
@@ -113,13 +113,14 @@ public class TestEditView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a single parameter (aid)
+		// sort, aid
 		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
-
+		String sort = params[2];
 		String assessmentId = params[3];
+
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
@@ -149,27 +150,31 @@ public class TestEditView extends ControllerImpl
 		// commit the save
 		try
 		{
-			// save assessment properties
-			this.assessmentService.saveAssessment(assessment);
-
 			if (destination.equals("DRAW"))
 			{
 				DrawPart dPart = assessment.getParts().addDrawPart();
 				this.assessmentService.saveAssessment(assessment);
+
 				// create url for draw
-				destination = "/part_edit/" + params[2] + "/" + assessment.getId() + "/" + dPart.getId();
+				destination = "/part_edit/" + sort + "/" + assessment.getId() + "/" + dPart.getId();
 			}
+
 			else if (destination.equals("MANUAL"))
 			{
 				ManualPart mPart = assessment.getParts().addManualPart();
 				this.assessmentService.saveAssessment(assessment);
+
 				// create url for manual
-				destination = "/part_edit/" + params[2] + "/" + assessment.getId() + "/" + mPart.getId();
+				destination = "/part_edit/" + sort + "/" + assessment.getId() + "/" + mPart.getId();
 			}
-			else if (destination.equals("/part_delete"))
+
+			else if (destination.equals("DELETE"))
 			{
-				// delete the parts
-				StringBuffer path = new StringBuffer("/part_delete/" + params[2] + "/" + assessment.getId() + "/");
+				// save
+				this.assessmentService.saveAssessment(assessment);
+
+				// destination for confirm delete
+				StringBuilder path = new StringBuilder("/part_delete/" + sort + "/" + assessment.getId() + "/");
 				String separator = "+";
 
 				String[] deletePartIds = values.getValues();
@@ -182,9 +187,15 @@ public class TestEditView extends ControllerImpl
 						path.append(deletePartIds[i]);
 					}
 				}
-				
+
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
 				return;
+			}
+
+			else
+			{
+				// save assessment properties
+				this.assessmentService.saveAssessment(assessment);
 			}
 		}
 		catch (AssessmentPermissionException e)

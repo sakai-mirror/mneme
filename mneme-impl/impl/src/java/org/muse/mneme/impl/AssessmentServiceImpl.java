@@ -371,8 +371,26 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 
-		// if no changes have been made, ignore this
-		if (!assessment.getIsChanged()) return;
+		// if any changes made, clear mint
+		if (assessment.getIsChanged())
+		{
+			((AssessmentImpl) assessment).clearMint();
+		}
+
+		// otherwise we don't save: but if mint, we delete
+		else
+		{
+			// if mint, delete instead of save
+			if (((AssessmentImpl) assessment).getMint())
+			{
+				if (M_log.isDebugEnabled()) M_log.debug("saveAssessment: deleting mint: " + assessment.getId());
+
+				// Note: mint questions cannot have already been dependened on, so we can just forget about it.
+				this.storage.removeAssessment((AssessmentImpl) assessment);
+			}
+
+			return;
+		}
 
 		if (M_log.isDebugEnabled()) M_log.debug("saveAssessment: " + assessment.getId());
 

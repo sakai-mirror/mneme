@@ -7,7 +7,7 @@
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You may obtain a copyO of the License at
  * 
  *      http://www.apache.org/licenses/LICENSE-2.0
  * 
@@ -81,6 +81,9 @@ public class AssessmentImpl implements Assessment
 	/** Track any changes that cannot be made to live tests. */
 	protected transient Boolean liveChanged = Boolean.FALSE;
 
+	/** Stays TRUE until an end-user change to the object occurs, showing it was actually initially set. */
+	protected Boolean mint = Boolean.TRUE;
+
 	protected Attribution modifiedBy = null;
 
 	protected AssessmentPartsImpl parts = null;
@@ -101,11 +104,11 @@ public class AssessmentImpl implements Assessment
 
 	protected AssessmentReview review = null;
 
-	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
-
 	protected Boolean showHints = Boolean.FALSE;
 
 	protected AssessmentSpecialAccess specialAccess = null;
+
+	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
 
 	protected transient Submission submissionContext = null;
 
@@ -313,6 +316,14 @@ public class AssessmentImpl implements Assessment
 		if (!this.parts.getIsValid()) return Boolean.FALSE;
 
 		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getMint()
+	{
+		return this.mint;
 	}
 
 	/**
@@ -673,6 +684,14 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Clear the mint setting.
+	 */
+	protected void clearMint()
+	{
+		this.mint = Boolean.FALSE;
+	}
+
+	/**
 	 * Check if there were any changes that need to generate history.
 	 * 
 	 * @return TRUE if there were history changes, FALSE if not.
@@ -762,6 +781,7 @@ public class AssessmentImpl implements Assessment
 		this.honorPledge = other.honorPledge;
 		this.id = other.id;
 		this.liveChanged = other.liveChanged;
+		this.mint = other.mint;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
 		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts, this.historyChanged);
 		this.password = new AssessmentPasswordImpl((AssessmentPasswordImpl) other.password, this.changed);

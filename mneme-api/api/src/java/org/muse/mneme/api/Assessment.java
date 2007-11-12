@@ -129,6 +129,13 @@ public interface Assessment
 	Boolean getIsValid();
 
 	/**
+	 * Check if the end user has never made initial settings.
+	 * 
+	 * @return TRUE if this has not been modified since creation, FALSE if it has.
+	 */
+	Boolean getMint();
+
+	/**
 	 * Access the modified-by attribution (user and date).
 	 * 
 	 * @return The modified-by attribution.

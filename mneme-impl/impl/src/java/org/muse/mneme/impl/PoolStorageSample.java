@@ -60,6 +60,15 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clearOldMints()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer countPools(String context, String search)
 	{
 		fakeIt();
@@ -68,7 +77,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.historical) && pool.getContext().equals(context))
+			if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
 			{
 				// TODO: search
 				count++;
@@ -135,7 +144,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.historical) && pool.getContext().equals(context))
+			if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
 			{
 				// TODO: search
 				rv.add(new PoolImpl(pool));
@@ -252,7 +261,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.historical) && pool.getId().equals(context))
+			if ((!pool.historical) && (!pool.getMint()) && pool.getId().equals(context))
 			{
 				rv.add(new PoolImpl(pool));
 			}
@@ -414,6 +423,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.getModifiedBy().setDate(now);
 			pool.setContext("mercury");
 			pool.changed.clearChanged();
+			pool.clearMint();
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
@@ -432,6 +442,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.getModifiedBy().setDate(now);
 			pool.setContext("mercury");
 			pool.changed.clearChanged();
+			pool.clearMint();
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
@@ -450,6 +461,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.getModifiedBy().setDate(now);
 			pool.setContext("mercury");
 			pool.changed.clearChanged();
+			pool.clearMint();
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
@@ -468,6 +480,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.getModifiedBy().setDate(now);
 			pool.setContext("mercury");
 			pool.changed.clearChanged();
+			pool.clearMint();
 			this.pools.put(pool.getId(), pool);
 
 			pool = newPool();
@@ -486,6 +499,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.getModifiedBy().setDate(now);
 			pool.setContext("mercury");
 			pool.changed.clearChanged();
+			pool.clearMint();
 			this.pools.put(pool.getId(), pool);
 		}
 	}

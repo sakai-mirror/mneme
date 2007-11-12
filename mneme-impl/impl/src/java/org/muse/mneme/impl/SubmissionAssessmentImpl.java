@@ -253,6 +253,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getMint()
+	{
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Attribution getModifiedBy()
 	{
 		return getMainAssessment().getModifiedBy();

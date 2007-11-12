@@ -43,6 +43,11 @@ public interface AssessmentStorage
 	Boolean assessmentExists(String id);
 
 	/**
+	 * Remove any mints that are over a threshold age.
+	 */
+	void clearOldMints();
+
+	/**
 	 * Count the assessments in a context that are not archived.
 	 * 
 	 * @param context

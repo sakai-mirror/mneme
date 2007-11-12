@@ -90,6 +90,15 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clearOldMints()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer countAssessments(String context)
 	{
 		fakeIt();
@@ -98,7 +107,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(context) && !assessment.getArchived() && !assessment.isHistorical())
+			if (assessment.getContext().equals(context) && !assessment.getArchived() && !assessment.isHistorical() && !assessment.getMint())
 			{
 				i++;
 			}
@@ -174,7 +183,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(context) && !assessment.getArchived() && !assessment.isHistorical())
+			if (assessment.getContext().equals(context) && !assessment.getArchived() && !assessment.isHistorical() && !assessment.getMint())
 			{
 				// filter out unpublished if requested (also ignoring invalid)
 				if (publishedOnly)
@@ -635,6 +644,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			p.getPresentation().setText("This is part two.");
 
 			a.clearChanged();
+			a.clearMint();
 			this.assessments.put(a.getId(), a);
 
 			//
@@ -679,6 +689,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			p2.getPresentation().setText("This is part one.");
 
 			a.clearChanged();
+			a.clearMint();
 			this.assessments.put(a.getId(), a);
 
 			//
@@ -716,6 +727,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			p.getPresentation().setText("This is part 1.");
 
 			a.clearChanged();
+			a.clearMint();
 			this.assessments.put(a.getId(), a);
 		}
 	}

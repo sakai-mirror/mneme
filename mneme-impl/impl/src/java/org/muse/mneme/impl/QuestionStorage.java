@@ -35,6 +35,11 @@ import org.muse.mneme.api.QuestionService;
 public interface QuestionStorage
 {
 	/**
+	 * Remove any mints that are over a threshold age.
+	 */
+	void clearOldMints();
+
+	/**
 	 * Create a new question that is a copy of each question in the pool.
 	 * 
 	 * @param userId

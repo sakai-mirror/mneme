@@ -33,6 +33,11 @@ import org.muse.mneme.api.Question;
 public interface PoolStorage
 {
 	/**
+	 * Remove any mints that are over a threshold age.
+	 */
+	void clearOldMints();
+
+	/**
 	 * Count the pools in this context that meet this criteria.
 	 * 
 	 * @param context

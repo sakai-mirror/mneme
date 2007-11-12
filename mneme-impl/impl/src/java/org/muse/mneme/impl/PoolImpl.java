@@ -53,6 +53,9 @@ public class PoolImpl implements Pool
 
 	protected String id = null;
 
+	/** Stays TRUE until an end-user change to the object occurs, showing it was actually initially set. */
+	protected Boolean mint = Boolean.TRUE;
+
 	protected Attribution modifiedBy = null;
 
 	protected Float points = null;
@@ -168,6 +171,14 @@ public class PoolImpl implements Pool
 	public Boolean getIsHistorical()
 	{
 		return this.historical;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getMint()
+	{
+		return this.mint;
 	}
 
 	/**
@@ -302,6 +313,14 @@ public class PoolImpl implements Pool
 	}
 
 	/**
+	 * Clear the mint setting.
+	 */
+	protected void clearMint()
+	{
+		this.mint = Boolean.FALSE;
+	}
+
+	/**
 	 * Check if the pool has been changed.
 	 * 
 	 * @return TRUE if the pool as been changed, FALSE if not.
@@ -357,6 +376,7 @@ public class PoolImpl implements Pool
 		this.difficulty = other.difficulty;
 		this.historical = other.historical;
 		this.id = other.id;
+		this.mint = other.mint;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
 		this.points = other.points;
 		this.poolService = other.poolService;

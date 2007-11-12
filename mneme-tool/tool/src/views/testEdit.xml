@@ -122,7 +122,7 @@
 									</included>
 								</navigation>
 								<!-- delete is dependent, and desired to go last  -->
-								<navigation destination="/part_delete" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements"
+								<navigation destination="DELETE" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements"
 									title="delete-part" style="LINK" description="part-delete-description" submit="TRUE">
 									<icon icon="/icons/delete.png" style="LEFT" />
 									<included>

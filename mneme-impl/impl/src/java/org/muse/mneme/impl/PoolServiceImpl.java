@@ -246,7 +246,7 @@ public class PoolServiceImpl implements PoolService
 		pool.setContext(context);
 
 		// save
-		savePool(pool);
+		doSave(pool);
 
 		return pool;
 	}
@@ -310,55 +310,31 @@ public class PoolServiceImpl implements PoolService
 	{
 		if (pool == null) throw new IllegalArgumentException();
 
-		if (!((PoolImpl) pool).getChanged()) return;
+		// if any changes made, clear mint
+		if (((PoolImpl) pool).getChanged())
+		{
+			((PoolImpl) pool).clearMint();
+		}
 
-		if (M_log.isDebugEnabled()) M_log.debug("savePool: " + pool.getId());
+		// otherwise we don't save: but if mint, we delete
+		else
+		{
+			// if mint, delete instead of save
+			if (((PoolImpl) pool).getMint())
+			{
+				if (M_log.isDebugEnabled()) M_log.debug("savePool: deleting mint: " + pool.getId());
 
-		String userId = sessionManager.getCurrentSessionUserId();
+				// Note: mint questions cannot have already been dependened on, so we can just forget about it.
+				this.storage.removePool((PoolImpl) pool);
+			}
+
+			return;
+		}
 
 		// security check
-		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, pool.getContext());
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, pool.getContext());
 
-		// get the current pool for history
-		PoolImpl current = this.storage.getPool(pool.getId());
-
-		Date now = new Date();
-
-		// if the pool is new (i.e. no id), set the createdBy information, if not already set
-		if ((pool.getId() == null) && (pool.getCreatedBy().getUserId() == null))
-		{
-			pool.getCreatedBy().setDate(now);
-			pool.getCreatedBy().setUserId(userId);
-		}
-
-		// update last modified information
-		pool.getModifiedBy().setDate(now);
-		pool.getModifiedBy().setUserId(userId);
-
-		// clear the changed settings
-		((PoolImpl) pool).clearChanged();
-
-		// save
-		storage.savePool((PoolImpl) pool);
-
-		if (current != null)
-		{
-			// if there are any history dependencies on this changed pool, we need to store the history version
-			// - draws or manual question selection.
-			if (this.assessmentService.liveDependencyExists(pool, false))
-			{
-				// get a new id on the old and save it
-				current.initId(null);
-				current.initHistorical(pool);
-				this.storage.savePool(current);
-
-				// swap all historical dependencies to the new
-				this.assessmentService.switchLiveDependency(pool, current, false);
-			}
-		}
-
-		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
+		doSave(pool);
 	}
 
 	/**
@@ -505,6 +481,60 @@ public class PoolServiceImpl implements PoolService
 		}
 
 		return false;
+	}
+
+	/**
+	 * Save the pool.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 */
+	protected void doSave(Pool pool)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("doSave: " + pool.getId());
+
+		String userId = sessionManager.getCurrentSessionUserId();
+
+		// get the current pool for history
+		PoolImpl current = this.storage.getPool(pool.getId());
+
+		Date now = new Date();
+
+		// if the pool is new (i.e. no id), set the createdBy information, if not already set
+		if ((pool.getId() == null) && (pool.getCreatedBy().getUserId() == null))
+		{
+			pool.getCreatedBy().setDate(now);
+			pool.getCreatedBy().setUserId(userId);
+		}
+
+		// update last modified information
+		pool.getModifiedBy().setDate(now);
+		pool.getModifiedBy().setUserId(userId);
+
+		// clear the changed settings
+		((PoolImpl) pool).clearChanged();
+
+		// save
+		storage.savePool((PoolImpl) pool);
+
+		if (current != null)
+		{
+			// if there are any history dependencies on this changed pool, we need to store the history version
+			// - draws or manual question selection.
+			if (this.assessmentService.liveDependencyExists(pool, false))
+			{
+				// get a new id on the old and save it
+				current.initId(null);
+				current.initHistorical(pool);
+				this.storage.savePool(current);
+
+				// swap all historical dependencies to the new
+				this.assessmentService.switchLiveDependency(pool, current, false);
+			}
+		}
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
 	}
 
 	/**
