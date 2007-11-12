@@ -135,10 +135,14 @@
 				</attachments>
 				<section>
 					<container>
-						<evaluation title="question-eval-overall-comment-title">
-							<icon icon="/icons/note.png" message="comments" />
-							<message selector="question-eval-overall-comment">
-								<model type="text" ref="submission.evaluation.comment" />
+						<evaluation>
+							<title>
+								<message selector="question-evaluation">
+									<model type="icon" icon="/icons/note.png" />
+								</message>
+							</title>
+							<message>
+								<model type="html" ref="submission.evaluation.comment" />
 							</message>
 						</evaluation>
 					</container>
@@ -377,8 +381,8 @@
 											<model type="icon" icon="/icons/note.png" />
 										</message>
 									</title>
-									<message selector="question-eval-question-comment">
-										<model type="text" ref="answer.evaluation.comment" />
+									<message>
+										<model type="html" ref="answer.evaluation.comment" />
 									</message>
 								</evaluation>
 							</container>

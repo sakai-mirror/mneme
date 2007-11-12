@@ -219,7 +219,7 @@
 						<!-- evaluation -->
 						<section>
 							<container>
-								<htmlEdit model="answer.evaluation.comment" rows="5" cols="40">
+								<htmlEdit model="answer.evaluation.comment" rows="5" cols="60">
 									<title>
 										<message selector="submission-evaluation">
 											<model type="icon" icon="/icons/note.png" />
