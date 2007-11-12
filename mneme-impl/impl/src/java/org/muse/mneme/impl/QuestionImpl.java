@@ -246,6 +246,9 @@ public class QuestionImpl implements Question
 
 	protected String id = null;
 
+	/** Stays TRUE until an end-user change to the object occurs, showing it was actually initially set. */
+	protected Boolean mint = Boolean.TRUE;
+
 	protected AttributionImpl modifiedBy = new AttributionImpl(null);
 
 	protected Part partContext = null;
@@ -399,6 +402,14 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getMint()
+	{
+		return this.mint;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Attribution getModifiedBy()
 	{
 		return this.modifiedBy;
@@ -547,6 +558,14 @@ public class QuestionImpl implements Question
 	}
 
 	/**
+	 * Clear the mint setting.
+	 */
+	protected void clearMint()
+	{
+		this.mint = Boolean.FALSE;
+	}
+
+	/**
 	 * Set this assessment to be "historical" - used only for history by submissions.
 	 */
 	protected void initHistorical()
@@ -640,6 +659,7 @@ public class QuestionImpl implements Question
 		this.hints = other.hints;
 		this.historical = other.historical;
 		this.id = other.id;
+		this.mint = other.mint;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, null);
 		this.partContext = other.partContext;
 		this.poolContext = other.poolContext;

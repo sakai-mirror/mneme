@@ -80,7 +80,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		{
 			this.id = id;
 			this.myQuestion = question;
-			setText(text);
+			this.text = StringUtil.trimToNull(text);
 		}
 
 		public Boolean getCorrect()
@@ -116,6 +116,11 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			this.text = StringUtil.trimToNull(text);
 
 			this.myQuestion.setChanged();
+		}
+
+		protected void initCorrect()
+		{
+			this.correct = Boolean.TRUE;
 		}
 	}
 
@@ -241,7 +246,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		}
 
 		// add more choices
-		if (destination.startsWith("ADD:"))
+		if (destination.startsWith("ADD:") || destination.startsWith("INIT:"))
 		{
 			removeBlanks = false;
 			stayHere = true;
@@ -255,10 +260,19 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 					int i = this.answerChoices.size();
 					for (int count = 0; count < more; count++)
 					{
-						this.answerChoices.add(new MultipleChoiceQuestionChoice(this.question, Integer.toString(i++), ""));
+						MultipleChoiceQuestionChoice choice = new MultipleChoiceQuestionChoice(this.question, Integer.toString(i++), "");
+						if ((count == 0) && (destination.startsWith("INIT:")))
+						{
+							choice.initCorrect();
+						}
+						this.answerChoices.add(choice);
 					}
 
-					this.question.setChanged();
+					// if init, this is not enough to set as changed
+					if (!destination.startsWith("INIT:"))
+					{
+						this.question.setChanged();
+					}
 				}
 				catch (NumberFormatException e)
 				{
@@ -296,7 +310,12 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			if (removed)
 			{
 				this.answerChoices = newChoices;
-				this.question.setChanged();
+
+				// if mint, this is not enough to trigger a changed
+				if (!this.question.getMint())
+				{
+					this.question.setChanged();
+				}
 			}
 		}
 
@@ -478,7 +497,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		// if we have no choices yet, start with 4
 		if (this.answerChoices.isEmpty())
 		{
-			consolidate("ADD:4");
+			consolidate("INIT:4");
 		}
 		List newChoices = new ArrayList<MultipleChoiceQuestionChoice>();
 		for (MultipleChoiceQuestionChoice choice : this.answerChoices)

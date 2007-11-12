@@ -372,7 +372,7 @@ public class QuestionServiceImpl implements QuestionService
 			M_log.warn("newQuestion: no plugin for type: " + type);
 		}
 
-		saveQuestion(question);
+		doSave(question);
 
 		return question;
 	}
@@ -400,16 +400,45 @@ public class QuestionServiceImpl implements QuestionService
 		if (question == null) throw new IllegalArgumentException();
 		if (((QuestionImpl) question).getIsHistorical()) throw new IllegalArgumentException();
 
-		// if no changes have been made, ignore this
-		if (!question.getIsChanged()) return;
+		// if any changes made, clear mint
+		if (question.getIsChanged())
+		{
+			((QuestionImpl) question).clearMint();
+		}
 
-		if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: " + question.getId());
+		// otherwise we don't save: but if mint, we delete
+		else
+		{
+			// if mint, delete instead of save
+			if (((QuestionImpl) question).getMint())
+			{
+				if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: deleting mint: " + question.getId());
+
+				// Note: mint questions cannot have already been dependened on, so we can just forget about it.
+				this.storage.removeQuestion((QuestionImpl) question);
+			}
+
+			return;
+		}
+
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getPool().getContext());
+
+		doSave(question);
+	}
+
+	/**
+	 * Save the question.
+	 * 
+	 * @param question
+	 *        The question to save.
+	 */
+	protected void doSave(Question question)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("doSave: " + question.getId());
 
 		String userId = sessionManager.getCurrentSessionUserId();
 		Date now = new Date();
-
-		// security check
-		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, question.getPool().getContext());
 
 		// if the question is new (i.e. no id), set the createdBy information, if not already set
 		if ((question.getId() == null) && (question.getCreatedBy().getUserId() == null))

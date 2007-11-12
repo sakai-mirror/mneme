@@ -79,11 +79,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		public MatchQuestionPair(Question question, MatchQuestionPair other)
 		{
 			this.myQuestion = question;
-			setChoice(other.choice);
+			this.choice = other.choice;
 			this.choiceId = other.choiceId;
 			this.correctChoiceId = other.correctChoiceId;
 			this.id = other.id;
-			setMatch(other.match);
+			this.match = other.match;
 			this.choiceLabel = other.choiceLabel;
 			this.matchLabel = other.matchLabel;
 		}
@@ -91,11 +91,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		public MatchQuestionPair(Question question, String choice, String match, int index)
 		{
 			this.myQuestion = question;
-			setChoice(choice);
+			this.choice = StringUtil.trimToNull(choice);
 			this.choiceId = idManager.createUuid();
 			this.correctChoiceId = this.choiceId;
 			this.id = idManager.createUuid();
-			setMatch(match);
+			this.match = StringUtil.trimToNull(match);
 			this.choiceLabel = choiceLabels[index];
 			this.matchLabel = matchLabels[index];
 			// TODO: max!
@@ -299,7 +299,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		}
 
 		// add more choices
-		if (destination.startsWith("ADD:"))
+		if (destination.startsWith("ADD:") || destination.startsWith("INIT:"))
 		{
 			stayHere = true;
 			removeBlanks = false;
@@ -314,7 +314,12 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 					{
 						this.pairs.add(new MatchQuestionPair(this.question, null, null, this.pairs.size()));
 					}
-					this.question.setChanged();
+
+					// for init, don't mark the question as changed
+					if (!destination.startsWith("INIT:"))
+					{
+						this.question.setChanged();
+					}
 				}
 				catch (NumberFormatException e)
 				{
@@ -343,7 +348,12 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 			if (anyRemoved)
 			{
 				this.pairs = newChoices;
-				this.question.setChanged();
+
+				// if mint, this is not enought to cause it to be marked changed
+				if (!this.question.getMint())
+				{
+					this.question.setChanged();
+				}
 			}
 		}
 
@@ -536,7 +546,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	{
 		if (this.pairs.size() == 0)
 		{
-			consolidate("ADD:4");
+			consolidate("INIT:4");
 		}
 		return this.pairs;
 	}
@@ -921,6 +931,8 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	{
 		if (this.distractor == null)
 		{
+			if (distractor == null) return;
+
 			this.distractor = new MatchQuestionPair(this.question, distractor, null, 0);
 			this.question.setChanged();
 			return;

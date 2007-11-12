@@ -97,6 +97,13 @@ public interface Question
 	Boolean getIsHistorical();
 
 	/**
+	 * Check if the end user has never made initial settings.
+	 * 
+	 * @return TRUE if this has not been modified since creation, FALSE if it has.
+	 */
+	Boolean getMint();
+
+	/**
 	 * Access the modified-by (owner / date created)
 	 * 
 	 * @return The modified-by for the question.
