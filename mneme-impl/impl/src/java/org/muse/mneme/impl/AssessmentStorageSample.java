@@ -93,7 +93,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	public void clearOldMints()
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/**
@@ -343,7 +343,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	{
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(question.getPool().getContext()) && assessment.getIsLive())
+			if (assessment.getContext().equals(question.getContext()) && assessment.getIsLive())
 			{
 				// if the asssessment's parts use this question
 				for (Part part : assessment.getParts().getParts())
@@ -417,7 +417,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	{
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(question.getPool().getContext()))
+			if (assessment.getContext().equals(question.getContext()))
 			{
 				// if the asssessment's manual parts use this question
 				for (Part part : assessment.getParts().getParts())
@@ -566,7 +566,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	{
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(from.getPool().getContext()) && assessment.getIsLive())
+			if (assessment.getContext().equals(from.getContext()) && assessment.getIsLive())
 			{
 				// if the asssessment's manual parts use this question
 				for (Part part : assessment.getParts().getParts())

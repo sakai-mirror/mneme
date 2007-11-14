@@ -63,7 +63,7 @@ public class PoolStorageSample implements PoolStorage
 	public void clearOldMints()
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/**
@@ -304,7 +304,7 @@ public class PoolStorageSample implements PoolStorage
 	{
 		for (PoolImpl pool : this.pools.values())
 		{
-			if (pool.getContext().equals(question.getPool().getContext()) && (pool.getFrozenManifest() != null))
+			if (pool.getContext().equals(question.getContext()) && (pool.getFrozenManifest() != null))
 			{
 				List<String> manifest = pool.getFrozenManifest();
 				int index = manifest.indexOf(question.getId());
@@ -387,7 +387,7 @@ public class PoolStorageSample implements PoolStorage
 	{
 		for (PoolImpl pool : this.pools.values())
 		{
-			if (pool.getContext().equals(from.getPool().getContext()) && (pool.getFrozenManifest() != null))
+			if (pool.getContext().equals(from.getContext()) && (pool.getFrozenManifest() != null))
 			{
 				List<String> manifest = pool.getFrozenManifest();
 				int index = manifest.indexOf(from.getId());

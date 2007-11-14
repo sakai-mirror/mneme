@@ -75,7 +75,7 @@ public class QuestionStorageSample implements QuestionStorage
 	public void clearOldMints()
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class QuestionStorageSample implements QuestionStorage
 			if (question.getIsHistorical()) continue;
 			if (question.getMint()) continue;
 			if ((pool != null) && (!question.getPool().equals(pool))) continue;
-			if ((context != null) && (!question.getPool().getContext().equals(context))) continue;
+			if ((context != null) && (!question.getContext().equals(context))) continue;
 
 			count++;
 		}
@@ -174,7 +174,7 @@ public class QuestionStorageSample implements QuestionStorage
 			if (question.getIsHistorical()) continue;
 			if (question.getMint()) continue;
 			if ((pool != null) && (!question.getPool().equals(pool))) continue;
-			if ((context != null) && (!question.getPool().getContext().equals(context))) continue;
+			if ((context != null) && (!question.getContext().equals(context))) continue;
 
 			rv.add(new QuestionImpl(question));
 		}

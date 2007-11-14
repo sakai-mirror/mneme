@@ -234,6 +234,9 @@ public class QuestionImpl implements Question
 	/** Track changes. */
 	protected transient ChangeableImpl changed = new ChangeableImpl();
 
+	/** Used only when historical and there's no pool to point to. */
+	protected String context = null;
+
 	protected AttributionImpl createdBy = new AttributionImpl(null);
 
 	protected Boolean explainReason = Boolean.FALSE;
@@ -320,6 +323,19 @@ public class QuestionImpl implements Question
 	public Ordering<Question> getAssessmentOrdering()
 	{
 		return this.assessmentOrdering;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getContext()
+	{
+		if (this.getIsHistorical())
+		{
+			return this.context;
+		}
+
+		return this.getPool().getContext();
 	}
 
 	/**
@@ -570,6 +586,14 @@ public class QuestionImpl implements Question
 	 */
 	protected void initHistorical()
 	{
+		if (this.historical) return;
+
+		// set the context to the pool's context
+		this.context = this.getPool().getContext();
+
+		// forget our original pool
+		this.poolId = null;
+
 		this.historical = Boolean.TRUE;
 	}
 
@@ -654,6 +678,7 @@ public class QuestionImpl implements Question
 	{
 		if (other.questionHandler != null) this.questionHandler = (TypeSpecificQuestion) (other.questionHandler.clone(this));
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy, null);
+		this.context = other.context;
 		this.explainReason = other.explainReason;
 		this.feedback = other.feedback;
 		this.hints = other.hints;

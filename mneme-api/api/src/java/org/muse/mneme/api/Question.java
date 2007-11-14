@@ -34,6 +34,13 @@ public interface Question
 	Ordering<Question> getAssessmentOrdering();
 
 	/**
+	 * Access the context of this pool.
+	 * 
+	 * @return The pool's context string.
+	 */
+	String getContext();
+
+	/**
 	 * Access the created-by (owner / date created)
 	 * 
 	 * @return The created-by for the question.

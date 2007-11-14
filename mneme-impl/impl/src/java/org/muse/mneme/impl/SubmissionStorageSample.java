@@ -940,7 +940,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 		// for all submissions in the context
 		for (SubmissionImpl submission : this.submissions.values())
 		{
-			if (submission.getAssessment().getContext().equals(question.getPool().getContext()))
+			if (submission.getAssessment().getContext().equals(question.getContext()))
 			{
 				// check the answers
 				for (Answer answer : submission.getAnswers())
@@ -1007,7 +1007,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 		// for all submissions in the context
 		for (SubmissionImpl submission : this.submissions.values())
 		{
-			if (submission.getAssessment().getContext().equals(from.getPool().getContext()))
+			if (submission.getAssessment().getContext().equals(from.getContext()))
 			{
 				// check the answers
 				for (Answer answer : submission.getAnswers())

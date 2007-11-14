@@ -93,8 +93,7 @@ public class QuestionServiceImpl implements QuestionService
 		if (M_log.isDebugEnabled()) M_log.debug("allowEditQuestion: " + question.getId());
 
 		// check permission - user must have MANAGE_PERMISSION in the context
-		boolean ok = securityService.checkSecurity(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getPool()
-				.getContext());
+		boolean ok = securityService.checkSecurity(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getContext());
 
 		return ok;
 	}
@@ -319,7 +318,7 @@ public class QuestionServiceImpl implements QuestionService
 		if (M_log.isDebugEnabled()) M_log.debug("moveQuestion: " + question.getId() + " to pool: " + pool.getId());
 
 		// security check
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getPool().getContext());
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getContext());
 		// TODO: also check the pool?
 
 		// if to the same pool, do nothing
@@ -387,7 +386,7 @@ public class QuestionServiceImpl implements QuestionService
 		if (M_log.isDebugEnabled()) M_log.debug("removeQuestion: " + question.getId());
 
 		// security check
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getPool().getContext());
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getContext());
 
 		removeQuestion(question, null);
 	}
@@ -422,118 +421,9 @@ public class QuestionServiceImpl implements QuestionService
 		}
 
 		// security check
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getPool().getContext());
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getContext());
 
 		doSave(question);
-	}
-
-	/**
-	 * Save the question.
-	 * 
-	 * @param question
-	 *        The question to save.
-	 */
-	protected void doSave(Question question)
-	{
-		if (M_log.isDebugEnabled()) M_log.debug("doSave: " + question.getId());
-
-		String userId = sessionManager.getCurrentSessionUserId();
-		Date now = new Date();
-
-		// if the question is new (i.e. no id), set the createdBy information, if not already set
-		if ((question.getId() == null) && (question.getCreatedBy().getUserId() == null))
-		{
-			question.getCreatedBy().setDate(now);
-			question.getCreatedBy().setUserId(userId);
-		}
-
-		// update last modified information
-		question.getModifiedBy().setDate(now);
-		question.getModifiedBy().setUserId(userId);
-
-		// see if the question has been moved from its current pool
-		QuestionImpl current = this.storage.getQuestion(question.getId());
-
-		Pool currentPool = ((current == null) ? null : current.getPool());
-
-		if ((current != null) && (!currentPool.equals(question.getPool())))
-		{
-			// TODO: I'm not completely sure of this - ggolden
-			// before anything changes, move to history if needed by assessments drawing from the pool
-			// or using this question
-			// - Note: the 'false' widens this to any assessment drawing from the pool or using any pool question
-			// but that's not a real problem -ggolden
-			// - when done, any live test at all dependent on this pool (draw or manual) will
-			// no longer be dependent on the pool, but will be dependent on the history made from the pool.
-			this.poolService.createHistoryIfNeeded(current.getPool(), false);
-			this.poolService.createHistoryIfNeeded(question.getPool(), false);
-		}
-
-		// deal with direct dependencies on this question from live assessments
-		if ((current != null) && (this.assessmentService.liveDependencyExists(question)))
-		{
-			// get a new id on the old and save it as history
-			current.initId(null);
-			current.initHistorical();
-			((QuestionImpl) current).clearChanged();
-			this.storage.saveQuestion(current);
-
-			// switch the manual uses of this question in tests to the history
-			this.assessmentService.switchLiveDependency(question, current);
-		}
-
-		// deal with (draw-only, direct) dependencies to this question's pool from live assessments
-		if ((current != null) && (this.assessmentService.liveDependencyExists(currentPool, true)))
-		{
-			// generate history if needed
-			if (!current.getIsHistorical())
-			{
-				current.initId(null);
-				current.initHistorical();
-				((QuestionImpl) current).clearChanged();
-				this.storage.saveQuestion(current);
-			}
-
-			// Note: if the question is moved to a new pool, the code above (createHistoryIfNeeded) will
-			// catch it, and we won't be in here, since there will then be no live dependencies on the pool -ggolden
-			this.poolService.createHistory(currentPool, true);
-		}
-
-		// make history if any submissions reference this question
-		if ((current != null) && (!current.getIsHistorical()) && this.submissionService.submissionsDependsOn(current))
-		{
-			current.initId(null);
-			current.initHistorical();
-			((QuestionImpl) current).clearChanged();
-			this.storage.saveQuestion(current);
-		}
-
-		// if any frozen / historical pool manifests reference this, we need history (skip if we already are going history)
-		if ((current != null) && (!current.getIsHistorical()) && this.poolService.manifestDependsOn(current))
-		{
-			current.initId(null);
-			current.initHistorical();
-			((QuestionImpl) current).clearChanged();
-			this.storage.saveQuestion(current);
-		}
-
-		// if we made history
-		if ((current != null) && current.getIsHistorical())
-		{
-			// update any frozen manifest pools so they refer to the historical (i.e. unchanged) quesion
-			// Note: this catches the cases where we just (above) possibly made the pool historical.
-			this.poolService.switchManifests(question, current);
-
-			// switch any use of this question in a submission to the history
-			this.submissionService.switchLiveDependency(question, current);
-		}
-
-		// save
-		((QuestionImpl) question).clearChanged();
-		this.storage.saveQuestion((QuestionImpl) question);
-
-		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
 	}
 
 	/**
@@ -644,6 +534,115 @@ public class QuestionServiceImpl implements QuestionService
 	public void setSubmissionService(SubmissionServiceImpl service)
 	{
 		submissionService = service;
+	}
+
+	/**
+	 * Save the question.
+	 * 
+	 * @param question
+	 *        The question to save.
+	 */
+	protected void doSave(Question question)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("doSave: " + question.getId());
+
+		String userId = sessionManager.getCurrentSessionUserId();
+		Date now = new Date();
+
+		// if the question is new (i.e. no id), set the createdBy information, if not already set
+		if ((question.getId() == null) && (question.getCreatedBy().getUserId() == null))
+		{
+			question.getCreatedBy().setDate(now);
+			question.getCreatedBy().setUserId(userId);
+		}
+
+		// update last modified information
+		question.getModifiedBy().setDate(now);
+		question.getModifiedBy().setUserId(userId);
+
+		// see if the question has been moved from its current pool
+		QuestionImpl current = this.storage.getQuestion(question.getId());
+
+		Pool currentPool = ((current == null) ? null : current.getPool());
+
+		if ((current != null) && (!currentPool.equals(question.getPool())))
+		{
+			// TODO: I'm not completely sure of this - ggolden
+			// before anything changes, move to history if needed by assessments drawing from the pool
+			// or using this question
+			// - Note: the 'false' widens this to any assessment drawing from the pool or using any pool question
+			// but that's not a real problem -ggolden
+			// - when done, any live test at all dependent on this pool (draw or manual) will
+			// no longer be dependent on the pool, but will be dependent on the history made from the pool.
+			this.poolService.createHistoryIfNeeded(current.getPool(), false);
+			this.poolService.createHistoryIfNeeded(question.getPool(), false);
+		}
+
+		// deal with direct dependencies on this question from live assessments
+		if ((current != null) && (this.assessmentService.liveDependencyExists(question)))
+		{
+			// get a new id on the old and save it as history
+			current.initId(null);
+			current.initHistorical();
+			((QuestionImpl) current).clearChanged();
+			this.storage.saveQuestion(current);
+
+			// switch the manual uses of this question in tests to the history
+			this.assessmentService.switchLiveDependency(question, current);
+		}
+
+		// deal with (draw-only, direct) dependencies to this question's pool from live assessments
+		if ((current != null) && (this.assessmentService.liveDependencyExists(currentPool, true)))
+		{
+			// generate history if needed
+			if (!current.getIsHistorical())
+			{
+				current.initId(null);
+				current.initHistorical();
+				((QuestionImpl) current).clearChanged();
+				this.storage.saveQuestion(current);
+			}
+
+			// Note: if the question is moved to a new pool, the code above (createHistoryIfNeeded) will
+			// catch it, and we won't be in here, since there will then be no live dependencies on the pool -ggolden
+			this.poolService.createHistory(currentPool, true);
+		}
+
+		// make history if any submissions reference this question
+		if ((current != null) && (!current.getIsHistorical()) && this.submissionService.submissionsDependsOn(current))
+		{
+			current.initId(null);
+			current.initHistorical();
+			((QuestionImpl) current).clearChanged();
+			this.storage.saveQuestion(current);
+		}
+
+		// if any frozen / historical pool manifests reference this, we need history (skip if we already are going history)
+		if ((current != null) && (!current.getIsHistorical()) && this.poolService.manifestDependsOn(current))
+		{
+			current.initId(null);
+			current.initHistorical();
+			((QuestionImpl) current).clearChanged();
+			this.storage.saveQuestion(current);
+		}
+
+		// if we made history
+		if ((current != null) && current.getIsHistorical())
+		{
+			// update any frozen manifest pools so they refer to the historical (i.e. unchanged) quesion
+			// Note: this catches the cases where we just (above) possibly made the pool historical.
+			this.poolService.switchManifests(question, current);
+
+			// switch any use of this question in a submission to the history
+			this.submissionService.switchLiveDependency(question, current);
+		}
+
+		// save
+		((QuestionImpl) question).clearChanged();
+		this.storage.saveQuestion((QuestionImpl) question);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
 	}
 
 	/**
