@@ -495,8 +495,12 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 			{
 				pick.setQuestion(to.getId());
 
-				// to is likely the history of from, so won't report a pool - use from's
-				pick.setPool(from.getPool().getId());
+				// if we already have a pool set in the pick, leave it
+				if (pick.getPoolId() == null)
+				{
+					// to is likely the history of from, so won't report a pool - use from's
+					pick.setPool(from.getPool().getId());
+				}
 			}
 		}
 	}
