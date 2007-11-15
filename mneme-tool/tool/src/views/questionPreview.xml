@@ -62,8 +62,8 @@
 				</text>
 				<!-- hints toggle -->
 				<gap />
-				<toggle target="hints" title="hide-hints" description="hide-hints-description" style="LINK">
-					<icon icon="/icons/hints.png" style="LEFT" />
+				<toggle target="hints" title="close" style="LINK">
+					<icon icon="/icons/close.png" style="LEFT" />
 					<included>
 						<hasValueDecision model="question.hints" />
 					</included>

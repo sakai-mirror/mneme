@@ -175,10 +175,11 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 		Overlay instructions = this.uiService.newOverlay();
 		instructions.setId("instructions");
-		instructions.add(this.uiService.newText().setText("view-instructions"));
+		instructions.add(this.uiService.newText().setText("view-instructions", this.uiService.newIconPropertyReference().setIcon("/icons/test.png")));
 		instructions.add(this.uiService.newText().setText("instructions"));
 		instructions.add(this.uiService.newGap());
-		instructions.add(this.uiService.newToggle().setTarget("instructions").setTitle("hide-instructions"));
+		instructions.add(this.uiService.newToggle().setTarget("instructions").setTitle("close").setIcon("/icons/close.png",
+				Navigation.IconStyle.left));
 
 		Toggle viewInstructions = this.uiService.newToggle().setTarget("instructions").setTitle("view-instructions").setIcon("/icons/test.png",
 				Navigation.IconStyle.left);

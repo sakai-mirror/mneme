@@ -143,8 +143,8 @@
 								</text>
 								<!-- hints toggle -->
 								<gap />
-								<toggle target="hints" title="hide-hints" description="hide-hints-description" style="LINK">
-									<icon icon="/icons/hints.png" style="LEFT" />
+								<toggle target="hints" title="close" style="LINK">
+									<icon icon="/icons/closes.png" style="LEFT" />
 									<included>
 										<decision model="question.part.assessment.showHints" />
 										<hasValueDecision model="question.hints" />

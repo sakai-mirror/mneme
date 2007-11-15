@@ -267,7 +267,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		Overlay modelAnswerOverlay = this.uiService.newOverlay();
 		modelAnswerOverlay.setId("modelanswer");
 		modelAnswerOverlay.add(modelAnswerTitle).add(modelAnswer).add(this.uiService.newGap());
-		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer").setIcon("/icons/model_answer.png",
+		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("close").setIcon("/icons/close.png",
 				Navigation.IconStyle.left));
 
 		// control to show the model answer
@@ -374,7 +374,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		Overlay modelAnswerOverlay = this.uiService.newOverlay();
 		modelAnswerOverlay.setId("modelanswer");
 		modelAnswerOverlay.add(modelAnswerTitle).add(modelAnswer).add(this.uiService.newGap());
-		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("hide-model-answer").setIcon("/icons/model_answer.png",
+		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("close").setIcon("/icons/close.png",
 				Navigation.IconStyle.left));
 
 		// control to show the model answer
