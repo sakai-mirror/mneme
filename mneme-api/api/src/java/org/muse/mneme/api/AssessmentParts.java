@@ -64,6 +64,13 @@ public interface AssessmentParts
 	Boolean getIsValid();
 
 	/**
+	 * Access the number of parts.
+	 * 
+	 * @return The number of parts.
+	 */
+	Integer getNumParts();
+
+	/**
 	 * Access the count of questions in all parts.
 	 * 
 	 * @return The count of questions in all parts.

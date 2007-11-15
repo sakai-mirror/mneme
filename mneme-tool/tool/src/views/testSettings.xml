@@ -2,26 +2,26 @@
 <!-- !DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd" -->
 
 <!--
-/**********************************************************************************
- * $URL$
- * $Id$
- ***********************************************************************************
- *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- **********************************************************************************/
+	/**********************************************************************************
+	* $URL$
+	* $Id$
+	***********************************************************************************
+	*
+	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* 
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	* 
+	*      http://www.apache.org/licenses/LICENSE-2.0
+	* 
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*
+	**********************************************************************************/
 -->
 
 <interface>
@@ -263,12 +263,72 @@
 				<decision reversed="TRUE" model="assessment.published" />
 			</included>
 			<container>
+
+				<section>
+					<title>
+						<message selector="summary-title">
+							<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+						</message>
+					</title>
+
+					<container>
+
+						<alert>
+							<message selector="invalid">
+								<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+							</message>
+							<included>
+								<decision model="assessment.isValid" reversed="TRUE" />
+							</included>
+						</alert>
+
+						<text>
+							<message selector="summary">
+								<model ref="assessment.parts.numParts" />
+								<model ref="assessment.parts.numQuestions" />
+								<model ref="assessment.parts.totalPoints" />
+							</message>
+						</text>
+
+						<section>
+							<iterator name="part">
+								<model ref="assessment.parts.parts" />
+							</iterator>
+							<entityIncluded>
+								<compareDecision model="part.totalPoints" constant="0.0" />
+							</entityIncluded>
+							<container>
+								<alert selector="part-zero-points" model="part.ordering.position" />
+							</container>
+							<included>
+								<compareDecision model="assessment.type" constant="survey" reversed="TRUE" />
+							</included>
+						</section>
+
+						<section>
+							<iterator name="part">
+								<model ref="assessment.parts.parts" />
+							</iterator>
+							<entityIncluded>
+								<decision model="part.isValid" reversed="TRUE" />
+							</entityIncluded>
+							<container>
+								<alert selector="part-invalid" model="part.ordering.position" />
+							</container>
+						</section>
+
+					</container>
+				</section>
+
 				<selection>
 					<selectionChoices>
 						<selectionChoice value="true" selector="publish-title" />
 						<!-- <model type="enum" messageRoot="assessment-type-" ref="assessment.type" /> -->
 					</selectionChoices>
 					<model ref="assessment.published" />
+					<included>
+						<decision model="assessment.isValid" />
+					</included>
 				</selection>
 			</container>
 		</section>

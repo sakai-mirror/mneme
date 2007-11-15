@@ -205,6 +205,15 @@ public class AssessmentPartsImpl implements AssessmentParts
 	/**
 	 * {@inheritDoc}
 	 */
+	public Integer getNumParts()
+	{
+		int rv = this.parts.size();
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer getNumQuestions()
 	{
 		int rv = 0;
