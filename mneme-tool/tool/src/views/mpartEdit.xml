@@ -65,6 +65,13 @@
 		<section>
 			<container>
 
+				<!-- if the part is invalid -->
+				<alert selector="invalid-part">
+					<included>
+						<decision reversed="TRUE" model="part.isValid" />
+					</included>
+				</alert>
+
 				<!-- the list of the selected questions -->
 				<entityList style="FLAT">
 					<emptyTitle>

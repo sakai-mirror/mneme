@@ -46,6 +46,15 @@
 			<container>
 				<section>
 					<container>
+						<!--  if invalid -->
+						<alert>
+							<message selector="invalid-dates">
+								<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+							</message>
+							<included>
+								<decision model="assessment.dates.isValid" reversed="TRUE" />
+							</included>
+						</alert>
 						<textEdit title="test-title" rows="1" cols="40">
 							<model ref="assessment.title" />
 						</textEdit>
@@ -80,6 +89,16 @@
 
 		<section>
 			<container>
+
+				<!-- if the parts are invalid -->
+				<alert>
+					<message selector="invalid-parts">
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+					</message>
+					<included>
+						<decision reversed="TRUE" model="assessment.parts.isValid" />
+					</included>
+				</alert>
 
 				<!-- the list of parts -->
 				<entityList style="FLAT">
@@ -143,6 +162,18 @@
 								<decision reversed="TRUE" model="assessment.isLive" />
 							</included>
 						</orderColumn>
+						<column pixels="16">
+							<entityIncluded>
+								<decision reversed="TRUE" model="part.isValid" />
+							</entityIncluded>
+							<container>
+								<text>
+									<message>
+										<model type="icon" icon="/icons/warning.png" />
+									</message>
+								</text>
+							</container>
+						</column>
 						<modelColumn>
 							<title>
 								<message selector="part-title" />
@@ -170,28 +201,8 @@
 							</title>
 							<model ref="part.totalPoints" />
 						</modelColumn>
-						<column>
-							<entityIncluded>
-								<decision reversed="TRUE" model="part.isValid" />
-							</entityIncluded>
-							<container>
-								<text>
-									<message>
-										<model type="icon" icon="/icons/warning.png" />
-									</message>
-								</text>
-							</container>
-						</column>
 					</columns>
 				</entityList>
-				<text>
-					<message>
-						<model type="icon" icon="/icons/warning.png" />
-					</message>
-					<included>
-						<decision reversed="TRUE" model="assessment.parts.isValid" />
-					</included>
-				</text>
 				<text>
 					<message selector="assessment-totals">
 						<model ref="assessment.parts.numQuestions" />

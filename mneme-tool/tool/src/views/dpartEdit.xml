@@ -65,6 +65,13 @@
 		<section>
 			<container>
 
+				<!-- if the part is invalid -->
+				<alert selector="invalid-part">
+					<included>
+						<decision reversed="TRUE" model="part.isValid" />
+					</included>
+				</alert>
+
 				<!-- the list of ALL pools, with those selected for this part checked and their "draw" filled in -->
 				<entityList style="FLAT" title="part-pools-msg">
 					<emptyTitle>
@@ -96,13 +103,13 @@
 						<model ref="draws" indexRef="pool.id" />
 					</iterator>
 					<columns>
-						<column>
+						<column em="8">
 							<entityIncluded>
-								<decision reversed = "TRUE" model="draw.pool.id" delegate="PoolReferencedDecision" tool="sakai.mneme" />
+								<decision reversed="TRUE" model="draw.pool.id" delegate="PoolReferencedDecision" tool="sakai.mneme" />
 								<message>
 									<model type="icon" icon="/icons/checkon.gif" />
 								</message>
-							</entityIncluded>							
+							</entityIncluded>
 							<title>
 								<message selector="pool-draw" />
 							</title>
@@ -159,13 +166,13 @@
 							</title>
 							<model type="text" ref="draw.pool.description" max="60" />
 						</modelColumn>
-						<modelColumn>
+						<modelColumn em="12">
 							<title>
 								<message selector="questions" />
 							</title>
-							<model ref="draw.pool.numQuestions" />
+							<model ref="draw.poolNumAvailableQuestions" />
 						</modelColumn>
-						<modelColumn>
+						<modelColumn em="12">
 							<title>
 								<message selector="points" />
 							</title>
@@ -203,7 +210,7 @@
 								</desc>
 							</sort>
 						</modelColumn>
-						<modelColumn>
+						<modelColumn em="12">
 							<title>
 								<message selector="difficulty" />
 							</title>

@@ -61,6 +61,14 @@
 
 				<section>
 					<container>
+
+						<!-- if invalid -->
+						<alert selector="invalid-dates">
+							<included>
+								<decision model="assessment.dates.isValid" reversed="TRUE" />
+							</included>
+						</alert>
+
 						<dateEdit title="open-date">
 							<model ref="assessment.dates.openDate" type="date" />
 						</dateEdit>
