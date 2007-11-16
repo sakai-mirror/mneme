@@ -22,7 +22,6 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,7 +37,7 @@ import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
- * 
+ * The /pool_properties view for the mneme tool.
  */
 public class PoolPropertiesView extends ControllerImpl
 {
@@ -50,15 +49,6 @@ public class PoolPropertiesView extends ControllerImpl
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
-
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		super.init();
-		M_log.info("init()");
-	}
 
 	/**
 	 * Shutdown.
@@ -73,23 +63,31 @@ public class PoolPropertiesView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// pools sort, pools page, pool id
 		if (params.length != 5) throw new IllegalArgumentException();
-		
-		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		String poolsSort = params[2];
+		String poolsPaging = params[3];
+		String pid = params[4];
+
+		// get the pool
+		Pool pool = this.poolService.getPool(pid);
+		if (pool == null)
 		{
-			//redirect to error
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		// check that the user can manage this pool
+		if (!this.poolService.allowManagePools(pool.getContext()))
+		{
+			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
-		// pools - sort at index 2, paging at index 3. pool id at index 4
-		// pools sort parameter is in param array at index 2
-		context.put("poolsSortCode", params[2]);
-
-		// pools paging parameter - is in param array at index 4
-		context.put("poolsPagingParameter", params[3]);
-
-		Pool pool = this.poolService.getPool(params[4]);
+		context.put("poolsSortCode", poolsSort);
+		context.put("poolsPagingParameter", poolsPaging);
 		context.put("pool", pool);
 
 		// render
@@ -97,25 +95,39 @@ public class PoolPropertiesView extends ControllerImpl
 	}
 
 	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		super.init();
+		M_log.info("init()");
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// pools sort, pools page, pool id
 		if (params.length != 5) throw new IllegalArgumentException();
-		
-		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
-		{
-			//redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
+		String poolsSort = params[2];
+		String poolsPaging = params[3];
+		String pid = params[4];
 
-		// setup the model: the selected pool
-		Pool pool = this.poolService.getPool(params[4]);
+		// get the pool
+		Pool pool = this.poolService.getPool(pid);
 		if (pool == null)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		// check that the user can manage this pool
+		if (!this.poolService.allowManagePools(pool.getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
@@ -133,8 +145,7 @@ public class PoolPropertiesView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
-	
-		destination = "/pools/" + params[2] + "/" + params[3];
+
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
@@ -155,5 +166,4 @@ public class PoolPropertiesView extends ControllerImpl
 	{
 		this.toolManager = toolManager;
 	}
-
 }

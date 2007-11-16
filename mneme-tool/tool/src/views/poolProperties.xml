@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- !DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd" -->
+<!DOCTYPE interface SYSTEM "http://source.sakaiproject.org/ambrosia/ambrosia.dtd">
 
 <!--
 	/**********************************************************************************
@@ -47,9 +47,17 @@
 
 		<section>
 			<container>
+
 				<textEdit title="pool-title" model="pool.title" rows="1" cols="40" />
+
 				<htmlEdit title="pool-description" model="pool.description" rows="5" cols="40" />
-				<floatEdit title="pool-points" model="pool.pointsEdit" cols="6" />
+
+				<floatEdit title="pool-points" model="pool.pointsEdit" cols="6">
+					<onEmptyAlert>
+						<message selector="missing-points" />
+					</onEmptyAlert>
+				</floatEdit>
+
 				<selection title="pool-difficulty">
 					<model ref="pool.difficulty" />
 					<selectionChoices>
@@ -60,6 +68,7 @@
 						<selectionChoice value="5" selector="Level-5" />
 					</selectionChoices>
 				</selection>
+
 			</container>
 		</section>
 
@@ -68,7 +77,7 @@
 			<container>
 				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
-					<destination template="/pool_properties/{0}/{1}">
+					<destination template="/pools/{0}/{1}">
 						<model ref="poolsSortCode" />
 						<model ref="poolsPagingParameter" />
 					</destination>
