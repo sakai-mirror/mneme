@@ -123,6 +123,15 @@
 									<maxValue>
 										<model ref="draw.poolNumAvailableQuestions" />
 									</maxValue>
+									<included>
+										<orDecision>
+											<compareDecision reversed="TRUE" model="draw.poolNumAvailableQuestions" constant="0" />
+											<andDecision>
+												<hasValueDecision model="draw.numQuestions" />
+												<compareDecision reversed="TRUE" model="draw.numQuestions" constant="0" />
+											</andDecision>
+										</orDecision>
+									</included>
 								</countEdit>
 							</container>
 						</column>
