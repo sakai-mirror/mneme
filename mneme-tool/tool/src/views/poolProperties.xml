@@ -56,6 +56,9 @@
 					<onEmptyAlert>
 						<message selector="missing-points" />
 					</onEmptyAlert>
+					<minValue>
+						<model type="constant" value="0" />
+					</minValue>
 				</floatEdit>
 
 				<selection title="pool-difficulty">

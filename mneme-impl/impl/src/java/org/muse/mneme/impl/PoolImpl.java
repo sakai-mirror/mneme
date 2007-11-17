@@ -273,6 +273,7 @@ public class PoolImpl implements Pool
 	public void setPoints(Float points)
 	{
 		if (points == null) throw new IllegalArgumentException();
+		if (points < 0) return;
 		if (!Different.different(this.points, points)) return;
 
 		this.points = points;
@@ -285,6 +286,7 @@ public class PoolImpl implements Pool
 	 */
 	public void setPointsEdit(Float points)
 	{
+		if ((points != null) && (points < 0f)) return;
 		if (!Different.different(this.points, points)) return;
 
 		this.points = points;
