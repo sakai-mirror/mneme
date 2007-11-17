@@ -47,6 +47,8 @@ import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -61,9 +63,14 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 	protected AssessmentService assessmentService = null;
 
+	/** Messages bundle name. */
+	protected String bundle = null;
+
 	protected boolean fakedAlready = false;
 
 	protected Object idGenerator = new Object();
+
+	protected transient InternationalizedMessages messages = null;
 
 	protected long nextAccessId = 100;
 
@@ -310,6 +317,9 @@ public class AssessmentStorageSample implements AssessmentStorage
 	 */
 	public void init()
 	{
+		// messages
+		if (this.bundle != null) this.messages = new ResourceLoader(this.bundle);
+
 		M_log.info("init()");
 	}
 
@@ -364,7 +374,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	 */
 	public AssessmentImpl newAssessment()
 	{
-		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService);
+		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService, this.messages);
 	}
 
 	/**
@@ -503,6 +513,17 @@ public class AssessmentStorageSample implements AssessmentStorage
 	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the message bundle.
+	 * 
+	 * @param bundle
+	 *        The message bundle.
+	 */
+	public void setBundle(String name)
+	{
+		this.bundle = name;
 	}
 
 	/**

@@ -172,7 +172,9 @@
 							</entityIncluded>
 							<container>
 								<warning>
-									<message selector="invalid-part" />
+									<message>
+										<model ref="part.invalidMessage" />
+									</message>
 								</warning>
 							</container>
 						</column>

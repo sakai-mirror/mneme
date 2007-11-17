@@ -44,6 +44,7 @@ import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.user.api.User;
 
 /**
@@ -80,6 +81,8 @@ public class AssessmentImpl implements Assessment
 
 	/** Track any changes that cannot be made to live tests. */
 	protected transient Boolean liveChanged = Boolean.FALSE;
+
+	protected transient InternationalizedMessages messages = null;
 
 	/** Stays TRUE until an end-user change to the object occurs, showing it was actually initially set. */
 	protected Boolean mint = Boolean.TRUE;
@@ -128,18 +131,19 @@ public class AssessmentImpl implements Assessment
 	 * Construct
 	 */
 	public AssessmentImpl(AssessmentService assessmentService, PoolService poolService, QuestionService questionService,
-			SubmissionService submissionService)
+			SubmissionService submissionService, InternationalizedMessages messages)
 	{
 		this.assessmentService = assessmentService;
 		this.poolService = poolService;
 		this.submissionService = submissionService;
 		this.questionService = questionService;
+		this.messages = messages;
 
 		this.createdBy = new AttributionImpl(this.changed);
 		this.dates = new AssessmentDatesImpl(this, this.changed);
 		this.grading = new AssessmentGradingImpl(this.changed);
 		this.modifiedBy = new AttributionImpl(this.changed);
-		this.parts = new AssessmentPartsImpl(this, questionService, submissionService, poolService, this.historyChanged);
+		this.parts = new AssessmentPartsImpl(this, questionService, submissionService, poolService, this.historyChanged, this.messages);
 		this.password = new AssessmentPasswordImpl(this.changed);
 		this.presentation = new PresentationImpl(this.historyChanged);
 		this.review = new AssessmentReviewImpl(this, this.changed);
@@ -788,6 +792,7 @@ public class AssessmentImpl implements Assessment
 		this.honorPledge = other.honorPledge;
 		this.id = other.id;
 		this.liveChanged = other.liveChanged;
+		this.messages = other.messages;
 		this.mint = other.mint;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
 		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts, this.historyChanged);

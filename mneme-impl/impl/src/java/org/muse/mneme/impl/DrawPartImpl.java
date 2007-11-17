@@ -36,6 +36,7 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -58,9 +59,9 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 *        The PoolService.
 	 */
 	public DrawPartImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, PoolService poolService,
-			Changeable owner)
+			Changeable owner, InternationalizedMessages messages)
 	{
-		super(assessment, questionService, submissionService, owner);
+		super(assessment, questionService, submissionService, owner, messages);
 		this.poolService = poolService;
 	}
 
@@ -244,6 +245,37 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		question.initPartContext(this);
 		question.initPoolContext(order.get(0).getPoolId());
 		return question;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getInvalidMessage()
+	{
+		Object[] args = new Object[1];
+		args[0] = this.getOrdering().getPosition().toString();
+
+		// we must have draws
+		if (this.pools.isEmpty())
+		{
+			return messages.getFormattedMessage("invalid-part-empty", args);
+		}
+
+		// each pool must have enough questions to draw
+		for (PoolDraw draw : this.pools)
+		{
+			Pool pool = draw.getPool();
+			if (pool == null)
+			{
+				return messages.getFormattedMessage("invalid-draw-part-deleted-pool", args);
+			}
+			if (draw.getPoolNumAvailableQuestions() < draw.getNumQuestions())
+			{
+				return messages.getFormattedMessage("invalid-draw-part-overdraw", args);
+			}
+		}
+
+		return null;
 	}
 
 	/**

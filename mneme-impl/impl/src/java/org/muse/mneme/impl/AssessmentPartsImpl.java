@@ -13,7 +13,7 @@
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expresos or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
@@ -37,6 +37,7 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.i18n.InternationalizedMessages;
 
 /**
  * AssessmentPartsImpl implements AssessmentParts
@@ -46,6 +47,8 @@ public class AssessmentPartsImpl implements AssessmentParts
 	protected transient AssessmentImpl assessment = null;
 
 	protected Boolean continuousNumbering = Boolean.TRUE;
+
+	protected transient InternationalizedMessages messages = null;
 
 	protected Changeable owner = null;
 
@@ -84,13 +87,14 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 *        The PoolService.
 	 */
 	public AssessmentPartsImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService,
-			PoolService poolService, Changeable owner)
+			PoolService poolService, Changeable owner, InternationalizedMessages messages)
 	{
 		this.owner = owner;
 		this.assessment = assessment;
 		this.questionService = questionService;
 		this.submissionService = submissionService;
 		this.poolService = poolService;
+		this.messages = messages;
 	}
 
 	/**
@@ -99,7 +103,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	public DrawPart addDrawPart()
 	{
 		// create the new part
-		DrawPart rv = new DrawPartImpl(this.assessment, this.questionService, this.submissionService, this.poolService, this.owner);
+		DrawPart rv = new DrawPartImpl(this.assessment, this.questionService, this.submissionService, this.poolService, this.owner, this.messages);
 
 		// add it to the list
 		this.parts.add(rv);
@@ -119,7 +123,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	public ManualPart addManualPart()
 	{
 		// create the new part
-		ManualPart rv = new ManualPartImpl(this.assessment, this.questionService, this.submissionService, this.owner);
+		ManualPart rv = new ManualPartImpl(this.assessment, this.questionService, this.submissionService, this.owner, this.messages);
 
 		// add it to the list
 		this.parts.add(rv);
@@ -474,6 +478,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		this.questionService = other.questionService;
 		this.submissionService = other.submissionService;
 		this.poolService = other.poolService;
+		this.messages = other.messages;
 
 		for (Part part : other.parts)
 		{

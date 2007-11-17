@@ -49,6 +49,12 @@ public interface Part
 	 */
 	String getId();
 
+	/**
+	 * Get a message describing what is wrong with the part.
+	 * 
+	 * @return A localized message describing what is wrong with the part, or null if the part is valid.
+	 */
+	String getInvalidMessage();
 
 	/**
 	 * Check if the part is valid.

@@ -35,6 +35,7 @@ import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.i18n.InternationalizedMessages;
 
 /**
  * PartImpl implements Part
@@ -132,6 +133,8 @@ public abstract class PartImpl implements Part
 
 	protected String id = null;
 
+	protected transient InternationalizedMessages messages = null;
+
 	protected MyOrdering ordering = new MyOrdering(this);
 
 	protected transient Changeable owner = null;
@@ -152,13 +155,15 @@ public abstract class PartImpl implements Part
 	 * @param questionService
 	 *        The QuestionService.
 	 */
-	public PartImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, Changeable owner)
+	public PartImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, Changeable owner,
+			InternationalizedMessages messages)
 	{
 		this.owner = owner;
 		this.assessment = assessment;
 		this.questionService = questionService;
 		this.submissionService = submissionService;
 		this.presentation = new PresentationImpl(this.owner);
+		this.messages = messages;
 	}
 
 	/**
@@ -225,14 +230,14 @@ public abstract class PartImpl implements Part
 	{
 		// collect the questions
 		List<PoolPick> questions = null;
-		
+
 		// if under a submission context, use the actual set of questions for this submission
 		if (this.assessment.getSubmissionContext() != null)
 		{
 			// get the actual list of question picks
 			questions = getQuestionPickOrder();
 		}
-		
+
 		// else use all possible questions
 		else
 		{
@@ -430,6 +435,7 @@ public abstract class PartImpl implements Part
 		this.questionService = other.questionService;
 		this.submissionService = other.submissionService;
 		this.title = other.title;
+		this.messages = other.messages;
 	}
 
 	/**

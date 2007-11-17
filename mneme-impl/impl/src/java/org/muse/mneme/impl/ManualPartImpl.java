@@ -33,6 +33,7 @@ import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.i18n.InternationalizedMessages;
 
 /**
  * ManualPartImpl implements ManualPart
@@ -51,9 +52,10 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	 * @param questionService
 	 *        The QuestionService.
 	 */
-	public ManualPartImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, Changeable owner)
+	public ManualPartImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, Changeable owner,
+			InternationalizedMessages messages)
 	{
-		super(assessment, questionService, submissionService, owner);
+		super(assessment, questionService, submissionService, owner, messages);
 	}
 
 	/**
@@ -105,6 +107,32 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		question.initPoolContext(pick.getPoolId());
 
 		return question;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getInvalidMessage()
+	{
+		Object[] args = new Object[1];
+		args[0] = this.getOrdering().getPosition().toString();
+
+		// we must have questions
+		if (this.questions.isEmpty())
+		{
+			return messages.getFormattedMessage("invalid-part-empty", args);
+		}
+
+		// the questions must exist
+		for (PoolPick pick : this.questions)
+		{
+			if (!this.questionService.existsQuestion(pick.getQuestionId()))
+			{
+				return messages.getFormattedMessage("invalid-manual-part-deleted-question", args);
+			}
+		}
+
+		return null;
 	}
 
 	/**

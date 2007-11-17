@@ -188,6 +188,8 @@
 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
+
+		<property name="bundle"><value>mnemeImpl</value></property>
 	</bean>
 
 	<bean id="org.muse.mneme.api.SecurityService"
