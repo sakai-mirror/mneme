@@ -63,11 +63,11 @@
 					<container>
 
 						<!-- if invalid -->
-						<alert selector="invalid-dates">
+						<warning selector="invalid-dates">
 							<included>
 								<decision model="assessment.dates.isValid" reversed="TRUE" />
 							</included>
-						</alert>
+						</warning>
 
 						<dateEdit title="open-date">
 							<model ref="assessment.dates.openDate" type="date" />

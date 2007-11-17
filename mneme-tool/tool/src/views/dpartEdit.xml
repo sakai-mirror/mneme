@@ -65,13 +65,6 @@
 		<section>
 			<container>
 
-				<!-- if the part is invalid -->
-				<alert selector="invalid-part">
-					<included>
-						<decision reversed="TRUE" model="part.isValid" />
-					</included>
-				</alert>
-
 				<!-- the list of ALL pools, with those selected for this part checked and their "draw" filled in -->
 				<entityList style="FLAT" title="part-pools-msg">
 					<emptyTitle>
@@ -87,6 +80,12 @@
 								<decision model="assessment.isLive" />
 							</included>
 						</instructions>
+						<!-- if the part is invalid -->
+						<warning selector="invalid-part">
+							<included>
+								<decision reversed="TRUE" model="part.isValid" />
+							</included>
+						</warning>
 					</entityActions>
 					<pager paging="paging">
 						<destination template="/part_edit/{0}/{1}/{2}/{3}{4}/{5}/{6}">
