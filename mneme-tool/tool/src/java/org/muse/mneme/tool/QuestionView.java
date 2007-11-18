@@ -385,7 +385,7 @@ public class QuestionView extends ControllerImpl
 				if (!part.getOrdering().getIsLast())
 				{
 					Part next = part.getOrdering().getNext();
-					return "/question/" + submissionId + "/s" + next.getId();
+					return "/question/" + submissionId + "/p" + next.getId();
 				}
 
 				// no next part, this is an error
@@ -398,7 +398,7 @@ public class QuestionView extends ControllerImpl
 				if (!part.getOrdering().getIsFirst())
 				{
 					Part prev = part.getOrdering().getPrevious();
-					return "/question/" + submissionId + "/s" + prev.getId();
+					return "/question/" + submissionId + "/p" + prev.getId();
 				}
 
 				// no prev part, this is an error
@@ -471,7 +471,7 @@ public class QuestionView extends ControllerImpl
 		}
 
 		// for requests for a part
-		else if (questionSelector.startsWith("s"))
+		else if (questionSelector.startsWith("p"))
 		{
 			// TODO: assure the test is by-part
 
@@ -579,7 +579,7 @@ public class QuestionView extends ControllerImpl
 					}
 					else if (assessment.getQuestionGrouping() == QuestionGrouping.part)
 					{
-						destination = "/question/" + submission.getId() + "/s" + question.getPart().getId();
+						destination = "/question/" + submission.getId() + "/p" + question.getPart().getId();
 
 						// include the question target if not the first quesiton in the part
 						if (!question.getPartOrdering().getIsFirst())

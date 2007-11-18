@@ -153,7 +153,7 @@
 								<disabled>
 									<compareDecision model="submission.assessment.questionGrouping">
 										<constant value="assessment" />
-										<constant value="section" />
+										<constant value="part" />
 									</compareDecision>
 								</disabled>
 								<destination template="/part_instructions/{0}/{1}">
