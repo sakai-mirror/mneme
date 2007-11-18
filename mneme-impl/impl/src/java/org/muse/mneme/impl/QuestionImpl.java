@@ -254,11 +254,11 @@ public class QuestionImpl implements Question
 
 	protected AttributionImpl modifiedBy = new AttributionImpl(null);
 
-	protected Part partContext = null;
+	protected transient Part partContext = null;
 
 	protected MyPartOrdering partOrdering = new MyPartOrdering(this);
 
-	protected String poolContext = null;
+	protected transient String poolContext = null;
 
 	protected String poolId = null;
 
@@ -270,7 +270,7 @@ public class QuestionImpl implements Question
 
 	protected transient QuestionService questionService = null;
 
-	protected Submission submissionContext = null;
+	protected transient Submission submissionContext = null;
 
 	protected transient SubmissionService submissionService = null;
 

@@ -386,6 +386,31 @@ public class QuestionStorageSample implements QuestionStorage
 			question.initId("q" + Long.toString(id));
 		}
 
+		if ((question.poolId == null) && (!question.historical))
+		{
+			M_log.warn("saveQuestion: no pool id: " + question.getId());
+		}
+		if ((question.poolId != null) && (question.historical))
+		{
+			M_log.warn("saveQuestion: historical with pool id: " + question.getId());
+		}
+		if (question.partContext != null)
+		{
+			M_log.warn("saveQuestion: has partContext: " + question.getId());
+		}
+		if (question.poolContext != null)
+		{
+			M_log.warn("saveQuestion: has poolContext: " + question.getId());
+		}
+		if (question.submissionContext != null)
+		{
+			M_log.warn("saveQuestion: has submissionContext: " + question.getId());
+		}
+		if ((question.poolId != null) && (this.poolService.getPool(question.poolId) == null))
+		{
+			M_log.warn("saveQuestion: missing pool: qid: " + question.getId() + " poolId: " + question.poolId);
+		}
+
 		this.questions.put(question.getId(), new QuestionImpl(question));
 	}
 
