@@ -255,92 +255,97 @@
 
 		<section>
 			<title highlighted="TRUE">
-				<message selector="publish">
-					<model type="icon" icon="/icons/publish.png" />
-				</message>
+				<message selector="summary-title" />
 			</title>
 			<included>
 				<decision reversed="TRUE" model="assessment.published" />
 			</included>
 			<container>
 
+				<alert>
+					<message selector="invalid">
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+					</message>
+					<included>
+						<decision model="assessment.isValid" reversed="TRUE" />
+					</included>
+				</alert>
+
+				<text>
+					<message selector="summary">
+						<model ref="assessment.parts.numParts" />
+						<model ref="assessment.parts.numQuestions" />
+						<model ref="assessment.parts.totalPoints" />
+					</message>
+				</text>
+
 				<section>
-					<title>
-						<message selector="summary-title">
-							<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
-						</message>
-					</title>
-
+					<iterator name="part">
+						<model ref="assessment.parts.parts" />
+					</iterator>
+					<entityIncluded>
+						<compareDecision model="part.totalPoints" constant="0.0" />
+					</entityIncluded>
 					<container>
+						<alert selector="part-zero-points" model="part.ordering.position" />
+					</container>
+					<included>
+						<compareDecision model="assessment.type" constant="survey" reversed="TRUE" />
+					</included>
+				</section>
 
-						<alert>
-							<message selector="invalid">
-								<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
-							</message>
-							<included>
-								<decision model="assessment.isValid" reversed="TRUE" />
-							</included>
-						</alert>
-
-						<text>
-							<message selector="summary">
-								<model ref="assessment.parts.numParts" />
-								<model ref="assessment.parts.numQuestions" />
-								<model ref="assessment.parts.totalPoints" />
-							</message>
-						</text>
-
-						<section>
-							<iterator name="part">
-								<model ref="assessment.parts.parts" />
-							</iterator>
-							<entityIncluded>
-								<compareDecision model="part.totalPoints" constant="0.0" />
-							</entityIncluded>
-							<container>
-								<alert selector="part-zero-points" model="part.ordering.position" />
-							</container>
-							<included>
-								<compareDecision model="assessment.type" constant="survey" reversed="TRUE" />
-							</included>
-						</section>
-
-						<section>
-							<iterator name="part">
-								<model ref="assessment.parts.parts" />
-							</iterator>
-							<entityIncluded>
-								<decision model="part.isValid" reversed="TRUE" />
-							</entityIncluded>
-							<container>
-								<alert selector="part-invalid" model="part.ordering.position" />
-							</container>
-						</section>
-
+				<section>
+					<iterator name="part">
+						<model ref="assessment.parts.parts" />
+					</iterator>
+					<entityIncluded>
+						<decision model="part.isValid" reversed="TRUE" />
+					</entityIncluded>
+					<container>
+						<alert selector="part-invalid" model="part.ordering.position" />
 					</container>
 				</section>
 
-				<selection>
-					<selectionChoices>
-						<selectionChoice value="true" selector="publish-title" />
-						<!-- <model type="enum" messageRoot="assessment-type-" ref="assessment.type" /> -->
-					</selectionChoices>
-					<model ref="assessment.published" />
-					<included>
-						<decision model="assessment.isValid" />
-					</included>
-				</selection>
 			</container>
 		</section>
 
-		<!-- navigation -->
+		<!-- navigation for publish -->
 		<navigationBar>
 			<container>
-				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE"
-					destination="/assessments">
+				<navigation title="publish" accessKey="publish-access" description="publish-description" style="BUTTON" submit="TRUE"
+					destination="PUBLISH">
+					<icon icon="/icons/OK.png" style="LEFT" />
+				</navigation>
+				<divider />
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
+					<destination template="/assessments/{0}">
+						<model ref="sort" />
+					</destination>
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
 			</container>
+			<included>
+				<decision model="assessment.isValid" />
+				<decision reversed="TRUE" model="assessment.published" />
+			</included>
+		</navigationBar>
+
+		<!-- navigation otherwise -->
+		<navigationBar>
+			<container>
+				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
+					<destination template="/assessments/{0}">
+						<model ref="sort" />
+					</destination>
+					<icon icon="/icons/return.png" style="LEFT" />
+				</navigation>
+			</container>
+			<included>
+				<orDecision>
+					<decision model="assessment.published" />
+					<decision reversed="TRUE" model="assessment.isValid" />
+				</orDecision>
+			</included>
 		</navigationBar>
 
 	</container>

@@ -291,7 +291,7 @@
 								<decision model="assessment.published" />
 							</included>
 						</navigation>
-						<navigation description="published-alt">
+						<navigation style="LINK" description="published-alt" submit="TRUE">
 							<icon icon="/icons/publish_new.png" style="LEFT" />
 							<destination template="/assessment_settings/{0}{1}/{2}">
 								<model ref="sort_column" />

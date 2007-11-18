@@ -60,12 +60,13 @@ public class TestSettingsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a single parameter (aid)
+		// sort, aid
 		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
+		String sort = params[2];
 		String assessmentId = params[3];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
@@ -86,7 +87,7 @@ public class TestSettingsView extends ControllerImpl
 
 		// collect information: the selected assessment
 		context.put("assessment", assessment);
-		context.put("sortcode", params[2]);
+		context.put("sort", sort);
 
 		// render
 		uiService.render(ui, context);
@@ -106,12 +107,13 @@ public class TestSettingsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need a single parameter (aid)
+		// sort, aid
 		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
+		String sort = params[2];
 		String assessmentId = params[3];
 
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
@@ -136,31 +138,33 @@ public class TestSettingsView extends ControllerImpl
 		// read the form
 		String destination = uiService.decode(req, context);
 
-		if (destination != null && (destination.trim().startsWith("/assessments")))
+		// if publish, set
+		if ("PUBLISH".equals(destination))
 		{
-			StringBuffer path = new StringBuffer();
-			// commit the save
-			try
-			{
-				this.assessmentService.saveAssessment(assessment);
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-				return;
-			}
-			catch (AssessmentPolicyException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
-				return;
-			}
-
-			path.append("/assessments/" + params[2]);
-			// redirect to the next destination
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
+			assessment.setPublished(Boolean.TRUE);
+			destination = "/assessments/" + sort;
 		}
+
+		// commit the save
+		try
+		{
+			this.assessmentService.saveAssessment(assessment);
+		}
+		catch (AssessmentPermissionException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+		catch (AssessmentPolicyException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+			return;
+		}
+
+		// redirect to the next destination
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
