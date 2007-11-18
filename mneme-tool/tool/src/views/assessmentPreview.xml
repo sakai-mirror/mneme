@@ -174,25 +174,6 @@
 							</included>
 						</section>
 
-						<!-- mark for review -->
-						<section>
-							<container>
-								<selection readOnly="TRUE">
-									<title>
-										<message selector="question-mark-review-header">
-											<model type="icon" icon="/icons/markedforreview.png" />
-										</message>
-									</title>
-									<selectionChoices>
-										<selectionChoice value="true" selector="question-mark-review" />
-									</selectionChoices>
-									<included>
-										<decision model="question.part.assessment.randomAccess" />
-									</included>
-								</selection>
-							</container>
-						</section>
-
 						<!-- hints toggle -->
 						<section>
 							<container>
