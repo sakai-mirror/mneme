@@ -32,7 +32,6 @@ import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
@@ -263,41 +262,7 @@ public class PoolServiceImpl implements PoolService
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, pool.getContext());
 
-		// get the current pool for history
-		PoolImpl current = this.storage.getPool(pool.getId());
-		if (this.assessmentService.liveDependencyExists(pool, false))
-		{
-			// get a new id on the old and save it
-			current.initId(null);
-			current.initHistorical(pool);
-			this.storage.savePool(current);
-
-			// swap all historical dependencies to the new
-			this.assessmentService.switchLiveDependency(pool, current, false);
-		}
-
-		// remove each of our questions
-		List<String> qids = current.getAllQuestionIds();
-		for (String qid : qids)
-		{
-			Question q = this.questionService.getQuestion(qid);
-			if ((q != null) && (!q.getIsHistorical()))
-			{
-				// remove the questions
-				// use current as the history pool, if needed
-				// Note: will only be needed if there are live assessment pool dependencies,
-				// - in which case we have already made current into a historical pool.
-				this.questionService.removeQuestion(q, current);
-			}
-		}
-
-		// remove any assessment dependencies on this pool
-		// - any live dependencies have already been swapped tot the historical 'current',
-		// so these are all non-live and may be removed.
-		this.assessmentService.removeDependency(pool);
-
-		// remove the pool
-		storage.removePool((PoolImpl) pool);
+		doRemove(pool);
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
@@ -324,8 +289,8 @@ public class PoolServiceImpl implements PoolService
 			{
 				if (M_log.isDebugEnabled()) M_log.debug("savePool: deleting mint: " + pool.getId());
 
-				// Note: mint questions cannot have already been dependened on, so we can just forget about it.
-				this.storage.removePool((PoolImpl) pool);
+				// make sure any questions are also removed
+				doRemove(pool);
 			}
 
 			return;
@@ -481,6 +446,51 @@ public class PoolServiceImpl implements PoolService
 		}
 
 		return false;
+	}
+
+	/**
+	 * Remove the pool, the questions, and deal with dependencies
+	 * 
+	 * @param pool
+	 *        The pool to remove.
+	 */
+	protected void doRemove(Pool pool)
+	{
+		// get the current pool for history
+		PoolImpl current = this.storage.getPool(pool.getId());
+		if (this.assessmentService.liveDependencyExists(pool, false))
+		{
+			// get a new id on the old and save it
+			current.initId(null);
+			current.initHistorical(pool);
+			this.storage.savePool(current);
+
+			// swap all historical dependencies to the new
+			this.assessmentService.switchLiveDependency(pool, current, false);
+		}
+
+		// remove each of our questions
+		List<String> qids = current.getAllQuestionIds();
+		for (String qid : qids)
+		{
+			Question q = this.questionService.getQuestion(qid);
+			if ((q != null) && (!q.getIsHistorical()))
+			{
+				// remove the questions
+				// use current as the history pool, if needed
+				// Note: will only be needed if there are live assessment pool dependencies,
+				// - in which case we have already made current into a historical pool.
+				this.questionService.removeQuestion(q, current);
+			}
+		}
+
+		// remove any assessment dependencies on this pool
+		// - any live dependencies have already been swapped tot the historical 'current',
+		// so these are all non-live and may be removed.
+		this.assessmentService.removeDependency(pool);
+
+		// remove the pool
+		storage.removePool((PoolImpl) pool);
 	}
 
 	/**
