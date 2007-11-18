@@ -310,41 +310,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	{
 		// TODO: review the efficiency of this method! -ggolden
 
-		if (assessment == null) throw new IllegalArgumentException();
-		if (question == null) throw new IllegalArgumentException();
-		if (official == null) throw new IllegalArgumentException();
-		Date asOf = new Date();
-
-		if (M_log.isDebugEnabled()) M_log.debug("countSubmissionAnswers: assessment: " + assessment.getId());
-
-		// read all the submissions for this assessment from all possible submitters
-		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, FindAssessmentSubmissionsSort.status_a, question);
-
-		// see if any needs to be completed based on time limit or dates
-		checkAutoComplete(all, asOf);
-
-		// pick one for each assessment - the one in progress, or the official complete one (if official)
-		List<Submission> rv = null;
-		if (official)
-		{
-			rv = officializeByUser(all, null);
-		}
-		else
-		{
-			rv = new ArrayList<Submission>(all.size());
-			rv.addAll(all);
-		}
-
-		// pull out the one answer we want
-		List<Answer> answers = new ArrayList<Answer>();
-		for (Submission s : rv)
-		{
-			Answer a = s.getAnswer(question);
-			if (a != null)
-			{
-				answers.add(a);
-			}
-		}
+		List<Answer> answers = findSubmissionAnswers(assessment, question, FindAssessmentSubmissionsSort.status_a, official, null, null);
 
 		return answers.size();
 	}
