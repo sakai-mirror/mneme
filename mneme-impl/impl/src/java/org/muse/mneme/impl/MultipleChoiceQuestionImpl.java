@@ -38,6 +38,7 @@ import org.muse.ambrosia.api.Destination;
 import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.EntityListColumn;
 import org.muse.ambrosia.api.HtmlEdit;
+import org.muse.ambrosia.api.Instructions;
 import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.OrDecision;
 import org.muse.ambrosia.api.PropertyColumn;
@@ -123,6 +124,9 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			this.correct = Boolean.TRUE;
 		}
 	}
+
+	/** The maximum number of choices we support. */
+	protected final static int MAX = 25;
 
 	/** List of choices */
 	protected List<MultipleChoiceQuestionChoice> answerChoices = new ArrayList<MultipleChoiceQuestionChoice>();
@@ -257,21 +261,28 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 				try
 				{
 					int more = Integer.parseInt(parts[1]);
-					int i = this.answerChoices.size();
-					for (int count = 0; count < more; count++)
+					if ((this.answerChoices.size() + more) > this.MAX)
 					{
-						MultipleChoiceQuestionChoice choice = new MultipleChoiceQuestionChoice(this.question, Integer.toString(i++), "");
-						if ((count == 0) && (destination.startsWith("INIT:")))
-						{
-							choice.initCorrect();
-						}
-						this.answerChoices.add(choice);
+						more = this.MAX - this.answerChoices.size();
 					}
-
-					// if init, this is not enough to set as changed
-					if (!destination.startsWith("INIT:"))
+					if (more > 0)
 					{
-						this.question.setChanged();
+						int i = this.answerChoices.size();
+						for (int count = 0; count < more; count++)
+						{
+							MultipleChoiceQuestionChoice choice = new MultipleChoiceQuestionChoice(this.question, Integer.toString(i++), "");
+							if ((count == 0) && (destination.startsWith("INIT:")))
+							{
+								choice.initCorrect();
+							}
+							this.answerChoices.add(choice);
+						}
+
+						// if init, this is not enough to set as changed
+						if (!destination.startsWith("INIT:"))
+						{
+							this.question.setChanged();
+						}
 					}
 				}
 				catch (NumberFormatException e)
@@ -450,6 +461,13 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		addMore.setOrientation(Selection.Orientation.dropdown);
 		addMore.setSubmitValue();
 		addMore.setTitle("more-choices");
+		addMore.setIncluded(this.uiService.newDecision().setReversed().setProperty(
+				this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesMaxedOut")));
+
+		Instructions noMore = uiService.newInstructions();
+		noMore.setText("no-more");
+		noMore.setIncluded(this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesMaxedOut")));
 
 		// shuffle choices
 		Selection shuffle = this.uiService.newSelection();
@@ -459,7 +477,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		// choices section
 		Section choices = this.uiService.newSection();
 		choices.setTitle("choices");
-		choices.add(choicesList).add(addMore).add(shuffle);
+		choices.add(choicesList).add(addMore).add(noMore).add(shuffle);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(answer).add(choices);
 	}
@@ -507,6 +525,16 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 
 		this.answerChoices = newChoices;
 		return this.answerChoices;
+	}
+
+	/**
+	 * Check if there are already max choices.
+	 * 
+	 * @return TRUE if there are already max choices, false if fewer.
+	 */
+	public Boolean getChoicesMaxedOut()
+	{
+		return Boolean.valueOf(this.answerChoices.size() >= this.MAX);
 	}
 
 	/**
@@ -857,10 +885,15 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 			if (!different) return;
 		}
 
-		this.answerChoices = new ArrayList<MultipleChoiceQuestionChoice>(choices.size());
+		int size = choices.size();
+		if (size > this.MAX) size = this.MAX;
+		this.answerChoices = new ArrayList<MultipleChoiceQuestionChoice>(size);
+
 		int i = 0;
 		for (String choice : choices)
 		{
+			if (this.answerChoices.size() > this.MAX) break;
+
 			this.answerChoices.add(new MultipleChoiceQuestionChoice(this.question, Integer.toString(i++), choice));
 		}
 

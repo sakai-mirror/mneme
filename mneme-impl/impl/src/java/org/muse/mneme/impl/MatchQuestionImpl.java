@@ -35,6 +35,7 @@ import org.muse.ambrosia.api.Destination;
 import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.EntityListColumn;
 import org.muse.ambrosia.api.HtmlEdit;
+import org.muse.ambrosia.api.Instructions;
 import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.OrDecision;
 import org.muse.ambrosia.api.PropertyColumn;
@@ -165,6 +166,9 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	protected static String[] matchLabels = {"1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10.", "11.", "12.", "13.", "14.", "15.", "16.",
 			"17.", "18.", "19.", "20.", "21.", "22.", "23.", "24.", "25.", "26."};
 
+	/** The maximum number of choices we support. */
+	protected final static int MAX = 25;
+
 	/** String that holds the distractor choice */
 	protected MatchQuestionPair distractor = null;
 
@@ -193,17 +197,17 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public MatchQuestionImpl(Question question, MatchQuestionImpl other)
 	{
-		if (other.distractor != null) this.distractor = new MatchQuestionPair(this.question, other.distractor);
+		if (other.distractor != null) this.distractor = new MatchQuestionPair(question, other.distractor);
 		this.pairs = new ArrayList<MatchQuestionPair>(other.pairs.size());
 		for (MatchQuestionPair choice : other.pairs)
 		{
-			this.pairs.add(new MatchQuestionPair(this.question, choice));
+			this.pairs.add(new MatchQuestionPair(question, choice));
 		}
 		this.messages = other.messages;
-		this.question = question;
 		this.uiService = other.uiService;
 		this.idManager = other.idManager;
 		this.plugin = other.plugin;
+		this.question = question;
 	}
 
 	/**
@@ -233,6 +237,9 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void addPair(String choice, String match)
 	{
+		// take no more than the max
+		if (this.pairs.size() == this.MAX) return;
+
 		this.pairs.add(new MatchQuestionPair(this.question, choice, match, this.pairs.size()));
 	}
 
@@ -250,10 +257,10 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 			((MatchQuestionImpl) rv).pairs = new ArrayList<MatchQuestionPair>(this.pairs.size());
 			for (MatchQuestionPair choice : this.pairs)
 			{
-				((MatchQuestionImpl) rv).pairs.add(new MatchQuestionPair(this.question, choice));
+				((MatchQuestionImpl) rv).pairs.add(new MatchQuestionPair(question, choice));
 			}
 
-			if (this.distractor != null) ((MatchQuestionImpl) rv).distractor = new MatchQuestionPair(this.question, this.distractor);
+			if (this.distractor != null) ((MatchQuestionImpl) rv).distractor = new MatchQuestionPair(question, this.distractor);
 
 			// set the question
 			((MatchQuestionImpl) rv).question = question;
@@ -310,15 +317,22 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 				try
 				{
 					int more = Integer.parseInt(parts[1]);
-					for (int count = 0; count < more; count++)
+					if ((this.pairs.size() + more) > this.MAX)
 					{
-						this.pairs.add(new MatchQuestionPair(this.question, null, null, this.pairs.size()));
+						more = this.MAX - this.pairs.size();
 					}
-
-					// for init, don't mark the question as changed
-					if (!destination.startsWith("INIT:"))
+					if (more > 0)
 					{
-						this.question.setChanged();
+						for (int count = 0; count < more; count++)
+						{
+							this.pairs.add(new MatchQuestionPair(this.question, null, null, this.pairs.size()));
+						}
+
+						// for init, don't mark the question as changed
+						if (!destination.startsWith("INIT:"))
+						{
+							this.question.setChanged();
+						}
 					}
 				}
 				catch (NumberFormatException e)
@@ -449,10 +463,17 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		addMore.setOrientation(Selection.Orientation.dropdown);
 		addMore.setSubmitValue();
 		addMore.setTitle("more-choices");
+		addMore.setIncluded(this.uiService.newDecision().setReversed().setProperty(
+				this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.pairsMaxedOut")));
+
+		Instructions noMore = uiService.newInstructions();
+		noMore.setText("no-more");		
+		noMore.setIncluded(this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.pairsMaxedOut")));
 
 		Section choicesSection = this.uiService.newSection();
 		choicesSection.setTitle("choices", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
-		choicesSection.add(choices).add(distractor).add(addMore);
+		choicesSection.add(choices).add(distractor).add(addMore).add(noMore);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(choicesSection);
 	}
@@ -614,6 +635,16 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		}
 
 		return rv;
+	}
+
+	/**
+	 * Check if there are already max pairs.
+	 * 
+	 * @return TRUE if there are already max pairs, false if fewer.
+	 */
+	public Boolean getPairsMaxedOut()
+	{
+		return Boolean.valueOf(this.pairs.size() >= this.MAX);
 	}
 
 	/**
