@@ -30,7 +30,7 @@
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
 	</modeContainer>
-	
+
 	<title>
 		<message selector="grading-assessment-title" />
 	</title>
@@ -61,11 +61,12 @@
 		<!--navigation-->
 		<navigationBar>
 			<container>
-				<navigation title="grade-submission-title" style="LINK" description="grade-submission-description" submit="FALSE" disabled="TRUE">
+				<navigation title="grade-submission-title" style="LINK" description="grade-submission-description" submit="TRUE" disabled="TRUE">
 					<icon icon="/icons/grade_student.png" style="LEFT" />
 				</navigation>
 				<navigation disabled="TRUE" title="bar" />
-				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description">
+				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description"
+					submit="TRUE">
 					<icon icon="/icons/grade_questions.png" style="LEFT" />
 					<destination template="/grade_questions_list/{0}/{1}">
 						<model ref="sort_grades" />

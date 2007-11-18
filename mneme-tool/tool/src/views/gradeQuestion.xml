@@ -58,8 +58,8 @@
 		<!--navigation-->
 		<navigationBar>
 			<container>
-				<navigation title="grade-submission-title" style="LINK" accessKey="grade-submission-access"
-					description="grade-submission-description">
+				<navigation title="grade-submission-title" style="LINK" accessKey="grade-submission-access" description="grade-submission-description"
+					submit="TRUE">
 					<icon icon="/icons/grade_student.png" style="LEFT" />
 					<destination template="/grade_assessment/{0}/{1}">
 						<model ref="sort_grades" />
@@ -68,8 +68,12 @@
 				</navigation>
 				<navigation disabled="TRUE" title="bar" />
 				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description"
-					submit="FALSE" disabled="TRUE">
+					submit="TRUE">
 					<icon icon="/icons/grade_questions.png" style="LEFT" />
+					<destination template="/grade_questions_list/{0}/{1}">
+						<model ref="sort_grades" />
+						<model ref="assessment.id" />
+					</destination>
 				</navigation>
 			</container>
 		</navigationBar>
@@ -90,7 +94,7 @@
 			<iterator name="answer">
 				<model ref="answers" indexRef="id" />
 			</iterator>
-			<pager paging="paging">
+			<pager paging="paging" submit="TRUE">
 				<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
 					<model ref="sort_grades" />
 					<model ref="assessment.id" />
@@ -129,7 +133,7 @@
 						</navigation>
 					</entityNavigations>
 					<model type="userInfo" selector="SORTNAME" ref="answer.submission.userId" missing="no-username" />
-					<sort>
+					<sort submit="TRUE">
 						<active>
 							<compareDecision model="sort_column" constant="0" />
 						</active>
@@ -249,7 +253,7 @@
 					<container>
 						<floatEdit model="answer.totalScore" cols="6" />
 					</container>
-					<sort>
+					<sort submit="TRUE">
 						<active>
 							<compareDecision model="sort_column" constant="1" />
 						</active>
