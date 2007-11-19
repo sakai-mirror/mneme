@@ -142,6 +142,7 @@
 									<included>
 										<decision reversed="TRUE" model="assessment.isLive" />
 									</included>
+									<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-delete" />
 								</navigation>
 							</entityActions>
 						</selectionColumn>

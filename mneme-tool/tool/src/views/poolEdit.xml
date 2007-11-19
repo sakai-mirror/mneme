@@ -118,6 +118,7 @@
 								<model ref="sort_direction" />
 								<model ref="pagingParameter" />
 							</destination>
+							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-delete" />
 						</navigation>
 						<pager paging="paging">
 							<destination template="/pool_edit/{0}/{1}/{2}/{3}{4}/{5}">

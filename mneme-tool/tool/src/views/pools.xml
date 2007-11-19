@@ -85,6 +85,7 @@
 								<model ref="sort_direction" />
 								<model ref="pagingParameter" />
 							</destination>
+							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-delete" />
 						</navigation>
 					</entityActions>
 				</selectionColumn>
