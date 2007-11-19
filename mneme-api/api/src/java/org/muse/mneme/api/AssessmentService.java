@@ -35,7 +35,7 @@ public interface AssessmentService
 	 */
 	enum AssessmentsSort
 	{
-		ddate_a, ddate_d, odate_a, odate_d, published_a, published_d, title_a, title_d, type_a, type_d
+		cdate_a, cdate_d, ddate_a, ddate_d, odate_a, odate_d, published_a, published_d, title_a, title_d, type_a, type_d
 	}
 
 	/**

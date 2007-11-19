@@ -22,8 +22,8 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,8 +31,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.api.PopulatingSet;
+import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.api.PopulatingSet.Factory;
 import org.muse.ambrosia.api.PopulatingSet.Id;
 import org.muse.ambrosia.util.ControllerImpl;
@@ -41,6 +41,7 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -70,102 +71,88 @@ public class TestsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-
-		// sort parameter
-		String sortCode = null;
-
-		if (params.length == 3)
+		// sort (optional)
+		if ((params.length != 2) && (params.length != 3))
 		{
-			sortCode = params[2];
+			throw new IllegalArgumentException();
 		}
 
-		// default sort is title ascending
-		AssessmentService.AssessmentsSort sort;
-
-		if (sortCode != null)
+		// default is due date, ascending
+		String sortCode = (params.length > 2) ? params[2] : "0A";
+		if (sortCode.length() != 2)
 		{
-			if (sortCode.trim().length() == 2)
-			{
-				context.put("sort_column", sortCode.charAt(0));
-				context.put("sort_direction", sortCode.charAt(1));
+			throw new IllegalArgumentException();
+		}
 
-				// TODO: 0 is type, need to add code for processing it
-				// 1 is title
-				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
-				{
-					sort = AssessmentService.AssessmentsSort.type_a;
-				}
-				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
-				{
-					sort = AssessmentService.AssessmentsSort.type_d;
-				}
-				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
-				{
-					sort = AssessmentService.AssessmentsSort.title_a;
-				}
-				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
-				{
-					sort = AssessmentService.AssessmentsSort.title_d;
-				}
-				// 2 is odate
-				else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
-				{
-					sort = AssessmentService.AssessmentsSort.odate_a;
-				}
-				else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
-				{
-					sort = AssessmentService.AssessmentsSort.odate_d;
-				}
-				// 3 is ddate
-				else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'A'))
-				{
-					sort = AssessmentService.AssessmentsSort.ddate_a;
-				}
-				else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'D'))
-				{
-					sort = AssessmentService.AssessmentsSort.ddate_d;
-				}
-				// 4 is active
-				else if ((sortCode.charAt(0) == '4') && (sortCode.charAt(1) == 'A'))
-				{
-					sort = AssessmentService.AssessmentsSort.published_a;
-				}
-				else if ((sortCode.charAt(0) == '4') && (sortCode.charAt(1) == 'D'))
-				{
-					sort = AssessmentService.AssessmentsSort.published_d;
-				}
-				else
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
-				}
+		// due (0), open (1), title (2), publish (3), view/type (4)
+		AssessmentService.AssessmentsSort sort = null;
+		if (sortCode.charAt(0) == '0')
+		{
+			if (sortCode.charAt(1) == 'A')
+			{
+				sort = AssessmentService.AssessmentsSort.ddate_a;
 			}
 			else
 			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
+				sort = AssessmentService.AssessmentsSort.ddate_d;
+			}
+		}
+		else if (sortCode.charAt(0) == '1')
+		{
+			if (sortCode.charAt(1) == 'A')
+			{
+				sort = AssessmentService.AssessmentsSort.odate_a;
+			}
+			else
+			{
+				sort = AssessmentService.AssessmentsSort.odate_d;
+			}
+		}
+		else if (sortCode.charAt(0) == '2')
+		{
+			if (sortCode.charAt(1) == 'A')
+			{
+				sort = AssessmentService.AssessmentsSort.title_a;
+			}
+			else
+			{
+				sort = AssessmentService.AssessmentsSort.title_d;
+			}
+
+		}
+		else if (sortCode.charAt(0) == '3')
+		{
+			if (sortCode.charAt(1) == 'A')
+			{
+				sort = AssessmentService.AssessmentsSort.published_a;
+			}
+			else
+			{
+				sort = AssessmentService.AssessmentsSort.published_d;
+			}
+		}
+		else if (sortCode.charAt(0) == '4')
+		{
+			if (sortCode.charAt(1) == 'A')
+			{
+				sort = AssessmentService.AssessmentsSort.type_a;
+			}
+			else
+			{
+				sort = AssessmentService.AssessmentsSort.type_d;
 			}
 		}
 		else
 		{
-			// default sort: title ascending
-			sort = AssessmentService.AssessmentsSort.ddate_a;
-
-			context.put("sort_column", '3');
-			context.put("sort_direction", 'A');
-
+			throw new IllegalArgumentException();
 		}
+		context.put("sort_column", sortCode.charAt(0));
+		context.put("sort_direction", sortCode.charAt(1));
 
 		// collect the assessments in this context
 		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext(), sort,
 				Boolean.FALSE);
 		context.put("assessments", assessments);
-
-		// value holders for the selection checkboxes
-		Values values = this.uiService.newValues();
-		context.put("ids", values);
 
 		// disable the tool navigation to this view
 		context.put("disableAssessments", Boolean.TRUE);
@@ -188,6 +175,15 @@ public class TestsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// sort (optional)
+		if ((params.length != 2) && (params.length != 3))
+		{
+			throw new IllegalArgumentException();
+		}
+
+		// default is due date, ascending
+		String sort = (params.length > 2) ? params[2] : "0A";
+
 		// security check
 		if (!assessmentService.allowManageAssessments(this.toolManager.getCurrentPlacement().getContext()))
 		{
@@ -196,190 +192,13 @@ public class TestsView extends ControllerImpl
 			return;
 		}
 
-		// for the selected tests to delete
+		// for the selected select
 		Values values = this.uiService.newValues();
 		context.put("ids", values);
 
-		// read the form
-		String destination = uiService.decode(req, context);
-		
-		if (destination != null)
-		{
-			// save date changes regardless of where user goes
-			if (!saveDates(req, res, context)) return;
-
-			// for an add
-			if (destination.startsWith("/assessment_add"))
-			{
-				StringBuffer path = new StringBuffer();
-				// create a new test
-				try
-				{
-					Assessment assessment = this.assessmentService.newAssessment(this.toolManager.getCurrentPlacement().getContext());
-
-					// redirect to edit for this assessment
-					path.append("/assessment_edit/");
-					// for sort code
-					if (params.length == 3)
-					{
-						path.append(params[2]);
-						path.append("/");
-					}
-					else
-					{
-						// default sort - title ascending
-						path.append("1A");
-						path.append("/");
-					}
-					path.append(assessment.getId());
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
-					return;
-				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
-			}
-
-			else if (destination.startsWith("/ARCHIVE"))
-			{
-				// archive these tests, here and now
-				String[] selectedTestIds = values.getValues();
-				for (String id : selectedTestIds)
-				{
-					Assessment assessment = this.assessmentService.getAssessment(id);
-					if (assessment != null)
-					{
-						assessment.setArchived(Boolean.TRUE);
-						try
-						{
-							this.assessmentService.saveAssessment(assessment);
-						}
-						catch (AssessmentPermissionException e)
-						{
-							// redirect to error
-							res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-							return;
-						}
-						catch (AssessmentPolicyException e)
-						{
-							// redirect to error
-							res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
-							return;
-						}
-					}
-				}
-			}
-			else if (destination.startsWith("/assessment_unpublish"))
-			{
-				String[] selectedTestIds = values.getValues();
-				// delete the tests with ids
-				StringBuffer path = new StringBuffer();
-				String separator = "+";
-
-				if (selectedTestIds != null && (selectedTestIds.length > 0))
-				{
-					path.append(destination);
-					path.append("/");
-
-					// for sort code
-					if (params.length == 3)
-					{
-						path.append(params[2]);
-						path.append("/");
-					}
-					else
-					{
-						// default sort - title ascending
-						path.append("1A");
-						path.append("/");
-					}
-					path.append(selectedTestIds[0]);
-					for (int i = 1; i < selectedTestIds.length; i++)
-					{
-						path.append(separator);
-						path.append(selectedTestIds[i]);
-					}
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
-					return;
-				}
-			}
-			else if (destination.trim().equalsIgnoreCase("/assessments_delete"))
-			{
-				String[] selectedTestIds = values.getValues();
-				// delete the tests with ids
-				StringBuffer path = new StringBuffer();
-				String separator = "+";
-
-				if (selectedTestIds != null && (selectedTestIds.length > 0))
-				{
-					path.append(destination);
-					path.append("/");
-
-					// for sort code
-					if (params.length == 3)
-					{
-						path.append(params[2]);
-						path.append("/");
-					}
-					else
-					{
-						// default sort - title ascending
-						path.append("1A");
-						path.append("/");
-					}
-					path.append(selectedTestIds[0]);
-					for (int i = 1; i < selectedTestIds.length; i++)
-					{
-						path.append(separator);
-						path.append(selectedTestIds[i]);
-					}
-
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
-					return;
-				}
-			}
-
-			else if (destination.trim().startsWith("/COPY"))
-			{
-				try
-				{
-					Assessment assessment = this.assessmentService.getAssessment(destination.substring(destination.lastIndexOf("/") + 1));
-					if (assessment != null)
-					{
-						this.assessmentService.copyAssessment(toolManager.getCurrentPlacement().getContext(), assessment);
-					}
-				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
-			}
-
-			else
-			{
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-		}
-
-		if (params.length == 3)
-			destination = "/assessments/" + params[2];
-		else
-			destination = "/assessments/";
-
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-	}
-
-	private boolean saveDates(HttpServletRequest req, HttpServletResponse res, Context context) throws IOException
-	{
-		PopulatingSet assessments = null;
+		// for the dates
 		final AssessmentService assessmentService = this.assessmentService;
-		assessments = uiService.newPopulatingSet(new Factory()
+		PopulatingSet assessments = uiService.newPopulatingSet(new Factory()
 		{
 			public Object get(String id)
 			{
@@ -394,10 +213,12 @@ public class TestsView extends ControllerImpl
 				return ((Assessment) o).getId();
 			}
 		});
-
 		context.put("assessments", assessments);
+
+		// read the form
 		String destination = uiService.decode(req, context);
 
+		// save the dates
 		for (Iterator i = assessments.getSet().iterator(); i.hasNext();)
 		{
 			Assessment assessment = (Assessment) i.next();
@@ -409,17 +230,116 @@ public class TestsView extends ControllerImpl
 			{
 				// redirect to error
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-				return false;
+				return;
 			}
 			catch (AssessmentPolicyException e)
 			{
 				// redirect to error
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
-				return false;
+				return;
 			}
 		}
 
-		return true;
+		// for an add
+		if (destination.equals("ADD"))
+		{
+			try
+			{
+				Assessment assessment = this.assessmentService.newAssessment(this.toolManager.getCurrentPlacement().getContext());
+				destination = "/assessment_edit/" + sort + "/" + assessment.getId();
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+		}
+
+		else if (destination.equals("ARCHIVE"))
+		{
+			for (String id : values.getValues())
+			{
+				Assessment assessment = this.assessmentService.getAssessment(id);
+				if (assessment != null)
+				{
+					assessment.setArchived(Boolean.TRUE);
+					try
+					{
+						this.assessmentService.saveAssessment(assessment);
+						destination = context.getDestination();
+					}
+					catch (AssessmentPermissionException e)
+					{
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+						return;
+					}
+					catch (AssessmentPolicyException e)
+					{
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+						return;
+					}
+				}
+			}
+		}
+
+		else if (destination.equals("UNPUBLISH"))
+		{
+			// build up list of ids separated by "+" for the unpublish view destination
+			StringBuilder buf = new StringBuilder();
+			for (String id : values.getValues())
+			{
+				buf.append(id);
+				buf.append("+");
+			}
+			if (buf.length() > 1) buf.setLength(buf.length() - 1);
+
+			destination = "/assessment_unpublish/" + sort + "/" + buf.toString();
+		}
+
+		else if (destination.equals("DELETE"))
+		{
+			// build up list of ids separated by "+" for the delete view destination
+			StringBuilder buf = new StringBuilder();
+			for (String id : values.getValues())
+			{
+				buf.append(id);
+				buf.append("+");
+			}
+			if (buf.length() > 1) buf.setLength(buf.length() - 1);
+
+			destination = "/assessments_delete/" + sort + "/" + buf.toString();
+		}
+
+		else if (destination.startsWith("DUPLICATE:"))
+		{
+			String[] parts = StringUtil.split(destination, ":");
+			if (parts.length != 2)
+			{
+				throw new IllegalArgumentException();
+			}
+			String aid = parts[1];
+			try
+			{
+				Assessment assessment = this.assessmentService.getAssessment(aid);
+				if (assessment == null)
+				{
+					throw new IllegalArgumentException();
+				}
+				this.assessmentService.copyAssessment(toolManager.getCurrentPlacement().getContext(), assessment);
+				destination = context.getDestination();
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+		}
+
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**

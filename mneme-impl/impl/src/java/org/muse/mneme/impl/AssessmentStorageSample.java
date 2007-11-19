@@ -201,113 +201,139 @@ public class AssessmentStorageSample implements AssessmentStorage
 			}
 		}
 
-		// sort
+		// sort - use title as a secondary sort (or for title, use create date as secondary sort)
+		// sort ascending first - reverse if descending
 		Collections.sort(rv, new Comparator()
 		{
 			public int compare(Object arg0, Object arg1)
 			{
 				int rv = 0;
+				AssessmentService.AssessmentsSort secondary = null;
 				switch (sort)
 				{
 					case published_a:
-					{
-						rv = ((Assessment) arg0).getPublished().compareTo(((Assessment) arg1).getPublished());
-						break;
-					}
 					case published_d:
 					{
-						rv = -1 * ((Assessment) arg0).getPublished().compareTo(((Assessment) arg1).getPublished());
+						rv = ((Assessment) arg0).getPublished().compareTo(((Assessment) arg1).getPublished());
+						secondary = AssessmentService.AssessmentsSort.title_a;
 						break;
 					}
 					case title_a:
-					{
-						String s0 = StringUtil.trimToZero(((Assessment) arg0).getTitle());
-						String s1 = StringUtil.trimToZero(((Assessment) arg1).getTitle());
-						rv = s0.compareToIgnoreCase(s1);
-						break;
-					}
 					case title_d:
 					{
 						String s0 = StringUtil.trimToZero(((Assessment) arg0).getTitle());
 						String s1 = StringUtil.trimToZero(((Assessment) arg1).getTitle());
-						rv = -1 * s0.compareToIgnoreCase(s1);
+						rv = s0.compareToIgnoreCase(s1);
+						secondary = AssessmentService.AssessmentsSort.cdate_a;
 						break;
 					}
 					case type_a:
-					{
-						rv = ((Assessment) arg0).getType().getSortValue().compareTo(((Assessment) arg1).getType().getSortValue());
-						break;
-					}
 					case type_d:
 					{
-						rv = -1 * ((Assessment) arg0).getType().getSortValue().compareTo(((Assessment) arg1).getType().getSortValue());
+						rv = ((Assessment) arg0).getType().getSortValue().compareTo(((Assessment) arg1).getType().getSortValue());
+						secondary = AssessmentService.AssessmentsSort.title_a;
 						break;
 					}
 					case odate_a:
-					{
-						// no open date sorts low
-						if (((Assessment) arg0).getDates().getOpenDate() == null)
-						{
-							if (((Assessment) arg1).getDates().getOpenDate() == null) return 0;
-							return -1;
-						}
-						if (((Assessment) arg1).getDates().getOpenDate() == null)
-						{
-							return 1;
-						}
-						rv = ((Assessment) arg0).getDates().getOpenDate().compareTo(((Assessment) arg1).getDates().getOpenDate());
-						break;
-					}
 					case odate_d:
 					{
 						// no open date sorts low
 						if (((Assessment) arg0).getDates().getOpenDate() == null)
 						{
-							if (((Assessment) arg1).getDates().getOpenDate() == null) return 0;
-							return 1;
+							if (((Assessment) arg1).getDates().getOpenDate() == null)
+							{
+								rv = 0;
+							}
+							else
+							{
+								rv = -1;
+							}
 						}
-						if (((Assessment) arg1).getDates().getOpenDate() == null)
+						else if (((Assessment) arg1).getDates().getOpenDate() == null)
 						{
-							return -1;
+							rv = 1;
 						}
-						rv = -1 * ((Assessment) arg0).getDates().getOpenDate().compareTo(((Assessment) arg1).getDates().getOpenDate());
+						else
+						{
+							rv = ((Assessment) arg0).getDates().getOpenDate().compareTo(((Assessment) arg1).getDates().getOpenDate());
+						}
+						secondary = AssessmentService.AssessmentsSort.title_a;
 						break;
 					}
 					case ddate_a:
-					{
-						// no open date sorts high
-						if (((Assessment) arg0).getDates().getDueDate() == null)
-						{
-							if (((Assessment) arg1).getDates().getDueDate() == null) return 0;
-							return 1;
-						}
-						if (((Assessment) arg1).getDates().getDueDate() == null)
-						{
-							return -1;
-						}
-						rv = ((Assessment) arg0).getDates().getDueDate().compareTo(((Assessment) arg1).getDates().getDueDate());
-						break;
-					}
 					case ddate_d:
 					{
 						// no open date sorts high
 						if (((Assessment) arg0).getDates().getDueDate() == null)
 						{
-							if (((Assessment) arg1).getDates().getDueDate() == null) return 0;
-							return -1;
+							if (((Assessment) arg1).getDates().getDueDate() == null)
+							{
+								rv = 0;
+							}
+							else
+							{
+								rv = 1;
+							}
 						}
-						if (((Assessment) arg1).getDates().getDueDate() == null)
+						else if (((Assessment) arg1).getDates().getDueDate() == null)
 						{
-							return 1;
+							rv = -1;
 						}
-						rv = -1 * ((Assessment) arg0).getDates().getDueDate().compareTo(((Assessment) arg1).getDates().getDueDate());
+						else
+						{
+							rv = ((Assessment) arg0).getDates().getDueDate().compareTo(((Assessment) arg1).getDates().getDueDate());
+						}
+						secondary = AssessmentService.AssessmentsSort.title_a;
 						break;
+					}
+					case cdate_a:
+					case cdate_d:
+					{
+						rv = ((Assessment) arg0).getCreatedBy().getDate().compareTo(((Assessment) arg1).getCreatedBy().getDate());
+						secondary = null;
+						break;
+					}
+				}
+
+				// kick in the secondary if needed
+				if ((rv == 0) && (secondary != null))
+				{
+					switch (secondary)
+					{
+						case title_a:
+						case title_d:
+						{
+							String s0 = StringUtil.trimToZero(((Assessment) arg0).getTitle());
+							String s1 = StringUtil.trimToZero(((Assessment) arg1).getTitle());
+							rv = s0.compareToIgnoreCase(s1);
+							break;
+						}
+						case cdate_a:
+						case cdate_d:
+						{
+							rv = ((Assessment) arg0).getCreatedBy().getDate().compareTo(((Assessment) arg1).getCreatedBy().getDate());
+							break;
+						}
 					}
 				}
 
 				return rv;
 			}
 		});
+
+		// reverse for descending
+		switch (sort)
+		{
+			case cdate_d:
+			case ddate_d:
+			case odate_d:
+			case published_d:
+			case title_d:
+			case type_d:
+			{
+				Collections.reverse(rv);
+			}
+		}
 
 		return rv;
 	}
@@ -621,7 +647,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.setQuestionGrouping(QuestionGrouping.question);
 			a.setRandomAccess(Boolean.TRUE);
 			a.setTimeLimit(1200l * 1000l);
-			a.setTitle("assessment one");
+			a.setTitle("Ann Arbor");
 			a.setType(AssessmentType.test);
 			// a.getAccess().setPassword("password");
 			a.getCreatedBy().setUserId("admin");
@@ -631,7 +657,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			try
 			{
 				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("10/01/07"));
-				a.getDates().setDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("11/22/07"));
+				a.getDates().setDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("12/22/07"));
 			}
 			catch (ParseException e)
 			{
@@ -671,6 +697,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			//
 
 			a = newAssessment();
+			a.setType(AssessmentType.assignment);
 			a.initId("a2");
 			a.setPublished(Boolean.TRUE);
 			a.setContext("mercury");
@@ -679,8 +706,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.setQuestionGrouping(QuestionGrouping.question);
 			a.setRandomAccess(Boolean.TRUE);
 			// a.setTimeLimit(1200l * 1000l);
-			a.setTitle("assessment two");
-			a.setType(AssessmentType.test);
+			a.setTitle("Boston");
 			// a.getAccess().setPassword("password");
 			a.getCreatedBy().setUserId("admin");
 			a.getCreatedBy().setDate(now);
@@ -688,8 +714,8 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.getModifiedBy().setDate(now);
 			try
 			{
-				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("10/01/07"));
-				a.getDates().setDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("11/15/07"));
+				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("09/01/07"));
+				a.getDates().setDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("12/15/07"));
 			}
 			catch (ParseException e)
 			{
@@ -716,6 +742,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			//
 
 			a = newAssessment();
+			a.setType(AssessmentType.survey);
 			a.initId("a3");
 			a.setPublished(Boolean.TRUE);
 			a.setContext("mercury");
@@ -724,8 +751,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.setQuestionGrouping(QuestionGrouping.question);
 			a.setRandomAccess(Boolean.TRUE);
 			// a.setTimeLimit(1200l * 1000l);
-			a.setTitle("assessment three");
-			a.setType(AssessmentType.test);
+			a.setTitle("Detroit");
 			// a.getAccess().setPassword("password");
 			a.getCreatedBy().setUserId("admin");
 			a.getCreatedBy().setDate(now);
