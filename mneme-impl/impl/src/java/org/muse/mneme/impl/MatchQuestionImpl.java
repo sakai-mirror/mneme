@@ -467,7 +467,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 				this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.pairsMaxedOut")));
 
 		Instructions noMore = uiService.newInstructions();
-		noMore.setText("no-more");		
+		noMore.setText("no-more");
 		noMore.setIncluded(this.uiService.newDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.pairsMaxedOut")));
 
@@ -499,14 +499,15 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.pairsForDelivery")
 				.setIndexReference("id"), "pair");
 
-		PropertyColumn choiceLabel = this.uiService.newPropertyColumn();
-		choiceLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choiceLabel"));
-		entityList.addColumn(choiceLabel);
+		// match display
+		PropertyColumn matchLabel = this.uiService.newPropertyColumn();
+		matchLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.matchLabel"));
+		entityList.addColumn(matchLabel);
 
-		PropertyColumn choice = this.uiService.newPropertyColumn();
-		choice.setTitle("choice");
-		choice.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
-		entityList.addColumn(choice);
+		PropertyColumn match = this.uiService.newPropertyColumn();
+		match.setTitle("match");
+		match.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.match"));
+		entityList.addColumn(match);
 
 		// match
 		Selection selection = this.uiService.newSelection();
@@ -524,14 +525,15 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 				this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("pair.match")), null);
 		entityList.addColumn(matchCol);
 
-		PropertyColumn matchLabel = this.uiService.newPropertyColumn();
-		matchLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.matchLabel"));
-		entityList.addColumn(matchLabel);
+		// choice display
+		PropertyColumn choiceLabel = this.uiService.newPropertyColumn();
+		choiceLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choiceLabel"));
+		entityList.addColumn(choiceLabel);
 
-		PropertyColumn match = this.uiService.newPropertyColumn();
-		match.setTitle("match");
-		match.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.match"));
-		entityList.addColumn(match);
+		PropertyColumn choice = this.uiService.newPropertyColumn();
+		choice.setTitle("choice");
+		choice.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
+		entityList.addColumn(choice);
 
 		Section matchSection = this.uiService.newSection();
 		matchSection.add(entityList);
@@ -676,14 +678,15 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.pairsForDelivery")
 				.setIndexReference("id"), "pair");
 
-		PropertyColumn choiceLabel = this.uiService.newPropertyColumn();
-		choiceLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choiceLabel"));
-		entityList.addColumn(choiceLabel);
+		// match display
+		PropertyColumn matchLabel = this.uiService.newPropertyColumn();
+		matchLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.matchLabel"));
+		entityList.addColumn(matchLabel);
 
-		PropertyColumn choice = this.uiService.newPropertyColumn();
-		choice.setTitle("choice");
-		choice.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
-		entityList.addColumn(choice);
+		PropertyColumn match = this.uiService.newPropertyColumn();
+		match.setTitle("match");
+		match.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.match"));
+		entityList.addColumn(match);
 
 		// correct / incorrect
 		Text correct = this.uiService.newText();
@@ -740,14 +743,15 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 				this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("pair.match")), null);
 		entityList.addColumn(matchCol);
 
-		PropertyColumn matchLabel = this.uiService.newPropertyColumn();
-		matchLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.matchLabel"));
-		entityList.addColumn(matchLabel);
+		// choice display
+		PropertyColumn choiceLabel = this.uiService.newPropertyColumn();
+		choiceLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choiceLabel"));
+		entityList.addColumn(choiceLabel);
 
-		PropertyColumn match = this.uiService.newPropertyColumn();
-		match.setTitle("match");
-		match.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.match"));
-		entityList.addColumn(match);
+		PropertyColumn choice = this.uiService.newPropertyColumn();
+		choice.setTitle("choice");
+		choice.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
+		entityList.addColumn(choice);
 
 		Section matchSection = this.uiService.newSection();
 		matchSection.add(entityList);
@@ -812,14 +816,15 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.pairsForDelivery")
 				.setIndexReference("id"), "pair");
 
-		PropertyColumn choiceLabel = this.uiService.newPropertyColumn();
-		choiceLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choiceLabel"));
-		entityList.addColumn(choiceLabel);
+		// match display
+		PropertyColumn matchLabel = this.uiService.newPropertyColumn();
+		matchLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.matchLabel"));
+		entityList.addColumn(matchLabel);
 
-		PropertyColumn choice = this.uiService.newPropertyColumn();
-		choice.setTitle("choice");
-		choice.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
-		entityList.addColumn(choice);
+		PropertyColumn match = this.uiService.newPropertyColumn();
+		match.setTitle("match");
+		match.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.match"));
+		entityList.addColumn(match);
 
 		// correct / incorrect
 		Text correct = this.uiService.newText();
@@ -860,14 +865,15 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 				this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("pair.match")), null);
 		entityList.addColumn(matchCol);
 
-		PropertyColumn matchLabel = this.uiService.newPropertyColumn();
-		matchLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.matchLabel"));
-		entityList.addColumn(matchLabel);
+		// choice display
+		PropertyColumn choiceLabel = this.uiService.newPropertyColumn();
+		choiceLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choiceLabel"));
+		entityList.addColumn(choiceLabel);
 
-		PropertyColumn match = this.uiService.newPropertyColumn();
-		match.setTitle("match");
-		match.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.match"));
-		entityList.addColumn(match);
+		PropertyColumn choice = this.uiService.newPropertyColumn();
+		choice.setTitle("choice");
+		choice.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
+		entityList.addColumn(choice);
 
 		Section matchSection = this.uiService.newSection();
 		matchSection.add(entityList);
@@ -905,14 +911,15 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.pairsForDelivery")
 				.setIndexReference("id"), "pair");
 
-		PropertyColumn choiceLabel = this.uiService.newPropertyColumn();
-		choiceLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choiceLabel"));
-		entityList.addColumn(choiceLabel);
+		// match display
+		PropertyColumn matchLabel = this.uiService.newPropertyColumn();
+		matchLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.matchLabel"));
+		entityList.addColumn(matchLabel);
 
-		PropertyColumn choice = this.uiService.newPropertyColumn();
-		choice.setTitle("choice");
-		choice.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
-		entityList.addColumn(choice);
+		PropertyColumn match = this.uiService.newPropertyColumn();
+		match.setTitle("match");
+		match.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.match"));
+		entityList.addColumn(match);
 
 		// match
 		Selection selection = this.uiService.newSelection();
@@ -928,14 +935,15 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 				this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("pair.match")), null);
 		entityList.addColumn(matchCol);
 
-		PropertyColumn matchLabel = this.uiService.newPropertyColumn();
-		matchLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.matchLabel"));
-		entityList.addColumn(matchLabel);
+		// choice display
+		PropertyColumn choiceLabel = this.uiService.newPropertyColumn();
+		choiceLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choiceLabel"));
+		entityList.addColumn(choiceLabel);
 
-		PropertyColumn match = this.uiService.newPropertyColumn();
-		match.setTitle("match");
-		match.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.match"));
-		entityList.addColumn(match);
+		PropertyColumn choice = this.uiService.newPropertyColumn();
+		choice.setTitle("choice");
+		choice.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
+		entityList.addColumn(choice);
 
 		Section matchSection = this.uiService.newSection();
 		matchSection.add(entityList);
