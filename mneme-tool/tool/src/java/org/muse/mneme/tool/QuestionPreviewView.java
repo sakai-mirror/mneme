@@ -32,6 +32,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -58,22 +59,34 @@ public class QuestionPreviewView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need one parameter (qid)
-		if (params.length != 3)
+		// we need a qid, then any number of parameters to form the return destination
+		if (params.length < 3)
 		{
 			throw new IllegalArgumentException();
 		}
 
+		String destination = null;
+		if (params.length > 3)
+		{
+			destination = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
+		}
+		
+		// if not specified, go to the main pools page
+		else
+		{
+			destination = "/pools";
+		}
+		context.put("return", destination);
+
 		String questionId = params[2];
-
 		Question question = questionService.getQuestion(questionId);
-
 		if (question == null)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
+		context.put("question", question);
 
 		// security check
 		if (!questionService.allowEditQuestion(question))
@@ -82,8 +95,6 @@ public class QuestionPreviewView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
-
-		context.put("question", question);
 
 		// render
 		uiService.render(ui, context);
@@ -103,12 +114,6 @@ public class QuestionPreviewView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need two parameters (assessments sort / aid)
-		if (params.length != 4)
-		{
-			throw new IllegalArgumentException();
-		}
-
 		// read form
 		String destination = uiService.decode(req, context);
 

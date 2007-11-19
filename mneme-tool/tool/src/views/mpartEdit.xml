@@ -57,7 +57,7 @@
 				<textEdit title="part-title" rows="1" cols="40">
 					<model ref="part.title" />
 				</textEdit>
-				<htmlEdit title="part-instructions" model="part.presentation.text" rows="5" cols="40"/>
+				<htmlEdit title="part-instructions" model="part.presentation.text" rows="5" cols="40" />
 				<attachmentsEdit title="attachments" model="part.presentation.attachments" />
 			</container>
 		</section>
@@ -76,7 +76,7 @@
 							<value>
 								<model type="text" ref="question.id" />
 							</value>
-							<model ref="questionids.values" />
+							<model ref="questionIds.values" />
 							<entityActions>
 								<!--  inform if live -->
 								<instructions>
@@ -87,8 +87,12 @@
 										<decision model="assessment.isLive" />
 									</included>
 								</instructions>
-								<navigation destination="/select_add_mpart_question" title="select-questions" style="LINK"
-									description="select-questions-description" submit="TRUE">
+								<navigation title="select-questions" style="LINK" description="select-questions-description" submit="TRUE">
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}">
+										<model ref="assessmentSort" />
+										<model ref="assessment.id" />
+										<model ref="part.id" />
+									</destination>
 									<icon icon="/icons/add_manual.png" style="LEFT" />
 									<included>
 										<decision reversed="TRUE" model="assessment.isLive" />
@@ -125,8 +129,11 @@
 							<navigations>
 								<navigation style="LINK" submit="TRUE">
 									<icon icon="/icons/preview.png" style="LEFT" />
-									<destination template="/question_preview/{0}">
+									<destination template="/question_preview/{0}/part_edit/{1}/{2}/{3}">
 										<model ref="question.id" />
+										<model ref="assessmentSort" />
+										<model ref="assessment.id" />
+										<model ref="part.id" />
 									</destination>
 								</navigation>
 							</navigations>
@@ -180,7 +187,7 @@
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/assessment_edit/{0}/{1}">
-						<model ref="testsortcode" />
+						<model ref="assessmentSort" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>

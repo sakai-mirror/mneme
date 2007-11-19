@@ -26,8 +26,8 @@
 
 <beans>
 
-	<bean id="org.muse.mneme.tool.TestEditView"
-			class="org.muse.mneme.tool.TestEditView"
+	<bean id="org.muse.mneme.tool.AssessmentEditView"
+			class="org.muse.mneme.tool.AssessmentEditView"
 			init-method="init"
 			destroy-method="destroy"
 			singleton="true"
@@ -38,9 +38,9 @@
  
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>assessment_edit</value></property>
- 		<property name="bundle"><value>testEdit</value></property>
+ 		<property name="bundle"><value>assessmentEdit</value></property>
 		<property name="shared"><value>mneme</value></property>
-		<property name="components"><value>testEdit.xml</value></property>
+		<property name="components"><value>assessmentEdit.xml</value></property>
 	</bean>
 
 	<bean id="FormatPartSummary"

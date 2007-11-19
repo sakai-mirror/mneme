@@ -23,7 +23,6 @@ package org.muse.mneme.tool;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,13 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Values;
-import org.muse.ambrosia.api.PopulatingSet;
-import org.muse.ambrosia.api.PopulatingSet.Factory;
-import org.muse.ambrosia.api.PopulatingSet.Id;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
@@ -48,7 +42,7 @@ import org.sakaiproject.util.Web;
 public class GradesView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(TestsView.class);
+	private static Log M_log = LogFactory.getLog(GradesView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;

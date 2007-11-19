@@ -83,7 +83,7 @@
 					</entityActions>
 					<pager paging="paging">
 						<destination template="/part_edit/{0}/{1}/{2}/{3}{4}/{5}/{6}">
-							<model ref="testsortcode" />
+							<model ref="assessmentSort" />
 							<model ref="assessment.id" />
 							<model ref="part.id" />
 							<model ref="sort_column" />
@@ -143,7 +143,7 @@
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
 									<destination template="/part_edit/{0}/{1}/{2}/0A/{3}/{4}">
-										<model ref="testsortcode" />
+										<model ref="assessmentSort" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
@@ -153,7 +153,7 @@
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
 									<destination template="/part_edit/{0}/{1}/{2}/0D/{3}/{4}">
-										<model ref="testsortcode" />
+										<model ref="assessmentSort" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
@@ -193,7 +193,7 @@
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
 									<destination template="/part_edit/{0}/{1}/{2}/1A/{3}/{4}">
-										<model ref="testsortcode" />
+										<model ref="assessmentSort" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
@@ -203,7 +203,7 @@
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
 									<destination template="/part_edit/{0}/{1}/{2}/1D/{3}/{4}">
-										<model ref="testsortcode" />
+										<model ref="assessmentSort" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
@@ -230,7 +230,7 @@
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/assessment_edit/{0}/{1}">
-						<model ref="testsortcode" />
+						<model ref="assessmentSort" />
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>

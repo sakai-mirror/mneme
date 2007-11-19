@@ -37,30 +37,29 @@
 	<subHeader>
 		<container>
 			<text>
-			<message selector="select-add-to">
-				<model ref="partTitle" missing="no-title" />
-				<model ref="assessmentTitle" missing="no-title" />
-			</message>
-		</text>
+				<message selector="select-add-to">
+					<model ref="part.title" missing="no-title" />
+					<model ref="assessment.title" missing="no-title" />
+				</message>
+			</text>
 		</container>
 	</subHeader>
-	<container>	
+	<container>
 		<section>
-			<container>			
+			<container>
 				<!-- the list of the selected questions -->
 				<entityList style="FLAT">
 					<emptyTitle>
 						<message selector="no-questions" />
 					</emptyTitle>
 					<pager paging="paging">
-						<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}{4}/{5}/{6}">
-							<model ref="testsortcode" />
-							<model ref="assessmentId" />
-							<model ref="partId" />
+						<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}{4}/{5}">
+							<model ref="assessmentSort" />
+							<model ref="assessment.id" />
+							<model ref="part.id" />
 							<model ref="sort_column" />
 							<model ref="sort_direction" />
 							<model type="paging" ref="paging" />
-							<model ref="view" />
 						</destination>
 					</pager>
 					<iterator name="question" model="questions" />
@@ -71,21 +70,27 @@
 							</value>
 							<model ref="questionids.values" />
 							<entityIncluded>
-								<decision reversed = "TRUE" model="question.id" delegate="QuestionReferencedDecision" tool="sakai.mneme" />
+								<decision reversed="TRUE" model="question.id" delegate="QuestionReferencedDecision" tool="sakai.mneme" />
 								<message>
 									<model type="icon" icon="/icons/checkon.gif" />
 								</message>
-							</entityIncluded>							
+							</entityIncluded>
 						</selectionColumn>
 						<column>
 							<title>
 								<message selector="question-preview" />
 							</title>
 							<navigations>
-								<navigation style="LINK">
+								<navigation style="LINK" submit="TRUE">
 									<icon icon="/icons/preview.png" style="LEFT" />
-									<destination template="/question_preview/{0}">
+									<destination template="/question_preview/{0}/select_add_mpart_question/{1}/{2}/{3}/{4}{5}/{6}">
 										<model ref="question.id" />
+										<model ref="assessmentSort" />
+										<model ref="assessment.id" />
+										<model ref="part.id" />
+										<model ref="sort_column" />
+										<model ref="sort_direction" />
+										<model type="paging" ref="paging" />
 									</destination>
 								</navigation>
 							</navigations>
@@ -110,22 +115,20 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/1A/{3}/{4}">
-										<model ref="testsortcode" />
-										<model ref="assessmentId" />
-										<model ref="partId" />
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/1A/{3}">
+										<model ref="assessmentSort" />
+										<model ref="assessment.id" />
+										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
-										<model ref="view" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/1D/{3}/{4}">
-										<model ref="testsortcode" />
-										<model ref="assessmentId" />
-										<model ref="partId" />
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/1D/{3}">
+										<model ref="assessmentSort" />
+										<model ref="assessment.id" />
+										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
-										<model ref="view" />
 									</destination>
 								</desc>
 							</sort>
@@ -144,22 +147,20 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/0A/{3}/{4}">
-										<model ref="testsortcode" />
-										<model ref="assessmentId" />
-										<model ref="partId" />
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/0A/{3}">
+										<model ref="assessmentSort" />
+										<model ref="assessment.id" />
+										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
-										<model ref="view" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/0D/{3}/{4}">
-										<model ref="testsortcode" />
-										<model ref="assessmentId" />
-										<model ref="partId" />
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/0D/{3}">
+										<model ref="assessmentSort" />
+										<model ref="assessment.id" />
+										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
-										<model ref="view" />
 									</destination>
 								</desc>
 							</sort>
@@ -168,7 +169,7 @@
 							<title>
 								<message selector="question-difficulty" />
 							</title>
-							<model ref="question.pool.difficulty" />							
+							<model ref="question.pool.difficulty" />
 						</modelColumn>
 						<modelColumn>
 							<title>
@@ -184,22 +185,20 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/2A/{3}/{4}">
-										<model ref="testsortcode" />
-										<model ref="assessmentId" />
-										<model ref="partId" />
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/2A/{3}">
+										<model ref="assessmentSort" />
+										<model ref="assessment.id" />
+										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
-										<model ref="view" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/select_add_mpart_question/{0}/{1}/{2}/2D/{3}/{4}">
-										<model ref="testsortcode" />
-										<model ref="assessmentId" />
-										<model ref="partId" />
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/2D/{3}">
+										<model ref="assessmentSort" />
+										<model ref="assessment.id" />
+										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
-										<model ref="view" />
 									</destination>
 								</desc>
 							</sort>
@@ -216,11 +215,11 @@
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/part_edit/{0}/{1}/{2}">
-						<model ref="testsortcode" />
-						<model ref="assessmentId" />
-						<model ref="partId" />
+						<model ref="assessmentSort" />
+						<model ref="assessment.id" />
+						<model ref="part.id" />
 					</destination>
-				</navigation>				
+				</navigation>
 			</container>
 		</navigationBar>
 

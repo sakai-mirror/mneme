@@ -37,15 +37,16 @@ import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
+import org.muse.mneme.api.Part;
 import org.sakaiproject.util.Web;
 
 /**
  * The /assessment_edit view for the mneme tool.
  */
-public class TestEditView extends ControllerImpl
+public class AssessmentEditView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(TestEditView.class);
+	private static Log M_log = LogFactory.getLog(AssessmentEditView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
@@ -70,7 +71,7 @@ public class TestEditView extends ControllerImpl
 		}
 		String sort = params[2];
 		String assessmentId = params[3];
-		
+
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
@@ -147,7 +148,6 @@ public class TestEditView extends ControllerImpl
 		// read the form
 		String destination = uiService.decode(req, context);
 
-		// commit the save
 		try
 		{
 			if (destination.equals("DRAW"))
@@ -170,31 +170,39 @@ public class TestEditView extends ControllerImpl
 
 			else if (destination.equals("DELETE"))
 			{
-				// save
+				// // destination for confirm delete
+				// StringBuilder path = new StringBuilder("/part_delete/" + sort + "/" + assessment.getId() + "/");
+				// String separator = "+";
+				//
+				// String[] deletePartIds = values.getValues();
+				// if (deletePartIds != null && deletePartIds.length != 0)
+				// {
+				// path.append(deletePartIds[0]);
+				// for (int i = 1; i < deletePartIds.length; i++)
+				// {
+				// path.append(separator);
+				// path.append(deletePartIds[i]);
+				// }
+				// }
+				for (String id : values.getValues())
+				{
+					Part part = assessment.getParts().getPart(id);
+					if (part == null)
+					{
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+						return;
+					}
+
+					// remove part
+					assessment.getParts().removePart(part);
+				}
 				this.assessmentService.saveAssessment(assessment);
 
-				// destination for confirm delete
-				StringBuilder path = new StringBuilder("/part_delete/" + sort + "/" + assessment.getId() + "/");
-				String separator = "+";
-
-				String[] deletePartIds = values.getValues();
-				if (deletePartIds != null && deletePartIds.length != 0)
-				{
-					path.append(deletePartIds[0]);
-					for (int i = 1; i < deletePartIds.length; i++)
-					{
-						path.append(separator);
-						path.append(deletePartIds[i]);
-					}
-				}
-
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
-				return;
+				destination = context.getDestination();
 			}
-
 			else
 			{
-				// save assessment properties
 				this.assessmentService.saveAssessment(assessment);
 			}
 		}

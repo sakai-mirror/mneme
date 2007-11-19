@@ -26,20 +26,21 @@
 
 <beans>
 
-	<bean id="org.muse.mneme.tool.TestSettingsView"
-			class="org.muse.mneme.tool.TestSettingsView"
+	<bean id="org.muse.mneme.tool.AssessmentsView"
+			class="org.muse.mneme.tool.AssessmentsView"
 			init-method="init"
 			destroy-method="destroy"
 			singleton="true">
 
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
  		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+ 		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="path"><value>assessment_settings</value></property>
- 		<property name="bundle"><value>testSettings</value></property>
+ 		<property name="path"><value>assessments</value></property>
+ 		<property name="bundle"><value>assessments</value></property>
 		<property name="shared"><value>mneme</value></property>
-		<property name="components"><value>testSettings.xml</value></property>
+		<property name="components"><value>assessments.xml</value></property>
 	</bean>
 
 </beans>

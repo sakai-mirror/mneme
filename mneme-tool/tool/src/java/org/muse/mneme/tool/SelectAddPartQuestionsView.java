@@ -23,7 +23,6 @@ package org.muse.mneme.tool;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,19 +33,14 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
-import org.muse.mneme.api.MnemeService;
-import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.AssessmentService;
-import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
-import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
-import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -57,17 +51,11 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(SelectAddPartQuestionsView.class);
 
-	/** Dependency: mneme service. */
-	protected MnemeService mnemeService = null;
-
 	/** Dependency: Pool service. */
 	protected AssessmentService assessmentService = null;
 
 	/** Dependency: Question service. */
 	protected QuestionService questionService = null;
-
-	/** Dependency: SessionManager */
-	protected SessionManager sessionManager = null;
 
 	/** Dependency: ToolManager */
 	protected ToolManager toolManager = null;
@@ -86,12 +74,14 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page
-		if (params.length < 5 || params.length > 7)	throw new IllegalArgumentException();
-		
-		context.put("testsortcode", params[2]);
-		context.put("assessmentId", params[3]);
-		context.put("partId", params[4]);
+		if (params.length < 5 || params.length > 7) throw new IllegalArgumentException();
 
+		// assessment view sort
+		String assessmentSort = params[2];
+		context.put("assessmentSort", assessmentSort);
+
+		// assessment
+		String assessmentId = params[3];
 		Assessment assessment = assessmentService.getAssessment(params[3]);
 		if (assessment == null)
 		{
@@ -101,6 +91,8 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		}
 		context.put("assessment", assessment);
 
+		// part
+		String partId = params[4];
 		ManualPart part = (ManualPart) assessment.getParts().getPart(params[4]);
 		if (part == null)
 		{
@@ -108,60 +100,146 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
-		context.put("partTitle", part.getTitle());
-		
-		String pagingParameter = null;
-		if (params.length >= 7)
+		context.put("part", part);
+
+		// sort
+		String sortCode = "0A";
+		if (params.length > 5) sortCode = params[5];
+		if ((sortCode == null) || (sortCode.length() != 2))
 		{
-			pagingParameter = params[6];
+			throw new IllegalArgumentException();
 		}
-		Paging paging = uiService.newPaging();
+		context.put("sort_column", sortCode.charAt(0));
+		context.put("sort_direction", sortCode.charAt(1));
+		QuestionService.FindQuestionsSort sort = findQuestionSortCode(sortCode);
 
 		// paging
-		if (pagingParameter == null)
-		{
-			pagingParameter = "1-30";
-		}
-
 		Integer maxQuestions = this.questionService.countQuestions(this.toolManager.getCurrentPlacement().getContext(), null);
-
+		String pagingParameter = "1-30";
+		if (params.length > 6) pagingParameter = params[6];
+		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxQuestions);
 		paging.setCurrentAndSize(pagingParameter);
 		context.put("paging", paging);
-		context.put("pagingParameter", pagingParameter);
 
-		// default sort: title ascending
-		QuestionService.FindQuestionsSort sort = QuestionService.FindQuestionsSort.type_a;
-		String sortCode = null;
-		if (params.length >= 6)
-		{
-			sortCode = params[5];
-			if (sortCode != null && sortCode.length() == 2)
-			{
-				context.put("sort_column", sortCode.charAt(0));
-				context.put("sort_direction", sortCode.charAt(1));
-				sort = findQuestionSortCode(sortCode);
-			}
-		}
-		else
-		{
-			context.put("sort_column", '0');
-			context.put("sort_direction", 'A');
-		}
 		// get questions
-		List<Question> questions = questionService.findQuestions(this.toolManager.getCurrentPlacement().getContext(), sort, null, paging.getCurrent(),
-				paging.getSize());
-
-		context.put("questions", questions);		
-		
-		// for the checkboxes
-		Values values = this.uiService.newValues();
-		context.put("questionids", values);
+		List<Question> questions = questionService.findQuestions(this.toolManager.getCurrentPlacement().getContext(), sort, null,
+				paging.getCurrent(), paging.getSize());
+		context.put("questions", questions);
 
 		// render
 		uiService.render(ui, context);
 	}
 
+	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		super.init();
+		M_log.info("init()");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
+	{
+		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page
+		if (params.length < 5 || params.length > 7) throw new IllegalArgumentException();
+
+		String assessmentId = params[3];
+		Assessment assessment = assessmentService.getAssessment(assessmentId);
+		if (assessment == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		String partId = params[4];
+		ManualPart part = (ManualPart) assessment.getParts().getPart(partId);
+		if (part == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		Values values = this.uiService.newValues();
+		context.put("questionids", values);
+
+		// read form
+		String destination = this.uiService.decode(req, context);
+
+		for (String id : values.getValues())
+		{
+			Question question = this.questionService.getQuestion(id);
+			if (question != null)
+			{
+				part.addQuestion(question);
+			}
+		}
+
+		// commit the save
+		try
+		{
+			this.assessmentService.saveAssessment(assessment);
+		}
+		catch (AssessmentPermissionException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+		catch (AssessmentPolicyException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+			return;
+		}
+
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+	}
+
+	/**
+	 * Set the PoolService.
+	 * 
+	 * @param service
+	 *        The PoolService.
+	 */
+	public void setAssessmentService(AssessmentService service)
+	{
+		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the QuestionService.
+	 * 
+	 * @param service
+	 *        The QuestionService.
+	 */
+	public void setQuestionService(QuestionService service)
+	{
+		this.questionService = service;
+	}
+
+	/**
+	 * @param toolManager
+	 *        the ToolManager.
+	 */
+	public void setToolManager(ToolManager toolManager)
+	{
+		this.toolManager = toolManager;
+	}
+
+	/**
+	 * Figure out the sort from the code.
+	 * 
+	 * @param sortCode
+	 *        The sort code.
+	 * @return The sort.
+	 */
 	protected QuestionService.FindQuestionsSort findQuestionSortCode(String sortCode)
 	{
 		QuestionService.FindQuestionsSort sort = QuestionService.FindQuestionsSort.type_a;
@@ -194,130 +272,5 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		}
 
 		return sort;
-	}
-
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		super.init();
-		M_log.info("init()");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
-	{
-		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page
-		if (params.length < 5 || params.length > 7)	throw new IllegalArgumentException();
-		
-		Values values = this.uiService.newValues();
-		context.put("questionids", values);
-
-		// read form
-		String destination = this.uiService.decode(req, context);
-
-		String assessmentId = params[3];
-		Assessment assessment = assessmentService.getAssessment(assessmentId);
-		if (assessment == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-		context.put("testsortcode", params[2]);
-
-		String partId = params[4];
-		ManualPart part = (ManualPart) assessment.getParts().getPart(partId);
-
-		if (part == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
-		String[] selectedQuesIds = values.getValues();
-		if (selectedQuesIds != null && selectedQuesIds.length != 0)
-		{
-			for (String selectedQuesId : selectedQuesIds)
-			{
-				Question ques = this.questionService.getQuestion(selectedQuesId);
-				if (ques != null) part.addQuestion(ques);
-			}
-		}
-
-		// commit the save
-		try
-		{
-			this.assessmentService.saveAssessment(assessment);
-		}
-		catch (AssessmentPermissionException e)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
-		catch (AssessmentPolicyException e)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
-			return;
-		}
-
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-	}
-
-	/**
-	 * Set the MnemeService.
-	 * 
-	 * @param service
-	 *        the MnemeService.
-	 */
-	public void setMnemeService(MnemeService sevice)
-	{
-		this.mnemeService = sevice;
-	}
-
-	/**
-	 * Set the PoolService.
-	 * 
-	 * @param service
-	 *        The PoolService.
-	 */
-	public void setAssessmentService(AssessmentService service)
-	{
-		this.assessmentService = service;
-	}
-
-	/**
-	 * Set the QuestionService.
-	 * 
-	 * @param service
-	 *        The QuestionService.
-	 */
-	public void setQuestionService(QuestionService service)
-	{
-		this.questionService = service;
-	}
-
-	/**
-	 * @param sessionManager
-	 *        the SessionManager.
-	 */
-	public void setSessionManager(SessionManager sessionManager)
-	{
-		this.sessionManager = sessionManager;
-	}
-
-	/**
-	 * @param toolManager
-	 *        the ToolManager.
-	 */
-	public void setToolManager(ToolManager toolManager)
-	{
-		this.toolManager = toolManager;
 	}
 }

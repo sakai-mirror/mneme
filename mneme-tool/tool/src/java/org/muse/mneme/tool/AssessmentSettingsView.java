@@ -39,10 +39,10 @@ import org.sakaiproject.util.Web;
 /**
  * The /assessment_settings view for the mneme tool.
  */
-public class TestSettingsView extends ControllerImpl
+public class AssessmentSettingsView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(TestSettingsView.class);
+	private static Log M_log = LogFactory.getLog(AssessmentSettingsView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;

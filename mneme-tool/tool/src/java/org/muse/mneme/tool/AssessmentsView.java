@@ -47,10 +47,10 @@ import org.sakaiproject.util.Web;
 /**
  * The /tests view for the mneme tool.
  */
-public class TestsView extends ControllerImpl
+public class AssessmentsView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(TestsView.class);
+	private static Log M_log = LogFactory.getLog(AssessmentsView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
@@ -287,30 +287,86 @@ public class TestsView extends ControllerImpl
 
 		else if (destination.equals("UNPUBLISH"))
 		{
-			// build up list of ids separated by "+" for the unpublish view destination
-			StringBuilder buf = new StringBuilder();
+			// // build up list of ids separated by "+" for the unpublish view destination
+			// StringBuilder buf = new StringBuilder();
+			// for (String id : values.getValues())
+			// {
+			// buf.append(id);
+			// buf.append("+");
+			// }
+			// if (buf.length() > 1) buf.setLength(buf.length() - 1);
+			//
+			// destination = "/assessment_unpublish/" + sort + "/" + buf.toString();
+
 			for (String id : values.getValues())
 			{
-				buf.append(id);
-				buf.append("+");
+				Assessment assessment = this.assessmentService.getAssessment(id);
+				if (assessment != null)
+				{
+					try
+					{
+						assessment.setPublished(Boolean.FALSE);
+						this.assessmentService.saveAssessment(assessment);
+					}
+					catch (AssessmentPermissionException e)
+					{
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+						return;
+					}
+					catch (AssessmentPolicyException e)
+					{
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+						return;
+					}
+				}
 			}
-			if (buf.length() > 1) buf.setLength(buf.length() - 1);
 
-			destination = "/assessment_unpublish/" + sort + "/" + buf.toString();
+			destination = context.getDestination();
 		}
 
 		else if (destination.equals("DELETE"))
 		{
-			// build up list of ids separated by "+" for the delete view destination
-			StringBuilder buf = new StringBuilder();
+			// // build up list of ids separated by "+" for the delete view destination
+			// StringBuilder buf = new StringBuilder();
+			// for (String id : values.getValues())
+			// {
+			// buf.append(id);
+			// buf.append("+");
+			// }
+			// if (buf.length() > 1) buf.setLength(buf.length() - 1);
+			//
+			// destination = "/assessments_delete/" + sort + "/" + buf.toString();
+
 			for (String id : values.getValues())
 			{
-				buf.append(id);
-				buf.append("+");
+				Assessment assessment = this.assessmentService.getAssessment(id);
+				if (assessment != null)
+				{
+					try
+					{
+						if (this.assessmentService.allowRemoveAssessment(assessment))
+						{
+							this.assessmentService.removeAssessment(assessment);
+						}
+					}
+					catch (AssessmentPermissionException e)
+					{
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+						return;
+					}
+					catch (AssessmentPolicyException e)
+					{
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+						return;
+					}
+				}
 			}
-			if (buf.length() > 1) buf.setLength(buf.length() - 1);
 
-			destination = "/assessments_delete/" + sort + "/" + buf.toString();
+			destination = context.getDestination();
 		}
 
 		else if (destination.startsWith("DUPLICATE:"))
