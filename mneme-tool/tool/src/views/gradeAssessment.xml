@@ -284,7 +284,7 @@
 						</navigation>
 						<navigation style="LINK" submit="TRUE">
 							<title>
-								<message selector="close" />
+								<message selector="view-best" />
 							</title>
 							<destination template="/grade_assessment/{0}/{1}/{2}{3}/{4}/official">
 								<model ref="sort_grades" />
@@ -295,7 +295,7 @@
 							</destination>
 							<included>
 								<compareDecision model="submission.userId" compare="view" />
-								<compareDecision model="submission.best.id" compare="submission.id" />
+								<!-- <compareDecision model="submission.best.id" compare="submission.id" /> -->
 							</included>
 						</navigation>
 					</navigations>

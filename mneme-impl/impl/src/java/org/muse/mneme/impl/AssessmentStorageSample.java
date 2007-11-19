@@ -296,6 +296,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 				}
 
 				// kick in the secondary if needed
+				AssessmentService.AssessmentsSort third = null;
 				if ((rv == 0) && (secondary != null))
 				{
 					switch (secondary)
@@ -306,8 +307,23 @@ public class AssessmentStorageSample implements AssessmentStorage
 							String s0 = StringUtil.trimToZero(((Assessment) arg0).getTitle());
 							String s1 = StringUtil.trimToZero(((Assessment) arg1).getTitle());
 							rv = s0.compareToIgnoreCase(s1);
+							third = AssessmentService.AssessmentsSort.cdate_a;
 							break;
 						}
+						case cdate_a:
+						case cdate_d:
+						{
+							rv = ((Assessment) arg0).getCreatedBy().getDate().compareTo(((Assessment) arg1).getCreatedBy().getDate());
+							break;
+						}
+					}
+				}
+
+				// third sort
+				if ((rv == 0) && (third != null))
+				{
+					switch (third)
+					{
 						case cdate_a:
 						case cdate_d:
 						{

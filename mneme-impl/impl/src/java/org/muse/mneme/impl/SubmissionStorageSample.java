@@ -357,6 +357,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 				}
 
 				// secondary sort
+				FindAssessmentSubmissionsSort third = null;
 				if ((rv == 0) && (secondary != null))
 				{
 					switch (secondary)
@@ -385,9 +386,24 @@ public class SubmissionStorageSample implements SubmissionStorage
 							}
 
 							rv = id0.compareToIgnoreCase(id1);
+							third = FindAssessmentSubmissionsSort.sdate_a;
 							break;
 						}
 
+						case sdate_a:
+						case sdate_d:
+						{
+							rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
+							break;
+						}
+					}
+				}
+
+				// third sort
+				if ((rv == 0) && (third != null))
+				{
+					switch (third)
+					{
 						case sdate_a:
 						case sdate_d:
 						{
