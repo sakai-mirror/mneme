@@ -271,15 +271,17 @@ public class SubmissionStorageSample implements SubmissionStorage
 			}
 		}
 
-		// sort
+		// sort - secondary sort of user name, or if primary is title, on submit date
 		Collections.sort(rv, new Comparator()
 		{
 			public int compare(Object arg0, Object arg1)
 			{
 				int rv = 0;
+				FindAssessmentSubmissionsSort secondary = null;
 				switch (sort)
 				{
 					case userName_a:
+					case userName_d:
 					case status_a:
 					case status_d:
 					{
@@ -304,69 +306,10 @@ public class SubmissionStorageSample implements SubmissionStorage
 						}
 
 						rv = id0.compareToIgnoreCase(id1);
-						break;
-					}
-					case userName_d:
-					{
-						String id0 = ((Submission) arg0).getUserId();
-						try
-						{
-							User u = userDirectoryService.getUser(id0);
-							id0 = u.getSortName();
-						}
-						catch (UserNotDefinedException e)
-						{
-						}
-
-						String id1 = ((Submission) arg1).getUserId();
-						try
-						{
-							User u = userDirectoryService.getUser(id1);
-							id1 = u.getSortName();
-						}
-						catch (UserNotDefinedException e)
-						{
-						}
-
-						rv = -1 * id0.compareToIgnoreCase(id1);
+						secondary = FindAssessmentSubmissionsSort.sdate_a;
 						break;
 					}
 					case final_a:
-					{
-						Float final0 = null;
-						Float final1 = null;
-						if (question != null)
-						{
-							Answer a0 = ((Submission) arg0).getAnswer(question);
-							Answer a1 = ((Submission) arg1).getAnswer(question);
-							final0 = ((a0 == null) ? Float.valueOf(0f) : a0.getTotalScore());
-							final1 = ((a1 == null) ? Float.valueOf(0f) : a1.getTotalScore());
-						}
-						else
-						{
-							final0 = ((Submission) arg0).getTotalScore();
-							final1 = ((Submission) arg1).getTotalScore();
-						}
-
-						// null sorts small
-						if ((final0 == null) && (final1 == null))
-						{
-							rv = 0;
-							break;
-						}
-						if (final0 == null)
-						{
-							rv = -1;
-							break;
-						}
-						if (final1 == null)
-						{
-							rv = 1;
-							break;
-						}
-						rv = final0.compareTo(final1);
-						break;
-					}
 					case final_d:
 					{
 						Float final0 = null;
@@ -388,26 +331,87 @@ public class SubmissionStorageSample implements SubmissionStorage
 						if ((final0 == null) && (final1 == null))
 						{
 							rv = 0;
-							break;
 						}
-						if (final0 == null)
-						{
-							rv = 1;
-							break;
-						}
-						if (final1 == null)
+						else if (final0 == null)
 						{
 							rv = -1;
+						}
+						else if (final1 == null)
+						{
+							rv = 1;
+						}
+						else
+						{
+							rv = final0.compareTo(final1);
+						}
+						secondary = FindAssessmentSubmissionsSort.userName_a;
+						break;
+					}
+					case sdate_a:
+					case sdate_d:
+					{
+						rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
+						secondary = null;
+						break;
+					}
+				}
+
+				// secondary sort
+				if ((rv == 0) && (secondary != null))
+				{
+					switch (secondary)
+					{
+						case userName_a:
+						case userName_d:
+						{
+							String id0 = ((Submission) arg0).getUserId();
+							try
+							{
+								User u = userDirectoryService.getUser(id0);
+								id0 = u.getSortName();
+							}
+							catch (UserNotDefinedException e)
+							{
+							}
+
+							String id1 = ((Submission) arg1).getUserId();
+							try
+							{
+								User u = userDirectoryService.getUser(id1);
+								id1 = u.getSortName();
+							}
+							catch (UserNotDefinedException e)
+							{
+							}
+
+							rv = id0.compareToIgnoreCase(id1);
 							break;
 						}
-						rv = -1 * final0.compareTo(final1);
-						break;
+
+						case sdate_a:
+						case sdate_d:
+						{
+							rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
+							break;
+						}
 					}
 				}
 
 				return rv;
 			}
 		});
+
+		// reverse for descending (except for status)
+		switch (sort)
+		{
+			case final_d:
+			case userName_d:
+			case sdate_d:
+			{
+				Collections.reverse(rv);
+			}
+		}
+
 		return rv;
 	}
 

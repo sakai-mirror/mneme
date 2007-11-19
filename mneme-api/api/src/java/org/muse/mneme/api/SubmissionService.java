@@ -34,7 +34,7 @@ public interface SubmissionService
 	 */
 	enum FindAssessmentSubmissionsSort
 	{
-		final_a, final_d, status_a, status_d, userName_a, userName_d
+		final_a, final_d, sdate_a, sdate_d, status_a, status_d, userName_a, userName_d
 	}
 
 	/**
