@@ -46,6 +46,11 @@ public interface QuestionService
 	Boolean allowEditQuestion(Question question);
 
 	/**
+	 * Clear out any mint objects that are old enough to be considered abandoned.
+	 */
+	void clearStaleMintQuestions();
+
+	/**
 	 * Create a new question that is a copy of each question in the pool.
 	 * 
 	 * @param source

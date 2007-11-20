@@ -60,10 +60,27 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void clearOldMints()
+	public void clearStaleMintPools()
 	{
-		// TODO Auto-generated method stub
+		// give it a day
+		Date stale = new Date();
+		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
 
+		// find them
+		List<String> delete = new ArrayList<String>();
+		for (PoolImpl pool : this.pools.values())
+		{
+			if (pool.getMint() && pool.getCreatedBy().getDate().before(stale))
+			{
+				delete.add(pool.getId());
+			}
+		}
+
+		// remove them
+		for (String id : delete)
+		{
+			this.pools.remove(id);
+		}
 	}
 
 	/**

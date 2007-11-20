@@ -155,6 +155,14 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clearStaleMintAssessments()
+	{
+		this.storage.clearStaleMintAssessments();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Assessment copyAssessment(String context, Assessment assessment) throws AssessmentPermissionException
 	{
 		if (context == null) throw new IllegalArgumentException();

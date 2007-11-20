@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,13 +51,16 @@ import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCompletedException;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.authz.api.FunctionManager;
+import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.db.api.SqlService;
+import org.sakaiproject.thread_local.api.ThreadLocalManager;
+import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.user.api.User;
 
 /**
  * MnemeServiceImpl implements MnemeService
  */
-public class MnemeServiceImpl implements MnemeService
+public class MnemeServiceImpl implements MnemeService, Runnable
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(MnemeServiceImpl.class);
@@ -66,6 +70,9 @@ public class MnemeServiceImpl implements MnemeService
 
 	/** Dependency: AttachmentService */
 	protected AttachmentService attachmentService = null;
+
+	/** The checker thread. */
+	protected Thread checkerThread = null;
 
 	/** Dependency: FunctionManager */
 	protected FunctionManager functionManager = null;
@@ -88,6 +95,15 @@ public class MnemeServiceImpl implements MnemeService
 	/** Dependency: SubmissionService */
 	protected SubmissionService submissionService = null;
 
+	/** Dependency: ThreadLocalManager */
+	protected ThreadLocalManager threadLocalManager = null;
+
+	/** The thread quit flag. */
+	protected boolean threadStop = false;
+
+	/** How long to wait (ms) between checks for timed-out submission in the db. 0 disables. */
+	protected long timeoutCheckMs = 1000L * 60L * 60L * 12L;
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -175,6 +191,30 @@ public class MnemeServiceImpl implements MnemeService
 	public Boolean allowSubmit(Submission submission)
 	{
 		return submissionService.allowSubmit(submission);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void clearStaleMintAssessments()
+	{
+		this.assessmentService.clearStaleMintAssessments();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void clearStaleMintPools()
+	{
+		this.poolService.clearStaleMintPools();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void clearStaleMintQuestions()
+	{
+		this.questionService.clearStaleMintQuestions();
 	}
 
 	/**
@@ -271,6 +311,9 @@ public class MnemeServiceImpl implements MnemeService
 	 */
 	public void destroy()
 	{
+		// stop the checking thread
+		stop();
+
 		M_log.info("destroy()");
 	}
 
@@ -544,7 +587,13 @@ public class MnemeServiceImpl implements MnemeService
 			functionManager.registerFunction(MANAGE_PERMISSION);
 			functionManager.registerFunction(SUBMIT_PERMISSION);
 
-			M_log.info("init()");
+			// start the checking thread
+			if (timeoutCheckMs > 0)
+			{
+				start();
+			}
+
+			M_log.info("init(): timout check seconds: " + timeoutCheckMs / 1000);
 		}
 		catch (Throwable t)
 		{
@@ -630,6 +679,46 @@ public class MnemeServiceImpl implements MnemeService
 	public void removeQuestion(Question question) throws AssessmentPermissionException
 	{
 		questionService.removeQuestion(question);
+	}
+
+	/**
+	 * Run the event checking thread.
+	 */
+	public void run()
+	{
+		// since we might be running while the component manager is still being created and populated,
+		// such as at server startup, wait here for a complete component manager
+		ComponentManager.waitTillConfigured();
+
+		// loop till told to stop
+		while ((!threadStop) && (!Thread.currentThread().isInterrupted()))
+		{
+			try
+			{
+				// ask the various services to clear their stale mints
+				clearStaleMintQuestions();
+				clearStaleMintPools();
+				clearStaleMintAssessments();
+			}
+			catch (Throwable e)
+			{
+				M_log.warn("run: will continue: ", e);
+			}
+			finally
+			{
+				// clear out any current current bindings
+				this.threadLocalManager.clear();
+			}
+
+			// take a small nap
+			try
+			{
+				Thread.sleep(timeoutCheckMs);
+			}
+			catch (Exception ignore)
+			{
+			}
+		}
 	}
 
 	/**
@@ -745,6 +834,28 @@ public class MnemeServiceImpl implements MnemeService
 	}
 
 	/**
+	 * Dependency: ThreadLocalManager.
+	 * 
+	 * @param service
+	 *        The ThreadLocalManager.
+	 */
+	public void setThreadLocalManager(ThreadLocalManager service)
+	{
+		this.threadLocalManager = service;
+	}
+
+	/**
+	 * Set the # seconds to wait between db checks for timed-out submissions.
+	 * 
+	 * @param time
+	 *        The # seconds to wait between db checks for timed-out submissions.
+	 */
+	public void setTimeoutCheckSeconds(String time)
+	{
+		this.timeoutCheckMs = Integer.parseInt(time) * 1000L;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public Boolean submissionsExist(Assessment assessment)
@@ -776,5 +887,32 @@ public class MnemeServiceImpl implements MnemeService
 	public void updateGradebook(Assessment assessment) throws AssessmentPermissionException
 	{
 		submissionService.updateGradebook(assessment);
+	}
+
+	/**
+	 * Start the clean and report thread.
+	 */
+	protected void start()
+	{
+		threadStop = false;
+
+		checkerThread = new Thread(this, getClass().getName());
+		checkerThread.start();
+	}
+
+	/**
+	 * Stop the clean and report thread.
+	 */
+	protected void stop()
+	{
+		if (checkerThread == null) return;
+
+		// signal the thread to stop
+		threadStop = true;
+
+		// wake up the thread
+		checkerThread.interrupt();
+
+		checkerThread = null;
 	}
 }

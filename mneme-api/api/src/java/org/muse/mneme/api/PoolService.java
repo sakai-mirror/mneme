@@ -46,6 +46,11 @@ public interface PoolService
 	Boolean allowManagePools(String context);
 
 	/**
+	 * Clear out any mint objects that are old enough to be considered abandoned.
+	 */
+	void clearStaleMintPools();
+
+	/**
 	 * Copy an existing pool creating a new pool in the context.
 	 * 
 	 * @param context

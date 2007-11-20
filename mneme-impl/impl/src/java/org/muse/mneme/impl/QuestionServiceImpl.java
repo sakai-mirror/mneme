@@ -119,6 +119,14 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clearStaleMintQuestions()
+	{
+		this.storage.clearStaleMintQuestions();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void copyPoolQuestions(Pool source, Pool destination) throws AssessmentPermissionException
 	{
 		if (source == null) throw new IllegalArgumentException();

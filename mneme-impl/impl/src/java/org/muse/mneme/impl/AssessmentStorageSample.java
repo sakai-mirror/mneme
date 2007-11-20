@@ -97,10 +97,27 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void clearOldMints()
+	public void clearStaleMintAssessments()
 	{
-		// TODO Auto-generated method stub
+		// give it a day
+		Date stale = new Date();
+		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
 
+		// find them
+		List<String> delete = new ArrayList<String>();
+		for (AssessmentImpl assessment : this.assessments.values())
+		{
+			if (assessment.getMint() && assessment.getCreatedBy().getDate().before(stale))
+			{
+				delete.add(assessment.getId());
+			}
+		}
+
+		// remove them
+		for (String id : delete)
+		{
+			this.assessments.remove(id);
+		}
 	}
 
 	/**

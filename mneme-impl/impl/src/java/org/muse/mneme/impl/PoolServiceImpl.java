@@ -90,6 +90,14 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clearStaleMintPools()
+	{
+		this.storage.clearStaleMintPools();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Pool copyPool(String context, Pool pool) throws AssessmentPermissionException
 	{
 		if (context == null) throw new IllegalArgumentException();

@@ -33,9 +33,9 @@ import org.muse.mneme.api.Question;
 public interface PoolStorage
 {
 	/**
-	 * Remove any mints that are over a threshold age.
+	 * Clear out any mint objects that are old enough to be considered abandoned.
 	 */
-	void clearOldMints();
+	void clearStaleMintPools();
 
 	/**
 	 * Count the pools in this context that meet this criteria.

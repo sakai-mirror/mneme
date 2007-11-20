@@ -75,6 +75,11 @@ public interface AssessmentService
 	Boolean allowRemoveAssessment(Assessment assessment);
 
 	/**
+	 * Clear out any mint objects that are old enough to be considered abandoned.
+	 */
+	void clearStaleMintAssessments();
+
+	/**
 	 * Create a new Assessment in the context that is a copy of another.<br />
 	 * The new assessment is non-archived and un-published.
 	 * 

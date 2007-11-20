@@ -43,9 +43,9 @@ public interface AssessmentStorage
 	Boolean assessmentExists(String id);
 
 	/**
-	 * Remove any mints that are over a threshold age.
+	 * Clear out any mint objects that are old enough to be considered abandoned.
 	 */
-	void clearOldMints();
+	void clearStaleMintAssessments();
 
 	/**
 	 * Count the assessments in a context that are not archived.

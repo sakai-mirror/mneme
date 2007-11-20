@@ -73,10 +73,27 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void clearOldMints()
+	public void clearStaleMintQuestions()
 	{
-		// TODO Auto-generated method stub
+		// give it a day
+		Date stale = new Date();
+		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
 
+		// find them
+		List<String> delete = new ArrayList<String>();
+		for (QuestionImpl question : this.questions.values())
+		{
+			if (question.getMint() && question.getCreatedBy().getDate().before(stale))
+			{
+				delete.add(question.getId());
+			}
+		}
+
+		// remove them
+		for (String id : delete)
+		{
+			this.questions.remove(id);
+		}
 	}
 
 	/**
