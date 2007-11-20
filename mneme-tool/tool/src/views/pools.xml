@@ -88,11 +88,15 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/pools/0A" />
+							<destination template="/pools/0A/{0}">
+								<model type="paging" ref="paging" selector="FIRST" />
+							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/pools/0D" />
+							<destination template="/pools/0D/{0}">
+								<model type="paging" ref="paging" selector="FIRST" />
+							</destination>
 						</desc>
 					</sort>
 					<entityNavigations>
@@ -100,7 +104,7 @@
 							<destination template="/pool_edit/{0}{1}/{2}/{3}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="pagingParameter" />
+								<model type="paging" ref="paging" />
 								<model ref="pool.id" />
 							</destination>
 						</navigation>
@@ -140,7 +144,7 @@
 							<destination template="/pool_properties/{0}{1}/{2}/{3}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="pagingParameter" />
+								<model type="paging" ref="paging" />
 								<model ref="pool.id" />
 							</destination>
 						</navigation>

@@ -139,7 +139,6 @@ public class PoolEditView extends ControllerImpl
 		paging.setMaxItems(maxQuestions);
 		paging.setCurrentAndSize(pagingParameter);
 		context.put("paging", paging);
-		context.put("pagingParameter", pagingParameter);
 
 		// get questions
 		List<Question> questions = questionService.findQuestions(pool, sort, null, paging.getCurrent(), paging.getSize());

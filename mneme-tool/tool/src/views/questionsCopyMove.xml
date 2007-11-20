@@ -50,7 +50,7 @@
 				<message selector="no-pools" />
 			</emptyTitle>
 			<columns>
-				<selectionColumn multiple="FALSE" id="SELECTION">
+				<selectionColumn multiple="FALSE" id="SELECTION" pixels="16">
 					<value>
 						<model type="text" ref="pool.id" />
 					</value>
@@ -71,13 +71,13 @@
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
 							<destination template="{0}/0A">
-								<model ref="saveDestination" />
+								<model ref="here" />
 							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
 							<destination template="{0}/0D">
-								<model ref="saveDestination" />
+								<model ref="here" />
 							</destination>
 						</desc>
 					</sort>
@@ -113,21 +113,14 @@
 		<navigationBar>
 			<container>
 				<navigation title="ok" style="BUTTON" accessKey="ok-access" description="ok-description" submit="TRUE" selectRequirement="SINGLE"
-					selectRequirementId="SELECTION" selectRequirementMessage="save-failed-requirements">
+					selectRequirementId="SELECTION" selectRequirementMessage="save-failed-requirements" destination="DOIT">
 					<icon icon="/icons/OK.png" style="LEFT" />
-					<destination template="{0}">
-						<model ref="saveDestination" />
-					</destination>
 				</navigation>
 				<divider />
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/pool_edit/{0}/{1}/{2}/{3}/{4}">
-						<model ref="poolsSortCode" />
-						<model ref="poolsPagingParameter" />
-						<model ref="poolid" />
-						<model ref="poolsEditSortCode" />
-						<model ref="poolsEditPagingParameter" />
+					<destination template="/pool_edit/{0}">
+						<model ref="extras" />
 					</destination>
 				</navigation>
 			</container>

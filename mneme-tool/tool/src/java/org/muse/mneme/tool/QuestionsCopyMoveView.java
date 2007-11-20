@@ -33,12 +33,12 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Value;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -48,9 +48,6 @@ public class QuestionsCopyMoveView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(QuestionsCopyMoveView.class);
-
-	/** Dependency: mneme service. */
-	protected MnemeService mnemeService = null;
 
 	/** Pool Service */
 	protected PoolService poolService = null;
@@ -74,20 +71,21 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 8 && params.length != 9) throw new IllegalArgumentException();
+		// [2] pool_sort / [3] pool_page / [4] pool_id / [5] question_sort / [6] question_page / [7] question_ids / [8] sort
+		if ((params.length != 8) && (params.length != 9))
+		{
+			throw new IllegalArgumentException();
+		}
 
-		String saveDestination = context.getDestination();
+		String questionIds = params[7];
 
-		if (params.length == 9)
-			context.put("saveDestination", saveDestination.substring(0, saveDestination.lastIndexOf("/")));
-		else
-			context.put("saveDestination", context.getDestination());
+		// put the extra parameters all together
+		String extras = StringUtil.unsplit(params, 2, 5, "/");
+		context.put("extras", extras);
 
-		// pools sort param is in params array at index 2
-		context.put("poolsSortCode", params[2]);
-
-		// pools paging parameter - is in params array at index 3
-		context.put("poolsPagingParameter", params[3]);
+		// for sort, this destination without the sort
+		String here = "/" + params[1] + "/" + extras + "/" + questionIds;
+		context.put("here", here);
 
 		// header and icon dependent on which function
 		if (path.startsWith("question_copy"))
@@ -101,70 +99,42 @@ public class QuestionsCopyMoveView extends ControllerImpl
 			context.put("headerIcon", "/icons/page_go.png");
 		}
 
-		// pools id is in params array at index 4
-		context.put("poolid", params[4]);
-
-		// pools sort param is in params array at index 5
-		context.put("poolsEditSortCode", params[5]);
-
-		// pools paging parameter - is in params array at index 6
-		context.put("poolsEditPagingParameter", params[6]);
-
-		// sort parameter - sort is in param array at index 7
-		String sortCode = null;
+		// sort
+		String sortCode = "0A";
 		if (params.length > 8) sortCode = params[8];
-
-		// default sort is title ascending
-		PoolService.FindPoolsSort sort;
-
-		if (sortCode != null)
+		if ((sortCode == null) || (sortCode.length() != 2))
 		{
-			if (sortCode.trim().length() == 2)
-			{
-				context.put("sort_column", sortCode.charAt(0));
-				context.put("sort_direction", sortCode.charAt(1));
-
-				// 0 is title
-				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
-				{
-					sort = PoolService.FindPoolsSort.title_a;
-				}
-				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
-				{
-					sort = PoolService.FindPoolsSort.title_d;
-				}
-				else
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
-				}
-			}
-			else
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
-			}
+			throw new IllegalArgumentException();
+		}
+		context.put("sort_column", sortCode.charAt(0));
+		context.put("sort_direction", sortCode.charAt(1));
+		PoolService.FindPoolsSort sort = null;
+		// 0 is title
+		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = PoolService.FindPoolsSort.title_a;
+		}
+		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = PoolService.FindPoolsSort.title_d;
 		}
 		else
 		{
-			// default sort: title ascending
-			sort = PoolService.FindPoolsSort.title_a;
-
-			context.put("sort_column", '0');
-			context.put("sort_direction", 'A');
+			throw new IllegalArgumentException();
 		}
 
-		Pool pool = this.poolService.getPool(params[4]);
-
+		// pools - all but the one we came from
+		String pid = params[4];
+		Pool pool = this.poolService.getPool(pid);
+		if (pool == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
 		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), sort, null, null, null);
 		pools.remove(pool);
 		context.put("pools", pools);
-
-		// for the selected pool
-		Value value = this.uiService.newValue();
-		context.put("selectedPoolId", value);
 
 		// render
 		uiService.render(ui, context);
@@ -184,7 +154,17 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 8 && params.length != 9) throw new IllegalArgumentException();
+		// [2] pool_sort / [3] pool_page / [4] pool_id / [5] question_sort / [6] question_page / [7] question_ids / [8] sort
+		if ((params.length != 8) && (params.length != 9))
+		{
+			throw new IllegalArgumentException();
+		}
+
+		String questionIds = params[7];
+
+		// put the extra parameters all together
+		String extras = StringUtil.unsplit(params, 2, 5, "/");
+		context.put("extras", extras);
 
 		// for the selected pool
 		Value value = this.uiService.newValue();
@@ -193,55 +173,47 @@ public class QuestionsCopyMoveView extends ControllerImpl
 		// read form
 		String destination = this.uiService.decode(req, context);
 
-		String selectedPoolId = value.getValue();
-
-		if (selectedPoolId != null)
+		if (destination.equals("DOIT"))
 		{
-			Pool pool = this.poolService.getPool(selectedPoolId);
-
-			Question question = null;
-
-			try
+			String selectedPoolId = value.getValue();
+			if (selectedPoolId != null)
 			{
-				// question id's are in the params array at the index 7
-				String questionIds[] = params[7].split("\\+");
-
-				for (String questionId : questionIds)
+				Pool pool = this.poolService.getPool(selectedPoolId);
+				try
 				{
-					// get the question
-					question = this.questionService.getQuestion(questionId);
+					// question id's are in the params array at the index 7
+					String qids[] = StringUtil.split(questionIds, "+");
+					for (String qid : qids)
+					{
+						// get the question
+						Question question = this.questionService.getQuestion(qid);
+						if (question != null)
+						{
+							// which function to perform
+							if (path.startsWith("question_copy"))
+							{
+								this.questionService.copyQuestion(question, pool);
+							}
+							else if (path.startsWith("question_move"))
+							{
+								this.questionService.moveQuestion(question, pool);
+							}
+						}
+					}
 
-					// which function to perform
-					if (path.startsWith("question_copy"))
-					{
-						this.questionService.copyQuestion(question, pool);
-					}
-					else if (path.startsWith("question_move"))
-					{
-						this.questionService.moveQuestion(question, pool);
-					}
+					// back to the pool
+					destination = "/pool_edit/" + extras;
 				}
-
-				destination = "/pool_edit/" + params[2] + "/" + params[3] + "/" + params[4] + "/" + params[5] + "/" + params[6];
-			}
-			catch (AssessmentPermissionException e)
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-				return;
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
 			}
 		}
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-		return;
-	}
 
-	/**
-	 * @param mnemeService
-	 *        the mnemeService to set
-	 */
-	public void setMnemeService(MnemeService mnemeService)
-	{
-		this.mnemeService = mnemeService;
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**

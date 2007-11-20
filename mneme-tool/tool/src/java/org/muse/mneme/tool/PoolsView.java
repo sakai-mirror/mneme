@@ -118,7 +118,6 @@ public class PoolsView extends ControllerImpl
 		paging.setMaxItems(maxPools);
 		paging.setCurrentAndSize(pagingParameter);
 		context.put("paging", paging);
-		context.put("pagingParameter", pagingParameter);
 
 		// collect the pools to show
 		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), sort, null, paging.getCurrent(), paging

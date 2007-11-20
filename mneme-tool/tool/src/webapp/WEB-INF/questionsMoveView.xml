@@ -32,9 +32,6 @@
 		<property name="ui">
 			<ref bean="org.muse.ambrosia.api.UiService" />
 		</property>
-		<property name="mnemeService">
-			<ref bean="org.muse.mneme.api.MnemeService" />
-		</property>
 		<property name="poolService">
 			<ref bean="org.muse.mneme.api.PoolService" />
 		</property>

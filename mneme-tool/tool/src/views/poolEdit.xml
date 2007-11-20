@@ -79,7 +79,7 @@
 								<model ref="pool.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="pagingParameter" />
+								<model type="paging" ref="paging" />
 							</destination>
 							<icon icon="/icons/add_qst.png" style="LEFT" />
 						</navigation>
@@ -92,7 +92,7 @@
 								<model ref="pool.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="pagingParameter" />
+								<model type="paging" ref="paging" />
 							</destination>
 						</navigation>
 						<navigation title="copy-to-pool" selectRequirement="SOME" selectRequirementMessage="copy-failed-requirements" style="LINK"
@@ -104,7 +104,7 @@
 								<model ref="pool.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="pagingParameter" />
+								<model type="paging" ref="paging" />
 							</destination>
 						</navigation>
 						<navigation title="delete-title" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements" style="LINK"
@@ -128,13 +128,14 @@
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="view-question">
 							<icon icon="/icons/preview.png" style="LEFT" />
-							<destination template="/question_preview/{0}/pool_edit/{1}/{2}/{3}/{4}{5}">
+							<destination template="/question_preview/{0}/pool_edit/{1}/{2}/{3}/{4}{5}/{6}">
 								<model ref="question.id" />
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
 								<model ref="pool.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
+								<model type="paging" ref="paging" />
 							</destination>
 						</navigation>
 					</navigations>
@@ -152,7 +153,7 @@
 								<model ref="pool.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model ref="pagingParameter" />
+								<model type="paging" ref="paging" />
 								<model ref="question.id" />
 							</destination>
 						</navigation>
@@ -166,18 +167,20 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/pool_edit/{0}/{1}/{2}/0A">
+							<destination template="/pool_edit/{0}/{1}/{2}/0A/{3}">
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
 								<model ref="pool.id" />
+								<model type="paging" ref="paging" selector="FIRST" />
 							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/pool_edit/{0}/{1}/{2}/0D">
+							<destination template="/pool_edit/{0}/{1}/{2}/0D/{3}">
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
 								<model ref="pool.id" />
+								<model type="paging" ref="paging" selector="FIRST" />
 							</destination>
 						</desc>
 					</sort>
@@ -196,18 +199,20 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/pool_edit/{0}/{1}/{2}/1A">
+							<destination template="/pool_edit/{0}/{1}/{2}/1A/{3}">
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
 								<model ref="pool.id" />
+								<model type="paging" ref="paging" selector="FIRST" />
 							</destination>
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/pool_edit/{0}/{1}/{2}/1D">
+							<destination template="/pool_edit/{0}/{1}/{2}/1D/{3}">
 								<model ref="poolsSortCode" />
 								<model ref="poolsPagingParameter" />
 								<model ref="pool.id" />
+								<model type="paging" ref="paging" selector="FIRST" />
 							</destination>
 						</desc>
 					</sort>
