@@ -144,14 +144,13 @@ public class SectionInstructionView extends ControllerImpl
 		String destination = this.uiService.decode(req, context);
 
 		// if other than the /submitted destination, just go there
-		if (!destination.startsWith("/submitted"))
+		if (!destination.startsWith("/submitted") && (!destination.equals("SUBMIT")))
 		{
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 			return;
 		}
 
 		String submissionId = params[2];
-		String sectionId = params[3];
 
 		// this post is from the timer, and completes the submission
 		TocView.submissionCompletePost(req, res, context, submissionId, this.uiService, this.assessmentService);
