@@ -626,6 +626,9 @@ public class AssessmentImpl implements Assessment
 	 */
 	public void setTimeLimit(Long limit)
 	{
+		// minimum of one minute
+		if ((limit != null) && (limit.longValue() < 60000l)) limit = new Long(60000l);
+
 		if (!Different.different(this.timeLimit, limit)) return;
 
 		this.timeLimit = limit;
