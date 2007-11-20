@@ -60,7 +60,7 @@
 					</value>
 					<model ref="ids.values" />
 				</selectionColumn>
-				<column em="4">
+				<column pixels="16">
 					<container>
 						<navigation style="LINK" submit="TRUE">
 							<description>

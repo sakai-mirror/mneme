@@ -41,9 +41,6 @@
 		<property name="toolManager">
 			<ref bean="org.sakaiproject.tool.api.ToolManager" />
 		</property>
-		<property name="sessionManager">
-			<ref bean="org.sakaiproject.tool.api.SessionManager" />
-		</property>
 		<property name="toolId">
 			<value>sakai.mneme</value>
 		</property>

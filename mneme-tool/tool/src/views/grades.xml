@@ -38,8 +38,8 @@
 	<title>
 		<message selector="grading-title" />
 	</title>
-	<subHeader/>		
-	<container>		
+	<subHeader />
+	<container>
 		<!-- the list of assessments -->
 		<entityList style="FLAT">
 			<iterator name="assessment">
@@ -49,46 +49,58 @@
 				<message selector="no-assessments" />
 			</emptyTitle>
 			<columns>
-				<column>
-					<title>
-						<message selector="assessment-view" />
-					</title>
+				<column pixels="16">
 					<navigations>
-						<navigation description="assessment-type-test" style="LINK" submit="TRUE">
-							<icon icon="/icons/test_view.png" style="LEFT" />							
+						<navigation style="LINK" submit="TRUE">
+							<icon icon="/icons/test_view.png" style="LEFT" />
 							<included>
 								<compareDecision model="assessment.type" constant="test" />
 							</included>
+							<description>
+								<message selector="view-type">
+									<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+								</message>
+							</description>
 							<destination template="/assessment_preview/{0}/grades/{1}{2}">
 								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 							</destination>
 						</navigation>
-						<navigation description="assessment-type-survey" style="LINK" submit="TRUE">
-							<icon icon="/icons/survey_view.png" style="LEFT" />							
+						<navigation style="LINK" submit="TRUE">
+							<icon icon="/icons/survey_view.png" style="LEFT" />
 							<included>
 								<compareDecision model="assessment.type" constant="survey" />
 							</included>
+							<description>
+								<message selector="view-type">
+									<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+								</message>
+							</description>
 							<destination template="/assessment_preview/{0}/grades/{1}{2}">
 								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 							</destination>
 						</navigation>
-						<navigation description="assessment-type-assignment" style="LINK" submit="TRUE">
-							<icon icon="/icons/assignment_view.png" style="LEFT" />						
+						<navigation style="LINK" submit="TRUE">
+							<icon icon="/icons/assignment_view.png" style="LEFT" />
 							<included>
 								<compareDecision model="assessment.type" constant="assignment" />
 							</included>
+							<description>
+								<message selector="view-type">
+									<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+								</message>
+							</description>
 							<destination template="/assessment_preview/{0}/grades/{1}{2}">
 								<model ref="assessment.id" />
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
 							</destination>
 						</navigation>
-					</navigations>					
-				</column>			
+					</navigations>
+				</column>
 				<column>
 					<title>
 						<message selector="assessment-title" />
@@ -126,7 +138,7 @@
 				</column>
 				<modelColumn wrap="FALSE">
 					<title>
-						<message selector="assessment-odate"/>
+						<message selector="assessment-odate" />
 					</title>
 					<sort submit="TRUE">
 						<active>
@@ -171,10 +183,10 @@
 				<modelColumn>
 					<title>
 						<message selector="submit_status" />
-					</title>					
-					<model type="enum" ref="assessment.acceptSubmitStatus" messageRoot="submit-status-" />					
+					</title>
+					<model type="enum" ref="assessment.acceptSubmitStatus" messageRoot="submit-status-" />
 				</modelColumn>
-				<modelColumn>					
+				<modelColumn>
 					<navigations>
 						<navigation style="LINK" submit="TRUE">
 							<icon icon="/icons/grade.png" />

@@ -63,25 +63,22 @@ public class GradesView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-
-		// sort parameter
-		String sortCode = null;
-
-		// default sort is type ascending
-		AssessmentService.AssessmentsSort sort = AssessmentService.AssessmentsSort.ddate_a;
-		context.put("sort_column", '0');
-		context.put("sort_direction", 'A');
-
-		if (params.length == 3)
+		// sort (optional)
+		if ((params.length != 2) && (params.length != 3))
 		{
-			sortCode = params[2];
-			if (sortCode != null && sortCode.length() == 2)
-			{
-				context.put("sort_column", sortCode.charAt(0));
-				context.put("sort_direction", sortCode.charAt(1));
-				sort = findSortCode(sortCode);
-			}
+			throw new IllegalArgumentException();
 		}
+
+		// sort
+		String sortCode = "0A";
+		if (params.length > 2) sortCode = params[2];
+		if ((sortCode == null) || (sortCode.length() != 2))
+		{
+			throw new IllegalArgumentException();
+		}
+		context.put("sort_column", sortCode.charAt(0));
+		context.put("sort_direction", sortCode.charAt(1));
+		AssessmentService.AssessmentsSort sort = findSortCode(sortCode);
 
 		// collect the assessments in this context
 		List<Assessment> assessments = this.assessmentService.getContextAssessments(this.toolManager.getCurrentPlacement().getContext(), sort,
@@ -93,41 +90,6 @@ public class GradesView extends ControllerImpl
 
 		// render
 		uiService.render(ui, context);
-	}
-
-	private AssessmentService.AssessmentsSort findSortCode(String sortCode)
-	{
-		AssessmentService.AssessmentsSort sort = null;
-		
-		// 0 is ddate
-		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
-		{
-			sort = AssessmentService.AssessmentsSort.ddate_a;
-		}
-		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
-		{
-			sort = AssessmentService.AssessmentsSort.ddate_d;
-		}
-		// 1 is odate
-		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
-		{
-			sort = AssessmentService.AssessmentsSort.odate_a;
-		}
-		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
-		{
-			sort = AssessmentService.AssessmentsSort.odate_d;
-		}		
-		// 2 is title
-		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
-		{
-			sort = AssessmentService.AssessmentsSort.title_a;
-		}
-		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
-		{
-			sort = AssessmentService.AssessmentsSort.title_d;
-		}		
-
-		return sort;
 	}
 
 	/**
@@ -170,5 +132,47 @@ public class GradesView extends ControllerImpl
 	public void setToolManager(ToolManager manager)
 	{
 		toolManager = manager;
+	}
+
+	/**
+	 * Figure out the sort from the sort parameter.
+	 * 
+	 * @param sortCode
+	 *        The sort parameter.
+	 * @return The sort.
+	 */
+	protected AssessmentService.AssessmentsSort findSortCode(String sortCode)
+	{
+		AssessmentService.AssessmentsSort sort = null;
+
+		// 0 is ddate
+		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = AssessmentService.AssessmentsSort.ddate_a;
+		}
+		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = AssessmentService.AssessmentsSort.ddate_d;
+		}
+		// 1 is odate
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = AssessmentService.AssessmentsSort.odate_a;
+		}
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = AssessmentService.AssessmentsSort.odate_d;
+		}
+		// 2 is title
+		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = AssessmentService.AssessmentsSort.title_a;
+		}
+		else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = AssessmentService.AssessmentsSort.title_d;
+		}
+
+		return sort;
 	}
 }

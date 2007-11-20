@@ -42,7 +42,6 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
-import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
@@ -57,9 +56,6 @@ public class GradeAssessmentView extends ControllerImpl
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
-
-	/** Dependency: SessionManager */
-	protected SessionManager sessionManager = null;
 
 	/** Submission Service */
 	protected SubmissionService submissionService = null;
@@ -80,7 +76,7 @@ public class GradeAssessmentView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]sort for /grades, [3]aid |optional->| [4]our sort, [5]our page, [6]our highest/al-for-uid
+		// [2]sort for /grades, [3]aid |optional->| [4]our sort, [5]our page, [6]our highest/all-for-uid
 		if ((params.length < 4) || params.length > 7) throw new IllegalArgumentException();
 
 		// check for user permission to access the assessments for grading
@@ -128,7 +124,7 @@ public class GradeAssessmentView extends ControllerImpl
 		}
 
 		// get the size
-		Integer maxSubmissions = this.submissionService.countAssessmentSubmissions(assessment, official ,allUid);
+		Integer maxSubmissions = this.submissionService.countAssessmentSubmissions(assessment, official, allUid);
 
 		// paging
 		Paging paging = uiService.newPaging();
@@ -137,17 +133,10 @@ public class GradeAssessmentView extends ControllerImpl
 		context.put("paging", paging);
 
 		// get all Assessment submissions
-		List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, official, allUid, paging.getCurrent(), paging.getSize());
+		List<Submission> submissions = this.submissionService.findAssessmentSubmissions(assessment, sort, official, allUid, paging.getCurrent(),
+				paging.getSize());
 		context.put("submissions", submissions);
 		context.put("view", allUid);
-
-		// for Adjust every student's test submission by
-		Value submissionAdjust = this.uiService.newValue();
-		context.put("submissionAdjust", submissionAdjust);
-
-		// for "Adjust every student's test submission by" comments
-		Value submissionAdjustComments = this.uiService.newValue();
-		context.put("submissionAdjustComments", submissionAdjustComments);
 
 		uiService.render(ui, context);
 	}
@@ -300,15 +289,6 @@ public class GradeAssessmentView extends ControllerImpl
 	public void setAssessmentService(AssessmentService assessmentService)
 	{
 		this.assessmentService = assessmentService;
-	}
-
-	/**
-	 * @param sessionManager
-	 *        the sessionManager to set
-	 */
-	public void setSessionManager(SessionManager sessionManager)
-	{
-		this.sessionManager = sessionManager;
 	}
 
 	/**
