@@ -270,6 +270,15 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		{
 			sort = QuestionService.FindQuestionsSort.pool_points_d;
 		}
+		// 3 is question description
+		else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'A'))
+		{
+			sort = QuestionService.FindQuestionsSort.description_a;
+		}
+		else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'D'))
+		{
+			sort = QuestionService.FindQuestionsSort.description_d;
+		}
 
 		return sort;
 	}

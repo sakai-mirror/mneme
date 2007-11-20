@@ -290,7 +290,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 					case cdate_d:
 					{
 						rv = ((Assessment) arg0).getCreatedBy().getDate().compareTo(((Assessment) arg1).getCreatedBy().getDate());
-						secondary = null;
 						break;
 					}
 				}

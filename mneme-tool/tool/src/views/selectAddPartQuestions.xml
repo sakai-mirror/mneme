@@ -97,6 +97,32 @@
 								<message selector="question-description" />
 							</title>
 							<model type="text" ref="question.description" missing="no-title" stripHtml="TRUE" max="60" />
+							<sort submit="TRUE">
+								<active>
+									<compareDecision model="sort_column" constant="3" />
+								</active>
+								<direction>
+									<compareDecision model="sort_direction" constant="A" />
+								</direction>
+								<asc icon="/icons/sortascending.gif">
+									<message selector="asc" />
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/3A/{3}">
+										<model ref="assessmentSort" />
+										<model ref="assessment.id" />
+										<model ref="part.id" />
+										<model type="paging" ref="paging" selector="FIRST" />
+									</destination>
+								</asc>
+								<desc icon="/icons/sortdescending.gif">
+									<message selector="desc" />
+									<destination template="/select_add_mpart_question/{0}/{1}/{2}/3D/{3}">
+										<model ref="assessmentSort" />
+										<model ref="assessment.id" />
+										<model ref="part.id" />
+										<model type="paging" ref="paging" selector="FIRST" />
+									</destination>
+								</desc>
+							</sort>
 						</modelColumn>
 						<modelColumn>
 							<title>
