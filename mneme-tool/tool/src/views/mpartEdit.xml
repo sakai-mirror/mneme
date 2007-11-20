@@ -72,7 +72,7 @@
 					</emptyTitle>
 					<iterator name="question" model="part.questionsAsAuthored" />
 					<columns>
-						<selectionColumn multiple="TRUE">
+						<selectionColumn multiple="TRUE" pixels="16">
 							<value>
 								<model type="text" ref="question.id" />
 							</value>
@@ -122,12 +122,9 @@
 							</included>
 							<model ref="part.questionOrder" />
 						</orderColumn>
-						<column>
-							<title>
-								<message selector="question-preview" />
-							</title>
+						<column pixels="16">
 							<navigations>
-								<navigation style="LINK" submit="TRUE">
+								<navigation style="LINK" submit="TRUE" description="question-preview">
 									<icon icon="/icons/preview.png" style="LEFT" />
 									<destination template="/question_preview/{0}/part_edit/{1}/{2}/{3}">
 										<model ref="question.id" />

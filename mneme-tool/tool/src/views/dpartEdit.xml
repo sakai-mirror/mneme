@@ -57,7 +57,7 @@
 				<textEdit title="part-title" rows="1" cols="40">
 					<model ref="part.title" />
 				</textEdit>
-				<htmlEdit title="part-instructions" model="part.presentation.text" rows="5" cols="40"/>
+				<htmlEdit title="part-instructions" model="part.presentation.text" rows="5" cols="40" />
 				<attachmentsEdit title="attachments" model="part.presentation.attachments" />
 			</container>
 		</section>
@@ -82,21 +82,20 @@
 						</instructions>
 					</entityActions>
 					<pager paging="paging">
-						<destination template="/part_edit/{0}/{1}/{2}/{3}{4}/{5}/{6}">
+						<destination template="/part_edit/{0}/{1}/{2}/{3}{4}/{5}">
 							<model ref="assessmentSort" />
 							<model ref="assessment.id" />
 							<model ref="part.id" />
 							<model ref="sort_column" />
 							<model ref="sort_direction" />
 							<model type="paging" ref="paging" />
-							<model ref="view" />
 						</destination>
 					</pager>
 					<iterator name="draw">
 						<model ref="draws" indexRef="pool.id" />
 					</iterator>
 					<columns>
-						<column em="8">
+						<column em="4">
 							<entityIncluded>
 								<decision reversed="TRUE" model="draw.pool.id" delegate="PoolReferencedDecision" tool="sakai.mneme" />
 								<message>
@@ -107,7 +106,7 @@
 								<message selector="pool-draw" />
 							</title>
 							<container>
-								<countEdit>
+								<countEdit cols="4">
 									<model ref="draw.numQuestions" />
 									<summary initialValue="part.numQuestions" title="total-questions" />
 									<readOnly>
@@ -142,22 +141,20 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/part_edit/{0}/{1}/{2}/0A/{3}/{4}">
+									<destination template="/part_edit/{0}/{1}/{2}/0A/{3}">
 										<model ref="assessmentSort" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
-										<model ref="view" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/part_edit/{0}/{1}/{2}/0D/{3}/{4}">
+									<destination template="/part_edit/{0}/{1}/{2}/0D/{3}">
 										<model ref="assessmentSort" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
-										<model ref="view" />
 									</destination>
 								</desc>
 							</sort>
@@ -192,22 +189,20 @@
 								</direction>
 								<asc icon="/icons/sortascending.gif">
 									<message selector="asc" />
-									<destination template="/part_edit/{0}/{1}/{2}/1A/{3}/{4}">
+									<destination template="/part_edit/{0}/{1}/{2}/1A/{3}">
 										<model ref="assessmentSort" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
-										<model ref="view" />
 									</destination>
 								</asc>
 								<desc icon="/icons/sortdescending.gif">
 									<message selector="desc" />
-									<destination template="/part_edit/{0}/{1}/{2}/1D/{3}/{4}">
+									<destination template="/part_edit/{0}/{1}/{2}/1D/{3}">
 										<model ref="assessmentSort" />
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 										<model type="paging" ref="paging" selector="FIRST" />
-										<model ref="view" />
 									</destination>
 								</desc>
 							</sort>

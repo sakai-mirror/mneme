@@ -64,7 +64,7 @@
 					</pager>
 					<iterator name="question" model="questions" />
 					<columns>
-						<selectionColumn multiple="TRUE">
+						<selectionColumn multiple="TRUE" pixels="16">
 							<value>
 								<model type="text" ref="question.id" />
 							</value>
@@ -76,12 +76,9 @@
 								</message>
 							</entityIncluded>
 						</selectionColumn>
-						<column>
-							<title>
-								<message selector="question-preview" />
-							</title>
+						<column pixels="16">
 							<navigations>
-								<navigation style="LINK" submit="TRUE">
+								<navigation style="LINK" submit="TRUE" description="view-question">
 									<icon icon="/icons/preview.png" style="LEFT" />
 									<destination template="/question_preview/{0}/select_add_mpart_question/{1}/{2}/{3}/{4}{5}/{6}">
 										<model ref="question.id" />

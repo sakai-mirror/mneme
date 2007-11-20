@@ -52,7 +52,7 @@
 				<message selector="no-assessments" />
 			</emptyTitle>
 			<columns>
-				<selectionColumn multiple="TRUE">
+				<selectionColumn multiple="TRUE" pixels="16">
 					<value>
 						<model type="text" ref="assessment.id" />
 					</value>
@@ -89,7 +89,7 @@
 						</navigation>
 					</entityActions>
 				</selectionColumn>
-				<modelColumn>
+				<modelColumn em="4">
 					<title>
 						<message selector="assessment-view" />
 					</title>

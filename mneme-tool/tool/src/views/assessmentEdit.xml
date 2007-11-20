@@ -102,7 +102,7 @@
 						<message selector="no-parts" />
 					</emptyTitle>
 					<columns>
-						<selectionColumn multiple="TRUE">
+						<selectionColumn multiple="TRUE" pixels="16">
 							<value>
 								<model ref="part.id" />
 							</value>
