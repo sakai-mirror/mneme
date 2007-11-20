@@ -139,6 +139,7 @@
 					</destination>
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
+				<divider />
 				<navigation title="add" accessKey="add-access" description="add-description" style="BUTTON" submit="TRUE">
 					<destination template="/select_question_type/{0}">
 						<model ref="extras" />

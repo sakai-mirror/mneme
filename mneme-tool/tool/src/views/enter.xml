@@ -191,6 +191,7 @@
 				<navigation destination="ENTER" submit="TRUE" title="begin" style="BUTTON" accessKey="begin-access" description="begin-description">
 					<icon icon="/icons/begin.gif" style="LEFT" />
 				</navigation>
+				<divider />
 				<navigation destination="/list" title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
 				</navigation>
