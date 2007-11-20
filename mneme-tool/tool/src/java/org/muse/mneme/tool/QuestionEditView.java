@@ -33,8 +33,6 @@ import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
-import org.sakaiproject.tool.api.SessionManager;
-import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
@@ -48,21 +46,6 @@ public class QuestionEditView extends ControllerImpl
 
 	/** Question Service */
 	protected QuestionService questionService = null;
-
-	/** Dependency: ToolManager */
-	protected ToolManager toolManager = null;
-
-	/** Dependency: SessionManager */
-	protected SessionManager sessionManager = null;
-
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		super.init();
-		M_log.info("init()");
-	}
 
 	/**
 	 * Shutdown.
@@ -80,7 +63,7 @@ public class QuestionEditView extends ControllerImpl
 		// [2] pool_sort / [3] pool_page / [4] pool_id / [5] question_sort / [6] question_page / [7] question_id
 		if ((params.length != 8)) throw new IllegalArgumentException();
 		String questionId = params[7];
-		
+
 		// put the extra parameters all together
 		String extras = StringUtil.unsplit(params, 2, 5, "/");
 		context.put("extras", extras);
@@ -101,6 +84,15 @@ public class QuestionEditView extends ControllerImpl
 		context.put("question", question);
 
 		uiService.render(ui, context);
+	}
+
+	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		super.init();
+		M_log.info("init()");
 	}
 
 	/**
@@ -154,23 +146,5 @@ public class QuestionEditView extends ControllerImpl
 	public void setQuestionService(QuestionService questionService)
 	{
 		this.questionService = questionService;
-	}
-
-	/**
-	 * @param sessionManager
-	 *        the sessionManager to set
-	 */
-	public void setSessionManager(SessionManager sessionManager)
-	{
-		this.sessionManager = sessionManager;
-	}
-
-	/**
-	 * @param toolManager
-	 *        the toolManager to set
-	 */
-	public void setToolManager(ToolManager toolManager)
-	{
-		this.toolManager = toolManager;
 	}
 }

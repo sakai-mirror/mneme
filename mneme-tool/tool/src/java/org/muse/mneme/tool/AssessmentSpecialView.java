@@ -92,10 +92,6 @@ public class AssessmentSpecialView extends ControllerImpl
 		context.put("assessment", assessment);
 		context.put("sort", sort);
 
-		// for the checkboxes
-		Values values = this.uiService.newValues();
-		context.put("ids", values);
-
 		// render
 		uiService.render(ui, context);
 	}

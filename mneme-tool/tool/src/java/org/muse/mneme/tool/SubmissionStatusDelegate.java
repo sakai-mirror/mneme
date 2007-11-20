@@ -34,7 +34,7 @@ import org.muse.mneme.api.Submission;
 public class SubmissionStatusDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(SubmissionScoreDelegate.class);
+	private static Log M_log = LogFactory.getLog(SubmissionStatusDelegate.class);
 
 	/**
 	 * Shutdown.

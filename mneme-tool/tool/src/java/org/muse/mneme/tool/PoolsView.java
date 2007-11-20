@@ -37,8 +37,8 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.QuestionService;
-import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -54,9 +54,6 @@ public class PoolsView extends ControllerImpl
 
 	/** Dependency: Question service. */
 	protected QuestionService questionService = null;
-
-	/** Dependency: SessionManager */
-	protected SessionManager sessionManager = null;
 
 	/** Dependency: ToolManager */
 	protected ToolManager toolManager = null;
@@ -74,87 +71,49 @@ public class PoolsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// sort, paging (both optional)
 		if ((params.length != 2) && (params.length != 3) && (params.length != 4))
 		{
 			throw new IllegalArgumentException();
 		}
-		
+
+		// security
 		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 		{
-			//redirect to error
+			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
 		// sort parameter
-		String sortCode = null;
-		if (params.length > 2)
+		String sortCode = "0A";
+		if (params.length > 2) sortCode = params[2];
+		if ((sortCode == null) || (sortCode.length() != 2))
 		{
-			// sort is in param array at index 2
-			sortCode = params[2];
+			throw new IllegalArgumentException();
 		}
+		context.put("sort_column", sortCode.charAt(0));
+		context.put("sort_direction", sortCode.charAt(1));
 
-		// paging parameter
-		String pagingParameter = null;
-		if (params.length > 3)
+		// 0 is title
+		PoolService.FindPoolsSort sort = null;
+		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
 		{
-			// paging parameter is in param array at index 3
-			pagingParameter = params[3];
+			sort = PoolService.FindPoolsSort.title_a;
 		}
-
-		// default sort is title ascending
-		PoolService.FindPoolsSort sort;
-
-		if (sortCode != null)
+		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
 		{
-			if (sortCode.trim().length() == 2)
-			{
-				context.put("sort_column", sortCode.charAt(0));
-				context.put("sort_direction", sortCode.charAt(1));
-
-				// 0 is title
-				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
-				{
-					sort = PoolService.FindPoolsSort.title_a;
-				}
-				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
-				{
-					sort = PoolService.FindPoolsSort.title_d;
-				}
-				else
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
-				}
-			}
-			else
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
-			}
+			sort = PoolService.FindPoolsSort.title_d;
 		}
 		else
 		{
-			// default sort: title ascending
-			sort = PoolService.FindPoolsSort.title_a;
-
-			context.put("sort_column", '0');
-			context.put("sort_direction", 'A');
-
+			throw new IllegalArgumentException();
 		}
 
-		// how many pools, total?
+		// paging parameter
+		String pagingParameter = "1-30";
+		if (params.length > 3) pagingParameter = params[3];
 		Integer maxPools = this.poolService.countPools(toolManager.getCurrentPlacement().getContext(), null);
-
-		// default paging
-		if (pagingParameter == null)
-		{
-			pagingParameter = "1-30";
-		}
-
-		// paging
 		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxPools);
 		paging.setCurrentAndSize(pagingParameter);
@@ -165,10 +124,6 @@ public class PoolsView extends ControllerImpl
 		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), sort, null, paging.getCurrent(), paging
 				.getSize());
 		context.put("pools", pools);
-
-		// for the checkboxes
-		Values values = this.uiService.newValues();
-		context.put("poolids", values);
 
 		// disable the tool navigation to this view
 		context.put("disablePools", Boolean.TRUE);
@@ -191,18 +146,28 @@ public class PoolsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// sort, paging (both optional)
 		if ((params.length != 2) && (params.length != 3) && (params.length != 4))
 		{
 			throw new IllegalArgumentException();
 		}
-		
+
+		// security
 		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 		{
-			//redirect to error
+			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
-		
+
+		// sort parameter
+		String sortCode = "0A";
+		if (params.length > 2) sortCode = params[2];
+
+		// paging parameter
+		String pagingParameter = "1-30";
+		if (params.length > 3) pagingParameter = params[3];
+
 		// for the selected pools to delete
 		Values values = this.uiService.newValues();
 		context.put("poolids", values);
@@ -210,97 +175,96 @@ public class PoolsView extends ControllerImpl
 		// read form
 		String destination = this.uiService.decode(req, context);
 
-		String[] selectedPoolIds = values.getValues();
-
-		if (destination != null)
+		if (destination.equals("DELETE"))
 		{
-
-			if (destination.startsWith("/pools_delete"))
+			for (String id : values.getValues())
 			{
-				// delete the pools
-				if (selectedPoolIds != null && (selectedPoolIds.length > 0))
+				Pool pool = this.poolService.getPool(id);
+				if (pool != null)
 				{
-					StringBuilder path = new StringBuilder();
-					String separator = "+";
-
-					path.append(destination);
-					path.append("/");
-
-					for (String selectedPoolId : selectedPoolIds)
+					try
 					{
-						path.append(selectedPoolId);
-						path.append(separator);
+						this.poolService.removePool(pool);
 					}
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
-					return;
-				}
-			}
-			else if (destination.trim().startsWith("/pool_properties"))
-			{
-				try
-				{
-					// create new pool and redirect to pool properties
-					Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext());
-
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination + "/" + newPool.getId())));
-					return;
-				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
-			}
-			else if (destination.trim().startsWith("/COMBINE"))
-			{
-				try
-				{
-					// create new pool and redirect to pool properties
-					Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext());
-
-					if (selectedPoolIds != null && (selectedPoolIds.length > 0))
-					{
-						for (String selectedPoolId : selectedPoolIds)
-						{
-							Pool sourcePool = this.poolService.getPool(selectedPoolId);
-							this.questionService.copyPoolQuestions(sourcePool, newPool);
-						}
-
-						destination = destination.replace("COMBINE", "pool_properties");
-						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination + "/" + newPool.getId())));
-						return;
-					}
-					else
+					catch (AssessmentPermissionException e)
 					{
 						// redirect to error
 						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 						return;
 					}
 				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
 			}
-			else if (destination.trim().startsWith("/pool_duplicate"))
-			{
-				try
-				{
-					Pool pool = this.poolService.getPool(destination.substring(destination.lastIndexOf("/") + 1));
-					if (pool != null) this.poolService.copyPool(toolManager.getCurrentPlacement().getContext(), pool);
 
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
-					return;
-				}
-				catch (AssessmentPermissionException e)
+			destination = context.getDestination();
+		}
+
+		else if (destination.equals("ADD"))
+		{
+			try
+			{
+				// create new pool
+				Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext());
+
+				// edit it next
+				destination = "/pool_properties/" + sortCode + "/" + pagingParameter + "/" + newPool.getId();
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+		}
+
+		else if (destination.equals("COMBINE"))
+		{
+			try
+			{
+				// create a new pool
+				Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext());
+
+				// copy in all the questions
+				for (String id : values.getValues())
 				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
+					Pool sourcePool = this.poolService.getPool(id);
+					this.questionService.copyPoolQuestions(sourcePool, newPool);
 				}
+
+				// edit it next
+				destination = "/pool_properties/" + sortCode + "/" + pagingParameter + "/" + newPool.getId();
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+		}
+
+		else if (destination.startsWith("DUPLICATE:"))
+		{
+			String[] parts = StringUtil.split(destination, ":");
+			if (parts.length != 2)
+			{
+				throw new IllegalArgumentException();
+			}
+			String pid = parts[1];
+			try
+			{
+				Pool pool = this.poolService.getPool(pid);
+				if (pool != null)
+				{
+					this.poolService.copyPool(toolManager.getCurrentPlacement().getContext(), pool);
+				}
+
+				// stay here
+				destination = context.getDestination();
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
 			}
 		}
 
@@ -327,15 +291,6 @@ public class PoolsView extends ControllerImpl
 	public void setQuestionService(QuestionService service)
 	{
 		this.questionService = service;
-	}
-
-	/**
-	 * @param sessionManager
-	 *        the SessionManager.
-	 */
-	public void setSessionManager(SessionManager sessionManager)
-	{
-		this.sessionManager = sessionManager;
 	}
 
 	/**

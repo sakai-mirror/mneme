@@ -54,37 +54,22 @@
 				</destination>
 			</pager>
 			<columns>
-				<selectionColumn multiple="TRUE">
+				<selectionColumn multiple="TRUE" pixels="16">
 					<value>
 						<model type="text" ref="pool.id" />
 					</value>
 					<model ref="poolids.values" />
 					<entityActions>
-						<navigation title="add-pool-title" style="LINK" description="add-pool-description" submit="TRUE">
+						<navigation title="add-pool-title" style="LINK" description="add-pool-description" submit="TRUE" destination="ADD">
 							<icon icon="/icons/document_add.png" style="LEFT" />
-							<destination template="/pool_properties/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="pagingParameter" />
-							</destination>
 						</navigation>
 						<navigation selectRequirement="MULTIPLE" selectRequirementMessage="combine-failed-requirements" title="combine-title"
-							style="LINK" description="combine-description" disabled="FALSE" submit="TRUE">
+							style="LINK" description="combine-description" disabled="FALSE" submit="TRUE" destination="COMBINE">
 							<icon icon="/icons/combine_pools.png" style="LEFT" />
-							<destination template="/COMBINE/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="pagingParameter" />
-							</destination>
 						</navigation>
 						<navigation selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements" title="delete-title" style="LINK"
-							description="delete-description" submit="TRUE">
+							description="delete-description" submit="TRUE" destination="DELETE">
 							<icon icon="/icons/delete.png" style="LEFT" />
-							<destination template="/pools_delete/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="pagingParameter" />
-							</destination>
 							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-delete" />
 						</navigation>
 					</entityActions>
@@ -168,7 +153,7 @@
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="pool-duplicate-description">
 							<icon icon="/icons/copy.png" style="RIGHT" />
-							<destination template="/pool_duplicate/{0}">
+							<destination template="DUPLICATE:{0}">
 								<model ref="pool.id" />
 							</destination>
 						</navigation>

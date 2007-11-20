@@ -22,8 +22,6 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,12 +38,12 @@ import org.muse.mneme.api.Part;
 import org.sakaiproject.util.Web;
 
 /**
- * The /??? view for the mneme tool.
+ * The /assessment_invalid view for the mneme tool.
  */
-public class TestInvalidView extends ControllerImpl
+public class AssessmentInvalidView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(TestInvalidView.class);
+	private static Log M_log = LogFactory.getLog(AssessmentInvalidView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;

@@ -40,10 +40,10 @@ import org.sakaiproject.util.Web;
 /**
  * The /assessment_access view for the mneme tool.
  */
-public class TestAccessView extends ControllerImpl
+public class AssessmentAccessView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(AssessmentSettingsView.class);
+	private static Log M_log = LogFactory.getLog(AssessmentAccessView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;

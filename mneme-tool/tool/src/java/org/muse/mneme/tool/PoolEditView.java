@@ -34,13 +34,10 @@ import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
-import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
@@ -53,9 +50,6 @@ public class PoolEditView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(PoolEditView.class);
 
-	/** Dependency: mneme service. */
-	protected MnemeService mnemeService = null;
-
 	/** Pool Service */
 	protected PoolService poolService = null;
 
@@ -64,18 +58,6 @@ public class PoolEditView extends ControllerImpl
 
 	/** Dependency: ToolManager */
 	protected ToolManager toolManager = null;
-
-	/** Dependency: SessionManager */
-	protected SessionManager sessionManager = null;
-
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		super.init();
-		M_log.info("init()");
-	}
 
 	/**
 	 * Shutdown.
@@ -90,7 +72,11 @@ public class PoolEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if ((params.length != 4) && (params.length != 5) && (params.length != 6) && (params.length != 7)) throw new IllegalArgumentException();
+		// pools sort, pools paging, pool id, optional sort, optional paging
+		if ((params.length != 5) && (params.length != 6) && (params.length != 7))
+		{
+			throw new IllegalArgumentException();
+		}
 
 		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 		{
@@ -99,81 +85,56 @@ public class PoolEditView extends ControllerImpl
 			return;
 		}
 
-		// pools - sort at index 2, paging at index 3. pool id at index 4. Move pool_edit sort to index 5, paging to index 6
-		// pools sort parameter is in param array at index 2
+		// pools view sort
 		String poolsSortCode = null;
 		poolsSortCode = params[2];
 		context.put("poolsSortCode", poolsSortCode);
 
-		// pools paging parameter - is in param array at index 3
+		// pools view paging parameter
 		String poolsPagingParameter = null;
 		poolsPagingParameter = params[3];
 		context.put("poolsPagingParameter", poolsPagingParameter);
 
-		// setup the model: the selected pool - pool id is at index 4
-		Pool pool = this.poolService.getPool(params[4]);
+		// pool
+		String pid = params[4];
+		Pool pool = this.poolService.getPool(pid);
+		if (pool == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
 		context.put("pool", pool);
 
-		// sort parameter - sort is in param array at index 5
-		String sortCode = null;
+		// sort
+		String sortCode = "0A";
 		if (params.length > 5) sortCode = params[5];
-
-		// paging parameter - is in param array at index 6
-		String pagingParameter = null;
-		if (params.length == 7) pagingParameter = params[6];
-
-		// default sort is title ascending
-		QuestionService.FindQuestionsSort sort;
-		if (sortCode != null)
+		if ((sortCode == null) || (sortCode.length() != 2))
 		{
-			if (sortCode.trim().length() == 2)
-			{
-				context.put("sort_column", sortCode.charAt(0));
-				context.put("sort_direction", sortCode.charAt(1));
-
-				// 0 is description
-				if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
-					sort = QuestionService.FindQuestionsSort.description_a;
-				else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
-					sort = QuestionService.FindQuestionsSort.description_d;
-				// 1 is type
-				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
-					sort = QuestionService.FindQuestionsSort.type_a;
-				else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
-					sort = QuestionService.FindQuestionsSort.type_d;
-				else
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
-				}
-			}
-			else
-			{
-				// redirect to error
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-				return;
-			}
+			throw new IllegalArgumentException();
 		}
+		context.put("sort_column", sortCode.charAt(0));
+		context.put("sort_direction", sortCode.charAt(1));
+		QuestionService.FindQuestionsSort sort = null;
+		// 0 is description
+		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
+			sort = QuestionService.FindQuestionsSort.description_a;
+		else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
+			sort = QuestionService.FindQuestionsSort.description_d;
+		// 1 is type
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
+			sort = QuestionService.FindQuestionsSort.type_a;
+		else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
+			sort = QuestionService.FindQuestionsSort.type_d;
 		else
 		{
-			// default sort: description ascending
-			sort = QuestionService.FindQuestionsSort.description_a;
-
-			context.put("sort_column", '0');
-			context.put("sort_direction", 'A');
+			throw new IllegalArgumentException();
 		}
-
-		// default paging
-		if (pagingParameter == null)
-		{
-			// TODO: other than 2 size!
-			pagingParameter = "1-30";
-		}
-		// total questions
-		Integer maxQuestions = this.questionService.countQuestions(pool, null);
 
 		// paging
+		String pagingParameter = "1-30";
+		if (params.length > 6) pagingParameter = params[6];
+		Integer maxQuestions = this.questionService.countQuestions(pool, null);
 		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxQuestions);
 		paging.setCurrentAndSize(pagingParameter);
@@ -184,11 +145,16 @@ public class PoolEditView extends ControllerImpl
 		List<Question> questions = questionService.findQuestions(pool, sort, null, paging.getCurrent(), paging.getSize());
 		context.put("questions", questions);
 
-		// for the checkboxes
-		Values values = this.uiService.newValues();
-		context.put("questionids", values);
-
 		uiService.render(ui, context);
+	}
+
+	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		super.init();
+		M_log.info("init()");
 	}
 
 	/**
@@ -196,8 +162,11 @@ public class PoolEditView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if ((params.length != 3) && (params.length != 4) && (params.length != 5) && (params.length != 6) && (params.length != 7))
+		// pools sort, pools paging, pool id, optional sort, optional paging
+		if ((params.length != 5) && (params.length != 6) && (params.length != 7))
+		{
 			throw new IllegalArgumentException();
+		}
 
 		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 		{
@@ -206,15 +175,6 @@ public class PoolEditView extends ControllerImpl
 			return;
 		}
 
-		String poolsSortCode = null;
-		if (params.length > 2) poolsSortCode = params[2];
-		context.put("poolsSortCode", poolsSortCode);
-
-		// pools paging parameter - is in param array at index 3
-		String poolsPagingParameter = null;
-		if (params.length > 3) poolsPagingParameter = params[3];
-		context.put("poolsPagingParameter", poolsPagingParameter);
-
 		// for the selected questions to delete
 		Values values = this.uiService.newValues();
 		context.put("questionids", values);
@@ -222,106 +182,75 @@ public class PoolEditView extends ControllerImpl
 		// read form
 		String destination = this.uiService.decode(req, context);
 
-		String[] selectedQuestionIds = values.getValues();
-
-		if (destination != null)
+		if (destination.equals("DELETE"))
 		{
-			if (destination.startsWith("/questions_delete"))
+			for (String id : values.getValues())
 			{
-				// delete the questions
-				if (selectedQuestionIds != null && (selectedQuestionIds.length > 0))
+				Question question = this.questionService.getQuestion(id);
+				if (question != null)
 				{
-					StringBuffer path = new StringBuffer();
-					String separator = "+";
-
-					path.append(destination);
-					path.append("/");
-
-					for (String selectedQuestionId : selectedQuestionIds)
+					try
 					{
-						path.append(selectedQuestionId);
-						path.append(separator);
+						this.questionService.removeQuestion(question);
 					}
-
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
-					return;
-				}
-			}
-			else if (destination.trim().startsWith("/question_duplicate"))
-			{
-				try
-				{
-					String destinationParams[] = destination.split("/");
-					Question question = this.questionService.getQuestion(destinationParams[5]);
-
-					if (question != null)
+					catch (AssessmentPermissionException e)
 					{
-						// copy within the same pool
-						this.questionService.copyQuestion(question, null);
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+						return;
 					}
-
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, context.getDestination())));
-					return;
-				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
 				}
 			}
-			else if ((destination.trim().startsWith("/question_copy")) || (destination.trim().startsWith("/question_move")))
+
+			// stay here
+			destination = context.getDestination();
+		}
+
+		else if (destination.trim().startsWith("DUPLICATE:"))
+		{
+			String[] parts = StringUtil.split(destination, ":");
+			if (parts.length != 2)
 			{
-				if (selectedQuestionIds != null && (selectedQuestionIds.length > 0))
-				{
-					StringBuffer path = new StringBuffer();
-					String separator = "+";
-
-					path.append(destination);
-					path.append("/");
-
-					for (String selectedQuestionId : selectedQuestionIds)
-					{
-						path.append(selectedQuestionId);
-						path.append(separator);
-					}
-
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, path.toString())));
-					return;
-				}
+				throw new IllegalArgumentException();
 			}
-			// handle adding a question
-			else if (destination.startsWith("/select_question_type"))
+			String qid = parts[1];
+			try
 			{
-				Pool pool = this.poolService.getPool(params[4]);
-
-				if (pool == null)
+				Question question = this.questionService.getQuestion(qid);
+				if (question != null)
 				{
-					// TODO: do this better!
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-					return;
+					// copy within the same pool
+					this.questionService.copyQuestion(question, null);
 				}
 
-				// check security
-				if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
-				// redirect
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
+				// stay here
+				destination = context.getDestination();
 			}
-			else
+			catch (AssessmentPermissionException e)
 			{
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 				return;
 			}
 		}
 
-		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+		else if ((destination.trim().startsWith("/question_copy")) || (destination.trim().startsWith("/question_move")))
+		{
+			// add the selected ids to the destination
+			StringBuilder buf = new StringBuilder();
+			buf.append(destination);
+			buf.append("/");
+			for (String id : values.getValues())
+			{
+				buf.append(id);
+				buf.append("+");
+			}
+			buf.setLength(buf.length() - 1);
 
+			destination = buf.toString();
+		}
+
+		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
@@ -343,15 +272,6 @@ public class PoolEditView extends ControllerImpl
 	}
 
 	/**
-	 * @param sessionManager
-	 *        the sessionManager to set
-	 */
-	public void setSessionManager(SessionManager sessionManager)
-	{
-		this.sessionManager = sessionManager;
-	}
-
-	/**
 	 * @param toolManager
 	 *        the toolManager to set
 	 */
@@ -359,14 +279,4 @@ public class PoolEditView extends ControllerImpl
 	{
 		this.toolManager = toolManager;
 	}
-
-	/**
-	 * @param mnemeService
-	 *        the mnemeService to set
-	 */
-	public void setMnemeService(MnemeService mnemeService)
-	{
-		this.mnemeService = mnemeService;
-	}
-
 }

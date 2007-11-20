@@ -64,7 +64,11 @@ public class PoolPropertiesView extends ControllerImpl
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// pools sort, pools page, pool id
-		if (params.length != 5) throw new IllegalArgumentException();
+		if (params.length != 5)
+		{
+			throw new IllegalArgumentException();
+		}
+
 		String poolsSort = params[2];
 		String poolsPaging = params[3];
 		String pid = params[4];

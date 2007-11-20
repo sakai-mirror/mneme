@@ -42,10 +42,10 @@ import org.sakaiproject.util.Web;
 /**
  * The /assessments_restore view for the mneme tool.
  */
-public class TestsRestoreView extends ControllerImpl
+public class AssessmentsRestoreView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(TestsRestoreView.class);
+	private static Log M_log = LogFactory.getLog(AssessmentsRestoreView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
@@ -77,10 +77,6 @@ public class TestsRestoreView extends ControllerImpl
 		// collect the archived assessments in this context
 		List<Assessment> assessments = this.assessmentService.getArchivedAssessments(this.toolManager.getCurrentPlacement().getContext());
 		context.put("archived", assessments);
-
-		// value holders for the selection checkboxes
-		Values values = this.uiService.newValues();
-		context.put("ids", values);
 
 		// render
 		uiService.render(ui, context);
@@ -115,9 +111,8 @@ public class TestsRestoreView extends ControllerImpl
 		// read the form
 		String destination = uiService.decode(req, context);
 
-		// un-archive these tests, here and now
-		String[] selectedTestIds = values.getValues();
-		for (String id : selectedTestIds)
+		// restore
+		for (String id : values.getValues())
 		{
 			Assessment assessment = this.assessmentService.getAssessment(id);
 			if (assessment != null)
@@ -164,6 +159,6 @@ public class TestsRestoreView extends ControllerImpl
 	 */
 	public void setToolManager(ToolManager manager)
 	{
-		toolManager = manager;
+		this.toolManager = manager;
 	}
 }

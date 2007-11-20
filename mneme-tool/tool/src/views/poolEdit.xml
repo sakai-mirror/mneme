@@ -66,7 +66,7 @@
 				<message selector="no-questions" />
 			</emptyTitle>
 			<columns>
-				<selectionColumn multiple="TRUE">
+				<selectionColumn multiple="TRUE" pixels="16">
 					<value>
 						<model type="text" ref="question.id" />
 					</value>
@@ -108,16 +108,8 @@
 							</destination>
 						</navigation>
 						<navigation title="delete-title" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements" style="LINK"
-							description="delete-description" submit="TRUE">
+							description="delete-description" submit="TRUE" destination="DELETE">
 							<icon icon="/icons/delete.png" style="LEFT" />
-							<destination template="/questions_delete/{0}/{1}/{2}/{3}{4}/{5}">
-								<model ref="poolsSortCode" />
-								<model ref="poolsPagingParameter" />
-								<model ref="pool.id" />
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="pagingParameter" />
-							</destination>
 							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-delete" />
 						</navigation>
 						<pager paging="paging" submit="TRUE">
@@ -132,12 +124,9 @@
 						</pager>
 					</entityActions>
 				</selectionColumn>
-				<column>
-					<title>
-						<message selector="question-preview" />
-					</title>
+				<column pixels="16">
 					<navigations>
-						<navigation style="LINK" submit="TRUE">
+						<navigation style="LINK" submit="TRUE" description="view-question">
 							<icon icon="/icons/preview.png" style="LEFT" />
 							<destination template="/question_preview/{0}/pool_edit/{1}/{2}/{3}/{4}{5}">
 								<model ref="question.id" />
@@ -230,10 +219,7 @@
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="question-duplicate-description">
 							<icon icon="/icons/copy.png" style="LEFT" />
-							<destination template="/question_duplicate/{0}/{1}/{2}/{3}">
-								<model ref="poolsSortCode" />
-								<model ref="poolsPagingParameter" />
-								<model ref="pool.id" />
+							<destination template="DUPLICATE:{0}">
 								<model ref="question.id" />
 							</destination>
 						</navigation>

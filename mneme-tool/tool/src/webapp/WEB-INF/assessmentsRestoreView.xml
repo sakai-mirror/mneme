@@ -26,8 +26,8 @@
 
 <beans>
 
-	<bean id="org.muse.mneme.tool.TestsRestoreView"
-			class="org.muse.mneme.tool.TestsRestoreView"
+	<bean id="org.muse.mneme.tool.AssessmentsRestoreView"
+			class="org.muse.mneme.tool.AssessmentsRestoreView"
 			init-method="init"
 			destroy-method="destroy"
 			singleton="true">
@@ -38,9 +38,9 @@
  
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>assessments_restore</value></property>
- 		<property name="bundle"><value>testsRestore</value></property>
+ 		<property name="bundle"><value>assessmentsRestore</value></property>
 		<property name="shared"><value>mneme</value></property>
-		<property name="components"><value>testsRestore.xml</value></property>
+		<property name="components"><value>assessmentsRestore.xml</value></property>
 	</bean>
 
 </beans>
