@@ -52,7 +52,7 @@
 					<emptyTitle>
 						<message selector="no-questions" />
 					</emptyTitle>
-					<pager paging="paging">
+					<pager paging="paging" submit="TRUE">
 						<destination template="/select_add_mpart_question/{0}/{1}/{2}/{3}{4}/{5}">
 							<model ref="assessmentSort" />
 							<model ref="assessment.id" />
@@ -103,7 +103,7 @@
 								<message selector="question-type" />
 							</title>
 							<model ref="question.typeName" />
-							<sort>
+							<sort submit="TRUE">
 								<active>
 									<compareDecision model="sort_column" constant="1" />
 								</active>
@@ -135,7 +135,7 @@
 								<message selector="question-pool-title" />
 							</title>
 							<model ref="question.pool.title" missing="no-title" />
-							<sort>
+							<sort submit="TRUE">
 								<active>
 									<compareDecision model="sort_column" constant="0" />
 								</active>
@@ -173,7 +173,7 @@
 								<message selector="question-points" />
 							</title>
 							<model ref="question.pool.points" />
-							<sort>
+							<sort submit="TRUE">
 								<active>
 									<compareDecision model="sort_column" constant="2" />
 								</active>
