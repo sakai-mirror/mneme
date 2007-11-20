@@ -89,7 +89,7 @@
 						</navigation>
 					</entityActions>
 				</selectionColumn>
-				<modelColumn pixels="16">
+				<modelColumn em="4" centered="TRUE">
 					<title>
 						<message selector="assessment-type" />
 					</title>
@@ -180,8 +180,7 @@
 						</navigation>
 					</container>
 				</column>
-
-				<column>
+				<column em="16">
 					<title>
 						<message selector="assessment-odate" />
 					</title>
@@ -207,7 +206,7 @@
 						</dateEdit>
 					</container>
 				</column>
-				<column>
+				<column em="16">
 					<title>
 						<message selector="assessment-ddate" />
 					</title>
@@ -233,10 +232,7 @@
 						</dateEdit>
 					</container>
 				</column>
-				<column centered="TRUE">
-					<title>
-						<message selector="assessment-status" />
-					</title>
+				<column pixels="48" centered="TRUE">
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="live-alt">
 							<icon icon="/icons/grade_student.png" style="LEFT" />
@@ -261,7 +257,7 @@
 						</navigation>
 					</navigations>
 				</column>
-				<column centered="TRUE">
+				<column pixels="16" centered="TRUE">
 					<title>
 						<message selector="publish" />
 					</title>
@@ -306,10 +302,7 @@
 						</navigation>
 					</navigations>
 				</column>
-				<column centered="TRUE">
-					<title>
-						<message selector="access" />
-					</title>
+				<column centered="TRUE" pixels="64" wrap="FALSE">
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="special-access">
 							<icon icon="/icons/access.png" style="LEFT" />
@@ -319,14 +312,8 @@
 								<model ref="assessment.id" />
 							</destination>
 						</navigation>
-					</navigations>
-				</column>
-				<column centered="TRUE">
-					<title>
-						<message selector="copy" />
-					</title>
-					<navigations>
-						<navigation style="LINK" submit="TRUE" description="copy">
+						<text selector="blank" />
+						<navigation style="LINK" submit="TRUE" description="duplicate">
 							<icon icon="/icons/page_copy.png" style="LEFT" />
 							<destination template="DUPLICATE:{0}">
 								<model ref="assessment.id" />
@@ -334,7 +321,6 @@
 						</navigation>
 					</navigations>
 				</column>
-
 			</columns>
 		</entityList>
 
