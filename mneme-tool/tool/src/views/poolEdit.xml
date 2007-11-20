@@ -217,10 +217,7 @@
 						</desc>
 					</sort>
 				</modelColumn>
-				<modelColumn>
-					<title>
-						<message selector="question-duplicate" />
-					</title>
+				<modelColumn pixels="16">
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="question-duplicate-description">
 							<icon icon="/icons/copy.png" style="LEFT" />

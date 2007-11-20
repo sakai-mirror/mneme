@@ -89,9 +89,9 @@
 						</navigation>
 					</entityActions>
 				</selectionColumn>
-				<modelColumn em="4">
+				<modelColumn pixels="16">
 					<title>
-						<message selector="assessment-view" />
+						<message selector="assessment-type" />
 					</title>
 					<sort submit="TRUE">
 						<active>

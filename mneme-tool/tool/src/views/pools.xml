@@ -74,6 +74,19 @@
 						</navigation>
 					</entityActions>
 				</selectionColumn>
+				<modelColumn pixels="16">
+					<navigations>
+						<navigation style="LINK" description="pool-edit-description">
+							<icon icon="/icons/edit.png" style="LEFT" />
+							<destination template="/pool_properties/{0}{1}/{2}/{3}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model type="paging" ref="paging" />
+								<model ref="pool.id" />
+							</destination>
+						</navigation>
+					</navigations>
+				</modelColumn>
 				<modelColumn>
 					<title>
 						<message selector="pool-title" />
@@ -134,26 +147,7 @@
 					</title>
 					<model ref="pool.difficulty" />
 				</modelColumn>
-				<modelColumn>
-					<title>
-						<message selector="pool-edit" />
-					</title>
-					<navigations>
-						<navigation style="LINK" description="pool-edit-description">
-							<icon icon="/icons/edit.png" style="LEFT" />
-							<destination template="/pool_properties/{0}{1}/{2}/{3}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model type="paging" ref="paging" />
-								<model ref="pool.id" />
-							</destination>
-						</navigation>
-					</navigations>
-				</modelColumn>
-				<modelColumn>
-					<title>
-						<message selector="pool-duplicate" />
-					</title>
+				<modelColumn pixels="16">
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="pool-duplicate-description">
 							<icon icon="/icons/copy.png" style="RIGHT" />
