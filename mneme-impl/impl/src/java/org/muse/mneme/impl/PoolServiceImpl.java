@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,10 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.SecurityService;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
+import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.util.ResourceLoader;
+import org.sakaiproject.util.Validator;
 
 /**
  * <p>
@@ -49,8 +53,14 @@ public class PoolServiceImpl implements PoolService
 
 	protected AssessmentServiceImpl assessmentService = null;
 
+	/** Messages bundle name. */
+	protected String bundle = null;
+
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
+
+	/** Messages. */
+	protected transient InternationalizedMessages messages = null;
 
 	protected QuestionServiceImpl questionService = null;
 
@@ -125,6 +135,9 @@ public class PoolServiceImpl implements PoolService
 		rv.getCreatedBy().setUserId(userId);
 		rv.getModifiedBy().setDate(now);
 		rv.getModifiedBy().setUserId(userId);
+
+		// add to the title
+		rv.setTitle(addDate("copy-text", rv.getTitle(), now));
 
 		// clear the changed settings
 		((PoolImpl) rv).clearChanged();
@@ -225,6 +238,9 @@ public class PoolServiceImpl implements PoolService
 
 			if (storage == null) M_log.warn("no storage set: " + this.storageKey);
 
+			// messages
+			if (this.bundle != null) this.messages = new ResourceLoader(this.bundle);
+
 			M_log.info("init()");
 		}
 		catch (Throwable t)
@@ -322,6 +338,17 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
+	 * Set the message bundle.
+	 * 
+	 * @param bundle
+	 *        The message bundle.
+	 */
+	public void setBundle(String name)
+	{
+		this.bundle = name;
+	}
+
+	/**
 	 * Dependency: EventTrackingService.
 	 * 
 	 * @param service
@@ -396,6 +423,34 @@ public class PoolServiceImpl implements PoolService
 	public void setStorageKey(String key)
 	{
 		this.storageKey = key;
+	}
+
+	/**
+	 * Add a formatted date to a source string, using a message selector.
+	 * 
+	 * @param selector
+	 *        The message selector.
+	 * @param source
+	 *        The original string.
+	 * @param date
+	 *        The date to format.
+	 * @return The source and date passed throught the selector message.
+	 */
+	protected String addDate(String selector, String source, Date date)
+	{
+		// format the date
+		DateFormat format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
+		String fmt = format.format(date);
+
+		// the args
+		Object[] args = new Object[2];
+		args[0] = source;
+		args[1] = fmt;
+
+		// format the works
+		String rv = this.messages.getFormattedMessage(selector, args);
+
+		return rv;
 	}
 
 	/**

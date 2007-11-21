@@ -57,6 +57,8 @@
 		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 
+		<property name="bundle"><value>mnemeImpl</value></property>
+
 		<property name="storage">
 			<map>
 				<!-- <entry key="default"><ref bean="org.muse.mneme.impl.PoolStorageDefault"/></entry> -->

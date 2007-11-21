@@ -70,6 +70,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 	protected Object idGenerator = new Object();
 
+	/** Messages. */
 	protected transient InternationalizedMessages messages = null;
 
 	protected long nextAccessId = 100;
