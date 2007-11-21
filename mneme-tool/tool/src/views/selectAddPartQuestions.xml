@@ -188,13 +188,7 @@
 								</desc>
 							</sort>
 						</modelColumn>
-						<modelColumn>
-							<title>
-								<message selector="question-difficulty" />
-							</title>
-							<model ref="question.pool.difficulty" />
-						</modelColumn>
-						<modelColumn>
+						<modelColumn em="5">
 							<title>
 								<message selector="question-points" />
 							</title>
@@ -225,6 +219,12 @@
 									</destination>
 								</desc>
 							</sort>
+						</modelColumn>
+						<modelColumn em="5">
+							<title>
+								<message selector="question-difficulty" />
+							</title>
+							<model ref="question.pool.difficulty" />
 						</modelColumn>
 					</columns>
 				</entityList>

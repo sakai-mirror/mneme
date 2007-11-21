@@ -110,7 +110,7 @@
 								<decision model="assessment.isLive" />
 							</readOnly>
 						</selectionColumn>
-						<orderColumn>
+						<orderColumn em="4">
 							<title>
 								<message selector="question-order" />
 							</title>
@@ -141,7 +141,7 @@
 							</title>
 							<model type="text" ref="question.description" missing="no-title" stripHtml="TRUE" max="60" />
 						</modelColumn>
-						<modelColumn>
+						<modelColumn em="10">
 							<title>
 								<message selector="question-type" />
 							</title>
@@ -153,17 +153,17 @@
 							</title>
 							<model ref="question.pool.title" missing="no-title" />
 						</modelColumn>
-						<modelColumn>
-							<title>
-								<message selector="difficulty" />
-							</title>
-							<model ref="question.pool.difficulty" />
-						</modelColumn>
-						<modelColumn>
+						<modelColumn em="5">
 							<title>
 								<message selector="points" />
 							</title>
 							<model ref="question.pool.points" />
+						</modelColumn>
+						<modelColumn em="5">
+							<title>
+								<message selector="difficulty" />
+							</title>
+							<model ref="question.pool.difficulty" />
 						</modelColumn>
 					</columns>
 				</entityList>
