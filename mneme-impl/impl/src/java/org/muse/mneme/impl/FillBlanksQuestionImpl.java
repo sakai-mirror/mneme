@@ -177,6 +177,10 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		instructions.setId("instructions");
 		instructions.add(this.uiService.newText().setText("instructions-title", this.uiService.newIconPropertyReference().setIcon("/icons/test.png")));
 		instructions.add(this.uiService.newText().setText("instructions"));
+		instructions.add(this.uiService.newGap());
+		instructions.add(this.uiService.newToggle().setTarget("instructions").setTitle("close").setIcon("/icons/close.png",
+				Navigation.IconStyle.left));
+		instructions.add(this.uiService.newGap());
 		instructions.add(this.uiService.newText().setTitle("examples-title"));
 		instructions.add(this.uiService.newText().setText("example1").setTitle("example1-title"));
 		instructions.add(this.uiService.newText().setText("example2").setTitle("example2-title"));
