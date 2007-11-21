@@ -88,23 +88,26 @@ public class AssessmentEditView extends ControllerImpl
 			return;
 		}
 
-		// clear the assessment of any empty parts
-		try
+		// clear the assessment of any empty parts (if not mint, which would end up causing it to become a stale mint and vanish!)
+		if (!assessment.getMint())
 		{
-			assessment.getParts().removeEmptyParts();
-			this.assessmentService.saveAssessment(assessment);
-		}
-		catch (AssessmentPermissionException e)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
-		catch (AssessmentPolicyException e)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
-			return;
+			try
+			{
+				assessment.getParts().removeEmptyParts();
+				this.assessmentService.saveAssessment(assessment);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+			catch (AssessmentPolicyException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+				return;
+			}
 		}
 
 		// collect information: the selected assessment
