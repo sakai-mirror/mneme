@@ -81,12 +81,22 @@ public class FormatListDecorationDelegate extends FormatDelegateImpl
 						+ context.getMessages().getString("format-list-decoration-todo") + "</span>";
 			}
 
+			case overdueReady:
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/exit.gif\" alt=\""
+				+ context.getMessages().getString("format-list-decoration-inprogress") + "\" />" + "<img src=\""
+				+ context.get("sakai.return.url") + "/icons/warning.png\" alt=\""
+				+ context.getMessages().getString("format-list-decoration-urgent") + "\" />" + "<br /><span style=\"font-size:smaller\">"
+				+ context.getMessages().getString("format-list-decoration-overdue-ready") + "</span>";
+			}
+
 			case inProgressAlert:
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/exit.gif\" alt=\""
-						+ context.getMessages().getString("format-list-decoration-inprogress") + "\" />" + "<img src=\"" + context.get("sakai.return.url")
-						+ "/icons/warning.png\" alt=\"" + context.getMessages().getString("format-list-decoration-urgent") + "\" />"
-						+ "<br /><span style=\"font-size:smaller\">" + context.getMessages().getString("format-list-decoration-inprogress-urgent") + "</span>";
+						+ context.getMessages().getString("format-list-decoration-inprogress") + "\" />" + "<img src=\""
+						+ context.get("sakai.return.url") + "/icons/warning.png\" alt=\""
+						+ context.getMessages().getString("format-list-decoration-urgent") + "\" />" + "<br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("format-list-decoration-inprogress-urgent") + "</span>";
 			}
 
 			case inProgress:
@@ -99,9 +109,19 @@ public class FormatListDecorationDelegate extends FormatDelegateImpl
 			case completeReady:
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/finish.gif\" alt=\""
-						+ context.getMessages().getString("format-list-decoration-complete") + "\" />" + "<img src=\"" + context.get("sakai.return.url")
-						+ "/icons/begin.gif\" alt=\"" + context.getMessages().getString("format-list-decoration-repeat") + "\" />"
-						+ "<br /><span style=\"font-size:smaller\">" + context.getMessages().getString("format-list-decoration-complete-repeat") + "</span>";
+						+ context.getMessages().getString("format-list-decoration-complete") + "\" />" + "<img src=\""
+						+ context.get("sakai.return.url") + "/icons/begin.gif\" alt=\""
+						+ context.getMessages().getString("format-list-decoration-repeat") + "\" />" + "<br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("format-list-decoration-complete-repeat") + "</span>";
+			}
+
+			case overdueCompleteReady:
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/finish.gif\" alt=\""
+						+ context.getMessages().getString("format-list-decoration-complete") + "\" />" + "<img src=\""
+						+ context.get("sakai.return.url") + "/icons/begin.gif\" alt=\""
+						+ context.getMessages().getString("format-list-decoration-repeat") + "\" />" + "<br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("format-list-decoration-complete-repeat-overdue") + "</span>";
 			}
 
 			case complete:

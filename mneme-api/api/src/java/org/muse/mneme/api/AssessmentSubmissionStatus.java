@@ -28,5 +28,5 @@ package org.muse.mneme.api;
  */
 public enum AssessmentSubmissionStatus
 {
-	complete, completeReady, future, inProgress, inProgressAlert, other, over, ready
+	complete, completeReady, future, inProgress, inProgressAlert, other, over, overdueCompleteReady, overdueReady, ready
 }

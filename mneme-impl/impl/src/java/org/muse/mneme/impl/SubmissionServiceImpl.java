@@ -2103,7 +2103,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		List<Submission> over = new ArrayList<Submission>();
 		List<Submission> complete = new ArrayList<Submission>();
 		List<Submission> completeReady = new ArrayList<Submission>();
+		List<Submission> overdueCompleteReady = new ArrayList<Submission>();
 		List<Submission> ready = new ArrayList<Submission>();
+		List<Submission> overdueReady = new ArrayList<Submission>();
 		List<Submission> inProgress = new ArrayList<Submission>();
 		List<Submission> inProgressAlert = new ArrayList<Submission>();
 
@@ -2141,9 +2143,21 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					break;
 				}
 
+				case overdueCompleteReady:
+				{
+					overdueCompleteReady.add(s);
+					break;
+				}
+
 				case ready:
 				{
 					ready.add(s);
+					break;
+				}
+
+				case overdueReady:
+				{
+					overdueReady.add(s);
 					break;
 				}
 
@@ -2167,7 +2181,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		rv.addAll(over);
 		rv.addAll(complete);
 		rv.addAll(completeReady);
+		rv.addAll(overdueCompleteReady);
 		rv.addAll(ready);
+		rv.addAll(overdueReady);
 		rv.addAll(inProgress);
 		rv.addAll(inProgressAlert);
 

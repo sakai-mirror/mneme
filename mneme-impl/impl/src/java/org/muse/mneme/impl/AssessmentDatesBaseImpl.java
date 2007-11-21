@@ -117,6 +117,22 @@ public abstract class AssessmentDatesBaseImpl implements AssessmentDates
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsLate()
+	{
+		Date acceptUntil = getAcceptUntilDate();
+		Date due = getDueDate();
+		if ((acceptUntil != null) && (due != null))
+		{
+			Date now = new Date();
+			return Boolean.valueOf(now.after(due) && now.before(acceptUntil));
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsOpen(Boolean withGrace)
 	{
 		if (this.assessessment.getArchived()) return Boolean.TRUE;

@@ -260,6 +260,12 @@ public class SubmissionImpl implements Submission
 		// todo (not over, not started)
 		if ((getStartDate() == null) && !over)
 		{
+			// if overdue but ready
+			if (assessment.getDates().getIsLate())
+			{
+				return AssessmentSubmissionStatus.overdueReady;
+			}
+
 			return AssessmentSubmissionStatus.ready;
 		}
 
@@ -281,6 +287,12 @@ public class SubmissionImpl implements Submission
 			// if there are fewer sibs than allowed, add the todo image as well
 			if (!over && (getSiblingCount() != null) && ((assessment.getTries() == null) || (getSiblingCount().intValue() < assessment.getTries())))
 			{
+				// if overdue but ready
+				if (assessment.getDates().getIsLate())
+				{
+					return AssessmentSubmissionStatus.overdueCompleteReady;
+				}
+
 				return AssessmentSubmissionStatus.completeReady;
 			}
 

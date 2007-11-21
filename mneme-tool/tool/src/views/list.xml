@@ -164,7 +164,10 @@
 									<andDecision>
 										<hasValueDecision model="submission.assessment.dates.expiration" />
 										<orDecision>
-											<compareDecision model="submission.assessmentSubmissionStatus" constant="ready" />
+											<compareDecision model="submission.assessmentSubmissionStatus">
+												<constant value="ready" />
+												<constant value="overdueReady" />
+											</compareDecision>
 											<andDecision>
 												<compareDecision model="submission.assessmentSubmissionStatus">
 													<constant value="inProgress" />
@@ -195,7 +198,10 @@
 								<andDecision>
 									<hasValueDecision model="submission.assessment.dates.expiration" />
 									<orDecision>
-										<compareDecision model="submission.assessmentSubmissionStatus" constant="ready" />
+										<compareDecision model="submission.assessmentSubmissionStatus">
+											<constant value="ready" />
+											<constant value="overdueReady" />
+										</compareDecision>
 										<andDecision>
 											<compareDecision model="submission.assessmentSubmissionStatus">
 												<constant value="inProgress" />

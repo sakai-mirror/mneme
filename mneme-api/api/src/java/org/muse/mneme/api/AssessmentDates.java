@@ -73,6 +73,13 @@ public interface AssessmentDates
 	Boolean getIsClosed();
 
 	/**
+	 * Check if we are now between due and accept until dates.
+	 * 
+	 * @return TRUE if we are in the "late but open" period, FALSE if not.
+	 */
+	Boolean getIsLate();
+
+	/**
 	 * Check if the assessment is open for submissions - published, not archived, past open date, before submit-until date.
 	 * 
 	 * @param withGrace
@@ -99,7 +106,7 @@ public interface AssessmentDates
 	/**
 	 * Access the date after which submissions are not allowed. Computed based on due and accept-until dates.
 	 * 
-	 * @return The date after which submissinos are not allowed.
+	 * @return The date after which submissions are not allowed.
 	 */
 	Date getSubmitUntilDate();
 
