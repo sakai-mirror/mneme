@@ -323,6 +323,39 @@ public class AssessmentPartsImpl implements AssessmentParts
 	/**
 	 * {@inheritDoc}
 	 */
+	public void removeEmptyParts()
+	{
+		for (Iterator i = this.parts.iterator(); i.hasNext();)
+		{
+			Part part = (Part) i.next();
+
+			if ((part.getTitle() == null) && (part.getPresentation().getText() == null) && (part.getPresentation().getAttachments().isEmpty()))
+			{
+				if (part instanceof ManualPart)
+				{
+					ManualPart mpart = (ManualPart) part;
+					if (mpart.getQuestionsAsAuthored().isEmpty())
+					{
+						i.remove();
+						this.owner.setChanged();
+					}
+				}
+				else if (part instanceof DrawPart)
+				{
+					DrawPart dpart = (DrawPart) part;
+					if (dpart.getDraws().isEmpty())
+					{
+						i.remove();
+						this.owner.setChanged();
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void removePart(Part part)
 	{
 		this.parts.remove(part);

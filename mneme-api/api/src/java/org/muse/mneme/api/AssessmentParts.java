@@ -133,6 +133,11 @@ public interface AssessmentParts
 	Float getTotalPoints();
 
 	/**
+	 * Remove any parts that have no title, no description, and no questions.
+	 */
+	void removeEmptyParts();
+
+	/**
 	 * Remove this part.
 	 * 
 	 * @param part

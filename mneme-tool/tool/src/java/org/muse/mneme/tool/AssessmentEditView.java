@@ -88,6 +88,25 @@ public class AssessmentEditView extends ControllerImpl
 			return;
 		}
 
+		// clear the assessment of any empty parts
+		try
+		{
+			assessment.getParts().removeEmptyParts();
+			this.assessmentService.saveAssessment(assessment);
+		}
+		catch (AssessmentPermissionException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+		catch (AssessmentPolicyException e)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+			return;
+		}
+
 		// collect information: the selected assessment
 		context.put("assessment", assessment);
 		context.put("sortcode", sort);
@@ -170,20 +189,6 @@ public class AssessmentEditView extends ControllerImpl
 
 			else if (destination.equals("DELETE"))
 			{
-				// // destination for confirm delete
-				// StringBuilder path = new StringBuilder("/part_delete/" + sort + "/" + assessment.getId() + "/");
-				// String separator = "+";
-				//
-				// String[] deletePartIds = values.getValues();
-				// if (deletePartIds != null && deletePartIds.length != 0)
-				// {
-				// path.append(deletePartIds[0]);
-				// for (int i = 1; i < deletePartIds.length; i++)
-				// {
-				// path.append(separator);
-				// path.append(deletePartIds[i]);
-				// }
-				// }
 				for (String id : values.getValues())
 				{
 					Part part = assessment.getParts().getPart(id);
