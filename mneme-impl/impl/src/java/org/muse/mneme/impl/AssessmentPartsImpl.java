@@ -156,6 +156,22 @@ public class AssessmentPartsImpl implements AssessmentParts
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasZeroPointParts()
+	{
+		for (Part part : this.parts)
+		{
+			if ((part.getTotalPoints().floatValue() == 0f) && (part.getIsValid()))
+			{
+				return Boolean.TRUE;
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsValid()
 	{
 		// we must have some parts defined

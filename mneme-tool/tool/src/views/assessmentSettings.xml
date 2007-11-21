@@ -265,9 +265,10 @@
 				<alert>
 					<message selector="invalid">
 						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+						<model type="html" ref="invalidMsg" />
 					</message>
 					<included>
-						<decision model="assessment.isValid" reversed="TRUE" />
+						<hasValueDecision model="invalidMsg" />
 					</included>
 				</alert>
 
@@ -279,32 +280,14 @@
 					</message>
 				</text>
 
-				<section>
-					<iterator name="part">
-						<model ref="assessment.parts.parts" />
-					</iterator>
-					<entityIncluded>
-						<compareDecision model="part.totalPoints" constant="0.0" />
-					</entityIncluded>
-					<container>
-						<alert selector="part-zero-points" model="part.ordering.position" />
-					</container>
+				<text>
+					<message selector="zero-parts">
+						<model type="html" ref="zeroMsg" />
+					</message>
 					<included>
-						<compareDecision model="assessment.type" constant="survey" reversed="TRUE" />
+						<hasValueDecision model="zeroMsg" />
 					</included>
-				</section>
-
-				<section>
-					<iterator name="part">
-						<model ref="assessment.parts.parts" />
-					</iterator>
-					<entityIncluded>
-						<decision model="part.isValid" reversed="TRUE" />
-					</entityIncluded>
-					<container>
-						<alert selector="part-invalid" model="part.ordering.position" />
-					</container>
-				</section>
+				</text>
 
 			</container>
 		</section>

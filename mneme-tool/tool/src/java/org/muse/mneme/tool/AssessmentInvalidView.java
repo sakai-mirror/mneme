@@ -35,6 +35,7 @@ import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
+import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.util.Web;
 
 /**
@@ -44,6 +45,79 @@ public class AssessmentInvalidView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(AssessmentInvalidView.class);
+
+	/**
+	 * Format an invalid message as a
+	 * <ul>
+	 * for this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return The invalid display for this assessment.
+	 */
+	public static String formatInvalidDisplay(Assessment assessment, InternationalizedMessages msgs)
+	{
+		// what is invalid?
+		StringBuilder msg = new StringBuilder();
+		msg.append("<ul>");
+		if (!assessment.getIsValid())
+		{
+			// could be dates
+			if (!assessment.getDates().getIsValid())
+			{
+				msg.append("<li>" + msgs.getString("invalid-dates") + "</li>");
+			}
+
+			// could be parts
+			if (!assessment.getParts().getIsValid())
+			{
+				// if no parts
+				if (assessment.getParts().getParts().isEmpty())
+				{
+					msg.append("<li>" + msgs.getString("invalid-parts") + "</li>");
+				}
+
+				// could be a specific part
+				int i = 0;
+				for (Part part : assessment.getParts().getParts())
+				{
+					i++;
+					if (!part.getIsValid())
+					{
+						Object args[] = new Object[1];
+						args[0] = part.getTitle();
+						if (args[0] == null) args[0] = Integer.toString(i);
+
+						if (part instanceof ManualPart)
+						{
+							// manual parts go invalid when they have no questions
+							msg.append("<li>" + msgs.getFormattedMessage("invalid-mpart", args) + "</li>");
+						}
+						else if (part instanceof DrawPart)
+						{
+							// draw parts go invalid if they draw too much from a pool, or have no draws
+							if (((DrawPart) part).getDraws().isEmpty())
+							{
+								msg.append("<li>" + msgs.getFormattedMessage("invalid-dpart-empty", args) + "</li>");
+							}
+							else
+							{
+								msg.append("<li>" + msgs.getFormattedMessage("invalid-dpart", args) + "</li>");
+							}
+						}
+						else
+						{
+							msg.append("<li>" + msgs.getFormattedMessage("invalid-part", args) + "</li>");
+						}
+					}
+				}
+			}
+		}
+
+		msg.append("</ul>");
+
+		return msg.toString();
+	}
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
@@ -86,66 +160,7 @@ public class AssessmentInvalidView extends ControllerImpl
 			return;
 		}
 
-		// what is invalid?
-		StringBuilder msg = new StringBuilder();
-		msg.append("<ul>");
-		if (!assessment.getIsValid())
-		{
-			// could be dates
-			if (!assessment.getDates().getIsValid())
-			{
-				msg.append("<li>" + this.messages.getString("invalid-dates") + "</li>");
-			}
-
-			// could be parts
-			if (!assessment.getParts().getIsValid())
-			{
-				// if no parts
-				if (assessment.getParts().getParts().isEmpty())
-				{
-					msg.append("<li>" + this.messages.getString("invalid-parts") + "</li>");
-				}
-
-				// could be a specific part
-				int i = 0;
-				for (Part part : assessment.getParts().getParts())
-				{
-					i++;
-					if (!part.getIsValid())
-					{
-						Object args[] = new Object[1];
-						args[0] = part.getTitle();
-						if (args[0] == null) args[0] = Integer.toString(i);
-
-						if (part instanceof ManualPart)
-						{
-							// manual parts go invalid when they have no questions
-							msg.append("<li>" + this.messages.getFormattedMessage("invalid-mpart", args) + "</li>");
-						}
-						else if (part instanceof DrawPart)
-						{
-							// draw parts go invalid if they draw too much from a pool, or have no draws
-							if (((DrawPart) part).getDraws().isEmpty())
-							{
-								msg.append("<li>" + this.messages.getFormattedMessage("invalid-dpart-empty", args) + "</li>");
-							}
-							else
-							{
-								msg.append("<li>" + this.messages.getFormattedMessage("invalid-dpart", args) + "</li>");
-							}
-						}
-						else
-						{
-							msg.append("<li>" + this.messages.getFormattedMessage("invalid-part", args) + "</li>");
-						}
-					}
-				}
-			}
-		}
-
-		msg.append("</ul>");
-
-		context.put("message", msg.toString());
+		context.put("message", formatInvalidDisplay(assessment, this.messages));
 		context.put("assessment", assessment);
 		context.put("sortcode", sortCode);
 

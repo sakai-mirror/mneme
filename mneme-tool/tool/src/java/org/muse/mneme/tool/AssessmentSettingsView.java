@@ -34,6 +34,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.Part;
 import org.sakaiproject.util.Web;
 
 /**
@@ -83,6 +84,30 @@ public class AssessmentSettingsView extends ControllerImpl
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
+		}
+
+		// format an invalid message
+		if ((!assessment.getIsValid()) && (!assessment.getPublished()))
+		{
+			context.put("invalidMsg", AssessmentInvalidView.formatInvalidDisplay(assessment, this.messages));
+		}
+
+		// format part list of zero parts
+		if (assessment.getParts().getHasZeroPointParts())
+		{
+			StringBuilder buf = new StringBuilder("<ul>");
+			Object args[] = new Object[1];
+			for (Part part : assessment.getParts().getParts())
+			{
+				if ((part.getTotalPoints().floatValue() == 0f) && (part.getIsValid()))
+				{
+					args[0] = part.getTitle();
+					if (args[0] == null) args[0] = part.getOrdering().getPosition().toString();
+					buf.append("<li>" + this.messages.getFormattedMessage("part", args) + "</li>");
+				}
+			}
+			buf.append("</ul>");
+			context.put("zeroMsg", buf.toString());
 		}
 
 		// collect information: the selected assessment
