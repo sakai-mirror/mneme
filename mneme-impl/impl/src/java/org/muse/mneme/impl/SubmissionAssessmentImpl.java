@@ -84,7 +84,19 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public boolean equals(Object obj)
 	{
-		return getMainAssessment().equals(obj);
+		// two Assessments are equals if they have the same id
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if ((this.mainAssessmentId == null) && (this.historicalAssessmentId == null)) return false;
+		if (!(obj instanceof Assessment)) return false;
+		Assessment a = (Assessment) obj;
+		if (a.getId() == null) return false;
+
+		// we are "equal" to both the main and historical
+		if ((this.mainAssessmentId != null) && (this.mainAssessmentId.equals(a.getId()))) return true;
+		if ((this.historicalAssessmentId != null) && (this.historicalAssessmentId.equals(a.getId()))) return true;
+
+		return false;
 	}
 
 	/**
@@ -230,7 +242,8 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public Boolean getIsLive()
 	{
-		return getMainAssessment().getIsLive();
+		// since this is an assessment hooked to a submission, we are live!
+		return Boolean.TRUE;
 	}
 
 	/**

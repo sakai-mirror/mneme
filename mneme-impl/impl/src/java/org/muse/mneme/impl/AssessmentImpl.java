@@ -304,6 +304,9 @@ public class AssessmentImpl implements Assessment
 	 */
 	public Boolean getIsLive()
 	{
+		// if historical, which is only created because the assessment is live, we are live!
+		if (this.historical) return Boolean.TRUE;
+
 		// TODO: we may want to compute this on read -ggolden
 		return this.submissionService.submissionsExist(this);
 	}
