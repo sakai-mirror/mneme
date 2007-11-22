@@ -660,11 +660,10 @@ public class AssessmentImpl implements Assessment
 	 */
 	public void setTries(Integer count)
 	{
-		// if < 1, set to no limit
+		// if < 1, set to 1
 		if ((count != null) && (count.intValue() < 1))
 		{
-			setHasTriesLimit(Boolean.FALSE);
-			return;
+			count = Integer.valueOf(1);
 		}
 
 		if (!Different.different(count, this.tries)) return;
