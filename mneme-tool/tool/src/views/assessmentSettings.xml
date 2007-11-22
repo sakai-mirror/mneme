@@ -226,17 +226,19 @@
 				<selection title="nav">
 					<model ref="assessment.randomAccess" />
 					<selectionChoices>
-						<selectionChoice value="true" selector="type-flex" />
+						<selectionChoice value="true" selector="type-flex">
+							<container separate="TRUE">
+								<selection title="layout">
+									<model ref="assessment.questionGrouping" />
+									<selectionChoices>
+										<selectionChoice value="question" selector="type-question" />
+										<selectionChoice value="part" selector="type-part" />
+										<selectionChoice value="assessment" selector="type-assessment" />
+									</selectionChoices>
+								</selection>
+							</container>
+						</selectionChoice>
 						<selectionChoice value="false" selector="type-strict" />
-					</selectionChoices>
-				</selection>
-
-				<selection title="layout">
-					<model ref="assessment.questionGrouping" />
-					<selectionChoices>
-						<selectionChoice value="question" selector="type-question" />
-						<selectionChoice value="part" selector="type-part" />
-						<selectionChoice value="assessment" selector="type-assessment" />
 					</selectionChoices>
 				</selection>
 

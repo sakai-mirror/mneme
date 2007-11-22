@@ -574,7 +574,7 @@ public class AssessmentImpl implements Assessment
 	 */
 	public void setQuestionGrouping(QuestionGrouping value)
 	{
-		if (value == null) throw new IllegalArgumentException();
+		if (value == null) return;
 		if (this.questionGrouping.equals(value)) return;
 
 		this.questionGrouping = value;
@@ -591,6 +591,12 @@ public class AssessmentImpl implements Assessment
 		if (this.randomAccess.equals(setting)) return;
 
 		this.randomAccess = setting;
+
+		// strict order needs by question
+		if (!this.randomAccess)
+		{
+			setQuestionGrouping(QuestionGrouping.question);
+		}
 
 		this.historyChanged.setChanged();
 	}

@@ -52,6 +52,31 @@
 				<message selector="no-assessments" />
 			</emptyTitle>
 			<columns>
+				<column pixels="16">
+					<navigations>
+						<navigation style="LINK" submit="TRUE" description="live-alt">
+							<icon icon="/icons/grade_student.png" style="LEFT" />
+							<destination template="/grade_assessment/0A/{0}">
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<decision model="assessment.isLive" />
+								<decision model="assessment.isValid" />
+							</included>
+						</navigation>
+						<navigation style="LINK" submit="TRUE" description="invalid-alt">
+							<icon icon="/icons/warning.png" style="LEFT" />
+							<destination template="/assessment_invalid/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<decision reversed="TRUE" model="assessment.isValid" />
+							</included>
+						</navigation>
+					</navigations>
+				</column>
 				<selectionColumn multiple="TRUE" pixels="16">
 					<value>
 						<model type="text" ref="assessment.id" />
@@ -89,31 +114,6 @@
 						</navigation>
 					</entityActions>
 				</selectionColumn>
-				<column pixels="16">
-					<navigations>
-						<navigation style="LINK" submit="TRUE" description="live-alt">
-							<icon icon="/icons/grade_student.png" style="LEFT" />
-							<destination template="/grade_assessment/0A/{0}">
-								<model ref="assessment.id" />
-							</destination>
-							<included>
-								<decision model="assessment.isLive" />
-								<decision model="assessment.isValid" />
-							</included>
-						</navigation>
-						<navigation style="LINK" submit="TRUE" description="invalid-alt">
-							<icon icon="/icons/warning.png" style="LEFT" />
-							<destination template="/assessment_invalid/{0}{1}/{2}">
-								<model ref="sort_column" />
-								<model ref="sort_direction" />
-								<model ref="assessment.id" />
-							</destination>
-							<included>
-								<decision reversed="TRUE" model="assessment.isValid" />
-							</included>
-						</navigation>
-					</navigations>
-				</column>
 				<modelColumn pixels="16" centered="TRUE">
 					<title>
 						<message selector="assessment-type" />
