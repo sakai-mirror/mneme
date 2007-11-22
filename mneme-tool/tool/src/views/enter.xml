@@ -42,12 +42,13 @@
 	</title>
 	<header>
 		<message selector="enter-header">
+			<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 			<model ref="assessment.title" />
 		</message>
 	</header>
 	<container>
 		<section>
-			<title>
+			<title highlighted="TRUE">
 				<message selector="enter-test-title">
 					<model type="icon" icon="/icons/test.png" />
 					<model ref="assessment.title" />
@@ -73,6 +74,7 @@
 				<instructions>
 					<message selector="linear-instructions">
 						<model type="icon" icon="/icons/linear.png" />
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 					</message>
 				</instructions>
 			</container>
@@ -85,6 +87,7 @@
 				<instructions>
 					<message selector="flexible-instructions">
 						<model type="icon" icon="/icons/flexible.png" />
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 					</message>
 				</instructions>
 			</container>
@@ -102,6 +105,7 @@
 				<instructions>
 					<message selector="flexible-instructions-by-assessment">
 						<model type="icon" icon="/icons/flexible.png" />
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 					</message>
 				</instructions>
 			</container>
@@ -115,6 +119,7 @@
 				<instructions>
 					<message selector="highest-instructions">
 						<model type="icon" icon="/icons/highest.png" />
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 					</message>
 				</instructions>
 			</container>
@@ -141,6 +146,7 @@
 				<instructions>
 					<message selector="timed-instructions">
 						<model type="icon" icon="/icons/clock.png" />
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 					</message>
 				</instructions>
 			</container>
@@ -168,6 +174,7 @@
 				<instructions>
 					<message selector="near-due-instructions">
 						<model type="icon" icon="/icons/future.gif" />
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 					</message>
 				</instructions>
 			</container>
@@ -178,7 +185,11 @@
 		</section>
 		<section>
 			<container>
-				<instructions selector="enter-pw-instructions" />
+				<instructions>
+					<message selector="enter-pw-instructions">
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+					</message>
+				</instructions>
 				<password title="enter-password" model="password.value" />
 			</container>
 			<included>
