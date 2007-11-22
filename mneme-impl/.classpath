@@ -21,5 +21,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/site-api"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ambrosia-api"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/user-api"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/content-api"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

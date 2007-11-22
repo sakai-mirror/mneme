@@ -21,7 +21,12 @@
 
 package org.muse.mneme.impl;
 
+import java.util.ArrayList;
+
 import org.muse.mneme.api.Answer;
+import org.sakaiproject.content.api.ContentHostingService;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.id.api.IdManager;
 
 /**
  * TaskAnswerImpl handles answers for the Task question type.
@@ -33,10 +38,14 @@ public class TaskAnswerImpl extends EssayAnswerImpl
 	 * 
 	 * @param answer
 	 *        The answer this is a helper for.
+	 * @param idManager
+	 *        The IdManager dependency.
+	 * @param contentHostingService
+	 *        The ContentHostingService dependency.
 	 */
-	public TaskAnswerImpl(Answer answer)
+	public TaskAnswerImpl(Answer answer, IdManager idManager, ContentHostingService contentHostingService)
 	{
-		super(answer);
+		super(answer, idManager, contentHostingService);
 	}
 
 	/**
@@ -63,7 +72,7 @@ public class TaskAnswerImpl extends EssayAnswerImpl
 			Object rv = super.clone();
 
 			// deep copy
-			((TaskAnswerImpl) rv).answerData = this.answerData;
+			((TaskAnswerImpl) rv).uploads = new ArrayList<Reference>(this.uploads);
 
 			((TaskAnswerImpl) rv).answer = answer;
 

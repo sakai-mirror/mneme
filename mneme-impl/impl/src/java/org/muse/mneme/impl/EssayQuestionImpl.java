@@ -21,10 +21,13 @@
 
 package org.muse.mneme.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.muse.ambrosia.api.Attachments;
 import org.muse.ambrosia.api.AttachmentsEdit;
 import org.muse.ambrosia.api.Component;
-import org.muse.ambrosia.api.Gap;
+import org.muse.ambrosia.api.FileUpload;
 import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.Instructions;
 import org.muse.ambrosia.api.Navigation;
@@ -37,7 +40,9 @@ import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
+import org.muse.mneme.impl.MatchQuestionImpl.MatchQuestionPair;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * EssayQuestionImpl handles questions for the essay question type.
@@ -184,12 +189,28 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		answerSection.add(edit);
 
 		// the upload
-		// TODO: this should be upload, not attachments...
-		AttachmentsEdit upload = this.uiService.newAttachmentsEdit();
+		FileUpload upload = this.uiService.newFileUpload();
+		upload.setTitle("upload-title");
+		upload.setUpload("upload-button");
+		upload.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.upload"));
 		upload.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.attachments.toString(),
 				SubmissionType.both.toString()).setProperty(
 				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
-		answerSection.add(upload);
+
+		Attachments uploaded = this.uiService.newAttachments();
+		uploaded.setAttachments(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded"), "attachment");
+		uploaded.setSize(false).setTimestamp(false);
+		uploaded.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.attachments.toString(),
+				SubmissionType.both.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
+
+		Navigation remove = this.uiService.newNavigation();
+		remove.setTitle("upload-remove").setStyle(Navigation.Style.link).setSubmit();
+		remove.setDestination(this.uiService.newDestination().setDestination("REMOVE:{0}",
+				this.uiService.newPropertyReference().setReference("attachment")));
+		uploaded.addNavigation(remove);
+
+		answerSection.add(upload).add(uploaded);
 
 		// if no submission
 		Instructions noSub = this.uiService.newInstructions();

@@ -658,6 +658,7 @@ public class QuestionStorageSample implements QuestionStorage
 			q.getCreatedBy().setUserId("admin");
 			q.getPresentation().setText("Tell me a little bit about yourself.");
 			((EssayQuestionImpl) q.getTypeSpecificQuestion()).setModelAnswer("I need more space, this space is too short.");
+			((EssayQuestionImpl) q.getTypeSpecificQuestion()).setSubmissionType(EssayQuestionImpl.SubmissionType.both);
 			q.getCreatedBy().setUserId("admin");
 			q.getCreatedBy().setDate(now);
 			q.getModifiedBy().setUserId("admin");

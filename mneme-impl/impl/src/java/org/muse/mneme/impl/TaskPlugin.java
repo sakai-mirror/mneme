@@ -30,7 +30,9 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificAnswer;
 import org.muse.mneme.api.TypeSpecificQuestion;
+import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.id.api.IdManager;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
@@ -42,6 +44,12 @@ public class TaskPlugin implements QuestionPlugin
 
 	/** Messages bundle name. */
 	protected String bundle = null;
+
+	/** Dependency: ContentHostingService */
+	protected ContentHostingService contentHostingService = null;
+
+	/** Dependency: IdManager. */
+	protected IdManager idManager = null;
 
 	/** Localized messages. */
 	protected InternationalizedMessages messages = null;
@@ -102,7 +110,7 @@ public class TaskPlugin implements QuestionPlugin
 	 */
 	public TypeSpecificAnswer newAnswer(Answer answer)
 	{
-		return new TaskAnswerImpl(answer);
+		return new TaskAnswerImpl(answer, this.idManager, this.contentHostingService);
 	}
 
 	/**
@@ -122,6 +130,28 @@ public class TaskPlugin implements QuestionPlugin
 	public void setBundle(String name)
 	{
 		this.bundle = name;
+	}
+
+	/**
+	 * Dependency: ContentHostingService.
+	 * 
+	 * @param service
+	 *        The ContentHostingService.
+	 */
+	public void setContentHostingService(ContentHostingService service)
+	{
+		contentHostingService = service;
+	}
+
+	/**
+	 * Set the IdManager
+	 * 
+	 * @param IdManager
+	 *        The IdManager
+	 */
+	public void setIdManager(IdManager idManager)
+	{
+		this.idManager = idManager;
 	}
 
 	/**
