@@ -40,12 +40,14 @@
 			<model ref="assessment.title" />
 		</message>
 	</title>
+
 	<header>
 		<message selector="enter-header">
+			<model type="icon" icon="/icons/begin.gif" />
 			<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
-			<model ref="assessment.title" />
 		</message>
 	</header>
+
 	<container>
 		<section>
 			<title highlighted="TRUE">

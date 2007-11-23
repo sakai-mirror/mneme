@@ -41,9 +41,10 @@
 			<model ref="submission.assessment.title" />
 		</message>
 	</title>
+
 	<header>
 		<message selector="instructions-header">
-			<model ref="submission.assessment.title" />
+			<model type="icon" icon="/icons/test.png" />
 		</message>
 	</header>
 
@@ -171,6 +172,7 @@
 				<instructions>
 					<message selector="linear-instructions">
 						<model type="icon" icon="/icons/linear.png" />
+						<model type="enum" messageRoot="assessment-type-" ref="submission.assessment.type" />
 					</message>
 				</instructions>
 			</container>
@@ -185,6 +187,7 @@
 				<instructions>
 					<message selector="flexible-instructions">
 						<model type="icon" icon="/icons/flexible.png" />
+						<model type="enum" messageRoot="assessment-type-" ref="submission.assessment.type" />
 					</message>
 				</instructions>
 			</container>
@@ -204,6 +207,7 @@
 				<instructions>
 					<message selector="flexible-instructions-by-assessment">
 						<model type="icon" icon="/icons/flexible.png" />
+						<model type="enum" messageRoot="assessment-type-" ref="submission.assessment.type" />
 					</message>
 				</instructions>
 			</container>
@@ -219,6 +223,7 @@
 				<instructions>
 					<message selector="highest-instructions">
 						<model type="icon" icon="/icons/highest.png" />
+						<model type="enum" messageRoot="assessment-type-" ref="submission.assessment.type" />
 					</message>
 				</instructions>
 			</container>
@@ -234,6 +239,7 @@
 				<instructions>
 					<message selector="timed-instructions-inprogress">
 						<model type="icon" icon="/icons/clock.png" />
+						<model type="enum" messageRoot="assessment-type-" ref="submission.assessment.type" />
 					</message>
 				</instructions>
 			</container>

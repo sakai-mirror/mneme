@@ -62,6 +62,29 @@
 				<section>
 					<container>
 
+						<!--  inform if live -->
+						<instructions>
+							<message selector="live-warning-survey">
+								<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+							</message>
+							<included>
+								<decision model="assessment.isLive" />
+								<compareDecision model="assessment.type" constant="survey" />
+							</included>
+						</instructions>
+						<selection title="type">
+							<model ref="assessment.type" />
+							<selectionChoices>
+								<selectionChoice value="test" selector="assessment-type-test" />
+								<selectionChoice value="assignment" selector="assessment-type-assignment" />
+								<!-- <selectionChoice value="survey" selector="assessment-type-survey" /> -->
+							</selectionChoices>
+							<readOnly>
+								<decision model="assessment.isLive" />
+								<compareDecision model="assessment.type" constant="survey" />
+							</readOnly>
+						</selection>
+
 						<!-- if invalid -->
 						<warning selector="invalid-dates">
 							<included>
@@ -276,6 +299,7 @@
 
 				<text>
 					<message selector="summary">
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 						<model ref="assessment.parts.numParts" />
 						<model ref="assessment.parts.numQuestions" />
 						<model ref="assessment.parts.totalPoints" />

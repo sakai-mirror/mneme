@@ -106,7 +106,6 @@ public class SectionInstructionView extends ControllerImpl
 			return;
 		}
 
-		context.put("actionTitle", messages.getString("question-header-instructions"));
 		context.put("submission", submission);
 		context.put("part", part);
 

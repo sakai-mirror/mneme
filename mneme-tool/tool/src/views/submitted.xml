@@ -41,27 +41,43 @@
 			<model type="text" ref="submission.assessment.title" />
 		</message>
 	</title>
+
 	<header>
 		<message selector="submitted-header">
-			<model type="text" ref="submission.assessment.title" />
+			<model type="icon" icon="/icons/finish.gif" />
 		</message>
 	</header>
 
+	<subHeader>
+		<container>
+			<text>
+				<message>
+					<model ref="submission.assessment.title" missing="no-title" />
+				</message>
+			</text>
+		</container>
+	</subHeader>
+
 	<container>
 
-		<gap />
+		<section>
+			<container>
 
-		<!-- test's submit message -->
-		<text>
-			<message selector="submitted-display-message">
-				<model type="html" ref="submission.assessment.submitPresentation.text" />
-			</message>
+				<!-- repeat the nav up top -->
+				<alias to="nav" />
+				<gap />
+				<!-- test's submit message -->
+				<text>
+					<message>
+						<model type="html" ref="submission.assessment.submitPresentation.text" />
+					</message>
+				</text>
+				<gap />
+			</container>
 			<included>
 				<hasValueDecision model="submission.assessment.submitPresentation.text" />
 			</included>
-		</text>
-
-		<gap />
+		</section>
 
 		<!-- navigation -->
 		<navigationBar id="nav">

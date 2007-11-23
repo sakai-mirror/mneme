@@ -39,15 +39,28 @@
 	<title>
 		<message selector="question-title">
 			<model ref="actionTitle" />
+			<model type="enum" messageRoot="assessment-type-" ref="submission.assessment.type" />
 			<model ref="submission.assessment.title" />
 		</message>
 	</title>
+
 	<header>
-		<message selector="question-title">
+		<message selector="question-header">
+			<model type="icon" icon="/icons/begin.gif" />
 			<model ref="actionTitle" />
-			<model ref="submission.assessment.title" />
+			<model type="enum" messageRoot="assessment-type-" ref="submission.assessment.type" />
 		</message>
 	</header>
+
+	<subHeader>
+		<container>
+			<text>
+				<message>
+					<model ref="submission.assessment.title" missing="no-title" />
+				</message>
+			</text>
+		</container>
+	</subHeader>
 
 	<container>
 

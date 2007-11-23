@@ -37,17 +37,25 @@
 
 	<!-- title & header-->
 	<title>
-		<message selector="question-title">
-			<model ref="actionTitle" />
+		<message selector="instructions-title">
 			<model ref="submission.assessment.title" />
 		</message>
 	</title>
 	<header>
-		<message selector="question-title">
-			<model ref="actionTitle" />
-			<model ref="submission.assessment.title" />
+		<message selector="instructions-header">
+			<model type="icon" icon="/icons/section.png" />
 		</message>
 	</header>
+	
+	<subHeader>
+		<container>
+			<text>
+				<message>
+					<model ref="submission.assessment.title" missing="no-title" />
+				</message>
+			</text>
+		</container>
+	</subHeader>
 
 	<container>
 

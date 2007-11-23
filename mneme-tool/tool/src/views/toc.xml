@@ -39,8 +39,11 @@
 	<title>
 		<message selector="toc-title" model="submission.assessment.title" />
 	</title>
+
 	<header>
-		<message selector="toc-header" model="submission.assessment.title" />
+		<message selector="toc-header">
+			<model type="icon" icon="/icons/contents.gif" />
+		</message>
 	</header>
 
 	<container>
