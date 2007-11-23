@@ -21,6 +21,8 @@
 
 package org.muse.mneme.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,11 @@ import org.muse.mneme.api.AttachmentService;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
+import org.sakaiproject.content.api.ContentCollection;
+import org.sakaiproject.content.api.ContentCollectionEdit;
+import org.sakaiproject.content.api.ContentHostingService;
+import org.sakaiproject.content.api.ContentResource;
+import org.sakaiproject.content.api.ContentResourceEdit;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityAccessOverloadException;
 import org.sakaiproject.entity.api.EntityCopyrightException;
@@ -46,6 +53,17 @@ import org.sakaiproject.entity.api.EntityProducer;
 import org.sakaiproject.entity.api.HttpAccess;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.api.ResourceProperties;
+import org.sakaiproject.entity.api.ResourcePropertiesEdit;
+import org.sakaiproject.exception.IdInvalidException;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.exception.IdUsedException;
+import org.sakaiproject.exception.InUseException;
+import org.sakaiproject.exception.InconsistentException;
+import org.sakaiproject.exception.OverQuotaException;
+import org.sakaiproject.exception.PermissionException;
+import org.sakaiproject.exception.ServerOverloadException;
+import org.sakaiproject.exception.TypeException;
+import org.sakaiproject.id.api.IdManager;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.util.StringUtil;
 import org.w3c.dom.Document;
@@ -59,20 +77,114 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(AttachmentServiceImpl.class);
 
+	protected final static String PROP_UNIQUE_HOLDER = "attachment:unique";
+
 	/** The chunk size used when streaming (100k). */
 	protected static final int STREAM_BUFFER_SIZE = 102400;
 
+	/** Dependency: ContentHostingService */
+	protected ContentHostingService contentHostingService = null;
+
 	/** Dependency: EntityManager */
-	protected EntityManager m_entityManager = null;
+	protected EntityManager entityManager = null;
+
+	/** Dependency: IdManager. */
+	protected IdManager idManager = null;
 
 	/** Dependency: SecurityService */
-	protected SecurityService m_securityService = null;
+	protected SecurityService securityService = null;
 
 	/** Dependency: ServerConfigurationService */
-	protected ServerConfigurationService m_serverConfigurationService = null;
+	protected ServerConfigurationService serverConfigurationService = null;
 
 	/** Dependency: SessionManager */
-	protected SessionManager m_sessionManager = null;
+	protected SessionManager sessionManager = null;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, String name, InputStream body, String type)
+	{
+		pushAdvisor();
+
+		// form the content hosting path, and make sure all the folders exist
+		String contentPath = "/private/";
+		assureCollection(contentPath, application + "/", false);
+		contentPath += application + "/";
+		assureCollection(contentPath, context + "/", false);
+		contentPath += context + "/";
+		if ((prefix != null) && (prefix.length() > 0))
+		{
+			assureCollection(contentPath, prefix + "/", false);
+			contentPath += prefix + "/";
+		}
+		if (uniqueHolder)
+		{
+			String uuid = this.idManager.createUuid();
+			assureCollection(contentPath, uuid + "/", true);
+			contentPath += uuid + "/";
+		}
+
+		contentPath += name;
+
+		try
+		{
+			ContentResourceEdit edit = contentHostingService.addResource(contentPath);
+			edit.setContent(body);
+			edit.setContentType(type);
+			ResourcePropertiesEdit props = edit.getPropertiesEdit();
+
+			// set the alternate reference root so we get all requests
+			props.addProperty(ContentHostingService.PROP_ALTERNATE_REFERENCE, AttachmentService.REFERENCE_ROOT);
+
+			props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, name);
+
+			contentHostingService.commitResource(edit);
+
+			String ref = edit.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+			Reference reference = entityManager.newReference(ref);
+
+			return reference;
+		}
+		catch (PermissionException e2)
+		{
+			M_log.warn("addAttachment: creating our content: " + e2.toString());
+		}
+		catch (IdUsedException e2)
+		{
+			M_log.warn("addAttachment: creating our content: " + e2.toString());
+		}
+		catch (IdInvalidException e2)
+		{
+			M_log.warn("addAttachment: creating our content: " + e2.toString());
+		}
+		catch (InconsistentException e2)
+		{
+			M_log.warn("addAttachment: creating our content: " + e2.toString());
+		}
+		catch (ServerOverloadException e2)
+		{
+			M_log.warn("addAttachment: creating our content: " + e2.toString());
+		}
+		catch (OverQuotaException e2)
+		{
+			M_log.warn("addAttachment: creating our content: " + e2.toString());
+		}
+		finally
+		{
+			try
+			{
+				if (body != null) body.close();
+			}
+			catch (IOException e)
+			{
+			}
+
+			popAdvisor();
+		}
+
+		return null;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -99,7 +211,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		if (!checkSecurity(ref)) return null;
 
 		// isolate the ContentHosting reference
-		Reference contentHostingRef = m_entityManager.newReference(ref.getId());
+		Reference contentHostingRef = entityManager.newReference(ref.getId());
 
 		// setup a security advisor
 		pushAdvisor();
@@ -137,7 +249,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		if (!checkSecurity(ref)) return null;
 
 		// isolate the ContentHosting reference
-		Reference contentHostingRef = m_entityManager.newReference(ref.getId());
+		Reference contentHostingRef = entityManager.newReference(ref.getId());
 
 		// setup a security advisor
 		pushAdvisor();
@@ -166,7 +278,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		if (!checkSecurity(ref)) return null;
 
 		// isolate the ContentHosting reference
-		Reference contentHostingRef = m_entityManager.newReference(ref.getId());
+		Reference contentHostingRef = entityManager.newReference(ref.getId());
 
 		// setup a security advisor
 		pushAdvisor();
@@ -191,7 +303,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public String getEntityUrl(Reference ref)
 	{
-		return m_serverConfigurationService.getAccessUrl() + ref.getReference();
+		return serverConfigurationService.getAccessUrl() + ref.getReference();
 	}
 
 	/**
@@ -207,11 +319,11 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 				// decide on security
 				if (!checkSecurity(ref))
 				{
-					throw new EntityPermissionException(m_sessionManager.getCurrentSessionUserId(), "sampleAccess", ref.getReference());
+					throw new EntityPermissionException(sessionManager.getCurrentSessionUserId(), "sampleAccess", ref.getReference());
 				}
 
 				// isolate the ContentHosting reference
-				Reference contentHostingRef = m_entityManager.newReference(ref.getId());
+				Reference contentHostingRef = entityManager.newReference(ref.getId());
 
 				// setup a security advisor
 				pushAdvisor();
@@ -253,7 +365,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		try
 		{
 			// register as an entity producer
-			m_entityManager.registerEntityProducer(this, REFERENCE_ROOT);
+			entityManager.registerEntityProducer(this, REFERENCE_ROOT);
 
 			M_log.info("init()");
 		}
@@ -300,6 +412,66 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public void removeAttachment(Reference ref)
+	{
+		pushAdvisor();
+		String id = entityManager.newReference(ref.getId()).getId();
+		try
+		{
+			// check if this has a unique containing collection
+			ContentResource resource = this.contentHostingService.getResource(id);
+			ContentCollection collection = resource.getContainingCollection();
+
+			// remove the resource
+			this.contentHostingService.removeResource(id);
+
+			// if the collection was made just to hold the attachment, remove it as well
+			if (collection.getProperties().getProperty(PROP_UNIQUE_HOLDER) != null)
+			{
+				this.contentHostingService.removeCollection(collection.getId());
+			}
+		}
+		catch (PermissionException e)
+		{
+			M_log.warn("removeAttachment: " + e.toString());
+		}
+		catch (ServerOverloadException e)
+		{
+			M_log.warn("removeAttachment: " + e.toString());
+		}
+		catch (InUseException e)
+		{
+			M_log.warn("removeAttachment: " + e.toString());
+
+		}
+		catch (IdUnusedException e)
+		{
+			M_log.warn("removeAttachment: " + e.toString());
+		}
+		catch (TypeException e)
+		{
+			M_log.warn("removeAttachment: " + e.toString());
+		}
+		finally
+		{
+			popAdvisor();
+		}
+	}
+
+	/**
+	 * Dependency: ContentHostingService.
+	 * 
+	 * @param service
+	 *        The ContentHostingService.
+	 */
+	public void setContentHostingService(ContentHostingService service)
+	{
+		contentHostingService = service;
+	}
+
+	/**
 	 * Dependency: EntityManager.
 	 * 
 	 * @param service
@@ -307,7 +479,18 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public void setEntityManager(EntityManager service)
 	{
-		m_entityManager = service;
+		entityManager = service;
+	}
+
+	/**
+	 * Set the IdManager
+	 * 
+	 * @param IdManager
+	 *        The IdManager
+	 */
+	public void setIdManager(IdManager idManager)
+	{
+		this.idManager = idManager;
 	}
 
 	/**
@@ -318,7 +501,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public void setSecurityService(SecurityService service)
 	{
-		m_securityService = service;
+		securityService = service;
 	}
 
 	/**
@@ -329,7 +512,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public void setServerConfigurationService(ServerConfigurationService service)
 	{
-		m_serverConfigurationService = service;
+		serverConfigurationService = service;
 	}
 
 	/**
@@ -340,7 +523,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public void setSessionManager(SessionManager service)
 	{
-		m_sessionManager = service;
+		sessionManager = service;
 	}
 
 	/**
@@ -349,6 +532,69 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	public boolean willArchiveMerge()
 	{
 		return false;
+	}
+
+	/**
+	 * Assure that a collection with this name exists in the container collection: create it if it is missing.
+	 * 
+	 * @param container
+	 *        The full path of the container collection.
+	 * @param name
+	 *        The collection name to check and create.
+	 * @param uniqueHolder
+	 *        true if the folder is being created soley to hold the attachment uniquely.
+	 */
+	protected void assureCollection(String container, String name, boolean uniqueHolder)
+	{
+		try
+		{
+			contentHostingService.getCollection(container + name);
+		}
+		catch (IdUnusedException e)
+		{
+			try
+			{
+				ContentCollectionEdit edit = contentHostingService.addCollection(container + name);
+				ResourcePropertiesEdit props = edit.getPropertiesEdit();
+
+				// set the alternate reference root so we get all requests
+				props.addProperty(ContentHostingService.PROP_ALTERNATE_REFERENCE, AttachmentService.REFERENCE_ROOT);
+
+				props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, name);
+
+				// mark it if it is a unique holder
+				if (uniqueHolder)
+				{
+					props.addProperty(PROP_UNIQUE_HOLDER, PROP_UNIQUE_HOLDER);
+				}
+
+				contentHostingService.commitCollection(edit);
+			}
+			catch (IdUsedException e2)
+			{
+				// M_log.warn("init: creating our root collection: " + e2.toString());
+			}
+			catch (IdInvalidException e2)
+			{
+				M_log.warn("init: creating our root collection: " + e2.toString());
+			}
+			catch (PermissionException e2)
+			{
+				M_log.warn("init: creating our root collection: " + e2.toString());
+			}
+			catch (InconsistentException e2)
+			{
+				M_log.warn("init: creating our root collection: " + e2.toString());
+			}
+		}
+		catch (TypeException e)
+		{
+			M_log.warn("init: checking our root collection: " + e.toString());
+		}
+		catch (PermissionException e)
+		{
+			M_log.warn("init: checking our root collection: " + e.toString());
+		}
 	}
 
 	/**
@@ -369,7 +615,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	protected void popAdvisor()
 	{
-		m_securityService.popAdvisor();
+		securityService.popAdvisor();
 	}
 
 	/**
@@ -378,7 +624,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	protected void pushAdvisor()
 	{
 		// setup a security advisor
-		m_securityService.pushAdvisor(new SecurityAdvisor()
+		securityService.pushAdvisor(new SecurityAdvisor()
 		{
 			public SecurityAdvice isAllowed(String userId, String function, String reference)
 			{

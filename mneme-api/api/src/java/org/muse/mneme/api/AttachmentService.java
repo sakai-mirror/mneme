@@ -21,12 +21,12 @@
 
 package org.muse.mneme.api;
 
+import java.io.InputStream;
+
 import org.sakaiproject.entity.api.Reference;
 
 /**
- * <p>
- * AttachmentService ...
- * </p>
+ * AttachmentService manages attachments.
  */
 public interface AttachmentService
 {
@@ -38,6 +38,32 @@ public interface AttachmentService
 	/** This string starts the references to uploaded resources. */
 	static final String REFERENCE_ROOT = "/mneme";
 
-	/** This string starts the references to uploaded resources. */
-	static final String REFERENCE_ROOT_NAME = "mneme";
+	/**
+	 * Add the attachment.
+	 * 
+	 * @param application
+	 *        The application prefix for the collection in private.
+	 * @param context
+	 *        The context associated with the attachment.
+	 * @param prefix
+	 *        Any prefix path for within the context are of the application in private.
+	 * @param uniqueHolder
+	 *        If true, a uniquely named folder is created to hold the resource.
+	 * @param name
+	 *        The resource name.
+	 * @param body
+	 *        The resource body bytes stream.
+	 * @param type
+	 *        The resource mime type.
+	 * @return The attachment reference.
+	 */
+	Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, String name, InputStream body, String type);
+
+	/**
+	 * Remove this attachment.
+	 * 
+	 * @param ref
+	 *        The attachment reference.
+	 */
+	void removeAttachment(Reference ref);
 }

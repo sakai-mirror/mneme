@@ -33,22 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.TypeSpecificAnswer;
-import org.sakaiproject.content.api.ContentCollectionEdit;
-import org.sakaiproject.content.api.ContentHostingService;
-import org.sakaiproject.content.api.ContentResourceEdit;
 import org.sakaiproject.entity.api.Reference;
-import org.sakaiproject.entity.api.ResourceProperties;
-import org.sakaiproject.entity.api.ResourcePropertiesEdit;
-import org.sakaiproject.entity.cover.EntityManager;
-import org.sakaiproject.exception.IdInvalidException;
-import org.sakaiproject.exception.IdUnusedException;
-import org.sakaiproject.exception.IdUsedException;
-import org.sakaiproject.exception.InconsistentException;
-import org.sakaiproject.exception.OverQuotaException;
-import org.sakaiproject.exception.PermissionException;
-import org.sakaiproject.exception.ServerOverloadException;
-import org.sakaiproject.exception.TypeException;
-import org.sakaiproject.id.api.IdManager;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -65,17 +50,26 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	/** The String answer as entered by the user. */
 	protected String answerData = null;
 
+	/** Dependency: AttachmentService. */
+	protected AttachmentService attachmentService = null;
+
 	/** Set when the answer has been changed. */
 	protected boolean changed = false;
 
-	/** Dependency: ContentHostingService */
-	protected ContentHostingService contentHostingService = null;
-
-	/** Dependency: IdManager. */
-	protected IdManager idManager = null;
-
 	/** The uploaded file references. */
 	List<Reference> uploads = new ArrayList<Reference>();
+
+	/**
+	 * Construct.
+	 * 
+	 * @param answer
+	 *        The answer this is a helper for.
+	 */
+	public EssayAnswerImpl(Answer answer, AttachmentService attachmentService)
+	{
+		this.answer = answer;
+		this.attachmentService = attachmentService;
+	}
 
 	/**
 	 * Construct.
@@ -91,21 +85,7 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 		this.answerData = other.answerData;
 		this.uploads.addAll(other.uploads);
 		this.changed = other.changed;
-		this.idManager = other.idManager;
-		this.contentHostingService = other.contentHostingService;
-	}
-
-	/**
-	 * Construct.
-	 * 
-	 * @param answer
-	 *        The answer this is a helper for.
-	 */
-	public EssayAnswerImpl(Answer answer, IdManager idManager, ContentHostingService contentHostingService)
-	{
-		this.answer = answer;
-		this.idManager = idManager;
-		this.contentHostingService = contentHostingService;
+		this.attachmentService = other.attachmentService;
 	}
 
 	/**
@@ -156,8 +136,7 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 					if (ref.getReference().equals(parts[1]))
 					{
 						i.remove();
-
-						// TODO: actually delete it!
+						this.attachmentService.removeAttachment(ref);
 
 						this.changed = true;
 					}
@@ -245,138 +224,16 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 				return;
 			}
 
-			String ref = "/private/";
-			// make sure our root area exists (assume private exists)
-			assureCollection(ref, AttachmentService.REFERENCE_ROOT_NAME);
-
-			ref += AttachmentService.REFERENCE_ROOT_NAME + "/";
-			// make sure the context area exists.
-			assureCollection(ref, this.answer.getSubmission().getAssessment().getContext());
-			ref += this.answer.getSubmission().getAssessment().getContext() + "/";
-
-			// make sure the submissions area exists
-			assureCollection(ref, "submissions");
-			ref += "submissions" + "/";
-
-			// make sure the submission's area exists
-			assureCollection(ref, this.answer.getSubmission().getId());
-			ref += this.answer.getSubmission().getId() + "/";
-
-			// make sure the submission's answer area exists
-			assureCollection(ref, this.answer.getId());
-			ref += this.answer.getId() + "/";
-
-			// to support the same name twice, use a unique id for this one
-			String uid = this.idManager.createUuid();
-			assureCollection(ref, uid);
-			ref += uid + "/";
-
-			// add the file name
-			ref += name;
-
-			// write the resource
-			try
+			Reference reference = this.attachmentService.addAttachment("mneme", this.answer.getSubmission().getAssessment().getContext(),
+					"submissions", true, name, body, type);
+			if (reference != null)
 			{
-				ContentResourceEdit edit = contentHostingService.addResource(ref);
-				edit.setContent(body);
-				edit.setContentType(type);
-				ResourcePropertiesEdit props = edit.getPropertiesEdit();
-
-				// set the alternate reference root so we get all requests
-				props.addProperty(ContentHostingService.PROP_ALTERNATE_REFERENCE, AttachmentService.REFERENCE_ROOT);
-
-				props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, name);
-
-				contentHostingService.commitResource(edit);
-				ref = edit.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+				this.uploads.add(reference);
+				this.changed = true;
 			}
-			catch (PermissionException e2)
-			{
-				M_log.warn("setUpload: creating our content: " + e2.toString());
-			}
-			catch (IdUsedException e2)
-			{
-				M_log.warn("setUpload: creating our content: " + e2.toString());
-			}
-			catch (IdInvalidException e2)
-			{
-				M_log.warn("setUpload: creating our content: " + e2.toString());
-			}
-			catch (InconsistentException e2)
-			{
-				M_log.warn("setUpload: creating our content: " + e2.toString());
-			}
-			catch (ServerOverloadException e2)
-			{
-				M_log.warn("setUpload: creating our content: " + e2.toString());
-			}
-			catch (OverQuotaException e2)
-			{
-				M_log.warn("setUpload: creating our content: " + e2.toString());
-			}
-
-			Reference reference = EntityManager.newReference(ref);
-			this.uploads.add(reference);
-
-			this.changed = true;
 		}
 		catch (IOException e)
 		{
-		}
-	}
-
-	/**
-	 * Assure that a collection with this name exists in the container collection: create it if it is missing.
-	 * 
-	 * @param container
-	 *        The full path of the container collection.
-	 * @param name
-	 *        The collection name to check and create.
-	 */
-	protected void assureCollection(String container, String name)
-	{
-		try
-		{
-			contentHostingService.getCollection(container + name);
-		}
-		catch (IdUnusedException e)
-		{
-			try
-			{
-				ContentCollectionEdit edit = contentHostingService.addCollection(container + name);
-				ResourcePropertiesEdit props = edit.getPropertiesEdit();
-
-				// set the alternate reference root so we get all requests
-				props.addProperty(ContentHostingService.PROP_ALTERNATE_REFERENCE, AttachmentService.REFERENCE_ROOT);
-
-				props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, name);
-
-				contentHostingService.commitCollection(edit);
-			}
-			catch (IdUsedException e2)
-			{
-				// M_log.warn("init: creating our root collection: " + e2.toString());
-			}
-			catch (IdInvalidException e2)
-			{
-				M_log.warn("init: creating our root collection: " + e2.toString());
-			}
-			catch (PermissionException e2)
-			{
-				M_log.warn("init: creating our root collection: " + e2.toString());
-			}
-			catch (InconsistentException e2)
-			{
-				M_log.warn("init: creating our root collection: " + e2.toString());
-			}
-		}
-		catch (TypeException e)
-		{
-			M_log.warn("init: checking our root collection: " + e.toString());
-		}
-		catch (PermissionException e)
-		{
-			M_log.warn("init: checking our root collection: " + e.toString());
 		}
 	}
 }

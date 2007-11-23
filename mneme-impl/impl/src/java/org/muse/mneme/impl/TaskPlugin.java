@@ -25,14 +25,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Answer;
+import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificAnswer;
 import org.muse.mneme.api.TypeSpecificQuestion;
-import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.i18n.InternationalizedMessages;
-import org.sakaiproject.id.api.IdManager;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
@@ -42,14 +41,11 @@ public class TaskPlugin implements QuestionPlugin
 {
 	private static Log M_log = LogFactory.getLog(TaskPlugin.class);
 
+	/** Dependency: AttachmentService */
+	protected AttachmentService attachmentService = null;
+
 	/** Messages bundle name. */
 	protected String bundle = null;
-
-	/** Dependency: ContentHostingService */
-	protected ContentHostingService contentHostingService = null;
-
-	/** Dependency: IdManager. */
-	protected IdManager idManager = null;
 
 	/** Localized messages. */
 	protected InternationalizedMessages messages = null;
@@ -110,7 +106,7 @@ public class TaskPlugin implements QuestionPlugin
 	 */
 	public TypeSpecificAnswer newAnswer(Answer answer)
 	{
-		return new TaskAnswerImpl(answer, this.idManager, this.contentHostingService);
+		return new TaskAnswerImpl(answer, this.attachmentService);
 	}
 
 	/**
@@ -122,6 +118,17 @@ public class TaskPlugin implements QuestionPlugin
 	}
 
 	/**
+	 * Dependency: AttachmentService.
+	 * 
+	 * @param service
+	 *        The AttachmentService.
+	 */
+	public void setAttachmentService(AttachmentService service)
+	{
+		attachmentService = service;
+	}
+
+	/**
 	 * Set the message bundle.
 	 * 
 	 * @param bundle
@@ -130,28 +137,6 @@ public class TaskPlugin implements QuestionPlugin
 	public void setBundle(String name)
 	{
 		this.bundle = name;
-	}
-
-	/**
-	 * Dependency: ContentHostingService.
-	 * 
-	 * @param service
-	 *        The ContentHostingService.
-	 */
-	public void setContentHostingService(ContentHostingService service)
-	{
-		contentHostingService = service;
-	}
-
-	/**
-	 * Set the IdManager
-	 * 
-	 * @param IdManager
-	 *        The IdManager
-	 */
-	public void setIdManager(IdManager idManager)
-	{
-		this.idManager = idManager;
 	}
 
 	/**
