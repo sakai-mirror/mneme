@@ -171,6 +171,20 @@
 			</included>
 		</section>
 
+		<section>
+			<container>
+				<!-- test's submit message -->
+				<text>
+					<message>
+						<model type="html" ref="submission.assessment.submitPresentation.text" />
+					</message>
+				</text>
+			</container>
+			<included>
+				<hasValueDecision model="submission.assessment.submitPresentation.text" />
+			</included>
+		</section>
+
 		<!-- iterating section for each answer -->
 		<section>
 			<iterator name="answer">
