@@ -190,10 +190,10 @@
 										<model type="html" ref="answer.question.feedback" />
 									</message>
 								</text>
-								<included>
-									<hasValueDecision model="answer.question.feedback" />
-								</included>
 							</container>
+							<included>
+								<hasValueDecision model="answer.question.feedback" />
+							</included>
 						</section>
 
 						<!-- evaluation -->
