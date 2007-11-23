@@ -189,17 +189,22 @@ public class QuestionView extends ControllerImpl
 		// if we are going to submitted, we must complete the submission (unless there was an upload error)
 		Boolean complete = Boolean.valueOf((!uploadError) && destination.startsWith("/submitted"));
 
-		// unless we are going to list, remove, instructions (or soon hints), or this very same question, or we have a file upload error, mark the
+		// unless we are going to list, instructions, or this very same question, or we have a file upload error, mark the
 		// answers as complete
-		// TODO: when hints are in, this counts (adding ~ || destination.endsWith("/feedback"))
-		Boolean answersComplete = Boolean.valueOf(!(uploadError || destination.startsWith("/list") || destination.startsWith("/remove")
+		Boolean answersComplete = Boolean.valueOf(!(uploadError || destination.startsWith("/list") || destination.startsWith("STAY")
 				|| destination.startsWith("/instructions") || context.getPreviousDestination().equals(destination)));
 
 		// and if we are working in a random access test, answers are always complete
 		if (submission.getAssessment().getRandomAccess()) answersComplete = Boolean.TRUE;
 
+		// post-process the answers
+		for (Answer answer : answers)
+		{
+			answer.getTypeSpecificAnswer().consolidate(destination);
+		}
+
 		// where are we going?
-		destination = questionChooseDestination(destination, questionSelector, submissionId);
+		destination = questionChooseDestination(context, destination, questionSelector, submissionId);
 
 		// submit all answers
 		try
@@ -283,13 +288,19 @@ public class QuestionView extends ControllerImpl
 	 * @param submisssionId
 	 *        The selected submission id.
 	 */
-	protected String questionChooseDestination(String destination, String questionSelector, String submissionId)
+	protected String questionChooseDestination(Context context, String destination, String questionSelector, String submissionId)
 	{
 		// get the submission
 		Submission submission = assessmentService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			return "/error/" + Errors.invalid;
+		}
+
+		// if we are staying heres
+		if (destination.startsWith("STAY"))
+		{
+			return context.getDestination();
 		}
 
 		// for requests for a single question

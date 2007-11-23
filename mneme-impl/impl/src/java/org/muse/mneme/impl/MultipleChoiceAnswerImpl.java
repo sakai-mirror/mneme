@@ -102,6 +102,30 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public void consolidate(String destination)
+	{
+	}
+
+	/**
+	 * Access the currently selected answer as a string.
+	 * 
+	 * @return The answer.
+	 */
+	public String[] getAnswers()
+	{
+		String[] rv = new String[answerData.size()];
+		int i = 0;
+		for (Integer answer : this.answerData)
+		{
+			rv[i++] = answer.toString();
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Float getAutoScore()
 	{
 		// partial credit for each correct answer, partial negative for each incorrect, floor at 0.
@@ -133,23 +157,6 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 		if (total < 0f) total = 0f;
 
 		return total;
-	}
-
-	/**
-	 * Access the currently selected answer as a string.
-	 * 
-	 * @return The answer.
-	 */
-	public String[] getAnswers()
-	{
-		String[] rv = new String[answerData.size()];
-		int i = 0;
-		for (Integer answer : this.answerData)
-		{
-			rv[i++] = answer.toString();
-		}
-
-		return rv;
 	}
 
 	/**

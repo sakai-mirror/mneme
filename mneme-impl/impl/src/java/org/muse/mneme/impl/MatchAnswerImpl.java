@@ -133,6 +133,13 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public void consolidate(String destination)
+	{
+	}
+
 	public Map<String, Value> getAnswer()
 	{
 		if (this.answerData.isEmpty())

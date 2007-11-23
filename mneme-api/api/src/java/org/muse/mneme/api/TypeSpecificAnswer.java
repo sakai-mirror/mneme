@@ -41,6 +41,14 @@ public interface TypeSpecificAnswer extends Cloneable
 	Object clone(Answer answer);
 
 	/**
+	 * Consolidate the answer, such as after entering and before save.
+	 * 
+	 * @param destination
+	 *        The destination from the post.
+	 */
+	void consolidate(String destination);
+
+	/**
 	 * Access the answer's automatic score.
 	 * 
 	 * @return The answer's auto-score.

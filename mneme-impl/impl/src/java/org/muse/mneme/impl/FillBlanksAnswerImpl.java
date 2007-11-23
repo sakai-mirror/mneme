@@ -108,6 +108,13 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public void consolidate(String destination)
+	{
+	}
+
+	/**
 	 * Access the currently selected answer as a string.
 	 * 
 	 * @return The answer.

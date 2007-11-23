@@ -64,19 +64,19 @@
 						</desc>
 					</sort>
 					<navigations>
-						<navigation style="LINK" title="list-nav-begin">
+						<navigation style="LINK" title="list-nav-begin" small="TRUE">
 							<destination template="/enter/{0}" model="submission.assessment.id" />
 							<included>
 								<decision model="submission.mayBegin" />
 							</included>
 						</navigation>
-						<navigation style="LINK" title="list-nav-continue">
+						<navigation style="LINK" title="list-nav-continue" small="TRUE">
 							<destination template="/question/{0}/z" model="submission.id" />
 							<included>
 								<decision model="submission.mayContinue" />
 							</included>
 						</navigation>
-						<navigation style="LINK" title="list-nav-begin-again">
+						<navigation style="LINK" title="list-nav-begin-again" small="TRUE">
 							<destination template="/enter/{0}" model="submission.assessment.id" />
 							<included>
 								<decision model="submission.mayBeginAgain" />
@@ -283,13 +283,13 @@
 						</text>
 					</container>
 					<navigations>
-						<navigation style="LINK" title="list-nav-review">
+						<navigation style="LINK" title="list-nav-review" small="TRUE">
 							<destination template="/review/{0}" model="submission.best.id" />
 							<included>
 								<decision model="submission.best.mayReview" />
 							</included>
 						</navigation>
-						<navigation style="LINK" disabled="TRUE">
+						<navigation style="LINK" disabled="TRUE" small="TRUE">
 							<title>
 								<message selector="list-nav-review-later">
 									<model type="date" ref="submission.best.assessment.review.date" />
@@ -301,7 +301,7 @@
 								<compareDecision model="submission.best.assessment.review.timing" constant="date" />
 							</included>
 						</navigation>
-						<navigation style="LINK" disabled="TRUE">
+						<navigation style="LINK" disabled="TRUE" small="TRUE">
 							<title>
 								<message selector="list-nav-review-graded" />
 							</title>
@@ -311,7 +311,7 @@
 								<compareDecision model="submission.best.assessment.review.timing" constant="graded" />
 							</included>
 						</navigation>
-						<navigation style="LINK" title="list-nav-review-not" disabled="TRUE">
+						<navigation style="LINK" title="list-nav-review-not" disabled="TRUE" small="TRUE">
 							<included>
 								<decision model="submission.best.isComplete" />
 								<decision reversed="TRUE" model="submission.best.mayReview" />

@@ -98,6 +98,25 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public void consolidate(String destination)
+	{		
+	}
+
+	/**
+	 * Access the currently selected answer as a string.
+	 * 
+	 * @return The answer.
+	 */
+	public String getAnswer()
+	{
+		if (this.answerData == null) return null;
+
+		return this.answerData.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Float getAutoScore()
 	{
 		// correct?
@@ -116,18 +135,6 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 		}
 
 		return 0f;
-	}
-
-	/**
-	 * Access the currently selected answer as a string.
-	 * 
-	 * @return The answer.
-	 */
-	public String getAnswer()
-	{
-		if (this.answerData == null) return null;
-
-		return this.answerData.toString();
 	}
 
 	/**

@@ -205,9 +205,11 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
 
 		Navigation remove = this.uiService.newNavigation();
-		remove.setTitle("upload-remove").setStyle(Navigation.Style.link).setSubmit();
-		remove.setDestination(this.uiService.newDestination().setDestination("REMOVE:{0}",
-				this.uiService.newPropertyReference().setReference("attachment")));
+		remove.setTitle("upload-remove").setStyle(Navigation.Style.link).setSubmit().setSmall();
+		remove.setIcon("/icons/delete.png", Navigation.IconStyle.none);
+		remove.setDestination(this.uiService.newDestination().setDestination("STAY_REMOVE:{0}",
+				this.uiService.newPropertyReference().setReference("attachment.reference")));
+		remove.setConfirm(this.uiService.newTrueDecision(), "cancel", "/icons/cancel.gif", "confirm-remove");
 		uploaded.addNavigation(remove);
 
 		answerSection.add(upload).add(uploaded);

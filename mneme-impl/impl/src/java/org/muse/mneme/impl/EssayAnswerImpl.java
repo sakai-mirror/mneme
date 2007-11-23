@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.fileupload.FileItem;
@@ -48,6 +49,7 @@ import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.exception.ServerOverloadException;
 import org.sakaiproject.exception.TypeException;
 import org.sakaiproject.id.api.IdManager;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * EssayAnswerImpl handles answers for the essay question type.
@@ -134,6 +136,33 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 		catch (CloneNotSupportedException e)
 		{
 			return null;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void consolidate(String destination)
+	{
+		// check for remove
+		if (destination.startsWith("STAY_REMOVE:"))
+		{
+			String[] parts = StringUtil.split(destination, ":");
+			if (parts.length == 2)
+			{
+				for (Iterator i = this.uploads.iterator(); i.hasNext();)
+				{
+					Reference ref = (Reference) i.next();
+					if (ref.getReference().equals(parts[1]))
+					{
+						i.remove();
+
+						// TODO: actually delete it!
+
+						this.changed = true;
+					}
+				}
+			}
 		}
 	}
 
