@@ -188,7 +188,8 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Boolean getIsAnswered()
 	{
-		return ((((EssayQuestionImpl) this.answer.getQuestion().getTypeSpecificQuestion()).getSubmissionType() == EssayQuestionImpl.SubmissionType.none) || (this.answerData != null));
+		return ((((EssayQuestionImpl) this.answer.getQuestion().getTypeSpecificQuestion()).getSubmissionType() == EssayQuestionImpl.SubmissionType.none)
+				|| (this.answerData != null) || (!this.uploads.isEmpty()));
 	}
 
 	/**

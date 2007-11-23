@@ -270,7 +270,14 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		answer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
 		answerSection.add(answer);
 
-		// TODO: add to the answerSection the uploaded links
+		Attachments uploaded = this.uiService.newAttachments();
+		uploaded.setTitle("uploaded-title");
+		uploaded.setAttachments(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded"), "attachment");
+		uploaded.setSize(false).setTimestamp(false);
+		uploaded.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.attachments.toString(),
+				SubmissionType.both.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
+		answerSection.add(uploaded);
 
 		// if no submission
 		Instructions noSub = this.uiService.newInstructions();
@@ -355,7 +362,15 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		Text answer = this.uiService.newText();
 		answer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
 
-		return this.uiService.newFragment().setMessages(this.messages).add(answer);
+		Attachments uploaded = this.uiService.newAttachments();
+		uploaded.setTitle("uploaded-title");
+		uploaded.setAttachments(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded"), "attachment");
+		uploaded.setSize(false).setTimestamp(false);
+		uploaded.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.attachments.toString(),
+				SubmissionType.both.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
+
+		return this.uiService.newFragment().setMessages(this.messages).add(answer).add(uploaded);
 	}
 
 	/**
