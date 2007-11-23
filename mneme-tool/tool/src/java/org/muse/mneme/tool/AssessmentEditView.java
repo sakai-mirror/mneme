@@ -35,9 +35,14 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
+import org.sakaiproject.entity.api.EntityManager;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -50,6 +55,15 @@ public class AssessmentEditView extends ControllerImpl
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
+
+	/** Dependency: AttachmentService. */
+	protected AttachmentService attachmentService = null;
+
+	/** Dependency: EntityManager. */
+	protected EntityManager entityManager = null;
+
+	/** tool manager reference. */
+	protected ToolManager toolManager = null;
 
 	/**
 	 * Shutdown.
@@ -167,8 +181,40 @@ public class AssessmentEditView extends ControllerImpl
 		Values values = this.uiService.newValues();
 		context.put("ids", values);
 
+		// for the upload of attachments
+		Upload upload = new Upload(this.toolManager.getCurrentPlacement().getContext(), "docs", false, this.attachmentService);
+		context.put("upload", upload);
+
 		// read the form
 		String destination = uiService.decode(req, context);
+
+		// save the attachments upload
+		if (upload.getUpload() != null)
+		{
+			assessment.getPresentation().addAttachment(upload.getUpload());
+		}
+
+		// handle an attachments remove
+		if (destination.startsWith("REMOVE:"))
+		{
+			String[] parts = StringUtil.split(destination, ":");
+			if (parts.length != 2)
+			{
+				throw new IllegalArgumentException();
+			}
+			String refString = parts[1];
+			Reference ref = this.entityManager.newReference(refString);
+			
+			// remove from the assessment
+			assessment.getPresentation().removeAttachment(ref);
+			
+			// remove the attachment
+			// TODO: really?
+			this.attachmentService.removeAttachment(ref);
+
+			// stay here
+			destination = context.getDestination();
+		}
 
 		try
 		{
@@ -241,4 +287,38 @@ public class AssessmentEditView extends ControllerImpl
 	{
 		this.assessmentService = service;
 	}
+
+	/**
+	 * Set the AttachmentService.
+	 * 
+	 * @param service
+	 *        The AttachmentService.
+	 */
+	public void setAttachmentService(AttachmentService service)
+	{
+		this.attachmentService = service;
+	}
+
+	/**
+	 * Set the EntityManager.
+	 * 
+	 * @param manager
+	 *        The EntityManager.
+	 */
+	public void setEntityManager(EntityManager manager)
+	{
+		entityManager = manager;
+	}
+
+	/**
+	 * Set the tool manager.
+	 * 
+	 * @param manager
+	 *        The tool manager.
+	 */
+	public void setToolManager(ToolManager manager)
+	{
+		toolManager = manager;
+	}
+
 }

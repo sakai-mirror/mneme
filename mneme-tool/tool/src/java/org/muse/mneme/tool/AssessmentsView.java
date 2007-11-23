@@ -287,17 +287,6 @@ public class AssessmentsView extends ControllerImpl
 
 		else if (destination.equals("UNPUBLISH"))
 		{
-			// // build up list of ids separated by "+" for the unpublish view destination
-			// StringBuilder buf = new StringBuilder();
-			// for (String id : values.getValues())
-			// {
-			// buf.append(id);
-			// buf.append("+");
-			// }
-			// if (buf.length() > 1) buf.setLength(buf.length() - 1);
-			//
-			// destination = "/assessment_unpublish/" + sort + "/" + buf.toString();
-
 			for (String id : values.getValues())
 			{
 				Assessment assessment = this.assessmentService.getAssessment(id);
@@ -328,17 +317,6 @@ public class AssessmentsView extends ControllerImpl
 
 		else if (destination.equals("DELETE"))
 		{
-			// // build up list of ids separated by "+" for the delete view destination
-			// StringBuilder buf = new StringBuilder();
-			// for (String id : values.getValues())
-			// {
-			// buf.append(id);
-			// buf.append("+");
-			// }
-			// if (buf.length() > 1) buf.setLength(buf.length() - 1);
-			//
-			// destination = "/assessments_delete/" + sort + "/" + buf.toString();
-
 			for (String id : values.getValues())
 			{
 				Assessment assessment = this.assessmentService.getAssessment(id);

@@ -86,7 +86,28 @@
 							</readOnly>
 						</selection>
 						<htmlEdit title="test-instructions" model="assessment.presentation.text" rows="5" cols="40" />
-						<attachmentsEdit title="attachments" model="assessment.presentation.attachments" />
+						<attachments title="attachments" model="assessment.presentation.attachments" name="attachment">
+							<navigations>
+								<navigation destination="REMOVE" title="remove-attachment" style="LINK" description="remove-attachment-description"
+									submit="TRUE" small="true">
+									<icon icon="/icons/delete.png" style="NONE" />
+									<destination template="REMOVE:{0}">
+										<model ref="attachment.reference" />
+									</destination>
+									<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif"
+										selector="confirm-remove-attachment" />
+								</navigation>
+							</navigations>
+						</attachments>
+						<fileUpload>
+							<model ref="upload.upload" />
+							<title>
+								<message selector="upload-attachment" />
+							</title>
+							<upload>
+								<message selector="upload-button" />
+							</upload>
+						</fileUpload>
 					</container>
 				</section>
 			</container>

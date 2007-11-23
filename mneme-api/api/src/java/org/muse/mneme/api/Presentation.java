@@ -23,25 +23,28 @@ package org.muse.mneme.api;
 
 import java.util.List;
 
+import org.apache.commons.fileupload.FileItem;
+import org.sakaiproject.entity.api.Reference;
+
 /**
  * Presentation defines a rich text with attachments.
  */
 public interface Presentation
 {
 	/**
-	 * Add this reference string as another attachment.
+	 * Add this reference as another attachment.
 	 * 
 	 * @param reference
 	 *        The attachment reference string.
 	 */
-	void addAttachment(String reference);
+	void addAttachment(Reference reference);
 
 	/**
 	 * Access the attachments for the presentation, each a reference string.
 	 * 
-	 * @return The list of attachment reference strings, or an empty list if there are none.
+	 * @return The list of attachment references, or an empty list if there are none.
 	 */
-	List<String> getAttachments();
+	List<Reference> getAttachments();
 
 	/**
 	 * Check if there is nothing defined for this presentation.
@@ -63,7 +66,7 @@ public interface Presentation
 	 * @param reference
 	 *        The attachment to remove.
 	 */
-	void removeAttachment(String reference);
+	void removeAttachment(Reference reference);
 
 	/**
 	 * Set the rich text (html) part of the presentation.

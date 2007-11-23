@@ -22,17 +22,19 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.Presentation;
+import org.sakaiproject.entity.api.Reference;
 
 /**
  * PresentationImpl implements Presentation
  */
 public class PresentationImpl implements Presentation
 {
-	protected List<String> attachments = new ArrayList<String>();
+	protected List<Reference> attachments = new ArrayList<Reference>();
 
 	protected transient Changeable owner = null;
 
@@ -61,15 +63,16 @@ public class PresentationImpl implements Presentation
 	/**
 	 * {@inheritDoc}
 	 */
-	public void addAttachment(String reference)
+	public void addAttachment(Reference reference)
 	{
 		this.attachments.add(reference);
+		if (this.owner != null) this.owner.setChanged();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getAttachments()
+	public List<Reference> getAttachments()
 	{
 		return this.attachments;
 	}
@@ -93,12 +96,17 @@ public class PresentationImpl implements Presentation
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removeAttachment(String reference)
+	public void removeAttachment(Reference reference)
 	{
-		// TODO: is there really a change here?
-		this.attachments.remove(reference);
-
-		if (this.owner != null) this.owner.setChanged();
+		for (Iterator i = this.attachments.iterator(); i.hasNext();)
+		{
+			Reference ref = (Reference) i.next();
+			if (ref.getReference().equals(reference.getReference()))
+			{
+				i.remove();
+				if (this.owner != null) this.owner.setChanged();
+			}
+		}
 	}
 
 	/**
@@ -121,7 +129,7 @@ public class PresentationImpl implements Presentation
 	 */
 	protected void set(PresentationImpl other)
 	{
-		this.attachments = new ArrayList<String>(other.attachments.size());
+		this.attachments = new ArrayList<Reference>(other.attachments.size());
 		this.attachments.addAll(other.attachments);
 		this.text = other.text;
 	}
