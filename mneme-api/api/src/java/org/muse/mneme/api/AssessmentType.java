@@ -26,7 +26,7 @@ package org.muse.mneme.api;
  */
 public enum AssessmentType
 {
-	test(1), survey(2), assignment(0);
+	test(0), survey(2), assignment(1);
 
 	private final int sortOrder;
 

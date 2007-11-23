@@ -622,6 +622,16 @@ public class SubmissionStorageSample implements SubmissionStorage
 						rv = -1 * s0.compareToIgnoreCase(s1);
 						break;
 					}
+					case type_a:
+					{
+						rv = ((Submission) arg0).getAssessment().getType().getSortValue().compareTo(((Submission) arg1).getAssessment().getType().getSortValue());
+						break;
+					}
+					case type_d:
+					{
+						rv = -1 * ((Submission) arg0).getAssessment().getType().getSortValue().compareTo(((Submission) arg1).getAssessment().getType().getSortValue());
+						break;
+					}
 					case dueDate_a:
 					{
 						// no due date sorts high

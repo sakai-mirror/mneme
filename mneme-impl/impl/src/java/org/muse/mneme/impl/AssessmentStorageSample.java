@@ -775,7 +775,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			//
 
 			a = newAssessment();
-			a.setType(AssessmentType.survey);
+			a.setType(AssessmentType.test);
 			a.initId("a3");
 			a.setPublished(Boolean.TRUE);
 			a.setContext("mercury");

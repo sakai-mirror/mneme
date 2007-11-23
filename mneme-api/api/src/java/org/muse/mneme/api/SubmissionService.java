@@ -42,7 +42,7 @@ public interface SubmissionService
 	 */
 	enum GetUserContextSubmissionsSort
 	{
-		dueDate_a, dueDate_d, status_a, status_d, title_a, title_d
+		dueDate_a, dueDate_d, status_a, status_d, title_a, title_d, type_a, type_d
 	}
 
 	/** Phantom submissions start with this, and are followed by the assessment id, another slash, then the user id. */

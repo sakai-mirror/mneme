@@ -42,6 +42,47 @@
 				<message selector="list-empty" />
 			</emptyTitle>
 			<columns>
+				<modelColumn pixels="16" centered="TRUE">
+					<title>
+						<message selector="list-type" />
+					</title>
+					<sort submit="TRUE">
+						<active>
+							<compareDecision model="sort_column" constant="3" />
+						</active>
+						<direction>
+							<compareDecision model="sort_direction" constant="A" />
+						</direction>
+						<asc icon="/icons/sortascending.gif">
+							<message selector="asc" />
+							<destination template="/list/3A" />
+						</asc>
+						<desc icon="/icons/sortdescending.gif">
+							<message selector="desc" />
+							<destination template="/list/3D" />
+						</desc>
+					</sort>
+					<navigations>
+						<navigation style="LINK" submit="TRUE" description="assessment-type-test" disabled="TRUE">
+							<icon icon="/icons/test_type.png" style="LEFT" />
+							<included>
+								<compareDecision model="submission.assessment.type" constant="test" />
+							</included>
+						</navigation>
+						<navigation style="LINK" submit="TRUE" description="assessment-type-survey" disabled="TRUE">
+							<icon icon="/icons/survey_type.png" style="LEFT" />
+							<included>
+								<compareDecision model="submission.assessment.type" constant="survey" />
+							</included>
+						</navigation>
+						<navigation style="LINK" submit="TRUE" description="assessment-type-assignment" disabled="TRUE">
+							<icon icon="/icons/assignment_type.png" style="LEFT" />
+							<included>
+								<compareDecision model="submission.assessment.type" constant="assignment" />
+							</included>
+						</navigation>
+					</navigations>
+				</modelColumn>
 				<modelColumn>
 					<title>
 						<message selector="list-header-title" />

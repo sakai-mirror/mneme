@@ -83,7 +83,7 @@ public class ListView extends ControllerImpl
 			return;
 		}
 
-		// SORT: 0|1|2 A|D - 2 chars, column | direction
+		// SORT: 0|1|2|3 A|D - 2 chars, column | direction
 		if ((sortCode != null) && (sortCode.length() != 2))
 		{
 			// redirect to error
@@ -125,6 +125,16 @@ public class ListView extends ControllerImpl
 			else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
 			{
 				sort = MnemeService.GetUserContextSubmissionsSort.dueDate_d;
+			}
+			
+			// 3 is type
+			else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'A'))
+			{
+				sort = MnemeService.GetUserContextSubmissionsSort.type_a;
+			}
+			else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'D'))
+			{
+				sort = MnemeService.GetUserContextSubmissionsSort.type_d;
 			}
 
 			else
