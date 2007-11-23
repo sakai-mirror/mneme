@@ -198,6 +198,30 @@
 				<hasValueDecision model="assessment.password.password" />
 			</included>
 		</section>
+		<section>
+			<container>
+				<instructions>
+					<message selector="enter-honor-pledge">
+						<model type="icon" icon="/icons/access.png" />
+						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+					</message>
+				</instructions>
+				<selection>
+					<title>
+						<message selector="honor-pledge-title">
+							<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+						</message>
+					</title>
+					<model ref="pledge.value" />
+					<selectionChoices>
+						<selectionChoice value="true" selector="honor-pledge-agree" />
+					</selectionChoices>
+				</selection>
+			</container>
+			<included>
+				<decision model="assessment.requireHonorPledge" />
+			</included>
+		</section>
 		<gap />
 		<navigationBar id="nav">
 			<container>

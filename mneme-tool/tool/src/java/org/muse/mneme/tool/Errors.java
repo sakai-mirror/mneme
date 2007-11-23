@@ -24,5 +24,5 @@ package org.muse.mneme.tool;
 /** Our errors. */
 enum Errors
 {
-	closed, invalid, invalidpost, linear, over, password, policy, unauthorized, unexpected, unknown, upload
+	closed, invalid, invalidpost, linear, over, password, pledge, policy, unauthorized, unexpected, unknown, upload
 }

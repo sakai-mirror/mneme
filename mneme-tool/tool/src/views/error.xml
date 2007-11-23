@@ -116,6 +116,14 @@
 		</section>
 		<section>
 			<container>
+				<alert selector="error-pledge" />
+			</container>
+			<included>
+				<hasValueDecision model="pledge" />
+			</included>
+		</section>
+		<section>
+			<container>
 				<instructions selector="error-recovery-test" />
 				<navigation style="BUTTON" title="enter" default="TRUE">
 					<destination template="{0}">

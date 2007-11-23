@@ -167,6 +167,12 @@ public class ErrorView extends ControllerImpl
 				context.put("password", Boolean.TRUE);
 				break;
 			}
+
+			case pledge:
+			{
+				context.put("pledge", Boolean.TRUE);
+				break;
+			}
 		}
 
 		// render

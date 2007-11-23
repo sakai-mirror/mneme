@@ -161,6 +161,10 @@ public class EnterView extends ControllerImpl
 		Value value = this.uiService.newValue();
 		context.put("password", value);
 
+		// for the honor pledge
+		Value pledge = this.uiService.newValue();
+		context.put("pledge", pledge);
+
 		// read form
 		String destination = this.uiService.decode(req, context);
 
@@ -195,6 +199,14 @@ public class EnterView extends ControllerImpl
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.password)));
+			return;
+		}
+
+		// check pledge
+		if (submission.getAssessment().getRequireHonorPledge() && (!"true".equals(pledge.getValue())))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.pledge)));
 			return;
 		}
 
