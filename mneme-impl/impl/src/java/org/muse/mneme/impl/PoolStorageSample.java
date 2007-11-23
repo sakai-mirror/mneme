@@ -132,7 +132,10 @@ public class PoolStorageSample implements PoolStorage
 		Collections.shuffle(rv, new Random(seed));
 
 		// cut off the number of questions we want
-		rv = rv.subList(0, numQuestions);
+		if (rv.size() > numQuestions)
+		{
+			rv = rv.subList(0, numQuestions);
+		}
 
 		return rv;
 	}
