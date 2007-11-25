@@ -343,19 +343,14 @@ public class PoolImpl implements Pool
 	}
 
 	/**
-	 * Set this assessment to be "historical" - used only for history by submissions.
+	 * Establish the historical settings.
 	 * 
-	 * @param current
-	 *        The current pool this was made from.
+	 * @param historical
+	 *        The historical setting.
 	 */
-	protected void initHistorical(Pool current)
+	protected void initHistorical(Boolean historical)
 	{
-		if (this.historical) return;
-
-		this.historical = Boolean.TRUE;
-
-		// suck in the current question manifest
-		this.frozenManifest = current.getAllQuestionIds();
+		this.historical = historical;
 	}
 
 	/**
@@ -367,6 +362,33 @@ public class PoolImpl implements Pool
 	protected void initId(String id)
 	{
 		this.id = id;
+	}
+
+	/**
+	 * Establish the mint setting.
+	 * 
+	 * @param mint
+	 *        The mint setting.
+	 */
+	protected void initMint(Boolean mint)
+	{
+		this.mint = mint;
+	}
+
+	/**
+	 * Set this assessment to be "historical" - used only for history by submissions.
+	 * 
+	 * @param current
+	 *        The current pool this was made from.
+	 */
+	protected void makeHistorical(Pool current)
+	{
+		if (this.historical) return;
+
+		this.historical = Boolean.TRUE;
+
+		// suck in the current question manifest
+		this.frozenManifest = current.getAllQuestionIds();
 	}
 
 	protected void set(PoolImpl other)

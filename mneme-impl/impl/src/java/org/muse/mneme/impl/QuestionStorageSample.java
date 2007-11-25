@@ -50,7 +50,7 @@ public class QuestionStorageSample implements QuestionStorage
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(QuestionStorageSample.class);
 
-	protected boolean fakedAlready = false;
+	protected boolean fakedAlready = true;
 
 	protected Object idGenerator = new Object();
 
@@ -73,12 +73,8 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void clearStaleMintQuestions()
+	public void clearStaleMintQuestions(Date stale)
 	{
-		// give it a day
-		Date stale = new Date();
-		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
-
 		// find them
 		List<String> delete = new ArrayList<String>();
 		for (QuestionImpl question : this.questions.values())

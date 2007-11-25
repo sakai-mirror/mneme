@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,9 +51,7 @@ import org.muse.mneme.api.SubmissionCompletedException;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.authz.api.FunctionManager;
 import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
-import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.user.api.User;
 
 /**
@@ -77,9 +74,6 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	/** Dependency: FunctionManager */
 	protected FunctionManager functionManager = null;
 
-	/** Configuration: to run the ddl on init or not. */
-	protected boolean m_autoDdl = false;
-
 	/** Dependency: PoolService */
 	protected PoolService poolService = null;
 
@@ -88,9 +82,6 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 
 	/** Dependency: QuestionService */
 	protected QuestionService questionService = null;
-
-	/** Dependency: SqlService */
-	protected SqlService sqlService = null;
 
 	/** Dependency: SubmissionService */
 	protected SubmissionService submissionService = null;
@@ -103,7 +94,7 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 
 	/** How long to wait (ms) between checks for timed-out submission in the db. 0 disables. */
 	protected long timeoutCheckMs = 1000L * 60L * 60L * 12L;
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -576,12 +567,6 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	{
 		try
 		{
-			// if we are auto-creating our schema, check and create
-			if (m_autoDdl)
-			{
-				sqlService.ddl(this.getClass().getClassLoader(), "mneme");
-			}
-
 			// register functions
 			functionManager.registerFunction(GRADE_PERMISSION);
 			functionManager.registerFunction(MANAGE_PERMISSION);
@@ -768,17 +753,6 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	}
 
 	/**
-	 * Configuration: to run the ddl on init or not.
-	 * 
-	 * @param value
-	 *        the auto ddl value.
-	 */
-	public void setAutoDdl(String value)
-	{
-		m_autoDdl = new Boolean(value).booleanValue();
-	}
-
-	/**
 	 * Dependency: FunctionManager.
 	 * 
 	 * @param service
@@ -809,17 +783,6 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	public void setQuestionService(QuestionService service)
 	{
 		questionService = service;
-	}
-
-	/**
-	 * Dependency: SqlService.
-	 * 
-	 * @param service
-	 *        The SqlService.
-	 */
-	public void setSqlService(SqlService service)
-	{
-		sqlService = service;
 	}
 
 	/**

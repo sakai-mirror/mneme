@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.muse.mneme.api.Pool;
@@ -34,31 +35,20 @@ public interface PoolStorage
 {
 	/**
 	 * Clear out any mint objects that are old enough to be considered abandoned.
+	 * 
+	 * @param stale
+	 *        The time to compare to the create date; before this they are stale.
 	 */
-	void clearStaleMintPools();
+	void clearStaleMintPools(Date stale);
 
 	/**
 	 * Count the pools in this context that meet this criteria.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @param search
-	 *        The search criteria.
 	 * @return a list of pools that meet the criteria.
 	 */
-	Integer countPools(String context, String search);
-
-	/**
-	 * Draw a set of questions from the pool.
-	 * 
-	 * @param pool
-	 *        The pool to draw from.
-	 * @oaram seed A Random seed for the random draw.
-	 * @param numQuestions
-	 *        The number of questions to draw.
-	 * @return a List of question ids drawn from the pool.
-	 */
-	List<String> drawQuestionIds(Pool pool, long seed, Integer numQuestions);
+	Integer countPools(String context);
 
 	/**
 	 * Check if a pool by this id exists.
@@ -76,24 +66,13 @@ public interface PoolStorage
 	 *        The context.
 	 * @param sort
 	 *        The sort criteria.
-	 * @param search
-	 *        The search criteria.
 	 * @param pageNum
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return The list of pools that meet the criteria.
 	 */
-	List<Pool> findPools(String context, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
-
-	/**
-	 * Access all questions.
-	 * 
-	 * @param pool
-	 *        The pool to draw from.
-	 * @return A List of question ids from the pool.
-	 */
-	List<String> getAllQuestionIds(Pool pool);
+	List<PoolImpl> findPools(String context, PoolService.FindPoolsSort sort, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Access a pool by id.
@@ -111,21 +90,13 @@ public interface PoolStorage
 	 *        The context.
 	 * @return The List of Pools in the context.
 	 */
-	List<Pool> getPools(String context);
-
-	/**
-	 * Count the questions in a pool.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @return The number of questions in the pool.
-	 */
-	Integer getPoolSize(PoolImpl pool);
+	List<PoolImpl> getPools(String context);
 
 	/**
 	 * Check if any frozen manifests reference this question.
 	 * 
-	 * @param question The question.
+	 * @param question
+	 *        The question.
 	 * @return TRUE if any frozen manifests reference the quesiton, FALSE if not.
 	 */
 	Boolean manifestDependsOn(Question question);

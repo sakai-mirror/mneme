@@ -121,7 +121,11 @@ public class QuestionServiceImpl implements QuestionService
 	 */
 	public void clearStaleMintQuestions()
 	{
-		this.storage.clearStaleMintQuestions();
+		// give it a day
+		Date stale = new Date();
+		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
+
+		this.storage.clearStaleMintQuestions(stale);
 	}
 
 	/**

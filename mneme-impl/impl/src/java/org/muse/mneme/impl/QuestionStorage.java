@@ -21,11 +21,10 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
 import java.util.List;
 
-import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Pool;
-import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 
@@ -36,8 +35,11 @@ public interface QuestionStorage
 {
 	/**
 	 * Clear out any mint objects that are old enough to be considered abandoned.
+	 * 
+	 * @param stale
+	 *        The time to compare to the create date; before this they are stale.
 	 */
-	void clearStaleMintQuestions();
+	void clearStaleMintQuestions(Date stale);
 
 	/**
 	 * Create a new question that is a copy of each question in the pool.

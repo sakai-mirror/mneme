@@ -22,9 +22,12 @@
 package org.muse.mneme.impl;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +42,6 @@ import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.util.ResourceLoader;
-import org.sakaiproject.util.Validator;
 
 /**
  * <p>
@@ -102,7 +104,11 @@ public class PoolServiceImpl implements PoolService
 	 */
 	public void clearStaleMintPools()
 	{
-		this.storage.clearStaleMintPools();
+		// give it a day
+		Date stale = new Date();
+		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
+
+		this.storage.clearStaleMintPools(stale);
 	}
 
 	/**
@@ -161,9 +167,11 @@ public class PoolServiceImpl implements PoolService
 	{
 		if (context == null) throw new IllegalArgumentException();
 
+		// TODO: search
+
 		if (M_log.isDebugEnabled()) M_log.debug("countPools: context: " + context);
 
-		Integer rv = storage.countPools(context, search);
+		Integer rv = storage.countPools(context);
 		return rv;
 	}
 
@@ -193,7 +201,9 @@ public class PoolServiceImpl implements PoolService
 
 		if (M_log.isDebugEnabled()) M_log.debug("findPools: context: " + context);
 
-		List<Pool> rv = storage.findPools(context, sort, search, pageNum, pageSize);
+		// TODO: search
+
+		List<Pool> rv = new ArrayList<Pool>(storage.findPools(context, sort, pageNum, pageSize));
 		return rv;
 	}
 
@@ -236,12 +246,12 @@ public class PoolServiceImpl implements PoolService
 				this.storage = this.storgeOptions.get("default");
 			}
 
-			if (storage == null) M_log.warn("no storage set: " + this.storageKey);
+			if (this.storage == null) M_log.warn("no storage set: " + this.storageKey);
 
 			// messages
 			if (this.bundle != null) this.messages = new ResourceLoader(this.bundle);
 
-			M_log.info("init()");
+			M_log.info("init(): storage: " + this.storage);
 		}
 		catch (Throwable t)
 		{
@@ -474,7 +484,7 @@ public class PoolServiceImpl implements PoolService
 
 		// get a new id on the old and save it
 		current.initId(null);
-		current.initHistorical(pool);
+		current.makeHistorical(pool);
 		this.storage.savePool(current);
 
 		// swap all historical dependencies to the new
@@ -521,11 +531,16 @@ public class PoolServiceImpl implements PoolService
 	{
 		// get the current pool for history
 		PoolImpl current = this.storage.getPool(pool.getId());
+
+		// if we don't have one, or we are trying to delete history, that's bad!
+		if (current == null) throw new IllegalArgumentException();
+		if (current.getIsHistorical()) throw new IllegalArgumentException();
+
 		if (this.assessmentService.liveDependencyExists(pool, false))
 		{
 			// get a new id on the old and save it
 			current.initId(null);
-			current.initHistorical(pool);
+			current.makeHistorical(pool);
 			this.storage.savePool(current);
 
 			// swap all historical dependencies to the new
@@ -598,7 +613,7 @@ public class PoolServiceImpl implements PoolService
 			{
 				// get a new id on the old and save it
 				current.initId(null);
-				current.initHistorical(pool);
+				current.makeHistorical(pool);
 				this.storage.savePool(current);
 
 				// swap all historical dependencies to the new
@@ -615,7 +630,17 @@ public class PoolServiceImpl implements PoolService
 	 */
 	protected List<String> drawQuestionIds(Pool pool, long seed, Integer numQuestions)
 	{
-		List<String> rv = storage.drawQuestionIds(pool, seed, numQuestions);
+		List<String> rv = getAllQuestionIds(pool);
+
+		// randomize the questions in the copy
+		Collections.shuffle(rv, new Random(seed));
+
+		// cut off the number of questions we want
+		if (rv.size() > numQuestions)
+		{
+			rv = rv.subList(0, numQuestions);
+		}
+
 		return rv;
 	}
 
@@ -624,7 +649,17 @@ public class PoolServiceImpl implements PoolService
 	 */
 	protected List<String> getAllQuestionIds(Pool pool)
 	{
-		List<String> rv = storage.getAllQuestionIds(pool);
+		List<String> rv = null;
+
+		if ((pool != null) && ((PoolImpl) pool).getFrozenManifest() != null)
+		{
+			rv = new ArrayList<String>(((PoolImpl) pool).getFrozenManifest());
+		}
+		else
+		{
+			rv = this.questionService.getPoolQuestions(pool);
+		}
+
 		return rv;
 	}
 
@@ -640,7 +675,7 @@ public class PoolServiceImpl implements PoolService
 		if (context == null) throw new IllegalArgumentException();
 
 		// get all the pools for these users
-		List<Pool> rv = this.storage.getPools(context);
+		List<Pool> rv = new ArrayList<Pool>(this.storage.getPools(context));
 
 		return rv;
 	}
@@ -667,7 +702,17 @@ public class PoolServiceImpl implements PoolService
 	 */
 	protected Integer getPoolSize(Pool pool)
 	{
-		Integer rv = storage.getPoolSize((PoolImpl) pool);
+		Integer rv = null;
+
+		if (((PoolImpl) pool).getFrozenManifest() != null)
+		{
+			rv = ((PoolImpl) pool).getFrozenManifest().size();
+		}
+		else
+		{
+			rv = this.questionService.getPoolQuestions(pool).size();
+		}
+
 		return rv;
 	}
 

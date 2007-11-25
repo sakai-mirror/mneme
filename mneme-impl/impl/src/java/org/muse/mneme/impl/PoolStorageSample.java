@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,7 +44,7 @@ public class PoolStorageSample implements PoolStorage
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(PoolStorageSample.class);
 
-	protected boolean fakedAlready = false;
+	protected boolean fakedAlready = true;
 
 	protected Object idGenerator = new Object();
 
@@ -60,12 +59,8 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void clearStaleMintPools()
+	public void clearStaleMintPools(Date stale)
 	{
-		// give it a day
-		Date stale = new Date();
-		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
-
 		// find them
 		List<String> delete = new ArrayList<String>();
 		for (PoolImpl pool : this.pools.values())
@@ -86,7 +81,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPools(String context, String search)
+	public Integer countPools(String context)
 	{
 		fakeIt();
 
@@ -96,7 +91,6 @@ public class PoolStorageSample implements PoolStorage
 		{
 			if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
 			{
-				// TODO: search
 				count++;
 			}
 		}
@@ -115,34 +109,6 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> drawQuestionIds(Pool pool, long seed, Integer numQuestions)
-	{
-		List<String> rv = null;
-
-		if (((PoolImpl) pool).getFrozenManifest() != null)
-		{
-			rv = new ArrayList<String>(((PoolImpl) pool).getFrozenManifest());
-		}
-		else
-		{
-			rv = this.questionService.getPoolQuestions(pool);
-		}
-
-		// randomize the questions in the copy
-		Collections.shuffle(rv, new Random(seed));
-
-		// cut off the number of questions we want
-		if (rv.size() > numQuestions)
-		{
-			rv = rv.subList(0, numQuestions);
-		}
-
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean existsPool(String poolId)
 	{
 		fakeIt();
@@ -156,17 +122,16 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String context, final PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<PoolImpl> findPools(String context, final PoolService.FindPoolsSort sort, Integer pageNum, Integer pageSize)
 	{
 		fakeIt();
 
-		List<Pool> rv = new ArrayList<Pool>();
+		List<PoolImpl> rv = new ArrayList<PoolImpl>();
 
 		for (PoolImpl pool : this.pools.values())
 		{
 			if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
 			{
-				// TODO: search
 				rv.add(new PoolImpl(pool));
 			}
 		}
@@ -239,25 +204,6 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getAllQuestionIds(Pool pool)
-	{
-		List<String> rv = null;
-
-		if ((pool != null) && ((PoolImpl) pool).getFrozenManifest() != null)
-		{
-			rv = new ArrayList<String>(((PoolImpl) pool).getFrozenManifest());
-		}
-		else
-		{
-			rv = this.questionService.getPoolQuestions(pool);
-		}
-
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public PoolImpl getPool(String poolId)
 	{
 		fakeIt();
@@ -273,11 +219,11 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> getPools(String context)
+	public List<PoolImpl> getPools(String context)
 	{
 		fakeIt();
 
-		List<Pool> rv = new ArrayList<Pool>();
+		List<PoolImpl> rv = new ArrayList<PoolImpl>();
 
 		for (PoolImpl pool : this.pools.values())
 		{
@@ -285,25 +231,6 @@ public class PoolStorageSample implements PoolStorage
 			{
 				rv.add(new PoolImpl(pool));
 			}
-		}
-
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Integer getPoolSize(PoolImpl pool)
-	{
-		Integer rv = null;
-
-		if (((PoolImpl) pool).getFrozenManifest() != null)
-		{
-			rv = ((PoolImpl) pool).getFrozenManifest().size();
-		}
-		else
-		{
-			rv = this.questionService.getPoolQuestions(pool).size();
 		}
 
 		return rv;
