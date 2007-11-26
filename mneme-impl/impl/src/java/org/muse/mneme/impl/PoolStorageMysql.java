@@ -23,12 +23,9 @@ package org.muse.mneme.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +34,7 @@ import org.muse.mneme.api.Question;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.id.api.IdManager;
+import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -53,21 +51,24 @@ public class PoolStorageMysql implements PoolStorage
 	/** Dependency: IdManager. */
 	protected IdManager idManager = null;
 
-	protected Map<String, PoolImpl> pools = new LinkedHashMap<String, PoolImpl>();
-
+	/** Dependency: PoolService. */
 	protected PoolServiceImpl poolService = null;
 
+	/** Dependency: QuestionService. */
 	protected QuestionServiceImpl questionService = null;
 
 	/** Dependency: SqlService. */
 	protected SqlService sqlService = null;
+
+	/** Dependency: ThreadLocalManager. */
+	protected ThreadLocalManager threadLocalManager = null;
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void clearStaleMintPools(final Date stale)
 	{
-		sqlService.transact(new Runnable()
+		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
@@ -88,7 +89,7 @@ public class PoolStorageMysql implements PoolStorage
 		sql.append(" WHERE P.CONTEXT=? AND P.MINT='0' AND P.HISTORICAL='0'");
 		Object[] fields = new Object[1];
 		fields[0] = context;
-		List results = sqlService.dbRead(sql.toString(), fields, null);
+		List results = this.sqlService.dbRead(sql.toString(), fields, null);
 		if (results.size() > 0)
 		{
 			return Integer.valueOf((String) results.get(0));
@@ -115,7 +116,7 @@ public class PoolStorageMysql implements PoolStorage
 		sql.append(" WHERE P.ID=?");
 		Object[] fields = new Object[1];
 		fields[0] = poolId;
-		List results = sqlService.dbRead(sql.toString(), fields, null);
+		List results = this.sqlService.dbRead(sql.toString(), fields, null);
 		if (results.size() > 0)
 		{
 			int size = Integer.parseInt((String) results.get(0));
@@ -186,10 +187,33 @@ public class PoolStorageMysql implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<String> getManifest(String poolId)
+	{
+		// for thread-local caching
+		String key = cacheKey(poolId);
+
+		// check the thread-local cache
+		List<String> rv = (List<String>) this.threadLocalManager.get(key);
+		if (rv != null)
+		{
+			// return a copy
+			return new ArrayList<String>(rv);
+		}
+
+		rv = readManifest(poolId);
+
+		// thread-local cache (a copy)
+		this.threadLocalManager.set(key, new ArrayList<String>(rv));
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public PoolImpl getPool(String poolId)
 	{
-		PoolImpl rv = readPool(poolId);
-		return rv;
+		return readPool(poolId);
 	}
 
 	/**
@@ -205,8 +229,7 @@ public class PoolStorageMysql implements PoolStorage
 		Object[] fields = new Object[1];
 		fields[0] = context;
 
-		List<PoolImpl> rv = readPools(whereOrder.toString(), fields);
-		return rv;
+		return readPools(whereOrder.toString(), fields);
 	}
 
 	/**
@@ -217,7 +240,7 @@ public class PoolStorageMysql implements PoolStorage
 		// if we are auto-creating our schema, check and create
 		if (autoDdl)
 		{
-			sqlService.ddl(this.getClass().getClassLoader(), "mneme_pool");
+			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_pool");
 		}
 
 		M_log.info("init()");
@@ -235,7 +258,7 @@ public class PoolStorageMysql implements PoolStorage
 		Object[] fields = new Object[1];
 		fields[0] = question.getId();
 
-		List results = sqlService.dbRead(sql.toString(), fields, null);
+		List results = this.sqlService.dbRead(sql.toString(), fields, null);
 		if (results.size() > 0)
 		{
 			int size = Integer.parseInt((String) results.get(0));
@@ -250,7 +273,7 @@ public class PoolStorageMysql implements PoolStorage
 	 */
 	public PoolImpl newPool()
 	{
-		return new PoolImpl(this.poolService, this.questionService);
+		return new PoolImplLazyManifest(this.poolService, this.questionService, this);
 	}
 
 	/**
@@ -258,7 +281,7 @@ public class PoolStorageMysql implements PoolStorage
 	 */
 	public PoolImpl newPool(PoolImpl pool)
 	{
-		return new PoolImpl(pool);
+		return new PoolImplLazyManifest(pool);
 	}
 
 	/**
@@ -283,13 +306,20 @@ public class PoolStorageMysql implements PoolStorage
 		{
 			pool.initId(idManager.createUuid());
 			insertPool(pool);
+
+			// if newly made historical
+			if (((PoolImplLazyManifest) pool).getNewlyHistorical())
+			{
+				// save the manifest
+				insertManifest(pool);
+				((PoolImplLazyManifest) pool).clearNewlyHistorical();
+			}
 		}
 
 		// for existing pools
 		else
 		{
 			updatePool(pool);
-			// TODO: detect just gone historical and insert the manifest
 		}
 	}
 
@@ -337,17 +367,41 @@ public class PoolStorageMysql implements PoolStorage
 	}
 
 	/**
+	 * Dependency: ThreadLocalManager.
+	 * 
+	 * @param service
+	 *        The SqlService.
+	 */
+	public void setThreadLocalManager(ThreadLocalManager service)
+	{
+		threadLocalManager = service;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void switchManifests(final Question from, final Question to)
 	{
-		sqlService.transact(new Runnable()
+		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
 				switchManifestTx(from, to);
 			}
 		}, "switchManifests: " + from.getId() + " " + to.getId());
+	}
+
+	/**
+	 * Form a key for caching a pool.
+	 * 
+	 * @param poolId
+	 *        The pool id.
+	 * @return The cache key.
+	 */
+	protected String cacheKey(String poolId)
+	{
+		String key = "mneme:pool:manifest:" + poolId;
+		return key;
 	}
 
 	/**
@@ -364,7 +418,7 @@ public class PoolStorageMysql implements PoolStorage
 		Object[] fields = new Object[1];
 		fields[0] = stale.getTime();
 
-		if (!sqlService.dbWrite(sql.toString(), fields))
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
 			throw new RuntimeException("insertPoolTx: db write failed");
 		}
@@ -378,7 +432,7 @@ public class PoolStorageMysql implements PoolStorage
 	 */
 	protected void deletePool(final PoolImpl pool)
 	{
-		sqlService.transact(new Runnable()
+		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
@@ -395,7 +449,7 @@ public class PoolStorageMysql implements PoolStorage
 	 */
 	protected void deletePoolManifest(final PoolImpl pool)
 	{
-		sqlService.transact(new Runnable()
+		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
@@ -419,7 +473,7 @@ public class PoolStorageMysql implements PoolStorage
 		Object[] fields = new Object[1];
 		fields[0] = pool.getId();
 
-		if (!sqlService.dbWrite(sql.toString(), fields))
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
 			throw new RuntimeException("deletePoolManifestTx: db write failed");
 		}
@@ -440,7 +494,7 @@ public class PoolStorageMysql implements PoolStorage
 		Object[] fields = new Object[1];
 		fields[0] = pool.getId();
 
-		if (!sqlService.dbWrite(sql.toString(), fields))
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
 			throw new RuntimeException("deletePoolTx: db write failed");
 		}
@@ -454,13 +508,13 @@ public class PoolStorageMysql implements PoolStorage
 	 */
 	protected void insertManifest(final PoolImpl pool)
 	{
-		sqlService.transact(new Runnable()
+		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
-				insertPoolTx(pool);
+				insertManifestTx(pool);
 			}
-		}, "insertPool: " + pool.getId());
+		}, "insertManifest: " + pool.getId());
 	}
 
 	/**
@@ -484,7 +538,7 @@ public class PoolStorageMysql implements PoolStorage
 			fields[0] = qid;
 			fields[2] = qid;
 
-			if (!sqlService.dbWrite(sql.toString(), fields))
+			if (!this.sqlService.dbWrite(sql.toString(), fields))
 			{
 				throw new RuntimeException("insertManifestTx: db write failed");
 			}
@@ -499,7 +553,7 @@ public class PoolStorageMysql implements PoolStorage
 	 */
 	protected void insertPool(final PoolImpl pool)
 	{
-		sqlService.transact(new Runnable()
+		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
@@ -536,27 +590,10 @@ public class PoolStorageMysql implements PoolStorage
 		fields[10] = pool.getPoints();
 		fields[11] = pool.getTitle();
 
-		if (!sqlService.dbWrite(sql.toString(), fields))
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
 			throw new RuntimeException("insertPoolTx: db write failed");
 		}
-	}
-
-	/**
-	 * Read a date from a result set.
-	 * 
-	 * @param position
-	 *        The position in the result set.
-	 * @param result
-	 *        The result set.
-	 * @return The date read as a java Date, or null.
-	 * @throws SQLException
-	 *         if there was an exception.
-	 */
-	protected Date readDate(int position, ResultSet result) throws SQLException
-	{
-		long time = result.getLong(position);
-		return new Date(time);
 	}
 
 	/**
@@ -574,20 +611,20 @@ public class PoolStorageMysql implements PoolStorage
 		sql.append("SELECT M.QUESTION_ID FROM MNEME_POOL_MANIFEST M WHERE M.POOL_ID = ? ORDER BY M.ORIG_QID ASC");
 		Object[] fields = new Object[1];
 		fields[0] = id;
-		sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
 			{
 				try
 				{
-					String qid = StringUtil.trimToNull(result.getString(4));
+					String qid = StringUtil.trimToNull(result.getString(1));
 					if (qid != null) rv.add(qid);
 
 					return null;
 				}
 				catch (SQLException e)
 				{
-					M_log.warn("" + e);
+					M_log.warn("readManifest: " + e);
 					return null;
 				}
 			}
@@ -636,7 +673,7 @@ public class PoolStorageMysql implements PoolStorage
 		sql.append(" FROM MNEME_POOL P ");
 		sql.append(whereOrder);
 
-		sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
 			{
@@ -644,14 +681,14 @@ public class PoolStorageMysql implements PoolStorage
 				{
 					PoolImpl pool = newPool();
 					pool.setContext(StringUtil.trimToNull(result.getString(1)));
-					pool.getCreatedBy().setDate(readDate(2, result));
+					pool.getCreatedBy().setDate(new Date(result.getLong(2)));
 					pool.getCreatedBy().setUserId(StringUtil.trimToNull(result.getString(3)));
 					pool.setDescription(StringUtil.trimToNull(result.getString(4)));
 					pool.setDifficulty(Integer.parseInt(StringUtil.trimToNull(result.getString(5))));
 					pool.initHistorical(Boolean.valueOf("1".equals(StringUtil.trimToNull(result.getString(6)))));
 					pool.initId(StringUtil.trimToNull(result.getString(7)));
 					pool.initMint(Boolean.valueOf("1".equals(StringUtil.trimToNull(result.getString(8)))));
-					pool.getModifiedBy().setDate(readDate(9, result));
+					pool.getModifiedBy().setDate(new Date(result.getLong(9)));
 					pool.getModifiedBy().setUserId(StringUtil.trimToNull(result.getString(10)));
 					pool.setPoints(result.getFloat(11));
 					pool.setTitle(StringUtil.trimToNull(result.getString(12)));
@@ -663,7 +700,7 @@ public class PoolStorageMysql implements PoolStorage
 				}
 				catch (SQLException e)
 				{
-					M_log.warn("" + e);
+					M_log.warn("readPools: " + e);
 					return null;
 				}
 			}
@@ -686,7 +723,7 @@ public class PoolStorageMysql implements PoolStorage
 		fields[0] = to.getId();
 		fields[1] = from.getId();
 
-		if (!sqlService.dbWrite(sql.toString(), fields))
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
 			throw new RuntimeException("switchManifestTx: db write failed");
 		}
@@ -700,7 +737,7 @@ public class PoolStorageMysql implements PoolStorage
 	 */
 	protected void updatePool(final PoolImpl pool)
 	{
-		sqlService.transact(new Runnable()
+		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
@@ -735,7 +772,7 @@ public class PoolStorageMysql implements PoolStorage
 		fields[8] = pool.getTitle();
 		fields[9] = pool.getId();
 
-		if (!sqlService.dbWrite(sql.toString(), fields))
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
 			throw new RuntimeException("updatePoolTx: db write failed");
 		}

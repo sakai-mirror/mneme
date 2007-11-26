@@ -380,17 +380,25 @@ public class PoolImpl implements Pool
 	 * 
 	 * @param current
 	 *        The current pool this was made from.
+	 * @return true if effective, false if ignored.
 	 */
-	protected void makeHistorical(Pool current)
+	protected boolean makeHistorical(Pool current)
 	{
-		if (this.historical) return;
+		if (this.historical) return false;
 
 		this.historical = Boolean.TRUE;
 
 		// suck in the current question manifest
 		this.frozenManifest = current.getAllQuestionIds();
+		return true;
 	}
 
+	/**
+	 * Set as a copy of the other.
+	 * 
+	 * @param other
+	 *        The other to copy.
+	 */
 	protected void set(PoolImpl other)
 	{
 		this.changed = new ChangeableImpl(other.changed);

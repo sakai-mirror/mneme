@@ -132,7 +132,7 @@ public class PoolStorageSample implements PoolStorage
 		{
 			if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
 			{
-				rv.add(new PoolImpl(pool));
+				rv.add(newPool(pool));
 			}
 		}
 
@@ -204,6 +204,17 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<String> getManifest(String poolId)
+	{
+		PoolImpl rv = this.pools.get(poolId);
+		if (rv == null) return null;
+
+		return rv.getFrozenManifest();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public PoolImpl getPool(String poolId)
 	{
 		fakeIt();
@@ -212,7 +223,7 @@ public class PoolStorageSample implements PoolStorage
 		if (rv == null) return null;
 
 		// return a copy
-		rv = new PoolImpl(rv);
+		rv = newPool(rv);
 		return rv;
 	}
 
@@ -229,7 +240,7 @@ public class PoolStorageSample implements PoolStorage
 		{
 			if ((!pool.historical) && (!pool.getMint()) && pool.getId().equals(context))
 			{
-				rv.add(new PoolImpl(pool));
+				rv.add(newPool(pool));
 			}
 		}
 
@@ -251,7 +262,7 @@ public class PoolStorageSample implements PoolStorage
 	{
 		for (PoolImpl pool : this.pools.values())
 		{
-			if (pool.getContext().equals(question.getContext()) && (pool.getFrozenManifest() != null))
+			if (pool.getContext().equals(question.getContext()) && (pool.getIsHistorical()))
 			{
 				List<String> manifest = pool.getFrozenManifest();
 				int index = manifest.indexOf(question.getId());
@@ -308,7 +319,7 @@ public class PoolStorageSample implements PoolStorage
 			pool.initId("b" + Long.toString(id));
 		}
 
-		this.pools.put(pool.getId(), new PoolImpl(pool));
+		this.pools.put(pool.getId(), newPool(pool));
 	}
 
 	/**
@@ -334,7 +345,7 @@ public class PoolStorageSample implements PoolStorage
 	{
 		for (PoolImpl pool : this.pools.values())
 		{
-			if (pool.getContext().equals(from.getContext()) && (pool.getFrozenManifest() != null))
+			if (pool.getContext().equals(from.getContext()) && (pool.getIsHistorical()))
 			{
 				List<String> manifest = pool.getFrozenManifest();
 				int index = manifest.indexOf(from.getId());

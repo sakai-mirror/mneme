@@ -213,7 +213,7 @@ public class PoolServiceImpl implements PoolService
 		for (Pool pool : rv)
 		{
 			String key = cacheKey(pool.getId());
-			this.threadLocalManager.set(key, new PoolImpl((PoolImpl) pool));
+			this.threadLocalManager.set(key, this.storage.newPool((PoolImpl) pool));
 		}
 
 		return rv;
@@ -232,7 +232,7 @@ public class PoolServiceImpl implements PoolService
 		if (rv != null)
 		{
 			// return a copy
-			return new PoolImpl(rv);
+			return this.storage.newPool(rv);
 		}
 
 		if (M_log.isDebugEnabled()) M_log.debug("getPool: " + poolId);
@@ -240,7 +240,7 @@ public class PoolServiceImpl implements PoolService
 		PoolImpl pool = this.storage.getPool(poolId);
 
 		// thread-local cache (a copy)
-		this.threadLocalManager.set(key, new PoolImpl(pool));
+		this.threadLocalManager.set(key, this.storage.newPool(pool));
 
 		return pool;
 	}
@@ -616,6 +616,10 @@ public class PoolServiceImpl implements PoolService
 		// so these are all non-live and may be removed.
 		this.assessmentService.removeDependency(pool);
 
+		// clear the cache
+		String key = cacheKey(pool.getId());
+		this.threadLocalManager.set(key, null);
+
 		// remove the pool
 		storage.removePool((PoolImpl) pool);
 	}
@@ -650,6 +654,10 @@ public class PoolServiceImpl implements PoolService
 
 		// clear the changed settings
 		((PoolImpl) pool).clearChanged();
+
+		// clear the cache
+		String key = cacheKey(pool.getId());
+		this.threadLocalManager.set(key, null);
 
 		// save
 		storage.savePool((PoolImpl) pool);
@@ -700,7 +708,7 @@ public class PoolServiceImpl implements PoolService
 	{
 		List<String> rv = null;
 
-		if ((pool != null) && ((PoolImpl) pool).getFrozenManifest() != null)
+		if ((pool != null) && (pool.getIsHistorical()))
 		{
 			rv = new ArrayList<String>(((PoolImpl) pool).getFrozenManifest());
 		}
@@ -753,7 +761,7 @@ public class PoolServiceImpl implements PoolService
 	{
 		Integer rv = null;
 
-		if (((PoolImpl) pool).getFrozenManifest() != null)
+		if (pool.getIsHistorical())
 		{
 			rv = ((PoolImpl) pool).getFrozenManifest().size();
 		}
@@ -790,6 +798,7 @@ public class PoolServiceImpl implements PoolService
 		if (from == null) throw new IllegalArgumentException();
 		if (to == null) throw new IllegalArgumentException();
 
+		// TODO: clear all cached pools from thread-local? -ggolden
 		this.storage.switchManifests(from, to);
 	}
 }

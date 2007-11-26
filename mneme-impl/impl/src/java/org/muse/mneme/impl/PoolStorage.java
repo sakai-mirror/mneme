@@ -24,7 +24,6 @@ package org.muse.mneme.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 
@@ -73,6 +72,15 @@ public interface PoolStorage
 	 * @return The list of pools that meet the criteria.
 	 */
 	List<PoolImpl> findPools(String context, PoolService.FindPoolsSort sort, Integer pageNum, Integer pageSize);
+
+	/**
+	 * Access a pool manifest.
+	 * 
+	 * @param poolId
+	 *        The pool id.
+	 * @return The pool manifest from the pool with this id, null if not found or no manifest.
+	 */
+	List<String> getManifest(String poolId);
 
 	/**
 	 * Access a pool by id.
