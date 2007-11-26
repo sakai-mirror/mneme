@@ -40,6 +40,7 @@ import org.muse.mneme.api.SecurityService;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.util.ResourceLoader;
 
@@ -83,6 +84,9 @@ public class PoolServiceImpl implements PoolService
 
 	/** Map of registered PoolStorage options. */
 	protected Map<String, PoolStorage> storgeOptions;
+
+	/** Dependency: ThreadLocalManager. */
+	protected ThreadLocalManager threadLocalManager = null;
 
 	/**
 	 * {@inheritDoc}
@@ -204,6 +208,14 @@ public class PoolServiceImpl implements PoolService
 		// TODO: search
 
 		List<Pool> rv = new ArrayList<Pool>(storage.findPools(context, sort, pageNum, pageSize));
+
+		// thread-local cache each found pool
+		for (Pool pool : rv)
+		{
+			String key = cacheKey(pool.getId());
+			this.threadLocalManager.set(key, new PoolImpl((PoolImpl) pool));
+		}
+
 		return rv;
 	}
 
@@ -214,9 +226,21 @@ public class PoolServiceImpl implements PoolService
 	{
 		if (poolId == null) throw new IllegalArgumentException();
 
+		// for thread-local caching
+		String key = cacheKey(poolId);
+		PoolImpl rv = (PoolImpl) this.threadLocalManager.get(key);
+		if (rv != null)
+		{
+			// return a copy
+			return new PoolImpl(rv);
+		}
+
 		if (M_log.isDebugEnabled()) M_log.debug("getPool: " + poolId);
 
 		PoolImpl pool = this.storage.getPool(poolId);
+
+		// thread-local cache (a copy)
+		this.threadLocalManager.set(key, new PoolImpl(pool));
 
 		return pool;
 	}
@@ -436,6 +460,17 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
+	 * Dependency: ThreadLocalManager.
+	 * 
+	 * @param service
+	 *        The SqlService.
+	 */
+	public void setThreadLocalManager(ThreadLocalManager service)
+	{
+		threadLocalManager = service;
+	}
+
+	/**
 	 * Add a formatted date to a source string, using a message selector.
 	 * 
 	 * @param selector
@@ -464,6 +499,19 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
+	 * Form a key for caching a pool.
+	 * 
+	 * @param poolId
+	 *        The pool id.
+	 * @return The cache key.
+	 */
+	protected String cacheKey(String poolId)
+	{
+		String key = "mneme:pool:" + poolId;
+		return key;
+	}
+
+	/**
 	 * Create a historical record of this pool.
 	 * 
 	 * @param pool
@@ -475,12 +523,13 @@ public class PoolServiceImpl implements PoolService
 	protected Pool createHistory(Pool pool, boolean directOnly)
 	{
 		if (pool == null) throw new IllegalArgumentException();
+		if (pool.getId() == null) throw new IllegalArgumentException();
 		if (((PoolImpl) pool).getIsHistorical()) return pool;
 
 		if (M_log.isDebugEnabled()) M_log.debug("createHistory: " + pool.getId());
 
 		// get the current pool for history
-		PoolImpl current = this.storage.getPool(pool.getId());
+		PoolImpl current = (PoolImpl) getPool(pool.getId());
 
 		// get a new id on the old and save it
 		current.initId(null);
@@ -530,7 +579,7 @@ public class PoolServiceImpl implements PoolService
 	protected void doRemove(Pool pool)
 	{
 		// get the current pool for history
-		PoolImpl current = this.storage.getPool(pool.getId());
+		PoolImpl current = (PoolImpl) getPool(pool.getId());
 
 		// if we don't have one, or we are trying to delete history, that's bad!
 		if (current == null) throw new IllegalArgumentException();
@@ -584,7 +633,7 @@ public class PoolServiceImpl implements PoolService
 		String userId = sessionManager.getCurrentSessionUserId();
 
 		// get the current pool for history
-		PoolImpl current = this.storage.getPool(pool.getId());
+		PoolImpl current = (pool.getId() == null) ? null : (PoolImpl) getPool(pool.getId());
 
 		Date now = new Date();
 
