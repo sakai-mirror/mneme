@@ -164,6 +164,18 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String[] getData()
+	{
+		String[] rv = new String[2];
+		rv[0] = this.submissionType.toString();
+		rv[1] = this.modelAnswer;
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Component getDeliveryUi()
 	{
 		Text question = this.uiService.newText();
@@ -427,6 +439,18 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		showModelAnswerSection.add(modelAnswerOverlay).add(showModelAnswer);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(typeSection).add(showModelAnswerSection);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setData(String[] data)
+	{
+		if ((data != null) && (data.length == 2))
+		{
+			this.submissionType = SubmissionType.valueOf(data[0]);
+			this.modelAnswer = data[1];
+		}
 	}
 
 	/**

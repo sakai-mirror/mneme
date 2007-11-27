@@ -80,7 +80,6 @@
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 		
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
- 		<property name="idManager"><ref bean="org.sakaiproject.id.api.IdManager"/></property>
 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
 
 		<property name="autoDdl"><value>${auto.ddl}</value></property>
@@ -106,6 +105,7 @@
 			<map>
 				<!-- <entry key="default"><ref bean="org.muse.mneme.impl.QuestionStorageDefault"/></entry> -->
 				<entry key="sample"><ref bean="org.muse.mneme.impl.QuestionStorageSample"/></entry>
+				<entry key="mysql"><ref bean="org.muse.mneme.impl.QuestionStorageMysql"/></entry>
 			</map>
 		</property>
 		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
@@ -121,6 +121,22 @@
 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
+	</bean>
+
+	<bean id="org.muse.mneme.impl.QuestionStorageMysql"
+		class="org.muse.mneme.impl.QuestionStorageMysql"
+		init-method="init"
+		destroy-method="destroy"
+		singleton="true">
+
+		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
+		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
+
+		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
+ 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
+
+		<property name="autoDdl"><value>${auto.ddl}</value></property>
 	</bean>
 
 	<bean id="org.muse.mneme.api.SubmissionService"

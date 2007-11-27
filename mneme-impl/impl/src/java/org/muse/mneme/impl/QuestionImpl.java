@@ -582,19 +582,25 @@ public class QuestionImpl implements Question
 	}
 
 	/**
-	 * Set this assessment to be "historical" - used only for history by submissions.
+	 * Initialize the context.
+	 * 
+	 * @param context
+	 *        The context.
 	 */
-	protected void initHistorical()
+	protected void initContext(String context)
 	{
-		if (this.historical) return;
+		this.context = context;
+	}
 
-		// set the context to the pool's context
-		this.context = this.getPool().getContext();
-
-		// forget our original pool
-		this.poolId = null;
-
-		this.historical = Boolean.TRUE;
+	/**
+	 * Establish the historical flag.
+	 * 
+	 * @param historical
+	 *        The historical flag.
+	 */
+	protected void initHistorical(Boolean historical)
+	{
+		this.historical = historical;
 	}
 
 	/**
@@ -609,6 +615,17 @@ public class QuestionImpl implements Question
 	}
 
 	/**
+	 * Establish the mint flag.
+	 * 
+	 * @param mint
+	 *        The mint flag.
+	 */
+	protected void initMint(Boolean mint)
+	{
+		this.mint = mint;
+	}
+
+	/**
 	 * Initialize the part context for this question - the part this question instance was created to support.
 	 * 
 	 * @param part
@@ -617,6 +634,17 @@ public class QuestionImpl implements Question
 	protected void initPartContext(Part part)
 	{
 		this.partContext = part;
+	}
+
+	/**
+	 * Establish the pool id.
+	 * 
+	 * @param poolId
+	 *        The pool id.
+	 */
+	protected void initPool(String poolId)
+	{
+		this.poolId = poolId;
 	}
 
 	/**
@@ -672,6 +700,22 @@ public class QuestionImpl implements Question
 	protected void initTypeSpecificQuestion(TypeSpecificQuestion questionHandler)
 	{
 		this.questionHandler = questionHandler;
+	}
+
+	/**
+	 * Set this assessment to be "historical" - used only for history by submissions.
+	 */
+	protected void makeHistorical()
+	{
+		if (this.historical) return;
+
+		// set the context to the pool's context
+		this.context = this.getPool().getContext();
+
+		// forget our original pool
+		this.poolId = null;
+
+		this.historical = Boolean.TRUE;
 	}
 
 	protected void set(QuestionImpl other)

@@ -33,7 +33,6 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
-import org.sakaiproject.id.api.IdManager;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.util.StringUtil;
 
@@ -47,9 +46,6 @@ public class PoolStorageMysql implements PoolStorage
 
 	/** Configuration: to run the ddl on init or not. */
 	protected boolean autoDdl = false;
-
-	/** Dependency: IdManager. */
-	protected IdManager idManager = null;
 
 	/** Dependency: PoolService. */
 	protected PoolServiceImpl poolService = null;
@@ -115,7 +111,7 @@ public class PoolStorageMysql implements PoolStorage
 		sql.append("SELECT COUNT(1) FROM MNEME_POOL P");
 		sql.append(" WHERE P.ID=?");
 		Object[] fields = new Object[1];
-		fields[0] = poolId;
+		fields[0] = Long.valueOf(poolId);
 		List results = this.sqlService.dbRead(sql.toString(), fields, null);
 		if (results.size() > 0)
 		{
@@ -256,7 +252,7 @@ public class PoolStorageMysql implements PoolStorage
 		sql.append(" WHERE M.QUESTION_ID=?");
 
 		Object[] fields = new Object[1];
-		fields[0] = question.getId();
+		fields[0] = Long.valueOf(question.getId());
 
 		List results = this.sqlService.dbRead(sql.toString(), fields, null);
 		if (results.size() > 0)
@@ -304,7 +300,6 @@ public class PoolStorageMysql implements PoolStorage
 		// for new pools
 		if (pool.getId() == null)
 		{
-			pool.initId(idManager.createUuid());
 			insertPool(pool);
 
 			// if newly made historical
@@ -332,14 +327,6 @@ public class PoolStorageMysql implements PoolStorage
 	public void setAutoDdl(String value)
 	{
 		autoDdl = new Boolean(value).booleanValue();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setIdManager(IdManager service)
-	{
-		this.idManager = service;
 	}
 
 	/**
@@ -471,7 +458,7 @@ public class PoolStorageMysql implements PoolStorage
 		sql.append(" WHERE POOL_ID=?");
 
 		Object[] fields = new Object[1];
-		fields[0] = pool.getId();
+		fields[0] = Long.valueOf(pool.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
@@ -492,7 +479,7 @@ public class PoolStorageMysql implements PoolStorage
 		sql.append(" WHERE ID=?");
 
 		Object[] fields = new Object[1];
-		fields[0] = pool.getId();
+		fields[0] = Long.valueOf(pool.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
@@ -531,12 +518,12 @@ public class PoolStorageMysql implements PoolStorage
 		sql.append(" VALUES(?,?,?)");
 
 		Object[] fields = new Object[3];
-		fields[1] = pool.getId();
+		fields[1] = Long.valueOf(pool.getId());
 
 		for (String qid : pool.getFrozenManifest())
 		{
-			fields[0] = qid;
-			fields[2] = qid;
+			fields[0] = Long.valueOf(qid);
+			fields[2] = Long.valueOf(qid);
 
 			if (!this.sqlService.dbWrite(sql.toString(), fields))
 			{
@@ -573,27 +560,30 @@ public class PoolStorageMysql implements PoolStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_POOL (");
 		sql.append(" CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, DIFFICULTY, HISTORICAL,");
-		sql.append(" ID, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POINTS, TITLE )");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POINTS, TITLE )");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[12];
+		Object[] fields = new Object[11];
 		fields[0] = pool.getContext();
 		fields[1] = pool.getCreatedBy().getDate().getTime();
 		fields[2] = pool.getCreatedBy().getUserId();
 		fields[3] = pool.getDescription();
 		fields[4] = pool.getDifficulty().toString();
 		fields[5] = pool.getIsHistorical() ? "1" : "0";
-		fields[6] = pool.getId();
-		fields[7] = pool.getMint() ? "1" : "0";
-		fields[8] = pool.getModifiedBy().getDate().getTime();
-		fields[9] = pool.getModifiedBy().getUserId();
-		fields[10] = pool.getPoints();
-		fields[11] = pool.getTitle();
+		fields[6] = pool.getMint() ? "1" : "0";
+		fields[7] = pool.getModifiedBy().getDate().getTime();
+		fields[8] = pool.getModifiedBy().getUserId();
+		fields[9] = pool.getPoints();
+		fields[10] = pool.getTitle();
 
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
 		{
-			throw new RuntimeException("insertPoolTx: db write failed");
+			throw new RuntimeException("insertPoolTx: dbInsert failed");
 		}
+
+		// set the pool's id
+		pool.initId(id.toString());
 	}
 
 	/**
@@ -610,14 +600,14 @@ public class PoolStorageMysql implements PoolStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT M.QUESTION_ID FROM MNEME_POOL_MANIFEST M WHERE M.POOL_ID = ? ORDER BY M.ORIG_QID ASC");
 		Object[] fields = new Object[1];
-		fields[0] = id;
+		fields[0] = Long.valueOf(id);
 		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
 			{
 				try
 				{
-					String qid = StringUtil.trimToNull(result.getString(1));
+					String qid = Long.toString(result.getLong(1));
 					if (qid != null) rv.add(qid);
 
 					return null;
@@ -644,7 +634,7 @@ public class PoolStorageMysql implements PoolStorage
 	{
 		String whereOrder = "WHERE P.ID = ?";
 		Object[] fields = new Object[1];
-		fields[0] = id;
+		fields[0] = Long.valueOf(id);
 		List<PoolImpl> rv = readPools(whereOrder, fields);
 		if (rv.size() > 0)
 		{
@@ -686,7 +676,7 @@ public class PoolStorageMysql implements PoolStorage
 					pool.setDescription(StringUtil.trimToNull(result.getString(4)));
 					pool.setDifficulty(Integer.parseInt(StringUtil.trimToNull(result.getString(5))));
 					pool.initHistorical(Boolean.valueOf("1".equals(StringUtil.trimToNull(result.getString(6)))));
-					pool.initId(StringUtil.trimToNull(result.getString(7)));
+					pool.initId(Long.toString(result.getLong(7)));
 					pool.initMint(Boolean.valueOf("1".equals(StringUtil.trimToNull(result.getString(8)))));
 					pool.getModifiedBy().setDate(new Date(result.getLong(9)));
 					pool.getModifiedBy().setUserId(StringUtil.trimToNull(result.getString(10)));
@@ -720,8 +710,8 @@ public class PoolStorageMysql implements PoolStorage
 		sql.append(" WHERE ORIG_QID=?");
 
 		Object[] fields = new Object[2];
-		fields[0] = to.getId();
-		fields[1] = from.getId();
+		fields[0] = Long.valueOf(to.getId());
+		fields[1] = Long.valueOf(from.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
@@ -770,7 +760,7 @@ public class PoolStorageMysql implements PoolStorage
 		fields[6] = pool.getModifiedBy().getUserId();
 		fields[7] = pool.getPoints();
 		fields[8] = pool.getTitle();
-		fields[9] = pool.getId();
+		fields[9] = Long.valueOf(pool.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{

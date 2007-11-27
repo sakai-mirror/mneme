@@ -481,6 +481,23 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String[] getData()
+	{
+		String[] rv = new String[(2 * this.pairs.size()) + 1];
+		int i = 0;
+		rv[i++] = (this.distractor == null) ? null : this.distractor.choice;
+		for (MatchQuestionPair pair : this.pairs)
+		{
+			rv[i++] = pair.choice;
+			rv[i++] = pair.match;
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Component getDeliveryUi()
 	{
 		Text question = this.uiService.newText();
@@ -958,6 +975,30 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		answerKeySection.add(answerKey);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(quesitonSection).add(matchSection).add(answerKeySection);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setData(String[] data)
+	{
+		if ((data != null) && (data.length > 0))
+		{
+			int numPairs = (data.length - 1) / 2;
+			int i = 0;
+
+			String distractor = data[i++];
+			if (distractor != null)
+			{
+				this.distractor = new MatchQuestionPair(this.question, distractor, null, 0);
+			}
+
+			this.pairs = new ArrayList<MatchQuestionPair>();
+			for (int count = 0; count < numPairs; count++)
+			{
+				this.pairs.add(new MatchQuestionPair(this.question, data[i++], data[i++], this.pairs.size()));
+			}
+		}
 	}
 
 	/**

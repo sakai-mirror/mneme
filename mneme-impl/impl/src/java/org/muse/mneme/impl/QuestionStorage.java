@@ -54,17 +54,22 @@ public interface QuestionStorage
 	void copyPoolQuestions(String userId, Pool source, Pool destination);
 
 	/**
-	 * Count the questions with this criteria.
+	 * Count the questions in this context.
 	 * 
 	 * @param context
-	 *        The context criteria - count questions from all pools in the context, or if null, use pool.
-	 * @param pool
-	 *        The pool criteria - count questions from this pool only, or if null, use context.
-	 * @param search
-	 *        The search criteria.
+	 *        The context.
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countQuestions(String context, Pool pool, String search);
+	Integer countContextQuestions(String context);
+
+	/**
+	 * Count the questions in this pool
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @return The questions in this pool with this criteria.
+	 */
+	Integer countPoolQuestions(Pool pool);
 
 	/**
 	 * Check if a question by this id exists.
@@ -76,23 +81,34 @@ public interface QuestionStorage
 	Boolean existsQuestion(String id);
 
 	/**
-	 * Find all the questions that meet the criteria.
+	 * Find all the questions in the context, sorted and paged.
 	 * 
 	 * @param context
-	 *        The context criteria - get questions from all pools in the context, or if null, use pool.
-	 * @param pool
-	 *        The pool criteria - get questions from this pool only, or if null, use context.
+	 *        The context.
 	 * @param sort
 	 *        The sort criteria.
-	 * @param search
-	 *        The search criteria.
 	 * @param pageNum
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
-	 * @return a list of pools that meet the criteria.
+	 * @return The list of questions.
 	 */
-	List<Question> findQuestions(String context, Pool pool, QuestionService.FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, Integer pageNum, Integer pageSize);
+
+	/**
+	 * Find all the questions in the Pool, sorted and paged.
+	 * 
+	 * @param pool
+	 *        The Pool.
+	 * @param sort
+	 *        The sort criteria.
+	 * @param pageNum
+	 *        The page number (1 based) to display, or null to disable paging and get them all.
+	 * @param pageSize
+	 *        The number of items for the requested page, or null if we are not paging.
+	 * @return The list of questions.
+	 */
+	List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Find all the questions in the pool
@@ -154,13 +170,4 @@ public interface QuestionStorage
 	 */
 	void saveQuestion(QuestionImpl question);
 
-	/**
-	 * Put this question into this pool
-	 * 
-	 * @param question
-	 *        The question.
-	 * @param pool
-	 *        The pool.
-	 */
-	void setPool(Question question, Pool pool);
 }

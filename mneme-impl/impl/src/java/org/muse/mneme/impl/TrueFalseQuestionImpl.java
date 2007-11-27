@@ -206,6 +206,17 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String[] getData()
+	{
+		String[] rv = new String[1];
+		rv[0] = this.correctAnswer.toString();
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Component getDeliveryUi()
 	{
 		Text question = this.uiService.newText();
@@ -415,6 +426,17 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		this.correctAnswer = b;
 
 		this.question.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setData(String[] data)
+	{
+		if ((data != null) && (data.length == 1))
+		{
+			this.correctAnswer = Boolean.valueOf(data[0]);
+		}
 	}
 
 	/**

@@ -54,6 +54,13 @@ public interface TypeSpecificQuestion extends Cloneable
 	Component getAuthoringUi();
 
 	/**
+	 * Access the type specific question data as an array of strings that can be restored with setData()
+	 * 
+	 * @return The type specific question data.
+	 */
+	String[] getData();
+
+	/**
 	 * Access the user interface component for delivery of this question type.
 	 * 
 	 * @return The user interface component for delivery of this question type.
@@ -122,4 +129,12 @@ public interface TypeSpecificQuestion extends Cloneable
 	 * @return The user interface component for question view of this question type.
 	 */
 	Component getViewQuestionUi();
+
+	/**
+	 * Restore settings from this array of strings, created by getData()
+	 * 
+	 * @param data
+	 *        The data to restore.
+	 */
+	void setData(String[] data);
 }

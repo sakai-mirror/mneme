@@ -33,7 +33,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
@@ -127,20 +126,32 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countQuestions(String context, Pool pool, String search)
+	public Integer countContextQuestions(String context)
 	{
-		if (context == null && pool == null) throw new IllegalArgumentException();
-		if (context != null && pool != null) throw new IllegalArgumentException();
-
-		// TODO: search
-
 		int count = 0;
 		for (QuestionImpl question : this.questions.values())
 		{
 			if (question.getIsHistorical()) continue;
 			if (question.getMint()) continue;
-			if ((pool != null) && (!question.getPool().equals(pool))) continue;
-			if ((context != null) && (!question.getContext().equals(context))) continue;
+			if (!question.getContext().equals(context)) continue;
+
+			count++;
+		}
+
+		return count;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countPoolQuestions(Pool pool)
+	{
+		int count = 0;
+		for (QuestionImpl question : this.questions.values())
+		{
+			if (question.getIsHistorical()) continue;
+			if (question.getMint()) continue;
+			if (!question.getPool().equals(pool)) continue;
 
 			count++;
 		}
@@ -172,164 +183,17 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findQuestions(String context, Pool pool, final QuestionService.FindQuestionsSort sort, String search, Integer pageNum,
-			Integer pageSize)
+	public List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, Integer pageNum, Integer pageSize)
 	{
-		if (context == null && pool == null) throw new IllegalArgumentException();
-		if (context != null && pool != null) throw new IllegalArgumentException();
+		return findQuestions(context, null, sort, pageNum, pageSize);
+	}
 
-		fakeIt();
-
-		// TODO: search
-
-		List<Question> rv = new ArrayList<Question>();
-		for (QuestionImpl question : this.questions.values())
-		{
-			if (question.getIsHistorical()) continue;
-			if (question.getMint()) continue;
-			if ((pool != null) && (!question.getPool().equals(pool))) continue;
-			if ((context != null) && (!question.getContext().equals(context))) continue;
-
-			rv.add(new QuestionImpl(question));
-		}
-
-		// sort
-		Collections.sort(rv, new Comparator()
-		{
-			public int compare(Object arg0, Object arg1)
-			{
-				int rv = 0;
-				QuestionService.FindQuestionsSort secondary = null;
-				switch (sort)
-				{
-					case type_a:
-					case type_d:
-					{
-						// compare based on the localized type name
-						rv = -1
-								* ((Question) arg0).getTypeSpecificQuestion().getPlugin().getPopularity().compareTo(
-										((Question) arg1).getTypeSpecificQuestion().getPlugin().getPopularity());
-						if (rv == 0)
-						{
-							rv = ((Question) arg0).getTypeName().compareTo(((Question) arg1).getTypeName());
-						}
-						secondary = QuestionService.FindQuestionsSort.description_a;
-						break;
-					}
-					case description_a:
-					case description_d:
-					{
-						String s0 = StringUtil.trimToZero(((Question) arg0).getDescription());
-						String s1 = StringUtil.trimToZero(((Question) arg1).getDescription());
-						rv = s0.compareToIgnoreCase(s1);
-						secondary = QuestionService.FindQuestionsSort.cdate_a;
-						break;
-					}
-					case pool_difficulty_a:
-					case pool_difficulty_d:
-					{
-						rv = ((Question) arg0).getPool().getDifficulty().compareTo(((Question) arg1).getPool().getDifficulty());
-						secondary = QuestionService.FindQuestionsSort.description_a;
-						break;
-					}
-					case pool_points_a:
-					case pool_points_d:
-					{
-						rv = ((Question) arg0).getPool().getPoints().compareTo(((Question) arg1).getPool().getPoints());
-						secondary = QuestionService.FindQuestionsSort.description_a;
-						break;
-					}
-					case pool_title_a:
-					case pool_title_d:
-					{
-						String s0 = StringUtil.trimToZero(((Question) arg0).getPool().getTitle());
-						String s1 = StringUtil.trimToZero(((Question) arg1).getPool().getTitle());
-						rv = s0.compareToIgnoreCase(s1);
-						secondary = QuestionService.FindQuestionsSort.description_a;
-						break;
-					}
-					case cdate_a:
-					case cdate_d:
-					{
-						rv = ((Question) arg0).getCreatedBy().getDate().compareTo(((Question) arg1).getCreatedBy().getDate());
-						break;
-					}
-				}
-
-				// kick in the secondary if needed
-				QuestionService.FindQuestionsSort third = null;
-				if ((rv == 0) && (secondary != null))
-				{
-					switch (secondary)
-					{
-						case description_a:
-						case description_d:
-						{
-							String s0 = StringUtil.trimToZero(((Question) arg0).getDescription());
-							String s1 = StringUtil.trimToZero(((Question) arg1).getDescription());
-							rv = s0.compareToIgnoreCase(s1);
-
-							third = QuestionService.FindQuestionsSort.cdate_a;
-							break;
-						}
-						case cdate_a:
-						case cdate_d:
-						{
-							rv = ((Question) arg0).getCreatedBy().getDate().compareTo(((Question) arg1).getCreatedBy().getDate());
-							break;
-						}
-					}
-				}
-
-				// third sort
-				if ((rv == 0) && (third != null))
-				{
-					switch (third)
-					{
-						case cdate_a:
-						case cdate_d:
-						{
-							rv = ((Question) arg0).getCreatedBy().getDate().compareTo(((Question) arg1).getCreatedBy().getDate());
-							break;
-						}
-					}
-				}
-
-				return rv;
-			}
-		});
-		
-		// reverse if descending
-		switch (sort)
-		{
-			case cdate_d:
-			case description_d:
-			case pool_difficulty_d:
-			case pool_points_d:
-			case pool_title_d:
-			case type_d:
-			{
-				Collections.reverse(rv);
-			}
-		}
-
-		// page
-		if ((pageNum != null) && (pageSize != null))
-		{
-			// start at ((pageNum-1)*pageSize)
-			int start = ((pageNum - 1) * pageSize);
-			if (start < 0) start = 0;
-			if (start > rv.size()) start = rv.size() - 1;
-
-			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
-			int end = ((pageNum) * pageSize);
-			if (end < 0) end = 0;
-			if (end > rv.size()) end = rv.size();
-
-			rv = rv.subList(start, end);
-		}
-
-		return rv;
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, Integer pageNum, Integer pageSize)
+	{
+		return findQuestions(null, pool, sort, pageNum, pageSize);
 	}
 
 	/**
@@ -683,5 +547,168 @@ public class QuestionStorageSample implements QuestionStorage
 			q.clearMint();
 			questions.put(q.getId(), q);
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected List<QuestionImpl> findQuestions(String context, Pool pool, final QuestionService.FindQuestionsSort sort, Integer pageNum,
+			Integer pageSize)
+	{
+		if (context == null && pool == null) throw new IllegalArgumentException();
+		if (context != null && pool != null) throw new IllegalArgumentException();
+
+		fakeIt();
+
+		// TODO: search
+
+		List<QuestionImpl> rv = new ArrayList<QuestionImpl>();
+		for (QuestionImpl question : this.questions.values())
+		{
+			if (question.getIsHistorical()) continue;
+			if (question.getMint()) continue;
+			if ((pool != null) && (!question.getPool().equals(pool))) continue;
+			if ((context != null) && (!question.getContext().equals(context))) continue;
+
+			rv.add(new QuestionImpl(question));
+		}
+
+		// sort
+		Collections.sort(rv, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				int rv = 0;
+				QuestionService.FindQuestionsSort secondary = null;
+				switch (sort)
+				{
+					case type_a:
+					case type_d:
+					{
+						// compare based on the localized type name
+						rv = -1
+								* ((Question) arg0).getTypeSpecificQuestion().getPlugin().getPopularity().compareTo(
+										((Question) arg1).getTypeSpecificQuestion().getPlugin().getPopularity());
+						if (rv == 0)
+						{
+							rv = ((Question) arg0).getTypeName().compareTo(((Question) arg1).getTypeName());
+						}
+						secondary = QuestionService.FindQuestionsSort.description_a;
+						break;
+					}
+					case description_a:
+					case description_d:
+					{
+						String s0 = StringUtil.trimToZero(((Question) arg0).getDescription());
+						String s1 = StringUtil.trimToZero(((Question) arg1).getDescription());
+						rv = s0.compareToIgnoreCase(s1);
+						secondary = QuestionService.FindQuestionsSort.cdate_a;
+						break;
+					}
+					case pool_difficulty_a:
+					case pool_difficulty_d:
+					{
+						rv = ((Question) arg0).getPool().getDifficulty().compareTo(((Question) arg1).getPool().getDifficulty());
+						secondary = QuestionService.FindQuestionsSort.description_a;
+						break;
+					}
+					case pool_points_a:
+					case pool_points_d:
+					{
+						rv = ((Question) arg0).getPool().getPoints().compareTo(((Question) arg1).getPool().getPoints());
+						secondary = QuestionService.FindQuestionsSort.description_a;
+						break;
+					}
+					case pool_title_a:
+					case pool_title_d:
+					{
+						String s0 = StringUtil.trimToZero(((Question) arg0).getPool().getTitle());
+						String s1 = StringUtil.trimToZero(((Question) arg1).getPool().getTitle());
+						rv = s0.compareToIgnoreCase(s1);
+						secondary = QuestionService.FindQuestionsSort.description_a;
+						break;
+					}
+					case cdate_a:
+					case cdate_d:
+					{
+						rv = ((Question) arg0).getCreatedBy().getDate().compareTo(((Question) arg1).getCreatedBy().getDate());
+						break;
+					}
+				}
+
+				// kick in the secondary if needed
+				QuestionService.FindQuestionsSort third = null;
+				if ((rv == 0) && (secondary != null))
+				{
+					switch (secondary)
+					{
+						case description_a:
+						case description_d:
+						{
+							String s0 = StringUtil.trimToZero(((Question) arg0).getDescription());
+							String s1 = StringUtil.trimToZero(((Question) arg1).getDescription());
+							rv = s0.compareToIgnoreCase(s1);
+
+							third = QuestionService.FindQuestionsSort.cdate_a;
+							break;
+						}
+						case cdate_a:
+						case cdate_d:
+						{
+							rv = ((Question) arg0).getCreatedBy().getDate().compareTo(((Question) arg1).getCreatedBy().getDate());
+							break;
+						}
+					}
+				}
+
+				// third sort
+				if ((rv == 0) && (third != null))
+				{
+					switch (third)
+					{
+						case cdate_a:
+						case cdate_d:
+						{
+							rv = ((Question) arg0).getCreatedBy().getDate().compareTo(((Question) arg1).getCreatedBy().getDate());
+							break;
+						}
+					}
+				}
+
+				return rv;
+			}
+		});
+
+		// reverse if descending
+		switch (sort)
+		{
+			case cdate_d:
+			case description_d:
+			case pool_difficulty_d:
+			case pool_points_d:
+			case pool_title_d:
+			case type_d:
+			{
+				Collections.reverse(rv);
+			}
+		}
+
+		// page
+		if ((pageNum != null) && (pageSize != null))
+		{
+			// start at ((pageNum-1)*pageSize)
+			int start = ((pageNum - 1) * pageSize);
+			if (start < 0) start = 0;
+			if (start > rv.size()) start = rv.size() - 1;
+
+			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
+			int end = ((pageNum) * pageSize);
+			if (end < 0) end = 0;
+			if (end > rv.size()) end = rv.size();
+
+			rv = rv.subList(start, end);
+		}
+
+		return rv;
 	}
 }

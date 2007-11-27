@@ -175,11 +175,12 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 		Overlay instructions = this.uiService.newOverlay();
 		instructions.setId("instructions");
-		instructions.add(this.uiService.newText().setText("instructions-title", this.uiService.newIconPropertyReference().setIcon("/icons/test.png")));
+		instructions
+				.add(this.uiService.newText().setText("instructions-title", this.uiService.newIconPropertyReference().setIcon("/icons/test.png")));
 		instructions.add(this.uiService.newText().setText("instructions"));
 		instructions.add(this.uiService.newGap());
-		instructions.add(this.uiService.newToggle().setTarget("instructions").setTitle("close").setIcon("/icons/close.png",
-				Navigation.IconStyle.left));
+		instructions.add(this.uiService.newToggle().setTarget("instructions").setTitle("close")
+				.setIcon("/icons/close.png", Navigation.IconStyle.left));
 		instructions.add(this.uiService.newGap());
 		instructions.add(this.uiService.newText().setTitle("examples-title"));
 		instructions.add(this.uiService.newText().setText("example1").setTitle("example1-title"));
@@ -188,8 +189,8 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		instructions.add(this.uiService.newText().setText("example4").setTitle("example4-title"));
 		instructions.add(this.uiService.newText().setText("example5").setTitle("example5-title"));
 		instructions.add(this.uiService.newGap());
-		instructions.add(this.uiService.newToggle().setTarget("instructions").setTitle("close").setIcon("/icons/close.png",
-				Navigation.IconStyle.left));
+		instructions.add(this.uiService.newToggle().setTarget("instructions").setTitle("close")
+				.setIcon("/icons/close.png", Navigation.IconStyle.left));
 
 		Toggle viewInstructions = this.uiService.newToggle().setTarget("instructions").setTitle("view-instructions").setIcon("/icons/test.png",
 				Navigation.IconStyle.left);
@@ -253,6 +254,20 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		}
 
 		return correctAnswers;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String[] getData()
+	{
+		String[] rv = new String[4];
+		rv[0] = this.anyOrder.toString();
+		rv[1] = this.caseSensitive.toString();
+		rv[2] = this.responseTextual.toString();
+		rv[3] = this.text;
+
+		return rv;
 	}
 
 	/**
@@ -482,6 +497,20 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		this.caseSensitive = b;
 
 		this.question.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setData(String[] data)
+	{
+		if ((data != null) && (data.length == 4))
+		{
+			this.anyOrder = Boolean.valueOf(data[0]);
+			this.caseSensitive = Boolean.valueOf(data[1]);
+			this.responseTextual = Boolean.valueOf(data[2]);
+			this.text = data[3];
+		}
 	}
 
 	/**

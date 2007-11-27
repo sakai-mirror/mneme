@@ -51,6 +51,7 @@ import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
+import org.muse.mneme.impl.MatchQuestionImpl.MatchQuestionPair;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.util.StringUtil;
 
@@ -577,6 +578,24 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String[] getData()
+	{
+		String[] rv = new String[(2 * this.answerChoices.size()) + 2];
+		int i = 0;
+		rv[i++] = this.singleCorrect.toString();
+		rv[i++] = this.shuffleChoices.toString();
+		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+		{
+			rv[i++] = choice.text;
+			rv[i++] = choice.correct.toString();
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Component getDeliveryUi()
 	{
 		Text question = this.uiService.newText();
@@ -952,6 +971,30 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		}
 
 		this.question.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setData(String[] data)
+	{
+		if ((data != null) && (data.length >= 2))
+		{
+			int numChoices = (data.length - 2) / 2;
+			int i = 0;
+
+			this.singleCorrect = Boolean.valueOf(data[i++]);
+			this.shuffleChoices = Boolean.valueOf(data[i++]);
+
+			this.answerChoices = new ArrayList<MultipleChoiceQuestionChoice>();
+			for (int count = 0; count < numChoices; count++)
+			{
+				MultipleChoiceQuestionChoice choice = new MultipleChoiceQuestionChoice(this.question, Integer.toString(this.answerChoices.size()),
+						data[i++]);
+				choice.correct = Boolean.valueOf(data[i++]);
+				this.answerChoices.add(choice);
+			}
+		}
 	}
 
 	/**

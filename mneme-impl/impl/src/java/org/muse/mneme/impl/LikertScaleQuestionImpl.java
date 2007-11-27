@@ -228,6 +228,17 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String[] getData()
+	{
+		String[] rv = new String[1];
+		rv[0] = this.scale.toString();
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Component getDeliveryUi()
 	{
 		Text question = this.uiService.newText();
@@ -489,6 +500,17 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public void setData(String[] data)
+	{
+		if ((data != null) && (data.length == 1))
+		{
+			this.scale = Integer.valueOf(data[0]);
+		}
+	}
+
+	/**
 	 * Set the scale
 	 * 
 	 * @param scale
@@ -497,7 +519,7 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	public void setScale(String scale)
 	{
 		if (scale == null) throw new IllegalArgumentException();
-		
+
 		Integer s = Integer.valueOf(scale);
 		if (!Different.different(this.scale, s)) return;
 

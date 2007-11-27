@@ -579,7 +579,7 @@ public class PoolServiceImpl implements PoolService
 	protected void doRemove(Pool pool)
 	{
 		// get the current pool for history
-		PoolImpl current = (PoolImpl) getPool(pool.getId());
+		PoolImpl current = (pool.getId() == null) ? null : (PoolImpl) getPool(pool.getId());
 
 		// if we don't have one, or we are trying to delete history, that's bad!
 		if (current == null) throw new IllegalArgumentException();

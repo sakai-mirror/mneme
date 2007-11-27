@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -206,8 +207,10 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		if (pool == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("countQuestions");
-		Integer rv = this.storage.countQuestions(null, pool, search);
+		// TODO: search
+
+		if (M_log.isDebugEnabled()) M_log.debug("countQuestions: pool: " + pool.getId());
+		Integer rv = this.storage.countPoolQuestions(pool);
 
 		return rv;
 	}
@@ -219,8 +222,10 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		if (context == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("countQuestions");
-		Integer rv = this.storage.countQuestions(context, null, search);
+		// TODO: search
+
+		if (M_log.isDebugEnabled()) M_log.debug("countQuestions: context: " + context);
+		Integer rv = this.storage.countContextQuestions(context);
 
 		return rv;
 	}
@@ -236,9 +241,10 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean existsQuestion(String questionid)
+	public Boolean existsQuestion(String questionId)
 	{
-		return this.storage.existsQuestion(questionid);
+		if (questionId == null) return null;
+		return this.storage.existsQuestion(questionId);
 	}
 
 	/**
@@ -248,10 +254,11 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		if (pool == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("findQuestions");
-		List<Question> rv = this.storage.findQuestions(null, pool, sort, search, pageNum, pageSize);
+		// TODO: search
 
-		return rv;
+		if (M_log.isDebugEnabled()) M_log.debug("findQuestions");
+
+		return new ArrayList<Question>(this.storage.findPoolQuestions(pool, sort, pageNum, pageSize));
 	}
 
 	/**
@@ -261,10 +268,11 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		if (context == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("findQuestions");
-		List<Question> rv = this.storage.findQuestions(context, null, sort, search, pageNum, pageSize);
+		// TODO: search
 
-		return rv;
+		if (M_log.isDebugEnabled()) M_log.debug("findQuestions");
+
+		return new ArrayList<Question>(this.storage.findContextQuestions(context, sort, pageNum, pageSize));
 	}
 
 	/**
@@ -311,7 +319,7 @@ public class QuestionServiceImpl implements QuestionService
 
 			if (storage == null) M_log.warn("no storage set: " + this.storageKey);
 
-			M_log.info("init()");
+			M_log.info("init() storage: " + this.storage);
 		}
 		catch (Throwable t)
 		{
@@ -361,27 +369,13 @@ public class QuestionServiceImpl implements QuestionService
 
 		QuestionImpl question = this.storage.newQuestion();
 		question.setPool(pool);
-		question.initType(type);
 
 		// set the new created info
 		question.getCreatedBy().setUserId(userId);
 		question.getCreatedBy().setDate(new Date());
 
-		// build a type-specific handler
-		QuestionPlugin plugin = this.mnemeService.getQuestionPlugin(type);
-		TypeSpecificQuestion handler = null;
-		if (plugin != null)
-		{
-			handler = plugin.newQuestion(question);
-		}
-		if (handler != null)
-		{
-			question.initTypeSpecificQuestion(handler);
-		}
-		else
-		{
-			M_log.warn("newQuestion: no plugin for type: " + type);
-		}
+		// set the type, building a type-specific handler
+		setType(type, question);
 
 		doSave(question);
 
@@ -573,7 +567,7 @@ public class QuestionServiceImpl implements QuestionService
 		question.getModifiedBy().setUserId(userId);
 
 		// see if the question has been moved from its current pool
-		QuestionImpl current = this.storage.getQuestion(question.getId());
+		QuestionImpl current = (question.getId() == null) ? null : this.storage.getQuestion(question.getId());
 
 		Pool currentPool = ((current == null) ? null : current.getPool());
 
@@ -595,7 +589,7 @@ public class QuestionServiceImpl implements QuestionService
 		{
 			// get a new id on the old and save it as history
 			current.initId(null);
-			current.initHistorical();
+			current.makeHistorical();
 			((QuestionImpl) current).clearChanged();
 			this.storage.saveQuestion(current);
 
@@ -610,7 +604,7 @@ public class QuestionServiceImpl implements QuestionService
 			if (!current.getIsHistorical())
 			{
 				current.initId(null);
-				current.initHistorical();
+				current.makeHistorical();
 				((QuestionImpl) current).clearChanged();
 				this.storage.saveQuestion(current);
 			}
@@ -624,7 +618,7 @@ public class QuestionServiceImpl implements QuestionService
 		if ((current != null) && (!current.getIsHistorical()) && this.submissionService.submissionsDependsOn(current))
 		{
 			current.initId(null);
-			current.initHistorical();
+			current.makeHistorical();
 			((QuestionImpl) current).clearChanged();
 			this.storage.saveQuestion(current);
 		}
@@ -633,7 +627,7 @@ public class QuestionServiceImpl implements QuestionService
 		if ((current != null) && (!current.getIsHistorical()) && this.poolService.manifestDependsOn(current))
 		{
 			current.initId(null);
-			current.initHistorical();
+			current.makeHistorical();
 			((QuestionImpl) current).clearChanged();
 			this.storage.saveQuestion(current);
 		}
@@ -695,7 +689,7 @@ public class QuestionServiceImpl implements QuestionService
 		if (M_log.isDebugEnabled()) M_log.debug("removeQuestion: " + question.getId() + ", " + ((historyPool == null) ? "" : historyPool.getId()));
 
 		// get the current from storage, we may need to make a copy for history
-		QuestionImpl current = this.storage.getQuestion(question.getId());
+		QuestionImpl current = (question.getId() == null) ? null : this.storage.getQuestion(question.getId());
 
 		// if we don't have one, or we are trying to delete history, that's bad!
 		if (current == null) throw new IllegalArgumentException();
@@ -707,7 +701,7 @@ public class QuestionServiceImpl implements QuestionService
 		{
 			// get a new id on the old and save it as history
 			current.initId(null);
-			current.initHistorical();
+			current.makeHistorical();
 			((QuestionImpl) current).clearChanged();
 			this.storage.saveQuestion(current);
 
@@ -725,7 +719,7 @@ public class QuestionServiceImpl implements QuestionService
 			if (!current.getIsHistorical())
 			{
 				current.initId(null);
-				current.initHistorical();
+				current.makeHistorical();
 				((QuestionImpl) current).clearChanged();
 				this.storage.saveQuestion(current);
 			}
@@ -738,7 +732,7 @@ public class QuestionServiceImpl implements QuestionService
 			if (!current.getIsHistorical())
 			{
 				current.initId(null);
-				current.initHistorical();
+				current.makeHistorical();
 				((QuestionImpl) current).clearChanged();
 				this.storage.saveQuestion(current);
 			}
@@ -757,7 +751,7 @@ public class QuestionServiceImpl implements QuestionService
 			if (!current.getIsHistorical())
 			{
 				current.initId(null);
-				current.initHistorical();
+				current.makeHistorical();
 				((QuestionImpl) current).clearChanged();
 				this.storage.saveQuestion(current);
 			}
@@ -766,13 +760,13 @@ public class QuestionServiceImpl implements QuestionService
 		// if we made history
 		if (current.getIsHistorical())
 		{
-			// set the history question's pool to historyPool, if we have one
-			if (historyPool != null)
-			{
-				// set it to null, so that history questions have no pool
-				// TODO: this might not be what we want, but lets give it a try -golden
-				this.storage.setPool(current, /* historyPool */null);
-			}
+			// // set the history question's pool to historyPool, if we have one
+			// if (historyPool != null)
+			// {
+			// // set it to null, so that history questions have no pool
+			// // TODO: this might not be what we want, but lets give it a try -golden
+			// this.storage.setPool(current, /* historyPool */null);
+			// }
 
 			// update any frozen manifest pools
 			this.poolService.switchManifests(question, current);
@@ -786,5 +780,34 @@ public class QuestionServiceImpl implements QuestionService
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
+	}
+
+	/**
+	 * Set the question type, and set it up with a type-specific handler.
+	 * 
+	 * @param type
+	 *        The type.
+	 * @param question
+	 *        The question.
+	 */
+	protected void setType(String type, QuestionImpl question)
+	{
+		question.initType(type);
+
+		// build a type-specific handler
+		QuestionPlugin plugin = this.mnemeService.getQuestionPlugin(type);
+		TypeSpecificQuestion handler = null;
+		if (plugin != null)
+		{
+			handler = plugin.newQuestion(question);
+		}
+		if (handler != null)
+		{
+			question.initTypeSpecificQuestion(handler);
+		}
+		else
+		{
+			M_log.warn("setTypeHandler: no plugin for type: " + type);
+		}
 	}
 }
