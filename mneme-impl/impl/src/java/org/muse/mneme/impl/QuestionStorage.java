@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
@@ -70,6 +71,15 @@ public interface QuestionStorage
 	 * @return The questions in this pool with this criteria.
 	 */
 	Integer countPoolQuestions(Pool pool);
+
+	/**
+	 * Count the questions in the pools of this context
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return A Map of the pool id -> count.
+	 */
+	Map<String, Integer> countPoolQuestions(String context);
 
 	/**
 	 * Check if a question by this id exists.

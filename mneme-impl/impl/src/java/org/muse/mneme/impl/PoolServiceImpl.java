@@ -767,7 +767,7 @@ public class PoolServiceImpl implements PoolService
 		}
 		else
 		{
-			rv = this.questionService.getPoolQuestions(pool).size();
+			rv = this.questionService.countQuestions(pool, null);
 		}
 
 		return rv;

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -157,6 +158,21 @@ public class QuestionStorageSample implements QuestionStorage
 		}
 
 		return count;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Map<String, Integer> countPoolQuestions(String context)
+	{
+		Map<String, Integer> rv = new HashMap<String, Integer>();
+		List<Pool> pools = this.poolService.findPools(context, null, null, null, null);
+		for (Pool pool : pools)
+		{
+			rv.put(pool.getId(), countPoolQuestions(pool));
+		}
+
+		return rv;
 	}
 
 	/**

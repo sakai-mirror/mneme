@@ -25,7 +25,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -151,6 +153,45 @@ public class QuestionStorageMysql implements QuestionStorage
 		}
 
 		return Integer.valueOf(0);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Map<String, Integer> countPoolQuestions(String context)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT P.ID, COUNT(Q.ID)");
+		sql.append(" FROM MNEME_POOL P");
+		sql.append(" LEFT OUTER JOIN MNEME_QUESTION Q");
+		sql.append(" ON P.ID=Q.POOL_ID AND P.CONTEXT=? AND P.MINT='0' AND P.HISTORICAL='0' AND Q.MINT='0'");
+		sql.append(" GROUP BY P.ID");
+
+		Object[] fields = new Object[1];
+		fields[0] = context;
+
+		final Map<String, Integer> rv = new HashMap<String, Integer>();
+		List results = this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String id = StringUtil.trimToNull(result.getString(1));
+					Integer count = Integer.valueOf(result.getInt(2));
+					rv.put(id, count);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("countPoolQuestions: " + e);
+					return null;
+				}
+			}
+		});
+
+		return rv;
 	}
 
 	/**

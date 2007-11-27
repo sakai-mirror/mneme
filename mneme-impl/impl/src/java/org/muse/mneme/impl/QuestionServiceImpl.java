@@ -38,6 +38,7 @@ import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
+import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.SessionManager;
 
 /**
@@ -82,6 +83,9 @@ public class QuestionServiceImpl implements QuestionService
 
 	/** Dependency: SubmissionService */
 	protected SubmissionServiceImpl submissionService = null;
+
+	/** Dependency: ThreadLocalManager. */
+	protected ThreadLocalManager threadLocalManager = null;
 
 	/**
 	 * {@inheritDoc}
@@ -207,10 +211,33 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		if (pool == null) throw new IllegalArgumentException();
 
+		// check the thread-local cache
+		String key = cacheKeyPoolCount(pool.getId());
+		Integer rv = (Integer) this.threadLocalManager.get(key);
+		if (rv != null) return rv;
+
+		// anticipate that we will want more than just this pool; read the counts of the pools of the context
+		Map<String, Integer> counts = this.storage.countPoolQuestions(pool.getContext());
+
+		// and cache them
+		for (Map.Entry entry : counts.entrySet())
+		{
+			key = cacheKeyPoolCount((String) entry.getKey());
+			this.threadLocalManager.set(key, entry.getValue());
+		}
+
 		// TODO: search
 
+		// check the thread-local cache
+		key = cacheKeyPoolCount(pool.getId());
+		rv = (Integer) this.threadLocalManager.get(key);
+		if (rv != null) return rv;
+
 		if (M_log.isDebugEnabled()) M_log.debug("countQuestions: pool: " + pool.getId());
-		Integer rv = this.storage.countPoolQuestions(pool);
+		rv = this.storage.countPoolQuestions(pool);
+
+		// cache
+		this.threadLocalManager.set(key, rv);
 
 		return rv;
 	}
@@ -224,8 +251,16 @@ public class QuestionServiceImpl implements QuestionService
 
 		// TODO: search
 
+		// check the thread-local cache
+		String key = cacheKeyContextCount(context);
+		Integer rv = (Integer) this.threadLocalManager.get(key);
+		if (rv != null) return rv;
+
 		if (M_log.isDebugEnabled()) M_log.debug("countQuestions: context: " + context);
-		Integer rv = this.storage.countContextQuestions(context);
+		rv = this.storage.countContextQuestions(context);
+
+		// cache
+		this.threadLocalManager.set(key, rv);
 
 		return rv;
 	}
@@ -543,6 +578,53 @@ public class QuestionServiceImpl implements QuestionService
 	}
 
 	/**
+	 * Dependency: ThreadLocalManager.
+	 * 
+	 * @param service
+	 *        The SqlService.
+	 */
+	public void setThreadLocalManager(ThreadLocalManager service)
+	{
+		threadLocalManager = service;
+	}
+
+	/**
+	 * Form the cache key for caching questions-in-context count.
+	 * 
+	 * @param poolId
+	 *        The pool id.
+	 * @return The cache key.
+	 */
+	protected String cacheKeyContextCount(String context)
+	{
+		return "mneme:question:context:count:" + context;
+	}
+
+	/**
+	 * Form the cache key for caching questions-in-pool count.
+	 * 
+	 * @param poolId
+	 *        The pool id.
+	 * @return The cache key.
+	 */
+	protected String cacheKeyPoolCount(String poolId)
+	{
+		return "mneme:question:pool:count:" + poolId;
+	}
+
+	/**
+	 * Form the cache key for caching question ids in pool.
+	 * 
+	 * @param poolId
+	 *        The pool id.
+	 * @return The cache key.
+	 */
+	protected String cacheKeyPoolQuestions(String poolId)
+	{
+		return "mneme:question:pool:questions:" + poolId;
+	}
+
+	/**
 	 * Save the question.
 	 * 
 	 * @param question
@@ -582,6 +664,11 @@ public class QuestionServiceImpl implements QuestionService
 			// no longer be dependent on the pool, but will be dependent on the history made from the pool.
 			this.poolService.createHistoryIfNeeded(current.getPool(), false);
 			this.poolService.createHistoryIfNeeded(question.getPool(), false);
+
+			// clear cache entries for the pool that the question is leaving
+			this.threadLocalManager.set(this.cacheKeyPoolCount(current.getPool().getId()), null);
+			this.threadLocalManager.set(this.cacheKeyContextCount(current.getContext()), null);
+			this.threadLocalManager.set(this.cacheKeyPoolQuestions(current.getPool().getId()), null);
 		}
 
 		// deal with direct dependencies on this question from live assessments
@@ -647,6 +734,11 @@ public class QuestionServiceImpl implements QuestionService
 		((QuestionImpl) question).clearChanged();
 		this.storage.saveQuestion((QuestionImpl) question);
 
+		// clear thread-local counts for the pool and context and questions
+		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId()), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext()), null);
+		this.threadLocalManager.set(this.cacheKeyPoolQuestions(question.getPool().getId()), null);
+
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
 	}
@@ -660,7 +752,17 @@ public class QuestionServiceImpl implements QuestionService
 	 */
 	protected List<String> getPoolQuestions(Pool pool)
 	{
-		return this.storage.getPoolQuestions(pool);
+		// check the cache (return a copy)
+		String key = cacheKeyPoolQuestions(pool.getId());
+		List<String> rv = (List<String>) this.threadLocalManager.get(key);
+		if (rv != null) return new ArrayList<String>(rv);
+
+		rv = this.storage.getPoolQuestions(pool);
+
+		// cache (a copy)
+		this.threadLocalManager.set(key, new ArrayList<String>(rv));
+
+		return rv;
 	}
 
 	/**
@@ -777,6 +879,11 @@ public class QuestionServiceImpl implements QuestionService
 
 		// delete
 		this.storage.removeQuestion((QuestionImpl) question);
+
+		// clear thread-local counts for the pool and context and questions
+		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId()), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext()), null);
+		this.threadLocalManager.set(this.cacheKeyPoolQuestions(question.getPool().getId()), null);
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
