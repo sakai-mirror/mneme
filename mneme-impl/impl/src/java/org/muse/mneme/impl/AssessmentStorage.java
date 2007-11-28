@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.muse.mneme.api.Assessment;
@@ -34,18 +35,12 @@ import org.muse.mneme.api.Question;
 public interface AssessmentStorage
 {
 	/**
-	 * Check if an assessment by this id exists.
-	 * 
-	 * @param id
-	 *        The assessment id
-	 * @return TRUE if the assessment with this id exists, FALSE if not.
-	 */
-	Boolean assessmentExists(String id);
-
-	/**
 	 * Clear out any mint objects that are old enough to be considered abandoned.
+	 * 
+	 * @param stale
+	 *        The time to compare to the create date; before this they are stale.
 	 */
-	void clearStaleMintAssessments();
+	void clearStaleMintAssessments(Date stale);
 
 	/**
 	 * Count the assessments in a context that are not archived.
@@ -57,13 +52,22 @@ public interface AssessmentStorage
 	Integer countAssessments(String context);
 
 	/**
+	 * Check if an assessment by this id exists.
+	 * 
+	 * @param id
+	 *        The assessment id
+	 * @return TRUE if the assessment with this id exists, FALSE if not.
+	 */
+	Boolean existsAssessment(String id);
+
+	/**
 	 * Get all the archived assessments in the context.
 	 * 
 	 * @param context
 	 *        The context.
 	 * @return The List<Assesment> of all archived assesments in the context, or empty if there are none.
 	 */
-	List<Assessment> getArchivedAssessments(String context);
+	List<AssessmentImpl> getArchivedAssessments(String context);
 
 	/**
 	 * Access a assessment by id.
@@ -85,7 +89,7 @@ public interface AssessmentStorage
 	 *        if TRUE, return only published assessments, else return unpublished as well.
 	 * @return The list of Assessments defined in the context, sorted.
 	 */
-	List<Assessment> getContextAssessments(String context, AssessmentService.AssessmentsSort sort, Boolean publishedOnly);
+	List<AssessmentImpl> getContextAssessments(String context, AssessmentService.AssessmentsSort sort, Boolean publishedOnly);
 
 	/**
 	 * Check if any live tests have any dependency on this pool.

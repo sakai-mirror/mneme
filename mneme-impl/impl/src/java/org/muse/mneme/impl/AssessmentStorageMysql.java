@@ -1,0 +1,930 @@
+/**********************************************************************************
+ * $URL$
+ * $Id$
+ ***********************************************************************************
+ *
+ * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ **********************************************************************************/
+
+package org.muse.mneme.impl;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.AssessmentAccess;
+import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.AssessmentType;
+import org.muse.mneme.api.DrawPart;
+import org.muse.mneme.api.ManualPart;
+import org.muse.mneme.api.Part;
+import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionGrouping;
+import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.ReviewTiming;
+import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.db.api.SqlReader;
+import org.sakaiproject.db.api.SqlService;
+import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.thread_local.api.ThreadLocalManager;
+import org.sakaiproject.util.ResourceLoader;
+import org.sakaiproject.util.StringUtil;
+
+/**
+ * QuestionStorageSample defines a sample storage for questions.
+ */
+public class AssessmentStorageMysql implements AssessmentStorage
+{
+	/** Our logger. */
+	private static Log M_log = LogFactory.getLog(AssessmentStorageMysql.class);
+
+	/** Dependency: AssessmentService. */
+	protected AssessmentService assessmentService = null;
+
+	/** Configuration: to run the ddl on init or not. */
+	protected boolean autoDdl = false;
+
+	/** Messages bundle name. */
+	protected String bundle = null;
+
+	/** Messages. */
+	protected transient InternationalizedMessages messages = null;
+
+	/** Dependency: PoolService. */
+	protected PoolService poolService = null;
+
+	/** Dependency: QuestionService. */
+	protected QuestionService questionService = null;
+
+	/** Dependency: SqlService. */
+	protected SqlService sqlService = null;
+
+	protected SubmissionService submissionService = null;
+
+	/** Dependency: ThreadLocalManager. */
+	protected ThreadLocalManager threadLocalManager = null;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void clearStaleMintAssessments(final Date stale)
+	{
+
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				clearStaleMintQuestionsTx(stale);
+			}
+		}, "clearStaleMintQuestions: " + stale.toString());
+	}
+
+	/**
+	 * Transaction code for clearStaleMintQuestions()
+	 */
+	protected void clearStaleMintQuestionsTx(Date stale)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ASSESSMENT");
+		sql.append(" WHERE MINT='1' AND CREATED_BY_DATE < ?");
+
+		Object[] fields = new Object[1];
+		fields[0] = stale.getTime();
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("clearStaleMintQuestionsTx: db write failed");
+		}
+
+		// TODO: access and parts
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer countAssessments(String context)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(1) FROM MNEME_ASSESSMENT A");
+		sql.append(" WHERE A.CONTEXT=? AND A.ARCHIVED='0' AND A.MINT='0' AND A.HISTORICAL='0'");
+		Object[] fields = new Object[1];
+		fields[0] = context;
+		List results = this.sqlService.dbRead(sql.toString(), fields, null);
+		if (results.size() > 0)
+		{
+			return Integer.valueOf((String) results.get(0));
+		}
+
+		return Integer.valueOf(0);
+	}
+
+	/**
+	 * Returns to uninitialized state.
+	 */
+	public void destroy()
+	{
+		M_log.info("destroy()");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean existsAssessment(String id)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(1) FROM MNEME_ASSESSMENT A");
+		sql.append(" WHERE A.ID=?");
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(id);
+		List results = this.sqlService.dbRead(sql.toString(), fields, null);
+		if (results.size() > 0)
+		{
+			int size = Integer.parseInt((String) results.get(0));
+			return Boolean.valueOf(size == 1);
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<AssessmentImpl> getArchivedAssessments(String context)
+	{
+		StringBuilder whereOrder = new StringBuilder();
+		whereOrder.append("WHERE A.CONTEXT=? AND A.ARCHIVED='1' AND A.MINT='0' AND A.HISTORICAL='0' ORDER BY DATES_ARCHIVED ASC");
+
+		Object[] fields = new Object[1];
+		fields[0] = context;
+
+		return readAssessments(whereOrder.toString(), fields);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentImpl getAssessment(String id)
+	{
+		return readAssessment(id);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<AssessmentImpl> getContextAssessments(String context, final AssessmentService.AssessmentsSort sort, Boolean publishedOnly)
+	{
+		StringBuilder whereOrder = new StringBuilder();
+		whereOrder.append("WHERE A.CONTEXT=? AND A.ARCHIVED='0' AND A.MINT='0' AND A.HISTORICAL='0'");
+		if (publishedOnly)
+		{
+			whereOrder.append(" AND A.PUBLISHED='1'");
+		}
+
+		// sort
+		switch (sort)
+		{
+			case published_a:
+			{
+				whereOrder.append(" ORDER BY A.PUBLISHED ASC, A.TITLE ASC, A.CREATED_BY_DATE ASC");
+				break;
+			}
+			case published_d:
+			{
+				whereOrder.append(" ORDER BY A.PUBLISHED DESC, A.TITLE DESC, A.CREATED_BY_DATE DESC");
+				break;
+			}
+			case title_a:
+			{
+				whereOrder.append(" ORDER BY A.TITLE ASC, A.CREATED_BY_DATE ASC");
+				break;
+			}
+			case title_d:
+			{
+				whereOrder.append(" ORDER BY A.TITLE DESC, A.CREATED_BY_DATE DESC");
+				break;
+			}
+			case type_a:
+			{
+				// TODO: getType().getSortValue()
+				whereOrder.append(" ORDER BY A.TYPE ASC, A.TITLE ASC, A.CREATED_BY_DATE ASC");
+				break;
+			}
+			case type_d:
+			{
+				// TODO: getType().getSortValue()
+				whereOrder.append(" ORDER BY A.TYPE DESC, A.TITLE DESC, A.CREATED_BY_DATE DESC");
+				break;
+			}
+			case odate_a:
+			{
+				// TODO: null sorts low
+				whereOrder.append(" ORDER BY A.DATES_OPEN ASC, A.TITLE ASC, A.CREATED_BY_DATE ASC");
+				break;
+			}
+			case odate_d:
+			{
+				// TODO: null sorts low
+				whereOrder.append(" ORDER BY A.DATES_OPEN DESC, A.TITLE DESC, A.CREATED_BY_DATE DESC");
+				break;
+			}
+			case ddate_a:
+			{
+				// TODO: null sorts high
+				whereOrder.append(" ORDER BY A.DATES_DUE ASC, A.TITLE ASC, A.CREATED_BY_DATE ASC");
+				break;
+			}
+			case ddate_d:
+			{
+				// TODO: null sorts high
+				whereOrder.append(" ORDER BY A.DATES_DUE DESC, A.TITLE DESC, A.CREATED_BY_DATE DESC");
+				break;
+			}
+			case cdate_a:
+			{
+				whereOrder.append(" ORDER BY A.CREATED_BY_DATE ASC");
+				break;
+			}
+			case cdate_d:
+			{
+				whereOrder.append(" ORDER BY A.CREATED_BY_DATE DESC");
+				break;
+			}
+		}
+
+		Object[] fields = new Object[1];
+		fields[0] = context;
+
+		return readAssessments(whereOrder.toString(), fields);
+	}
+
+	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		// if we are auto-creating our schema, check and create
+		if (autoDdl)
+		{
+			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_assessment");
+		}
+
+		// messages
+		if (this.bundle != null) this.messages = new ResourceLoader(this.bundle);
+
+		M_log.info("init()");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean liveDependencyExists(Pool pool, boolean directOnly)
+	{
+		// for (AssessmentImpl assessment : this.assessments.values())
+		// {
+		// if (assessment.getContext().equals(pool.getContext()) && assessment.getIsLive())
+		// {
+		// // if the asssessment's parts use this pool
+		// for (Part part : assessment.getParts().getParts())
+		// {
+		// if (((PartImpl) part).dependsOn(pool, directOnly))
+		// {
+		// return Boolean.TRUE;
+		// }
+		// }
+		// }
+		// }
+		// TODO:
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean liveDependencyExists(Question question)
+	{
+		// for (AssessmentImpl assessment : this.assessments.values())
+		// {
+		// if (assessment.getContext().equals(question.getContext()) && assessment.getIsLive())
+		// {
+		// // if the asssessment's parts use this question
+		// for (Part part : assessment.getParts().getParts())
+		// {
+		// if (((PartImpl) part).dependsOn(question))
+		// {
+		// return Boolean.TRUE;
+		// }
+		// }
+		// }
+		// }
+		// TODO:
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentImpl newAssessment()
+	{
+		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService, this.messages);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentImpl newAssessment(AssessmentImpl assessment)
+	{
+		return new AssessmentImpl(assessment);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeAssessment(AssessmentImpl assessment)
+	{
+		deleteAssessment(assessment);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeDependency(Pool pool)
+	{
+		// for (AssessmentImpl assessment : this.assessments.values())
+		// {
+		// if (assessment.getContext().equals(pool.getContext()))
+		// {
+		// // if the asssessment's draw parts use this question
+		// for (Part part : assessment.getParts().getParts())
+		// {
+		// if (part instanceof DrawPart)
+		// {
+		// if (((DrawPartImpl) part).dependsOn(pool, Boolean.TRUE))
+		// {
+		// ((DrawPartImpl) part).removePool(pool);
+		// assessment.clearChanged();
+		// }
+		// }
+		// }
+		// }
+		// }
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeDependency(Question question)
+	{
+		// for (AssessmentImpl assessment : this.assessments.values())
+		// {
+		// if (assessment.getContext().equals(question.getContext()))
+		// {
+		// // if the asssessment's manual parts use this question
+		// for (Part part : assessment.getParts().getParts())
+		// {
+		// if (part instanceof ManualPart)
+		// {
+		// if (((ManualPartImpl) part).dependsOn(question))
+		// {
+		// ((ManualPartImpl) part).removeQuestion(question);
+		// assessment.clearChanged();
+		// }
+		// }
+		// }
+		// }
+		// }
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void saveAssessment(AssessmentImpl assessment)
+	{
+		// for new assessments
+		if (assessment.getId() == null)
+		{
+			insertAssessment(assessment);
+		}
+
+		// for existing assessments
+		else
+		{
+			updateAssessment(assessment);
+		}
+	}
+
+	/**
+	 * Set the AssessmentService.
+	 * 
+	 * @param service
+	 *        The AssessmentService.
+	 */
+	public void setAssessmentService(AssessmentService service)
+	{
+		this.assessmentService = service;
+	}
+
+	/**
+	 * Configuration: to run the ddl on init or not.
+	 * 
+	 * @param value
+	 *        the auto ddl value.
+	 */
+	public void setAutoDdl(String value)
+	{
+		autoDdl = new Boolean(value).booleanValue();
+	}
+
+	/**
+	 * Set the message bundle.
+	 * 
+	 * @param bundle
+	 *        The message bundle.
+	 */
+	public void setBundle(String name)
+	{
+		this.bundle = name;
+	}
+
+	/**
+	 * Set the PoolService.
+	 * 
+	 * @param service
+	 *        The PoolService.
+	 */
+	public void setPoolService(PoolService service)
+	{
+		this.poolService = service;
+	}
+
+	/**
+	 * Set the QuestionService.
+	 * 
+	 * @param service
+	 *        The QuestionService.
+	 */
+	public void setQuestionService(QuestionService service)
+	{
+		this.questionService = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setSqlService(SqlService service)
+	{
+		this.sqlService = service;
+	}
+
+	/**
+	 * Set the SubmissionService.
+	 * 
+	 * @param service
+	 *        The SubmissionService.
+	 */
+	public void setSubmissionService(SubmissionService service)
+	{
+		this.submissionService = service;
+	}
+
+	/**
+	 * Dependency: ThreadLocalManager.
+	 * 
+	 * @param service
+	 *        The SqlService.
+	 */
+	public void setThreadLocalManager(ThreadLocalManager service)
+	{
+		threadLocalManager = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchLiveDependency(Pool from, Pool to, boolean directOnly)
+	{
+		// for (AssessmentImpl assessment : this.assessments.values())
+		// {
+		// if (assessment.getContext().equals(from.getContext()) && assessment.getIsLive())
+		// {
+		// // if the asssessment's parts use this pool
+		// for (Part part : assessment.getParts().getParts())
+		// {
+		// if (((PartImpl) part).dependsOn(from, directOnly))
+		// {
+		// ((PartImpl) part).switchPool(from, to, directOnly);
+		// }
+		// }
+		// }
+		// }
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchLiveDependency(Question from, Question to)
+	{
+		// for (AssessmentImpl assessment : this.assessments.values())
+		// {
+		// if (assessment.getContext().equals(from.getContext()) && assessment.getIsLive())
+		// {
+		// // if the asssessment's manual parts use this question
+		// for (Part part : assessment.getParts().getParts())
+		// {
+		// if (part instanceof ManualPart)
+		// {
+		// if (((ManualPartImpl) part).dependsOn(from))
+		// {
+		// ((ManualPartImpl) part).switchQuestion(from, to);
+		// }
+		// }
+		// }
+		// }
+		// }
+	}
+
+	/**
+	 * Delete an assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void deleteAssessment(final AssessmentImpl assessment)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				deleteAssessmentTx(assessment);
+			}
+		}, "deleteAssessment: " + assessment.getId());
+	}
+
+	/**
+	 * Delete an assessment (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void deleteAssessmentTx(AssessmentImpl assessment)
+	{
+		// TODO: access
+		// TODO: part pick-draw
+		// TODO: parts
+
+		// assessment
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ASSESSMENT");
+		sql.append(" WHERE ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("deleteAssessmentTx: db write failed");
+		}
+	}
+
+	/**
+	 * Insert a new assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void insertAssessment(final AssessmentImpl assessment)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				insertAssessmentTx(assessment);
+			}
+		}, "insertAssessment: " + assessment.getId());
+	}
+
+	/**
+	 * Insert a new assessment (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void insertAssessmentAccessTx(AssessmentImpl assessment)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO MNEME_ASSESSMENT_ACCESS (");
+		sql.append(" ASSESSMENT_ID, DATES_ACCEPT_UNTIL, DATES_DUE, DATES_OPEN,");
+		sql.append(" OVERRIDE_ACCEPT_UNTIL, OVERRIDE_DUE, OVERRIDE_OPEN, OVERRIDE_PASSWORD,");
+		sql.append(" OVERRIDE_TIME_LIMIT, OVERRIDE_TRIES, PASSWORD, TIME_LIMIT, TRIES, USERS)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+
+		Object[] fields = new Object[14];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		for (AssessmentAccess access : assessment.getSpecialAccess().getAccess())
+		{
+			int i = 1;
+			fields[i++] = (access.getAcceptUntilDate() == null) ? null : access.getAcceptUntilDate().getTime();
+			fields[i++] = (access.getDueDate() == null) ? null : access.getDueDate().getTime();
+			fields[i++] = (access.getOpenDate() == null) ? null : access.getOpenDate().getTime();
+			fields[i++] = access.getOverrideAcceptUntilDate() ? "1" : "0";
+			fields[i++] = access.getOverrideDueDate() ? "1" : "0";
+			fields[i++] = access.getOverrideOpenDate() ? "1" : "0";
+			fields[i++] = access.getOverridePassword() ? "1" : "0";
+			fields[i++] = access.getOverrideTimeLimit() ? "1" : "0";
+			fields[i++] = access.getOverrideTries() ? "1" : "0";
+			fields[i++] = access.getPassword().getPassword();
+			fields[i++] = access.getTimeLimit();
+			fields[i++] = access.getTries();
+			fields[i++] = SqlHelper.encodeStringArray(access.getUsers().toArray(new String[access.getUsers().size()]));
+
+			Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+			if (id == null)
+			{
+				throw new RuntimeException("insertAssessmentAccessTx: dbInsert failed");
+			}
+
+			// set the access's id
+			((AssessmentAccessImpl) access).initId(id.toString());
+		}
+	}
+
+	/**
+	 * Insert a new assessment (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void insertAssessmentTx(AssessmentImpl assessment)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO MNEME_ASSESSMENT (");
+		sql.append(" ARCHIVED, CONTEXT, CREATED_BY_DATE, CREATED_BY_USER,");
+		sql.append(" DATES_ACCEPT_UNTIL, DATES_ARCHIVED, DATES_DUE, DATES_OPEN,");
+		sql.append(" GRADING_ANONYMOUS, GRADING_AUTO_RELEASE, GRADING_GRADEBOOK,");
+		sql.append(" HISTORICAL, HONOR_PLEDGE, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER,");
+		sql.append(" PARTS_CONTINUOUS, PARTS_SHOW_PRES, PASSWORD, PRESENTATION_TEXT,");
+		sql.append(" PUBLISHED, QUESTION_GROUPING, RANDOM_ACCESS,");
+		sql.append(" REVIEW_DATE, REVIEW_SHOW_CORRECT, REVIEW_SHOW_FEEDBACK, REVIEW_TIMING,");
+		sql.append(" SHOW_HINTS, SUBMIT_PRES_TEXT, TIME_LIMIT, TITLE, TRIES, TYPE)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+
+		Object[] fields = new Object[33];
+		int i = 0;
+		fields[i++] = assessment.getArchived() ? "1" : "0";
+		fields[i++] = assessment.getContext();
+		fields[i++] = assessment.getCreatedBy().getDate().getTime();
+		fields[i++] = assessment.getCreatedBy().getUserId();
+		fields[i++] = (assessment.getDates().getAcceptUntilDate() == null) ? null : assessment.getDates().getAcceptUntilDate().getTime();
+		fields[i++] = (assessment.getDates().getArchivedDate() == null) ? null : assessment.getDates().getArchivedDate().getTime();
+		fields[i++] = (assessment.getDates().getDueDate() == null) ? null : assessment.getDates().getDueDate().getTime();
+		fields[i++] = (assessment.getDates().getOpenDate() == null) ? null : assessment.getDates().getOpenDate().getTime();
+		fields[i++] = assessment.getGrading().getAnonymous() ? "1" : "0";
+		fields[i++] = assessment.getGrading().getAutoRelease() ? "1" : "0";
+		fields[i++] = assessment.getGrading().getGradebookIntegration() ? "1" : "0";
+		fields[i++] = assessment.isHistorical() ? "1" : "0";
+		fields[i++] = assessment.getRequireHonorPledge() ? "1" : "0";
+		fields[i++] = assessment.getMint() ? "1" : "0";
+		fields[i++] = assessment.getModifiedBy().getDate().getTime();
+		fields[i++] = assessment.getModifiedBy().getUserId();
+		fields[i++] = assessment.getParts().getContinuousNumbering() ? "1" : "0";
+		fields[i++] = assessment.getParts().getShowPresentation() ? "1" : "0";
+		fields[i++] = assessment.getPassword().getPassword();
+		fields[i++] = assessment.getPresentation().getText();
+		fields[i++] = assessment.getPublished() ? "1" : "0";
+		fields[i++] = assessment.getQuestionGrouping().toString();
+		fields[i++] = assessment.getRandomAccess() ? "1" : "0";
+		fields[i++] = (assessment.getReview().getDate() == null) ? null : assessment.getReview().getDate().getTime();
+		fields[i++] = assessment.getReview().getShowCorrectAnswer() ? "1" : "0";
+		fields[i++] = assessment.getReview().getShowFeedback() ? "1" : "0";
+		fields[i++] = assessment.getReview().getTiming().toString();
+		fields[i++] = assessment.getShowHints() ? "1" : "0";
+		fields[i++] = assessment.getSubmitPresentation().getText();
+		fields[i++] = assessment.getTimeLimit();
+		fields[i++] = assessment.getTitle();
+		fields[i++] = assessment.getTries();
+		fields[i++] = assessment.getType().toString();
+
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
+		{
+			throw new RuntimeException("updateAssessmentTx: dbInsert failed");
+		}
+
+		// set the assessment's id
+		assessment.initId(id.toString());
+
+		// access
+		insertAssessmentAccessTx(assessment);
+
+		// TODO: parts
+	}
+
+	/**
+	 * Read an assessment
+	 * 
+	 * @param id
+	 *        The assessment id.
+	 * @return The assesment.
+	 */
+	protected AssessmentImpl readAssessment(String id)
+	{
+		String whereOrder = "WHERE A.ID = ?";
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(id);
+		List<AssessmentImpl> rv = readAssessments(whereOrder, fields);
+		if (rv.size() > 0)
+		{
+			return rv.get(0);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Read a selection of assessments
+	 * 
+	 * @param whereOrder
+	 *        The WHERE and ORDER BY sql clauses
+	 * @param fields
+	 *        The bind variables.
+	 * @return The assessments.
+	 */
+	protected List<AssessmentImpl> readAssessments(String whereOrder, Object[] fields)
+	{
+		final List<AssessmentImpl> rv = new ArrayList<AssessmentImpl>();
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT A.ARCHIVED, A.CONTEXT, A.CREATED_BY_DATE, A.CREATED_BY_USER,");
+		sql.append(" A.DATES_ACCEPT_UNTIL, A.DATES_ARCHIVED, A.DATES_DUE, A.DATES_OPEN,");
+		sql.append(" A.GRADING_ANONYMOUS, A.GRADING_AUTO_RELEASE, A.GRADING_GRADEBOOK,");
+		sql.append(" A.HISTORICAL, A.HONOR_PLEDGE, A.ID, A.MINT, A.MODIFIED_BY_DATE, A.MODIFIED_BY_USER,");
+		sql.append(" A.PARTS_CONTINUOUS, A.PARTS_SHOW_PRES, A.PASSWORD, A.PRESENTATION_TEXT,");
+		sql.append(" A.PUBLISHED, A.QUESTION_GROUPING, A.RANDOM_ACCESS,");
+		sql.append(" A.REVIEW_DATE, A.REVIEW_SHOW_CORRECT, A.REVIEW_SHOW_FEEDBACK, A.REVIEW_TIMING,");
+		sql.append(" A.SHOW_HINTS, A.SUBMIT_PRES_TEXT, A.TIME_LIMIT, A.TITLE, A.TRIES, A.TYPE");
+		sql.append(" FROM MNEME_ASSESSMENT A ");
+		sql.append(whereOrder);
+
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					int i = 1;
+					AssessmentImpl assessment = newAssessment();
+					assessment.setArchived(SqlHelper.readBoolean(result, i++));
+					assessment.setContext(StringUtil.trimToNull(result.getString(i++)));
+					assessment.getCreatedBy().setDate(SqlHelper.readDate(result, i++));
+					assessment.getCreatedBy().setUserId(StringUtil.trimToNull(result.getString(i++)));
+					assessment.getDates().setAcceptUntilDate(SqlHelper.readDate(result, i++));
+					((AssessmentDatesImpl) assessment.getDates()).archived = SqlHelper.readDate(result, i++);
+					assessment.getDates().setDueDate(SqlHelper.readDate(result, i++));
+					assessment.getDates().setOpenDate(SqlHelper.readDate(result, i++));
+					assessment.getGrading().setAnonymous(SqlHelper.readBoolean(result, i++));
+					assessment.getGrading().setAutoRelease(SqlHelper.readBoolean(result, i++));
+					assessment.getGrading().setGradebookIntegration(SqlHelper.readBoolean(result, i++));
+					assessment.initHistorical(SqlHelper.readBoolean(result, i++));
+					assessment.setRequireHonorPledge(SqlHelper.readBoolean(result, i++));
+					assessment.initId(Long.toString(result.getLong(i++)));
+					assessment.initMint(SqlHelper.readBoolean(result, i++));
+					assessment.getModifiedBy().setDate(SqlHelper.readDate(result, i++));
+					assessment.getModifiedBy().setUserId(StringUtil.trimToNull(result.getString(i++)));
+					assessment.getParts().setContinuousNumbering(SqlHelper.readBoolean(result, i++));
+					assessment.getParts().setShowPresentation(SqlHelper.readBoolean(result, i++));
+					assessment.getPassword().setPassword(StringUtil.trimToNull(result.getString(i++)));
+					assessment.getPresentation().setText(StringUtil.trimToNull(result.getString(i++)));
+					assessment.setPublished(SqlHelper.readBoolean(result, i++));
+					assessment.setQuestionGrouping(QuestionGrouping.valueOf(StringUtil.trimToNull(result.getString(i++))));
+					assessment.setRandomAccess(SqlHelper.readBoolean(result, i++));
+					assessment.getReview().setDate(SqlHelper.readDate(result, i++));
+					assessment.getReview().setShowCorrectAnswer(SqlHelper.readBoolean(result, i++));
+					assessment.getReview().setShowFeedback(SqlHelper.readBoolean(result, i++));
+					assessment.getReview().setTiming(ReviewTiming.valueOf(StringUtil.trimToNull(result.getString(i++))));
+					assessment.setShowHints(SqlHelper.readBoolean(result, i++));
+					assessment.getSubmitPresentation().setText(StringUtil.trimToNull(result.getString(i++)));
+					assessment.setTimeLimit(SqlHelper.readLong(result, i++));
+					assessment.setTitle(StringUtil.trimToNull(result.getString(i++)));
+					assessment.setTries(SqlHelper.readInteger(result, i++));
+					assessment.setType(AssessmentType.valueOf(StringUtil.trimToNull(result.getString(i++))));
+
+					assessment.changed.clearChanged();
+					rv.add(assessment);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessments: " + e);
+					return null;
+				}
+			}
+		});
+
+		return rv;
+	}
+
+	/**
+	 * Update an existing assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void updateAssessment(final AssessmentImpl assessment)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				updateAssessmentTx(assessment);
+			}
+		}, "updateAssessment: " + assessment.getId());
+	}
+
+	/**
+	 * Update an existing assessment (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void updateAssessmentTx(AssessmentImpl assessment)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ASSESSMENT SET");
+		sql.append(" ARCHIVED=?, CONTEXT=?,");
+		sql.append(" DATES_ACCEPT_UNTIL=?, DATES_ARCHIVED=?, DATES_DUE=?, DATES_OPEN=?,");
+		sql.append(" GRADING_ANONYMOUS=?, GRADING_AUTO_RELEASE=?, GRADING_GRADEBOOK=?,");
+		sql.append(" HISTORICAL=?, HONOR_PLEDGE=?, MINT=?, MODIFIED_BY_DATE=?, MODIFIED_BY_USER=?,");
+		sql.append(" PARTS_CONTINUOUS=?, PARTS_SHOW_PRES=?, PASSWORD=?, PRESENTATION_TEXT=?,");
+		sql.append(" PUBLISHED=?, QUESTION_GROUPING=?, RANDOM_ACCESS=?,");
+		sql.append(" REVIEW_DATE=?, REVIEW_SHOW_CORRECT=?, REVIEW_SHOW_FEEDBACK=?, REVIEW_TIMING=?,");
+		sql.append(" SHOW_HINTS=?, SUBMIT_PRES_TEXT=?, TIME_LIMIT=?, TITLE=?, TRIES=?, TYPE=?");
+		sql.append(" WHERE ID=?");
+
+		Object[] fields = new Object[32];
+		int i = 0;
+		fields[i++] = assessment.getArchived() ? "1" : "0";
+		fields[i++] = assessment.getContext();
+		fields[i++] = (assessment.getDates().getAcceptUntilDate() == null) ? null : assessment.getDates().getAcceptUntilDate().getTime();
+		fields[i++] = (assessment.getDates().getArchivedDate() == null) ? null : assessment.getDates().getArchivedDate().getTime();
+		fields[i++] = (assessment.getDates().getDueDate() == null) ? null : assessment.getDates().getDueDate().getTime();
+		fields[i++] = (assessment.getDates().getOpenDate() == null) ? null : assessment.getDates().getOpenDate().getTime();
+		fields[i++] = assessment.getGrading().getAnonymous() ? "1" : "0";
+		fields[i++] = assessment.getGrading().getAutoRelease() ? "1" : "0";
+		fields[i++] = assessment.getGrading().getGradebookIntegration() ? "1" : "0";
+		fields[i++] = assessment.isHistorical() ? "1" : "0";
+		fields[i++] = assessment.getRequireHonorPledge() ? "1" : "0";
+		fields[i++] = assessment.getMint() ? "1" : "0";
+		fields[i++] = assessment.getModifiedBy().getDate().getTime();
+		fields[i++] = assessment.getModifiedBy().getUserId();
+		fields[i++] = assessment.getParts().getContinuousNumbering() ? "1" : "0";
+		fields[i++] = assessment.getParts().getShowPresentation() ? "1" : "0";
+		fields[i++] = assessment.getPassword().getPassword();
+		fields[i++] = assessment.getPresentation().getText();
+		fields[i++] = assessment.getPublished() ? "1" : "0";
+		fields[i++] = assessment.getQuestionGrouping().toString();
+		fields[i++] = assessment.getRandomAccess() ? "1" : "0";
+		fields[i++] = (assessment.getReview().getDate() == null) ? null : assessment.getReview().getDate().getTime();
+		fields[i++] = assessment.getReview().getShowCorrectAnswer() ? "1" : "0";
+		fields[i++] = assessment.getReview().getShowFeedback() ? "1" : "0";
+		fields[i++] = assessment.getReview().getTiming().toString();
+		fields[i++] = assessment.getShowHints() ? "1" : "0";
+		fields[i++] = assessment.getSubmitPresentation().getText();
+		fields[i++] = assessment.getTimeLimit();
+		fields[i++] = assessment.getTitle();
+		fields[i++] = assessment.getTries();
+		fields[i++] = assessment.getType().toString();
+		fields[i++] = Long.valueOf(assessment.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("updateAssessmentTx: db write failed");
+		}
+	}
+}

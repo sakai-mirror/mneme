@@ -407,7 +407,7 @@ public class PoolStorageMysql implements PoolStorage
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
-			throw new RuntimeException("insertPoolTx: db write failed");
+			throw new RuntimeException("clearStaleMintPoolsTx: db write failed");
 		}
 	}
 

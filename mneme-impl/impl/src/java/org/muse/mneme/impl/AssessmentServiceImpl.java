@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -157,7 +158,11 @@ public class AssessmentServiceImpl implements AssessmentService
 	 */
 	public void clearStaleMintAssessments()
 	{
-		this.storage.clearStaleMintAssessments();
+		// give it a day
+		Date stale = new Date();
+		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
+
+		this.storage.clearStaleMintAssessments(stale);
 	}
 
 	/**
@@ -246,7 +251,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		if (M_log.isDebugEnabled()) M_log.debug("getArchivedAssessments: " + context);
 
-		List<Assessment> rv = this.storage.getArchivedAssessments(context);
+		List<Assessment> rv = new ArrayList<Assessment>(this.storage.getArchivedAssessments(context));
 		return rv;
 	}
 
@@ -275,7 +280,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		if (M_log.isDebugEnabled()) M_log.debug("getContextAssessments: " + context + " " + sort);
 
-		List<Assessment> rv = this.storage.getContextAssessments(context, sort, publishedOnly);
+		List<Assessment> rv = new ArrayList<Assessment>(this.storage.getContextAssessments(context, sort, publishedOnly));
 		return rv;
 	}
 
@@ -609,7 +614,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// get the current assessment for history
 		AssessmentImpl current = null;
-		if (historyNeeded) current = this.storage.getAssessment(assessment.getId());
+		if (historyNeeded) current = (assessment.getId() == null) ? null : this.storage.getAssessment(assessment.getId());
 
 		Date now = new Date();
 
@@ -637,7 +642,7 @@ public class AssessmentServiceImpl implements AssessmentService
 			{
 				// get a new id on the old and save it
 				current.initId(null);
-				current.initHistorical();
+				current.makeHistorical();
 				this.storage.saveAssessment(current);
 
 				// swap all historical dependencies to the new

@@ -37,7 +37,6 @@ import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentSpecialAccess;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Attribution;
-import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.QuestionGrouping;
@@ -744,11 +743,14 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
-	 * Set this assessment to be "historical" - used only for history by submissions.
+	 * Establish the historical setting.
+	 * 
+	 * @param historical
+	 *        The historical setting;
 	 */
-	protected void initHistorical()
+	protected void initHistorical(Boolean historical)
 	{
-		this.historical = Boolean.TRUE;
+		this.historical = historical;
 	}
 
 	/**
@@ -760,6 +762,17 @@ public class AssessmentImpl implements Assessment
 	protected void initId(String id)
 	{
 		this.id = id;
+	}
+
+	/**
+	 * Establish the mint setting.
+	 * 
+	 * @param mint
+	 *        The mint setting;
+	 */
+	protected void initMint(Boolean mint)
+	{
+		this.mint = mint;
 	}
 
 	/**
@@ -781,6 +794,14 @@ public class AssessmentImpl implements Assessment
 	protected Boolean isHistorical()
 	{
 		return this.historical;
+	}
+
+	/**
+	 * Set this assessment to be "historical" - used only for history by submissions.
+	 */
+	protected void makeHistorical()
+	{
+		this.historical = Boolean.TRUE;
 	}
 
 	/**

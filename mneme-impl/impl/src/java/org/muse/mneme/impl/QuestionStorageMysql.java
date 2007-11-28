@@ -353,13 +353,13 @@ public class QuestionStorageMysql implements QuestionStorage
 	 */
 	public void saveQuestion(QuestionImpl question)
 	{
-		// for new pools
+		// for new questions
 		if (question.getId() == null)
 		{
 			insertQuestion(question);
 		}
 
-		// for existing pools
+		// for existing questions
 		else
 		{
 			updateQuestion(question);
@@ -443,7 +443,7 @@ public class QuestionStorageMysql implements QuestionStorage
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
-			throw new RuntimeException("insertPoolTx: db write failed");
+			throw new RuntimeException("clearStaleMintQuestionsTx: db write failed");
 		}
 	}
 
@@ -473,41 +473,6 @@ public class QuestionStorageMysql implements QuestionStorage
 		{
 			throw new RuntimeException("copyPoolQuestionsTx: db write failed");
 		}
-	}
-
-	/**
-	 * Decode an encoded string array.
-	 * 
-	 * @param data
-	 *        The encoded data.
-	 * @return The decoded string array.
-	 */
-	protected String[] decodeStringArray(String data)
-	{
-		if (data == null) return new String[0];
-
-		// collect the strings
-		List<String> strings = new ArrayList<String>();
-		int pos = 0;
-		while (pos < data.length())
-		{
-			// find the next length, bound by a":"
-			int bound = data.indexOf(":", pos);
-			if (bound == -1) break;
-
-			// take the pos..bound characters (skipping the last one
-			String length = data.substring(pos, bound);
-			int len = Integer.valueOf(length);
-
-			// take the characters from after bound, len of them
-			String s = (len > 0) ? data.substring(bound + 1, bound + 1 + len) : null;
-			pos = bound + 1 + len;
-
-			strings.add(s);
-		}
-
-		String[] rv = strings.toArray(new String[strings.size()]);
-		return rv;
 	}
 
 	/**
@@ -546,27 +511,6 @@ public class QuestionStorageMysql implements QuestionStorage
 		{
 			throw new RuntimeException("deleteQuestionTx: db write failed");
 		}
-	}
-
-	/**
-	 * Encode a string array into a single string
-	 * 
-	 * @param data
-	 *        The data to encode.
-	 * @return The encoded data.
-	 */
-	protected String encodeStringArray(String[] data)
-	{
-		if ((data == null) || (data.length == 0)) return null;
-		StringBuilder rv = new StringBuilder();
-		for (String s : data)
-		{
-			rv.append((s == null) ? "0" : Integer.toString(s.length()));
-			rv.append(":");
-			if (s != null) rv.append(s);
-		}
-
-		return rv.toString();
 	}
 
 	/**
@@ -616,7 +560,7 @@ public class QuestionStorageMysql implements QuestionStorage
 		fields[11] = (question.poolId == null) ? null : Long.valueOf(question.poolId);
 		fields[12] = question.getPresentation().getText();
 		fields[13] = question.getType();
-		fields[14] = encodeStringArray(question.getTypeSpecificQuestion().getData());
+		fields[14] = SqlHelper.encodeStringArray(question.getTypeSpecificQuestion().getData());
 
 		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
 		if (id == null)
@@ -731,7 +675,7 @@ public class QuestionStorageMysql implements QuestionStorage
 					question.initPool((poolIdLong == 0) ? null : Long.toString(poolIdLong));
 					question.getPresentation().setText(StringUtil.trimToNull(result.getString(13)));
 					qService.setType(StringUtil.trimToNull(result.getString(14)), question);
-					question.getTypeSpecificQuestion().setData(decodeStringArray(StringUtil.trimToNull(result.getString(15))));
+					question.getTypeSpecificQuestion().setData(SqlHelper.decodeStringArray(StringUtil.trimToNull(result.getString(15))));
 
 					question.changed.clearChanged();
 					rv.add(question);
@@ -858,7 +802,7 @@ public class QuestionStorageMysql implements QuestionStorage
 		fields[8] = question.getModifiedBy().getUserId();
 		fields[9] = (question.poolId == null) ? null : Long.valueOf(question.poolId);
 		fields[10] = question.getPresentation().getText();
-		fields[11] = encodeStringArray(question.getTypeSpecificQuestion().getData());
+		fields[11] = SqlHelper.encodeStringArray(question.getTypeSpecificQuestion().getData());
 		fields[12] = Long.valueOf(question.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))

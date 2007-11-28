@@ -88,22 +88,8 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean assessmentExists(String id)
+	public void clearStaleMintAssessments(Date stale)
 	{
-		fakeIt();
-
-		return (this.assessments.get(id) != null);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void clearStaleMintAssessments()
-	{
-		// give it a day
-		Date stale = new Date();
-		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
-
 		// find them
 		List<String> delete = new ArrayList<String>();
 		for (AssessmentImpl assessment : this.assessments.values())
@@ -152,11 +138,21 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Assessment> getArchivedAssessments(String context)
+	public Boolean existsAssessment(String id)
 	{
 		fakeIt();
 
-		List<Assessment> rv = new ArrayList<Assessment>();
+		return (this.assessments.get(id) != null);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<AssessmentImpl> getArchivedAssessments(String context)
+	{
+		fakeIt();
+
+		List<AssessmentImpl> rv = new ArrayList<AssessmentImpl>();
 
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
@@ -200,11 +196,11 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Assessment> getContextAssessments(String context, final AssessmentService.AssessmentsSort sort, Boolean publishedOnly)
+	public List<AssessmentImpl> getContextAssessments(String context, final AssessmentService.AssessmentsSort sort, Boolean publishedOnly)
 	{
 		fakeIt();
 
-		List<Assessment> rv = new ArrayList<Assessment>();
+		List<AssessmentImpl> rv = new ArrayList<AssessmentImpl>();
 
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
