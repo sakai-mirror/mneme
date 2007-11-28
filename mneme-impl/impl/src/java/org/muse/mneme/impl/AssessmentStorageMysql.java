@@ -32,7 +32,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentType;
@@ -413,6 +412,14 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		{
 			updateAssessment(assessment);
 		}
+
+		// clear changed
+		assessment.clearChanged();
+		for (AssessmentAccess access : assessment.getSpecialAccess().getAccess())
+		{
+			((AssessmentAccessImpl) access).clearChanged();
+		}
+		((AssessmentSpecialAccessImpl) assessment.getSpecialAccess()).clearDeleted();
 	}
 
 	/**
@@ -583,6 +590,29 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	}
 
 	/**
+	 * Delete an assessment's access record (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param access
+	 *        The access to delete.
+	 */
+	protected void deleteAssessmentAccessTx(AssessmentAccess access)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ASSESSMENT_ACCESS");
+		sql.append(" WHERE ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(access.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("deleteAssessmentAccessTx(access): db write failed");
+		}
+	}
+
+	/**
 	 * Delete an assessment's access records (transaction code).
 	 * 
 	 * @param assessment
@@ -599,7 +629,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
-			throw new RuntimeException("deleteAssessmentAccessTx: db write failed");
+			throw new RuntimeException("deleteAssessmentAccessTx(assessment): db write failed");
 		}
 	}
 
@@ -694,12 +724,12 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	}
 
 	/**
-	 * Insert a new assessment (transaction code).
+	 * Insert a new assessment access (transaction code).
 	 * 
 	 * @param assessment
 	 *        The assessment.
 	 */
-	protected void insertAssessmentAccessTx(AssessmentImpl assessment)
+	protected void insertAssessmentAccessTx(AssessmentImpl assessment, AssessmentAccessImpl access)
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_ASSESSMENT_ACCESS (");
@@ -709,72 +739,30 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
 		Object[] fields = new Object[14];
-		fields[0] = Long.valueOf(assessment.getId());
+		int i = 0;
+		fields[i++] = Long.valueOf(assessment.getId());
+		fields[i++] = (access.getAcceptUntilDate() == null) ? null : access.getAcceptUntilDate().getTime();
+		fields[i++] = (access.getDueDate() == null) ? null : access.getDueDate().getTime();
+		fields[i++] = (access.getOpenDate() == null) ? null : access.getOpenDate().getTime();
+		fields[i++] = access.getOverrideAcceptUntilDate() ? "1" : "0";
+		fields[i++] = access.getOverrideDueDate() ? "1" : "0";
+		fields[i++] = access.getOverrideOpenDate() ? "1" : "0";
+		fields[i++] = access.getOverridePassword() ? "1" : "0";
+		fields[i++] = access.getOverrideTimeLimit() ? "1" : "0";
+		fields[i++] = access.getOverrideTries() ? "1" : "0";
+		fields[i++] = access.getPassword().getPassword();
+		fields[i++] = access.getTimeLimit();
+		fields[i++] = access.getTries();
+		fields[i++] = SqlHelper.encodeStringArray(access.getUsers().toArray(new String[access.getUsers().size()]));
 
-		for (AssessmentAccess access : assessment.getSpecialAccess().getAccess())
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
 		{
-			int i = 1;
-			fields[i++] = (access.getAcceptUntilDate() == null) ? null : access.getAcceptUntilDate().getTime();
-			fields[i++] = (access.getDueDate() == null) ? null : access.getDueDate().getTime();
-			fields[i++] = (access.getOpenDate() == null) ? null : access.getOpenDate().getTime();
-			fields[i++] = access.getOverrideAcceptUntilDate() ? "1" : "0";
-			fields[i++] = access.getOverrideDueDate() ? "1" : "0";
-			fields[i++] = access.getOverrideOpenDate() ? "1" : "0";
-			fields[i++] = access.getOverridePassword() ? "1" : "0";
-			fields[i++] = access.getOverrideTimeLimit() ? "1" : "0";
-			fields[i++] = access.getOverrideTries() ? "1" : "0";
-			fields[i++] = access.getPassword().getPassword();
-			fields[i++] = access.getTimeLimit();
-			fields[i++] = access.getTries();
-			fields[i++] = SqlHelper.encodeStringArray(access.getUsers().toArray(new String[access.getUsers().size()]));
-
-			Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
-			if (id == null)
-			{
-				throw new RuntimeException("insertAssessmentAccessTx: dbInsert failed");
-			}
-
-			// set the access's id
-			((AssessmentAccessImpl) access).initId(id.toString());
+			throw new RuntimeException("insertAssessmentAccessTx: dbInsert failed");
 		}
-	}
 
-	/**
-	 * Insert a new assessment's parts (transaction code).
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 */
-	protected void insertAssessmentPartsTx(AssessmentImpl assessment)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_ASSESSMENT_PART (");
-		sql.append(" ASSESSMENT_ID, PRESENTATION_TEXT, SEQUENCE, TITLE, TYPE, RANDOMIZE)");
-		sql.append(" VALUES(?,?,?,?,?,?)");
-
-		Object[] fields = new Object[6];
-		fields[0] = Long.valueOf(assessment.getId());
-
-		int seq = 0;
-		for (Part part : assessment.getParts().getParts())
-		{
-			seq++;
-			int i = 1;
-			fields[i++] = part.getPresentation().getText();
-			fields[i++] = Integer.valueOf(seq);
-			fields[i++] = part.getTitle();
-			fields[i++] = (part instanceof ManualPart) ? "M" : "D";
-			fields[i++] = (part instanceof ManualPart) ? (((ManualPart) part).getRandomize() ? "1" : "0") : "0";
-
-			Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
-			if (id == null)
-			{
-				throw new RuntimeException("insertAssessmentAccessTx: dbInsert failed");
-			}
-
-			// set the part's id
-			((PartImpl) part).initId(id.toString());
-		}
+		// set the access's id
+		access.initId(id.toString());
 	}
 
 	/**
@@ -848,6 +836,44 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	}
 
 	/**
+	 * Insert a new assessment's parts (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void insertAssessmentPartsTx(AssessmentImpl assessment)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO MNEME_ASSESSMENT_PART (");
+		sql.append(" ASSESSMENT_ID, PRESENTATION_TEXT, SEQUENCE, TITLE, TYPE, RANDOMIZE)");
+		sql.append(" VALUES(?,?,?,?,?,?)");
+
+		Object[] fields = new Object[6];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		int seq = 0;
+		for (Part part : assessment.getParts().getParts())
+		{
+			seq++;
+			int i = 1;
+			fields[i++] = part.getPresentation().getText();
+			fields[i++] = Integer.valueOf(seq);
+			fields[i++] = part.getTitle();
+			fields[i++] = (part instanceof ManualPart) ? "M" : "D";
+			fields[i++] = (part instanceof ManualPart) ? (((ManualPart) part).getRandomize() ? "1" : "0") : "0";
+
+			Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+			if (id == null)
+			{
+				throw new RuntimeException("insertAssessmentPartsTx: dbInsert failed");
+			}
+
+			// set the part's id
+			((PartImpl) part).initId(id.toString());
+		}
+	}
+
+	/**
 	 * Insert a new assessment (transaction code).
 	 * 
 	 * @param assessment
@@ -913,7 +939,10 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		assessment.initId(id.toString());
 
 		// access
-		insertAssessmentAccessTx(assessment);
+		for (AssessmentAccess access : assessment.getSpecialAccess().getAccess())
+		{
+			insertAssessmentAccessTx(assessment, (AssessmentAccessImpl) access);
+		}
 
 		// parts
 		insertAssessmentPartsTx(assessment);
@@ -1098,6 +1127,44 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	}
 
 	/**
+	 * Update an existing assessment access record (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void updateAssessmentAccessTx(AssessmentAccessImpl access)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ASSESSMENT_ACCESS SET");
+		sql.append(" DATES_ACCEPT_UNTIL=?, DATES_DUE=?, DATES_OPEN=?,");
+		sql.append(" OVERRIDE_ACCEPT_UNTIL=?, OVERRIDE_DUE=?, OVERRIDE_OPEN=?, OVERRIDE_PASSWORD=?,");
+		sql.append(" OVERRIDE_TIME_LIMIT=?, OVERRIDE_TRIES=?, PASSWORD=?, TIME_LIMIT=?, TRIES=?, USERS=?");
+		sql.append(" WHERE ID=?");
+
+		Object[] fields = new Object[14];
+		int i = 0;
+		fields[i++] = (access.getAcceptUntilDate() == null) ? null : access.getAcceptUntilDate().getTime();
+		fields[i++] = (access.getDueDate() == null) ? null : access.getDueDate().getTime();
+		fields[i++] = (access.getOpenDate() == null) ? null : access.getOpenDate().getTime();
+		fields[i++] = access.getOverrideAcceptUntilDate() ? "1" : "0";
+		fields[i++] = access.getOverrideDueDate() ? "1" : "0";
+		fields[i++] = access.getOverrideOpenDate() ? "1" : "0";
+		fields[i++] = access.getOverridePassword() ? "1" : "0";
+		fields[i++] = access.getOverrideTimeLimit() ? "1" : "0";
+		fields[i++] = access.getOverrideTries() ? "1" : "0";
+		fields[i++] = access.getPassword().getPassword();
+		fields[i++] = access.getTimeLimit();
+		fields[i++] = access.getTries();
+		fields[i++] = SqlHelper.encodeStringArray(access.getUsers().toArray(new String[access.getUsers().size()]));
+		fields[i++] = Long.valueOf(access.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("updateAssessmentAccessTx: dbInsert failed");
+		}
+	}
+
+	/**
 	 * Update an existing assessment (transaction code).
 	 * 
 	 * @param assessment
@@ -1156,5 +1223,26 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		{
 			throw new RuntimeException("updateAssessmentTx: db write failed");
 		}
+
+		// access
+		for (AssessmentAccess access : assessment.getSpecialAccess().getAccess())
+		{
+			if (access.getId() == null)
+			{
+				insertAssessmentAccessTx(assessment, (AssessmentAccessImpl) access);
+			}
+			else if (((AssessmentAccessImpl) access).getChanged())
+			{
+				updateAssessmentAccessTx((AssessmentAccessImpl) access);
+			}
+		}
+		for (AssessmentAccess access : ((AssessmentSpecialAccessImpl) assessment.getSpecialAccess()).getDeleted())
+		{
+			deleteAssessmentAccessTx(access);
+		}
+
+		// TODO: parts
+
+		// TODO: draw-picks
 	}
 }

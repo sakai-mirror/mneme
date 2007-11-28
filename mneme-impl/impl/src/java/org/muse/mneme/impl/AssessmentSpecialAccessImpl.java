@@ -35,10 +35,16 @@ import org.muse.mneme.api.Changeable;
  */
 public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 {
+	/** The assessment we are for. */
 	protected transient Assessment assessment = null;
 
+	/** Track the recently deleted entries. */
+	protected transient List<AssessmentAccess> deleted = new ArrayList<AssessmentAccess>();
+
+	/** For container change tracking. */
 	protected Changeable owner = null;
 
+	/** The special access definitions. */
 	protected List<AssessmentAccess> specialAccess = new ArrayList<AssessmentAccess>();
 
 	/**
@@ -139,12 +145,30 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 			if (access.equals(remove))
 			{
 				i.remove();
-
 				this.owner.setChanged();
+				this.deleted.add(access);
 
 				return;
 			}
 		}
+	}
+
+	/**
+	 * Clear out the deleted definitions.
+	 */
+	protected void clearDeleted()
+	{
+		this.deleted.clear();
+	}
+
+	/**
+	 * Access the deleted definitions.
+	 * 
+	 * @return The List of deleted definitions.
+	 */
+	protected List<AssessmentAccess> getDeleted()
+	{
+		return this.deleted;
 	}
 
 	/**

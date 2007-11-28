@@ -33,7 +33,7 @@ import org.muse.mneme.api.Changeable;
 /**
  * AssessmentAccessImpl implements AssessmentAccess
  */
-public class AssessmentAccessImpl implements AssessmentAccess
+public class AssessmentAccessImpl implements AssessmentAccess, Changeable
 {
 	protected Date acceptUntilDate = null;
 
@@ -66,6 +66,8 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	protected Integer tries = null;
 
 	protected List<String> userIds = new ArrayList<String>();
+
+	boolean changed = false;
 
 	/**
 	 * Construct.
@@ -102,6 +104,14 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clearChanged()
+	{
+		this.changed = false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean equals(Object obj)
 	{
 		// two are equals if they have the same id
@@ -119,6 +129,14 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		if (!this.overrideAcceptUntilDate) return this.assessment.getDates().getAcceptUntilDate();
 
 		return this.acceptUntilDate;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getChanged()
+	{
+		return Boolean.valueOf(this.changed);
 	}
 
 	/**
@@ -309,6 +327,15 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		this.acceptUntilDate = d;
 
 		this.owner.setChanged();
+		setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setChanged()
+	{
+		this.changed = true;
 	}
 
 	/**
@@ -339,6 +366,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		this.dueDate = d;
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -370,6 +398,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		this.timeLimit = null;
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -401,6 +430,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		this.tries = null;
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -431,6 +461,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		this.openDate = d;
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -448,6 +479,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		}
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -465,6 +497,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		}
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -482,6 +515,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		}
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -499,6 +533,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		}
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -516,6 +551,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		}
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -533,6 +569,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		}
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -561,6 +598,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		this.password.setPassword(pw);
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -589,6 +627,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		this.timeLimit = tl;
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -617,6 +656,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		this.tries = t;
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -652,6 +692,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 		}
 
 		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -674,6 +715,7 @@ public class AssessmentAccessImpl implements AssessmentAccess
 	protected void set(AssessmentAccessImpl other)
 	{
 		this.acceptUntilDate = other.acceptUntilDate;
+		this.changed = other.changed;
 		this.dueDate = other.dueDate;
 		this.id = other.id;
 		this.openDate = other.openDate;

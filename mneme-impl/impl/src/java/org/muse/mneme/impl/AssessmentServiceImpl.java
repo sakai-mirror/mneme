@@ -210,9 +210,6 @@ public class AssessmentServiceImpl implements AssessmentService
 			((PartImpl) part).setOrig();
 		}
 
-		// clear the changed settings
-		rv.clearChanged();
-
 		// save
 		this.storage.saveAssessment(rv);
 
@@ -628,9 +625,6 @@ public class AssessmentServiceImpl implements AssessmentService
 		// update last modified information
 		assessment.getModifiedBy().setDate(now);
 		assessment.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
-
-		// clear the changed settings
-		((AssessmentImpl) assessment).clearChanged();
 
 		// save
 		this.storage.saveAssessment((AssessmentImpl) assessment);

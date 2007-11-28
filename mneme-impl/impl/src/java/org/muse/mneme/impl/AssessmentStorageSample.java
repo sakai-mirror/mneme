@@ -507,6 +507,14 @@ public class AssessmentStorageSample implements AssessmentStorage
 	{
 		fakeIt();
 
+		// clear changed
+		assessment.clearChanged();
+		for (AssessmentAccess access : assessment.getSpecialAccess().getAccess())
+		{
+			((AssessmentAccessImpl) access).clearChanged();
+		}
+		((AssessmentSpecialAccessImpl) assessment.getSpecialAccess()).clearDeleted();
+
 		// assign an id
 		boolean idsNeeded = false;
 		if (assessment.getId() == null)
