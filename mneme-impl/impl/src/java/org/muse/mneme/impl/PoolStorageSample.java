@@ -44,7 +44,7 @@ public class PoolStorageSample implements PoolStorage
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(PoolStorageSample.class);
 
-	protected boolean fakedAlready = true;
+	protected boolean fakedAlready = false;
 
 	protected Object idGenerator = new Object();
 

@@ -66,7 +66,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/** Messages bundle name. */
 	protected String bundle = null;
 
-	protected boolean fakedAlready = true;
+	protected boolean fakedAlready = false;
 
 	protected Object idGenerator = new Object();
 

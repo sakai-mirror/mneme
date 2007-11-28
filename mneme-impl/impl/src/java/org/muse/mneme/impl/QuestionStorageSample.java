@@ -50,7 +50,7 @@ public class QuestionStorageSample implements QuestionStorage
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(QuestionStorageSample.class);
 
-	protected boolean fakedAlready = true;
+	protected boolean fakedAlready = false;
 
 	protected Object idGenerator = new Object();
 
