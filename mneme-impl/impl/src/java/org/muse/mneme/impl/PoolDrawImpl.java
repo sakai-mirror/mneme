@@ -71,6 +71,8 @@ public class PoolDrawImpl implements PoolDraw
 	/**
 	 * Construct.
 	 * 
+	 * @param assessment
+	 *        The Assessment.
 	 * @param poolService
 	 *        The PoolService.
 	 * @param pool
@@ -84,6 +86,30 @@ public class PoolDrawImpl implements PoolDraw
 		if (pool == null) throw new IllegalArgumentException();
 		this.poolId = pool.getId();
 		this.origPoolId = pool.getId();
+		this.numQuestions = numQuestions;
+	}
+
+	/**
+	 * Construct.
+	 * 
+	 * @param assessment
+	 *        The Assessment.
+	 * @param poolService
+	 *        The PoolService.
+	 * @param poolId
+	 *        The pool to draw from.
+	 * @param origPoolId
+	 *        The orig pool id.
+	 * @param numQuestions
+	 *        The number of questions to draw.
+	 */
+	public PoolDrawImpl(Assessment assessment, PoolService poolService, String poolId, String origPoolId, Integer numQuestions)
+	{
+		this(assessment, poolService);
+		if (poolId == null) throw new IllegalArgumentException();
+		if (origPoolId == null) throw new IllegalArgumentException();
+		this.poolId = poolId;
+		this.origPoolId = origPoolId;
 		this.numQuestions = numQuestions;
 	}
 

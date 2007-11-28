@@ -241,6 +241,21 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	}
 
 	/**
+	 * Re-establish a pick
+	 * 
+	 * @param questionId
+	 *        The question id.
+	 * @param origQuestionId
+	 *        The orig question id.
+	 * @param poolId
+	 *        The pool id.
+	 */
+	public void initPick(String questionId, String origQuestionId, String poolId)
+	{
+		this.questions.add(new PoolPick(this.questionService, questionId, origQuestionId, poolId));
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void removeQuestion(Question question)

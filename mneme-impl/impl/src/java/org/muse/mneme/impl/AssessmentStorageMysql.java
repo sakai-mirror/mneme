@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentType;
+import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
@@ -645,10 +646,10 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 * @param assessment
 	 *        The assessment.
 	 */
-	protected void deleteAssessmentDrawPickTx(AssessmentImpl assessment)
+	protected void deleteAssessmentPartDetailTx(AssessmentImpl assessment)
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("DELETE FROM MNEME_ASSESSMENT_DRAW_PICK");
+		sql.append("DELETE FROM MNEME_ASSESSMENT_PART_DETAIL");
 		sql.append(" WHERE ASSESSMENT_ID=?");
 
 		Object[] fields = new Object[1];
@@ -656,7 +657,28 @@ public class AssessmentStorageMysql implements AssessmentStorage
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
-			throw new RuntimeException("deleteAssessmentDrawPickTx: db write failed");
+			throw new RuntimeException("deleteAssessmentDrawPickTx(assessment): db write failed");
+		}
+	}
+
+	/**
+	 * Delete an assessment's part detail for a single part(draw and pick) records (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void deleteAssessmentPartDetailTx(Part part)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ASSESSMENT_PART_DETAIL");
+		sql.append(" WHERE PART_ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(part.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("deleteAssessmentDrawPickTx(part): db write failed");
 		}
 	}
 
@@ -668,6 +690,9 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 */
 	protected void deleteAssessmentPartTx(AssessmentImpl assessment)
 	{
+		// part pick-draw
+		deleteAssessmentPartDetailTx(assessment);
+
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM MNEME_ASSESSMENT_PART");
 		sql.append(" WHERE ASSESSMENT_ID=?");
@@ -689,6 +714,9 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 */
 	protected void deleteAssessmentPartTx(Part part)
 	{
+		// part pick-draw
+		deleteAssessmentPartDetailTx(part);
+
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM MNEME_ASSESSMENT_PART");
 		sql.append(" WHERE ID=?");
@@ -712,9 +740,6 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	{
 		// access
 		deleteAssessmentAccessTx(assessment);
-
-		// part pick-draw
-		deleteAssessmentDrawPickTx(assessment);
 
 		// parts
 		deleteAssessmentPartTx(assessment);
@@ -798,65 +823,54 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 * @param assessment
 	 *        The assessment.
 	 */
-	protected void insertAssessmentDrawPickTx(AssessmentImpl assessment)
+	protected void insertAssessmentPartDetailTx(AssessmentImpl assessment, Part part)
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_ASSESSMENT_DRAW_PICK (");
+		sql.append("INSERT INTO MNEME_ASSESSMENT_PART_DETAIL (");
 		sql.append(" ASSESSMENT_ID, NUM_QUESTIONS_SEQ, ORIG_PID, ORIG_QID, PART_ID, POOL_ID, QUESTION_ID)");
 		sql.append(" VALUES(?,?,?,?,?,?,?)");
 
 		Object[] fields = new Object[7];
 		fields[0] = Long.valueOf(assessment.getId());
 
-		for (Part part : assessment.getParts().getParts())
+		if (part instanceof ManualPartImpl)
 		{
-			if (part instanceof ManualPartImpl)
+			ManualPartImpl mpart = (ManualPartImpl) part;
+			int seq = 0;
+			for (PoolPick pick : mpart.questions)
 			{
-				ManualPartImpl mpart = (ManualPartImpl) part;
-				int seq = 0;
-				for (PoolPick pick : mpart.questions)
+				seq++;
+				int i = 1;
+				fields[i++] = Integer.valueOf(seq);
+				fields[i++] = null;
+				fields[i++] = (pick.origQuestionId == null) ? null : Long.valueOf(pick.origQuestionId);
+				fields[i++] = Long.valueOf(part.getId());
+				fields[i++] = (pick.poolId == null) ? null : Long.valueOf(pick.poolId);
+				fields[i++] = Long.valueOf(pick.questionId);
+
+				if (!this.sqlService.dbWrite(null, sql.toString(), fields))
 				{
-					seq++;
-					int i = 1;
-					fields[i++] = Integer.valueOf(seq);
-					fields[i++] = null;
-					fields[i++] = (pick.origQuestionId == null) ? null : Long.valueOf(pick.origQuestionId);
-					fields[i++] = Long.valueOf(part.getId());
-					fields[i++] = (pick.poolId == null) ? null : Long.valueOf(pick.poolId);
-					fields[i++] = Long.valueOf(pick.questionId);
-
-					Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
-					if (id == null)
-					{
-						throw new RuntimeException("insertAssessmentDrawPickTx: dbInsert failed");
-					}
-
-					// set the pick's id
-					// ((PartImpl) part).initId(id.toString());
+					throw new RuntimeException("insertAssessmentDrawPickTx: dbWrite failed");
 				}
 			}
+		}
 
-			else if (part instanceof DrawPartImpl)
+		else if (part instanceof DrawPartImpl)
+		{
+			DrawPartImpl dpart = (DrawPartImpl) part;
+			for (PoolDraw draw : dpart.pools)
 			{
-				DrawPartImpl dpart = (DrawPartImpl) part;
-				for (PoolDraw draw : dpart.pools)
+				int i = 1;
+				fields[i++] = Integer.valueOf(draw.getNumQuestions());
+				fields[i++] = ((PoolDrawImpl) draw).origPoolId == null ? null : Long.valueOf(((PoolDrawImpl) draw).origPoolId);
+				fields[i++] = null;
+				fields[i++] = Long.valueOf(part.getId());
+				fields[i++] = Long.valueOf(draw.getPoolId());
+				fields[i++] = null;
+
+				if (!this.sqlService.dbWrite(null, sql.toString(), fields))
 				{
-					int i = 1;
-					fields[i++] = Integer.valueOf(draw.getNumQuestions());
-					fields[i++] = ((PoolDrawImpl) draw).origPoolId == null ? null : Long.valueOf(((PoolDrawImpl) draw).origPoolId);
-					fields[i++] = null;
-					fields[i++] = Long.valueOf(part.getId());
-					fields[i++] = Long.valueOf(draw.getPoolId());
-					fields[i++] = null;
-
-					Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
-					if (id == null)
-					{
-						throw new RuntimeException("insertAssessmentDrawPickTx: dbInsert failed");
-					}
-
-					// set the part's id
-					// ((PartImpl) part).initId(id.toString());
+					throw new RuntimeException("insertAssessmentDrawPickTx: dbWrite failed");
 				}
 			}
 		}
@@ -893,6 +907,9 @@ public class AssessmentStorageMysql implements AssessmentStorage
 
 		// set the part's id
 		((PartImpl) part).initId(id.toString());
+
+		// part draw-pick
+		insertAssessmentPartDetailTx(assessment, part);
 	}
 
 	/**
@@ -934,7 +951,8 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		fields[i++] = assessment.getModifiedBy().getDate().getTime();
 		fields[i++] = assessment.getModifiedBy().getUserId();
 		fields[i++] = assessment.getParts().getContinuousNumbering() ? "1" : "0";
-		fields[i++] = assessment.getParts().getShowPresentation() ? "1" : "0";
+		fields[i++] = ((AssessmentPartsImpl) assessment.getParts()).showPresentation == null ? null
+				: (((AssessmentPartsImpl) assessment.getParts()).showPresentation ? "1" : "0");
 		fields[i++] = assessment.getPassword().getPassword();
 		fields[i++] = assessment.getPresentation().getText();
 		fields[i++] = assessment.getPublished() ? "1" : "0";
@@ -971,9 +989,6 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		{
 			insertAssessmentPartTx(assessment, part);
 		}
-
-		// part draw-pick
-		insertAssessmentDrawPickTx(assessment);
 	}
 
 	/**
@@ -1067,8 +1082,6 @@ public class AssessmentStorageMysql implements AssessmentStorage
 					assessment.setTries(SqlHelper.readInteger(result, i++));
 					assessment.setType(AssessmentType.valueOf(StringUtil.trimToNull(result.getString(i++))));
 
-					assessment.changed.clearChanged();
-
 					rv.add(assessment);
 					assessments.put(assessment.getId(), assessment);
 
@@ -1108,18 +1121,62 @@ public class AssessmentStorageMysql implements AssessmentStorage
 					{
 						part = a.getParts().addDrawPart();
 					}
-					
+
 					((PartImpl) part).initId(SqlHelper.readId(result, 2));
 					part.getPresentation().setText(SqlHelper.readString(result, 3));
 					part.setTitle(SqlHelper.readString(result, 4));
-					
+
 					((PartImpl) part).clearChanged();
 
 					return null;
 				}
 				catch (SQLException e)
 				{
-					M_log.warn("readAssessments(access): " + e);
+					M_log.warn("readAssessments(parts): " + e);
+					return null;
+				}
+			}
+		});
+
+		// read all the part details for these assessments
+		sql = new StringBuilder();
+		sql.append("SELECT P.ASSESSMENT_ID, P.NUM_QUESTIONS_SEQ, P.ORIG_PID, P.ORIG_QID, P.PART_ID,");
+		sql.append(" P.POOL_ID, P.QUESTION_ID");
+		sql.append(" FROM MNEME_ASSESSMENT_PART_DETAIL P");
+		sql.append(" JOIN MNEME_ASSESSMENT A ON P.ASSESSMENT_ID=A.ID ");
+		sql.append(where);
+		sql.append(" ORDER BY P.ASSESSMENT_ID ASC, P.NUM_QUESTIONS_SEQ ASC");
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String aid = SqlHelper.readId(result, 1);
+					AssessmentImpl a = assessments.get(aid);
+					String pid = SqlHelper.readId(result, 5);
+					Part p = a.getParts().getPart(pid);
+
+					if (p instanceof DrawPart)
+					{
+						Integer numQuestions = SqlHelper.readInteger(result, 2);
+						String origPoolId = SqlHelper.readString(result, 3);
+						String poolId = SqlHelper.readString(result, 6);
+						((DrawPartImpl) p).initDraw(poolId, origPoolId, numQuestions);
+					}
+					else if (p instanceof ManualPart)
+					{
+						String questionId = SqlHelper.readString(result, 7);
+						String origQid = SqlHelper.readString(result, 4);
+						String poolId = SqlHelper.readString(result, 6);
+						((ManualPartImpl) p).initPick(questionId, origQid, poolId);
+					}
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessments(part details): " + e);
 					return null;
 				}
 			}
@@ -1171,6 +1228,12 @@ public class AssessmentStorageMysql implements AssessmentStorage
 				}
 			}
 		});
+
+		// clear changed for the assessments
+		for (AssessmentImpl a : rv)
+		{
+			a.clearChanged();
+		}
 
 		return rv;
 	}
@@ -1236,8 +1299,11 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 * @param part
 	 *        the part.
 	 */
-	protected void updateAssessmentPartTx(Part part)
+	protected void updateAssessmentPartTx(AssessmentImpl assessment, Part part)
 	{
+		// delete the old part pick-draw
+		deleteAssessmentPartDetailTx(part);
+
 		StringBuilder sql = new StringBuilder();
 		sql.append("UPDATE MNEME_ASSESSMENT_PART SET");
 		sql.append(" PRESENTATION_TEXT=?, SEQUENCE=?, TITLE=?, RANDOMIZE=?");
@@ -1254,6 +1320,9 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		{
 			throw new RuntimeException("updateAssessmentPartTx: dbInsert failed");
 		}
+
+		// insert the new part draw-pick
+		insertAssessmentPartDetailTx(assessment, part);
 	}
 
 	/**
@@ -1293,7 +1362,8 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		fields[i++] = assessment.getModifiedBy().getDate().getTime();
 		fields[i++] = assessment.getModifiedBy().getUserId();
 		fields[i++] = assessment.getParts().getContinuousNumbering() ? "1" : "0";
-		fields[i++] = assessment.getParts().getShowPresentation() ? "1" : "0";
+		fields[i++] = ((AssessmentPartsImpl) assessment.getParts()).showPresentation == null ? null
+				: (((AssessmentPartsImpl) assessment.getParts()).showPresentation ? "1" : "0");
 		fields[i++] = assessment.getPassword().getPassword();
 		fields[i++] = assessment.getPresentation().getText();
 		fields[i++] = assessment.getPublished() ? "1" : "0";
@@ -1342,14 +1412,12 @@ public class AssessmentStorageMysql implements AssessmentStorage
 			}
 			else if (((PartImpl) part).getChanged())
 			{
-				updateAssessmentPartTx((PartImpl) part);
+				updateAssessmentPartTx(assessment, (PartImpl) part);
 			}
 		}
 		for (Part part : ((AssessmentPartsImpl) assessment.getParts()).getDeleted())
 		{
 			deleteAssessmentPartTx(part);
 		}
-
-		// TODO: draw-picks
 	}
 }

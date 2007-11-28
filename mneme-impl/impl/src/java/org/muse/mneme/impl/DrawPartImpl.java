@@ -55,8 +55,14 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 *        The assessment this is the parts for.
 	 * @param questionService
 	 *        The QuestionService.
+	 * @param submissionService
+	 *        The SubmissionService.
 	 * @param poolService
 	 *        The PoolService.
+	 * @param owner
+	 *        A Changeable to report changes to.
+	 * @param messages
+	 *        A messages bundle.
 	 */
 	public DrawPartImpl(AssessmentImpl assessment, QuestionService questionService, SubmissionService submissionService, PoolService poolService,
 			Changeable owner, InternationalizedMessages messages)
@@ -72,6 +78,8 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 *        The other to copy.
 	 * @param assessment
 	 *        The assessment this is the parts for.
+	 * @param owner
+	 *        A Changeable to report changes to.
 	 */
 	public DrawPartImpl(DrawPartImpl other, AssessmentImpl assessment, Changeable owner)
 	{
@@ -496,6 +504,24 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		Collections.shuffle(rv, new Random(seed));
 
 		return rv;
+	}
+
+	/**
+	 * Reconstruct a draw.
+	 * 
+	 * @param poolId
+	 *        The poolId value.
+	 * @param origPoolId
+	 *        The origPoolId value
+	 * @param assessment
+	 *        The assessment this is the parts for.
+	 * @param numQuestions
+	 *        The number of questions.
+	 */
+	protected void initDraw(String poolId, String origPoolId, Integer numQuestions)
+	{
+		PoolDraw draw = new PoolDrawImpl(this.assessment, this.poolService, poolId, origPoolId, numQuestions);
+		pools.add(draw);
 	}
 
 	/**

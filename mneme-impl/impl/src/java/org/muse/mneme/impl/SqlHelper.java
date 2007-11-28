@@ -102,7 +102,9 @@ public class SqlHelper
 	 */
 	public static Boolean readBoolean(ResultSet result, int index) throws SQLException
 	{
-		return Boolean.valueOf("1".equals(StringUtil.trimToNull(result.getString(index))));
+		String b = StringUtil.trimToNull(result.getString(index));
+		if (b == null) return null;
+		return Boolean.valueOf("1".equals(b));
 	}
 
 	/**

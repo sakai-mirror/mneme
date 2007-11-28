@@ -39,14 +39,6 @@ public class PoolPick
 
 	/**
 	 * Construct.
-	 */
-	public PoolPick(QuestionService questionService)
-	{
-		this.questionService = questionService;
-	}
-
-	/**
-	 * Construct.
 	 * 
 	 * @param other
 	 *        The other to copy.
@@ -59,6 +51,19 @@ public class PoolPick
 	/**
 	 * Construct.
 	 * 
+	 * @param questionService
+	 *        The QuestionService.
+	 */
+	public PoolPick(QuestionService questionService)
+	{
+		this.questionService = questionService;
+	}
+
+	/**
+	 * Construct.
+	 * 
+	 * @param questionService
+	 *        The QuestionService.
 	 * @param questionId
 	 *        The question id.
 	 */
@@ -73,8 +78,12 @@ public class PoolPick
 	/**
 	 * Construct.
 	 * 
+	 * @param questionService
+	 *        The QuestionService.
 	 * @param questionId
 	 *        The question id.
+	 * @param poolId
+	 *        The pool.
 	 */
 	public PoolPick(QuestionService questionService, String questionId, String poolId)
 	{
@@ -82,6 +91,28 @@ public class PoolPick
 		if (poolId == null) throw new IllegalArgumentException();
 		this.questionId = questionId;
 		this.origQuestionId = questionId;
+		this.poolId = poolId;
+		this.questionService = questionService;
+	}
+
+	/**
+	 * Construct.
+	 * 
+	 * @param questionService
+	 *        The QuestionService.
+	 * @param questionId
+	 *        The question id.
+	 * @param origQid
+	 *        The origQuestionId value.
+	 * @param poolId
+	 *        The pool.
+	 */
+	public PoolPick(QuestionService questionService, String questionId, String origQid, String poolId)
+	{
+		if (questionId == null) throw new IllegalArgumentException();
+		if (origQid == null) throw new IllegalArgumentException();
+		this.questionId = questionId;
+		this.origQuestionId = origQid;
 		this.poolId = poolId;
 		this.questionService = questionService;
 	}
