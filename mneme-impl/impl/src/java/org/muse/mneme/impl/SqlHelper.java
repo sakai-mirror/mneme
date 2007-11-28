@@ -100,9 +100,9 @@ public class SqlHelper
 	 * @return The Boolean.
 	 * @throws SQLException
 	 */
-	public static Boolean readBoolean(ResultSet results, int index) throws SQLException
+	public static Boolean readBoolean(ResultSet result, int index) throws SQLException
 	{
-		return Boolean.valueOf("1".equals(StringUtil.trimToNull(results.getString(index))));
+		return Boolean.valueOf("1".equals(StringUtil.trimToNull(result.getString(index))));
 	}
 
 	/**
@@ -115,11 +115,28 @@ public class SqlHelper
 	 * @return The Date or null.
 	 * @throws SQLException
 	 */
-	public static Date readDate(ResultSet results, int index) throws SQLException
+	public static Date readDate(ResultSet result, int index) throws SQLException
 	{
-		long time = results.getLong(index);
+		long time = result.getLong(index);
 		if (time == 0) return null;
 		return new Date(time);
+	}
+
+	/**
+	 * Read an id encoded as an unsigned long from the results set. 0 is treated as null.
+	 * 
+	 * @param results
+	 *        The result set.
+	 * @param index
+	 *        The index.
+	 * @return The id string.
+	 * @throws SQLException
+	 */
+	public static String readId(ResultSet result, int index) throws SQLException
+	{
+		long l = result.getLong(index);
+		if (l == 0) return null;
+		return Long.valueOf(l).toString();
 	}
 
 	/**
@@ -132,9 +149,9 @@ public class SqlHelper
 	 * @return The Integer.
 	 * @throws SQLException
 	 */
-	public static Integer readInteger(ResultSet results, int index) throws SQLException
+	public static Integer readInteger(ResultSet result, int index) throws SQLException
 	{
-		int i = results.getInt(index);
+		int i = result.getInt(index);
 		if (i == 0) return null;
 		return Integer.valueOf(i);
 	}
@@ -149,10 +166,25 @@ public class SqlHelper
 	 * @return The Long.
 	 * @throws SQLException
 	 */
-	public static Long readLong(ResultSet results, int index) throws SQLException
+	public static Long readLong(ResultSet result, int index) throws SQLException
 	{
-		long l = results.getLong(index);
+		long l = result.getLong(index);
 		if (l == 0) return null;
 		return Long.valueOf(l);
+	}
+
+	/**
+	 * Read a string from the result set, trimmed to null
+	 * 
+	 * @param results
+	 *        The result set.
+	 * @param index
+	 *        The index.
+	 * @return The String.
+	 * @throws SQLException
+	 */
+	public static String readString(ResultSet result, int index) throws SQLException
+	{
+		return StringUtil.trimToNull(result.getString(index));
 	}
 }

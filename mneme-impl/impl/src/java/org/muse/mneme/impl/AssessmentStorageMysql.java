@@ -23,13 +23,10 @@ package org.muse.mneme.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,10 +36,10 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentType;
-import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGrouping;
@@ -106,26 +103,6 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	}
 
 	/**
-	 * Transaction code for clearStaleMintQuestions()
-	 */
-	protected void clearStaleMintQuestionsTx(Date stale)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("DELETE FROM MNEME_ASSESSMENT");
-		sql.append(" WHERE MINT='1' AND CREATED_BY_DATE < ?");
-
-		Object[] fields = new Object[1];
-		fields[0] = stale.getTime();
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("clearStaleMintQuestionsTx: db write failed");
-		}
-
-		// TODO: access and parts
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public Integer countAssessments(String context)
@@ -177,13 +154,13 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 */
 	public List<AssessmentImpl> getArchivedAssessments(String context)
 	{
-		StringBuilder whereOrder = new StringBuilder();
-		whereOrder.append("WHERE A.CONTEXT=? AND A.ARCHIVED='1' AND A.MINT='0' AND A.HISTORICAL='0' ORDER BY DATES_ARCHIVED ASC");
+		String where = "WHERE A.CONTEXT=? AND A.ARCHIVED='1' AND A.MINT='0' AND A.HISTORICAL='0'";
+		String order = "ORDER BY DATES_ARCHIVED ASC";
 
 		Object[] fields = new Object[1];
 		fields[0] = context;
 
-		return readAssessments(whereOrder.toString(), fields);
+		return readAssessments(where, order.toString(), fields);
 	}
 
 	/**
@@ -199,80 +176,80 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 */
 	public List<AssessmentImpl> getContextAssessments(String context, final AssessmentService.AssessmentsSort sort, Boolean publishedOnly)
 	{
-		StringBuilder whereOrder = new StringBuilder();
-		whereOrder.append("WHERE A.CONTEXT=? AND A.ARCHIVED='0' AND A.MINT='0' AND A.HISTORICAL='0'");
+		String where = "WHERE A.CONTEXT=? AND A.ARCHIVED='0' AND A.MINT='0' AND A.HISTORICAL='0'";
 		if (publishedOnly)
 		{
-			whereOrder.append(" AND A.PUBLISHED='1'");
+			where += " AND A.PUBLISHED='1'";
 		}
 
 		// sort
+		String order = null;
 		switch (sort)
 		{
 			case published_a:
 			{
-				whereOrder.append(" ORDER BY A.PUBLISHED ASC, A.TITLE ASC, A.CREATED_BY_DATE ASC");
+				order = " ORDER BY A.PUBLISHED ASC, A.TITLE ASC, A.CREATED_BY_DATE ASC";
 				break;
 			}
 			case published_d:
 			{
-				whereOrder.append(" ORDER BY A.PUBLISHED DESC, A.TITLE DESC, A.CREATED_BY_DATE DESC");
+				order = " ORDER BY A.PUBLISHED DESC, A.TITLE DESC, A.CREATED_BY_DATE DESC";
 				break;
 			}
 			case title_a:
 			{
-				whereOrder.append(" ORDER BY A.TITLE ASC, A.CREATED_BY_DATE ASC");
+				order = " ORDER BY A.TITLE ASC, A.CREATED_BY_DATE ASC";
 				break;
 			}
 			case title_d:
 			{
-				whereOrder.append(" ORDER BY A.TITLE DESC, A.CREATED_BY_DATE DESC");
+				order = " ORDER BY A.TITLE DESC, A.CREATED_BY_DATE DESC";
 				break;
 			}
 			case type_a:
 			{
 				// TODO: getType().getSortValue()
-				whereOrder.append(" ORDER BY A.TYPE ASC, A.TITLE ASC, A.CREATED_BY_DATE ASC");
+				order = " ORDER BY A.TYPE ASC, A.TITLE ASC, A.CREATED_BY_DATE ASC";
 				break;
 			}
 			case type_d:
 			{
 				// TODO: getType().getSortValue()
-				whereOrder.append(" ORDER BY A.TYPE DESC, A.TITLE DESC, A.CREATED_BY_DATE DESC");
+				order = " ORDER BY A.TYPE DESC, A.TITLE DESC, A.CREATED_BY_DATE DESC";
 				break;
 			}
 			case odate_a:
 			{
 				// TODO: null sorts low
-				whereOrder.append(" ORDER BY A.DATES_OPEN ASC, A.TITLE ASC, A.CREATED_BY_DATE ASC");
+				order = " ORDER BY A.DATES_OPEN ASC, A.TITLE ASC, A.CREATED_BY_DATE ASC";
 				break;
 			}
 			case odate_d:
 			{
 				// TODO: null sorts low
-				whereOrder.append(" ORDER BY A.DATES_OPEN DESC, A.TITLE DESC, A.CREATED_BY_DATE DESC");
+				order = " ORDER BY A.DATES_OPEN DESC, A.TITLE DESC, A.CREATED_BY_DATE DESC";
 				break;
 			}
 			case ddate_a:
 			{
 				// TODO: null sorts high
-				whereOrder.append(" ORDER BY A.DATES_DUE ASC, A.TITLE ASC, A.CREATED_BY_DATE ASC");
+				order = " ORDER BY A.DATES_DUE ASC, A.TITLE ASC, A.CREATED_BY_DATE ASC";
 				break;
 			}
 			case ddate_d:
 			{
 				// TODO: null sorts high
-				whereOrder.append(" ORDER BY A.DATES_DUE DESC, A.TITLE DESC, A.CREATED_BY_DATE DESC");
+				order = " ORDER BY A.DATES_DUE DESC, A.TITLE DESC, A.CREATED_BY_DATE DESC";
 				break;
 			}
 			case cdate_a:
 			{
-				whereOrder.append(" ORDER BY A.CREATED_BY_DATE ASC");
+				order = " ORDER BY A.CREATED_BY_DATE ASC";
 				break;
 			}
 			case cdate_d:
 			{
-				whereOrder.append(" ORDER BY A.CREATED_BY_DATE DESC");
+				order = " ORDER BY A.CREATED_BY_DATE DESC";
 				break;
 			}
 		}
@@ -280,7 +257,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		Object[] fields = new Object[1];
 		fields[0] = context;
 
-		return readAssessments(whereOrder.toString(), fields);
+		return readAssessments(where, order.toString(), fields);
 	}
 
 	/**
@@ -569,6 +546,26 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	}
 
 	/**
+	 * Transaction code for clearStaleMintQuestions()
+	 */
+	protected void clearStaleMintQuestionsTx(Date stale)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ASSESSMENT");
+		sql.append(" WHERE MINT='1' AND CREATED_BY_DATE < ?");
+
+		Object[] fields = new Object[1];
+		fields[0] = stale.getTime();
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("clearStaleMintQuestionsTx: db write failed");
+		}
+
+		// TODO: access and parts
+	}
+
+	/**
 	 * Delete an assessment.
 	 * 
 	 * @param assessment
@@ -586,6 +583,69 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	}
 
 	/**
+	 * Delete an assessment's access records (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void deleteAssessmentAccessTx(AssessmentImpl assessment)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ASSESSMENT_ACCESS");
+		sql.append(" WHERE ASSESSMENT_ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("deleteAssessmentAccessTx: db write failed");
+		}
+	}
+
+	/**
+	 * Delete an assessment's part detail (draw and pick) records (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void deleteAssessmentDrawPickTx(AssessmentImpl assessment)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ASSESSMENT_DRAW_PICK");
+		sql.append(" WHERE ASSESSMENT_ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("deleteAssessmentDrawPickTx: db write failed");
+		}
+	}
+
+	/**
+	 * Delete an assessment's part records (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void deleteAssessmentPartTx(AssessmentImpl assessment)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ASSESSMENT_PART");
+		sql.append(" WHERE ASSESSMENT_ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("deleteAssessmentPartTx: db write failed");
+		}
+	}
+
+	/**
 	 * Delete an assessment (transaction code).
 	 * 
 	 * @param assessment
@@ -593,9 +653,14 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 */
 	protected void deleteAssessmentTx(AssessmentImpl assessment)
 	{
-		// TODO: access
-		// TODO: part pick-draw
-		// TODO: parts
+		// access
+		deleteAssessmentAccessTx(assessment);
+
+		// part pick-draw
+		deleteAssessmentDrawPickTx(assessment);
+
+		// parts
+		deleteAssessmentPartTx(assessment);
 
 		// assessment
 		StringBuilder sql = new StringBuilder();
@@ -675,6 +740,114 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	}
 
 	/**
+	 * Insert a new assessment's parts (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void insertAssessmentPartsTx(AssessmentImpl assessment)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO MNEME_ASSESSMENT_PART (");
+		sql.append(" ASSESSMENT_ID, PRESENTATION_TEXT, SEQUENCE, TITLE, TYPE, RANDOMIZE)");
+		sql.append(" VALUES(?,?,?,?,?,?)");
+
+		Object[] fields = new Object[6];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		int seq = 0;
+		for (Part part : assessment.getParts().getParts())
+		{
+			seq++;
+			int i = 1;
+			fields[i++] = part.getPresentation().getText();
+			fields[i++] = Integer.valueOf(seq);
+			fields[i++] = part.getTitle();
+			fields[i++] = (part instanceof ManualPart) ? "M" : "D";
+			fields[i++] = (part instanceof ManualPart) ? (((ManualPart) part).getRandomize() ? "1" : "0") : "0";
+
+			Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+			if (id == null)
+			{
+				throw new RuntimeException("insertAssessmentAccessTx: dbInsert failed");
+			}
+
+			// set the part's id
+			((PartImpl) part).initId(id.toString());
+		}
+	}
+
+	/**
+	 * Insert a new assessment's parts (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void insertAssessmentDrawPickTx(AssessmentImpl assessment)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO MNEME_ASSESSMENT_DRAW_PICK (");
+		sql.append(" ASSESSMENT_ID, NUM_QUESTIONS_SEQ, ORIG_PID, ORIG_QID, PART_ID, POOL_ID, QUESTION_ID)");
+		sql.append(" VALUES(?,?,?,?,?,?,?)");
+
+		Object[] fields = new Object[7];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		for (Part part : assessment.getParts().getParts())
+		{
+			if (part instanceof ManualPartImpl)
+			{
+				ManualPartImpl mpart = (ManualPartImpl) part;
+				int seq = 0;
+				for (PoolPick pick : mpart.questions)
+				{
+					seq++;
+					int i = 1;
+					fields[i++] = Integer.valueOf(seq);
+					fields[i++] = null;
+					fields[i++] = (pick.origQuestionId == null) ? null : Long.valueOf(pick.origQuestionId);
+					fields[i++] = Long.valueOf(part.getId());
+					fields[i++] = (pick.poolId == null) ? null : Long.valueOf(pick.poolId);
+					fields[i++] = Long.valueOf(pick.questionId);
+
+					Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+					if (id == null)
+					{
+						throw new RuntimeException("insertAssessmentDrawPickTx: dbInsert failed");
+					}
+
+					// set the pick's id
+					// ((PartImpl) part).initId(id.toString());
+				}
+			}
+
+			else if (part instanceof DrawPartImpl)
+			{
+				DrawPartImpl dpart = (DrawPartImpl) part;
+				for (PoolDraw draw : dpart.pools)
+				{
+					int i = 1;
+					fields[i++] = Integer.valueOf(draw.getNumQuestions());
+					fields[i++] = ((PoolDrawImpl) draw).origPoolId == null ? null : Long.valueOf(((PoolDrawImpl) draw).origPoolId);
+					fields[i++] = null;
+					fields[i++] = Long.valueOf(part.getId());
+					fields[i++] = Long.valueOf(draw.getPoolId());
+					fields[i++] = null;
+
+					Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+					if (id == null)
+					{
+						throw new RuntimeException("insertAssessmentDrawPickTx: dbInsert failed");
+					}
+
+					// set the part's id
+					// ((PartImpl) part).initId(id.toString());
+				}
+			}
+		}
+	}
+
+	/**
 	 * Insert a new assessment (transaction code).
 	 * 
 	 * @param assessment
@@ -742,7 +915,11 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		// access
 		insertAssessmentAccessTx(assessment);
 
-		// TODO: parts
+		// parts
+		insertAssessmentPartsTx(assessment);
+
+		// part draw-pick
+		insertAssessmentDrawPickTx(assessment);
 	}
 
 	/**
@@ -754,10 +931,10 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 */
 	protected AssessmentImpl readAssessment(String id)
 	{
-		String whereOrder = "WHERE A.ID = ?";
+		String where = "WHERE A.ID = ?";
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(id);
-		List<AssessmentImpl> rv = readAssessments(whereOrder, fields);
+		List<AssessmentImpl> rv = readAssessments(where, null, fields);
 		if (rv.size() > 0)
 		{
 			return rv.get(0);
@@ -775,9 +952,10 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 *        The bind variables.
 	 * @return The assessments.
 	 */
-	protected List<AssessmentImpl> readAssessments(String whereOrder, Object[] fields)
+	protected List<AssessmentImpl> readAssessments(String where, String order, Object[] fields)
 	{
 		final List<AssessmentImpl> rv = new ArrayList<AssessmentImpl>();
+		final Map<String, AssessmentImpl> assessments = new HashMap<String, AssessmentImpl>();
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT A.ARCHIVED, A.CONTEXT, A.CREATED_BY_DATE, A.CREATED_BY_USER,");
@@ -789,7 +967,8 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		sql.append(" A.REVIEW_DATE, A.REVIEW_SHOW_CORRECT, A.REVIEW_SHOW_FEEDBACK, A.REVIEW_TIMING,");
 		sql.append(" A.SHOW_HINTS, A.SUBMIT_PRES_TEXT, A.TIME_LIMIT, A.TITLE, A.TRIES, A.TYPE");
 		sql.append(" FROM MNEME_ASSESSMENT A ");
-		sql.append(whereOrder);
+		sql.append(where);
+		if (order != null) sql.append(order);
 
 		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
@@ -835,13 +1014,64 @@ public class AssessmentStorageMysql implements AssessmentStorage
 					assessment.setType(AssessmentType.valueOf(StringUtil.trimToNull(result.getString(i++))));
 
 					assessment.changed.clearChanged();
+
 					rv.add(assessment);
+					assessments.put(assessment.getId(), assessment);
 
 					return null;
 				}
 				catch (SQLException e)
 				{
-					M_log.warn("readAssessments: " + e);
+					M_log.warn("readAssessments(assessment): " + e);
+					return null;
+				}
+			}
+		});
+
+		// read all the parts for these assessments
+
+		// read all the access for these assesments
+		sql = new StringBuilder();
+		sql.append("SELECT X.ASSESSMENT_ID, X.DATES_ACCEPT_UNTIL, X.DATES_DUE, X.DATES_OPEN, X.ID,");
+		sql.append(" X.OVERRIDE_ACCEPT_UNTIL, X.OVERRIDE_DUE, X.OVERRIDE_OPEN, X.OVERRIDE_PASSWORD,");
+		sql.append(" X.OVERRIDE_TIME_LIMIT, X.OVERRIDE_TRIES, X.PASSWORD, X.TIME_LIMIT, X.TRIES, X.USERS");
+		sql.append(" FROM MNEME_ASSESSMENT_ACCESS X");
+		sql.append(" JOIN MNEME_ASSESSMENT A ON X.ASSESSMENT_ID=A.ID ");
+		sql.append(where);
+		sql.append(" ORDER BY X.ASSESSMENT_ID ASC, X.ID ASC");
+
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String aid = SqlHelper.readId(result, 1);
+					AssessmentImpl a = assessments.get(aid);
+					AssessmentAccess access = a.getSpecialAccess().addAccess();
+
+					access.setAcceptUntilDate(SqlHelper.readDate(result, 2));
+					access.setDueDate(SqlHelper.readDate(result, 3));
+					access.setOpenDate(SqlHelper.readDate(result, 4));
+					((AssessmentAccessImpl) access).initId(SqlHelper.readId(result, 5));
+					access.setOverrideAcceptUntilDate(SqlHelper.readBoolean(result, 6));
+					access.setOverrideDueDate(SqlHelper.readBoolean(result, 7));
+					access.setOverrideOpenDate(SqlHelper.readBoolean(result, 8));
+					access.setOverridePassword(SqlHelper.readBoolean(result, 9));
+					access.setOverrideTimeLimit(SqlHelper.readBoolean(result, 10));
+					access.setOverrideTries(SqlHelper.readBoolean(result, 11));
+					access.setPasswordValue(SqlHelper.readString(result, 12));
+					access.setTimeLimit(SqlHelper.readLong(result, 13));
+					access.setTries(SqlHelper.readInteger(result, 14));
+					access.setUsers(Arrays.asList(SqlHelper.decodeStringArray(SqlHelper.readString(result, 15))));
+
+					a.changed.clearChanged();
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readAssessments(access): " + e);
 					return null;
 				}
 			}
