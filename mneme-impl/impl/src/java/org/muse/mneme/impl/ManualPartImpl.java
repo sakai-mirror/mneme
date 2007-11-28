@@ -89,7 +89,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -264,7 +264,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 			// this is a change that cannot be made to live tests
 			this.assessment.liveChanged = Boolean.TRUE;
 
-			this.owner.setChanged();
+			setChanged();
 		}
 	}
 
@@ -313,7 +313,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -326,7 +326,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 
 		this.randomize = setting;
 
-		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**

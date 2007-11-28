@@ -106,7 +106,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 				// this is a change that cannot be made to live tests
 				this.assessment.liveChanged = Boolean.TRUE;
 
-				this.owner.setChanged();
+				setChanged();
 
 				return already;
 			}
@@ -119,7 +119,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.owner.setChanged();
+		setChanged();
 
 		return rv;
 	}
@@ -380,7 +380,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
-		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -415,7 +415,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 							// this is a change that cannot be made to live tests
 							this.assessment.liveChanged = Boolean.TRUE;
 
-							this.owner.setChanged();
+							setChanged();
 						}
 					}
 				}

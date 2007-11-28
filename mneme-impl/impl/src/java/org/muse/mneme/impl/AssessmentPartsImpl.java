@@ -48,6 +48,8 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 	protected Boolean continuousNumbering = Boolean.TRUE;
 
+	protected List<Part> deleted = new ArrayList<Part>();
+
 	protected transient InternationalizedMessages messages = null;
 
 	protected Changeable owner = null;
@@ -354,6 +356,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 					{
 						i.remove();
 						this.owner.setChanged();
+						this.deleted.add(part);
 					}
 				}
 				else if (part instanceof DrawPart)
@@ -363,6 +366,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 					{
 						i.remove();
 						this.owner.setChanged();
+						this.deleted.add(part);
 					}
 				}
 			}
@@ -381,6 +385,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		this.assessment.liveChanged = Boolean.TRUE;
 
 		this.owner.setChanged();
+		this.deleted.add(part);
 	}
 
 	/**
@@ -448,6 +453,14 @@ public class AssessmentPartsImpl implements AssessmentParts
 		// take the new list
 		this.parts = newParts;
 
+		// mark the parts as changed to pick up the new order
+		// mark the parts as living in this new container
+		for (Part part : this.parts)
+		{
+			((PartImpl) part).setChanged();
+			((PartImpl) part).initContainer(this.parts);
+		}
+
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
 
@@ -464,6 +477,14 @@ public class AssessmentPartsImpl implements AssessmentParts
 		this.showPresentation = setting;
 
 		this.owner.setChanged();
+	}
+
+	/**
+	 * Clear the deleted parts.
+	 */
+	protected void clearDeleted()
+	{
+		this.deleted.clear();
 	}
 
 	/**
@@ -487,6 +508,16 @@ public class AssessmentPartsImpl implements AssessmentParts
 		}
 
 		return count;
+	}
+
+	/**
+	 * Access the deleted parts.
+	 * 
+	 * @return The List of deleted parts.
+	 */
+	protected List<Part> getDeleted()
+	{
+		return this.deleted;
 	}
 
 	/**

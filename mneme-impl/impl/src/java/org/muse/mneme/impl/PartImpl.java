@@ -40,7 +40,7 @@ import org.sakaiproject.i18n.InternationalizedMessages;
 /**
  * PartImpl implements Part
  */
-public abstract class PartImpl implements Part
+public abstract class PartImpl implements Part, Changeable
 {
 	public class MyOrdering implements Ordering<Part>
 	{
@@ -131,6 +131,8 @@ public abstract class PartImpl implements Part
 
 	protected transient AssessmentImpl assessment = null;
 
+	protected boolean changed = false;
+
 	protected String id = null;
 
 	protected transient InternationalizedMessages messages = null;
@@ -162,7 +164,7 @@ public abstract class PartImpl implements Part
 		this.assessment = assessment;
 		this.questionService = questionService;
 		this.submissionService = submissionService;
-		this.presentation = new PresentationImpl(this.owner);
+		this.presentation = new PresentationImpl(this);
 		this.messages = messages;
 	}
 
@@ -177,6 +179,14 @@ public abstract class PartImpl implements Part
 		this.owner = owner;
 		this.assessment = assessment;
 		set(other);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void clearChanged()
+	{
+		this.changed = false;
 	}
 
 	/**
@@ -197,6 +207,14 @@ public abstract class PartImpl implements Part
 	public Assessment getAssessment()
 	{
 		return this.assessment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getChanged()
+	{
+		return this.changed;
 	}
 
 	/**
@@ -322,13 +340,22 @@ public abstract class PartImpl implements Part
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setChanged()
+	{
+		this.changed = true;
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setTitle(String title)
 	{
 		if (!Different.different(this.title, title)) return;
 
 		this.title = title;
 
-		this.owner.setChanged();
+		setChanged();
 	}
 
 	/**
@@ -430,8 +457,9 @@ public abstract class PartImpl implements Part
 	 */
 	protected void set(PartImpl other)
 	{
+		this.changed = other.changed;
 		this.id = other.id;
-		this.presentation = new PresentationImpl(other.presentation, this.owner);
+		this.presentation = new PresentationImpl(other.presentation, this);
 		this.questionService = other.questionService;
 		this.submissionService = other.submissionService;
 		this.title = other.title;
