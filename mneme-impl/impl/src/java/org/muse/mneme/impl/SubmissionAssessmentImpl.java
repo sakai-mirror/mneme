@@ -242,8 +242,7 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public Boolean getIsLive()
 	{
-		// since this is an assessment hooked to a submission, we are live!
-		return Boolean.TRUE;
+		return getMainAssessment().getIsLive();
 	}
 
 	/**

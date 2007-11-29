@@ -427,6 +427,18 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void makeLive(Assessment assessment)
+	{
+		AssessmentImpl rv = this.assessments.get(assessment.getId());
+		if (rv != null)
+		{
+			rv.initLive(Boolean.TRUE);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public AssessmentImpl newAssessment()
 	{
 		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService, this.messages);

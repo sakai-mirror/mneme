@@ -112,6 +112,14 @@ public interface AssessmentStorage
 	Boolean liveDependencyExists(Question question);
 
 	/**
+	 * Set this assessment to be live.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	void makeLive(Assessment assessment);
+
+	/**
 	 * Construct a new Assessment object.
 	 * 
 	 * @return A new Assessment object.

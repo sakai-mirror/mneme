@@ -563,6 +563,17 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
+	 * Set this assessment to be live.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void makeLive(Assessment assessment)
+	{
+		this.storage.makeLive(assessment);
+	}
+
+	/**
 	 * Remove any direct dependencies on this pool from all assessments.
 	 * 
 	 * @param question

@@ -78,6 +78,9 @@ public class AssessmentImpl implements Assessment
 
 	protected String id = null;
 
+	/** The live setting. */
+	protected Boolean live = Boolean.FALSE;
+
 	/** Track any changes that cannot be made to live tests. */
 	protected transient Boolean liveChanged = Boolean.FALSE;
 
@@ -303,11 +306,13 @@ public class AssessmentImpl implements Assessment
 	 */
 	public Boolean getIsLive()
 	{
-		// if historical, which is only created because the assessment is live, we are live!
-		if (this.historical) return Boolean.TRUE;
+		return this.live;
 
-		// TODO: we may want to compute this on read -ggolden
-		return this.submissionService.submissionsExist(this);
+		// if historical, which is only created because the assessment is live, we are live!
+		// if (this.historical) return Boolean.TRUE;
+		//
+		// // TODO: we may want to compute this on read -ggolden
+		// return this.submissionService.submissionsExist(this);
 	}
 
 	/**
@@ -765,6 +770,17 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Establish the live setting.
+	 * 
+	 * @param live
+	 *        The live setting;
+	 */
+	protected void initLive(Boolean live)
+	{
+		this.live = live;
+	}
+
+	/**
 	 * Establish the mint setting.
 	 * 
 	 * @param mint
@@ -825,6 +841,7 @@ public class AssessmentImpl implements Assessment
 		this.id = other.id;
 		this.liveChanged = other.liveChanged;
 		this.messages = other.messages;
+		this.live = other.live;
 		this.mint = other.mint;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
 		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts, this.historyChanged);

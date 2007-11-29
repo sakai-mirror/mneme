@@ -361,6 +361,12 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// TODO: it is possible to make too many submissions for the assessment. If this method is entered concurrently for the same user and
 		// assessment, the previous count check might fail.
 
+		// go live
+		if (!submission.getAssessment().getIsLive())
+		{
+			((AssessmentServiceImpl) this.assessmentService).makeLive(submission.getAssessment());
+		}
+
 		// make a new submission
 		SubmissionImpl rv = this.storage.newSubmission();
 		rv.initAssessmentIds(submission.getAssessment().getId(), submission.getAssessment().getId());
@@ -1875,7 +1881,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	protected List<Submission> officializeByUser(List<SubmissionImpl> all, String allUid)
 	{
 		// pick one for each user - the one in progress, or the official complete one
-		//List<Submission> official = new ArrayList<Submission>();
+		// List<Submission> official = new ArrayList<Submission>();
 
 		// in all's order
 		List<Submission> allOrder = new ArrayList<Submission>(all);
@@ -1897,7 +1903,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			SubmissionImpl inProgressSubmission = null;
 
 			// keep it if it belongs to allUid
-			//if (uid.equals(allUid)) official.add(submission);
+			// if (uid.equals(allUid)) official.add(submission);
 
 			// this one may be our best, or in progress, but only if it's started
 			if (submission.getIsStarted())
@@ -1926,7 +1932,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					i.remove();
 
 					// keep it if it belongs to allUid
-					//if (candidateSub.getUserId().equals(allUid)) official.add(candidateSub);
+					// if (candidateSub.getUserId().equals(allUid)) official.add(candidateSub);
 
 					// we should not get a second one that is unstarted
 					if (!candidateSub.getIsStarted())
@@ -2004,11 +2010,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				winner.initBest(bestSubmission);
 			}
 
-//			// keep the winner - unless we already did
-//			if (!winner.getUserId().equals(allUid))
-//			{
-//				official.add(winner);
-//			}
+			// // keep the winner - unless we already did
+			// if (!winner.getUserId().equals(allUid))
+			// {
+			// official.add(winner);
+			// }
 
 			// mark the allUid's loosers
 			if (uid.equals(allUid))
@@ -2022,7 +2028,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					}
 				}
 			}
-			
+
 			// remove the loosers from the allOrder (except allUid)
 			for (Submission looser : loosers)
 			{
@@ -2034,8 +2040,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 
 		// this returns the allUid entries grouped together, against any sort
-		//return official;
-		
+		// return official;
+
 		// this returns the proper set of entries, preserving the sort, but allUid is not grouped
 		return allOrder;
 	}
