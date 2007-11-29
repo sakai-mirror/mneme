@@ -41,15 +41,6 @@ public interface PoolStorage
 	void clearStaleMintPools(Date stale);
 
 	/**
-	 * Count the pools in this context that meet this criteria.
-	 * 
-	 * @param context
-	 *        The context.
-	 * @return a list of pools that meet the criteria.
-	 */
-	Integer countPools(String context);
-
-	/**
 	 * Check if a pool by this id exists.
 	 * 
 	 * @param poolId
@@ -65,13 +56,9 @@ public interface PoolStorage
 	 *        The context.
 	 * @param sort
 	 *        The sort criteria.
-	 * @param pageNum
-	 *        The page number (1 based) to display, or null to disable paging and get them all.
-	 * @param pageSize
-	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return The list of pools that meet the criteria.
 	 */
-	List<PoolImpl> findPools(String context, PoolService.FindPoolsSort sort, Integer pageNum, Integer pageSize);
+	List<PoolImpl> findPools(String context, PoolService.FindPoolsSort sort);
 
 	/**
 	 * Access a pool manifest.

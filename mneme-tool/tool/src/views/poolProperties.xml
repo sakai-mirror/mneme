@@ -80,9 +80,8 @@
 			<container>
 				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
-					<destination template="/pools/{0}/{1}">
+					<destination template="/pools/{0}">
 						<model ref="poolsSortCode" />
-						<model ref="poolsPagingParameter" />
 					</destination>
 				</navigation>
 			</container>

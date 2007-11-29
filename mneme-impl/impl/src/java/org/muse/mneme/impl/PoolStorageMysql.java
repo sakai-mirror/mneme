@@ -74,27 +74,6 @@ public class PoolStorageMysql implements PoolStorage
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public Integer countPools(String context)
-	{
-		// if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT COUNT(1) FROM MNEME_POOL P");
-		sql.append(" WHERE P.CONTEXT=? AND P.MINT='0' AND P.HISTORICAL='0'");
-		Object[] fields = new Object[1];
-		fields[0] = context;
-		List results = this.sqlService.dbRead(sql.toString(), fields, null);
-		if (results.size() > 0)
-		{
-			return Integer.valueOf((String) results.get(0));
-		}
-
-		return Integer.valueOf(0);
-	}
-
-	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -125,7 +104,7 @@ public class PoolStorageMysql implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<PoolImpl> findPools(String context, PoolService.FindPoolsSort sort, Integer pageNum, Integer pageSize)
+	public List<PoolImpl> findPools(String context, PoolService.FindPoolsSort sort)
 	{
 		// if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
 
@@ -160,22 +139,6 @@ public class PoolStorageMysql implements PoolStorage
 		fields[0] = context;
 
 		List<PoolImpl> rv = readPools(whereOrder.toString(), fields);
-
-		// TODO: page in the SQL...
-		if ((pageNum != null) && (pageSize != null))
-		{
-			// start at ((pageNum-1)*pageSize)
-			int start = ((pageNum - 1) * pageSize);
-			if (start < 0) start = 0;
-			if (start > rv.size()) start = rv.size() - 1;
-
-			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
-			int end = ((pageNum) * pageSize);
-			if (end < 0) end = 0;
-			if (end > rv.size()) end = rv.size();
-
-			rv = rv.subList(start, end);
-		}
 
 		return rv;
 	}

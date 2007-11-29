@@ -268,14 +268,6 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPools(String context, String search)
-	{
-		return poolService.countPools(context, search);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Integer countQuestions(Pool pool, String search)
 	{
 		return this.questionService.countQuestions(pool, search);
@@ -377,9 +369,9 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String context, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Pool> findPools(String context, PoolService.FindPoolsSort sort, String search)
 	{
-		return poolService.findPools(context, sort, search, pageNum, pageSize);
+		return poolService.findPools(context, sort, search);
 	}
 
 	/**

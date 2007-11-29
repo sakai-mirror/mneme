@@ -166,7 +166,7 @@ public class QuestionStorageSample implements QuestionStorage
 	public Map<String, Integer> countPoolQuestions(String context)
 	{
 		Map<String, Integer> rv = new HashMap<String, Integer>();
-		List<Pool> pools = this.poolService.findPools(context, null, null, null, null);
+		List<Pool> pools = this.poolService.findPools(context, null, null);
 		for (Pool pool : pools)
 		{
 			rv.put(pool.getId(), countPoolQuestions(pool));

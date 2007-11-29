@@ -71,16 +71,16 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pool_sort / [3] pool_page / [4] pool_id / [5] question_sort / [6] question_page / [7] question_ids / [8] sort
-		if ((params.length != 8) && (params.length != 9))
+		// [2] pool_sort / [3] pool_id / [4] question_sort / [5] question_page / [6] question_ids / [7] sort
+		if ((params.length != 7) && (params.length != 8))
 		{
 			throw new IllegalArgumentException();
 		}
 
-		String questionIds = params[7];
+		String questionIds = params[6];
 
 		// put the extra parameters all together
-		String extras = StringUtil.unsplit(params, 2, 5, "/");
+		String extras = StringUtil.unsplit(params, 2, 4, "/");
 		context.put("extras", extras);
 
 		// for sort, this destination without the sort
@@ -101,7 +101,7 @@ public class QuestionsCopyMoveView extends ControllerImpl
 
 		// sort
 		String sortCode = "0A";
-		if (params.length > 8) sortCode = params[8];
+		if (params.length > 7) sortCode = params[7];
 		if ((sortCode == null) || (sortCode.length() != 2))
 		{
 			throw new IllegalArgumentException();
@@ -124,7 +124,7 @@ public class QuestionsCopyMoveView extends ControllerImpl
 		}
 
 		// pools - all but the one we came from
-		String pid = params[4];
+		String pid = params[3];
 		Pool pool = this.poolService.getPool(pid);
 		if (pool == null)
 		{
@@ -132,7 +132,7 @@ public class QuestionsCopyMoveView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
-		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), sort, null, null, null);
+		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), sort, null);
 		pools.remove(pool);
 		context.put("pools", pools);
 
@@ -154,16 +154,16 @@ public class QuestionsCopyMoveView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pool_sort / [3] pool_page / [4] pool_id / [5] question_sort / [6] question_page / [7] question_ids / [8] sort
-		if ((params.length != 8) && (params.length != 9))
+		// [2] pool_sort / [3] pool_id / [4] question_sort / [5] question_page / [6] question_ids / [7] sort
+		if ((params.length != 7) && (params.length != 8))
 		{
 			throw new IllegalArgumentException();
 		}
 
-		String questionIds = params[7];
+		String questionIds = params[6];
 
 		// put the extra parameters all together
-		String extras = StringUtil.unsplit(params, 2, 5, "/");
+		String extras = StringUtil.unsplit(params, 2, 4, "/");
 		context.put("extras", extras);
 
 		// for the selected pool

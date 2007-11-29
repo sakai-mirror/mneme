@@ -72,8 +72,8 @@ public class PoolEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// pools sort, pools paging, pool id, optional sort, optional paging
-		if ((params.length != 5) && (params.length != 6) && (params.length != 7))
+		// pools sort, pool id, optional sort, optional paging
+		if ((params.length != 4) && (params.length != 5) && (params.length != 6))
 		{
 			throw new IllegalArgumentException();
 		}
@@ -90,13 +90,8 @@ public class PoolEditView extends ControllerImpl
 		poolsSortCode = params[2];
 		context.put("poolsSortCode", poolsSortCode);
 
-		// pools view paging parameter
-		String poolsPagingParameter = null;
-		poolsPagingParameter = params[3];
-		context.put("poolsPagingParameter", poolsPagingParameter);
-
 		// pool
-		String pid = params[4];
+		String pid = params[3];
 		Pool pool = this.poolService.getPool(pid);
 		if (pool == null)
 		{
@@ -108,7 +103,7 @@ public class PoolEditView extends ControllerImpl
 
 		// sort
 		String sortCode = "0A";
-		if (params.length > 5) sortCode = params[5];
+		if (params.length > 4) sortCode = params[4];
 		if ((sortCode == null) || (sortCode.length() != 2))
 		{
 			throw new IllegalArgumentException();
@@ -133,7 +128,7 @@ public class PoolEditView extends ControllerImpl
 
 		// paging
 		String pagingParameter = "1-30";
-		if (params.length > 6) pagingParameter = params[6];
+		if (params.length > 5) pagingParameter = params[5];
 		Integer maxQuestions = this.questionService.countQuestions(pool, null);
 		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxQuestions);
@@ -161,8 +156,8 @@ public class PoolEditView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// pools sort, pools paging, pool id, optional sort, optional paging
-		if ((params.length != 5) && (params.length != 6) && (params.length != 7))
+		// pools sort, pool id, optional sort, optional paging
+		if ((params.length != 4) && (params.length != 5) && (params.length != 6))
 		{
 			throw new IllegalArgumentException();
 		}

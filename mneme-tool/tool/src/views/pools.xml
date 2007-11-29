@@ -46,13 +46,6 @@
 			<emptyTitle>
 				<message selector="no-pools" />
 			</emptyTitle>
-			<pager paging="paging">
-				<destination template="/pools/{0}{1}/{2}">
-					<model ref="sort_column" />
-					<model ref="sort_direction" />
-					<model type="paging" ref="paging" />
-				</destination>
-			</pager>
 			<columns>
 				<selectionColumn multiple="TRUE" pixels="16">
 					<value>
@@ -78,10 +71,9 @@
 					<navigations>
 						<navigation style="LINK" description="pool-edit-description">
 							<icon icon="/icons/edit.png" style="LEFT" />
-							<destination template="/pool_properties/{0}{1}/{2}/{3}">
+							<destination template="/pool_properties/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model type="paging" ref="paging" />
 								<model ref="pool.id" />
 							</destination>
 						</navigation>
@@ -101,23 +93,18 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/pools/0A/{0}">
-								<model type="paging" ref="paging" selector="FIRST" />
-							</destination>
+							<destination template="/pools/0A" />
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/pools/0D/{0}">
-								<model type="paging" ref="paging" selector="FIRST" />
-							</destination>
+							<destination template="/pools/0D" />
 						</desc>
 					</sort>
 					<entityNavigations>
 						<navigation>
-							<destination template="/pool_edit/{0}{1}/{2}/{3}">
+							<destination template="/pool_edit/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
-								<model type="paging" ref="paging" />
 								<model ref="pool.id" />
 							</destination>
 						</navigation>

@@ -46,11 +46,11 @@ public interface DrawPart extends Part
 	List<PoolDraw> getDraws();
 
 	/**
-	 * Get all the pools and their counts, sorted and paged.
+	 * Get all the pools and their counts, sorted.
 	 * 
 	 * @return The List of draws.
 	 */
-	List<PoolDraw> getDraws(PoolService.FindPoolsSort sort, Integer pageNum, Integer pageSize);
+	List<PoolDraw> getDraws(PoolService.FindPoolsSort sort);
 
 	/**
 	 * Get a list of draws for each pool specified - for those that are already in this part, set the non-null numQuestions.<br />
@@ -62,13 +62,9 @@ public interface DrawPart extends Part
 	 *        The sort criteria (from the PoolService).
 	 * @param search
 	 *        The search criteria.
-	 * @param pageNum
-	 *        The page number (1 based) to display, or null to disable paging and get them all.
-	 * @param pageSize
-	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return A list of draws for each pool.
 	 */
-	List<PoolDraw> getDrawsForPools(String context, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<PoolDraw> getDrawsForPools(String context, PoolService.FindPoolsSort sort, String search);
 
 	/**
 	 * Get a virtal draw for this pool, set to the same count as one of our draws if we have one, else set to 0.<br />

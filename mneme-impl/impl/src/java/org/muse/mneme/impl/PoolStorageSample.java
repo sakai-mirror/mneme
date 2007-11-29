@@ -79,26 +79,6 @@ public class PoolStorageSample implements PoolStorage
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public Integer countPools(String context)
-	{
-		fakeIt();
-
-		int count = 0;
-
-		for (PoolImpl pool : this.pools.values())
-		{
-			if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
-			{
-				count++;
-			}
-		}
-
-		return count;
-	}
-
-	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -122,7 +102,7 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<PoolImpl> findPools(String context, final PoolService.FindPoolsSort sort, Integer pageNum, Integer pageSize)
+	public List<PoolImpl> findPools(String context, final PoolService.FindPoolsSort sort)
 	{
 		fakeIt();
 
@@ -181,22 +161,6 @@ public class PoolStorageSample implements PoolStorage
 				return rv;
 			}
 		});
-
-		// page
-		if ((pageNum != null) && (pageSize != null))
-		{
-			// start at ((pageNum-1)*pageSize)
-			int start = ((pageNum - 1) * pageSize);
-			if (start < 0) start = 0;
-			if (start > rv.size()) start = rv.size() - 1;
-
-			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
-			int end = ((pageNum) * pageSize);
-			if (end < 0) end = 0;
-			if (end > rv.size()) end = rv.size();
-
-			rv = rv.subList(start, end);
-		}
 
 		return rv;
 	}

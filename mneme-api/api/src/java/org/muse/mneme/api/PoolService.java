@@ -64,17 +64,6 @@ public interface PoolService
 	Pool copyPool(String context, Pool pool) throws AssessmentPermissionException;
 
 	/**
-	 * Count the pools in this context with this criteria.
-	 * 
-	 * @param context
-	 *        The context.
-	 * @param search
-	 *        The search criteria.
-	 * @return a list of pools that meet the criteria.
-	 */
-	Integer countPools(String context, String search);
-
-	/**
 	 * Check if this pool exists.
 	 * 
 	 * @param poolId
@@ -92,13 +81,9 @@ public interface PoolService
 	 *        The sort criteria.
 	 * @param search
 	 *        The search criteria.
-	 * @param pageNum
-	 *        The page number (1 based) to display, or null to disable paging and get them all.
-	 * @param pageSize
-	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return a list of pools that meet the criteria.
 	 */
-	List<Pool> findPools(String context, FindPoolsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<Pool> findPools(String context, FindPoolsSort sort, String search);
 
 	/**
 	 * Access a pool by id.

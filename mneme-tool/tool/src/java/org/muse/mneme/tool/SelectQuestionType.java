@@ -30,9 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.Value;
-import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.MnemeService;
@@ -41,9 +39,7 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
-import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
-import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -53,10 +49,10 @@ public class SelectQuestionType extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(SelectQuestionType.class);
-	
+
 	/** Dependency: mneme service. */
 	protected MnemeService mnemeService = null;
-	
+
 	/** Dependency: Pool service. */
 	protected PoolService poolService = null;
 
@@ -65,7 +61,7 @@ public class SelectQuestionType extends ControllerImpl
 
 	/** Dependency: ToolManager */
 	protected ToolManager toolManager = null;
-	
+
 	/**
 	 * Shutdown.
 	 */
@@ -79,27 +75,27 @@ public class SelectQuestionType extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 7)	throw new IllegalArgumentException();
-		
+		if (params.length != 6) throw new IllegalArgumentException();
+
 		StringBuilder prevDestinationParamPath = new StringBuilder();
 		prevDestinationParamPath.append(params[2]);
-		for (int i=3; i<7; i++)
+		for (int i = 3; i < 6; i++)
 		{
 			prevDestinationParamPath.append("/");
 			prevDestinationParamPath.append(params[i]);
 		}
-		
+
 		context.put("prevDestinationParamPath", prevDestinationParamPath.toString());
-		
-		//the question types
+
+		// the question types
 		List<QuestionPlugin> questionTypes = this.mnemeService.getQuestionPlugins();
 		context.put("questionTypes", questionTypes);
-		
-		//for the selected question type - pre-select the top of the list
+
+		// for the selected question type - pre-select the top of the list
 		Value value = this.uiService.newValue();
 		value.setValue(questionTypes.get(0).getType());
 		context.put("selectedQuestionType", value);
-		
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -118,20 +114,20 @@ public class SelectQuestionType extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 7)	throw new IllegalArgumentException();
-		
-		//for the selected question type
+		if (params.length != 6) throw new IllegalArgumentException();
+
+		// for the selected question type
 		Value value = this.uiService.newValue();
 		context.put("selectedQuestionType", value);
-		
-		//read the form
+
+		// read the form
 		String destination = uiService.decode(req, context);
-		
+
 		String selectedQuestionType = value.getValue();
-		
+
 		if ((selectedQuestionType != null) && (destination.startsWith("CREATE")))
 		{
-			//pool id is in params array at index 4
+			// pool id is in params array at index 4
 			Pool pool = this.poolService.getPool(params[4]);
 			if (pool == null)
 			{
@@ -168,12 +164,13 @@ public class SelectQuestionType extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 			return;
 		}
-		
+
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
-	 * @param mnemeService the mnemeService to set
+	 * @param mnemeService
+	 *        the mnemeService to set
 	 */
 	public void setMnemeService(MnemeService mnemeService)
 	{
@@ -181,7 +178,8 @@ public class SelectQuestionType extends ControllerImpl
 	}
 
 	/**
-	 * @param poolService the poolService to set
+	 * @param poolService
+	 *        the poolService to set
 	 */
 	public void setPoolService(PoolService poolService)
 	{
@@ -189,7 +187,8 @@ public class SelectQuestionType extends ControllerImpl
 	}
 
 	/**
-	 * @param questionService the questionService to set
+	 * @param questionService
+	 *        the questionService to set
 	 */
 	public void setQuestionService(QuestionService questionService)
 	{
@@ -197,7 +196,8 @@ public class SelectQuestionType extends ControllerImpl
 	}
 
 	/**
-	 * @param toolManager the toolManager to set
+	 * @param toolManager
+	 *        the toolManager to set
 	 */
 	public void setToolManager(ToolManager toolManager)
 	{

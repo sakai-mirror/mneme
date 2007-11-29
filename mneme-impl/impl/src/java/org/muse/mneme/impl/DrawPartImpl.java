@@ -143,7 +143,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<PoolDraw> getDraws(final PoolService.FindPoolsSort sort, Integer pageNum, Integer pageSize)
+	public List<PoolDraw> getDraws(final PoolService.FindPoolsSort sort)
 	{
 		List<PoolDraw> rv = new ArrayList<PoolDraw>(this.pools);
 
@@ -196,32 +196,16 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 			});
 		}
 
-		// page
-		if ((pageNum != null) && (pageSize != null))
-		{
-			// start at ((pageNum-1)*pageSize)
-			int start = ((pageNum - 1) * pageSize);
-			if (start < 0) start = 0;
-			if (start > rv.size()) start = rv.size() - 1;
-
-			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
-			int end = ((pageNum) * pageSize);
-			if (end < 0) end = 0;
-			if (end > rv.size()) end = rv.size();
-
-			rv = rv.subList(start, end);
-		}
-
 		return rv;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<PoolDraw> getDrawsForPools(String context, PoolService.FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<PoolDraw> getDrawsForPools(String context, PoolService.FindPoolsSort sort, String search)
 	{
 		// get all the pools we need
-		List<Pool> allPools = this.poolService.findPools(context, sort, search, pageNum, pageSize);
+		List<Pool> allPools = this.poolService.findPools(context, sort, search);
 
 		List<PoolDraw> rv = new ArrayList<PoolDraw>();
 

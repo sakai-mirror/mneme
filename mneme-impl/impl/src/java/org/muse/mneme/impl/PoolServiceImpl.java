@@ -165,21 +165,6 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public Integer countPools(String context, String search)
-	{
-		if (context == null) throw new IllegalArgumentException();
-
-		// TODO: search
-
-		if (M_log.isDebugEnabled()) M_log.debug("countPools: context: " + context);
-
-		Integer rv = storage.countPools(context);
-		return rv;
-	}
-
-	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -198,7 +183,7 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Pool> findPools(String context, FindPoolsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Pool> findPools(String context, FindPoolsSort sort, String search)
 	{
 		if (context == null) throw new IllegalArgumentException();
 		if (sort == null) sort = PoolService.FindPoolsSort.title_a;
@@ -207,7 +192,7 @@ public class PoolServiceImpl implements PoolService
 
 		// TODO: search
 
-		List<Pool> rv = new ArrayList<Pool>(storage.findPools(context, sort, pageNum, pageSize));
+		List<Pool> rv = new ArrayList<Pool>(storage.findPools(context, sort));
 
 		// thread-local cache each found pool
 		for (Pool pool : rv)

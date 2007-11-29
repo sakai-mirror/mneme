@@ -60,12 +60,12 @@ public class QuestionEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pool_sort / [3] pool_page / [4] pool_id / [5] question_sort / [6] question_page / [7] question_id
-		if ((params.length != 8)) throw new IllegalArgumentException();
-		String questionId = params[7];
+		// [2] pool_sort / [3] pool_id / [4] question_sort / [5] question_page / [6] question_id
+		if ((params.length != 7)) throw new IllegalArgumentException();
+		String questionId = params[6];
 
 		// put the extra parameters all together
-		String extras = StringUtil.unsplit(params, 2, 5, "/");
+		String extras = StringUtil.unsplit(params, 2, 4, "/");
 		context.put("extras", extras);
 
 		// get the question to work on
@@ -100,9 +100,9 @@ public class QuestionEditView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pool_sort / [3] pool_page / [4] pool_id / [5] question_sort / [6] question_page / [7] question_id
-		if ((params.length != 8)) throw new IllegalArgumentException();
-		String questionId = params[7];
+		// [2] pool_sort / [3] pool_id / [4] question_sort / [5] question_page / [6] question_id
+		if ((params.length != 7)) throw new IllegalArgumentException();
+		String questionId = params[6];
 
 		// get the question to work on
 		Question question = this.questionService.getQuestion(questionId);

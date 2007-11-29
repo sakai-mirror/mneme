@@ -63,15 +63,14 @@ public class PoolPropertiesView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// pools sort, pools page, pool id
-		if (params.length != 5)
+		// pools sort, pool id
+		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 
 		String poolsSort = params[2];
-		String poolsPaging = params[3];
-		String pid = params[4];
+		String pid = params[3];
 
 		// get the pool
 		Pool pool = this.poolService.getPool(pid);
@@ -91,7 +90,6 @@ public class PoolPropertiesView extends ControllerImpl
 		}
 
 		context.put("poolsSortCode", poolsSort);
-		context.put("poolsPagingParameter", poolsPaging);
 		context.put("pool", pool);
 
 		// render
@@ -112,11 +110,10 @@ public class PoolPropertiesView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// pools sort, pools page, pool id
-		if (params.length != 5) throw new IllegalArgumentException();
+		// pools sort, pool id
+		if (params.length != 4) throw new IllegalArgumentException();
 		String poolsSort = params[2];
-		String poolsPaging = params[3];
-		String pid = params[4];
+		String pid = params[3];
 
 		// get the pool
 		Pool pool = this.poolService.getPool(pid);

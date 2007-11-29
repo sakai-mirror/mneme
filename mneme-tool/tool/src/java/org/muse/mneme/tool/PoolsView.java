@@ -71,8 +71,8 @@ public class PoolsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// sort, paging (both optional)
-		if ((params.length != 2) && (params.length != 3) && (params.length != 4))
+		// sort, optional
+		if ((params.length != 2) && (params.length != 3))
 		{
 			throw new IllegalArgumentException();
 		}
@@ -110,18 +110,8 @@ public class PoolsView extends ControllerImpl
 			throw new IllegalArgumentException();
 		}
 
-		// paging parameter
-		String pagingParameter = "1-30";
-		if (params.length > 3) pagingParameter = params[3];
-		Integer maxPools = this.poolService.countPools(toolManager.getCurrentPlacement().getContext(), null);
-		Paging paging = uiService.newPaging();
-		paging.setMaxItems(maxPools);
-		paging.setCurrentAndSize(pagingParameter);
-		context.put("paging", paging);
-
 		// collect the pools to show
-		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), sort, null, paging.getCurrent(), paging
-				.getSize());
+		List<Pool> pools = this.poolService.findPools(toolManager.getCurrentPlacement().getContext(), sort, null);
 		context.put("pools", pools);
 
 		// disable the tool navigation to this view
@@ -145,8 +135,8 @@ public class PoolsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// sort, paging (both optional)
-		if ((params.length != 2) && (params.length != 3) && (params.length != 4))
+		// sort optional
+		if ((params.length != 2) && (params.length != 3))
 		{
 			throw new IllegalArgumentException();
 		}
@@ -162,10 +152,6 @@ public class PoolsView extends ControllerImpl
 		// sort parameter
 		String sortCode = "0A";
 		if (params.length > 2) sortCode = params[2];
-
-		// paging parameter
-		String pagingParameter = "1-30";
-		if (params.length > 3) pagingParameter = params[3];
 
 		// for the selected pools to delete
 		Values values = this.uiService.newValues();
@@ -205,7 +191,7 @@ public class PoolsView extends ControllerImpl
 				Pool newPool = this.poolService.newPool(toolManager.getCurrentPlacement().getContext());
 
 				// edit it next
-				destination = "/pool_properties/" + sortCode + "/" + pagingParameter + "/" + newPool.getId();
+				destination = "/pool_properties/" + sortCode + "/" + newPool.getId();
 			}
 			catch (AssessmentPermissionException e)
 			{
@@ -230,7 +216,7 @@ public class PoolsView extends ControllerImpl
 				}
 
 				// edit it next
-				destination = "/pool_properties/" + sortCode + "/" + pagingParameter + "/" + newPool.getId();
+				destination = "/pool_properties/" + sortCode + "/" + newPool.getId();
 			}
 			catch (AssessmentPermissionException e)
 			{
