@@ -225,7 +225,7 @@ public class PoolServiceImpl implements PoolService
 		PoolImpl pool = this.storage.getPool(poolId);
 
 		// thread-local cache (a copy)
-		this.threadLocalManager.set(key, this.storage.newPool(pool));
+		if (pool != null) this.threadLocalManager.set(key, this.storage.newPool(pool));
 
 		return pool;
 	}

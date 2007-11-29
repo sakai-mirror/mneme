@@ -188,7 +188,7 @@
 		<section>
 			<title highlighted="TRUE">
 				<message selector="enter-pw-instructions">
-					<model type="icon" icon="/icons/door_in.png" />
+					<model type="icon" icon="/icons/password.png" />
 					<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 				</message>
 			</title>

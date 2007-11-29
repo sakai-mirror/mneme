@@ -113,7 +113,7 @@
 				<textEdit rows="1" cols="16">
 					<title>
 						<message selector="password">
-							<model type="icon" icon="/icons/door_in.png" />
+							<model type="icon" icon="/icons/password.png" />
 						</message>
 					</title>
 					<model ref="access.passwordValue" />

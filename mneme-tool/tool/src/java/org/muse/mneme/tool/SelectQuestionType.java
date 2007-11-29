@@ -127,8 +127,7 @@ public class SelectQuestionType extends ControllerImpl
 
 		if ((selectedQuestionType != null) && (destination.startsWith("CREATE")))
 		{
-			// pool id is in params array at index 4
-			Pool pool = this.poolService.getPool(params[4]);
+			Pool pool = this.poolService.getPool(params[3]);
 			if (pool == null)
 			{
 				// TODO: do this better!
