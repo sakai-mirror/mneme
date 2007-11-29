@@ -186,12 +186,13 @@
 			</included>
 		</section>
 		<section>
+			<title highlighted="TRUE">
+				<message selector="enter-pw-instructions">
+					<model type="icon" icon="/icons/door_in.png" />
+					<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+				</message>
+			</title>
 			<container>
-				<instructions>
-					<message selector="enter-pw-instructions">
-						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
-					</message>
-				</instructions>
 				<password title="enter-password" model="password.value" />
 			</container>
 			<included>
@@ -199,13 +200,13 @@
 			</included>
 		</section>
 		<section>
+			<title highlighted="TRUE">
+				<message selector="enter-honor-pledge">
+					<model type="icon" icon="/icons/user_pledge.png" />
+					<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+				</message>
+			</title>
 			<container>
-				<instructions>
-					<message selector="enter-honor-pledge">
-						<model type="icon" icon="/icons/access.png" />
-						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
-					</message>
-				</instructions>
 				<selection>
 					<title>
 						<message selector="honor-pledge-title">

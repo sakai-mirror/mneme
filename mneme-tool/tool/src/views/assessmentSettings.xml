@@ -204,7 +204,12 @@
 					</container>
 				</section>
 
-				<textEdit title="password" rows="1" cols="16">
+				<textEdit rows="1" cols="16">
+					<title>
+						<message selector="password">
+							<model type="icon" icon="/icons/door_in.png" />
+						</message>
+					</title>
 					<model ref="assessment.password.password" />
 				</textEdit>
 
@@ -227,7 +232,12 @@
 					</included>
 				</instructions>
 
-				<selection title="honor-pledge">
+				<selection>
+					<title>
+						<message selector="honor-pledge">
+							<model type="icon" icon="/icons/user_pledge.png" />
+						</message>
+					</title>
 					<selectionChoices>
 						<selectionChoice value="true" selector="require-users" />
 					</selectionChoices>

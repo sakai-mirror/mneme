@@ -110,7 +110,12 @@
 						</selectionChoice>
 					</selectionChoices>
 				</selection>
-				<textEdit title="password" rows="1" cols="16">
+				<textEdit rows="1" cols="16">
+					<title>
+						<message selector="password">
+							<model type="icon" icon="/icons/door_in.png" />
+						</message>
+					</title>
 					<model ref="access.passwordValue" />
 				</textEdit>
 
