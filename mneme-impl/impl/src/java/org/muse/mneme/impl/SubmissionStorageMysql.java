@@ -24,7 +24,6 @@ package org.muse.mneme.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,34 +31,23 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentService;
-import org.muse.mneme.api.AssessmentType;
-import org.muse.mneme.api.DrawPart;
-import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.QuestionGrouping;
-import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
-import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
 import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.SessionManager;
-import org.sakaiproject.user.api.User;
-import org.sakaiproject.user.api.UserDirectoryService;
-import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -83,8 +71,10 @@ public class SubmissionStorageMysql implements SubmissionStorage
 
 	protected long nextSubmissionId = 100;
 
+	/** Dependency: SecurityService. */
 	protected SecurityService securityService = null;
 
+	/** Dependency: SessionManager. */
 	protected SessionManager sessionManager = null;
 
 	/** Dependency: SqlService. */
@@ -92,12 +82,11 @@ public class SubmissionStorageMysql implements SubmissionStorage
 
 	protected Map<String, SubmissionImpl> submissions = new LinkedHashMap<String, SubmissionImpl>();
 
+	/** Dependency: SubmissionService. */
 	protected SubmissionServiceImpl submissionService = null;
 
 	/** Dependency: ThreadLocalManager. */
 	protected ThreadLocalManager threadLocalManager = null;
-
-	protected UserDirectoryService userDirectoryService = null;
 
 	/**
 	 * Returns to uninitialized state.
@@ -112,6 +101,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public List<Question> findPartQuestions(Part part)
 	{
+		// TODO:
 		List<Question> rv = new ArrayList<Question>();
 
 		// check the submissions to this assessment
@@ -158,6 +148,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public Answer getAnswer(String answerId)
 	{
+		// TODO:
 		for (SubmissionImpl submission : this.submissions.values())
 		{
 			for (Answer answer : submission.getAnswers())
@@ -177,16 +168,12 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public List<SubmissionImpl> getAssessmentCompleteSubmissions(Assessment assessment)
 	{
-		// collect the submissions to this assessment
-		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			if (submission.getIsComplete() && submission.getAssessment().equals(assessment))
-			{
-				rv.add(new SubmissionImpl(submission));
-			}
-		}
+		String where = "WHERE S.ASSESSMENT_ID=? AND COMPLETE='1'";
+		String order = "ORDER BY S.SUBMITTED_DATE ASC";
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessment.getId());
 
+		List<SubmissionImpl> rv = readSubmissions(where, order, fields);
 		return rv;
 	}
 
@@ -195,20 +182,19 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public Boolean getAssessmentHasUnscoredSubmissions(Assessment assessment)
 	{
-		// check the submissions to this assessment
-		for (SubmissionImpl submission : this.submissions.values())
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(1) FROM MNEME_ANSWER A");
+		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=? AND COMPLETE='1'");
+		sql.append(" WHERE A.ANSWERED='1' AND A.EVAL_SCORE IS NULL AND A.AUTO_SCORE IS NULL");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		List results = this.sqlService.dbRead(sql.toString(), fields, null);
+		if (results.size() > 0)
 		{
-			// if any for this assessment are complete and not released, the assessment is not fully released
-			if (submission.getAssessment().equals(assessment) && submission.getIsComplete())
-			{
-				for (Answer answer : submission.getAnswers())
-				{
-					if ((answer.getIsAnswered()) && (answer.getTotalScore() == null))
-					{
-						return Boolean.TRUE;
-					}
-				}
-			}
+			int size = Integer.parseInt((String) results.get(0));
+			return Boolean.valueOf(size > 0);
 		}
 
 		return Boolean.FALSE;
@@ -219,20 +205,20 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
 	{
-		// check the submissions to this assessment
-		for (SubmissionImpl submission : this.submissions.values())
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(1) FROM MNEME_ANSWER A");
+		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=? AND COMPLETE='1'");
+		sql.append(" WHERE A.QUESTION_ID=? AND A.ANSWERED='1' AND A.EVAL_SCORE IS NULL AND A.AUTO_SCORE IS NULL");
+
+		Object[] fields = new Object[2];
+		fields[0] = Long.valueOf(assessment.getId());
+		fields[1] = Long.valueOf(question.getId());
+
+		List results = this.sqlService.dbRead(sql.toString(), fields, null);
+		if (results.size() > 0)
 		{
-			// if any submissions that are for this assessment are complete and not released, the assessment is not fully released
-			if (submission.getAssessment().equals(assessment) && submission.getIsComplete())
-			{
-				for (Answer answer : submission.getAnswers())
-				{
-					if ((answer.getQuestion().equals(question)) && (answer.getIsAnswered()) && (answer.getTotalScore() == null))
-					{
-						return Boolean.TRUE;
-					}
-				}
-			}
+			int size = Integer.parseInt((String) results.get(0));
+			return Boolean.valueOf(size > 0);
 		}
 
 		return Boolean.FALSE;
@@ -244,211 +230,23 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	public List<Float> getAssessmentScores(Assessment assessment)
 	{
 		List<Float> rv = new ArrayList<Float>();
-
+		// TODO:
 		return rv;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment, final FindAssessmentSubmissionsSort sort, final Question question)
+	public List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment)
 	{
 		// collect the submissions to this assessment
-		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			if (submission.getAssessment().equals(assessment))
-			{
-				rv.add(new SubmissionImpl(submission));
-			}
-		}
+		String where = "WHERE S.ASSESSMENT_ID=?";
+		String order = "ORDER BY S.SUBMITTED_DATE ASC";
 
-		// get all possible users who can submit
-		Set<String> userIds = this.securityService.getUsersIsAllowed(MnemeService.SUBMIT_PERMISSION, assessment.getContext());
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessment.getId());
 
-		// if any user is not represented in the submissions we found, add an empty submission
-		for (String userId : userIds)
-		{
-			boolean found = false;
-			for (Submission s : rv)
-			{
-				if (s.getUserId().equals(userId))
-				{
-					found = true;
-					break;
-				}
-			}
-
-			if (!found)
-			{
-				SubmissionImpl s = newSubmission();
-				s.initUserId(userId);
-				s.initAssessmentIds(assessment.getId(), assessment.getId());
-
-				// set the id so we know it is a phantom
-				s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
-
-				rv.add(s);
-			}
-		}
-
-		// sort - secondary sort of user name, or if primary is title, on submit date
-		Collections.sort(rv, new Comparator()
-		{
-			public int compare(Object arg0, Object arg1)
-			{
-				int rv = 0;
-				FindAssessmentSubmissionsSort secondary = null;
-				switch (sort)
-				{
-					case userName_a:
-					case userName_d:
-					case status_a:
-					case status_d:
-					{
-						String id0 = ((Submission) arg0).getUserId();
-						try
-						{
-							User u = userDirectoryService.getUser(id0);
-							id0 = u.getSortName();
-						}
-						catch (UserNotDefinedException e)
-						{
-						}
-
-						String id1 = ((Submission) arg1).getUserId();
-						try
-						{
-							User u = userDirectoryService.getUser(id1);
-							id1 = u.getSortName();
-						}
-						catch (UserNotDefinedException e)
-						{
-						}
-
-						rv = id0.compareToIgnoreCase(id1);
-						secondary = FindAssessmentSubmissionsSort.sdate_a;
-						break;
-					}
-					case final_a:
-					case final_d:
-					{
-						Float final0 = null;
-						Float final1 = null;
-						if (question != null)
-						{
-							Answer a0 = ((Submission) arg0).getAnswer(question);
-							Answer a1 = ((Submission) arg1).getAnswer(question);
-							final0 = ((a0 == null) ? Float.valueOf(0f) : a0.getTotalScore());
-							final1 = ((a1 == null) ? Float.valueOf(0f) : a1.getTotalScore());
-						}
-						else
-						{
-							final0 = ((Submission) arg0).getTotalScore();
-							final1 = ((Submission) arg1).getTotalScore();
-						}
-
-						// null sorts small
-						if ((final0 == null) && (final1 == null))
-						{
-							rv = 0;
-						}
-						else if (final0 == null)
-						{
-							rv = -1;
-						}
-						else if (final1 == null)
-						{
-							rv = 1;
-						}
-						else
-						{
-							rv = final0.compareTo(final1);
-						}
-						secondary = FindAssessmentSubmissionsSort.userName_a;
-						break;
-					}
-					case sdate_a:
-					case sdate_d:
-					{
-						rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
-						secondary = null;
-						break;
-					}
-				}
-
-				// secondary sort
-				FindAssessmentSubmissionsSort third = null;
-				if ((rv == 0) && (secondary != null))
-				{
-					switch (secondary)
-					{
-						case userName_a:
-						case userName_d:
-						{
-							String id0 = ((Submission) arg0).getUserId();
-							try
-							{
-								User u = userDirectoryService.getUser(id0);
-								id0 = u.getSortName();
-							}
-							catch (UserNotDefinedException e)
-							{
-							}
-
-							String id1 = ((Submission) arg1).getUserId();
-							try
-							{
-								User u = userDirectoryService.getUser(id1);
-								id1 = u.getSortName();
-							}
-							catch (UserNotDefinedException e)
-							{
-							}
-
-							rv = id0.compareToIgnoreCase(id1);
-							third = FindAssessmentSubmissionsSort.sdate_a;
-							break;
-						}
-
-						case sdate_a:
-						case sdate_d:
-						{
-							rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
-							break;
-						}
-					}
-				}
-
-				// third sort
-				if ((rv == 0) && (third != null))
-				{
-					switch (third)
-					{
-						case sdate_a:
-						case sdate_d:
-						{
-							rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
-							break;
-						}
-					}
-				}
-
-				return rv;
-			}
-		});
-
-		// reverse for descending (except for status)
-		switch (sort)
-		{
-			case final_d:
-			case userName_d:
-			case sdate_d:
-			{
-				Collections.reverse(rv);
-			}
-		}
-
+		List<SubmissionImpl> rv = readSubmissions(where, order, fields);
 		return rv;
 	}
 
@@ -457,15 +255,14 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public List<SubmissionImpl> getOpenSubmissions()
 	{
-		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			if (!submission.getIsComplete())
-			{
-				rv.add(new SubmissionImpl(submission));
-			}
-		}
+		// collect the submissions to this assessment
+		String where = "WHERE S.COMPLETE='0'";
+		String order = "ORDER BY S.SUBMITTED_DATE ASC";
 
+		// Object[] fields = new Object[1];
+		// fields[0] = Long.valueOf(assessment.getId());
+
+		List<SubmissionImpl> rv = readSubmissions(where, order, null);
 		return rv;
 	}
 
@@ -475,7 +272,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	public List<Float> getQuestionScores(Question question)
 	{
 		List<Float> rv = new ArrayList<Float>();
-
+		// TODO:
 		return rv;
 	}
 
@@ -484,31 +281,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public SubmissionImpl getSubmission(String id)
 	{
-		// recognize phantom ids
-		if (id.startsWith(SubmissionService.PHANTOM_PREFIX))
-		{
-			// split out the phantom id parts: [1] the aid, [2] the uid
-			String[] idParts = StringUtil.split(id, "/");
-			String aid = idParts[1];
-			String userId = idParts[2];
-
-			// create a phantom
-			SubmissionImpl s = newSubmission();
-			s.initUserId(userId);
-			s.initAssessmentIds(aid, aid);
-			s.initId(id);
-
-			return s;
-		}
-
-		// for real submissions
-		SubmissionImpl rv = this.submissions.get(id);
-		if (rv != null)
-		{
-			rv = new SubmissionImpl(rv);
-		}
-
-		return rv;
+		return readSubmission(id);
 	}
 
 	/**
@@ -1009,14 +782,6 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setUserDirectoryService(UserDirectoryService service)
-	{
-		this.userDirectoryService = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean submissionExists(String id)
 	{
 		return Boolean.FALSE;
@@ -1284,6 +1049,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 					a.setSubmittedDate(SqlHelper.readDate(result, 14));
 
 					a.clearIsChanged();
+					a.initSubmission(s);
 					s.initAnswer(a);
 
 					return null;

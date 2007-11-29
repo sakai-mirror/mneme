@@ -24,10 +24,12 @@ package org.muse.mneme.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,6 +47,7 @@ import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCompletedException;
 import org.muse.mneme.api.SubmissionService;
+import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
@@ -54,6 +57,10 @@ import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.UserDirectoryService;
+import org.sakaiproject.user.api.UserNotDefinedException;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * SubmissionServiceImpl implements SubmissionService
@@ -108,6 +115,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 	/** How long to wait (ms) between checks for timed-out submission in the db. 0 disables. */
 	protected long timeoutCheckMs = 1000L * 300L;
+
+	/** Dependenct: UserDirectoryService. */
+	protected UserDirectoryService userDirectoryService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -283,7 +293,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (M_log.isDebugEnabled()) M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId());
 
 		// get the submissions to the assignment made by all possible submitters
-		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, FindAssessmentSubmissionsSort.status_a, null);
+		List<SubmissionImpl> all = getAssessmentSubmissions(assessment, FindAssessmentSubmissionsSort.status_a, null);
 
 		// see if any needs to be completed based on time limit or dates
 		checkAutoComplete(all, asOf);
@@ -671,7 +681,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (M_log.isDebugEnabled()) M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId());
 
 		// get the submissions to the assignment made by all possible submitters
-		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, sort, null);
+		List<SubmissionImpl> all = getAssessmentSubmissions(assessment, sort, null);
 
 		// see if any needs to be completed based on time limit or dates
 		checkAutoComplete(all, asOf);
@@ -736,7 +746,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// get the submissions to the assignment made by all possible submitters
 		// TODO: we don't really need them all... no phantoms!
-		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(submission.getAssessment(), sort, null);
+		List<SubmissionImpl> all = getAssessmentSubmissions(submission.getAssessment(), sort, null);
 
 		// see if any needs to be completed based on time limit or dates
 		checkAutoComplete(all, asOf);
@@ -808,7 +818,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (M_log.isDebugEnabled()) M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId());
 
 		// read all the submissions for this assessment from all possible submitters
-		List<SubmissionImpl> all = this.storage.getAssessmentSubmissions(assessment, sort, question);
+		List<SubmissionImpl> all = getAssessmentSubmissions(assessment, sort, question);
 
 		// see if any needs to be completed based on time limit or dates
 		checkAutoComplete(all, asOf);
@@ -952,6 +962,23 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (id == null) throw new IllegalArgumentException();
 
 		if (M_log.isDebugEnabled()) M_log.debug("getSubmission: " + id);
+
+		// recognize phantom ids
+		if (id.startsWith(SubmissionService.PHANTOM_PREFIX))
+		{
+			// split out the phantom id parts: [1] the aid, [2] the uid
+			String[] idParts = StringUtil.split(id, "/");
+			String aid = idParts[1];
+			String userId = idParts[2];
+
+			// create a phantom
+			SubmissionImpl s = this.storage.newSubmission();
+			s.initUserId(userId);
+			s.initAssessmentIds(aid, aid);
+			s.initId(id);
+
+			return s;
+		}
 
 		// TODO: check storage to see that it really exists?
 		// this.storage.submissionExists(id);
@@ -1310,6 +1337,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setUserDirectoryService(UserDirectoryService service)
+	{
+		this.userDirectoryService = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean submissionsExist(Assessment assessment)
 	{
 		return this.storage.submissionsExist(assessment);
@@ -1653,6 +1688,211 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
+	 * Get the submissions to the assignment made by all users.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param sort
+	 *        The sort.
+	 * @param question
+	 *        An optional question, to use for sort-by-score (the score would be for this question in the submission, not the overall).
+	 * @return A List<Submission> of the submissions for the assessment.
+	 */
+	protected List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment, final FindAssessmentSubmissionsSort sort, final Question question)
+	{
+		// collect the submissions to this assessment
+		List<SubmissionImpl> rv = this.storage.getAssessmentSubmissions(assessment);
+
+		// get all possible users who can submit
+		Set<String> userIds = this.securityService.getUsersIsAllowed(MnemeService.SUBMIT_PERMISSION, assessment.getContext());
+
+		// if any user is not represented in the submissions we found, add an empty submission
+		for (String userId : userIds)
+		{
+			boolean found = false;
+			for (Submission s : rv)
+			{
+				if (s.getUserId().equals(userId))
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				SubmissionImpl s = this.storage.newSubmission();
+				s.initUserId(userId);
+				s.initAssessmentIds(assessment.getId(), assessment.getId());
+
+				// set the id so we know it is a phantom
+				s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
+
+				rv.add(s);
+			}
+		}
+
+		// sort - secondary sort of user name, or if primary is title, on submit date
+		Collections.sort(rv, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				int rv = 0;
+				FindAssessmentSubmissionsSort secondary = null;
+				switch (sort)
+				{
+					case userName_a:
+					case userName_d:
+					case status_a:
+					case status_d:
+					{
+						String id0 = ((Submission) arg0).getUserId();
+						try
+						{
+							User u = userDirectoryService.getUser(id0);
+							id0 = u.getSortName();
+						}
+						catch (UserNotDefinedException e)
+						{
+						}
+
+						String id1 = ((Submission) arg1).getUserId();
+						try
+						{
+							User u = userDirectoryService.getUser(id1);
+							id1 = u.getSortName();
+						}
+						catch (UserNotDefinedException e)
+						{
+						}
+
+						rv = id0.compareToIgnoreCase(id1);
+						secondary = FindAssessmentSubmissionsSort.sdate_a;
+						break;
+					}
+					case final_a:
+					case final_d:
+					{
+						Float final0 = null;
+						Float final1 = null;
+						if (question != null)
+						{
+							Answer a0 = ((Submission) arg0).getAnswer(question);
+							Answer a1 = ((Submission) arg1).getAnswer(question);
+							final0 = ((a0 == null) ? Float.valueOf(0f) : a0.getTotalScore());
+							final1 = ((a1 == null) ? Float.valueOf(0f) : a1.getTotalScore());
+						}
+						else
+						{
+							final0 = ((Submission) arg0).getTotalScore();
+							final1 = ((Submission) arg1).getTotalScore();
+						}
+
+						// null sorts small
+						if ((final0 == null) && (final1 == null))
+						{
+							rv = 0;
+						}
+						else if (final0 == null)
+						{
+							rv = -1;
+						}
+						else if (final1 == null)
+						{
+							rv = 1;
+						}
+						else
+						{
+							rv = final0.compareTo(final1);
+						}
+						secondary = FindAssessmentSubmissionsSort.userName_a;
+						break;
+					}
+					case sdate_a:
+					case sdate_d:
+					{
+						rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
+						secondary = null;
+						break;
+					}
+				}
+
+				// secondary sort
+				FindAssessmentSubmissionsSort third = null;
+				if ((rv == 0) && (secondary != null))
+				{
+					switch (secondary)
+					{
+						case userName_a:
+						case userName_d:
+						{
+							String id0 = ((Submission) arg0).getUserId();
+							try
+							{
+								User u = userDirectoryService.getUser(id0);
+								id0 = u.getSortName();
+							}
+							catch (UserNotDefinedException e)
+							{
+							}
+
+							String id1 = ((Submission) arg1).getUserId();
+							try
+							{
+								User u = userDirectoryService.getUser(id1);
+								id1 = u.getSortName();
+							}
+							catch (UserNotDefinedException e)
+							{
+							}
+
+							rv = id0.compareToIgnoreCase(id1);
+							third = FindAssessmentSubmissionsSort.sdate_a;
+							break;
+						}
+
+						case sdate_a:
+						case sdate_d:
+						{
+							rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
+							break;
+						}
+					}
+				}
+
+				// third sort
+				if ((rv == 0) && (third != null))
+				{
+					switch (third)
+					{
+						case sdate_a:
+						case sdate_d:
+						{
+							rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
+							break;
+						}
+					}
+				}
+
+				return rv;
+			}
+		});
+
+		// reverse for descending (except for status)
+		switch (sort)
+		{
+			case final_d:
+			case userName_d:
+			case sdate_d:
+			{
+				Collections.reverse(rv);
+			}
+		}
+
+		return rv;
+	}
+
+	/**
 	 * Create a phantom submission for this user and this assessment.
 	 * 
 	 * @param userId
@@ -1699,6 +1939,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		final Date asOf = new Date();
 
 		// select all open submission for every user assessment context
+		// TODO: tune this so more is done in the db, fewer are read -ggolden
 		List<SubmissionImpl> all = this.storage.getOpenSubmissions();
 
 		// filter out the ones we really want

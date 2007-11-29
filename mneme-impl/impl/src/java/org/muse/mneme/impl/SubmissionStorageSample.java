@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,12 +41,8 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
-import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
 import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 import org.sakaiproject.tool.api.SessionManager;
-import org.sakaiproject.user.api.User;
-import org.sakaiproject.user.api.UserDirectoryService;
-import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -75,8 +70,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 	protected Map<String, SubmissionImpl> submissions = new LinkedHashMap<String, SubmissionImpl>();
 
 	protected SubmissionServiceImpl submissionService = null;
-
-	protected UserDirectoryService userDirectoryService = null;
 
 	/**
 	 * Returns to uninitialized state.
@@ -230,7 +223,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment, final FindAssessmentSubmissionsSort sort, final Question question)
+	public List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment)
 	{
 		// collect the submissions to this assessment
 		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
@@ -239,192 +232,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 			if (submission.getAssessment().equals(assessment))
 			{
 				rv.add(new SubmissionImpl(submission));
-			}
-		}
-
-		// get all possible users who can submit
-		Set<String> userIds = this.securityService.getUsersIsAllowed(MnemeService.SUBMIT_PERMISSION, assessment.getContext());
-
-		// if any user is not represented in the submissions we found, add an empty submission
-		for (String userId : userIds)
-		{
-			boolean found = false;
-			for (Submission s : rv)
-			{
-				if (s.getUserId().equals(userId))
-				{
-					found = true;
-					break;
-				}
-			}
-
-			if (!found)
-			{
-				SubmissionImpl s = newSubmission();
-				s.initUserId(userId);
-				s.initAssessmentIds(assessment.getId(), assessment.getId());
-
-				// set the id so we know it is a phantom
-				s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
-
-				rv.add(s);
-			}
-		}
-
-		// sort - secondary sort of user name, or if primary is title, on submit date
-		Collections.sort(rv, new Comparator()
-		{
-			public int compare(Object arg0, Object arg1)
-			{
-				int rv = 0;
-				FindAssessmentSubmissionsSort secondary = null;
-				switch (sort)
-				{
-					case userName_a:
-					case userName_d:
-					case status_a:
-					case status_d:
-					{
-						String id0 = ((Submission) arg0).getUserId();
-						try
-						{
-							User u = userDirectoryService.getUser(id0);
-							id0 = u.getSortName();
-						}
-						catch (UserNotDefinedException e)
-						{
-						}
-
-						String id1 = ((Submission) arg1).getUserId();
-						try
-						{
-							User u = userDirectoryService.getUser(id1);
-							id1 = u.getSortName();
-						}
-						catch (UserNotDefinedException e)
-						{
-						}
-
-						rv = id0.compareToIgnoreCase(id1);
-						secondary = FindAssessmentSubmissionsSort.sdate_a;
-						break;
-					}
-					case final_a:
-					case final_d:
-					{
-						Float final0 = null;
-						Float final1 = null;
-						if (question != null)
-						{
-							Answer a0 = ((Submission) arg0).getAnswer(question);
-							Answer a1 = ((Submission) arg1).getAnswer(question);
-							final0 = ((a0 == null) ? Float.valueOf(0f) : a0.getTotalScore());
-							final1 = ((a1 == null) ? Float.valueOf(0f) : a1.getTotalScore());
-						}
-						else
-						{
-							final0 = ((Submission) arg0).getTotalScore();
-							final1 = ((Submission) arg1).getTotalScore();
-						}
-
-						// null sorts small
-						if ((final0 == null) && (final1 == null))
-						{
-							rv = 0;
-						}
-						else if (final0 == null)
-						{
-							rv = -1;
-						}
-						else if (final1 == null)
-						{
-							rv = 1;
-						}
-						else
-						{
-							rv = final0.compareTo(final1);
-						}
-						secondary = FindAssessmentSubmissionsSort.userName_a;
-						break;
-					}
-					case sdate_a:
-					case sdate_d:
-					{
-						rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
-						secondary = null;
-						break;
-					}
-				}
-
-				// secondary sort
-				FindAssessmentSubmissionsSort third = null;
-				if ((rv == 0) && (secondary != null))
-				{
-					switch (secondary)
-					{
-						case userName_a:
-						case userName_d:
-						{
-							String id0 = ((Submission) arg0).getUserId();
-							try
-							{
-								User u = userDirectoryService.getUser(id0);
-								id0 = u.getSortName();
-							}
-							catch (UserNotDefinedException e)
-							{
-							}
-
-							String id1 = ((Submission) arg1).getUserId();
-							try
-							{
-								User u = userDirectoryService.getUser(id1);
-								id1 = u.getSortName();
-							}
-							catch (UserNotDefinedException e)
-							{
-							}
-
-							rv = id0.compareToIgnoreCase(id1);
-							third = FindAssessmentSubmissionsSort.sdate_a;
-							break;
-						}
-
-						case sdate_a:
-						case sdate_d:
-						{
-							rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
-							break;
-						}
-					}
-				}
-
-				// third sort
-				if ((rv == 0) && (third != null))
-				{
-					switch (third)
-					{
-						case sdate_a:
-						case sdate_d:
-						{
-							rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
-							break;
-						}
-					}
-				}
-
-				return rv;
-			}
-		});
-
-		// reverse for descending (except for status)
-		switch (sort)
-		{
-			case final_d:
-			case userName_d:
-			case sdate_d:
-			{
-				Collections.reverse(rv);
 			}
 		}
 
@@ -463,24 +270,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 	 */
 	public SubmissionImpl getSubmission(String id)
 	{
-		// recognize phantom ids
-		if (id.startsWith(SubmissionService.PHANTOM_PREFIX))
-		{
-			// split out the phantom id parts: [1] the aid, [2] the uid
-			String[] idParts = StringUtil.split(id, "/");
-			String aid = idParts[1];
-			String userId = idParts[2];
-
-			// create a phantom
-			SubmissionImpl s = newSubmission();
-			s.initUserId(userId);
-			s.initAssessmentIds(aid, aid);
-			s.initId(id);
-
-			return s;
-		}
-
-		// for real submissions
 		SubmissionImpl rv = this.submissions.get(id);
 		if (rv != null)
 		{
@@ -624,12 +413,15 @@ public class SubmissionStorageSample implements SubmissionStorage
 					}
 					case type_a:
 					{
-						rv = ((Submission) arg0).getAssessment().getType().getSortValue().compareTo(((Submission) arg1).getAssessment().getType().getSortValue());
+						rv = ((Submission) arg0).getAssessment().getType().getSortValue().compareTo(
+								((Submission) arg1).getAssessment().getType().getSortValue());
 						break;
 					}
 					case type_d:
 					{
-						rv = -1 * ((Submission) arg0).getAssessment().getType().getSortValue().compareTo(((Submission) arg1).getAssessment().getType().getSortValue());
+						rv = -1
+								* ((Submission) arg0).getAssessment().getType().getSortValue().compareTo(
+										((Submission) arg1).getAssessment().getType().getSortValue());
 						break;
 					}
 					case dueDate_a:
@@ -944,14 +736,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 	public void setSubmissionService(SubmissionServiceImpl service)
 	{
 		this.submissionService = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setUserDirectoryService(UserDirectoryService service)
-	{
-		this.userDirectoryService = service;
 	}
 
 	/**

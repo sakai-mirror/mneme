@@ -91,18 +91,15 @@ public interface SubmissionStorage
 	List<Float> getAssessmentScores(Assessment assessment);
 
 	/**
-	 * Get the submissions to the assignment made by all users.<br />
-	 * If a user has not yet submitted, a phantom one for that user is included.
+	 * Get the submissions to the assignment made by all users.
 	 * 
 	 * @param assessment
 	 *        The assessment.
-	 * @param sort
-	 *        The sort order.
 	 * @param question
 	 *        An optional question, to use for sort-by-score (the score would be for this question in the submission, not the overall).
-	 * @return A sorted List<Submission> of the submissions for the assessment.
+	 * @return A List<Submission> of the submissions for the assessment.
 	 */
-	List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment, FindAssessmentSubmissionsSort sort, Question question);
+	List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment);
 
 	/**
 	 * Get all the in-progress (open) submissions (all users, all assessments, all contexts).
