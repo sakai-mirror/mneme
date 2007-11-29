@@ -58,7 +58,7 @@ public class SubmissionImpl implements Submission
 
 	protected transient AssessmentService assessmentService = null;
 
-	protected String bestSubmissionId = null;
+	protected transient String bestSubmissionId = null;
 
 	protected SubmissionEvaluationImpl evaluation = null;
 
@@ -69,17 +69,17 @@ public class SubmissionImpl implements Submission
 	protected Boolean released = Boolean.FALSE;
 
 	/** Track changes. */
-	protected Changeable releasedChanged = new ChangeableImpl();
+	protected transient Changeable releasedChanged = new ChangeableImpl();
 
 	protected transient SecurityService securityService = null;
 
 	protected transient SessionManager sessionManager = null;
 
-	protected Integer siblingCount = 0;
+	protected transient Integer siblingCount = 0;
 
 	protected Date startDate = null;
 
-	protected SubmissionServiceImpl submissionService = null;
+	protected transient SubmissionServiceImpl submissionService = null;
 
 	protected Date submittedDate = null;
 

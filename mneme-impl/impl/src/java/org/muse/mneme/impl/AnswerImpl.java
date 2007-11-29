@@ -47,13 +47,13 @@ public class AnswerImpl implements Answer
 	protected AnswerEvaluationImpl evaluation = new AnswerEvaluationImpl(this);
 
 	/** Set when there's a change in the generic part of the answer. */
-	protected boolean genericChanged = false;
+	protected transient boolean genericChanged = false;
 
 	protected String id = null;
 
 	protected Boolean markedForReview = Boolean.FALSE;
 
-	protected MnemeService mnemeService = null;
+	protected transient MnemeService mnemeService = null;
 
 	/**
 	 * an answer could be changed from its original part it, if the assessment has gone historical and has new part ids. This always points to the
