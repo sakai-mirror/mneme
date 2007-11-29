@@ -68,7 +68,7 @@ public class MatchPlugin implements QuestionPlugin
 	 */
 	public Integer getPopularity()
 	{
-		return Integer.valueOf(50);
+		return Integer.valueOf(60);
 	}
 
 	/**
