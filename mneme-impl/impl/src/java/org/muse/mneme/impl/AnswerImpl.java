@@ -115,7 +115,7 @@ public class AnswerImpl implements Answer
 
 		// round
 		float newScore = Math.round(score * 100.0f) / 100.0f;
-		
+
 		return Float.valueOf(newScore);
 	}
 
@@ -356,6 +356,44 @@ public class AnswerImpl implements Answer
 		if (this.origIPartId == null)
 		{
 			this.origIPartId = id;
+		}
+	}
+
+	/**
+	 * Initialize the part ids.
+	 * 
+	 * @param partId
+	 *        The part partId.
+	 * @param origPartId
+	 *        The origPartId.
+	 */
+	protected void initPartIds(String partId, String origPartId)
+	{
+		this.partId = id;
+		this.origIPartId = origPartId;
+	}
+
+	/**
+	 * Initialize the question id and type specific handler.
+	 * 
+	 * @param questionId
+	 *        The question id.
+	 * @param type
+	 *        The question type.
+	 */
+	protected void initQuestion(String questionId, String type)
+	{
+		this.questionId = questionId;
+
+		QuestionPlugin plugin = this.mnemeService.getQuestionPlugin(type);
+		if (plugin != null)
+		{
+			this.answerHandler = plugin.newAnswer(this);
+		}
+
+		if (this.answerHandler == null)
+		{
+			M_log.warn("initQuestion: no plugin for type: " + type);
 		}
 	}
 

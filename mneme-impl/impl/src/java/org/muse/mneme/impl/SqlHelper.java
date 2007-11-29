@@ -142,7 +142,7 @@ public class SqlHelper
 	}
 
 	/**
-	 * Read a Integer from the results set. 0 is treated as null.
+	 * Read a Integer from the results set. null is treated as null.
 	 * 
 	 * @param results
 	 *        The result set.
@@ -153,13 +153,20 @@ public class SqlHelper
 	 */
 	public static Integer readInteger(ResultSet result, int index) throws SQLException
 	{
-		int i = result.getInt(index);
-		if (i == 0) return null;
-		return Integer.valueOf(i);
+		String str = StringUtil.trimToNull(result.getString(index));
+		if (str == null) return null;
+		try
+		{
+			return Integer.valueOf(str);
+		}
+		catch (NumberFormatException e)
+		{
+			return null;
+		}
 	}
 
 	/**
-	 * Read a Long from the results set. 0 is treated as null.
+	 * Read a Long from the results set. null is treated as null.
 	 * 
 	 * @param results
 	 *        The result set.
@@ -170,9 +177,40 @@ public class SqlHelper
 	 */
 	public static Long readLong(ResultSet result, int index) throws SQLException
 	{
-		long l = result.getLong(index);
-		if (l == 0) return null;
-		return Long.valueOf(l);
+		String str = StringUtil.trimToNull(result.getString(index));
+		if (str == null) return null;
+		try
+		{
+			return Long.valueOf(str);
+		}
+		catch (NumberFormatException e)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * Read a float from the results set. null is treated as null.
+	 * 
+	 * @param results
+	 *        The result set.
+	 * @param index
+	 *        The index.
+	 * @return The Float.
+	 * @throws SQLException
+	 */
+	public static Float readFloat(ResultSet result, int index) throws SQLException
+	{
+		String str = StringUtil.trimToNull(result.getString(index));
+		if (str == null) return null;
+		try
+		{
+			return Float.valueOf(str);
+		}
+		catch (NumberFormatException e)
+		{
+			return null;
+		}
 	}
 
 	/**

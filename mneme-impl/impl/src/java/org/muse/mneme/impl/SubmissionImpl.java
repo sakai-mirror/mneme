@@ -968,6 +968,18 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
+	 * Establish another answer.
+	 * 
+	 * @param answer
+	 *        The answer.
+	 */
+	protected void initAnswer(AnswerImpl answer)
+	{
+		answer.initSubmission(this);
+		this.answers.add(answer);
+	}
+
+	/**
 	 * Initialize the assessment id property.
 	 * 
 	 * @param id
