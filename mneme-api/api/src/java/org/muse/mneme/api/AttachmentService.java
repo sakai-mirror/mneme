@@ -23,6 +23,7 @@ package org.muse.mneme.api;
 
 import java.io.InputStream;
 
+import org.apache.commons.fileupload.FileItem;
 import org.sakaiproject.entity.api.Reference;
 
 /**
@@ -49,15 +50,10 @@ public interface AttachmentService
 	 *        Any prefix path for within the context are of the application in private.
 	 * @param uniqueHolder
 	 *        If true, a uniquely named folder is created to hold the resource.
-	 * @param name
-	 *        The resource name.
-	 * @param body
-	 *        The resource body bytes stream.
-	 * @param type
-	 *        The resource mime type.
-	 * @return The attachment reference.
+	 * @param file
+	 *        The attachment file.
 	 */
-	Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, String name, InputStream body, String type);
+	Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, FileItem file);
 
 	/**
 	 * Remove this attachment.

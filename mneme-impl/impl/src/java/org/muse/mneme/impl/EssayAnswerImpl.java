@@ -210,30 +210,12 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void setUpload(FileItem file)
 	{
-		try
+		Reference reference = this.attachmentService.addAttachment("mneme", this.answer.getSubmission().getAssessment().getContext(), "submissions",
+				true, file);
+		if (reference != null)
 		{
-			String name = file.getName();
-			String type = file.getContentType();
-			InputStream body = file.getInputStream();
-			long size = file.getSize();
-
-			// detect no file selected
-			if ((name == null) || (type == null) || (body == null) || (size == 0))
-			{
-				if (body != null) body.close();
-				return;
-			}
-
-			Reference reference = this.attachmentService.addAttachment("mneme", this.answer.getSubmission().getAssessment().getContext(),
-					"submissions", true, name, body, type);
-			if (reference != null)
-			{
-				this.uploads.add(reference);
-				this.changed = true;
-			}
-		}
-		catch (IOException e)
-		{
+			this.uploads.add(reference);
+			this.changed = true;
 		}
 	}
 }

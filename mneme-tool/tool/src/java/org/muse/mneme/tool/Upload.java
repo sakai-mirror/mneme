@@ -86,28 +86,10 @@ public class Upload
 	 */
 	public void setUpload(FileItem file)
 	{
-		try
+		Reference reference = this.attachmentService.addAttachment("mneme", this.context, this.prefix, this.uniqueHolder, file);
+		if (reference != null)
 		{
-			String name = file.getName();
-			String type = file.getContentType();
-			InputStream body = file.getInputStream();
-			long size = file.getSize();
-
-			// detect no file selected
-			if ((name == null) || (type == null) || (body == null) || (size == 0))
-			{
-				if (body != null) body.close();
-				return;
-			}
-
-			Reference reference = this.attachmentService.addAttachment("mneme", this.context, this.prefix, this.uniqueHolder, name, body, type);
-			if (reference != null)
-			{
-				this.upload = reference;
-			}
-		}
-		catch (IOException e)
-		{
+			this.upload = reference;
 		}
 	}
 }

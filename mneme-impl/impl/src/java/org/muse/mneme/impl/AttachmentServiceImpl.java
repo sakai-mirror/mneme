@@ -32,6 +32,7 @@ import java.util.Stack;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AttachmentService;
@@ -103,8 +104,25 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, String name, InputStream body, String type)
+	public Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, FileItem file)
 	{
+		String name = file.getName();
+		String type = file.getContentType();
+
+		// TODO: change to file.getInputStream() for after Sakai 2.3 more efficient support
+		// InputStream body = file.getInputStream();
+		byte[] body = file.get();
+
+		long size = file.getSize();
+
+		// detect no file selected
+		if ((name == null) || (type == null) || (body == null) || (size == 0))
+		{
+			// TODO: if using input stream, close it
+			// if (body != null) body.close();
+			return null;
+		}
+
 		pushAdvisor();
 
 		// form the content hosting path, and make sure all the folders exist
@@ -172,13 +190,14 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		}
 		finally
 		{
-			try
-			{
-				if (body != null) body.close();
-			}
-			catch (IOException e)
-			{
-			}
+			// try
+			// {
+			// // TODO: if using input stream
+			// if (body != null) body.close();
+			// }
+			// catch (IOException e)
+			// {
+			// }
 
 			popAdvisor();
 		}
