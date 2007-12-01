@@ -366,7 +366,8 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (!satisfyAssessmentRemovalPolicy(assessment)) throw new AssessmentPolicyException();
 
 		// remove incomplete submissions
-		this.submissionService.removeIncompleteAssessmentSubmissions(assessment);
+		// TODO: I'm not sure we can remove if we have submissions started... -ggolden
+		//this.submissionService.removeIncompleteAssessmentSubmissions(assessment);
 
 		this.storage.removeAssessment((AssessmentImpl) assessment);
 

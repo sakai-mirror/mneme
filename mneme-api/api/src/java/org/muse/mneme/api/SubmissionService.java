@@ -362,15 +362,15 @@ public interface SubmissionService
 	 */
 	void releaseSubmissions(Assessment assessment, Boolean evaluatedOnly) throws AssessmentPermissionException;
 
-	/**
-	 * Remove all incomplete submissions to this assessment.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 * @throws AssessmentPermissionException
-	 *         if the user does not have permission to remove these submissions.
-	 */
-	void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException;
+//	/**
+//	 * Remove all incomplete submissions to this assessment.
+//	 * 
+//	 * @param assessment
+//	 *        The assessment.
+//	 * @throws AssessmentPermissionException
+//	 *         if the user does not have permission to remove these submissions.
+//	 */
+//	void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException;
 
 	/**
 	 * Check if any submissions in any state exist for this assessment.

@@ -637,14 +637,6 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException
-	{
-		submissionService.removeIncompleteAssessmentSubmissions(assessment);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void removePool(Pool pool) throws AssessmentPermissionException
 	{
 		poolService.removePool(pool);

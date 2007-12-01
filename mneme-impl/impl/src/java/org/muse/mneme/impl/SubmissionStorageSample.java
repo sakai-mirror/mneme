@@ -319,25 +319,11 @@ public class SubmissionStorageSample implements SubmissionStorage
 		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
 		for (SubmissionImpl submission : this.submissions.values())
 		{
-			// find those to this assessment for this user, filter out archived and un-published assessments
-			if (submission.getAssessment().equals(assessment) && submission.getUserId().equals(userId) && (!submission.getAssessment().getArchived())
-					&& (submission.getAssessment().getPublished()))
+			// find those to this assessment for this user
+			if (submission.getAssessment().equals(assessment) && submission.getUserId().equals(userId))
 			{
 				rv.add(new SubmissionImpl(submission));
 			}
-		}
-
-		// if we didn't get one, invent one
-		if (rv.isEmpty())
-		{
-			SubmissionImpl s = newSubmission();
-			s.initUserId(userId);
-			s.initAssessmentIds(assessment.getId(), assessment.getId());
-
-			// set the id so we know it is a phantom
-			s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
-
-			rv.add(s);
 		}
 
 		return rv;
@@ -346,7 +332,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<SubmissionImpl> getUserContextSubmissions(String context, String userId, final GetUserContextSubmissionsSort sort)
+	public List<SubmissionImpl> getUserContextSubmissions(String context, String userId)
 	{
 		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
 		for (SubmissionImpl submission : this.submissions.values())
@@ -359,123 +345,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 			}
 		}
 
-		// get all the assessments for this context
-		List<Assessment> assessments = this.assessmentService.getContextAssessments(context, AssessmentService.AssessmentsSort.title_a, Boolean.TRUE);
-
-		// if any assessment is not represented in the submissions we found, add an empty submission for it
-		for (Assessment a : assessments)
-		{
-			boolean found = false;
-			for (Submission s : rv)
-			{
-				if (s.getAssessment().equals(a))
-				{
-					found = true;
-					break;
-				}
-			}
-
-			if (!found)
-			{
-				SubmissionImpl s = newSubmission();
-				s.initUserId(userId);
-				s.initAssessmentIds(a.getId(), a.getId());
-
-				// set the id so we know it is a phantom
-				s.initId(SubmissionService.PHANTOM_PREFIX + a.getId() + "/" + userId);
-
-				rv.add(s);
-			}
-		}
-
-		// sort
-		// status sorts first by due date descending, then status final sorting is done in the service
-		Collections.sort(rv, new Comparator()
-		{
-			public int compare(Object arg0, Object arg1)
-			{
-				int rv = 0;
-				switch (sort)
-				{
-					case title_a:
-					{
-						String s0 = StringUtil.trimToZero(((Submission) arg0).getAssessment().getTitle());
-						String s1 = StringUtil.trimToZero(((Submission) arg1).getAssessment().getTitle());
-						rv = s0.compareToIgnoreCase(s1);
-						break;
-					}
-					case title_d:
-					{
-						String s0 = StringUtil.trimToZero(((Submission) arg0).getAssessment().getTitle());
-						String s1 = StringUtil.trimToZero(((Submission) arg1).getAssessment().getTitle());
-						rv = -1 * s0.compareToIgnoreCase(s1);
-						break;
-					}
-					case type_a:
-					{
-						rv = ((Submission) arg0).getAssessment().getType().getSortValue().compareTo(
-								((Submission) arg1).getAssessment().getType().getSortValue());
-						break;
-					}
-					case type_d:
-					{
-						rv = -1
-								* ((Submission) arg0).getAssessment().getType().getSortValue().compareTo(
-										((Submission) arg1).getAssessment().getType().getSortValue());
-						break;
-					}
-					case dueDate_a:
-					{
-						// no due date sorts high
-						if (((Submission) arg0).getAssessment().getDates().getDueDate() == null)
-						{
-							if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
-							{
-								rv = 0;
-								break;
-							}
-							rv = 1;
-							break;
-						}
-						if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
-						{
-							rv = -1;
-							break;
-						}
-						rv = ((Submission) arg0).getAssessment().getDates().getDueDate().compareTo(
-								((Submission) arg1).getAssessment().getDates().getDueDate());
-						break;
-					}
-					case dueDate_d:
-					case status_a:
-					case status_d:
-					{
-						// no due date sorts high
-						if (((Submission) arg0).getAssessment().getDates().getDueDate() == null)
-						{
-							if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
-							{
-								rv = 0;
-								break;
-							}
-							rv = -1;
-							break;
-						}
-						if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
-						{
-							rv = 1;
-							break;
-						}
-						rv = -1
-								* ((Submission) arg0).getAssessment().getDates().getDueDate().compareTo(
-										((Submission) arg1).getAssessment().getDates().getDueDate());
-						break;
-					}
-				}
-
-				return rv;
-			}
-		});
 		return rv;
 	}
 
@@ -536,28 +405,28 @@ public class SubmissionStorageSample implements SubmissionStorage
 		return new SubmissionImpl(assessmentService, securityService, submissionService, sessionManager);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void removeIncompleteAssessmentSubmissions(Assessment assessment)
-	{
-		for (Iterator i = this.submissions.values().iterator(); i.hasNext();)
-		{
-			SubmissionImpl submission = (SubmissionImpl) i.next();
-			if (submission.getAssessment().equals(assessment) && (!submission.getIsComplete()))
-			{
-				i.remove();
-			}
-		}
-	}
+//	/**
+//	 * {@inheritDoc}
+//	 */
+//	public void removeIncompleteAssessmentSubmissions(Assessment assessment)
+//	{
+//		for (Iterator i = this.submissions.values().iterator(); i.hasNext();)
+//		{
+//			SubmissionImpl submission = (SubmissionImpl) i.next();
+//			if (submission.getAssessment().equals(assessment) && (!submission.getIsComplete()))
+//			{
+//				i.remove();
+//			}
+//		}
+//	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void removeSubmission(SubmissionImpl submission)
-	{
-		this.submissions.remove(submission.getId());
-	}
+//	/**
+//	 * {@inheritDoc}
+//	 */
+//	public void removeSubmission(SubmissionImpl submission)
+//	{
+//		this.submissions.remove(submission.getId());
+//	}
 
 	/**
 	 * {@inheritDoc}

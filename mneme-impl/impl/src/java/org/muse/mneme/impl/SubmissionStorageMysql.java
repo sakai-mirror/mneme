@@ -289,17 +289,61 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public Float getSubmissionHighestScore(Assessment assessment, String userId)
 	{
-		float rv = 0f;
-		for (SubmissionImpl submission : this.submissions.values())
+		// TODO: pre-compute into MNEME_SUBMISSION.TOTAL_SCORE? -ggolden
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT S.ID, S.EVAL_SCORE, SUM(A.EVAL_SCORE+A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
+		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID AND S.COMPLETE='1'");
+		sql.append(" WHERE S.ASSESSMENT_ID=? AND S.USER=?");
+		sql.append(" GROUP BY S.ID");
+
+		Object[] fields = new Object[2];
+		fields[0] = Long.valueOf(assessment.getId());
+		fields[1] = userId;
+
+		final Map<String, Float> scores = new HashMap<String, Float>();
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
-			if (submission.getAssessment().equals(assessment) && submission.getUserId().equals(userId) && submission.getIsComplete()
-					&& submission.getTotalScore() > rv)
+			public Object readSqlResultRecord(ResultSet result)
 			{
-				rv = submission.getTotalScore();
+				try
+				{
+					String sid = SqlHelper.readId(result, 1);
+					Float sEval = SqlHelper.readFloat(result, 2);
+					Float aTotal = SqlHelper.readFloat(result, 3);
+					Float total = Float.valueOf((sEval == null ? 0f : sEval.floatValue()) + (aTotal == null ? 0f : aTotal.floatValue()));
+					scores.put(sid, total);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getSubmissionHighestScore: " + e);
+					return null;
+				}
+			}
+		});
+
+		// find the submission with the highest score
+		String highestId = null;
+		Float highestTotal = null;
+		for (Map.Entry entry : scores.entrySet())
+		{
+			String sid = (String) entry.getKey();
+			Float total = (Float) entry.getValue();
+			if (highestId == null)
+			{
+				highestId = sid;
+				highestTotal = total;
+			}
+			else if (total.floatValue() > highestTotal.floatValue())
+			{
+				highestId = sid;
+				highestTotal = total;
 			}
 		}
 
-		return rv;
+		return highestTotal;
 	}
 
 	/**
@@ -307,13 +351,47 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public Float getSubmissionScore(Submission submission)
 	{
-		SubmissionImpl s = getSubmission(submission.getId());
-		if (s != null)
+		// TODO: pre-compute into MNEME_SUBMISSION.TOTAL_SCORE? -ggolden
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT S.EVAL_SCORE, SUM(A.EVAL_SCORE+A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
+		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID");
+		sql.append(" WHERE S.ID=?");
+		sql.append(" GROUP BY S.ID");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(submission.getId());
+
+		// to collect the score (we just need something that we can change that is also Final)
+		final List<Float> score = new ArrayList<Float>();
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
-			return s.getTotalScore();
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					Float sEval = SqlHelper.readFloat(result, 2);
+					Float aTotal = SqlHelper.readFloat(result, 3);
+					Float total = Float.valueOf((sEval == null ? 0f : sEval.floatValue()) + (aTotal == null ? 0f : aTotal.floatValue()));
+					score.add(total);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getSubmissionScore: " + e);
+					return null;
+				}
+			}
+		});
+
+		if (score.size() > 0)
+		{
+			return score.get(0);
 		}
 
-		return 0f;
+		// TODO: return null here? sample returns 0f -ggolden
+		return Float.valueOf(0f);
 	}
 
 	/**
@@ -321,166 +399,32 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public List<SubmissionImpl> getUserAssessmentSubmissions(Assessment assessment, String userId)
 	{
-		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			// find those to this assessment for this user, filter out archived and un-published assessments
-			if (submission.getAssessment().equals(assessment) && submission.getUserId().equals(userId) && (!submission.getAssessment().getArchived())
-					&& (submission.getAssessment().getPublished()))
-			{
-				rv.add(new SubmissionImpl(submission));
-			}
-		}
+		String where = "WHERE S.ASSESSMENT_ID=? AND S.USER=?";
+		String order = "ORDER BY S.SUBMITTED_DATE ASC";
 
-		// if we didn't get one, invent one
-		if (rv.isEmpty())
-		{
-			SubmissionImpl s = newSubmission();
-			s.initUserId(userId);
-			s.initAssessmentIds(assessment.getId(), assessment.getId());
+		Object[] fields = new Object[2];
+		fields[0] = Long.valueOf(assessment.getId());
+		fields[1] = userId;
 
-			// set the id so we know it is a phantom
-			s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
-
-			rv.add(s);
-		}
-
+		List<SubmissionImpl> rv = readSubmissions(where, order, fields);
 		return rv;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<SubmissionImpl> getUserContextSubmissions(String context, String userId, final GetUserContextSubmissionsSort sort)
+	public List<SubmissionImpl> getUserContextSubmissions(String context, String userId)
 	{
-		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			// find those in the context for this user, filter out archived and un-published assessments
-			if (submission.getAssessment().getContext().equals(context) && submission.getUserId().equals(userId)
-					&& (!submission.getAssessment().getArchived()) && (submission.getAssessment().getPublished()))
-			{
-				rv.add(new SubmissionImpl(submission));
-			}
-		}
+		StringBuilder where = new StringBuilder();
+		where.append("JOIN MNEME_ASSESSMENT A ON S.ASSESSMENT_ID=A.ID AND A.ARCHIVED='0' AND A.PUBLISHED='1'");
+		where.append(" WHERE S.CONTEXT=? AND S.USER=?");
+		String order = "ORDER BY S.SUBMITTED_DATE ASC";
 
-		// get all the assessments for this context
-		List<Assessment> assessments = this.assessmentService.getContextAssessments(context, AssessmentService.AssessmentsSort.title_a, Boolean.TRUE);
+		Object[] fields = new Object[2];
+		fields[0] = context;
+		fields[1] = userId;
 
-		// if any assessment is not represented in the submissions we found, add an empty submission for it
-		for (Assessment a : assessments)
-		{
-			boolean found = false;
-			for (Submission s : rv)
-			{
-				if (s.getAssessment().equals(a))
-				{
-					found = true;
-					break;
-				}
-			}
-
-			if (!found)
-			{
-				SubmissionImpl s = newSubmission();
-				s.initUserId(userId);
-				s.initAssessmentIds(a.getId(), a.getId());
-
-				// set the id so we know it is a phantom
-				s.initId(SubmissionService.PHANTOM_PREFIX + a.getId() + "/" + userId);
-
-				rv.add(s);
-			}
-		}
-
-		// sort
-		// status sorts first by due date descending, then status final sorting is done in the service
-		Collections.sort(rv, new Comparator()
-		{
-			public int compare(Object arg0, Object arg1)
-			{
-				int rv = 0;
-				switch (sort)
-				{
-					case title_a:
-					{
-						String s0 = StringUtil.trimToZero(((Submission) arg0).getAssessment().getTitle());
-						String s1 = StringUtil.trimToZero(((Submission) arg1).getAssessment().getTitle());
-						rv = s0.compareToIgnoreCase(s1);
-						break;
-					}
-					case title_d:
-					{
-						String s0 = StringUtil.trimToZero(((Submission) arg0).getAssessment().getTitle());
-						String s1 = StringUtil.trimToZero(((Submission) arg1).getAssessment().getTitle());
-						rv = -1 * s0.compareToIgnoreCase(s1);
-						break;
-					}
-					case type_a:
-					{
-						rv = ((Submission) arg0).getAssessment().getType().getSortValue().compareTo(
-								((Submission) arg1).getAssessment().getType().getSortValue());
-						break;
-					}
-					case type_d:
-					{
-						rv = -1
-								* ((Submission) arg0).getAssessment().getType().getSortValue().compareTo(
-										((Submission) arg1).getAssessment().getType().getSortValue());
-						break;
-					}
-					case dueDate_a:
-					{
-						// no due date sorts high
-						if (((Submission) arg0).getAssessment().getDates().getDueDate() == null)
-						{
-							if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
-							{
-								rv = 0;
-								break;
-							}
-							rv = 1;
-							break;
-						}
-						if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
-						{
-							rv = -1;
-							break;
-						}
-						rv = ((Submission) arg0).getAssessment().getDates().getDueDate().compareTo(
-								((Submission) arg1).getAssessment().getDates().getDueDate());
-						break;
-					}
-					case dueDate_d:
-					case status_a:
-					case status_d:
-					{
-						// no due date sorts high
-						if (((Submission) arg0).getAssessment().getDates().getDueDate() == null)
-						{
-							if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
-							{
-								rv = 0;
-								break;
-							}
-							rv = -1;
-							break;
-						}
-						if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
-						{
-							rv = 1;
-							break;
-						}
-						rv = -1
-								* ((Submission) arg0).getAssessment().getDates().getDueDate().compareTo(
-										((Submission) arg1).getAssessment().getDates().getDueDate());
-						break;
-					}
-				}
-
-				return rv;
-			}
-		});
+		List<SubmissionImpl> rv = readSubmissions(where.toString(), order, fields);
 		return rv;
 	}
 
@@ -489,14 +433,14 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public List<String> getUsersSubmitted(Assessment assessment)
 	{
-		List<String> rv = new ArrayList<String>();
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			if (submission.getAssessment().equals(assessment) && !rv.contains(submission.getUserId()))
-			{
-				rv.add(submission.getUserId());
-			}
-		}
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT S.USER FROM MNEME_SUBMISSION S");
+		sql.append(" WHERE S.ASSESSMENT_ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		List rv = this.sqlService.dbRead(sql.toString(), fields, null);
 
 		return rv;
 	}
@@ -506,14 +450,20 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public Boolean historicalDependencyExists(Assessment assessment)
 	{
-		for (SubmissionImpl submission : this.submissions.values())
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(1) FROM MNEME_SUBMISSION S");
+		sql.append(" WHERE S.HISTORICAL_AID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		List results = this.sqlService.dbRead(sql.toString(), fields, null);
+		if (results.size() > 0)
 		{
-			SubmissionAssessmentImpl subAsmnt = (SubmissionAssessmentImpl) submission.getAssessment();
-			if (subAsmnt.historicalAssessmentId.equals(assessment.getId()))
-			{
-				return Boolean.TRUE;
-			}
+			int size = Integer.parseInt((String) results.get(0));
+			return Boolean.valueOf(size > 0);
 		}
+
 		return Boolean.FALSE;
 	}
 
@@ -545,29 +495,6 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	public SubmissionImpl newSubmission()
 	{
 		return new SubmissionImpl(assessmentService, securityService, submissionService, sessionManager);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void removeIncompleteAssessmentSubmissions(Assessment assessment)
-	{
-		for (Iterator i = this.submissions.values().iterator(); i.hasNext();)
-		{
-			SubmissionImpl submission = (SubmissionImpl) i.next();
-			if (submission.getAssessment().equals(assessment) && (!submission.getIsComplete()))
-			{
-				i.remove();
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void removeSubmission(SubmissionImpl submission)
-	{
-		this.submissions.remove(submission.getId());
 	}
 
 	/**

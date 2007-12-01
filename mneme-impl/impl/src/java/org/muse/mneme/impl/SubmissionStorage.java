@@ -147,32 +147,26 @@ public interface SubmissionStorage
 	Float getSubmissionScore(Submission submissionImpl);
 
 	/**
-	 * Get the submission to the assignment made by this user.<br />
-	 * Returns the official submission, or one in progress, or a blank one if not yet started.<br />
-	 * The sibling count is set.
+	 * Get the submissions to the assignment made by this user.
 	 * 
 	 * @param assessment
 	 *        The assessment to use.
 	 * @param userId
 	 *        The user id - if null, use the current user.
-	 * @return The user's submission for this assessment.
+	 * @return The user's submissions for this assessment.
 	 */
 	List<SubmissionImpl> getUserAssessmentSubmissions(Assessment assessment, String userId);
 
 	/**
-	 * Get all the submissions by this user in this context, sorted.<br />
-	 * Each assessment in the context is represented by at least one submission.<br />
-	 * If the user has not started a submission yet for an assessment, an empty submission (no start date).
+	 * Get all the submissions by this user in this context.
 	 * 
 	 * @param context
 	 *        The context.
 	 * @param userId
 	 *        The user.
-	 * @param sort
-	 *        The sort specification.
-	 * @return The list of submissions by this user in this context, sorted.
+	 * @return The list of submissions by this user in this context.
 	 */
-	List<SubmissionImpl> getUserContextSubmissions(String context, String userId, GetUserContextSubmissionsSort sort);
+	List<SubmissionImpl> getUserContextSubmissions(String context, String userId);
 
 	/**
 	 * Get all the users who have submitted to this assessment.
@@ -206,21 +200,21 @@ public interface SubmissionStorage
 	 */
 	SubmissionImpl newSubmission();
 
-	/**
-	 * Remove all incomplete submissions to this assessment.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 */
-	void removeIncompleteAssessmentSubmissions(Assessment assessment);
+//	/**
+//	 * Remove all incomplete submissions to this assessment.
+//	 * 
+//	 * @param assessment
+//	 *        The assessment.
+//	 */
+//	void removeIncompleteAssessmentSubmissions(Assessment assessment);
 
-	/**
-	 * Remove a submission from storage.
-	 * 
-	 * @param submission
-	 *        The submission to remove.
-	 */
-	void removeSubmission(SubmissionImpl submission);
+//	/**
+//	 * Remove a submission from storage.
+//	 * 
+//	 * @param submission
+//	 *        The submission to remove.
+//	 */
+//	void removeSubmission(SubmissionImpl submission);
 
 	/**
 	 * Save changes made to these answers.

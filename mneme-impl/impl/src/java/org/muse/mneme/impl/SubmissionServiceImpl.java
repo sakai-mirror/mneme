@@ -920,7 +920,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// read all the submissions for this user to this assessment, with all the assessment and submission data we need
 		// each assessment is covered with at least one - if there are no submission yet for an assessment, an empty submission is returned
-		List<SubmissionImpl> all = this.storage.getUserAssessmentSubmissions(assessment, userId);
+		List<SubmissionImpl> all = getUserAssessmentSubmissions(assessment, userId);
 
 		// see if any needs to be completed based on time limit or dates
 		checkAutoComplete(all, asOf);
@@ -991,18 +991,136 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Submission> getUserContextSubmissions(String context, String userId, GetUserContextSubmissionsSort sort)
+	public List<Submission> getUserContextSubmissions(String context, String userId, GetUserContextSubmissionsSort sortParam)
 	{
 		if (context == null) throw new IllegalArgumentException();
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
-		if (sort == null) sort = GetUserContextSubmissionsSort.title_a;
+		if (sortParam == null) sortParam = GetUserContextSubmissionsSort.title_a;
+		final GetUserContextSubmissionsSort sort = sortParam;
 		Date asOf = new Date();
 
 		if (M_log.isDebugEnabled()) M_log.debug("getUserContextSubmissions: context: " + context + " userId: " + userId + ": " + sort);
 
-		// read all the submissions for this user in the context, with all the assessment and submission data we need
-		// each assessment is covered with at least one - if there are no submission yet for an assessment, an empty submission is returned
-		List<SubmissionImpl> all = this.storage.getUserContextSubmissions(context, userId, sort);
+		// read all the submissions for this user in the context
+		List<SubmissionImpl> all = this.storage.getUserContextSubmissions(context, userId);
+
+		// get all the assessments for this context
+		List<Assessment> assessments = this.assessmentService.getContextAssessments(context, AssessmentService.AssessmentsSort.title_a, Boolean.TRUE);
+
+		// if any assessment is not represented in the submissions we found, add an empty submission for it
+		for (Assessment a : assessments)
+		{
+			boolean found = false;
+			for (Submission s : all)
+			{
+				if (s.getAssessment().equals(a))
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				SubmissionImpl s = this.storage.newSubmission();
+				s.initUserId(userId);
+				s.initAssessmentIds(a.getId(), a.getId());
+
+				// set the id so we know it is a phantom
+				s.initId(SubmissionService.PHANTOM_PREFIX + a.getId() + "/" + userId);
+
+				all.add(s);
+			}
+		}
+
+		// sort
+		// status sorts first by due date descending, then status final sorting is done in the service
+		Collections.sort(all, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				int rv = 0;
+				switch (sort)
+				{
+					case title_a:
+					{
+						String s0 = StringUtil.trimToZero(((Submission) arg0).getAssessment().getTitle());
+						String s1 = StringUtil.trimToZero(((Submission) arg1).getAssessment().getTitle());
+						rv = s0.compareToIgnoreCase(s1);
+						break;
+					}
+					case title_d:
+					{
+						String s0 = StringUtil.trimToZero(((Submission) arg0).getAssessment().getTitle());
+						String s1 = StringUtil.trimToZero(((Submission) arg1).getAssessment().getTitle());
+						rv = -1 * s0.compareToIgnoreCase(s1);
+						break;
+					}
+					case type_a:
+					{
+						rv = ((Submission) arg0).getAssessment().getType().getSortValue().compareTo(
+								((Submission) arg1).getAssessment().getType().getSortValue());
+						break;
+					}
+					case type_d:
+					{
+						rv = -1
+								* ((Submission) arg0).getAssessment().getType().getSortValue().compareTo(
+										((Submission) arg1).getAssessment().getType().getSortValue());
+						break;
+					}
+					case dueDate_a:
+					{
+						// no due date sorts high
+						if (((Submission) arg0).getAssessment().getDates().getDueDate() == null)
+						{
+							if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
+							{
+								rv = 0;
+								break;
+							}
+							rv = 1;
+							break;
+						}
+						if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
+						{
+							rv = -1;
+							break;
+						}
+						rv = ((Submission) arg0).getAssessment().getDates().getDueDate().compareTo(
+								((Submission) arg1).getAssessment().getDates().getDueDate());
+						break;
+					}
+					case dueDate_d:
+					case status_a:
+					case status_d:
+					{
+						// no due date sorts high
+						if (((Submission) arg0).getAssessment().getDates().getDueDate() == null)
+						{
+							if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
+							{
+								rv = 0;
+								break;
+							}
+							rv = -1;
+							break;
+						}
+						if (((Submission) arg1).getAssessment().getDates().getDueDate() == null)
+						{
+							rv = 1;
+							break;
+						}
+						rv = -1
+								* ((Submission) arg0).getAssessment().getDates().getDueDate().compareTo(
+										((Submission) arg1).getAssessment().getDates().getDueDate());
+						break;
+					}
+				}
+
+				return rv;
+			}
+		});
 
 		// see if any needs to be completed based on time limit or dates
 		checkAutoComplete(all, asOf);
@@ -1127,20 +1245,20 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException
-	{
-		if (assessment == null) throw new IllegalArgumentException();
-
-		// permission
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
-
-		this.storage.removeIncompleteAssessmentSubmissions(assessment);
-
-		// TODO: events?
-	}
+//	/**
+//	 * {@inheritDoc}
+//	 */
+//	public void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException
+//	{
+//		if (assessment == null) throw new IllegalArgumentException();
+//
+//		// permission
+//		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
+//
+//		this.storage.removeIncompleteAssessmentSubmissions(assessment);
+//
+//		// TODO: events?
+//	}
 
 	/**
 	 * Run the event checking thread.
@@ -1971,6 +2089,35 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// TODO: what about unpublished? archived?
 
 			if (selected) rv.add(submission);
+		}
+
+		return rv;
+	}
+
+	/**
+	 * Get the user's submissions to the assessment. If there are none, create a phantom.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param userId
+	 *        The user id.
+	 * @return a List of the submissions.
+	 */
+	protected List<SubmissionImpl> getUserAssessmentSubmissions(Assessment assessment, String userId)
+	{
+		List<SubmissionImpl> rv = this.storage.getUserAssessmentSubmissions(assessment, userId);
+
+		// if we didn't get one, invent one
+		if (rv.isEmpty())
+		{
+			SubmissionImpl s = this.storage.newSubmission();
+			s.initUserId(userId);
+			s.initAssessmentIds(assessment.getId(), assessment.getId());
+
+			// set the id so we know it is a phantom
+			s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
+
+			rv.add(s);
 		}
 
 		return rv;
