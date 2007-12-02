@@ -57,7 +57,7 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	protected boolean changed = false;
 
 	/** The uploaded file references. */
-	List<Reference> uploads = new ArrayList<Reference>();
+	protected List<Reference> uploads = new ArrayList<Reference>();
 
 	/**
 	 * Construct.
@@ -165,6 +165,22 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public String[] getData()
+	{
+		String[] rv = new String[1 + this.uploads.size()];
+		rv[0] = this.answerData;
+		int i = 1;
+		for (Reference ref : this.uploads)
+		{
+			rv[i++] = ref.getReference();
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsAnswered()
 	{
 		return ((((EssayQuestionImpl) this.answer.getQuestion().getTypeSpecificQuestion()).getSubmissionType() == EssayQuestionImpl.SubmissionType.none)
@@ -200,6 +216,24 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 
 		this.answerData = answerData;
 		this.changed = true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setData(String[] data)
+	{
+		this.answerData = null;
+		this.uploads.clear();
+		if ((data != null) && (data.length >= 1))
+		{
+			this.answerData = data[0];
+			for (int index = 1; index < data.length; index++)
+			{
+				// TODO: need to convert data[index] to a Reference
+				// uploads.add(data[0]);
+			}
+		}
 	}
 
 	/**

@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +42,6 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
-import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
@@ -58,18 +56,14 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(SubmissionStorageMysql.class);
 
+	/** Dependency: AssessmentService. */
 	protected AssessmentService assessmentService = null;
 
 	/** Configuration: to run the ddl on init or not. */
 	protected boolean autoDdl = false;
 
-	protected Object idGenerator = new Object();
-
+	/** Dependency: MnemeService. */
 	protected MnemeService mnemeService = null;
-
-	protected long nextAnswerId = 100;
-
-	protected long nextSubmissionId = 100;
 
 	/** Dependency: SecurityService. */
 	protected SecurityService securityService = null;
@@ -79,8 +73,6 @@ public class SubmissionStorageMysql implements SubmissionStorage
 
 	/** Dependency: SqlService. */
 	protected SqlService sqlService = null;
-
-	protected Map<String, SubmissionImpl> submissions = new LinkedHashMap<String, SubmissionImpl>();
 
 	/** Dependency: SubmissionService. */
 	protected SubmissionServiceImpl submissionService = null;
@@ -99,48 +91,21 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findPartQuestions(Part part)
+	public List<String> findPartQuestions(Part part)
 	{
-		// TODO:
-		List<Question> rv = new ArrayList<Question>();
+		// get all question ids from submission answers to this part's assessment,
+		// in this part (using orig part id)
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT A.QUESTION_ID FROM MNEME_ANSWER A");
+		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=?");
+		sql.append(" WHERE A.ORIG_PID=?");
 
-		// check the submissions to this assessment
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			// TODO: only for complete? && submission.getIsComplete()
-			if (submission.getAssessment().equals(part.getAssessment()))
-			{
-				for (Answer answer : submission.getAnswers())
-				{
-					// find the answers based on the part from their original, main, non-historical assessment part.
-					if (((AnswerImpl) answer).getOrigPartId().equals(part.getId()))
-					{
-						if (!rv.contains((QuestionImpl) answer.getQuestion()))
-						{
-							// copy and set the part context to the main part (might have been historical)
-							QuestionImpl q = new QuestionImpl((QuestionImpl) answer.getQuestion());
-							q.initPartContext(part);
+		Object[] fields = new Object[2];
+		fields[0] = Long.valueOf(part.getAssessment().getId());
+		fields[1] = Long.valueOf(part.getId());
 
-							rv.add(q);
-						}
-					}
-				}
-			}
-		}
-
-		// sort by question text
-		Collections.sort(rv, new Comparator()
-		{
-			public int compare(Object arg0, Object arg1)
-			{
-				String s0 = StringUtil.trimToZero(((QuestionImpl) arg0).getDescription());
-				String s1 = StringUtil.trimToZero(((QuestionImpl) arg1).getDescription());
-				int rv = s0.compareToIgnoreCase(s1);
-				return rv;
-			}
-		});
-
-		return rv;
+		List results = this.sqlService.dbRead(sql.toString(), fields, null);
+		return results;
 	}
 
 	/**
@@ -148,16 +113,20 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public Answer getAnswer(String answerId)
 	{
-		// TODO:
-		for (SubmissionImpl submission : this.submissions.values())
+		// get the submission so the answer has its full context
+		StringBuilder where = new StringBuilder();
+		where.append("JOIN MNEME_ANSWER AA ON AA.SUBMISSION_ID=S.ID");
+		where.append(" WHERE AA.ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(answerId);
+
+		List<SubmissionImpl> submissions = readSubmissions(where.toString(), null, fields);
+		if (submissions.size() > 0)
 		{
-			for (Answer answer : submission.getAnswers())
-			{
-				if (answer.getId().equals(answerId))
-				{
-					return answer;
-				}
-			}
+			// find the answer
+			Answer rv = submissions.get(0).getAnswer(answerId);
+			return rv;
 		}
 
 		return null;
@@ -416,7 +385,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	public List<SubmissionImpl> getUserContextSubmissions(String context, String userId)
 	{
 		StringBuilder where = new StringBuilder();
-		where.append("JOIN MNEME_ASSESSMENT A ON S.ASSESSMENT_ID=A.ID AND A.ARCHIVED='0' AND A.PUBLISHED='1'");
+		where.append("JOIN MNEME_ASSESSMENT AA ON S.ASSESSMENT_ID=AA.ID AND AA.ARCHIVED='0' AND AA.PUBLISHED='1'");
 		where.append(" WHERE S.CONTEXT=? AND S.USER=?");
 		String order = "ORDER BY S.SUBMITTED_DATE ASC";
 
@@ -502,31 +471,22 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public void saveAnswers(List<Answer> answers)
 	{
-		// for each answer, place it into the submission replacing the answer we have or adding
+		// for each answer, update or insert
 		for (Answer a : answers)
 		{
-			// if there is no id, assign one
 			if (a.getId() == null)
 			{
-				long id = 0;
-				synchronized (this.idGenerator)
-				{
-					id = this.nextAnswerId;
-					this.nextAnswerId++;
-				}
-				((AnswerImpl) a).initId("n" + Long.toString(id));
+				// insert
+				insertAnswer((AnswerImpl) a);
+			}
+			else
+			{
+				// update
+				updateAnswer((AnswerImpl) a);
 			}
 
 			// clear the evaluation changed
 			((EvaluationImpl) a.getEvaluation()).clearIsChanged();
-
-			// find the submission
-			SubmissionImpl s = this.submissions.get(a.getSubmission().getId());
-			if (s != null)
-			{
-				// replace or add the answer
-				s.replaceAnswer((AnswerImpl) a);
-			}
 		}
 	}
 
@@ -537,16 +497,10 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	{
 		for (Answer a : answers)
 		{
-			// find the submission
-			SubmissionImpl s = this.submissions.get(a.getSubmission().getId());
-			if (s != null)
-			{
-				AnswerImpl oldAnswer = (AnswerImpl) s.getAnswer(a.getQuestion());
-				if (oldAnswer != null)
-				{
-					oldAnswer.evaluation.set(((AnswerImpl) a).evaluation);
-				}
-			}
+			updateAnswerEval((AnswerImpl) a);
+
+			// clear the evaluation changed
+			((EvaluationImpl) a.getEvaluation()).clearIsChanged();
 		}
 	}
 
@@ -555,40 +509,27 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public void saveSubmission(SubmissionImpl submission)
 	{
-		// assign an id
+		// clear the submission evaluation changed
+		((EvaluationImpl) submission.getEvaluation()).clearIsChanged();
+
+		// if new
 		if (submission.getId() == null)
 		{
-			long id = 0;
-			synchronized (this.idGenerator)
-			{
-				id = this.nextSubmissionId;
-				this.nextSubmissionId++;
-			}
-			submission.initId("s" + Long.toString(id));
+			// insert
+			insertSubmission(submission);
 		}
 
+		// reject phantoms
 		else if (submission.getId().startsWith(SubmissionService.PHANTOM_PREFIX))
 		{
 			// lets not save phanton submissions
 			throw new IllegalArgumentException();
 		}
 
-		// clear the submission evaluation changed
-		((EvaluationImpl) submission.getEvaluation()).clearIsChanged();
-
-		// if we have this already, update ONLY the main information, not the answers
-		SubmissionImpl old = this.submissions.get(submission.getId());
-		if (old != null)
-		{
-			old.setMain(submission);
-		}
-
-		// otherwise save it w/ no answers
+		// update
 		else
 		{
-			SubmissionImpl s = new SubmissionImpl(submission);
-			s.clearAnswers();
-			this.submissions.put(submission.getId(), s);
+			updateSubmission(submission);
 		}
 	}
 
@@ -606,12 +547,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		// has to be an existing saved submission
 		if (submission.getId() == null) throw new IllegalArgumentException();
 
-		// we must already have the submission
-		SubmissionImpl old = this.submissions.get(submission.getId());
-		if (old == null) throw new IllegalArgumentException();
-
-		// update the submission evaluation
-		old.evaluation.set(submission.evaluation);
+		updateSubmissionEval(submission);
 	}
 
 	/**
@@ -628,12 +564,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		// has to be an existing saved submission
 		if (submission.getId() == null) throw new IllegalArgumentException();
 
-		// we must already have the submission
-		SubmissionImpl old = this.submissions.get(submission.getId());
-		if (old == null) throw new IllegalArgumentException();
-
-		// update the submission evaluation
-		old.released = submission.released;
+		updateSubmissionReleased(submission);
 	}
 
 	/**
@@ -709,30 +640,20 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean submissionExists(String id)
-	{
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Boolean submissionsDependsOn(Question question)
 	{
-		// for all submissions in the context
-		for (SubmissionImpl submission : this.submissions.values())
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(1) FROM MNEME_ANSWER A");
+		sql.append(" WHERE A.QUESTION_ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(question.getId());
+
+		List results = this.sqlService.dbRead(sql.toString(), fields, null);
+		if (results.size() > 0)
 		{
-			if (submission.getAssessment().getContext().equals(question.getContext()))
-			{
-				// check the answers
-				for (Answer answer : submission.getAnswers())
-				{
-					if (((AnswerImpl) answer).questionId.equals(question.getId()))
-					{
-						return Boolean.TRUE;
-					}
-				}
-			}
+			int size = Integer.parseInt((String) results.get(0));
+			return Boolean.valueOf(size > 0);
 		}
 
 		return Boolean.FALSE;
@@ -743,64 +664,109 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public Boolean submissionsExist(Assessment assessment)
 	{
-		for (SubmissionImpl submission : this.submissions.values())
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(1) FROM MNEME_SUBMISSION S");
+		sql.append(" WHERE S.ASSESSMENT_ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		List results = this.sqlService.dbRead(sql.toString(), fields, null);
+		if (results.size() > 0)
 		{
-			if (submission.getAssessment().equals(assessment))
-			{
-				return Boolean.TRUE;
-			}
+			int size = Integer.parseInt((String) results.get(0));
+			return Boolean.valueOf(size > 0);
 		}
+
 		return Boolean.FALSE;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void switchHistoricalDependency(Assessment assessment, Assessment newAssessment)
+	public void switchHistoricalDependency(final Assessment assessment, final Assessment newAssessment)
 	{
-		// map the old part ids to the new
-		Map<String, String> partIdMap = new HashMap<String, String>();
-		for (int i = 0; i < assessment.getParts().getParts().size(); i++)
+		this.sqlService.transact(new Runnable()
 		{
-			partIdMap.put(assessment.getParts().getParts().get(i).getId(), newAssessment.getParts().getParts().get(i).getId());
-		}
-
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			SubmissionAssessmentImpl subAsmnt = (SubmissionAssessmentImpl) submission.getAssessment();
-			if (subAsmnt.historicalAssessmentId.equals(assessment.getId()))
+			public void run()
 			{
-				subAsmnt.historicalAssessmentId = newAssessment.getId();
-
-				// switch all answer part ids in submission to newAssessment's new part ids
-				for (Answer answer : submission.getAnswers())
-				{
-					((AnswerImpl) answer).initPartId(partIdMap.get(((AnswerImpl) answer).getPartId()));
-				}
+				switchHistoricalDependencyTx(assessment, newAssessment);
 			}
-		}
+		}, "switchHistoricalDependency: from: " + assessment.getId());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void switchLiveDependency(Question from, Question to)
+	public void switchLiveDependency(final Question from, final Question to)
 	{
-		// for all submissions in the context
-		for (SubmissionImpl submission : this.submissions.values())
+		this.sqlService.transact(new Runnable()
 		{
-			if (submission.getAssessment().getContext().equals(from.getContext()))
+			public void run()
 			{
-				// check the answers
-				for (Answer answer : submission.getAnswers())
-				{
-					if (((AnswerImpl) answer).questionId.equals(from.getId()))
-					{
-						((AnswerImpl) answer).questionId = to.getId();
-					}
-				}
+				switchLiveDependencyTx(from, to);
 			}
+		}, "switchLiveDependencyTx: from: " + from.getId());
+	}
+
+	/**
+	 * Insert a new answer.
+	 * 
+	 * @param answer
+	 *        The answer.
+	 */
+	protected void insertAnswer(final AnswerImpl answer)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				insertAnswerTx(answer);
+			}
+		}, "insertAnswer: " + answer.getId());
+	}
+
+	/**
+	 * Insert a new pool (transaction code).
+	 * 
+	 * @param pool
+	 *        The pool.
+	 */
+	protected void insertAnswerTx(AnswerImpl answer)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO MNEME_ANSWER (");
+		sql.append(" ANSWERED, AUTO_SCORE, GUEST, EVAL_ATRIB_DATE, EVAL_ATRIB_USER, EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE,");
+		sql.append(" ORIG_PID, PART_ID, QUESTION_ID, QUESTION_TYPE, REASON, REVIEW, SUBMISSION_ID, SUBMITTED_DATE)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+
+		Object[] fields = new Object[16];
+		fields[0] = answer.getIsAnswered();
+		fields[1] = answer.getAutoScore();
+		fields[2] = SqlHelper.encodeStringArray(answer.getTypeSpecificAnswer().getData());
+		fields[3] = (answer.getEvaluation().getAttribution().getDate() == null) ? null : answer.getEvaluation().getAttribution().getDate().getTime();
+		fields[4] = answer.getEvaluation().getAttribution().getUserId();
+		fields[5] = answer.getEvaluation().getComment();
+		fields[6] = answer.getEvaluation().getEvaluated() ? "1" : "0";
+		fields[7] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
+		fields[8] = Long.valueOf(answer.getOrigPartId());
+		fields[9] = Long.valueOf(answer.getPartId());
+		Question q = answer.getQuestion();
+		fields[10] = Long.valueOf(q.getId());
+		fields[11] = q.getType();
+		fields[12] = answer.getReason();
+		fields[13] = answer.getMarkedForReview() ? "1" : "0";
+		fields[14] = Long.valueOf(answer.getSubmission().getId());
+		fields[15] = (answer.getSubmittedDate() == null) ? null : answer.getSubmittedDate().getTime();
+
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
+		{
+			throw new RuntimeException("insertPoolTx: dbInsert failed");
 		}
+
+		// set the answer's id
+		answer.initId(id.toString());
 	}
 
 	/**
@@ -832,9 +798,9 @@ public class SubmissionStorageMysql implements SubmissionStorage
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_SUBMISSION (");
-		sql.append(" ASSESSMENT_ID, ASSESSMENT_HID, COMPLETE, CONTEXT, EVAL_ATRIB_DATE, EVAL_ATRIB_USER,");
+		sql.append(" ASSESSMENT_ID, HISTORICAL_AID, COMPLETE, CONTEXT, EVAL_ATRIB_DATE, EVAL_ATRIB_USER,");
 		sql.append(" EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE, RELEASED, START_DATE, SUBMITTED_DATE, USER )");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
 		Object[] fields = new Object[13];
 		fields[0] = submission.getAssessment().getId();
@@ -901,12 +867,16 @@ public class SubmissionStorageMysql implements SubmissionStorage
 
 		// submissions
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT S.ASSESSMENT_ID, S.ASSESSMENT_HID, S.COMPLETE, S.CONTEXT, S.EVAL_ATRIB_DATE,");
+		sql.append("SELECT S.ASSESSMENT_ID, S.HISTORICAL_AID, S.COMPLETE, S.EVAL_ATRIB_DATE,");
 		sql.append(" S.EVAL_ATRIB_USER, S.EVAL_COMMENT, S.EVAL_EVALUATED, S.EVAL_SCORE,");
 		sql.append(" S.ID, S.RELEASED, S.START_DATE, S.SUBMITTED_DATE, S.USER");
 		sql.append(" FROM MNEME_SUBMISSION S ");
 		sql.append(where);
-		if (order != null) sql.append(order);
+		if (order != null)
+		{
+			sql.append(" ");
+			sql.append(order);
+		}
 
 		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
@@ -970,10 +940,10 @@ public class SubmissionStorageMysql implements SubmissionStorage
 					a.initId(SqlHelper.readId(result, 7));
 					a.initPartIds(SqlHelper.readId(result, 9), SqlHelper.readId(result, 8));
 					a.initQuestion(SqlHelper.readId(result, 10), SqlHelper.readString(result, 11));
-					// TODO: guest SqlHelper.readString(result, 1)
+					a.getTypeSpecificAnswer().setData(SqlHelper.decodeStringArray(StringUtil.trimToNull(result.getString(1))));
 					a.setReason(SqlHelper.readString(result, 12));
 					a.setMarkedForReview(SqlHelper.readBoolean(result, 13));
-					a.setSubmittedDate(SqlHelper.readDate(result, 14));
+					a.setSubmittedDate(SqlHelper.readDate(result, 15));
 
 					a.clearIsChanged();
 					a.initSubmission(s);
@@ -999,6 +969,162 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	}
 
 	/**
+	 * Transaction code for switchHistoricalDependency().
+	 */
+	protected void switchHistoricalDependencyTx(Assessment from, Assessment to)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_SUBMISSION S");
+		sql.append(" SET S.HISTORICAL_AID=?");
+		sql.append(" WHERE S.HISTORICAL_AID=?");
+
+		Object[] fields = new Object[2];
+		fields[0] = Long.valueOf(to.getId());
+		fields[1] = Long.valueOf(from.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("switchHistoricalDependencyTx(submission): dbWrite failed");
+		}
+
+		// swap the answer parts
+		for (int i = 0; i < from.getParts().getParts().size(); i++)
+		{
+			Part fromPart = from.getParts().getParts().get(i);
+			Part toPart = to.getParts().getParts().get(i);
+
+			sql.append("UPDATE MNEME_ANSWER A");
+			sql.append(" SET A.PART_ID=?");
+			sql.append(" WHERE A.PART_ID=?");
+
+			fields = new Object[2];
+			fields[0] = Long.valueOf(toPart.getId());
+			fields[1] = Long.valueOf(fromPart.getId());
+
+			if (!this.sqlService.dbWrite(sql.toString(), fields))
+			{
+				throw new RuntimeException("switchHistoricalDependencyTx(answer): dbWrite failed");
+			}
+		}
+	}
+
+	/**
+	 * Transaction code for switchLiveDependency().
+	 */
+	protected void switchLiveDependencyTx(Question from, Question to)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ANSWER A");
+		sql.append(" SET A.QUESTION_ID=?");
+		sql.append(" WHERE A.QUESTION_ID=?");
+
+		Object[] fields = new Object[2];
+		fields[0] = Long.valueOf(to.getId());
+		fields[1] = Long.valueOf(from.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("switchLiveDependencyTx: dbWrite failed");
+		}
+	}
+
+	/**
+	 * Update an existing submission answer.
+	 * 
+	 * @param answer
+	 *        The answer.
+	 */
+	protected void updateAnswer(final AnswerImpl answer)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				updateAnswerTx(answer);
+			}
+		}, "updateAnswer: " + answer.getId());
+	}
+
+	/**
+	 * Update an existing submission answer evaluation.
+	 * 
+	 * @param answer
+	 *        The answer.
+	 */
+	protected void updateAnswerEval(final AnswerImpl answer)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				updateAnswerEvalTx(answer);
+			}
+		}, "updateAnswer: " + answer.getId());
+	}
+
+	/**
+	 * Update an existing submission answer eval. (transaction code).
+	 * 
+	 * @param answer
+	 *        The answer.
+	 */
+	protected void updateAnswerEvalTx(AnswerImpl answer)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ANSWER SET");
+		sql.append(" AUTO_SCORE=?, EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_COMMENT=?, EVAL_EVALUATED=?, EVAL_SCORE=?");
+		sql.append(" WHERE ID=?");
+
+		Object[] fields = new Object[7];
+		fields[0] = answer.getAutoScore();
+		fields[1] = (answer.getEvaluation().getAttribution().getDate() == null) ? null : answer.getEvaluation().getAttribution().getDate().getTime();
+		fields[2] = answer.getEvaluation().getAttribution().getUserId();
+		fields[3] = answer.getEvaluation().getComment();
+		fields[4] = answer.getEvaluation().getEvaluated() ? "1" : "0";
+		fields[5] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
+		fields[6] = Long.valueOf(answer.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("updateAnswerEvalTx: db write failed");
+		}
+	}
+
+	/**
+	 * Update an existing submission answer (transaction code).
+	 * 
+	 * @param answer
+	 *        The answer.
+	 */
+	protected void updateAnswerTx(AnswerImpl answer)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ANSWER SET");
+		sql.append(" ANSWERED=?, AUTO_SCORE=?, GUEST=?, EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_COMMENT=?, EVAL_EVALUATED=?,");
+		sql.append(" EVAL_SCORE=?, REASON=?, REVIEW=?, SUBMITTED_DATE=?");
+		sql.append(" WHERE ID=?");
+
+		Object[] fields = new Object[12];
+		fields[0] = answer.getIsAnswered();
+		fields[1] = answer.getAutoScore();
+		fields[2] = SqlHelper.encodeStringArray(answer.getTypeSpecificAnswer().getData());
+		fields[3] = (answer.getEvaluation().getAttribution().getDate() == null) ? null : answer.getEvaluation().getAttribution().getDate().getTime();
+		fields[4] = answer.getEvaluation().getAttribution().getUserId();
+		fields[5] = answer.getEvaluation().getComment();
+		fields[6] = answer.getEvaluation().getEvaluated() ? "1" : "0";
+		fields[7] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
+		fields[8] = answer.getReason();
+		fields[9] = answer.getMarkedForReview() ? "1" : "0";
+		fields[10] = (answer.getSubmittedDate() == null) ? null : answer.getSubmittedDate().getTime();
+		fields[11] = Long.valueOf(answer.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("updateAnswerTx: db write failed");
+		}
+	}
+
+	/**
 	 * Update an existing submission.
 	 * 
 	 * @param submission
@@ -1013,6 +1139,91 @@ public class SubmissionStorageMysql implements SubmissionStorage
 				updateSubmissionTx(submission);
 			}
 		}, "updateSubmission: " + submission.getId());
+	}
+
+	/**
+	 * Update an existing submission Eval.
+	 * 
+	 * @param submission
+	 *        The submission.
+	 */
+	protected void updateSubmissionEval(final SubmissionImpl submission)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				updateSubmissionEvalTx(submission);
+			}
+		}, "updateSubmissionEval: " + submission.getId());
+	}
+
+	/**
+	 * Update an existing submission Eval. (transaction code).
+	 * 
+	 * @param submission
+	 *        The submission.
+	 */
+	protected void updateSubmissionEvalTx(SubmissionImpl submission)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_SUBMISSION SET");
+		sql.append(" EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_COMMENT=?, EVAL_EVALUATED=?, EVAL_SCORE=?");
+		sql.append(" WHERE ID=?");
+
+		Object[] fields = new Object[6];
+		fields[0] = (submission.getEvaluation().getAttribution().getDate() == null) ? null : submission.getEvaluation().getAttribution().getDate()
+				.getTime();
+		fields[1] = submission.getEvaluation().getAttribution().getUserId();
+		fields[2] = submission.getEvaluation().getComment();
+		fields[3] = submission.getEvaluation().getEvaluated() ? "1" : "0";
+		fields[4] = submission.getEvaluation().getScore() == null ? null : Float.valueOf(submission.getEvaluation().getScore());
+		fields[5] = Long.valueOf(submission.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("updateSubmissionEvalTx: db write failed");
+		}
+	}
+
+	/**
+	 * Update an existing submission's released status.
+	 * 
+	 * @param submission
+	 *        The submission.
+	 */
+	protected void updateSubmissionReleased(final SubmissionImpl submission)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				updateSubmissionReleasedTx(submission);
+			}
+		}, "updateSubmissionReleased: " + submission.getId());
+	}
+
+	/**
+	 * Update an existing submission's released status (transaction code).
+	 * 
+	 * @param submission
+	 *        The submission.
+	 */
+	protected void updateSubmissionReleasedTx(SubmissionImpl submission)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_SUBMISSION SET");
+		sql.append(" RELEASED=?");
+		sql.append(" WHERE ID=?");
+
+		Object[] fields = new Object[2];
+		fields[0] = submission.getIsReleased() ? "1" : "0";
+		fields[1] = Long.valueOf(submission.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("updateSubmissionReleasedTx: db write failed");
+		}
 	}
 
 	/**
@@ -1046,112 +1257,4 @@ public class SubmissionStorageMysql implements SubmissionStorage
 			throw new RuntimeException("updateSubmissionTx: db write failed");
 		}
 	}
-
-	/**
-	 * Update an existing submission answer.
-	 * 
-	 * @param answer
-	 *        The answer.
-	 */
-	protected void updateAnswer(final AnswerImpl answer)
-	{
-		this.sqlService.transact(new Runnable()
-		{
-			public void run()
-			{
-				updateAnswerTx(answer);
-			}
-		}, "updateAnswer: " + answer.getId());
-	}
-
-	/**
-	 * Update an existing submission answer (transaction code).
-	 * 
-	 * @param answer
-	 *        The answer.
-	 */
-	protected void updateAnswerTx(AnswerImpl answer)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE MNEME_ANSWER SET");
-		sql.append(" GUEST=?, EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_COMMENT=?, EVAL_EVALUATED=?,");
-		sql.append(" EVAL_SCORE=?, REASON=?, REVIEW=?, SUBMITTED_DATE=?");
-		sql.append(" WHERE ID=?");
-
-		Object[] fields = new Object[10];
-		fields[0] = null;// TODO: guest
-		fields[1] = (answer.getEvaluation().getAttribution().getDate() == null) ? null : answer.getEvaluation().getAttribution().getDate().getTime();
-		fields[2] = answer.getEvaluation().getAttribution().getUserId();
-		fields[3] = answer.getEvaluation().getComment();
-		fields[4] = answer.getEvaluation().getEvaluated() ? "1" : "0";
-		fields[5] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
-		fields[6] = answer.getReason();
-		fields[7] = answer.getMarkedForReview() ? "1" : "0";
-		fields[8] = (answer.getSubmittedDate() == null) ? null : answer.getSubmittedDate().getTime();
-		fields[9] = Long.valueOf(answer.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("updateAnswerTx: db write failed");
-		}
-	}
-
-	/**
-	 * Insert a new answer.
-	 * 
-	 * @param answer
-	 *        The answer.
-	 */
-	protected void inserAnswer(final AnswerImpl answer)
-	{
-		this.sqlService.transact(new Runnable()
-		{
-			public void run()
-			{
-				insertAnswerTx(answer);
-			}
-		}, "inserAnswer: " + answer.getId());
-	}
-
-	/**
-	 * Insert a new pool (transaction code).
-	 * 
-	 * @param pool
-	 *        The pool.
-	 */
-	protected void insertAnswerTx(AnswerImpl answer)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_ANSWER (");
-		sql.append(" GUEST, EVAL_ATRIB_DATE, EVAL_ATRIB_USER, EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE,");
-		sql.append(" ORIG_PID, PART_ID, QUESTION_ID, QUESTION_TYPE, REASON, REVIEW, SUBMISSION_ID, SUBMITTED_DATE)");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-
-		Object[] fields = new Object[14];
-		fields[0] = null;// TODO: guest
-		fields[1] = (answer.getEvaluation().getAttribution().getDate() == null) ? null : answer.getEvaluation().getAttribution().getDate().getTime();
-		fields[2] = answer.getEvaluation().getAttribution().getUserId();
-		fields[3] = answer.getEvaluation().getComment();
-		fields[4] = answer.getEvaluation().getEvaluated() ? "1" : "0";
-		fields[5] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
-		fields[6] = Long.valueOf(answer.getOrigPartId());
-		fields[7] = Long.valueOf(answer.getPartId());
-		Question q = answer.getQuestion();
-		fields[8] = Long.valueOf(q.getId());
-		fields[9] = q.getType();
-		fields[10] = answer.getReason();
-		fields[11] = answer.getMarkedForReview() ? "1" : "0";
-		fields[12] = Long.valueOf(answer.getSubmission().getId());
-		fields[13] = (answer.getSubmittedDate() == null) ? null : answer.getSubmittedDate().getTime();
-
-		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
-		if (id == null)
-		{
-			throw new RuntimeException("insertPoolTx: dbInsert failed");
-		}
-
-		// set the answer's id
-		answer.initId(id.toString());
-	}
-
 }

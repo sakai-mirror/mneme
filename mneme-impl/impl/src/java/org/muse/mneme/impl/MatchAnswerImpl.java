@@ -21,7 +21,7 @@
 
 package org.muse.mneme.impl;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,10 +41,10 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	protected transient Answer answer = null;
 
 	/** The answers: a map between a pair id and a choice id (the choice is stored in the Value). */
-	protected Map<String, Value> answerData = new HashMap<String, Value>();
+	protected Map<String, Value> answerData = new LinkedHashMap<String, Value>();
 
 	/** The answer before possible modification. */
-	protected Map<String, Value> priorAnswer = new HashMap<String, Value>();
+	protected Map<String, Value> priorAnswer = new LinkedHashMap<String, Value>();
 
 	/** Dependency: The UI service (Ambrosia). */
 	protected transient UiService uiService = null;
@@ -60,8 +60,8 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	public MatchAnswerImpl(Answer answer, MatchAnswerImpl other)
 	{
 		this.answer = answer;
-		this.answerData = new HashMap<String, Value>(other.answerData.size());
-		this.priorAnswer = new HashMap<String, Value>(other.answerData.size());
+		this.answerData = new LinkedHashMap<String, Value>(other.answerData.size());
+		this.priorAnswer = new LinkedHashMap<String, Value>(other.answerData.size());
 		for (Map.Entry entry : other.answerData.entrySet())
 		{
 			Value v = this.uiService.newValue();
@@ -93,7 +93,7 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void clearIsChanged()
 	{
-		this.priorAnswer = new HashMap<String, Value>(this.answerData);
+		this.priorAnswer = new LinkedHashMap<String, Value>(this.answerData);
 	}
 
 	/**
@@ -109,8 +109,8 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 			// deep copy
 			if (this.answerData != null)
 			{
-				((MatchAnswerImpl) rv).answerData = new HashMap<String, Value>(this.answerData.size());
-				((MatchAnswerImpl) rv).priorAnswer = new HashMap<String, Value>(this.answerData.size());
+				((MatchAnswerImpl) rv).answerData = new LinkedHashMap<String, Value>(this.answerData.size());
+				((MatchAnswerImpl) rv).priorAnswer = new LinkedHashMap<String, Value>(this.answerData.size());
 				for (Map.Entry entry : this.answerData.entrySet())
 				{
 					Value v = this.uiService.newValue();
@@ -196,6 +196,24 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public String[] getData()
+	{
+		int size = this.answerData.size() * 2;
+
+		String[] rv = new String[size];
+		int i = 0;
+		for (Map.Entry entry : this.answerData.entrySet())
+		{
+			rv[i++] = (String) entry.getKey();
+			rv[i++] = ((Value) entry.getValue()).getValue();
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsAnswered()
 	{
 		for (Object value : this.answerData.values())
@@ -222,5 +240,29 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 		}
 
 		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setData(String[] data)
+	{
+		this.answerData = new LinkedHashMap<String, Value>();
+		this.priorAnswer = new LinkedHashMap<String, Value>();
+		if ((data != null) && (data.length > 0))
+		{
+			for (int i = 0; i < data.length; i++)
+			{
+				String key = data[i++];
+
+				Value value = this.uiService.newValue();
+				value.setValue(data[i]);
+				this.answerData.put(key, value);
+
+				value = this.uiService.newValue();
+				value.setValue(data[i]);
+				this.priorAnswer.put(key, value);
+			}
+		}
 	}
 }

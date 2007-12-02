@@ -124,6 +124,25 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public String[] getData()
+	{
+		String[] rv = null;
+		if (this.answerData == null)
+		{
+			rv = new String[0];
+		}
+		else
+		{
+			rv = new String[1];
+			rv[0] = answerData.toString();
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsAnswered()
 	{
 		return this.answerData != null;
@@ -152,5 +171,17 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 
 		this.answerData = i;
 		this.changed = true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setData(String[] data)
+	{
+		this.answerData = null;
+		if ((data != null) && (data.length == 1))
+		{
+			this.answerData = Integer.valueOf(data[0]);
+		}
 	}
 }

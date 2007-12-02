@@ -28,24 +28,20 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
-import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 
 /**
  * SubmissionStorage defines the storage interface for Submissions.
  */
 public interface SubmissionStorage
 {
-
 	/**
-	 * Find the questions that have been used in submissions in this assessment part.<br />
-	 * Order by question description.
+	 * Find the question ids that have been used in submissions in this assessment part.
 	 * 
 	 * @param part
 	 *        The assessment part.
-	 * @return A List of Questions found used by submissions to this assessment part.
+	 * @return A List of Question ids found used by submissions to this assessment part.
 	 */
-	List<Question> findPartQuestions(Part part);
+	List<String> findPartQuestions(Part part);
 
 	/**
 	 * Get this answer.
@@ -200,21 +196,21 @@ public interface SubmissionStorage
 	 */
 	SubmissionImpl newSubmission();
 
-//	/**
-//	 * Remove all incomplete submissions to this assessment.
-//	 * 
-//	 * @param assessment
-//	 *        The assessment.
-//	 */
-//	void removeIncompleteAssessmentSubmissions(Assessment assessment);
+	// /**
+	// * Remove all incomplete submissions to this assessment.
+	// *
+	// * @param assessment
+	// * The assessment.
+	// */
+	// void removeIncompleteAssessmentSubmissions(Assessment assessment);
 
-//	/**
-//	 * Remove a submission from storage.
-//	 * 
-//	 * @param submission
-//	 *        The submission to remove.
-//	 */
-//	void removeSubmission(SubmissionImpl submission);
+	// /**
+	// * Remove a submission from storage.
+	// *
+	// * @param submission
+	// * The submission to remove.
+	// */
+	// void removeSubmission(SubmissionImpl submission);
 
 	/**
 	 * Save changes made to these answers.
@@ -255,15 +251,6 @@ public interface SubmissionStorage
 	 *        the submission to save.
 	 */
 	void saveSubmissionReleased(SubmissionImpl submission);
-
-	/**
-	 * Check if an submission by this id exists.
-	 * 
-	 * @param id
-	 *        The submission id
-	 * @return TRUE if the submission with this id exists, FALSE if not.
-	 */
-	Boolean submissionExists(String id);
 
 	/**
 	 * Check if there are any submissions that are dependent on this question.

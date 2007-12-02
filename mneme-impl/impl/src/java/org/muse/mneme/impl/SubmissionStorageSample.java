@@ -82,9 +82,9 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findPartQuestions(Part part)
+	public List<String> findPartQuestions(Part part)
 	{
-		List<Question> rv = new ArrayList<Question>();
+		List<String> rv = new ArrayList<String>();
 
 		// check the submissions to this assessment
 		for (SubmissionImpl submission : this.submissions.values())
@@ -97,30 +97,14 @@ public class SubmissionStorageSample implements SubmissionStorage
 					// find the answers based on the part from their original, main, non-historical assessment part.
 					if (((AnswerImpl) answer).getOrigPartId().equals(part.getId()))
 					{
-						if (!rv.contains((QuestionImpl) answer.getQuestion()))
+						if (!rv.contains(answer.getQuestion().getId()))
 						{
-							// copy and set the part context to the main part (might have been historical)
-							QuestionImpl q = new QuestionImpl((QuestionImpl) answer.getQuestion());
-							q.initPartContext(part);
-
-							rv.add(q);
+							rv.add(answer.getQuestion().getId());
 						}
 					}
 				}
 			}
 		}
-
-		// sort by question text
-		Collections.sort(rv, new Comparator()
-		{
-			public int compare(Object arg0, Object arg1)
-			{
-				String s0 = StringUtil.trimToZero(((QuestionImpl) arg0).getDescription());
-				String s1 = StringUtil.trimToZero(((QuestionImpl) arg1).getDescription());
-				int rv = s0.compareToIgnoreCase(s1);
-				return rv;
-			}
-		});
 
 		return rv;
 	}
@@ -405,28 +389,28 @@ public class SubmissionStorageSample implements SubmissionStorage
 		return new SubmissionImpl(assessmentService, securityService, submissionService, sessionManager);
 	}
 
-//	/**
-//	 * {@inheritDoc}
-//	 */
-//	public void removeIncompleteAssessmentSubmissions(Assessment assessment)
-//	{
-//		for (Iterator i = this.submissions.values().iterator(); i.hasNext();)
-//		{
-//			SubmissionImpl submission = (SubmissionImpl) i.next();
-//			if (submission.getAssessment().equals(assessment) && (!submission.getIsComplete()))
-//			{
-//				i.remove();
-//			}
-//		}
-//	}
+	// /**
+	// * {@inheritDoc}
+	// */
+	// public void removeIncompleteAssessmentSubmissions(Assessment assessment)
+	// {
+	// for (Iterator i = this.submissions.values().iterator(); i.hasNext();)
+	// {
+	// SubmissionImpl submission = (SubmissionImpl) i.next();
+	// if (submission.getAssessment().equals(assessment) && (!submission.getIsComplete()))
+	// {
+	// i.remove();
+	// }
+	// }
+	// }
 
-//	/**
-//	 * {@inheritDoc}
-//	 */
-//	public void removeSubmission(SubmissionImpl submission)
-//	{
-//		this.submissions.remove(submission.getId());
-//	}
+	// /**
+	// * {@inheritDoc}
+	// */
+	// public void removeSubmission(SubmissionImpl submission)
+	// {
+	// this.submissions.remove(submission.getId());
+	// }
 
 	/**
 	 * {@inheritDoc}
@@ -478,6 +462,9 @@ public class SubmissionStorageSample implements SubmissionStorage
 					oldAnswer.evaluation.set(((AnswerImpl) a).evaluation);
 				}
 			}
+
+			// clear the evaluation changed
+			((EvaluationImpl) a.getEvaluation()).clearIsChanged();
 		}
 	}
 
@@ -605,14 +592,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 	public void setSubmissionService(SubmissionServiceImpl service)
 	{
 		this.submissionService = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean submissionExists(String id)
-	{
-		return Boolean.FALSE;
 	}
 
 	/**

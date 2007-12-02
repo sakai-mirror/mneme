@@ -56,6 +56,13 @@ public interface TypeSpecificAnswer extends Cloneable
 	Float getAutoScore();
 
 	/**
+	 * Access the type specific answer data as an array of strings that can be restored with setData()
+	 * 
+	 * @return The type specific answer data.
+	 */
+	String[] getData();
+
+	/**
 	 * Check if the question is answered.
 	 * 
 	 * @return TRUE if the question is considered to be answered, FALSE if not.
@@ -68,4 +75,12 @@ public interface TypeSpecificAnswer extends Cloneable
 	 * @return TRUE if changed, FALSE if not.
 	 */
 	Boolean getIsChanged();
+
+	/**
+	 * Restore settings from this array of strings, created by getData()
+	 * 
+	 * @param data
+	 *        The data to restore.
+	 */
+	void setData(String[] data);
 }

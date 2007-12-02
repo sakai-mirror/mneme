@@ -162,6 +162,21 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public String[] getData()
+	{
+		String[] rv = new String[this.answerData.size()];
+		int i = 0;
+		for (Integer a : this.answerData)
+		{
+			rv[i++] = a.toString();
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsAnswered()
 	{
 		return !this.answerData.isEmpty();
@@ -195,5 +210,20 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 
 		this.answerData = s;
 		this.changed = true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setData(String[] data)
+	{
+		this.answerData = new HashSet<Integer>();
+		if ((data != null) && (data.length > 0))
+		{
+			for (int i = 0; i < data.length; i++)
+			{
+				this.answerData.add(Integer.valueOf(data[i]));
+			}
+		}
 	}
 }

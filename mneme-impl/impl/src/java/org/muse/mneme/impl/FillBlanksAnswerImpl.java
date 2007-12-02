@@ -44,14 +44,10 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	protected transient Answer answer = null;
 
 	/** String array of user answers */
-	protected String[] answers;
+	protected String[] answers = null;
 
 	/** Set when the answer has been changed. */
 	protected boolean changed = false;
-
-	protected List<Boolean> entryCorrects = new ArrayList<Boolean>();
-
-	protected String reviewText = null;
 
 	/**
 	 * Construct.
@@ -145,6 +141,22 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public String[] getData()
+	{
+		int size = (this.answers == null) ? 0 : this.answers.length;
+
+		String[] rv = new String[size];
+		for (int i = 0; i < size; i++)
+		{
+			rv[i] = this.answers[i];
+		}
+
+		return rv;
+	}
+
+	/**
 	 * Get an Boolean for each possible fill-in blank.
 	 * 
 	 * @return A list of Boolean, one for each possible fill-in blank, TRUE if the entry was made and is correct, FALSE if not.
@@ -202,122 +214,6 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	}
 
 	/**
-	 * Get an Boolean for each possible fill-in blank.
-	 * 
-	 * @return A list of Boolean, one for each possible fill-in blank, TRUE if the entry was made and is correct, FALSE if not.
-	 */
-	public List<Boolean> getEntryCorrectsX()
-	{
-		Question question = answer.getQuestion();
-		List<String> correctAnswers = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswers();
-		String[] correctAnswersArray = new String[correctAnswers.size()];
-		correctAnswersArray = (String[]) correctAnswers.toArray(correctAnswersArray);
-
-		// Get all other question properties
-		Boolean caseSensitive = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCaseSensitive());
-		Boolean anyOrder = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getAnyOrder());
-		Boolean responseTextual = Boolean.valueOf(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getResponseTextual());
-
-		if (this.answers != null)
-		{
-			String[] answersArray = (String[]) this.answers.clone();
-			// Any order only matters when there is more than one blank
-			if ((anyOrder == Boolean.TRUE) && (correctAnswers.size() > 1))
-			{
-				for (int j = 0; j < answersArray.length; j++)
-				{
-					boolean foundCorrect = false;
-					if (answersArray[j] != null)
-					{
-						if (answersArray[j].trim().length() > 0)
-						{
-							for (int i = 0; i < correctAnswersArray.length; i++)
-							{
-
-								if (responseTextual == Boolean.TRUE)
-								{
-									if (isFillInAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
-									{
-										foundCorrect = true;
-										break;
-									}
-									else
-									{
-										foundCorrect = false;
-									}
-								}
-								else
-								{
-									if (isNumericAnswerCorrect(answersArray[j].trim(), correctAnswersArray[i].trim()))
-									{
-										foundCorrect = true;
-										break;
-									}
-									else
-									{
-										foundCorrect = false;
-									}
-								}
-							}
-							if (foundCorrect)
-							{
-								this.entryCorrects.add(Boolean.TRUE);
-							}
-							else
-							{
-								this.entryCorrects.add(Boolean.FALSE);
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				for (int i = 0; i < correctAnswersArray.length; i++)
-				{
-					if (answersArray[i] != null)
-					{
-						if (answersArray[i].trim().length() > 0)
-						{
-							if (responseTextual == Boolean.TRUE)
-							{
-								if (isFillInAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim(), caseSensitive.booleanValue()))
-								{
-									this.entryCorrects.add(Boolean.TRUE);
-								}
-								else
-								{
-									this.entryCorrects.add(Boolean.FALSE);
-								}
-							}
-							else
-							{
-								if (isNumericAnswerCorrect(answersArray[i].trim(), correctAnswersArray[i].trim()))
-								{
-									this.entryCorrects.add(Boolean.TRUE);
-								}
-								else
-								{
-									this.entryCorrects.add(Boolean.FALSE);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		else
-		{
-			// If all answers are blank, they each need to be marked incorrect
-			for (int i = 0; i < correctAnswersArray.length; i++)
-			{
-				this.entryCorrects.add(Boolean.FALSE);
-			}
-		}
-		return this.entryCorrects;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public Boolean getIsAnswered()
@@ -346,6 +242,22 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		if ((answers == null) || (answers.length == 0)) return;
 		this.answers = answers;
 		this.changed = true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setData(String[] data)
+	{
+		this.answers = null;
+		if ((data != null) && (data.length > 0))
+		{
+			this.answers = new String[data.length];
+			for (int i = 0; i < data.length; i++)
+			{
+				this.answers[i] = data[i];
+			}
+		}
 	}
 
 	/**

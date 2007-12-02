@@ -728,7 +728,32 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	public List<Question> findPartQuestions(Part part)
 	{
-		return this.storage.findPartQuestions(part);
+		List<String> qids = this.storage.findPartQuestions(part);
+		List<Question> rv = new ArrayList<Question>();
+
+		for (String qid : qids)
+		{
+			QuestionImpl q = (QuestionImpl) this.questionService.getQuestion(qid);
+			if (q != null)
+			{
+				q.initPartContext(part);
+				rv.add(q);
+			}
+		}
+
+		// sort by question text
+		Collections.sort(rv, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				String s0 = StringUtil.trimToZero(((QuestionImpl) arg0).getDescription());
+				String s1 = StringUtil.trimToZero(((QuestionImpl) arg1).getDescription());
+				int rv = s0.compareToIgnoreCase(s1);
+				return rv;
+			}
+		});
+
+		return rv;
 	}
 
 	/**
@@ -1245,20 +1270,20 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 	}
 
-//	/**
-//	 * {@inheritDoc}
-//	 */
-//	public void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException
-//	{
-//		if (assessment == null) throw new IllegalArgumentException();
-//
-//		// permission
-//		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
-//
-//		this.storage.removeIncompleteAssessmentSubmissions(assessment);
-//
-//		// TODO: events?
-//	}
+	// /**
+	// * {@inheritDoc}
+	// */
+	// public void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException
+	// {
+	// if (assessment == null) throw new IllegalArgumentException();
+	//
+	// // permission
+	// securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
+	//
+	// this.storage.removeIncompleteAssessmentSubmissions(assessment);
+	//
+	// // TODO: events?
+	// }
 
 	/**
 	 * Run the event checking thread.
