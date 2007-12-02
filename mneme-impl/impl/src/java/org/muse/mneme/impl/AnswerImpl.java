@@ -369,7 +369,7 @@ public class AnswerImpl implements Answer
 	 */
 	protected void initPartIds(String partId, String origPartId)
 	{
-		this.partId = id;
+		this.partId = partId;
 		this.origIPartId = origPartId;
 	}
 
