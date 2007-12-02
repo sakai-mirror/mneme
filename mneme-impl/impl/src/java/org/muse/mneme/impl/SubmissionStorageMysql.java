@@ -993,6 +993,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 			Part fromPart = from.getParts().getParts().get(i);
 			Part toPart = to.getParts().getParts().get(i);
 
+			sql = new StringBuilder();
 			sql.append("UPDATE MNEME_ANSWER A");
 			sql.append(" SET A.PART_ID=?");
 			sql.append(" WHERE A.PART_ID=?");
