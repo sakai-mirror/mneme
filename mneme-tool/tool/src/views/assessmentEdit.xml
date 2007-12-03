@@ -178,7 +178,7 @@
 								</navigation>
 							</entityActions>
 						</selectionColumn>
-						<orderColumn>
+						<orderColumn em="2">
 							<title>
 								<message selector="part-order" />
 							</title>
