@@ -60,32 +60,62 @@
 			<container>
 				<section>
 					<container>
+
+						<!-- instructions overlay -->
+						<overlay id="instructions">
+							<container>
+								<!-- this should be htmlEdit, but tinyMCE is having trouble -->
+								<textEdit title="test-instructions" model="assessment.presentation.text" rows="8" cols="60" />
+								<!-- 
+									<attachments title="attachments" model="assessment.presentation.attachments" name="attachment">
+									<navigations>
+									<navigation destination="REMOVE" title="remove-attachment" style="LINK"
+									description="remove-attachment-description" submit="TRUE" small="true">
+									<icon icon="/icons/delete.png" style="NONE" />
+									<destination template="REMOVE:{0}">
+									<model ref="attachment.reference" />
+									</destination>
+									<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif"
+									selector="confirm-remove-attachment" />
+									</navigation>
+									</navigations>
+									</attachments>
+									<fileUpload>
+									<model ref="upload.upload" />
+									<title>
+									<message selector="upload-attachment" />
+									</title>
+									<upload>
+									<message selector="upload-button" />
+									</upload>
+									</fileUpload>
+								-->
+								<gap />
+								<toggle target="instructions" title="close" style="LINK">
+									<icon icon="/icons/close.png" style="LEFT" />
+								</toggle>
+							</container>
+						</overlay>
+
+						<!-- title -->
 						<textEdit title="test-title" rows="1" cols="40">
 							<model ref="assessment.title" />
 						</textEdit>
-						<htmlEdit title="test-instructions" model="assessment.presentation.text" rows="5" cols="40" />
-						<attachments title="attachments" model="assessment.presentation.attachments" name="attachment">
-							<navigations>
-								<navigation destination="REMOVE" title="remove-attachment" style="LINK" description="remove-attachment-description"
-									submit="TRUE" small="true">
-									<icon icon="/icons/delete.png" style="NONE" />
-									<destination template="REMOVE:{0}">
-										<model ref="attachment.reference" />
-									</destination>
-									<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif"
-										selector="confirm-remove-attachment" />
-								</navigation>
-							</navigations>
-						</attachments>
-						<fileUpload>
-							<model ref="upload.upload" />
-							<title>
-								<message selector="upload-attachment" />
-							</title>
-							<upload>
-								<message selector="upload-button" />
-							</upload>
-						</fileUpload>
+
+						<!-- toggle to show instructinos -->
+						<toggle target="instructions" title="edit-instructions" style="LINK">
+							<icon icon="/icons/test.png" style="LEFT" />
+							<included>
+								<hasValueDecision model="assessment.presentation.text" />
+							</included>
+						</toggle>
+						<toggle target="instructions" title="add-instructions" style="LINK">
+							<icon icon="/icons/test.png" style="LEFT" />
+							<included>
+								<hasValueDecision reversed="TRUE" model="assessment.presentation.text" />
+							</included>
+						</toggle>
+
 					</container>
 				</section>
 			</container>

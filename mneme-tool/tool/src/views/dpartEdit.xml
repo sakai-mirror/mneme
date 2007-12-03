@@ -54,11 +54,38 @@
 
 		<section>
 			<container>
+
+				<!-- instructions overlay -->
+				<overlay id="instructions">
+					<container>
+						<!-- this should be htmlEdit, but tinyMCE is having trouble -->
+						<textEdit title="part-instructions" model="part.presentation.text" rows="5" cols="60" />
+						<gap />
+						<toggle target="instructions" title="close" style="LINK">
+							<icon icon="/icons/close.png" style="LEFT" />
+						</toggle>
+					</container>
+				</overlay>
+
+				<!-- title -->
 				<textEdit title="part-title" rows="1" cols="40">
 					<model ref="part.title" />
 				</textEdit>
-				<htmlEdit title="part-instructions" model="part.presentation.text" rows="5" cols="40" />
-				<attachmentsEdit title="attachments" model="part.presentation.attachments" />
+
+				<!-- toggle to show instructinos -->
+				<toggle target="instructions" title="edit-instructions" style="LINK">
+					<icon icon="/icons/section.png" style="LEFT" />
+					<included>
+						<hasValueDecision model="part.presentation.text" />
+					</included>
+				</toggle>
+				<toggle target="instructions" title="add-instructions" style="LINK">
+					<icon icon="/icons/section.png" style="LEFT" />
+					<included>
+						<hasValueDecision reversed="TRUE" model="part.presentation.text" />
+					</included>
+				</toggle>
+
 			</container>
 		</section>
 
@@ -66,7 +93,12 @@
 			<container>
 
 				<!-- the list of ALL pools, with those selected for this part checked and their "draw" filled in -->
-				<entityList style="FLAT" title="part-pools-msg">
+				<entityList style="FLAT">
+					<title>
+						<message selector="part-pools-msg">
+							<model type="icon" icon="/icons/add_random.png" />
+						</message>
+					</title>
 					<emptyTitle>
 						<message selector="no-pools" />
 					</emptyTitle>
