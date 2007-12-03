@@ -126,6 +126,9 @@
 
 				<!-- the list of parts -->
 				<entityList style="FLAT">
+					<title>
+						<message selector="add-parts" />
+					</title>
 					<iterator name="part" model="assessment.parts.parts" />
 					<emptyTitle>
 						<message selector="no-parts" />
