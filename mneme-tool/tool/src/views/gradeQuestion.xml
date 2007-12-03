@@ -194,7 +194,7 @@
 					<container>
 						<text>
 							<message>
-								<model type="date" ref="answer.submission.submittedDate" />
+								<model type="date" twoLine="TRUE" ref="answer.submission.submittedDate" />
 							</message>
 							<included>
 								<decision reversed="TRUE" model="answer.submission.isCompletedLate" />
@@ -202,7 +202,7 @@
 						</text>
 						<text>
 							<message selector="submission-finished-date-late">
-								<model type="date" ref="answer.submission.submittedDate" />
+								<model type="date" twoLine="TRUE" ref="answer.submission.submittedDate" />
 							</message>
 							<included>
 								<decision model="answer.submission.isCompletedLate" />
@@ -237,7 +237,7 @@
 						<!-- evaluation -->
 						<section>
 							<container>
-								<htmlEdit model="answer.evaluation.comment" rows="5" cols="60">
+								<htmlEdit model="answer.evaluation.comment" rows="5" cols="40">
 									<title>
 										<message selector="submission-evaluation">
 											<model type="icon" icon="/icons/note.png" />
