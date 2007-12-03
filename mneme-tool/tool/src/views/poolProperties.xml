@@ -50,7 +50,7 @@
 
 				<textEdit title="pool-title" model="pool.title" rows="1" cols="40" />
 
-				<htmlEdit title="pool-description" model="pool.description" rows="5" cols="40" />
+				<textEdit title="pool-description" model="pool.description" rows="5" cols="40" />
 
 				<floatEdit title="pool-points" model="pool.pointsEdit" cols="6">
 					<onEmptyAlert>

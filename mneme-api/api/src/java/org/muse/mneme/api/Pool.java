@@ -80,7 +80,7 @@ public interface Pool
 	/**
 	 * Access the description of the pool.
 	 * 
-	 * @return The description of the pool.
+	 * @return The description of the pool (plain text).
 	 */
 	String getDescription();
 

@@ -182,6 +182,7 @@
 			</container>
 			<included>
 				<hasValueDecision model="submission.assessment.submitPresentation.text" />
+				<decision model="review" />
 			</included>
 		</section>
 
