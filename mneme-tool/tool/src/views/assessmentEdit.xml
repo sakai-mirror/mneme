@@ -154,7 +154,7 @@
 									</included>
 								</instructions>
 								<!-- these two are not dependent, but put here for desired presentation order of actions -->
-								<navigation destination="MANUAL" title="manual-draw" style="LINK" description="manual-draw-description"
+								<navigation destination="MANUAL" title="manual-select" style="LINK" description="manual-select-description"
 									submit="TRUE">
 									<icon icon="/icons/add_manual.png" style="LEFT" />
 									<included>
