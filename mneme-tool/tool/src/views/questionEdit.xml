@@ -65,7 +65,7 @@
 		<!-- generic presentation -->
 		<section>
 			<container>
-				<htmlEdit title="question-presentation" model="question.presentation.text" />
+				<htmlEdit rows="14" cols="100" title="question-presentation" model="question.presentation.text" />
 				<attachmentsEdit title="attachments" model="question.presentation.attachments" />
 			</container>
 			<included>
