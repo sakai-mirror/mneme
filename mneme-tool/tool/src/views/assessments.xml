@@ -290,7 +290,7 @@
 							</included>
 						</navigation>
 						<navigation style="LINK" description="published-alt" submit="TRUE">
-							<icon icon="/icons/publish_new.png" style="LEFT" />
+							<icon icon="/icons/unpub_settings.png" style="LEFT" />
 							<destination template="/assessment_settings/{0}{1}/{2}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />
