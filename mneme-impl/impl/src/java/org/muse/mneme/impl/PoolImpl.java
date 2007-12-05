@@ -247,6 +247,14 @@ public class PoolImpl implements Pool
 	 */
 	public void setDescription(String description)
 	{
+		// massage the description
+		if (description != null)
+		{
+			description = description.trim();
+			if (description.length() > 255) description = description.substring(0, 255);
+			if (description.length() == 0) description = null;
+		}
+
 		if (!Different.different(this.description, description)) return;
 
 		this.description = description;
@@ -260,6 +268,11 @@ public class PoolImpl implements Pool
 	public void setDifficulty(Integer difficulty)
 	{
 		if (difficulty == null) throw new IllegalArgumentException();
+
+		// massage
+		if (difficulty.intValue() < 1) difficulty = Integer.valueOf(1);
+		if (difficulty.intValue() > 5) difficulty = Integer.valueOf(5);
+
 		if (this.difficulty.equals(difficulty)) return;
 
 		this.difficulty = difficulty;
@@ -299,6 +312,14 @@ public class PoolImpl implements Pool
 	 */
 	public void setTitle(String title)
 	{
+		// massage the title
+		if (title != null)
+		{
+			title = title.trim();
+			if (title.length() > 255) title = title.substring(0, 255);
+			if (title.length() == 0) title = null;
+		}
+
 		if (!Different.different(this.title, title)) return;
 
 		this.title = title;

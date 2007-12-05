@@ -160,7 +160,8 @@ public interface Pool
 	 * Set the description of the pool.
 	 * 
 	 * @param description
-	 *        The description of the pool.
+	 *        The description of the pool.<br />
+	 *        Truncated to 255 characters, trimmed, if all blank, set to null.
 	 */
 	void setDescription(String description);
 
@@ -168,23 +169,28 @@ public interface Pool
 	 * Set the difficulty value for the questions in this pool.
 	 * 
 	 * @param difficulty
-	 *        The difficulty value for the questions in this pool.
+	 *        The difficulty value for the questions in this pool.<br />
+	 *        Must be between 1 (lowest) and 5 (highest) - other values will be adjusted to a near end.<br />
+	 *        Defaults to 3.<br />
+	 *        May not be null.
 	 */
 	void setDifficulty(Integer difficulty);
 
 	/**
 	 * Set the number of points for each question in this pool.
 	 * 
-	 * @param points
-	 *        The number of points for each question in this pool.
+	 * @param points.
+	 *        The number of points for each question in this pool.<br />
+	 *        Must be >= 0, otherwise ignored. May not be null.
 	 */
 	void setPoints(Float points);
 
 	/**
 	 * Set the number of points for each question in this pool.
 	 * 
-	 * @param points
-	 *        The number of points for each question in this pool, or null to have none set.
+	 * @param points.
+	 *        The number of points for each question in this pool, or null to have none set.<br />
+	 *        Must be >= 0, otherwise ignored. May be null.
 	 */
 	void setPointsEdit(Float points);
 
@@ -192,7 +198,8 @@ public interface Pool
 	 * Set the title of the pool.
 	 * 
 	 * @param title
-	 *        The title of the pool.
+	 *        The title of the pool.<br />
+	 *        Truncated to 255 characters, trimmed, if all blank, set to null.
 	 */
 	void setTitle(String title);
 }
