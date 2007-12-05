@@ -156,13 +156,13 @@
 								<!-- these two are not dependent, but put here for desired presentation order of actions -->
 								<navigation destination="MANUAL" title="manual-select" style="LINK" description="manual-select-description"
 									submit="TRUE">
-									<icon icon="/icons/add_manual.png" style="LEFT" />
+									<icon icon="/icons/add_manual_add.png" style="LEFT" />
 									<included>
 										<decision reversed="TRUE" model="assessment.isLive" />
 									</included>
 								</navigation>
 								<navigation destination="DRAW" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
-									<icon icon="/icons/add_random.png" style="LEFT" />
+									<icon icon="/icons/add_draw_add.png" style="LEFT" />
 									<included>
 										<decision reversed="TRUE" model="assessment.isLive" />
 									</included>
