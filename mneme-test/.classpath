@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="test-tool/src/java"/>
+	<classpathentry kind="src" path="test/src/java"/>
 	<classpathentry kind="var" path="JRE_LIB" sourcepath="JRE_SRC"/>
 	<classpathentry kind="var" path="MAVEN_REPO/commons-logging/jars/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="var" path="MAVEN_REPO/servletapi/jars/servletapi-2.4.jar"/>
@@ -17,5 +18,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/ambrosia-api"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/db-api"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ambrosia-util"/>
+	<classpathentry kind="var" path="JUNIT_HOME/junit.jar" sourcepath="ECLIPSE_HOME/plugins/org.eclipse.jdt.source_3.1.1/src/org.junit_3.8.1/junitsrc.zip"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/mneme-impl"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

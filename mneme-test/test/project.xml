@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+	<pomVersion>3</pomVersion>
+	<extend>../../project.xml</extend>
+	<name>muse-mneme-test</name>
+	<groupId>muse</groupId>
+	<id>muse-mneme-test</id>
+	<currentVersion>${mneme.version}</currentVersion>
+	<organization>
+		<name>University of Michigan and Foothill College, ETUDES Project</name>
+		<url>http://etudesproject.org/mneme</url>
+	</organization>
+	<inceptionYear>2007</inceptionYear>
+
+	<properties>
+		<!-- deploy as a jar -->
+		<deploy.type>jar</deploy.type>
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>muse</groupId>
+			<artifactId>muse-mneme-api</artifactId>
+			<version>${mneme.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>muse</groupId>
+			<artifactId>muse-mneme-impl</artifactId>
+			<version>${mneme.version}</version>
+		</dependency>
+
+ 		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+		</dependency>
+ 
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.0.4</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+
+		<unitTestSourceDirectory>src/java</unitTestSourceDirectory>
+		<unitTest>
+			<includes>
+				<include>**/*Test.java</include>
+			</includes>
+		</unitTest>
+	</build>
+
+</project>
