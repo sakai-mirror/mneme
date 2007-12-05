@@ -78,6 +78,23 @@
 
 		<section title="actions">
 			<container>
+				<!-- comments overlay -->
+				<overlay id="comments">
+					<container>
+						<!-- this should be htmlEdit, but tinyMCE is having trouble -->
+						<textEdit model="submissionAdjustComments.value" rows="5" cols="40">
+							<title>
+								<message selector="add-comments">
+									<model type="icon" icon="/icons/note.png" />
+								</message>
+							</title>
+						</textEdit>
+						<gap />
+						<toggle target="comments" title="close" style="LINK">
+							<icon icon="/icons/close.png" style="LEFT" />
+						</toggle>
+					</container>
+				</overlay>
 				<navigation title="release-evaluated" style="LINK" submit="TRUE" destination="RELEASEEVALUATED">
 					<icon icon="/icons/active.png" style="LEFT" />
 					<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-release-evaluated" />
@@ -86,8 +103,20 @@
 					<icon icon="/icons/active.png" style="LEFT" />
 					<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-release-all" />
 				</navigation>
-				<floatEdit title="adjust-submissions" model="submissionAdjust.value" cols="6" />
-				<htmlEdit title="add-comments" model="submissionAdjustComments.value" rows="5" cols="40" />
+				<text>
+					<message selector="adjust-submissions">
+						<model type="icon" icon="/icons/adjust_scores.png" />
+						<model type="component">
+							<container>
+								<floatEdit model="submissionAdjust.value" cols="6" />
+							</container>
+						</model>
+					</message>
+				</text>
+				<!-- toggle to show instructinos -->
+				<toggle target="comments" title="add-comments-toggle" style="LINK">
+					<icon icon="/icons/note.png" style="LEFT" />
+				</toggle>
 			</container>
 		</section>
 
