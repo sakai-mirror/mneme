@@ -199,7 +199,7 @@
 						<!-- evaluation -->
 						<section>
 							<container>
-								<htmlEdit model="answer.evaluation.comment" rows="5" cols="60">
+								<htmlEdit model="answer.evaluation.comment" rows="5" cols="80">
 									<title>
 										<message selector="question-evaluation">
 											<model type="icon" icon="/icons/note.png" />
@@ -232,7 +232,7 @@
 				<!-- overall comments -->
 				<section>
 					<container>
-						<htmlEdit model="submission.evaluation.comment" rows="5" cols="60">
+						<htmlEdit model="submission.evaluation.comment" rows="5" cols="80">
 							<title>
 								<message selector="overall-comments">
 									<model type="icon" icon="/icons/note.png" />

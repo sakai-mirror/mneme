@@ -99,7 +99,7 @@
 		<!--  generic hints -->
 		<section>
 			<container>
-				<htmlEdit>
+				<htmlEdit rows="5" cols="80">
 					<title>
 						<message selector="question-author-hints">
 							<model type="icon" icon="/icons/hints.png" />
@@ -116,7 +116,7 @@
 		<!--  generic feedback -->
 		<section>
 			<container>
-				<htmlEdit>
+				<htmlEdit rows="5" cols="80">
 					<title>
 						<message selector="question-author-feedback">
 							<model type="icon" icon="/icons/feedback.png" />

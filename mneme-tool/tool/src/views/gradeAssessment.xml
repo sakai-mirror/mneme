@@ -81,8 +81,8 @@
 				<!-- comments overlay -->
 				<overlay id="comments">
 					<container>
-						<!-- this should be htmlEdit, but tinyMCE is having trouble -->
-						<textEdit model="submissionAdjustComments.value" rows="5" cols="40">
+						<!-- this should be htmlEdit, but tinyMCE is having trouble, and perhaps 80 wide -->
+						<textEdit model="submissionAdjustComments.value" rows="5" cols="60">
 							<title>
 								<message selector="add-comments">
 									<model type="icon" icon="/icons/note.png" />
