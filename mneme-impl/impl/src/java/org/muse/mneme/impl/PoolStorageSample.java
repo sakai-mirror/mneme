@@ -202,7 +202,7 @@ public class PoolStorageSample implements PoolStorage
 
 		for (PoolImpl pool : this.pools.values())
 		{
-			if ((!pool.historical) && (!pool.getMint()) && pool.getId().equals(context))
+			if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
 			{
 				rv.add(newPool(pool));
 			}

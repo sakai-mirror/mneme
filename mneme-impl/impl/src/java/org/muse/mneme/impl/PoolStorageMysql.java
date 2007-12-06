@@ -180,7 +180,7 @@ public class PoolStorageMysql implements PoolStorage
 	 */
 	public List<PoolImpl> getPools(String context)
 	{
-		// if ((!pool.historical) && (!pool.getMint()) && pool.getId().equals(context))
+		// if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
 
 		StringBuilder whereOrder = new StringBuilder();
 		whereOrder.append("WHERE P.CONTEXT=? AND P.MINT='0' AND P.HISTORICAL='0' ORDER BY CREATED_BY_DATE ASC");
