@@ -536,7 +536,7 @@ public class PoolStorageMysql implements PoolStorage
 		fields[6] = pool.getMint() ? "1" : "0";
 		fields[7] = pool.getModifiedBy().getDate().getTime();
 		fields[8] = pool.getModifiedBy().getUserId();
-		fields[9] = pool.getPoints();
+		fields[9] = pool.getPointsEdit();
 		fields[10] = pool.getTitle();
 
 		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
@@ -570,7 +570,7 @@ public class PoolStorageMysql implements PoolStorage
 			{
 				try
 				{
-					String qid = Long.toString(result.getLong(1));
+					String qid = SqlHelper.readId(result, 1);
 					if (qid != null) rv.add(qid);
 
 					return null;
@@ -633,18 +633,18 @@ public class PoolStorageMysql implements PoolStorage
 				try
 				{
 					PoolImpl pool = newPool();
-					pool.setContext(StringUtil.trimToNull(result.getString(1)));
-					pool.getCreatedBy().setDate(new Date(result.getLong(2)));
-					pool.getCreatedBy().setUserId(StringUtil.trimToNull(result.getString(3)));
-					pool.setDescription(StringUtil.trimToNull(result.getString(4)));
-					pool.setDifficulty(Integer.parseInt(StringUtil.trimToNull(result.getString(5))));
-					pool.initHistorical(Boolean.valueOf("1".equals(StringUtil.trimToNull(result.getString(6)))));
-					pool.initId(Long.toString(result.getLong(7)));
-					pool.initMint(Boolean.valueOf("1".equals(StringUtil.trimToNull(result.getString(8)))));
-					pool.getModifiedBy().setDate(new Date(result.getLong(9)));
-					pool.getModifiedBy().setUserId(StringUtil.trimToNull(result.getString(10)));
-					pool.setPoints(result.getFloat(11));
-					pool.setTitle(StringUtil.trimToNull(result.getString(12)));
+					pool.setContext(SqlHelper.readString(result, 1));
+					pool.getCreatedBy().setDate(SqlHelper.readDate(result, 2));
+					pool.getCreatedBy().setUserId(SqlHelper.readString(result, 3));
+					pool.setDescription(SqlHelper.readString(result, 4));
+					pool.setDifficulty(SqlHelper.readInteger(result, 5));
+					pool.initHistorical(SqlHelper.readBoolean(result, 6));
+					pool.initId(SqlHelper.readId(result, 7));
+					pool.initMint(SqlHelper.readBoolean(result, 8));
+					pool.getModifiedBy().setDate(SqlHelper.readDate(result, 9));
+					pool.getModifiedBy().setUserId(SqlHelper.readString(result, 10));
+					pool.setPointsEdit(SqlHelper.readFloat(result, 11));
+					pool.setTitle(SqlHelper.readString(result, 12));
 
 					pool.changed.clearChanged();
 					rv.add(pool);
@@ -721,7 +721,7 @@ public class PoolStorageMysql implements PoolStorage
 		fields[4] = pool.getMint() ? "1" : "0";
 		fields[5] = pool.getModifiedBy().getDate().getTime();
 		fields[6] = pool.getModifiedBy().getUserId();
-		fields[7] = pool.getPoints();
+		fields[7] = pool.getPointsEdit();
 		fields[8] = pool.getTitle();
 		fields[9] = Long.valueOf(pool.getId());
 
