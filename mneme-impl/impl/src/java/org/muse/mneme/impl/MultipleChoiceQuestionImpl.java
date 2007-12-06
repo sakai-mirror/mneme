@@ -437,7 +437,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		EntityListColumn choiceText = this.uiService.newEntityListColumn();
 		HtmlEdit edit = this.uiService.newHtmlEdit();
 		edit.setSize(5, 50);
-		edit.setProperty(this.uiService.newPropertyReference().setReference("choice.text"));
+		edit.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
 		choiceText.add(edit);
 		choicesList.addColumn(choiceText);
 

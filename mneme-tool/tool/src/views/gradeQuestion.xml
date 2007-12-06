@@ -237,7 +237,8 @@
 						<!-- evaluation -->
 						<section>
 							<container>
-								<htmlEdit model="answer.evaluation.comment" rows="5" cols="40">
+								<htmlEdit rows="5" cols="40">
+									<model type="html" ref="answer.evaluation.comment" />
 									<title>
 										<message selector="submission-evaluation">
 											<model type="icon" icon="/icons/note.png" />

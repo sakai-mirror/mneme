@@ -283,7 +283,9 @@
 					</selectionChoices>
 				</selection>
 
-				<htmlEdit title="submitMessage" model="assessment.submitPresentation.text" />
+				<htmlEdit title="submitMessage">
+					<model type="html" ref="assessment.submitPresentation.text" />
+				</htmlEdit>
 
 			</container>
 		</section>

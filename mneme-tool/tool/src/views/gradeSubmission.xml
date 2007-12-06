@@ -199,7 +199,8 @@
 						<!-- evaluation -->
 						<section>
 							<container>
-								<htmlEdit model="answer.evaluation.comment">
+								<htmlEdit>
+									<model type="html" ref="answer.evaluation.comment" />
 									<title>
 										<message selector="question-evaluation">
 											<model type="icon" icon="/icons/note.png" />
@@ -232,7 +233,8 @@
 				<!-- overall comments -->
 				<section>
 					<container>
-						<htmlEdit model="submission.evaluation.comment">
+						<htmlEdit>
+							<model type="html" ref="submission.evaluation.comment" />
 							<title>
 								<message selector="overall-comments">
 									<model type="icon" icon="/icons/note.png" />

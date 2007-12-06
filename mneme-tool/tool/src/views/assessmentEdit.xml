@@ -65,7 +65,9 @@
 						<overlay id="instructions">
 							<container>
 								<!-- this should be htmlEdit, but tinyMCE is having trouble -->
-								<textEdit title="test-instructions" model="assessment.presentation.text" rows="8" cols="60" />
+								<textEdit title="test-instructions" rows="8" cols="60">
+									<model type="html" ref="assessment.presentation.text" />
+								</textEdit>
 								<!-- 
 									<attachments title="attachments" model="assessment.presentation.attachments" name="attachment">
 									<navigations>
