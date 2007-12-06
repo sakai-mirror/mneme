@@ -197,6 +197,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// start out unpublished
 		rv.setPublished(Boolean.FALSE);
+		
+		// and not-live
+		rv.initLive(Boolean.FALSE);
 
 		// update created and last modified information
 		rv.getCreatedBy().setDate(now);
