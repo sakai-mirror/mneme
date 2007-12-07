@@ -243,7 +243,6 @@ public interface SubmissionService
 
 	/**
 	 * Find the submission answers to the assignment and question made by all users.<br />
-	 * Answers must be marked as answered.<br />
 	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one.
 	 * 
 	 * @param assessment

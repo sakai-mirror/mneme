@@ -833,6 +833,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			Integer pageNum, Integer pageSize)
 	{
 		// TODO: review the efficiency of this method! -ggolden
+		// TODO: consider removing the official (set to false, getting all) to improve efficiency -ggolden
 
 		if (assessment == null) throw new IllegalArgumentException();
 		if (question == null) throw new IllegalArgumentException();
@@ -866,14 +867,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			rv = sortByGradingSubmissionStatus((sort == FindAssessmentSubmissionsSort.status_d), rv);
 		}
 
-		// pull out the one answer we want
+		// pull out the one answer we want from the completed submissions
 		List<Answer> answers = new ArrayList<Answer>();
 		for (Submission s : rv)
 		{
-			Answer a = s.getAnswer(question);
-			if (a != null)
+			if (s.getIsComplete())
 			{
-				if (a.getIsAnswered())
+				Answer a = s.getAnswer(question);
+				if (a != null)
 				{
 					answers.add(a);
 				}
