@@ -76,7 +76,12 @@
 			</container>
 		</navigationBar>
 
-		<section title="actions">
+		<section>
+			<title>
+				<message selector="actions">
+					<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+				</message>
+			</title>
 			<container>
 				<!-- comments overlay -->
 				<overlay id="comments">
