@@ -414,11 +414,19 @@ public class AssessmentServiceImpl implements AssessmentService
 		// check for changes not allowed if live
 		if ((assessment.getIsLive()) && ((AssessmentImpl) assessment).getIsLiveChanged()) throw new AssessmentPolicyException();
 
-		// see if we need to retract released grades
+		// see if we need to retract or release grades
 		boolean retract = false;
-		if ((!assessment.getGrading().getAutoRelease()) && ((AssessmentGradingImpl) (assessment.getGrading())).getAutoReleaseChanged())
+		boolean release = false;
+		if (((AssessmentGradingImpl) (assessment.getGrading())).getAutoReleaseChanged())
 		{
-			retract = true;
+			if (assessment.getGrading().getAutoRelease())
+			{
+				release = true;
+			}
+			else
+			{
+				retract = true;
+			}
 		}
 
 		// clear the auto-release change tracking
@@ -430,6 +438,10 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (retract)
 		{
 			this.submissionService.retractSubmissions(assessment);
+		}
+		else if (release)
+		{
+			this.submissionService.releaseSubmissions(assessment, Boolean.FALSE);
 		}
 	}
 
