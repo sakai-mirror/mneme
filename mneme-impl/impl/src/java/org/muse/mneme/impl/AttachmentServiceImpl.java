@@ -377,6 +377,15 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Reference getReference(String refString)
+	{
+		Reference ref = this.entityManager.newReference(refString);
+		return ref;
+	}
+
+	/**
 	 * Final initialization, once all dependencies are set.
 	 */
 	public void init()

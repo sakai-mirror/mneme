@@ -56,6 +56,15 @@ public interface AttachmentService
 	Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, FileItem file);
 
 	/**
+	 * Form a Reference object from a reference string.
+	 * 
+	 * @param refString
+	 *        The reference string.
+	 * @return The Reference object.
+	 */
+	Reference getReference(String refString);
+
+	/**
 	 * Remove this attachment.
 	 * 
 	 * @param ref

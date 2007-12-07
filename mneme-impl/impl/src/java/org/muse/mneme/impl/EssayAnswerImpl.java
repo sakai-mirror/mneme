@@ -230,8 +230,8 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 			this.answerData = data[0];
 			for (int index = 1; index < data.length; index++)
 			{
-				// TODO: need to convert data[index] to a Reference
-				// uploads.add(data[0]);
+				Reference ref = this.attachmentService.getReference(data[index]);
+				uploads.add(ref);
 			}
 		}
 	}
