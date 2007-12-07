@@ -93,7 +93,14 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void clearIsChanged()
 	{
-		this.priorAnswer = new LinkedHashMap<String, Value>(this.answerData);
+		// deep copy to match the current answerData
+		this.priorAnswer = new LinkedHashMap<String, Value>(this.answerData.size());
+		for (Map.Entry entry : this.answerData.entrySet())
+		{
+			Value v = this.uiService.newValue();
+			v.setValue(((Value) entry.getValue()).getValue());
+			this.priorAnswer.put((String) entry.getKey(), v);
+		}
 	}
 
 	/**
@@ -236,7 +243,12 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 
 		for (Map.Entry entry : this.answerData.entrySet())
 		{
-			if (Different.different(entry.getValue(), this.priorAnswer.get(entry.getKey()))) return Boolean.TRUE;
+			String curValue = ((Value) (entry.getValue())).getValue();
+			String priorValue = ((Value) (this.priorAnswer.get(entry.getKey()))).getValue();
+			if (Different.different(curValue, priorValue))
+			{
+				return Boolean.TRUE;
+			}
 		}
 
 		return Boolean.FALSE;

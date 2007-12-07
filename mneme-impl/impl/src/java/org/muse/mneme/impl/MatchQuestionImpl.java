@@ -102,6 +102,19 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 			// TODO: max!
 		}
 
+		public MatchQuestionPair(Question question, String choice, String choiceId, String match, String id, int index)
+		{
+			this.myQuestion = question;
+			this.choice = StringUtil.trimToNull(choice);
+			this.choiceId = StringUtil.trimToNull(choiceId);
+			this.correctChoiceId = this.choiceId;
+			this.id = StringUtil.trimToNull(id);
+			this.match = StringUtil.trimToNull(match);
+			this.choiceLabel = choiceLabels[index];
+			this.matchLabel = matchLabels[index];
+			// TODO: max!
+		}
+
 		public String getChoice()
 		{
 			return this.choice;
@@ -483,13 +496,29 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String[] getData()
 	{
-		String[] rv = new String[(2 * this.pairs.size()) + 1];
+		String[] rv = new String[4 * (this.pairs.size() + 1)];
 		int i = 0;
-		rv[i++] = (this.distractor == null) ? null : this.distractor.choice;
+		if (this.distractor != null)
+		{
+			rv[i++] = this.distractor.choice;
+			rv[i++] = this.distractor.choiceId;
+			rv[i++] = this.distractor.match;
+			rv[i++] = this.distractor.id;
+		}
+		else
+		{
+			rv[i++] = null;
+			rv[i++] = null;
+			rv[i++] = null;
+			rv[i++] = null;
+
+		}
 		for (MatchQuestionPair pair : this.pairs)
 		{
 			rv[i++] = pair.choice;
+			rv[i++] = pair.choiceId;
 			rv[i++] = pair.match;
+			rv[i++] = pair.id;
 		}
 
 		return rv;
@@ -984,19 +1013,26 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	{
 		if ((data != null) && (data.length > 0))
 		{
-			int numPairs = (data.length - 1) / 2;
+			int numPairs = ((data.length / 4) - 1);
 			int i = 0;
 
-			String distractor = data[i++];
-			if (distractor != null)
+			String choice = data[i++];
+			String choiceId = data[i++];
+			String match = data[i++];
+			String id = data[i++];
+			if (choice != null)
 			{
-				this.distractor = new MatchQuestionPair(this.question, distractor, null, 0);
+				this.distractor = new MatchQuestionPair(this.question, choice, choiceId, match, id, 0);
 			}
 
 			this.pairs = new ArrayList<MatchQuestionPair>();
 			for (int count = 0; count < numPairs; count++)
 			{
-				this.pairs.add(new MatchQuestionPair(this.question, data[i++], data[i++], this.pairs.size()));
+				choice = data[i++];
+				choiceId = data[i++];
+				match = data[i++];
+				id = data[i++];
+				this.pairs.add(new MatchQuestionPair(this.question, choice, choiceId, match, id, this.pairs.size()));
 			}
 		}
 	}
