@@ -741,6 +741,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 			a.clearChanged();
 			a.clearMint();
+			((AssessmentGradingImpl) (a.getGrading())).initAutoRelease(a.getGrading().getAutoRelease());
 			this.assessments.put(a.getId(), a);
 
 			//
@@ -786,6 +787,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 			a.clearChanged();
 			a.clearMint();
+			((AssessmentGradingImpl) (a.getGrading())).initAutoRelease(a.getGrading().getAutoRelease());
 			this.assessments.put(a.getId(), a);
 
 			//
@@ -824,6 +826,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 			a.clearChanged();
 			a.clearMint();
+			((AssessmentGradingImpl) (a.getGrading())).initAutoRelease(a.getGrading().getAutoRelease());
 			this.assessments.put(a.getId(), a);
 		}
 	}
