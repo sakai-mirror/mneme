@@ -1270,20 +1270,38 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 	}
 
-	// /**
-	// * {@inheritDoc}
-	// */
-	// public void removeIncompleteAssessmentSubmissions(Assessment assessment) throws AssessmentPermissionException
-	// {
-	// if (assessment == null) throw new IllegalArgumentException();
-	//
-	// // permission
-	// securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
-	//
-	// this.storage.removeIncompleteAssessmentSubmissions(assessment);
-	//
-	// // TODO: events?
-	// }
+	/**
+	 * {@inheritDoc}
+	 */
+	public void retractSubmissions(Assessment assessment) throws AssessmentPermissionException
+	{
+		if (assessment == null) throw new IllegalArgumentException();
+
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, assessment.getContext());
+
+		// get the completed submissions to this assessment
+		List<SubmissionImpl> submissions = this.storage.getAssessmentCompleteSubmissions(assessment);
+
+		// TODO: only for the "official" one ? submissions = officialize(submissions);
+
+		for (SubmissionImpl submission : submissions)
+		{
+			if (!submission.getIsReleased()) continue;
+
+			// set as not released
+			submission.setIsReleased(Boolean.FALSE);
+
+			// clear the changed flag
+			((SubmissionImpl) submission).clearIsChanged();
+
+			// save
+			this.storage.saveSubmission(submission);
+
+			// TODO: events?
+			// TODO: retract from gb
+		}
+	}
 
 	/**
 	 * Run the event checking thread.

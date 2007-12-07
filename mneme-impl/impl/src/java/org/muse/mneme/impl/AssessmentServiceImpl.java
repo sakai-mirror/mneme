@@ -197,7 +197,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// start out unpublished
 		rv.setPublished(Boolean.FALSE);
-		
+
 		// and not-live
 		rv.initLive(Boolean.FALSE);
 
@@ -370,7 +370,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// remove incomplete submissions
 		// TODO: I'm not sure we can remove if we have submissions started... -ggolden
-		//this.submissionService.removeIncompleteAssessmentSubmissions(assessment);
+		// this.submissionService.removeIncompleteAssessmentSubmissions(assessment);
 
 		this.storage.removeAssessment((AssessmentImpl) assessment);
 
@@ -414,7 +414,23 @@ public class AssessmentServiceImpl implements AssessmentService
 		// check for changes not allowed if live
 		if ((assessment.getIsLive()) && ((AssessmentImpl) assessment).getIsLiveChanged()) throw new AssessmentPolicyException();
 
+		// see if we need to retract released grades
+		boolean retract = false;
+		if ((!assessment.getGrading().getAutoRelease()) && ((AssessmentGradingImpl) (assessment.getGrading())).getAutoReleaseChanged())
+		{
+			retract = true;
+		}
+
+		// clear the auto-release change tracking
+		((AssessmentGradingImpl) (assessment.getGrading())).initAutoRelease(assessment.getGrading().getAutoRelease());
+
 		save(assessment);
+
+		// if the assessment's grading options were changed to be manual from auto-release, retract any released submissions
+		if (retract)
+		{
+			this.submissionService.retractSubmissions(assessment);
+		}
 	}
 
 	/**

@@ -33,6 +33,9 @@ public class AssessmentGradingImpl implements AssessmentGrading
 
 	protected Boolean autoRelease = Boolean.TRUE;
 
+	/** Track the original auto-release value. */
+	protected transient Boolean autoReleaseWas = Boolean.TRUE;
+
 	protected Boolean gradebookIntegration = Boolean.FALSE;
 
 	protected transient Changeable owner = null;
@@ -121,6 +124,29 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	}
 
 	/**
+	 * Check if the auto-release setting was changed.
+	 * 
+	 * @return TRUE if changed, FALSE if not.
+	 */
+	protected Boolean getAutoReleaseChanged()
+	{
+		Boolean rv = Boolean.valueOf(!this.autoRelease.equals(this.autoReleaseWas));
+		return rv;
+	}
+
+	/**
+	 * Initialize the auto release, and set the "was" to the same.
+	 * 
+	 * @param autoRelease
+	 *        The auto-release setting.
+	 */
+	protected void initAutoRelease(Boolean autoRelease)
+	{
+		this.autoRelease = autoRelease;
+		this.autoReleaseWas = autoRelease;
+	}
+
+	/**
 	 * Set as a copy of another.
 	 * 
 	 * @param other
@@ -129,6 +155,7 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	protected void set(AssessmentGradingImpl other)
 	{
 		this.autoRelease = other.autoRelease;
+		this.autoReleaseWas = other.autoReleaseWas;
 		this.gradebookIntegration = other.gradebookIntegration;
 		this.anonymous = other.anonymous;
 	}

@@ -1118,7 +1118,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 					assessment.getDates().setDueDate(SqlHelper.readDate(result, i++));
 					assessment.getDates().setOpenDate(SqlHelper.readDate(result, i++));
 					assessment.getGrading().setAnonymous(SqlHelper.readBoolean(result, i++));
-					assessment.getGrading().setAutoRelease(SqlHelper.readBoolean(result, i++));
+					((AssessmentGradingImpl)(assessment.getGrading())).initAutoRelease(SqlHelper.readBoolean(result, i++));
 					assessment.getGrading().setGradebookIntegration(SqlHelper.readBoolean(result, i++));
 					assessment.initHistorical(SqlHelper.readBoolean(result, i++));
 					assessment.setRequireHonorPledge(SqlHelper.readBoolean(result, i++));

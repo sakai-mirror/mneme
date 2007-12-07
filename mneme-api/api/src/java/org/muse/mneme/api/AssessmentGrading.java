@@ -55,7 +55,8 @@ public interface AssessmentGrading
 	void setAnonymous(Boolean setting);
 
 	/**
-	 * Set if submissions are to be considered graded as soon as submitted (based only on the auto-scoring).
+	 * Set if submissions are to be considered graded as soon as submitted (based only on the auto-scoring).<br />
+	 * If changed to FALSE, the assessment's submissions are retracted (un-released) when the assessment is saved.
 	 * 
 	 * @return TRUE if the submissions are considered graded on submission, FALSE for manual grading.
 	 */

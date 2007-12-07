@@ -651,6 +651,14 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public void retractSubmissions(Assessment assessment) throws AssessmentPermissionException
+	{
+		this.submissionService.retractSubmissions(assessment);
+	}
+
+	/**
 	 * Run the event checking thread.
 	 */
 	public void run()
