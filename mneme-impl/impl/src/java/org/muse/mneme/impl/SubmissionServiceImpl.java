@@ -2649,14 +2649,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if ((submissions == null) || (submissions.size() < 2)) return submissions;
 
 		List<Submission> rv = new ArrayList<Submission>();
-
-		// sort order (a) future, notStarted, inProgress, submitted, evaluated, released
+		
+		// sort order (a) future, notStarted, released, inProgress, submitted, evaluated
 		List<Submission> future = new ArrayList<Submission>();
 		List<Submission> notStarted = new ArrayList<Submission>();
+		List<Submission> released = new ArrayList<Submission>();
 		List<Submission> inProgress = new ArrayList<Submission>();
 		List<Submission> submitted = new ArrayList<Submission>();
 		List<Submission> evaluated = new ArrayList<Submission>();
-		List<Submission> released = new ArrayList<Submission>();
 
 		for (Submission s : submissions)
 		{
@@ -2703,10 +2703,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// order ascending
 		rv.addAll(future);
 		rv.addAll(notStarted);
+		rv.addAll(released);
 		rv.addAll(inProgress);
 		rv.addAll(submitted);
 		rv.addAll(evaluated);
-		rv.addAll(released);
 
 		// reverse if descending
 		if (descending)
