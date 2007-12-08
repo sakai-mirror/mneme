@@ -97,13 +97,16 @@ public interface QuestionStorage
 	 *        The context.
 	 * @param sort
 	 *        The sort criteria.
+	 * @param questionType
+	 *        The (optional) quesiton type; if specified, only questions of this type are included.
 	 * @param pageNum
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return The list of questions.
 	 */
-	List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, Integer pageNum, Integer pageSize);
+	List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum,
+			Integer pageSize);
 
 	/**
 	 * Find all the questions in the Pool, sorted and paged.
@@ -112,13 +115,15 @@ public interface QuestionStorage
 	 *        The Pool.
 	 * @param sort
 	 *        The sort criteria.
+	 * @param questionType
+	 *        The (optional) quesiton type; if specified, only questions of this type are included.
 	 * @param pageNum
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return The list of questions.
 	 */
-	List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, Integer pageNum, Integer pageSize);
+	List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Find all the questions in the pool

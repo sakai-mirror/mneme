@@ -400,8 +400,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		// single or multiple answers
 		Selection singleMultiple = uiService.newSelection();
 		singleMultiple.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.singleCorrect"));
-		singleMultiple.addSelection("single-choice", "true");
-		singleMultiple.addSelection("multiple-select", "false");
+		singleMultiple.addSelection(this.uiService.newMessage().setMessage("single-choice"), this.uiService.newMessage().setTemplate("true"));
+		singleMultiple.addSelection(this.uiService.newMessage().setMessage("multiple-select"), this.uiService.newMessage().setTemplate("false"));
 		singleMultiple.setDestination(this.uiService.newDestination().setDestination("STAY"));
 		singleMultiple.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
 
@@ -453,12 +453,12 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 
 		// add more choices control
 		Selection addMore = uiService.newSelection();
-		addMore.addSelection("none", "ADD:0");
-		addMore.addSelection("one", "ADD:1");
-		addMore.addSelection("two", "ADD:2");
-		addMore.addSelection("three", "ADD:3");
-		addMore.addSelection("four", "ADD:4");
-		addMore.addSelection("five", "ADD:5");
+		addMore.addSelection(this.uiService.newMessage().setMessage("none"), this.uiService.newMessage().setTemplate("ADD:0"));
+		addMore.addSelection(this.uiService.newMessage().setMessage("one"), this.uiService.newMessage().setTemplate("ADD:1"));
+		addMore.addSelection(this.uiService.newMessage().setMessage("two"), this.uiService.newMessage().setTemplate("ADD:2"));
+		addMore.addSelection(this.uiService.newMessage().setMessage("three"), this.uiService.newMessage().setTemplate("ADD:3"));
+		addMore.addSelection(this.uiService.newMessage().setMessage("four"), this.uiService.newMessage().setTemplate("ADD:4"));
+		addMore.addSelection(this.uiService.newMessage().setMessage("five"), this.uiService.newMessage().setTemplate("ADD:5"));
 		addMore.setOrientation(Selection.Orientation.dropdown);
 		addMore.setSubmitValue();
 		addMore.setTitle("more-choices");
@@ -473,7 +473,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		// shuffle choices
 		Selection shuffle = this.uiService.newSelection();
 		shuffle.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.shuffleChoices"));
-		shuffle.addSelection("shuffle", "true");
+		shuffle.addSelection(this.uiService.newMessage().setMessage("shuffle"), this.uiService.newMessage().setTemplate("true"));
 
 		// choices section
 		Section choices = this.uiService.newSection();

@@ -385,17 +385,17 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize)
 	{
-		return questionService.findQuestions(pool, sort, search, pageNum, pageSize);
+		return questionService.findQuestions(pool, sort, search, questionType, pageNum, pageSize);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findQuestions(String context, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Question> findQuestions(String context, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize)
 	{
-		return questionService.findQuestions(context, sort, search, pageNum, pageSize);
+		return questionService.findQuestions(context, sort, search, questionType, pageNum, pageSize);
 	}
 
 	/**
@@ -477,6 +477,14 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	public Pool getPool(String poolId)
 	{
 		return poolService.getPool(poolId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Pool> getPools(String context)
+	{
+		return this.poolService.getPools(context);
 	}
 
 	/**

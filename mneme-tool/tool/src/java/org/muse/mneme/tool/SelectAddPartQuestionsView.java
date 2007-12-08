@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Paging;
+import org.muse.ambrosia.api.Value;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
@@ -38,7 +39,11 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.ManualPart;
+import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
@@ -53,6 +58,12 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 
 	/** Dependency: Pool service. */
 	protected AssessmentService assessmentService = null;
+
+	/** Dependency: mneme service. */
+	protected MnemeService mnemeService = null;
+
+	/** Dependency: PoolService. */
+	protected PoolService poolService = null;
 
 	/** Dependency: Question service. */
 	protected QuestionService questionService = null;
@@ -73,8 +84,8 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page
-		if (params.length < 5 || params.length > 7) throw new IllegalArgumentException();
+		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page, [7] our type filter, [8] our pool filter
+		if (params.length < 5 || params.length > 9) throw new IllegalArgumentException();
 
 		// assessment view sort
 		String assessmentSort = params[2];
@@ -122,9 +133,45 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		paging.setCurrentAndSize(pagingParameter);
 		context.put("paging", paging);
 
+		String typeFilter = (params.length > 7) ? params[7] : "0";
+		context.put("typeFilter", typeFilter);
+
+		// the question types
+		List<QuestionPlugin> questionTypes = this.mnemeService.getQuestionPlugins();
+		context.put("questionTypes", questionTypes);
+
+		// for the selected question type - pre-select the top of the list
+		Value value = this.uiService.newValue();
+		value.setValue(typeFilter);
+		context.put("selectedQuestionType", value);
+
+		String poolFilter = (params.length > 8) ? params[8] : "0";
+		context.put("poolFilter", poolFilter);
+
+		// the pools
+		List<Pool> pools = this.poolService.getPools(toolManager.getCurrentPlacement().getContext());
+		context.put("pools", pools);
+
+		// for the selected pool - pre-select the top of the list
+		value = this.uiService.newValue();
+		value.setValue(poolFilter);
+		context.put("selectedPool", value);
+
 		// get questions
-		List<Question> questions = questionService.findQuestions(this.toolManager.getCurrentPlacement().getContext(), sort, null,
-				paging.getCurrent(), paging.getSize());
+		List<Question> questions = null;
+
+		if (poolFilter.equals("0"))
+		{
+			questions = questionService.findQuestions(this.toolManager.getCurrentPlacement().getContext(), sort, null, (typeFilter.equals("0") ? null
+					: typeFilter), paging.getCurrent(), paging.getSize());
+		}
+		else
+		{
+			// get the pool
+			Pool pool = this.poolService.getPool(poolFilter);
+			questions = questionService.findQuestions(pool, sort, null, (typeFilter.equals("0") ? null : typeFilter), paging.getCurrent(), paging
+					.getSize());
+		}
 		context.put("questions", questions);
 
 		// render
@@ -145,8 +192,8 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page
-		if (params.length < 5 || params.length > 7) throw new IllegalArgumentException();
+		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page, [7] our type filter, [8] our pool filter
+		if (params.length < 5 || params.length > 9) throw new IllegalArgumentException();
 
 		String assessmentId = params[3];
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
@@ -211,6 +258,26 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * @param mnemeService
+	 *        the mnemeService to set
+	 */
+	public void setMnemeService(MnemeService mnemeService)
+	{
+		this.mnemeService = mnemeService;
+	}
+
+	/**
+	 * Set the PoolService.
+	 * 
+	 * @param service
+	 *        The PoolService.
+	 */
+	public void setPoolService(PoolService service)
+	{
+		this.poolService = service;
 	}
 
 	/**

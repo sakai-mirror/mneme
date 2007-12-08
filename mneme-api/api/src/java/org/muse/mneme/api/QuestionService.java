@@ -115,13 +115,15 @@ public interface QuestionService
 	 *        The sort criteria.
 	 * @param search
 	 *        The search criteria.
+	 * @param questionType
+	 *        The (optional) quesiton type; if specified, only questions of this type are included.
 	 * @param pageNum
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return a list of questions that meet the criteria.
 	 */
-	List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Locate a list of questions with this criteria.
@@ -132,13 +134,15 @@ public interface QuestionService
 	 *        The sort criteria.
 	 * @param search
 	 *        The search criteria.
+	 * @param questionType
+	 *        The (optional) quesiton type; if specified, only questions of this type are included.
 	 * @param pageNum
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return a list of questions that meet the criteria.
 	 */
-	List<Question> findQuestions(String context, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<Question> findQuestions(String context, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Access a question by id.

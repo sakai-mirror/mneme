@@ -285,7 +285,7 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize)
 	{
 		if (pool == null) throw new IllegalArgumentException();
 
@@ -293,13 +293,13 @@ public class QuestionServiceImpl implements QuestionService
 
 		if (M_log.isDebugEnabled()) M_log.debug("findQuestions");
 
-		return new ArrayList<Question>(this.storage.findPoolQuestions(pool, sort, pageNum, pageSize));
+		return new ArrayList<Question>(this.storage.findPoolQuestions(pool, sort, questionType, pageNum, pageSize));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findQuestions(String context, FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Question> findQuestions(String context, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize)
 	{
 		if (context == null) throw new IllegalArgumentException();
 
@@ -307,7 +307,7 @@ public class QuestionServiceImpl implements QuestionService
 
 		if (M_log.isDebugEnabled()) M_log.debug("findQuestions");
 
-		return new ArrayList<Question>(this.storage.findContextQuestions(context, sort, pageNum, pageSize));
+		return new ArrayList<Question>(this.storage.findContextQuestions(context, sort, questionType, pageNum, pageSize));
 	}
 
 	/**

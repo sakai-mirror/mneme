@@ -250,14 +250,28 @@
 						<!--mark as evaluated -->
 						<selection>
 							<selectionChoices>
-								<selectionChoice value="true" selector="mark-evaluated" />
+								<selectionChoice>
+									<displayMessage>
+										<message selector="mark-evaluated" />
+									</displayMessage>
+									<valueMessage>
+										<message template="true" />
+									</valueMessage>
+								</selectionChoice>
 							</selectionChoices>
 							<model ref="submission.evaluation.evaluated" />
 						</selection>
 						<!-- release -->
 						<selection>
 							<selectionChoices>
-								<selectionChoice value="true" selector="release-scores" />
+								<selectionChoice>
+									<displayMessage>
+										<message selector="release-scores" />
+									</displayMessage>
+									<valueMessage>
+										<message template="true" />
+									</valueMessage>
+								</selectionChoice>
 							</selectionChoices>
 							<model ref="submission.isReleased" />
 						</selection>

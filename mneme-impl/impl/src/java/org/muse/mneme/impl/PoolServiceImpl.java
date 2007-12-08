@@ -231,6 +231,19 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public List<Pool> getPools(String context)
+	{
+		if (context == null) throw new IllegalArgumentException();
+
+		// get all the pools for these users
+		List<Pool> rv = new ArrayList<Pool>(this.storage.getPools(context));
+
+		return rv;
+	}
+
+	/**
 	 * Final initialization, once all dependencies are set.
 	 */
 	public void init()
@@ -701,23 +714,6 @@ public class PoolServiceImpl implements PoolService
 		{
 			rv = this.questionService.getPoolQuestions(pool);
 		}
-
-		return rv;
-	}
-
-	/**
-	 * Get all the pools available to the context.
-	 * 
-	 * @param context
-	 *        The context.
-	 * @return The pools available to the context.
-	 */
-	protected List<Pool> getContextPools(String context)
-	{
-		if (context == null) throw new IllegalArgumentException();
-
-		// get all the pools for these users
-		List<Pool> rv = new ArrayList<Pool>(this.storage.getPools(context));
 
 		return rv;
 	}

@@ -136,7 +136,7 @@ public class PoolEditView extends ControllerImpl
 		context.put("paging", paging);
 
 		// get questions
-		List<Question> questions = questionService.findQuestions(pool, sort, null, paging.getCurrent(), paging.getSize());
+		List<Question> questions = questionService.findQuestions(pool, sort, null, null, paging.getCurrent(), paging.getSize());
 		context.put("questions", questions);
 
 		uiService.render(ui, context);

@@ -93,10 +93,10 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 		// submission type
 		Selection type = uiService.newSelection();
 		type.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.submissionType"));
-		type.addSelection("inline", "inline");
-		type.addSelection("inline-attachments", "both");
-		type.addSelection("attachments", "attachments");
-		type.addSelection("no-submission", "none");
+		type.addSelection(this.uiService.newMessage().setMessage("inline"), this.uiService.newMessage().setTemplate("inline"));
+		type.addSelection(this.uiService.newMessage().setMessage("inline-attachments"), this.uiService.newMessage().setTemplate("both"));
+		type.addSelection(this.uiService.newMessage().setMessage("attachments"), this.uiService.newMessage().setTemplate("attachments"));
+		type.addSelection(this.uiService.newMessage().setMessage("no-submission"), this.uiService.newMessage().setTemplate("none"));
 		type.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 
 		Section typeSection = this.uiService.newSection();
@@ -133,10 +133,10 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 		// submission type
 		Selection type = uiService.newSelection();
 		type.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.submissionType"));
-		type.addSelection("inline", "inline");
-		type.addSelection("inline-attachments", "both");
-		type.addSelection("attachments", "attachments");
-		type.addSelection("no-submission", "none");
+		type.addSelection(this.uiService.newMessage().setMessage("inline"), this.uiService.newMessage().setTemplate("inline"));
+		type.addSelection(this.uiService.newMessage().setMessage("inline-attachments"), this.uiService.newMessage().setTemplate("both"));
+		type.addSelection(this.uiService.newMessage().setMessage("attachments"), this.uiService.newMessage().setTemplate("attachments"));
+		type.addSelection(this.uiService.newMessage().setMessage("no-submission"), this.uiService.newMessage().setTemplate("none"));
 		type.setReadOnly(this.uiService.newTrueDecision());
 		type.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 

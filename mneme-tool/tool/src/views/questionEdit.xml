@@ -88,7 +88,14 @@
 						</message>
 					</title>
 					<selectionChoices>
-						<selectionChoice value="true" selector="question-author-reason" />
+						<selectionChoice>
+							<displayMessage>
+								<message selector="question-author-reason" />
+							</displayMessage>
+							<valueMessage>
+								<message template="true" />
+							</valueMessage>
+						</selectionChoice>
 					</selectionChoices>
 					<model ref="question.explainReason" />
 				</selection>

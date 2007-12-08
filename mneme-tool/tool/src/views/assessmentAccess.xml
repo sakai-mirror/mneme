@@ -67,7 +67,14 @@
 						<decision type="true" reversed="TRUE" />
 					</singleSelect>
 					<model ref="access.users" />
-					<selectionModel name="user" model="assessment.submitUsers" value="user.id" display="user.sortName" />
+					<selectionModel name="user" model="assessment.submitUsers">
+						<valueMessage>
+							<message ref="user.id" />
+						</valueMessage>
+						<displayMessage>
+							<message ref="user.sortName" />
+						</displayMessage>
+					</selectionModel>
 				</selection>
 				<dateEdit title="open-date">
 					<model ref="access.openDate" type="date" />
@@ -81,8 +88,21 @@
 				<selection title="timeLimit">
 					<model ref="access.hasTimeLimit" />
 					<selectionChoices>
-						<selectionChoice value="false" selector="no-time-limit" />
-						<selectionChoice value="true" selector="time-limit">
+						<selectionChoice>
+							<displayMessage>
+								<message selector="no-time-limit" />
+							</displayMessage>
+							<valueMessage>
+								<message template="false" />
+							</valueMessage>
+						</selectionChoice>
+						<selectionChoice>
+							<displayMessage>
+								<message selector="time-limit" />
+							</displayMessage>
+							<valueMessage>
+								<message template="true" />
+							</valueMessage>
 							<container>
 								<durationEdit>
 									<model ref="access.timeLimit" type="duration" />
@@ -97,8 +117,21 @@
 				<selection title="allowTries">
 					<model ref="access.hasTriesLimit" />
 					<selectionChoices>
-						<selectionChoice value="false" selector="no-tries" />
-						<selectionChoice value="true" selector="tries">
+						<selectionChoice>
+							<displayMessage>
+								<message selector="no-tries" />
+							</displayMessage>
+							<valueMessage>
+								<message template="false" />
+							</valueMessage>
+						</selectionChoice>
+						<selectionChoice>
+							<displayMessage>
+								<message selector="tries" />
+							</displayMessage>
+							<valueMessage>
+								<message template="true" />
+							</valueMessage>
 							<container>
 								<countEdit>
 									<model ref="access.tries" type="count" />

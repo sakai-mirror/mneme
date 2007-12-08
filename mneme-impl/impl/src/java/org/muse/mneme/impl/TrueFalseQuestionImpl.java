@@ -168,8 +168,8 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	{
 		Selection selection = this.uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer"));
-		selection.addSelection("true", "true");
-		selection.addSelection("false", "false");
+		selection.addSelection(this.uiService.newMessage().setMessage("true"), this.uiService.newMessage().setTemplate("true"));
+		selection.addSelection(this.uiService.newMessage().setMessage("false"), this.uiService.newMessage().setTemplate("false"));
 		selection.setTitle("correct-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
 
 		Section section = this.uiService.newSection();
@@ -229,8 +229,8 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 
 		Selection selection = this.uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
-		selection.addSelection("true", "true");
-		selection.addSelection("false", "false");
+		selection.addSelection(this.uiService.newMessage().setMessage("true"), this.uiService.newMessage().setTemplate("true"));
+		selection.addSelection(this.uiService.newMessage().setMessage("false"), this.uiService.newMessage().setTemplate("false"));
 
 		Section section = this.uiService.newSection();
 		section.add(question).add(attachments).add(selection);
@@ -269,8 +269,8 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 
 		Selection selection = this.uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
-		selection.addSelection("true", "true");
-		selection.addSelection("false", "false");
+		selection.addSelection(this.uiService.newMessage().setMessage("true"), this.uiService.newMessage().setTemplate("true"));
+		selection.addSelection(this.uiService.newMessage().setMessage("false"), this.uiService.newMessage().setTemplate("false"));
 		selection.setReadOnly(this.uiService.newTrueDecision());
 		selection.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswer"));
 
@@ -390,8 +390,8 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 
 		Selection selection = this.uiService.newSelection();
 		selection.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer"));
-		selection.addSelection("true", "true");
-		selection.addSelection("false", "false");
+		selection.addSelection(this.uiService.newMessage().setMessage("true"), this.uiService.newMessage().setTemplate("true"));
+		selection.addSelection(this.uiService.newMessage().setMessage("false"), this.uiService.newMessage().setTemplate("false"));
 		selection.setReadOnly(this.uiService.newTrueDecision());
 		selection.setCorrect(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer"));
 

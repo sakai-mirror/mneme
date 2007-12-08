@@ -204,15 +204,21 @@ public class QuestionStorageMysql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, Integer pageNum, Integer pageSize)
+	public List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum,
+			Integer pageSize)
 	{
 		// the where and order by
 		StringBuilder whereOrder = new StringBuilder();
-		whereOrder.append("LEFT OUTER JOIN MNEME_POOL P ON Q.POOL_ID=P.ID WHERE Q.MINT='0' AND Q.HISTORICAL='0' AND P.CONTEXT=? ORDER BY ");
+		whereOrder.append("LEFT OUTER JOIN MNEME_POOL P ON Q.POOL_ID=P.ID WHERE Q.MINT='0' AND Q.HISTORICAL='0' AND P.CONTEXT=?"
+				+ ((questionType != null) ? " AND Q.TYPE=?" : "") + " ORDER BY ");
 		whereOrder.append(sortToSql(sort));
 
-		Object[] fields = new Object[1];
+		Object[] fields = new Object[(questionType == null) ? 1 : 2];
 		fields[0] = context;
+		if (questionType != null)
+		{
+			fields[1] = questionType;
+		}
 
 		List<QuestionImpl> rv = readQuestions(whereOrder.toString(), fields);
 
@@ -238,15 +244,21 @@ public class QuestionStorageMysql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, Integer pageNum, Integer pageSize)
+	public List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum,
+			Integer pageSize)
 	{
 		// the where and order by
 		StringBuilder whereOrder = new StringBuilder();
-		whereOrder.append("LEFT OUTER JOIN MNEME_POOL P ON Q.POOL_ID=P.ID WHERE Q.MINT='0' AND Q.HISTORICAL='0' AND Q.POOL_ID=? ORDER BY ");
+		whereOrder.append("LEFT OUTER JOIN MNEME_POOL P ON Q.POOL_ID=P.ID WHERE Q.MINT='0' AND Q.HISTORICAL='0' AND Q.POOL_ID=?"
+				+ ((questionType != null) ? " AND Q.TYPE=?" : "") + " ORDER BY ");
 		whereOrder.append(sortToSql(sort));
 
-		Object[] fields = new Object[1];
+		Object[] fields = new Object[(questionType == null) ? 1 : 2];
 		fields[0] = Long.valueOf(pool.getId());
+		if (questionType != null)
+		{
+			fields[1] = questionType;
+		}
 
 		List<QuestionImpl> rv = readQuestions(whereOrder.toString(), fields);
 

@@ -95,6 +95,15 @@ public interface PoolService
 	Pool getPool(String poolId);
 
 	/**
+	 * Get all the pools available to the context.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return The pools available to the context.
+	 */
+	List<Pool> getPools(String context);
+
+	/**
 	 * Create a new pool.
 	 * 
 	 * @param context

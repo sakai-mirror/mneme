@@ -199,17 +199,19 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, Integer pageNum, Integer pageSize)
+	public List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum,
+			Integer pageSize)
 	{
-		return findQuestions(context, null, sort, pageNum, pageSize);
+		return findQuestions(context, null, sort, questionType, pageNum, pageSize);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, Integer pageNum, Integer pageSize)
+	public List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum,
+			Integer pageSize)
 	{
-		return findQuestions(null, pool, sort, pageNum, pageSize);
+		return findQuestions(null, pool, sort, questionType, pageNum, pageSize);
 	}
 
 	/**
@@ -568,21 +570,20 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	protected List<QuestionImpl> findQuestions(String context, Pool pool, final QuestionService.FindQuestionsSort sort, Integer pageNum,
-			Integer pageSize)
+	protected List<QuestionImpl> findQuestions(String context, Pool pool, final QuestionService.FindQuestionsSort sort, String questionType,
+			Integer pageNum, Integer pageSize)
 	{
 		if (context == null && pool == null) throw new IllegalArgumentException();
 		if (context != null && pool != null) throw new IllegalArgumentException();
 
 		fakeIt();
 
-		// TODO: search
-
 		List<QuestionImpl> rv = new ArrayList<QuestionImpl>();
 		for (QuestionImpl question : this.questions.values())
 		{
 			if (question.getIsHistorical()) continue;
 			if (question.getMint()) continue;
+			if ((questionType != null) && (!question.getType().equals(questionType))) continue;
 			if ((pool != null) && (!question.getPool().equals(pool))) continue;
 			if ((context != null) && (!question.getContext().equals(context))) continue;
 

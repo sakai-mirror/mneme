@@ -114,7 +114,7 @@ public class PoolImpl implements Pool
 	 */
 	public List<Question> findQuestions(FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
-		return this.questionService.findQuestions(this, sort, search, pageNum, pageSize);
+		return this.questionService.findQuestions(this, sort, search, null, pageNum, pageSize);
 	}
 
 	/**

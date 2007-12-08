@@ -202,16 +202,16 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		// answer options
 		Selection response = this.uiService.newSelection();
 		response.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.responseTextual"));
-		response.addSelection("textual", "true");
-		response.addSelection("numeric", "false");
+		response.addSelection(this.uiService.newMessage().setMessage("textual"), this.uiService.newMessage().setTemplate("true"));
+		response.addSelection(this.uiService.newMessage().setMessage("numeric"), this.uiService.newMessage().setTemplate("false"));
 		response.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
 
 		Selection caseSensitive = this.uiService.newSelection();
-		caseSensitive.addSelection("case-sensitive", "true");
+		caseSensitive.addSelection(this.uiService.newMessage().setMessage("case-sensitive"), this.uiService.newMessage().setTemplate("true"));
 		caseSensitive.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.caseSensitive"));
 
 		Selection order = this.uiService.newSelection();
-		order.addSelection("any-order", "true");
+		order.addSelection(this.uiService.newMessage().setMessage("any-order"), this.uiService.newMessage().setTemplate("true"));
 		order.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.anyOrder"));
 
 		Section answerSection = this.uiService.newSection();

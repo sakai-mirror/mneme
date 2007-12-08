@@ -467,12 +467,12 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		distractor.setProperty(this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.distractor"));
 
 		Selection addMore = uiService.newSelection();
-		addMore.addSelection("none", "ADD:0");
-		addMore.addSelection("one", "ADD:1");
-		addMore.addSelection("two", "ADD:2");
-		addMore.addSelection("three", "ADD:3");
-		addMore.addSelection("four", "ADD:4");
-		addMore.addSelection("five", "ADD:5");
+		addMore.addSelection(this.uiService.newMessage().setMessage("none"), this.uiService.newMessage().setTemplate("ADD:0"));
+		addMore.addSelection(this.uiService.newMessage().setMessage("one"), this.uiService.newMessage().setTemplate("ADD:1"));
+		addMore.addSelection(this.uiService.newMessage().setMessage("two"), this.uiService.newMessage().setTemplate("ADD:2"));
+		addMore.addSelection(this.uiService.newMessage().setMessage("three"), this.uiService.newMessage().setTemplate("ADD:3"));
+		addMore.addSelection(this.uiService.newMessage().setMessage("four"), this.uiService.newMessage().setTemplate("ADD:4"));
+		addMore.addSelection(this.uiService.newMessage().setMessage("five"), this.uiService.newMessage().setTemplate("ADD:5"));
 		addMore.setOrientation(Selection.Orientation.dropdown);
 		addMore.setSubmitValue();
 		addMore.setTitle("more-choices");
@@ -560,10 +560,10 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
 				this.uiService.newPropertyReference().setReference("pair.id")));
 		selection.setSelectionModel(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.pairsForDelivery"),
-				"choice", this.uiService.newPropertyReference().setReference("choice.choiceId"), this.uiService.newPropertyReference().setReference(
-						"choice.choiceLabel"));
+				"choice", this.uiService.newMessage().setMessage(null, this.uiService.newPropertyReference().setReference("choice.choiceId")),
+				this.uiService.newMessage().setMessage(null, this.uiService.newPropertyReference().setReference("choice.choiceLabel")));
 		selection.setOrientation(Selection.Orientation.dropdown);
-		selection.addSelection("select", null);
+		selection.addSelection(this.uiService.newMessage().setMessage("select"), null);
 
 		EntityListColumn matchCol = this.uiService.newEntityListColumn();
 		matchCol.add(selection);
@@ -777,11 +777,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
 				this.uiService.newPropertyReference().setReference("pair.id")));
 		selection.setSelectionModel(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.pairsForDelivery"),
-				"choice", this.uiService.newPropertyReference().setReference("choice.choiceId"), this.uiService.newPropertyReference().setReference(
-						"choice.choiceLabel"));
+				"choice", this.uiService.newMessage().setMessage(null, this.uiService.newPropertyReference().setReference("choice.choiceId")),
+				this.uiService.newMessage().setMessage(null, this.uiService.newPropertyReference().setReference("choice.choiceLabel")));
 		selection.setOrientation(Selection.Orientation.dropdown);
 		selection.setReadOnly(this.uiService.newTrueDecision());
-		selection.addSelection("select", null);
+		selection.addSelection(this.uiService.newMessage().setMessage("select"), null);
 
 		EntityListColumn matchCol = this.uiService.newEntityListColumn();
 		matchCol.add(selection);
@@ -899,11 +899,11 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
 				this.uiService.newPropertyReference().setReference("pair.id")));
 		selection.setSelectionModel(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.pairsForDelivery"),
-				"choice", this.uiService.newPropertyReference().setReference("choice.choiceId"), this.uiService.newPropertyReference().setReference(
-						"choice.choiceLabel"));
+				"choice", this.uiService.newMessage().setMessage(null, this.uiService.newPropertyReference().setReference("choice.choiceId")),
+				this.uiService.newMessage().setMessage(null, this.uiService.newPropertyReference().setReference("choice.choiceLabel")));
 		selection.setOrientation(Selection.Orientation.dropdown);
 		selection.setReadOnly(this.uiService.newTrueDecision());
-		selection.addSelection("select", null);
+		selection.addSelection(this.uiService.newMessage().setMessage("select"), null);
 
 		EntityListColumn matchCol = this.uiService.newEntityListColumn();
 		matchCol.add(selection);
@@ -970,10 +970,10 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		// match
 		Selection selection = this.uiService.newSelection();
 		selection.setSelectionModel(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.pairsForDelivery"), "choice",
-				this.uiService.newPropertyReference().setReference("choice.choiceId"), this.uiService.newPropertyReference().setReference(
-						"choice.choiceLabel"));
+				this.uiService.newMessage().setMessage(null, this.uiService.newPropertyReference().setReference("choice.choiceId")), this.uiService
+						.newMessage().setMessage(null, this.uiService.newPropertyReference().setReference("choice.choiceLabel")));
 		selection.setOrientation(Selection.Orientation.dropdown);
-		selection.addSelection("select", null);
+		selection.addSelection(this.uiService.newMessage().setMessage("select"), null);
 
 		EntityListColumn matchCol = this.uiService.newEntityListColumn();
 		matchCol.add(selection);

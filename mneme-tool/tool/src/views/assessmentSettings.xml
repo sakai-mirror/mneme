@@ -75,9 +75,30 @@
 						<selection title="type">
 							<model ref="assessment.type" />
 							<selectionChoices>
-								<selectionChoice value="test" selector="assessment-type-test" />
-								<selectionChoice value="assignment" selector="assessment-type-assignment" />
-								<!-- <selectionChoice value="survey" selector="assessment-type-survey" /> -->
+								<selectionChoice>
+									<displayMessage>
+										<message selector="assessment-type-test" />
+									</displayMessage>
+									<valueMessage>
+										<message template="test" />
+									</valueMessage>
+								</selectionChoice>
+								<selectionChoice>
+									<displayMessage>
+										<message selector="assessment-type-assignment" />
+									</displayMessage>
+									<valueMessage>
+										<message template="assignment" />
+									</valueMessage>
+								</selectionChoice>
+								<!-- <selectionChoice>
+									<displayMessage>
+									<message selector="assessment-type-survey" />
+									</displayMessage>
+									<valueMessage>
+									<message template="survey" />
+									</valueMessage>
+									</selectionChoice> -->
 							</selectionChoices>
 							<readOnly>
 								<decision model="assessment.isLive" />
@@ -109,7 +130,13 @@
 				<selection title="allowTries">
 					<model ref="assessment.hasTriesLimit" />
 					<selectionChoices>
-						<selectionChoice value="true" selector="type-number">
+						<selectionChoice>
+							<displayMessage>
+								<message selector="type-number" />
+							</displayMessage>
+							<valueMessage>
+								<message template="true" />
+							</valueMessage>
 							<container>
 								<countEdit>
 									<model ref="assessment.tries" type="count" />
@@ -119,15 +146,35 @@
 								</countEdit>
 							</container>
 						</selectionChoice>
-						<selectionChoice value="false" selector="type-unlimited" />
+						<selectionChoice>
+							<displayMessage>
+								<message selector="type-unlimited" />
+							</displayMessage>
+							<valueMessage>
+								<message template="false" />
+							</valueMessage>
+						</selectionChoice>
 					</selectionChoices>
 				</selection>
 
 				<selection title="timed-settings">
 					<model ref="assessment.hasTimeLimit" />
 					<selectionChoices>
-						<selectionChoice value="false" selector="no-time-limit" />
-						<selectionChoice value="true" selector="time-limit">
+						<selectionChoice>
+							<displayMessage>
+								<message selector="no-time-limit" />
+							</displayMessage>
+							<valueMessage>
+								<message template="false" />
+							</valueMessage>
+						</selectionChoice>
+						<selectionChoice>
+							<displayMessage>
+								<message selector="time-limit" />
+							</displayMessage>
+							<valueMessage>
+								<message template="true" />
+							</valueMessage>
 							<container>
 								<durationEdit>
 									<model ref="assessment.timeLimit" type="duration" />
@@ -147,27 +194,68 @@
 							</title>
 							<model ref="assessment.review.timing" />
 							<selectionChoices>
-								<selectionChoice value="submitted" selector="type-submitted" />
-								<selectionChoice value="graded" selector="type-graded" />
-								<selectionChoice value="date" selector="type-date">
+								<selectionChoice>
+									<displayMessage>
+										<message selector="type-submitted" />
+									</displayMessage>
+									<valueMessage>
+										<message template="submitted" />
+									</valueMessage>
+								</selectionChoice>
+								<selectionChoice>
+									<displayMessage>
+										<message selector="type-graded" />
+									</displayMessage>
+									<valueMessage>
+										<message template="graded" />
+									</valueMessage>
+								</selectionChoice>
+								<selectionChoice>
+									<displayMessage>
+										<message selector="type-date" />
+									</displayMessage>
+									<valueMessage>
+										<message template="date" />
+									</valueMessage>
 									<container>
 										<dateEdit>
 											<model ref="assessment.review.date" type="date" />
 										</dateEdit>
 									</container>
 								</selectionChoice>
-								<selectionChoice value="never" selector="type-never" />
+								<selectionChoice>
+									<displayMessage>
+										<message selector="type-never" />
+									</displayMessage>
+									<valueMessage>
+										<message template="never" />
+									</valueMessage>
+								</selectionChoice>
 							</selectionChoices>
 						</selection>
 						<selection>
 							<selectionChoices>
-								<selectionChoice value="true" selector="showAnswerKey" />
+								<selectionChoice>
+									<displayMessage>
+										<message selector="showAnswerKey" />
+									</displayMessage>
+									<valueMessage>
+										<message template="true" />
+									</valueMessage>
+								</selectionChoice>
 							</selectionChoices>
 							<model ref="assessment.review.showCorrectAnswer" />
 						</selection>
 						<selection>
 							<selectionChoices>
-								<selectionChoice value="true" selector="showFeedback" />
+								<selectionChoice>
+									<displayMessage>
+										<message selector="showFeedback" />
+									</displayMessage>
+									<valueMessage>
+										<message template="true" />
+									</valueMessage>
+								</selectionChoice>
 							</selectionChoices>
 							<model ref="assessment.review.showFeedback" />
 						</selection>
@@ -184,20 +272,48 @@
 							</title>
 							<model ref="assessment.grading.autoRelease" />
 							<selectionChoices>
-								<selectionChoice value="true" selector="type-auto" />
-								<selectionChoice value="false" selector="type-manual" />
+								<selectionChoice>
+									<displayMessage>
+										<message selector="type-auto" />
+									</displayMessage>
+									<valueMessage>
+										<message template="true" />
+									</valueMessage>
+								</selectionChoice>
+								<selectionChoice>
+									<displayMessage>
+										<message selector="type-manual" />
+									</displayMessage>
+									<valueMessage>
+										<message template="false" />
+									</valueMessage>
+								</selectionChoice>
 							</selectionChoices>
 						</selection>
 						<selection title="sendgbook">
 							<selectionChoices>
-								<selectionChoice value="true" selector="sendgbook" />
+								<selectionChoice>
+									<displayMessage>
+										<message selector="sendgbook" />
+									</displayMessage>
+									<valueMessage>
+										<message template="true" />
+									</valueMessage>
+								</selectionChoice>
 							</selectionChoices>
 							<model ref="assessment.grading.gradebookIntegration" />
 						</selection>
 
 						<selection title="anonymous">
 							<selectionChoices>
-								<selectionChoice value="true" selector="anonymous" />
+								<selectionChoice>
+									<displayMessage>
+										<message selector="anonymous" />
+									</displayMessage>
+									<valueMessage>
+										<message template="true" />
+									</valueMessage>
+								</selectionChoice>
 							</selectionChoices>
 							<model ref="assessment.grading.anonymous" />
 						</selection>
@@ -239,7 +355,14 @@
 						</message>
 					</title>
 					<selectionChoices>
-						<selectionChoice value="true" selector="require-users" />
+						<selectionChoice>
+							<displayMessage>
+								<message selector="require-users" />
+							</displayMessage>
+							<valueMessage>
+								<message template="true" />
+							</valueMessage>
+						</selectionChoice>
 					</selectionChoices>
 					<model ref="assessment.requireHonorPledge" />
 				</selection>
@@ -251,7 +374,14 @@
 						</message>
 					</title>
 					<selectionChoices>
-						<selectionChoice value="true" selector="hints-title" />
+						<selectionChoice>
+							<displayMessage>
+								<message selector="hints-title" />
+							</displayMessage>
+							<valueMessage>
+								<message template="true" />
+							</valueMessage>
+						</selectionChoice>
 					</selectionChoices>
 					<model ref="assessment.showHints" />
 				</selection>
@@ -259,27 +389,75 @@
 				<selection title="nav">
 					<model ref="assessment.randomAccess" />
 					<selectionChoices>
-						<selectionChoice value="true" selector="type-flex">
+						<selectionChoice>
+							<displayMessage>
+								<message selector="type-flex" />
+							</displayMessage>
+							<valueMessage>
+								<message template="true" />
+							</valueMessage>
 							<container separate="TRUE">
 								<selection title="layout">
 									<model ref="assessment.questionGrouping" />
 									<selectionChoices>
-										<selectionChoice value="question" selector="type-question" />
-										<selectionChoice value="part" selector="type-part" />
-										<selectionChoice value="assessment" selector="type-assessment" />
+										<selectionChoice>
+											<displayMessage>
+												<message selector="type-question" />
+											</displayMessage>
+											<valueMessage>
+												<message template="question" />
+											</valueMessage>
+										</selectionChoice>
+										<selectionChoice>
+											<displayMessage>
+												<message selector="type-part" />
+											</displayMessage>
+											<valueMessage>
+												<message template="part" />
+											</valueMessage>
+										</selectionChoice>
+										<selectionChoice>
+											<displayMessage>
+												<message selector="type-assessment" />
+											</displayMessage>
+											<valueMessage>
+												<message template="assessment" />
+											</valueMessage>
+										</selectionChoice>
 									</selectionChoices>
 								</selection>
 							</container>
 						</selectionChoice>
-						<selectionChoice value="false" selector="type-strict" />
+						<selectionChoice>
+							<displayMessage>
+								<message selector="type-strict" />
+							</displayMessage>
+							<valueMessage>
+								<message template="false" />
+							</valueMessage>
+						</selectionChoice>
 					</selectionChoices>
 				</selection>
 
 				<selection title="partSettings">
 					<model ref="assessment.parts.continuousNumbering" />
 					<selectionChoices>
-						<selectionChoice value="true" selector="type-continuous" />
-						<selectionChoice value="false" selector="type-restart" />
+						<selectionChoice>
+							<displayMessage>
+								<message selector="type-continuous" />
+							</displayMessage>
+							<valueMessage>
+								<message template="true" />
+							</valueMessage>
+						</selectionChoice>
+						<selectionChoice>
+							<displayMessage>
+								<message selector="type-restart" />
+							</displayMessage>
+							<valueMessage>
+								<message template="false" />
+							</valueMessage>
+						</selectionChoice>
 					</selectionChoices>
 				</selection>
 

@@ -215,7 +215,14 @@
 					</title>
 					<model ref="pledge.value" />
 					<selectionChoices>
-						<selectionChoice value="true" selector="honor-pledge-agree" />
+						<selectionChoice>
+							<displayMessage>
+								<message selector="honor-pledge-agree" />
+							</displayMessage>
+							<valueMessage>
+								<message template="true" />
+							</valueMessage>
+						</selectionChoice>
 					</selectionChoices>
 				</selection>
 			</container>

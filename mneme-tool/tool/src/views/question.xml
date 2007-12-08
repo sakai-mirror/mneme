@@ -347,7 +347,14 @@
 										</message>
 									</title>
 									<selectionChoices>
-										<selectionChoice value="true" selector="question-mark-review" />
+										<selectionChoice>
+											<displayMessage>
+												<message selector="question-mark-review" />
+											</displayMessage>
+											<valueMessage>
+												<message template="true" />
+											</valueMessage>
+										</selectionChoice>
 									</selectionChoices>
 									<readOnly>
 										<decision model="review" />
