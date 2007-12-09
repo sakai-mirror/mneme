@@ -99,6 +99,41 @@
 							</container>
 						</overlay>
 
+						<!-- type -->
+						<selection title="type">
+							<model ref="assessment.type" />
+							<selectionChoices>
+								<selectionChoice>
+									<displayMessage>
+										<message selector="assessment-type-test" />
+									</displayMessage>
+									<valueMessage>
+										<message template="test" />
+									</valueMessage>
+								</selectionChoice>
+								<selectionChoice>
+									<displayMessage>
+										<message selector="assessment-type-assignment" />
+									</displayMessage>
+									<valueMessage>
+										<message template="assignment" />
+									</valueMessage>
+								</selectionChoice>
+								<!-- <selectionChoice>
+									<displayMessage>
+									<message selector="assessment-type-survey" />
+									</displayMessage>
+									<valueMessage>
+									<message template="survey" />
+									</valueMessage>
+									</selectionChoice> -->
+							</selectionChoices>
+							<readOnly>
+								<decision model="assessment.isLive" />
+								<compareDecision model="assessment.type" constant="survey" />
+							</readOnly>
+						</selection>
+
 						<!-- title -->
 						<textEdit title="test-title" rows="1" cols="40">
 							<model ref="assessment.title" />

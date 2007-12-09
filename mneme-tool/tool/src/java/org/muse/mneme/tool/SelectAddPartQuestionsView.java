@@ -142,7 +142,7 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 
 		// for the selected question type - pre-select the top of the list
 		Value value = this.uiService.newValue();
-		value.setValue(typeFilter);
+		value.setValue(context.getDestination());
 		context.put("selectedQuestionType", value);
 
 		String poolFilter = (params.length > 8) ? params[8] : "0";
@@ -154,7 +154,7 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 
 		// for the selected pool - pre-select the top of the list
 		value = this.uiService.newValue();
-		value.setValue(poolFilter);
+		value.setValue(context.getDestination());
 		context.put("selectedPool", value);
 
 		// get questions

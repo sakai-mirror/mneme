@@ -124,6 +124,9 @@ public class PoolPropertiesView extends ControllerImpl
 			return;
 		}
 
+		// if we start out, we are coming from an add
+		boolean mint = pool.getMint();
+
 		// check that the user can manage this pool
 		if (!this.poolService.allowManagePools(pool.getContext()))
 		{
@@ -145,6 +148,18 @@ public class PoolPropertiesView extends ControllerImpl
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
+		}
+
+		// change destination to edit if this is new
+		if (mint)
+		{
+			// make sure we were not deleted
+			pool = this.poolService.getPool(pid);
+			if (pool != null)
+			{
+				// send them to edit pool
+				destination = "/pool_edit/" + poolsSort + "/" + pool.getId();
+			}
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));

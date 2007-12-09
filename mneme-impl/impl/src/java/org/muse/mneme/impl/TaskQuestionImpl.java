@@ -33,6 +33,7 @@ import org.muse.ambrosia.api.Toggle;
 import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
+import org.muse.mneme.impl.EssayQuestionImpl.SubmissionType;
 import org.sakaiproject.i18n.InternationalizedMessages;
 
 /**
@@ -62,6 +63,7 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 	public TaskQuestionImpl(QuestionPlugin plugin, InternationalizedMessages messages, UiService uiService, Question question)
 	{
 		super(plugin, messages, uiService, question);
+		this.submissionType = SubmissionType.none;
 	}
 
 	/**

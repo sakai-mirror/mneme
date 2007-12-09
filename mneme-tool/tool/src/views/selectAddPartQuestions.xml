@@ -54,52 +54,6 @@
 					</emptyTitle>
 					<entityActions>
 						<text>
-							<message selector="type">
-								<model type="component">
-									<container>
-										<selection orientation="DROPDOWN" submitValue="TRUE">
-											<model ref="selectedQuestionType.value" />
-											<selectionChoices>
-												<selectionChoice>
-													<displayMessage>
-														<message selector="all" />
-													</displayMessage>
-													<valueMessage>
-														<message template="/select_add_mpart_question/{0}/{1}/{2}/{3}{4}/{5}/0/{6}">
-															<model ref="assessmentSort" />
-															<model ref="assessment.id" />
-															<model ref="part.id" />
-															<model ref="sort_column" />
-															<model ref="sort_direction" />
-															<model type="paging" ref="paging" />
-															<model ref="poolFilter" />
-														</message>
-													</valueMessage>
-												</selectionChoice>
-											</selectionChoices>
-											<selectionModel model="questionTypes" name="type">
-												<valueMessage>
-													<message template="/select_add_mpart_question/{0}/{1}/{2}/{3}{4}/{5}/{6}/{7}">
-														<model ref="assessmentSort" />
-														<model ref="assessment.id" />
-														<model ref="part.id" />
-														<model ref="sort_column" />
-														<model ref="sort_direction" />
-														<model type="paging" ref="paging" />
-														<model ref="type.type" />
-														<model ref="poolFilter" />
-													</message>
-												</valueMessage>
-												<displayMessage>
-													<message model="type.typeName" />
-												</displayMessage>
-											</selectionModel>
-										</selection>
-									</container>
-								</model>
-							</message>
-						</text>
-						<text>
 							<message selector="pool">
 								<model type="component">
 									<container>
@@ -138,6 +92,52 @@
 												</valueMessage>
 												<displayMessage>
 													<message model="pool.title" />
+												</displayMessage>
+											</selectionModel>
+										</selection>
+									</container>
+								</model>
+							</message>
+						</text>
+						<text>
+							<message selector="type">
+								<model type="component">
+									<container>
+										<selection orientation="DROPDOWN" submitValue="TRUE">
+											<model ref="selectedQuestionType.value" />
+											<selectionChoices>
+												<selectionChoice>
+													<displayMessage>
+														<message selector="all" />
+													</displayMessage>
+													<valueMessage>
+														<message template="/select_add_mpart_question/{0}/{1}/{2}/{3}{4}/{5}/0/{6}">
+															<model ref="assessmentSort" />
+															<model ref="assessment.id" />
+															<model ref="part.id" />
+															<model ref="sort_column" />
+															<model ref="sort_direction" />
+															<model type="paging" ref="paging" />
+															<model ref="poolFilter" />
+														</message>
+													</valueMessage>
+												</selectionChoice>
+											</selectionChoices>
+											<selectionModel model="questionTypes" name="type">
+												<valueMessage>
+													<message template="/select_add_mpart_question/{0}/{1}/{2}/{3}{4}/{5}/{6}/{7}">
+														<model ref="assessmentSort" />
+														<model ref="assessment.id" />
+														<model ref="part.id" />
+														<model ref="sort_column" />
+														<model ref="sort_direction" />
+														<model type="paging" ref="paging" />
+														<model ref="type.type" />
+														<model ref="poolFilter" />
+													</message>
+												</valueMessage>
+												<displayMessage>
+													<message model="type.typeName" />
 												</displayMessage>
 											</selectionModel>
 										</selection>

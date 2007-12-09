@@ -337,7 +337,10 @@
 				</column>
 				<modelColumn title="submission-score" model="submission.answersAutoScore">
 					<entityIncluded selector="dash">
-						<decision model="submission.isComplete" />
+						<orDecision>
+							<decision model="submission.isComplete" />
+							<compareDecision model="submission.gradingStatus" constant="inProgress" />
+						</orDecision>
 					</entityIncluded>
 				</modelColumn>
 				<column>
@@ -373,6 +376,9 @@
 					<container>
 						<floatEdit model="submission.totalScore" cols="6" />
 					</container>
+					<entityIncluded selector="dash">
+						<compareDecision reversed="TRUE" model="submission.gradingStatus" constant="inProgress" />
+					</entityIncluded>
 				</column>
 				<column>
 					<container>

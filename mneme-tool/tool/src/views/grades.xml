@@ -195,11 +195,23 @@
 								<model ref="sort_direction" />
 								<model ref="assessment.id" />
 							</destination>
+							<included>
+								<decision model="assessment.hasUnscoredSubmissions" />
+							</included>
+						</navigation>
+						<navigation style="LINK" submit="TRUE">
+							<icon icon="/icons/grade_student.png" />
+							<destination template="/grade_assessment/{0}{1}/{2}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<decision model="assessment.isLive" />
+								<decision reversed="TRUE" model="assessment.hasUnscoredSubmissions" />
+							</included>
 						</navigation>
 					</navigations>
-					<entityIncluded>
-						<decision model="assessment.hasUnscoredSubmissions" />
-					</entityIncluded>
 				</modelColumn>
 			</columns>
 		</entityList>

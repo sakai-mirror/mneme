@@ -69,10 +69,10 @@
 					<model ref="access.users" />
 					<selectionModel name="user" model="assessment.submitUsers">
 						<valueMessage>
-							<message ref="user.id" />
+							<message model="user.id" />
 						</valueMessage>
 						<displayMessage>
-							<message ref="user.sortName" />
+							<message model="user.sortName" />
 						</displayMessage>
 					</selectionModel>
 				</selection>

@@ -56,7 +56,14 @@
 
 				<selection>
 					<model ref="selectedQuestionType.value" />
-					<selectionModel model="questionTypes" name="type" value="type.type" display="type.typeName"></selectionModel>
+					<selectionModel model="questionTypes" name="type">
+						<valueMessage>
+							<message model="type.type" />
+						</valueMessage>
+						<displayMessage>
+							<message model="type.typeName" />
+						</displayMessage>
+					</selectionModel>
 				</selection>
 
 			</container>
