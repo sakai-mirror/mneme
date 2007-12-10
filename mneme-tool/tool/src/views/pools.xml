@@ -65,6 +65,13 @@
 							<icon icon="/icons/delete.png" style="LEFT" />
 							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-delete" />
 						</navigation>
+						<navigation title="import-title" style="LINK" description="import-description" submit="TRUE">
+							<destination template="/import_pool/{0}{1}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+							</destination>
+							<icon icon="/icons/import_export.png" style="LEFT" />
+						</navigation>
 					</entityActions>
 				</selectionColumn>
 				<modelColumn pixels="16">
