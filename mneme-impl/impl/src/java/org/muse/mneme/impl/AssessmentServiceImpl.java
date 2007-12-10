@@ -44,6 +44,7 @@ import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.memory.api.Cache;
+import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
@@ -88,6 +89,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 	/** Dependency: SubmissionService */
 	protected SubmissionServiceImpl submissionService = null;
+
+	/** Dependency: ThreadLocalManager. */
+	protected ThreadLocalManager threadLocalManager = null;
 
 	protected UserDirectoryService userDirectoryService = null;
 
@@ -146,6 +150,8 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 
+		if (M_log.isDebugEnabled()) M_log.debug("allowRemoveAssessment: " + assessment.getId());
+
 		// user must have manage permission
 		if (!this.allowManageAssessments(assessment.getContext())) return Boolean.FALSE;
 
@@ -161,6 +167,8 @@ public class AssessmentServiceImpl implements AssessmentService
 		// give it a day
 		Date stale = new Date();
 		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
+
+		if (M_log.isDebugEnabled()) M_log.debug("clearStaleMintAssessments");
 
 		this.storage.clearStaleMintAssessments(stale);
 	}
@@ -262,9 +270,21 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		if (id == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("idAssessment: " + id);
+		// for thread-local caching
+		String key = cacheKey(id);
+		AssessmentImpl rv = (AssessmentImpl) this.threadLocalManager.get(key);
+		if (rv != null)
+		{
+			// return a copy
+			return this.storage.newAssessment(rv);
+		}
 
-		AssessmentImpl rv = this.storage.getAssessment(id);
+		if (M_log.isDebugEnabled()) M_log.debug("getAssessment: " + id);
+
+		rv = this.storage.getAssessment(id);
+
+		// thread-local cache (a copy)
+		if (rv != null) this.threadLocalManager.set(key, this.storage.newAssessment(rv));
 
 		return rv;
 	}
@@ -278,9 +298,18 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (publishedOnly == null) throw new IllegalArgumentException();
 		if (sort == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("getContextAssessments: " + context + " " + sort);
+		if (M_log.isDebugEnabled()) M_log.debug("getContextAssessments: " + context + " sort: " + sort + " publishOnly: " + publishedOnly);
 
 		List<Assessment> rv = new ArrayList<Assessment>(this.storage.getContextAssessments(context, sort, publishedOnly));
+
+		// TODO: needed?
+		// // thread-local cache each found assessment
+		// for (Assessment assessment : rv)
+		// {
+		// String key = cacheKey(assessment.getId());
+		// this.threadLocalManager.set(key, this.storage.newAssessment((AssessmentImpl) assessment));
+		// }
+
 		return rv;
 	}
 
@@ -289,7 +318,9 @@ public class AssessmentServiceImpl implements AssessmentService
 	 */
 	public List<User> getSubmitUsers(String context)
 	{
-		// ge the ids
+		if (M_log.isDebugEnabled()) M_log.debug("getSubmitUsers: " + context);
+
+		// get the ids
 		Set<String> ids = this.securityService.getUsersIsAllowed(MnemeService.SUBMIT_PERMISSION, context);
 
 		// turn into users
@@ -326,7 +357,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 			if (storage == null) M_log.warn("no storage set: " + this.storageKey);
 
-			M_log.info("init()");
+			M_log.info("init(): storage: " + this.storage);
 		}
 		catch (Throwable t)
 		{
@@ -372,6 +403,10 @@ public class AssessmentServiceImpl implements AssessmentService
 		// TODO: I'm not sure we can remove if we have submissions started... -ggolden
 		// this.submissionService.removeIncompleteAssessmentSubmissions(assessment);
 
+		// clear the cache
+		String key = cacheKey(assessment.getId());
+		this.threadLocalManager.set(key, null);
+
 		this.storage.removeAssessment((AssessmentImpl) assessment);
 
 		// event
@@ -398,6 +433,10 @@ public class AssessmentServiceImpl implements AssessmentService
 			if (((AssessmentImpl) assessment).getMint())
 			{
 				if (M_log.isDebugEnabled()) M_log.debug("saveAssessment: deleting mint: " + assessment.getId());
+
+				// clear the cache
+				String key = cacheKey(assessment.getId());
+				this.threadLocalManager.set(key, null);
 
 				// Note: mint questions cannot have already been dependened on, so we can just forget about it.
 				this.storage.removeAssessment((AssessmentImpl) assessment);
@@ -545,6 +584,17 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
+	 * Dependency: ThreadLocalManager.
+	 * 
+	 * @param service
+	 *        The SqlService.
+	 */
+	public void setThreadLocalManager(ThreadLocalManager service)
+	{
+		threadLocalManager = service;
+	}
+
+	/**
 	 * Dependency: UserDirectoryService.
 	 * 
 	 * @param service
@@ -553,6 +603,19 @@ public class AssessmentServiceImpl implements AssessmentService
 	public void setUserDirectoryService(UserDirectoryService service)
 	{
 		userDirectoryService = service;
+	}
+
+	/**
+	 * Form a key for caching an assessment.
+	 * 
+	 * @param assessmentId
+	 *        The assessment id.
+	 * @return The cache key.
+	 */
+	protected String cacheKey(String assessmentId)
+	{
+		String key = "mneme:assessment:" + assessmentId;
+		return key;
 	}
 
 	/**
@@ -602,6 +665,10 @@ public class AssessmentServiceImpl implements AssessmentService
 	 */
 	protected void makeLive(Assessment assessment)
 	{
+		// clear the cache
+		String key = cacheKey(assessment.getId());
+		this.threadLocalManager.set(key, null);
+
 		this.storage.makeLive(assessment);
 	}
 
@@ -668,6 +735,10 @@ public class AssessmentServiceImpl implements AssessmentService
 		// update last modified information
 		assessment.getModifiedBy().setDate(now);
 		assessment.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
+
+		// clear the cache
+		String key = cacheKey(assessment.getId());
+		this.threadLocalManager.set(key, null);
 
 		// save
 		this.storage.saveAssessment((AssessmentImpl) assessment);

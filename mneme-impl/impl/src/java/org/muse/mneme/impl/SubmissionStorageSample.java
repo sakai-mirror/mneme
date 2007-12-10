@@ -389,6 +389,14 @@ public class SubmissionStorageSample implements SubmissionStorage
 		return new SubmissionImpl(assessmentService, securityService, submissionService, sessionManager);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public SubmissionImpl newSubmission(SubmissionImpl other)
+	{
+		return new SubmissionImpl(other);
+	}
+
 	// /**
 	// * {@inheritDoc}
 	// */

@@ -24,10 +24,7 @@ package org.muse.mneme.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -464,6 +461,14 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	public SubmissionImpl newSubmission()
 	{
 		return new SubmissionImpl(assessmentService, securityService, submissionService, sessionManager);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public SubmissionImpl newSubmission(SubmissionImpl other)
+	{
+		return new SubmissionImpl(other);
 	}
 
 	/**

@@ -108,6 +108,8 @@ public class PoolServiceImpl implements PoolService
 	 */
 	public void clearStaleMintPools()
 	{
+		if (M_log.isDebugEnabled()) M_log.debug("clearStaleMintPools");
+
 		// give it a day
 		Date stale = new Date();
 		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
@@ -177,6 +179,8 @@ public class PoolServiceImpl implements PoolService
 	 */
 	public Boolean existsPool(String poolId)
 	{
+		if (M_log.isDebugEnabled()) M_log.debug("existsPool: id: " + poolId);
+
 		return this.storage.existsPool(poolId);
 	}
 
@@ -188,7 +192,7 @@ public class PoolServiceImpl implements PoolService
 		if (context == null) throw new IllegalArgumentException();
 		if (sort == null) sort = PoolService.FindPoolsSort.title_a;
 
-		if (M_log.isDebugEnabled()) M_log.debug("findPools: context: " + context);
+		if (M_log.isDebugEnabled()) M_log.debug("findPools: context: " + context + " sort: " + sort + " search: " + search);
 
 		// TODO: search
 
@@ -222,12 +226,12 @@ public class PoolServiceImpl implements PoolService
 
 		if (M_log.isDebugEnabled()) M_log.debug("getPool: " + poolId);
 
-		PoolImpl pool = this.storage.getPool(poolId);
+		rv = this.storage.getPool(poolId);
 
 		// thread-local cache (a copy)
-		if (pool != null) this.threadLocalManager.set(key, this.storage.newPool(pool));
+		if (rv != null) this.threadLocalManager.set(key, this.storage.newPool(rv));
 
-		return pool;
+		return rv;
 	}
 
 	/**
@@ -236,6 +240,8 @@ public class PoolServiceImpl implements PoolService
 	public List<Pool> getPools(String context)
 	{
 		if (context == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getPools: " + context);
 
 		// get all the pools for these users
 		List<Pool> rv = new ArrayList<Pool>(this.storage.getPools(context));
@@ -351,6 +357,8 @@ public class PoolServiceImpl implements PoolService
 
 			return;
 		}
+
+		if (M_log.isDebugEnabled()) M_log.debug("savePool: " + pool.getId());
 
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, pool.getContext());
@@ -630,8 +638,6 @@ public class PoolServiceImpl implements PoolService
 	 */
 	protected void doSave(Pool pool)
 	{
-		if (M_log.isDebugEnabled()) M_log.debug("doSave: " + pool.getId());
-
 		String userId = sessionManager.getCurrentSessionUserId();
 
 		// get the current pool for history

@@ -47,7 +47,6 @@ import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCompletedException;
 import org.muse.mneme.api.SubmissionService;
-import org.muse.mneme.api.SubmissionService.FindAssessmentSubmissionsSort;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
@@ -129,7 +128,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		Assessment assessment = submission.getAssessment();
 		if (assessment == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("allowCompleteSubmission: " + submission.getId() + ": " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("allowCompleteSubmission: " + submission.getId() + " user: " + userId);
 
 		// user must be this submission's user
 		if (!submission.getUserId().equals(userId)) return Boolean.FALSE;
@@ -154,7 +153,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (context == null) throw new IllegalArgumentException();
 		String userId = sessionManager.getCurrentSessionUserId();
 
-		if (M_log.isDebugEnabled()) M_log.debug("allowEvaluate_context: " + context + ": " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("allowEvaluate: context: " + context + " user: " + userId);
 
 		// user must have grade permission in the context of the assessment for this submission
 		if (!securityService.checkSecurity(userId, MnemeService.GRADE_PERMISSION, context)) return Boolean.FALSE;
@@ -170,7 +169,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (submission == null) throw new IllegalArgumentException();
 		String userId = sessionManager.getCurrentSessionUserId();
 
-		if (M_log.isDebugEnabled()) M_log.debug("allowEvaluate: " + submission.getId() + ": " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("allowEvaluate: " + submission.getId() + " user: " + userId);
 
 		// the submission must be complete
 		if (!submission.getIsComplete()) return Boolean.FALSE;
@@ -191,7 +190,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		Assessment assessment = submission.getAssessment();
 		if (assessment == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("allowReviewSubmission: " + submission.getId() + ": " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("allowReviewSubmission: " + submission.getId() + " user: " + userId);
 
 		// user must be this submission's user
 		if (!submission.getUserId().equals(userId)) return Boolean.FALSE;
@@ -212,7 +211,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (submission == null) throw new IllegalArgumentException();
 		String userId = sessionManager.getCurrentSessionUserId();
 
-		if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: " + submission.getAssessment().getId() + ": " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: " + submission.getAssessment().getId() + " user: " + userId);
 
 		// user must have submit permission in the context of the assessment for this submission
 		if (!securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, submission.getAssessment().getContext())) return Boolean.FALSE;
@@ -241,6 +240,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (assessment == null) throw new IllegalArgumentException();
 		Date asOf = new Date();
 
+		if (M_log.isDebugEnabled()) M_log.debug("completeSubmission: submission: " + submission.getId());
+
 		// submission must be incomplete
 		if (submission.getIsComplete()) throw new SubmissionCompletedException();
 
@@ -257,8 +258,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// the assessment must be currently open for submission (with the grace period to support completion near closing time)
 		if (!assessment.getDates().getIsOpen(Boolean.TRUE)) throw new AssessmentClosedException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("completeSubmission: submission: " + submission.getId());
-
 		// update the submission
 		submission.setSubmittedDate(asOf);
 		submission.setIsComplete(Boolean.TRUE);
@@ -268,6 +267,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		{
 			submission.setIsReleased(Boolean.TRUE);
 		}
+
+		// clear the cache
+		String key = cacheKey(submission.getId());
+		this.threadLocalManager.set(key, null);
 
 		// store the changes
 		((SubmissionImpl) submission).clearIsChanged();
@@ -290,7 +293,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (official == null) throw new IllegalArgumentException();
 		Date asOf = new Date();
 
-		if (M_log.isDebugEnabled()) M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId());
+		if (M_log.isDebugEnabled())
+			M_log.debug("countAssessmentSubmissions: assessment: " + assessment.getId() + " official: " + official + " allUid: " + allUid);
 
 		// get the submissions to the assignment made by all possible submitters
 		List<SubmissionImpl> all = getAssessmentSubmissions(assessment, FindAssessmentSubmissionsSort.status_a, null);
@@ -318,7 +322,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	public Integer countSubmissionAnswers(Assessment assessment, Question question, Boolean official)
 	{
+		if (assessment == null) throw new IllegalArgumentException();
+		if (question == null) throw new IllegalArgumentException();
+		if (official == null) throw new IllegalArgumentException();
+
 		// TODO: review the efficiency of this method! -ggolden
+
+		if (M_log.isDebugEnabled())
+			M_log.debug("countSubmissionAnswers: assessment: " + assessment.getId() + " question: " + question.getId() + " official: " + official);
 
 		List<Answer> answers = findSubmissionAnswers(assessment, question, FindAssessmentSubmissionsSort.status_a, official, null, null);
 
@@ -346,7 +357,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		Date asOf = new Date();
 
 		if (M_log.isDebugEnabled())
-			M_log.debug("enterSubmission: assessment: " + submission.getAssessment().getId() + " user: " + submission.getUserId() + " asOf: " + asOf);
+			M_log.debug("enterSubmission: assessment: " + submission.getAssessment().getId() + " user: " + submission.getUserId());
 
 		// user must have SUBMIT_PERMISSION in the context of the assessment
 		securityService.secure(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, submission.getAssessment().getContext());
@@ -458,6 +469,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// save the answers
 		if (!work.isEmpty())
 		{
+			// clear these submissions from the cache
+			for (Answer a : work)
+			{
+				// clear the cache
+				String key = cacheKey(a.getSubmission().getId());
+				this.threadLocalManager.set(key, null);
+			}
+
 			this.storage.saveAnswersEvaluation(work);
 
 			// TODO: events? single event?
@@ -595,6 +614,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			this.storage.saveSubmissionReleased((SubmissionImpl) submission);
 		}
 
+		// clear the cache
+		String key = cacheKey(submission.getId());
+		this.threadLocalManager.set(key, null);
+
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
 
@@ -610,6 +633,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if ((comment == null) && (score == null)) return;
 		Date now = new Date();
 		String userId = sessionManager.getCurrentSessionUserId();
+
+		if (M_log.isDebugEnabled()) M_log.debug("evaluateSubmissions: " + assessment.getId());
 
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, assessment.getContext());
@@ -658,6 +683,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				// clear the changed flag
 				((EvaluationImpl) submission.getEvaluation()).clearIsChanged();
 
+				// clear the cache
+				String key = cacheKey(submission.getId());
+				this.threadLocalManager.set(key, null);
+
 				// save
 				this.storage.saveSubmissionEvaluation(submission);
 			}
@@ -678,7 +707,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (sort == null) sort = FindAssessmentSubmissionsSort.userName_a;
 		Date asOf = new Date();
 
-		if (M_log.isDebugEnabled()) M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId());
+		if (M_log.isDebugEnabled())
+			M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId() + " sort: " + sort + " official: " + official + " allUid: "
+					+ allUid);
 
 		// get the submissions to the assignment made by all possible submitters
 		List<SubmissionImpl> all = getAssessmentSubmissions(assessment, sort, null);
@@ -728,6 +759,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	public List<Question> findPartQuestions(Part part)
 	{
+		if (M_log.isDebugEnabled()) M_log.debug("findPartQuestions: " + part.getId());
+
 		List<String> qids = this.storage.findPartQuestions(part);
 		List<Question> rv = new ArrayList<Question>();
 
@@ -767,7 +800,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (sort == null) sort = FindAssessmentSubmissionsSort.userName_a;
 		Date asOf = new Date();
 
-		if (M_log.isDebugEnabled()) M_log.debug("findNextPrevSubmissionIds: submission: " + submission.getId());
+		if (M_log.isDebugEnabled())
+			M_log.debug("findNextPrevSubmissionIds: submission: " + submission.getId() + " sort: " + sort + " official: " + official);
 
 		// get the submissions to the assignment made by all possible submitters
 		// TODO: we don't really need them all... no phantoms!
@@ -841,7 +875,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (sort == null) sort = FindAssessmentSubmissionsSort.userName_a;
 		Date asOf = new Date();
 
-		if (M_log.isDebugEnabled()) M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId());
+		if (M_log.isDebugEnabled())
+			M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId() + " question: " + question.getId() + " sort: " + sort
+					+ " official: " + official);
 
 		// read all the submissions for this assessment from all possible submitters
 		List<SubmissionImpl> all = getAssessmentSubmissions(assessment, sort, question);
@@ -905,6 +941,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	public Answer getAnswer(String answerId)
 	{
+		if (answerId == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getAnswer:" + answerId);
+
 		return this.storage.getAnswer(answerId);
 	}
 
@@ -913,6 +953,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	public Boolean getAssessmentHasUnscoredSubmissions(Assessment assessment)
 	{
+		if (assessment == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getAssessmentHasUnscoredSubmissions:" + assessment.getId());
+
 		return this.storage.getAssessmentHasUnscoredSubmissions(assessment);
 	}
 
@@ -921,6 +965,12 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	public Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
 	{
+		if (assessment == null) throw new IllegalArgumentException();
+		if (question == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled())
+			M_log.debug("getAssessmentQuestionHasUnscoredSubmissions:" + assessment.getId() + " question: " + question.getId());
+
 		return this.storage.getAssessmentQuestionHasUnscoredSubmissions(assessment, question);
 	}
 
@@ -929,6 +979,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	public List<Float> getAssessmentScores(Assessment assessment)
 	{
+		if (assessment == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getAssessmentScores:" + assessment.getId());
+
 		List<Float> rv = this.storage.getAssessmentScores(assessment);
 		return rv;
 	}
@@ -942,7 +996,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 		Date asOf = new Date();
 
-		if (M_log.isDebugEnabled()) M_log.debug("getUserAssessmentSubmission: assessment: " + assessment.getId() + " userId: " + userId);
+		if (M_log.isDebugEnabled()) M_log.debug("getNewUserAssessmentSubmission: assessment: " + assessment.getId() + " userId: " + userId);
 
 		// read all the submissions for this user to this assessment, with all the assessment and submission data we need
 		// each assessment is covered with at least one - if there are no submission yet for an assessment, an empty submission is returned
@@ -976,6 +1030,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	public List<Float> getQuestionScores(Question question)
 	{
+		if (question == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getQuestionScores: " + question.getId());
+
 		final List<Float> rv = this.storage.getQuestionScores(question);
 		return rv;
 	}
@@ -987,7 +1045,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	{
 		if (id == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("getSubmission: " + id);
+		// for thread-local caching
+		String key = cacheKey(id);
+		SubmissionImpl rv = (SubmissionImpl) this.threadLocalManager.get(key);
+		if (rv != null)
+		{
+			// return a copy
+			return this.storage.newSubmission(rv);
+		}
 
 		// recognize phantom ids
 		if (id.startsWith(SubmissionService.PHANTOM_PREFIX))
@@ -998,20 +1063,22 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			String userId = idParts[2];
 
 			// create a phantom
-			SubmissionImpl s = this.storage.newSubmission();
-			s.initUserId(userId);
-			s.initAssessmentIds(aid, aid);
-			s.initId(id);
+			rv = this.storage.newSubmission();
+			rv.initUserId(userId);
+			rv.initAssessmentIds(aid, aid);
+			rv.initId(id);
 
-			return s;
+			return rv;
 		}
 
-		// TODO: check storage to see that it really exists?
-		// this.storage.submissionExists(id);
+		if (M_log.isDebugEnabled()) M_log.debug("getSubmission: " + id);
 
-		SubmissionImpl submission = this.storage.getSubmission(id);
+		rv = this.storage.getSubmission(id);
 
-		return submission;
+		// thread-local cache (a copy)
+		if (rv != null) this.threadLocalManager.set(key, this.storage.newSubmission(rv));
+
+		return rv;
 	}
 
 	/**
@@ -1227,7 +1294,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				start();
 			}
 
-			M_log.info("init(): timout check seconds: " + timeoutCheckMs / 1000);
+			M_log.info("init(): timout check seconds: " + timeoutCheckMs / 1000 + " storage: " + this.storage);
 		}
 		catch (Throwable t)
 		{
@@ -1242,6 +1309,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 		if (evaluatedOnly == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("releaseSubmissions: assessment: " + assessment.getId() + " evaluatedOnly: " + evaluatedOnly);
 
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, assessment.getContext());
@@ -1263,6 +1332,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// clear the changed flag
 			((SubmissionImpl) submission).clearIsChanged();
 
+			// clear the cache
+			String key = cacheKey(submission.getId());
+			this.threadLocalManager.set(key, null);
+
 			// save
 			this.storage.saveSubmission(submission);
 
@@ -1277,6 +1350,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	public void retractSubmissions(Assessment assessment) throws AssessmentPermissionException
 	{
 		if (assessment == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("retractSubmissions: assessment: " + assessment.getId());
 
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, assessment.getContext());
@@ -1296,6 +1371,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// clear the changed flag
 			((SubmissionImpl) submission).clearIsChanged();
 
+			// clear the cache
+			String key = cacheKey(submission.getId());
+			this.threadLocalManager.set(key, null);
+
 			// save
 			this.storage.saveSubmission(submission);
 
@@ -1305,7 +1384,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
-	 * Run the event checking thread.
+	 * Run the expiration checking thread.
 	 */
 	public void run()
 	{
@@ -1318,6 +1397,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		{
 			try
 			{
+				if (M_log.isDebugEnabled()) M_log.debug("run: running");
+
 				// get a list of submission ids that are open, timed, and well expired (considering double our grace period),
 				// or open and past an accept-until date
 				List<Submission> submissions = getTimedOutSubmissions(2 * MnemeService.GRACE);
@@ -1509,6 +1590,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	 */
 	public Boolean submissionsExist(Assessment assessment)
 	{
+		if (assessment == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("submissionsExist: assessment: " + assessment.getId());
+
 		return this.storage.submissionsExist(assessment);
 	}
 
@@ -1521,6 +1606,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (answer == null) throw new IllegalArgumentException();
 		if (completeAnswer == null) throw new IllegalArgumentException();
 		if (completeSubmission == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled())
+			M_log.debug("submitAnswer: answer: " + answer.getId() + " completeAnswer: " + completeAnswer + " completeSubmission: "
+					+ completeSubmission);
 
 		List<Answer> answers = new ArrayList<Answer>(1);
 		answers.add(answer);
@@ -1576,6 +1665,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					((AssessmentServiceImpl) assessmentService).getAssessmentReference(assessment.getId()));
 		}
 
+		if (M_log.isDebugEnabled())
+			M_log.debug("submitAnswers: submission: " + submission.getId() + " completeAnswer: " + completeAnswers + " completeSubmission: "
+					+ completeSubmission);
+
 		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
 		securityService.secure(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, assessment.getContext());
 
@@ -1583,9 +1676,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (!assessment.getDates().getIsOpen(Boolean.TRUE)) throw new AssessmentClosedException();
 
 		Date asOf = new Date();
-
-		if (M_log.isDebugEnabled())
-			M_log.debug("submitAnswer: submission: " + submission.getId() + " complete?: " + Boolean.toString(completeSubmission) + " asOf: " + asOf);
 
 		// update the dates and answer scores
 		submission.setSubmittedDate(asOf);
@@ -1615,6 +1705,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				submission.setIsReleased(Boolean.TRUE);
 			}
 		}
+
+		// clear the cache
+		String key = cacheKey(submission.getId());
+		this.threadLocalManager.set(key, null);
 
 		// save the answers, update the submission
 		((SubmissionImpl) submission).clearIsChanged();
@@ -1761,6 +1855,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			submission.setIsReleased(Boolean.TRUE);
 		}
 
+		// clear the cache
+		String key = cacheKey(submission.getId());
+		this.threadLocalManager.set(key, null);
+
 		((SubmissionImpl) submission).clearIsChanged();
 		this.storage.saveSubmission((SubmissionImpl) submission);
 
@@ -1771,6 +1869,19 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				true));
 
 		return true;
+	}
+
+	/**
+	 * Form a key for caching a submission.
+	 * 
+	 * @param submissionId
+	 *        The submission id.
+	 * @return The cache key.
+	 */
+	protected String cacheKey(String submissionId)
+	{
+		String key = "mneme:submission:" + submissionId;
+		return key;
 	}
 
 	/**
@@ -2649,7 +2760,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if ((submissions == null) || (submissions.size() < 2)) return submissions;
 
 		List<Submission> rv = new ArrayList<Submission>();
-		
+
 		// sort order (a) future, notStarted, released, inProgress, submitted, evaluated
 		List<Submission> future = new ArrayList<Submission>();
 		List<Submission> notStarted = new ArrayList<Submission>();

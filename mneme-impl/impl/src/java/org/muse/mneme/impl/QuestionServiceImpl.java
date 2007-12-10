@@ -126,6 +126,8 @@ public class QuestionServiceImpl implements QuestionService
 	 */
 	public void clearStaleMintQuestions()
 	{
+		if (M_log.isDebugEnabled()) M_log.debug("clearStaleMintQuestions");
+
 		// give it a day
 		Date stale = new Date();
 		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
@@ -154,7 +156,7 @@ public class QuestionServiceImpl implements QuestionService
 
 		this.storage.copyPoolQuestions(userId, source, destination);
 
-		// TODO: event? events?
+		// TODO: event?
 	}
 
 	/**
@@ -216,6 +218,8 @@ public class QuestionServiceImpl implements QuestionService
 		Integer rv = (Integer) this.threadLocalManager.get(key);
 		if (rv != null) return rv;
 
+		if (M_log.isDebugEnabled()) M_log.debug("countQuestions: pre-caching for context: " + pool.getContext() + " pool: " + pool.getId());
+
 		// anticipate that we will want more than just this pool; read the counts of the pools of the context
 		Map<String, Integer> counts = this.storage.countPoolQuestions(pool.getContext());
 
@@ -256,7 +260,8 @@ public class QuestionServiceImpl implements QuestionService
 		Integer rv = (Integer) this.threadLocalManager.get(key);
 		if (rv != null) return rv;
 
-		if (M_log.isDebugEnabled()) M_log.debug("countQuestions: context: " + context);
+		if (M_log.isDebugEnabled()) M_log.debug("countQuestions: context: " + context + " search: " + search);
+
 		rv = this.storage.countContextQuestions(context);
 
 		// cache
@@ -279,7 +284,21 @@ public class QuestionServiceImpl implements QuestionService
 	public Boolean existsQuestion(String questionId)
 	{
 		if (questionId == null) return null;
-		return this.storage.existsQuestion(questionId);
+
+		// for thread-local caching
+		String key = cacheKey(questionId);
+		QuestionImpl rv = (QuestionImpl) this.threadLocalManager.get(key);
+		if (rv != null)
+		{
+			return true;
+		}
+
+		if (M_log.isDebugEnabled()) M_log.debug("existsQuestion: " + questionId);
+
+		// assume we are going to need the question
+		// return this.storage.existsQuestion(questionId);
+		boolean found = (getQuestion(questionId) != null);
+		return found;
 	}
 
 	/**
@@ -291,7 +310,7 @@ public class QuestionServiceImpl implements QuestionService
 
 		// TODO: search
 
-		if (M_log.isDebugEnabled()) M_log.debug("findQuestions");
+		if (M_log.isDebugEnabled()) M_log.debug("findQuestions: pool: " + pool.getId());
 
 		return new ArrayList<Question>(this.storage.findPoolQuestions(pool, sort, questionType, pageNum, pageSize));
 	}
@@ -305,7 +324,7 @@ public class QuestionServiceImpl implements QuestionService
 
 		// TODO: search
 
-		if (M_log.isDebugEnabled()) M_log.debug("findQuestions");
+		if (M_log.isDebugEnabled()) M_log.debug("findQuestions: context: " + context);
 
 		return new ArrayList<Question>(this.storage.findContextQuestions(context, sort, questionType, pageNum, pageSize));
 	}
@@ -317,14 +336,23 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		if (questionId == null) throw new IllegalArgumentException();
 
+		// for thread-local caching
+		String key = cacheKey(questionId);
+		QuestionImpl rv = (QuestionImpl) this.threadLocalManager.get(key);
+		if (rv != null)
+		{
+			// return a copy
+			return this.storage.newQuestion(rv);
+		}
+
 		if (M_log.isDebugEnabled()) M_log.debug("getQuestion: " + questionId);
 
-		// TODO: check to see if id is a valid existing question?
-		// this.storage.questionExists(questionId);
+		rv = this.storage.getQuestion(questionId);
 
-		QuestionImpl question = this.storage.getQuestion(questionId);
+		// thread-local cache (a copy)
+		if (rv != null) this.threadLocalManager.set(key, this.storage.newQuestion(rv));
 
-		return question;
+		return rv;
 	}
 
 	/**
@@ -383,6 +411,10 @@ public class QuestionServiceImpl implements QuestionService
 		this.poolService.createHistoryIfNeeded(question.getPool(), false);
 		this.poolService.createHistoryIfNeeded(pool, false);
 
+		// clear the cache
+		String key = cacheKey(question.getId());
+		this.threadLocalManager.set(key, null);
+
 		// do the move
 		this.storage.moveQuestion(question, pool);
 	}
@@ -392,7 +424,7 @@ public class QuestionServiceImpl implements QuestionService
 	 */
 	public Question newQuestion(Pool pool, String type) throws AssessmentPermissionException
 	{
-		if (M_log.isDebugEnabled()) M_log.debug("newQuestion: pool: " + pool.getId() + " tyrpe: " + type);
+		if (M_log.isDebugEnabled()) M_log.debug("newQuestion: pool: " + pool.getId() + " type: " + type);
 
 		String userId = sessionManager.getCurrentSessionUserId();
 
@@ -460,6 +492,8 @@ public class QuestionServiceImpl implements QuestionService
 
 			return;
 		}
+
+		if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: " + question.getId());
 
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getContext());
@@ -589,6 +623,19 @@ public class QuestionServiceImpl implements QuestionService
 	}
 
 	/**
+	 * Form a key for caching a question.
+	 * 
+	 * @param questionId
+	 *        The question id.
+	 * @return The cache key.
+	 */
+	protected String cacheKey(String questionId)
+	{
+		String key = "mneme:question:" + questionId;
+		return key;
+	}
+
+	/**
 	 * Form the cache key for caching questions-in-context count.
 	 * 
 	 * @param poolId
@@ -632,8 +679,6 @@ public class QuestionServiceImpl implements QuestionService
 	 */
 	protected void doSave(Question question)
 	{
-		if (M_log.isDebugEnabled()) M_log.debug("doSave: " + question.getId());
-
 		String userId = sessionManager.getCurrentSessionUserId();
 		Date now = new Date();
 
@@ -734,6 +779,10 @@ public class QuestionServiceImpl implements QuestionService
 		((QuestionImpl) question).clearChanged();
 		this.storage.saveQuestion((QuestionImpl) question);
 
+		// clear the cache
+		String key = cacheKey(question.getId());
+		this.threadLocalManager.set(key, null);
+
 		// clear thread-local counts for the pool and context and questions
 		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId()), null);
 		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext()), null);
@@ -797,6 +846,10 @@ public class QuestionServiceImpl implements QuestionService
 		if (current == null) throw new IllegalArgumentException();
 		if (current.getIsHistorical()) throw new IllegalArgumentException();
 		Pool currentPool = current.getPool();
+
+		// clear the cache
+		String key = cacheKey(question.getId());
+		this.threadLocalManager.set(key, null);
 
 		// deal with direct dependencies on this question from live assessments
 		if (this.assessmentService.liveDependencyExists(question))

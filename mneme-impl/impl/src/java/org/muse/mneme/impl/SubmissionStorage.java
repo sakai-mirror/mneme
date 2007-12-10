@@ -196,6 +196,15 @@ public interface SubmissionStorage
 	 */
 	SubmissionImpl newSubmission();
 
+	/**
+	 * Construct a new Submission object as a copy of another.
+	 * 
+	 * @param other
+	 *        The submisison to copy.
+	 * @return A new Submission object.
+	 */
+	SubmissionImpl newSubmission(SubmissionImpl other);
+
 	// /**
 	// * Remove all incomplete submissions to this assessment.
 	// *
