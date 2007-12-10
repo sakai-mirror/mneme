@@ -33,6 +33,8 @@
 			singleton="true">
 
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+  		<property name="importService"><ref bean="org.muse.mneme.api.ImportService"/></property>
+  		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
  		<property name="path"><value>import_tq_pool</value></property>

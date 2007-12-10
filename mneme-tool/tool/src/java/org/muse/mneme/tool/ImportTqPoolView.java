@@ -22,7 +22,6 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +32,9 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.Ent;
+import org.muse.mneme.api.ImportService;
+import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
@@ -40,55 +42,14 @@ import org.sakaiproject.util.Web;
  */
 public class ImportTqPoolView extends ControllerImpl
 {
-	public class IdTitle
-	{
-		protected String id;
-
-		protected String title;
-
-		public IdTitle(String id, String title)
-		{
-			setId(id);
-			setTitle(title);
-		}
-
-		/**
-		 * @return the id
-		 */
-		public String getId()
-		{
-			return this.id;
-		}
-
-		/**
-		 * @return the title
-		 */
-		public String getTitle()
-		{
-			return this.title;
-		}
-
-		/**
-		 * @param id
-		 *        the id to set
-		 */
-		public void setId(String id)
-		{
-			this.id = id;
-		}
-
-		/**
-		 * @param title
-		 *        the title to set
-		 */
-		public void setTitle(String title)
-		{
-			this.title = title;
-		}
-	}
-
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(ImportTqPoolView.class);
+
+	/** Dependency: ImportService */
+	protected ImportService importService = null;
+
+	/** tool manager reference. */
+	protected ToolManager toolManager = null;
 
 	/**
 	 * Shutdown.
@@ -111,14 +72,8 @@ public class ImportTqPoolView extends ControllerImpl
 		String poolsSort = params[2];
 		context.put("poolsSort", poolsSort);
 
-		// the list of Samigo pools for this user
-		// TODO:
-		List<IdTitle> pools = new ArrayList<IdTitle>();
-		pools.add(new IdTitle("0", "EECS 100 - Assignments"));
-		pools.add(new IdTitle("2", "EECS 100 - Tests"));
-		pools.add(new IdTitle("3", "EECS 200 - Assignments"));
-		pools.add(new IdTitle("4", "EECS 200 - Tests"));
-
+		// the list of importable pools for this user
+		List<Ent> pools = this.importService.getPools(null);
 		context.put("pools", pools);
 
 		// render
@@ -144,8 +99,7 @@ public class ImportTqPoolView extends ControllerImpl
 		{
 			throw new IllegalArgumentException();
 		}
-		// String poolsSort = params[2];
-		// context.put("poolsSort", poolsSort);
+		String poolsSort = params[2];
 
 		Values selectedPools = this.uiService.newValues();
 		context.put("selectedPools", selectedPools);
@@ -153,8 +107,39 @@ public class ImportTqPoolView extends ControllerImpl
 		// read the form
 		String destination = uiService.decode(req, context);
 
-		// TODO: import the pools
+		// import the pools
+		if ("IMPORT".equals(destination))
+		{
+			for (String id : selectedPools.getValues())
+			{
+				this.importService.importPool(id, toolManager.getCurrentPlacement().getContext());
+			}
+
+			destination = "/pools/" + poolsSort;
+		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+	}
+
+	/**
+	 * Set the ImportService
+	 * 
+	 * @param service
+	 *        the ImportService.
+	 */
+	public void setImportService(ImportService service)
+	{
+		this.importService = service;
+	}
+
+	/**
+	 * Set the tool manager.
+	 * 
+	 * @param manager
+	 *        The tool manager.
+	 */
+	public void setToolManager(ToolManager manager)
+	{
+		toolManager = manager;
 	}
 }
