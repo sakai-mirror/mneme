@@ -23,7 +23,9 @@ package org.muse.mneme.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +46,7 @@ import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -53,6 +56,13 @@ import org.sakaiproject.util.StringUtil;
  */
 public class ImportServiceImpl implements ImportService
 {
+	public class PoolInfo
+	{
+		String description = null;
+
+		String title = null;
+	}
+
 	public class SamigoQuestion
 	{
 		String answerMatchText;
@@ -156,6 +166,9 @@ public class ImportServiceImpl implements ImportService
 	 */
 	public void init()
 	{
+		// messages
+		if (this.bundle != null) this.messages = new ResourceLoader(this.bundle);
+
 		M_log.info("init()");
 	}
 
@@ -245,6 +258,34 @@ public class ImportServiceImpl implements ImportService
 	public void setThreadLocalManager(ThreadLocalManager service)
 	{
 		threadLocalManager = service;
+	}
+
+	/**
+	 * Add a formatted date to a source string, using a message selector.
+	 * 
+	 * @param selector
+	 *        The message selector.
+	 * @param source
+	 *        The original string.
+	 * @param date
+	 *        The date to format.
+	 * @return The source and date passed throught the selector message.
+	 */
+	protected String addDate(String selector, String source, Date date)
+	{
+		// format the date
+		DateFormat format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
+		String fmt = format.format(date);
+
+		// the args
+		Object[] args = new Object[2];
+		args[0] = source;
+		args[1] = fmt;
+
+		// format the works
+		String rv = this.messages.getFormattedMessage(selector, args);
+
+		return rv;
 	}
 
 	/**
@@ -383,6 +424,105 @@ public class ImportServiceImpl implements ImportService
 
 		// set the text
 		f.setText(questionText);
+
+		return question;
+	}
+
+	/**
+	 * Create a Likert scale question from Samigo data.
+	 * 
+	 * @param these
+	 *        The Samigo data entries.
+	 * @param pool
+	 *        The pool for the question.
+	 * @return The question, or null if it was not made
+	 * @throws AssessmentPermissionException
+	 */
+	protected Question createLikert(SamigoQuestion[] these, Pool pool) throws AssessmentPermissionException
+	{
+		// validate: fist questionChoiceText for the question text not null
+		boolean valid = (these[0].questionChoiceText != null);
+
+		// recognize a scale
+		String scale = null;
+		// "0" for our 5 point "strongly-agree"
+		// "1" for our 4 point "excellent"
+		// "2" for our 3 point "above-average"
+		// "3" for our 2 point "yes"
+		// "4" for our 5 point "5"
+		// "5" for our 2 point "rocks"
+
+		// 3 choices is below/average/above or disagree/undecided/agree
+		if (these.length == 3)
+		{
+			if ("Below Average".equals(these[0].answerMatchText))
+			{
+				scale = "2";
+			}
+			else
+			{
+				scale = "0";
+			}
+		}
+
+		// 2 is yes/no, or agree / disagree
+		else if (these.length == 2)
+		{
+			if ("No".equals(these[0].answerMatchText))
+			{
+				scale = "3";
+			}
+
+			else
+			{
+				scale = "0";
+			}
+		}
+
+		// 5 is strongly agree -> strongly disagree or unacceptable/below average/average/above average/excelent
+		// or 1..5
+		else if (these.length == 5)
+		{
+			if ("1".equals(these[0].answerMatchText))
+			{
+				scale = "4";
+			}
+			else if ("Strongly Disagree".equals(these[0].answerMatchText))
+			{
+				scale = "0";
+			}
+			else
+			{
+				scale = "1";
+			}
+		}
+
+		// 10 is 1..10
+		else if (these.length == 10)
+		{
+			scale = "4";
+		}
+
+		if (scale == null)
+		{
+			valid = false;
+		}
+
+		if (!valid)
+		{
+			M_log.info("createLikert: invalid samigo question: " + these[0].itemId);
+			return null;
+		}
+
+		// create the question
+		Question question = this.questionService.newQuestion(pool, "mneme:LikertScale");
+		LikertScaleQuestionImpl l = (LikertScaleQuestionImpl) (question.getTypeSpecificQuestion());
+
+		// set the text
+		question.getPresentation().setText(these[0].questionChoiceText);
+
+		// set the scale
+		l.setScale(scale);
 
 		return question;
 	}
@@ -538,105 +678,6 @@ public class ImportServiceImpl implements ImportService
 	}
 
 	/**
-	 * Create a Likert scale question from Samigo data.
-	 * 
-	 * @param these
-	 *        The Samigo data entries.
-	 * @param pool
-	 *        The pool for the question.
-	 * @return The question, or null if it was not made
-	 * @throws AssessmentPermissionException
-	 */
-	protected Question createLikert(SamigoQuestion[] these, Pool pool) throws AssessmentPermissionException
-	{
-		// validate: fist questionChoiceText for the question text not null
-		boolean valid = (these[0].questionChoiceText != null);
-
-		// recognize a scale
-		String scale = null;
-		// "0" for our 5 point "strongly-agree"
-		// "1" for our 4 point "excellent"
-		// "2" for our 3 point "above-average"
-		// "3" for our 2 point "yes"
-		// "4" for our 5 point "5"
-		// "5" for our 2 point "rocks"
-
-		// 3 choices is below/average/above or disagree/undecided/agree
-		if (these.length == 3)
-		{
-			if ("Below Average".equals(these[0].answerMatchText))
-			{
-				scale = "2";
-			}
-			else
-			{
-				scale = "0";
-			}
-		}
-
-		// 2 is yes/no, or agree / disagree
-		else if (these.length == 2)
-		{
-			if ("No".equals(these[0].answerMatchText))
-			{
-				scale = "3";
-			}
-
-			else
-			{
-				scale = "0";
-			}
-		}
-
-		// 5 is strongly agree -> strongly disagree or unacceptable/below average/average/above average/excelent
-		// or 1..5
-		else if (these.length == 5)
-		{
-			if ("1".equals(these[0].answerMatchText))
-			{
-				scale = "4";
-			}
-			else if ("Strongly Disagree".equals(these[0].answerMatchText))
-			{
-				scale = "0";
-			}
-			else
-			{
-				scale = "1";
-			}
-		}
-
-		// 10 is 1..10
-		else if (these.length == 10)
-		{
-			scale = "4";
-		}
-
-		if (scale == null)
-		{
-			valid = false;
-		}
-
-		if (!valid)
-		{
-			M_log.info("createLikert: invalid samigo question: " + these[0].itemId);
-			return null;
-		}
-
-		// create the question
-		Question question = this.questionService.newQuestion(pool, "mneme:LikertScale");
-		LikertScaleQuestionImpl l = (LikertScaleQuestionImpl) (question.getTypeSpecificQuestion());
-
-		// set the text
-		question.getPresentation().setText(these[0].questionChoiceText);
-
-		// set the scale
-		l.setScale(scale);
-
-		return question;
-	}
-
-	/**
 	 * Create a pool in Mneme from Samigo pool information.
 	 * 
 	 * @param poolId
@@ -645,15 +686,13 @@ public class ImportServiceImpl implements ImportService
 	 */
 	protected Pool createPool(String poolId, final String context) throws AssessmentPermissionException
 	{
-		final PoolService ps = this.poolService;
-		final List<Pool> created = new ArrayList<Pool>(1);
-
 		// read the details
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT P.TITLE, P.DESCRIPTION FROM SAM_QUESTIONPOOL_T P WHERE P.QUESTIONPOOLID=?");
 
 		Object[] fields = new Object[1];
 		fields[0] = StringUtil.trimToNull(poolId);
+		final PoolInfo info = new PoolInfo();
 
 		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
@@ -661,18 +700,8 @@ public class ImportServiceImpl implements ImportService
 			{
 				try
 				{
-					// make only one
-					if (!created.isEmpty()) return null;
-
-					String title = SqlHelper.readString(result, 1);
-					String description = SqlHelper.readString(result, 2);
-
-					// TODO: add to title?
-					Pool pool = ps.newPool(context);
-					pool.setTitle(title);
-					pool.setDescription(description);
-					ps.savePool(pool);
-					created.add(pool);
+					info.title = SqlHelper.readString(result, 1);
+					info.description = SqlHelper.readString(result, 2);
 
 					return null;
 				}
@@ -681,17 +710,17 @@ public class ImportServiceImpl implements ImportService
 					M_log.warn("createPool: reading pool details: " + e);
 					return null;
 				}
-				catch (AssessmentPermissionException e)
-				{
-					M_log.warn("createPool: reading pool details: " + e);
-					return null;
-				}
 			}
 		});
 
-		if (created.size() == 1)
+		if (info.title != null)
 		{
-			return created.get(0);
+			Pool pool = this.poolService.newPool(context);
+			pool.setTitle(addDate("import-text", info.title, new Date()));
+			pool.setDescription(info.description);
+			this.poolService.savePool(pool);
+
+			return pool;
 		}
 
 		return null;
