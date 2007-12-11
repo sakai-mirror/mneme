@@ -335,8 +335,37 @@ public class ImportServiceImpl implements ImportService
 		Question question = this.questionService.newQuestion(pool, "mneme:FillBlanks");
 		FillBlanksQuestionImpl f = (FillBlanksQuestionImpl) (question.getTypeSpecificQuestion());
 
-		// TODO: detect these[0].exclusive and translate to our "any order"
+		// detect these[0].exclusive and translate to our "any order"
 		f.setAnyOrder(Boolean.FALSE.toString());
+		if ((these[0].exclusive != null) && (these[0].exclusive.booleanValue()))
+		{
+			// if we find that all the fill-in correct patterns are the same,
+			// and there are is one for each answer (comma separated),
+			// spread them out, one per fill-in, and set any-order
+			boolean mutualExclusive = true;
+			for (int index = 1; index < these.length; index++)
+			{
+				if (!these[index].answerMatchText.equals(these[0].answerMatchText))
+				{
+					mutualExclusive = false;
+					break;
+				}
+			}
+
+			if (mutualExclusive)
+			{
+				String[] parts = these[0].answerMatchText.split("\\|");
+				if ((parts != null) && (parts.length == these.length))
+				{
+					for (int index = 0; index < these.length; index++)
+					{
+						these[index].answerMatchText = parts[index];
+					}
+
+					f.setAnyOrder(Boolean.TRUE.toString());
+				}
+			}
+		}
 
 		// case sensitive
 		if (these[0].caseSensitive != null) f.setCaseSensitive(these[0].caseSensitive.toString());
@@ -349,7 +378,7 @@ public class ImportServiceImpl implements ImportService
 		String questionText = these[0].questionChoiceText;
 		for (int index = 0; index < these.length; index++)
 		{
-			questionText.replaceFirst("\\{\\}", these[index].answerMatchText);
+			questionText = questionText.replaceFirst("\\{\\}", "{" + these[index].answerMatchText + "}");
 		}
 
 		// set the text
@@ -420,44 +449,42 @@ public class ImportServiceImpl implements ImportService
 	 *        The Samigo data entries.
 	 * @param pool
 	 *        The pool for the question.
+	 * @param multiAllowed
+	 *        true if we can have multiple answers, false if not.
 	 * @return The question, or null if it was not made
 	 * @throws AssessmentPermissionException
 	 */
-	protected Question createMc(SamigoQuestion[] these, Pool pool) throws AssessmentPermissionException
+	protected Question createMc(SamigoQuestion[] these, Pool pool, boolean multiAllowed) throws AssessmentPermissionException
 	{
 		// validate: fist questionChoiceText for the question text not null
 		boolean valid = (these[0].questionChoiceText != null);
 
-		// answerMatchText from all for the choices not null
-		boolean multiCorrect = false;
-		if (valid)
-		{
-			for (int index = 0; index < these.length; index++)
-			{
-				if (these[index].answerMatchText == null)
-				{
-					valid = false;
-					break;
-				}
-			}
-		}
-
+		// Note: answerMatchText may actually be null
 		// we must have one or more marked correct
+		boolean multiCorrect = false;
 		if (valid)
 		{
 			boolean seenCorrect = false;
 			for (int index = 0; index < these.length; index++)
 			{
-				if ((these[index].correct != null) && (these[index].correct.booleanValue()))
+				if (these[index].answerMatchText != null)
 				{
-					if (seenCorrect) multiCorrect = true;
-					seenCorrect = true;
+					if ((these[index].correct != null) && (these[index].correct.booleanValue()))
+					{
+						if (seenCorrect) multiCorrect = true;
+						seenCorrect = true;
+					}
 				}
 			}
 			if (!seenCorrect)
 			{
 				valid = false;
 			}
+		}
+
+		if (valid && multiCorrect && !multiAllowed)
+		{
+			valid = false;
 		}
 
 		if (!valid)
@@ -483,21 +510,128 @@ public class ImportServiceImpl implements ImportService
 		List<String> choices = new ArrayList<String>();
 		for (int index = 0; index < these.length; index++)
 		{
-			choices.add(these[index].answerMatchText);
+			if (these[index].answerMatchText != null)
+			{
+				choices.add(these[index].answerMatchText);
+			}
 		}
 		mc.setAnswerChoices(choices);
 
 		// corrects
 		Set<Integer> correctAnswers = new HashSet<Integer>();
 		List<MultipleChoiceQuestionImpl.MultipleChoiceQuestionChoice> choicesAuthored = mc.getChoicesAsAuthored();
+		int authoredIndex = 0;
 		for (int index = 0; index < these.length; index++)
 		{
-			if ((these[index].correct != null) && (these[index].correct.booleanValue()))
+			if (these[index].answerMatchText != null)
 			{
-				correctAnswers.add(Integer.valueOf(choicesAuthored.get(index).getId()));
+				if ((these[index].correct != null) && (these[index].correct.booleanValue()))
+				{
+					correctAnswers.add(Integer.valueOf(choicesAuthored.get(authoredIndex).getId()));
+				}
+				authoredIndex++;
 			}
 		}
 		mc.setCorrectAnswerSet(correctAnswers);
+
+		return question;
+	}
+
+	/**
+	 * Create a Likert scale question from Samigo data.
+	 * 
+	 * @param these
+	 *        The Samigo data entries.
+	 * @param pool
+	 *        The pool for the question.
+	 * @return The question, or null if it was not made
+	 * @throws AssessmentPermissionException
+	 */
+	protected Question createLikert(SamigoQuestion[] these, Pool pool) throws AssessmentPermissionException
+	{
+		// validate: fist questionChoiceText for the question text not null
+		boolean valid = (these[0].questionChoiceText != null);
+
+		// recognize a scale
+		String scale = null;
+		// "0" for our 5 point "strongly-agree"
+		// "1" for our 4 point "excellent"
+		// "2" for our 3 point "above-average"
+		// "3" for our 2 point "yes"
+		// "4" for our 5 point "5"
+		// "5" for our 2 point "rocks"
+
+		// 3 choices is below/average/above or disagree/undecided/agree
+		if (these.length == 3)
+		{
+			if ("Below Average".equals(these[0].answerMatchText))
+			{
+				scale = "2";
+			}
+			else
+			{
+				scale = "0";
+			}
+		}
+
+		// 2 is yes/no, or agree / disagree
+		else if (these.length == 2)
+		{
+			if ("No".equals(these[0].answerMatchText))
+			{
+				scale = "3";
+			}
+
+			else
+			{
+				scale = "0";
+			}
+		}
+
+		// 5 is strongly agree -> strongly disagree or unacceptable/below average/average/above average/excelent
+		// or 1..5
+		else if (these.length == 5)
+		{
+			if ("1".equals(these[0].answerMatchText))
+			{
+				scale = "4";
+			}
+			else if ("Strongly Disagree".equals(these[0].answerMatchText))
+			{
+				scale = "0";
+			}
+			else
+			{
+				scale = "1";
+			}
+		}
+
+		// 10 is 1..10
+		else if (these.length == 10)
+		{
+			scale = "4";
+		}
+
+		if (scale == null)
+		{
+			valid = false;
+		}
+
+		if (!valid)
+		{
+			M_log.info("createLikert: invalid samigo question: " + these[0].itemId);
+			return null;
+		}
+
+		// create the question
+		Question question = this.questionService.newQuestion(pool, "mneme:LikertScale");
+		LikertScaleQuestionImpl l = (LikertScaleQuestionImpl) (question.getTypeSpecificQuestion());
+
+		// set the text
+		question.getPresentation().setText(these[0].questionChoiceText);
+
+		// set the scale
+		l.setScale(scale);
 
 		return question;
 	}
@@ -667,12 +801,12 @@ public class ImportServiceImpl implements ImportService
 					sq.itemId = SqlHelper.readId(result, 1);
 					sq.type = SqlHelper.readInteger(result, 2);
 					sq.score = SqlHelper.readFloat(result, 3);
-					sq.reason = SqlHelper.readBoolean(result, 4);
+					sq.reason = SqlHelper.readBitBoolean(result, 4);
 					sq.instruction = SqlHelper.readString(result, 5);
 					sq.questionChoiceText = SqlHelper.readString(result, 6);
 					sq.answerMatchText = SqlHelper.readString(result, 7);
 					sq.answerSeq = SqlHelper.readInteger(result, 8);
-					sq.correct = SqlHelper.readBoolean(result, 9);
+					sq.correct = SqlHelper.readBitBoolean(result, 9);
 					sq.incorrectFeedback = SqlHelper.readString(result, 10);
 					sq.correctFeedback = SqlHelper.readString(result, 11);
 					sq.generalFeedback = SqlHelper.readString(result, 12);
@@ -684,16 +818,25 @@ public class ImportServiceImpl implements ImportService
 				}
 				catch (SQLException e)
 				{
-					M_log.warn("readSamigoQuestions: " + e);
+					M_log.warn("importSamigoQuestions: " + e);
 					return null;
 				}
 			}
 		});
 
 		// build the questions
+		float total = 0f;
+		int count = 0;
 		for (int i = 0; i < sqs.size(); i++)
 		{
 			SamigoQuestion sq = sqs.get(i);
+
+			// accumulate the score for an average for the pool
+			if (sq.score != null)
+			{
+				count++;
+				total += sq.score.floatValue();
+			}
 
 			// get the rest
 			int next = i + 1;
@@ -721,13 +864,22 @@ public class ImportServiceImpl implements ImportService
 			{
 				case 1:
 				{
-					question = createMc(these, pool);
+					// single correct
+					question = createMc(these, pool, false);
+
+					break;
+				}
+				case 2:
+				{
+					// multi correct
+					question = createMc(these, pool, true);
 
 					break;
 				}
 				case 3:
 				{
 					// mnemeType = "mneme:LikertScale";
+					question = createLikert(these, pool);
 					break;
 				}
 				case 4:
@@ -792,16 +944,6 @@ public class ImportServiceImpl implements ImportService
 		}
 
 		// set the pool's points to the average
-		float total = 0f;
-		int count = 0;
-		for (SamigoQuestion sq : sqs)
-		{
-			if (sq.score != null)
-			{
-				count++;
-				total += sq.score.floatValue();
-			}
-		}
 		if (count > 0)
 		{
 			Float average = Float.valueOf(total / count);

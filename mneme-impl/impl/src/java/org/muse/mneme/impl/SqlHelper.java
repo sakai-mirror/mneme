@@ -108,6 +108,41 @@ public class SqlHelper
 	}
 
 	/**
+	 * Read a Boolean (encoded in a bit or tinyint field) from the results set.
+	 * 
+	 * @param results
+	 *        The result set.
+	 * @param index
+	 *        The index.
+	 * @return The Boolean.
+	 * @throws SQLException
+	 */
+	public static Boolean readBitBoolean(ResultSet result, int index) throws SQLException
+	{
+		Object o = result.getObject(index);
+		if (o == null) return null;
+
+		Boolean rv = null;
+		if (o instanceof Boolean)
+		{
+			rv = (Boolean) o;
+		}
+		else if (o instanceof Integer)
+		{
+			rv = Boolean.valueOf(((Integer) o).intValue() == 1);
+		}
+		else if (o instanceof String)
+		{
+			if (((String) o).length() > 0)
+			{
+				rv = Boolean.valueOf(((String) o).charAt(0) == '\u0001');
+			}
+		}
+
+		return rv;
+	}
+
+	/**
 	 * Read a long from the result set, and convert to a null (if 0) or a Date.
 	 * 
 	 * @param results
