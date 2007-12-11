@@ -32,8 +32,10 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Ent;
 import org.muse.mneme.api.ImportService;
+import org.muse.mneme.api.PoolService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
@@ -47,6 +49,9 @@ public class ImportTqPoolView extends ControllerImpl
 
 	/** Dependency: ImportService */
 	protected ImportService importService = null;
+
+	/** Pool Service */
+	protected PoolService poolService = null;
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
@@ -71,6 +76,13 @@ public class ImportTqPoolView extends ControllerImpl
 		}
 		String poolsSort = params[2];
 		context.put("poolsSort", poolsSort);
+
+		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
 
 		// the list of importable pools for this user
 		List<Ent> pools = this.importService.getPools(null);
@@ -101,6 +113,13 @@ public class ImportTqPoolView extends ControllerImpl
 		}
 		String poolsSort = params[2];
 
+		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
 		Values selectedPools = this.uiService.newValues();
 		context.put("selectedPools", selectedPools);
 
@@ -112,7 +131,16 @@ public class ImportTqPoolView extends ControllerImpl
 		{
 			for (String id : selectedPools.getValues())
 			{
-				this.importService.importPool(id, toolManager.getCurrentPlacement().getContext());
+				try
+				{
+					this.importService.importPool(id, toolManager.getCurrentPlacement().getContext());
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
 			}
 
 			destination = "/pools/" + poolsSort;
@@ -130,6 +158,15 @@ public class ImportTqPoolView extends ControllerImpl
 	public void setImportService(ImportService service)
 	{
 		this.importService = service;
+	}
+
+	/**
+	 * @param poolService
+	 *        the poolService to set
+	 */
+	public void setPoolService(PoolService poolService)
+	{
+		this.poolService = poolService;
 	}
 
 	/**

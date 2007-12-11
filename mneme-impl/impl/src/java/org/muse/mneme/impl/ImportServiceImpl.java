@@ -24,8 +24,9 @@ package org.muse.mneme.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,8 +74,6 @@ public class ImportServiceImpl implements ImportService
 		String instruction;
 
 		String itemId;
-
-		Question question;
 
 		String questionChoiceText;
 
@@ -140,13 +139,16 @@ public class ImportServiceImpl implements ImportService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void importPool(String id, String context)
+	public void importPool(String id, String context) throws AssessmentPermissionException
 	{
-		// TODO: create the pool
-		
-		// TODO: import the questions
+		// create the pool
+		Pool pool = createPool(id, context);
 
-		M_log.info("importPool: id: " + id + " context: " + context);
+		if (pool != null)
+		{
+			// import the questions
+			importSamigoQuestions(id, pool);
+		}
 	}
 
 	/**
@@ -246,21 +248,278 @@ public class ImportServiceImpl implements ImportService
 	}
 
 	/**
-	 * Read the Samigo pools for this user id.
+	 * Create an essay question from Samigo data.
 	 * 
-	 * @param userId
-	 *        The user id.
-	 * @return The list of Ents describing the pools for this user id.
+	 * @param these
+	 *        The Samigo data entries.
+	 * @param pool
+	 *        The pool for the question.
+	 * @param upload
+	 *        true for an upload type, false for inline.
+	 * @return The question, or null if it was not made
+	 * @throws AssessmentPermissionException
 	 */
-	protected List<Ent> readSamigoPools(String userId)
+	protected Question createEssay(SamigoQuestion[] these, Pool pool, boolean upload) throws AssessmentPermissionException
 	{
-		final List<Ent> rv = new ArrayList<Ent>();
+		// validate: fist questionChoiceText for the question text not null
+		boolean valid = (these[0].questionChoiceText != null);
 
+		// there must be only one entry
+		if (valid)
+		{
+			valid = (these.length == 1);
+		}
+
+		if (!valid)
+		{
+			M_log.info("createEssay: invalid samigo question: " + these[0].itemId);
+			return null;
+		}
+
+		// create the question
+		Question question = this.questionService.newQuestion(pool, "mneme:Essay");
+		EssayQuestionImpl e = (EssayQuestionImpl) (question.getTypeSpecificQuestion());
+
+		// set the text
+		question.getPresentation().setText(these[0].questionChoiceText);
+
+		// model answer
+		if (these[0].answerMatchText != null)
+		{
+			e.setModelAnswer(these[0].answerMatchText);
+		}
+
+		// type
+		e.setSubmissionType(upload ? EssayQuestionImpl.SubmissionType.attachments : EssayQuestionImpl.SubmissionType.inline);
+
+		return question;
+	}
+
+	/**
+	 * Create a fillin question from Samigo data.
+	 * 
+	 * @param these
+	 *        The Samigo data entries.
+	 * @param pool
+	 *        The pool for the question.
+	 * @param text
+	 *        true if text, false if numeric.
+	 * @return The question, or null if it was not made
+	 * @throws AssessmentPermissionException
+	 */
+	protected Question createFillin(SamigoQuestion[] these, Pool pool, boolean text) throws AssessmentPermissionException
+	{
+		// validate: fist questionChoiceText for the question text not null
+		boolean valid = (these[0].questionChoiceText != null);
+
+		// answerMatchText from all for the choices not null
+		if (valid)
+		{
+			for (int index = 0; index < these.length; index++)
+			{
+				if (these[index].answerMatchText == null)
+				{
+					valid = false;
+					break;
+				}
+			}
+		}
+
+		if (!valid)
+		{
+			M_log.info("createFillin: invalid samigo question: " + these[0].itemId);
+			return null;
+		}
+
+		// create the question
+		Question question = this.questionService.newQuestion(pool, "mneme:FillBlanks");
+		FillBlanksQuestionImpl f = (FillBlanksQuestionImpl) (question.getTypeSpecificQuestion());
+
+		// TODO: detect these[0].exclusive and translate to our "any order"
+		f.setAnyOrder(Boolean.FALSE.toString());
+
+		// case sensitive
+		if (these[0].caseSensitive != null) f.setCaseSensitive(these[0].caseSensitive.toString());
+
+		// text or numeric
+		f.setResponseTextual(Boolean.toString(text));
+
+		// recreate the text, fillin in the "{}" with these answerMatchText
+
+		String questionText = these[0].questionChoiceText;
+		for (int index = 0; index < these.length; index++)
+		{
+			questionText.replaceFirst("\\{\\}", these[index].answerMatchText);
+		}
+
+		// set the text
+		f.setText(questionText);
+
+		return question;
+	}
+
+	/**
+	 * Create a match question from Samigo data.
+	 * 
+	 * @param these
+	 *        The Samigo data entries.
+	 * @param pool
+	 *        The pool for the question.
+	 * @return The question, or null if it was not made
+	 * @throws AssessmentPermissionException
+	 */
+	protected Question createMatch(SamigoQuestion[] these, Pool pool) throws AssessmentPermissionException
+	{
+		// validate: fist instruction for the question text not null
+		boolean valid = (these[0].instruction != null);
+
+		// answerMatchText and questionChoiceText from all for the match and choices not null
+		if (valid)
+		{
+			for (int index = 0; index < these.length; index++)
+			{
+				if ((these[index].answerMatchText == null) || (these[index].questionChoiceText == null))
+				{
+					valid = false;
+					break;
+				}
+			}
+		}
+
+		if (!valid)
+		{
+			M_log.info("createMatch: invalid samigo question: " + these[0].itemId);
+			return null;
+		}
+
+		// create the question
+		Question question = this.questionService.newQuestion(pool, "mneme:Match");
+		MatchQuestionImpl m = (MatchQuestionImpl) (question.getTypeSpecificQuestion());
+
+		// set the text
+		question.getPresentation().setText(these[0].instruction);
+
+		// set the # pairs
+		m.consolidate("INIT:" + these.length);
+
+		// set the pair values
+		List<MatchQuestionImpl.MatchQuestionPair> pairs = m.getPairs();
+		for (int index = 0; index < these.length; index++)
+		{
+			pairs.get(index).setChoice(these[index].questionChoiceText);
+			pairs.get(index).setMatch(these[index].answerMatchText);
+		}
+
+		return question;
+	}
+
+	/**
+	 * Create a multiple choice question from Samigo data.
+	 * 
+	 * @param these
+	 *        The Samigo data entries.
+	 * @param pool
+	 *        The pool for the question.
+	 * @return The question, or null if it was not made
+	 * @throws AssessmentPermissionException
+	 */
+	protected Question createMc(SamigoQuestion[] these, Pool pool) throws AssessmentPermissionException
+	{
+		// validate: fist questionChoiceText for the question text not null
+		boolean valid = (these[0].questionChoiceText != null);
+
+		// answerMatchText from all for the choices not null
+		boolean multiCorrect = false;
+		if (valid)
+		{
+			for (int index = 0; index < these.length; index++)
+			{
+				if (these[index].answerMatchText == null)
+				{
+					valid = false;
+					break;
+				}
+			}
+		}
+
+		// we must have one or more marked correct
+		if (valid)
+		{
+			boolean seenCorrect = false;
+			for (int index = 0; index < these.length; index++)
+			{
+				if ((these[index].correct != null) && (these[index].correct.booleanValue()))
+				{
+					if (seenCorrect) multiCorrect = true;
+					seenCorrect = true;
+				}
+			}
+			if (!seenCorrect)
+			{
+				valid = false;
+			}
+		}
+
+		if (!valid)
+		{
+			M_log.info("createMc: invalid samigo question: " + these[0].itemId);
+			return null;
+		}
+
+		// create the question
+		Question question = this.questionService.newQuestion(pool, "mneme:MultipleChoice");
+		MultipleChoiceQuestionImpl mc = (MultipleChoiceQuestionImpl) (question.getTypeSpecificQuestion());
+
+		// set the text
+		question.getPresentation().setText(these[0].questionChoiceText);
+
+		// randomize
+		if (these[0].randomize != null) mc.setShuffleChoices(these[0].randomize.toString());
+
+		// single / multiple select
+		mc.setSingleCorrect(Boolean.toString(!multiCorrect));
+
+		// set the choices
+		List<String> choices = new ArrayList<String>();
+		for (int index = 0; index < these.length; index++)
+		{
+			choices.add(these[index].answerMatchText);
+		}
+		mc.setAnswerChoices(choices);
+
+		// corrects
+		Set<Integer> correctAnswers = new HashSet<Integer>();
+		List<MultipleChoiceQuestionImpl.MultipleChoiceQuestionChoice> choicesAuthored = mc.getChoicesAsAuthored();
+		for (int index = 0; index < these.length; index++)
+		{
+			if ((these[index].correct != null) && (these[index].correct.booleanValue()))
+			{
+				correctAnswers.add(Integer.valueOf(choicesAuthored.get(index).getId()));
+			}
+		}
+		mc.setCorrectAnswerSet(correctAnswers);
+
+		return question;
+	}
+
+	/**
+	 * Create a pool in Mneme from Samigo pool information.
+	 * 
+	 * @param poolId
+	 *        The Samigo pool id.
+	 * @return The pool, or null if it was not created.
+	 */
+	protected Pool createPool(String poolId, final String context) throws AssessmentPermissionException
+	{
+		final PoolService ps = this.poolService;
+		final List<Pool> created = new ArrayList<Pool>(1);
+
+		// read the details
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT P.QUESTIONPOOLID, P.TITLE FROM SAM_QUESTIONPOOL_T P WHERE P.OWNERID=?");
+		sql.append("SELECT P.TITLE, P.DESCRIPTION FROM SAM_QUESTIONPOOL_T P WHERE P.QUESTIONPOOLID=?");
 
 		Object[] fields = new Object[1];
-		fields[0] = StringUtil.trimToNull(userId);
+		fields[0] = StringUtil.trimToNull(poolId);
 
 		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
@@ -268,23 +527,95 @@ public class ImportServiceImpl implements ImportService
 			{
 				try
 				{
-					String id = SqlHelper.readString(result, 1);
-					String title = SqlHelper.readString(result, 2);
+					// make only one
+					if (!created.isEmpty()) return null;
 
-					Ent ent = new EntImpl(id, title);
-					rv.add(ent);
+					String title = SqlHelper.readString(result, 1);
+					String description = SqlHelper.readString(result, 2);
+
+					// TODO: add to title?
+					Pool pool = ps.newPool(context);
+					pool.setTitle(title);
+					pool.setDescription(description);
+					ps.savePool(pool);
+					created.add(pool);
 
 					return null;
 				}
 				catch (SQLException e)
 				{
-					M_log.warn("readSubmissions(submission): " + e);
+					M_log.warn("createPool: reading pool details: " + e);
+					return null;
+				}
+				catch (AssessmentPermissionException e)
+				{
+					M_log.warn("createPool: reading pool details: " + e);
 					return null;
 				}
 			}
 		});
 
-		return rv;
+		if (created.size() == 1)
+		{
+			return created.get(0);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Create a true false question from Samigo data.
+	 * 
+	 * @param these
+	 *        The Samigo data entries.
+	 * @param pool
+	 *        The pool for the question.
+	 * @return The question, or null if it was not made
+	 * @throws AssessmentPermissionException
+	 */
+	protected Question createTf(SamigoQuestion[] these, Pool pool) throws AssessmentPermissionException
+	{
+		// validate: fist questionChoiceText for the question text not null
+		boolean valid = (these[0].questionChoiceText != null);
+
+		// there must be two of these
+		if (valid)
+		{
+			valid = (these.length == 2);
+		}
+
+		// they must have "true" and "false" marked in their answerMatchText
+		if (valid)
+		{
+			valid = ("true".equals(these[0].answerMatchText) && "false".equals(these[1].answerMatchText));
+		}
+
+		// one of these must be marked correct
+		if (valid)
+		{
+			int count = 0;
+			if ((these[0].correct != null) && (these[0].correct.booleanValue())) count++;
+			if ((these[1].correct != null) && (these[1].correct.booleanValue())) count++;
+			valid = (count == 1);
+		}
+
+		if (!valid)
+		{
+			M_log.info("createTf: invalid samigo question: " + these[0].itemId);
+			return null;
+		}
+
+		// create the question
+		Question question = this.questionService.newQuestion(pool, "mneme:TrueFalse");
+		TrueFalseQuestionImpl tf = (TrueFalseQuestionImpl) (question.getTypeSpecificQuestion());
+
+		// set the text
+		question.getPresentation().setText(these[0].questionChoiceText);
+
+		// the correct answer
+		tf.setCorrectAnswer((((these[0].correct != null) && (these[0].correct.booleanValue()))) ? Boolean.TRUE.toString() : Boolean.FALSE.toString());
+
+		return question;
 	}
 
 	/**
@@ -292,14 +623,16 @@ public class ImportServiceImpl implements ImportService
 	 * 
 	 * @param poolId
 	 *        The Samigo pool id.
+	 * @param pool
+	 *        The pool for the questions.
 	 * @return A list of the item ids in the pool.
 	 */
-	protected void importSamigoQuestions(String poolId)
+	protected void importSamigoQuestions(String poolId, Pool pool) throws AssessmentPermissionException
 	{
-		final Pool pool = this.poolService.getPool(poolId);
 		final QuestionService qs = this.questionService;
-		final List<SamigoQuestion> sqs = new ArrayList<SamigoQuestion>();
 
+		// read the questions
+		final List<SamigoQuestion> sqs = new ArrayList<SamigoQuestion>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT ");
 		sql.append(" P.ITEMID, I.TYPEID, I.SCORE, I.HASRATIONALE, I.INSTRUCTION, T.TEXT,");
@@ -346,7 +679,6 @@ public class ImportServiceImpl implements ImportService
 					sq.caseSensitive = SqlHelper.readBoolean(result, 13);
 					sq.exclusive = SqlHelper.readBoolean(result, 14);
 					sq.randomize = SqlHelper.readBoolean(result, 15);
-					sq.question = null;
 
 					return null;
 				}
@@ -358,178 +690,106 @@ public class ImportServiceImpl implements ImportService
 			}
 		});
 
-		// start building up questions
-		int lastItem = -1;
-		for (Iterator i = sqs.iterator(); i.hasNext();)
+		// build the questions
+		for (int i = 0; i < sqs.size(); i++)
 		{
-			SamigoQuestion sq = (SamigoQuestion) i.next();
+			SamigoQuestion sq = sqs.get(i);
 
-			// make a question
-			String mnemeType = null;
+			// get the rest
+			int next = i + 1;
+			for (; next < sqs.size(); next++)
+			{
+				SamigoQuestion sqNext = sqs.get(next);
+				if (!sqNext.itemId.equals(sq.itemId))
+				{
+					next--;
+					break;
+				}
+			}
+			if (next == sqs.size()) next--;
+
+			// we have from i .. next, inclusive
+			SamigoQuestion[] these = new SamigoQuestion[(next - i) + 1];
+			for (int index = i; index <= next; index++)
+			{
+				these[index - i] = sqs.get(index);
+			}
+			i = next;
+
+			Question question = null;
 			switch (sq.type)
 			{
 				case 1:
 				{
-					mnemeType = "mneme:MultipleChoice";
+					question = createMc(these, pool);
+
 					break;
 				}
 				case 3:
 				{
-					mnemeType = "mneme:LikertScale";
+					// mnemeType = "mneme:LikertScale";
 					break;
 				}
 				case 4:
 				{
-					mnemeType = "mneme:TrueFalse";
+					question = createTf(these, pool);
 					break;
 				}
 				case 5:
 				{
-					mnemeType = "mneme:Essay";
+					// inline essay
+					question = createEssay(these, pool, false);
 					break;
 				}
 				case 6:
 				{
-					// upload
-					mnemeType = "mneme:Essay";
+					// upload essay
+					question = createEssay(these, pool, true);
 					break;
 				}
 				case 8:
 				{
 					// text
-					mnemeType = "mneme:FillBlanks";
+					question = createFillin(these, pool, true);
 					break;
 				}
 				case 9:
 				{
-					mnemeType = "mneme:Match";
+					question = createMatch(these, pool);
 					break;
 				}
 				case 11:
 				{
 					// numeric
-					mnemeType = "mneme:FillBlanks";
+					question = createFillin(these, pool, false);
 					break;
 				}
 			}
 
-			try
+			if (question != null)
 			{
-				sq.question = qs.newQuestion(pool, mnemeType);
-			}
-			catch (AssessmentPermissionException e)
-			{
-			}
+				// reason
+				if (sq.reason != null) question.setExplainReason(sq.reason);
 
-			if (sq.reason != null) sq.question.setExplainReason(sq.reason);
-
-			if (sq.generalFeedback != null)
-			{
-				sq.question.setFeedback(sq.generalFeedback);
-			}
-			else if (sq.correctFeedback != null)
-			{
-				sq.question.setFeedback(sq.correctFeedback);
-			}
-			else if (sq.incorrectFeedback != null)
-			{
-				sq.question.setFeedback(sq.incorrectFeedback);
-			}
-
-			// type specific
-			switch (sq.type)
-			{
-				case 1:
+				// feedback
+				if (sq.generalFeedback != null)
 				{
-					// mc
-					if (sq.questionChoiceText != null) sq.question.getPresentation().setText(sq.questionChoiceText);
-
-					MultipleChoiceQuestionImpl mc = (MultipleChoiceQuestionImpl) (sq.question.getTypeSpecificQuestion());
-					if (sq.randomize != null) mc.setShuffleChoices(sq.randomize.toString());
-
-					// TODO: set options from this and further entries
-					break;
+					question.setFeedback(sq.generalFeedback);
 				}
-				case 3:
+				else if (sq.correctFeedback != null)
 				{
-					// Likert
-					if (sq.questionChoiceText != null) sq.question.getPresentation().setText(sq.questionChoiceText);
-
-					// TODO: what scale? Look at this and future entries...
-					break;
+					question.setFeedback(sq.correctFeedback);
 				}
-				case 4:
+				else if (sq.incorrectFeedback != null)
 				{
-					// tf
-					if (sq.questionChoiceText != null) sq.question.getPresentation().setText(sq.questionChoiceText);
-
-					// this and the next will have the "true" "false" in answer text, and one is correct
-					TrueFalseQuestionImpl tf = (TrueFalseQuestionImpl) (sq.question.getTypeSpecificQuestion());
-					if ((sq.correct != null) && (sq.correct.booleanValue())) tf.setCorrectAnswer(sq.answerMatchText);
-
-					// TODO: check the next one too
-					break;
+					question.setFeedback(sq.incorrectFeedback);
 				}
-				case 5:
-				{
-					// essay
-					if (sq.questionChoiceText != null) sq.question.getPresentation().setText(sq.questionChoiceText);
 
-					// model answer is in answer text
-					EssayQuestionImpl e = (EssayQuestionImpl) (sq.question.getTypeSpecificQuestion());
-					if (sq.answerMatchText != null) e.setModelAnswer(sq.answerMatchText);
-					e.setSubmissionType(EssayQuestionImpl.SubmissionType.inline);
-
-					break;
-				}
-				case 6:
-				{
-					// upload
-					if (sq.questionChoiceText != null) sq.question.getPresentation().setText(sq.questionChoiceText);
-
-					// model answer is in answer text
-					EssayQuestionImpl e = (EssayQuestionImpl) (sq.question.getTypeSpecificQuestion());
-					if (sq.answerMatchText != null) e.setModelAnswer(sq.answerMatchText);
-					e.setSubmissionType(EssayQuestionImpl.SubmissionType.attachments);
-
-					break;
-				}
-				case 8:
-				{
-					// fillin-text
-					FillBlanksQuestionImpl fb = (FillBlanksQuestionImpl) (sq.question.getTypeSpecificQuestion());
-					if (sq.questionChoiceText != null) fb.setText(sq.questionChoiceText);
-					fb.setResponseTextual("true");
-					// TODO: the fill in values need to be harvested from the following entries
-
-					if (sq.caseSensitive != null) fb.setCaseSensitive(sq.caseSensitive.toString());
-
-					break;
-				}
-				case 9:
-				{
-					// match
-					MatchQuestionImpl m = (MatchQuestionImpl) (sq.question.getTypeSpecificQuestion());
-
-					// TODO:
-					break;
-				}
-				case 11:
-				{
-					// fillin numeric
-					FillBlanksQuestionImpl fb = (FillBlanksQuestionImpl) (sq.question.getTypeSpecificQuestion());
-					if (sq.questionChoiceText != null) fb.setText(sq.questionChoiceText);
-					fb.setResponseTextual("false");
-					// TODO: the fill in values need to be harvested from the following entries
-
-					if (sq.caseSensitive != null) fb.setCaseSensitive(sq.caseSensitive.toString());
-
-					break;
-				}
+				// save
+				question.getTypeSpecificQuestion().consolidate("");
+				this.questionService.saveQuestion(question);
 			}
 		}
-
-		// TODO: consolidate q? save q?
 
 		// set the pool's points to the average
 		float total = 0f;
@@ -546,13 +806,49 @@ public class ImportServiceImpl implements ImportService
 		{
 			Float average = Float.valueOf(total / count);
 			pool.setPoints(average);
-			try
-			{
-				this.poolService.savePool(pool);
-			}
-			catch (AssessmentPermissionException e)
-			{
-			}
+			this.poolService.savePool(pool);
 		}
+	}
+
+	/**
+	 * Read the Samigo pools for this user id.
+	 * 
+	 * @param userId
+	 *        The user id.
+	 * @return The list of Ents describing the pools for this user id.
+	 */
+	protected List<Ent> readSamigoPools(String userId)
+	{
+		final List<Ent> rv = new ArrayList<Ent>();
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT P.QUESTIONPOOLID, P.TITLE FROM SAM_QUESTIONPOOL_T P WHERE P.OWNERID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = StringUtil.trimToNull(userId);
+
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String id = SqlHelper.readString(result, 1);
+					String title = SqlHelper.readString(result, 2);
+
+					Ent ent = new EntImpl(id, title);
+					rv.add(ent);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readSubmissions(submission): " + e);
+					return null;
+				}
+			}
+		});
+
+		return rv;
 	}
 }

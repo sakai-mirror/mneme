@@ -44,6 +44,8 @@ public interface ImportService
 	 *        The id of the pool to import.
 	 * @param context
 	 *        The context where the new pool will live.
+	 * @throws AssessmentPermissionException
+	 *         if the user does not have permission to create pools and questions.
 	 */
-	void importPool(String id, String context);
+	void importPool(String id, String context) throws AssessmentPermissionException;
 }
