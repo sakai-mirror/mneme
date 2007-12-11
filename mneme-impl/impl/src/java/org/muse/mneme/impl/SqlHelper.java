@@ -104,7 +104,7 @@ public class SqlHelper
 	{
 		String b = StringUtil.trimToNull(result.getString(index));
 		if (b == null) return null;
-		return Boolean.valueOf("1".equals(b));
+		return Boolean.valueOf("1".equals(b) || "true".equals(b));
 	}
 
 	/**
