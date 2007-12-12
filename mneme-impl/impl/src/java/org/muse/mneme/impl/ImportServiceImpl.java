@@ -32,6 +32,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.ambrosia.api.Navigation;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Ent;
 import org.muse.mneme.api.ImportService;
@@ -40,14 +41,21 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
+import org.sakaiproject.content.cover.ContentTypeImageService;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
+import org.sakaiproject.entity.api.EntityManager;
+import org.sakaiproject.entity.api.EntityPropertyNotDefinedException;
+import org.sakaiproject.entity.api.EntityPropertyTypeException;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.StringUtil;
+import org.sakaiproject.util.Validator;
 
 /**
  * <p>
@@ -56,6 +64,19 @@ import org.sakaiproject.util.StringUtil;
  */
 public class ImportServiceImpl implements ImportService
 {
+	public class AttachmentInfo
+	{
+		String fileName = null;
+
+		Boolean isLink = null;
+
+		String itemId = null;
+
+		String mimeType = null;
+
+		String ref = null;
+	}
+
 	public class PoolInfo
 	{
 		String description = null;
@@ -101,6 +122,9 @@ public class ImportServiceImpl implements ImportService
 
 	/** Messages bundle name. */
 	protected String bundle = null;
+
+	/** Dependency: EntityManager */
+	protected EntityManager entityManager = null;
 
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
@@ -181,6 +205,17 @@ public class ImportServiceImpl implements ImportService
 	public void setBundle(String name)
 	{
 		this.bundle = name;
+	}
+
+	/**
+	 * Dependency: EntityManager.
+	 * 
+	 * @param service
+	 *        The EntityManager.
+	 */
+	public void setEntityManager(EntityManager service)
+	{
+		entityManager = service;
 	}
 
 	/**
@@ -300,7 +335,7 @@ public class ImportServiceImpl implements ImportService
 	 * @return The question, or null if it was not made
 	 * @throws AssessmentPermissionException
 	 */
-	protected Question createEssay(SamigoQuestion[] these, Pool pool, boolean upload) throws AssessmentPermissionException
+	protected Question createEssay(SamigoQuestion[] these, String attachments, Pool pool, boolean upload) throws AssessmentPermissionException
 	{
 		// validate: fist questionChoiceText for the question text not null
 		boolean valid = (these[0].questionChoiceText != null);
@@ -322,7 +357,7 @@ public class ImportServiceImpl implements ImportService
 		EssayQuestionImpl e = (EssayQuestionImpl) (question.getTypeSpecificQuestion());
 
 		// set the text
-		question.getPresentation().setText(these[0].questionChoiceText);
+		question.getPresentation().setText(these[0].questionChoiceText + attachments);
 
 		// model answer
 		if (these[0].answerMatchText != null)
@@ -348,7 +383,7 @@ public class ImportServiceImpl implements ImportService
 	 * @return The question, or null if it was not made
 	 * @throws AssessmentPermissionException
 	 */
-	protected Question createFillin(SamigoQuestion[] these, Pool pool, boolean text) throws AssessmentPermissionException
+	protected Question createFillin(SamigoQuestion[] these, String attachments, Pool pool, boolean text) throws AssessmentPermissionException
 	{
 		// validate: fist questionChoiceText for the question text not null
 		boolean valid = (these[0].questionChoiceText != null);
@@ -423,7 +458,7 @@ public class ImportServiceImpl implements ImportService
 		}
 
 		// set the text
-		f.setText(questionText);
+		f.setText(questionText + attachments);
 
 		return question;
 	}
@@ -438,7 +473,7 @@ public class ImportServiceImpl implements ImportService
 	 * @return The question, or null if it was not made
 	 * @throws AssessmentPermissionException
 	 */
-	protected Question createLikert(SamigoQuestion[] these, Pool pool) throws AssessmentPermissionException
+	protected Question createLikert(SamigoQuestion[] these, String attachments, Pool pool) throws AssessmentPermissionException
 	{
 		// validate: fist questionChoiceText for the question text not null
 		boolean valid = (these[0].questionChoiceText != null);
@@ -519,7 +554,7 @@ public class ImportServiceImpl implements ImportService
 		LikertScaleQuestionImpl l = (LikertScaleQuestionImpl) (question.getTypeSpecificQuestion());
 
 		// set the text
-		question.getPresentation().setText(these[0].questionChoiceText);
+		question.getPresentation().setText(these[0].questionChoiceText + attachments);
 
 		// set the scale
 		l.setScale(scale);
@@ -537,7 +572,7 @@ public class ImportServiceImpl implements ImportService
 	 * @return The question, or null if it was not made
 	 * @throws AssessmentPermissionException
 	 */
-	protected Question createMatch(SamigoQuestion[] these, Pool pool) throws AssessmentPermissionException
+	protected Question createMatch(SamigoQuestion[] these, String attachments, Pool pool) throws AssessmentPermissionException
 	{
 		// validate: fist instruction for the question text not null
 		boolean valid = (these[0].instruction != null);
@@ -566,7 +601,7 @@ public class ImportServiceImpl implements ImportService
 		MatchQuestionImpl m = (MatchQuestionImpl) (question.getTypeSpecificQuestion());
 
 		// set the text
-		question.getPresentation().setText(these[0].instruction);
+		question.getPresentation().setText(these[0].instruction + attachments);
 
 		// set the # pairs
 		m.consolidate("INIT:" + these.length);
@@ -594,7 +629,7 @@ public class ImportServiceImpl implements ImportService
 	 * @return The question, or null if it was not made
 	 * @throws AssessmentPermissionException
 	 */
-	protected Question createMc(SamigoQuestion[] these, Pool pool, boolean multiAllowed) throws AssessmentPermissionException
+	protected Question createMc(SamigoQuestion[] these, String attachments, Pool pool, boolean multiAllowed) throws AssessmentPermissionException
 	{
 		// validate: fist questionChoiceText for the question text not null
 		boolean valid = (these[0].questionChoiceText != null);
@@ -638,7 +673,7 @@ public class ImportServiceImpl implements ImportService
 		MultipleChoiceQuestionImpl mc = (MultipleChoiceQuestionImpl) (question.getTypeSpecificQuestion());
 
 		// set the text
-		question.getPresentation().setText(these[0].questionChoiceText);
+		question.getPresentation().setText(these[0].questionChoiceText + attachments);
 
 		// randomize
 		if (these[0].randomize != null) mc.setShuffleChoices(these[0].randomize.toString());
@@ -736,7 +771,7 @@ public class ImportServiceImpl implements ImportService
 	 * @return The question, or null if it was not made
 	 * @throws AssessmentPermissionException
 	 */
-	protected Question createTf(SamigoQuestion[] these, Pool pool) throws AssessmentPermissionException
+	protected Question createTf(SamigoQuestion[] these, String attachments, Pool pool) throws AssessmentPermissionException
 	{
 		// validate: fist questionChoiceText for the question text not null
 		boolean valid = (these[0].questionChoiceText != null);
@@ -773,12 +808,93 @@ public class ImportServiceImpl implements ImportService
 		TrueFalseQuestionImpl tf = (TrueFalseQuestionImpl) (question.getTypeSpecificQuestion());
 
 		// set the text
-		question.getPresentation().setText(these[0].questionChoiceText);
+		question.getPresentation().setText(these[0].questionChoiceText + attachments);
 
 		// the correct answer
 		tf.setCorrectAnswer((((these[0].correct != null) && (these[0].correct.booleanValue()))) ? Boolean.TRUE.toString() : Boolean.FALSE.toString());
 
 		return question;
+	}
+
+	/**
+	 * Form html for attachments for this item.
+	 * 
+	 * @param attachments
+	 *        The attachments definitions.
+	 * @param id
+	 *        The item id.
+	 * @return The html for attachments for this item.
+	 */
+	protected String formatAttachments(List<AttachmentInfo> attachments, String id)
+	{
+		// TODO: move them into mnemeDocs?
+
+		StringBuilder attachmentsHtml = new StringBuilder();
+		for (AttachmentInfo a : attachments)
+		{
+			if (id.equals(a.itemId))
+			{
+				// TODO: new window or not, icon... -ggolden
+				if ((a.isLink != null) && (a.isLink.booleanValue()))
+				{
+					attachmentsHtml.append("<li><a href=\"" + a.fileName + "\" target=\"_blank\">" + a.fileName + "</a></li>");
+				}
+				else
+				{
+					Reference ref = this.entityManager.newReference(a.ref);
+
+					// if we can't get the properties, assume that the attachment is to a deleted entity and skip it
+					ResourceProperties props = ref.getProperties();
+					if (props != null)
+					{
+						try
+						{
+							// for folders
+							if (props.getBooleanProperty(ResourceProperties.PROP_IS_COLLECTION))
+							{
+								attachmentsHtml.append("<li><img src = \"/library/" + ContentTypeImageService.getContentTypeImage("folder")
+										+ "\" border=\"0\" />");
+							}
+
+							// otherwise lookup the icon from the mime type
+							else
+							{
+								String type = props.getProperty(ResourceProperties.PROP_CONTENT_TYPE);
+								attachmentsHtml.append("<li><img src = \"/library/image/" + ContentTypeImageService.getContentTypeImage(type)
+										+ "\" border=\"0\" alt=\"" + type + "\"/>");
+							}
+
+							// the link
+							attachmentsHtml.append("<a href=\"" + ref.getUrl() + "\" target=\"_blank\" title=\""
+									+ Validator.escapeHtml(props.getPropertyFormatted("DAV:displayname")) + "\">"
+									+ Validator.escapeHtml(props.getPropertyFormatted("DAV:displayname")) + "</a>");
+
+							// size
+							attachmentsHtml.append(" (" + props.getPropertyFormatted(ResourceProperties.PROP_CONTENT_LENGTH) + ")");
+
+							attachmentsHtml.append("</li>");
+						}
+						catch (EntityPropertyNotDefinedException e)
+						{
+						}
+						catch (EntityPropertyTypeException e)
+						{
+						}
+					}
+					// else
+					// {
+					// attachmentsHtml.append("<li><a href=\"" + ref.getUrl() + "\" target=\"_blank\">" + a.fileName + "</a></li>");
+					//					}
+				}
+			}
+		}
+		if (attachmentsHtml.length() > 0)
+		{
+			attachmentsHtml.insert(0, "<p><ul>");
+			attachmentsHtml.append("</ul></p>");
+		}
+
+		return attachmentsHtml.toString();
 	}
 
 	/**
@@ -847,7 +963,42 @@ public class ImportServiceImpl implements ImportService
 				}
 				catch (SQLException e)
 				{
-					M_log.warn("importSamigoQuestions: " + e);
+					M_log.warn("importSamigoQuestions-questions: " + e);
+					return null;
+				}
+			}
+		});
+
+		// read all attachment references for these questions
+		sql = new StringBuilder();
+		sql.append("SELECT A.ITEMID, A.RESOURCEID, A.FILENAME, A.MIMETYPE, A.ISLINK");
+		sql.append(" FROM SAM_ATTACHMENT_T A");
+		sql.append(" JOIN SAM_QUESTIONPOOLITEM_T P ON A.ITEMID=P.ITEMID AND P.QUESTIONPOOLID=?");
+		sql.append(" ORDER BY A.ATTACHMENTID ASC");
+
+		final List<AttachmentInfo> attachments = new ArrayList<AttachmentInfo>();
+
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					AttachmentInfo a = new AttachmentInfo();
+					attachments.add(a);
+
+					a.itemId = SqlHelper.readId(result, 1);
+					a.ref = SqlHelper.readString(result, 2);
+					if (a.ref != null) a.ref = "/content" + a.ref;
+					a.fileName = SqlHelper.readString(result, 3);
+					a.mimeType = SqlHelper.readString(result, 4);
+					a.isLink = SqlHelper.readBitBoolean(result, 5);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("importSamigoQuestions-attachments: " + e);
 					return null;
 				}
 			}
@@ -880,6 +1031,8 @@ public class ImportServiceImpl implements ImportService
 			}
 			if (next == sqs.size()) next--;
 
+			String attachmentsHtml = formatAttachments(attachments, sq.itemId);
+
 			// we have from i .. next, inclusive
 			SamigoQuestion[] these = new SamigoQuestion[(next - i) + 1];
 			for (int index = i; index <= next; index++)
@@ -894,55 +1047,55 @@ public class ImportServiceImpl implements ImportService
 				case 1:
 				{
 					// single correct
-					question = createMc(these, pool, false);
+					question = createMc(these, attachmentsHtml, pool, false);
 
 					break;
 				}
 				case 2:
 				{
 					// multi correct
-					question = createMc(these, pool, true);
+					question = createMc(these, attachmentsHtml, pool, true);
 
 					break;
 				}
 				case 3:
 				{
 					// mnemeType = "mneme:LikertScale";
-					question = createLikert(these, pool);
+					question = createLikert(these, attachmentsHtml, pool);
 					break;
 				}
 				case 4:
 				{
-					question = createTf(these, pool);
+					question = createTf(these, attachmentsHtml, pool);
 					break;
 				}
 				case 5:
 				{
 					// inline essay
-					question = createEssay(these, pool, false);
+					question = createEssay(these, attachmentsHtml, pool, false);
 					break;
 				}
 				case 6:
 				{
 					// upload essay
-					question = createEssay(these, pool, true);
+					question = createEssay(these, attachmentsHtml, pool, true);
 					break;
 				}
 				case 8:
 				{
 					// text
-					question = createFillin(these, pool, true);
+					question = createFillin(these, attachmentsHtml.toString(), pool, true);
 					break;
 				}
 				case 9:
 				{
-					question = createMatch(these, pool);
+					question = createMatch(these, attachmentsHtml, pool);
 					break;
 				}
 				case 11:
 				{
 					// numeric
-					question = createFillin(these, pool, false);
+					question = createFillin(these, attachmentsHtml, pool, false);
 					break;
 				}
 			}
