@@ -21,8 +21,6 @@
 
 package org.muse.mneme.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -123,83 +121,40 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			return null;
 		}
 
-		pushAdvisor();
+		Reference rv = doAdd(name, type, body, size, application, context, prefix, uniqueHolder);
+		return rv;
+	}
 
-		// form the content hosting path, and make sure all the folders exist
-		String contentPath = "/private/";
-		assureCollection(contentPath, application + "/", false);
-		contentPath += application + "/";
-		assureCollection(contentPath, context + "/", false);
-		contentPath += context + "/";
-		if ((prefix != null) && (prefix.length() > 0))
-		{
-			assureCollection(contentPath, prefix + "/", false);
-			contentPath += prefix + "/";
-		}
-		if (uniqueHolder)
-		{
-			String uuid = this.idManager.createUuid();
-			assureCollection(contentPath, uuid + "/", true);
-			contentPath += uuid + "/";
-		}
-
-		contentPath += name;
-
+	/**
+	 * {@inheritDoc}
+	 */
+	public Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, Reference resourceRef)
+	{
 		try
 		{
-			ContentResourceEdit edit = contentHostingService.addResource(contentPath);
-			edit.setContent(body);
-			edit.setContentType(type);
-			ResourcePropertiesEdit props = edit.getPropertiesEdit();
-
-			// set the alternate reference root so we get all requests
-			props.addProperty(ContentHostingService.PROP_ALTERNATE_REFERENCE, AttachmentService.REFERENCE_ROOT);
-
-			props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, name);
-
-			contentHostingService.commitResource(edit);
-
-			String ref = edit.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
-			Reference reference = entityManager.newReference(ref);
-
-			return reference;
+			ContentResource resource = this.contentHostingService.getResource(resourceRef.getId());
+			String type = resource.getContentType();
+			long size = resource.getContentLength();
+			byte[] body = resource.getContent();
+			String name = resource.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME);
+			Reference rv = doAdd(name, type, body, size, application, context, prefix, uniqueHolder);
+			return rv;
 		}
-		catch (PermissionException e2)
+		catch (PermissionException e)
 		{
-			M_log.warn("addAttachment: creating our content: " + e2.toString());
+			M_log.warn("addAttachment: " + e.toString());
 		}
-		catch (IdUsedException e2)
+		catch (IdUnusedException e)
 		{
-			M_log.warn("addAttachment: creating our content: " + e2.toString());
+			M_log.warn("addAttachment: " + e.toString());
 		}
-		catch (IdInvalidException e2)
+		catch (TypeException e)
 		{
-			M_log.warn("addAttachment: creating our content: " + e2.toString());
+			M_log.warn("addAttachment: " + e.toString());
 		}
-		catch (InconsistentException e2)
+		catch (ServerOverloadException e)
 		{
-			M_log.warn("addAttachment: creating our content: " + e2.toString());
-		}
-		catch (ServerOverloadException e2)
-		{
-			M_log.warn("addAttachment: creating our content: " + e2.toString());
-		}
-		catch (OverQuotaException e2)
-		{
-			M_log.warn("addAttachment: creating our content: " + e2.toString());
-		}
-		finally
-		{
-			// try
-			// {
-			// // TODO: if using input stream
-			// if (body != null) body.close();
-			// }
-			// catch (IOException e)
-			// {
-			// }
-
-			popAdvisor();
+			M_log.warn("addAttachment: " + e.toString());
 		}
 
 		return null;
@@ -639,6 +594,112 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
+	 * Perform the add.
+	 * 
+	 * @param name
+	 *        The file name.
+	 * @param type
+	 *        The mime type.
+	 * @param body
+	 *        The body bytes.
+	 * @param size
+	 *        The body size.
+	 * @param application
+	 *        The application prefix for the collection in private.
+	 * @param context
+	 *        The context associated with the attachment.
+	 * @param prefix
+	 *        Any prefix path for within the context are of the application in private.
+	 * @param uniqueHolder
+	 *        If true, a uniquely named folder is created to hold the resource.
+	 * @return The Reference to the added attachment.
+	 */
+	protected Reference doAdd(String name, String type, byte[] body, long size, String application, String context, String prefix,
+			boolean uniqueHolder)
+	{
+		pushAdvisor();
+
+		// form the content hosting path, and make sure all the folders exist
+		String contentPath = "/private/";
+		assureCollection(contentPath, application + "/", false);
+		contentPath += application + "/";
+		assureCollection(contentPath, context + "/", false);
+		contentPath += context + "/";
+		if ((prefix != null) && (prefix.length() > 0))
+		{
+			assureCollection(contentPath, prefix + "/", false);
+			contentPath += prefix + "/";
+		}
+		if (uniqueHolder)
+		{
+			String uuid = this.idManager.createUuid();
+			assureCollection(contentPath, uuid + "/", true);
+			contentPath += uuid + "/";
+		}
+
+		contentPath += name;
+
+		try
+		{
+			ContentResourceEdit edit = contentHostingService.addResource(contentPath);
+			edit.setContent(body);
+			edit.setContentType(type);
+			ResourcePropertiesEdit props = edit.getPropertiesEdit();
+
+			// set the alternate reference root so we get all requests
+			props.addProperty(ContentHostingService.PROP_ALTERNATE_REFERENCE, AttachmentService.REFERENCE_ROOT);
+
+			props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, name);
+
+			contentHostingService.commitResource(edit);
+
+			String ref = edit.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+			Reference reference = entityManager.newReference(ref);
+
+			return reference;
+		}
+		catch (PermissionException e2)
+		{
+			M_log.warn("addAttachment: creating our content: " + e2.toString());
+		}
+		catch (IdUsedException e2)
+		{
+			M_log.warn("addAttachment: creating our content: " + e2.toString());
+		}
+		catch (IdInvalidException e2)
+		{
+			M_log.warn("addAttachment: creating our content: " + e2.toString());
+		}
+		catch (InconsistentException e2)
+		{
+			M_log.warn("addAttachment: creating our content: " + e2.toString());
+		}
+		catch (ServerOverloadException e2)
+		{
+			M_log.warn("addAttachment: creating our content: " + e2.toString());
+		}
+		catch (OverQuotaException e2)
+		{
+			M_log.warn("addAttachment: creating our content: " + e2.toString());
+		}
+		finally
+		{
+			// try
+			// {
+			// // TODO: if using input stream
+			// if (body != null) body.close();
+			// }
+			// catch (IOException e)
+			// {
+			// }
+
+			popAdvisor();
+		}
+
+		return null;
+	}
+
+	/**
 	 * Remove our security advisor.
 	 */
 	protected void popAdvisor()
@@ -660,5 +721,4 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			}
 		});
 	}
-
 }

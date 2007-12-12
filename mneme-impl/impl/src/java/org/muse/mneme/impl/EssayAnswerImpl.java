@@ -244,8 +244,8 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void setUpload(FileItem file)
 	{
-		Reference reference = this.attachmentService.addAttachment("mneme", this.answer.getSubmission().getAssessment().getContext(), "submissions",
-				true, file);
+		Reference reference = this.attachmentService.addAttachment(AttachmentService.MNEME_APPLICATION, this.answer.getSubmission().getAssessment()
+				.getContext(), AttachmentService.SUBMISSIONS_AREA, true, file);
 		if (reference != null)
 		{
 			this.uploads.add(reference);

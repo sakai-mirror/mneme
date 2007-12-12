@@ -363,6 +363,7 @@
 		destroy-method="destroy"
 		singleton="true">
 
+		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>

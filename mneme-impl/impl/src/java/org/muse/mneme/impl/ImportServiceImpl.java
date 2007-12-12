@@ -32,8 +32,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.muse.ambrosia.api.Navigation;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Ent;
 import org.muse.mneme.api.ImportService;
 import org.muse.mneme.api.Pool;
@@ -120,6 +120,9 @@ public class ImportServiceImpl implements ImportService
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(ImportServiceImpl.class);
 
+	/** Dependency: AttachmentService */
+	protected AttachmentService attachmentService = null;
+
 	/** Messages bundle name. */
 	protected String bundle = null;
 
@@ -194,6 +197,17 @@ public class ImportServiceImpl implements ImportService
 		if (this.bundle != null) this.messages = new ResourceLoader(this.bundle);
 
 		M_log.info("init()");
+	}
+
+	/**
+	 * Dependency: AttachmentService.
+	 * 
+	 * @param service
+	 *        The AttachmentService.
+	 */
+	public void setAttachmentService(AttachmentService service)
+	{
+		attachmentService = service;
 	}
 
 	/**
@@ -884,7 +898,7 @@ public class ImportServiceImpl implements ImportService
 					// else
 					// {
 					// attachmentsHtml.append("<li><a href=\"" + ref.getUrl() + "\" target=\"_blank\">" + a.fileName + "</a></li>");
-					//					}
+					// }
 				}
 			}
 		}
@@ -895,6 +909,39 @@ public class ImportServiceImpl implements ImportService
 		}
 
 		return attachmentsHtml.toString();
+	}
+
+	/**
+	 * Import the attachments to the MnemeDocs for the pool's context.
+	 * 
+	 * @param attachment
+	 *        The list of attachments.
+	 * @param context
+	 *        The destination context.
+	 */
+	protected void importAttachments(List<AttachmentInfo> attachments, String context)
+	{
+		for (AttachmentInfo a : attachments)
+		{
+			// not for links
+			if ((a.isLink == null) || (!a.isLink.booleanValue()))
+			{
+				// form a reference to the existing resource
+				Reference resource = this.entityManager.newReference(a.ref);
+
+				// move the referenced resource into our docs
+				Reference attachment = this.attachmentService.addAttachment(AttachmentService.MNEME_APPLICATION, context,
+						AttachmentService.DOCS_AREA, true, resource);
+				if (attachment == null)
+				{
+					M_log.warn("importAttachments: failed to move resource: " + a.ref);
+				}
+				// TODO: else what?
+
+				// remember the new reference
+				a.ref = attachment.getReference();
+			}
+		}
 	}
 
 	/**
@@ -1003,6 +1050,9 @@ public class ImportServiceImpl implements ImportService
 				}
 			}
 		});
+
+		// import the attachments to the MnemeDocs for the pool's context
+		importAttachments(attachments, pool.getContext());
 
 		// build the questions
 		float total = 0f;

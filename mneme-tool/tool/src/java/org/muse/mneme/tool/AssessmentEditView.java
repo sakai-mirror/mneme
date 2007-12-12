@@ -182,7 +182,7 @@ public class AssessmentEditView extends ControllerImpl
 		context.put("ids", values);
 
 		// for the upload of attachments
-		Upload upload = new Upload(this.toolManager.getCurrentPlacement().getContext(), "docs", false, this.attachmentService);
+		Upload upload = new Upload(this.toolManager.getCurrentPlacement().getContext(), AttachmentService.DOCS_AREA, false, this.attachmentService);
 		context.put("upload", upload);
 
 		// read the form

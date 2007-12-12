@@ -21,8 +21,6 @@
 
 package org.muse.mneme.api;
 
-import java.io.InputStream;
-
 import org.apache.commons.fileupload.FileItem;
 import org.sakaiproject.entity.api.Reference;
 
@@ -36,11 +34,20 @@ public interface AttachmentService
 	 */
 	static final String APPLICATION_ID = "sakai:mneme";
 
+	/** Prefix for the MnemeDocs area. */
+	static final String DOCS_AREA = "docs";
+
+	/** Application code for Mneme in ContentHosting's private area. */
+	static final String MNEME_APPLICATION = "mneme";
+
 	/** This string starts the references to uploaded resources. */
 	static final String REFERENCE_ROOT = "/mneme";
 
+	/** Prefix for the submissions upload area in MnemeDocs. */
+	static final String SUBMISSIONS_AREA = "submissions";
+
 	/**
-	 * Add the attachment.
+	 * Add an attachment from an uploaded file.
 	 * 
 	 * @param application
 	 *        The application prefix for the collection in private.
@@ -52,8 +59,26 @@ public interface AttachmentService
 	 *        If true, a uniquely named folder is created to hold the resource.
 	 * @param file
 	 *        The attachment file.
+	 * @return The Reference to the added attachment.
 	 */
 	Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, FileItem file);
+
+	/**
+	 * Add an attachment from a reference to a resource in ContentHosting.
+	 * 
+	 * @param application
+	 *        The application prefix for the collection in private.
+	 * @param context
+	 *        The context associated with the attachment.
+	 * @param prefix
+	 *        Any prefix path for within the context are of the application in private.
+	 * @param uniqueHolder
+	 *        If true, a uniquely named folder is created to hold the resource.
+	 * @param resource
+	 *        The Reference to the resource in ContentHosting.
+	 * @return The Reference to the added attachment.
+	 */
+	Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, Reference resource);
 
 	/**
 	 * Form a Reference object from a reference string.

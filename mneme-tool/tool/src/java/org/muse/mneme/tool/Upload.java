@@ -29,7 +29,7 @@ import org.muse.mneme.api.AttachmentService;
 import org.sakaiproject.entity.api.Reference;
 
 /**
- * UiUpload implements Upload.
+ * Upload handles file uploads into MnemeDocs.
  */
 public class Upload
 {
@@ -86,7 +86,8 @@ public class Upload
 	 */
 	public void setUpload(FileItem file)
 	{
-		Reference reference = this.attachmentService.addAttachment("mneme", this.context, this.prefix, this.uniqueHolder, file);
+		Reference reference = this.attachmentService.addAttachment(AttachmentService.MNEME_APPLICATION, this.context, this.prefix, this.uniqueHolder,
+				file);
 		if (reference != null)
 		{
 			this.upload = reference;
