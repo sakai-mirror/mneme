@@ -740,7 +740,7 @@ public class ImportServiceImpl implements ImportService
 		sql.append("SELECT P.TITLE, P.DESCRIPTION FROM SAM_QUESTIONPOOL_T P WHERE P.QUESTIONPOOLID=?");
 
 		Object[] fields = new Object[1];
-		fields[0] = StringUtil.trimToNull(poolId);
+		fields[0] = Long.valueOf(poolId);
 		final PoolInfo info = new PoolInfo();
 
 		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
