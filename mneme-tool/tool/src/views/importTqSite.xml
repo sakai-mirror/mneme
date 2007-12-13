@@ -32,11 +32,11 @@
 	</modeContainer>
 
 	<title>
-		<message selector="import-tq-pool-title" />
+		<message selector="import-tq-site-title" />
 	</title>
 
 	<header>
-		<message selector="import-tq-pool-header">
+		<message selector="import-tq-site-header">
 			<model type="icon" icon="/icons/import_export.png" />
 		</message>
 	</header>
@@ -46,7 +46,7 @@
 		<navigationBar>
 			<container>
 				<text>
-					<message selector="select-pools" />
+					<message selector="select-sites" />
 				</text>
 			</container>
 		</navigationBar>
@@ -55,16 +55,16 @@
 			<container>
 
 				<selection>
-					<model ref="selectedPools.values" />
+					<model ref="selectedSite.value" />
 					<singleSelect>
-						<decision type="true" reversed="TRUE" />
+						<decision type="true" />
 					</singleSelect>
-					<selectionModel model="pools" name="pool">
+					<selectionModel model="sites" name="site">
 						<valueMessage>
-							<message model="pool.id" />
+							<message model="site.id" />
 						</valueMessage>
 						<displayMessage>
-							<message model="pool.description" />
+							<message model="site.description" />
 						</displayMessage>
 					</selectionModel>
 				</selection>

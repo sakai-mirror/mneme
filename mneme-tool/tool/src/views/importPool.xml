@@ -59,7 +59,7 @@
 				<gap />
 				<navigation title="import-tq-assessment-questions" style="LINK">
 					<icon icon="/icons/import_assessment.png" style="LEFT" />
-					<destination template="/import_tq_pool/{0}">
+					<destination template="/import_tq_site/{0}">
 						<model ref="poolsSort" />
 					</destination>
 				</navigation>

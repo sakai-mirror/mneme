@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Values;
+import org.muse.ambrosia.api.Value;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Ent;
@@ -40,12 +40,12 @@ import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
- * The /import_tq_pool view for the mneme tool.
+ * The /import_tq_site view for the mneme tool.
  */
-public class ImportTqPoolView extends ControllerImpl
+public class ImportTqSiteView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(ImportTqPoolView.class);
+	private static Log M_log = LogFactory.getLog(ImportTqSiteView.class);
 
 	/** Dependency: ImportService */
 	protected ImportService importService = null;
@@ -84,9 +84,9 @@ public class ImportTqPoolView extends ControllerImpl
 			return;
 		}
 
-		// the list of importable pools for this user
-		List<Ent> pools = this.importService.getSamigoPools(null);
-		context.put("pools", pools);
+		// the list of site for this user with Samigo access
+		List<Ent> sites = this.importService.getSamigoSites(null);
+		context.put("sites", sites);
 
 		// render
 		uiService.render(ui, context);
@@ -120,8 +120,8 @@ public class ImportTqPoolView extends ControllerImpl
 			return;
 		}
 
-		Values selectedPools = this.uiService.newValues();
-		context.put("selectedPools", selectedPools);
+		Value selectedSite = this.uiService.newValue();
+		context.put("selectedPool", selectedSite);
 
 		// read the form
 		String destination = uiService.decode(req, context);
@@ -129,21 +129,8 @@ public class ImportTqPoolView extends ControllerImpl
 		// import the pools
 		if ("IMPORT".equals(destination))
 		{
-			for (String id : selectedPools.getValues())
-			{
-				try
-				{
-					this.importService.importPool(id, toolManager.getCurrentPlacement().getContext());
-				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
-			}
-
-			destination = "/pools/" + poolsSort;
+			String siteId = selectedSite.getValue();
+			destination = "/import_tq_assessments/" + poolsSort + "/" + siteId;
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));

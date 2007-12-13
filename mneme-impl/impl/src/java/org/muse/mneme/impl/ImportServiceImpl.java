@@ -43,6 +43,7 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
+import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.content.cover.ContentTypeImageService;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
@@ -53,6 +54,7 @@ import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.util.ResourceLoader;
@@ -151,6 +153,9 @@ public class ImportServiceImpl implements ImportService
 	/** Dependency: AttachmentService */
 	protected AttachmentService attachmentService = null;
 
+	/** Dependency: AuthzGroupService */
+	protected AuthzGroupService authzGroupService = null;
+
 	/** Messages bundle name. */
 	protected String bundle = null;
 
@@ -175,6 +180,9 @@ public class ImportServiceImpl implements ImportService
 	/** Dependency: SessionManager */
 	protected SessionManager sessionManager = null;
 
+	/** Dependency: SiteService */
+	protected SiteService siteService = null;
+
 	/** Dependency: SqlService */
 	protected SqlService sqlService = null;
 
@@ -192,11 +200,40 @@ public class ImportServiceImpl implements ImportService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Ent> getPools(String userId)
+	public List<Ent> getSamigoPools(String userId)
 	{
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
 		List<Ent> rv = readSamigoPools(userId);
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Ent> getSamigoSites(String userId)
+	{
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		List<Ent> rv = new ArrayList<Ent>();
+
+		// get the authz groups in which this user has samigo permission
+		Set refs = this.authzGroupService.getAuthzGroupsIsAllowed(userId, "assessment.createAssessment", null);
+		for (Object o : refs)
+		{
+			String ref = (String) o;
+
+			// each is a site ref
+			Reference siteRef = this.entityManager.newReference(ref);
+
+			// get the site display
+			String display = this.siteService.getSiteDisplay(siteRef.getId());
+
+			// record for return
+			Ent ent = new EntImpl(siteRef.getId(), display);
+			rv.add(ent);
+		}
 
 		return rv;
 	}
@@ -236,6 +273,17 @@ public class ImportServiceImpl implements ImportService
 	public void setAttachmentService(AttachmentService service)
 	{
 		attachmentService = service;
+	}
+
+	/**
+	 * Dependency: AuthzGroupService.
+	 * 
+	 * @param service
+	 *        The AuthzGroupService.
+	 */
+	public void setAuthzGroupService(AuthzGroupService service)
+	{
+		authzGroupService = service;
 	}
 
 	/**
@@ -313,6 +361,17 @@ public class ImportServiceImpl implements ImportService
 	public void setSessionManager(SessionManager service)
 	{
 		sessionManager = service;
+	}
+
+	/**
+	 * Dependency: SiteService.
+	 * 
+	 * @param service
+	 *        The SiteService.
+	 */
+	public void setSiteService(SiteService service)
+	{
+		siteService = service;
 	}
 
 	/**
