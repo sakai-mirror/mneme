@@ -156,7 +156,7 @@ public class QuestionStorageMysql implements QuestionStorage
 			{
 				try
 				{
-					String id = StringUtil.trimToNull(result.getString(1));
+					String id = SqlHelper.readId(result, 1);
 					Integer count = Integer.valueOf(result.getInt(2));
 					rv.put(id, count);
 
@@ -295,7 +295,27 @@ public class QuestionStorageMysql implements QuestionStorage
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(pool.getId());
 
-		return new ArrayList<String>(this.sqlService.dbRead(sql.toString(), fields, null));
+		final List<String> rv = new ArrayList<String>();
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String qid = SqlHelper.readId(result, 1);
+					rv.add(qid);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getPoolQuestions: " + e);
+					return null;
+				}
+			}
+		});
+
+		return rv;
 	}
 
 	/**
@@ -672,21 +692,20 @@ public class QuestionStorageMysql implements QuestionStorage
 				try
 				{
 					QuestionImpl question = newQuestion();
-					question.initContext(StringUtil.trimToNull(result.getString(1)));
-					question.getCreatedBy().setDate(new Date(result.getLong(2)));
-					question.getCreatedBy().setUserId(StringUtil.trimToNull(result.getString(3)));
-					question.setExplainReason(Boolean.valueOf("1".equals(StringUtil.trimToNull(result.getString(4)))));
-					question.setFeedback(StringUtil.trimToNull(result.getString(5)));
-					question.setHints(StringUtil.trimToNull(result.getString(6)));
-					question.initHistorical(Boolean.valueOf("1".equals(StringUtil.trimToNull(result.getString(7)))));
-					question.initId(Long.toString(result.getLong(8)));
-					question.initMint(Boolean.valueOf("1".equals(StringUtil.trimToNull(result.getString(9)))));
-					question.getModifiedBy().setDate(new Date(result.getLong(10)));
-					question.getModifiedBy().setUserId(StringUtil.trimToNull(result.getString(11)));
-					long poolIdLong = result.getLong(12);
-					question.initPool((poolIdLong == 0) ? null : Long.toString(poolIdLong));
-					question.getPresentation().setText(StringUtil.trimToNull(result.getString(13)));
-					qService.setType(StringUtil.trimToNull(result.getString(14)), question);
+					question.initContext(SqlHelper.readString(result, 1));
+					question.getCreatedBy().setDate(SqlHelper.readDate(result, 2));
+					question.getCreatedBy().setUserId(SqlHelper.readString(result, 3));
+					question.setExplainReason(SqlHelper.readBoolean(result, 4));
+					question.setFeedback(SqlHelper.readString(result, 5));
+					question.setHints(SqlHelper.readString(result, 6));
+					question.initHistorical(SqlHelper.readBoolean(result, 7));
+					question.initId(SqlHelper.readId(result, 8));
+					question.initMint(SqlHelper.readBoolean(result, 9));
+					question.getModifiedBy().setDate(SqlHelper.readDate(result, 10));
+					question.getModifiedBy().setUserId(SqlHelper.readString(result, 11));
+					question.initPool(SqlHelper.readId(result, 12));
+					question.getPresentation().setText(SqlHelper.readString(result, 13));
+					qService.setType(SqlHelper.readString(result, 14), question);
 					question.getTypeSpecificQuestion().setData(SqlHelper.decodeStringArray(StringUtil.trimToNull(result.getString(15))));
 
 					question.changed.clearChanged();

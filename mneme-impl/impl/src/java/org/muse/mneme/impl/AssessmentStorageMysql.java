@@ -52,7 +52,6 @@ import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.util.ResourceLoader;
-import org.sakaiproject.util.StringUtil;
 
 /**
  * QuestionStorageSample defines a sample storage for questions.
@@ -1110,40 +1109,40 @@ public class AssessmentStorageMysql implements AssessmentStorage
 					int i = 1;
 					AssessmentImpl assessment = newAssessment();
 					assessment.setArchived(SqlHelper.readBoolean(result, i++));
-					assessment.setContext(StringUtil.trimToNull(result.getString(i++)));
+					assessment.setContext(SqlHelper.readString(result, i++));
 					assessment.getCreatedBy().setDate(SqlHelper.readDate(result, i++));
-					assessment.getCreatedBy().setUserId(StringUtil.trimToNull(result.getString(i++)));
+					assessment.getCreatedBy().setUserId(SqlHelper.readString(result, i++));
 					assessment.getDates().setAcceptUntilDate(SqlHelper.readDate(result, i++));
 					((AssessmentDatesImpl) assessment.getDates()).archived = SqlHelper.readDate(result, i++);
 					assessment.getDates().setDueDate(SqlHelper.readDate(result, i++));
 					assessment.getDates().setOpenDate(SqlHelper.readDate(result, i++));
 					assessment.getGrading().setAnonymous(SqlHelper.readBoolean(result, i++));
-					((AssessmentGradingImpl)(assessment.getGrading())).initAutoRelease(SqlHelper.readBoolean(result, i++));
+					((AssessmentGradingImpl) (assessment.getGrading())).initAutoRelease(SqlHelper.readBoolean(result, i++));
 					assessment.getGrading().setGradebookIntegration(SqlHelper.readBoolean(result, i++));
 					assessment.initHistorical(SqlHelper.readBoolean(result, i++));
 					assessment.setRequireHonorPledge(SqlHelper.readBoolean(result, i++));
-					assessment.initId(Long.toString(result.getLong(i++)));
+					assessment.initId(SqlHelper.readId(result, i++));
 					assessment.initLive(SqlHelper.readBoolean(result, i++));
 					assessment.initMint(SqlHelper.readBoolean(result, i++));
 					assessment.getModifiedBy().setDate(SqlHelper.readDate(result, i++));
-					assessment.getModifiedBy().setUserId(StringUtil.trimToNull(result.getString(i++)));
+					assessment.getModifiedBy().setUserId(SqlHelper.readString(result, i++));
 					assessment.getParts().setContinuousNumbering(SqlHelper.readBoolean(result, i++));
 					assessment.getParts().setShowPresentation(SqlHelper.readBoolean(result, i++));
-					assessment.getPassword().setPassword(StringUtil.trimToNull(result.getString(i++)));
-					assessment.getPresentation().setText(StringUtil.trimToNull(result.getString(i++)));
+					assessment.getPassword().setPassword(SqlHelper.readString(result, i++));
+					assessment.getPresentation().setText(SqlHelper.readString(result, i++));
 					assessment.setPublished(SqlHelper.readBoolean(result, i++));
-					assessment.setQuestionGrouping(QuestionGrouping.valueOf(StringUtil.trimToNull(result.getString(i++))));
+					assessment.setQuestionGrouping(QuestionGrouping.valueOf(SqlHelper.readString(result, i++)));
 					assessment.setRandomAccess(SqlHelper.readBoolean(result, i++));
 					assessment.getReview().setDate(SqlHelper.readDate(result, i++));
 					assessment.getReview().setShowCorrectAnswer(SqlHelper.readBoolean(result, i++));
 					assessment.getReview().setShowFeedback(SqlHelper.readBoolean(result, i++));
-					assessment.getReview().setTiming(ReviewTiming.valueOf(StringUtil.trimToNull(result.getString(i++))));
+					assessment.getReview().setTiming(ReviewTiming.valueOf(SqlHelper.readString(result, i++)));
 					assessment.setShowHints(SqlHelper.readBoolean(result, i++));
-					assessment.getSubmitPresentation().setText(StringUtil.trimToNull(result.getString(i++)));
+					assessment.getSubmitPresentation().setText(SqlHelper.readString(result, i++));
 					assessment.setTimeLimit(SqlHelper.readLong(result, i++));
-					assessment.setTitle(StringUtil.trimToNull(result.getString(i++)));
+					assessment.setTitle(SqlHelper.readString(result, i++));
 					assessment.setTries(SqlHelper.readInteger(result, i++));
-					assessment.setType(AssessmentType.valueOf(StringUtil.trimToNull(result.getString(i++))));
+					assessment.setType(AssessmentType.valueOf(SqlHelper.readString(result, i++)));
 
 					rv.add(assessment);
 					assessments.put(assessment.getId(), assessment);
@@ -1223,15 +1222,15 @@ public class AssessmentStorageMysql implements AssessmentStorage
 					if (p instanceof DrawPart)
 					{
 						Integer numQuestions = SqlHelper.readInteger(result, 2);
-						String origPoolId = SqlHelper.readString(result, 3);
-						String poolId = SqlHelper.readString(result, 6);
+						String origPoolId = SqlHelper.readId(result, 3);
+						String poolId = SqlHelper.readId(result, 6);
 						((DrawPartImpl) p).initDraw(poolId, origPoolId, numQuestions);
 					}
 					else if (p instanceof ManualPart)
 					{
-						String questionId = SqlHelper.readString(result, 7);
-						String origQid = SqlHelper.readString(result, 4);
-						String poolId = SqlHelper.readString(result, 6);
+						String questionId = SqlHelper.readId(result, 7);
+						String origQid = SqlHelper.readId(result, 4);
+						String poolId = SqlHelper.readId(result, 6);
 						((ManualPartImpl) p).initPick(questionId, origQid, poolId);
 					}
 

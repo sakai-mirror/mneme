@@ -34,7 +34,6 @@ import org.muse.mneme.api.Question;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
-import org.sakaiproject.util.StringUtil;
 
 /**
  * PoolStorageMysql implements PoolStorage in mysql.

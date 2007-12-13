@@ -101,8 +101,27 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		fields[0] = Long.valueOf(part.getAssessment().getId());
 		fields[1] = Long.valueOf(part.getId());
 
-		List results = this.sqlService.dbRead(sql.toString(), fields, null);
-		return results;
+		final List<String> rv = new ArrayList<String>();
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String qid = SqlHelper.readId(result, 1);
+					rv.add(qid);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("findPartQuestions: " + e);
+					return null;
+				}
+			}
+		});
+
+		return rv;
 	}
 
 	/**
@@ -224,9 +243,6 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		// collect the submissions to this assessment
 		String where = "WHERE S.COMPLETE='0'";
 		String order = "ORDER BY S.SUBMITTED_DATE ASC";
-
-		// Object[] fields = new Object[1];
-		// fields[0] = Long.valueOf(assessment.getId());
 
 		List<SubmissionImpl> rv = readSubmissions(where, order, null);
 		return rv;
@@ -808,8 +824,8 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
 		Object[] fields = new Object[13];
-		fields[0] = submission.getAssessment().getId();
-		fields[1] = submission.getAssessment().getId();
+		fields[0] = Long.valueOf(submission.getAssessment().getId());
+		fields[1] = Long.valueOf(submission.getAssessment().getId());
 		fields[2] = submission.getIsComplete() ? "1" : "0";
 		fields[3] = submission.getAssessment().getContext();
 		fields[4] = (submission.getEvaluation().getAttribution().getDate() == null) ? null : submission.getEvaluation().getAttribution().getDate()
@@ -891,7 +907,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 				{
 					int i = 1;
 					SubmissionImpl submission = newSubmission();
-					submission.initAssessmentIds(SqlHelper.readString(result, i++), SqlHelper.readString(result, i++));
+					submission.initAssessmentIds(SqlHelper.readId(result, i++), SqlHelper.readId(result, i++));
 					submission.setIsComplete(SqlHelper.readBoolean(result, i++));
 					submission.getEvaluation().getAttribution().setDate(SqlHelper.readDate(result, i++));
 					submission.getEvaluation().getAttribution().setUserId(SqlHelper.readString(result, i++));
