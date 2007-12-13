@@ -119,6 +119,32 @@ public class ImportServiceImpl implements ImportService
 		Integer type;
 	}
 
+	public class Translation
+	{
+		String from = null;
+
+		String to = null;
+
+		public Translation(String from, String to)
+		{
+			this.from = Pattern.quote(from);
+			this.to = to;
+		}
+
+		/**
+		 * Translate a target string.
+		 * 
+		 * @param target
+		 *        The target string.
+		 * @return The target string with all "from" instances replaced with "to" instances.
+		 */
+		public String translate(String target)
+		{
+			String rv = target.replaceAll(from, to);
+			return rv;
+		}
+	}
+
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(ImportServiceImpl.class);
 
@@ -337,6 +363,30 @@ public class ImportServiceImpl implements ImportService
 		String rv = this.messages.getFormattedMessage(selector, args);
 
 		return rv;
+	}
+
+	/**
+	 * Convert all references to embedded documents that have been imported to their new locations in the question data.
+	 * 
+	 * @param questionData
+	 *        The Samigo question data.
+	 * @param translations
+	 *        The translations for each imported embedded document reference.
+	 */
+	protected void convertDocumentsReferenced(List<SamigoQuestion> questionData, List<Translation> translations)
+	{
+		for (Translation t : translations)
+		{
+			for (SamigoQuestion q : questionData)
+			{
+				if (q.answerMatchText != null) q.answerMatchText = t.translate(q.answerMatchText);
+				if (q.correctFeedback != null) q.correctFeedback = t.translate(q.correctFeedback);
+				if (q.generalFeedback != null) q.generalFeedback = t.translate(q.generalFeedback);
+				if (q.incorrectFeedback != null) q.incorrectFeedback = t.translate(q.incorrectFeedback);
+				if (q.instruction != null) q.instruction = t.translate(q.instruction);
+				if (q.questionChoiceText != null) q.questionChoiceText = t.translate(q.questionChoiceText);
+			}
+		}
 	}
 
 	/**
@@ -893,8 +943,7 @@ public class ImportServiceImpl implements ImportService
 							// for folders
 							if (props.getBooleanProperty(ResourceProperties.PROP_IS_COLLECTION))
 							{
-								// TODO: check: /library/ or /library/image/ as below? -ggolden
-								attachmentsHtml.append("<li><img src=\"/library/" + ContentTypeImageService.getContentTypeImage("folder")
+								attachmentsHtml.append("<li><img src=\"/library/image/" + ContentTypeImageService.getContentTypeImage("folder")
 										+ "\" border=\"0\" />&nbsp;");
 							}
 
@@ -943,16 +992,16 @@ public class ImportServiceImpl implements ImportService
 	 * Collect all the document references in the Samigo question data:<br />
 	 * Anything referenced by a src= or href=.
 	 * 
-	 * @param sqs
+	 * @param questionData
 	 *        The Samigo question data.
 	 * @return The set of document references.
 	 */
-	protected Set<String> harvestDocumentsReferenced(List<SamigoQuestion> sqs)
+	protected Set<String> harvestDocumentsReferenced(List<SamigoQuestion> questionData)
 	{
 		Set<String> all = new HashSet<String>();
 
 		// collect all the references
-		for (SamigoQuestion q : sqs)
+		for (SamigoQuestion q : questionData)
 		{
 			all.addAll(findSrcHrefValues(q.answerMatchText));
 			all.addAll(findSrcHrefValues(q.correctFeedback));
@@ -966,9 +1015,11 @@ public class ImportServiceImpl implements ImportService
 		Set<String> filtered = new HashSet<String>();
 		for (String ref : all)
 		{
-			if (ref.indexOf("/access/content/") != -1)
+			int index = ref.indexOf("/access/content/");
+			if (index != -1)
 			{
-				filtered.add(ref);
+				// save just the reference part (i.e. after the /access);
+				filtered.add(ref.substring(index + 7));
 			}
 		}
 
@@ -996,16 +1047,52 @@ public class ImportServiceImpl implements ImportService
 				// move the referenced resource into our docs
 				Reference attachment = this.attachmentService.addAttachment(AttachmentService.MNEME_APPLICATION, context,
 						AttachmentService.DOCS_AREA, true, resource);
-				if (attachment == null)
+				if (attachment != null)
+				{
+					// remember the new reference
+					a.ref = attachment.getReference();
+				}
+				else
 				{
 					M_log.warn("importAttachments: failed to move resource: " + a.ref);
 				}
-				// TODO: else what?
-
-				// remember the new reference
-				a.ref = attachment.getReference();
 			}
 		}
+	}
+
+	/**
+	 * Import the embedded documents to the MnemeDocs for the pool's context.
+	 * 
+	 * @param refStrings
+	 *        The list of reference strings to the embedded documents.
+	 * @param context
+	 *        The destination context.
+	 * @return a Translation list for each imported document.
+	 */
+	protected List<Translation> importEmbeddedDocs(Set<String> refStrings, String context)
+	{
+		List<Translation> rv = new ArrayList<Translation>();
+		for (String ref : refStrings)
+		{
+			// form a reference to the existing resource
+			Reference resource = this.entityManager.newReference(ref);
+
+			// move the referenced resource into our docs
+			Reference attachment = this.attachmentService.addAttachment(AttachmentService.MNEME_APPLICATION, context, AttachmentService.DOCS_AREA,
+					true, resource);
+			if (attachment != null)
+			{
+				// make the translation
+				Translation t = new Translation(ref, attachment.getReference());
+				rv.add(t);
+			}
+			else
+			{
+				M_log.warn("importEmbeddedDocs: failed to move resource: " + ref);
+			}
+		}
+
+		return rv;
 	}
 
 	/**
@@ -1022,7 +1109,7 @@ public class ImportServiceImpl implements ImportService
 		final QuestionService qs = this.questionService;
 
 		// read the questions
-		final List<SamigoQuestion> sqs = new ArrayList<SamigoQuestion>();
+		final List<SamigoQuestion> questionData = new ArrayList<SamigoQuestion>();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT ");
 		sql.append(" P.ITEMID, I.TYPEID, I.SCORE, I.HASRATIONALE, I.INSTRUCTION, T.TEXT,");
@@ -1052,7 +1139,7 @@ public class ImportServiceImpl implements ImportService
 				try
 				{
 					SamigoQuestion sq = new SamigoQuestion();
-					sqs.add(sq);
+					questionData.add(sq);
 
 					sq.itemId = SqlHelper.readId(result, 1);
 					sq.type = SqlHelper.readInteger(result, 2);
@@ -1116,11 +1203,13 @@ public class ImportServiceImpl implements ImportService
 		});
 
 		// find any additional docs references in the question data
-		Set<String> docs = harvestDocumentsReferenced(sqs);
+		Set<String> docs = harvestDocumentsReferenced(questionData);
 
-		// TODO: import those docs
+		// import those docs, returning the translation mapping
+		List<Translation> translations = importEmbeddedDocs(docs, pool.getContext());
 
-		// TODO: modify the question data to reference the new doc locations
+		// modify the question data to reference the new doc locations
+		convertDocumentsReferenced(questionData, translations);
 
 		// import the attachments to the MnemeDocs for the pool's context
 		importAttachments(attachments, pool.getContext());
@@ -1128,9 +1217,9 @@ public class ImportServiceImpl implements ImportService
 		// build the questions
 		float total = 0f;
 		int count = 0;
-		for (int i = 0; i < sqs.size(); i++)
+		for (int i = 0; i < questionData.size(); i++)
 		{
-			SamigoQuestion sq = sqs.get(i);
+			SamigoQuestion sq = questionData.get(i);
 
 			// accumulate the score for an average for the pool
 			if (sq.score != null)
@@ -1141,16 +1230,16 @@ public class ImportServiceImpl implements ImportService
 
 			// get the rest
 			int next = i + 1;
-			for (; next < sqs.size(); next++)
+			for (; next < questionData.size(); next++)
 			{
-				SamigoQuestion sqNext = sqs.get(next);
+				SamigoQuestion sqNext = questionData.get(next);
 				if (!sqNext.itemId.equals(sq.itemId))
 				{
 					next--;
 					break;
 				}
 			}
-			if (next == sqs.size()) next--;
+			if (next == questionData.size()) next--;
 
 			String attachmentsHtml = formatAttachments(attachments, sq.itemId);
 
@@ -1158,7 +1247,7 @@ public class ImportServiceImpl implements ImportService
 			SamigoQuestion[] these = new SamigoQuestion[(next - i) + 1];
 			for (int index = i; index <= next; index++)
 			{
-				these[index - i] = sqs.get(index);
+				these[index - i] = questionData.get(index);
 			}
 			i = next;
 
