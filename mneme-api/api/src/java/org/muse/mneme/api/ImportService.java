@@ -29,6 +29,15 @@ import java.util.List;
 public interface ImportService
 {
 	/**
+	 * The the Samigo assessments in this context that can be imported as pools.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return A list of Samigo assessment "Ent"s (id and description).
+	 */
+	List<Ent> getSamigoAssessments(String context);
+
+	/**
 	 * The the samigo pools available to this user.
 	 * 
 	 * @param userId
@@ -45,6 +54,18 @@ public interface ImportService
 	 * @return A list of Samigo site "Ent"s (id and description).
 	 */
 	List<Ent> getSamigoSites(String userId);
+
+	/**
+	 * Import the Samigo assessment with this id into this context as a pool.
+	 * 
+	 * @param id
+	 *        The id of the Samigo assessment to import.
+	 * @param context
+	 *        The context where the new pool will live.
+	 * @throws AssessmentPermissionException
+	 *         if the user does not have permission to create pools and questions.
+	 */
+	void importAssessment(String id, String context) throws AssessmentPermissionException;
 
 	/**
 	 * Import the Samigo pool with this id into this context

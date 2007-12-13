@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Value;
+import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.Ent;
@@ -40,12 +40,12 @@ import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
- * The /import_tq_site view for the mneme tool.
+ * The /import_tq_assessment view for the mneme tool.
  */
-public class ImportTqSiteView extends ControllerImpl
+public class ImportTqAssessmentView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(ImportTqSiteView.class);
+	private static Log M_log = LogFactory.getLog(ImportTqAssessmentView.class);
 
 	/** Dependency: ImportService */
 	protected ImportService importService = null;
@@ -69,13 +69,14 @@ public class ImportTqSiteView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pools sort
-		if (params.length != 3)
+		// [2] pools sort, [3] source context
+		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 		String poolsSort = params[2];
 		context.put("poolsSort", poolsSort);
+		String sourceContext = params[3];
 
 		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 		{
@@ -84,9 +85,9 @@ public class ImportTqSiteView extends ControllerImpl
 			return;
 		}
 
-		// the list of site for this user with Samigo access
-		List<Ent> sites = this.importService.getSamigoSites(null);
-		context.put("sites", sites);
+		// the list of importable assessments for this site
+		List<Ent> assessments = this.importService.getSamigoAssessments(sourceContext);
+		context.put("assessments", assessments);
 
 		// render
 		uiService.render(ui, context);
@@ -106,12 +107,13 @@ public class ImportTqSiteView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pools sort
-		if (params.length != 3)
+		// [2] pools sort, [3] source context
+		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
 		String poolsSort = params[2];
+		String sourceContext = params[3];
 
 		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 		{
@@ -120,8 +122,8 @@ public class ImportTqSiteView extends ControllerImpl
 			return;
 		}
 
-		Value selectedSite = this.uiService.newValue();
-		context.put("selectedSite", selectedSite);
+		Values selectedPools = this.uiService.newValues();
+		context.put("selectedAssessments", selectedPools);
 
 		// read the form
 		String destination = uiService.decode(req, context);
@@ -129,8 +131,21 @@ public class ImportTqSiteView extends ControllerImpl
 		// import the pools
 		if ("IMPORT".equals(destination))
 		{
-			String siteId = selectedSite.getValue();
-			destination = "/import_tq_assessment/" + poolsSort + "/" + siteId;
+			for (String id : selectedPools.getValues())
+			{
+				try
+				{
+					this.importService.importAssessment(id, toolManager.getCurrentPlacement().getContext());
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+			}
+
+			destination = "/pools/" + poolsSort;
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));

@@ -200,6 +200,18 @@ public class ImportServiceImpl implements ImportService
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<Ent> getSamigoAssessments(String context)
+	{
+		if (context == null) throw new IllegalArgumentException();
+
+		List<Ent> rv = readSamigoAssessments(context);
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Ent> getSamigoPools(String userId)
 	{
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
@@ -241,6 +253,21 @@ public class ImportServiceImpl implements ImportService
 	/**
 	 * {@inheritDoc}
 	 */
+	public void importAssessment(String id, String context) throws AssessmentPermissionException
+	{
+		// create the pool
+		Pool pool = createAssessmentPool(id, context);
+
+		if (pool != null)
+		{
+			// import the questions
+			importSamigoAssessmentQuestions(id, pool);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void importPool(String id, String context) throws AssessmentPermissionException
 	{
 		// create the pool
@@ -249,7 +276,7 @@ public class ImportServiceImpl implements ImportService
 		if (pool != null)
 		{
 			// import the questions
-			importSamigoQuestions(id, pool);
+			importSamigoPoolQuestions(id, pool);
 		}
 	}
 
@@ -446,6 +473,55 @@ public class ImportServiceImpl implements ImportService
 				if (q.questionChoiceText != null) q.questionChoiceText = t.translate(q.questionChoiceText);
 			}
 		}
+	}
+
+	/**
+	 * Create a pool in Mneme from Samigo assessment information.
+	 * 
+	 * @param assessmentId
+	 *        The Samigo assessment id.
+	 * @return The pool, or null if it was not created.
+	 */
+	protected Pool createAssessmentPool(String assessmentId, final String context) throws AssessmentPermissionException
+	{
+		// read the details
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT A.TITLE FROM SAM_ASSESSMENTBASE_T A WHERE A.ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessmentId);
+		final PoolInfo info = new PoolInfo();
+
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					info.title = SqlHelper.readString(result, 1);
+					info.description = null;
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("createAssessmentPool: reading pool details: " + e);
+					return null;
+				}
+			}
+		});
+
+		if (info.title != null)
+		{
+			Pool pool = this.poolService.newPool(context);
+			pool.setTitle(addDate("import-text", info.title, new Date()));
+			// pool.setDescription(info.description);
+			this.poolService.savePool(pool);
+
+			return pool;
+		}
+
+		return null;
 	}
 
 	/**
@@ -1031,10 +1107,6 @@ public class ImportServiceImpl implements ImportService
 						{
 						}
 					}
-					// else
-					// {
-					// attachmentsHtml.append("<li><a href=\"" + ref.getUrl() + "\" target=\"_blank\">" + a.fileName + "</a></li>");
-					// }
 				}
 			}
 		}
@@ -1155,20 +1227,130 @@ public class ImportServiceImpl implements ImportService
 	}
 
 	/**
-	 * Read the list of item (question) ids in a Samigo pool.
+	 * Import the questions from a Samigo assessment.
+	 * 
+	 * @param assessmentId
+	 *        The Samigo assessment id.
+	 * @param pool
+	 *        The pool for the questions.
+	 */
+	protected void importSamigoAssessmentQuestions(String assessmentId, Pool pool) throws AssessmentPermissionException
+	{
+		// read the questions
+		final List<SamigoQuestion> questionData = new ArrayList<SamigoQuestion>();
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT ");
+		sql.append(" I.ITEMID, I.TYPEID, I.SCORE, I.HASRATIONALE, I.INSTRUCTION, T.TEXT,");
+		sql.append(" A.TEXT, A.SEQUENCE, A.ISCORRECT,");
+		sql.append(" F1.TEXT, F2.TEXT, F3.TEXT,");
+		sql.append(" M1.ENTRY, M2.ENTRY, M3.ENTRY");
+		sql.append(" FROM SAM_SECTION_T S");
+		sql.append(" JOIN SAM_ITEM_T I ON I.SECTIONID=S.SECTIONID");
+		sql.append(" JOIN SAM_ITEMTEXT_T T ON I.ITEMID=T.ITEMID");
+		sql.append(" INNER JOIN SAM_SECTIONMETADATA_T M ON S.SECTIONID=M.SECTIONID AND M.LABEL='AUTHOR_TYPE' AND M.ENTRY='1'");
+		sql.append(" LEFT OUTER JOIN SAM_ANSWER_T A ON I.ITEMID=A.ITEMID AND ((I.TYPEID != 9) OR (A.ISCORRECT='1' AND A.ITEMTEXTID=T.ITEMTEXTID))");
+		sql.append(" LEFT OUTER JOIN SAM_ITEMFEEDBACK_T F1 ON I.ITEMID=F1.ITEMID AND F1.TYPEID='INCORRECT FEEDBACK'");
+		sql.append(" LEFT OUTER JOIN SAM_ITEMFEEDBACK_T F2 ON I.ITEMID=F2.ITEMID AND F2.TYPEID='CORRECT FEEDBACK'");
+		sql.append(" LEFT OUTER JOIN SAM_ITEMFEEDBACK_T F3 ON I.ITEMID=F3.ITEMID AND F3.TYPEID='GENERAL FEEDBACK'");
+		sql.append(" LEFT OUTER JOIN SAM_ITEMMETADATA_T M1 ON I.ITEMID=M1.ITEMID AND M1.LABEL='CASE_SENSITIVE'");
+		sql.append(" LEFT OUTER JOIN SAM_ITEMMETADATA_T M2 ON I.ITEMID=M2.ITEMID AND M2.LABEL='MUTUALLY_EXCLUSIVE'");
+		sql.append(" LEFT OUTER JOIN SAM_ITEMMETADATA_T M3 ON I.ITEMID=M3.ITEMID AND M3.LABEL='RANDOMIZE'");
+		sql.append(" WHERE S.ASSESSMENTID=?");
+		sql.append(" ORDER BY I.ITEMID ASC, A.SEQUENCE ASC ");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessmentId);
+
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					SamigoQuestion sq = new SamigoQuestion();
+					questionData.add(sq);
+
+					sq.itemId = SqlHelper.readId(result, 1);
+					sq.type = SqlHelper.readInteger(result, 2);
+					sq.score = SqlHelper.readFloat(result, 3);
+					sq.reason = SqlHelper.readBitBoolean(result, 4);
+					sq.instruction = SqlHelper.readString(result, 5);
+					sq.questionChoiceText = SqlHelper.readString(result, 6);
+					sq.answerMatchText = SqlHelper.readString(result, 7);
+					sq.answerSeq = SqlHelper.readInteger(result, 8);
+					sq.correct = SqlHelper.readBitBoolean(result, 9);
+					sq.incorrectFeedback = SqlHelper.readString(result, 10);
+					sq.correctFeedback = SqlHelper.readString(result, 11);
+					sq.generalFeedback = SqlHelper.readString(result, 12);
+					sq.caseSensitive = SqlHelper.readBoolean(result, 13);
+					sq.exclusive = SqlHelper.readBoolean(result, 14);
+					sq.randomize = SqlHelper.readBoolean(result, 15);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("importSamigoQuestions-questions: " + e);
+					return null;
+				}
+			}
+		});
+
+		// read all attachment references for these questions
+		final List<AttachmentInfo> attachments = new ArrayList<AttachmentInfo>();
+
+		sql = new StringBuilder();
+		sql.append("SELECT A.ITEMID, A.RESOURCEID, A.FILENAME, A.MIMETYPE, A.ISLINK");
+		sql.append(" FROM SAM_SECTION_T S");
+		sql.append(" JOIN SAM_ITEM_T I ON I.SECTIONID=S.SECTIONID");
+		sql.append(" JOIN SAM_ATTACHMENT_T A ON A.ITEMID=I.ITEMID");
+		sql.append(" WHERE S.ASSESSMENTID=?");
+		sql.append(" ORDER BY A.ATTACHMENTID ASC");
+
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					AttachmentInfo a = new AttachmentInfo();
+					attachments.add(a);
+
+					a.itemId = SqlHelper.readId(result, 1);
+					a.ref = SqlHelper.readString(result, 2);
+					if (a.ref != null) a.ref = "/content" + a.ref;
+					a.fileName = SqlHelper.readString(result, 3);
+					a.mimeType = SqlHelper.readString(result, 4);
+					a.isLink = SqlHelper.readBitBoolean(result, 5);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("importSamigoQuestions-attachments: " + e);
+					return null;
+				}
+			}
+		});
+
+		// bring in these questions
+		importSamigoQuestions(questionData, attachments, pool);
+	}
+
+	/**
+	 * Import the questions from a Samigo pool.
 	 * 
 	 * @param poolId
 	 *        The Samigo pool id.
 	 * @param pool
 	 *        The pool for the questions.
-	 * @return A list of the item ids in the pool.
 	 */
-	protected void importSamigoQuestions(String poolId, Pool pool) throws AssessmentPermissionException
+	protected void importSamigoPoolQuestions(String poolId, Pool pool) throws AssessmentPermissionException
 	{
-		final QuestionService qs = this.questionService;
-
 		// read the questions
 		final List<SamigoQuestion> questionData = new ArrayList<SamigoQuestion>();
+
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT ");
 		sql.append(" P.ITEMID, I.TYPEID, I.SCORE, I.HASRATIONALE, I.INSTRUCTION, T.TEXT,");
@@ -1227,13 +1409,13 @@ public class ImportServiceImpl implements ImportService
 		});
 
 		// read all attachment references for these questions
+		final List<AttachmentInfo> attachments = new ArrayList<AttachmentInfo>();
+
 		sql = new StringBuilder();
 		sql.append("SELECT A.ITEMID, A.RESOURCEID, A.FILENAME, A.MIMETYPE, A.ISLINK");
 		sql.append(" FROM SAM_ATTACHMENT_T A");
 		sql.append(" JOIN SAM_QUESTIONPOOLITEM_T P ON A.ITEMID=P.ITEMID AND P.QUESTIONPOOLID=?");
 		sql.append(" ORDER BY A.ATTACHMENTID ASC");
-
-		final List<AttachmentInfo> attachments = new ArrayList<AttachmentInfo>();
 
 		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
@@ -1261,6 +1443,21 @@ public class ImportServiceImpl implements ImportService
 			}
 		});
 
+		// bring in these questions
+		importSamigoQuestions(questionData, attachments, pool);
+	}
+
+	/**
+	 * Create questions from this data.
+	 * 
+	 * @param questionData
+	 *        The Samigo question data.
+	 * @param attachments
+	 *        The attachments info.
+	 */
+	protected void importSamigoQuestions(List<SamigoQuestion> questionData, List<AttachmentInfo> attachments, Pool pool)
+			throws AssessmentPermissionException
+	{
 		// find any additional docs references in the question data
 		Set<String> docs = harvestDocumentsReferenced(questionData);
 
@@ -1404,6 +1601,52 @@ public class ImportServiceImpl implements ImportService
 	}
 
 	/**
+	 * Read the Samigo assessmentss for this context.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return The list of Ents describing the assessments for this context.
+	 */
+	protected List<Ent> readSamigoAssessments(String context)
+	{
+		final List<Ent> rv = new ArrayList<Ent>();
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT A.ID, A.TITLE FROM SAM_ASSESSMENTBASE_T A");
+		sql.append(" INNER JOIN SAM_AUTHZDATA_T Z ON A.ID=Z.QUALIFIERID AND Z.FUNCTIONID=? AND Z.AGENTID=?");
+		sql.append(" INNER JOIN SAM_SECTION_T S ON S.ASSESSMENTID=A.ID");
+		sql.append(" INNER JOIN SAM_SECTIONMETADATA_T M ON S.SECTIONID=M.SECTIONID AND M.LABEL='AUTHOR_TYPE' AND M.ENTRY='1'");
+
+		Object[] fields = new Object[2];
+		fields[0] = "EDIT_ASSESSMENT";
+		fields[1] = StringUtil.trimToNull(context);
+
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String id = SqlHelper.readId(result, 1);
+					String title = SqlHelper.readString(result, 2);
+
+					Ent ent = new EntImpl(id, title);
+					if (!rv.contains(ent)) rv.add(ent);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("readSamigoAssessments: " + e);
+					return null;
+				}
+			}
+		});
+
+		return rv;
+	}
+
+	/**
 	 * Read the Samigo pools for this user id.
 	 * 
 	 * @param userId
@@ -1426,7 +1669,7 @@ public class ImportServiceImpl implements ImportService
 			{
 				try
 				{
-					String id = SqlHelper.readString(result, 1);
+					String id = SqlHelper.readId(result, 1);
 					String title = SqlHelper.readString(result, 2);
 
 					Ent ent = new EntImpl(id, title);
@@ -1436,7 +1679,7 @@ public class ImportServiceImpl implements ImportService
 				}
 				catch (SQLException e)
 				{
-					M_log.warn("readSubmissions(submission): " + e);
+					M_log.warn("readSamigoPools: " + e);
 					return null;
 				}
 			}
