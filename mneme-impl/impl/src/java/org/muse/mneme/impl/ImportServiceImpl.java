@@ -29,6 +29,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -831,6 +833,34 @@ public class ImportServiceImpl implements ImportService
 	}
 
 	/**
+	 * Isolate the src or href from the target.
+	 * 
+	 * @param target
+	 *        The target html fragment.
+	 * @return A Set of the src or href values in the quotes.
+	 */
+	protected Set<String> findSrcHrefValues(String target)
+	{
+		Set<String> rv = new HashSet<String>();
+		if (target == null) return rv;
+
+		// pattern to find any src= or href= text
+		// groups: 0: the whole matching text 1: src|href 2: the string in the quotes
+		Pattern p = Pattern.compile("(src|href)[\\s]*=[\\s]*\"([^\"]*)\"");
+
+		Matcher m = p.matcher(target);
+		while (m.find())
+		{
+			if (m.groupCount() == 2)
+			{
+				rv.add(m.group(2));
+			}
+		}
+
+		return rv;
+	}
+
+	/**
 	 * Form html for attachments for this item.
 	 * 
 	 * @param attachments
@@ -841,14 +871,11 @@ public class ImportServiceImpl implements ImportService
 	 */
 	protected String formatAttachments(List<AttachmentInfo> attachments, String id)
 	{
-		// TODO: move them into mnemeDocs?
-
 		StringBuilder attachmentsHtml = new StringBuilder();
 		for (AttachmentInfo a : attachments)
 		{
 			if (id.equals(a.itemId))
 			{
-				// TODO: new window or not, icon... -ggolden
 				if ((a.isLink != null) && (a.isLink.booleanValue()))
 				{
 					attachmentsHtml.append("<li><a href=\"" + a.fileName + "\" target=\"_blank\">" + a.fileName + "</a></li>");
@@ -866,16 +893,17 @@ public class ImportServiceImpl implements ImportService
 							// for folders
 							if (props.getBooleanProperty(ResourceProperties.PROP_IS_COLLECTION))
 							{
-								attachmentsHtml.append("<li><img src = \"/library/" + ContentTypeImageService.getContentTypeImage("folder")
-										+ "\" border=\"0\" />");
+								// TODO: check: /library/ or /library/image/ as below? -ggolden
+								attachmentsHtml.append("<li><img src=\"/library/" + ContentTypeImageService.getContentTypeImage("folder")
+										+ "\" border=\"0\" />&nbsp;");
 							}
 
 							// otherwise lookup the icon from the mime type
 							else
 							{
 								String type = props.getProperty(ResourceProperties.PROP_CONTENT_TYPE);
-								attachmentsHtml.append("<li><img src = \"/library/image/" + ContentTypeImageService.getContentTypeImage(type)
-										+ "\" border=\"0\" alt=\"" + type + "\"/>");
+								attachmentsHtml.append("<li><img src=\"/library/image/" + ContentTypeImageService.getContentTypeImage(type)
+										+ "\" border=\"0\" alt=\"" + type + "\"/>&nbsp;");
 							}
 
 							// the link
@@ -884,7 +912,7 @@ public class ImportServiceImpl implements ImportService
 									+ Validator.escapeHtml(props.getPropertyFormatted("DAV:displayname")) + "</a>");
 
 							// size
-							attachmentsHtml.append(" (" + props.getPropertyFormatted(ResourceProperties.PROP_CONTENT_LENGTH) + ")");
+							attachmentsHtml.append("&nbsp;(" + props.getPropertyFormatted(ResourceProperties.PROP_CONTENT_LENGTH) + ")");
 
 							attachmentsHtml.append("</li>");
 						}
@@ -909,6 +937,42 @@ public class ImportServiceImpl implements ImportService
 		}
 
 		return attachmentsHtml.toString();
+	}
+
+	/**
+	 * Collect all the document references in the Samigo question data:<br />
+	 * Anything referenced by a src= or href=.
+	 * 
+	 * @param sqs
+	 *        The Samigo question data.
+	 * @return The set of document references.
+	 */
+	protected Set<String> harvestDocumentsReferenced(List<SamigoQuestion> sqs)
+	{
+		Set<String> all = new HashSet<String>();
+
+		// collect all the references
+		for (SamigoQuestion q : sqs)
+		{
+			all.addAll(findSrcHrefValues(q.answerMatchText));
+			all.addAll(findSrcHrefValues(q.correctFeedback));
+			all.addAll(findSrcHrefValues(q.generalFeedback));
+			all.addAll(findSrcHrefValues(q.incorrectFeedback));
+			all.addAll(findSrcHrefValues(q.instruction));
+			all.addAll(findSrcHrefValues(q.questionChoiceText));
+		}
+
+		// filter out those that are not in our content hosting (i.e. don't have "/access/content/")
+		Set<String> filtered = new HashSet<String>();
+		for (String ref : all)
+		{
+			if (ref.indexOf("/access/content/") != -1)
+			{
+				filtered.add(ref);
+			}
+		}
+
+		return filtered;
 	}
 
 	/**
@@ -1050,6 +1114,13 @@ public class ImportServiceImpl implements ImportService
 				}
 			}
 		});
+
+		// find any additional docs references in the question data
+		Set<String> docs = harvestDocumentsReferenced(sqs);
+
+		// TODO: import those docs
+
+		// TODO: modify the question data to reference the new doc locations
 
 		// import the attachments to the MnemeDocs for the pool's context
 		importAttachments(attachments, pool.getContext());
