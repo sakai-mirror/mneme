@@ -68,4 +68,13 @@ public interface GradesService
 	 * @return TRUE if successful, FALSE if not.
 	 */
 	Boolean retractSubmissionGrade(Submission submission);
+
+	/**
+	 * Check if this assessment has an entry in the grading authority.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return TRUE if the assessment has an entry in the grading authoity, FALSE if not.
+	 */
+	Boolean assessmentReported(Assessment assessment);
 }

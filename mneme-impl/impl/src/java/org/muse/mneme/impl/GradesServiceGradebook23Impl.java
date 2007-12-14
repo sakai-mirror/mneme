@@ -67,6 +67,17 @@ public class GradesServiceGradebook23Impl implements GradesService
 	protected UserDirectoryService userDirectoryService = null;
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean assessmentReported(Assessment assessment)
+	{
+		if (assessment == null) throw new IllegalArgumentException();
+
+		// TODO:
+		return Boolean.FALSE;
+	}
+
+	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -94,7 +105,19 @@ public class GradesServiceGradebook23Impl implements GradesService
 	 */
 	public Boolean reportAssessmentGrades(Assessment assessment)
 	{
+		if (assessment == null) throw new IllegalArgumentException();
+
+		// make sure we are published, valid and desire gradebook integration
+		if (!(assessment.getPublished() && assessment.getGrading().getGradebookIntegration() && assessment.getIsValid())) return Boolean.FALSE;
+
 		// TODO:
+		
+		// make sure there's an entry
+		
+		// get all the "official" submissions
+		
+		// push them
+
 		M_log.debug("reportAssessmentGrades: " + assessment.getId());
 		return Boolean.FALSE;
 	}
@@ -104,6 +127,19 @@ public class GradesServiceGradebook23Impl implements GradesService
 	 */
 	public Boolean reportSubmissionGrade(Submission submission)
 	{
+		if (submission == null) throw new IllegalArgumentException();
+
+		// make sure we are published, valid and desire gradebook integration
+		Assessment assessment = submission.getAssessment();
+		if (!(assessment.getPublished() && assessment.getGrading().getGradebookIntegration() && assessment.getIsValid())) return Boolean.FALSE;
+
+		// make sure we are complete and released
+		if (!(submission.getIsComplete() && submission.getIsReleased())) return Boolean.FALSE;
+
+		// get this submission's user's "official" submission for this submission's assessment
+		
+		// push it
+
 		// TODO:
 		M_log.debug("reportSubmissionGrade: " + submission.getId());
 		return Boolean.FALSE;

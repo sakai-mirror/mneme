@@ -508,6 +508,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (titleChanged || retract || (publishedChanged && !assessment.getPublished()) || (validityChanged && !nowValid)
 				|| (archivedChanged && assessment.getArchived()) || (gbIntegrationChanged && !assessment.getGrading().getGradebookIntegration()))
 		{
+			// retract the entire assessment from grades
 			this.gradesService.retractAssessmentGrades(assessment);
 
 			// retract the submissions
@@ -523,13 +524,14 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (titleChanged || release || (publishedChanged && assessment.getPublished()) || (validityChanged && nowValid && assessment.getPublished())
 				|| (gbIntegrationChanged && assessment.getGrading().getGradebookIntegration()))
 		{
-			// first release the submissions, if we need to
+			// assure we have an entry in the grades, and push over any completed official submissions
+			this.gradesService.reportAssessmentGrades(assessment);
+
+			// release the submissions, if we need to (each will have the grade reported)
 			if (release)
 			{
 				this.submissionService.releaseSubmissions(assessment, Boolean.FALSE);
 			}
-
-			this.gradesService.reportAssessmentGrades(assessment);
 		}
 	}
 

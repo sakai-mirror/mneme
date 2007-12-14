@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -445,6 +446,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// set the attribution for each answer
 		List<Answer> work = new ArrayList<Answer>(answers);
+		Set<Submission> submissions = new HashSet<Submission>();
 		for (Iterator i = work.iterator(); i.hasNext();)
 		{
 			Answer answer = (Answer) i.next();
@@ -457,6 +459,12 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 				// clear changed flag
 				((EvaluationImpl) answer.getEvaluation()).clearIsChanged();
+				
+				// clear the answer's submission from the thread-local cache
+				String key = cacheKey(answer.getSubmission().getId());
+				this.threadLocalManager.set(key, null);
+				
+				submissions.add(answer.getSubmission());
 			}
 			else
 			{
@@ -467,14 +475,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// save the answers
 		if (!work.isEmpty())
 		{
-			// clear these submissions from the cache
-			for (Answer a : work)
-			{
-				// clear the cache
-				String key = cacheKey(a.getSubmission().getId());
-				this.threadLocalManager.set(key, null);
-			}
-
 			this.storage.saveAnswersEvaluation(work);
 
 			// TODO: events? single event?
@@ -482,7 +482,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// true));
 		}
 
-		// TODO: record in gb
+		// push each submission modified to the gb
+		for (Submission s : submissions)
+		{
+			this.gradesService.reportSubmissionGrade(s);
+		}
 	}
 
 	/**
@@ -537,7 +541,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			temp.setSubmittedDate(now);
 			temp.evaluation = (SubmissionEvaluationImpl) submission.getEvaluation();
 
-			// TODO: should we do this? if grade at submission
 			if (submission.getAssessment().getGrading().getAutoRelease())
 			{
 				temp.setIsReleased(Boolean.TRUE);
@@ -609,6 +612,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			this.storage.saveAnswersEvaluation(work);
 		}
 
+		// TODO: !!!!!!!!! is this supposed to be getIsReleasedChanged...?
 		if (((SubmissionImpl) submission).getIsChanged())
 		{
 			((SubmissionImpl) submission).clearIsChanged();
@@ -646,6 +650,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// TODO: only for the "official" one ? submissions = officialize(submissions);
 
+		// process all submissions, official or not
 		for (SubmissionImpl submission : submissions)
 		{
 			// if there's a comment to set, append it
@@ -693,9 +698,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				this.storage.saveSubmissionEvaluation(submission);
 			}
 
-			// TODO: events?
-			// TODO: record in gb
+			// TODO: event? s?
 		}
+		
+		// release the grades to the grading authority
+		this.gradesService.reportAssessmentGrades(assessment);
 	}
 
 	/**
@@ -1322,6 +1329,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// TODO: only for the "official" one ? submissions = officialize(submissions);
 
+		// release the all, official or not
 		for (SubmissionImpl submission : submissions)
 		{
 			if ((evaluatedOnly) && !submission.evaluation.getEvaluated()) continue;
@@ -1341,8 +1349,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// save
 			this.storage.saveSubmission(submission);
 
-			// TODO: events?
-			// TODO: record in gb
+			// push the grade
+			this.gradesService.reportSubmissionGrade(submission);
+
+			// TODO: event? s?
 		}
 	}
 
@@ -1363,6 +1373,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// TODO: only for the "official" one ? submissions = officialize(submissions);
 
+		// retract them all, offical or not
 		for (SubmissionImpl submission : submissions)
 		{
 			if (!submission.getIsReleased()) continue;
@@ -1380,8 +1391,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// save
 			this.storage.saveSubmission(submission);
 
-			// TODO: events?
-			// TODO: retract from gb
+			// pull the grade
+			this.gradesService.retractSubmissionGrade(submission);
+
+			// TODO: event? s?
 		}
 	}
 
