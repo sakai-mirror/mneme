@@ -419,14 +419,4 @@ public interface SubmissionService
 	 */
 	void submitAnswers(List<Answer> answers, Boolean completeAnswers, Boolean completeSubmission) throws AssessmentPermissionException,
 			AssessmentClosedException, SubmissionCompletedException;
-
-	/**
-	 * Update the assessment's gradebook entry for all users with their highest score.
-	 * 
-	 * @param assessment
-	 *        The assessment to update.
-	 * @throws AssessmentPermissionException
-	 *         if the user does not have permission to create the assessment.
-	 */
-	void updateGradebook(Assessment assessment) throws AssessmentPermissionException;
 }

@@ -1108,7 +1108,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 				{
 					int i = 1;
 					AssessmentImpl assessment = newAssessment();
-					assessment.setArchived(SqlHelper.readBoolean(result, i++));
+					assessment.initArchived(SqlHelper.readBoolean(result, i++));
 					assessment.setContext(SqlHelper.readString(result, i++));
 					assessment.getCreatedBy().setDate(SqlHelper.readDate(result, i++));
 					assessment.getCreatedBy().setUserId(SqlHelper.readString(result, i++));
@@ -1118,7 +1118,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 					assessment.getDates().setOpenDate(SqlHelper.readDate(result, i++));
 					assessment.getGrading().setAnonymous(SqlHelper.readBoolean(result, i++));
 					((AssessmentGradingImpl) (assessment.getGrading())).initAutoRelease(SqlHelper.readBoolean(result, i++));
-					assessment.getGrading().setGradebookIntegration(SqlHelper.readBoolean(result, i++));
+					((AssessmentGradingImpl) (assessment.getGrading())).initGradebookIntegration(SqlHelper.readBoolean(result, i++));
 					assessment.initHistorical(SqlHelper.readBoolean(result, i++));
 					assessment.setRequireHonorPledge(SqlHelper.readBoolean(result, i++));
 					assessment.initId(SqlHelper.readId(result, i++));
@@ -1130,7 +1130,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 					assessment.getParts().setShowPresentation(SqlHelper.readBoolean(result, i++));
 					assessment.getPassword().setPassword(SqlHelper.readString(result, i++));
 					assessment.getPresentation().setText(SqlHelper.readString(result, i++));
-					assessment.setPublished(SqlHelper.readBoolean(result, i++));
+					assessment.initPublished(SqlHelper.readBoolean(result, i++));
 					assessment.setQuestionGrouping(QuestionGrouping.valueOf(SqlHelper.readString(result, i++)));
 					assessment.setRandomAccess(SqlHelper.readBoolean(result, i++));
 					assessment.getReview().setDate(SqlHelper.readDate(result, i++));
@@ -1140,7 +1140,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 					assessment.setShowHints(SqlHelper.readBoolean(result, i++));
 					assessment.getSubmitPresentation().setText(SqlHelper.readString(result, i++));
 					assessment.setTimeLimit(SqlHelper.readLong(result, i++));
-					assessment.setTitle(SqlHelper.readString(result, i++));
+					assessment.initTitle(SqlHelper.readString(result, i++));
 					assessment.setTries(SqlHelper.readInteger(result, i++));
 					assessment.setType(AssessmentType.valueOf(SqlHelper.readString(result, i++)));
 

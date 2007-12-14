@@ -140,6 +140,22 @@
 		<property name="autoDdl"><value>${auto.ddl}</value></property>
 	</bean>
 
+	<bean id="org.muse.mneme.api.GradesService"
+		class="org.muse.mneme.impl.GradesServiceGradebook23Impl"
+		init-method="init"
+		destroy-method="destroy"
+		singleton="true">
+		
+		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
+
+		<!-- for 2.4 only: <property name="gradebookService"><ref bean="org.sakaiproject.service.gradebook.GradebookExternalAssessmentService"/></property> -->
+		<property name="gradebookService"><ref bean="org.sakaiproject.service.gradebook.GradebookService"/></property>
+		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
+		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>		
+		<property name="userDirectoryService"><ref bean="org.sakaiproject.user.api.UserDirectoryService"/></property>
+	</bean>
+
 	<bean id="org.muse.mneme.api.SubmissionService"
 		class="org.muse.mneme.impl.SubmissionServiceImpl"
 		init-method="init"
@@ -147,13 +163,12 @@
 		singleton="true">
 		
 		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+		<property name="gradesService"><ref bean="org.muse.mneme.api.GradesService"/></property>
 		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
 
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
-		<!-- for 2.4 only: <property name="gradebookService"><ref bean="org.sakaiproject.service.gradebook.GradebookExternalAssessmentService"/></property> -->
-		<property name="gradebookService"><ref bean="org.sakaiproject.service.gradebook.GradebookService"/></property>
 		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>		
@@ -206,6 +221,7 @@
 		destroy-method="destroy"
 		singleton="true">
 		
+		<property name="gradesService"><ref bean="org.muse.mneme.api.GradesService"/></property>
 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>

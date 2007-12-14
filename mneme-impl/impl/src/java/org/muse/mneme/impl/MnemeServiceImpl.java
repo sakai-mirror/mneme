@@ -845,14 +845,6 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public void updateGradebook(Assessment assessment) throws AssessmentPermissionException
-	{
-		submissionService.updateGradebook(assessment);
-	}
-
-	/**
 	 * Start the clean and report thread.
 	 */
 	protected void start()

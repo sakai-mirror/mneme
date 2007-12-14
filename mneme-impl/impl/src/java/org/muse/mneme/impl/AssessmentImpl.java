@@ -45,6 +45,7 @@ import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.user.api.User;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * AssessmentImpl implements Assessment
@@ -55,6 +56,9 @@ public class AssessmentImpl implements Assessment
 	private static Log M_log = LogFactory.getLog(AssessmentImpl.class);
 
 	protected Boolean archived = Boolean.FALSE;
+
+	/** Track the original archived setting. */
+	protected transient Boolean archivedWas = Boolean.FALSE;
 
 	protected transient AssessmentService assessmentService = null;
 
@@ -101,6 +105,9 @@ public class AssessmentImpl implements Assessment
 
 	protected Boolean published = Boolean.FALSE;
 
+	/** Track the original published setting. */
+	protected transient Boolean publishedWas = Boolean.FALSE;
+
 	protected QuestionGrouping questionGrouping = QuestionGrouping.question;
 
 	protected transient QuestionService questionService = null;
@@ -124,6 +131,9 @@ public class AssessmentImpl implements Assessment
 	protected Long timeLimit = null;
 
 	protected String title = "";
+
+	/** Track the original title value. */
+	protected transient String titleWas = "";
 
 	protected Integer tries = Integer.valueOf(1);
 
@@ -654,7 +664,17 @@ public class AssessmentImpl implements Assessment
 	 */
 	public void setTitle(String title)
 	{
-		if (title == null) title = "";
+		// massage the title
+		if (title != null)
+		{
+			title = title.trim();
+			if (title.length() > 255) title = title.substring(0, 255);
+		}
+		else
+		{
+			title = "";
+		}
+
 		if (this.title.equals(title)) return;
 
 		this.title = title;
@@ -718,6 +738,17 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Check if the archived was changed.
+	 * 
+	 * @return TRUE if changed, FALSE if not.
+	 */
+	protected Boolean getArchivedChanged()
+	{
+		Boolean rv = Boolean.valueOf(!this.archived.equals(this.archivedWas));
+		return rv;
+	}
+
+	/**
 	 * Check if there were any changes that need to generate history.
 	 * 
 	 * @return TRUE if there were history changes, FALSE if not.
@@ -748,10 +779,44 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Check if the published setting was changed.
+	 * 
+	 * @return TRUE if changed, FALSE if not.
+	 */
+	protected Boolean getPublishedChanged()
+	{
+		Boolean rv = Boolean.valueOf(!this.published.equals(this.publishedWas));
+		return rv;
+	}
+
+	/**
+	 * Check if the title was changed.
+	 * 
+	 * @return TRUE if changed, FALSE if not.
+	 */
+	protected Boolean getTitleChanged()
+	{
+		Boolean rv = Boolean.valueOf(!this.title.equals(this.titleWas));
+		return rv;
+	}
+
+	/**
+	 * Establish the archived setting.
+	 * 
+	 * @param archived
+	 *        The archived setting.
+	 */
+	protected void initArchived(Boolean archived)
+	{
+		this.archived = archived;
+		this.archivedWas = archived;
+	}
+
+	/**
 	 * Establish the historical setting.
 	 * 
 	 * @param historical
-	 *        The historical setting;
+	 *        The historical setting.
 	 */
 	protected void initHistorical(Boolean historical)
 	{
@@ -773,7 +838,7 @@ public class AssessmentImpl implements Assessment
 	 * Establish the live setting.
 	 * 
 	 * @param live
-	 *        The live setting;
+	 *        The live setting.
 	 */
 	protected void initLive(Boolean live)
 	{
@@ -784,11 +849,23 @@ public class AssessmentImpl implements Assessment
 	 * Establish the mint setting.
 	 * 
 	 * @param mint
-	 *        The mint setting;
+	 *        The mint setting.
 	 */
 	protected void initMint(Boolean mint)
 	{
 		this.mint = mint;
+	}
+
+	/**
+	 * Establish the published setting.
+	 * 
+	 * @param published
+	 *        The published setting.
+	 */
+	protected void initPublished(Boolean published)
+	{
+		this.published = published;
+		this.publishedWas = published;
 	}
 
 	/**
@@ -800,6 +877,19 @@ public class AssessmentImpl implements Assessment
 	protected void initSubmissionContext(Submission submission)
 	{
 		this.submissionContext = submission;
+	}
+
+	/**
+	 * Establish the title.
+	 * 
+	 * @param title
+	 *        The title;
+	 */
+	protected void initTitle(String title)
+	{
+		if (title == null) title = "";
+		this.title = title;
+		this.titleWas = title;
 	}
 
 	/**
@@ -829,6 +919,7 @@ public class AssessmentImpl implements Assessment
 	protected void set(AssessmentImpl other)
 	{
 		this.archived = other.archived;
+		this.archivedWas = other.archivedWas;
 		this.assessmentService = other.assessmentService;
 		this.changed = new ChangeableImpl(other.changed);
 		this.context = other.context;
@@ -849,6 +940,7 @@ public class AssessmentImpl implements Assessment
 		this.poolService = other.poolService;
 		this.presentation = new PresentationImpl((PresentationImpl) other.presentation, this.historyChanged);
 		this.published = other.published;
+		this.publishedWas = other.publishedWas;
 		this.questionGrouping = other.questionGrouping;
 		this.questionService = other.questionService;
 		this.randomAccess = other.randomAccess;
@@ -861,6 +953,7 @@ public class AssessmentImpl implements Assessment
 		this.specialAccess = new AssessmentSpecialAccessImpl(this, (AssessmentSpecialAccessImpl) other.specialAccess, this.changed);
 		this.timeLimit = other.timeLimit;
 		this.title = other.title;
+		this.titleWas = other.titleWas;
 		this.tries = other.tries;
 		this.type = other.type;
 	}

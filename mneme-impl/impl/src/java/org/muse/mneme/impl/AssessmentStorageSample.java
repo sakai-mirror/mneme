@@ -742,6 +742,9 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.clearChanged();
 			a.clearMint();
 			((AssessmentGradingImpl) (a.getGrading())).initAutoRelease(a.getGrading().getAutoRelease());
+			((AssessmentGradingImpl) (a.getGrading())).initGradebookIntegration(a.getGrading().getGradebookIntegration());
+			a.initTitle(a.getTitle());
+			a.initPublished(a.getPublished());
 			this.assessments.put(a.getId(), a);
 
 			//
@@ -788,6 +791,9 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.clearChanged();
 			a.clearMint();
 			((AssessmentGradingImpl) (a.getGrading())).initAutoRelease(a.getGrading().getAutoRelease());
+			((AssessmentGradingImpl) (a.getGrading())).initGradebookIntegration(a.getGrading().getGradebookIntegration());
+			a.initTitle(a.getTitle());
+			a.initPublished(a.getPublished());
 			this.assessments.put(a.getId(), a);
 
 			//
@@ -827,6 +833,9 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.clearChanged();
 			a.clearMint();
 			((AssessmentGradingImpl) (a.getGrading())).initAutoRelease(a.getGrading().getAutoRelease());
+			((AssessmentGradingImpl) (a.getGrading())).initGradebookIntegration(a.getGrading().getGradebookIntegration());
+			a.initTitle(a.getTitle());
+			a.initPublished(a.getPublished());
 			this.assessments.put(a.getId(), a);
 		}
 	}

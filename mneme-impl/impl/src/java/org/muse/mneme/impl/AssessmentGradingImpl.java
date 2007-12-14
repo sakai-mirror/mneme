@@ -38,6 +38,9 @@ public class AssessmentGradingImpl implements AssessmentGrading
 
 	protected Boolean gradebookIntegration = Boolean.FALSE;
 
+	/** Track the original gradebookIntegration value. */
+	protected transient Boolean gradebookIntegrationWas = Boolean.FALSE;
+
 	protected transient Changeable owner = null;
 
 	/**
@@ -135,6 +138,17 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	}
 
 	/**
+	 * Check if the gradebookIntegration setting was changed.
+	 * 
+	 * @return TRUE if changed, FALSE if not.
+	 */
+	protected Boolean getGradebookIntegrationChanged()
+	{
+		Boolean rv = Boolean.valueOf(!this.gradebookIntegration.equals(this.gradebookIntegrationWas));
+		return rv;
+	}
+
+	/**
 	 * Initialize the auto release, and set the "was" to the same.
 	 * 
 	 * @param autoRelease
@@ -144,6 +158,18 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	{
 		this.autoRelease = autoRelease;
 		this.autoReleaseWas = autoRelease;
+	}
+
+	/**
+	 * Initialize the gradebook integration, and set the "was" to the same.
+	 * 
+	 * @param gradebookIntegration
+	 *        The gradebookIntegration setting.
+	 */
+	protected void initGradebookIntegration(Boolean gradebookIntegration)
+	{
+		this.gradebookIntegration = gradebookIntegration;
+		this.gradebookIntegrationWas = gradebookIntegration;
 	}
 
 	/**
@@ -157,6 +183,7 @@ public class AssessmentGradingImpl implements AssessmentGrading
 		this.autoRelease = other.autoRelease;
 		this.autoReleaseWas = other.autoReleaseWas;
 		this.gradebookIntegration = other.gradebookIntegration;
+		this.gradebookIntegrationWas = other.gradebookIntegrationWas;
 		this.anonymous = other.anonymous;
 	}
 }

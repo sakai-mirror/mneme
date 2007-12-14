@@ -134,23 +134,23 @@ public class GbView extends ControllerImpl
 	 */
 	protected String updateGb(String context)
 	{
-		String rv = "GB updated in site " + context;
+		String rv = "TODO: GB updated in site " + context;
 
-		try
-		{
-			// get a list of the tests in the site
-			List<Assessment> tests = assessmentService.getContextAssessments(context, null, Boolean.FALSE);
-
-			// for each one, update the gb
-			for (Assessment test : tests)
-			{
-				assessmentService.updateGradebook(test);
-			}
-		}
-		catch (AssessmentPermissionException e)
-		{
-			rv += " FAILED due to lack of permissions!";
-		}
+//		try
+//		{
+//			// get a list of the tests in the site
+//			List<Assessment> tests = assessmentService.getContextAssessments(context, null, Boolean.FALSE);
+//
+//			// for each one, update the gb
+//			for (Assessment test : tests)
+//			{
+//				assessmentService.updateGradebook(test);
+//			}
+//		}
+//		catch (AssessmentPermissionException e)
+//		{
+//			rv += " FAILED due to lack of permissions!";
+//		}
 
 		return rv;
 	}

@@ -33,6 +33,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.GradesService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
@@ -62,6 +63,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
+
+	/** Dependency: GradesService */
+	protected GradesService gradesService = null;
 
 	/** Dependency: PoolService */
 	protected PoolService poolService = null;
@@ -198,13 +202,13 @@ public class AssessmentServiceImpl implements AssessmentService
 		rv.setContext(context);
 
 		// clear archived
-		rv.setArchived(Boolean.FALSE);
+		rv.initArchived(Boolean.FALSE);
 
 		// clear out any special access
 		rv.getSpecialAccess().clear();
 
 		// start out unpublished
-		rv.setPublished(Boolean.FALSE);
+		rv.initPublished(Boolean.FALSE);
 
 		// and not-live
 		rv.initLive(Boolean.FALSE);
@@ -419,6 +423,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	public void saveAssessment(Assessment assessment) throws AssessmentPermissionException, AssessmentPolicyException
 	{
 		if (assessment == null) throw new IllegalArgumentException();
+		if (assessment.getId() == null) throw new IllegalArgumentException(); // TODO: really?
 
 		// if any changes made, clear mint
 		if (assessment.getIsChanged())
@@ -467,20 +472,64 @@ public class AssessmentServiceImpl implements AssessmentService
 				retract = true;
 			}
 		}
-
 		// clear the auto-release change tracking
 		((AssessmentGradingImpl) (assessment.getGrading())).initAutoRelease(assessment.getGrading().getAutoRelease());
 
+		// see if we have had a title change (and clear)
+		boolean titleChanged = ((AssessmentImpl) assessment).getTitleChanged();
+		((AssessmentImpl) assessment).initTitle(assessment.getTitle());
+
+		// see if we had a change in published (and clear)
+		boolean publishedChanged = ((AssessmentImpl) assessment).getPublishedChanged();
+		((AssessmentImpl) assessment).initPublished(assessment.getPublished());
+
+		// see if we have changed our validity
+		boolean validityChanged = false;
+		boolean nowValid = assessment.getIsValid();
+		Assessment b4 = getAssessment(assessment.getId());
+		if (b4 != null)
+		{
+			validityChanged = (b4.getIsValid().booleanValue() != nowValid);
+		}
+
+		// see if we have just been archived (and clear)
+		boolean archivedChanged = ((AssessmentImpl) assessment).getArchivedChanged();
+		((AssessmentImpl) assessment).initArchived(assessment.getArchived());
+
+		// see if we have changed our gradebook integration (and clear)
+		boolean gbIntegrationChanged = ((AssessmentGradingImpl) (assessment.getGrading())).getGradebookIntegrationChanged();
+		((AssessmentGradingImpl) (assessment.getGrading())).initGradebookIntegration(assessment.getGrading().getGradebookIntegration());
+
 		save(assessment);
 
-		// if the assessment's grading options were changed to be manual from auto-release, retract any released submissions
-		if (retract)
+		// if the name has changed, or we are retracting submissions, or we are now unpublished,
+		// or we are now invalid, or we have just been archived, or we are now not gradebook integrated,
+		// retract the assessment from the grades authority
+		if (titleChanged || retract || (publishedChanged && !assessment.getPublished()) || (validityChanged && !nowValid)
+				|| (archivedChanged && assessment.getArchived()) || (gbIntegrationChanged && !assessment.getGrading().getGradebookIntegration()))
 		{
-			this.submissionService.retractSubmissions(assessment);
+			this.gradesService.retractAssessmentGrades(assessment);
+
+			// retract the submissions
+			if (retract)
+			{
+				this.submissionService.retractSubmissions(assessment);
+			}
 		}
-		else if (release)
+
+		// if the name has changed, or we are releasing submissions, or we are now published,
+		// or we are now valid (and are published), or we are now gradebook integrated,
+		// report the assessment and all completed submissions to the grades authority
+		if (titleChanged || release || (publishedChanged && assessment.getPublished()) || (validityChanged && nowValid && assessment.getPublished())
+				|| (gbIntegrationChanged && assessment.getGrading().getGradebookIntegration()))
 		{
-			this.submissionService.releaseSubmissions(assessment, Boolean.FALSE);
+			// first release the submissions, if we need to
+			if (release)
+			{
+				this.submissionService.releaseSubmissions(assessment, Boolean.FALSE);
+			}
+
+			this.gradesService.reportAssessmentGrades(assessment);
 		}
 	}
 
@@ -493,6 +542,17 @@ public class AssessmentServiceImpl implements AssessmentService
 	public void setEventTrackingService(EventTrackingService service)
 	{
 		eventTrackingService = service;
+	}
+
+	/**
+	 * Dependency: GradesService.
+	 * 
+	 * @param service
+	 *        The GradesService.
+	 */
+	public void setGradesService(GradesService service)
+	{
+		this.gradesService = service;
 	}
 
 	/**
@@ -721,7 +781,7 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// get the current assessment for history
 		AssessmentImpl current = null;
-		if (historyNeeded) current = (assessment.getId() == null) ? null : this.storage.getAssessment(assessment.getId());
+		if (historyNeeded) current = (assessment.getId() == null) ? null : (AssessmentImpl) getAssessment(assessment.getId());
 
 		Date now = new Date();
 

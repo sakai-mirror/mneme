@@ -39,6 +39,7 @@ import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.GradesService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
@@ -50,9 +51,6 @@ import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
-import org.sakaiproject.service.gradebook.shared.AssessmentNotFoundException;
-import org.sakaiproject.service.gradebook.shared.GradebookNotFoundException;
-import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
@@ -78,9 +76,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
 
-	/** Dependency: GradebookExternalAssessmentService */
-	// for 2.4 only: protected GradebookExternalAssessmentService m_gradebookService = null;
-	protected GradebookService gradebookService = null;
+	/** Dependency: GradesService */
+	protected GradesService gradesService = null;
 
 	/** Dependency: MnemeService */
 	protected MnemeService mnemeService = null;
@@ -276,7 +273,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		((SubmissionImpl) submission).clearIsChanged();
 		this.storage.saveSubmission((SubmissionImpl) submission);
 
-		recordInGradebook(submission, true);
+		// push the grade
+		this.gradesService.reportSubmissionGrade(submission);
 
 		// event track it
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_COMPLETE, getSubmissionReference(submission.getId()), true));
@@ -568,6 +566,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				this.storage.saveSubmission(temp);
 			}
 
+			// push the grade
+			this.gradesService.reportSubmissionGrade(temp);
+
 			// TODO: which event? event track it
 			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_ENTER, getSubmissionReference(temp.getId()), true));
 
@@ -621,7 +622,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
 
-		recordInGradebook(submission, true);
+		// push the grade
+		this.gradesService.reportSubmissionGrade(submission);
 	}
 
 	/**
@@ -1468,14 +1470,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
-	 * Dependency: GradebookService.
+	 * Dependency: GradesService.
 	 * 
 	 * @param service
-	 *        The GradebookService.
+	 *        The GradesService.
 	 */
-	public void setGradebookService(/* for 2.4 only: GradebookExternalAssessmentService */GradebookService service)
+	public void setGradesService(GradesService service)
 	{
-		this.gradebookService = service;
+		this.gradesService = service;
 	}
 
 	/**
@@ -1715,8 +1717,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		this.storage.saveSubmission((SubmissionImpl) submission);
 		this.storage.saveAnswers(answers);
 
-		recordInGradebook(submission, true);
-
 		// event track it (one for each answer)
 		for (Answer answer : answers)
 		{
@@ -1727,106 +1727,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			}
 		}
 
-		// track if we are complete
+		// if complete
 		if (submission.getIsComplete())
 		{
+			// push the grade
+			this.gradesService.reportSubmissionGrade(submission);
+
 			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_COMPLETE, getSubmissionReference(submission.getId()),
 					true));
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void updateGradebook(Assessment assessment) throws AssessmentPermissionException
-	{
-		if (assessment == null) throw new IllegalArgumentException();
-
-		if (M_log.isDebugEnabled()) M_log.debug("updateGradebook: " + assessment.getId());
-
-		// check permission
-		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, assessment.getContext());
-
-		// skip if there is no gradebook integration
-		if (!assessment.getGrading().getGradebookIntegration()) return;
-
-		// try each user with a submission
-		List<String> userIds = this.storage.getUsersSubmitted(assessment);
-
-		for (String uid : userIds)
-		{
-			// find the user's highest score among the completed submissions
-			Float highestScore = this.storage.getSubmissionHighestScore(assessment, uid);
-
-			// push this into the GB
-			try
-			{
-				gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(), uid, ((highestScore == null) ? null
-						: new Double(highestScore.doubleValue())));
-			}
-			catch (GradebookNotFoundException e)
-			{
-				// if there's no gradebook for this context, oh well...
-				M_log.warn("updateGradebook: (no gradebook for context): " + e);
-			}
-			catch (AssessmentNotFoundException e)
-			{
-				// if the assessment has not been registered in gb, this is a problem
-				M_log.warn("updateGradebook: (assessment has not been registered in context's gb): " + e);
-			}
-		}
-	}
-
-	/**
-	 * Record this submission in the gradebook.
-	 * 
-	 * @param submission
-	 *        The submission to record in the gradebook.
-	 * @param refresh
-	 *        if true, get the latest score from the db, if false, use the final score from the submission.
-	 */
-	protected void addToGradebook(Submission submission, boolean refresh)
-	{
-		if (submission == null) throw new IllegalArgumentException();
-
-		Assessment assessment = submission.getAssessment();
-
-		Double points = null;
-
-		// refresh from the database if requested
-		if (refresh)
-		{
-			// read the final score for this submission from the db
-			points = this.storage.getSubmissionScore(submission).doubleValue();
-		}
-		else
-		{
-			// use the score from the submission record
-			points = submission.getTotalScore().doubleValue();
-		}
-
-		// find the highest score recorded for this user and this assessment
-		Float highestScore = this.storage.getSubmissionHighestScore(assessment, submission.getUserId());
-		if ((highestScore != null) && (points.doubleValue() < highestScore.doubleValue()))
-		{
-			// if this submission's points is not highest, don't record this in GB
-			return;
-		}
-
-		// post it
-		try
-		{
-			gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(), submission.getUserId(), points);
-		}
-		catch (GradebookNotFoundException e)
-		{
-			// if there's no gradebook for this context, oh well...
-			M_log.warn("addToGradebook: (no gradebook for context): " + e);
-		}
-		catch (AssessmentNotFoundException e)
-		{
-			// if the assessment has not been registered in gb, this is a problem
-			M_log.warn("addToGradebook: (assessment has not been registered in context's gb): " + e);
 		}
 	}
 
@@ -1862,7 +1770,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		((SubmissionImpl) submission).clearIsChanged();
 		this.storage.saveSubmission((SubmissionImpl) submission);
 
-		recordInGradebook(submission, false);
+		// push the grade
+		this.gradesService.reportSubmissionGrade(submission);
 
 		// event track it
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_AUTO_COMPLETE, getSubmissionReference(submission.getId()),
@@ -2587,28 +2496,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// this returns the proper set of entries, preserving the sort, but allUid is not grouped
 		return allOrder;
-	}
-
-	/**
-	 * Update the gradebook for ths submission.
-	 * 
-	 * @param submission
-	 *        The submission to record in the gradebook.
-	 * @param refresh
-	 *        if true, get the latest score from the db, if false, use the final score from the submission.
-	 */
-	protected void recordInGradebook(Submission submission, boolean refresh)
-	{
-		if (submission.getIsReleased() && submission.getAssessment().getGrading().getGradebookIntegration())
-		{
-			addToGradebook(submission, refresh);
-		}
-
-		// TODO: remove from gb
-		else
-		{
-
-		}
 	}
 
 	/**
