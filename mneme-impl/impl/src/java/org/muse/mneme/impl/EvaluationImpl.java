@@ -133,7 +133,10 @@ public class EvaluationImpl implements Evaluation
 		else
 		{
 			// round
-			float newScore = Math.round(s * 100.0f) / 100.0f;
+			Float newScore = Float.valueOf(((float) Math.round(s.floatValue() * 100.0f)) / 100.0f);
+
+			// prefer a null to a 0
+			if (newScore.floatValue() == 0f) newScore = null;
 
 			if (!Different.different(this.score, newScore)) return;
 
@@ -159,6 +162,39 @@ public class EvaluationImpl implements Evaluation
 	protected Boolean getIsChanged()
 	{
 		return this.changed.getChanged();
+	}
+
+	/**
+	 * Initialize the comment.
+	 * 
+	 * @param comment
+	 *        The comment.
+	 */
+	protected void initComment(String comment)
+	{
+		this.comment = comment;
+	}
+
+	/**
+	 * Initialize evaluated.
+	 * 
+	 * @param evaluated
+	 *        The evaluated setting.
+	 */
+	protected void initEvaluated(Boolean evaluated)
+	{
+		this.evaluated = evaluated;
+	}
+
+	/**
+	 * Initialize the score.
+	 * 
+	 * @param score
+	 *        The score.
+	 */
+	protected void initScore(Float score)
+	{
+		this.score = (score == null) ? null : Float.valueOf(((float) Math.round(score.floatValue() * 100.0f)) / 100.0f);
 	}
 
 	/**

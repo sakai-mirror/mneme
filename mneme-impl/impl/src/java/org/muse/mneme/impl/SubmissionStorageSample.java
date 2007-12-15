@@ -22,10 +22,7 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +38,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
-import org.muse.mneme.api.SubmissionService.GetUserContextSubmissionsSort;
 import org.sakaiproject.tool.api.SessionManager;
-import org.sakaiproject.util.StringUtil;
 
 /**
  * SubmissionStorageSample defines sample storage for Submissions.
@@ -440,9 +435,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 				((AnswerImpl) a).initId("n" + Long.toString(id));
 			}
 
-			// clear the evaluation changed
-			((EvaluationImpl) a.getEvaluation()).clearIsChanged();
-
 			// find the submission
 			SubmissionImpl s = this.submissions.get(a.getSubmission().getId());
 			if (s != null)
@@ -470,9 +462,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 					oldAnswer.evaluation.set(((AnswerImpl) a).evaluation);
 				}
 			}
-
-			// clear the evaluation changed
-			((EvaluationImpl) a.getEvaluation()).clearIsChanged();
 		}
 	}
 
@@ -498,9 +487,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 			// lets not save phanton submissions
 			throw new IllegalArgumentException();
 		}
-
-		// clear the submission evaluation changed
-		((EvaluationImpl) submission.getEvaluation()).clearIsChanged();
 
 		// if we have this already, update ONLY the main information, not the answers
 		SubmissionImpl old = this.submissions.get(submission.getId());
@@ -690,5 +676,4 @@ public class SubmissionStorageSample implements SubmissionStorage
 			}
 		}
 	}
-
 }

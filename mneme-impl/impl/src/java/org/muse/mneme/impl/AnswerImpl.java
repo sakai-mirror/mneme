@@ -309,6 +309,7 @@ public class AnswerImpl implements Answer
 	{
 		this.genericChanged = false;
 		this.answerHandler.clearIsChanged();
+		this.evaluation.clearIsChanged();
 	}
 
 	/**

@@ -142,7 +142,7 @@ public class SubmissionImpl implements Submission
 			Float answerScore = answer.getTotalScore();
 			if (answerScore != null)
 			{
-				curAnswerScore += answerScore;
+				curAnswerScore += answerScore.floatValue();
 			}
 		}
 
@@ -156,8 +156,8 @@ public class SubmissionImpl implements Submission
 		float total = this.totalScoreToBe.floatValue();
 		this.totalScoreToBe = null;
 
-		// only for a change - or if there is no evaluation
-		if ((curTotalScore == total) && (this.evaluation.getScore() != null)) return;
+		// if the current total is the total we want, we are done
+		if (curTotalScore == total) return;
 
 		// adjust to remove the current answer score
 		total -= curAnswerScore;
@@ -908,12 +908,24 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
-	 * Clear the changed flag(s).
+	 * Clear the changed flags.
 	 */
 	protected void clearIsChanged()
 	{
 		this.releasedChanged.clearChanged();
 		this.evaluation.clearIsChanged();
+		for (Answer a : this.answers)
+		{
+			((AnswerImpl) a).clearIsChanged();
+		}
+	}
+
+	/**
+	 * Clear the released changed flags.
+	 */
+	protected void clearReleasedIsChanged()
+	{
+		this.releasedChanged.clearChanged();
 	}
 
 	/**
@@ -968,6 +980,16 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
+	 * Check if there were any changes to the released setting.
+	 * 
+	 * @return TRUE if any changes to the released settings, FALSE if not.
+	 */
+	protected Boolean getIsReleasedChanged()
+	{
+		return this.releasedChanged.getChanged();
+	}
+
+	/**
 	 * Establish another answer.
 	 * 
 	 * @param answer
@@ -1008,6 +1030,17 @@ public class SubmissionImpl implements Submission
 	protected void initId(String id)
 	{
 		this.id = id;
+	}
+
+	/**
+	 * Initialize the released setting.
+	 * 
+	 * @param released
+	 *        The released setting.
+	 */
+	protected void initReleased(Boolean released)
+	{
+		this.released = released;
 	}
 
 	/**

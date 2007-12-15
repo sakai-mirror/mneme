@@ -112,6 +112,28 @@ public class AttributionImpl implements Attribution
 	}
 
 	/**
+	 * Init the date.
+	 * 
+	 * @param date
+	 *        The date.
+	 */
+	protected void initDate(Date date)
+	{
+		this.date = date;
+	}
+
+	/**
+	 * Init the user id.
+	 * 
+	 * @param userId
+	 *        The user id.
+	 */
+	protected void initUserId(String userId)
+	{
+		this.userId = userId;
+	}
+
+	/**
 	 * Set as a copy of another.
 	 * 
 	 * @param other

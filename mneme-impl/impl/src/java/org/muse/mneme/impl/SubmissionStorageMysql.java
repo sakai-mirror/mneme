@@ -505,9 +505,6 @@ public class SubmissionStorageMysql implements SubmissionStorage
 				// update
 				updateAnswer((AnswerImpl) a);
 			}
-
-			// clear the evaluation changed
-			((EvaluationImpl) a.getEvaluation()).clearIsChanged();
 		}
 	}
 
@@ -519,9 +516,6 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		for (Answer a : answers)
 		{
 			updateAnswerEval((AnswerImpl) a);
-
-			// clear the evaluation changed
-			((EvaluationImpl) a.getEvaluation()).clearIsChanged();
 		}
 	}
 
@@ -530,9 +524,6 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public void saveSubmission(SubmissionImpl submission)
 	{
-		// clear the submission evaluation changed
-		((EvaluationImpl) submission.getEvaluation()).clearIsChanged();
-
 		// if new
 		if (submission.getId() == null)
 		{
@@ -909,17 +900,18 @@ public class SubmissionStorageMysql implements SubmissionStorage
 					SubmissionImpl submission = newSubmission();
 					submission.initAssessmentIds(SqlHelper.readId(result, i++), SqlHelper.readId(result, i++));
 					submission.setIsComplete(SqlHelper.readBoolean(result, i++));
-					submission.getEvaluation().getAttribution().setDate(SqlHelper.readDate(result, i++));
-					submission.getEvaluation().getAttribution().setUserId(SqlHelper.readString(result, i++));
-					submission.getEvaluation().setComment(SqlHelper.readString(result, i++));
-					submission.getEvaluation().setEvaluated(SqlHelper.readBoolean(result, i++));
-					submission.getEvaluation().setScore(SqlHelper.readFloat(result, i++));
+					((AttributionImpl) submission.getEvaluation().getAttribution()).initDate(SqlHelper.readDate(result, i++));
+					((AttributionImpl) submission.getEvaluation().getAttribution()).initUserId(SqlHelper.readString(result, i++));
+					((EvaluationImpl) submission.getEvaluation()).initComment(SqlHelper.readString(result, i++));
+					((EvaluationImpl) submission.getEvaluation()).initEvaluated(SqlHelper.readBoolean(result, i++));
+					((EvaluationImpl) submission.getEvaluation()).initScore(SqlHelper.readFloat(result, i++));
 					submission.initId(SqlHelper.readId(result, i++));
-					submission.setIsReleased(SqlHelper.readBoolean(result, i++));
+					submission.initReleased(SqlHelper.readBoolean(result, i++));
 					submission.setStartDate(SqlHelper.readDate(result, i++));
 					submission.setSubmittedDate(SqlHelper.readDate(result, i++));
 					submission.initUserId(SqlHelper.readString(result, i++));
 
+					submission.clearIsChanged();
 					rv.add(submission);
 					submissions.put(submission.getId(), submission);
 
@@ -953,11 +945,11 @@ public class SubmissionStorageMysql implements SubmissionStorage
 					SubmissionImpl s = submissions.get(sid);
 					AnswerImpl a = newAnswer();
 
-					a.getEvaluation().getAttribution().setDate(SqlHelper.readDate(result, 2));
-					a.getEvaluation().getAttribution().setUserId(SqlHelper.readString(result, 3));
-					a.getEvaluation().setComment(SqlHelper.readString(result, 4));
-					a.getEvaluation().setEvaluated(SqlHelper.readBoolean(result, 5));
-					a.getEvaluation().setScore(SqlHelper.readFloat(result, 6));
+					((AttributionImpl) a.getEvaluation().getAttribution()).initDate(SqlHelper.readDate(result, 2));
+					((AttributionImpl) a.getEvaluation().getAttribution()).initUserId(SqlHelper.readString(result, 3));
+					((EvaluationImpl) a.getEvaluation()).initComment(SqlHelper.readString(result, 4));
+					((EvaluationImpl) a.getEvaluation()).initEvaluated(SqlHelper.readBoolean(result, 5));
+					((EvaluationImpl) a.getEvaluation()).initScore(SqlHelper.readFloat(result, 6));
 					a.initId(SqlHelper.readId(result, 7));
 					a.initPartIds(SqlHelper.readId(result, 9), SqlHelper.readId(result, 8));
 					a.initQuestion(SqlHelper.readId(result, 10), SqlHelper.readString(result, 11));
@@ -979,12 +971,6 @@ public class SubmissionStorageMysql implements SubmissionStorage
 				}
 			}
 		});
-
-		// clear changed for the submissions
-		for (SubmissionImpl s : rv)
-		{
-			s.clearIsChanged();
-		}
 
 		return rv;
 	}

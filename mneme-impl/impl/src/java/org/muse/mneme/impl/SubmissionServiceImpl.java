@@ -274,7 +274,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		((SubmissionImpl) submission).clearIsChanged();
 		this.storage.saveSubmission((SubmissionImpl) submission);
 
-		// push the grade
+		// report the grade
 		this.gradesService.reportSubmissionGrade(submission);
 
 		// event track it
@@ -406,6 +406,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			answer.initQuestion(question);
 			((SubmissionImpl) rv).replaceAnswer(answer);
 		}
+		((SubmissionImpl) rv).clearIsChanged();
 		this.storage.saveAnswers(rv.getAnswers());
 
 		// event track it
@@ -459,11 +460,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 				// clear changed flag
 				((EvaluationImpl) answer.getEvaluation()).clearIsChanged();
-				
+
 				// clear the answer's submission from the thread-local cache
 				String key = cacheKey(answer.getSubmission().getId());
 				this.threadLocalManager.set(key, null);
-				
+
 				submissions.add(answer.getSubmission());
 			}
 			else
@@ -560,12 +561,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				answer.initQuestion(question);
 				((SubmissionImpl) temp).replaceAnswer(answer);
 			}
+			((SubmissionImpl) temp).clearIsChanged();
 			this.storage.saveAnswers(temp.getAnswers());
 
 			temp.setTotalScore(total);
 			temp.consolidateTotalScore();
 			if (temp.getIsChanged())
 			{
+				((SubmissionImpl) temp).clearIsChanged();
 				this.storage.saveSubmission(temp);
 			}
 
@@ -604,7 +607,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (((EvaluationImpl) submission.getEvaluation()).getIsChanged())
 		{
 			((EvaluationImpl) submission.getEvaluation()).clearIsChanged();
-
 			this.storage.saveSubmissionEvaluation((SubmissionImpl) submission);
 		}
 		if (!work.isEmpty())
@@ -612,10 +614,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			this.storage.saveAnswersEvaluation(work);
 		}
 
-		// TODO: !!!!!!!!! is this supposed to be getIsReleasedChanged...?
-		if (((SubmissionImpl) submission).getIsChanged())
+		// save the released setting if changed
+		if (((SubmissionImpl) submission).getIsReleasedChanged())
 		{
-			((SubmissionImpl) submission).clearIsChanged();
+			((SubmissionImpl) submission).clearReleasedIsChanged();
 			this.storage.saveSubmissionReleased((SubmissionImpl) submission);
 		}
 
@@ -700,7 +702,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 			// TODO: event? s?
 		}
-		
+
 		// release the grades to the grading authority
 		this.gradesService.reportAssessmentGrades(assessment);
 	}
@@ -1340,14 +1342,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			submission.setIsReleased(Boolean.TRUE);
 
 			// clear the changed flag
-			((SubmissionImpl) submission).clearIsChanged();
+			((SubmissionImpl) submission).clearReleasedIsChanged();
 
 			// clear the cache
 			String key = cacheKey(submission.getId());
 			this.threadLocalManager.set(key, null);
 
-			// save
-			this.storage.saveSubmission(submission);
+			// save release info
+			this.storage.saveSubmissionReleased(submission);
 
 			// push the grade
 			this.gradesService.reportSubmissionGrade(submission);
@@ -1382,14 +1384,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			submission.setIsReleased(Boolean.FALSE);
 
 			// clear the changed flag
-			((SubmissionImpl) submission).clearIsChanged();
+			((SubmissionImpl) submission).clearReleasedIsChanged();
 
 			// clear the cache
 			String key = cacheKey(submission.getId());
 			this.threadLocalManager.set(key, null);
 
-			// save
-			this.storage.saveSubmission(submission);
+			// save the released info
+			this.storage.saveSubmissionReleased(submission);
 
 			// pull the grade
 			this.gradesService.retractSubmissionGrade(submission);
@@ -1645,7 +1647,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// unless we are going to complete the submission, if there has been no change in the answers, do nothing...
 		// unless the answers are to be marked complete and they don't all have a submitted date
-		// TODO:
 		if (!completeSubmission)
 		{
 			boolean anyChange = false;
@@ -1667,6 +1668,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			if (!anyChange) return;
 		}
 
+		// TODO: Assume these are all to the same submission... test this?
 		Submission submission = getSubmission(answers.get(0).getSubmission().getId());
 		Assessment assessment = submission.getAssessment();
 
@@ -1694,19 +1696,36 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// update the dates and answer scores
 		submission.setSubmittedDate(asOf);
-		for (Answer answer : answers)
+		List<Answer> work = new ArrayList<Answer>(answers);
+		for (Iterator i = work.iterator(); i.hasNext();)
 		{
+			Answer answer = (Answer) i.next();
+
 			// mark a submitted date only if the new answers are complete (and the answer has otherwise been changed OR the answer is incomplete)
 			if (completeAnswers)
 			{
 				if (answer.getIsChanged() || (answer.getSubmittedDate() == null))
 				{
 					answer.setSubmittedDate(asOf);
+					((AnswerImpl) answer).clearIsChanged();
+				}
+				else
+				{
+					// remove unchanged answers from further processing
+					i.remove();
 				}
 			}
-
-			// clear the changed
-			((AnswerImpl) answer).clearIsChanged();
+			else
+			{
+				if (!answer.getIsChanged())
+				{
+					i.remove();
+				}
+				else
+				{
+					((AnswerImpl) answer).clearIsChanged();
+				}
+			}
 		}
 
 		// complete the submission is requested to
@@ -1728,26 +1747,23 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// save the answers, update the submission
 		((SubmissionImpl) submission).clearIsChanged();
 		this.storage.saveSubmission((SubmissionImpl) submission);
-		this.storage.saveAnswers(answers);
+		this.storage.saveAnswers(work);
 
 		// event track it (one for each answer)
-		for (Answer answer : answers)
+		for (Answer answer : work)
 		{
-			if (answer.getIsChanged())
-			{
-				eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_ANSWER, getSubmissionReference(submission.getId())
-						+ ":" + answer.getQuestion().getId(), true));
-			}
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_ANSWER, getSubmissionReference(submission.getId()) + ":"
+					+ answer.getQuestion().getId(), true));
 		}
 
 		// if complete
 		if (submission.getIsComplete())
 		{
-			// push the grade
-			this.gradesService.reportSubmissionGrade(submission);
-
 			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_COMPLETE, getSubmissionReference(submission.getId()),
 					true));
+
+			// push the grade
+			this.gradesService.reportSubmissionGrade(submission);
 		}
 	}
 
