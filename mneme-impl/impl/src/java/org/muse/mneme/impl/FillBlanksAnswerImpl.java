@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.TypeSpecificAnswer;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * FillBlanksAnswerImpl handles answers for the true/false question type.
@@ -226,8 +227,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Boolean getIsChanged()
 	{
-		// TODO ???
-		return Boolean.TRUE;
+		return this.changed;
 	}
 
 	/**
@@ -238,8 +238,46 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void setAnswers(String[] answers)
 	{
-		// TODO: check order of answers. Don't set the changed flag if so.
 		if ((answers == null) || (answers.length == 0)) return;
+
+		// massage the answers
+		for (int i = 0; i < answers.length; i++)
+		{
+			answers[i] = StringUtil.trimToNull(answers[i]);
+		}
+
+		// if we have no answers yet, and we have none from these, ignore
+		if (this.answers == null)
+		{
+			boolean allNull = true;
+			for (String s : answers)
+			{
+				if (s != null)
+				{
+					allNull = false;
+					break;
+				}
+			}
+
+			if (allNull) return;
+		}
+
+		// check for a change
+		if ((this.answers != null) && (answers.length == this.answers.length))
+		{
+			boolean changed = false;
+			for (int i = 0; i < this.answers.length; i++)
+			{
+				if (Different.different(answers[i], this.answers[i]))
+				{
+					changed = true;
+					break;
+				}
+			}
+
+			if (!changed) return;
+		}
+
 		this.answers = answers;
 		this.changed = true;
 	}

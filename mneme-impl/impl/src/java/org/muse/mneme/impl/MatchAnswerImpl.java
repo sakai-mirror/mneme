@@ -156,6 +156,7 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 			for (MatchQuestionPair pair : pairs)
 			{
 				this.answerData.put(pair.getId(), this.uiService.newValue());
+				this.priorAnswer.put(pair.getId(), this.uiService.newValue());
 			}
 		}
 

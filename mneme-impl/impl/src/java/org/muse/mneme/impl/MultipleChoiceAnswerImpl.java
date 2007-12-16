@@ -198,14 +198,15 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void setAnswers(String[] answers)
 	{
-		Set<Integer> s = new HashSet<Integer>();
 		if ((answers == null) || (answers.length == 0)) return;
+
+		Set<Integer> s = new HashSet<Integer>();
 		for (String answer : answers)
 		{
 			s.add(Integer.valueOf(answer));
 		}
 
-		// check if the answers to set exactly match the answers we already have. Don't set the changed flag if so.
+		// check if the new answers exactly match the answers we already have.
 		if (s.equals(this.answerData)) return;
 
 		this.answerData = s;
