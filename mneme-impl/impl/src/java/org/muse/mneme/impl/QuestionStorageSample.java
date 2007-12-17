@@ -270,6 +270,20 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void switchQuestionPools(Pool from, Pool to)
+	{
+		for (QuestionImpl question : this.questions.values())
+		{
+			if ((!question.getIsHistorical()) && (question.poolId.equals(from.getId())))
+			{
+				question.poolId = to.getId();
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public QuestionImpl newQuestion()
 	{
 		QuestionImpl rv = new QuestionImpl(poolService, questionService, submissionService);

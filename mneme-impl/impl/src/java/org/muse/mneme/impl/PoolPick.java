@@ -29,10 +29,19 @@ import org.muse.mneme.api.QuestionService;
  */
 public class PoolPick
 {
-	protected String origQuestionId = null;
+	/** Once a test is live, it stops updating with pool deletes. This is set if this draw would have been removed due. */
+	protected Boolean modernDeleted = Boolean.FALSE;
 
+	/** Once a test is live, it stops updating with pool / question changes. This keeps track of what would have been if not live. */
+	protected String modernPoolId = null;
+
+	/** Once a test is live, it stops updating with pool / question changes. This keeps track of what would have been if not live. */
+	protected String modernQuestionId = null;
+
+	/** The question's effective pool. */
 	protected String poolId = null;
 
+	/** The question. */
 	protected String questionId = null;
 
 	protected transient QuestionService questionService = null;
@@ -67,11 +76,14 @@ public class PoolPick
 	 * @param questionId
 	 *        The question id.
 	 */
-	public PoolPick(QuestionService questionService, String questionId)
+	public PoolPick(QuestionService questionService, Question question)
 	{
-		if (questionId == null) throw new IllegalArgumentException();
-		this.questionId = questionId;
-		this.origQuestionId = questionId;
+		if (question == null) throw new IllegalArgumentException();
+		if (questionService == null) throw new IllegalArgumentException();
+		this.questionId = question.getId();
+		this.modernQuestionId = questionId;
+		this.poolId = question.getPool().getId();
+		this.modernPoolId = this.poolId;
 		this.questionService = questionService;
 	}
 
@@ -89,9 +101,11 @@ public class PoolPick
 	{
 		if (questionId == null) throw new IllegalArgumentException();
 		if (poolId == null) throw new IllegalArgumentException();
+		if (questionService == null) throw new IllegalArgumentException();
 		this.questionId = questionId;
-		this.origQuestionId = questionId;
+		this.modernQuestionId = questionId;
 		this.poolId = poolId;
+		this.modernPoolId = poolId;
 		this.questionService = questionService;
 	}
 
@@ -102,18 +116,27 @@ public class PoolPick
 	 *        The QuestionService.
 	 * @param questionId
 	 *        The question id.
-	 * @param origQid
-	 *        The origQuestionId value.
+	 * @param modernQid
+	 *        The modern question id.
+	 * @param modernDeleted
+	 *        The modern deleted value.
 	 * @param poolId
 	 *        The pool.
+	 * @param modernPoolId
+	 *        The modern pool id.
 	 */
-	public PoolPick(QuestionService questionService, String questionId, String origQid, String poolId)
+	public PoolPick(QuestionService questionService, String questionId, String modernQid, Boolean modernDeleted, String poolId, String modernPoolId)
 	{
 		if (questionId == null) throw new IllegalArgumentException();
-		if (origQid == null) throw new IllegalArgumentException();
+		if (modernQid == null) throw new IllegalArgumentException();
+		if (modernDeleted == null) throw new IllegalArgumentException();
+		if (poolId == null) throw new IllegalArgumentException();
+		if (modernPoolId == null) throw new IllegalArgumentException();
 		this.questionId = questionId;
-		this.origQuestionId = origQid;
+		this.modernQuestionId = modernQid;
+		this.modernDeleted = modernDeleted;
 		this.poolId = poolId;
+		this.modernPoolId = modernPoolId;
 		this.questionService = questionService;
 	}
 
@@ -157,18 +180,11 @@ public class PoolPick
 	 * 
 	 * @return true if successful, false if not.
 	 */
-	public boolean setOrig()
+	public boolean setModern()
 	{
-		// if no change
-		if (this.questionId.equals(this.origQuestionId) && this.poolId == null) return true;
-
-		// the question must exist, and be non-historical, and its pool must exist and be non-historical
-		Question q = this.questionService.getQuestion(this.origQuestionId);
-		if ((q == null) || (q.getIsHistorical()) || q.getPool().getIsHistorical()) return false;
-
-		// restore
-		this.poolId = null;
-		this.questionId = this.origQuestionId;
+		if (this.modernDeleted) return false;
+		this.poolId = this.modernPoolId;
+		this.questionId = this.modernQuestionId;
 		return true;
 	}
 
@@ -178,6 +194,7 @@ public class PoolPick
 	public void setPool(String poolId)
 	{
 		this.poolId = poolId;
+		this.modernPoolId = poolId;
 	}
 
 	/**
@@ -186,12 +203,7 @@ public class PoolPick
 	public void setQuestion(String questionId)
 	{
 		this.questionId = questionId;
-
-		// set the orig only once
-		if (this.origQuestionId == null)
-		{
-			this.origQuestionId = questionId;
-		}
+		this.modernQuestionId = questionId;
 	}
 
 	/**
@@ -202,7 +214,9 @@ public class PoolPick
 	 */
 	protected void set(PoolPick other)
 	{
-		this.origQuestionId = other.origQuestionId;
+		this.modernDeleted = other.modernDeleted;
+		this.modernPoolId = other.modernPoolId;
+		this.modernQuestionId = other.modernQuestionId;
 		this.poolId = other.poolId;
 		this.questionId = other.questionId;
 		this.questionService = other.questionService;

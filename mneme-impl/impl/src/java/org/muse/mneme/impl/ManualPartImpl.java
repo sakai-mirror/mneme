@@ -84,7 +84,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	{
 		if (question == null) throw new IllegalArgumentException();
 		// TODO: do we already have this? ignore it?
-		this.questions.add(new PoolPick(this.questionService, question.getId()));
+		this.questions.add(new PoolPick(this.questionService, question));
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
@@ -245,14 +245,18 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	 * 
 	 * @param questionId
 	 *        The question id.
-	 * @param origQuestionId
-	 *        The orig question id.
+	 * @param modernQid
+	 *        The modern question id.
+	 * @param modernDeleted
+	 *        The modern deleted value.
 	 * @param poolId
-	 *        The pool id.
+	 *        The pool.
+	 * @param modernPoolId
+	 *        The modern pool id.
 	 */
-	public void initPick(String questionId, String origQuestionId, String poolId)
+	public void initPick(String questionId, String modernQid, Boolean modernDeleted, String poolId, String modernPoolId)
 	{
-		this.questions.add(new PoolPick(this.questionService, questionId, origQuestionId, poolId));
+		this.questions.add(new PoolPick(this.questionService, questionId, modernQid, modernDeleted, poolId, modernPoolId));
 	}
 
 	/**
@@ -289,30 +293,30 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	public void setQuestionOrder(String[] questionIds)
 	{
 		if (questionIds == null) return;
-
-		List<PoolPick> ids = new ArrayList<PoolPick>();
-		for (String id : questionIds)
-		{
-			ids.add(new PoolPick(this.questionService, id));
-		}
+		if (questionIds.length != this.questions.size()) throw new IllegalArgumentException();
 
 		// make a copy of our current list
-		List<PoolPick> current = new ArrayList<PoolPick>(this.questions);
-
-		// remove anything from the new list not in our questions
-		ids.retainAll(current);
-
-		// remove these from our current list
-		current.removeAll(ids);
-
-		// add to the end of the new list any remaining quesitions from our current list
-		ids.addAll(current);
+		List<PoolPick> newOrder = new ArrayList<PoolPick>();
+		for (String id : questionIds)
+		{
+			// find this one
+			for (PoolPick pick : this.questions)
+			{
+				if (pick.getQuestionId().equals(id))
+				{
+					newOrder.add(pick);
+					break;
+				}
+			}
+		}
 
 		// if the order is the same as when we started, ignore it.
 		boolean changed = false;
-		for (int i = 0; i < ids.size(); i++)
+		for (int i = 0; i < newOrder.size(); i++)
 		{
-			if (!this.questions.get(i).equals(ids.get(i)))
+			PoolPick oldPick = this.questions.get(i);
+			PoolPick newPick = newOrder.get(i);
+			if (!oldPick.getQuestionId().equals(newPick.getQuestionId()))
 			{
 				changed = true;
 				break;
@@ -323,7 +327,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		if (!changed) return;
 
 		// take the new list
-		this.questions = ids;
+		this.questions = newOrder;
 
 		// this is a change that cannot be made to live tests
 		this.assessment.liveChanged = Boolean.TRUE;
@@ -484,14 +488,14 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void setOrig()
+	protected void setModern()
 	{
 		for (Iterator i = this.questions.iterator(); i.hasNext();)
 		{
 			PoolPick pick = (PoolPick) i.next();
 
-			// if we cannot restore the orig. values, remove the pick
-			if (!pick.setOrig())
+			// if the modern version is deleted, remove it
+			if (!pick.setModern())
 			{
 				i.remove();
 			}

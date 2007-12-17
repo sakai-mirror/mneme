@@ -222,7 +222,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		// set the parts to their original question and pool values
 		for (Part part : rv.getParts().getParts())
 		{
-			((PartImpl) part).setOrig();
+			((PartImpl) part).setModern();
 		}
 
 		// save
@@ -708,6 +708,18 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
+	 * Check if any live assessments have any draw dependency on this pool.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @return TRUE if any live assessments have a draw dependency on this pool, FALSE if not.
+	 */
+	protected Boolean liveDrawDependencyExists(Pool pool)
+	{
+		return this.storage.liveDrawDependencyExists(pool);
+	}
+
+	/**
 	 * Check if any live assessments have any direct dependency on this question.
 	 * 
 	 * @param question
@@ -716,9 +728,21 @@ public class AssessmentServiceImpl implements AssessmentService
 	 */
 	protected Boolean liveDependencyExists(Question question)
 	{
-		return this.storage.liveDependencyExists(question);
+		return this.storage.livePickDependencyExists(question);
 	}
 
+	/**
+	 * Check if any live assessments have any question pick dependency on this question.
+	 * 
+	 * @param question
+	 *        The question.
+	 * @return TRUE if any live assessments have a question pick dependency on this question, FALSE if not.
+	 */
+	protected Boolean livePickDependencyExists(Question question)
+	{
+		return this.storage.livePickDependencyExists(question);
+	}
+	
 	/**
 	 * Set this assessment to be live.
 	 * 
@@ -746,14 +770,28 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
-	 * Remove any direct dependencies on this question from all assessments.
+	 * Remove any direct pick (i.e. manual part) dependencies on this question from all assessments.
 	 * 
 	 * @param question
 	 *        The question.
 	 */
-	protected void removeDependency(Question question)
+	protected void removePickDependency(Question question)
 	{
-		this.storage.removeDependency(question);
+		this.storage.removePickDependency(question);
+	}
+	
+	/**
+	 * Switch all pool references from from to to.<br />
+	 * Live assessments are preserved (their modern settings updated), non-live assessments are updated directly.
+	 * 
+	 * @param from
+	 *        The from pool.
+	 * @param to
+	 *        The to pool.
+	 */
+	protected void switchPoolDependency(Pool from, Pool to)
+	{
+		this.storage.switchPoolDependency(from, to);
 	}
 
 	/**

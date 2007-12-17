@@ -467,9 +467,9 @@ public abstract class PartImpl implements Part, Changeable
 	}
 
 	/**
-	 * Restore the part pool and question references to their original values.
+	 * Restore the part pool and question references to their modern values.
 	 */
-	protected abstract void setOrig();
+	protected abstract void setModern();
 
 	/**
 	 * Change any part references that are from to to.

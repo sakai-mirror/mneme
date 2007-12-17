@@ -330,9 +330,33 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean liveDependencyExists(Question question)
+	public Boolean liveDrawDependencyExists(Pool pool)
 	{
-		// M parts only (question_id is set non-null): match the question_id field for live assessments
+		// look for any pool_id that matches from D parts only (question_id is null) for live assessments
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT COUNT(1) FROM MNEME_ASSESSMENT_PART_DETAIL D");
+		sql.append(" JOIN MNEME_ASSESSMENT A ON D.ASSESSMENT_ID=A.ID AND A.LIVE='1'");
+		sql.append(" WHERE D.POOL_ID=? AND D.QUESTION_ID IS NULL");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(pool.getId());
+
+		List results = this.sqlService.dbRead(sql.toString(), fields, null);
+		if (results.size() > 0)
+		{
+			int size = Integer.parseInt((String) results.get(0));
+			return Boolean.valueOf(size > 0);
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean livePickDependencyExists(Question question)
+	{
+		// M parts only (question_id is non-null): match the question_id field for live assessments
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT COUNT(1) FROM MNEME_ASSESSMENT_PART_DETAIL D");
 		sql.append(" JOIN MNEME_ASSESSMENT A ON D.ASSESSMENT_ID=A.ID AND A.LIVE='1'");
@@ -406,15 +430,15 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removeDependency(final Question question)
+	public void removePickDependency(final Question question)
 	{
 		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
-				removeDependencyTx(question);
+				removePickDependencyTx(question);
 			}
-		}, "removeDependency(question): " + question.getId());
+		}, "removePickDependency: " + question.getId());
 	}
 
 	/**
@@ -560,6 +584,25 @@ public class AssessmentStorageMysql implements AssessmentStorage
 				switchLiveDependencyTx(from, to);
 			}
 		}, "switchLiveDependency(question): from: " + from.getId());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchPoolDependency(final Pool from, final Pool to)
+	{
+		// for all non-live mpart that reference p, change to reference pNew
+		// for all mpart that reference p in modernPoolId, change to reference pNew
+
+		// for all non-live dpart that use p, change to use pNew
+		// for all dpart that reference p in modernPoolId, change to reference pNew
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				switchPoolDependencyTx(from, to);
+			}
+		}, "switchPoolDependency: from: " + from.getId() + " to: " + to.getId());
 	}
 
 	/**
@@ -866,10 +909,10 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_ASSESSMENT_PART_DETAIL (");
-		sql.append(" ASSESSMENT_ID, NUM_QUESTIONS_SEQ, ORIG_PID, ORIG_QID, PART_ID, POOL_ID, QUESTION_ID)");
-		sql.append(" VALUES(?,?,?,?,?,?,?)");
+		sql.append(" ASSESSMENT_ID, MODERN_DELETED, MODERN_POOL_ID, MODERN_QID, NUM_QUESTIONS_SEQ, PART_ID, POOL_ID, QUESTION_ID)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[7];
+		Object[] fields = new Object[8];
 		fields[0] = Long.valueOf(assessment.getId());
 
 		if (part instanceof ManualPartImpl)
@@ -880,11 +923,12 @@ public class AssessmentStorageMysql implements AssessmentStorage
 			{
 				seq++;
 				int i = 1;
+				fields[i++] = (pick.modernDeleted) ? "1" : "0";
+				fields[i++] = (pick.modernPoolId == null) ? null : Long.valueOf(pick.modernPoolId);
+				fields[i++] = (pick.modernQuestionId == null) ? null : Long.valueOf(pick.modernQuestionId);
 				fields[i++] = Integer.valueOf(seq);
-				fields[i++] = null;
-				fields[i++] = (pick.origQuestionId == null) ? null : Long.valueOf(pick.origQuestionId);
 				fields[i++] = Long.valueOf(part.getId());
-				fields[i++] = (pick.poolId == null) ? null : Long.valueOf(pick.poolId);
+				fields[i++] = Long.valueOf(pick.poolId);
 				fields[i++] = Long.valueOf(pick.questionId);
 
 				if (!this.sqlService.dbWrite(null, sql.toString(), fields))
@@ -900,9 +944,10 @@ public class AssessmentStorageMysql implements AssessmentStorage
 			for (PoolDraw draw : dpart.pools)
 			{
 				int i = 1;
-				fields[i++] = Integer.valueOf(draw.getNumQuestions());
-				fields[i++] = ((PoolDrawImpl) draw).origPoolId == null ? null : Long.valueOf(((PoolDrawImpl) draw).origPoolId);
+				fields[i++] = (((PoolDrawImpl) draw).modernDeleted) ? "1" : "0";
+				fields[i++] = (((PoolDrawImpl) draw).modernPoolId == null) ? null : Long.valueOf(((PoolDrawImpl) draw).modernPoolId);
 				fields[i++] = null;
+				fields[i++] = Integer.valueOf(draw.getNumQuestions());
 				fields[i++] = Long.valueOf(part.getId());
 				fields[i++] = Long.valueOf(draw.getPoolId());
 				fields[i++] = null;
@@ -1202,7 +1247,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 
 		// read all the part details for these assessments
 		sql = new StringBuilder();
-		sql.append("SELECT P.ASSESSMENT_ID, P.NUM_QUESTIONS_SEQ, P.ORIG_PID, P.ORIG_QID, P.PART_ID,");
+		sql.append("SELECT P.ASSESSMENT_ID, P.NUM_QUESTIONS_SEQ, P.MODERN_DELETED, P.MODERN_POOL_ID, P.MODERN_QID, P.PART_ID,");
 		sql.append(" P.POOL_ID, P.QUESTION_ID");
 		sql.append(" FROM MNEME_ASSESSMENT_PART_DETAIL P");
 		sql.append(" JOIN MNEME_ASSESSMENT A ON P.ASSESSMENT_ID=A.ID ");
@@ -1216,22 +1261,25 @@ public class AssessmentStorageMysql implements AssessmentStorage
 				{
 					String aid = SqlHelper.readId(result, 1);
 					AssessmentImpl a = assessments.get(aid);
-					String pid = SqlHelper.readId(result, 5);
+					String pid = SqlHelper.readId(result, 6);
 					Part p = a.getParts().getPart(pid);
 
 					if (p instanceof DrawPart)
 					{
 						Integer numQuestions = SqlHelper.readInteger(result, 2);
-						String origPoolId = SqlHelper.readId(result, 3);
-						String poolId = SqlHelper.readId(result, 6);
-						((DrawPartImpl) p).initDraw(poolId, origPoolId, numQuestions);
+						Boolean modernDeleted = SqlHelper.readBoolean(result, 3);
+						String modernPoolId = SqlHelper.readId(result, 4);
+						String poolId = SqlHelper.readId(result, 7);
+						((DrawPartImpl) p).initDraw(poolId, modernPoolId, modernDeleted, numQuestions);
 					}
 					else if (p instanceof ManualPart)
 					{
-						String questionId = SqlHelper.readId(result, 7);
-						String origQid = SqlHelper.readId(result, 4);
-						String poolId = SqlHelper.readId(result, 6);
-						((ManualPartImpl) p).initPick(questionId, origQid, poolId);
+						String questionId = SqlHelper.readId(result, 8);
+						Boolean modernDeleted = SqlHelper.readBoolean(result, 3);
+						String modernPoolId = SqlHelper.readId(result, 4);
+						String modernQid = SqlHelper.readId(result, 5);
+						String poolId = SqlHelper.readId(result, 7);
+						((ManualPartImpl) p).initPick(questionId, modernQid, modernDeleted, poolId, modernPoolId);
 					}
 
 					return null;
@@ -1322,19 +1370,69 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void removeDependencyTx(Question question)
+	protected void removePickDependencyTx(Question question)
 	{
-		// M parts only (question_id is set non-null): match the question_id field
+		// TODO: for live, mark modern_deleted, for non-live, remove as below
+
+		// M parts only (question_id is non-null), non-live assessments only: remove where matches the question_id field
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM MNEME_ASSESSMENT_PART_DETAIL");
-		sql.append(" WHERE QUESTION_ID=?");
+		sql.append(" USING MNEME_ASSESSMENT_PART_DETAIL, MNEME_ASSESSMENT");
+		sql.append(" WHERE MNEME_ASSESSMENT_PART_DETAIL.ASSESSMENT_ID=MNEME_ASSESSMENT.ID");
+		sql.append(" AND MNEME_ASSESSMENT.LIVE='0'");
+		sql.append(" AND MNEME_ASSESSMENT_PART_DETAIL.QUESTION_ID=?");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(question.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
 		{
-			throw new RuntimeException("removeDependencyTx(question): db write failed");
+			throw new RuntimeException("removePickDependencyTx (non-live): db write failed");
+		}
+
+		// for live assessment, update the modern deleted flag where the modern question id matches
+		sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D, MNEME_ASSESSMENT A");
+		sql.append(" SET D.MODERN_DELETED='1'");
+		sql.append(" WHERE D.ASSESSMENT_ID=A.ID AND A.LIVE='1'");
+		sql.append(" AND D.MODERN_QID=?");
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
+		{
+			throw new RuntimeException("removePickDependencyTx (live): db write failed");
+		}
+	}
+
+	/**
+	 * Transaction code for switchLiveDependency()
+	 */
+	protected void switchPoolDependencyTx(Pool from, Pool to)
+	{
+		// for all non-live mpart or dpart that reference p, change to reference pNew
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D, MNEME_ASSESSMENT A");
+		sql.append(" SET D.POOL_ID=?");
+		sql.append(" WHERE D.ASSESSMENT_ID=A.ID AND A.LIVE='0'");
+		sql.append(" AND D.POOL_ID=?");
+
+		Object[] fields = new Object[2];
+		fields[0] = Long.valueOf(to.getId());
+		fields[1] = Long.valueOf(from.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("switchPoolDependencyTx(1): dbWrite failed");
+		}
+
+		// for all mpart or dpart that reference p in modernPoolId, change to reference pNew
+		sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D");
+		sql.append(" SET D.MODERN_POOL_ID=?");
+		sql.append(" WHERE D.MODERN_POOL_ID=?");
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("switchPoolDependencyTx(2): dbWrite failed");
 		}
 	}
 

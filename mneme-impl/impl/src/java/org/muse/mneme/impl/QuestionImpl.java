@@ -703,9 +703,9 @@ public class QuestionImpl implements Question
 	}
 
 	/**
-	 * Set this assessment to be "historical" - used only for history by submissions.
+	 * Set this question to be historical; pick up a context, drop the pool reference.
 	 */
-	protected void makeHistorical()
+	protected void setHistorical()
 	{
 		if (this.historical) return;
 

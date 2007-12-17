@@ -154,6 +154,16 @@ public interface QuestionStorage
 	void moveQuestion(Question question, Pool pool);
 
 	/**
+	 * Switch all non-historical questions that are in the from pool to be in the to pool
+	 * 
+	 * @param from
+	 *        The from pool.
+	 * @param to
+	 *        The to pool.
+	 */
+	void switchQuestionPools(Pool from, Pool to);
+
+	/**
 	 * Construct a new question object.
 	 * 
 	 * @return A question object.

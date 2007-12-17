@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGrouping;
@@ -404,18 +406,53 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean liveDependencyExists(Question question)
+	public Boolean liveDrawDependencyExists(Pool pool)
+	{
+		for (AssessmentImpl assessment : this.assessments.values())
+		{
+			if (assessment.getContext().equals(pool.getContext()) && assessment.getIsLive())
+			{
+				// if the asssessment's parts draws from this pool (dparts only)
+				for (Part part : assessment.getParts().getParts())
+				{
+					if (part instanceof DrawPart)
+					{
+						for (PoolDraw draw : ((DrawPartImpl) part).pools)
+						{
+							if (draw.getPoolId().equals(pool.getId()))
+							{
+								return Boolean.TRUE;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean livePickDependencyExists(Question question)
 	{
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
 			if (assessment.getContext().equals(question.getContext()) && assessment.getIsLive())
 			{
-				// if the asssessment's parts use this question
+				// if the asssessment's manual parts use this question (draw parts dont depend on specific questions)
 				for (Part part : assessment.getParts().getParts())
 				{
-					if (((PartImpl) part).dependsOn(question))
+					if (part instanceof ManualPart)
 					{
-						return Boolean.TRUE;
+						for (PoolPick pick : ((ManualPartImpl) part).questions)
+						{
+							if (pick.getQuestionId().equals(question.getId()))
+							{
+								return Boolean.TRUE;
+							}
+						}
 					}
 				}
 			}
@@ -490,21 +527,104 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void removeDependency(Question question)
+	public void removePickDependency(Question question)
 	{
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
 			if (assessment.getContext().equals(question.getContext()))
 			{
-				// if the asssessment's manual parts use this question
 				for (Part part : assessment.getParts().getParts())
 				{
 					if (part instanceof ManualPart)
 					{
-						if (((ManualPartImpl) part).dependsOn(question))
+						for (Iterator i = ((ManualPartImpl) part).questions.iterator(); i.hasNext();)
 						{
-							((ManualPartImpl) part).removeQuestion(question);
-							assessment.clearChanged();
+							PoolPick pick = (PoolPick) i.next();
+
+							// for a non-live assessment referencing the question, remove the pick
+							if (!assessment.getIsLive())
+							{
+								if (pick.getQuestionId().equals(question.getId()))
+								{
+									i.remove();
+								}
+							}
+
+							// for a live assessment referencing the question in its modern reference, mark the pick as modern deleted
+							else
+							{
+								if (pick.modernQuestionId.equals(question.getId()))
+								{
+									pick.modernDeleted = Boolean.TRUE;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchPoolDependency(Pool from, Pool to)
+	{
+		// for all non-live mpart that reference p, change to reference pNew
+		// for all mpart that reference p in modernPoolId, change to reference pNew
+
+		// for all non-live dpart that use p, change to use pNew
+		// for all dpart that reference p in modernPoolId, change to reference pNew
+		for (AssessmentImpl assessment : this.assessments.values())
+		{
+			if (assessment.getContext().equals(from.getContext()))
+			{
+				for (Part part : assessment.getParts().getParts())
+				{
+					if (part instanceof ManualPart)
+					{
+						for (PoolPick pick : ((ManualPartImpl) part).questions)
+						{
+							// for a non-live assessment referencing the pool, switch
+							if (!assessment.getIsLive())
+							{
+								if (pick.getPoolId().equals(from.getId()))
+								{
+									pick.setPool(to.getId());
+								}
+							}
+
+							// for a live assessment referencing the pool in its modern reference, switch modern
+							else
+							{
+								if (pick.modernPoolId.equals(from.getId()))
+								{
+									pick.modernPoolId = to.getId();
+								}
+							}
+						}
+					}
+					else if (part instanceof DrawPart)
+					{
+						for (PoolDraw draw : ((DrawPartImpl) part).pools)
+						{
+							// for a non-live assessment referencing the pool, switch
+							if (!assessment.getIsLive())
+							{
+								if (draw.getPoolId().equals(from.getId()))
+								{
+									draw.setPool(to);
+								}
+							}
+
+							// for a live assessment referencing the pool in its modern reference, switch modern
+							else
+							{
+								if (((PoolDrawImpl) draw).modernPoolId.equals(from.getId()))
+								{
+									((PoolDrawImpl) draw).modernPoolId = to.getId();
+								}
+							}
 						}
 					}
 				}

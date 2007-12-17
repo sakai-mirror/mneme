@@ -36,9 +36,13 @@ public class PoolDrawImpl implements PoolDraw
 {
 	protected transient Assessment assessment = null;
 
-	protected Integer numQuestions = null;
+	/** Once a test is live, it stops updating with pool deletes. This is set if this draw would have been removed due. */
+	protected Boolean modernDeleted = Boolean.FALSE;
 
-	protected String origPoolId = null;
+	/** Once a test is live, it stops updating with pool / question changes. This keeps track of what would have been if not live. */
+	protected String modernPoolId = null;
+
+	protected Integer numQuestions = null;
 
 	protected String poolId = null;
 
@@ -85,7 +89,7 @@ public class PoolDrawImpl implements PoolDraw
 		this(assessment, poolService);
 		if (pool == null) throw new IllegalArgumentException();
 		this.poolId = pool.getId();
-		this.origPoolId = pool.getId();
+		this.modernPoolId = pool.getId();
 		this.numQuestions = numQuestions;
 	}
 
@@ -98,18 +102,23 @@ public class PoolDrawImpl implements PoolDraw
 	 *        The PoolService.
 	 * @param poolId
 	 *        The pool to draw from.
-	 * @param origPoolId
-	 *        The orig pool id.
+	 * @param modernPoolId
+	 *        The modern pool id.
+	 * @param modernDeleted
+	 *        set if the draw would not be in a modern version of the assessment.
 	 * @param numQuestions
 	 *        The number of questions to draw.
 	 */
-	public PoolDrawImpl(Assessment assessment, PoolService poolService, String poolId, String origPoolId, Integer numQuestions)
+	public PoolDrawImpl(Assessment assessment, PoolService poolService, String poolId, String modernPoolId, Boolean modernDeleted,
+			Integer numQuestions)
 	{
 		this(assessment, poolService);
 		if (poolId == null) throw new IllegalArgumentException();
-		if (origPoolId == null) throw new IllegalArgumentException();
+		if (modernPoolId == null) throw new IllegalArgumentException();
+		if (modernDeleted == null) throw new IllegalArgumentException();
 		this.poolId = poolId;
-		this.origPoolId = origPoolId;
+		this.modernPoolId = modernPoolId;
+		this.modernDeleted = modernDeleted;
 		this.numQuestions = numQuestions;
 	}
 
@@ -225,12 +234,7 @@ public class PoolDrawImpl implements PoolDraw
 	{
 		if (pool == null) throw new IllegalArgumentException();
 		this.poolId = pool.getId();
-
-		// set the orig only once
-		if (this.origPoolId == null)
-		{
-			this.origPoolId = pool.getId();
-		}
+		this.modernPoolId = pool.getId();
 	}
 
 	/**
@@ -241,28 +245,22 @@ public class PoolDrawImpl implements PoolDraw
 	 */
 	protected void set(PoolDrawImpl other)
 	{
+		this.modernDeleted = other.modernDeleted;
+		this.modernPoolId = other.modernPoolId;
 		this.numQuestions = other.numQuestions;
-		this.origPoolId = other.origPoolId;
 		this.poolId = other.poolId;
 		this.poolService = other.poolService;
 	}
 
 	/**
-	 * Restore the pool id to the original value.
+	 * Restore the settings to modern values, as if it had been updated by pool / question changes instead of isolated from them.
 	 * 
-	 * @return true if successful, false if the orig pool is not available.
+	 * @return true if successful, false if it would have been deleted.
 	 */
-	protected boolean setOrig()
+	protected boolean setModern()
 	{
-		// if there has been no change, we are done.
-		if (this.poolId.equals(this.origPoolId)) return true;
-
-		// check that the orig pool is available
-		Pool pool = this.poolService.getPool(this.origPoolId);
-		if ((pool == null) || (pool.getIsHistorical())) return false;
-
-		// set it
-		this.poolId = this.origPoolId;
+		if (this.modernDeleted) return false;
+		this.poolId = this.modernPoolId;
 		return true;
 	}
 }

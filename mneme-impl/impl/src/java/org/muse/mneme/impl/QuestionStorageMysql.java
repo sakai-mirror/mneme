@@ -357,6 +357,20 @@ public class QuestionStorageMysql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void switchQuestionPools(final Pool from, final Pool to)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				switchQuestionPoolsTx(from, to);
+			}
+		}, "switchQuestionPools: from: " + from.getId() + " to: " + to.getId());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public QuestionImpl newQuestion()
 	{
 		QuestionImpl rv = new QuestionImpl(poolService, questionService, submissionService);
@@ -640,6 +654,26 @@ public class QuestionStorageMysql implements QuestionStorage
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
 			throw new RuntimeException("moveQuestionTx: db write failed");
+		}
+	}
+
+	/**
+	 * Transaction code for switchQuestionPools()
+	 */
+	protected void switchQuestionPoolsTx(Pool from, Pool to)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_QUESTION SET");
+		sql.append(" POOL_ID=?");
+		sql.append(" WHERE POOL_ID=?");
+
+		Object[] fields = new Object[2];
+		fields[0] = Long.valueOf(to.getId());
+		fields[1] = Long.valueOf(from.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("switchQuestionPoolsTx: db write failed");
 		}
 	}
 

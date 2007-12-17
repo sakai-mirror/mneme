@@ -103,13 +103,22 @@ public interface AssessmentStorage
 	Boolean liveDependencyExists(Pool pool, boolean directOnly);
 
 	/**
-	 * Check if any live assessments have any direct dependency on this question.
+	 * Check if any live tests have any draw dependency on this pool.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @return TRUE if any live tests have a draw dependency on this pool, FALSE if not.
+	 */
+	Boolean liveDrawDependencyExists(Pool pool);
+
+	/**
+	 * Check if any live assessments have any pick dependency on this question.
 	 * 
 	 * @param question
 	 *        The question.
-	 * @return TRUE if any live assessments have a direct dependency on this question, FALSE if not.
+	 * @return TRUE if any live assessments have a pick dependency on this question, FALSE if not.
 	 */
-	Boolean liveDependencyExists(Question question);
+	Boolean livePickDependencyExists(Question question);
 
 	/**
 	 * Set this assessment to be live.
@@ -152,12 +161,23 @@ public interface AssessmentStorage
 	void removeDependency(Pool pool);
 
 	/**
-	 * Remove any direct dependencies on this question from all assessments.
+	 * Remove any pick (i.e. manual part) dependencies on this question from all assessments.
 	 * 
 	 * @param question
 	 *        The question.
 	 */
-	void removeDependency(Question question);
+	void removePickDependency(Question question);
+
+	/**
+	 * Switch all pool references from from to to.<br />
+	 * Live assessments are preserved (their modern settings updated), non-live assessments are updated directly.
+	 * 
+	 * @param from
+	 *        The from pool.
+	 * @param to
+	 *        The to pool.
+	 */
+	void switchPoolDependency(Pool from, Pool to);
 
 	/**
 	 * Save changes made to this assessment.

@@ -415,6 +415,19 @@ public class PoolImpl implements Pool
 	}
 
 	/**
+	 * Set this pool to be historical, pick up a manifest.
+	 * 
+	 * @return true if effective, false if ignored.
+	 */
+	protected void setHistorical()
+	{
+		if (this.historical) throw new IllegalArgumentException();
+
+		this.frozenManifest = getAllQuestionIds();
+		this.historical = Boolean.TRUE;
+	}
+
+	/**
 	 * Set as a copy of the other.
 	 * 
 	 * @param other

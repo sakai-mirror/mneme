@@ -495,30 +495,32 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 * 
 	 * @param poolId
 	 *        The poolId value.
-	 * @param origPoolId
-	 *        The origPoolId value
+	 * @param modernPoolId
+	 *        The modern pool id.
+	 * @param modernDeleted
+	 *        set if the draw would not be in a modern version of the assessment.
 	 * @param assessment
 	 *        The assessment this is the parts for.
 	 * @param numQuestions
 	 *        The number of questions.
 	 */
-	protected void initDraw(String poolId, String origPoolId, Integer numQuestions)
+	protected void initDraw(String poolId, String modernPoolId, Boolean modernDeleted, Integer numQuestions)
 	{
-		PoolDraw draw = new PoolDrawImpl(this.assessment, this.poolService, poolId, origPoolId, numQuestions);
+		PoolDraw draw = new PoolDrawImpl(this.assessment, this.poolService, poolId, modernPoolId, modernDeleted, numQuestions);
 		pools.add(draw);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void setOrig()
+	protected void setModern()
 	{
 		for (Iterator i = this.pools.iterator(); i.hasNext();)
 		{
 			PoolDrawImpl draw = (PoolDrawImpl) i.next();
 
-			// if we cannot restore the orig. values, remove the draw
-			if (!draw.setOrig())
+			// if the modern version is deleted, remove it
+			if (!draw.setModern())
 			{
 				i.remove();
 			}
