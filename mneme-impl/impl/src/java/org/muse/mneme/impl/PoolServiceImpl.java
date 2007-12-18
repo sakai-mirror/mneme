@@ -518,6 +518,31 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
+	 * Mark this pool as historical, and pick up the manifst, and create a new pool that is not historical based on the pool (if requested).
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @param copy
+	 *        if true, make the non-historical copy.
+	 * @return a new, non-historical pool that is a copy of the pool.
+	 */
+	protected Pool convertToHistorical(Pool pool, boolean copy)
+	{
+		PoolImpl rv = null;
+		if (copy)
+		{
+			rv = this.storage.newPool((PoolImpl) pool);
+			rv.initId(null);
+			this.storage.savePool(rv);
+		}
+
+		((PoolImpl) pool).setHistorical(rv);
+		this.storage.savePool(((PoolImpl) pool));
+
+		return rv;
+	}
+
+	/**
 	 * Create a historical record of this pool.
 	 * 
 	 * @param pool
@@ -549,31 +574,6 @@ public class PoolServiceImpl implements PoolService
 		// eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
 
 		return current;
-	}
-
-	/**
-	 * Mark this pool as historical, and pick up the manifst, and create a new pool that is not historical based on the pool (if requested).
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @param copy
-	 *        if true, make the non-historical copy.
-	 * @return a new, non-historical pool that is a copy of the pool.
-	 */
-	protected Pool convertToHistorical(Pool pool, boolean copy)
-	{
-		PoolImpl rv = null;
-		if (copy)
-		{
-			rv = this.storage.newPool((PoolImpl) pool);
-			rv.initId(null);
-			this.storage.savePool(rv);
-		}
-
-		((PoolImpl) pool).setHistorical();
-		this.storage.savePool(((PoolImpl) pool));
-
-		return rv;
 	}
 
 	/**
@@ -812,5 +812,18 @@ public class PoolServiceImpl implements PoolService
 
 		// TODO: clear all cached pools from thread-local? -ggolden
 		this.storage.switchManifests(from, to);
+	}
+
+	/**
+	 * Switch historical pool modern references from from to to.
+	 * 
+	 * @param from
+	 *        The from pool.
+	 * @param to
+	 *        The to pool.
+	 */
+	protected void switchPoolModerns(Pool from, Pool to)
+	{
+		this.storage.switchPoolModerns(from, to);
 	}
 }

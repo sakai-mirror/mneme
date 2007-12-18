@@ -708,18 +708,6 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
-	 * Check if any live assessments have any draw dependency on this pool.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @return TRUE if any live assessments have a draw dependency on this pool, FALSE if not.
-	 */
-	protected Boolean liveDrawDependencyExists(Pool pool)
-	{
-		return this.storage.liveDrawDependencyExists(pool);
-	}
-
-	/**
 	 * Check if any live assessments have any direct dependency on this question.
 	 * 
 	 * @param question
@@ -729,6 +717,18 @@ public class AssessmentServiceImpl implements AssessmentService
 	protected Boolean liveDependencyExists(Question question)
 	{
 		return this.storage.livePickDependencyExists(question);
+	}
+
+	/**
+	 * Check if any live assessments have any draw dependency on this pool.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @return TRUE if any live assessments have a draw dependency on this pool, FALSE if not.
+	 */
+	protected Boolean liveDrawDependencyExists(Pool pool)
+	{
+		return this.storage.liveDrawDependencyExists(pool);
 	}
 
 	/**
@@ -742,7 +742,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		return this.storage.livePickDependencyExists(question);
 	}
-	
+
 	/**
 	 * Set this assessment to be live.
 	 * 
@@ -778,20 +778,6 @@ public class AssessmentServiceImpl implements AssessmentService
 	protected void removePickDependency(Question question)
 	{
 		this.storage.removePickDependency(question);
-	}
-	
-	/**
-	 * Switch all pool references from from to to.<br />
-	 * Live assessments are preserved (their modern settings updated), non-live assessments are updated directly.
-	 * 
-	 * @param from
-	 *        The from pool.
-	 * @param to
-	 *        The to pool.
-	 */
-	protected void switchPoolDependency(Pool from, Pool to)
-	{
-		this.storage.switchPoolDependency(from, to);
 	}
 
 	/**
@@ -888,5 +874,19 @@ public class AssessmentServiceImpl implements AssessmentService
 	protected void switchLiveDependency(Question from, Question to)
 	{
 		this.storage.switchLiveDependency(from, to);
+	}
+
+	/**
+	 * Switch all pool references from from to to.<br />
+	 * Live assessments are preserved (their modern settings updated), non-live assessments are updated directly.
+	 * 
+	 * @param from
+	 *        The from pool.
+	 * @param to
+	 *        The to pool.
+	 */
+	protected void switchPoolDependency(Pool from, Pool to)
+	{
+		this.storage.switchPoolDependency(from, to);
 	}
 }

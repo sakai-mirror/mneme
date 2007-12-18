@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.sakaiproject.db.api.SqlReader;
@@ -341,6 +342,20 @@ public class PoolStorageMysql implements PoolStorage
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public void switchPoolModerns(final Pool from, final Pool to)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				switchPoolModernsTx(from, to);
+			}
+		}, "switchPoolModerns: " + from.getId() + " " + to.getId());
+	}
+
+	/**
 	 * Form a key for caching a pool.
 	 * 
 	 * @param poolId
@@ -621,7 +636,7 @@ public class PoolStorageMysql implements PoolStorage
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT P.CONTEXT, P.CREATED_BY_DATE, P.CREATED_BY_USER, P.DESCRIPTION, P.DIFFICULTY,");
-		sql.append(" P.HISTORICAL, P.ID, P.MINT, P.MODIFIED_BY_DATE, P.MODIFIED_BY_USER, P.POINTS, P.TITLE");
+		sql.append(" P.HISTORICAL, P.ID, P.MINT, P.MODERN_ID, P.MODIFIED_BY_DATE, P.MODIFIED_BY_USER, P.POINTS, P.TITLE");
 		sql.append(" FROM MNEME_POOL P ");
 		sql.append(whereOrder);
 
@@ -640,10 +655,11 @@ public class PoolStorageMysql implements PoolStorage
 					pool.initHistorical(SqlHelper.readBoolean(result, 6));
 					pool.initId(SqlHelper.readId(result, 7));
 					pool.initMint(SqlHelper.readBoolean(result, 8));
-					pool.getModifiedBy().setDate(SqlHelper.readDate(result, 9));
-					pool.getModifiedBy().setUserId(SqlHelper.readString(result, 10));
-					pool.setPointsEdit(SqlHelper.readFloat(result, 11));
-					pool.setTitle(SqlHelper.readString(result, 12));
+					pool.initModernId(SqlHelper.readId(result, 9));
+					pool.getModifiedBy().setDate(SqlHelper.readDate(result, 10));
+					pool.getModifiedBy().setUserId(SqlHelper.readString(result, 11));
+					pool.setPointsEdit(SqlHelper.readFloat(result, 12));
+					pool.setTitle(SqlHelper.readString(result, 13));
 
 					pool.changed.clearChanged();
 					rv.add(pool);
@@ -682,6 +698,26 @@ public class PoolStorageMysql implements PoolStorage
 	}
 
 	/**
+	 * Transaction code for switchPoolModerns().
+	 */
+	protected void switchPoolModernsTx(Pool from, Pool to)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_POOL SET");
+		sql.append(" MODERN_ID=?");
+		sql.append(" WHERE MODERN_ID=?");
+
+		Object[] fields = new Object[2];
+		fields[0] = Long.valueOf(to.getId());
+		fields[1] = Long.valueOf(from.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("switchPoolModernsTx: db write failed");
+		}
+	}
+
+	/**
 	 * Update an existing pool.
 	 * 
 	 * @param pool
@@ -709,20 +745,21 @@ public class PoolStorageMysql implements PoolStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("UPDATE MNEME_POOL SET");
 		sql.append(" CONTEXT=?, DESCRIPTION=?, DIFFICULTY=?, HISTORICAL=?,");
-		sql.append(" MINT=?, MODIFIED_BY_DATE=?, MODIFIED_BY_USER=?, POINTS=?, TITLE=?");
+		sql.append(" MINT=?, MODERN_ID=? MODIFIED_BY_DATE=?, MODIFIED_BY_USER=?, POINTS=?, TITLE=?");
 		sql.append(" WHERE ID=?");
 
-		Object[] fields = new Object[10];
+		Object[] fields = new Object[11];
 		fields[0] = pool.getContext();
 		fields[1] = pool.getDescription();
 		fields[2] = pool.getDifficulty().toString();
 		fields[3] = pool.getIsHistorical() ? "1" : "0";
 		fields[4] = pool.getMint() ? "1" : "0";
-		fields[5] = pool.getModifiedBy().getDate().getTime();
-		fields[6] = pool.getModifiedBy().getUserId();
-		fields[7] = pool.getPointsEdit();
-		fields[8] = pool.getTitle();
-		fields[9] = Long.valueOf(pool.getId());
+		fields[5] = (pool.modernId == null) ? null : Long.valueOf(pool.modernId);
+		fields[6] = pool.getModifiedBy().getDate().getTime();
+		fields[7] = pool.getModifiedBy().getUserId();
+		fields[8] = pool.getPointsEdit();
+		fields[9] = pool.getTitle();
+		fields[10] = Long.valueOf(pool.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{

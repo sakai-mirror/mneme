@@ -321,6 +321,20 @@ public class PoolStorageSample implements PoolStorage
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchPoolModerns(Pool from, Pool to)
+	{
+		for (PoolImpl pool : this.pools.values())
+		{
+			if (pool.getContext().equals(from.getContext()) && (pool.getIsHistorical()) && (from.getId().equals(pool.modernId)))
+			{
+				pool.modernId = to.getId();
+			}
+		}
+	}
+
 	protected void fakeIt()
 	{
 		if (!fakedAlready)

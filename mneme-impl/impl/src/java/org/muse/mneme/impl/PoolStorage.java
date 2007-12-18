@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.Date;
 import java.util.List;
 
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 
@@ -137,4 +138,14 @@ public interface PoolStorage
 	 *        The to question.
 	 */
 	void switchManifests(Question from, Question to);
+
+	/**
+	 * Switch historical pool modern references from from to to.
+	 * 
+	 * @param from
+	 *        The from pool.
+	 * @param to
+	 *        The to pool.
+	 */
+	void switchPoolModerns(Pool from, Pool to);
 }

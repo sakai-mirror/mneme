@@ -868,6 +868,9 @@ public class QuestionServiceImpl implements QuestionService
 			// for all non-live dpart that use p, change to use pNew
 			// for all dpart that reference p in modernPoolId, change to reference pNew
 			this.assessmentService.switchPoolDependency(currentPool, newPool);
+
+			// for any historical pool modern reference that was to currentPool, switch to newPool
+			this.poolService.switchPoolModerns(currentPool, newPool);
 		}
 
 		// if there's a live test picking this question, keep it around as history.

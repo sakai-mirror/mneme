@@ -169,17 +169,6 @@ public interface AssessmentStorage
 	void removePickDependency(Question question);
 
 	/**
-	 * Switch all pool references from from to to.<br />
-	 * Live assessments are preserved (their modern settings updated), non-live assessments are updated directly.
-	 * 
-	 * @param from
-	 *        The from pool.
-	 * @param to
-	 *        The to pool.
-	 */
-	void switchPoolDependency(Pool from, Pool to);
-
-	/**
 	 * Save changes made to this assessment.
 	 * 
 	 * @param assessment
@@ -208,4 +197,15 @@ public interface AssessmentStorage
 	 *        The to question.
 	 */
 	void switchLiveDependency(Question from, Question to);
+
+	/**
+	 * Switch all pool references from from to to.<br />
+	 * Live assessments are preserved (their modern settings updated), non-live assessments are updated directly.
+	 * 
+	 * @param from
+	 *        The from pool.
+	 * @param to
+	 *        The to pool.
+	 */
+	void switchPoolDependency(Pool from, Pool to);
 }

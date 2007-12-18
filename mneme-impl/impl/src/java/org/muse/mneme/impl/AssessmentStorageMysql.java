@@ -1406,39 +1406,6 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	/**
 	 * Transaction code for switchLiveDependency()
 	 */
-	protected void switchPoolDependencyTx(Pool from, Pool to)
-	{
-		// for all non-live mpart or dpart that reference p, change to reference pNew
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D, MNEME_ASSESSMENT A");
-		sql.append(" SET D.POOL_ID=?");
-		sql.append(" WHERE D.ASSESSMENT_ID=A.ID AND A.LIVE='0'");
-		sql.append(" AND D.POOL_ID=?");
-
-		Object[] fields = new Object[2];
-		fields[0] = Long.valueOf(to.getId());
-		fields[1] = Long.valueOf(from.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("switchPoolDependencyTx(1): dbWrite failed");
-		}
-
-		// for all mpart or dpart that reference p in modernPoolId, change to reference pNew
-		sql = new StringBuilder();
-		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D");
-		sql.append(" SET D.MODERN_POOL_ID=?");
-		sql.append(" WHERE D.MODERN_POOL_ID=?");
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("switchPoolDependencyTx(2): dbWrite failed");
-		}
-	}
-
-	/**
-	 * Transaction code for switchLiveDependency()
-	 */
 	protected void switchLiveDependencyTx(Pool from, Pool to, boolean directOnly)
 	{
 		if (directOnly)
@@ -1535,6 +1502,39 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
 			throw new RuntimeException("switchLiveDependencyTx(question-2): dbWrite failed");
+		}
+	}
+
+	/**
+	 * Transaction code for switchLiveDependency()
+	 */
+	protected void switchPoolDependencyTx(Pool from, Pool to)
+	{
+		// for all non-live mpart or dpart that reference p, change to reference pNew
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D, MNEME_ASSESSMENT A");
+		sql.append(" SET D.POOL_ID=?");
+		sql.append(" WHERE D.ASSESSMENT_ID=A.ID AND A.LIVE='0'");
+		sql.append(" AND D.POOL_ID=?");
+
+		Object[] fields = new Object[2];
+		fields[0] = Long.valueOf(to.getId());
+		fields[1] = Long.valueOf(from.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("switchPoolDependencyTx(1): dbWrite failed");
+		}
+
+		// for all mpart or dpart that reference p in modernPoolId, change to reference pNew
+		sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D");
+		sql.append(" SET D.MODERN_POOL_ID=?");
+		sql.append(" WHERE D.MODERN_POOL_ID=?");
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("switchPoolDependencyTx(2): dbWrite failed");
 		}
 	}
 

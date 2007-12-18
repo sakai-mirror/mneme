@@ -93,12 +93,32 @@ public class PoolEditView extends ControllerImpl
 		// pool
 		String pid = params[3];
 		Pool pool = this.poolService.getPool(pid);
+
 		if (pool == null)
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
+
+		// if historical, get modern
+		if (pool.getIsHistorical())
+		{
+			pool = pool.getModern();
+			if (pool == null)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+			else
+			{
+				// redirect here with the modern pool to edit
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/pool_edit/" + poolsSortCode + "/" + pool.getId())));
+				return;
+			}
+		}
+
 		context.put("pool", pool);
 
 		// sort

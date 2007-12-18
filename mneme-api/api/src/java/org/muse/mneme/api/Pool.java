@@ -114,6 +114,13 @@ public interface Pool
 	Boolean getMint();
 
 	/**
+	 * If the pool is historical, return the modern version.
+	 * 
+	 * @return The pool, if not historical, else the modern version of the pool, if historical, or null if the modern version is deleted.
+	 */
+	Pool getModern();
+
+	/**
 	 * Access the modified-by (owner / date)
 	 * 
 	 * @return The pool's modified-bt.

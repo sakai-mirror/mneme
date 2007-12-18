@@ -702,22 +702,6 @@ public class QuestionImpl implements Question
 		this.questionHandler = questionHandler;
 	}
 
-	/**
-	 * Set this question to be historical; pick up a context, drop the pool reference.
-	 */
-	protected void setHistorical()
-	{
-		if (this.historical) return;
-
-		// set the context to the pool's context
-		this.context = this.getPool().getContext();
-
-		// forget our original pool
-		this.poolId = null;
-
-		this.historical = Boolean.TRUE;
-	}
-
 	protected void set(QuestionImpl other)
 	{
 		if (other.questionHandler != null) this.questionHandler = (TypeSpecificQuestion) (other.questionHandler.clone(this));
@@ -739,5 +723,21 @@ public class QuestionImpl implements Question
 		this.submissionContext = other.submissionContext;
 		this.submissionService = other.submissionService;
 		this.type = other.type;
+	}
+
+	/**
+	 * Set this question to be historical; pick up a context, drop the pool reference.
+	 */
+	protected void setHistorical()
+	{
+		if (this.historical) return;
+
+		// set the context to the pool's context
+		this.context = this.getPool().getContext();
+
+		// forget our original pool
+		this.poolId = null;
+
+		this.historical = Boolean.TRUE;
 	}
 }

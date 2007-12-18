@@ -56,6 +56,9 @@ public class PoolImpl implements Pool
 	/** Stays TRUE until an end-user change to the object occurs, showing it was actually initially set. */
 	protected Boolean mint = Boolean.TRUE;
 
+	/** Once historical, tracks the modern version of the pool. If null, the modern version is deleted. */
+	protected String modernId = null;
+
 	protected Attribution modifiedBy = null;
 
 	protected Float points = null;
@@ -179,6 +182,16 @@ public class PoolImpl implements Pool
 	public Boolean getMint()
 	{
 		return this.mint;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Pool getModern()
+	{
+		if (!this.historical) return this;
+
+		return this.poolService.getPool(this.modernId);
 	}
 
 	/**
@@ -397,6 +410,17 @@ public class PoolImpl implements Pool
 	}
 
 	/**
+	 * Establish the modern id.
+	 * 
+	 * @param id
+	 *        The modern id.
+	 */
+	protected void initModernId(String id)
+	{
+		this.modernId = id;
+	}
+
+	/**
 	 * Set this assessment to be "historical" - used only for history by submissions.
 	 * 
 	 * @param current
@@ -415,19 +439,6 @@ public class PoolImpl implements Pool
 	}
 
 	/**
-	 * Set this pool to be historical, pick up a manifest.
-	 * 
-	 * @return true if effective, false if ignored.
-	 */
-	protected void setHistorical()
-	{
-		if (this.historical) throw new IllegalArgumentException();
-
-		this.frozenManifest = getAllQuestionIds();
-		this.historical = Boolean.TRUE;
-	}
-
-	/**
 	 * Set as a copy of the other.
 	 * 
 	 * @param other
@@ -443,6 +454,7 @@ public class PoolImpl implements Pool
 		this.historical = other.historical;
 		this.id = other.id;
 		this.mint = other.mint;
+		this.modernId = other.modernId;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
 		this.points = other.points;
 		this.poolService = other.poolService;
@@ -452,5 +464,21 @@ public class PoolImpl implements Pool
 			this.frozenManifest = new ArrayList<String>(other.frozenManifest);
 		}
 		this.title = other.title;
+	}
+
+	/**
+	 * Set this pool to be historical, pick up a manifest.
+	 * 
+	 * @param modern
+	 *        The modern version of the pool.
+	 * @return true if effective, false if ignored.
+	 */
+	protected void setHistorical(Pool modern)
+	{
+		if (this.historical) throw new IllegalArgumentException();
+
+		this.modernId = (modern == null) ? null : modern.getId();
+		this.frozenManifest = getAllQuestionIds();
+		this.historical = Boolean.TRUE;
 	}
 }

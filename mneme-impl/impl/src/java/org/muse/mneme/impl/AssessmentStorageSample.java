@@ -568,73 +568,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void switchPoolDependency(Pool from, Pool to)
-	{
-		// for all non-live mpart that reference p, change to reference pNew
-		// for all mpart that reference p in modernPoolId, change to reference pNew
-
-		// for all non-live dpart that use p, change to use pNew
-		// for all dpart that reference p in modernPoolId, change to reference pNew
-		for (AssessmentImpl assessment : this.assessments.values())
-		{
-			if (assessment.getContext().equals(from.getContext()))
-			{
-				for (Part part : assessment.getParts().getParts())
-				{
-					if (part instanceof ManualPart)
-					{
-						for (PoolPick pick : ((ManualPartImpl) part).questions)
-						{
-							// for a non-live assessment referencing the pool, switch
-							if (!assessment.getIsLive())
-							{
-								if (pick.getPoolId().equals(from.getId()))
-								{
-									pick.setPool(to.getId());
-								}
-							}
-
-							// for a live assessment referencing the pool in its modern reference, switch modern
-							else
-							{
-								if (pick.modernPoolId.equals(from.getId()))
-								{
-									pick.modernPoolId = to.getId();
-								}
-							}
-						}
-					}
-					else if (part instanceof DrawPart)
-					{
-						for (PoolDraw draw : ((DrawPartImpl) part).pools)
-						{
-							// for a non-live assessment referencing the pool, switch
-							if (!assessment.getIsLive())
-							{
-								if (draw.getPoolId().equals(from.getId()))
-								{
-									draw.setPool(to);
-								}
-							}
-
-							// for a live assessment referencing the pool in its modern reference, switch modern
-							else
-							{
-								if (((PoolDrawImpl) draw).modernPoolId.equals(from.getId()))
-								{
-									((PoolDrawImpl) draw).modernPoolId = to.getId();
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void saveAssessment(AssessmentImpl assessment)
 	{
 		fakeIt();
@@ -792,6 +725,73 @@ public class AssessmentStorageSample implements AssessmentStorage
 						if (((ManualPartImpl) part).dependsOn(from))
 						{
 							((ManualPartImpl) part).switchQuestion(from, to);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchPoolDependency(Pool from, Pool to)
+	{
+		// for all non-live mpart that reference p, change to reference pNew
+		// for all mpart that reference p in modernPoolId, change to reference pNew
+
+		// for all non-live dpart that use p, change to use pNew
+		// for all dpart that reference p in modernPoolId, change to reference pNew
+		for (AssessmentImpl assessment : this.assessments.values())
+		{
+			if (assessment.getContext().equals(from.getContext()))
+			{
+				for (Part part : assessment.getParts().getParts())
+				{
+					if (part instanceof ManualPart)
+					{
+						for (PoolPick pick : ((ManualPartImpl) part).questions)
+						{
+							// for a non-live assessment referencing the pool, switch
+							if (!assessment.getIsLive())
+							{
+								if (pick.getPoolId().equals(from.getId()))
+								{
+									pick.setPool(to.getId());
+								}
+							}
+
+							// for a live assessment referencing the pool in its modern reference, switch modern
+							else
+							{
+								if (pick.modernPoolId.equals(from.getId()))
+								{
+									pick.modernPoolId = to.getId();
+								}
+							}
+						}
+					}
+					else if (part instanceof DrawPart)
+					{
+						for (PoolDraw draw : ((DrawPartImpl) part).pools)
+						{
+							// for a non-live assessment referencing the pool, switch
+							if (!assessment.getIsLive())
+							{
+								if (draw.getPoolId().equals(from.getId()))
+								{
+									draw.setPool(to);
+								}
+							}
+
+							// for a live assessment referencing the pool in its modern reference, switch modern
+							else
+							{
+								if (((PoolDrawImpl) draw).modernPoolId.equals(from.getId()))
+								{
+									((PoolDrawImpl) draw).modernPoolId = to.getId();
+								}
+							}
 						}
 					}
 				}
