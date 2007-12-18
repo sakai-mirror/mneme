@@ -148,7 +148,7 @@ public class QuestionServiceImpl implements QuestionService
 		// security check
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, destination.getContext());
 
-		this.storage.copyPoolQuestions(userId, source, destination, false);
+		this.storage.copyPoolQuestions(userId, source, destination, false, null);
 
 		// TODO: event?
 	}
@@ -667,12 +667,15 @@ public class QuestionServiceImpl implements QuestionService
 	 *        The destination pool.
 	 * @param asHistory
 	 *        If set, copy the questions as historical
+	 * @param oldToNew
+	 *        A map, which, if present, will be filled in with the mapping of the source question id to the destination question id for each question
+	 *        copied.
 	 */
-	protected void copyPoolQuestionsHistorical(Pool source, Pool destination, boolean asHistory)
+	protected void copyPoolQuestionsHistorical(Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew)
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("copyPoolQuestionsHistorical: source: " + source.getId() + " destination: " + destination.getId());
 
-		this.storage.copyPoolQuestions(sessionManager.getCurrentSessionUserId(), source, destination, asHistory);
+		this.storage.copyPoolQuestions(sessionManager.getCurrentSessionUserId(), source, destination, asHistory, oldToNew);
 	}
 
 	/**

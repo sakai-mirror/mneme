@@ -95,7 +95,7 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory)
+	public void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew)
 	{
 		List<QuestionImpl> questions = new ArrayList<QuestionImpl>(this.questions.values());
 		for (QuestionImpl question : questions)
@@ -122,6 +122,11 @@ public class QuestionStorageSample implements QuestionStorage
 
 				// save
 				saveQuestion(q);
+
+				if (oldToNew != null)
+				{
+					oldToNew.put(question.getId(), q.getId());
+				}
 			}
 		}
 	}

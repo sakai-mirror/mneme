@@ -46,6 +46,7 @@ import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Presentation;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
@@ -783,8 +784,12 @@ public class AssessmentImpl implements Assessment
 		initLive(Boolean.TRUE);
 
 		Map<String, Pool> histories = new HashMap<String, Pool>();
+		Map<String, Map<String,String>> oldToNews = new HashMap<String, Map<String,String>>();
+
 		// make a history copy of all used pools and questions
 		// switch over the parts
+		// make sure questions from the same pool end up in the same pool
+		
 		for (Part part : this.parts.parts)
 		{
 			if (part instanceof DrawPart)
@@ -795,8 +800,10 @@ public class AssessmentImpl implements Assessment
 					Pool history = histories.get(draw.getPoolId());
 					if (history == null)
 					{
-						history = this.poolService.makePoolHistory(draw.getPool());
+						Map<String, String> oldToNew = new HashMap<String, String>();
+						history = this.poolService.makePoolHistory(draw.getPool(), oldToNew);
 						histories.put(draw.getPoolId(), history);
+						oldToNews.put(draw.getPoolId(), oldToNew);
 					}
 					draw.setPool(history);
 				}
@@ -805,10 +812,27 @@ public class AssessmentImpl implements Assessment
 			{
 				for (PoolPick pick : ((ManualPartImpl) part).questions)
 				{
-					// if (pick.getQuestionId().equals(question.getId()))
-					// {
-					// i.remove();
-					// }
+					Question q = this.questionService.getQuestion(pick.getQuestionId());
+					if (q != null)
+					{
+						// make sure we have this question's comlete pool
+						Pool history = histories.get(q.getPool().getId());
+						if (history == null)
+						{
+							Map<String, String> oldToNew = new HashMap<String, String>();
+							history = this.poolService.makePoolHistory(q.getPool(), oldToNew);
+							histories.put(q.getPool().getId(), history);
+							oldToNews.put(q.getPool().getId(), oldToNew);
+						}
+						
+						// get the mapping for this pool
+						Map<String, String> oldToNew = oldToNews.get(q.getPool().getId());
+						String historicalQid = oldToNew.get(q.getId());
+						if (historicalQid != null)
+						{
+							pick.setQuestion(historicalQid);
+						}
+					}
 				}
 			}
 		}

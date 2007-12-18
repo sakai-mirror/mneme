@@ -130,7 +130,7 @@ public class PoolServiceImpl implements PoolService
 		// security check
 		this.securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
 
-		Pool rv = doCopyPool(context, pool, false);
+		Pool rv = doCopyPool(context, pool, false, null);
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(rv.getId()), true));
@@ -497,9 +497,12 @@ public class PoolServiceImpl implements PoolService
 	 *        The source pool.
 	 * @param asHistory
 	 *        If set, make the pool and questions all historical.
+	 * @param oldToNew
+	 *        A map, which, if present, will be filled in with the mapping of the source question id to the destination question id for each question
+	 *        copied.
 	 * @return The copied pool.
 	 */
-	protected Pool doCopyPool(String context, Pool pool, boolean asHistory)
+	protected Pool doCopyPool(String context, Pool pool, boolean asHistory, Map<String, String> oldToNew)
 	{
 		String userId = sessionManager.getCurrentSessionUserId();
 		Date now = new Date();
@@ -529,7 +532,7 @@ public class PoolServiceImpl implements PoolService
 		storage.savePool((PoolImpl) rv);
 
 		// make a copy of the questions
-		this.questionService.copyPoolQuestionsHistorical(pool, rv, asHistory);
+		this.questionService.copyPoolQuestionsHistorical(pool, rv, asHistory, oldToNew);
 
 		if (asHistory)
 		{
@@ -683,15 +686,18 @@ public class PoolServiceImpl implements PoolService
 	 * 
 	 * @param pool
 	 *        The pool to copy.
+	 * @param oldToNew
+	 *        A map, which, if present, will be filled in with the mapping of the source question id to the destination question id for each question
+	 *        copied.
 	 * @return The historical pool.
 	 */
-	protected Pool makePoolHistory(Pool pool)
+	protected Pool makePoolHistory(Pool pool, Map<String, String> oldToNew)
 	{
 		if (pool == null) throw new IllegalArgumentException();
 
 		if (M_log.isDebugEnabled()) M_log.debug("makePoolHistory: " + pool.getId());
 
-		Pool rv = doCopyPool(pool.getContext(), pool, true);
+		Pool rv = doCopyPool(pool.getContext(), pool, true, oldToNew);
 
 		return rv;
 	}
