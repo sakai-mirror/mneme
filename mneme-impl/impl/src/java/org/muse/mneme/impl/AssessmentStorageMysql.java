@@ -606,6 +606,56 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public void switchQuestionDependency(final Question from, final Question to)
+	{
+		// for all non-live mpart that use q, change to use new
+		// for all mpart that reference q in modernQuestionId, change to use new
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				switchQuestionDependencyTx(from, to);
+			}
+		}, "switchQuestionDependency: from: " + from.getId() + " to: " + to.getId());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchQuestionDependencyTx(Question from, Question to)
+	{
+		// for all non-live mpart that use from, change to use to and to's pool
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D, MNEME_ASSESSMENT A");
+		sql.append(" SET D.QUESTION_ID=?, D.POOL_ID=?");
+		sql.append(" WHERE D.ASSESSMENT_ID=A.ID AND A.LIVE='0'");
+		sql.append(" AND D.QUESTION_ID=?");
+
+		Object[] fields = new Object[3];
+		fields[0] = Long.valueOf(to.getId());
+		fields[1] = Long.valueOf(to.getPool().getId());
+		fields[2] = Long.valueOf(from.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("switchQuestionDependencyTx(1): dbWrite failed");
+		}
+
+		// for all mpart that reference from in modernQuestionId, change to use to
+		sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D");
+		sql.append(" SET D.MODERN_QID=?, D.MODERN_POOL_ID=?");
+		sql.append(" WHERE D.MODERN_QID=?");
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("switchQuestionDependencyTx(2): dbWrite failed");
+		}
+	}
+
+	/**
 	 * Transaction code for clearStaleMintQuestions()
 	 */
 	protected void clearStaleMintQuestionsTx(Date stale)

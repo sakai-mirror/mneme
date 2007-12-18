@@ -208,4 +208,15 @@ public interface AssessmentStorage
 	 *        The to pool.
 	 */
 	void switchPoolDependency(Pool from, Pool to);
+
+	/**
+	 * Switch all question references from from to to.<br />
+	 * Live assessments are preserved (their modern settings updated), non-live assessments are updated directly.
+	 * 
+	 * @param from
+	 *        The from question.
+	 * @param to
+	 *        The to question.
+	 */
+	void switchQuestionDependency(Question from, Question to);
 }

@@ -889,4 +889,18 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		this.storage.switchPoolDependency(from, to);
 	}
+
+	/**
+	 * Switch all question pick references from from to to.<br />
+	 * Live assessments are preserved (their modern settings updated), non-live assessments are updated directly.
+	 * 
+	 * @param from
+	 *        The from question.
+	 * @param to
+	 *        The to question.
+	 */
+	protected void switchQuestionDependency(Question from, Question to)
+	{
+		this.storage.switchQuestionDependency(from, to);
+	}
 }

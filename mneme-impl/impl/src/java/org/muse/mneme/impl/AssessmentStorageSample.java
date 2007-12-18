@@ -799,6 +799,49 @@ public class AssessmentStorageSample implements AssessmentStorage
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public void switchQuestionDependency(Question from, Question to)
+	{
+		// for all non-live mpart that use from, change to use to and to's pool
+		// for all mpart that reference from in modernQuestionId, change to use to
+		for (AssessmentImpl assessment : this.assessments.values())
+		{
+			if (assessment.getContext().equals(from.getContext()))
+			{
+				for (Part part : assessment.getParts().getParts())
+				{
+					if (part instanceof ManualPart)
+					{
+						for (PoolPick pick : ((ManualPartImpl) part).questions)
+						{
+							// for a non-live assessment referencing the question, switch
+							if (!assessment.getIsLive())
+							{
+								if (pick.getQuestionId().equals(from.getId()))
+								{
+									pick.setQuestion(to.getId());
+									pick.setPool(to.getPool().getId());
+								}
+							}
+
+							// for a live assessment referencing the question in its modern reference, switch modern
+							else
+							{
+								if (pick.modernQuestionId.equals(from.getId()))
+								{
+									pick.modernQuestionId = to.getId();
+									pick.modernPoolId = to.getPool().getId();
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	protected void fakeIt()
 	{
 		if (!fakedAlready)
