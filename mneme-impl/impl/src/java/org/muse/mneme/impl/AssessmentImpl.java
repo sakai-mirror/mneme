@@ -780,6 +780,7 @@ public class AssessmentImpl implements Assessment
 	protected void goLive()
 	{
 		if (this.live) return;
+		initLive(Boolean.TRUE);
 
 		Map<String, Pool> histories = new HashMap<String, Pool>();
 		// make a history copy of all used pools and questions

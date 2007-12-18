@@ -533,7 +533,7 @@ public class PoolServiceImpl implements PoolService
 
 		if (asHistory)
 		{
-			rv.makeHistorical(pool);
+			rv.makeHistorical(rv);
 			storage.savePool((PoolImpl) rv);
 		}
 

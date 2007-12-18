@@ -75,7 +75,7 @@ public interface QuestionStorage
 	Integer countPoolQuestions(Pool pool);
 
 	/**
-	 * Count the questions in the pools of this context
+	 * Count the questions in the non-historical pools of this context
 	 * 
 	 * @param context
 	 *        The context.
