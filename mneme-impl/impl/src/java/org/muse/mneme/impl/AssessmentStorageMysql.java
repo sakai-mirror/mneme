@@ -108,7 +108,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT COUNT(1) FROM MNEME_ASSESSMENT A");
-		sql.append(" WHERE A.CONTEXT=? AND A.ARCHIVED='0' AND A.MINT='0' AND A.HISTORICAL='0'");
+		sql.append(" WHERE A.CONTEXT=? AND A.ARCHIVED='0' AND A.MINT='0'");
 		Object[] fields = new Object[1];
 		fields[0] = context;
 		List results = this.sqlService.dbRead(sql.toString(), fields, null);
@@ -153,7 +153,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 */
 	public List<AssessmentImpl> getArchivedAssessments(String context)
 	{
-		String where = "WHERE A.CONTEXT=? AND A.ARCHIVED='1' AND A.MINT='0' AND A.HISTORICAL='0'";
+		String where = "WHERE A.CONTEXT=? AND A.ARCHIVED='1' AND A.MINT='0'";
 		String order = "ORDER BY DATES_ARCHIVED ASC";
 
 		Object[] fields = new Object[1];
@@ -175,7 +175,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 */
 	public List<AssessmentImpl> getContextAssessments(String context, final AssessmentService.AssessmentsSort sort, Boolean publishedOnly)
 	{
-		String where = "WHERE A.CONTEXT=? AND A.ARCHIVED='0' AND A.MINT='0' AND A.HISTORICAL='0'";
+		String where = "WHERE A.CONTEXT=? AND A.ARCHIVED='0' AND A.MINT='0'";
 		if (publishedOnly)
 		{
 			where += " AND A.PUBLISHED='1'";
@@ -847,14 +847,14 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		sql.append(" ARCHIVED, CONTEXT, CREATED_BY_DATE, CREATED_BY_USER,");
 		sql.append(" DATES_ACCEPT_UNTIL, DATES_ARCHIVED, DATES_DUE, DATES_OPEN,");
 		sql.append(" GRADING_ANONYMOUS, GRADING_AUTO_RELEASE, GRADING_GRADEBOOK,");
-		sql.append(" HISTORICAL, HONOR_PLEDGE, LIVE, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER,");
+		sql.append(" HONOR_PLEDGE, LIVE, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER,");
 		sql.append(" PARTS_CONTINUOUS, PARTS_SHOW_PRES, PASSWORD, PRESENTATION_TEXT,");
 		sql.append(" PUBLISHED, QUESTION_GROUPING, RANDOM_ACCESS,");
 		sql.append(" REVIEW_DATE, REVIEW_SHOW_CORRECT, REVIEW_SHOW_FEEDBACK, REVIEW_TIMING,");
 		sql.append(" SHOW_HINTS, SUBMIT_PRES_TEXT, TIME_LIMIT, TITLE, TRIES, TYPE)");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[34];
+		Object[] fields = new Object[33];
 		int i = 0;
 		fields[i++] = assessment.getArchived() ? "1" : "0";
 		fields[i++] = assessment.getContext();
@@ -867,7 +867,6 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		fields[i++] = assessment.getGrading().getAnonymous() ? "1" : "0";
 		fields[i++] = assessment.getGrading().getAutoRelease() ? "1" : "0";
 		fields[i++] = assessment.getGrading().getGradebookIntegration() ? "1" : "0";
-		fields[i++] = assessment.isHistorical() ? "1" : "0";
 		fields[i++] = assessment.getRequireHonorPledge() ? "1" : "0";
 		fields[i++] = assessment.getIsLive() ? "1" : "0";
 		fields[i++] = assessment.getMint() ? "1" : "0";
@@ -955,7 +954,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		sql.append("SELECT A.ARCHIVED, A.CONTEXT, A.CREATED_BY_DATE, A.CREATED_BY_USER,");
 		sql.append(" A.DATES_ACCEPT_UNTIL, A.DATES_ARCHIVED, A.DATES_DUE, A.DATES_OPEN,");
 		sql.append(" A.GRADING_ANONYMOUS, A.GRADING_AUTO_RELEASE, A.GRADING_GRADEBOOK,");
-		sql.append(" A.HISTORICAL, A.HONOR_PLEDGE, A.ID, A.LIVE, A.MINT, A.MODIFIED_BY_DATE, A.MODIFIED_BY_USER,");
+		sql.append(" A.HONOR_PLEDGE, A.ID, A.LIVE, A.MINT, A.MODIFIED_BY_DATE, A.MODIFIED_BY_USER,");
 		sql.append(" A.PARTS_CONTINUOUS, A.PARTS_SHOW_PRES, A.PASSWORD, A.PRESENTATION_TEXT,");
 		sql.append(" A.PUBLISHED, A.QUESTION_GROUPING, A.RANDOM_ACCESS,");
 		sql.append(" A.REVIEW_DATE, A.REVIEW_SHOW_CORRECT, A.REVIEW_SHOW_FEEDBACK, A.REVIEW_TIMING,");
@@ -983,7 +982,6 @@ public class AssessmentStorageMysql implements AssessmentStorage
 					assessment.getGrading().setAnonymous(SqlHelper.readBoolean(result, i++));
 					((AssessmentGradingImpl) (assessment.getGrading())).initAutoRelease(SqlHelper.readBoolean(result, i++));
 					((AssessmentGradingImpl) (assessment.getGrading())).initGradebookIntegration(SqlHelper.readBoolean(result, i++));
-					assessment.initHistorical(SqlHelper.readBoolean(result, i++));
 					assessment.setRequireHonorPledge(SqlHelper.readBoolean(result, i++));
 					assessment.initId(SqlHelper.readId(result, i++));
 					assessment.initLive(SqlHelper.readBoolean(result, i++));
@@ -1195,7 +1193,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		sql.append("DELETE FROM MNEME_ASSESSMENT_PART_DETAIL");
 		sql.append(" USING MNEME_ASSESSMENT_PART_DETAIL, MNEME_ASSESSMENT");
 		sql.append(" WHERE MNEME_ASSESSMENT_PART_DETAIL.ASSESSMENT_ID=MNEME_ASSESSMENT.ID AND MNEME_ASSESSMENT.LIVE='0'");
-		sql.append(" WHERE QUESTION_ID=?");
+		sql.append(" AND QUESTION_ID=?");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(question.getId());
@@ -1306,14 +1304,14 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		sql.append(" ARCHIVED=?, CONTEXT=?,");
 		sql.append(" DATES_ACCEPT_UNTIL=?, DATES_ARCHIVED=?, DATES_DUE=?, DATES_OPEN=?,");
 		sql.append(" GRADING_ANONYMOUS=?, GRADING_AUTO_RELEASE=?, GRADING_GRADEBOOK=?,");
-		sql.append(" HISTORICAL=?, HONOR_PLEDGE=?, LIVE=?, MINT=?, MODIFIED_BY_DATE=?, MODIFIED_BY_USER=?,");
+		sql.append(" HONOR_PLEDGE=?, LIVE=?, MINT=?, MODIFIED_BY_DATE=?, MODIFIED_BY_USER=?,");
 		sql.append(" PARTS_CONTINUOUS=?, PARTS_SHOW_PRES=?, PASSWORD=?, PRESENTATION_TEXT=?,");
 		sql.append(" PUBLISHED=?, QUESTION_GROUPING=?, RANDOM_ACCESS=?,");
 		sql.append(" REVIEW_DATE=?, REVIEW_SHOW_CORRECT=?, REVIEW_SHOW_FEEDBACK=?, REVIEW_TIMING=?,");
 		sql.append(" SHOW_HINTS=?, SUBMIT_PRES_TEXT=?, TIME_LIMIT=?, TITLE=?, TRIES=?, TYPE=?");
 		sql.append(" WHERE ID=?");
 
-		Object[] fields = new Object[33];
+		Object[] fields = new Object[32];
 		int i = 0;
 		fields[i++] = assessment.getArchived() ? "1" : "0";
 		fields[i++] = assessment.getContext();
@@ -1324,7 +1322,6 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		fields[i++] = assessment.getGrading().getAnonymous() ? "1" : "0";
 		fields[i++] = assessment.getGrading().getAutoRelease() ? "1" : "0";
 		fields[i++] = assessment.getGrading().getGradebookIntegration() ? "1" : "0";
-		fields[i++] = assessment.isHistorical() ? "1" : "0";
 		fields[i++] = assessment.getRequireHonorPledge() ? "1" : "0";
 		fields[i++] = assessment.getIsLive() ? "1" : "0";
 		fields[i++] = assessment.getMint() ? "1" : "0";

@@ -120,7 +120,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(context) && !assessment.getArchived() && !assessment.isHistorical() && !assessment.getMint())
+			if (assessment.getContext().equals(context) && !assessment.getArchived() && !assessment.getMint())
 			{
 				i++;
 			}
@@ -206,7 +206,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(context) && !assessment.getArchived() && !assessment.isHistorical() && !assessment.getMint())
+			if (assessment.getContext().equals(context) && !assessment.getArchived() && !assessment.getMint())
 			{
 				// filter out unpublished if requested (also ignoring invalid)
 				if (publishedOnly)

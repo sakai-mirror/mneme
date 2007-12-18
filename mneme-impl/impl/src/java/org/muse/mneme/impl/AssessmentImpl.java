@@ -80,7 +80,7 @@ public class AssessmentImpl implements Assessment
 
 	protected AssessmentGrading grading = null;
 
-	protected Boolean historical = Boolean.FALSE;
+	//protected Boolean historical = Boolean.FALSE;
 
 	protected Boolean honorPledge = Boolean.FALSE;
 
@@ -850,16 +850,16 @@ public class AssessmentImpl implements Assessment
 		this.archivedWas = archived;
 	}
 
-	/**
-	 * Establish the historical setting.
-	 * 
-	 * @param historical
-	 *        The historical setting.
-	 */
-	protected void initHistorical(Boolean historical)
-	{
-		this.historical = historical;
-	}
+//	/**
+//	 * Establish the historical setting.
+//	 * 
+//	 * @param historical
+//	 *        The historical setting.
+//	 */
+//	protected void initHistorical(Boolean historical)
+//	{
+//		this.historical = historical;
+//	}
 
 	/**
 	 * Initialize the id property.
@@ -930,23 +930,23 @@ public class AssessmentImpl implements Assessment
 		this.titleWas = title;
 	}
 
-	/**
-	 * Check the historical setting of the assessment.
-	 * 
-	 * @return TRUE if the assessment is used only for submission historical access, FALSE if it is a current assessment.
-	 */
-	protected Boolean isHistorical()
-	{
-		return this.historical;
-	}
+//	/**
+//	 * Check the historical setting of the assessment.
+//	 * 
+//	 * @return TRUE if the assessment is used only for submission historical access, FALSE if it is a current assessment.
+//	 */
+//	protected Boolean isHistorical()
+//	{
+//		return this.historical;
+//	}
 
-	/**
-	 * Set this assessment to be "historical" - used only for history by submissions.
-	 */
-	protected void makeHistorical()
-	{
-		this.historical = Boolean.TRUE;
-	}
+//	/**
+//	 * Set this assessment to be "historical" - used only for history by submissions.
+//	 */
+//	protected void makeHistorical()
+//	{
+//		this.historical = Boolean.TRUE;
+//	}
 
 	/**
 	 * Set as a copy of another.
@@ -964,7 +964,7 @@ public class AssessmentImpl implements Assessment
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy, this.changed);
 		this.dates = new AssessmentDatesImpl(this, (AssessmentDatesImpl) other.dates, this.changed);
 		this.grading = new AssessmentGradingImpl((AssessmentGradingImpl) other.grading, this.changed);
-		this.historical = other.historical;
+		//this.historical = other.historical;
 		this.honorPledge = other.honorPledge;
 		this.id = other.id;
 		this.liveChanged = other.liveChanged;
