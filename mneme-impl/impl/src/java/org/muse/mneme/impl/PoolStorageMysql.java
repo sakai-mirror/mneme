@@ -30,7 +30,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.PoolService;
-import org.muse.mneme.api.Question;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
@@ -207,28 +206,6 @@ public class PoolStorageMysql implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean manifestDependsOn(Question question)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT COUNT(1) FROM MNEME_POOL_MANIFEST M");
-		sql.append(" WHERE M.QUESTION_ID=?");
-
-		Object[] fields = new Object[1];
-		fields[0] = Long.valueOf(question.getId());
-
-		List results = this.sqlService.dbRead(sql.toString(), fields, null);
-		if (results.size() > 0)
-		{
-			int size = Integer.parseInt((String) results.get(0));
-			return Boolean.valueOf(size > 0);
-		}
-
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public PoolImpl newPool()
 	{
 		return new PoolImplLazyManifest(this.poolService, this.questionService, this);
@@ -324,20 +301,6 @@ public class PoolStorageMysql implements PoolStorage
 	public void setThreadLocalManager(ThreadLocalManager service)
 	{
 		threadLocalManager = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void switchManifests(final Question from, final Question to)
-	{
-		this.sqlService.transact(new Runnable()
-		{
-			public void run()
-			{
-				switchManifestTx(from, to);
-			}
-		}, "switchManifests: " + from.getId() + " " + to.getId());
 	}
 
 	/**
@@ -659,26 +622,6 @@ public class PoolStorageMysql implements PoolStorage
 		});
 
 		return rv;
-	}
-
-	/**
-	 * Transaction code for switchManifest().
-	 */
-	protected void switchManifestTx(Question from, Question to)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE MNEME_POOL_MANIFEST SET");
-		sql.append(" QUESTION_ID=?");
-		sql.append(" WHERE ORIG_QID=?");
-
-		Object[] fields = new Object[2];
-		fields[0] = Long.valueOf(to.getId());
-		fields[1] = Long.valueOf(from.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("switchManifestTx: db write failed");
-		}
 	}
 
 	/**

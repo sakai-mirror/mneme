@@ -407,10 +407,12 @@ public class PoolImpl implements Pool
 	{
 		if (this.historical) return false;
 
-		this.historical = Boolean.TRUE;
-
 		// suck in the current question manifest
 		this.frozenManifest = current.getAllQuestionIds();
+
+		// mark as historical
+		this.historical = Boolean.TRUE;
+
 		return true;
 	}
 

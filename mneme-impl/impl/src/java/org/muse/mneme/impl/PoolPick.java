@@ -31,8 +31,6 @@ public class PoolPick
 {
 	protected String origQuestionId = null;
 
-	protected String poolId = null;
-
 	protected String questionId = null;
 
 	protected transient QuestionService questionService = null;
@@ -91,7 +89,6 @@ public class PoolPick
 		if (poolId == null) throw new IllegalArgumentException();
 		this.questionId = questionId;
 		this.origQuestionId = questionId;
-		this.poolId = poolId;
 		this.questionService = questionService;
 	}
 
@@ -113,7 +110,6 @@ public class PoolPick
 		if (origQid == null) throw new IllegalArgumentException();
 		this.questionId = questionId;
 		this.origQuestionId = origQid;
-		this.poolId = poolId;
 		this.questionService = questionService;
 	}
 
@@ -126,14 +122,6 @@ public class PoolPick
 		if (this == obj) return true;
 		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
 		return this.questionId.equals(((PoolPick) obj).questionId);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getPoolId()
-	{
-		return this.poolId;
 	}
 
 	/**
@@ -160,24 +148,15 @@ public class PoolPick
 	public boolean setOrig()
 	{
 		// if no change
-		if (this.questionId.equals(this.origQuestionId) && this.poolId == null) return true;
+		if (this.questionId.equals(this.origQuestionId)) return true;
 
 		// the question must exist, and be non-historical, and its pool must exist and be non-historical
 		Question q = this.questionService.getQuestion(this.origQuestionId);
 		if ((q == null) || (q.getIsHistorical()) || q.getPool().getIsHistorical()) return false;
 
 		// restore
-		this.poolId = null;
 		this.questionId = this.origQuestionId;
 		return true;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setPool(String poolId)
-	{
-		this.poolId = poolId;
 	}
 
 	/**
@@ -203,7 +182,6 @@ public class PoolPick
 	protected void set(PoolPick other)
 	{
 		this.origQuestionId = other.origQuestionId;
-		this.poolId = other.poolId;
 		this.questionId = other.questionId;
 		this.questionService = other.questionService;
 	}

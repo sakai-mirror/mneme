@@ -91,11 +91,11 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	public List<String> findPartQuestions(Part part)
 	{
 		// get all question ids from submission answers to this part's assessment,
-		// in this part (using orig part id)
+		// in this part
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT A.QUESTION_ID FROM MNEME_ANSWER A");
 		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=?");
-		sql.append(" WHERE A.ORIG_PID=?");
+		sql.append(" WHERE A.PART_PID=?");
 
 		Object[] fields = new Object[2];
 		fields[0] = Long.valueOf(part.getAssessment().getId());
@@ -428,28 +428,6 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean historicalDependencyExists(Assessment assessment)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT COUNT(1) FROM MNEME_SUBMISSION S");
-		sql.append(" WHERE S.HISTORICAL_AID=?");
-
-		Object[] fields = new Object[1];
-		fields[0] = Long.valueOf(assessment.getId());
-
-		List results = this.sqlService.dbRead(sql.toString(), fields, null);
-		if (results.size() > 0)
-		{
-			int size = Integer.parseInt((String) results.get(0));
-			return Boolean.valueOf(size > 0);
-		}
-
-		return Boolean.FALSE;
-	}
-
-	/**
 	 * Final initialization, once all dependencies are set.
 	 */
 	public void init()
@@ -694,34 +672,6 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public void switchHistoricalDependency(final Assessment assessment, final Assessment newAssessment)
-	{
-		this.sqlService.transact(new Runnable()
-		{
-			public void run()
-			{
-				switchHistoricalDependencyTx(assessment, newAssessment);
-			}
-		}, "switchHistoricalDependency: from: " + assessment.getId());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void switchLiveDependency(final Question from, final Question to)
-	{
-		this.sqlService.transact(new Runnable()
-		{
-			public void run()
-			{
-				switchLiveDependencyTx(from, to);
-			}
-		}, "switchLiveDependencyTx: from: " + from.getId());
-	}
-
-	/**
 	 * Insert a new answer.
 	 * 
 	 * @param answer
@@ -749,10 +699,10 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_ANSWER (");
 		sql.append(" ANSWERED, AUTO_SCORE, GUEST, EVAL_ATRIB_DATE, EVAL_ATRIB_USER, EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE,");
-		sql.append(" ORIG_PID, PART_ID, QUESTION_ID, QUESTION_TYPE, REASON, REVIEW, SUBMISSION_ID, SUBMITTED_DATE)");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" PART_ID, QUESTION_ID, QUESTION_TYPE, REASON, REVIEW, SUBMISSION_ID, SUBMITTED_DATE)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[16];
+		Object[] fields = new Object[15];
 		fields[0] = answer.getIsAnswered();
 		fields[1] = answer.getAutoScore();
 		fields[2] = SqlHelper.encodeStringArray(answer.getTypeSpecificAnswer().getData());
@@ -761,15 +711,14 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		fields[5] = answer.getEvaluation().getComment();
 		fields[6] = answer.getEvaluation().getEvaluated() ? "1" : "0";
 		fields[7] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
-		fields[8] = Long.valueOf(answer.getOrigPartId());
-		fields[9] = Long.valueOf(answer.getPartId());
+		fields[8] = Long.valueOf(answer.getPartId());
 		Question q = answer.getQuestion();
-		fields[10] = Long.valueOf(q.getId());
-		fields[11] = q.getType();
-		fields[12] = answer.getReason();
-		fields[13] = answer.getMarkedForReview() ? "1" : "0";
-		fields[14] = Long.valueOf(answer.getSubmission().getId());
-		fields[15] = (answer.getSubmittedDate() == null) ? null : answer.getSubmittedDate().getTime();
+		fields[9] = Long.valueOf(q.getId());
+		fields[10] = q.getType();
+		fields[11] = answer.getReason();
+		fields[12] = answer.getMarkedForReview() ? "1" : "0";
+		fields[13] = Long.valueOf(answer.getSubmission().getId());
+		fields[14] = (answer.getSubmittedDate() == null) ? null : answer.getSubmittedDate().getTime();
 
 		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
 		if (id == null)
@@ -810,25 +759,24 @@ public class SubmissionStorageMysql implements SubmissionStorage
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_SUBMISSION (");
-		sql.append(" ASSESSMENT_ID, HISTORICAL_AID, COMPLETE, CONTEXT, EVAL_ATRIB_DATE, EVAL_ATRIB_USER,");
+		sql.append(" ASSESSMENT_ID, COMPLETE, CONTEXT, EVAL_ATRIB_DATE, EVAL_ATRIB_USER,");
 		sql.append(" EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE, RELEASED, START_DATE, SUBMITTED_DATE, USER )");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[13];
+		Object[] fields = new Object[12];
 		fields[0] = Long.valueOf(submission.getAssessment().getId());
-		fields[1] = Long.valueOf(submission.getAssessment().getId());
-		fields[2] = submission.getIsComplete() ? "1" : "0";
-		fields[3] = submission.getAssessment().getContext();
-		fields[4] = (submission.getEvaluation().getAttribution().getDate() == null) ? null : submission.getEvaluation().getAttribution().getDate()
+		fields[1] = submission.getIsComplete() ? "1" : "0";
+		fields[2] = submission.getAssessment().getContext();
+		fields[3] = (submission.getEvaluation().getAttribution().getDate() == null) ? null : submission.getEvaluation().getAttribution().getDate()
 				.getTime();
-		fields[5] = submission.getEvaluation().getAttribution().getUserId();
-		fields[6] = submission.getEvaluation().getComment();
-		fields[7] = submission.getEvaluation().getEvaluated() ? "1" : "0";
-		fields[8] = submission.getEvaluation().getScore() == null ? null : Float.valueOf(submission.getEvaluation().getScore());
-		fields[9] = submission.getIsReleased() ? "1" : "0";
-		fields[10] = (submission.getStartDate() == null) ? null : submission.getStartDate().getTime();
-		fields[11] = (submission.getSubmittedDate() == null) ? null : submission.getSubmittedDate().getTime();
-		fields[12] = submission.getUserId();
+		fields[4] = submission.getEvaluation().getAttribution().getUserId();
+		fields[5] = submission.getEvaluation().getComment();
+		fields[6] = submission.getEvaluation().getEvaluated() ? "1" : "0";
+		fields[7] = submission.getEvaluation().getScore() == null ? null : Float.valueOf(submission.getEvaluation().getScore());
+		fields[8] = submission.getIsReleased() ? "1" : "0";
+		fields[9] = (submission.getStartDate() == null) ? null : submission.getStartDate().getTime();
+		fields[10] = (submission.getSubmittedDate() == null) ? null : submission.getSubmittedDate().getTime();
+		fields[11] = submission.getUserId();
 
 		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
 		if (id == null)
@@ -879,7 +827,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 
 		// submissions
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT S.ASSESSMENT_ID, S.HISTORICAL_AID, S.COMPLETE, S.EVAL_ATRIB_DATE,");
+		sql.append("SELECT S.ASSESSMENT_ID, S.COMPLETE, S.EVAL_ATRIB_DATE,");
 		sql.append(" S.EVAL_ATRIB_USER, S.EVAL_COMMENT, S.EVAL_EVALUATED, S.EVAL_SCORE,");
 		sql.append(" S.ID, S.RELEASED, S.START_DATE, S.SUBMITTED_DATE, S.USER");
 		sql.append(" FROM MNEME_SUBMISSION S ");
@@ -898,7 +846,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 				{
 					int i = 1;
 					SubmissionImpl submission = newSubmission();
-					submission.initAssessmentIds(SqlHelper.readId(result, i++), SqlHelper.readId(result, i++));
+					submission.initAssessmentId(SqlHelper.readId(result, i++));
 					submission.setIsComplete(SqlHelper.readBoolean(result, i++));
 					((AttributionImpl) submission.getEvaluation().getAttribution()).initDate(SqlHelper.readDate(result, i++));
 					((AttributionImpl) submission.getEvaluation().getAttribution()).initUserId(SqlHelper.readString(result, i++));
@@ -928,7 +876,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		// read all the answers for these submissions
 		sql = new StringBuilder();
 		sql.append("SELECT A.GUEST, A.EVAL_ATRIB_DATE, A.EVAL_ATRIB_USER, A.EVAL_COMMENT, A.EVAL_EVALUATED,");
-		sql.append(" A.EVAL_SCORE, A.ID, A.ORIG_PID, A.PART_ID, A.QUESTION_ID, A.QUESTION_TYPE, A.REASON, A.REVIEW,");
+		sql.append(" A.EVAL_SCORE, A.ID, A.PART_ID, A.QUESTION_ID, A.QUESTION_TYPE, A.REASON, A.REVIEW,");
 		sql.append(" A.SUBMISSION_ID, A.SUBMITTED_DATE");
 		sql.append(" FROM MNEME_ANSWER A");
 		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID ");
@@ -941,7 +889,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 			{
 				try
 				{
-					String sid = SqlHelper.readId(result, 14);
+					String sid = SqlHelper.readId(result, 13);
 					SubmissionImpl s = submissions.get(sid);
 					AnswerImpl a = newAnswer();
 
@@ -951,12 +899,12 @@ public class SubmissionStorageMysql implements SubmissionStorage
 					((EvaluationImpl) a.getEvaluation()).initEvaluated(SqlHelper.readBoolean(result, 5));
 					((EvaluationImpl) a.getEvaluation()).initScore(SqlHelper.readFloat(result, 6));
 					a.initId(SqlHelper.readId(result, 7));
-					a.initPartIds(SqlHelper.readId(result, 9), SqlHelper.readId(result, 8));
-					a.initQuestion(SqlHelper.readId(result, 10), SqlHelper.readString(result, 11));
+					a.initPartId(SqlHelper.readId(result, 8));
+					a.initQuestion(SqlHelper.readId(result, 9), SqlHelper.readString(result, 10));
 					a.getTypeSpecificAnswer().setData(SqlHelper.decodeStringArray(StringUtil.trimToNull(result.getString(1))));
-					a.setReason(SqlHelper.readString(result, 12));
-					a.setMarkedForReview(SqlHelper.readBoolean(result, 13));
-					a.setSubmittedDate(SqlHelper.readDate(result, 15));
+					a.setReason(SqlHelper.readString(result, 11));
+					a.setMarkedForReview(SqlHelper.readBoolean(result, 12));
+					a.setSubmittedDate(SqlHelper.readDate(result, 14));
 
 					a.clearIsChanged();
 					a.initSubmission(s);
@@ -973,67 +921,6 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		});
 
 		return rv;
-	}
-
-	/**
-	 * Transaction code for switchHistoricalDependency().
-	 */
-	protected void switchHistoricalDependencyTx(Assessment from, Assessment to)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE MNEME_SUBMISSION S");
-		sql.append(" SET S.HISTORICAL_AID=?");
-		sql.append(" WHERE S.HISTORICAL_AID=?");
-
-		Object[] fields = new Object[2];
-		fields[0] = Long.valueOf(to.getId());
-		fields[1] = Long.valueOf(from.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("switchHistoricalDependencyTx(submission): dbWrite failed");
-		}
-
-		// swap the answer parts
-		for (int i = 0; i < from.getParts().getParts().size(); i++)
-		{
-			Part fromPart = from.getParts().getParts().get(i);
-			Part toPart = to.getParts().getParts().get(i);
-
-			sql = new StringBuilder();
-			sql.append("UPDATE MNEME_ANSWER A");
-			sql.append(" SET A.PART_ID=?");
-			sql.append(" WHERE A.PART_ID=?");
-
-			fields = new Object[2];
-			fields[0] = Long.valueOf(toPart.getId());
-			fields[1] = Long.valueOf(fromPart.getId());
-
-			if (!this.sqlService.dbWrite(sql.toString(), fields))
-			{
-				throw new RuntimeException("switchHistoricalDependencyTx(answer): dbWrite failed");
-			}
-		}
-	}
-
-	/**
-	 * Transaction code for switchLiveDependency().
-	 */
-	protected void switchLiveDependencyTx(Question from, Question to)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE MNEME_ANSWER A");
-		sql.append(" SET A.QUESTION_ID=?");
-		sql.append(" WHERE A.QUESTION_ID=?");
-
-		Object[] fields = new Object[2];
-		fields[0] = Long.valueOf(to.getId());
-		fields[1] = Long.valueOf(from.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("switchLiveDependencyTx: dbWrite failed");
-		}
 	}
 
 	/**

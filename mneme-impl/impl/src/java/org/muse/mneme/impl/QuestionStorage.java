@@ -51,8 +51,10 @@ public interface QuestionStorage
 	 *        The pool of questions to copy.
 	 * @param destination
 	 *        the pool where the question will live.
+	 * @param asHistory
+	 *        If set, make the questions historical.
 	 */
-	void copyPoolQuestions(String userId, Pool source, Pool destination);
+	void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory);
 
 	/**
 	 * Count the questions in this context.
@@ -184,5 +186,4 @@ public interface QuestionStorage
 	 *        the question to save.
 	 */
 	void saveQuestion(QuestionImpl question);
-
 }

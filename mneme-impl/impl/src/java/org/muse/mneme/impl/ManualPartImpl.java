@@ -104,7 +104,6 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		// set the assessment, part and submission context
 		question.initSubmissionContext(this.assessment.getSubmissionContext());
 		question.initPartContext(this);
-		question.initPoolContext(pick.getPoolId());
 
 		return question;
 	}
@@ -167,7 +166,6 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		// set the assessment, part and submission context
 		question.initSubmissionContext(this.assessment.getSubmissionContext());
 		question.initPartContext(this);
-		question.initPoolContext(pick.getPoolId());
 
 		return question;
 	}
@@ -200,7 +198,6 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 				// set the assessment, part and submission context
 				question.initSubmissionContext(this.assessment.getSubmissionContext());
 				question.initPartContext(this);
-				question.initPoolContext(pick.getPoolId());
 
 				rv.add(question);
 			}
@@ -228,7 +225,6 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(pick.getQuestionId());
 			if (question != null)
 			{
-				question.initPoolContext(pick.getPoolId());
 				Pool pool = question.getPool();
 				if (pool != null)
 				{
@@ -356,14 +352,11 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		int count = 0;
 		for (PoolPick pick : this.questions)
 		{
-			String poolId = pick.getPoolId();
-			if (poolId == null)
+			String poolId = null;
+			Question question = this.questionService.getQuestion(pick.getQuestionId());
+			if (question != null)
 			{
-				Question question = this.questionService.getQuestion(pick.getQuestionId());
-				if (question != null)
-				{
-					poolId = question.getPool().getId();
-				}
+				poolId = question.getPool().getId();
 			}
 
 			if ((poolId != null) && (poolId.equals(pool.getId())))
@@ -373,57 +366,6 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		}
 
 		return count;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected Boolean dependsOn(Pool pool, boolean directOnly)
-	{
-		// manual part dependencies are all indirect
-		if (directOnly) return Boolean.FALSE;
-
-		for (PoolPick pick : this.questions)
-		{
-			// use the pick's pool as an override to the question's native pool, if set
-			if (pick.getPoolId() != null)
-			{
-				if (pool.getId().equals(pick.getPoolId()))
-				{
-					return Boolean.TRUE;
-				}
-			}
-			else
-			{
-				Question question = this.questionService.getQuestion(pick.getQuestionId());
-				if (question != null)
-				{
-					Pool qp = question.getPool();
-					if ((qp != null) && (qp.equals(pool)))
-					{
-						return Boolean.TRUE;
-					}
-				}
-			}
-		}
-
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected Boolean dependsOn(Question question)
-	{
-		for (PoolPick pick : this.questions)
-		{
-			if (pick.getQuestionId().equals(question.getId()))
-			{
-				return Boolean.TRUE;
-			}
-		}
-
-		return Boolean.FALSE;
 	}
 
 	/**
@@ -438,14 +380,11 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		List<String> rv = new ArrayList<String>();
 		for (PoolPick pick : this.questions)
 		{
-			String poolId = pick.getPoolId();
-			if (poolId == null)
+			String poolId = null;
+			Question question = this.questionService.getQuestion(pick.getQuestionId());
+			if (question != null)
 			{
-				Question question = this.questionService.getQuestion(pick.getQuestionId());
-				if (question != null)
-				{
-					poolId = question.getPool().getId();
-				}
+				poolId = question.getPool().getId();
 			}
 
 			if ((poolId != null) && (poolId.equals(pool.getId())))
@@ -494,56 +433,6 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 			if (!pick.setOrig())
 			{
 				i.remove();
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void switchPool(Pool from, Pool to, boolean directOnly)
-	{
-		// manual part dependencies are all indirect
-		if (directOnly) return;
-
-		for (PoolPick pick : this.questions)
-		{
-			if (from.getId().equals(pick.getPoolId()))
-			{
-				pick.setPool(to.getId());
-			}
-
-			else if (pick.getPoolId() == null)
-			{
-				Question question = this.questionService.getQuestion(pick.getQuestionId());
-				if (question != null)
-				{
-					if (question.getPool().equals(from))
-					{
-						pick.setPool(to.getId());
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void switchQuestion(Question from, Question to)
-	{
-		for (PoolPick pick : this.questions)
-		{
-			if (from.getId().equals(pick.getQuestionId()))
-			{
-				pick.setQuestion(to.getId());
-
-				// if we already have a pool set in the pick, leave it
-				if (pick.getPoolId() == null)
-				{
-					// to is likely the history of from, so won't report a pool - use from's
-					pick.setPool(from.getPool().getId());
-				}
 			}
 		}
 	}

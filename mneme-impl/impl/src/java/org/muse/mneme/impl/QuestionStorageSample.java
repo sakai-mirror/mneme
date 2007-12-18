@@ -95,7 +95,7 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void copyPoolQuestions(String userId, Pool source, Pool destination)
+	public void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory)
 	{
 		List<QuestionImpl> questions = new ArrayList<QuestionImpl>(this.questions.values());
 		for (QuestionImpl question : questions)
@@ -117,6 +117,8 @@ public class QuestionStorageSample implements QuestionStorage
 				q.getCreatedBy().setDate(now);
 				q.getModifiedBy().setUserId(userId);
 				q.getModifiedBy().setDate(now);
+
+				if (asHistory) q.makeHistorical();
 
 				// save
 				saveQuestion(q);
@@ -310,31 +312,6 @@ public class QuestionStorageSample implements QuestionStorage
 				this.nextId++;
 			}
 			question.initId("q" + Long.toString(id));
-		}
-
-		if ((question.poolId == null) && (!question.historical))
-		{
-			M_log.warn("saveQuestion: no pool id: " + question.getId());
-		}
-		if ((question.poolId != null) && (question.historical))
-		{
-			M_log.warn("saveQuestion: historical with pool id: " + question.getId());
-		}
-		if (question.partContext != null)
-		{
-			M_log.warn("saveQuestion: has partContext: " + question.getId());
-		}
-		if (question.poolContext != null)
-		{
-			M_log.warn("saveQuestion: has poolContext: " + question.getId());
-		}
-		if (question.submissionContext != null)
-		{
-			M_log.warn("saveQuestion: has submissionContext: " + question.getId());
-		}
-		if ((question.poolId != null) && (this.poolService.getPool(question.poolId) == null))
-		{
-			M_log.warn("saveQuestion: missing pool: qid: " + question.getId() + " poolId: " + question.poolId);
 		}
 
 		this.questions.put(question.getId(), new QuestionImpl(question));

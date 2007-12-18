@@ -22,7 +22,9 @@
 package org.muse.mneme.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +39,11 @@ import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentSpecialAccess;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Attribution;
+import org.muse.mneme.api.DrawPart;
+import org.muse.mneme.api.ManualPart;
+import org.muse.mneme.api.Part;
+import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.QuestionGrouping;
@@ -45,7 +52,6 @@ import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.user.api.User;
-import org.sakaiproject.util.StringUtil;
 
 /**
  * AssessmentImpl implements Assessment
@@ -75,9 +81,6 @@ public class AssessmentImpl implements Assessment
 
 	protected Boolean historical = Boolean.FALSE;
 
-	/** Track any changes that need history. */
-	protected transient ChangeableImpl historyChanged = new ChangeableImpl();
-
 	protected Boolean honorPledge = Boolean.FALSE;
 
 	protected String id = null;
@@ -99,7 +102,7 @@ public class AssessmentImpl implements Assessment
 
 	protected AssessmentPassword password = null;
 
-	protected transient PoolService poolService = null;
+	protected transient PoolServiceImpl poolService = null;
 
 	protected Presentation presentation = null;
 
@@ -119,8 +122,6 @@ public class AssessmentImpl implements Assessment
 	protected Boolean showHints = Boolean.FALSE;
 
 	protected AssessmentSpecialAccess specialAccess = null;
-
-	// protected SubmissionCounts submissionCounts = new SubmissionCountsImpl();
 
 	protected transient Submission submissionContext = null;
 
@@ -146,7 +147,7 @@ public class AssessmentImpl implements Assessment
 			SubmissionService submissionService, InternationalizedMessages messages)
 	{
 		this.assessmentService = assessmentService;
-		this.poolService = poolService;
+		this.poolService = (PoolServiceImpl) poolService;
 		this.submissionService = submissionService;
 		this.questionService = questionService;
 		this.messages = messages;
@@ -155,12 +156,12 @@ public class AssessmentImpl implements Assessment
 		this.dates = new AssessmentDatesImpl(this, this.changed);
 		this.grading = new AssessmentGradingImpl(this.changed);
 		this.modifiedBy = new AttributionImpl(this.changed);
-		this.parts = new AssessmentPartsImpl(this, questionService, submissionService, poolService, this.historyChanged, this.messages);
+		this.parts = new AssessmentPartsImpl(this, questionService, submissionService, poolService, this.changed, this.messages);
 		this.password = new AssessmentPasswordImpl(this.changed);
-		this.presentation = new PresentationImpl(this.historyChanged);
+		this.presentation = new PresentationImpl(this.changed);
 		this.review = new AssessmentReviewImpl(this, this.changed);
 		this.specialAccess = new AssessmentSpecialAccessImpl(this, this.changed);
-		this.submitPresentation = new PresentationImpl(this.historyChanged);
+		this.submitPresentation = new PresentationImpl(this.changed);
 	}
 
 	/**
@@ -308,7 +309,7 @@ public class AssessmentImpl implements Assessment
 	 */
 	public Boolean getIsChanged()
 	{
-		return this.changed.getChanged() || this.historyChanged.getChanged();
+		return this.changed.getChanged();
 	}
 
 	/**
@@ -317,12 +318,6 @@ public class AssessmentImpl implements Assessment
 	public Boolean getIsLive()
 	{
 		return this.live;
-
-		// if historical, which is only created because the assessment is live, we are live!
-		// if (this.historical) return Boolean.TRUE;
-		//
-		// // TODO: we may want to compute this on read -ggolden
-		// return this.submissionService.submissionsExist(this);
 	}
 
 	/**
@@ -596,7 +591,7 @@ public class AssessmentImpl implements Assessment
 
 		this.questionGrouping = value;
 
-		this.historyChanged.setChanged();
+		this.changed.setChanged();
 	}
 
 	/**
@@ -615,7 +610,7 @@ public class AssessmentImpl implements Assessment
 			setQuestionGrouping(QuestionGrouping.question);
 		}
 
-		this.historyChanged.setChanged();
+		this.changed.setChanged();
 	}
 
 	/**
@@ -628,7 +623,7 @@ public class AssessmentImpl implements Assessment
 
 		this.honorPledge = honorPledge;
 
-		this.historyChanged.setChanged();
+		this.changed.setChanged();
 	}
 
 	/**
@@ -641,7 +636,7 @@ public class AssessmentImpl implements Assessment
 
 		this.showHints = showHints;
 
-		this.historyChanged.setChanged();
+		this.changed.setChanged();
 	}
 
 	/**
@@ -725,7 +720,6 @@ public class AssessmentImpl implements Assessment
 	protected void clearChanged()
 	{
 		this.changed.clearChanged();
-		this.historyChanged.clearChanged();
 		this.liveChanged = Boolean.FALSE;
 	}
 
@@ -746,26 +740,6 @@ public class AssessmentImpl implements Assessment
 	{
 		Boolean rv = Boolean.valueOf(!this.archived.equals(this.archivedWas));
 		return rv;
-	}
-
-	/**
-	 * Check if there were any changes that need to generate history.
-	 * 
-	 * @return TRUE if there were history changes, FALSE if not.
-	 */
-	protected Boolean getHistoryChanged()
-	{
-		return this.historyChanged.getChanged();
-	}
-
-	/**
-	 * Check if the assessment has been changed in parts that require history to be created.
-	 * 
-	 * @return TRUE if there's a history-making change, FALSE if not.
-	 */
-	protected Boolean getIsHistoryChanged()
-	{
-		return this.historyChanged.getChanged();
 	}
 
 	/**
@@ -798,6 +772,45 @@ public class AssessmentImpl implements Assessment
 	{
 		Boolean rv = Boolean.valueOf(!this.title.equals(this.titleWas));
 		return rv;
+	}
+
+	/**
+	 * Take the assessment live, locking down the dependencies (pools and questions).
+	 */
+	protected void goLive()
+	{
+		if (this.live) return;
+
+		Map<String, Pool> histories = new HashMap<String, Pool>();
+		// make a history copy of all used pools and questions
+		// switch over the parts
+		for (Part part : this.parts.parts)
+		{
+			if (part instanceof DrawPart)
+			{
+				for (PoolDraw draw : ((DrawPartImpl) part).pools)
+				{
+					// if we have not yet made a history for this pool, do so
+					Pool history = histories.get(draw.getPoolId());
+					if (history == null)
+					{
+						history = this.poolService.makePoolHistory(draw.getPool());
+						histories.put(draw.getPoolId(), history);
+					}
+					draw.setPool(history);
+				}
+			}
+			else if (part instanceof ManualPart)
+			{
+				for (PoolPick pick : ((ManualPartImpl) part).questions)
+				{
+					// if (pick.getQuestionId().equals(question.getId()))
+					// {
+					// i.remove();
+					// }
+				}
+			}
+		}
 	}
 
 	/**
@@ -927,7 +940,6 @@ public class AssessmentImpl implements Assessment
 		this.dates = new AssessmentDatesImpl(this, (AssessmentDatesImpl) other.dates, this.changed);
 		this.grading = new AssessmentGradingImpl((AssessmentGradingImpl) other.grading, this.changed);
 		this.historical = other.historical;
-		this.historyChanged = new ChangeableImpl(other.historyChanged);
 		this.honorPledge = other.honorPledge;
 		this.id = other.id;
 		this.liveChanged = other.liveChanged;
@@ -935,10 +947,10 @@ public class AssessmentImpl implements Assessment
 		this.live = other.live;
 		this.mint = other.mint;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
-		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts, this.historyChanged);
+		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts, this.changed);
 		this.password = new AssessmentPasswordImpl((AssessmentPasswordImpl) other.password, this.changed);
 		this.poolService = other.poolService;
-		this.presentation = new PresentationImpl((PresentationImpl) other.presentation, this.historyChanged);
+		this.presentation = new PresentationImpl((PresentationImpl) other.presentation, this.changed);
 		this.published = other.published;
 		this.publishedWas = other.publishedWas;
 		this.questionGrouping = other.questionGrouping;
@@ -947,9 +959,8 @@ public class AssessmentImpl implements Assessment
 		this.review = new AssessmentReviewImpl(this, (AssessmentReviewImpl) other.review, this.changed);
 		this.showHints = other.showHints;
 		this.submissionContext = other.submissionContext;
-		// this.submissionCounts = new SubmissionCountsImpl((SubmissionCountsImpl) other.submissionCounts);
 		this.submissionService = other.submissionService;
-		this.submitPresentation = new PresentationImpl((PresentationImpl) other.submitPresentation, this.historyChanged);
+		this.submitPresentation = new PresentationImpl((PresentationImpl) other.submitPresentation, this.changed);
 		this.specialAccess = new AssessmentSpecialAccessImpl(this, (AssessmentSpecialAccessImpl) other.specialAccess, this.changed);
 		this.timeLimit = other.timeLimit;
 		this.title = other.title;

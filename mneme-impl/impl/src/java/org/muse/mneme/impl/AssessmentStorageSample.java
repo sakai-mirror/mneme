@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGrouping;
@@ -381,64 +383,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean liveDependencyExists(Pool pool, boolean directOnly)
-	{
-		for (AssessmentImpl assessment : this.assessments.values())
-		{
-			if (assessment.getContext().equals(pool.getContext()) && assessment.getIsLive())
-			{
-				// if the asssessment's parts use this pool
-				for (Part part : assessment.getParts().getParts())
-				{
-					if (((PartImpl) part).dependsOn(pool, directOnly))
-					{
-						return Boolean.TRUE;
-					}
-				}
-			}
-		}
-
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean liveDependencyExists(Question question)
-	{
-		for (AssessmentImpl assessment : this.assessments.values())
-		{
-			if (assessment.getContext().equals(question.getContext()) && assessment.getIsLive())
-			{
-				// if the asssessment's parts use this question
-				for (Part part : assessment.getParts().getParts())
-				{
-					if (((PartImpl) part).dependsOn(question))
-					{
-						return Boolean.TRUE;
-					}
-				}
-			}
-		}
-
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void makeLive(Assessment assessment)
-	{
-		AssessmentImpl rv = this.assessments.get(assessment.getId());
-		if (rv != null)
-		{
-			rv.initLive(Boolean.TRUE);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public AssessmentImpl newAssessment()
 	{
 		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService, this.messages);
@@ -469,17 +413,20 @@ public class AssessmentStorageSample implements AssessmentStorage
 	{
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(pool.getContext()))
+			if (assessment.getContext().equals(pool.getContext()) && (!assessment.getIsLive()))
 			{
-				// if the asssessment's draw parts use this question
 				for (Part part : assessment.getParts().getParts())
 				{
 					if (part instanceof DrawPart)
 					{
-						if (((DrawPartImpl) part).dependsOn(pool, Boolean.TRUE))
+						for (Iterator i = ((DrawPartImpl) part).pools.iterator(); i.hasNext();)
 						{
-							((DrawPartImpl) part).removePool(pool);
-							assessment.clearChanged();
+							PoolDraw draw = (PoolDraw) i.next();
+
+							if (draw.getPoolId().equals(pool.getId()))
+							{
+								i.remove();
+							}
 						}
 					}
 				}
@@ -494,17 +441,20 @@ public class AssessmentStorageSample implements AssessmentStorage
 	{
 		for (AssessmentImpl assessment : this.assessments.values())
 		{
-			if (assessment.getContext().equals(question.getContext()))
+			if (assessment.getContext().equals(question.getContext()) && (!assessment.getIsLive()))
 			{
-				// if the asssessment's manual parts use this question
 				for (Part part : assessment.getParts().getParts())
 				{
 					if (part instanceof ManualPart)
 					{
-						if (((ManualPartImpl) part).dependsOn(question))
+						for (Iterator i = ((ManualPartImpl) part).questions.iterator(); i.hasNext();)
 						{
-							((ManualPartImpl) part).removeQuestion(question);
-							assessment.clearChanged();
+							PoolPick pick = (PoolPick) i.next();
+
+							if (pick.getQuestionId().equals(question.getId()))
+							{
+								i.remove();
+							}
 						}
 					}
 				}
@@ -632,51 +582,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 	public void setSubmissionService(SubmissionService service)
 	{
 		this.submissionService = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void switchLiveDependency(Pool from, Pool to, boolean directOnly)
-	{
-		for (AssessmentImpl assessment : this.assessments.values())
-		{
-			if (assessment.getContext().equals(from.getContext()) && assessment.getIsLive())
-			{
-				// if the asssessment's parts use this pool
-				for (Part part : assessment.getParts().getParts())
-				{
-					if (((PartImpl) part).dependsOn(from, directOnly))
-					{
-						((PartImpl) part).switchPool(from, to, directOnly);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void switchLiveDependency(Question from, Question to)
-	{
-		for (AssessmentImpl assessment : this.assessments.values())
-		{
-			if (assessment.getContext().equals(from.getContext()) && assessment.getIsLive())
-			{
-				// if the asssessment's manual parts use this question
-				for (Part part : assessment.getParts().getParts())
-				{
-					if (part instanceof ManualPart)
-					{
-						if (((ManualPartImpl) part).dependsOn(from))
-						{
-							((ManualPartImpl) part).switchQuestion(from, to);
-						}
-					}
-				}
-			}
-		}
 	}
 
 	protected void fakeIt()

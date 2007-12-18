@@ -234,7 +234,6 @@ public class QuestionImpl implements Question
 	/** Track changes. */
 	protected transient ChangeableImpl changed = new ChangeableImpl();
 
-	/** Used only when historical and there's no pool to point to. */
 	protected String context = null;
 
 	protected AttributionImpl createdBy = new AttributionImpl(null);
@@ -257,8 +256,6 @@ public class QuestionImpl implements Question
 	protected transient Part partContext = null;
 
 	protected MyPartOrdering partOrdering = new MyPartOrdering(this);
-
-	protected transient String poolContext = null;
 
 	protected String poolId = null;
 
@@ -330,12 +327,7 @@ public class QuestionImpl implements Question
 	 */
 	public String getContext()
 	{
-		if (this.getIsHistorical())
-		{
-			return this.context;
-		}
-
-		return this.getPool().getContext();
+		return this.context;
 	}
 
 	/**
@@ -452,18 +444,6 @@ public class QuestionImpl implements Question
 	 */
 	public Pool getPool()
 	{
-		// use the pool context if set
-		if (this.poolContext != null)
-		{
-			return this.poolService.getPool(this.poolContext);
-		}
-
-		// historical questions live in no pool
-		if (this.getIsHistorical())
-		{
-			return null;
-		}
-
 		return this.poolService.getPool(this.poolId);
 	}
 
@@ -561,6 +541,7 @@ public class QuestionImpl implements Question
 		if (!Different.different(pool.getId(), this.poolId)) return;
 
 		this.poolId = pool.getId();
+		this.context = pool.getContext();
 
 		this.changed.setChanged();
 	}
@@ -648,17 +629,6 @@ public class QuestionImpl implements Question
 	}
 
 	/**
-	 * Initialize the pool context for this question.
-	 * 
-	 * @param poolId
-	 *        The pool id.
-	 */
-	protected void initPoolContext(String poolId)
-	{
-		this.poolContext = poolId;
-	}
-
-	/**
 	 * Initialize the Pool id.
 	 * 
 	 * @param id
@@ -709,12 +679,6 @@ public class QuestionImpl implements Question
 	{
 		if (this.historical) return;
 
-		// set the context to the pool's context
-		this.context = this.getPool().getContext();
-
-		// forget our original pool
-		this.poolId = null;
-
 		this.historical = Boolean.TRUE;
 	}
 
@@ -731,7 +695,6 @@ public class QuestionImpl implements Question
 		this.mint = other.mint;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, null);
 		this.partContext = other.partContext;
-		this.poolContext = other.poolContext;
 		this.poolId = other.poolId;
 		this.poolService = other.poolService;
 		this.presentation = new PresentationImpl(other.presentation, this.changed);

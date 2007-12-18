@@ -32,7 +32,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentType;
@@ -280,94 +279,6 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean liveDependencyExists(Pool pool, boolean directOnly)
-	{
-		if (directOnly)
-		{
-			// look for any pool_id that matches from D parts only (question_id is null) for live assessments
-			StringBuilder sql = new StringBuilder();
-			sql.append("SELECT COUNT(1) FROM MNEME_ASSESSMENT_PART_DETAIL D");
-			sql.append(" JOIN MNEME_ASSESSMENT A ON D.ASSESSMENT_ID=A.ID AND A.LIVE='1'");
-			sql.append(" WHERE D.POOL_ID=? AND D.QUESTION_ID IS NULL");
-
-			Object[] fields = new Object[1];
-			fields[0] = Long.valueOf(pool.getId());
-
-			List results = this.sqlService.dbRead(sql.toString(), fields, null);
-			if (results.size() > 0)
-			{
-				int size = Integer.parseInt((String) results.get(0));
-				return Boolean.valueOf(size > 0);
-			}
-
-			return Boolean.FALSE;
-		}
-
-		else
-		{
-			// look for any pool_id that matches or a question's pool_id that matches for live assessments
-			StringBuilder sql = new StringBuilder();
-			sql.append("SELECT COUNT(1) FROM MNEME_ASSESSMENT_PART_DETAIL D");
-			sql.append(" JOIN MNEME_ASSESSMENT A ON D.ASSESSMENT_ID=A.ID AND A.LIVE='1'");
-			sql.append(" LEFT OUTER JOIN MNEME_QUESTION Q ON D.QUESTION_ID=Q.ID");
-			sql.append(" WHERE D.POOL_ID=? OR (Q.POOL_ID=? AND D.POOL_ID IS NULL)");
-
-			Object[] fields = new Object[2];
-			fields[0] = Long.valueOf(pool.getId());
-			fields[1] = fields[0];
-
-			List results = this.sqlService.dbRead(sql.toString(), fields, null);
-			if (results.size() > 0)
-			{
-				int size = Integer.parseInt((String) results.get(0));
-				return Boolean.valueOf(size > 0);
-			}
-
-			return Boolean.FALSE;
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean liveDependencyExists(Question question)
-	{
-		// M parts only (question_id is set non-null): match the question_id field for live assessments
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT COUNT(1) FROM MNEME_ASSESSMENT_PART_DETAIL D");
-		sql.append(" JOIN MNEME_ASSESSMENT A ON D.ASSESSMENT_ID=A.ID AND A.LIVE='1'");
-		sql.append(" WHERE D.QUESTION_ID=?");
-
-		Object[] fields = new Object[1];
-		fields[0] = Long.valueOf(question.getId());
-
-		List results = this.sqlService.dbRead(sql.toString(), fields, null);
-		if (results.size() > 0)
-		{
-			int size = Integer.parseInt((String) results.get(0));
-			return Boolean.valueOf(size > 0);
-		}
-
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void makeLive(final Assessment assessment)
-	{
-		this.sqlService.transact(new Runnable()
-		{
-			public void run()
-			{
-				makeLiveTx(assessment);
-			}
-		}, "makeLive: " + assessment.getId());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public AssessmentImpl newAssessment()
 	{
 		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService, this.messages);
@@ -532,34 +443,6 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	public void setThreadLocalManager(ThreadLocalManager service)
 	{
 		threadLocalManager = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void switchLiveDependency(final Pool from, final Pool to, final boolean directOnly)
-	{
-		this.sqlService.transact(new Runnable()
-		{
-			public void run()
-			{
-				switchLiveDependencyTx(from, to, directOnly);
-			}
-		}, "switchLiveDependency(pool): from: " + from.getId());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void switchLiveDependency(final Question from, final Question to)
-	{
-		this.sqlService.transact(new Runnable()
-		{
-			public void run()
-			{
-				switchLiveDependencyTx(from, to);
-			}
-		}, "switchLiveDependency(question): from: " + from.getId());
 	}
 
 	/**
@@ -884,7 +767,7 @@ public class AssessmentStorageMysql implements AssessmentStorage
 				fields[i++] = null;
 				fields[i++] = (pick.origQuestionId == null) ? null : Long.valueOf(pick.origQuestionId);
 				fields[i++] = Long.valueOf(part.getId());
-				fields[i++] = (pick.poolId == null) ? null : Long.valueOf(pick.poolId);
+				fields[i++] = null;
 				fields[i++] = Long.valueOf(pick.questionId);
 
 				if (!this.sqlService.dbWrite(null, sql.toString(), fields))
@@ -1028,25 +911,6 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		for (Part part : assessment.getParts().getParts())
 		{
 			insertAssessmentPartTx(assessment, part);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void makeLiveTx(Assessment assessment)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE MNEME_ASSESSMENT");
-		sql.append(" SET LIVE='1'");
-		sql.append(" WHERE ID=?");
-
-		Object[] fields = new Object[1];
-		fields[0] = Long.valueOf(assessment.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
-		{
-			throw new RuntimeException("makeLiveTx: db write failed");
 		}
 	}
 
@@ -1305,10 +1169,12 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 */
 	protected void removeDependencyTx(Pool pool)
 	{
-		// look for any pool_id that matches from D parts only (question_id is null)
+		// remove from in non-live assessments part details that use the pool
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM MNEME_ASSESSMENT_PART_DETAIL");
-		sql.append(" WHERE POOL_ID=? AND QUESTION_ID IS NULL");
+		sql.append(" USING MNEME_ASSESSMENT_PART_DETAIL, MNEME_ASSESSMENT");
+		sql.append(" WHERE MNEME_ASSESSMENT_PART_DETAIL.ASSESSMENT_ID=MNEME_ASSESSMENT.ID AND MNEME_ASSESSMENT.LIVE='0'");
+		sql.append(" AND POOL_ID=?");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(pool.getId());
@@ -1324,9 +1190,11 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 */
 	protected void removeDependencyTx(Question question)
 	{
-		// M parts only (question_id is set non-null): match the question_id field
+		// remove from in non-live assessments part details that use the question
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM MNEME_ASSESSMENT_PART_DETAIL");
+		sql.append(" USING MNEME_ASSESSMENT_PART_DETAIL, MNEME_ASSESSMENT");
+		sql.append(" WHERE MNEME_ASSESSMENT_PART_DETAIL.ASSESSMENT_ID=MNEME_ASSESSMENT.ID AND MNEME_ASSESSMENT.LIVE='0'");
 		sql.append(" WHERE QUESTION_ID=?");
 
 		Object[] fields = new Object[1];
@@ -1335,108 +1203,6 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
 		{
 			throw new RuntimeException("removeDependencyTx(question): db write failed");
-		}
-	}
-
-	/**
-	 * Transaction code for switchLiveDependency()
-	 */
-	protected void switchLiveDependencyTx(Pool from, Pool to, boolean directOnly)
-	{
-		if (directOnly)
-		{
-			// look for any pool_id that matches from D parts only (question_id is null) for live assessments
-			StringBuilder sql = new StringBuilder();
-			sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D, MNEME_ASSESSMENT A");
-			sql.append(" SET D.POOL_ID=?");
-			sql.append(" WHERE D.ASSESSMENT_ID=A.ID AND A.LIVE='1'");
-			sql.append(" AND D.POOL_ID=? AND D.QUESTION_ID IS NULL");
-
-			Object[] fields = new Object[2];
-			fields[0] = Long.valueOf(to.getId());
-			fields[1] = Long.valueOf(from.getId());
-
-			if (!this.sqlService.dbWrite(sql.toString(), fields))
-			{
-				throw new RuntimeException("switchLiveDependencyTx(pool-1): dbWrite failed");
-			}
-		}
-
-		else
-		{
-			// look for any pool_id that matches or a question's pool_id that matches for live assessments
-			// this one for when we have a question id (D part)
-			StringBuilder sql = new StringBuilder();
-			sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D, MNEME_ASSESSMENT A, MNEME_QUESTION Q");
-			sql.append(" SET D.POOL_ID=?");
-			sql.append(" WHERE D.ASSESSMENT_ID=A.ID AND A.LIVE='1'");
-			sql.append(" AND D.QUESTION_ID=Q.ID");
-			sql.append(" AND D.POOL_ID=? OR (Q.POOL_ID=? AND D.POOL_ID IS NULL)");
-
-			Object[] fields = new Object[3];
-			fields[0] = Long.valueOf(to.getId());
-			fields[1] = Long.valueOf(from.getId());
-			fields[2] = fields[1];
-
-			if (!this.sqlService.dbWrite(sql.toString(), fields))
-			{
-				throw new RuntimeException("switchLiveDependencyTx(pool-2): dbWrite failed");
-			}
-
-			// look for any pool_id that matches or a question's pool_id that matches for live assessments
-			// this one for when we have a no question id (M part)
-			sql = new StringBuilder();
-			sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D, MNEME_ASSESSMENT A");
-			sql.append(" SET D.POOL_ID=?");
-			sql.append(" WHERE D.ASSESSMENT_ID=A.ID AND A.LIVE='1'");
-			sql.append(" AND D.POOL_ID=? AND D.QUESTION_ID IS NULL");
-
-			fields = new Object[2];
-			fields[0] = Long.valueOf(to.getId());
-			fields[1] = Long.valueOf(from.getId());
-
-			if (!this.sqlService.dbWrite(sql.toString(), fields))
-			{
-				throw new RuntimeException("switchLiveDependencyTx(pool-3): dbWrite failed");
-			}
-		}
-	}
-
-	/**
-	 * Transaction code for switchLiveDependency().
-	 */
-	protected void switchLiveDependencyTx(Question from, Question to)
-	{
-		// swap the pool to the from's pool's id (only if we don't have a pool id yet)
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D, MNEME_ASSESSMENT A");
-		sql.append(" SET D.POOL_ID=?");
-		sql.append(" WHERE D.ASSESSMENT_ID=A.ID AND A.LIVE='1'");
-		sql.append(" AND D.POOL_ID IS NULL AND D.QUESTION_ID=?");
-
-		Object[] fields = new Object[2];
-		fields[0] = Long.valueOf(from.getPool().getId());
-		fields[1] = Long.valueOf(from.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("switchLiveDependencyTx(question-1): dbWrite failed");
-		}
-
-		// swap the question
-		sql = new StringBuilder();
-		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL D, MNEME_ASSESSMENT A");
-		sql.append(" SET D.QUESTION_ID=?");
-		sql.append(" WHERE D.ASSESSMENT_ID=A.ID AND A.LIVE='1'");
-		sql.append(" AND D.QUESTION_ID=?");
-
-		fields = new Object[2];
-		fields[0] = Long.valueOf(to.getId());
-		fields[1] = Long.valueOf(from.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("switchLiveDependencyTx(question-2): dbWrite failed");
 		}
 	}
 

@@ -235,7 +235,6 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		// set the assessment, part and submission context
 		question.initSubmissionContext(this.assessment.getSubmissionContext());
 		question.initPartContext(this);
-		question.initPoolContext(order.get(0).getPoolId());
 		return question;
 	}
 
@@ -306,7 +305,6 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		// set the assessment, part and submission context
 		question.initSubmissionContext(this.assessment.getSubmissionContext());
 		question.initPartContext(this);
-		question.initPoolContext(order.get(order.size() - 1).getPoolId());
 
 		return question;
 	}
@@ -424,31 +422,6 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
-	protected Boolean dependsOn(Pool pool, boolean directOnly)
-	{
-		// draw part dependencies are all direct
-		for (PoolDraw draw : this.pools)
-		{
-			if (draw.getPoolId().equals(pool.getId()))
-			{
-				return Boolean.TRUE;
-			}
-		}
-
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected Boolean dependsOn(Question question)
-	{
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	protected List<PoolPick> getPossibleQuestionPicks()
 	{
 		List<PoolPick> rv = new ArrayList<PoolPick>();
@@ -521,20 +494,6 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 			if (!draw.setOrig())
 			{
 				i.remove();
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void switchPool(Pool from, Pool to, boolean directOnly)
-	{
-		for (PoolDraw draw : this.pools)
-		{
-			if (draw.getPoolId().equals(from.getId()))
-			{
-				draw.setPool(to);
 			}
 		}
 	}

@@ -24,7 +24,6 @@ package org.muse.mneme.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
@@ -92,34 +91,6 @@ public interface AssessmentStorage
 	List<AssessmentImpl> getContextAssessments(String context, AssessmentService.AssessmentsSort sort, Boolean publishedOnly);
 
 	/**
-	 * Check if any live tests have any dependency on this pool.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @param directOnly
-	 *        if true, check only for direct (draw) dependencies, else use those as well as (manual) question dependencies.
-	 * @return TRUE if any live tests have a dependency on this pool, FALSE if not.
-	 */
-	Boolean liveDependencyExists(Pool pool, boolean directOnly);
-
-	/**
-	 * Check if any live assessments have any direct dependency on this question.
-	 * 
-	 * @param question
-	 *        The question.
-	 * @return TRUE if any live assessments have a direct dependency on this question, FALSE if not.
-	 */
-	Boolean liveDependencyExists(Question question);
-
-	/**
-	 * Set this assessment to be live.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 */
-	void makeLive(Assessment assessment);
-
-	/**
 	 * Construct a new Assessment object.
 	 * 
 	 * @return A new Assessment object.
@@ -144,7 +115,7 @@ public interface AssessmentStorage
 	void removeAssessment(AssessmentImpl assessment);
 
 	/**
-	 * Remove any direct dependencies on this pool from all assessments.
+	 * Remove any draw dependencies on this pool from all live assessments.
 	 * 
 	 * @param pool
 	 *        The pool.
@@ -152,7 +123,7 @@ public interface AssessmentStorage
 	void removeDependency(Pool pool);
 
 	/**
-	 * Remove any direct dependencies on this question from all assessments.
+	 * Remove any pick dependencies on this question from all live assessments.
 	 * 
 	 * @param question
 	 *        The question.
@@ -166,26 +137,4 @@ public interface AssessmentStorage
 	 *        the assessment to save.
 	 */
 	void saveAssessment(AssessmentImpl assessment);
-
-	/**
-	 * Change any live assessments that are dependent on the from pool to become dependent instead on the to pool
-	 * 
-	 * @param from
-	 *        The from pool.
-	 * @param to
-	 *        The to pool.
-	 * @param directOnly
-	 *        if true, switch only direct (draw) dependencies, else seitch those as well as (manual) question dependencies.
-	 */
-	void switchLiveDependency(Pool from, Pool to, boolean directOnly);
-
-	/**
-	 * Change any live assessments that are directly dependent on the from question to become dependent instead on the to question
-	 * 
-	 * @param from
-	 *        The from question.
-	 * @param to
-	 *        The to question.
-	 */
-	void switchLiveDependency(Question from, Question to);
 }

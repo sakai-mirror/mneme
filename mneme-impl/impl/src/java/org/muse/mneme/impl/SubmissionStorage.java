@@ -174,15 +174,6 @@ public interface SubmissionStorage
 	List<String> getUsersSubmitted(Assessment assessment);
 
 	/**
-	 * Check if any submission has a dependency for history on this assessment.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 * @return TRUE if there are any submissions dependent for history on this assessment, FALSE if not.
-	 */
-	Boolean historicalDependencyExists(Assessment assessment);
-
-	/**
 	 * Construct a new Answer object.
 	 * 
 	 * @return A new Answer object.
@@ -204,22 +195,6 @@ public interface SubmissionStorage
 	 * @return A new Submission object.
 	 */
 	SubmissionImpl newSubmission(SubmissionImpl other);
-
-	// /**
-	// * Remove all incomplete submissions to this assessment.
-	// *
-	// * @param assessment
-	// * The assessment.
-	// */
-	// void removeIncompleteAssessmentSubmissions(Assessment assessment);
-
-	// /**
-	// * Remove a submission from storage.
-	// *
-	// * @param submission
-	// * The submission to remove.
-	// */
-	// void removeSubmission(SubmissionImpl submission);
 
 	/**
 	 * Save changes made to these answers.
@@ -278,24 +253,4 @@ public interface SubmissionStorage
 	 * @return TRUE if there are any submissions to the assesment.
 	 */
 	Boolean submissionsExist(Assessment assessment);
-
-	/**
-	 * Switch any submissions with a historical dependency on the assessment to this new assessment.
-	 * 
-	 * @param assessment
-	 *        The current dependent assessment.
-	 * @param newAssessmentId
-	 *        The new assessment to switch to.
-	 */
-	void switchHistoricalDependency(Assessment assessment, Assessment newAssessment);
-
-	/**
-	 * Change any submissions that are directly dependent on the from question to become dependent instead on the to question
-	 * 
-	 * @param from
-	 *        The from question.
-	 * @param to
-	 *        The to question.
-	 */
-	void switchLiveDependency(Question from, Question to);
 }

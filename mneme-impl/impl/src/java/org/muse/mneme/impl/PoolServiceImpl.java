@@ -127,41 +127,13 @@ public class PoolServiceImpl implements PoolService
 
 		if (M_log.isDebugEnabled()) M_log.debug("copyPool: context: " + context + " id: " + pool.getId());
 
-		String userId = sessionManager.getCurrentSessionUserId();
-		Date now = new Date();
-
 		// security check
-		this.securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+		this.securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
 
-		// make a copy of the pool
-		PoolImpl rv = storage.newPool((PoolImpl) pool);
-
-		// clear the id to make it a new one
-		rv.id = null;
-
-		// set the context
-		rv.setContext(context);
-
-		// update created and last modified information
-		rv.getCreatedBy().setDate(now);
-		rv.getCreatedBy().setUserId(userId);
-		rv.getModifiedBy().setDate(now);
-		rv.getModifiedBy().setUserId(userId);
-
-		// add to the title
-		rv.setTitle(addDate("copy-text", rv.getTitle(), now));
-
-		// clear the changed settings
-		((PoolImpl) rv).clearChanged();
-
-		// save
-		storage.savePool((PoolImpl) rv);
+		Pool rv = doCopyPool(context, pool, false);
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(rv.getId()), true));
-
-		// make a copy of the questions
-		this.questionService.copyPoolQuestions(pool, rv);
 
 		return rv;
 	}
@@ -302,11 +274,10 @@ public class PoolServiceImpl implements PoolService
 
 		PoolImpl pool = storage.newPool();
 
-		// attributions will be set in save
 		// set the context
 		pool.setContext(context);
 
-		// save
+		// save (also sets attribution)
 		doSave(pool);
 
 		return pool;
@@ -324,7 +295,7 @@ public class PoolServiceImpl implements PoolService
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, pool.getContext());
 
-		doRemove(pool);
+		doRemove((PoolImpl) pool);
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
@@ -352,7 +323,7 @@ public class PoolServiceImpl implements PoolService
 				if (M_log.isDebugEnabled()) M_log.debug("savePool: deleting mint: " + pool.getId());
 
 				// make sure any questions are also removed
-				doRemove(pool);
+				doRemove((PoolImpl) pool);
 			}
 
 			return;
@@ -363,7 +334,7 @@ public class PoolServiceImpl implements PoolService
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, pool.getContext());
 
-		doSave(pool);
+		doSave((PoolImpl) pool);
 	}
 
 	/**
@@ -518,62 +489,55 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
-	 * Create a historical record of this pool.
+	 * Copy a pool and all questions
 	 * 
+	 * @param context
+	 *        The destination context.
 	 * @param pool
-	 *        The pool.
-	 * @param directOnly
-	 *        if TRUE, do it only if / for direct pool use (draw), else for all (manual and draw).
-	 * @return the history pool made.
+	 *        The source pool.
+	 * @param asHistory
+	 *        If set, make the pool and questions all historical.
+	 * @return The copied pool.
 	 */
-	protected Pool createHistory(Pool pool, boolean directOnly)
+	protected Pool doCopyPool(String context, Pool pool, boolean asHistory)
 	{
-		if (pool == null) throw new IllegalArgumentException();
-		if (pool.getId() == null) throw new IllegalArgumentException();
-		if (((PoolImpl) pool).getIsHistorical()) return pool;
+		String userId = sessionManager.getCurrentSessionUserId();
+		Date now = new Date();
 
-		if (M_log.isDebugEnabled()) M_log.debug("createHistory: " + pool.getId());
+		// make a copy of the pool
+		PoolImpl rv = storage.newPool((PoolImpl) pool);
 
-		// get the current pool for history
-		PoolImpl current = (PoolImpl) getPool(pool.getId());
+		// clear the id to make it a new one
+		rv.id = null;
 
-		// get a new id on the old and save it
-		current.initId(null);
-		current.makeHistorical(pool);
-		this.storage.savePool(current);
+		// set the context
+		rv.setContext(context);
 
-		// swap all historical dependencies to the new
-		this.assessmentService.switchLiveDependency(pool, current, directOnly);
+		// update created and last modified information
+		rv.getCreatedBy().setDate(now);
+		rv.getCreatedBy().setUserId(userId);
+		rv.getModifiedBy().setDate(now);
+		rv.getModifiedBy().setUserId(userId);
 
-		// event
-		// eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
+		// add to the title
+		if (!asHistory) rv.setTitle(addDate("copy-text", rv.getTitle(), now));
 
-		return current;
-	}
+		// clear the changed settings
+		((PoolImpl) rv).clearChanged();
 
-	/**
-	 * Create a historical record of this pool, if needed for live assessment dependencies.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @param directOnly
-	 *        if TRUE, do it only if / for direct pool use (draw), else for all (manual and draw).
-	 * @return true if we made history, false if not.
-	 */
-	protected boolean createHistoryIfNeeded(Pool pool, boolean directOnly)
-	{
-		if (pool == null) throw new IllegalArgumentException();
+		// save
+		storage.savePool((PoolImpl) rv);
 
-		if (M_log.isDebugEnabled()) M_log.debug("createHistoryIfNeeded: " + pool.getId());
+		// make a copy of the questions
+		this.questionService.copyPoolQuestionsHistorical(pool, rv, asHistory);
 
-		// if there are any history dependencies on this changed pool, we need to store the history version
-		if (this.assessmentService.liveDependencyExists(pool, directOnly))
+		if (asHistory)
 		{
-			createHistory(pool, directOnly);
-			return true;
+			rv.makeHistorical(pool);
+			storage.savePool((PoolImpl) rv);
 		}
 
-		return false;
+		return rv;
 	}
 
 	/**
@@ -582,52 +546,27 @@ public class PoolServiceImpl implements PoolService
 	 * @param pool
 	 *        The pool to remove.
 	 */
-	protected void doRemove(Pool pool)
+	protected void doRemove(PoolImpl pool)
 	{
-		// get the current pool for history
-		PoolImpl current = (pool.getId() == null) ? null : (PoolImpl) getPool(pool.getId());
-
-		// if we don't have one, or we are trying to delete history, that's bad!
-		if (current == null) throw new IllegalArgumentException();
-		if (current.getIsHistorical()) throw new IllegalArgumentException();
-
-		if (this.assessmentService.liveDependencyExists(pool, false))
-		{
-			// get a new id on the old and save it
-			current.initId(null);
-			current.makeHistorical(pool);
-			this.storage.savePool(current);
-
-			// swap all historical dependencies to the new
-			this.assessmentService.switchLiveDependency(pool, current, false);
-		}
-
 		// remove each of our questions
-		List<String> qids = current.getAllQuestionIds();
+		List<String> qids = pool.getAllQuestionIds();
 		for (String qid : qids)
 		{
 			Question q = this.questionService.getQuestion(qid);
-			if ((q != null) && (!q.getIsHistorical()))
+			if (q != null)
 			{
-				// remove the questions
-				// use current as the history pool, if needed
-				// Note: will only be needed if there are live assessment pool dependencies,
-				// - in which case we have already made current into a historical pool.
-				this.questionService.removeQuestion(q, current);
+				this.questionService.doRemoveQuestion(q);
 			}
 		}
 
 		// remove any assessment dependencies on this pool
-		// - any live dependencies have already been swapped tot the historical 'current',
-		// so these are all non-live and may be removed.
 		this.assessmentService.removeDependency(pool);
 
 		// clear the cache
-		String key = cacheKey(pool.getId());
-		this.threadLocalManager.set(key, null);
+		this.threadLocalManager.set(cacheKey(pool.getId()), null);
 
 		// remove the pool
-		storage.removePool((PoolImpl) pool);
+		storage.removePool(pool);
 	}
 
 	/**
@@ -636,13 +575,9 @@ public class PoolServiceImpl implements PoolService
 	 * @param pool
 	 *        The pool.
 	 */
-	protected void doSave(Pool pool)
+	protected void doSave(PoolImpl pool)
 	{
 		String userId = sessionManager.getCurrentSessionUserId();
-
-		// get the current pool for history
-		PoolImpl current = (pool.getId() == null) ? null : (PoolImpl) getPool(pool.getId());
-
 		Date now = new Date();
 
 		// if the pool is new (i.e. no id), set the createdBy information, if not already set
@@ -657,30 +592,13 @@ public class PoolServiceImpl implements PoolService
 		pool.getModifiedBy().setUserId(userId);
 
 		// clear the changed settings
-		((PoolImpl) pool).clearChanged();
+		pool.clearChanged();
 
 		// clear the cache
-		String key = cacheKey(pool.getId());
-		this.threadLocalManager.set(key, null);
+		this.threadLocalManager.set(cacheKey(pool.getId()), null);
 
 		// save
-		storage.savePool((PoolImpl) pool);
-
-		if (current != null)
-		{
-			// if there are any history dependencies on this changed pool, we need to store the history version
-			// - draws or manual question selection.
-			if (this.assessmentService.liveDependencyExists(pool, false))
-			{
-				// get a new id on the old and save it
-				current.initId(null);
-				current.makeHistorical(pool);
-				this.storage.savePool(current);
-
-				// swap all historical dependencies to the new
-				this.assessmentService.switchLiveDependency(pool, current, false);
-			}
-		}
+		storage.savePool(pool);
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
@@ -761,31 +679,20 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
-	 * Check if any frozen manifests reference this question.
+	 * Make a copy of this pool and its questions as historical.
 	 * 
-	 * @param question
-	 *        The question.
-	 * @return TRUE if any frozen manifests reference the quesiton, FALSE if not.
+	 * @param pool
+	 *        The pool to copy.
+	 * @return The historical pool.
 	 */
-	protected Boolean manifestDependsOn(Question question)
+	protected Pool makePoolHistory(Pool pool)
 	{
-		return this.storage.manifestDependsOn(question);
-	}
+		if (pool == null) throw new IllegalArgumentException();
 
-	/**
-	 * Switch any pool with a frozen manifest that references from to reference to.
-	 * 
-	 * @param from
-	 *        The from question.
-	 * @param to
-	 *        The to question.
-	 */
-	protected void switchManifests(Question from, Question to)
-	{
-		if (from == null) throw new IllegalArgumentException();
-		if (to == null) throw new IllegalArgumentException();
+		if (M_log.isDebugEnabled()) M_log.debug("makePoolHistory: " + pool.getId());
 
-		// TODO: clear all cached pools from thread-local? -ggolden
-		this.storage.switchManifests(from, to);
+		Pool rv = doCopyPool(pool.getContext(), pool, true);
+
+		return rv;
 	}
 }

@@ -22,7 +22,6 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,8 +88,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 			{
 				for (Answer answer : submission.getAnswers())
 				{
-					// find the answers based on the part from their original, main, non-historical assessment part.
-					if (((AnswerImpl) answer).getOrigPartId().equals(part.getId()))
+					if (((AnswerImpl) answer).getPartId().equals(part.getId()))
 					{
 						if (!rv.contains(answer.getQuestion().getId()))
 						{
@@ -342,22 +340,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 		}
 
 		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean historicalDependencyExists(Assessment assessment)
-	{
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			SubmissionAssessmentImpl subAsmnt = (SubmissionAssessmentImpl) submission.getAssessment();
-			if (subAsmnt.historicalAssessmentId.equals(assessment.getId()))
-			{
-				return Boolean.TRUE;
-			}
-		}
-		return Boolean.FALSE;
 	}
 
 	/**
@@ -625,55 +607,5 @@ public class SubmissionStorageSample implements SubmissionStorage
 			}
 		}
 		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void switchHistoricalDependency(Assessment assessment, Assessment newAssessment)
-	{
-		// map the old part ids to the new
-		Map<String, String> partIdMap = new HashMap<String, String>();
-		for (int i = 0; i < assessment.getParts().getParts().size(); i++)
-		{
-			partIdMap.put(assessment.getParts().getParts().get(i).getId(), newAssessment.getParts().getParts().get(i).getId());
-		}
-
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			SubmissionAssessmentImpl subAsmnt = (SubmissionAssessmentImpl) submission.getAssessment();
-			if (subAsmnt.historicalAssessmentId.equals(assessment.getId()))
-			{
-				subAsmnt.historicalAssessmentId = newAssessment.getId();
-
-				// switch all answer part ids in submission to newAssessment's new part ids
-				for (Answer answer : submission.getAnswers())
-				{
-					((AnswerImpl) answer).initPartId(partIdMap.get(((AnswerImpl) answer).getPartId()));
-				}
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void switchLiveDependency(Question from, Question to)
-	{
-		// for all submissions in the context
-		for (SubmissionImpl submission : this.submissions.values())
-		{
-			if (submission.getAssessment().getContext().equals(from.getContext()))
-			{
-				// check the answers
-				for (Answer answer : submission.getAnswers())
-				{
-					if (((AnswerImpl) answer).questionId.equals(from.getId()))
-					{
-						((AnswerImpl) answer).questionId = to.getId();
-					}
-				}
-			}
-		}
 	}
 }
