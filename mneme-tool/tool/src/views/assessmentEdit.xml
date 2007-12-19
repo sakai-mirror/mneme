@@ -129,7 +129,7 @@
 									</selectionChoice> -->
 							</selectionChoices>
 							<readOnly>
-								<decision model="assessment.isLive" />
+								<decision model="assessment.isLocked" />
 								<compareDecision model="assessment.type" constant="survey" />
 							</readOnly>
 						</selection>
@@ -176,7 +176,7 @@
 								<model ref="part.id" />
 							</value>
 							<readOnly>
-								<decision model="assessment.isLive" />
+								<decision model="assessment.isLocked" />
 							</readOnly>
 							<model ref="ids.values" />
 							<!-- entity actions -->
@@ -187,7 +187,7 @@
 										<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 									</message>
 									<included>
-										<decision model="assessment.isLive" />
+										<decision model="assessment.isLocked" />
 									</included>
 								</instructions>
 								<!-- these two are not dependent, but put here for desired presentation order of actions -->
@@ -195,13 +195,13 @@
 									submit="TRUE">
 									<icon icon="/icons/add_manual_add.png" style="LEFT" />
 									<included>
-										<decision reversed="TRUE" model="assessment.isLive" />
+										<decision reversed="TRUE" model="assessment.isLocked" />
 									</included>
 								</navigation>
 								<navigation destination="DRAW" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
 									<icon icon="/icons/add_draw_add.png" style="LEFT" />
 									<included>
-										<decision reversed="TRUE" model="assessment.isLive" />
+										<decision reversed="TRUE" model="assessment.isLocked" />
 									</included>
 								</navigation>
 								<!-- delete is dependent, and desired to go last  -->
@@ -209,7 +209,7 @@
 									title="delete-part" style="LINK" description="part-delete-description" submit="TRUE">
 									<icon icon="/icons/delete.png" style="LEFT" />
 									<included>
-										<decision reversed="TRUE" model="assessment.isLive" />
+										<decision reversed="TRUE" model="assessment.isLocked" />
 									</included>
 									<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-delete" />
 								</navigation>
@@ -224,7 +224,7 @@
 							</value>
 							<model ref="assessment.parts.order" />
 							<included>
-								<decision reversed="TRUE" model="assessment.isLive" />
+								<decision reversed="TRUE" model="assessment.isLocked" />
 							</included>
 						</orderColumn>
 						<column pixels="16">

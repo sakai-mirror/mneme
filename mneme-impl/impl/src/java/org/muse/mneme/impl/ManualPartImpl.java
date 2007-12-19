@@ -87,7 +87,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		this.questions.add(new PoolPick(this.questionService, question.getId()));
 
 		// this is a change that cannot be made to live tests
-		this.assessment.liveChanged = Boolean.TRUE;
+		this.assessment.lockedChanged = Boolean.TRUE;
 
 		setChanged();
 	}
@@ -273,7 +273,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 			this.questions.remove(remove);
 
 			// this is a change that cannot be made to live tests
-			this.assessment.liveChanged = Boolean.TRUE;
+			this.assessment.lockedChanged = Boolean.TRUE;
 
 			setChanged();
 		}
@@ -322,7 +322,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		this.questions = ids;
 
 		// this is a change that cannot be made to live tests
-		this.assessment.liveChanged = Boolean.TRUE;
+		this.assessment.lockedChanged = Boolean.TRUE;
 
 		setChanged();
 	}

@@ -418,7 +418,7 @@ public class PartEditView extends ControllerImpl
 	 */
 	protected List<PoolDraw> getDraws(Assessment assessment, DrawPart part, PoolService.FindPoolsSort sort)
 	{
-		if (assessment.getIsLive())
+		if (assessment.getIsLocked())
 		{
 			List<PoolDraw> draws = part.getDraws(sort);
 			return draws;

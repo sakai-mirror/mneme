@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import java.util.Date;
 import java.util.List;
 
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
@@ -89,6 +90,14 @@ public interface AssessmentStorage
 	 * @return The list of Assessments defined in the context, sorted.
 	 */
 	List<AssessmentImpl> getContextAssessments(String context, AssessmentService.AssessmentsSort sort, Boolean publishedOnly);
+
+	/**
+	 * Set this assessment to be live.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	void makeLive(Assessment assessment);
 
 	/**
 	 * Construct a new Assessment object.

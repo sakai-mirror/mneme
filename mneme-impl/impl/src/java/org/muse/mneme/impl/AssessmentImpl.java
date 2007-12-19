@@ -80,8 +80,6 @@ public class AssessmentImpl implements Assessment
 
 	protected AssessmentGrading grading = null;
 
-	//protected Boolean historical = Boolean.FALSE;
-
 	protected Boolean honorPledge = Boolean.FALSE;
 
 	protected String id = null;
@@ -89,8 +87,11 @@ public class AssessmentImpl implements Assessment
 	/** The live setting. */
 	protected Boolean live = Boolean.FALSE;
 
-	/** Track any changes that cannot be made to live tests. */
-	protected transient Boolean liveChanged = Boolean.FALSE;
+	/** The locked setting. */
+	protected Boolean locked = Boolean.FALSE;
+
+	/** Track any changes that cannot be made to locked tests. */
+	protected transient Boolean lockedChanged = Boolean.FALSE;
 
 	protected transient InternationalizedMessages messages = null;
 
@@ -319,6 +320,14 @@ public class AssessmentImpl implements Assessment
 	public Boolean getIsLive()
 	{
 		return this.live;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsLocked()
+	{
+		return this.locked;
 	}
 
 	/**
@@ -710,7 +719,7 @@ public class AssessmentImpl implements Assessment
 		if (this.type == AssessmentType.survey)
 		{
 			// this is a change that cannot be made to live tests
-			this.liveChanged = Boolean.TRUE;
+			this.lockedChanged = Boolean.TRUE;
 		}
 
 		this.type = type;
@@ -724,7 +733,7 @@ public class AssessmentImpl implements Assessment
 	protected void clearChanged()
 	{
 		this.changed.clearChanged();
-		this.liveChanged = Boolean.FALSE;
+		this.lockedChanged = Boolean.FALSE;
 	}
 
 	/**
@@ -747,13 +756,13 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
-	 * Check if any changes have been made that are not allowed if the test is live.
+	 * Check if any changes have been made that are not allowed if the test is locked.
 	 * 
-	 * @return TRUE if any changes that are not allowed if live have been made, FALSE if not.
+	 * @return TRUE if any changes that are not allowed if locked have been made, FALSE if not.
 	 */
-	protected Boolean getIsLiveChanged()
+	protected Boolean getIsLockedChanged()
 	{
-		return this.liveChanged;
+		return this.lockedChanged;
 	}
 
 	/**
@@ -779,71 +788,6 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
-	 * Take the assessment live, locking down the dependencies (pools and questions).
-	 */
-	protected void goLive()
-	{
-		if (this.live) return;
-		initLive(Boolean.TRUE);
-
-		Map<String, Pool> histories = new HashMap<String, Pool>();
-		Map<String, Map<String,String>> oldToNews = new HashMap<String, Map<String,String>>();
-
-		// make a history copy of all used pools and questions
-		// switch over the parts
-		// make sure questions from the same pool end up in the same pool
-		
-		for (Part part : this.parts.parts)
-		{
-			((PartImpl) part).changed = true;
-
-			if (part instanceof DrawPart)
-			{
-				for (PoolDraw draw : ((DrawPartImpl) part).pools)
-				{
-					// if we have not yet made a history for this pool, do so
-					Pool history = histories.get(draw.getPoolId());
-					if (history == null)
-					{
-						Map<String, String> oldToNew = new HashMap<String, String>();
-						history = this.poolService.makePoolHistory(draw.getPool(), oldToNew);
-						histories.put(draw.getPoolId(), history);
-						oldToNews.put(draw.getPoolId(), oldToNew);
-					}
-					draw.setPool(history);
-				}
-			}
-			else if (part instanceof ManualPart)
-			{
-				for (PoolPick pick : ((ManualPartImpl) part).questions)
-				{
-					Question q = this.questionService.getQuestion(pick.getQuestionId());
-					if (q != null)
-					{
-						// make sure we have this question's comlete pool
-						Pool history = histories.get(q.getPool().getId());
-						if (history == null)
-						{
-							Map<String, String> oldToNew = new HashMap<String, String>();
-							history = this.poolService.makePoolHistory(q.getPool(), oldToNew);
-							histories.put(q.getPool().getId(), history);
-							oldToNews.put(q.getPool().getId(), oldToNew);
-						}
-						
-						// get the mapping for this pool
-						Map<String, String> oldToNew = oldToNews.get(q.getPool().getId());
-						String historicalQid = oldToNew.get(q.getId());
-						if (historicalQid != null)
-						{
-							pick.setQuestion(historicalQid);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	/**
 	 * Establish the archived setting.
 	 * 
 	 * @param archived
@@ -854,17 +798,6 @@ public class AssessmentImpl implements Assessment
 		this.archived = archived;
 		this.archivedWas = archived;
 	}
-
-//	/**
-//	 * Establish the historical setting.
-//	 * 
-//	 * @param historical
-//	 *        The historical setting.
-//	 */
-//	protected void initHistorical(Boolean historical)
-//	{
-//		this.historical = historical;
-//	}
 
 	/**
 	 * Initialize the id property.
@@ -886,6 +819,17 @@ public class AssessmentImpl implements Assessment
 	protected void initLive(Boolean live)
 	{
 		this.live = live;
+	}
+
+	/**
+	 * Establish the locked setting.
+	 * 
+	 * @param locked
+	 *        The locked setting.
+	 */
+	protected void initLocked(Boolean locked)
+	{
+		this.locked = locked;
 	}
 
 	/**
@@ -935,23 +879,70 @@ public class AssessmentImpl implements Assessment
 		this.titleWas = title;
 	}
 
-//	/**
-//	 * Check the historical setting of the assessment.
-//	 * 
-//	 * @return TRUE if the assessment is used only for submission historical access, FALSE if it is a current assessment.
-//	 */
-//	protected Boolean isHistorical()
-//	{
-//		return this.historical;
-//	}
+	/**
+	 * Lock the assessment, locking down the dependencies (pools and questions).
+	 */
+	protected void lock()
+	{
+		if (this.locked) return;
+		initLocked(Boolean.TRUE);
 
-//	/**
-//	 * Set this assessment to be "historical" - used only for history by submissions.
-//	 */
-//	protected void makeHistorical()
-//	{
-//		this.historical = Boolean.TRUE;
-//	}
+		Map<String, Pool> histories = new HashMap<String, Pool>();
+		Map<String, Map<String, String>> oldToNews = new HashMap<String, Map<String, String>>();
+
+		// make a history copy of all used pools and questions
+		// switch over the parts
+		// make sure questions from the same pool end up in the same pool
+
+		for (Part part : this.parts.parts)
+		{
+			((PartImpl) part).changed = true;
+
+			if (part instanceof DrawPart)
+			{
+				for (PoolDraw draw : ((DrawPartImpl) part).pools)
+				{
+					// if we have not yet made a history for this pool, do so
+					Pool history = histories.get(draw.getPoolId());
+					if (history == null)
+					{
+						Map<String, String> oldToNew = new HashMap<String, String>();
+						history = this.poolService.makePoolHistory(draw.getPool(), oldToNew);
+						histories.put(draw.getPoolId(), history);
+						oldToNews.put(draw.getPoolId(), oldToNew);
+					}
+					draw.setPool(history);
+				}
+			}
+			else if (part instanceof ManualPart)
+			{
+				for (PoolPick pick : ((ManualPartImpl) part).questions)
+				{
+					Question q = this.questionService.getQuestion(pick.getQuestionId());
+					if (q != null)
+					{
+						// make sure we have this question's comlete pool
+						Pool history = histories.get(q.getPool().getId());
+						if (history == null)
+						{
+							Map<String, String> oldToNew = new HashMap<String, String>();
+							history = this.poolService.makePoolHistory(q.getPool(), oldToNew);
+							histories.put(q.getPool().getId(), history);
+							oldToNews.put(q.getPool().getId(), oldToNew);
+						}
+
+						// get the mapping for this pool
+						Map<String, String> oldToNew = oldToNews.get(q.getPool().getId());
+						String historicalQid = oldToNew.get(q.getId());
+						if (historicalQid != null)
+						{
+							pick.setQuestion(historicalQid);
+						}
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * Set as a copy of another.
@@ -969,12 +960,12 @@ public class AssessmentImpl implements Assessment
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy, this.changed);
 		this.dates = new AssessmentDatesImpl(this, (AssessmentDatesImpl) other.dates, this.changed);
 		this.grading = new AssessmentGradingImpl((AssessmentGradingImpl) other.grading, this.changed);
-		//this.historical = other.historical;
 		this.honorPledge = other.honorPledge;
 		this.id = other.id;
-		this.liveChanged = other.liveChanged;
+		this.lockedChanged = other.lockedChanged;
 		this.messages = other.messages;
 		this.live = other.live;
+		this.locked = other.locked;
 		this.mint = other.mint;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
 		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts, this.changed);

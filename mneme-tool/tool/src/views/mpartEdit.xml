@@ -113,7 +113,7 @@
 										<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 									</message>
 									<included>
-										<decision model="assessment.isLive" />
+										<decision model="assessment.isLocked" />
 									</included>
 								</instructions>
 								<navigation title="select-questions" style="LINK" description="select-questions-description" submit="TRUE">
@@ -124,19 +124,19 @@
 									</destination>
 									<icon icon="/icons/add_manual.png" style="LEFT" />
 									<included>
-										<decision reversed="TRUE" model="assessment.isLive" />
+										<decision reversed="TRUE" model="assessment.isLocked" />
 									</included>
 								</navigation>
 								<navigation destination="DELETEQ" selectRequirement="SOME" selectRequirementMessage="remove-failed-requirements"
 									title="remove-question" style="LINK" description="remove-question-description" submit="TRUE">
 									<icon icon="/icons/page_delete.png" style="LEFT" />
 									<included>
-										<decision reversed="TRUE" model="assessment.isLive" />
+										<decision reversed="TRUE" model="assessment.isLocked" />
 									</included>
 								</navigation>
 							</entityActions>
 							<readOnly>
-								<decision model="assessment.isLive" />
+								<decision model="assessment.isLocked" />
 							</readOnly>
 						</selectionColumn>
 						<orderColumn em="4">
@@ -147,7 +147,7 @@
 								<model type="text" ref="question.id" />
 							</value>
 							<included>
-								<decision reversed="TRUE" model="assessment.isLive" />
+								<decision reversed="TRUE" model="assessment.isLocked" />
 							</included>
 							<model ref="part.questionOrder" />
 						</orderColumn>

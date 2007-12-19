@@ -122,6 +122,13 @@ public interface Assessment
 	Boolean getIsLive();
 
 	/**
+	 * Check if the assessment is locked; i.e. will not reflect any pool or question changes, nor can the makeup of the assessment be changed.
+	 * 
+	 * @return TRUE if the assessment is locked, FALSE if not.
+	 */
+	Boolean getIsLocked();
+
+	/**
 	 * Check if the assessment is valid; i.e. has no inconsistencies in its definition.
 	 * 
 	 * @return TRUE if the assessment is valid, FALSE if not.

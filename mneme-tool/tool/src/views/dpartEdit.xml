@@ -111,7 +111,7 @@
 								<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 							</message>
 							<included>
-								<decision model="assessment.isLive" />
+								<decision model="assessment.isLocked" />
 							</included>
 						</instructions>
 					</entityActions>
@@ -134,7 +134,7 @@
 									<model ref="draw.numQuestions" />
 									<summary initialValue="part.numQuestions" title="total-questions" />
 									<readOnly>
-										<decision model="assessment.isLive" />
+										<decision model="assessment.isLocked" />
 									</readOnly>
 									<maxValue>
 										<model ref="draw.poolNumAvailableQuestions" />

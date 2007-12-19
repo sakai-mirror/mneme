@@ -68,7 +68,7 @@
 								<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 							</message>
 							<included>
-								<decision model="assessment.isLive" />
+								<decision model="assessment.isLocked" />
 								<compareDecision model="assessment.type" constant="survey" />
 							</included>
 						</instructions>
@@ -101,7 +101,7 @@
 									</selectionChoice> -->
 							</selectionChoices>
 							<readOnly>
-								<decision model="assessment.isLive" />
+								<decision model="assessment.isLocked" />
 								<compareDecision model="assessment.type" constant="survey" />
 							</readOnly>
 						</selection>

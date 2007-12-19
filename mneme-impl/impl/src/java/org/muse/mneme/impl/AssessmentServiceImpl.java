@@ -213,8 +213,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		// start out unpublished
 		rv.initPublished(Boolean.FALSE);
 
-		// and not-live
+		// and not-live, non-locked
 		rv.initLive(Boolean.FALSE);
+		rv.initLocked(Boolean.FALSE);
 
 		// update created and last modified information
 		rv.getCreatedBy().setDate(now);
@@ -452,8 +453,8 @@ public class AssessmentServiceImpl implements AssessmentService
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
 
-		// check for changes not allowed if live
-		if ((assessment.getIsLive()) && ((AssessmentImpl) assessment).getIsLiveChanged()) throw new AssessmentPolicyException();
+		// check for changes not allowed if locked
+		if ((assessment.getIsLocked()) && ((AssessmentImpl) assessment).getIsLockedChanged()) throw new AssessmentPolicyException();
 
 		// see if we need to retract or release grades
 		boolean retract = false;
@@ -509,7 +510,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		// if we are just going published and not yet live, bring the assessment live
 		if (!assessment.getIsLive() && publishedChanged && assessment.getPublished())
 		{
-			((AssessmentImpl) assessment).goLive();
+			((AssessmentImpl) assessment).lock();
 		}
 
 		// get the assessment before these changes
@@ -722,6 +723,20 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		String ref = MnemeService.REFERENCE_ROOT + "/" + MnemeService.ASSESSMENT_TYPE + "/" + assessmentId;
 		return ref;
+	}
+
+	/**
+	 * Set this assessment to be live.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void makeLive(Assessment assessment)
+	{
+		// clear the cache
+		this.threadLocalManager.set(cacheKey(assessment.getId()), null);
+
+		this.storage.makeLive(assessment);
 	}
 
 	/**

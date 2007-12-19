@@ -112,7 +112,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 				already.setNumQuestions(numQuestions);
 
 				// this is a change that cannot be made to live tests
-				this.assessment.liveChanged = Boolean.TRUE;
+				this.assessment.lockedChanged = Boolean.TRUE;
 
 				setChanged();
 
@@ -125,7 +125,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		pools.add(rv);
 
 		// this is a change that cannot be made to live tests
-		this.assessment.liveChanged = Boolean.TRUE;
+		this.assessment.lockedChanged = Boolean.TRUE;
 
 		setChanged();
 
@@ -368,7 +368,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		this.pools.remove(new PoolDrawImpl(this.assessment, this.poolService, pool, null));
 
 		// this is a change that cannot be made to live tests
-		this.assessment.liveChanged = Boolean.TRUE;
+		this.assessment.lockedChanged = Boolean.TRUE;
 
 		setChanged();
 	}
@@ -403,7 +403,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 							myDraw.setNumQuestions(draw.getNumQuestions());
 
 							// this is a change that cannot be made to live tests
-							this.assessment.liveChanged = Boolean.TRUE;
+							this.assessment.lockedChanged = Boolean.TRUE;
 
 							setChanged();
 						}

@@ -112,7 +112,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		((PartImpl) rv).initContainer(this.parts);
 
 		// this is a change that cannot be made to live tests
-		this.assessment.liveChanged = Boolean.TRUE;
+		this.assessment.lockedChanged = Boolean.TRUE;
 
 		this.owner.setChanged();
 
@@ -132,7 +132,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		((PartImpl) rv).initContainer(this.parts);
 
 		// this is a change that cannot be made to live tests
-		this.assessment.liveChanged = Boolean.TRUE;
+		this.assessment.lockedChanged = Boolean.TRUE;
 
 		this.owner.setChanged();
 
@@ -382,7 +382,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		((PartImpl) part).initContainer(null);
 
 		// this is a change that cannot be made to live tests
-		this.assessment.liveChanged = Boolean.TRUE;
+		this.assessment.lockedChanged = Boolean.TRUE;
 
 		this.owner.setChanged();
 		this.deleted.add(part);
@@ -462,7 +462,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		}
 
 		// this is a change that cannot be made to live tests
-		this.assessment.liveChanged = Boolean.TRUE;
+		this.assessment.lockedChanged = Boolean.TRUE;
 
 		this.owner.setChanged();
 	}

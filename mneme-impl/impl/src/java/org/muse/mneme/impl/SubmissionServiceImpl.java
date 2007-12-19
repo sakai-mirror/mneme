@@ -382,11 +382,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// TODO: it is possible to make too many submissions for the assessment. If this method is entered concurrently for the same user and
 		// assessment, the previous count check might fail.
 
-		// go live: Note: we are going live on publish for now -ggolden
-		// if (!submission.getAssessment().getIsLive())
-		// {
-		// ((AssessmentServiceImpl) this.assessmentService).makeLive(submission.getAssessment());
-		// }
+		// go live
+		if (!submission.getAssessment().getIsLive())
+		{
+			((AssessmentServiceImpl) this.assessmentService).makeLive(submission.getAssessment());
+		}
 
 		// make a new submission
 		SubmissionImpl rv = this.storage.newSubmission();
