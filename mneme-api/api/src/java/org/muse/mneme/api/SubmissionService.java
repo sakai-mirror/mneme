@@ -23,6 +23,7 @@ package org.muse.mneme.api;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * SubmissionService manages submissions.
@@ -281,6 +282,17 @@ public interface SubmissionService
 	Boolean getAssessmentHasUnscoredSubmissions(Assessment assessment);
 
 	/**
+	 * Find the "official" submission score for each user who has submitted to the assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param releasedOnly
+	 *        if TRUE, report only released submissions, else report all completed ones.
+	 * @return A Map of keyed by user id to that user's highest Float submission score for the assessment.
+	 */
+	Map<String, Float> getAssessmentHighestScores(Assessment assessment, Boolean releasedOnly);
+
+	/**
 	 * Check if there are any completed submissions that have any null scores for answered answers to this question for this assessment.
 	 * 
 	 * @param assessment
@@ -330,6 +342,17 @@ public interface SubmissionService
 	 * @return The submission object, or null if not found.
 	 */
 	Submission getSubmission(String id);
+
+	/**
+	 * Find the "official" submission score for this user to this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param userId
+	 *        The user.
+	 * @return The "official" submission score to this assessment by this user (or null if there are no submissions).
+	 */
+	Float getSubmissionOfficialScore(Assessment assessment, String userId);
 
 	/**
 	 * Get the submissions to assignments in this context made by this user. Consider:

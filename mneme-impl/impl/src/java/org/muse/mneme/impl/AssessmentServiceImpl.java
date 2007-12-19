@@ -502,6 +502,9 @@ public class AssessmentServiceImpl implements AssessmentService
 			((AssessmentImpl) assessment).goLive();
 		}
 
+		// get the assessment before these changes
+		Assessment current = getAssessment(assessment.getId());
+
 		// save the changes
 		save((AssessmentImpl) assessment);
 
@@ -511,8 +514,11 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (titleChanged || retract || (publishedChanged && !assessment.getPublished()) || (validityChanged && !nowValid)
 				|| (archivedChanged && assessment.getArchived()) || (gbIntegrationChanged && !assessment.getGrading().getGradebookIntegration()))
 		{
-			// retract the entire assessment from grades
-			this.gradesService.retractAssessmentGrades(assessment);
+			// retract the entire assessment from grades - use the old information (title) (if we existed before this call)
+			if (current != null)
+			{
+				this.gradesService.retractAssessmentGrades(current);
+			}
 
 			// retract the submissions
 			if (retract)

@@ -95,7 +95,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT A.QUESTION_ID FROM MNEME_ANSWER A");
 		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=?");
-		sql.append(" WHERE A.PART_PID=?");
+		sql.append(" WHERE A.PART_ID=?");
 
 		Object[] fields = new Object[2];
 		fields[0] = Long.valueOf(part.getAssessment().getId());
@@ -188,6 +188,66 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public Map<String, Float> getAssessmentHighestScores(Assessment assessment, Boolean releasedOnly)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT S.ID, S.USER, S.EVAL_SCORE, SUM(A.EVAL_SCORE), SUM(A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
+		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID AND S.COMPLETE='1'");
+		sql.append(" WHERE S.ASSESSMENT_ID=?");
+		if (releasedOnly)
+		{
+			sql.append(" AND S.RELEASED='1'");
+		}
+		sql.append(" GROUP BY S.ID");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		final Map<String, Float> scores = new HashMap<String, Float>();
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String sid = SqlHelper.readId(result, 1);
+					String user = SqlHelper.readString(result, 2);
+					Float sEval = SqlHelper.readFloat(result, 3);
+					Float aEval = SqlHelper.readFloat(result, 4);
+					Float aAuto = SqlHelper.readFloat(result, 5);
+					Float total = Float.valueOf((sEval == null ? 0f : sEval.floatValue()) + (aEval == null ? 0f : aEval.floatValue())
+							+ (aAuto == null ? 0f : aAuto.floatValue()));
+
+					// if the user has an entry already, replace it if this score is higher
+					Float prior = scores.get(user);
+					if (prior != null)
+					{
+						if (prior.floatValue() < total.floatValue())
+						{
+							scores.put(user, total);
+						}
+					}
+					else
+					{
+						scores.put(user, total);
+					}
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("getAssessmentHighestScores: " + e);
+					return null;
+				}
+			}
+		});
+
+		return scores;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
 	{
 		StringBuilder sql = new StringBuilder();
@@ -274,7 +334,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		// TODO: pre-compute into MNEME_SUBMISSION.TOTAL_SCORE? -ggolden
 
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT S.ID, S.EVAL_SCORE, SUM(A.EVAL_SCORE+A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
+		sql.append("SELECT S.ID, S.EVAL_SCORE, SUM(A.EVAL_SCORE), SUM(A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
 		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID AND S.COMPLETE='1'");
 		sql.append(" WHERE S.ASSESSMENT_ID=? AND S.USER=?");
 		sql.append(" GROUP BY S.ID");
@@ -292,8 +352,10 @@ public class SubmissionStorageMysql implements SubmissionStorage
 				{
 					String sid = SqlHelper.readId(result, 1);
 					Float sEval = SqlHelper.readFloat(result, 2);
-					Float aTotal = SqlHelper.readFloat(result, 3);
-					Float total = Float.valueOf((sEval == null ? 0f : sEval.floatValue()) + (aTotal == null ? 0f : aTotal.floatValue()));
+					Float aEval = SqlHelper.readFloat(result, 3);
+					Float aAuto = SqlHelper.readFloat(result, 4);
+					Float total = Float.valueOf((sEval == null ? 0f : sEval.floatValue()) + (aEval == null ? 0f : aEval.floatValue())
+							+ (aAuto == null ? 0f : aAuto.floatValue()));
 					scores.put(sid, total);
 
 					return null;
@@ -336,7 +398,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		// TODO: pre-compute into MNEME_SUBMISSION.TOTAL_SCORE? -ggolden
 
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT S.EVAL_SCORE, SUM(A.EVAL_SCORE+A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
+		sql.append("SELECT S.EVAL_SCORE, SUM(A.EVAL_SCORE), SUM(A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
 		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID");
 		sql.append(" WHERE S.ID=?");
 		sql.append(" GROUP BY S.ID");
@@ -352,9 +414,11 @@ public class SubmissionStorageMysql implements SubmissionStorage
 			{
 				try
 				{
-					Float sEval = SqlHelper.readFloat(result, 2);
-					Float aTotal = SqlHelper.readFloat(result, 3);
-					Float total = Float.valueOf((sEval == null ? 0f : sEval.floatValue()) + (aTotal == null ? 0f : aTotal.floatValue()));
+					Float sEval = SqlHelper.readFloat(result, 1);
+					Float aEval = SqlHelper.readFloat(result, 2);
+					Float aAuto = SqlHelper.readFloat(result, 3);
+					Float total = Float.valueOf((sEval == null ? 0f : sEval.floatValue()) + (aEval == null ? 0f : aEval.floatValue())
+							+ (aAuto == null ? 0f : aAuto.floatValue()));
 					score.add(total);
 
 					return null;

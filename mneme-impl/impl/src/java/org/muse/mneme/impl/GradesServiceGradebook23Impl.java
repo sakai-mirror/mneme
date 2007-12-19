@@ -21,17 +21,17 @@
 
 package org.muse.mneme.impl;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.GradesService;
-import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.service.gradebook.shared.AssessmentNotFoundException;
 import org.sakaiproject.service.gradebook.shared.GradebookNotFoundException;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
@@ -60,6 +60,9 @@ public class GradesServiceGradebook23Impl implements GradesService
 	/** Dependency: SessionManager */
 	protected SessionManager sessionManager = null;
 
+	/** Dependency: SubmissionService */
+	protected SubmissionService submissionService = null;
+
 	/** Dependency: ThreadLocalManager */
 	protected ThreadLocalManager threadLocalManager = null;
 
@@ -73,7 +76,20 @@ public class GradesServiceGradebook23Impl implements GradesService
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 
-		// TODO:
+		try
+		{
+			boolean hasGradebook = gradebookService.isGradebookDefined(assessment.getContext());
+			if (hasGradebook)
+			{
+				boolean reported = gradebookService.isExternalAssignmentDefined(assessment.getContext(), assessment.getTitle());
+				return Boolean.valueOf(reported);
+			}
+		}
+		catch (Exception e)
+		{
+			M_log.warn("assessmentReported:", e);
+		}
+
 		return Boolean.FALSE;
 	}
 
@@ -110,15 +126,53 @@ public class GradesServiceGradebook23Impl implements GradesService
 		// make sure we are published, valid and desire gradebook integration
 		if (!(assessment.getPublished() && assessment.getGrading().getGradebookIntegration() && assessment.getIsValid())) return Boolean.FALSE;
 
-		// TODO:
-		
-		// make sure there's an entry
-		
-		// get all the "official" submissions
-		
-		// push them
-
 		M_log.debug("reportAssessmentGrades: " + assessment.getId());
+
+		try
+		{
+			// make sure there's a gradebook
+			boolean hasGradebook = gradebookService.isGradebookDefined(assessment.getContext());
+			if (hasGradebook)
+			{
+				// see if there's an entry
+				boolean reported = gradebookService.isExternalAssignmentDefined(assessment.getContext(), assessment.getTitle());
+				if (!reported)
+				{
+					// TODO: what url to use?
+					String url = null;
+
+					// make an entry for the assessment
+					gradebookService.addExternalAssessment(assessment.getContext(), assessment.getTitle(), url, assessment.getTitle(), assessment
+							.getParts().getTotalPoints(), assessment.getDates().getDueDate(), "Test Center");
+				}
+
+				// get the "official" submissions map of user id -> Float score (for released completed submissions)
+				Map<String, Float> scores = this.submissionService.getAssessmentHighestScores(assessment, Boolean.TRUE);
+
+				// make them double for gb
+				Map<String, Double> dScores = new HashMap<String, Double>();
+				for (Map.Entry entry : scores.entrySet())
+				{
+					String key = (String) entry.getKey();
+					Float total = (Float) entry.getValue();
+					dScores.put(key, (total == null) ? null : Double.valueOf(total.doubleValue()));
+				}
+
+				// report them
+				gradebookService.updateExternalAssessmentScores(assessment.getContext(), assessment.getTitle(), dScores);
+
+				return Boolean.TRUE;
+			}
+		}
+		catch (GradebookNotFoundException e)
+		{
+			M_log.warn("reportAssessmentGrades: " + assessment.getId(), e);
+		}
+		catch (AssessmentNotFoundException e)
+		{
+			M_log.warn("reportAssessmentGrades: " + assessment.getId(), e);
+		}
+
 		return Boolean.FALSE;
 	}
 
@@ -133,15 +187,49 @@ public class GradesServiceGradebook23Impl implements GradesService
 		Assessment assessment = submission.getAssessment();
 		if (!(assessment.getPublished() && assessment.getGrading().getGradebookIntegration() && assessment.getIsValid())) return Boolean.FALSE;
 
-		// make sure we are complete and released
-		if (!(submission.getIsComplete() && submission.getIsReleased())) return Boolean.FALSE;
+		// make sure we are complete
+		if (!submission.getIsComplete()) return Boolean.FALSE;
 
-		// get this submission's user's "official" submission for this submission's assessment
-		
-		// push it
-
-		// TODO:
 		M_log.debug("reportSubmissionGrade: " + submission.getId());
+
+		try
+		{
+			// make sure there's an entry
+			boolean hasGradebook = gradebookService.isGradebookDefined(assessment.getContext());
+			if (hasGradebook)
+			{
+				boolean reported = gradebookService.isExternalAssignmentDefined(assessment.getContext(), assessment.getTitle());
+				if (reported)
+				{
+					Double dScore = null;
+
+					// if not released, report the null score
+					if (submission.getIsReleased())
+					{
+						// get this submission's user's "official" submission for this submission's assessment
+						Float score = this.submissionService.getSubmissionOfficialScore(assessment, submission.getUserId());
+						if (score != null)
+						{
+							dScore = Double.valueOf(score.doubleValue());
+						}
+					}
+
+					// report it
+					gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getTitle(), submission.getUserId(), dScore);
+
+					return Boolean.TRUE;
+				}
+			}
+		}
+		catch (GradebookNotFoundException e)
+		{
+			M_log.warn("reportAssessmentGrades: " + assessment.getId(), e);
+		}
+		catch (AssessmentNotFoundException e)
+		{
+			M_log.warn("reportAssessmentGrades: " + assessment.getId(), e);
+		}
+
 		return Boolean.FALSE;
 	}
 
@@ -150,8 +238,30 @@ public class GradesServiceGradebook23Impl implements GradesService
 	 */
 	public Boolean retractAssessmentGrades(Assessment assessment)
 	{
-		// TODO:
 		M_log.debug("retractAssessmentGrades: " + assessment.getId());
+
+		try
+		{
+			boolean hasGradebook = gradebookService.isGradebookDefined(assessment.getContext());
+			if (hasGradebook)
+			{
+				boolean reported = gradebookService.isExternalAssignmentDefined(assessment.getContext(), assessment.getTitle());
+				if (reported)
+				{
+					gradebookService.removeExternalAssessment(assessment.getContext(), assessment.getTitle());
+					return Boolean.TRUE;
+				}
+			}
+		}
+		catch (GradebookNotFoundException e)
+		{
+			M_log.warn("retractAssessmentGrades: ", e);
+		}
+		catch (AssessmentNotFoundException e)
+		{
+			M_log.warn("retractAssessmentGrades", e);
+		}
+
 		return Boolean.FALSE;
 	}
 
@@ -160,8 +270,38 @@ public class GradesServiceGradebook23Impl implements GradesService
 	 */
 	public Boolean retractSubmissionGrade(Submission submission)
 	{
-		// TODO:
+		Assessment assessment = submission.getAssessment();
+
 		M_log.debug("retractSubmissionGrade: " + submission.getId());
+
+		try
+		{
+			// make sure there's an entry
+			boolean hasGradebook = gradebookService.isGradebookDefined(assessment.getContext());
+			if (hasGradebook)
+			{
+				boolean reported = gradebookService.isExternalAssignmentDefined(assessment.getContext(), assessment.getTitle());
+				if (reported)
+				{
+					// null retracts the score
+					Double score = null;
+
+					// report it
+					gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getTitle(), submission.getUserId(), score);
+
+					return Boolean.TRUE;
+				}
+			}
+		}
+		catch (GradebookNotFoundException e)
+		{
+			M_log.warn("reportAssessmentGrades: " + assessment.getId(), e);
+		}
+		catch (AssessmentNotFoundException e)
+		{
+			M_log.warn("reportAssessmentGrades: " + assessment.getId(), e);
+		}
+
 		return Boolean.FALSE;
 	}
 
@@ -207,6 +347,17 @@ public class GradesServiceGradebook23Impl implements GradesService
 	public void setSessionManager(SessionManager service)
 	{
 		this.sessionManager = service;
+	}
+
+	/**
+	 * Dependency: SubmissionService.
+	 * 
+	 * @param service
+	 *        The SubmissionService.
+	 */
+	public void setSubmissionService(SubmissionService service)
+	{
+		this.submissionService = service;
 	}
 
 	/**

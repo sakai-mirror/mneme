@@ -974,6 +974,32 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
+	public Map<String, Float> getAssessmentHighestScores(Assessment assessment, Boolean releasedOnly)
+	{
+		if (assessment == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("getAssessmentHighestScores:" + assessment.getId());
+
+		// get all possible users who can submit
+		Set<String> userIds = this.securityService.getUsersIsAllowed(MnemeService.SUBMIT_PERMISSION, assessment.getContext());
+
+		Map<String, Float> rv = this.storage.getAssessmentHighestScores(assessment, releasedOnly);
+		
+		// add anyone missing
+		for (String userId : userIds)
+		{
+			if (rv.get(userId) == null)
+			{
+				rv.put(userId, null);
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
 	{
 		if (assessment == null) throw new IllegalArgumentException();
@@ -1090,6 +1116,18 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (rv != null) this.threadLocalManager.set(key, this.storage.newSubmission(rv));
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getSubmissionOfficialScore(Assessment assessment, String userId)
+	{
+		if (assessment == null) throw new IllegalArgumentException();
+		if (userId == null) throw new IllegalArgumentException();
+
+		// highest is official
+		return this.storage.getSubmissionHighestScore(assessment, userId);
 	}
 
 	/**

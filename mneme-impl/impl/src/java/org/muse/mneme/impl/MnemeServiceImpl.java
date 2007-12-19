@@ -442,6 +442,14 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
+	public Map<String, Float> getAssessmentHighestScores(Assessment assessment, Boolean releasedOnly)
+	{
+		return this.submissionService.getAssessmentHighestScores(assessment, releasedOnly);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
 	{
 		return submissionService.getAssessmentQuestionHasUnscoredSubmissions(assessment, question);
@@ -542,6 +550,14 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	public Submission getSubmission(String id)
 	{
 		return submissionService.getSubmission(id);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getSubmissionOfficialScore(Assessment assessment, String userId)
+	{
+		return this.submissionService.getSubmissionOfficialScore(assessment, userId);
 	}
 
 	/**

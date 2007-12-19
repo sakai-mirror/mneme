@@ -22,6 +22,7 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,6 +167,40 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public Map<String, Float> getAssessmentHighestScores(Assessment assessment, Boolean releasedOnly)
+	{
+		Map<String, Float> rv = new HashMap<String, Float>();
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			if (submission.getAssessment().equals(assessment) && submission.getIsComplete())
+			{
+				if (releasedOnly && !submission.getIsReleased()) continue;
+
+				Float total = submission.getTotalScore();
+				if (total != null)
+				{
+					Float prior = rv.get(submission.getUserId());
+					if (prior != null)
+					{
+						if (prior.floatValue() < total.floatValue())
+						{
+							rv.put(submission.getUserId(), total);
+						}
+					}
+					else
+					{
+						rv.put(submission.getUserId(), total);
+					}
+				}
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
 	{
 		// check the submissions to this assessment
@@ -261,11 +296,11 @@ public class SubmissionStorageSample implements SubmissionStorage
 	 */
 	public Float getSubmissionHighestScore(Assessment assessment, String userId)
 	{
-		float rv = 0f;
+		Float rv = null;
 		for (SubmissionImpl submission : this.submissions.values())
 		{
 			if (submission.getAssessment().equals(assessment) && submission.getUserId().equals(userId) && submission.getIsComplete()
-					&& submission.getTotalScore() > rv)
+					&& ((rv == null) || (submission.getTotalScore() > rv.floatValue())))
 			{
 				rv = submission.getTotalScore();
 			}

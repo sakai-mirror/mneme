@@ -22,6 +22,7 @@
 package org.muse.mneme.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
@@ -69,6 +70,17 @@ public interface SubmissionStorage
 	 * @return TRUE if there are unscored submissions to this assessment, FALSE if not.
 	 */
 	Boolean getAssessmentHasUnscoredSubmissions(Assessment assessment);
+
+	/**
+	 * Find the highest submission score for each user who has submitted to the assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param releasedOnly
+	 *        if TRUE, report only released submissions, else report all completed ones.
+	 * @return A Map of keyed by user id to that user's highest Float submission score for the assessment.
+	 */
+	Map<String, Float> getAssessmentHighestScores(Assessment assessment, Boolean releasedOnly);
 
 	/**
 	 * Check if there are any completed submissions that have any null scores for answered answers to this question for this assessment.
@@ -129,7 +141,7 @@ public interface SubmissionStorage
 	 *        The assessment.
 	 * @param userId
 	 *        The user.
-	 * @return The highest submission score to this assessment by this user (or 0 if there are no submissions).
+	 * @return The highest submission score to this assessment by this user (or null if there are no submissions).
 	 */
 	Float getSubmissionHighestScore(Assessment assessment, String userId);
 
