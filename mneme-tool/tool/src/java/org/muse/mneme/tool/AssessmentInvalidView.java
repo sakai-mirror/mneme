@@ -62,6 +62,12 @@ public class AssessmentInvalidView extends ControllerImpl
 		msg.append("<ul>");
 		if (!assessment.getIsValid())
 		{
+			// could be grading
+			if (!assessment.getGrading().getIsValid())
+			{
+				msg.append("<li>" + msgs.getString("invalid-grading") + "</li>");
+			}
+
 			// could be dates
 			if (!assessment.getDates().getIsValid())
 			{

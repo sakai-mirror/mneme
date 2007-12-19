@@ -332,6 +332,9 @@ public class AssessmentImpl implements Assessment
 		// parts valid
 		if (!this.parts.getIsValid()) return Boolean.FALSE;
 
+		// grading valid
+		if (!this.grading.getIsValid()) return Boolean.FALSE;
+
 		return Boolean.TRUE;
 	}
 

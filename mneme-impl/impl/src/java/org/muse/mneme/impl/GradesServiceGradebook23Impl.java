@@ -28,11 +28,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.GradesRejectsAssessmentException;
 import org.muse.mneme.api.GradesService;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.service.gradebook.shared.AssessmentNotFoundException;
+import org.sakaiproject.service.gradebook.shared.AssignmentHasIllegalPointsException;
+import org.sakaiproject.service.gradebook.shared.ConflictingAssignmentNameException;
+import org.sakaiproject.service.gradebook.shared.ConflictingExternalIdException;
 import org.sakaiproject.service.gradebook.shared.GradebookNotFoundException;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
@@ -85,12 +89,21 @@ public class GradesServiceGradebook23Impl implements GradesService
 				return Boolean.valueOf(reported);
 			}
 		}
-		catch (Exception e)
+		catch (GradebookNotFoundException e)
 		{
-			M_log.warn("assessmentReported:", e);
+			M_log.warn("assessmentReported:" + e.toString());
 		}
 
 		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean available(String context)
+	{
+		boolean hasGradebook = gradebookService.isGradebookDefined(context);
+		return Boolean.valueOf(hasGradebook);
 	}
 
 	/**
@@ -106,20 +119,13 @@ public class GradesServiceGradebook23Impl implements GradesService
 	 */
 	public void init()
 	{
-		try
-		{
-			M_log.info("init()");
-		}
-		catch (Throwable t)
-		{
-			M_log.warn("init(): ", t);
-		}
+		M_log.info("init()");
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean reportAssessmentGrades(Assessment assessment)
+	public Boolean reportAssessmentGrades(Assessment assessment) throws GradesRejectsAssessmentException
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 
@@ -166,11 +172,23 @@ public class GradesServiceGradebook23Impl implements GradesService
 		}
 		catch (GradebookNotFoundException e)
 		{
-			M_log.warn("reportAssessmentGrades: " + assessment.getId(), e);
+			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
 		}
 		catch (AssessmentNotFoundException e)
 		{
-			M_log.warn("reportAssessmentGrades: " + assessment.getId(), e);
+			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
+		}
+		catch (ConflictingAssignmentNameException e)
+		{
+			throw new GradesRejectsAssessmentException();
+		}
+		catch (ConflictingExternalIdException e)
+		{
+			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
+		}
+		catch (AssignmentHasIllegalPointsException e)
+		{
+			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
 		}
 
 		return Boolean.FALSE;
@@ -223,11 +241,11 @@ public class GradesServiceGradebook23Impl implements GradesService
 		}
 		catch (GradebookNotFoundException e)
 		{
-			M_log.warn("reportAssessmentGrades: " + assessment.getId(), e);
+			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
 		}
 		catch (AssessmentNotFoundException e)
 		{
-			M_log.warn("reportAssessmentGrades: " + assessment.getId(), e);
+			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
 		}
 
 		return Boolean.FALSE;
@@ -255,11 +273,11 @@ public class GradesServiceGradebook23Impl implements GradesService
 		}
 		catch (GradebookNotFoundException e)
 		{
-			M_log.warn("retractAssessmentGrades: ", e);
+			M_log.warn("retractAssessmentGrades: " + e.toString());
 		}
 		catch (AssessmentNotFoundException e)
 		{
-			M_log.warn("retractAssessmentGrades", e);
+			M_log.warn("retractAssessmentGrades" + e.toString());
 		}
 
 		return Boolean.FALSE;
@@ -295,11 +313,11 @@ public class GradesServiceGradebook23Impl implements GradesService
 		}
 		catch (GradebookNotFoundException e)
 		{
-			M_log.warn("reportAssessmentGrades: " + assessment.getId(), e);
+			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
 		}
 		catch (AssessmentNotFoundException e)
 		{
-			M_log.warn("reportAssessmentGrades: " + assessment.getId(), e);
+			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
 		}
 
 		return Boolean.FALSE;
@@ -378,121 +396,4 @@ public class GradesServiceGradebook23Impl implements GradesService
 	{
 		this.userDirectoryService = service;
 	}
-
-	// /**
-	// * {@inheritDoc}
-	// */
-	// public void updateGradebook(Assessment assessment) throws AssessmentPermissionException
-	// {
-	// if (assessment == null) throw new IllegalArgumentException();
-	//
-	// if (M_log.isDebugEnabled()) M_log.debug("updateGradebook: " + assessment.getId());
-	//
-	// // check permission
-	// securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.GRADE_PERMISSION, assessment.getContext());
-	//
-	// // skip if there is no gradebook integration
-	// if (!assessment.getGrading().getGradebookIntegration()) return;
-	//
-	// // try each user with a submission
-	// List<String> userIds = this.storage.getUsersSubmitted(assessment);
-	//
-	// for (String uid : userIds)
-	// {
-	// // find the user's highest score among the completed submissions
-	// Float highestScore = this.storage.getSubmissionHighestScore(assessment, uid);
-	//
-	// // push this into the GB
-	// try
-	// {
-	// gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(), uid, ((highestScore == null) ? null
-	// : new Double(highestScore.doubleValue())));
-	// }
-	// catch (GradebookNotFoundException e)
-	// {
-	// // if there's no gradebook for this context, oh well...
-	// M_log.warn("updateGradebook: (no gradebook for context): " + e);
-	// }
-	// catch (AssessmentNotFoundException e)
-	// {
-	// // if the assessment has not been registered in gb, this is a problem
-	// M_log.warn("updateGradebook: (assessment has not been registered in context's gb): " + e);
-	// }
-	// }
-	// }
-
-	// /**
-	// * Record this submission in the gradebook.
-	// *
-	// * @param submission
-	// * The submission to record in the gradebook.
-	// * @param refresh
-	// * if true, get the latest score from the db, if false, use the final score from the submission.
-	// */
-	// protected void addToGradebook(Submission submission, boolean refresh)
-	// {
-	// if (submission == null) throw new IllegalArgumentException();
-	//
-	// Assessment assessment = submission.getAssessment();
-	//
-	// Double points = null;
-	//
-	// // refresh from the database if requested
-	// if (refresh)
-	// {
-	// // read the final score for this submission from the db
-	// points = this.storage.getSubmissionScore(submission).doubleValue();
-	// }
-	// else
-	// {
-	// // use the score from the submission record
-	// points = submission.getTotalScore().doubleValue();
-	// }
-	//
-	// // find the highest score recorded for this user and this assessment
-	// Float highestScore = this.storage.getSubmissionHighestScore(assessment, submission.getUserId());
-	// if ((highestScore != null) && (points.doubleValue() < highestScore.doubleValue()))
-	// {
-	// // if this submission's points is not highest, don't record this in GB
-	// return;
-	// }
-	//
-	// // post it
-	// try
-	// {
-	// gradebookService.updateExternalAssessmentScore(assessment.getContext(), assessment.getId(), submission.getUserId(), points);
-	// }
-	// catch (GradebookNotFoundException e)
-	// {
-	// // if there's no gradebook for this context, oh well...
-	// M_log.warn("addToGradebook: (no gradebook for context): " + e);
-	// }
-	// catch (AssessmentNotFoundException e)
-	// {
-	// // if the assessment has not been registered in gb, this is a problem
-	// M_log.warn("addToGradebook: (assessment has not been registered in context's gb): " + e);
-	// }
-	// }
-
-	// /**
-	// * Update the gradebook for ths submission.
-	// *
-	// * @param submission
-	// * The submission to record in the gradebook.
-	// * @param refresh
-	// * if true, get the latest score from the db, if false, use the final score from the submission.
-	// */
-	// protected void recordInGradebook(Submission submission, boolean refresh)
-	// {
-	// if (submission.getIsReleased() && submission.getAssessment().getGrading().getGradebookIntegration())
-	// {
-	// addToGradebook(submission, refresh);
-	// }
-	//
-	// // TODO: remove from gb
-	// else
-	// {
-	//
-	// }
-	// }
 }

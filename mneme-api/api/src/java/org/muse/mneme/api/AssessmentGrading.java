@@ -48,6 +48,20 @@ public interface AssessmentGrading
 	Boolean getGradebookIntegration();
 
 	/**
+	 * Check if the assessment is rejected from entry into the gradebook.
+	 * 
+	 * @return TRUE if the assessment is rejected from entry into the gradebook, FALSE if not.
+	 */
+	Boolean getGradebookRejectedAssessment();
+
+	/**
+	 * Check if the grading options are valid; i.e. has not been rejected by the grades service if that option was enabled.
+	 * 
+	 * @return TRUE if the assessment dates are valid, FALSE if not.
+	 */
+	Boolean getIsValid();
+
+	/**
 	 * Set if student identities are invisible to the grader when grading.
 	 * 
 	 * @return TRUE if student identities are invisible to the grader when grading, FALSE if not.

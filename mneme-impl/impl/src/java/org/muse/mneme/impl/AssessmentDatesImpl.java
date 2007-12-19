@@ -38,6 +38,9 @@ public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements Asse
 
 	protected Date due = null;
 
+	/** Track the original due value. */
+	protected Date dueWas = null;
+
 	protected Date open = null;
 
 	protected transient Changeable owner = null;
@@ -132,6 +135,29 @@ public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements Asse
 	}
 
 	/**
+	 * Check if the due date was changed.
+	 * 
+	 * @return TRUE if changed, FALSE if not.
+	 */
+	protected Boolean getDueDateChanged()
+	{
+		Boolean rv = Boolean.valueOf(Different.different(this.due, this.dueWas));
+		return rv;
+	}
+
+	/**
+	 * Initialze the due date.
+	 * 
+	 * @param date
+	 *        The due date.
+	 */
+	protected void initDueDate(Date date)
+	{
+		this.due = date;
+		this.dueWas = (date == null) ? date : new Date(date.getTime());
+	}
+
+	/**
 	 * Set as a copy of another.
 	 * 
 	 * @param other
@@ -142,6 +168,7 @@ public class AssessmentDatesImpl extends AssessmentDatesBaseImpl implements Asse
 		this.acceptUntil = other.acceptUntil;
 		this.archived = other.archived;
 		this.due = other.due;
+		this.dueWas = other.dueWas;
 		this.open = other.open;
 	}
 }

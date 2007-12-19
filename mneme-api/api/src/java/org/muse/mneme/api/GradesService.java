@@ -29,6 +29,24 @@ import java.util.List;
 public interface GradesService
 {
 	/**
+	 * Check if this assessment has an entry in the grading authority.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return TRUE if the assessment has an entry in the grading authoity, FALSE if not.
+	 */
+	Boolean assessmentReported(Assessment assessment);
+
+	/**
+	 * Check if the grading authority is available for this context.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return TRUE if the grading authority is available for this context, FALSE if not.
+	 */
+	Boolean available(String context);
+
+	/**
 	 * Report this assessment's grade. All completed "best" submissions that are found are reported.<br />
 	 * Establish the Assessment with the grading authority if needed.<br />
 	 * Replace the entire set of grades for this assessment that are currently reported.
@@ -36,8 +54,10 @@ public interface GradesService
 	 * @param assessment
 	 *        The assessment.
 	 * @return TRUE if successful, FALSE if not.
+	 * @throws GradesRejectsAssessmentException
+	 *         if the assessment was not able to be added to the grading authority.
 	 */
-	Boolean reportAssessmentGrades(Assessment assessment);
+	Boolean reportAssessmentGrades(Assessment assessment) throws GradesRejectsAssessmentException;
 
 	/**
 	 * Report this submission's grade.<br />
@@ -68,13 +88,4 @@ public interface GradesService
 	 * @return TRUE if successful, FALSE if not.
 	 */
 	Boolean retractSubmissionGrade(Submission submission);
-
-	/**
-	 * Check if this assessment has an entry in the grading authority.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 * @return TRUE if the assessment has an entry in the grading authoity, FALSE if not.
-	 */
-	Boolean assessmentReported(Assessment assessment);
 }

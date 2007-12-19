@@ -34,6 +34,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.GradesService;
 import org.muse.mneme.api.Part;
 import org.sakaiproject.util.Web;
 
@@ -47,6 +48,9 @@ public class AssessmentSettingsView extends ControllerImpl
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
+
+	/** Dependency: GradesService */
+	protected GradesService gradesService = null;
 
 	/**
 	 * Shutdown.
@@ -113,6 +117,9 @@ public class AssessmentSettingsView extends ControllerImpl
 		// collect information: the selected assessment
 		context.put("assessment", assessment);
 		context.put("sort", sort);
+
+		// check if we have gradebook
+		context.put("gradebookAvailable", this.gradesService.available(assessment.getContext()));
 
 		// render
 		uiService.render(ui, context);
@@ -202,4 +209,16 @@ public class AssessmentSettingsView extends ControllerImpl
 	{
 		this.assessmentService = service;
 	}
+
+	/**
+	 * Set the GradesService.
+	 * 
+	 * @param service
+	 *        The GradesService.
+	 */
+	public void setGradesService(GradesService service)
+	{
+		this.gradesService = service;
+	}
+
 }

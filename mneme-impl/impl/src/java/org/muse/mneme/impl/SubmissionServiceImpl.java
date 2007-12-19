@@ -40,6 +40,7 @@ import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.GradesRejectsAssessmentException;
 import org.muse.mneme.api.GradesService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
@@ -704,7 +705,15 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 
 		// release the grades to the grading authority
-		this.gradesService.reportAssessmentGrades(assessment);
+		try
+		{
+			this.gradesService.reportAssessmentGrades(assessment);
+		}
+		catch (GradesRejectsAssessmentException e)
+		{
+			// TODO:
+			M_log.warn("evaluateSubmissions : " + e.toString());
+		}
 	}
 
 	/**
@@ -984,7 +993,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		Set<String> userIds = this.securityService.getUsersIsAllowed(MnemeService.SUBMIT_PERMISSION, assessment.getContext());
 
 		Map<String, Float> rv = this.storage.getAssessmentHighestScores(assessment, releasedOnly);
-		
+
 		// add anyone missing
 		for (String userId : userIds)
 		{

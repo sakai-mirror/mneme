@@ -33,6 +33,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.GradesRejectsAssessmentException;
 import org.muse.mneme.api.GradesService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
@@ -474,10 +475,19 @@ public class AssessmentServiceImpl implements AssessmentService
 		// see if we have had a title change (and clear)
 		boolean titleChanged = ((AssessmentImpl) assessment).getTitleChanged();
 		((AssessmentImpl) assessment).initTitle(assessment.getTitle());
+		if (titleChanged)
+		{
+			// make sure we are not still considered invalid for gb - if we are with the new title, we will pick that up down below
+			((AssessmentGradingImpl) (assessment.getGrading())).initGradebookRejectedAssessment(Boolean.FALSE);
+		}
 
 		// see if we had a change in published (and clear)
 		boolean publishedChanged = ((AssessmentImpl) assessment).getPublishedChanged();
 		((AssessmentImpl) assessment).initPublished(assessment.getPublished());
+
+		// see if we have had a due date change (and clear)
+		boolean dueChanged = ((AssessmentDatesImpl) assessment.getDates()).getDueDateChanged();
+		((AssessmentDatesImpl) assessment.getDates()).initDueDate(assessment.getDates().getDueDate());
 
 		// see if we have changed our validity
 		boolean validityChanged = false;
@@ -508,10 +518,10 @@ public class AssessmentServiceImpl implements AssessmentService
 		// save the changes
 		save((AssessmentImpl) assessment);
 
-		// if the name has changed, or we are retracting submissions, or we are now unpublished,
+		// if the name or due date has changed, or we are retracting submissions, or we are now unpublished,
 		// or we are now invalid, or we have just been archived, or we are now not gradebook integrated,
 		// retract the assessment from the grades authority
-		if (titleChanged || retract || (publishedChanged && !assessment.getPublished()) || (validityChanged && !nowValid)
+		if (titleChanged || dueChanged || retract || (publishedChanged && !assessment.getPublished()) || (validityChanged && !nowValid)
 				|| (archivedChanged && assessment.getArchived()) || (gbIntegrationChanged && !assessment.getGrading().getGradebookIntegration()))
 		{
 			// retract the entire assessment from grades - use the old information (title) (if we existed before this call)
@@ -527,14 +537,26 @@ public class AssessmentServiceImpl implements AssessmentService
 			}
 		}
 
-		// if the name has changed, or we are releasing submissions, or we are now published,
+		// if the name or due date has changed, or we are releasing submissions, or we are now published,
 		// or we are now valid (and are published), or we are now gradebook integrated,
 		// report the assessment and all completed submissions to the grades authority
-		if (titleChanged || release || (publishedChanged && assessment.getPublished()) || (validityChanged && nowValid && assessment.getPublished())
+		if (titleChanged || dueChanged || release || (publishedChanged && assessment.getPublished())
+				|| (validityChanged && nowValid && assessment.getPublished())
 				|| (gbIntegrationChanged && assessment.getGrading().getGradebookIntegration()))
 		{
 			// assure we have an entry in the grades, and push over any completed official submissions
-			this.gradesService.reportAssessmentGrades(assessment);
+			try
+			{
+				this.gradesService.reportAssessmentGrades(assessment);
+			}
+			catch (GradesRejectsAssessmentException e)
+			{
+				// mark as invalid
+				((AssessmentGradingImpl) (assessment.getGrading())).initGradebookRejectedAssessment(Boolean.TRUE);
+
+				// resave
+				save((AssessmentImpl) assessment);
+			}
 
 			// release the submissions, if we need to (each will have the grade reported)
 			if (release)

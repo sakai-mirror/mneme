@@ -290,6 +290,12 @@
 								</selectionChoice>
 							</selectionChoices>
 						</selection>
+						<!-- if invalid -->
+						<warning selector="invalid-grading">
+							<included>
+								<decision model="assessment.grading.isValid" reversed="TRUE" />
+							</included>
+						</warning>
 						<selection title="sendgbook">
 							<selectionChoices>
 								<selectionChoice>
@@ -302,6 +308,9 @@
 								</selectionChoice>
 							</selectionChoices>
 							<model ref="assessment.grading.gradebookIntegration" />
+							<included>
+								<decision model="gradebookAvailable" />
+							</included>
 						</selection>
 
 						<selection title="anonymous">

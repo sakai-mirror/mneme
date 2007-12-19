@@ -41,6 +41,8 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	/** Track the original gradebookIntegration value. */
 	protected transient Boolean gradebookIntegrationWas = Boolean.FALSE;
 
+	protected Boolean gradebookRejectedAssessment = Boolean.FALSE;
+
 	protected transient Changeable owner = null;
 
 	/**
@@ -90,6 +92,22 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getGradebookRejectedAssessment()
+	{
+		return this.gradebookRejectedAssessment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsValid()
+	{
+		return Boolean.valueOf(!gradebookRejectedAssessment);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setAnonymous(Boolean setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
@@ -122,6 +140,12 @@ public class AssessmentGradingImpl implements AssessmentGrading
 		if (this.gradebookIntegration.equals(setting)) return;
 
 		this.gradebookIntegration = setting;
+
+		// clear the invalid flag if we are no longer integrated
+		if (!this.gradebookIntegration)
+		{
+			this.gradebookRejectedAssessment = Boolean.FALSE;
+		}
 
 		this.owner.setChanged();
 	}
@@ -173,6 +197,17 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	}
 
 	/**
+	 * Initialize the gradebookRejectedAssessment setting.
+	 * 
+	 * @param gradebookRejectedAssessment
+	 *        The gradebookRejectedAssessment setting.
+	 */
+	protected void initGradebookRejectedAssessment(Boolean gradebookRejectedAssessment)
+	{
+		this.gradebookRejectedAssessment = gradebookRejectedAssessment;
+	}
+
+	/**
 	 * Set as a copy of another.
 	 * 
 	 * @param other
@@ -184,6 +219,7 @@ public class AssessmentGradingImpl implements AssessmentGrading
 		this.autoReleaseWas = other.autoReleaseWas;
 		this.gradebookIntegration = other.gradebookIntegration;
 		this.gradebookIntegrationWas = other.gradebookIntegrationWas;
+		this.gradebookRejectedAssessment = other.gradebookRejectedAssessment;
 		this.anonymous = other.anonymous;
 	}
 }

@@ -616,7 +616,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			try
 			{
 				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("10/01/07"));
-				a.getDates().setDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("12/22/07"));
+				((AssessmentDatesImpl) a.getDates()).initDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("12/22/07"));
 			}
 			catch (ParseException e)
 			{
@@ -678,7 +678,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			try
 			{
 				a.getDates().setOpenDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("09/01/07"));
-				a.getDates().setDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("12/15/07"));
+				((AssessmentDatesImpl) a.getDates()).initDueDate(DateFormat.getDateInstance(DateFormat.SHORT).parse("12/15/07"));
 			}
 			catch (ParseException e)
 			{
