@@ -792,6 +792,8 @@ public class AssessmentImpl implements Assessment
 		
 		for (Part part : this.parts.parts)
 		{
+			((PartImpl) part).changed = true;
+
 			if (part instanceof DrawPart)
 			{
 				for (PoolDraw draw : ((DrawPartImpl) part).pools)

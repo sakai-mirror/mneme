@@ -254,7 +254,16 @@ public class PoolStorageMysql implements PoolStorage
 		else
 		{
 			updatePool(pool);
+
+			// if newly made historical
+			if (((PoolImplLazyManifest) pool).getNewlyHistorical())
+			{
+				// save the manifest
+				insertManifest(pool);
+				((PoolImplLazyManifest) pool).clearNewlyHistorical();
+			}
 		}
+
 	}
 
 	/**
@@ -439,16 +448,15 @@ public class PoolStorageMysql implements PoolStorage
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_POOL_MANIFEST (");
-		sql.append(" ORIG_QID, POOL_ID, QUESTION_ID )");
-		sql.append(" VALUES(?,?,?)");
+		sql.append(" POOL_ID, QUESTION_ID )");
+		sql.append(" VALUES(?,?)");
 
-		Object[] fields = new Object[3];
-		fields[1] = Long.valueOf(pool.getId());
+		Object[] fields = new Object[2];
+		fields[0] = Long.valueOf(pool.getId());
 
 		for (String qid : pool.getFrozenManifest())
 		{
-			fields[0] = Long.valueOf(qid);
-			fields[2] = Long.valueOf(qid);
+			fields[1] = Long.valueOf(qid);
 
 			if (!this.sqlService.dbWrite(sql.toString(), fields))
 			{
@@ -523,7 +531,7 @@ public class PoolStorageMysql implements PoolStorage
 		final List<String> rv = new ArrayList<String>();
 
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT M.QUESTION_ID FROM MNEME_POOL_MANIFEST M WHERE M.POOL_ID = ? ORDER BY M.ORIG_QID ASC");
+		sql.append("SELECT M.QUESTION_ID FROM MNEME_POOL_MANIFEST M WHERE M.POOL_ID = ? ORDER BY M.QUESTION_ID ASC");
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(id);
 		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()

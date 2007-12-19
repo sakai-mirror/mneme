@@ -476,6 +476,11 @@ public class AssessmentStorageSample implements AssessmentStorage
 			((AssessmentAccessImpl) access).clearChanged();
 		}
 		((AssessmentSpecialAccessImpl) assessment.getSpecialAccess()).clearDeleted();
+		for (Part part : assessment.getParts().getParts())
+		{
+			((PartImpl) part).clearChanged();
+		}
+		((AssessmentPartsImpl) assessment.getParts()).clearDeleted();
 
 		// assign an id
 		boolean idsNeeded = false;
