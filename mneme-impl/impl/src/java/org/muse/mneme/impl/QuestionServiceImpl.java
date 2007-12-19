@@ -115,9 +115,6 @@ public class QuestionServiceImpl implements QuestionService
 
 		// check permission - user must have MANAGE_PERMISSION in the context
 		boolean ok = securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context);
-
-		// TODO: other users allowed...
-		// TODO: or is this user based...
 		return ok;
 	}
 
@@ -151,10 +148,7 @@ public class QuestionServiceImpl implements QuestionService
 		// security check
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, destination.getContext());
 
-		// before anything changes, move to history if needed
-		this.poolService.createHistoryIfNeeded(destination, false);
-
-		this.storage.copyPoolQuestions(userId, source, destination);
+		this.storage.copyPoolQuestions(userId, source, destination, false, null);
 
 		// TODO: event?
 	}
@@ -174,9 +168,6 @@ public class QuestionServiceImpl implements QuestionService
 		// security check
 		Pool destination = (pool != null) ? pool : question.getPool();
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, destination.getContext());
-
-		// before anything changes, move the destination pool to history if needed
-		this.poolService.createHistoryIfNeeded(destination, false);
 
 		// create a copy of the question
 		QuestionImpl rv = this.storage.newQuestion((QuestionImpl) question);
@@ -402,14 +393,13 @@ public class QuestionServiceImpl implements QuestionService
 
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getContext());
-		// TODO: also check the pool?
+		if (!question.getContext().equals(pool.getContext()))
+		{
+			securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, pool.getContext());
+		}
 
 		// if to the same pool, do nothing
 		if (question.getPool().equals(pool)) return;
-
-		// before anything changes, move to history if needed
-		this.poolService.createHistoryIfNeeded(question.getPool(), false);
-		this.poolService.createHistoryIfNeeded(pool, false);
 
 		// clear the cache
 		String key = cacheKey(question.getId());
@@ -430,9 +420,6 @@ public class QuestionServiceImpl implements QuestionService
 
 		// security check
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, pool.getContext());
-
-		// before anything changes, move to history if needed
-		this.poolService.createHistoryIfNeeded(pool, false);
 
 		QuestionImpl question = this.storage.newQuestion();
 		question.setPool(pool);
@@ -461,7 +448,7 @@ public class QuestionServiceImpl implements QuestionService
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getContext());
 
-		removeQuestion(question, null);
+		doRemoveQuestion(question);
 	}
 
 	/**
@@ -672,6 +659,62 @@ public class QuestionServiceImpl implements QuestionService
 	}
 
 	/**
+	 * Copy the questions from source to destination, possibly marked as historical.
+	 * 
+	 * @param source
+	 *        The source pool.
+	 * @param destination
+	 *        The destination pool.
+	 * @param asHistory
+	 *        If set, copy the questions as historical
+	 * @param oldToNew
+	 *        A map, which, if present, will be filled in with the mapping of the source question id to the destination question id for each question
+	 *        copied.
+	 */
+	protected void copyPoolQuestionsHistorical(Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("copyPoolQuestionsHistorical: source: " + source.getId() + " destination: " + destination.getId());
+
+		this.storage.copyPoolQuestions(sessionManager.getCurrentSessionUserId(), source, destination, asHistory, oldToNew);
+	}
+
+	/**
+	 * Remove the question
+	 * 
+	 * @param question
+	 *        The quesiton
+	 * @param historyPool
+	 *        if the pool's history pool already made, or null if there is none.
+	 */
+	protected void doRemoveQuestion(Question question)
+	{
+		if (M_log.isDebugEnabled()) M_log.debug("doRemoveQuestion: " + question.getId());
+
+		// get the current from storage
+		QuestionImpl current = (question.getId() == null) ? null : this.storage.getQuestion(question.getId());
+
+		// if we don't have one, or we are trying to delete history, that's bad!
+		if (current == null) throw new IllegalArgumentException();
+		if (current.getIsHistorical()) throw new IllegalArgumentException();
+		Pool currentPool = current.getPool();
+
+		// removed any assessment dependencies on the question
+		this.assessmentService.removeDependency(question);
+
+		// delete
+		this.storage.removeQuestion((QuestionImpl) question);
+
+		// clear caches
+		this.threadLocalManager.set(cacheKey(question.getId()), null);
+		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId()), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext()), null);
+		this.threadLocalManager.set(this.cacheKeyPoolQuestions(question.getPool().getId()), null);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
+	}
+
+	/**
 	 * Save the question.
 	 * 
 	 * @param question
@@ -693,97 +736,12 @@ public class QuestionServiceImpl implements QuestionService
 		question.getModifiedBy().setDate(now);
 		question.getModifiedBy().setUserId(userId);
 
-		// see if the question has been moved from its current pool
-		QuestionImpl current = (question.getId() == null) ? null : this.storage.getQuestion(question.getId());
-
-		Pool currentPool = ((current == null) ? null : current.getPool());
-
-		if ((current != null) && (!currentPool.equals(question.getPool())))
-		{
-			// TODO: I'm not completely sure of this - ggolden
-			// before anything changes, move to history if needed by assessments drawing from the pool
-			// or using this question
-			// - Note: the 'false' widens this to any assessment drawing from the pool or using any pool question
-			// but that's not a real problem -ggolden
-			// - when done, any live test at all dependent on this pool (draw or manual) will
-			// no longer be dependent on the pool, but will be dependent on the history made from the pool.
-			this.poolService.createHistoryIfNeeded(current.getPool(), false);
-			this.poolService.createHistoryIfNeeded(question.getPool(), false);
-
-			// clear cache entries for the pool that the question is leaving
-			this.threadLocalManager.set(this.cacheKeyPoolCount(current.getPool().getId()), null);
-			this.threadLocalManager.set(this.cacheKeyContextCount(current.getContext()), null);
-			this.threadLocalManager.set(this.cacheKeyPoolQuestions(current.getPool().getId()), null);
-		}
-
-		// deal with direct dependencies on this question from live assessments
-		if ((current != null) && (this.assessmentService.liveDependencyExists(question)))
-		{
-			// get a new id on the old and save it as history
-			current.initId(null);
-			current.makeHistorical();
-			((QuestionImpl) current).clearChanged();
-			this.storage.saveQuestion(current);
-
-			// switch the manual uses of this question in tests to the history
-			this.assessmentService.switchLiveDependency(question, current);
-		}
-
-		// deal with (draw-only, direct) dependencies to this question's pool from live assessments
-		if ((current != null) && (this.assessmentService.liveDependencyExists(currentPool, true)))
-		{
-			// generate history if needed
-			if (!current.getIsHistorical())
-			{
-				current.initId(null);
-				current.makeHistorical();
-				((QuestionImpl) current).clearChanged();
-				this.storage.saveQuestion(current);
-			}
-
-			// Note: if the question is moved to a new pool, the code above (createHistoryIfNeeded) will
-			// catch it, and we won't be in here, since there will then be no live dependencies on the pool -ggolden
-			this.poolService.createHistory(currentPool, true);
-		}
-
-		// make history if any submissions reference this question
-		if ((current != null) && (!current.getIsHistorical()) && this.submissionService.submissionsDependsOn(current))
-		{
-			current.initId(null);
-			current.makeHistorical();
-			((QuestionImpl) current).clearChanged();
-			this.storage.saveQuestion(current);
-		}
-
-		// if any frozen / historical pool manifests reference this, we need history (skip if we already are going history)
-		if ((current != null) && (!current.getIsHistorical()) && this.poolService.manifestDependsOn(current))
-		{
-			current.initId(null);
-			current.makeHistorical();
-			((QuestionImpl) current).clearChanged();
-			this.storage.saveQuestion(current);
-		}
-
-		// if we made history
-		if ((current != null) && current.getIsHistorical())
-		{
-			// update any frozen manifest pools so they refer to the historical (i.e. unchanged) quesion
-			// Note: this catches the cases where we just (above) possibly made the pool historical.
-			this.poolService.switchManifests(question, current);
-
-			// switch any use of this question in a submission to the history
-			this.submissionService.switchLiveDependency(question, current);
-		}
-
 		// save
 		((QuestionImpl) question).clearChanged();
 		this.storage.saveQuestion((QuestionImpl) question);
 
-		// clear the cache
-		String key = cacheKey(question.getId());
-		this.threadLocalManager.set(key, null);
-
-		// clear thread-local counts for the pool and context and questions
+		// clear thread-local caches
+		this.threadLocalManager.set(cacheKey(question.getId()), null);
 		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId()), null);
 		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext()), null);
 		this.threadLocalManager.set(this.cacheKeyPoolQuestions(question.getPool().getId()), null);
@@ -825,121 +783,6 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		String ref = MnemeService.REFERENCE_ROOT + "/" + MnemeService.QUESTION_TYPE + "/" + questionId;
 		return ref;
-	}
-
-	/**
-	 * Remove the question
-	 * 
-	 * @param question
-	 *        The quesiton
-	 * @param historyPool
-	 *        if the pool's history pool already made, or null if there is none.
-	 */
-	protected void removeQuestion(Question question, Pool historyPool)
-	{
-		if (M_log.isDebugEnabled()) M_log.debug("removeQuestion: " + question.getId() + ", " + ((historyPool == null) ? "" : historyPool.getId()));
-
-		// get the current from storage, we may need to make a copy for history
-		QuestionImpl current = (question.getId() == null) ? null : this.storage.getQuestion(question.getId());
-
-		// if we don't have one, or we are trying to delete history, that's bad!
-		if (current == null) throw new IllegalArgumentException();
-		if (current.getIsHistorical()) throw new IllegalArgumentException();
-		Pool currentPool = current.getPool();
-
-		// clear the cache
-		String key = cacheKey(question.getId());
-		this.threadLocalManager.set(key, null);
-
-		// deal with direct dependencies on this question from live assessments
-		if (this.assessmentService.liveDependencyExists(question))
-		{
-			// get a new id on the old and save it as history
-			current.initId(null);
-			current.makeHistorical();
-			((QuestionImpl) current).clearChanged();
-			this.storage.saveQuestion(current);
-
-			// switch the manual uses of this question in tests to the history
-			this.assessmentService.switchLiveDependency(question, current);
-		}
-
-		// any remaining assessment dependencies need to be removed
-		this.assessmentService.removeDependency(question);
-
-		// if any locked pool manifests reference this, we need history, too! (skip if we already are going history)
-		if ((!current.getIsHistorical()) && this.poolService.manifestDependsOn(current))
-		{
-			// make sure we have history
-			if (!current.getIsHistorical())
-			{
-				current.initId(null);
-				current.makeHistorical();
-				((QuestionImpl) current).clearChanged();
-				this.storage.saveQuestion(current);
-			}
-		}
-
-		// deal with (draw-only direct) dependencies to this question's pool from live assessments
-		if (this.assessmentService.liveDependencyExists(currentPool, true))
-		{
-			// make sure we have history
-			if (!current.getIsHistorical())
-			{
-				current.initId(null);
-				current.makeHistorical();
-				((QuestionImpl) current).clearChanged();
-				this.storage.saveQuestion(current);
-			}
-
-			// lock down the pool's manifest
-			if (historyPool == null)
-			{
-				historyPool = this.poolService.createHistory(currentPool, true);
-			}
-		}
-
-		// if any submissions reference this, we need history (skip if we already are going history)
-		if ((!current.getIsHistorical()) && this.submissionService.submissionsDependsOn(current))
-		{
-			// make sure we have history
-			if (!current.getIsHistorical())
-			{
-				current.initId(null);
-				current.makeHistorical();
-				((QuestionImpl) current).clearChanged();
-				this.storage.saveQuestion(current);
-			}
-		}
-
-		// if we made history
-		if (current.getIsHistorical())
-		{
-			// // set the history question's pool to historyPool, if we have one
-			// if (historyPool != null)
-			// {
-			// // set it to null, so that history questions have no pool
-			// // TODO: this might not be what we want, but lets give it a try -golden
-			// this.storage.setPool(current, /* historyPool */null);
-			// }
-
-			// update any frozen manifest pools
-			this.poolService.switchManifests(question, current);
-
-			// switch any use of this question in a submission to the history
-			this.submissionService.switchLiveDependency(question, current);
-		}
-
-		// delete
-		this.storage.removeQuestion((QuestionImpl) question);
-
-		// clear thread-local counts for the pool and context and questions
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId()), null);
-		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext()), null);
-		this.threadLocalManager.set(this.cacheKeyPoolQuestions(question.getPool().getId()), null);
-
-		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
 	}
 
 	/**

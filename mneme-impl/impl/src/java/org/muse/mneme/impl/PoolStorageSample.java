@@ -33,7 +33,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
-import org.muse.mneme.api.Question;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -222,27 +221,6 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean manifestDependsOn(Question question)
-	{
-		for (PoolImpl pool : this.pools.values())
-		{
-			if (pool.getContext().equals(question.getContext()) && (pool.getIsHistorical()))
-			{
-				List<String> manifest = pool.getFrozenManifest();
-				int index = manifest.indexOf(question.getId());
-				if (index != -1)
-				{
-					return Boolean.TRUE;
-				}
-			}
-		}
-
-		return Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public PoolImpl newPool()
 	{
 		return new PoolImpl(this.poolService, this.questionService);
@@ -300,25 +278,6 @@ public class PoolStorageSample implements PoolStorage
 	public void setQuestionService(QuestionServiceImpl service)
 	{
 		this.questionService = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void switchManifests(Question from, Question to)
-	{
-		for (PoolImpl pool : this.pools.values())
-		{
-			if (pool.getContext().equals(from.getContext()) && (pool.getIsHistorical()))
-			{
-				List<String> manifest = pool.getFrozenManifest();
-				int index = manifest.indexOf(from.getId());
-				if (index != -1)
-				{
-					manifest.set(index, to.getId());
-				}
-			}
-		}
 	}
 
 	protected void fakeIt()

@@ -84,13 +84,48 @@ public class QuestionStorageMysql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void copyPoolQuestions(final String userId, final Pool source, final Pool destination)
+	public void copyPoolQuestions(final String userId, final Pool source, final Pool destination, final boolean asHistory,
+			final Map<String, String> oldToNew)
 	{
+		// get source's question ids
+		List<String> qids = null;
+		if (oldToNew != null)
+		{
+			qids = source.getAllQuestionIds();
+		}
+		final List<String> poolIds = qids;
+
 		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
-				copyPoolQuestionsTx(userId, source, destination);
+				if (oldToNew == null)
+				{
+					if (asHistory)
+					{
+						copyPoolQuestionsHistoricalTx(userId, source, destination);
+					}
+					else
+					{
+						copyPoolQuestionsTx(userId, source, destination);
+					}
+				}
+				else
+				{
+					for (String qid : poolIds)
+					{
+						if (asHistory)
+						{
+							String hid = copyQuestionHistoricalTx(userId, qid, destination);
+							oldToNew.put(qid, hid);
+						}
+						else
+						{
+							String hid = copyQuestionTx(userId, qid, destination);
+							oldToNew.put(qid, hid);
+						}
+					}
+				}
 			}
 		}, "copyPoolQuestions: " + source.getId());
 	}
@@ -122,7 +157,7 @@ public class QuestionStorageMysql implements QuestionStorage
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT COUNT(1) FROM MNEME_QUESTION Q");
-		sql.append(" WHERE Q.MINT='0' AND Q.HISTORICAL='0' AND Q.POOL_ID=?");
+		sql.append(" WHERE Q.MINT='0' AND Q.POOL_ID=?");
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(pool.getId());
 		List results = this.sqlService.dbRead(sql.toString(), fields, null);
@@ -249,7 +284,7 @@ public class QuestionStorageMysql implements QuestionStorage
 	{
 		// the where and order by
 		StringBuilder whereOrder = new StringBuilder();
-		whereOrder.append("LEFT OUTER JOIN MNEME_POOL P ON Q.POOL_ID=P.ID WHERE Q.MINT='0' AND Q.HISTORICAL='0' AND Q.POOL_ID=?"
+		whereOrder.append("LEFT OUTER JOIN MNEME_POOL P ON Q.POOL_ID=P.ID WHERE Q.MINT='0' AND Q.POOL_ID=?"
 				+ ((questionType != null) ? " AND Q.TYPE=?" : "") + " ORDER BY ");
 		whereOrder.append(sortToSql(sort));
 
@@ -289,7 +324,7 @@ public class QuestionStorageMysql implements QuestionStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT Q.ID");
 		sql.append(" FROM MNEME_QUESTION Q ");
-		sql.append(" WHERE Q.MINT='0' AND Q.HISTORICAL='0' AND Q.POOL_ID=?");
+		sql.append(" WHERE Q.MINT='0' AND Q.POOL_ID=?");
 		sql.append(" ORDER BY CREATED_BY_DATE ASC");
 
 		Object[] fields = new Object[1];
@@ -480,7 +515,35 @@ public class QuestionStorageMysql implements QuestionStorage
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * copyPoolQuestions (transaction code)
+	 */
+	protected void copyPoolQuestionsHistoricalTx(String userId, Pool source, Pool destination)
+	{
+		Date now = new Date();
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO MNEME_QUESTION");
+		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
+		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
+		sql.append(" TYPE, GUEST)");
+		sql.append(" SELECT");
+		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
+		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, '1', Q.MINT,");
+		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
+		sql.append(" Q.PRESENTATION_TEXT, Q.TYPE, Q.GUEST");
+		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.POOL_ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(source.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("copyPoolQuestionsTx: db write failed");
+		}
+	}
+
+	/**
+	 * copyPoolQuestions (transaction code)
 	 */
 	protected void copyPoolQuestionsTx(String userId, Pool source, Pool destination)
 	{
@@ -496,7 +559,7 @@ public class QuestionStorageMysql implements QuestionStorage
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, Q.HISTORICAL, Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
 		sql.append(" Q.PRESENTATION_TEXT, Q.TYPE, Q.GUEST");
-		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL='0' AND Q.POOL_ID=?");
+		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.POOL_ID=?");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(source.getId());
@@ -505,6 +568,82 @@ public class QuestionStorageMysql implements QuestionStorage
 		{
 			throw new RuntimeException("copyPoolQuestionsTx: db write failed");
 		}
+	}
+
+	/**
+	 * Insert a new question as a copy of another question, marked as history (copyPoolQuestions transaction code).
+	 * 
+	 * @param userId
+	 *        The user id.
+	 * @param qid
+	 *        The source question id.
+	 * @param destination
+	 *        The pool for the new question.
+	 */
+	protected String copyQuestionHistoricalTx(String userId, String qid, Pool destination)
+	{
+		Date now = new Date();
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO MNEME_QUESTION");
+		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
+		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
+		sql.append(" TYPE, GUEST)");
+		sql.append(" SELECT");
+		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
+		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, '1', Q.MINT,");
+		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
+		sql.append(" Q.PRESENTATION_TEXT, Q.TYPE, Q.GUEST");
+		sql.append(" FROM MNEME_QUESTION Q WHERE Q.ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(qid);
+
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
+		{
+			throw new RuntimeException("copyQuestionTx: db write failed");
+		}
+
+		return id.toString();
+	}
+
+	/**
+	 * Insert a new question as a copy of another question (copyPoolQuestions transaction code).
+	 * 
+	 * @param userId
+	 *        The user id.
+	 * @param qid
+	 *        The source question id.
+	 * @param destination
+	 *        The pool for the new question.
+	 */
+	protected String copyQuestionTx(String userId, String qid, Pool destination)
+	{
+		Date now = new Date();
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO MNEME_QUESTION");
+		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
+		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
+		sql.append(" TYPE, GUEST)");
+		sql.append(" SELECT");
+		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
+		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, Q.HISTORICAL, Q.MINT,");
+		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
+		sql.append(" Q.PRESENTATION_TEXT, Q.TYPE, Q.GUEST");
+		sql.append(" FROM MNEME_QUESTION Q WHERE Q.ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(qid);
+
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
+		{
+			throw new RuntimeException("copyQuestionTx: db write failed");
+		}
+
+		return id.toString();
 	}
 
 	/**

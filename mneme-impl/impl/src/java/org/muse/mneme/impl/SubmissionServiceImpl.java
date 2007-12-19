@@ -381,15 +381,15 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// TODO: it is possible to make too many submissions for the assessment. If this method is entered concurrently for the same user and
 		// assessment, the previous count check might fail.
 
-		// go live
-		if (!submission.getAssessment().getIsLive())
-		{
-			((AssessmentServiceImpl) this.assessmentService).makeLive(submission.getAssessment());
-		}
+		// go live: Note: we are going live on publish for now -ggolden
+		// if (!submission.getAssessment().getIsLive())
+		// {
+		// ((AssessmentServiceImpl) this.assessmentService).makeLive(submission.getAssessment());
+		// }
 
 		// make a new submission
 		SubmissionImpl rv = this.storage.newSubmission();
-		rv.initAssessmentIds(submission.getAssessment().getId(), submission.getAssessment().getId());
+		rv.initAssessmentId(submission.getAssessment().getId());
 		rv.initUserId(submission.getUserId());
 		rv.setIsComplete(Boolean.FALSE);
 		rv.setStartDate(asOf);
@@ -535,7 +535,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		{
 			// make a new submission
 			SubmissionImpl temp = this.storage.newSubmission();
-			temp.initAssessmentIds(submission.getAssessment().getId(), submission.getAssessment().getId());
+			temp.initAssessmentId(submission.getAssessment().getId());
 			temp.initUserId(submission.getUserId());
 			temp.setIsComplete(Boolean.TRUE);
 			temp.setStartDate(now);
@@ -1076,7 +1076,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// create a phantom
 			rv = this.storage.newSubmission();
 			rv.initUserId(userId);
-			rv.initAssessmentIds(aid, aid);
+			rv.initAssessmentId(aid);
 			rv.initId(id);
 
 			return rv;
@@ -1128,7 +1128,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			{
 				SubmissionImpl s = this.storage.newSubmission();
 				s.initUserId(userId);
-				s.initAssessmentIds(a.getId(), a.getId());
+				s.initAssessmentId(a.getId());
 
 				// set the id so we know it is a phantom
 				s.initId(SubmissionService.PHANTOM_PREFIX + a.getId() + "/" + userId);
@@ -1934,7 +1934,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			{
 				SubmissionImpl s = this.storage.newSubmission();
 				s.initUserId(userId);
-				s.initAssessmentIds(assessment.getId(), assessment.getId());
+				s.initAssessmentId(assessment.getId());
 
 				// set the id so we know it is a phantom
 				s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
@@ -2116,7 +2116,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	{
 		SubmissionImpl s = this.storage.newSubmission();
 		s.initUserId(userId);
-		s.initAssessmentIds(assessment.getId(), assessment.getId());
+		s.initAssessmentId(assessment.getId());
 
 		// set the id so we know it is a phantom
 		s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
@@ -2205,7 +2205,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		{
 			SubmissionImpl s = this.storage.newSubmission();
 			s.initUserId(userId);
-			s.initAssessmentIds(assessment.getId(), assessment.getId());
+			s.initAssessmentId(assessment.getId());
 
 			// set the id so we know it is a phantom
 			s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
@@ -2214,18 +2214,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 
 		return rv;
-	}
-
-	/**
-	 * Check if any submission has a dependency for history on this assessment.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 * @return TRUE if there are any submissions dependent for history on this assessment, FALSE if not.
-	 */
-	protected Boolean historicalDependencyExists(Assessment assessment)
-	{
-		return this.storage.historicalDependencyExists(assessment);
 	}
 
 	/**
@@ -2769,43 +2757,5 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		checkerThread.interrupt();
 
 		checkerThread = null;
-	}
-
-	/**
-	 * Check if there are any submissions that are dependent on this question.
-	 * 
-	 * @param question
-	 *        The question.
-	 * @return TRUE if there are submissions dependent on this question, FALSE if not.
-	 */
-	protected Boolean submissionsDependsOn(Question question)
-	{
-		return this.storage.submissionsDependsOn(question);
-	}
-
-	/**
-	 * Switch any submissions with a historical dependency on the assessment to this new assessment.
-	 * 
-	 * @param assessment
-	 *        The current dependent assessment.
-	 * @param newAssessmentId
-	 *        The new assessment to switch to.
-	 */
-	protected void switchHistoricalDependency(Assessment assessment, Assessment newAssessment)
-	{
-		this.storage.switchHistoricalDependency(assessment, newAssessment);
-	}
-
-	/**
-	 * Change any submissions that are directly dependent on the from question to become dependent instead on the to question
-	 * 
-	 * @param from
-	 *        The from question.
-	 * @param to
-	 *        The to question.
-	 */
-	protected void switchLiveDependency(Question from, Question to)
-	{
-		this.storage.switchLiveDependency(from, to);
 	}
 }

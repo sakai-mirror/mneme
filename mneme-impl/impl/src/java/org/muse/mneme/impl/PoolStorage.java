@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.muse.mneme.api.PoolService;
-import org.muse.mneme.api.Question;
 
 /**
  * PoolStorage defines the storage interface for Pools.
@@ -88,15 +87,6 @@ public interface PoolStorage
 	List<PoolImpl> getPools(String context);
 
 	/**
-	 * Check if any frozen manifests reference this question.
-	 * 
-	 * @param question
-	 *        The question.
-	 * @return TRUE if any frozen manifests reference the quesiton, FALSE if not.
-	 */
-	Boolean manifestDependsOn(Question question);
-
-	/**
 	 * Construct a new pool object.
 	 * 
 	 * @return A pool object.
@@ -127,14 +117,4 @@ public interface PoolStorage
 	 *        the pool to save.
 	 */
 	void savePool(PoolImpl pool);
-
-	/**
-	 * Switch any pool with a frozen manifest that references from to reference to.
-	 * 
-	 * @param from
-	 *        The from question.
-	 * @param to
-	 *        The to question.
-	 */
-	void switchManifests(Question from, Question to);
 }

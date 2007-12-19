@@ -95,12 +95,12 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void copyPoolQuestions(String userId, Pool source, Pool destination)
+	public void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew)
 	{
 		List<QuestionImpl> questions = new ArrayList<QuestionImpl>(this.questions.values());
 		for (QuestionImpl question : questions)
 		{
-			if (!question.getIsHistorical() && !question.getMint() && question.getPool().equals(source))
+			if (!question.getMint() && question.getPool().equals(source))
 			{
 				QuestionImpl q = new QuestionImpl(question);
 
@@ -118,8 +118,15 @@ public class QuestionStorageSample implements QuestionStorage
 				q.getModifiedBy().setUserId(userId);
 				q.getModifiedBy().setDate(now);
 
+				if (asHistory) q.makeHistorical();
+
 				// save
 				saveQuestion(q);
+
+				if (oldToNew != null)
+				{
+					oldToNew.put(question.getId(), q.getId());
+				}
 			}
 		}
 	}
@@ -150,7 +157,6 @@ public class QuestionStorageSample implements QuestionStorage
 		int count = 0;
 		for (QuestionImpl question : this.questions.values())
 		{
-			if (question.getIsHistorical()) continue;
 			if (question.getMint()) continue;
 			if (!question.getPool().equals(pool)) continue;
 
@@ -169,7 +175,10 @@ public class QuestionStorageSample implements QuestionStorage
 		List<Pool> pools = this.poolService.findPools(context, null, null);
 		for (Pool pool : pools)
 		{
-			rv.put(pool.getId(), countPoolQuestions(pool));
+			if (!pool.getIsHistorical())
+			{
+				rv.put(pool.getId(), countPoolQuestions(pool));
+			}
 		}
 
 		return rv;
@@ -222,7 +231,7 @@ public class QuestionStorageSample implements QuestionStorage
 		List<String> rv = new ArrayList<String>();
 		for (QuestionImpl question : this.questions.values())
 		{
-			if ((!question.getIsHistorical()) && (!question.getMint()) && (question.getPool().equals(pool)))
+			if ((!question.getMint()) && (question.getPool().equals(pool)))
 			{
 				rv.add(question.getId());
 			}
@@ -310,31 +319,6 @@ public class QuestionStorageSample implements QuestionStorage
 				this.nextId++;
 			}
 			question.initId("q" + Long.toString(id));
-		}
-
-		if ((question.poolId == null) && (!question.historical))
-		{
-			M_log.warn("saveQuestion: no pool id: " + question.getId());
-		}
-		if ((question.poolId != null) && (question.historical))
-		{
-			M_log.warn("saveQuestion: historical with pool id: " + question.getId());
-		}
-		if (question.partContext != null)
-		{
-			M_log.warn("saveQuestion: has partContext: " + question.getId());
-		}
-		if (question.poolContext != null)
-		{
-			M_log.warn("saveQuestion: has poolContext: " + question.getId());
-		}
-		if (question.submissionContext != null)
-		{
-			M_log.warn("saveQuestion: has submissionContext: " + question.getId());
-		}
-		if ((question.poolId != null) && (this.poolService.getPool(question.poolId) == null))
-		{
-			M_log.warn("saveQuestion: missing pool: qid: " + question.getId() + " poolId: " + question.poolId);
 		}
 
 		this.questions.put(question.getId(), new QuestionImpl(question));
@@ -581,7 +565,8 @@ public class QuestionStorageSample implements QuestionStorage
 		List<QuestionImpl> rv = new ArrayList<QuestionImpl>();
 		for (QuestionImpl question : this.questions.values())
 		{
-			if (question.getIsHistorical()) continue;
+			// skip historical unless looking at a specific pool
+			if (question.getIsHistorical() && (pool == null)) continue;
 			if (question.getMint()) continue;
 			if ((questionType != null) && (!question.getType().equals(questionType))) continue;
 			if ((pool != null) && (!question.getPool().equals(pool))) continue;

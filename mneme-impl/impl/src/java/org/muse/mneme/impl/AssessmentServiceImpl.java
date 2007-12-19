@@ -207,6 +207,8 @@ public class AssessmentServiceImpl implements AssessmentService
 		// clear out any special access
 		rv.getSpecialAccess().clear();
 
+		// TODO: clear out any references to "private stash" pools
+
 		// start out unpublished
 		rv.initPublished(Boolean.FALSE);
 
@@ -403,10 +405,6 @@ public class AssessmentServiceImpl implements AssessmentService
 		// policy check
 		if (!satisfyAssessmentRemovalPolicy(assessment)) throw new AssessmentPolicyException();
 
-		// remove incomplete submissions
-		// TODO: I'm not sure we can remove if we have submissions started... -ggolden
-		// this.submissionService.removeIncompleteAssessmentSubmissions(assessment);
-
 		// clear the cache
 		String key = cacheKey(assessment.getId());
 		this.threadLocalManager.set(key, null);
@@ -423,7 +421,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	public void saveAssessment(Assessment assessment) throws AssessmentPermissionException, AssessmentPolicyException
 	{
 		if (assessment == null) throw new IllegalArgumentException();
-		if (assessment.getId() == null) throw new IllegalArgumentException(); // TODO: really?
+		if (assessment.getId() == null) throw new IllegalArgumentException();
 
 		// if any changes made, clear mint
 		if (assessment.getIsChanged())
@@ -440,10 +438,8 @@ public class AssessmentServiceImpl implements AssessmentService
 				if (M_log.isDebugEnabled()) M_log.debug("saveAssessment: deleting mint: " + assessment.getId());
 
 				// clear the cache
-				String key = cacheKey(assessment.getId());
-				this.threadLocalManager.set(key, null);
+				this.threadLocalManager.set(cacheKey(assessment.getId()), null);
 
-				// Note: mint questions cannot have already been dependened on, so we can just forget about it.
 				this.storage.removeAssessment((AssessmentImpl) assessment);
 			}
 
@@ -500,7 +496,14 @@ public class AssessmentServiceImpl implements AssessmentService
 		boolean gbIntegrationChanged = ((AssessmentGradingImpl) (assessment.getGrading())).getGradebookIntegrationChanged();
 		((AssessmentGradingImpl) (assessment.getGrading())).initGradebookIntegration(assessment.getGrading().getGradebookIntegration());
 
-		save(assessment);
+		// if we are just going published and not yet live, bring the assessment live
+		if (!assessment.getIsLive() && publishedChanged && assessment.getPublished())
+		{
+			((AssessmentImpl) assessment).goLive();
+		}
+
+		// save the changes
+		save((AssessmentImpl) assessment);
 
 		// if the name has changed, or we are retracting submissions, or we are now unpublished,
 		// or we are now invalid, or we have just been archived, or we are now not gradebook integrated,
@@ -694,48 +697,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
-	 * Check if any live assessments have any dependency on this pool.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @param directOnly
-	 *        if TRUE, check only direct use of the pool, if FALSE check indirect as well.
-	 * @return TRUE if any live assessments have a dependency on this pool, FALSE if not.
-	 */
-	protected Boolean liveDependencyExists(Pool pool, Boolean directOnly)
-	{
-		return this.storage.liveDependencyExists(pool, directOnly);
-	}
-
-	/**
-	 * Check if any live assessments have any direct dependency on this question.
-	 * 
-	 * @param question
-	 *        The question.
-	 * @return TRUE if any live assessments have a direct dependency on this question, FALSE if not.
-	 */
-	protected Boolean liveDependencyExists(Question question)
-	{
-		return this.storage.liveDependencyExists(question);
-	}
-
-	/**
-	 * Set this assessment to be live.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 */
-	protected void makeLive(Assessment assessment)
-	{
-		// clear the cache
-		String key = cacheKey(assessment.getId());
-		this.threadLocalManager.set(key, null);
-
-		this.storage.makeLive(assessment);
-	}
-
-	/**
-	 * Remove any direct dependencies on this pool from all assessments.
+	 * Remove any draw dependencies on this pool from all live assessments.
 	 * 
 	 * @param question
 	 *        The question.
@@ -746,7 +708,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
-	 * Remove any direct dependencies on this question from all assessments.
+	 * Remove any pick dependencies on this question from all live assessments.
 	 * 
 	 * @param question
 	 *        The question.
@@ -774,81 +736,31 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void save(Assessment assessment)
+	protected void save(AssessmentImpl assessment)
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("save: " + assessment.getId());
 
-		// is there a change that needs to generate history?
-		boolean historyNeeded = ((AssessmentImpl) assessment).getHistoryChanged();
-
-		// get the current assessment for history
-		AssessmentImpl current = null;
-		if (historyNeeded) current = (assessment.getId() == null) ? null : (AssessmentImpl) getAssessment(assessment.getId());
-
 		Date now = new Date();
+		String userId = sessionManager.getCurrentSessionUserId();
 
 		// if the assessment is new (i.e. no id), set the createdBy information, if not already set
 		if ((assessment.getId() == null) && (assessment.getCreatedBy().getUserId() == null))
 		{
 			assessment.getCreatedBy().setDate(now);
-			assessment.getCreatedBy().setUserId(sessionManager.getCurrentSessionUserId());
+			assessment.getCreatedBy().setUserId(userId);
 		}
 
 		// update last modified information
 		assessment.getModifiedBy().setDate(now);
-		assessment.getModifiedBy().setUserId(sessionManager.getCurrentSessionUserId());
+		assessment.getModifiedBy().setUserId(userId);
 
 		// clear the cache
-		String key = cacheKey(assessment.getId());
-		this.threadLocalManager.set(key, null);
+		this.threadLocalManager.set(cacheKey(assessment.getId()), null);
 
 		// save
-		this.storage.saveAssessment((AssessmentImpl) assessment);
-
-		// if there are any history dependencies on this changed assessment, we need to store the history version
-		if (historyNeeded && (current != null))
-		{
-			if (this.submissionService.historicalDependencyExists(assessment))
-			{
-				// get a new id on the old and save it
-				current.initId(null);
-				current.makeHistorical();
-				this.storage.saveAssessment(current);
-
-				// swap all historical dependencies to the new
-				this.submissionService.switchHistoricalDependency(assessment, current);
-			}
-		}
+		this.storage.saveAssessment(assessment);
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_EDIT, getAssessmentReference(assessment.getId()), true));
-	}
-
-	/**
-	 * Change any live assessments that are dependent on the from pool to become dependent instead on the to pool
-	 * 
-	 * @param from
-	 *        The from pool.
-	 * @param to
-	 *        The to pool.
-	 * @param directOnly
-	 *        if true, switch only direct (draw) dependencies, else seitch those as well as (manual) question dependencies.
-	 */
-	protected void switchLiveDependency(Pool from, Pool to, boolean directOnly)
-	{
-		this.storage.switchLiveDependency(from, to, directOnly);
-	}
-
-	/**
-	 * Change any live assessments that are directly dependent on the from question to become dependent instead on the to question
-	 * 
-	 * @param from
-	 *        The from question.
-	 * @param to
-	 *        The to question.
-	 */
-	protected void switchLiveDependency(Question from, Question to)
-	{
-		this.storage.switchLiveDependency(from, to);
 	}
 }
