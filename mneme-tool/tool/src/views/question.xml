@@ -161,6 +161,7 @@
 					</container>
 					<included>
 						<decision model="review" />
+						<decision model="submission.isReleased" />
 						<hasValueDecision model="submission.evaluation.comment" />
 					</included>
 				</section>
@@ -423,6 +424,7 @@
 							</container>
 							<included>
 								<decision model="review" />
+								<decision model="submission.isReleased" />
 								<hasValueDecision model="answer.evaluation.comment" />
 							</included>
 						</section>

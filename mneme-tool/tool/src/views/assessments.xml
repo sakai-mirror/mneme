@@ -62,6 +62,18 @@
 							<included>
 								<decision model="assessment.isLive" />
 								<decision model="assessment.isValid" />
+								<decision reversed="TRUE" model="assessment.hasUnscoredSubmissions" />
+							</included>
+						</navigation>
+						<navigation style="LINK" submit="TRUE" description="live-alt">
+							<icon icon="/icons/grade.png" style="LEFT" />
+							<destination template="/grade_assessment/0A/{0}">
+								<model ref="assessment.id" />
+							</destination>
+							<included>
+								<decision model="assessment.isLive" />
+								<decision model="assessment.isValid" />
+								<decision model="assessment.hasUnscoredSubmissions" />
 							</included>
 						</navigation>
 						<navigation style="LINK" submit="TRUE" description="invalid-alt">
