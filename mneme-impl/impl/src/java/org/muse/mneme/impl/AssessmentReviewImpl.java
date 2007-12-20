@@ -88,7 +88,8 @@ public class AssessmentReviewImpl implements AssessmentReview
 		{
 			if (this.date != null)
 			{
-				return this.date.after(new Date());
+				// we can now review if NOW is after the review date
+				return new Date().after(this.date);
 			}
 
 			// no date? no review
