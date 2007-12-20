@@ -242,6 +242,14 @@ public class ImportServiceImpl implements ImportService
 			// get the site display
 			String display = this.siteService.getSiteDisplay(siteRef.getId());
 
+			// take only the site title (between first and last quotes)
+			int firstPos = display.indexOf("\"");
+			int lastPos = display.lastIndexOf("\"");
+			if ((firstPos != -1) && (lastPos != -1))
+			{
+				display = display.substring(firstPos + 1, lastPos);
+			}
+
 			// record for return
 			Ent ent = new EntImpl(siteRef.getId(), display);
 			rv.add(ent);
