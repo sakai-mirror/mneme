@@ -62,9 +62,6 @@
 
 		<section>
 			<container>
-
-				<!-- repeat the nav up top -->
-				<alias to="nav" />
 				<gap />
 				<!-- test's submit message -->
 				<text>
