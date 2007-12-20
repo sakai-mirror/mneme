@@ -287,6 +287,10 @@ public class PoolImpl implements Pool
 	{
 		if (points == null) throw new IllegalArgumentException();
 		if (points < 0) return;
+
+		// massage points - 2 decimal places
+		points = Float.valueOf(((float) Math.round(points.floatValue() * 100.0f)) / 100.0f);
+
 		if (!Different.different(this.points, points)) return;
 
 		this.points = points;
@@ -300,6 +304,13 @@ public class PoolImpl implements Pool
 	public void setPointsEdit(Float points)
 	{
 		if ((points != null) && (points < 0f)) return;
+
+		// massage points - 2 decimal places
+		if (points != null)
+		{
+			points = Float.valueOf(((float) Math.round(points.floatValue() * 100.0f)) / 100.0f);
+		}
+
 		if (!Different.different(this.points, points)) return;
 
 		this.points = points;
