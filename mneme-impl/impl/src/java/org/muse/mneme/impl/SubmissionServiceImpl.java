@@ -320,18 +320,16 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countSubmissionAnswers(Assessment assessment, Question question, Boolean official)
+	public Integer countSubmissionAnswers(Assessment assessment, Question question)
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 		if (question == null) throw new IllegalArgumentException();
-		if (official == null) throw new IllegalArgumentException();
 
 		// TODO: review the efficiency of this method! -ggolden
 
-		if (M_log.isDebugEnabled())
-			M_log.debug("countSubmissionAnswers: assessment: " + assessment.getId() + " question: " + question.getId() + " official: " + official);
+		if (M_log.isDebugEnabled()) M_log.debug("countSubmissionAnswers: assessment: " + assessment.getId() + " question: " + question.getId());
 
-		List<Answer> answers = findSubmissionAnswers(assessment, question, FindAssessmentSubmissionsSort.status_a, official, null, null);
+		List<Answer> answers = findSubmissionAnswers(assessment, question, FindAssessmentSubmissionsSort.status_a, null, null);
 
 		return answers.size();
 	}
@@ -883,21 +881,19 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Boolean official,
-			Integer pageNum, Integer pageSize)
+	public List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Integer pageNum,
+			Integer pageSize)
 	{
 		// TODO: review the efficiency of this method! -ggolden
 		// TODO: consider removing the official (set to false, getting all) to improve efficiency -ggolden
 
 		if (assessment == null) throw new IllegalArgumentException();
 		if (question == null) throw new IllegalArgumentException();
-		if (official == null) throw new IllegalArgumentException();
 		if (sort == null) sort = FindAssessmentSubmissionsSort.userName_a;
 		Date asOf = new Date();
 
 		if (M_log.isDebugEnabled())
-			M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId() + " question: " + question.getId() + " sort: " + sort
-					+ " official: " + official);
+			M_log.debug("findAssessmentSubmissions: assessment: " + assessment.getId() + " question: " + question.getId() + " sort: " + sort);
 
 		// read all the submissions for this assessment from all possible submitters
 		List<SubmissionImpl> all = getAssessmentSubmissions(assessment, sort, question);
@@ -906,16 +902,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		checkAutoComplete(all, asOf);
 
 		// pick one for each assessment - the one in progress, or the official complete one (if official)
-		List<Submission> rv = null;
-		if (official)
-		{
-			rv = officializeByUser(all, null);
-		}
-		else
-		{
-			rv = new ArrayList<Submission>(all.size());
-			rv.addAll(all);
-		}
+		List<Submission> rv = new ArrayList<Submission>(all.size());
+		rv.addAll(all);
 
 		// if sorting by status, do that sort
 		if (sort == FindAssessmentSubmissionsSort.status_a || sort == FindAssessmentSubmissionsSort.status_d)
@@ -930,7 +918,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			if (s.getIsComplete())
 			{
 				Answer a = s.getAnswer(question);
-				if (a != null)
+				if ((a != null) && (a.getIsAnswered()))
 				{
 					answers.add(a);
 				}

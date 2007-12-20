@@ -133,18 +133,15 @@ public interface SubmissionService
 	Integer countAssessmentSubmissions(Assessment assessment, Boolean official, String allUid);
 
 	/**
-	 * Count the submission answers to the assignment and question made by all users.<br />
-	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one.
+	 * Count the submission answers to the assignment and question made by all users, answered, in completed submissions.
 	 * 
 	 * @param assessment
 	 *        The assessment.
 	 * @param question
 	 *        The question.
-	 * @param official
-	 *        if TRUE, clump multiple submissions by the same user behind the best one, else include all.
 	 * @return A sorted List<Answer> of the answers.
 	 */
-	Integer countSubmissionAnswers(Assessment assessment, Question question, Boolean official);
+	Integer countSubmissionAnswers(Assessment assessment, Question question);
 
 	/**
 	 * Start an end-user in taking an assessment. If there is an incomplete submission already, re-enter that, else create a new one.
@@ -243,8 +240,7 @@ public interface SubmissionService
 	String[] findPrevNextSubmissionIds(Submission submission, FindAssessmentSubmissionsSort sort, Boolean official);
 
 	/**
-	 * Find the submission answers to the assignment and question made by all users.<br />
-	 * Optionally group multiple submissions from a single user and select the in-progress or "best" one.
+	 * Find the submission answers to the assignment and question made by all users, answered, in completed submissions.
 	 * 
 	 * @param assessment
 	 *        The assessment.
@@ -252,16 +248,13 @@ public interface SubmissionService
 	 *        The question.
 	 * @param sort
 	 *        The sort order.
-	 * @param official
-	 *        if TRUE, clump multiple submissions by the same user behind the best one, else include all.
 	 * @param pageNum
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return A sorted List<Answer> of the answers.
 	 */
-	List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Boolean official,
-			Integer pageNum, Integer pageSize);
+	List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Find this answer.

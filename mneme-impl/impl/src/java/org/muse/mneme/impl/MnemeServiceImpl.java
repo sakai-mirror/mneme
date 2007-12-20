@@ -284,9 +284,9 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countSubmissionAnswers(Assessment assessment, Question question, Boolean official)
+	public Integer countSubmissionAnswers(Assessment assessment, Question question)
 	{
-		return submissionService.countSubmissionAnswers(assessment, question, official);
+		return submissionService.countSubmissionAnswers(assessment, question);
 	}
 
 	/**
@@ -401,10 +401,10 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Boolean official,
-			Integer pageNum, Integer pageSize)
+	public List<Answer> findSubmissionAnswers(Assessment assessment, Question question, FindAssessmentSubmissionsSort sort, Integer pageNum,
+			Integer pageSize)
 	{
-		return this.findSubmissionAnswers(assessment, question, sort, official, pageNum, pageSize);
+		return this.findSubmissionAnswers(assessment, question, sort, pageNum, pageSize);
 	}
 
 	/**

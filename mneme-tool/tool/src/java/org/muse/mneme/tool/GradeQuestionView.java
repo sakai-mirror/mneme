@@ -151,7 +151,7 @@ public class GradeQuestionView extends ControllerImpl
 		context.put("sort_direction", sortCode.charAt(1));
 
 		// get the size - from all submissions
-		Integer maxAnswers = this.submissionService.countSubmissionAnswers(assessment, question, Boolean.FALSE);
+		Integer maxAnswers = this.submissionService.countSubmissionAnswers(assessment, question);
 
 		// paging parameter
 		String pagingParameter = null;
@@ -166,7 +166,7 @@ public class GradeQuestionView extends ControllerImpl
 		context.put("paging", paging);
 
 		// get the answers - from all submissions
-		List<Answer> answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, Boolean.FALSE, paging.getCurrent(), paging
+		List<Answer> answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, paging.getCurrent(), paging
 				.getSize());
 		context.put("answers", answers);
 

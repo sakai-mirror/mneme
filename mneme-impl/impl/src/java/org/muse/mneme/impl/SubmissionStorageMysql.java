@@ -91,11 +91,11 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	public List<String> findPartQuestions(Part part)
 	{
 		// get all question ids from submission answers to this part's assessment,
-		// in this part
+		// in this part, complete submissions and answered questions
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT A.QUESTION_ID FROM MNEME_ANSWER A");
-		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=?");
-		sql.append(" WHERE A.PART_ID=?");
+		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=? and S.COMPLETE='1'");
+		sql.append(" WHERE A.PART_ID=? AND A.ANSWERED='1'");
 
 		Object[] fields = new Object[2];
 		fields[0] = Long.valueOf(part.getAssessment().getId());

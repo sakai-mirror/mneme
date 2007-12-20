@@ -84,12 +84,12 @@ public class SubmissionStorageSample implements SubmissionStorage
 		// check the submissions to this assessment
 		for (SubmissionImpl submission : this.submissions.values())
 		{
-			// TODO: only for complete? && submission.getIsComplete()
-			if (submission.getAssessment().equals(part.getAssessment()))
+			// TODO: only for complete? && submission.getIsComplete() and only if answered
+			if (submission.getAssessment().equals(part.getAssessment()) && submission.getIsComplete())
 			{
 				for (Answer answer : submission.getAnswers())
 				{
-					if (((AnswerImpl) answer).getPartId().equals(part.getId()))
+					if (((AnswerImpl) answer).getPartId().equals(part.getId()) && answer.getIsAnswered())
 					{
 						if (!rv.contains(answer.getQuestion().getId()))
 						{
