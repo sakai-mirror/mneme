@@ -357,7 +357,7 @@ public interface SubmissionService
 	/**
 	 * Get the submissions to assignments in this context made by this user. Consider:
 	 * <ul>
-	 * <li>published assessments</li>
+	 * <li>published and valid assessments</li>
 	 * <li>assessments in this context</li>
 	 * <li>assessments this user can submit to and have submitted to</li>
 	 * <li>the one (of many for this user) submission that will be the official (graded) (depending on the assessment settings, and submission time

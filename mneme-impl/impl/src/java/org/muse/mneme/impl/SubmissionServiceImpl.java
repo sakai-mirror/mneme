@@ -1155,6 +1155,16 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// read all the submissions for this user in the context
 		List<SubmissionImpl> all = this.storage.getUserContextSubmissions(context, userId);
 
+		// filter out invalid assessments
+		for (Iterator i = all.iterator(); i.hasNext();)
+		{
+			Submission s = (Submission) i.next();
+			if (!s.getAssessment().getIsValid())
+			{
+				i.remove();
+			}
+		}
+
 		// get all the assessments for this context
 		List<Assessment> assessments = this.assessmentService.getContextAssessments(context, AssessmentService.AssessmentsSort.title_a, Boolean.TRUE);
 

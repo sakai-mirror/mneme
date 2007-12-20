@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -257,7 +258,22 @@ public class AssessmentStorageMysql implements AssessmentStorage
 		Object[] fields = new Object[1];
 		fields[0] = context;
 
-		return readAssessments(where, order.toString(), fields);
+		List<AssessmentImpl> rv = readAssessments(where, order.toString(), fields);
+
+		// since valid is not stored on the db, filter invalid ones out if desired
+		if (publishedOnly)
+		{
+			for (Iterator i = rv.iterator(); i.hasNext();)
+			{
+				AssessmentImpl a = (AssessmentImpl) i.next();
+				if (!a.getIsValid())
+				{
+					i.remove();
+				}
+			}
+		}
+
+		return rv;
 	}
 
 	/**
