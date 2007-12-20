@@ -26,49 +26,35 @@
 
 <beans>
 
-	<bean id="org.muse.mneme.tool.GradeAssessmentView" class="org.muse.mneme.tool.GradeAssessmentView" init-method="init" destroy-method="destroy"
-		singleton="true" depends-on="SubmissionStatus">
+	<bean id="org.muse.mneme.tool.GradeAssessmentView"
+			class="org.muse.mneme.tool.GradeAssessmentView"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true"
+			depends-on="SubmissionStatus">
 
-		<property name="ui">
-			<ref bean="org.muse.ambrosia.api.UiService" />
-		</property>
-		<property name="assessmentService">
-			<ref bean="org.muse.mneme.api.AssessmentService" />
-		</property>
-		<property name="submissionService">
-			<ref bean="org.muse.mneme.api.SubmissionService" />
-		</property>
-		<property name="toolManager">
-			<ref bean="org.sakaiproject.tool.api.ToolManager" />
-		</property>
-		<property name="toolId">
-			<value>sakai.mneme</value>
-		</property>
-		<property name="path">
-			<value>grade_assessment</value>
-		</property>
-		<property name="bundle">
-			<value>gradeAssessment</value>
-		</property>
-		<property name="shared">
-			<value>mneme</value>
-		</property>
-		<property name="components">
-			<value>gradeAssessment.xml</value>
-		</property>
+		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService" /></property>
+		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService" /></property>
+		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService" /></property>
+		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager" /></property>
+
+		<property name="toolId"><value>sakai.mneme</value></property>
+		<property name="path"><value>grade_assessment</value></property>
+		<property name="bundle"><value>gradeAssessment</value></property>
+		<property name="shared"><value>mneme</value></property>
+		<property name="components"><value>gradeAssessment.xml</value></property>
+ 		<property name="docsPath"><value>/private/mneme/{CONTEXT}/docs/</value></property>
 	</bean>
 
-	<bean id="SubmissionStatus" class="org.muse.mneme.tool.SubmissionStatusDelegate" init-method="init" destroy-method="destroy" singleton="true">
+	<bean id="SubmissionStatus"
+			class="org.muse.mneme.tool.SubmissionStatusDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
 
-		<property name="ui">
-			<ref bean="org.muse.ambrosia.api.UiService" />
-		</property>
+		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService" /></property>
 
-		<property name="id">
-			<value>SubmissionStatus</value>
-		</property>
-		<property name="toolId">
-			<value>sakai.mneme</value>
-		</property>
+		<property name="id"><value>SubmissionStatus</value></property>
+		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 </beans>

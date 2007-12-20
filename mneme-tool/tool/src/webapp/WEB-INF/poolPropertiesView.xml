@@ -41,7 +41,7 @@
  		<property name="bundle"><value>poolProperties</value></property>
  		<property name="shared"><value>mneme</value></property>
  		<property name="components"><value>poolProperties.xml</value></property>
+ 		<property name="docsPath"><value>/private/mneme/{CONTEXT}/docs/</value></property>
 	</bean>
-
 
 </beans>

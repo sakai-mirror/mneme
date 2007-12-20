@@ -31,7 +31,6 @@
 			init-method="init"
 			destroy-method="destroy"
 			singleton="true">
-<!-- depends-on=FormatQuestionTitle,SubmissionScore,SectionScore,,AnswerFeedbackDecision,FormatAnswerCorrectFeedback -->
 
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
  		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
@@ -41,6 +40,7 @@
  		<property name="bundle"><value>questionPreview</value></property>
 		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>questionPreview.xml</value></property>
+ 		<property name="docsPath"><value>/private/mneme/{CONTEXT}/docs/</value></property>
 	</bean>
  
 </beans>

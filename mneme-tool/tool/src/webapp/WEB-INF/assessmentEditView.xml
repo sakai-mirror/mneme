@@ -44,6 +44,7 @@
  		<property name="bundle"><value>assessmentEdit</value></property>
 		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>assessmentEdit.xml</value></property>
+ 		<property name="docsPath"><value>/private/mneme/{CONTEXT}/docs/</value></property>
 	</bean>
 
 	<bean id="FormatPartSummary"

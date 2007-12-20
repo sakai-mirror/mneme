@@ -41,6 +41,7 @@
  		<property name="bundle"><value>assessmentSettings</value></property>
 		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>assessmentSettings.xml</value></property>
+ 		<property name="docsPath"><value>/private/mneme/{CONTEXT}/docs/</value></property>
 	</bean>
 
 </beans>

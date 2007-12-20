@@ -58,10 +58,9 @@
 				<!-- instructions overlay -->
 				<overlay id="instructions">
 					<container>
-						<!-- this should be htmlEdit, but tinyMCE is having trouble -->
-						<textEdit title="part-instructions" rows="5" cols="60">
+						<htmlEdit title="part-instructions" rows="5" cols="60">
 							<model type="html" ref="part.presentation.text" />
-						</textEdit>
+						</htmlEdit>
 						<gap />
 						<toggle target="instructions" title="close" style="LINK">
 							<icon icon="/icons/close.png" style="LEFT" />

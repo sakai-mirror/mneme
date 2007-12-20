@@ -43,6 +43,7 @@
  		<property name="bundle"><value>enter</value></property>
 		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>enter.xml</value></property>
+ 		<property name="docsPath"><value>/private/mneme/{CONTEXT}/docs/</value></property>
 	</bean>
 
 	<bean id="FormatScore"

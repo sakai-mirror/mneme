@@ -42,6 +42,7 @@
  		<property name="bundle"><value>list</value></property>
 		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>list.xml</value></property>
+ 		<property name="docsPath"><value>/private/mneme/{CONTEXT}/docs/</value></property>
 	</bean>
 
 	<bean id="FormatListDecoration"
