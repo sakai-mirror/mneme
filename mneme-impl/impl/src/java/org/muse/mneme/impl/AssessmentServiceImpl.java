@@ -411,6 +411,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		String key = cacheKey(assessment.getId());
 		this.threadLocalManager.set(key, null);
 
+		// retract the test from the gb
+		this.gradesService.retractAssessmentGrades(assessment);
+
 		this.storage.removeAssessment((AssessmentImpl) assessment);
 
 		// event
