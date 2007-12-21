@@ -301,14 +301,6 @@
 		<!--navigation-->
 		<navigationBar>
 			<container>
-				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
-					<icon icon="/icons/return.png" style="LEFT" />
-					<destination template="/grade_questions_list/{0}/{1}">
-						<model ref="sort_grades" />
-						<model ref="assessment.id" />
-					</destination>
-				</navigation>
-				<divider />
 				<pager paging="paging">
 					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
 						<model ref="sort_grades" />
@@ -319,6 +311,14 @@
 						<model type="paging" ref="paging" />
 					</destination>
 				</pager>
+				<divider />
+				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
+					<icon icon="/icons/return.png" style="LEFT" />
+					<destination template="/grade_questions_list/{0}/{1}">
+						<model ref="sort_grades" />
+						<model ref="assessment.id" />
+					</destination>
+				</navigation>
 			</container>
 		</navigationBar>
 	</container>
