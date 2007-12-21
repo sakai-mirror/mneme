@@ -82,9 +82,11 @@ public interface QuestionService
 	 *        The pool criteria - count questions from this pool only.
 	 * @param search
 	 *        The search criteria.
+	 * @param questionType
+	 *        The (optional) quesiton type; if specified, only questions of this type are included.
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countQuestions(Pool pool, String search);
+	Integer countQuestions(Pool pool, String search, String questionType);
 
 	/**
 	 * Count the questions with this criteria.
@@ -93,9 +95,11 @@ public interface QuestionService
 	 *        The context - count questions from all pools in this context.
 	 * @param search
 	 *        The search criteria.
+	 * @param questionType
+	 *        The (optional) quesiton type; if specified, only questions of this type are included.
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countQuestions(String context, String search);
+	Integer countQuestions(String context, String search, String questionType);
 
 	/**
 	 * Check if a question exists.

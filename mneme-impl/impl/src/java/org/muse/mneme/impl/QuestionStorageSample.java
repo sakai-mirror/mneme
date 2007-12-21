@@ -134,7 +134,7 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countContextQuestions(String context)
+	public Integer countContextQuestions(String context, String questionType)
 	{
 		int count = 0;
 		for (QuestionImpl question : this.questions.values())
@@ -142,6 +142,7 @@ public class QuestionStorageSample implements QuestionStorage
 			if (question.getIsHistorical()) continue;
 			if (question.getMint()) continue;
 			if (!question.getContext().equals(context)) continue;
+			if ((questionType != null) && (!question.getType().equals(questionType))) continue;
 
 			count++;
 		}
@@ -152,13 +153,14 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPoolQuestions(Pool pool)
+	public Integer countPoolQuestions(Pool pool, String questionType)
 	{
 		int count = 0;
 		for (QuestionImpl question : this.questions.values())
 		{
 			if (question.getMint()) continue;
 			if (!question.getPool().equals(pool)) continue;
+			if ((questionType != null) && (!question.getType().equals(questionType))) continue;
 
 			count++;
 		}
@@ -177,7 +179,7 @@ public class QuestionStorageSample implements QuestionStorage
 		{
 			if (!pool.getIsHistorical())
 			{
-				rv.put(pool.getId(), countPoolQuestions(pool));
+				rv.put(pool.getId(), countPoolQuestions(pool, null));
 			}
 		}
 

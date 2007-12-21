@@ -64,18 +64,22 @@ public interface QuestionStorage
 	 * 
 	 * @param context
 	 *        The context.
+	 * @param questionType
+	 *        The (optional) quesiton type; if specified, only questions of this type are included.
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countContextQuestions(String context);
+	Integer countContextQuestions(String context, String questionType);
 
 	/**
 	 * Count the questions in this pool
 	 * 
 	 * @param pool
 	 *        The pool.
+	 * @param questionType
+	 *        The (optional) quesiton type; if specified, only questions of this type are included.
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countPoolQuestions(Pool pool);
+	Integer countPoolQuestions(Pool pool, String questionType);
 
 	/**
 	 * Count the questions in the non-historical pools of this context

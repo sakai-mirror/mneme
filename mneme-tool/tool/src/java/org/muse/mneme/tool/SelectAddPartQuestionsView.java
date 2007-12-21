@@ -124,15 +124,6 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		context.put("sort_direction", sortCode.charAt(1));
 		QuestionService.FindQuestionsSort sort = findQuestionSortCode(sortCode);
 
-		// paging
-		Integer maxQuestions = this.questionService.countQuestions(this.toolManager.getCurrentPlacement().getContext(), null);
-		String pagingParameter = "1-30";
-		if (params.length > 6) pagingParameter = params[6];
-		Paging paging = uiService.newPaging();
-		paging.setMaxItems(maxQuestions);
-		paging.setCurrentAndSize(pagingParameter);
-		context.put("paging", paging);
-
 		String typeFilter = (params.length > 7) ? params[7] : "0";
 		context.put("typeFilter", typeFilter);
 
@@ -140,39 +131,62 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		List<QuestionPlugin> questionTypes = this.mnemeService.getQuestionPlugins();
 		context.put("questionTypes", questionTypes);
 
-		// for the selected question type - pre-select the top of the list
-		Value value = this.uiService.newValue();
-		value.setValue(context.getDestination());
-		context.put("selectedQuestionType", value);
-
 		String poolFilter = (params.length > 8) ? params[8] : "0";
 		context.put("poolFilter", poolFilter);
+		Pool pool = poolFilter.equals("0") ? null : this.poolService.getPool(poolFilter);
 
 		// the pools
 		List<Pool> pools = this.poolService.getPools(toolManager.getCurrentPlacement().getContext());
 		context.put("pools", pools);
 
-		// for the selected pool - pre-select the top of the list
-		value = this.uiService.newValue();
-		value.setValue(context.getDestination());
-		context.put("selectedPool", value);
+		// paging
+		Integer maxQuestions = null;
+		if (pool == null)
+		{
+			maxQuestions = this.questionService.countQuestions(this.toolManager.getCurrentPlacement().getContext(), null,
+					(typeFilter.equals("0") ? null : typeFilter));
+		}
+		else
+		{
+			maxQuestions = this.questionService.countQuestions(pool, null, (typeFilter.equals("0") ? null : typeFilter));
+		}
+		String pagingParameter = "1-30";
+		if (params.length > 6) pagingParameter = params[6];
+		Paging paging = uiService.newPaging();
+		paging.setMaxItems(maxQuestions);
+		paging.setCurrentAndSize(pagingParameter);
+		context.put("paging", paging);
 
 		// get questions
 		List<Question> questions = null;
 
-		if (poolFilter.equals("0"))
+		if (pool == null)
 		{
 			questions = questionService.findQuestions(this.toolManager.getCurrentPlacement().getContext(), sort, null, (typeFilter.equals("0") ? null
 					: typeFilter), paging.getCurrent(), paging.getSize());
 		}
 		else
 		{
-			// get the pool
-			Pool pool = this.poolService.getPool(poolFilter);
 			questions = questionService.findQuestions(pool, sort, null, (typeFilter.equals("0") ? null : typeFilter), paging.getCurrent(), paging
 					.getSize());
 		}
 		context.put("questions", questions);
+
+		// the paging is now more accurate than our current destination - we may have asked for page 1, but have to deliver page 0 if we have nothing
+		// get a new destination
+		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page, [7] our type filter, [8] our pool filter
+		String newDestination = "/" + params[1] + "/" + params[2] + "/" + params[3] + "/" + params[4] + "/" + sortCode + "/"
+				+ paging.getCurrent().toString() + "-" + paging.getSize().toString() + "/" + typeFilter + "/" + poolFilter;
+
+		// for the selected question type - pre-select the top of the list
+		Value value = this.uiService.newValue();
+		value.setValue(newDestination);
+		context.put("selectedQuestionType", value);
+
+		// for the selected pool - pre-select the top of the list
+		value = this.uiService.newValue();
+		value.setValue(newDestination);
+		context.put("selectedPool", value);
 
 		// render
 		uiService.render(ui, context);

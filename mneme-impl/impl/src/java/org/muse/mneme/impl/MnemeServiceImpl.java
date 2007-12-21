@@ -268,17 +268,17 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countQuestions(Pool pool, String search)
+	public Integer countQuestions(Pool pool, String search, String questionType)
 	{
-		return this.questionService.countQuestions(pool, search);
+		return this.questionService.countQuestions(pool, search, questionType);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countQuestions(String context, String search)
+	public Integer countQuestions(String context, String search, String questionType)
 	{
-		return questionService.countQuestions(context, search);
+		return questionService.countQuestions(context, search, questionType);
 	}
 
 	/**

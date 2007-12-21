@@ -129,7 +129,7 @@ public class PoolEditView extends ControllerImpl
 		// paging
 		String pagingParameter = "1-30";
 		if (params.length > 5) pagingParameter = params[5];
-		Integer maxQuestions = this.questionService.countQuestions(pool, null);
+		Integer maxQuestions = this.questionService.countQuestions(pool, null, null);
 		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxQuestions);
 		paging.setCurrentAndSize(pagingParameter);
