@@ -54,7 +54,7 @@ public class SubmissionImpl implements Submission
 
 	protected List<Answer> answers = new ArrayList<Answer>();
 
-	protected String assessmentId = null;
+	protected SubmissionAssessmentImpl assessment = null;
 
 	protected transient AssessmentService assessmentService = null;
 
@@ -100,6 +100,7 @@ public class SubmissionImpl implements Submission
 		this.securityService = securityService;
 		this.submissionService = submissionService;
 		this.sessionManager = sessionManager;
+		this.assessment = new SubmissionAssessmentImpl(null, this, this.assessmentService);
 		this.evaluation = new SubmissionEvaluationImpl(this);
 	}
 
@@ -235,10 +236,7 @@ public class SubmissionImpl implements Submission
 	 */
 	public Assessment getAssessment()
 	{
-		AssessmentImpl rv = (AssessmentImpl) this.assessmentService.getAssessment(this.assessmentId);
-		rv.initSubmissionContext(this);
-
-		return rv;
+		return this.assessment;
 	}
 
 	/**
@@ -957,7 +955,7 @@ public class SubmissionImpl implements Submission
 	 */
 	protected String getAssessmentId()
 	{
-		return this.assessmentId;
+		return this.assessment.getId();
 	}
 
 	/**
@@ -1010,7 +1008,7 @@ public class SubmissionImpl implements Submission
 	 */
 	protected void initAssessmentId(String id)
 	{
-		this.assessmentId = id;
+		this.assessment.assessmentId = id;
 	}
 
 	/**
@@ -1122,7 +1120,7 @@ public class SubmissionImpl implements Submission
 	 */
 	protected void setMain(SubmissionImpl other)
 	{
-		this.assessmentId = other.assessmentId;
+		this.assessment = new SubmissionAssessmentImpl(other.assessment, this);
 		this.assessmentService = other.assessmentService;
 		this.bestSubmissionId = other.bestSubmissionId;
 		this.evaluation = new SubmissionEvaluationImpl(other.evaluation, this);
