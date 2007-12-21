@@ -102,9 +102,7 @@ public class SqlHelper
 	 */
 	public static Boolean readBoolean(ResultSet result, int index) throws SQLException
 	{
-		String b = StringUtil.trimToNull(result.getString(index));
-		if (b == null) return null;
-		return Boolean.valueOf("1".equals(b) || "true".equals(b));
+		return readBitBoolean(result, index);
 	}
 
 	/**
@@ -135,7 +133,16 @@ public class SqlHelper
 		{
 			if (((String) o).length() > 0)
 			{
-				rv = Boolean.valueOf(((String) o).charAt(0) == '\u0001');
+				String s = (String) o;
+				
+				if (s.equals("1") || s.equals("0"))
+				{
+					rv = Boolean.valueOf(s.equals("1"));
+				}
+				else
+				{
+					rv = Boolean.valueOf(((String) o).charAt(0) == '\u0001');
+				}
 			}
 		}
 
