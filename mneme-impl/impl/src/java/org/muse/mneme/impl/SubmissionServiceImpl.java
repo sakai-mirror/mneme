@@ -2067,7 +2067,25 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					case sdate_a:
 					case sdate_d:
 					{
-						rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
+						Date date0 = ((Submission) arg0).getSubmittedDate();
+						Date date1 = ((Submission) arg1).getSubmittedDate();
+						if ((date0 == null) && (date1 == null))
+						{
+							rv = 0;
+						}
+						else if (date0 == null)
+						{
+							rv = -1;
+						}
+						else if (date1 == null)
+						{
+							rv = 1;
+						}
+						else
+						{
+							rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
+						}
+
 						secondary = null;
 						break;
 					}
@@ -2110,7 +2128,24 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 						case sdate_a:
 						case sdate_d:
 						{
-							rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
+							Date date0 = ((Submission) arg0).getSubmittedDate();
+							Date date1 = ((Submission) arg1).getSubmittedDate();
+							if ((date0 == null) && (date1 == null))
+							{
+								rv = 0;
+							}
+							else if (date0 == null)
+							{
+								rv = -1;
+							}
+							else if (date1 == null)
+							{
+								rv = 1;
+							}
+							else
+							{
+								rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
+							}
 							break;
 						}
 					}
@@ -2124,7 +2159,24 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 						case sdate_a:
 						case sdate_d:
 						{
-							rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
+							Date date0 = ((Submission) arg0).getSubmittedDate();
+							Date date1 = ((Submission) arg1).getSubmittedDate();
+							if ((date0 == null) && (date1 == null))
+							{
+								rv = 0;
+							}
+							else if (date0 == null)
+							{
+								rv = -1;
+							}
+							else if (date1 == null)
+							{
+								rv = 1;
+							}
+							else
+							{
+								rv = ((Submission) arg0).getSubmittedDate().compareTo(((Submission) arg1).getSubmittedDate());
+							}
 							break;
 						}
 					}
