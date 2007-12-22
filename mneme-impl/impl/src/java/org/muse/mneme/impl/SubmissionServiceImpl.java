@@ -703,15 +703,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 
 		// release the grades to the grading authority
-		try
-		{
-			this.gradesService.reportAssessmentGrades(assessment);
-		}
-		catch (GradesRejectsAssessmentException e)
-		{
-			// TODO:
-			M_log.warn("evaluateSubmissions : " + e.toString());
-		}
+		this.gradesService.reportAssessmentGrades(assessment);
 	}
 
 	/**

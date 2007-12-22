@@ -125,12 +125,68 @@ public class GradesServiceGradebook23Impl implements GradesService
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean reportAssessmentGrades(Assessment assessment) throws GradesRejectsAssessmentException
+	public Boolean initAssessmentGrades(Assessment assessment) throws GradesRejectsAssessmentException
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 
 		// make sure we are published, valid and desire gradebook integration
 		if (!(assessment.getPublished() && assessment.getGrading().getGradebookIntegration() && assessment.getIsValid())) return Boolean.FALSE;
+
+		// make sure we don't already have an entry
+		if (assessmentReported(assessment))
+		{
+			throw new GradesRejectsAssessmentException();
+		}
+
+		M_log.debug("initAssessmentGrades: " + assessment.getId());
+
+		try
+		{
+			// make sure there's a gradebook
+			boolean hasGradebook = gradebookService.isGradebookDefined(assessment.getContext());
+			if (hasGradebook)
+			{
+				// TODO: what url to use?
+				String url = null;
+
+				// make an entry for the assessment
+				gradebookService.addExternalAssessment(assessment.getContext(), assessment.getTitle(), url, assessment.getTitle(), assessment
+						.getParts().getTotalPoints(), assessment.getDates().getDueDate(), "Test Center");
+				return Boolean.TRUE;
+			}
+		}
+		catch (GradebookNotFoundException e)
+		{
+			M_log.warn("initAssessmentGrades: " + assessment.getId() + e.toString());
+		}
+		catch (ConflictingAssignmentNameException e)
+		{
+			throw new GradesRejectsAssessmentException();
+		}
+		catch (ConflictingExternalIdException e)
+		{
+			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
+		}
+		catch (AssignmentHasIllegalPointsException e)
+		{
+			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
+		}
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean reportAssessmentGrades(Assessment assessment)
+	{
+		if (assessment == null) throw new IllegalArgumentException();
+
+		// make sure we are published, valid and desire gradebook integration
+		if (!(assessment.getPublished() && assessment.getGrading().getGradebookIntegration() && assessment.getIsValid())) return Boolean.FALSE;
+
+		// make sure our assessment is in the gb
+		if (!assessmentReported(assessment)) return Boolean.FALSE;
 
 		M_log.debug("reportAssessmentGrades: " + assessment.getId());
 
@@ -140,18 +196,6 @@ public class GradesServiceGradebook23Impl implements GradesService
 			boolean hasGradebook = gradebookService.isGradebookDefined(assessment.getContext());
 			if (hasGradebook)
 			{
-				// see if there's an entry
-				boolean reported = gradebookService.isExternalAssignmentDefined(assessment.getContext(), assessment.getTitle());
-				if (!reported)
-				{
-					// TODO: what url to use?
-					String url = null;
-
-					// make an entry for the assessment
-					gradebookService.addExternalAssessment(assessment.getContext(), assessment.getTitle(), url, assessment.getTitle(), assessment
-							.getParts().getTotalPoints(), assessment.getDates().getDueDate(), "Test Center");
-				}
-
 				// get the "official" submissions map of user id -> Float score (for released completed submissions)
 				Map<String, Float> scores = this.submissionService.getAssessmentHighestScores(assessment, Boolean.TRUE);
 
@@ -175,18 +219,6 @@ public class GradesServiceGradebook23Impl implements GradesService
 			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
 		}
 		catch (AssessmentNotFoundException e)
-		{
-			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
-		}
-		catch (ConflictingAssignmentNameException e)
-		{
-			throw new GradesRejectsAssessmentException();
-		}
-		catch (ConflictingExternalIdException e)
-		{
-			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
-		}
-		catch (AssignmentHasIllegalPointsException e)
 		{
 			M_log.warn("reportAssessmentGrades: " + assessment.getId() + e.toString());
 		}

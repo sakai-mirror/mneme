@@ -47,9 +47,7 @@ public interface GradesService
 	Boolean available(String context);
 
 	/**
-	 * Report this assessment's grade. All completed "best" submissions that are found are reported.<br />
-	 * Establish the Assessment with the grading authority if needed.<br />
-	 * Replace the entire set of grades for this assessment that are currently reported.
+	 * Make sure the assessment is added to the grading authority.
 	 * 
 	 * @param assessment
 	 *        The assessment.
@@ -57,7 +55,17 @@ public interface GradesService
 	 * @throws GradesRejectsAssessmentException
 	 *         if the assessment was not able to be added to the grading authority.
 	 */
-	Boolean reportAssessmentGrades(Assessment assessment) throws GradesRejectsAssessmentException;
+	Boolean initAssessmentGrades(Assessment assessment) throws GradesRejectsAssessmentException;
+
+	/**
+	 * Report this assessment's grade. All completed "best" submissions that are found are reported.<br />
+	 * Replace the entire set of grades for this assessment that are currently reported.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @return TRUE if successful, FALSE if not.
+	 */
+	Boolean reportAssessmentGrades(Assessment assessment);
 
 	/**
 	 * Report this submission's grade.<br />

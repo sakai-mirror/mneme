@@ -217,6 +217,8 @@ public class AssessmentServiceImpl implements AssessmentService
 		rv.initLive(Boolean.FALSE);
 		rv.initLocked(Boolean.FALSE);
 
+		((AssessmentGradingImpl) (rv.getGrading())).initGradebookRejectedAssessment(Boolean.FALSE);
+		
 		// update created and last modified information
 		rv.getCreatedBy().setDate(now);
 		rv.getCreatedBy().setUserId(userId);
@@ -412,7 +414,10 @@ public class AssessmentServiceImpl implements AssessmentService
 		this.threadLocalManager.set(key, null);
 
 		// retract the test from the gb
-		this.gradesService.retractAssessmentGrades(assessment);
+		if (assessment.getIsValid() && assessment.getGrading().getGradebookIntegration() && assessment.getPublished())
+		{
+			this.gradesService.retractAssessmentGrades(assessment);
+		}
 
 		this.storage.removeAssessment((AssessmentImpl) assessment);
 
@@ -479,11 +484,6 @@ public class AssessmentServiceImpl implements AssessmentService
 		// see if we have had a title change (and clear)
 		boolean titleChanged = ((AssessmentImpl) assessment).getTitleChanged();
 		((AssessmentImpl) assessment).initTitle(assessment.getTitle());
-		if (titleChanged)
-		{
-			// make sure we are not still considered invalid for gb - if we are with the new title, we will pick that up down below
-			((AssessmentGradingImpl) (assessment.getGrading())).initGradebookRejectedAssessment(Boolean.FALSE);
-		}
 
 		// see if we had a change in published (and clear)
 		boolean publishedChanged = ((AssessmentImpl) assessment).getPublishedChanged();
@@ -493,6 +493,17 @@ public class AssessmentServiceImpl implements AssessmentService
 		boolean dueChanged = ((AssessmentDatesImpl) assessment.getDates()).getDueDateChanged();
 		((AssessmentDatesImpl) assessment.getDates()).initDueDate(assessment.getDates().getDueDate());
 
+		// see if we have just been archived (and clear)
+		boolean archivedChanged = ((AssessmentImpl) assessment).getArchivedChanged();
+		((AssessmentImpl) assessment).initArchived(assessment.getArchived());
+
+		// see if we have changed our gradebook integration (and clear)
+		boolean gbIntegrationChanged = ((AssessmentGradingImpl) (assessment.getGrading())).getGradebookIntegrationChanged();
+		((AssessmentGradingImpl) (assessment.getGrading())).initGradebookIntegration(assessment.getGrading().getGradebookIntegration());
+
+		// make sure we are not still considered invalid for gb - if we are, we will pick that up down below
+		((AssessmentGradingImpl) (assessment.getGrading())).initGradebookRejectedAssessment(Boolean.FALSE);
+
 		// see if we have changed our validity
 		boolean validityChanged = false;
 		boolean nowValid = assessment.getIsValid();
@@ -501,14 +512,6 @@ public class AssessmentServiceImpl implements AssessmentService
 		{
 			validityChanged = (b4.getIsValid().booleanValue() != nowValid);
 		}
-
-		// see if we have just been archived (and clear)
-		boolean archivedChanged = ((AssessmentImpl) assessment).getArchivedChanged();
-		((AssessmentImpl) assessment).initArchived(assessment.getArchived());
-
-		// see if we have changed our gradebook integration (and clear)
-		boolean gbIntegrationChanged = ((AssessmentGradingImpl) (assessment.getGrading())).getGradebookIntegrationChanged();
-		((AssessmentGradingImpl) (assessment.getGrading())).initGradebookIntegration(assessment.getGrading().getGradebookIntegration());
 
 		// if we are just going published and not yet live, bring the assessment live
 		if (!assessment.getIsLive() && publishedChanged && assessment.getPublished())
@@ -529,7 +532,8 @@ public class AssessmentServiceImpl implements AssessmentService
 				|| (archivedChanged && assessment.getArchived()) || (gbIntegrationChanged && !assessment.getGrading().getGradebookIntegration()))
 		{
 			// retract the entire assessment from grades - use the old information (title) (if we existed before this call)
-			if (current != null)
+			// ONLY IF we were expecting to be in the gb based on current values
+			if ((current != null) && current.getIsValid() && current.getGrading().getGradebookIntegration() && current.getPublished())
 			{
 				this.gradesService.retractAssessmentGrades(current);
 			}
@@ -548,18 +552,30 @@ public class AssessmentServiceImpl implements AssessmentService
 				|| (validityChanged && nowValid && assessment.getPublished())
 				|| (gbIntegrationChanged && assessment.getGrading().getGradebookIntegration()))
 		{
-			// assure we have an entry in the grades, and push over any completed official submissions
-			try
+			if (assessment.getIsValid() && assessment.getGrading().getGradebookIntegration() && assessment.getPublished())
 			{
-				this.gradesService.reportAssessmentGrades(assessment);
-			}
-			catch (GradesRejectsAssessmentException e)
-			{
-				// mark as invalid
-				((AssessmentGradingImpl) (assessment.getGrading())).initGradebookRejectedAssessment(Boolean.TRUE);
+				try
+				{
+					// we should not be in the gb!
+					if (this.gradesService.assessmentReported(assessment))
+					{
+						throw new GradesRejectsAssessmentException();
+					}
 
-				// resave
-				save((AssessmentImpl) assessment);
+					// try to get into the gb
+					this.gradesService.initAssessmentGrades(assessment);
+
+					// report any completed official submissions
+					this.gradesService.reportAssessmentGrades(assessment);
+				}
+				catch (GradesRejectsAssessmentException e)
+				{
+					// mark as invalid
+					((AssessmentGradingImpl) (assessment.getGrading())).initGradebookRejectedAssessment(Boolean.TRUE);
+
+					// re-save
+					save((AssessmentImpl) assessment);
+				}
 			}
 
 			// release the submissions, if we need to (each will have the grade reported)
