@@ -538,8 +538,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// if the name or due date has changed, or we are retracting submissions, or we are now unpublished,
 		// or we are now invalid, or we have just been archived, or we are now not gradebook integrated,
+		// or we are releasing (we need to remove our entry so we can add it back without conflict)
 		// retract the assessment from the grades authority
-		if (titleChanged || dueChanged || retract || (publishedChanged && !assessment.getPublished()) || (validityChanged && !nowValid)
+		if (titleChanged || dueChanged || retract || release || (publishedChanged && !assessment.getPublished()) || (validityChanged && !nowValid)
 				|| (archivedChanged && assessment.getArchived()) || (gbIntegrationChanged && !assessment.getGrading().getGradebookIntegration()))
 		{
 			// retract the entire assessment from grades - use the old information (title) (if we existed before this call)
@@ -558,8 +559,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// if the name or due date has changed, or we are releasing submissions, or we are now published,
 		// or we are now valid (and are published), or we are now gradebook integrated,
+		// or we are retracting (we need to add the entry back in that we just removed)
 		// report the assessment and all completed submissions to the grades authority
-		if (titleChanged || dueChanged || release || (publishedChanged && assessment.getPublished())
+		if (titleChanged || dueChanged || release || retract || (publishedChanged && assessment.getPublished())
 				|| (validityChanged && nowValid && assessment.getPublished())
 				|| (gbIntegrationChanged && assessment.getGrading().getGradebookIntegration()))
 		{
