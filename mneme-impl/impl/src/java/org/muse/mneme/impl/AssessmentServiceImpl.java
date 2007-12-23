@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -202,6 +203,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// set the context
 		rv.setContext(context);
+
+		// add to the title
+		rv.setTitle(((PoolServiceImpl) this.poolService).addDate("copy-text", rv.getTitle(), now));
 
 		// clear archived
 		rv.initArchived(Boolean.FALSE);
