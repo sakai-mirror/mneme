@@ -98,12 +98,15 @@ public class EnterView extends ControllerImpl
 			return;
 		}
 
-		// check for closed
-		if (submission.getAssessment().getDates().getIsClosed().booleanValue())
+		// check for closed (test drive can skip this)
+		if (!submission.getIsTestDrive())
 		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.closed)));
-			return;
+			if (submission.getAssessment().getDates().getIsClosed().booleanValue())
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.closed)));
+				return;
+			}
 		}
 
 		// security check (submissions count / allowed check)

@@ -85,7 +85,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 		for (SubmissionImpl submission : this.submissions.values())
 		{
 			// TODO: only for complete? && submission.getIsComplete() and only if answered
-			if (submission.getAssessment().equals(part.getAssessment()) && submission.getIsComplete())
+			if (submission.getAssessment().equals(part.getAssessment()) && submission.getIsComplete() && (!submission.getIsTestDrive()))
 			{
 				for (Answer answer : submission.getAnswers())
 				{
@@ -149,7 +149,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 		for (SubmissionImpl submission : this.submissions.values())
 		{
 			// if any for this assessment are complete and not released, the assessment is not fully released
-			if (submission.getAssessment().equals(assessment) && submission.getIsComplete())
+			if (submission.getAssessment().equals(assessment) && submission.getIsComplete() && (!submission.getIsTestDrive()))
 			{
 				for (Answer answer : submission.getAnswers())
 				{
@@ -172,7 +172,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 		Map<String, Float> rv = new HashMap<String, Float>();
 		for (SubmissionImpl submission : this.submissions.values())
 		{
-			if (submission.getAssessment().equals(assessment) && submission.getIsComplete())
+			if (submission.getAssessment().equals(assessment) && submission.getIsComplete() && (!submission.getIsTestDrive()))
 			{
 				if (releasedOnly && !submission.getIsReleased()) continue;
 
@@ -241,7 +241,7 @@ public class SubmissionStorageSample implements SubmissionStorage
 		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
 		for (SubmissionImpl submission : this.submissions.values())
 		{
-			if (submission.getAssessment().equals(assessment))
+			if (submission.getAssessment().equals(assessment) && (!submission.getIsTestDrive()))
 			{
 				rv.add(new SubmissionImpl(submission));
 			}
@@ -344,15 +344,17 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<SubmissionImpl> getUserContextSubmissions(String context, String userId)
+	public List<SubmissionImpl> getUserContextSubmissions(String context, String userId, Boolean publishedOnly)
 	{
 		List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
 		for (SubmissionImpl submission : this.submissions.values())
 		{
 			// find those in the context for this user, filter out archived and un-published assessments
 			if (submission.getAssessment().getContext().equals(context) && submission.getUserId().equals(userId)
-					&& (!submission.getAssessment().getArchived()) && (submission.getAssessment().getPublished()))
+					&& (!submission.getAssessment().getArchived()))
 			{
+				if (publishedOnly && !submission.getAssessment().getPublished()) continue;
+
 				rv.add(new SubmissionImpl(submission));
 			}
 		}
@@ -431,6 +433,46 @@ public class SubmissionStorageSample implements SubmissionStorage
 	// {
 	// this.submissions.remove(submission.getId());
 	// }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeTestDriveSubmissions(Assessment assessment)
+	{
+		List<String> ids = new ArrayList<String>();
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			if (submission.getAssessment().equals(assessment) && submission.getIsTestDrive())
+			{
+				ids.add(submission.getId());
+			}
+		}
+
+		for (String id : ids)
+		{
+			this.submissions.remove(id);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeTestDriveSubmissions(String context)
+	{
+		List<String> ids = new ArrayList<String>();
+		for (SubmissionImpl submission : this.submissions.values())
+		{
+			if (submission.getAssessment().getContext().equals(context) && submission.getIsTestDrive())
+			{
+				ids.add(submission.getId());
+			}
+		}
+
+		for (String id : ids)
+		{
+			this.submissions.remove(id);
+		}
+	}
 
 	/**
 	 * {@inheritDoc}

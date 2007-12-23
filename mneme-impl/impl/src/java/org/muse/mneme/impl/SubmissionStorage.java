@@ -172,9 +172,11 @@ public interface SubmissionStorage
 	 *        The context.
 	 * @param userId
 	 *        The user.
+	 * @param publishedOnly
+	 *        if TRUE, return only published assessments, else return submissions from unpublished as well.
 	 * @return The list of submissions by this user in this context.
 	 */
-	List<SubmissionImpl> getUserContextSubmissions(String context, String userId);
+	List<SubmissionImpl> getUserContextSubmissions(String context, String userId, Boolean publishedOnly);
 
 	/**
 	 * Get all the users who have submitted to this assessment.
@@ -207,6 +209,22 @@ public interface SubmissionStorage
 	 * @return A new Submission object.
 	 */
 	SubmissionImpl newSubmission(SubmissionImpl other);
+
+	/**
+	 * Remove any test-drive submissions for this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	void removeTestDriveSubmissions(Assessment assessment);
+
+	/**
+	 * Remove any test-drive submissions for this context.
+	 * 
+	 * @param context
+	 *        The context.
+	 */
+	void removeTestDriveSubmissions(String context);
 
 	/**
 	 * Save changes made to these answers.

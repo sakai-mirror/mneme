@@ -83,11 +83,11 @@ public class SubmissionImpl implements Submission
 
 	protected Date submittedDate = null;
 
+	protected Boolean testDrive = Boolean.FALSE;
+
 	/** A value sent to setTotalScore before it is applied. */
 	protected transient Float totalScoreToBe = null;
 
-	/** This is a pre-compute for the total score (trust me!), to be used if set and we don't have the answers & evaluations. */
-	// protected transient Float totalScore = null;
 	protected String userId = null;
 
 	/**
@@ -608,6 +608,14 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsTestDrive()
+	{
+		return this.testDrive;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getMayBegin()
 	{
 		// ASSSUMPTION: this will be a submission with sibling count, and it will be:
@@ -618,15 +626,39 @@ public class SubmissionImpl implements Submission
 		// not yet started
 		if (getStartDate() != null) return Boolean.FALSE;
 
-		// assessment is open
-		if (!getAssessment().getDates().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
+		// published (test drive need not be)
+		if (!getIsTestDrive())
+		{
+			if (!getAssessment().getPublished()) return Boolean.FALSE;
+		}
+		
+		// valid
+		if (!getAssessment().getIsValid()) return Boolean.FALSE;
+
+		// assessment is open (allow test drive submissions to skip this)
+		if (!getIsTestDrive())
+		{
+			if (!getAssessment().getDates().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
+		}
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-		if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
-				.getContext())) return Boolean.FALSE;
+		// test drive can instead use manage permission
+		if (!getIsTestDrive())
+		{
+			if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
+					.getContext())) return Boolean.FALSE;
+		}
+		else
+		{
+			if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, getAssessment()
+					.getContext())) return Boolean.FALSE;
+		}
 
-		// under limit
-		if ((getAssessment().getTries() != null) && (this.getSiblingCount() >= getAssessment().getTries())) return Boolean.FALSE;
+		// under limit (test drive can skip this)
+		if (!getIsTestDrive())
+		{
+			if ((getAssessment().getTries() != null) && (this.getSiblingCount() >= getAssessment().getTries())) return Boolean.FALSE;
+		}
 
 		return Boolean.TRUE;
 	}
@@ -642,18 +674,42 @@ public class SubmissionImpl implements Submission
 		// - the "official" completed one, if any
 
 		// submission is complete
-		if ((getIsComplete() == null) || (!getIsComplete().booleanValue())) return Boolean.FALSE;
+		if (!getIsComplete()) return Boolean.FALSE;
 
-		// assessment is open
-		if (!getAssessment().getDates().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
+		// published (test drive need not be)
+		if (!getIsTestDrive())
+		{
+			if (!getAssessment().getPublished()) return Boolean.FALSE;
+		}
 
-		// under limit
-		if ((getAssessment().getTries() != null) && (this.getSiblingCount().intValue() >= getAssessment().getTries().intValue()))
-			return Boolean.FALSE;
+		// valid
+		if (!getAssessment().getIsValid()) return Boolean.FALSE;
+
+		// assessment is open (allow test drive submissions to skip this)
+		if (!getIsTestDrive())
+		{
+			if (!getAssessment().getDates().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
+		}
+
+		// under limit (test drive can skip this)
+		if (!getIsTestDrive())
+		{
+			if ((getAssessment().getTries() != null) && (this.getSiblingCount().intValue() >= getAssessment().getTries().intValue()))
+				return Boolean.FALSE;
+		}
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-		if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
-				.getContext())) return Boolean.FALSE;
+		// test drive can instead use manage permission
+		if (!getIsTestDrive())
+		{
+			if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
+					.getContext())) return Boolean.FALSE;
+		}
+		else
+		{
+			if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, getAssessment()
+					.getContext())) return Boolean.FALSE;
+		}
 
 		return Boolean.TRUE;
 	}
@@ -667,17 +723,38 @@ public class SubmissionImpl implements Submission
 		if (getStartDate() == null) return Boolean.FALSE;
 
 		// submission not complete
-		if ((getIsComplete() != null) && (getIsComplete().booleanValue())) return Boolean.FALSE;
+		if (getIsComplete()) return Boolean.FALSE;
 
 		// same user
 		if (!this.sessionManager.getCurrentSessionUserId().equals(getUserId())) return Boolean.FALSE;
 
-		// assessment is open
-		if (!getAssessment().getDates().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
+		// published (test drive need not be)
+		if (!getIsTestDrive())
+		{
+			if (!getAssessment().getPublished()) return Boolean.FALSE;
+		}
+
+		// valid
+		if (!getAssessment().getIsValid()) return Boolean.FALSE;
+
+		// assessment is open (allow test drive submissions to skip this)
+		if (!getIsTestDrive())
+		{
+			if (!getAssessment().getDates().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
+		}
 
 		// permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-		if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
-				.getContext())) return Boolean.FALSE;
+		// test drive can instead use manage permission
+		if (!getIsTestDrive())
+		{
+			if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, getAssessment()
+					.getContext())) return Boolean.FALSE;
+		}
+		else
+		{
+			if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, getAssessment()
+					.getContext())) return Boolean.FALSE;
+		}
 
 		return Boolean.TRUE;
 	}
@@ -693,8 +770,14 @@ public class SubmissionImpl implements Submission
 		// submission complete
 		if (!getIsComplete()) return Boolean.FALSE;
 
-		// published
-		if (!getAssessment().getPublished()) return Boolean.FALSE;
+		// published (test drive need not be)
+		if (!getIsTestDrive())
+		{
+			if (!getAssessment().getPublished()) return Boolean.FALSE;
+		}
+
+		// valid
+		if (!getAssessment().getIsValid()) return Boolean.FALSE;
 
 		// assessment review enabled
 		if (!getAssessment().getReview().getNowAvailable()) return Boolean.FALSE;
@@ -715,8 +798,14 @@ public class SubmissionImpl implements Submission
 		// submission complete
 		if (!getIsComplete().booleanValue()) return Boolean.FALSE;
 
-		// published
-		if (!getAssessment().getPublished()) return Boolean.FALSE;
+		// published (test drive need not be)
+		if (!getIsTestDrive())
+		{
+			if (!getAssessment().getPublished()) return Boolean.FALSE;
+		}
+
+		// valid
+		if (!getAssessment().getIsValid()) return Boolean.FALSE;
 
 		// assessment not set to no review
 		if (getAssessment().getReview().getTiming() == ReviewTiming.never) return Boolean.FALSE;
@@ -1050,16 +1139,16 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
-	 * Initialize a total score value, sum of all answers manual and auto scores, plus the manual score for the whole submission.<br />
-	 * This is a pre-compute for the total score (trust me!), to be used if set and we don't have the answers & evaluations
+	 * Initialize the test-drive setting.
 	 * 
-	 * @param score
-	 *        The total score pre-compute.
+	 * @param testDrive
+	 *        The test-drive setting.
 	 */
-	// protected void initTotalScore(Float score)
-	// {
-	// this.totalScore = score;
-	// }
+	protected void initTestDrive(Boolean testDrive)
+	{
+		this.testDrive = testDrive;
+	}
+
 	/**
 	 * Initialize the user id property.
 	 * 
@@ -1134,7 +1223,7 @@ public class SubmissionImpl implements Submission
 		this.startDate = other.startDate;
 		this.submissionService = other.submissionService;
 		this.submittedDate = other.submittedDate;
-		// this.totalScore = other.totalScore;
+		this.testDrive = other.testDrive;
 		this.userId = other.userId;
 	}
 }

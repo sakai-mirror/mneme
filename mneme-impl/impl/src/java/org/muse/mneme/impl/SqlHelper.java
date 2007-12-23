@@ -102,11 +102,14 @@ public class SqlHelper
 	 */
 	public static Boolean readBoolean(ResultSet result, int index) throws SQLException
 	{
-		return readBitBoolean(result, index);
+		String s = result.getString(index);
+		if (s == null) return null;
+		Boolean rv = Boolean.valueOf(s.equals("1"));
+		return rv;
 	}
 
 	/**
-	 * Read a Boolean (encoded in a bit or tinyint field) from the results set.
+	 * Read a Boolean (encoded in a bit or tinyint or string field) from the results set.
 	 * 
 	 * @param results
 	 *        The result set.
@@ -134,7 +137,7 @@ public class SqlHelper
 			if (((String) o).length() > 0)
 			{
 				String s = (String) o;
-				
+
 				if (s.equals("1") || s.equals("0"))
 				{
 					rv = Boolean.valueOf(s.equals("1"));

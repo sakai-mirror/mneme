@@ -126,8 +126,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		if (M_log.isDebugEnabled()) M_log.debug("allowListDeliveryAssessment: " + context + ": " + userId);
 
-		// check permission - user must have SUBMIT_PERMISSION in the context
-		boolean ok = securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, context);
+		// check permission - user must have SUBMIT_PERMISSION or MANAGE in the context
+		boolean ok = securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, context)
+				|| securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context);
 
 		return Boolean.valueOf(ok);
 	}
@@ -218,7 +219,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		rv.initLocked(Boolean.FALSE);
 
 		((AssessmentGradingImpl) (rv.getGrading())).initGradebookRejectedAssessment(Boolean.FALSE);
-		
+
 		// update created and last modified information
 		rv.getCreatedBy().setDate(now);
 		rv.getCreatedBy().setUserId(userId);
@@ -409,6 +410,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		// policy check
 		if (!satisfyAssessmentRemovalPolicy(assessment)) throw new AssessmentPolicyException();
 
+		// clear any test-drive submissions for this assessment
+		this.submissionService.removeTestDriveSubmissions(assessment);
+
 		// clear the cache
 		String key = cacheKey(assessment.getId());
 		this.threadLocalManager.set(key, null);
@@ -463,6 +467,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// check for changes not allowed if locked
 		if ((assessment.getIsLocked()) && ((AssessmentImpl) assessment).getIsLockedChanged()) throw new AssessmentPolicyException();
+
+		// clear any test-drive submissions for this assessment
+		this.submissionService.removeTestDriveSubmissions(assessment);
 
 		// see if we need to retract or release grades
 		boolean retract = false;
@@ -759,24 +766,30 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
-	 * Remove any draw dependencies on this pool from all live assessments.
+	 * Remove any draw dependencies on this pool from all unlocked assessments.
 	 * 
 	 * @param question
 	 *        The question.
 	 */
 	protected void removeDependency(Pool pool)
 	{
+		// clear any test-drive submissions for this assessment
+		this.submissionService.removeTestDriveSubmissions(pool.getContext());
+
 		this.storage.removeDependency(pool);
 	}
 
 	/**
-	 * Remove any pick dependencies on this question from all live assessments.
+	 * Remove any pick dependencies on this question from all unlocked assessments.
 	 * 
 	 * @param question
 	 *        The question.
 	 */
 	protected void removeDependency(Question question)
 	{
+		// clear any test-drive submissions for this assessment
+		this.submissionService.removeTestDriveSubmissions(question.getContext());
+
 		this.storage.removeDependency(question);
 	}
 

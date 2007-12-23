@@ -1291,9 +1291,9 @@ public class ImportServiceImpl implements ImportService
 					sq.incorrectFeedback = SqlHelper.readString(result, 10);
 					sq.correctFeedback = SqlHelper.readString(result, 11);
 					sq.generalFeedback = SqlHelper.readString(result, 12);
-					sq.caseSensitive = SqlHelper.readBoolean(result, 13);
-					sq.exclusive = SqlHelper.readBoolean(result, 14);
-					sq.randomize = SqlHelper.readBoolean(result, 15);
+					sq.caseSensitive = SqlHelper.readBitBoolean(result, 13);
+					sq.exclusive = SqlHelper.readBitBoolean(result, 14);
+					sq.randomize = SqlHelper.readBitBoolean(result, 15);
 
 					return null;
 				}
@@ -1402,9 +1402,9 @@ public class ImportServiceImpl implements ImportService
 					sq.incorrectFeedback = SqlHelper.readString(result, 10);
 					sq.correctFeedback = SqlHelper.readString(result, 11);
 					sq.generalFeedback = SqlHelper.readString(result, 12);
-					sq.caseSensitive = SqlHelper.readBoolean(result, 13);
-					sq.exclusive = SqlHelper.readBoolean(result, 14);
-					sq.randomize = SqlHelper.readBoolean(result, 15);
+					sq.caseSensitive = SqlHelper.readBitBoolean(result, 13);
+					sq.exclusive = SqlHelper.readBitBoolean(result, 14);
+					sq.randomize = SqlHelper.readBitBoolean(result, 15);
 
 					return null;
 				}

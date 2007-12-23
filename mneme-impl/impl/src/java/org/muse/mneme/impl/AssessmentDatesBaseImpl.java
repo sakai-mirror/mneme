@@ -135,8 +135,8 @@ public abstract class AssessmentDatesBaseImpl implements AssessmentDates
 	 */
 	public Boolean getIsOpen(Boolean withGrace)
 	{
-		if (this.assessessment.getArchived()) return Boolean.TRUE;
-		if (!this.assessessment.getPublished()) return Boolean.TRUE;
+		if (this.assessessment.getArchived()) return Boolean.FALSE;
+		if (!this.assessessment.getPublished()) return Boolean.FALSE;
 
 		Date now = new Date();
 		long grace = withGrace ? MnemeService.GRACE : 0l;

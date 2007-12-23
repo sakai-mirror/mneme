@@ -40,7 +40,6 @@ import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
-import org.muse.mneme.api.GradesRejectsAssessmentException;
 import org.muse.mneme.api.GradesService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
@@ -135,11 +134,23 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// submission must be incomplete
 		if (submission.getIsComplete()) return Boolean.FALSE;
 
-		// user must have submit permission inthe context of the assessment for this submission
-		if (!securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, assessment.getContext())) return Boolean.FALSE;
+		// user must have submit permission in the context of the assessment for this submission
+		// test drive submissions need manage instead
+		if (!submission.getIsTestDrive())
+		{
+			if (!securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, assessment.getContext())) return Boolean.FALSE;
+		}
+		else
+		{
+			if (!securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, assessment.getContext())) return Boolean.FALSE;
+		}
 
 		// the assessment must be currently open for submission (with a grace period to allow completion near closing time)
-		if (!assessment.getDates().getIsOpen(Boolean.TRUE)) return Boolean.FALSE;
+		// test drive submissions can skip this
+		if (!submission.getIsTestDrive())
+		{
+			if (!assessment.getDates().getIsOpen(Boolean.TRUE)) return Boolean.FALSE;
+		}
 
 		return Boolean.TRUE;
 	}
@@ -213,10 +224,24 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (M_log.isDebugEnabled()) M_log.debug("allowSubmit: " + submission.getAssessment().getId() + " user: " + userId);
 
 		// user must have submit permission in the context of the assessment for this submission
-		if (!securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, submission.getAssessment().getContext())) return Boolean.FALSE;
+		// test drive submissions need manage permission instead
+		if (!submission.getIsTestDrive())
+		{
+			if (!securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, submission.getAssessment().getContext()))
+				return Boolean.FALSE;
+		}
+		else
+		{
+			if (!securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, submission.getAssessment().getContext()))
+				return Boolean.FALSE;
+		}
 
 		// the assessment must be currently open for submission
-		if (!submission.getAssessment().getDates().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
+		// test drive submissions can skip this
+		if (!submission.getIsTestDrive())
+		{
+			if (!submission.getAssessment().getDates().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
+		}
 
 		// if the user has a submission in progress, this is good
 		if (submission.getIsStarted() && (!submission.getIsComplete())) return Boolean.TRUE;
@@ -224,6 +249,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// if the user can submit a new one, this is good
 		Integer remaining = countRemainingSubmissions(submission);
 		if ((remaining == null) || (remaining > 0)) return Boolean.TRUE;
+
+		// at this point, let the test-drive start
+		if (submission.getIsTestDrive()) return Boolean.TRUE;
 
 		return Boolean.FALSE;
 	}
@@ -252,10 +280,22 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 
 		// user must have SUBMIT_PERMISSION in the context of the assessment
-		securityService.secure(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, assessment.getContext());
+		// or for test-drive, manage permission
+		if (!s.getIsTestDrive())
+		{
+			this.securityService.secure(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, assessment.getContext());
+		}
+		else
+		{
+			this.securityService.secure(submission.getUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
+		}
 
 		// the assessment must be currently open for submission (with the grace period to support completion near closing time)
-		if (!assessment.getDates().getIsOpen(Boolean.TRUE)) throw new AssessmentClosedException();
+		// test drive can skip this
+		if (!s.getIsTestDrive())
+		{
+			if (!assessment.getDates().getIsOpen(Boolean.TRUE)) throw new AssessmentClosedException();
+		}
 
 		// update the submission
 		submission.setSubmittedDate(asOf);
@@ -275,8 +315,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		((SubmissionImpl) submission).clearIsChanged();
 		this.storage.saveSubmission((SubmissionImpl) submission);
 
-		// report the grade
-		this.gradesService.reportSubmissionGrade(submission);
+		// report the grade (not for test drive)
+		if (!submission.getIsTestDrive())
+		{
+			this.gradesService.reportSubmissionGrade(submission);
+		}
 
 		// event track it
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_COMPLETE, getSubmissionReference(submission.getId()), true));
@@ -358,30 +401,46 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			M_log.debug("enterSubmission: assessment: " + submission.getAssessment().getId() + " user: " + submission.getUserId());
 
 		// user must have SUBMIT_PERMISSION in the context of the assessment
-		securityService.secure(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, submission.getAssessment().getContext());
+		// or if test drive, manage
+		if (!submission.getIsTestDrive())
+		{
+			this.securityService.secure(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, submission.getAssessment().getContext());
+		}
+		else
+		{
+			this.securityService.secure(submission.getUserId(), MnemeService.MANAGE_PERMISSION, submission.getAssessment().getContext());
+		}
 
 		// the assessment must be currently open for submission
-		if (!submission.getAssessment().getDates().getIsOpen(Boolean.FALSE)) throw new AssessmentClosedException();
+		// test drive can skip this
+		if (!submission.getIsTestDrive())
+		{
+			if (!submission.getAssessment().getDates().getIsOpen(Boolean.FALSE)) throw new AssessmentClosedException();
+		}
 
 		// use the one in progress if
 		if (submission.getIsStarted() && (!submission.getIsComplete()))
 		{
 			// event track it (not a modify event)
-			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_CONTINUE, getSubmissionReference(submission.getId()),
-					false));
+			this.eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_CONTINUE,
+					getSubmissionReference(submission.getId()), false));
 
 			return submission;
 		}
 
 		// the user must be able to create a new submission
-		Integer remaining = countRemainingSubmissions(submission);
-		if ((remaining != null) && (remaining == 0)) throw new AssessmentCompletedException();
+		// test drive can skip this
+		if (!submission.getIsTestDrive())
+		{
+			Integer remaining = countRemainingSubmissions(submission);
+			if ((remaining != null) && (remaining == 0)) throw new AssessmentCompletedException();
+		}
 
 		// TODO: it is possible to make too many submissions for the assessment. If this method is entered concurrently for the same user and
 		// assessment, the previous count check might fail.
 
-		// go live
-		if (!submission.getAssessment().getIsLive())
+		// go live - not for test drive
+		if ((!submission.getIsTestDrive()) && (!submission.getAssessment().getIsLive()))
 		{
 			((AssessmentServiceImpl) this.assessmentService).makeLive(submission.getAssessment());
 		}
@@ -393,6 +452,12 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		rv.setIsComplete(Boolean.FALSE);
 		rv.setStartDate(asOf);
 		rv.setSubmittedDate(asOf);
+
+		// if the user does not have submit, mark it as test drive
+		if (!securityService.checkSecurity(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, submission.getAssessment().getContext()))
+		{
+			rv.initTestDrive(Boolean.TRUE);
+		}
 
 		// store the new submission, setting the id
 		((SubmissionImpl) rv).clearIsChanged();
@@ -485,7 +550,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// push each submission modified to the gb
 		for (Submission s : submissions)
 		{
-			this.gradesService.reportSubmissionGrade(s);
+			if (!s.getIsTestDrive())
+			{
+				this.gradesService.reportSubmissionGrade(s);
+			}
 		}
 	}
 
@@ -546,6 +614,13 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				temp.setIsReleased(Boolean.TRUE);
 			}
 
+			// if the user does not have submit, but has manage, mark it as test drive
+			if ((!securityService.checkSecurity(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, submission.getAssessment().getContext()))
+					&& securityService.checkSecurity(submission.getUserId(), MnemeService.MANAGE_PERMISSION, submission.getAssessment().getContext()))
+			{
+				temp.initTestDrive(Boolean.TRUE);
+			}
+
 			// store the new submission, setting the id
 			((SubmissionImpl) temp).clearIsChanged();
 			this.storage.saveSubmission(temp);
@@ -571,8 +646,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				this.storage.saveSubmission(temp);
 			}
 
-			// push the grade
-			this.gradesService.reportSubmissionGrade(temp);
+			// push the grade - not for test drive
+			if (!temp.getIsTestDrive())
+			{
+				this.gradesService.reportSubmissionGrade(temp);
+			}
 
 			// TODO: which event? event track it
 			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_ENTER, getSubmissionReference(temp.getId()), true));
@@ -627,8 +705,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
 
-		// push the grade
-		this.gradesService.reportSubmissionGrade(submission);
+		// push the grade - not for test drive
+		if (!submission.getIsTestDrive())
+		{
+			this.gradesService.reportSubmissionGrade(submission);
+		}
 	}
 
 	/**
@@ -1088,11 +1169,12 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			String aid = idParts[1];
 			String userId = idParts[2];
 
-			// create a phantom
+			// create a phantom - note, we will not mark test drive (no context handy) -ggolden
 			rv = this.storage.newSubmission();
 			rv.initUserId(userId);
 			rv.initAssessmentId(aid);
 			rv.initId(id);
+			// rv = this.getPhantomSubmission(userId, aid);
 
 			return rv;
 		}
@@ -1132,8 +1214,16 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		if (M_log.isDebugEnabled()) M_log.debug("getUserContextSubmissions: context: " + context + " userId: " + userId + ": " + sort);
 
+		// if we are in a test drive situation, use unpublished as well
+		Boolean publishedOnly = Boolean.TRUE;
+		if (securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context)
+				&& (!securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, context)))
+		{
+			publishedOnly = Boolean.FALSE;
+		}
+
 		// read all the submissions for this user in the context
-		List<SubmissionImpl> all = this.storage.getUserContextSubmissions(context, userId);
+		List<SubmissionImpl> all = this.storage.getUserContextSubmissions(context, userId, publishedOnly);
 
 		// filter out invalid assessments
 		for (Iterator i = all.iterator(); i.hasNext();)
@@ -1146,7 +1236,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 
 		// get all the assessments for this context
-		List<Assessment> assessments = this.assessmentService.getContextAssessments(context, AssessmentService.AssessmentsSort.title_a, Boolean.TRUE);
+		List<Assessment> assessments = this.assessmentService
+				.getContextAssessments(context, AssessmentService.AssessmentsSort.title_a, publishedOnly);
 
 		// if any assessment is not represented in the submissions we found, add an empty submission for it
 		for (Assessment a : assessments)
@@ -1163,13 +1254,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 			if (!found)
 			{
-				SubmissionImpl s = this.storage.newSubmission();
-				s.initUserId(userId);
-				s.initAssessmentId(a.getId());
-
-				// set the id so we know it is a phantom
-				s.initId(SubmissionService.PHANTOM_PREFIX + a.getId() + "/" + userId);
-
+				SubmissionImpl s = this.getPhantomSubmission(userId, a);
 				all.add(s);
 			}
 		}
@@ -1389,7 +1474,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			this.storage.saveSubmissionReleased(submission);
 
 			// push the grade
-			this.gradesService.reportSubmissionGrade(submission);
+			if (!submission.getIsTestDrive())
+			{
+				this.gradesService.reportSubmissionGrade(submission);
+			}
 
 			// TODO: event? s?
 		}
@@ -1431,7 +1519,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			this.storage.saveSubmissionReleased(submission);
 
 			// pull the grade
-			this.gradesService.retractSubmissionGrade(submission);
+			if (!submission.getIsTestDrive())
+			{
+				this.gradesService.retractSubmissionGrade(submission);
+			}
 
 			// TODO: event? s?
 		}
@@ -1724,10 +1815,22 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					+ completeSubmission);
 
 		// check permission - userId must have SUBMIT_PERMISSION in the context of the assessment
-		securityService.secure(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, assessment.getContext());
+		// or for test-drive, MANAGE
+		if (!submission.getIsTestDrive())
+		{
+			this.securityService.secure(submission.getUserId(), MnemeService.SUBMIT_PERMISSION, assessment.getContext());
+		}
+		else
+		{
+			this.securityService.secure(submission.getUserId(), MnemeService.MANAGE_PERMISSION, assessment.getContext());
+		}
 
 		// the assessment must be currently open for submission (with the grace period to support completion near closing time)
-		if (!assessment.getDates().getIsOpen(Boolean.TRUE)) throw new AssessmentClosedException();
+		// test drive can skip this
+		if (!submission.getIsTestDrive())
+		{
+			if (!assessment.getDates().getIsOpen(Boolean.TRUE)) throw new AssessmentClosedException();
+		}
 
 		Date asOf = new Date();
 
@@ -1800,7 +1903,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					true));
 
 			// push the grade
-			this.gradesService.reportSubmissionGrade(submission);
+			if (!submission.getIsTestDrive())
+			{
+				this.gradesService.reportSubmissionGrade(submission);
+			}
 		}
 	}
 
@@ -1837,7 +1943,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		this.storage.saveSubmission((SubmissionImpl) submission);
 
 		// push the grade
-		this.gradesService.reportSubmissionGrade(submission);
+		if (!submission.getIsTestDrive())
+		{
+			this.gradesService.reportSubmissionGrade(submission);
+		}
 
 		// event track it
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_AUTO_COMPLETE, getSubmissionReference(submission.getId()),
@@ -1969,13 +2078,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 			if (!found)
 			{
-				SubmissionImpl s = this.storage.newSubmission();
-				s.initUserId(userId);
-				s.initAssessmentId(assessment.getId());
-
-				// set the id so we know it is a phantom
-				s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
-
+				SubmissionImpl s = this.getPhantomSubmission(userId, assessment);
 				rv.add(s);
 			}
 		}
@@ -2207,6 +2310,13 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		s.initUserId(userId);
 		s.initAssessmentId(assessment.getId());
 
+		// if the user does not have submit, mark it as test drive
+		if ((!securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, assessment.getContext()))
+				&& securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, assessment.getContext()))
+		{
+			s.initTestDrive(Boolean.TRUE);
+		}
+
 		// set the id so we know it is a phantom
 		s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
 
@@ -2292,13 +2402,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// if we didn't get one, invent one
 		if (rv.isEmpty())
 		{
-			SubmissionImpl s = this.storage.newSubmission();
-			s.initUserId(userId);
-			s.initAssessmentId(assessment.getId());
-
-			// set the id so we know it is a phantom
-			s.initId(SubmissionService.PHANTOM_PREFIX + assessment.getId() + "/" + userId);
-
+			SubmissionImpl s = this.getPhantomSubmission(userId, assessment);
 			rv.add(s);
 		}
 
@@ -2602,6 +2706,28 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// this returns the proper set of entries, preserving the sort, but allUid is not grouped
 		return allOrder;
+	}
+
+	/**
+	 * Remove any test-drive submissions for this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void removeTestDriveSubmissions(Assessment assessment)
+	{
+		this.storage.removeTestDriveSubmissions(assessment);
+	}
+
+	/**
+	 * Remove any test-drive submissions for this context.
+	 * 
+	 * @param context
+	 *        The context.
+	 */
+	protected void removeTestDriveSubmissions(String context)
+	{
+		this.storage.removeTestDriveSubmissions(context);
 	}
 
 	/**

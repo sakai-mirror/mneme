@@ -94,7 +94,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		// in this part, complete submissions and answered questions
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT A.QUESTION_ID FROM MNEME_ANSWER A");
-		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=? and S.COMPLETE='1'");
+		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=? AND S.COMPLETE='1' AND S.TEST_DRIVE='0'");
 		sql.append(" WHERE A.PART_ID=? AND A.ANSWERED='1'");
 
 		Object[] fields = new Object[2];
@@ -169,7 +169,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT COUNT(1) FROM MNEME_ANSWER A");
-		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=? AND COMPLETE='1'");
+		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=? AND S.COMPLETE='1' AND S.TEST_DRIVE='0'");
 		sql.append(" WHERE A.ANSWERED='1' AND A.EVAL_SCORE IS NULL AND A.AUTO_SCORE IS NULL");
 
 		Object[] fields = new Object[1];
@@ -192,8 +192,8 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT S.ID, S.USER, S.EVAL_SCORE, SUM(A.EVAL_SCORE), SUM(A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
-		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID AND S.COMPLETE='1'");
-		sql.append(" WHERE S.ASSESSMENT_ID=?");
+		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID");
+		sql.append(" WHERE S.ASSESSMENT_ID=? AND S.COMPLETE='1' AND S.TEST_DRIVE='0'");
 		if (releasedOnly)
 		{
 			sql.append(" AND S.RELEASED='1'");
@@ -285,7 +285,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	public List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment)
 	{
 		// collect the submissions to this assessment
-		String where = "WHERE S.ASSESSMENT_ID=?";
+		String where = "WHERE S.ASSESSMENT_ID=? AND S.TEST_DRIVE='0'";
 		String order = "ORDER BY S.SUBMITTED_DATE ASC";
 
 		Object[] fields = new Object[1];
@@ -335,8 +335,8 @@ public class SubmissionStorageMysql implements SubmissionStorage
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT S.ID, S.EVAL_SCORE, SUM(A.EVAL_SCORE), SUM(A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
-		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID AND S.COMPLETE='1'");
-		sql.append(" WHERE S.ASSESSMENT_ID=? AND S.USER=?");
+		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID");
+		sql.append(" WHERE S.ASSESSMENT_ID=? AND S.USER=? AND S.COMPLETE='1'");
 		sql.append(" GROUP BY S.ID");
 
 		Object[] fields = new Object[2];
@@ -459,10 +459,14 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<SubmissionImpl> getUserContextSubmissions(String context, String userId)
+	public List<SubmissionImpl> getUserContextSubmissions(String context, String userId, Boolean publishedOnly)
 	{
 		StringBuilder where = new StringBuilder();
-		where.append("JOIN MNEME_ASSESSMENT AA ON S.ASSESSMENT_ID=AA.ID AND AA.ARCHIVED='0' AND AA.PUBLISHED='1'");
+		where.append("JOIN MNEME_ASSESSMENT AA ON S.ASSESSMENT_ID=AA.ID AND AA.ARCHIVED='0'");
+		if (publishedOnly)
+		{
+			where.append(" AND AA.PUBLISHED='1'");
+		}
 		where.append(" WHERE S.CONTEXT=? AND S.USER=?");
 		String order = "ORDER BY S.SUBMITTED_DATE ASC";
 
@@ -527,6 +531,34 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	public SubmissionImpl newSubmission(SubmissionImpl other)
 	{
 		return new SubmissionImpl(other);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeTestDriveSubmissions(final Assessment assessment)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				removeTestDriveSubmissionsTx(assessment);
+			}
+		}, "removeTestDriveSubmissions: " + assessment.getId());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeTestDriveSubmissions(final String context)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				removeTestDriveSubmissionsTx(context);
+			}
+		}, "removeTestDriveSubmissions(context): " + context);
 	}
 
 	/**
@@ -824,10 +856,10 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_SUBMISSION (");
 		sql.append(" ASSESSMENT_ID, COMPLETE, CONTEXT, EVAL_ATRIB_DATE, EVAL_ATRIB_USER,");
-		sql.append(" EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE, RELEASED, START_DATE, SUBMITTED_DATE, USER )");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE, RELEASED, START_DATE, SUBMITTED_DATE, TEST_DRIVE, USER )");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[12];
+		Object[] fields = new Object[13];
 		fields[0] = Long.valueOf(submission.getAssessment().getId());
 		fields[1] = submission.getIsComplete() ? "1" : "0";
 		fields[2] = submission.getAssessment().getContext();
@@ -840,7 +872,8 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		fields[8] = submission.getIsReleased() ? "1" : "0";
 		fields[9] = (submission.getStartDate() == null) ? null : submission.getStartDate().getTime();
 		fields[10] = (submission.getSubmittedDate() == null) ? null : submission.getSubmittedDate().getTime();
-		fields[11] = submission.getUserId();
+		fields[11] = submission.getIsTestDrive() ? "1" : "0";
+		fields[12] = submission.getUserId();
 
 		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
 		if (id == null)
@@ -893,7 +926,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT S.ASSESSMENT_ID, S.COMPLETE, S.EVAL_ATRIB_DATE,");
 		sql.append(" S.EVAL_ATRIB_USER, S.EVAL_COMMENT, S.EVAL_EVALUATED, S.EVAL_SCORE,");
-		sql.append(" S.ID, S.RELEASED, S.START_DATE, S.SUBMITTED_DATE, S.USER");
+		sql.append(" S.ID, S.RELEASED, S.START_DATE, S.SUBMITTED_DATE, S.TEST_DRIVE, S.USER");
 		sql.append(" FROM MNEME_SUBMISSION S ");
 		sql.append(where);
 		if (order != null)
@@ -921,6 +954,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 					submission.initReleased(SqlHelper.readBoolean(result, i++));
 					submission.setStartDate(SqlHelper.readDate(result, i++));
 					submission.setSubmittedDate(SqlHelper.readDate(result, i++));
+					submission.initTestDrive(SqlHelper.readBoolean(result, i++));
 					submission.initUserId(SqlHelper.readString(result, i++));
 
 					submission.clearIsChanged();
@@ -985,6 +1019,66 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		});
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void removeTestDriveSubmissionsTx(Assessment assessment)
+	{
+		// answer
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ANSWER");
+		sql.append(" USING MNEME_ANSWER, MNEME_SUBMISSION");
+		sql.append(" WHERE MNEME_ANSWER.SUBMISSION_ID=MNEME_SUBMISSION.ID AND MNEME_SUBMISSION.ASSESSMENT_ID=? AND MNEME_SUBMISSION.TEST_DRIVE='1'");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(assessment.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
+		{
+			throw new RuntimeException("removeTestDriveSubmissions(answer): db write failed");
+		}
+
+		// submission
+		sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_SUBMISSION");
+		sql.append(" WHERE MNEME_SUBMISSION.ASSESSMENT_ID=? AND MNEME_SUBMISSION.TEST_DRIVE='1'");
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
+		{
+			throw new RuntimeException("removeTestDriveSubmissions(submission): db write failed");
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void removeTestDriveSubmissionsTx(String context)
+	{
+		// answer
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ANSWER");
+		sql.append(" USING MNEME_ANSWER, MNEME_SUBMISSION");
+		sql.append(" WHERE MNEME_ANSWER.SUBMISSION_ID=MNEME_SUBMISSION.ID AND MNEME_SUBMISSION.CONTEXT=? AND MNEME_SUBMISSION.TEST_DRIVE='1'");
+
+		Object[] fields = new Object[1];
+		fields[0] = context;
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
+		{
+			throw new RuntimeException("removeTestDriveSubmissions(context,answer): db write failed");
+		}
+
+		// submission
+		sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_SUBMISSION");
+		sql.append(" WHERE MNEME_SUBMISSION.CONTEXT=? AND MNEME_SUBMISSION.TEST_DRIVE='1'");
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
+		{
+			throw new RuntimeException("removeTestDriveSubmissions(context,submission): db write failed");
+		}
 	}
 
 	/**

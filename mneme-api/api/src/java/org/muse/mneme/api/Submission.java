@@ -200,6 +200,13 @@ public interface Submission
 	Boolean getIsStarted();
 
 	/**
+	 * Check if the submission is a test-drive submission.
+	 * 
+	 * @return TRUE if a test-drive submission, false if not.
+	 */
+	Boolean getIsTestDrive();
+
+	/**
 	 * Check if the submission may be started - the user must have permission, the submission must be a placeholder, the assessment must be open.
 	 * 
 	 * @return TRUE if the submission may be started, FALSE if not.
