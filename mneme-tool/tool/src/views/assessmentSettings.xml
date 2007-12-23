@@ -41,17 +41,12 @@
 		</message>
 	</header>
 
-	<subHeader>
-		<container>
-			<text>
-				<message>
-					<model ref="assessment.title" missing="no-title" />
-				</message>
-			</text>
-		</container>
-	</subHeader>
-
 	<container>
+
+		<!-- title -->
+		<textEdit title="title" rows="1" cols="40">
+			<model ref="assessment.title" />
+		</textEdit>
 
 		<section>
 			<title highlighted="TRUE">
