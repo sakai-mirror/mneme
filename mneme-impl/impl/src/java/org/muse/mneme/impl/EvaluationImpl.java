@@ -135,9 +135,6 @@ public class EvaluationImpl implements Evaluation
 			// round
 			Float newScore = Float.valueOf(((float) Math.round(s.floatValue() * 100.0f)) / 100.0f);
 
-			// prefer a null to a 0
-			if (newScore.floatValue() == 0f) newScore = null;
-
 			if (!Different.different(this.score, newScore)) return;
 
 			this.score = newScore;
