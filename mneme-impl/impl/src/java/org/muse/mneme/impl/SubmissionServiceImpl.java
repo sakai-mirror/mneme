@@ -1239,9 +1239,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		List<Assessment> assessments = this.assessmentService
 				.getContextAssessments(context, AssessmentService.AssessmentsSort.title_a, publishedOnly);
 
-		// if any assessment is not represented in the submissions we found, add an empty submission for it
+		// if any valid assessment is not represented in the submissions we found, add an empty submission for it
 		for (Assessment a : assessments)
 		{
+			if (!a.getIsValid()) continue;
+
 			boolean found = false;
 			for (Submission s : all)
 			{
