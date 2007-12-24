@@ -64,7 +64,7 @@
 						<!-- instructions overlay -->
 						<overlay id="instructions">
 							<container>
-								<htmlEdit title="test-instructions" rows="8" cols="60">
+								<htmlEdit title="test-instructions" rows="8" cols="60" optional="TRUE" small="TRUE">
 									<model type="html" ref="assessment.presentation.text" />
 								</htmlEdit>
 								<!-- 

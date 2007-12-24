@@ -237,7 +237,7 @@
 						<!-- evaluation -->
 						<section>
 							<container>
-								<htmlEdit rows="5" cols="40">
+								<htmlEdit rows="8" cols="40" small="TRUE">
 									<model type="html" ref="answer.evaluation.comment" />
 									<title>
 										<message selector="submission-evaluation">

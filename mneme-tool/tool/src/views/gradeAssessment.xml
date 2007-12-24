@@ -86,7 +86,7 @@
 				<!-- comments overlay -->
 				<overlay id="comments">
 					<container>
-						<htmlEdit rows="5" cols="60">
+						<htmlEdit rows="8" cols="60" optional="TRUE" small="TRUE">
 							<model type="html" ref="submissionAdjustComments.value" />
 							<title>
 								<message selector="add-comments">
