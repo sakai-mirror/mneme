@@ -142,6 +142,10 @@ public class SqlHelper
 				{
 					rv = Boolean.valueOf(s.equals("1"));
 				}
+				else if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false"))
+				{
+					rv = Boolean.valueOf(s.equalsIgnoreCase("true"));
+				}
 				else
 				{
 					rv = Boolean.valueOf(((String) o).charAt(0) == '\u0001');
