@@ -505,16 +505,16 @@
 		<!-- navigation for publish -->
 		<navigationBar>
 			<container>
-				<navigation title="publish" accessKey="publish-access" description="publish-description" style="BUTTON" submit="TRUE"
-					destination="PUBLISH">
-					<icon icon="/icons/OK.png" style="LEFT" />
-				</navigation>
-				<divider />
 				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
 					<destination template="/assessments/{0}">
 						<model ref="sort" />
 					</destination>
 					<icon icon="/icons/return.png" style="LEFT" />
+				</navigation>
+				<divider />
+				<navigation title="publish" accessKey="publish-access" description="publish-description" style="BUTTON" submit="TRUE"
+					destination="PUBLISH">
+					<icon icon="/icons/OK.png" style="LEFT" />
 				</navigation>
 			</container>
 			<included>
