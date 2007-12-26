@@ -24,7 +24,7 @@
 	**********************************************************************************/
 -->
 
-<interface>
+<interface focus="adjustScores">
 
 	<!--mode bar-->
 	<modeContainer>
@@ -113,7 +113,7 @@
 						<model type="icon" icon="/icons/adjust_scores.png" />
 						<model type="component">
 							<container>
-								<floatEdit model="submissionAdjust.value" cols="6" />
+								<floatEdit id="adjustScores" model="submissionAdjust.value" cols="6" />
 							</container>
 						</model>
 					</message>

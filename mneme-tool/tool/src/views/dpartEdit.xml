@@ -24,7 +24,7 @@
 	**********************************************************************************/
 -->
 
-<interface title="partEdit-title">
+<interface title="partEdit-title" focus="title">
 
 	<!--mode bar-->
 	<modeContainer>
@@ -69,7 +69,7 @@
 				</overlay>
 
 				<!-- title -->
-				<textEdit title="part-title" rows="1" cols="40">
+				<textEdit id="title" title="part-title" rows="1" cols="40">
 					<model ref="part.title" />
 				</textEdit>
 
