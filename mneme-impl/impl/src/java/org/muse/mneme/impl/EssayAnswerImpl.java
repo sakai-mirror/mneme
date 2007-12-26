@@ -127,7 +127,7 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 		// check for remove
 		if (destination.startsWith("STAY_REMOVE:"))
 		{
-			String[] parts = StringUtil.split(destination, ":");
+			String[] parts = StringUtil.splitFirst(destination, ":");
 			if (parts.length == 2)
 			{
 				for (Iterator i = this.uploads.iterator(); i.hasNext();)

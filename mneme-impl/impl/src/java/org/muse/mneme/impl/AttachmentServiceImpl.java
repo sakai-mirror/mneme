@@ -105,6 +105,11 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	public Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, FileItem file)
 	{
 		String name = file.getName();
+		if (name != null)
+		{
+			name = massageName(name);
+		}
+
 		String type = file.getContentType();
 
 		// TODO: change to file.getInputStream() for after Sakai 2.3 more efficient support
@@ -697,6 +702,36 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		}
 
 		return null;
+	}
+
+	/**
+	 * Trim the name to only the characters after the last slash of either kind.<br />
+	 * Remove junk from uploaded file names.
+	 * 
+	 * @param name
+	 *        The string to trim.
+	 * @return The trimmed string.
+	 */
+	protected String massageName(String name)
+	{
+		// if there are any slashes, forward or back, take from the last one found to the right as the name
+		int pos = -1;
+		for (int i = name.length() - 1; i >= 0; i--)
+		{
+			char c = name.charAt(i);
+			if ((c == '/') || (c == '\\'))
+			{
+				pos = i + 1;
+				break;
+			}
+		}
+
+		if (pos != -1)
+		{
+			name = name.substring(pos);
+		}
+
+		return name;
 	}
 
 	/**
