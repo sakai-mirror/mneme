@@ -116,35 +116,60 @@ public class HomeView extends ControllerImpl
 
 		if ("INSTALL".equals(destination))
 		{
-			// add the specs
-			destination = "/install/" + installValue.getValue();
+			if (installValue.getValue() != null)
+			{
+				// add the specs
+				destination = "/install/" + installValue.getValue();
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
 		}
 
 		else if ("REMOVE".equals(destination))
 		{
-			// add the specs
-			destination = "/remove/" + removeValue.getValue();
+			if (removeValue.getValue() != null)
+			{
+				// add the specs
+				destination = "/remove/" + removeValue.getValue();
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
 		}
 
 		else if ("INSTALL_BULK".equals(destination))
 		{
-			// add the specs
-			destination = "/install_bulk/" + installBulkValue.getValue();
+			if (installBulkValue.getValue() != null)
+			{
+				// add the specs
+				destination = "/install_bulk/" + installBulkValue.getValue();
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
 		}
 
 		else if ("SWAP_BULK".equals(destination))
 		{
-			// add the specs
-			destination = "/swap_bulk/" + swapBulkValue.getValue();
+			if (swapBulkValue.getValue() != null)
+			{
+				// add the specs
+				destination = "/swap_bulk/" + swapBulkValue.getValue();
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
 		}
 
 		else if ("REMOVE_BULK".equals(destination))
 		{
-			// add the specs
-			destination = "/remove_bulk/" + removeBulkValue.getValue();
+			if (removeBulkValue.getValue() != null)
+			{
+				// add the specs
+				destination = "/remove_bulk/" + removeBulkValue.getValue();
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+				return;
+			}
 		}
 
-		// redirect
+		destination = "/home";
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

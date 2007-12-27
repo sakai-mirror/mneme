@@ -103,17 +103,17 @@ public class RemoveView extends ControllerImpl
 				}
 			}
 
-			// remove our permissions
-			for (Iterator i = site.getRoles().iterator(); i.hasNext();)
-			{
-				Role role = (Role) i.next();
-				role.disallowFunction("mnene.grade");
-				role.disallowFunction("mnene.submit");
-				role.disallowFunction("mnene.manage");
-			}
+//			// remove our permissions
+//			for (Iterator i = site.getRoles().iterator(); i.hasNext();)
+//			{
+//				Role role = (Role) i.next();
+//				role.disallowFunction("mnene.grade");
+//				role.disallowFunction("mnene.submit");
+//				role.disallowFunction("mnene.manage");
+//			}
 
-			// work around a "feature" of the Site impl - role changes do not trigger an azg save
-			site.setMaintainRole(site.getMaintainRole());
+//			// work around a "feature" of the Site impl - role changes do not trigger an azg save
+//			site.setMaintainRole(site.getMaintainRole());
 
 			// save the site
 			siteService.save(site);

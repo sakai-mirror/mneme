@@ -93,7 +93,7 @@ public class SwapBulkView extends ControllerImpl
 		siteTitlePattern = siteTitlePattern.replaceAll("\\*", "%");
 
 		// do the install
-		String rv = installBulk(siteTitlePattern);
+		String rv = swapBulk(siteTitlePattern);
 
 		context.put("rv", rv);
 
@@ -153,42 +153,6 @@ public class SwapBulkView extends ControllerImpl
 	}
 
 	/**
-	 * Add Mneme to all the sites that meet the site title pattern.
-	 * 
-	 * @param siteTitlePattern
-	 *        A where site.title like string for selecting the sites. "*" means all.
-	 */
-	protected String installBulk(String siteTitlePattern)
-	{
-		StringBuffer rv = new StringBuffer();
-		rv.append("Installing Test Center:<br />");
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT S.SITE_ID ");
-		sql.append(" FROM SAKAI_SITE S ");
-		sql.append(" LEFT OUTER JOIN SAKAI_SITE_TOOL A ON S.SITE_ID = A.SITE_ID AND A.REGISTRATION = 'sakai.samigo' ");
-		sql.append(" WHERE A.REGISTRATION IS NOT NULL");
-		sql.append(" AND S.TITLE LIKE ?");
-
-		Object[] fields = new Object[1];
-		fields[0] = siteTitlePattern;
-
-		List sites = sqlService.dbRead(sql.toString(), fields, null);
-
-		// for each one, install
-		for (Iterator i = sites.iterator(); i.hasNext();)
-		{
-			String site = (String) i.next();
-			String res = InstallView.installMneme(site);
-			res += removeSamigo(site);
-			rv.append(res);
-			rv.append("<br />");
-		}
-
-		return rv.toString();
-	}
-
-	/**
 	 * Remove Samigo from the context.
 	 * 
 	 * @param context
@@ -237,5 +201,41 @@ public class SwapBulkView extends ControllerImpl
 		{
 			return e.toString();
 		}
+	}
+
+	/**
+	 * Add Mneme to all the sites that meet the site title pattern.
+	 * 
+	 * @param siteTitlePattern
+	 *        A where site.title like string for selecting the sites. "*" means all.
+	 */
+	protected String swapBulk(String siteTitlePattern)
+	{
+		StringBuffer rv = new StringBuffer();
+		rv.append("Installing Test Center:<br />");
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT S.SITE_ID ");
+		sql.append(" FROM SAKAI_SITE S ");
+		sql.append(" LEFT OUTER JOIN SAKAI_SITE_TOOL A ON S.SITE_ID = A.SITE_ID AND A.REGISTRATION = 'sakai.samigo' ");
+		sql.append(" WHERE A.REGISTRATION IS NOT NULL");
+		sql.append(" AND S.TITLE LIKE ?");
+
+		Object[] fields = new Object[1];
+		fields[0] = siteTitlePattern;
+
+		List sites = sqlService.dbRead(sql.toString(), fields, null);
+
+		// for each one, install
+		for (Iterator i = sites.iterator(); i.hasNext();)
+		{
+			String site = (String) i.next();
+			String res = InstallView.installMneme(site);
+			res += removeSamigo(site);
+			rv.append(res);
+			rv.append("<br />");
+		}
+
+		return rv.toString();
 	}
 }
