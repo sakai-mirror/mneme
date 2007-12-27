@@ -24,7 +24,7 @@
 	**********************************************************************************/
 -->
 
-<interface>
+<interface focus="title">
 
 	<!--mode bar-->
 	<modeContainer>
@@ -44,7 +44,7 @@
 	<container>
 
 		<!-- title -->
-		<textEdit title="title" rows="1" cols="40">
+		<textEdit id="title" title="title" rows="1" cols="40">
 			<model ref="assessment.title" />
 		</textEdit>
 
