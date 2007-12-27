@@ -22,6 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,24 +32,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.MnemeService;
 import org.sakaiproject.authz.api.SecurityService;
+import org.sakaiproject.db.api.SqlService;
 
 /**
- * The /gb view for the mneme test tool.
+ * The /remove_bulk view for the mneme admin tool.
  */
-public class GbView extends ControllerImpl
+public class RemoveBulkView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(GbView.class);
-
-	/** The assessment service. */
-	protected MnemeService assessmentService = null;
+	private static Log M_log = LogFactory.getLog(RemoveBulkView.class);
 
 	/** The security service. */
 	protected SecurityService securityService = null;
+
+	/** The sql service. */
+	protected SqlService sqlService = null;
 
 	/**
 	 * Shutdown.
@@ -75,10 +74,13 @@ public class GbView extends ControllerImpl
 			throw new IllegalArgumentException();
 		}
 
-		GbSpecs specs = new GbSpecs(params[2]);
+		String siteTitlePattern = params[2];
 
-		// do the update
-		String rv = updateGb(specs.getContext());
+		// convert "*" to the db wildcard, %
+		siteTitlePattern = siteTitlePattern.replaceAll("\\*", "%");
+
+		// do the install
+		String rv = removeBulk(siteTitlePattern);
 
 		context.put("rv", rv);
 
@@ -105,17 +107,6 @@ public class GbView extends ControllerImpl
 	}
 
 	/**
-	 * Set the assessment service.
-	 * 
-	 * @param service
-	 *        The assessment service.
-	 */
-	public void setAssessmentService(MnemeService service)
-	{
-		this.assessmentService = service;
-	}
-
-	/**
 	 * Set the security service.
 	 * 
 	 * @param service
@@ -127,31 +118,46 @@ public class GbView extends ControllerImpl
 	}
 
 	/**
-	 * Update the Gradebook entries for each test in the context.
+	 * Set the sql service.
 	 * 
-	 * @param context
-	 *        The context (site id).
+	 * @param service
+	 *        The sql serivce.
 	 */
-	protected String updateGb(String context)
+	public void setSqlService(SqlService service)
 	{
-		String rv = "TODO: GB updated in site " + context;
+		this.sqlService = service;
+	}
 
-//		try
-//		{
-//			// get a list of the tests in the site
-//			List<Assessment> tests = assessmentService.getContextAssessments(context, null, Boolean.FALSE);
-//
-//			// for each one, update the gb
-//			for (Assessment test : tests)
-//			{
-//				assessmentService.updateGradebook(test);
-//			}
-//		}
-//		catch (AssessmentPermissionException e)
-//		{
-//			rv += " FAILED due to lack of permissions!";
-//		}
+	/**
+	 * Remove Mneme from all the sites that meet the site title pattern.
+	 * 
+	 * @param siteTitlePattern
+	 *        A where site.title like string for selecting the sites. "*" means all.
+	 */
+	protected String removeBulk(String siteTitlePattern)
+	{
+		StringBuffer rv = new StringBuffer();
+		rv.append("Removing Test Center:<br />");
 
-		return rv;
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT S.SITE_ID ");
+		sql.append(" FROM SAKAI_SITE S ");
+		sql.append(" WHERE S.TITLE LIKE ?");
+
+		Object[] fields = new Object[1];
+		fields[0] = siteTitlePattern;
+
+		List sites = sqlService.dbRead(sql.toString(), fields, null);
+
+		// for each one, remove
+		for (Iterator i = sites.iterator(); i.hasNext();)
+		{
+			String site = (String) i.next();
+			String res = RemoveView.removeMneme(site);
+			rv.append(res);
+			rv.append("<br />");
+		}
+
+		return rv.toString();
 	}
 }

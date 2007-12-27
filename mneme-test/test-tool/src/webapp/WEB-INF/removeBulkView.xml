@@ -1,4 +1,5 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 
 <!--
 /**********************************************************************************
@@ -23,14 +24,22 @@
  **********************************************************************************/
 -->
 
-<registration>
+<beans>
 
-	<tool
-			id="sakai.mneme.test"
-			title="Test Center Test"
-			description="Test Center Test"
-	>
+	<bean id="org.muse.mneme.tool.RemoveBulkView"
+			class="org.muse.mneme.tool.RemoveBulkView"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
 
-	</tool>
+		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
+		<property name="securityService"><ref bean="org.sakaiproject.authz.api.SecurityService"/></property>
 
-</registration>
+ 		<property name="toolId"><value>sakai.mneme.admin</value></property>
+ 		<property name="path"><value>remove_bulk</value></property>
+ 		<property name="bundle"><value>home</value></property>
+		<property name="components"><value>confirm.xml</value></property>
+	</bean>
+
+</beans>

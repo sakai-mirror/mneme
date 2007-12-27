@@ -25,89 +25,59 @@
 
 <interface title="home-title" header="home-header">
 	<container>
-		<section title="home-generate-title">
+
+		<navigationBar />
+
+		<section>
 			<container>
-				<textEdit title="home-contextsWithAssessments" rows="1" cols="12">
-					<model ref="gspecs.contextsWithAssessments" />
+
+				<instructions selector="install-context-instructions" />
+				<textEdit title="install-value" rows="1" cols="40">
+					<model ref="installValue.value" />
 				</textEdit>
-				<textEdit title="home-assessmentsPerContext" rows="1" cols="12">
-					<model ref="gspecs.assessmentsPerContext" />
+				<navigation title="install-context" style="LINK" destination="INSTALL" submit="TRUE">
+					<confirm decision="TRUE" cancelSelector="cancel" selector="install-context-confirm" />
+				</navigation>
+				<gap />
+
+				<instructions selector="remove-context-instructions" />
+				<textEdit title="remove-value" rows="1" cols="40">
+					<model ref="removeValue.value" />
 				</textEdit>
-				<textEdit title="home-submissionsPerStudent" rows="1" cols="12">
-					<model ref="gspecs.submissionsPerStudent" />
+				<navigation title="remove-context" style="LINK" destination="REMOVE" submit="TRUE">
+					<confirm decision="TRUE" cancelSelector="cancel" selector="remove-context-confirm" />
+				</navigation>
+				<gap />
+
+				<instructions selector="install-bulk-instructions" />
+				<textEdit title="install-bulk-value" rows="1" cols="40">
+					<model ref="installBulkValue.value" />
 				</textEdit>
-				<textEdit title="home-contextStudents" rows="1" cols="12">
-					<model ref="gspecs.contextStudents" />
+				<navigation title="install-bulk" style="LINK" destination="INSTALL_BULK" submit="TRUE">
+					<confirm decision="TRUE" cancelSelector="cancel" selector="install-bulk-confirm" />
+				</navigation>
+				<gap />
+
+				<instructions selector="swap-bulk-instructions" />
+				<textEdit title="swap-bulk-value" rows="1" cols="40">
+					<model ref="swapBulkValue.value" />
 				</textEdit>
-				<textEdit title="home-itemsPerAssessment" rows="1" cols="12">
-					<model ref="gspecs.itemsPerAssessment" />
+				<navigation title="swap-bulk" style="LINK" destination="SWAP_BULK" submit="TRUE">
+					<confirm decision="TRUE" cancelSelector="cancel" selector="swap-bulk-confirm" />
+				</navigation>
+				<gap />
+
+				<instructions selector="remove-bulk-instructions" />
+				<textEdit title="remove-bulk-value" rows="1" cols="40">
+					<model ref="removeBulkValue.value" />
 				</textEdit>
-				<navigationBar>
-					<container>
-						<navigation style="BUTTON" destination="/generate" submit="TRUE">
-							<title>
-								<message selector="home-generate" />
-							</title>
-							<confirm decision="TRUE">
-								<cancel selector="cancel" />
-								<message selector="confirm-generate" />
-							</confirm>
-						</navigation>
-					</container>
-				</navigationBar>
+				<navigation title="remove-bulk" style="LINK" destination="REMOVE_BULK" submit="TRUE">
+					<confirm decision="TRUE" cancelSelector="cancel" selector="remove-bulk-confirm" />
+				</navigation>
+				<gap />
+
 			</container>
 		</section>
-		<section title="home-simulate-title">
-			<container>
-				<textEdit title="home-numUsers" rows="1" cols="12">
-					<model ref="sspecs.numUsers" />
-				</textEdit>
-				<textEdit title="home-startGap" rows="1" cols="12">
-					<model ref="sspecs.startGap" />
-				</textEdit>
-				<textEdit title="home-thinkTime" rows="1" cols="12">
-					<model ref="sspecs.thinkTime" />
-				</textEdit>
-				<navigationBar>
-					<container>
-						<navigation style="BUTTON" destination="/simulate" title="home-simulate" submit="TRUE">
-							<confirm decision="TRUE" cancelSelector="cancel" selector="confirm-simulate" />
-						</navigation>
-					</container>
-				</navigationBar>
-			</container>
-		</section>
-		<section title="home-install-title">
-			<container>
-				<textEdit title="home-context" rows="1" cols="50">
-					<model ref="ispecs.context" />
-				</textEdit>
-				<navigationBar>
-					<container>
-						<navigation style="BUTTON" destination="/install" title="home-install" submit="TRUE">
-							<confirm decision="TRUE" cancelSelector="cancel" selector="confirm-install" />
-						</navigation>
-						<navigation style="BUTTON" destination="/install_all" title="home-install-all" submit="TRUE">
-							<confirm decision="TRUE" cancelSelector="cancel" selector="confirm-install-all" />
-						</navigation>
-					</container>
-				</navigationBar>
-			</container>
-		</section>
-		<section title="home-gb-title">
-			<container>
-				<textEdit title="home-context" rows="1" cols="50">
-					<model ref="gbspecs.context" />
-				</textEdit>
-				<navigationBar>
-					<container>
-						<navigation style="BUTTON" destination="/gb" title="home-update" submit="TRUE">
-							<confirm decision="TRUE" cancelSelector="cancel" selector="confirm-gb" />
-						</navigation>
-						<!-- <navigation style="BUTTON" destination="/gb_all" title="home-update-all" submit="TRUE" /> -->
-					</container>
-				</navigationBar>
-			</container>
-		</section>
+
 	</container>
 </interface>

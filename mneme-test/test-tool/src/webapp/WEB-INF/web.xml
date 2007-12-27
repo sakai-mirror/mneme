@@ -26,8 +26,8 @@
 <web-app id="WebApp_9" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
-    <display-name>muse-mneme-tool-test</display-name>
-    <description>muse-mneme-tool-test</description>
+    <display-name>muse-mneme-tool-admin</display-name>
+    <description>muse-mneme-tool-admin</description>
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
@@ -43,14 +43,14 @@
 
     <filter-mapping>
         <filter-name>sakai.request</filter-name>
-        <servlet-name>sakai.mneme.test</servlet-name>
+        <servlet-name>sakai.mneme.admin</servlet-name>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
 
     <servlet>
-        <servlet-name>sakai.mneme.test</servlet-name>
+        <servlet-name>sakai.mneme.admin</servlet-name>
         <servlet-class>org.muse.ambrosia.util.AmbrosiaServlet</servlet-class>
         <init-param>
             <param-name>defaultView</param-name>
@@ -58,7 +58,7 @@
         </init-param>
         <init-param>
             <param-name>toolId</param-name>
-            <param-value>sakai.mneme.test</param-value>
+            <param-value>sakai.mneme.admin</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>

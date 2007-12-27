@@ -35,7 +35,7 @@
 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
 		<property name="securityService"><ref bean="org.sakaiproject.authz.api.SecurityService"/></property>
 
- 		<property name="toolId"><value>sakai.mneme.test</value></property>
+ 		<property name="toolId"><value>sakai.mneme.admin</value></property>
  		<property name="path"><value>home</value></property>
  		<property name="bundle"><value>home</value></property>
  		<property name="components"><value>home.xml</value></property>

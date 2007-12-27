@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 
 <!--
 /**********************************************************************************
@@ -23,13 +23,14 @@
  **********************************************************************************/
 -->
 
-<interface title="generate-title" header="generate-header">
-	<container>
-		<instructions ref="rv" />
-		<navigationBar>
-			<container>
-				<navigation style="BUTTON" destination="/home" title="return" />
-			</container>
-		</navigationBar>		
-	</container>
-</interface>
+<registration>
+
+	<tool
+			id="sakai.mneme.admin"
+			title="Test Center Admin"
+			description="Test Center Admin"
+	>
+
+	</tool>
+
+</registration>

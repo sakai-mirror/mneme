@@ -29,19 +29,20 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Value;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.util.Web;
 
 /**
- * The /home view for the mneme test tool.
+ * The /home view for the mneme admin tool.
  */
 public class HomeView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(HomeView.class);
 
-	/** The security service. */
+	/** Dependency: SecurityService. */
 	protected SecurityService securityService = null;
 
 	/**
@@ -69,10 +70,6 @@ public class HomeView extends ControllerImpl
 			throw new IllegalArgumentException();
 		}
 
-		context.put("gspecs", new GenerateSpecs());
-		context.put("sspecs", new SimulateSpecs());
-		context.put("ispecs", new InstallSpecs());
-
 		// render
 		uiService.render(ui, context);
 	}
@@ -83,8 +80,6 @@ public class HomeView extends ControllerImpl
 	public void init()
 	{
 		super.init();
-
-		// uiHome = TestControllers.constructHome(uiService);
 
 		M_log.info("init()");
 	}
@@ -106,42 +101,50 @@ public class HomeView extends ControllerImpl
 		}
 
 		// read form
-		GenerateSpecs gspecs = new GenerateSpecs();
-		context.put("gspecs", gspecs);
-		SimulateSpecs sspecs = new SimulateSpecs();
-		context.put("sspecs", sspecs);
-		InstallSpecs ispecs = new InstallSpecs();
-		context.put("ispecs", ispecs);
-		GbSpecs gbspecs = new GbSpecs();
-		context.put("gbspecs", gbspecs);
+		Value installValue = this.uiService.newValue();
+		context.put("installValue", installValue);
+		Value removeValue = this.uiService.newValue();
+		context.put("removeValue", removeValue);
+		Value installBulkValue = this.uiService.newValue();
+		context.put("installBulkValue", installBulkValue);
+		Value swapBulkValue = this.uiService.newValue();
+		context.put("swapBulkValue", swapBulkValue);
+		Value removeBulkValue = this.uiService.newValue();
+		context.put("removeBulkValue", removeBulkValue);
+
 		String destination = uiService.decode(req, context);
 
-		// look for special codes in the destination
-		if ("/generate".equals(destination))
+		if ("INSTALL".equals(destination))
 		{
 			// add the specs
-			destination = destination + "/" + gspecs.toString();
+			destination = "/install/" + installValue.getValue();
 		}
 
-		else if ("/simulate".equals(destination))
+		else if ("REMOVE".equals(destination))
 		{
 			// add the specs
-			destination = destination + "/" + sspecs.toString();
+			destination = "/remove/" + removeValue.getValue();
 		}
 
-		else if ("/install".equals(destination))
+		else if ("INSTALL_BULK".equals(destination))
 		{
 			// add the specs
-			destination = destination + "/" + ispecs.toString();
+			destination = "/install_bulk/" + installBulkValue.getValue();
 		}
 
-		else if ("/gb".equals(destination))
+		else if ("SWAP_BULK".equals(destination))
 		{
 			// add the specs
-			destination = destination + "/" + gbspecs.toString();
+			destination = "/swap_bulk/" + swapBulkValue.getValue();
 		}
 
-		// redirect to home
+		else if ("REMOVE_BULK".equals(destination))
+		{
+			// add the specs
+			destination = "/remove_bulk/" + removeBulkValue.getValue();
+		}
+
+		// redirect
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 

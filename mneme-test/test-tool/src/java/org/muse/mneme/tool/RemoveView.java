@@ -44,12 +44,12 @@ import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.api.ToolManager;
 
 /**
- * The /install view for the mneme admin tool.
+ * The /remove view for the mneme test tool.
  */
-public class InstallView extends ControllerImpl
+public class RemoveView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(InstallView.class);
+	private static Log M_log = LogFactory.getLog(RemoveView.class);
 
 	/** The site service. */
 	protected static SiteService siteService = null;
@@ -58,12 +58,12 @@ public class InstallView extends ControllerImpl
 	protected static ToolManager toolManager = null;
 
 	/**
-	 * Add Mneme to the named context.
+	 * Remove Mneme from the context.
 	 * 
 	 * @param context
 	 *        The context id.
 	 */
-	protected static String installMneme(String context)
+	protected static String removeMneme(String context)
 	{
 		// get the Test Center tool
 		Tool tcTool = toolManager.getTool("sakai.mneme");
@@ -73,7 +73,7 @@ public class InstallView extends ControllerImpl
 			Site site = siteService.getSite(context);
 
 			// find the site page with Mneme already
-			boolean mnemeFound = false;
+			boolean removed = false;
 			for (Iterator i = site.getPages().iterator(); i.hasNext();)
 			{
 				SitePage page = (SitePage) i.next();
@@ -81,39 +81,35 @@ public class InstallView extends ControllerImpl
 				Collection mnemeTools = page.getTools(mnemeToolIds);
 				if (!mnemeTools.isEmpty())
 				{
-					mnemeFound = true;
+					// remove it
+					site.removePage(page);
+					removed = true;
 					break;
 				}
 			}
 
-			if (mnemeFound)
+			if (!removed) return "Test Center not in site " + site.getTitle() + " (" + context + ")";
+
+			// clear the T&Q tool "functions.require"
+			for (Iterator i = site.getPages().iterator(); i.hasNext();)
 			{
-				return "Test Center already installed in site " + site.getTitle() + " (" + context + ")";
+				SitePage page = (SitePage) i.next();
+				String[] samToolIds = {"sakai.samigo"};
+				Collection samTools = page.getTools(samToolIds);
+				if (!samTools.isEmpty())
+				{
+					((ToolConfiguration) samTools.iterator().next()).getPlacementConfig().remove("functions.require");
+					break;
+				}
 			}
 
-			// add a new page
-			SitePage newPage = site.addPage();
-			newPage.setTitle(tcTool.getTitle());
-			// TODO: newPage.setPosition(?);
-
-			// add the tool
-			ToolConfiguration config = newPage.addTool();
-			config.setTitle(tcTool.getTitle());
-			config.setTool("sakai.mneme", tcTool);
-
-			// add permissions to realm
+			// remove our permissions
 			for (Iterator i = site.getRoles().iterator(); i.hasNext();)
 			{
 				Role role = (Role) i.next();
-				if (manageRole(role.getId()))
-				{
-					role.allowFunction("mneme.manage");
-					role.allowFunction("mneme.grade");
-				}
-				else if (submitRole(role.getId()))
-				{
-					role.allowFunction("mneme.submit");
-				}
+				role.disallowFunction("mnene.grade");
+				role.disallowFunction("mnene.submit");
+				role.disallowFunction("mnene.manage");
 			}
 
 			// work around a "feature" of the Site impl - role changes do not trigger an azg save
@@ -122,7 +118,7 @@ public class InstallView extends ControllerImpl
 			// save the site
 			siteService.save(site);
 
-			return "Test Center installed in site " + site.getTitle() + " (" + context + ")";
+			return "Test Center removed from site " + site.getTitle() + " (" + context + ")";
 		}
 		catch (IdUnusedException e)
 		{
@@ -132,37 +128,6 @@ public class InstallView extends ControllerImpl
 		{
 			return e.toString();
 		}
-	}
-
-	/**
-	 * Is the roleId a mneme manage role?
-	 * 
-	 * @param roleId
-	 *        The role id.
-	 * @return true if this is a manage role, false if not.
-	 */
-	protected static boolean manageRole(String roleId)
-	{
-		if (roleId.equalsIgnoreCase("maintain")) return true;
-		if (roleId.equalsIgnoreCase("instructor")) return true;
-		if (roleId.equalsIgnoreCase("teaching assistant")) return true;
-
-		return false;
-	}
-
-	/**
-	 * Is the roleId a mneme submit role?
-	 * 
-	 * @param roleId
-	 *        The role id.
-	 * @return true if this is a submit role, false if not.
-	 */
-	protected static boolean submitRole(String roleId)
-	{
-		if (roleId.equalsIgnoreCase("access")) return true;
-		if (roleId.equalsIgnoreCase("student")) return true;
-
-		return false;
 	}
 
 	/** The security service. */
@@ -195,8 +160,8 @@ public class InstallView extends ControllerImpl
 
 		String contextId = params[2];
 
-		// do the install
-		String rv = installMneme(contextId);
+		// do the remove
+		String rv = removeMneme(contextId);
 
 		context.put("rv", rv);
 

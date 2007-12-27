@@ -34,7 +34,7 @@
 
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
  
- 		<property name="toolId"><value>sakai.mneme.test</value></property>
+ 		<property name="toolId"><value>sakai.mneme.admin</value></property>
  		<property name="path"><value>error</value></property>
  		<property name="bundle"><value>error</value></property>
 	</bean>

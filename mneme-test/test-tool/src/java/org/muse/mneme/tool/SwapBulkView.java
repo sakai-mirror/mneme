@@ -24,6 +24,7 @@ package org.muse.mneme.tool;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,6 +35,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.sakaiproject.authz.api.Role;
 import org.sakaiproject.authz.api.SecurityService;
+import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.site.api.Site;
@@ -44,129 +46,21 @@ import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.api.ToolManager;
 
 /**
- * The /install view for the mneme admin tool.
+ * The /swap_bulk view for the mneme admin tool.
  */
-public class InstallView extends ControllerImpl
+public class SwapBulkView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(InstallView.class);
-
-	/** The site service. */
-	protected static SiteService siteService = null;
-
-	/** The tool manager. */
-	protected static ToolManager toolManager = null;
-
-	/**
-	 * Add Mneme to the named context.
-	 * 
-	 * @param context
-	 *        The context id.
-	 */
-	protected static String installMneme(String context)
-	{
-		// get the Test Center tool
-		Tool tcTool = toolManager.getTool("sakai.mneme");
-
-		try
-		{
-			Site site = siteService.getSite(context);
-
-			// find the site page with Mneme already
-			boolean mnemeFound = false;
-			for (Iterator i = site.getPages().iterator(); i.hasNext();)
-			{
-				SitePage page = (SitePage) i.next();
-				String[] mnemeToolIds = {"sakai.mneme"};
-				Collection mnemeTools = page.getTools(mnemeToolIds);
-				if (!mnemeTools.isEmpty())
-				{
-					mnemeFound = true;
-					break;
-				}
-			}
-
-			if (mnemeFound)
-			{
-				return "Test Center already installed in site " + site.getTitle() + " (" + context + ")";
-			}
-
-			// add a new page
-			SitePage newPage = site.addPage();
-			newPage.setTitle(tcTool.getTitle());
-			// TODO: newPage.setPosition(?);
-
-			// add the tool
-			ToolConfiguration config = newPage.addTool();
-			config.setTitle(tcTool.getTitle());
-			config.setTool("sakai.mneme", tcTool);
-
-			// add permissions to realm
-			for (Iterator i = site.getRoles().iterator(); i.hasNext();)
-			{
-				Role role = (Role) i.next();
-				if (manageRole(role.getId()))
-				{
-					role.allowFunction("mneme.manage");
-					role.allowFunction("mneme.grade");
-				}
-				else if (submitRole(role.getId()))
-				{
-					role.allowFunction("mneme.submit");
-				}
-			}
-
-			// work around a "feature" of the Site impl - role changes do not trigger an azg save
-			site.setMaintainRole(site.getMaintainRole());
-
-			// save the site
-			siteService.save(site);
-
-			return "Test Center installed in site " + site.getTitle() + " (" + context + ")";
-		}
-		catch (IdUnusedException e)
-		{
-			return e.toString();
-		}
-		catch (PermissionException e)
-		{
-			return e.toString();
-		}
-	}
-
-	/**
-	 * Is the roleId a mneme manage role?
-	 * 
-	 * @param roleId
-	 *        The role id.
-	 * @return true if this is a manage role, false if not.
-	 */
-	protected static boolean manageRole(String roleId)
-	{
-		if (roleId.equalsIgnoreCase("maintain")) return true;
-		if (roleId.equalsIgnoreCase("instructor")) return true;
-		if (roleId.equalsIgnoreCase("teaching assistant")) return true;
-
-		return false;
-	}
-
-	/**
-	 * Is the roleId a mneme submit role?
-	 * 
-	 * @param roleId
-	 *        The role id.
-	 * @return true if this is a submit role, false if not.
-	 */
-	protected static boolean submitRole(String roleId)
-	{
-		if (roleId.equalsIgnoreCase("access")) return true;
-		if (roleId.equalsIgnoreCase("student")) return true;
-
-		return false;
-	}
+	private static Log M_log = LogFactory.getLog(SwapBulkView.class);
 
 	/** The security service. */
 	protected SecurityService securityService = null;
+
+	/** The site service. */
+	protected SiteService siteService = null;
+
+	/** The sql service. */
+	protected SqlService sqlService = null;
 
 	/**
 	 * Shutdown.
@@ -193,10 +87,13 @@ public class InstallView extends ControllerImpl
 			throw new IllegalArgumentException();
 		}
 
-		String contextId = params[2];
+		String siteTitlePattern = params[2];
+
+		// convert "*" to the db wildcard, %
+		siteTitlePattern = siteTitlePattern.replaceAll("\\*", "%");
 
 		// do the install
-		String rv = installMneme(contextId);
+		String rv = installBulk(siteTitlePattern);
 
 		context.put("rv", rv);
 
@@ -245,13 +142,100 @@ public class InstallView extends ControllerImpl
 	}
 
 	/**
-	 * Set the tool manager.
+	 * Set the sql service.
 	 * 
 	 * @param service
-	 *        The tool manager.
+	 *        The sql serivce.
 	 */
-	public void setToolManager(ToolManager service)
+	public void setSqlService(SqlService service)
 	{
-		this.toolManager = service;
+		this.sqlService = service;
+	}
+
+	/**
+	 * Add Mneme to all the sites that meet the site title pattern.
+	 * 
+	 * @param siteTitlePattern
+	 *        A where site.title like string for selecting the sites. "*" means all.
+	 */
+	protected String installBulk(String siteTitlePattern)
+	{
+		StringBuffer rv = new StringBuffer();
+		rv.append("Installing Test Center:<br />");
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT S.SITE_ID ");
+		sql.append(" FROM SAKAI_SITE S ");
+		sql.append(" LEFT OUTER JOIN SAKAI_SITE_TOOL A ON S.SITE_ID = A.SITE_ID AND A.REGISTRATION = 'sakai.samigo' ");
+		sql.append(" WHERE A.REGISTRATION IS NOT NULL");
+		sql.append(" AND S.TITLE LIKE ?");
+
+		Object[] fields = new Object[1];
+		fields[0] = siteTitlePattern;
+
+		List sites = sqlService.dbRead(sql.toString(), fields, null);
+
+		// for each one, install
+		for (Iterator i = sites.iterator(); i.hasNext();)
+		{
+			String site = (String) i.next();
+			String res = InstallView.installMneme(site);
+			res += removeSamigo(site);
+			rv.append(res);
+			rv.append("<br />");
+		}
+
+		return rv.toString();
+	}
+
+	/**
+	 * Remove Samigo from the context.
+	 * 
+	 * @param context
+	 *        The context id.
+	 */
+	protected String removeSamigo(String context)
+	{
+		try
+		{
+			Site site = siteService.getSite(context);
+
+			for (Iterator i = site.getPages().iterator(); i.hasNext();)
+			{
+				SitePage page = (SitePage) i.next();
+				String[] samToolIds = {"sakai.samigo"};
+				Collection samTools = page.getTools(samToolIds);
+				if (!samTools.isEmpty())
+				{
+					site.removePage(page);
+					break;
+				}
+			}
+
+			// TODO: remove Samigo permissions?
+			// for (Iterator i = site.getRoles().iterator(); i.hasNext();)
+			// {
+			// Role role = (Role) i.next();
+			// role.disallowFunction("mnene.grade");
+			// role.disallowFunction("mnene.submit");
+			// role.disallowFunction("mnene.manage");
+			// }
+
+			// // work around a "feature" of the Site impl - role changes do not trigger an azg save
+			// site.setMaintainRole(site.getMaintainRole());
+
+			// save the site
+			siteService.save(site);
+
+			return " - Samigo removed from site " + site.getTitle() + " (" + context + ")";
+		}
+		catch (IdUnusedException e)
+		{
+			return e.toString();
+		}
+		catch (PermissionException e)
+		{
+			return e.toString();
+		}
 	}
 }

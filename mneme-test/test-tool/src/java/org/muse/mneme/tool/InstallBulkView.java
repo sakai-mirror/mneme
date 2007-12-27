@@ -36,12 +36,12 @@ import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.db.api.SqlService;
 
 /**
- * The /install_all view for the mneme test tool.
+ * The /install_bulk view for the mneme admin tool.
  */
-public class InstallAllView extends ControllerImpl
+public class InstallBulkView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(InstallAllView.class);
+	private static Log M_log = LogFactory.getLog(InstallBulkView.class);
 
 	/** The security service. */
 	protected SecurityService securityService = null;
@@ -68,14 +68,19 @@ public class InstallAllView extends ControllerImpl
 			throw new IllegalArgumentException();
 		}
 
-		// no parameters expected
-		if (params.length != 2)
+		// one parameter expected
+		if (params.length != 3)
 		{
 			throw new IllegalArgumentException();
 		}
 
+		String siteTitlePattern = params[2];
+
+		// convert "*" to the db wildcard, %
+		siteTitlePattern = siteTitlePattern.replaceAll("\\*", "%");
+
 		// do the install
-		String rv = installMnemeAll();
+		String rv = installBulk(siteTitlePattern);
 
 		context.put("rv", rv);
 
@@ -124,29 +129,41 @@ public class InstallAllView extends ControllerImpl
 	}
 
 	/**
-	 * Add Mneme to all the sites that have Samigo.
+	 * Add Mneme to all the sites that meet the site title pattern.
+	 * 
+	 * @param siteTitlePattern
+	 *        A where site.title like string for selecting the sites. "*" means all.
 	 */
-	protected String installMnemeAll()
+	protected String installBulk(String siteTitlePattern)
 	{
 		StringBuffer rv = new StringBuffer();
-		rv.append("Installing Mneme:<br />");
+		rv.append("Installing Test Center:<br />");
 
-		// find all the sites
-		StringBuffer statement = new StringBuffer();
-		statement.append("SELECT S.SITE_ID ");
-		statement.append("FROM SAKAI_SITE S ");
-		statement.append("LEFT OUTER JOIN SAKAI_SITE_TOOL A ON S.SITE_ID = A.SITE_ID AND A.REGISTRATION = 'sakai.samigo' ");
-		statement.append("LEFT OUTER JOIN SAKAI_SITE_TOOL B ON S.SITE_ID = B.SITE_ID AND B.REGISTRATION = 'sakai.mneme' ");
-		statement.append("WHERE A.REGISTRATION IS NOT NULL AND B.REGISTRATION IS NULL");
-		List sites = sqlService.dbRead(statement.toString(), null, null);
+		// find all the sites that ?
+		// TODO: ?
+		// StringBuffer statement = new StringBuffer();
+		// statement.append("SELECT S.SITE_ID ");
+		// statement.append("FROM SAKAI_SITE S ");
+		// statement.append("LEFT OUTER JOIN SAKAI_SITE_TOOL A ON S.SITE_ID = A.SITE_ID AND A.REGISTRATION = 'sakai.samigo' ");
+		// statement.append("LEFT OUTER JOIN SAKAI_SITE_TOOL B ON S.SITE_ID = B.SITE_ID AND B.REGISTRATION = 'sakai.mneme' ");
+		// statement.append("WHERE A.REGISTRATION IS NOT NULL AND B.REGISTRATION IS NULL");
+		// List sites = sqlService.dbRead(statement.toString(), null, null);
+
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT S.SITE_ID ");
+		sql.append(" FROM SAKAI_SITE S ");
+		sql.append(" WHERE S.TITLE LIKE ?");
+
+		Object[] fields = new Object[1];
+		fields[0] = siteTitlePattern;
+
+		List sites = sqlService.dbRead(sql.toString(), fields, null);
 
 		// for each one, install
 		for (Iterator i = sites.iterator(); i.hasNext();)
 		{
 			String site = (String) i.next();
 			String res = InstallView.installMneme(site);
-			rv.append(site);
-			rv.append(": ");
 			rv.append(res);
 			rv.append("<br />");
 		}

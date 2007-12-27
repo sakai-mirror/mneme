@@ -26,25 +26,21 @@
 
 <beans>
 
-	<bean id="org.muse.mneme.tool.GenerateView"
-			class="org.muse.mneme.tool.GenerateView"
+	<bean id="org.muse.mneme.tool.SwapBulkView"
+			class="org.muse.mneme.tool.SwapBulkView"
 			init-method="init"
 			destroy-method="destroy"
 			singleton="true">
 
 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
-		<property name="assessmentService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
-		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
 		<property name="siteService"><ref bean="org.sakaiproject.site.api.SiteService"/></property>
-		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
-		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
-		<property name="idManager"><ref bean="org.sakaiproject.id.api.IdManager"/></property>
+		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 		<property name="securityService"><ref bean="org.sakaiproject.authz.api.SecurityService"/></property>
 
- 		<property name="toolId"><value>sakai.mneme.test</value></property>
- 		<property name="path"><value>generate</value></property>
- 		<property name="bundle"><value>generate</value></property>
-		<property name="components"><value>generate.xml</value></property>
+ 		<property name="toolId"><value>sakai.mneme.admin</value></property>
+ 		<property name="path"><value>swap_bulk</value></property>
+ 		<property name="bundle"><value>home</value></property>
+		<property name="components"><value>confirm.xml</value></property>
 	</bean>
 
 </beans>
