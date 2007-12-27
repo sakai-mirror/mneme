@@ -65,6 +65,11 @@ public class InstallView extends ControllerImpl
 	 */
 	protected static String installMneme(String context)
 	{
+		if (siteService.isSpecialSite(context))
+		{
+			return "Site " + context + " is special - skipping.";
+		}
+
 		// get the Test Center tool
 		Tool tcTool = toolManager.getTool("sakai.mneme");
 

@@ -160,6 +160,11 @@ public class SwapBulkView extends ControllerImpl
 	 */
 	protected String removeSamigo(String context)
 	{
+		if (siteService.isSpecialSite(context))
+		{
+			return "Site " + context + " is special - skipping.";
+		}
+
 		try
 		{
 			Site site = siteService.getSite(context);
