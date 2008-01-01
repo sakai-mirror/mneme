@@ -164,11 +164,11 @@ public class QuestionStorageMysql implements QuestionStorage
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT COUNT(1) FROM MNEME_QUESTION Q");
-		sql.append(" WHERE Q.MINT='0' AND Q.POOL_ID=?");
+		sql.append(" WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=?");
 		if (questionType != null) sql.append(" AND Q.TYPE=?");
-		
+
 		Object[] fields = new Object[(questionType == null) ? 1 : 2];
-		fields[0] = Long.valueOf(pool.getId());;
+		fields[0] = Long.valueOf(pool.getId());
 		if (questionType != null)
 		{
 			fields[1] = questionType;
@@ -192,7 +192,8 @@ public class QuestionStorageMysql implements QuestionStorage
 		sql.append("SELECT P.ID, COUNT(Q.ID)");
 		sql.append(" FROM MNEME_POOL P");
 		sql.append(" LEFT OUTER JOIN MNEME_QUESTION Q");
-		sql.append(" ON P.ID=Q.POOL_ID AND P.CONTEXT=? AND P.MINT='0' AND P.HISTORICAL='0' AND Q.MINT='0'");
+		sql.append(" ON Q.MINT='0' AND Q.HISTORICAL='0' AND Q.POOL_ID=P.ID");
+		sql.append(" WHERE P.CONTEXT=? AND P.MINT='0' AND P.HISTORICAL='0'");
 		sql.append(" GROUP BY P.ID");
 
 		Object[] fields = new Object[1];
@@ -298,7 +299,7 @@ public class QuestionStorageMysql implements QuestionStorage
 	{
 		// the where and order by
 		StringBuilder whereOrder = new StringBuilder();
-		whereOrder.append("LEFT OUTER JOIN MNEME_POOL P ON Q.POOL_ID=P.ID WHERE Q.MINT='0' AND Q.POOL_ID=?"
+		whereOrder.append("LEFT OUTER JOIN MNEME_POOL P ON Q.POOL_ID=P.ID WHERE Q.MINT='0' AND Q.HISTORICAL=P.HISTORICAL AND Q.POOL_ID=?"
 				+ ((questionType != null) ? " AND Q.TYPE=?" : "") + " ORDER BY ");
 		whereOrder.append(sortToSql(sort));
 
@@ -338,8 +339,8 @@ public class QuestionStorageMysql implements QuestionStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT Q.ID");
 		sql.append(" FROM MNEME_QUESTION Q ");
-		sql.append(" WHERE Q.MINT='0' AND Q.POOL_ID=?");
-		sql.append(" ORDER BY CREATED_BY_DATE ASC");
+		sql.append(" WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=?");
+		sql.append(" ORDER BY Q.CREATED_BY_DATE ASC");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(pool.getId());
@@ -545,7 +546,7 @@ public class QuestionStorageMysql implements QuestionStorage
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, '1', Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
 		sql.append(" Q.PRESENTATION_TEXT, Q.TYPE, Q.GUEST");
-		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.POOL_ID=?");
+		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=?");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(source.getId());
@@ -573,7 +574,7 @@ public class QuestionStorageMysql implements QuestionStorage
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, Q.HISTORICAL, Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
 		sql.append(" Q.PRESENTATION_TEXT, Q.TYPE, Q.GUEST");
-		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.POOL_ID=?");
+		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=?");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(source.getId());
