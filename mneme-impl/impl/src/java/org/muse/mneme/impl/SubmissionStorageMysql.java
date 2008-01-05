@@ -218,6 +218,12 @@ public class SubmissionStorageMysql implements SubmissionStorage
 					Float total = Float.valueOf((sEval == null ? 0f : sEval.floatValue()) + (aEval == null ? 0f : aEval.floatValue())
 							+ (aAuto == null ? 0f : aAuto.floatValue()));
 
+					// massage total - 2 decimal places
+					if (total != null)
+					{
+						total = Float.valueOf(((float) Math.round(total.floatValue() * 100.0f)) / 100.0f);
+					}
+
 					// if the user has an entry already, replace it if this score is higher
 					Float prior = scores.get(user);
 					if (prior != null)
@@ -356,6 +362,13 @@ public class SubmissionStorageMysql implements SubmissionStorage
 					Float aAuto = SqlHelper.readFloat(result, 4);
 					Float total = Float.valueOf((sEval == null ? 0f : sEval.floatValue()) + (aEval == null ? 0f : aEval.floatValue())
 							+ (aAuto == null ? 0f : aAuto.floatValue()));
+
+					// massage total - 2 decimal places
+					if (total != null)
+					{
+						total = Float.valueOf(((float) Math.round(total.floatValue() * 100.0f)) / 100.0f);
+					}
+
 					scores.put(sid, total);
 
 					return null;
@@ -419,6 +432,13 @@ public class SubmissionStorageMysql implements SubmissionStorage
 					Float aAuto = SqlHelper.readFloat(result, 3);
 					Float total = Float.valueOf((sEval == null ? 0f : sEval.floatValue()) + (aEval == null ? 0f : aEval.floatValue())
 							+ (aAuto == null ? 0f : aAuto.floatValue()));
+
+					// massage total - 2 decimal places
+					if (total != null)
+					{
+						total = Float.valueOf(((float) Math.round(total.floatValue() * 100.0f)) / 100.0f);
+					}
+
 					score.add(total);
 
 					return null;

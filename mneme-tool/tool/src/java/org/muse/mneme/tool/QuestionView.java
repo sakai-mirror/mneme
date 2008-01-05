@@ -192,7 +192,7 @@ public class QuestionView extends ControllerImpl
 		// unless we are going to list, instructions, or this very same question, or we have a file upload error, mark the
 		// answers as complete
 		Boolean answersComplete = Boolean.valueOf(!(uploadError || destination.startsWith("/list") || destination.startsWith("STAY")
-				|| destination.startsWith("/instructions") || context.getPreviousDestination().equals(destination)));
+				|| destination.startsWith("/instructions") || destination.equals(context.getPreviousDestination())));
 
 		// and if we are working in a random access test, answers are always complete
 		if (submission.getAssessment().getRandomAccess()) answersComplete = Boolean.TRUE;
