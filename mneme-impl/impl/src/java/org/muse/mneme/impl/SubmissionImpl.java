@@ -228,7 +228,10 @@ public class SubmissionImpl implements Submission
 			}
 		}
 
-		return new Float(total);
+		// round away bogus decimals
+		total = Math.round(total * 100.0f) / 100.0f;
+
+		return Float.valueOf(total);
 	}
 
 	/**
@@ -631,7 +634,7 @@ public class SubmissionImpl implements Submission
 		{
 			if (!getAssessment().getPublished()) return Boolean.FALSE;
 		}
-		
+
 		// valid
 		if (!getAssessment().getIsValid()) return Boolean.FALSE;
 
@@ -876,7 +879,10 @@ public class SubmissionImpl implements Submission
 			total += this.evaluation.getScore().floatValue();
 		}
 
-		return new Float(total);
+		// round away bogus decimals
+		total = Math.round(total * 100.0f) / 100.0f;
+
+		return Float.valueOf(total);
 	}
 
 	/**

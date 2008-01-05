@@ -233,7 +233,10 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 			}
 		}
 
-		return total;
+		// round away bogus decimals
+		total = Math.round(total * 100.0f) / 100.0f;
+
+		return Float.valueOf(total);
 	}
 
 	/**

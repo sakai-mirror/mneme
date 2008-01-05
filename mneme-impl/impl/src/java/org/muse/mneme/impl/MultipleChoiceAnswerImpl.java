@@ -156,7 +156,10 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 		// floor at 0
 		if (total < 0f) total = 0f;
 
-		return total;
+		// round away bogus decimals
+		total = Math.round(total * 100.0f) / 100.0f;
+
+		return Float.valueOf(total);
 	}
 
 	/**

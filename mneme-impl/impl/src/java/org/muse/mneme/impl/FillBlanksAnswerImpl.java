@@ -138,7 +138,10 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 			if (correct) total += partial;
 		}
 
-		return new Float(total);
+		// round away bogus decimals
+		total = Math.round(total * 100.0f) / 100.0f;
+
+		return Float.valueOf(total);
 	}
 
 	/**
