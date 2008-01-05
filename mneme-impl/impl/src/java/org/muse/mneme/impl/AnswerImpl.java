@@ -221,7 +221,10 @@ public class AnswerImpl implements Answer
 			rv += this.evaluation.getScore().floatValue();
 		}
 
-		return new Float(rv);
+		// round away bogus decimals
+		rv = Math.round(rv * 100.0f) / 100.0f;
+
+		return Float.valueOf(rv);
 	}
 
 	/**
@@ -292,7 +295,10 @@ public class AnswerImpl implements Answer
 				total -= getAutoScore().floatValue();
 			}
 
-			this.evaluation.setScore(total);
+			// round away bogus decimals
+			total = Math.round(total * 100.0f) / 100.0f;
+
+			this.evaluation.setScore(Float.valueOf(total));
 		}
 	}
 

@@ -342,7 +342,10 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 			}
 		}
 
-		return total;
+		// round away bogus decimals
+		total = Math.round(total * 100.0f) / 100.0f;
+
+		return Float.valueOf(total);
 	}
 
 	/**

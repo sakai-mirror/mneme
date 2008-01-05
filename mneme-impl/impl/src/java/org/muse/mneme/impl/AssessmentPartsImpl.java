@@ -335,7 +335,10 @@ public class AssessmentPartsImpl implements AssessmentParts
 			rv += part.getTotalPoints();
 		}
 
-		return rv;
+		// round away bogus decimals
+		rv = Math.round(rv * 100.0f) / 100.0f;
+
+		return Float.valueOf(rv);
 	}
 
 	/**
