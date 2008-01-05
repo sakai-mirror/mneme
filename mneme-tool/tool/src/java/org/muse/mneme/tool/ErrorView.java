@@ -88,7 +88,7 @@ public class ErrorView extends ControllerImpl
 		{
 			case invalid:
 			{
-				context.put("invalidUrl", context.getPreviousDestination());
+				context.put("invalidUrl", (context.getPreviousDestination() == null) ? "" : context.getPreviousDestination());
 				break;
 			}
 
@@ -143,7 +143,7 @@ public class ErrorView extends ControllerImpl
 				context.put("upload", Boolean.TRUE);
 
 				// let them re-enter where they were
-				context.put("testUrl", context.getPreviousDestination());
+				context.put("testUrl", (context.getPreviousDestination() == null) ? "" : context.getPreviousDestination());
 
 				// the size (megs) that was exceeded
 				context.put("uploadMax", param);
