@@ -148,6 +148,9 @@ public class QuestionServiceImpl implements QuestionService
 		// security check
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, destination.getContext());
 
+		// the new questions in the destination pool may invalidate test-drive submissions in the context
+		this.submissionService.removeTestDriveSubmissions(destination.getContext());
+
 		this.storage.copyPoolQuestions(userId, source, destination, false, null);
 
 		// TODO: event?
@@ -168,6 +171,9 @@ public class QuestionServiceImpl implements QuestionService
 		// security check
 		Pool destination = (pool != null) ? pool : question.getPool();
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, destination.getContext());
+
+		// the new question in the destination pool may invalidate test-drive submissions in the context
+		this.submissionService.removeTestDriveSubmissions(destination.getContext());
 
 		// create a copy of the question
 		QuestionImpl rv = this.storage.newQuestion((QuestionImpl) question);
@@ -405,6 +411,14 @@ public class QuestionServiceImpl implements QuestionService
 		// if to the same pool, do nothing
 		if (question.getPool().equals(pool)) return;
 
+		// moving a question removes it from one pool, adds it to another, and in both cases,
+		// any test-drive submissions from the context (s) may become invalid
+		this.submissionService.removeTestDriveSubmissions(question.getPool().getContext());
+		if (!question.getPool().getContext().equals(pool.getContext()))
+		{
+			this.submissionService.removeTestDriveSubmissions(pool.getContext());
+		}
+
 		// clear the cache
 		String key = cacheKey(question.getId());
 		this.threadLocalManager.set(key, null);
@@ -418,12 +432,18 @@ public class QuestionServiceImpl implements QuestionService
 	 */
 	public Question newQuestion(Pool pool, String type) throws AssessmentPermissionException
 	{
+		if (pool == null) throw new IllegalArgumentException();
+		if (type == null) throw new IllegalArgumentException();
+
 		if (M_log.isDebugEnabled()) M_log.debug("newQuestion: pool: " + pool.getId() + " type: " + type);
 
 		String userId = sessionManager.getCurrentSessionUserId();
 
 		// security check
 		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, pool.getContext());
+
+		// adding a question may invalidate test-drive submissions from the context
+		this.submissionService.removeTestDriveSubmissions(pool.getContext());
 
 		QuestionImpl question = this.storage.newQuestion();
 		question.setPool(pool);
@@ -485,6 +505,9 @@ public class QuestionServiceImpl implements QuestionService
 		}
 
 		if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: " + question.getId());
+
+		// the changed question might invalidate test-drive submissions
+		this.submissionService.removeTestDriveSubmissions(question.getContext());
 
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getContext());
