@@ -138,6 +138,20 @@ public class PoolTest extends TestCase
 		assertTrue(pool.getPoints().equals(ONE_FIVE));
 		assertTrue(pool.getPointsEdit().equals(ONE_FIVE));
 
+		// too many decimals - truncate
+		final Float ONE_FIVE_PLUS = 1.5719843920f;
+		final Float ONE_FIVE_SEVEN = 1.57f;
+		pool.setPoints(ONE_FIVE_PLUS);
+		assertTrue(pool.getPoints().equals(ONE_FIVE_SEVEN));
+		assertTrue(pool.getPointsEdit().equals(ONE_FIVE_SEVEN));
+
+		// too many decimals - round
+		final Float ONE_FIVE_PLUS2 = 1.579843920f;
+		final Float ONE_FIVE_EIGHT = 1.58f;
+		pool.setPoints(ONE_FIVE_PLUS2);
+		assertTrue(pool.getPoints().equals(ONE_FIVE_EIGHT));
+		assertTrue(pool.getPointsEdit().equals(ONE_FIVE_EIGHT));
+
 		// 0
 		pool.setPoints(ZERO);
 		assertTrue(pool.getPoints().equals(ZERO));
@@ -146,6 +160,11 @@ public class PoolTest extends TestCase
 		// big number
 		final Float BIG = Float.MAX_VALUE;
 		pool.setPoints(BIG);
+		assertTrue(pool.getPoints().equals(BIG));
+		assertTrue(pool.getPointsEdit().equals(BIG));
+
+		// big number
+		pool.setPointsEdit(BIG);
 		assertTrue(pool.getPoints().equals(BIG));
 		assertTrue(pool.getPointsEdit().equals(BIG));
 
