@@ -702,6 +702,8 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("copyPoolQuestionsHistorical: source: " + source.getId() + " destination: " + destination.getId());
 
+		// TODO: if moving to a new context, we need to copy the MnemeDocs media, and translate any references in the question
+
 		this.storage.copyPoolQuestions(sessionManager.getCurrentSessionUserId(), source, destination, asHistory, oldToNew);
 	}
 
@@ -709,7 +711,7 @@ public class QuestionServiceImpl implements QuestionService
 	 * Remove the question
 	 * 
 	 * @param question
-	 *        The quesiton
+	 *        The question
 	 * @param historyPool
 	 *        if the pool's history pool already made, or null if there is none.
 	 */

@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -445,6 +446,9 @@ public abstract class PartImpl implements Part, Changeable
 
 	/**
 	 * Restore the part pool and question references to their original values.
+	 * 
+	 * @param idMap
+	 *        A map of pool and question ids (old id to new id) to change original references to.
 	 */
-	protected abstract void setOrig();
+	protected abstract void setOrig(Map<String, String> idMap);
 }

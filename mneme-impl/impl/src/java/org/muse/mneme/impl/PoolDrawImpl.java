@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.Pool;
@@ -250,14 +251,26 @@ public class PoolDrawImpl implements PoolDraw
 	/**
 	 * Restore the pool id to the original value.
 	 * 
-	 * @return true if successful, false if the orig pool is not available.
+	 * @param idMap
+	 *        A map from old pool id to new pool id - translate the origPoolId through the map if present.
+	 * @return true if successful, false if the original pool is not available.
 	 */
-	protected boolean setOrig()
+	protected boolean setOrig(Map<String, String> idMap)
 	{
+		// if the map is present, translate to another pool id
+		if (idMap != null)
+		{
+			String translated = idMap.get(this.origPoolId);
+			if (translated != null)
+			{
+				this.origPoolId = translated;
+			}
+		}
+
 		// if there has been no change, we are done.
 		if (this.poolId.equals(this.origPoolId)) return true;
 
-		// check that the orig pool is available
+		// check that the original pool is available
 		Pool pool = this.poolService.getPool(this.origPoolId);
 		if ((pool == null) || (pool.getIsHistorical())) return false;
 

@@ -21,6 +21,8 @@
 
 package org.muse.mneme.impl;
 
+import java.util.Map;
+
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 
@@ -145,8 +147,18 @@ public class PoolPick
 	 * 
 	 * @return true if successful, false if not.
 	 */
-	public boolean setOrig()
+	public boolean setOrig(Map<String, String> idMap)
 	{
+		// if the map is present, translate to another pool id
+		if (idMap != null)
+		{
+			String translated = idMap.get(this.origQuestionId);
+			if (translated != null)
+			{
+				this.origQuestionId = translated;
+			}
+		}
+
 		// if no change
 		if (this.questionId.equals(this.origQuestionId)) return true;
 

@@ -22,6 +22,7 @@
 package org.muse.mneme.impl;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,10 +30,14 @@ import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AttachmentService;
+import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.SecurityService;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.EntityProducer;
@@ -41,6 +46,7 @@ import org.sakaiproject.entity.api.HttpAccess;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
+import org.sakaiproject.tool.api.SessionManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -66,6 +72,12 @@ public class MnemeTransferServiceImpl implements EntityTransferrer, EntityProduc
 
 	/** Dependency: QuestionService */
 	protected QuestionService questionService = null;
+
+	/** Dependency: SecurityService */
+	protected SecurityService securityService = null;
+
+	/** Dependency: SessionManager */
+	protected SessionManager sessionManager = null;
 
 	/** Dependency: ThreadLocalManager */
 	protected ThreadLocalManager threadLocalManager = null;
@@ -243,6 +255,28 @@ public class MnemeTransferServiceImpl implements EntityTransferrer, EntityProduc
 	}
 
 	/**
+	 * Dependency: SecurityService.
+	 * 
+	 * @param service
+	 *        The SecurityService.
+	 */
+	public void setSecurityService(SecurityService service)
+	{
+		securityService = service;
+	}
+
+	/**
+	 * Dependency: SessionManager.
+	 * 
+	 * @param service
+	 *        The SessionManager.
+	 */
+	public void setSessionManager(SessionManager service)
+	{
+		sessionManager = service;
+	}
+
+	/**
 	 * Dependency: ThreadLocalManager.
 	 * 
 	 * @param service
@@ -258,8 +292,38 @@ public class MnemeTransferServiceImpl implements EntityTransferrer, EntityProduc
 	 */
 	public void transferCopyEntities(String fromContext, String toContext, List ids)
 	{
-		// TODO:
-		M_log.info("copy from: " + fromContext + " to: " + toContext);
+		if (M_log.isDebugEnabled()) M_log.debug("copy from: " + fromContext + " to: " + toContext);
+
+		// security check
+		if (!this.securityService.checkSecurity(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, toContext))
+		{
+			return;
+		}
+
+		// map from old pool ids to new ids
+		Map<String, String> pidMap = new HashMap<String, String>();
+
+		// map from old question ids to new ids
+		Map<String, String> qidMap = new HashMap<String, String>();
+
+		// get all pools in the context
+		List<Pool> pools = this.poolService.findPools(fromContext, null, null);
+
+		// copy each one, with all questions
+		for (Pool pool : pools)
+		{
+			Pool newPool = ((PoolServiceImpl) this.poolService).doCopyPool(toContext, pool, false, qidMap);
+			pidMap.put(pool.getId(), newPool.getId());
+		}
+
+		// get all the assessments
+		List<Assessment> assessments = this.assessmentService.getContextAssessments(fromContext, null, Boolean.FALSE);
+
+		// copy each one
+		for (Assessment assessment : assessments)
+		{
+			((AssessmentServiceImpl) this.assessmentService).doCopyAssessment(toContext, assessment, pidMap, qidMap);
+		}
 	}
 
 	/**

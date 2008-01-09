@@ -21,7 +21,6 @@
 
 package org.muse.mneme.impl;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,6 +33,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.GradesRejectsAssessmentException;
 import org.muse.mneme.api.GradesService;
 import org.muse.mneme.api.MnemeService;
@@ -188,59 +188,10 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (context == null) throw new IllegalArgumentException();
 		if (assessment == null) throw new IllegalArgumentException();
 
-		if (M_log.isDebugEnabled()) M_log.debug("copyAssessment: context:" + context + " id: " + assessment.getId());
-
-		String userId = sessionManager.getCurrentSessionUserId();
-		Date now = new Date();
-
 		// security check
-		securityService.secure(userId, MnemeService.MANAGE_PERMISSION, context);
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
 
-		AssessmentImpl rv = this.storage.newAssessment((AssessmentImpl) assessment);
-
-		// clear the id to make it a new one
-		rv.id = null;
-
-		// set the context
-		rv.setContext(context);
-
-		// add to the title
-		rv.setTitle(((PoolServiceImpl) this.poolService).addDate("copy-text", rv.getTitle(), now));
-
-		// clear archived
-		rv.initArchived(Boolean.FALSE);
-
-		// clear out any special access
-		rv.getSpecialAccess().clear();
-
-		// TODO: clear out any references to "private stash" pools
-
-		// start out unpublished
-		rv.initPublished(Boolean.FALSE);
-
-		// and not-live, non-locked
-		rv.initLive(Boolean.FALSE);
-		rv.initLocked(Boolean.FALSE);
-
-		((AssessmentGradingImpl) (rv.getGrading())).initGradebookRejectedAssessment(Boolean.FALSE);
-
-		// update created and last modified information
-		rv.getCreatedBy().setDate(now);
-		rv.getCreatedBy().setUserId(userId);
-		rv.getModifiedBy().setDate(now);
-		rv.getModifiedBy().setUserId(userId);
-
-		// set the parts to their original question and pool values
-		for (Part part : rv.getParts().getParts())
-		{
-			((PartImpl) part).setOrig();
-		}
-
-		// save
-		this.storage.saveAssessment(rv);
-
-		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_EDIT, getAssessmentReference(rv.getId()), true));
+		AssessmentImpl rv = doCopyAssessment(context, assessment, null, null);
 
 		return rv;
 	}
@@ -311,7 +262,7 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		if (context == null) throw new IllegalArgumentException();
 		if (publishedOnly == null) throw new IllegalArgumentException();
-		if (sort == null) throw new IllegalArgumentException();
+		if (sort == null) sort = AssessmentsSort.cdate_a;
 
 		if (M_log.isDebugEnabled()) M_log.debug("getContextAssessments: " + context + " sort: " + sort + " publishOnly: " + publishedOnly);
 
@@ -742,6 +693,84 @@ public class AssessmentServiceImpl implements AssessmentService
 	{
 		String key = "mneme:assessment:" + assessmentId;
 		return key;
+	}
+
+	/**
+	 * Copy an assessment
+	 * 
+	 * @param context
+	 *        The destination context.
+	 * @param assessment
+	 *        The source assessment.
+	 * @param pidMap
+	 *        A map (old pool id -> new pool id) to use to convert all pool references.
+	 * @param qidMap
+	 *        A map (old question id -> new question id) to use to convert all question references.
+	 */
+	protected AssessmentImpl doCopyAssessment(String context, Assessment assessment, Map<String, String> pidMap, Map<String, String> qidMap)
+	{
+		if (context == null) throw new IllegalArgumentException();
+		if (assessment == null) throw new IllegalArgumentException();
+
+		if (M_log.isDebugEnabled()) M_log.debug("doCopyAssessment: context:" + context + " id: " + assessment.getId());
+
+		String userId = sessionManager.getCurrentSessionUserId();
+		Date now = new Date();
+
+		AssessmentImpl rv = this.storage.newAssessment((AssessmentImpl) assessment);
+
+		// clear the id to make it a new one
+		rv.id = null;
+
+		// set the context
+		rv.setContext(context);
+
+		// add to the title
+		rv.setTitle(((PoolServiceImpl) this.poolService).addDate("copy-text", rv.getTitle(), now));
+
+		// clear archived
+		rv.initArchived(Boolean.FALSE);
+
+		// clear out any special access
+		rv.getSpecialAccess().clear();
+
+		// start out unpublished
+		rv.initPublished(Boolean.FALSE);
+
+		// and not-live, non-locked
+		rv.initLive(Boolean.FALSE);
+		rv.initLocked(Boolean.FALSE);
+
+		((AssessmentGradingImpl) (rv.getGrading())).initGradebookRejectedAssessment(Boolean.FALSE);
+
+		// update created and last modified information
+		rv.getCreatedBy().setDate(now);
+		rv.getCreatedBy().setUserId(userId);
+		rv.getModifiedBy().setDate(now);
+		rv.getModifiedBy().setUserId(userId);
+
+		// set the parts to their original question and pool values
+		for (Part part : rv.getParts().getParts())
+		{
+			if (part instanceof DrawPart)
+			{
+				((PartImpl) part).setOrig(pidMap);
+			}
+			else
+			{
+				((PartImpl) part).setOrig(qidMap);
+			}
+		}
+
+		// TODO: if the assessment is being copied to a new context, we need to copy all MnemeDocs media referenced, and translate the references
+
+		// save
+		this.storage.saveAssessment(rv);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_EDIT, getAssessmentReference(rv.getId()), true));
+
+		return rv;
 	}
 
 	/**
