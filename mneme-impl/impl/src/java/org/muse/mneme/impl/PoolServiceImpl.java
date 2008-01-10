@@ -130,7 +130,7 @@ public class PoolServiceImpl implements PoolService
 		// security check
 		this.securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
 
-		Pool rv = doCopyPool(context, pool, false, null);
+		Pool rv = doCopyPool(context, pool, false, null, true, null);
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(rv.getId()), true));
@@ -500,9 +500,14 @@ public class PoolServiceImpl implements PoolService
 	 * @param oldToNew
 	 *        A map, which, if present, will be filled in with the mapping of the source question id to the destination question id for each question
 	 *        copied.
+	 * @param appendTitle
+	 *        if true, append text to the title, else leave the title an exact copy.
+	 * @param attachmentTranslations
+	 *        A list of Translations for attachments and embedded media.
 	 * @return The copied pool.
 	 */
-	protected Pool doCopyPool(String context, Pool pool, boolean asHistory, Map<String, String> oldToNew)
+	protected Pool doCopyPool(String context, Pool pool, boolean asHistory, Map<String, String> oldToNew, boolean appendTitle,
+			List<Translation> attachmentTranslations)
 	{
 		String userId = sessionManager.getCurrentSessionUserId();
 		Date now = new Date();
@@ -523,7 +528,10 @@ public class PoolServiceImpl implements PoolService
 		rv.getModifiedBy().setUserId(userId);
 
 		// add to the title
-		if (!asHistory) rv.setTitle(addDate("copy-text", rv.getTitle(), now));
+		if (appendTitle)
+		{
+			rv.setTitle(addDate("copy-text", rv.getTitle(), now));
+		}
 
 		// clear the changed settings
 		((PoolImpl) rv).clearChanged();
@@ -532,7 +540,7 @@ public class PoolServiceImpl implements PoolService
 		storage.savePool((PoolImpl) rv);
 
 		// make a copy of the questions
-		this.questionService.copyPoolQuestionsHistorical(pool, rv, asHistory, oldToNew);
+		this.questionService.copyPoolQuestions(pool, rv, asHistory, oldToNew, attachmentTranslations);
 
 		if (asHistory)
 		{
@@ -697,7 +705,7 @@ public class PoolServiceImpl implements PoolService
 
 		if (M_log.isDebugEnabled()) M_log.debug("makePoolHistory: " + pool.getId());
 
-		Pool rv = doCopyPool(pool.getContext(), pool, true, oldToNew);
+		Pool rv = doCopyPool(pool.getContext(), pool, true, oldToNew, false, null);
 
 		return rv;
 	}

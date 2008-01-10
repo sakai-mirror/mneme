@@ -21,8 +21,10 @@
 
 package org.muse.mneme.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,8 +36,10 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.sakaiproject.entity.api.Entity;
@@ -309,20 +313,79 @@ public class MnemeTransferServiceImpl implements EntityTransferrer, EntityProduc
 		// get all pools in the context
 		List<Pool> pools = this.poolService.findPools(fromContext, null, null);
 
-		// copy each one, with all questions
-		for (Pool pool : pools)
-		{
-			Pool newPool = ((PoolServiceImpl) this.poolService).doCopyPool(toContext, pool, false, qidMap);
-			pidMap.put(pool.getId(), newPool.getId());
-		}
-
 		// get all the assessments
 		List<Assessment> assessments = this.assessmentService.getContextAssessments(fromContext, null, Boolean.FALSE);
 
-		// copy each one
+		// collect media references
+		Set<String> refs = new HashSet<String>();
+
+		for (Pool pool : pools)
+		{
+			List<String> qids = ((PoolImpl) pool).getAllQuestionIds();
+			for (String qid : qids)
+			{
+				Question question = this.questionService.getQuestion(qid);
+				// for (Reference attachment : question.getPresentation().getAttachments())
+				// {
+				// refs.add(attachment.getReference());
+				// }
+				refs.addAll(this.attachmentService.harvestAttachmentsReferenced(question.getPresentation().getText()));
+				refs.addAll(this.attachmentService.harvestAttachmentsReferenced(question.getHints()));
+				refs.addAll(this.attachmentService.harvestAttachmentsReferenced(question.getFeedback()));
+				for (String data : question.getTypeSpecificQuestion().getData())
+				{
+					refs.addAll(this.attachmentService.harvestAttachmentsReferenced(data));
+				}
+			}
+		}
+
 		for (Assessment assessment : assessments)
 		{
-			((AssessmentServiceImpl) this.assessmentService).doCopyAssessment(toContext, assessment, pidMap, qidMap);
+			// get this assessment's media refs instructions, part instructions, attachments
+			// for (Reference attachment : assessment.getPresentation().getAttachments())
+			// {
+			// refs.add(attachment.getReference());
+			// }
+			refs.addAll(this.attachmentService.harvestAttachmentsReferenced(assessment.getPresentation().getText()));
+			refs.addAll(this.attachmentService.harvestAttachmentsReferenced(assessment.getSubmitPresentation().getText()));
+
+			for (Part part : assessment.getParts().getParts())
+			{
+				// for (Reference attachment : part.getPresentation().getAttachments())
+				// {
+				// refs.add(attachment.getReference());
+				// }
+				refs.addAll(this.attachmentService.harvestAttachmentsReferenced(part.getPresentation().getText()));
+			}
+		}
+
+		// copy the attachments, creating a translation
+		List<Translation> translations = new ArrayList<Translation>();
+		for (String refString : refs)
+		{
+			// move the referenced attachment into our docs area in this context
+			Reference ref = this.attachmentService.getReference(refString);
+			Reference attachment = this.attachmentService.addAttachment(AttachmentService.MNEME_APPLICATION, toContext, AttachmentService.DOCS_AREA,
+					false, ref);
+			if (attachment != null)
+			{
+				// make the translation
+				Translation t = new Translation(ref.getReference(), attachment.getReference());
+				translations.add(t);
+			}
+		}
+
+		// copy each pool, with all questions
+		for (Pool pool : pools)
+		{
+			Pool newPool = ((PoolServiceImpl) this.poolService).doCopyPool(toContext, pool, false, qidMap, false, translations);
+			pidMap.put(pool.getId(), newPool.getId());
+		}
+
+		// copy each assessment
+		for (Assessment assessment : assessments)
+		{
+			((AssessmentServiceImpl) this.assessmentService).doCopyAssessment(toContext, assessment, pidMap, qidMap, false, translations);
 		}
 	}
 

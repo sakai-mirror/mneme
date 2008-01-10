@@ -191,7 +191,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		// security check
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, context);
 
-		AssessmentImpl rv = doCopyAssessment(context, assessment, null, null);
+		AssessmentImpl rv = doCopyAssessment(context, assessment, null, null, true, null);
 
 		return rv;
 	}
@@ -706,8 +706,13 @@ public class AssessmentServiceImpl implements AssessmentService
 	 *        A map (old pool id -> new pool id) to use to convert all pool references.
 	 * @param qidMap
 	 *        A map (old question id -> new question id) to use to convert all question references.
+	 * @param appendTitle
+	 *        if true, append text to the title, else leave the title an exact copy.
+	 * @param attachmentTranslations
+	 *        A list of Translations for attachments and embedded media.
 	 */
-	protected AssessmentImpl doCopyAssessment(String context, Assessment assessment, Map<String, String> pidMap, Map<String, String> qidMap)
+	protected AssessmentImpl doCopyAssessment(String context, Assessment assessment, Map<String, String> pidMap, Map<String, String> qidMap,
+			boolean appendTitle, List<Translation> attachmentTranslations)
 	{
 		if (context == null) throw new IllegalArgumentException();
 		if (assessment == null) throw new IllegalArgumentException();
@@ -726,7 +731,10 @@ public class AssessmentServiceImpl implements AssessmentService
 		rv.setContext(context);
 
 		// add to the title
-		rv.setTitle(((PoolServiceImpl) this.poolService).addDate("copy-text", rv.getTitle(), now));
+		if (appendTitle)
+		{
+			rv.setTitle(((PoolServiceImpl) this.poolService).addDate("copy-text", rv.getTitle(), now));
+		}
 
 		// clear archived
 		rv.initArchived(Boolean.FALSE);
@@ -762,7 +770,19 @@ public class AssessmentServiceImpl implements AssessmentService
 			}
 		}
 
-		// TODO: if the assessment is being copied to a new context, we need to copy all MnemeDocs media referenced, and translate the references
+		// translate embedded media references
+		if (attachmentTranslations != null)
+		{
+			for (Translation t : attachmentTranslations)
+			{
+				rv.getPresentation().setText(t.translate(rv.getPresentation().getText()));
+				rv.getSubmitPresentation().setText(t.translate(rv.getSubmitPresentation().getText()));
+				for (Part p : rv.getParts().getParts())
+				{
+					p.getPresentation().setText(t.translate(p.getPresentation().getText()));
+				}
+			}
+		}
 
 		// save
 		this.storage.saveAssessment(rv);

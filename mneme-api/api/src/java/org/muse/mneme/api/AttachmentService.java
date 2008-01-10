@@ -21,6 +21,8 @@
 
 package org.muse.mneme.api;
 
+import java.util.Set;
+
 import org.apache.commons.fileupload.FileItem;
 import org.sakaiproject.entity.api.Reference;
 
@@ -88,6 +90,16 @@ public interface AttachmentService
 	 * @return The Reference object.
 	 */
 	Reference getReference(String refString);
+
+	/**
+	 * Collect all the attachment references in the html data:<br />
+	 * Anything referenced by a src= or href=. in our content docs
+	 * 
+	 * @param data
+	 *        The data string.
+	 * @return The set of attachment references.
+	 */
+	Set<String> harvestAttachmentsReferenced(String data);
 
 	/**
 	 * Remove this attachment.

@@ -85,21 +85,21 @@ public class QuestionStorageMysql implements QuestionStorage
 	 * {@inheritDoc}
 	 */
 	public void copyPoolQuestions(final String userId, final Pool source, final Pool destination, final boolean asHistory,
-			final Map<String, String> oldToNew)
+			final Map<String, String> oldToNew, final List<Translation> attachmentTranslations)
 	{
 		// get source's question ids
 		List<String> qids = null;
-		if (oldToNew != null)
+		if ((oldToNew != null) || ((attachmentTranslations != null) && (!attachmentTranslations.isEmpty())))
 		{
 			qids = source.getAllQuestionIds();
 		}
-		final List<String> poolIds = qids;
+		final List<String> poolQids = qids;
 
 		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
-				if (oldToNew == null)
+				if ((oldToNew == null) && ((attachmentTranslations == null) || attachmentTranslations.isEmpty()))
 				{
 					if (asHistory)
 					{
@@ -112,17 +112,24 @@ public class QuestionStorageMysql implements QuestionStorage
 				}
 				else
 				{
-					for (String qid : poolIds)
+					for (String qid : poolQids)
 					{
+						String newId = null;
 						if (asHistory)
 						{
-							String hid = copyQuestionHistoricalTx(userId, qid, destination);
-							oldToNew.put(qid, hid);
+							newId = copyQuestionHistoricalTx(userId, qid, destination);
+							oldToNew.put(qid, newId);
 						}
 						else
 						{
-							String hid = copyQuestionTx(userId, qid, destination);
-							oldToNew.put(qid, hid);
+							newId = copyQuestionTx(userId, qid, destination);
+							oldToNew.put(qid, newId);
+						}
+
+						// translate attachments
+						if (attachmentTranslations != null)
+						{
+							translateQuestionAttachmentsTx(newId, attachmentTranslations);
 						}
 					}
 				}
@@ -876,6 +883,72 @@ public class QuestionStorageMysql implements QuestionStorage
 		});
 
 		return rv;
+	}
+
+	/**
+	 * Translate any embedded attachments in the question presentation text or guest area
+	 * 
+	 * @param qid
+	 *        The question id.
+	 * @param attachmentTranslations
+	 *        The translations.
+	 */
+	protected void translateQuestionAttachmentsTx(String qid, List<Translation> attachmentTranslations)
+	{
+		// read the question's text
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT Q.PRESENTATION_TEXT, Q.GUEST, Q.HINTS, Q.FEEDBACK");
+		sql.append(" FROM MNEME_QUESTION Q ");
+		sql.append(" WHERE Q.ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(qid);
+
+		final Object[] fields2 = new Object[5];
+		fields2[4] = fields[0];
+
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					fields2[0] = SqlHelper.readString(result, 1);
+					fields2[1] = SqlHelper.decodeStringArray(StringUtil.trimToNull(result.getString(2)));
+					fields2[2] = SqlHelper.readString(result, 3);
+					fields2[3] = SqlHelper.readString(result, 4);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("translateQuestionAttachmentsTx(read): " + e);
+					return null;
+				}
+			}
+		});
+
+		// translate
+		for (Translation t : attachmentTranslations)
+		{
+			fields2[0] = t.translate((String) fields2[0]);
+			fields2[2] = t.translate((String) fields2[2]);
+			fields2[3] = t.translate((String) fields2[3]);
+			for (int i = 0; i < ((String[]) fields2[1]).length; i++)
+			{
+				((String[]) fields2[1])[i] = t.translate(((String[]) fields2[1])[i]);
+			}
+		}
+
+		fields2[1] = SqlHelper.encodeStringArray(((String[]) fields2[1]));
+
+		// update
+		sql = new StringBuilder();
+		sql.append("UPDATE MNEME_QUESTION SET PRESENTATION_TEXT=?, GUEST=?, HINTS=?, FEEDBACK=? WHERE ID=?");
+		if (!this.sqlService.dbWrite(sql.toString(), fields2))
+		{
+			throw new RuntimeException("translateQuestionAttachmentsTx(write): db write failed");
+		}
 	}
 
 	/**

@@ -22,10 +22,13 @@
 package org.muse.mneme.impl;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -127,6 +130,13 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		}
 
 		Reference rv = doAdd(name, type, body, size, application, context, prefix, uniqueHolder);
+
+		// if this failed, and we are not using a uniqueHolder, try it with a uniqueHolder
+		if ((rv == null) && !uniqueHolder)
+		{
+			rv = doAdd(name, type, body, size, application, context, prefix, true);
+		}
+
 		return rv;
 	}
 
@@ -142,7 +152,15 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			long size = resource.getContentLength();
 			byte[] body = resource.getContent();
 			String name = resource.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME);
+
 			Reference rv = doAdd(name, type, body, size, application, context, prefix, uniqueHolder);
+
+			// if this failed, and we are not using a uniqueHolder, try it with a uniqueHolder
+			if ((rv == null) && !uniqueHolder)
+			{
+				rv = doAdd(name, type, body, size, application, context, prefix, true);
+			}
+
 			return rv;
 		}
 		catch (PermissionException e)
@@ -346,6 +364,41 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Set<String> harvestAttachmentsReferenced(String data)
+	{
+		Set<String> rv = new HashSet<String>();
+		if (data == null) return rv;
+
+		// pattern to find any src= or href= text
+		// groups: 0: the whole matching text 1: src|href 2: the string in the quotes
+		Pattern p = Pattern.compile("(src|href)[\\s]*=[\\s]*\"([^\"]*)\"");
+
+		Matcher m = p.matcher(data);
+		while (m.find())
+		{
+			if (m.groupCount() == 2)
+			{
+				String ref = m.group(2);
+
+				int index = ref.indexOf("/access/content/");
+				// TODO: further filter to docs root and context (optional)
+				if (index != -1)
+				{
+					// save just the reference part (i.e. after the /access);
+					String refString = ref.substring(index + 7);
+					
+					// TODO: translate any %XX characters to their natural character
+					rv.add(refString);
+				}
+			}
+		}
+
+		return rv;
+	}
+
+	/**
 	 * Final initialization, once all dependencies are set.
 	 */
 	public void init()
@@ -528,21 +581,21 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 * @param container
 	 *        The full path of the container collection.
 	 * @param name
-	 *        The collection name to check and create.
+	 *        The collection name to check and create (no trailing slash needed).
 	 * @param uniqueHolder
-	 *        true if the folder is being created soley to hold the attachment uniquely.
+	 *        true if the folder is being created solely to hold the attachment uniquely.
 	 */
 	protected void assureCollection(String container, String name, boolean uniqueHolder)
 	{
 		try
 		{
-			contentHostingService.getCollection(container + name);
+			contentHostingService.getCollection(container + name + "/");
 		}
 		catch (IdUnusedException e)
 		{
 			try
 			{
-				ContentCollectionEdit edit = contentHostingService.addCollection(container + name);
+				ContentCollectionEdit edit = contentHostingService.addCollection(container + name + "/");
 				ResourcePropertiesEdit props = edit.getPropertiesEdit();
 
 				// set the alternate reference root so we get all requests
@@ -626,19 +679,19 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 
 		// form the content hosting path, and make sure all the folders exist
 		String contentPath = "/private/";
-		assureCollection(contentPath, application + "/", false);
+		assureCollection(contentPath, application, false);
 		contentPath += application + "/";
-		assureCollection(contentPath, context + "/", false);
+		assureCollection(contentPath, context, false);
 		contentPath += context + "/";
 		if ((prefix != null) && (prefix.length() > 0))
 		{
-			assureCollection(contentPath, prefix + "/", false);
+			assureCollection(contentPath, prefix, false);
 			contentPath += prefix + "/";
 		}
 		if (uniqueHolder)
 		{
 			String uuid = this.idManager.createUuid();
-			assureCollection(contentPath, uuid + "/", true);
+			assureCollection(contentPath, uuid, true);
 			contentPath += uuid + "/";
 		}
 
@@ -669,7 +722,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		}
 		catch (IdUsedException e2)
 		{
-			M_log.warn("addAttachment: creating our content: " + e2.toString());
+			// M_log.warn("addAttachment: creating our content: " + e2.toString());
 		}
 		catch (IdInvalidException e2)
 		{

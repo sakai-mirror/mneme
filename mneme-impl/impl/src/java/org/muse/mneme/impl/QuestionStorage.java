@@ -56,8 +56,11 @@ public interface QuestionStorage
 	 * @param oldToNew
 	 *        A map, which, if present, will be filled in with the mapping of the source question id to the destination question id for each question
 	 *        copied.
+	 * @param attachmentTranslations
+	 *        A list of Translations for attachments and embedded media.
 	 */
-	void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew);
+	void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew,
+			List<Translation> attachmentTranslations);
 
 	/**
 	 * Count the questions in this context.

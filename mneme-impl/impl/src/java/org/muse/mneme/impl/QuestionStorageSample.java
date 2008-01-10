@@ -95,7 +95,8 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew)
+	public void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew,
+			List<Translation> attachmentTranslations)
 	{
 		List<QuestionImpl> questions = new ArrayList<QuestionImpl>(this.questions.values());
 		for (QuestionImpl question : questions)
@@ -119,6 +120,29 @@ public class QuestionStorageSample implements QuestionStorage
 				q.getModifiedBy().setDate(now);
 
 				if (asHistory) q.makeHistorical();
+
+				// translate attachments and embedded media using attachmentTranslations
+				if (attachmentTranslations != null)
+				{
+					String text = q.getPresentation().getText();
+					String[] data = q.getTypeSpecificQuestion().getData();
+					String feedback = q.getFeedback();
+					String hints = q.getHints();
+					for (Translation t : attachmentTranslations)
+					{
+						text = t.translate(text);
+						feedback = t.translate(feedback);
+						hints = t.translate(hints);
+						for (int i = 0; i < data.length; i++)
+						{
+							data[i] = t.translate(data[i]);
+						}
+					}
+					q.getPresentation().setText(text);
+					q.getTypeSpecificQuestion().setData(data);
+					q.setFeedback(feedback);
+					q.setHints(hints);
+				}
 
 				// save
 				saveQuestion(q);

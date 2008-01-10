@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -119,32 +117,6 @@ public class ImportServiceImpl implements ImportService
 		Float score;
 
 		Integer type;
-	}
-
-	public class Translation
-	{
-		String from = null;
-
-		String to = null;
-
-		public Translation(String from, String to)
-		{
-			this.from = Pattern.quote(from);
-			this.to = to;
-		}
-
-		/**
-		 * Translate a target string.
-		 * 
-		 * @param target
-		 *        The target string.
-		 * @return The target string with all "from" instances replaced with "to" instances.
-		 */
-		public String translate(String target)
-		{
-			String rv = target.replaceAll(from, to);
-			return rv;
-		}
 	}
 
 	/** Our logger. */
@@ -1026,34 +998,6 @@ public class ImportServiceImpl implements ImportService
 	}
 
 	/**
-	 * Isolate the src or href from the target.
-	 * 
-	 * @param target
-	 *        The target html fragment.
-	 * @return A Set of the src or href values in the quotes.
-	 */
-	protected Set<String> findSrcHrefValues(String target)
-	{
-		Set<String> rv = new HashSet<String>();
-		if (target == null) return rv;
-
-		// pattern to find any src= or href= text
-		// groups: 0: the whole matching text 1: src|href 2: the string in the quotes
-		Pattern p = Pattern.compile("(src|href)[\\s]*=[\\s]*\"([^\"]*)\"");
-
-		Matcher m = p.matcher(target);
-		while (m.find())
-		{
-			if (m.groupCount() == 2)
-			{
-				rv.add(m.group(2));
-			}
-		}
-
-		return rv;
-	}
-
-	/**
 	 * Form html for attachments for this item.
 	 * 
 	 * @param attachments
@@ -1128,41 +1072,29 @@ public class ImportServiceImpl implements ImportService
 	}
 
 	/**
-	 * Collect all the document references in the Samigo question data:<br />
+	 * Collect all the attachment references in the Samigo question html data:<br />
 	 * Anything referenced by a src= or href=.
 	 * 
 	 * @param questionData
 	 *        The Samigo question data.
-	 * @return The set of document references.
+	 * @return The set of attachment references.
 	 */
 	protected Set<String> harvestDocumentsReferenced(List<SamigoQuestion> questionData)
 	{
-		Set<String> all = new HashSet<String>();
+		Set<String> rv = new HashSet<String>();
 
 		// collect all the references
 		for (SamigoQuestion q : questionData)
 		{
-			all.addAll(findSrcHrefValues(q.answerMatchText));
-			all.addAll(findSrcHrefValues(q.correctFeedback));
-			all.addAll(findSrcHrefValues(q.generalFeedback));
-			all.addAll(findSrcHrefValues(q.incorrectFeedback));
-			all.addAll(findSrcHrefValues(q.instruction));
-			all.addAll(findSrcHrefValues(q.questionChoiceText));
+			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.answerMatchText));
+			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.correctFeedback));
+			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.generalFeedback));
+			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.incorrectFeedback));
+			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.instruction));
+			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.questionChoiceText));
 		}
 
-		// filter out those that are not in our content hosting (i.e. don't have "/access/content/")
-		Set<String> filtered = new HashSet<String>();
-		for (String ref : all)
-		{
-			int index = ref.indexOf("/access/content/");
-			if (index != -1)
-			{
-				// save just the reference part (i.e. after the /access);
-				filtered.add(ref.substring(index + 7));
-			}
-		}
-
-		return filtered;
+		return rv;
 	}
 
 	/**
@@ -1202,27 +1134,26 @@ public class ImportServiceImpl implements ImportService
 	/**
 	 * Import the embedded documents to the MnemeDocs for the pool's context.
 	 * 
-	 * @param refStrings
-	 *        The list of reference strings to the embedded documents.
+	 * @param refs
+	 *        The set of references to embedded document.
 	 * @param context
 	 *        The destination context.
 	 * @return a Translation list for each imported document.
 	 */
-	protected List<Translation> importEmbeddedDocs(Set<String> refStrings, String context)
+	protected List<Translation> importEmbeddedDocs(Set<String> refs, String context)
 	{
 		List<Translation> rv = new ArrayList<Translation>();
-		for (String ref : refStrings)
+		for (String refString : refs)
 		{
-			// form a reference to the existing resource
-			Reference resource = this.entityManager.newReference(ref);
+			Reference ref = this.attachmentService.getReference(refString);
 
 			// move the referenced resource into our docs
 			Reference attachment = this.attachmentService.addAttachment(AttachmentService.MNEME_APPLICATION, context, AttachmentService.DOCS_AREA,
-					true, resource);
+					true, ref);
 			if (attachment != null)
 			{
 				// make the translation
-				Translation t = new Translation(ref, attachment.getReference());
+				Translation t = new Translation(ref.getReference(), attachment.getReference());
 				rv.add(t);
 			}
 			else
