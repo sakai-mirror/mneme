@@ -28,6 +28,7 @@ import java.util.Map;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.Translation;
 
 /**
  * QuestionStorage defines the storage interface for Questions.

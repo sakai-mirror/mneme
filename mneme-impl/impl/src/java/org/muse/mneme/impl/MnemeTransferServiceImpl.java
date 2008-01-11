@@ -42,6 +42,7 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
+import org.muse.mneme.api.Translation;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.EntityProducer;
@@ -329,12 +330,12 @@ public class MnemeTransferServiceImpl implements EntityTransferrer, EntityProduc
 				// {
 				// refs.add(attachment.getReference());
 				// }
-				refs.addAll(this.attachmentService.harvestAttachmentsReferenced(question.getPresentation().getText()));
-				refs.addAll(this.attachmentService.harvestAttachmentsReferenced(question.getHints()));
-				refs.addAll(this.attachmentService.harvestAttachmentsReferenced(question.getFeedback()));
+				refs.addAll(this.attachmentService.harvestAttachmentsReferenced(question.getPresentation().getText(), true));
+				refs.addAll(this.attachmentService.harvestAttachmentsReferenced(question.getHints(), true));
+				refs.addAll(this.attachmentService.harvestAttachmentsReferenced(question.getFeedback(), true));
 				for (String data : question.getTypeSpecificQuestion().getData())
 				{
-					refs.addAll(this.attachmentService.harvestAttachmentsReferenced(data));
+					refs.addAll(this.attachmentService.harvestAttachmentsReferenced(data, true));
 				}
 			}
 		}
@@ -346,8 +347,8 @@ public class MnemeTransferServiceImpl implements EntityTransferrer, EntityProduc
 			// {
 			// refs.add(attachment.getReference());
 			// }
-			refs.addAll(this.attachmentService.harvestAttachmentsReferenced(assessment.getPresentation().getText()));
-			refs.addAll(this.attachmentService.harvestAttachmentsReferenced(assessment.getSubmitPresentation().getText()));
+			refs.addAll(this.attachmentService.harvestAttachmentsReferenced(assessment.getPresentation().getText(), true));
+			refs.addAll(this.attachmentService.harvestAttachmentsReferenced(assessment.getSubmitPresentation().getText(), true));
 
 			for (Part part : assessment.getParts().getParts())
 			{
@@ -355,11 +356,11 @@ public class MnemeTransferServiceImpl implements EntityTransferrer, EntityProduc
 				// {
 				// refs.add(attachment.getReference());
 				// }
-				refs.addAll(this.attachmentService.harvestAttachmentsReferenced(part.getPresentation().getText()));
+				refs.addAll(this.attachmentService.harvestAttachmentsReferenced(part.getPresentation().getText(), true));
 			}
 		}
 
-		// copy the attachments, creating a translation
+		// copy the attachments, creating translations
 		List<Translation> translations = new ArrayList<Translation>();
 		for (String refString : refs)
 		{
@@ -370,7 +371,7 @@ public class MnemeTransferServiceImpl implements EntityTransferrer, EntityProduc
 			if (attachment != null)
 			{
 				// make the translation
-				Translation t = new Translation(ref.getReference(), attachment.getReference());
+				Translation t = new TranslationImpl(ref.getReference(), attachment.getReference());
 				translations.add(t);
 			}
 		}

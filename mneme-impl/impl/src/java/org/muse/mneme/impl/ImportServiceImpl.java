@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +42,7 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
+import org.muse.mneme.api.Translation;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.content.cover.ContentTypeImageService;
 import org.sakaiproject.db.api.SqlReader;
@@ -445,12 +447,17 @@ public class ImportServiceImpl implements ImportService
 		{
 			for (SamigoQuestion q : questionData)
 			{
-				if (q.answerMatchText != null) q.answerMatchText = t.translate(q.answerMatchText);
-				if (q.correctFeedback != null) q.correctFeedback = t.translate(q.correctFeedback);
-				if (q.generalFeedback != null) q.generalFeedback = t.translate(q.generalFeedback);
-				if (q.incorrectFeedback != null) q.incorrectFeedback = t.translate(q.incorrectFeedback);
-				if (q.instruction != null) q.instruction = t.translate(q.instruction);
-				if (q.questionChoiceText != null) q.questionChoiceText = t.translate(q.questionChoiceText);
+				if (q.answerMatchText != null)
+					q.answerMatchText = this.attachmentService.translateEmbeddedReferences(q.answerMatchText, translations);
+				if (q.correctFeedback != null)
+					q.correctFeedback = this.attachmentService.translateEmbeddedReferences(q.correctFeedback, translations);
+				if (q.generalFeedback != null)
+					q.generalFeedback = this.attachmentService.translateEmbeddedReferences(q.generalFeedback, translations);
+				if (q.incorrectFeedback != null)
+					q.incorrectFeedback = this.attachmentService.translateEmbeddedReferences(q.incorrectFeedback, translations);
+				if (q.instruction != null) q.instruction = this.attachmentService.translateEmbeddedReferences(q.instruction, translations);
+				if (q.questionChoiceText != null)
+					q.questionChoiceText = this.attachmentService.translateEmbeddedReferences(q.questionChoiceText, translations);
 			}
 		}
 	}
@@ -635,7 +642,7 @@ public class ImportServiceImpl implements ImportService
 		String questionText = these[0].questionChoiceText;
 		for (int index = 0; index < these.length; index++)
 		{
-			questionText = questionText.replaceFirst("\\{\\}", "{" + these[index].answerMatchText + "}");
+			questionText = questionText.replaceFirst("\\{\\}", Matcher.quoteReplacement("{" + these[index].answerMatchText + "}"));
 		}
 
 		// set the text
@@ -1086,12 +1093,12 @@ public class ImportServiceImpl implements ImportService
 		// collect all the references
 		for (SamigoQuestion q : questionData)
 		{
-			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.answerMatchText));
-			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.correctFeedback));
-			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.generalFeedback));
-			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.incorrectFeedback));
-			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.instruction));
-			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.questionChoiceText));
+			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.answerMatchText, true));
+			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.correctFeedback, true));
+			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.generalFeedback, true));
+			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.incorrectFeedback, true));
+			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.instruction, true));
+			rv.addAll(this.attachmentService.harvestAttachmentsReferenced(q.questionChoiceText, true));
 		}
 
 		return rv;
@@ -1153,7 +1160,7 @@ public class ImportServiceImpl implements ImportService
 			if (attachment != null)
 			{
 				// make the translation
-				Translation t = new Translation(ref.getReference(), attachment.getReference());
+				TranslationImpl t = new TranslationImpl(ref.getReference(), attachment.getReference());
 				rv.add(t);
 			}
 			else

@@ -33,6 +33,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.GradesRejectsAssessmentException;
 import org.muse.mneme.api.GradesService;
@@ -44,6 +45,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.SubmissionService;
+import org.muse.mneme.api.Translation;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.memory.api.Cache;
@@ -62,6 +64,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 	/** A cache of assessments. */
 	protected Cache assessmentCache = null;
+
+	/** Dependency: AttachmentService */
+	protected AttachmentService attachmentService = null;
 
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
@@ -551,6 +556,17 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
+	 * Dependency: AttachmentService.
+	 * 
+	 * @param service
+	 *        The AttachmentService.
+	 */
+	public void setAttachmentService(AttachmentService service)
+	{
+		attachmentService = service;
+	}
+
+	/**
 	 * Dependency: EventTrackingService.
 	 * 
 	 * @param service
@@ -773,14 +789,13 @@ public class AssessmentServiceImpl implements AssessmentService
 		// translate embedded media references
 		if (attachmentTranslations != null)
 		{
-			for (Translation t : attachmentTranslations)
+			rv.getPresentation().setText(this.attachmentService.translateEmbeddedReferences(rv.getPresentation().getText(), attachmentTranslations));
+			rv.getSubmitPresentation().setText(
+					this.attachmentService.translateEmbeddedReferences(rv.getSubmitPresentation().getText(), attachmentTranslations));
+			for (Part p : rv.getParts().getParts())
 			{
-				rv.getPresentation().setText(t.translate(rv.getPresentation().getText()));
-				rv.getSubmitPresentation().setText(t.translate(rv.getSubmitPresentation().getText()));
-				for (Part p : rv.getParts().getParts())
-				{
-					p.getPresentation().setText(t.translate(p.getPresentation().getText()));
-				}
+				p.getPresentation()
+						.setText(this.attachmentService.translateEmbeddedReferences(p.getPresentation().getText(), attachmentTranslations));
 			}
 		}
 

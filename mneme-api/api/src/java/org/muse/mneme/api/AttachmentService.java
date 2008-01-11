@@ -21,6 +21,7 @@
 
 package org.muse.mneme.api;
 
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.fileupload.FileItem;
@@ -97,9 +98,11 @@ public interface AttachmentService
 	 * 
 	 * @param data
 	 *        The data string.
+	 * @param normalize
+	 *        if true, decode the references by URL decoding rules.
 	 * @return The set of attachment references.
 	 */
-	Set<String> harvestAttachmentsReferenced(String data);
+	Set<String> harvestAttachmentsReferenced(String data, boolean normalize);
 
 	/**
 	 * Remove this attachment.
@@ -108,4 +111,15 @@ public interface AttachmentService
 	 *        The attachment reference.
 	 */
 	void removeAttachment(Reference ref);
+
+	/**
+	 * Translate any embedded attachment references in the html data, based on the set of translations.
+	 * 
+	 * @param data
+	 *        The html data.
+	 * @param translations
+	 *        The translations.
+	 * @return The translated data.
+	 */
+	String translateEmbeddedReferences(String data, List<Translation> translations);
 }

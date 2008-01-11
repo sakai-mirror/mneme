@@ -21,13 +21,18 @@
 
 package org.muse.mneme.impl;
 
-public class Translation
+import org.muse.mneme.api.Translation;
+
+/**
+ * TranslationImpl implements Translation
+ */
+public class TranslationImpl implements Translation
 {
 	String from = null;
 
 	String to = null;
 
-	public Translation(String from, String to)
+	public TranslationImpl(String from, String to)
 	{
 		this.from = from;
 		this.to = to;

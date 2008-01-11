@@ -21,6 +21,8 @@
 
 package org.muse.mneme.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +39,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AttachmentService;
+import org.muse.mneme.api.Translation;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -145,8 +148,18 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, Reference resourceRef)
 	{
+		// make sure we can read!
+		pushAdvisor();
+
 		try
 		{
+			// if from our docs, convert into a content hosting ref
+			if (resourceRef.getType().equals(APPLICATION_ID))
+			{
+				resourceRef = entityManager.newReference(resourceRef.getId());
+			}
+
+			// make sure we can read!
 			ContentResource resource = this.contentHostingService.getResource(resourceRef.getId());
 			String type = resource.getContentType();
 			long size = resource.getContentLength();
@@ -178,6 +191,11 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		catch (ServerOverloadException e)
 		{
 			M_log.warn("addAttachment: " + e.toString());
+		}
+		finally
+		{
+			// clear the security advisor
+			popAdvisor();
 		}
 
 		return null;
@@ -366,7 +384,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Set<String> harvestAttachmentsReferenced(String data)
+	public Set<String> harvestAttachmentsReferenced(String data, boolean normalize)
 	{
 		Set<String> rv = new HashSet<String>();
 		if (data == null) return rv;
@@ -383,13 +401,26 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 				String ref = m.group(2);
 
 				int index = ref.indexOf("/access/content/");
+				if (index == -1) index = ref.indexOf("/access/mneme/content/");
 				// TODO: further filter to docs root and context (optional)
 				if (index != -1)
 				{
 					// save just the reference part (i.e. after the /access);
 					String refString = ref.substring(index + 7);
-					
-					// TODO: translate any %XX characters to their natural character
+
+					// deal with %20 and other encoded URL stuff
+					if (normalize)
+					{
+						try
+						{
+							refString = URLDecoder.decode(refString, "UTF-8");
+						}
+						catch (UnsupportedEncodingException e)
+						{
+							M_log.warn("harvestAttachmentsReferenced: " + e);
+						}
+					}
+
 					rv.add(refString);
 				}
 			}
@@ -565,6 +596,44 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	public void setSessionManager(SessionManager service)
 	{
 		sessionManager = service;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String translateEmbeddedReferences(String data, List<Translation> translations)
+	{
+		if (translations == null) return data;
+
+		// pull out the candidate parts to translate
+		Set<String> candidates = harvestAttachmentsReferenced(data, false);
+		for (String candidate : candidates)
+		{
+			try
+			{
+				// normalize
+				String normal = URLDecoder.decode(candidate, "UTF-8");
+
+				// translate the normal form
+				String translated = normal;
+				for (Translation translation : translations)
+				{
+					translated = translation.translate(translated);
+				}
+
+				// if changed, replace
+				if (!normal.equals(translated))
+				{
+					data = data.replace(candidate, translated);
+				}
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				M_log.warn("translateEmbeddedReferences: " + e);
+			}
+		}
+
+		return data;
 	}
 
 	/**
