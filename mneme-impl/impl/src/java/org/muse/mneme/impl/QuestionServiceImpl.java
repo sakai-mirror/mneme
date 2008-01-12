@@ -35,6 +35,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SecurityService;
+import org.muse.mneme.api.Translation;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.event.api.EventTrackingService;
@@ -151,7 +152,7 @@ public class QuestionServiceImpl implements QuestionService
 		// the new questions in the destination pool may invalidate test-drive submissions in the context
 		this.submissionService.removeTestDriveSubmissions(destination.getContext());
 
-		this.storage.copyPoolQuestions(userId, source, destination, false, null);
+		this.storage.copyPoolQuestions(userId, source, destination, false, null, null);
 
 		// TODO: event?
 	}
@@ -686,7 +687,7 @@ public class QuestionServiceImpl implements QuestionService
 	}
 
 	/**
-	 * Copy the questions from source to destination, possibly marked as historical.
+	 * Copy the questions from source to destination, possibly marked as historical, possibly with attachment translation.
 	 * 
 	 * @param source
 	 *        The source pool.
@@ -697,19 +698,22 @@ public class QuestionServiceImpl implements QuestionService
 	 * @param oldToNew
 	 *        A map, which, if present, will be filled in with the mapping of the source question id to the destination question id for each question
 	 *        copied.
+	 * @param attachmentTranslations
+	 *        A list of Translations for attachments and embedded media.
 	 */
-	protected void copyPoolQuestionsHistorical(Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew)
+	protected void copyPoolQuestions(Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew,
+			List<Translation> attachmentTranslations)
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("copyPoolQuestionsHistorical: source: " + source.getId() + " destination: " + destination.getId());
 
-		this.storage.copyPoolQuestions(sessionManager.getCurrentSessionUserId(), source, destination, asHistory, oldToNew);
+		this.storage.copyPoolQuestions(sessionManager.getCurrentSessionUserId(), source, destination, asHistory, oldToNew, attachmentTranslations);
 	}
 
 	/**
 	 * Remove the question
 	 * 
 	 * @param question
-	 *        The quesiton
+	 *        The question
 	 * @param historyPool
 	 *        if the pool's history pool already made, or null if there is none.
 	 */

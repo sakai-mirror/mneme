@@ -21,6 +21,9 @@
 
 package org.muse.mneme.api;
 
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.fileupload.FileItem;
 import org.sakaiproject.entity.api.Reference;
 
@@ -90,10 +93,35 @@ public interface AttachmentService
 	Reference getReference(String refString);
 
 	/**
+	 * Collect all the attachment references in the html data:<br />
+	 * Anything referenced by a src= or href=. in our content docs, or in a site content area <br />
+	 * Ignore anything in a myWorkspace content area or the public content area.
+	 * 
+	 * @param data
+	 *        The data string.
+	 * @param normalize
+	 *        if true, decode the references by URL decoding rules.
+	 * @return The set of attachment references.
+	 */
+	Set<String> harvestAttachmentsReferenced(String data, boolean normalize);
+
+	/**
 	 * Remove this attachment.
 	 * 
 	 * @param ref
 	 *        The attachment reference.
 	 */
 	void removeAttachment(Reference ref);
+
+	/**
+	 * Translate any embedded attachment references in the html data, based on the set of translations.<br />
+	 * Uses the same rules to find the references as harvestAttachmentsReferenced.
+	 * 
+	 * @param data
+	 *        The html data.
+	 * @param translations
+	 *        The translations.
+	 * @return The translated data.
+	 */
+	String translateEmbeddedReferences(String data, List<Translation> translations);
 }

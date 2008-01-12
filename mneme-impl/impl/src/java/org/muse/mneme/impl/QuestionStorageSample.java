@@ -34,12 +34,14 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SubmissionService;
+import org.muse.mneme.api.Translation;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -49,6 +51,9 @@ public class QuestionStorageSample implements QuestionStorage
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(QuestionStorageSample.class);
+
+	/** Dependency: AttachmentService */
+	protected AttachmentService attachmentService = null;
 
 	protected boolean fakedAlready = false;
 
@@ -95,7 +100,8 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew)
+	public void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew,
+			List<Translation> attachmentTranslations)
 	{
 		List<QuestionImpl> questions = new ArrayList<QuestionImpl>(this.questions.values());
 		for (QuestionImpl question : questions)
@@ -119,6 +125,22 @@ public class QuestionStorageSample implements QuestionStorage
 				q.getModifiedBy().setDate(now);
 
 				if (asHistory) q.makeHistorical();
+
+				// translate attachments and embedded media using attachmentTranslations
+				if (attachmentTranslations != null)
+				{
+					q.getPresentation().setText(
+							this.attachmentService.translateEmbeddedReferences(q.getPresentation().getText(), attachmentTranslations));
+					q.setFeedback(this.attachmentService.translateEmbeddedReferences(q.getFeedback(), attachmentTranslations));
+					q.setHints(this.attachmentService.translateEmbeddedReferences(q.getHints(), attachmentTranslations));
+
+					String[] data = q.getTypeSpecificQuestion().getData();
+					for (int i = 0; i < data.length; i++)
+					{
+						data[i] = this.attachmentService.translateEmbeddedReferences(data[i], attachmentTranslations);
+					}
+					q.getTypeSpecificQuestion().setData(data);
+				}
 
 				// save
 				saveQuestion(q);
@@ -324,6 +346,17 @@ public class QuestionStorageSample implements QuestionStorage
 		}
 
 		this.questions.put(question.getId(), new QuestionImpl(question));
+	}
+
+	/**
+	 * Dependency: AttachmentService.
+	 * 
+	 * @param service
+	 *        The AttachmentService.
+	 */
+	public void setAttachmentService(AttachmentService service)
+	{
+		attachmentService = service;
 	}
 
 	/**

@@ -39,6 +39,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.util.FormattedText;
 
 /**
  * LikertScaleQuestionImpl handles questions for the Likert question type.
@@ -275,7 +276,7 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getDescription()
 	{
-		return this.question.getPresentation().getText();
+		return FormattedText.convertFormattedTextToPlaintext(this.question.getPresentation().getText());
 	}
 
 	/**

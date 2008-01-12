@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.muse.mneme.api.Changeable;
@@ -426,14 +427,14 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void setOrig()
+	protected void setOrig(Map<String, String> idMap)
 	{
 		for (Iterator i = this.questions.iterator(); i.hasNext();)
 		{
 			PoolPick pick = (PoolPick) i.next();
 
-			// if we cannot restore the orig. values, remove the pick
-			if (!pick.setOrig())
+			// if we cannot restore the original values, remove the pick
+			if (!pick.setOrig(idMap))
 			{
 				i.remove();
 			}

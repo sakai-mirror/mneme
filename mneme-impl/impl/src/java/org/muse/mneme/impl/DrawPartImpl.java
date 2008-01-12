@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.muse.mneme.api.Changeable;
@@ -487,14 +488,14 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void setOrig()
+	protected void setOrig(Map<String, String> idMap)
 	{
 		for (Iterator i = this.pools.iterator(); i.hasNext();)
 		{
 			PoolDrawImpl draw = (PoolDrawImpl) i.next();
 
-			// if we cannot restore the orig. values, remove the draw
-			if (!draw.setOrig())
+			// if we cannot restore the original values, remove the draw
+			if (!draw.setOrig(idMap))
 			{
 				i.remove();
 			}

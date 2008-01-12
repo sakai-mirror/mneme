@@ -31,11 +31,13 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.SubmissionService;
+import org.muse.mneme.api.Translation;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
@@ -48,6 +50,9 @@ public class QuestionStorageMysql implements QuestionStorage
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(QuestionStorageMysql.class);
+
+	/** Dependency: AttachmentService */
+	protected AttachmentService attachmentService = null;
 
 	/** Configuration: to run the ddl on init or not. */
 	protected boolean autoDdl = false;
@@ -85,21 +90,21 @@ public class QuestionStorageMysql implements QuestionStorage
 	 * {@inheritDoc}
 	 */
 	public void copyPoolQuestions(final String userId, final Pool source, final Pool destination, final boolean asHistory,
-			final Map<String, String> oldToNew)
+			final Map<String, String> oldToNew, final List<Translation> attachmentTranslations)
 	{
 		// get source's question ids
 		List<String> qids = null;
-		if (oldToNew != null)
+		if ((oldToNew != null) || ((attachmentTranslations != null) && (!attachmentTranslations.isEmpty())))
 		{
 			qids = source.getAllQuestionIds();
 		}
-		final List<String> poolIds = qids;
+		final List<String> poolQids = qids;
 
 		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
-				if (oldToNew == null)
+				if ((oldToNew == null) && ((attachmentTranslations == null) || attachmentTranslations.isEmpty()))
 				{
 					if (asHistory)
 					{
@@ -112,17 +117,24 @@ public class QuestionStorageMysql implements QuestionStorage
 				}
 				else
 				{
-					for (String qid : poolIds)
+					for (String qid : poolQids)
 					{
+						String newId = null;
 						if (asHistory)
 						{
-							String hid = copyQuestionHistoricalTx(userId, qid, destination);
-							oldToNew.put(qid, hid);
+							newId = copyQuestionHistoricalTx(userId, qid, destination);
+							oldToNew.put(qid, newId);
 						}
 						else
 						{
-							String hid = copyQuestionTx(userId, qid, destination);
-							oldToNew.put(qid, hid);
+							newId = copyQuestionTx(userId, qid, destination);
+							oldToNew.put(qid, newId);
+						}
+
+						// translate attachments
+						if (attachmentTranslations != null)
+						{
+							translateQuestionAttachmentsTx(newId, attachmentTranslations);
 						}
 					}
 				}
@@ -446,6 +458,17 @@ public class QuestionStorageMysql implements QuestionStorage
 		{
 			updateQuestion(question);
 		}
+	}
+
+	/**
+	 * Dependency: AttachmentService.
+	 * 
+	 * @param service
+	 *        The AttachmentService.
+	 */
+	public void setAttachmentService(AttachmentService service)
+	{
+		attachmentService = service;
 	}
 
 	/**
@@ -941,6 +964,69 @@ public class QuestionStorageMysql implements QuestionStorage
 			}
 		}
 		return "";
+	}
+
+	/**
+	 * Translate any embedded attachments in the question presentation text or guest area
+	 * 
+	 * @param qid
+	 *        The question id.
+	 * @param attachmentTranslations
+	 *        The translations.
+	 */
+	protected void translateQuestionAttachmentsTx(String qid, List<Translation> attachmentTranslations)
+	{
+		// read the question's text
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT Q.PRESENTATION_TEXT, Q.GUEST, Q.HINTS, Q.FEEDBACK");
+		sql.append(" FROM MNEME_QUESTION Q ");
+		sql.append(" WHERE Q.ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(qid);
+
+		final Object[] fields2 = new Object[5];
+		fields2[4] = fields[0];
+
+		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					fields2[0] = SqlHelper.readString(result, 1);
+					fields2[1] = SqlHelper.decodeStringArray(StringUtil.trimToNull(result.getString(2)));
+					fields2[2] = SqlHelper.readString(result, 3);
+					fields2[3] = SqlHelper.readString(result, 4);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("translateQuestionAttachmentsTx(read): " + e);
+					return null;
+				}
+			}
+		});
+
+		// translate
+		fields2[0] = this.attachmentService.translateEmbeddedReferences((String) fields2[0], attachmentTranslations);
+		fields2[2] = this.attachmentService.translateEmbeddedReferences((String) fields2[2], attachmentTranslations);
+		fields2[3] = this.attachmentService.translateEmbeddedReferences((String) fields2[3], attachmentTranslations);
+		for (int i = 0; i < ((String[]) fields2[1]).length; i++)
+		{
+			((String[]) fields2[1])[i] = this.attachmentService.translateEmbeddedReferences(((String[]) fields2[1])[i], attachmentTranslations);
+		}
+
+		fields2[1] = SqlHelper.encodeStringArray(((String[]) fields2[1]));
+
+		// update
+		sql = new StringBuilder();
+		sql.append("UPDATE MNEME_QUESTION SET PRESENTATION_TEXT=?, GUEST=?, HINTS=?, FEEDBACK=? WHERE ID=?");
+		if (!this.sqlService.dbWrite(sql.toString(), fields2))
+		{
+			throw new RuntimeException("translateQuestionAttachmentsTx(write): db write failed");
+		}
 	}
 
 	/**

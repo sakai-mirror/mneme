@@ -49,6 +49,7 @@ import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.id.api.IdManager;
+import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -595,7 +596,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getDescription()
 	{
-		return this.question.getPresentation().getText();
+		return FormattedText.convertFormattedTextToPlaintext(this.question.getPresentation().getText());
 	}
 
 	/**
