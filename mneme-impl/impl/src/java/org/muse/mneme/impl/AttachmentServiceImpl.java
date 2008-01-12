@@ -682,14 +682,6 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 						m.appendReplacement(sb, Matcher.quoteReplacement(m.group(1) + "=\"" + ref.substring(0, index + 7) + translated + "\""));
 					}
 				}
-				else
-				{
-					m.appendReplacement(sb, Matcher.quoteReplacement(m.group()));
-				}
-			}
-			else
-			{
-				m.appendReplacement(sb, Matcher.quoteReplacement(m.group()));
 			}
 		}
 
