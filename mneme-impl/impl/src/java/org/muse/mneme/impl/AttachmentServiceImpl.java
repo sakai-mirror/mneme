@@ -400,8 +400,24 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			{
 				String ref = m.group(2);
 
+				// harvest any content hosting reference
 				int index = ref.indexOf("/access/content/");
+				if (index != -1)
+				{
+					// except for any in /user/ or /public/
+					if (ref.indexOf("/access/content/user/") != -1)
+					{
+						index = -1;
+					}
+					else if (ref.indexOf("/access/content/public/") != -1)
+					{
+						index = -1;
+					}
+				}
+
+				// harvest also the mneme docs references
 				if (index == -1) index = ref.indexOf("/access/mneme/content/");
+				
 				// TODO: further filter to docs root and context (optional)
 				if (index != -1)
 				{
@@ -603,37 +619,83 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public String translateEmbeddedReferences(String data, List<Translation> translations)
 	{
+		if (data == null) return data;
 		if (translations == null) return data;
 
-		// pull out the candidate parts to translate
-		Set<String> candidates = harvestAttachmentsReferenced(data, false);
-		for (String candidate : candidates)
-		{
-			try
-			{
-				// normalize
-				String normal = URLDecoder.decode(candidate, "UTF-8");
+		// pattern to find any src= or href= text
+		// groups: 0: the whole matching text 1: src|href 2: the string in the quotes
+		Pattern p = Pattern.compile("(src|href)[\\s]*=[\\s]*\"([^\"]*)\"");
 
-				// translate the normal form
-				String translated = normal;
-				for (Translation translation : translations)
+		Matcher m = p.matcher(data);
+		StringBuffer sb = new StringBuffer();
+
+		// process each "harvested" string (avoiding like strings that are not in src= or href= patterns)
+		while (m.find())
+		{
+			if (m.groupCount() == 2)
+			{
+				String ref = m.group(2);
+
+				// harvest any content hosting reference
+				int index = ref.indexOf("/access/content/");
+				if (index != -1)
 				{
-					translated = translation.translate(translated);
+					// except for any in /user/ or /public/
+					if (ref.indexOf("/access/content/user/") != -1)
+					{
+						index = -1;
+					}
+					else if (ref.indexOf("/access/content/public/") != -1)
+					{
+						index = -1;
+					}
 				}
 
-				// if changed, replace
-				if (!normal.equals(translated))
+				// harvest also the mneme docs references
+				if (index == -1) index = ref.indexOf("/access/mneme/content/");
+
+				if (index != -1)
 				{
-					data = data.replace(candidate, translated);
+					// save just the reference part (i.e. after the /access);
+					String normal = ref.substring(index + 7);
+
+					// deal with %20 and other encoded URL stuff
+					try
+					{
+						normal = URLDecoder.decode(normal, "UTF-8");
+					}
+					catch (UnsupportedEncodingException e)
+					{
+						M_log.warn("harvestAttachmentsReferenced: " + e);
+					}
+
+					// translate the normal form
+					String translated = normal;
+					for (Translation translation : translations)
+					{
+						translated = translation.translate(translated);
+					}
+
+					// if changed, replace
+					if (!normal.equals(translated))
+					{
+						m.appendReplacement(sb, Matcher.quoteReplacement(m.group(1) + "=\"" + ref.substring(0, index + 7) + translated + "\""));
+					}
+				}
+				else
+				{
+					m.appendReplacement(sb, Matcher.quoteReplacement(m.group()));
 				}
 			}
-			catch (UnsupportedEncodingException e)
+			else
 			{
-				M_log.warn("translateEmbeddedReferences: " + e);
+				m.appendReplacement(sb, Matcher.quoteReplacement(m.group()));
 			}
 		}
 
-		return data;
+		m.appendTail(sb);
+
+		return sb.toString();
 	}
 
 	/**

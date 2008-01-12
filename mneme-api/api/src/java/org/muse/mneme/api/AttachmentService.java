@@ -94,7 +94,8 @@ public interface AttachmentService
 
 	/**
 	 * Collect all the attachment references in the html data:<br />
-	 * Anything referenced by a src= or href=. in our content docs
+	 * Anything referenced by a src= or href=. in our content docs, or in a site content area <br />
+	 * Ignore anything in a myWorkspace content area or the public content area.
 	 * 
 	 * @param data
 	 *        The data string.
@@ -113,7 +114,8 @@ public interface AttachmentService
 	void removeAttachment(Reference ref);
 
 	/**
-	 * Translate any embedded attachment references in the html data, based on the set of translations.
+	 * Translate any embedded attachment references in the html data, based on the set of translations.<br />
+	 * Uses the same rules to find the references as harvestAttachmentsReferenced.
 	 * 
 	 * @param data
 	 *        The html data.
