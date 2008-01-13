@@ -83,7 +83,7 @@ public class GradesServiceGradebook23Impl implements GradesService
 		try
 		{
 			boolean hasGradebook = gradebookService.isGradebookDefined(assessment.getContext());
-			if (hasGradebook)
+			if (hasGradebook && (assessment.getTitle() != null))
 			{
 				boolean reported = gradebookService.isExternalAssignmentDefined(assessment.getContext(), assessment.getTitle());
 				return Boolean.valueOf(reported);
@@ -129,8 +129,9 @@ public class GradesServiceGradebook23Impl implements GradesService
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 
-		// make sure we are published, valid and desire gradebook integration
-		if (!(assessment.getPublished() && assessment.getGrading().getGradebookIntegration() && assessment.getIsValid())) return Boolean.FALSE;
+		// make sure we are published, valid, have a title, and desire gradebook integration
+		if (!(assessment.getPublished() && assessment.getGrading().getGradebookIntegration() && assessment.getIsValid() && (assessment.getTitle() != null)))
+			return Boolean.FALSE;
 
 		// make sure we don't already have an entry
 		if (assessmentReported(assessment))
@@ -182,8 +183,9 @@ public class GradesServiceGradebook23Impl implements GradesService
 	{
 		if (assessment == null) throw new IllegalArgumentException();
 
-		// make sure we are published, valid and desire gradebook integration
-		if (!(assessment.getPublished() && assessment.getGrading().getGradebookIntegration() && assessment.getIsValid())) return Boolean.FALSE;
+		// make sure we are published, valid, have a title, and desire gradebook integration
+		if (!(assessment.getPublished() && assessment.getGrading().getGradebookIntegration() && assessment.getIsValid() && (assessment.getTitle() != null)))
+			return Boolean.FALSE;
 
 		// make sure our assessment is in the gb
 		if (!assessmentReported(assessment)) return Boolean.FALSE;
@@ -235,7 +237,8 @@ public class GradesServiceGradebook23Impl implements GradesService
 
 		// make sure we are published, valid and desire gradebook integration
 		Assessment assessment = submission.getAssessment();
-		if (!(assessment.getPublished() && assessment.getGrading().getGradebookIntegration() && assessment.getIsValid())) return Boolean.FALSE;
+		if (!(assessment.getPublished() && assessment.getGrading().getGradebookIntegration() && assessment.getIsValid() && (assessment.getTitle() != null)))
+			return Boolean.FALSE;
 
 		// make sure we are complete
 		if (!submission.getIsComplete()) return Boolean.FALSE;
@@ -293,7 +296,7 @@ public class GradesServiceGradebook23Impl implements GradesService
 		try
 		{
 			boolean hasGradebook = gradebookService.isGradebookDefined(assessment.getContext());
-			if (hasGradebook)
+			if (hasGradebook && (assessment.getTitle() != null))
 			{
 				boolean reported = gradebookService.isExternalAssignmentDefined(assessment.getContext(), assessment.getTitle());
 				if (reported)
@@ -328,7 +331,7 @@ public class GradesServiceGradebook23Impl implements GradesService
 		{
 			// make sure there's an entry
 			boolean hasGradebook = gradebookService.isGradebookDefined(assessment.getContext());
-			if (hasGradebook)
+			if (hasGradebook && (assessment.getTitle() != null))
 			{
 				boolean reported = gradebookService.isExternalAssignmentDefined(assessment.getContext(), assessment.getTitle());
 				if (reported)
