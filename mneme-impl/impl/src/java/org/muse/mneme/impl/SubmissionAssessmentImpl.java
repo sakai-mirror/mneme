@@ -259,7 +259,6 @@ public class SubmissionAssessmentImpl implements Assessment
 	 */
 	public Boolean getIsValid()
 	{
-		// TODO: which? both? needed?
 		return getAssessment().getIsValid();
 	}
 
