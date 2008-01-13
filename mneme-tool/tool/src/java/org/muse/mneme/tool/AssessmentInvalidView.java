@@ -62,6 +62,12 @@ public class AssessmentInvalidView extends ControllerImpl
 		msg.append("<ul>");
 		if (!assessment.getIsValid())
 		{
+			// could be title
+			if (assessment.getTitle().length() == 0)
+			{
+				msg.append("<li>" + msgs.getString("missing-title") + "</li>");
+			}
+
 			// could be grading
 			if (!assessment.getGrading().getIsValid())
 			{

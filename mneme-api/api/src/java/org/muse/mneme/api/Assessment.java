@@ -262,7 +262,7 @@ public interface Assessment
 	/**
 	 * Access the title of this assessment.
 	 * 
-	 * @return The assessment's title.
+	 * @return The assessment's title.  Will be blank (never null) if not defined.
 	 */
 	String getTitle();
 

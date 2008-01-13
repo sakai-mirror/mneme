@@ -335,6 +335,9 @@ public class AssessmentImpl implements Assessment
 	 */
 	public Boolean getIsValid()
 	{
+		// must have a title
+		if (getTitle().length() == 0) return Boolean.FALSE;
+
 		// dates valid
 		if (!this.dates.getIsValid()) return Boolean.FALSE;
 
