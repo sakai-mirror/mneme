@@ -55,7 +55,7 @@ import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
- * QuestionStorageSample defines a sample storage for questions.
+ * AssessmentStorageMysql implements AssessmentStorage for MySQL.
  */
 public class AssessmentStorageMysql implements AssessmentStorage
 {

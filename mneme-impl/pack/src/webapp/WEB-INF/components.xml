@@ -55,6 +55,7 @@
 				<!-- <entry key="default"><ref bean="org.muse.mneme.impl.PoolStorageDefault"/></entry> -->
 				<entry key="sample"><ref bean="org.muse.mneme.impl.PoolStorageSample"/></entry>
 				<entry key="mysql"><ref bean="org.muse.mneme.impl.PoolStorageMysql"/></entry>
+				<entry key="oracle"><ref bean="org.muse.mneme.impl.PoolStorageOracle"/></entry>
 			</map>
 		</property>
 		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
@@ -72,6 +73,21 @@
 
 	<bean id="org.muse.mneme.impl.PoolStorageMysql"
 		class="org.muse.mneme.impl.PoolStorageMysql"
+		init-method="init"
+		destroy-method="destroy"
+		singleton="true">
+
+		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
+		
+		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
+		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
+
+		<property name="autoDdl"><value>${auto.ddl}</value></property>
+	</bean>
+
+	<bean id="org.muse.mneme.impl.PoolStorageOracle"
+		class="org.muse.mneme.impl.PoolStorageOracle"
 		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
@@ -107,6 +123,7 @@
 				<!-- <entry key="default"><ref bean="org.muse.mneme.impl.QuestionStorageDefault"/></entry> -->
 				<entry key="sample"><ref bean="org.muse.mneme.impl.QuestionStorageSample"/></entry>
 				<entry key="mysql"><ref bean="org.muse.mneme.impl.QuestionStorageMysql"/></entry>
+				<entry key="oracle"><ref bean="org.muse.mneme.impl.QuestionStorageOracle"/></entry>
 			</map>
 		</property>
 		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
@@ -127,6 +144,23 @@
 
 	<bean id="org.muse.mneme.impl.QuestionStorageMysql"
 		class="org.muse.mneme.impl.QuestionStorageMysql"
+		init-method="init"
+		destroy-method="destroy"
+		singleton="true">
+
+		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
+		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
+		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
+
+		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
+ 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
+
+		<property name="autoDdl"><value>${auto.ddl}</value></property>
+	</bean>
+
+	<bean id="org.muse.mneme.impl.QuestionStorageOracle"
+		class="org.muse.mneme.impl.QuestionStorageOracle"
 		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
@@ -182,6 +216,7 @@
 				<!-- <entry key="default"><ref bean="org.muse.mneme.impl.SubmissionStorageDefault"/></entry> -->
 				<entry key="sample"><ref bean="org.muse.mneme.impl.SubmissionStorageSample"/></entry>
 				<entry key="mysql"><ref bean="org.muse.mneme.impl.SubmissionStorageMysql"/></entry>
+				<entry key="oracle"><ref bean="org.muse.mneme.impl.SubmissionStorageOracle"/></entry>
 			</map>
 		</property>
 		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
@@ -202,6 +237,24 @@
 
 	<bean id="org.muse.mneme.impl.SubmissionStorageMysql"
 		class="org.muse.mneme.impl.SubmissionStorageMysql"
+		init-method="init"
+		destroy-method="destroy"
+		singleton="true">
+
+		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
+		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
+		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
+
+		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
+		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
+		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
+
+		<property name="autoDdl"><value>${auto.ddl}</value></property>
+	</bean>
+
+	<bean id="org.muse.mneme.impl.SubmissionStorageOracle"
+		class="org.muse.mneme.impl.SubmissionStorageOracle"
 		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
@@ -242,6 +295,7 @@
 				<!-- <entry key="default"><ref bean="org.muse.mneme.impl.AssesmentStorageDefault"/></entry> -->
 				<entry key="sample"><ref bean="org.muse.mneme.impl.AssessmentStorageSample"/></entry>
 				<entry key="mysql"><ref bean="org.muse.mneme.impl.AssessmentStorageMysql"/></entry>
+				<entry key="oracle"><ref bean="org.muse.mneme.impl.AssessmentStorageOracle"/></entry>
 			</map>
 		</property>
 		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
@@ -263,6 +317,24 @@
 
 	<bean id="org.muse.mneme.impl.AssessmentStorageMysql"
 		class="org.muse.mneme.impl.AssessmentStorageMysql"
+		init-method="init"
+		destroy-method="destroy"
+		singleton="true">
+
+		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
+		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
+
+		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
+		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
+
+		<property name="autoDdl"><value>${auto.ddl}</value></property>
+		<property name="bundle"><value>mnemeImpl</value></property>
+	</bean>
+
+	<bean id="org.muse.mneme.impl.AssessmentStorageOracle"
+		class="org.muse.mneme.impl.AssessmentStorageOracle"
 		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
