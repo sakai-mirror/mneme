@@ -263,7 +263,6 @@ public class PoolStorageMysql implements PoolStorage
 				((PoolImplLazyManifest) pool).clearNewlyHistorical();
 			}
 		}
-
 	}
 
 	/**

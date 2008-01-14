@@ -24,5 +24,10 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/event-api"/>
 	<classpathentry kind="var" path="MAVEN_REPO/commons-dbcp/jars/commons-dbcp-1.2.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/util-impl"/>
+	<classpathentry kind="lib" path="/mneme-impl/impl/src/bundle"/>
+	<classpathentry kind="lib" path="/mneme-impl/impl/src/sql"/>
+	<classpathentry kind="var" path="MAVEN_REPO/drivers/jars/mysql-connector-java-5.1.5-bin.jar"/>
+	<classpathentry kind="var" path="MAVEN_REPO/drivers/jars/ojdbc14_10.2.0.3.0.jar"/>
+	<classpathentry kind="var" path="MAVEN_REPO/commons-collections/jars/commons-collections-3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
