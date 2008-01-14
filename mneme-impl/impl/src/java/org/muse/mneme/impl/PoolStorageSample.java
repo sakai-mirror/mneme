@@ -58,6 +58,28 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clearContext(String context)
+	{
+		// find them
+		List<String> delete = new ArrayList<String>();
+		for (PoolImpl pool : this.pools.values())
+		{
+			if (pool.context.equals(context))
+			{
+				delete.add(pool.getId());
+			}
+		}
+
+		// remove them
+		for (String id : delete)
+		{
+			this.pools.remove(id);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void clearStaleMintPools(Date stale)
 	{
 		// find them

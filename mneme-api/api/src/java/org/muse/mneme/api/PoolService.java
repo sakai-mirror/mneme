@@ -73,7 +73,7 @@ public interface PoolService
 	Boolean existsPool(String poolId);
 
 	/**
-	 * Locate a list of pools in this context with this criteria.
+	 * Locate a list of pools in this context with this criteria (excluding mints and historicals).
 	 * 
 	 * @param context
 	 *        The context.
@@ -95,7 +95,7 @@ public interface PoolService
 	Pool getPool(String poolId);
 
 	/**
-	 * Get all the pools available to the context.
+	 * Get all the pools available to the context (excluding mints and historicals).
 	 * 
 	 * @param context
 	 *        The context.

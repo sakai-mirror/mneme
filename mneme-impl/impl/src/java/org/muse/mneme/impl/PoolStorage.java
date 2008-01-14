@@ -32,6 +32,14 @@ import org.muse.mneme.api.PoolService;
 public interface PoolStorage
 {
 	/**
+	 * Clear out all pools from the context.
+	 * 
+	 * @param context
+	 *        The context.
+	 */
+	void clearContext(String context);
+
+	/**
 	 * Clear out any mint objects that are old enough to be considered abandoned.
 	 * 
 	 * @param stale
@@ -49,7 +57,7 @@ public interface PoolStorage
 	Boolean existsPool(String poolId);
 
 	/**
-	 * Find all the pools in this context that meet the criteria.
+	 * Find all the pools in this context that meet the criteria (excluding mints and historicals).
 	 * 
 	 * @param context
 	 *        The context.
@@ -78,7 +86,7 @@ public interface PoolStorage
 	PoolImpl getPool(String poolId);
 
 	/**
-	 * Access all pools in the context.
+	 * Access all pools in the context (excluding mints and historicals).
 	 * 
 	 * @param context
 	 *        The context.

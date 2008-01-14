@@ -216,7 +216,7 @@ public class PoolServiceImpl implements PoolService
 
 		if (M_log.isDebugEnabled()) M_log.debug("getPools: " + context);
 
-		// get all the pools for these users
+		// get all the pools for the context
 		List<Pool> rv = new ArrayList<Pool>(this.storage.getPools(context));
 
 		return rv;

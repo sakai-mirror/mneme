@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.impl.PoolImpl;
+import org.muse.mneme.impl.PoolStorage;
 import org.muse.mneme.impl.PoolStorageMysql;
 import org.sakaiproject.db.impl.BasicSqlService;
 import org.sakaiproject.event.api.UsageSessionService;
@@ -40,10 +41,8 @@ import org.sakaiproject.thread_local.impl.ThreadLocalComponent;
 /**
  * Test Pool
  */
-public class PoolStorageTestX extends TestCase
+public abstract class PoolStorageTestX extends TestCase
 {
-	final static String CONTEXT = "JUNIT_TEST_JUNIT";
-
 	public class SqlServiceTest extends BasicSqlService
 	{
 		ThreadLocalManager tlm = null;
@@ -68,9 +67,11 @@ public class PoolStorageTestX extends TestCase
 	/** Logger. */
 	private static final Log log = LogFactory.getLog(PoolStorageTestX.class);
 
+	protected final static String CONTEXT = "JUNIT_TEST_JUNIT";
+
 	protected SqlServiceTest sqlService = null;
 
-	protected PoolStorageMysql storage = null;
+	protected PoolStorage storage = null;
 
 	protected ThreadLocalComponent thread_localManager = null;
 
@@ -87,10 +88,10 @@ public class PoolStorageTestX extends TestCase
 	 * 
 	 * @throws Exception
 	 */
-	public void test001() throws Exception
+	public void test001clearStaleMintPools() throws Exception
 	{
 		// create a pool - leave it mint - make it old
-		Date old = new Date(new Date().getTime()-(2 * 24 * 60 * 60 * 1000));
+		Date old = new Date(new Date().getTime() - (2 * 24 * 60 * 60 * 1000));
 		PoolImpl pool = this.storage.newPool();
 		pool.setContext(CONTEXT);
 		pool.setTitle(CONTEXT);
@@ -99,14 +100,14 @@ public class PoolStorageTestX extends TestCase
 		pool.getModifiedBy().setDate(old);
 		pool.getModifiedBy().setUserId("admin");
 		this.storage.savePool(pool);
-		
+
 		// it should now exist
 		Boolean exists = this.storage.existsPool(pool.getId());
 		assertTrue(exists == Boolean.TRUE);
 
 		// this should leave the pool in place
 		this.storage.clearStaleMintPools(old);
-		
+
 		// it should now exist
 		exists = this.storage.existsPool(pool.getId());
 		assertTrue(exists == Boolean.TRUE);
@@ -120,11 +121,11 @@ public class PoolStorageTestX extends TestCase
 	}
 
 	/**
-	 * Test existsPool()
+	 * Test existsPool() removePool() savePool()
 	 * 
 	 * @throws Exception
 	 */
-	public void test002() throws Exception
+	public void test002existsPool_removePool_savePool() throws Exception
 	{
 		// create a pool
 		PoolImpl pool = this.storage.newPool();
@@ -153,7 +154,7 @@ public class PoolStorageTestX extends TestCase
 	 * 
 	 * @throws Exception
 	 */
-	public void test003() throws Exception
+	public void test003findPools() throws Exception
 	{
 		// create some pools
 		PoolImpl pool1 = this.storage.newPool();
@@ -219,7 +220,7 @@ public class PoolStorageTestX extends TestCase
 		assertTrue(pools.get(1).equals(pool4));
 		assertTrue(pools.get(2).equals(pool2));
 		assertTrue(pools.get(3).equals(pool3));
-		
+
 		// title_d
 		pools = this.storage.findPools(CONTEXT, PoolService.FindPoolsSort.title_d);
 		assertTrue(pools != null);
@@ -249,35 +250,189 @@ public class PoolStorageTestX extends TestCase
 	}
 
 	/**
+	 * Test getManifest()
+	 * 
+	 * @throws Exception
+	 */
+	public void test004getManifest() throws Exception
+	{
+		// create a pool
+		PoolImpl pool = this.storage.newPool();
+		pool.setContext(CONTEXT);
+		pool.setTitle(CONTEXT);
+		pool.getCreatedBy().setDate(new Date());
+		pool.getCreatedBy().setUserId("admin");
+		pool.getModifiedBy().setDate(new Date());
+		pool.getModifiedBy().setUserId("admin");
+		this.storage.savePool(pool);
+
+		List<String> manifest = this.storage.getManifest(pool.getId());
+		assertTrue(manifest != null);
+		assertTrue(manifest.size() == 0);
+	}
+
+	/**
+	 * Test getPool()
+	 * 
+	 * @throws Exception
+	 */
+	public void test005getPool() throws Exception
+	{
+		// create a pool
+		Date now = new Date();
+		PoolImpl pool = this.storage.newPool();
+		pool.setContext(CONTEXT);
+		pool.setTitle(CONTEXT);
+		pool.getCreatedBy().setDate(now);
+		pool.getCreatedBy().setUserId("admin");
+		pool.getModifiedBy().setDate(now);
+		pool.getModifiedBy().setUserId("admin");
+		this.storage.savePool(pool);
+
+		// find it
+		PoolImpl found = this.storage.getPool(pool.getId());
+		assertTrue(found != null);
+		assertTrue(found.getId().equals(pool.getId()));
+		assertTrue(found.getTitle().equals(pool.getTitle()));
+		assertTrue(found.getCreatedBy().getDate().equals(pool.getCreatedBy().getDate()));
+		assertTrue(found.getCreatedBy().getUserId().equals(pool.getCreatedBy().getUserId()));
+		assertTrue(found.getModifiedBy().getDate().equals(pool.getModifiedBy().getDate()));
+		assertTrue(found.getModifiedBy().getUserId().equals(pool.getModifiedBy().getUserId()));
+
+		// remove it
+		this.storage.removePool(pool);
+
+		// it should not exist
+		found = this.storage.getPool(pool.getId());
+		assertTrue(found == null);
+	}
+
+	/**
+	 * Test getPools()
+	 * 
+	 * @throws Exception
+	 */
+	public void test006getPools() throws Exception
+	{
+		// create some pools
+		PoolImpl pool1 = this.storage.newPool();
+		pool1.setContext(CONTEXT);
+		pool1.setTitle("a");
+		pool1.setPoints(Float.valueOf(5));
+		pool1.getCreatedBy().setDate(new Date());
+		pool1.getCreatedBy().setUserId("admin");
+		pool1.getModifiedBy().setDate(new Date());
+		pool1.getModifiedBy().setUserId("admin");
+		pool1.clearMint();
+		this.storage.savePool(pool1);
+
+		PoolImpl pool2 = this.storage.newPool();
+		pool2.setContext(CONTEXT);
+		pool2.setTitle("b");
+		pool2.setPoints(Float.valueOf(10));
+		pool2.getCreatedBy().setDate(new Date());
+		pool2.getCreatedBy().setUserId("admin");
+		pool2.getModifiedBy().setDate(new Date());
+		pool2.getModifiedBy().setUserId("admin");
+		pool2.clearMint();
+		this.storage.savePool(pool2);
+
+		PoolImpl pool3 = this.storage.newPool();
+		pool3.setContext(CONTEXT);
+		pool3.setTitle("c");
+		pool3.setPoints(Float.valueOf(1));
+		pool3.getCreatedBy().setDate(new Date());
+		pool3.getCreatedBy().setUserId("admin");
+		pool3.getModifiedBy().setDate(new Date());
+		pool3.getModifiedBy().setUserId("admin");
+		pool3.clearMint();
+		this.storage.savePool(pool3);
+
+		PoolImpl pool4 = this.storage.newPool();
+		pool4.setContext(CONTEXT);
+		pool4.setTitle("a");
+		pool4.setPoints(Float.valueOf(5));
+		pool4.getCreatedBy().setDate(new Date());
+		pool4.getCreatedBy().setUserId("admin");
+		pool4.getModifiedBy().setDate(new Date());
+		pool4.getModifiedBy().setUserId("admin");
+		pool4.clearMint();
+		this.storage.savePool(pool4);
+
+		// mint still, so should not show up
+		PoolImpl pool5 = this.storage.newPool();
+		pool5.setContext(CONTEXT);
+		pool5.setTitle("d");
+		pool5.setPoints(Float.valueOf(7));
+		pool5.getCreatedBy().setDate(new Date());
+		pool5.getCreatedBy().setUserId("admin");
+		pool5.getModifiedBy().setDate(new Date());
+		pool5.getModifiedBy().setUserId("admin");
+		this.storage.savePool(pool5);
+
+		List<PoolImpl> pools = this.storage.getPools(CONTEXT);
+		assertTrue(pools != null);
+		assertTrue(pools.size() == 4);
+		assertTrue(pools.get(0).equals(pool1));
+		assertTrue(pools.get(1).equals(pool2));
+		assertTrue(pools.get(2).equals(pool3));
+		assertTrue(pools.get(3).equals(pool4));
+	}
+
+	/**
+	 * Test newPool()
+	 * 
+	 * @throws Exception
+	 */
+	public void test007newPool() throws Exception
+	{
+		// create a pool
+		PoolImpl pool = this.storage.newPool();
+		assertTrue(pool != null);
+		assertTrue(pool.getId() == null);
+	}
+
+	/**
+	 * Test newPool()
+	 * 
+	 * @throws Exception
+	 */
+	public void test008newPool() throws Exception
+	{
+		// create one to copy
+		PoolImpl pool1 = this.storage.newPool();
+		pool1.setContext(CONTEXT);
+		pool1.setTitle("a");
+		pool1.setPoints(Float.valueOf(5));
+		pool1.getCreatedBy().setDate(new Date());
+		pool1.getCreatedBy().setUserId("admin");
+		pool1.getModifiedBy().setDate(new Date());
+		pool1.getModifiedBy().setUserId("admin");
+		pool1.clearMint();
+		this.storage.savePool(pool1);
+
+		pool1 = this.storage.getPool(pool1.getId());
+
+		// create a copy
+		PoolImpl pool = this.storage.newPool(pool1);
+		assertTrue(pool != null);
+		assertTrue(pool.getId() != null);
+		assertTrue(pool.getId().equals(pool1.getId()));
+		assertTrue(pool.getTitle().equals(pool1.getTitle()));
+		assertTrue(pool.getCreatedBy().getDate().equals(pool1.getCreatedBy().getDate()));
+		assertTrue(pool.getCreatedBy().getUserId().equals(pool1.getCreatedBy().getUserId()));
+		assertTrue(pool.getModifiedBy().getDate().equals(pool1.getModifiedBy().getDate()));
+		assertTrue(pool.getModifiedBy().getUserId().equals(pool1.getModifiedBy().getUserId()));
+	}
+
+	/**
 	 * @param arg0
 	 */
 	protected void setUp() throws Exception
 	{
 		super.setUp();
 
-		// a data source (see db/pack/components.xml javax.sql.BaseDataSource)
-		SakaiBasicDataSource ds = new SakaiBasicDataSource();
-		ds.setDriverClassName("com.mysql.jdbc.Driver");
-		ds.setUrl("jdbc:mysql://127.0.0.1:3306/sakai?useUnicode=true&characterEncoding=UTF-8");
-		ds.setUsername("sakaiuser");
-		ds.setPassword("password");
-		ds.setInitialSize(10);
-		ds.setMaxActive(10);
-		ds.setMaxIdle(10);
-		ds.setMinIdle(10);
-		ds.setMaxWait(300000);
-		ds.setNumTestsPerEvictionRun(3);
-		ds.setTestOnBorrow(true);
-		ds.setTestOnReturn(false);
-		ds.setTestWhileIdle(false);
-		ds.setValidationQuery("select 1 from DUAL");
-		ds.setDefaultAutoCommit(false);
-		ds.setDefaultReadOnly(false);
-		ds.setDefaultTransactionIsolationString("TRANSACTION_READ_COMMITTED");
-		ds.setPoolPreparedStatements(false);
-		ds.setMaxOpenPreparedStatements(0);
-		ds.setMinEvictableIdleTimeMillis(1800000);
-		ds.setTimeBetweenEvictionRunsMillis(900000);
+		SakaiBasicDataSource ds = setupDataSource();
 
 		// the thread local manager
 		ThreadLocalComponent tl = new ThreadLocalComponent();
@@ -293,22 +448,16 @@ public class PoolStorageTestX extends TestCase
 		sqlService = sql;
 
 		// finally, our target...
-		PoolStorageMysql s = new PoolStorageMysql();
-		s.setAutoDdl("true");
-		s.setPoolService(null);
-		s.setQuestionService(null);
-		s.setSqlService(sqlService);
-		s.setThreadLocalManager(thread_localManager);
-		s.init();
+		PoolStorage s = setupPoolStorage();
 		storage = s;
 
 		// clean up from any prior tests
-		List<PoolImpl> pools = storage.findPools(CONTEXT, PoolService.FindPoolsSort.title_a);
-		for (PoolImpl pool : pools)
-		{
-			storage.removePool(pool);
-		}
+		storage.clearContext(CONTEXT);
 	}
+
+	protected abstract SakaiBasicDataSource setupDataSource();
+
+	protected abstract PoolStorage setupPoolStorage();
 
 	/**
 	 * @param arg0
@@ -316,16 +465,14 @@ public class PoolStorageTestX extends TestCase
 	protected void tearDown() throws Exception
 	{
 		// clean up from any prior tests
-		List<PoolImpl> pools = storage.findPools(CONTEXT, PoolService.FindPoolsSort.title_a);
-		for (PoolImpl pool : pools)
-		{
-			storage.removePool(pool);
-		}
+		storage.clearContext(CONTEXT);
 
-		storage.destroy();
+		teardownPoolStorage();
 		sqlService.destroy();
 		thread_localManager.destroy();
 
 		super.tearDown();
 	}
+
+	protected abstract void teardownPoolStorage();
 }

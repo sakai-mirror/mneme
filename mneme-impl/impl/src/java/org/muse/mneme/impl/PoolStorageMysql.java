@@ -60,6 +60,20 @@ public class PoolStorageMysql implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clearContext(final String context)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				clearContextTx(context);
+			}
+		}, "clearContext: " + context.toString());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void clearStaleMintPools(final Date stale)
 	{
 		this.sqlService.transact(new Runnable()
@@ -322,6 +336,24 @@ public class PoolStorageMysql implements PoolStorage
 	{
 		String key = "mneme:pool:manifest:" + poolId;
 		return key;
+	}
+
+	/**
+	 * Transaction code for clearContext()
+	 */
+	protected void clearContextTx(String context)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_POOL");
+		sql.append(" WHERE CONTEXT=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = context;
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("clearContextTx: dbWrite failed");
+		}
 	}
 
 	/**
