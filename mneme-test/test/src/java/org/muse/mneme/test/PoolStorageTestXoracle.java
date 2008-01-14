@@ -25,22 +25,22 @@ import org.apache.commons.dbcp.SakaiBasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.impl.PoolStorage;
-import org.muse.mneme.impl.PoolStorageMysql;
+import org.muse.mneme.impl.PoolStorageOracle;
 
 /**
- * Test PoolStorageMySql<br />
- * Note: to use, change the setupDataSource() code to connect to your MySQL db.<br />
+ * Test PoolStorageOracle.<br />
+ * Note: to use, change the setupDataSource() code to connect to your Oracle db.<br />
  * The schema will be created if missing via auto-ddl.
  */
-public class PoolStorageTestXmysql extends PoolStorageTestX
+public class PoolStorageTestXoracle extends PoolStorageTestX
 {
 	/** Logger. */
-	private static final Log log = LogFactory.getLog(PoolStorageTestXmysql.class);
+	private static final Log log = LogFactory.getLog(PoolStorageTestXoracle.class);
 
 	/**
 	 * @param arg0
 	 */
-	public PoolStorageTestXmysql(String arg0)
+	public PoolStorageTestXoracle(String arg0)
 	{
 		super(arg0);
 	}
@@ -49,10 +49,10 @@ public class PoolStorageTestXmysql extends PoolStorageTestX
 	{
 		// a data source (see db/pack/components.xml javax.sql.BaseDataSource)
 		SakaiBasicDataSource ds = new SakaiBasicDataSource();
-		ds.setDriverClassName("com.mysql.jdbc.Driver");
-		ds.setUrl("jdbc:mysql://127.0.0.1:3306/sakai?useUnicode=true&characterEncoding=UTF-8");
-		ds.setUsername("sakaiuser");
-		ds.setPassword("password");
+		ds.setDriverClassName("oracle.jdbc.driver.OracleDriver");
+		ds.setUrl("jdbc:oracle:thin:@localhost:11004:sakaidev");
+		ds.setUsername("ggolden");
+		ds.setPassword("ggolden");
 		ds.setInitialSize(10);
 		ds.setMaxActive(10);
 		ds.setMaxIdle(10);
@@ -76,7 +76,7 @@ public class PoolStorageTestXmysql extends PoolStorageTestX
 
 	protected PoolStorage setupPoolStorage()
 	{
-		PoolStorageMysql s = new PoolStorageMysql();
+		PoolStorageOracle s = new PoolStorageOracle();
 		s.setAutoDdl("true");
 		s.setPoolService(null);
 		s.setQuestionService(null);
@@ -89,11 +89,11 @@ public class PoolStorageTestXmysql extends PoolStorageTestX
 
 	protected void teardownPoolStorage()
 	{
-		((PoolStorageMysql) storage).destroy();
+		((PoolStorageOracle) storage).destroy();
 	}
 
 	protected String vendor()
 	{
-		return "mysql";
+		return "oracle";
 	}
 }

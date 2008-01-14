@@ -72,7 +72,7 @@ public interface PoolStorage
 	 * 
 	 * @param poolId
 	 *        The pool id.
-	 * @return The pool manifest from the pool with this id, null if not found or no manifest.
+	 * @return The pool manifest from the pool with this id, empty if not found or no manifest.
 	 */
 	List<String> getManifest(String poolId);
 

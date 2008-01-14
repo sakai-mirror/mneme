@@ -146,20 +146,15 @@ public class PoolStorageSample implements PoolStorage
 				switch (sort)
 				{
 					case title_a:
+					case title_d:
 					{
 						String s0 = StringUtil.trimToZero(((Pool) arg0).getTitle());
 						String s1 = StringUtil.trimToZero(((Pool) arg1).getTitle());
 						rv = s0.compareToIgnoreCase(s1);
 						break;
 					}
-					case title_d:
-					{
-						String s0 = StringUtil.trimToZero(((Pool) arg0).getTitle());
-						String s1 = StringUtil.trimToZero(((Pool) arg1).getTitle());
-						rv = -1 * s0.compareToIgnoreCase(s1);
-						break;
-					}
 					case points_a:
+					case points_d:
 					{
 						Float f0 = ((Pool) arg0).getPoints();
 						if (f0 == null) f0 = Float.valueOf(0f);
@@ -168,20 +163,16 @@ public class PoolStorageSample implements PoolStorage
 						rv = f0.compareTo(f1);
 						break;
 					}
-					case points_d:
-					{
-						Float f0 = ((Pool) arg0).getPoints();
-						if (f0 == null) f0 = Float.valueOf(0f);
-						Float f1 = ((Pool) arg1).getPoints();
-						if (f1 == null) f1 = Float.valueOf(0f);
-						rv = -1 * f0.compareTo(f1);
-						break;
-					}
 				}
 
 				return rv;
 			}
 		});
+
+		if ((sort == PoolService.FindPoolsSort.title_d) || (sort == PoolService.FindPoolsSort.points_d))
+		{
+			Collections.reverse(rv);
+		}
 
 		return rv;
 	}
@@ -192,7 +183,7 @@ public class PoolStorageSample implements PoolStorage
 	public List<String> getManifest(String poolId)
 	{
 		PoolImpl rv = this.pools.get(poolId);
-		if (rv == null) return null;
+		if (rv == null) return new ArrayList<String>();
 
 		return rv.getFrozenManifest();
 	}

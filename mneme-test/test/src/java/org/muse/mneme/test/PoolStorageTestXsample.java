@@ -26,62 +26,34 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.impl.PoolStorage;
 import org.muse.mneme.impl.PoolStorageMysql;
+import org.muse.mneme.impl.PoolStorageSample;
 
 /**
- * Test PoolStorageMySql<br />
- * Note: to use, change the setupDataSource() code to connect to your MySQL db.<br />
- * The schema will be created if missing via auto-ddl.
+ * Test PoolStorageSample
  */
-public class PoolStorageTestXmysql extends PoolStorageTestX
+public class PoolStorageTestXsample extends PoolStorageTestX
 {
 	/** Logger. */
-	private static final Log log = LogFactory.getLog(PoolStorageTestXmysql.class);
+	private static final Log log = LogFactory.getLog(PoolStorageTestXsample.class);
 
 	/**
 	 * @param arg0
 	 */
-	public PoolStorageTestXmysql(String arg0)
+	public PoolStorageTestXsample(String arg0)
 	{
 		super(arg0);
 	}
 
 	protected SakaiBasicDataSource setupDataSource()
 	{
-		// a data source (see db/pack/components.xml javax.sql.BaseDataSource)
-		SakaiBasicDataSource ds = new SakaiBasicDataSource();
-		ds.setDriverClassName("com.mysql.jdbc.Driver");
-		ds.setUrl("jdbc:mysql://127.0.0.1:3306/sakai?useUnicode=true&characterEncoding=UTF-8");
-		ds.setUsername("sakaiuser");
-		ds.setPassword("password");
-		ds.setInitialSize(10);
-		ds.setMaxActive(10);
-		ds.setMaxIdle(10);
-		ds.setMinIdle(10);
-		ds.setMaxWait(300000);
-		ds.setNumTestsPerEvictionRun(3);
-		ds.setTestOnBorrow(true);
-		ds.setTestOnReturn(false);
-		ds.setTestWhileIdle(false);
-		ds.setValidationQuery("select 1 from DUAL");
-		ds.setDefaultAutoCommit(false);
-		ds.setDefaultReadOnly(false);
-		ds.setDefaultTransactionIsolationString("TRANSACTION_READ_COMMITTED");
-		ds.setPoolPreparedStatements(false);
-		ds.setMaxOpenPreparedStatements(0);
-		ds.setMinEvictableIdleTimeMillis(1800000);
-		ds.setTimeBetweenEvictionRunsMillis(900000);
-
-		return ds;
+		return null;
 	}
 
 	protected PoolStorage setupPoolStorage()
 	{
-		PoolStorageMysql s = new PoolStorageMysql();
-		s.setAutoDdl("true");
+		PoolStorageSample s = new PoolStorageSample();
 		s.setPoolService(null);
 		s.setQuestionService(null);
-		s.setSqlService(sqlService);
-		s.setThreadLocalManager(thread_localManager);
 		s.init();
 
 		return s;
@@ -89,11 +61,11 @@ public class PoolStorageTestXmysql extends PoolStorageTestX
 
 	protected void teardownPoolStorage()
 	{
-		((PoolStorageMysql) storage).destroy();
+		((PoolStorageSample) storage).destroy();
 	}
 
 	protected String vendor()
 	{
-		return "mysql";
+		return null;
 	}
 }

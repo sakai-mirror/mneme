@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -433,19 +433,21 @@ public abstract class PoolStorageTestX extends TestCase
 		super.setUp();
 
 		SakaiBasicDataSource ds = setupDataSource();
+		if (ds != null)
+		{
+			// the thread local manager
+			ThreadLocalComponent tl = new ThreadLocalComponent();
+			tl.init();
+			thread_localManager = tl;
 
-		// the thread local manager
-		ThreadLocalComponent tl = new ThreadLocalComponent();
-		tl.init();
-		thread_localManager = tl;
-
-		// the SqlService
-		SqlServiceTest sql = new SqlServiceTest();
-		sql.setVendor("mysql");
-		sql.setDefaultDataSource(ds);
-		sql.setThreadLocalManager(thread_localManager);
-		sql.init();
-		sqlService = sql;
+			// the SqlService
+			SqlServiceTest sql = new SqlServiceTest();
+			sql.setVendor(vendor());
+			sql.setDefaultDataSource(ds);
+			sql.setThreadLocalManager(thread_localManager);
+			sql.init();
+			sqlService = sql;
+		}
 
 		// finally, our target...
 		PoolStorage s = setupPoolStorage();
@@ -468,11 +470,13 @@ public abstract class PoolStorageTestX extends TestCase
 		storage.clearContext(CONTEXT);
 
 		teardownPoolStorage();
-		sqlService.destroy();
-		thread_localManager.destroy();
+		if (sqlService != null) sqlService.destroy();
+		if (thread_localManager != null) thread_localManager.destroy();
 
 		super.tearDown();
 	}
 
 	protected abstract void teardownPoolStorage();
+
+	protected abstract String vendor();
 }

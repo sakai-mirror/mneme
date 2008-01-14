@@ -46,8 +46,8 @@ public class PoolImpl implements Pool
 
 	protected Integer difficulty = Integer.valueOf(3);
 
-	/** optional list of questions - if null, use the live query from the services to find the quesitons. */
-	protected List<String> frozenManifest = null;
+	/** optional list of questions - if null, use the live query from the services to find the questions. */
+	protected List<String> frozenManifest = new ArrayList<String>();
 
 	protected Boolean historical = Boolean.FALSE;
 
@@ -367,7 +367,7 @@ public class PoolImpl implements Pool
 	/**
 	 * Access the optional question id list.
 	 * 
-	 * @return The question id list, or null if questions are taken live from the services.
+	 * @return The question id list, or empty if questions are taken live from the services.
 	 */
 	protected List<String> getFrozenManifest()
 	{
@@ -446,11 +446,7 @@ public class PoolImpl implements Pool
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
 		this.points = other.points;
 		this.poolService = other.poolService;
-		if (other.frozenManifest != null)
-		{
-			// TODO: this could be shallow copy, if we make the quesitions immutable
-			this.frozenManifest = new ArrayList<String>(other.frozenManifest);
-		}
+		this.frozenManifest = new ArrayList<String>(other.frozenManifest);
 		this.title = other.title;
 	}
 }
