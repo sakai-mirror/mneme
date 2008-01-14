@@ -191,7 +191,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	public Map<String, Float> getAssessmentHighestScores(Assessment assessment, Boolean releasedOnly)
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT S.ID, S.USER, S.EVAL_SCORE, SUM(A.EVAL_SCORE), SUM(A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
+		sql.append("SELECT S.ID, S.USERID, S.EVAL_SCORE, SUM(A.EVAL_SCORE), SUM(A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
 		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID");
 		sql.append(" WHERE S.ASSESSMENT_ID=? AND S.COMPLETE='1' AND S.TEST_DRIVE='0'");
 		if (releasedOnly)
@@ -342,7 +342,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT S.ID, S.EVAL_SCORE, SUM(A.EVAL_SCORE), SUM(A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
 		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID");
-		sql.append(" WHERE S.ASSESSMENT_ID=? AND S.USER=? AND S.COMPLETE='1'");
+		sql.append(" WHERE S.ASSESSMENT_ID=? AND S.USERID=? AND S.COMPLETE='1'");
 		sql.append(" GROUP BY S.ID");
 
 		Object[] fields = new Object[2];
@@ -465,7 +465,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public List<SubmissionImpl> getUserAssessmentSubmissions(Assessment assessment, String userId)
 	{
-		String where = "WHERE S.ASSESSMENT_ID=? AND S.USER=?";
+		String where = "WHERE S.ASSESSMENT_ID=? AND S.USERID=?";
 		String order = "ORDER BY S.SUBMITTED_DATE ASC";
 
 		Object[] fields = new Object[2];
@@ -487,7 +487,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		{
 			where.append(" AND AA.PUBLISHED='1'");
 		}
-		where.append(" WHERE S.CONTEXT=? AND S.USER=?");
+		where.append(" WHERE S.CONTEXT=? AND S.USERID=?");
 		String order = "ORDER BY S.SUBMITTED_DATE ASC";
 
 		Object[] fields = new Object[2];
@@ -504,7 +504,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	public List<String> getUsersSubmitted(Assessment assessment)
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT DISTINCT S.USER FROM MNEME_SUBMISSION S");
+		sql.append("SELECT DISTINCT S.USERID FROM MNEME_SUBMISSION S");
 		sql.append(" WHERE S.ASSESSMENT_ID=?");
 
 		Object[] fields = new Object[1];
@@ -876,7 +876,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_SUBMISSION (");
 		sql.append(" ASSESSMENT_ID, COMPLETE, CONTEXT, EVAL_ATRIB_DATE, EVAL_ATRIB_USER,");
-		sql.append(" EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE, RELEASED, START_DATE, SUBMITTED_DATE, TEST_DRIVE, USER )");
+		sql.append(" EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE, RELEASED, START_DATE, SUBMITTED_DATE, TEST_DRIVE, USERID )");
 		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
 		Object[] fields = new Object[13];
@@ -946,7 +946,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT S.ASSESSMENT_ID, S.COMPLETE, S.EVAL_ATRIB_DATE,");
 		sql.append(" S.EVAL_ATRIB_USER, S.EVAL_COMMENT, S.EVAL_EVALUATED, S.EVAL_SCORE,");
-		sql.append(" S.ID, S.RELEASED, S.START_DATE, S.SUBMITTED_DATE, S.TEST_DRIVE, S.USER");
+		sql.append(" S.ID, S.RELEASED, S.START_DATE, S.SUBMITTED_DATE, S.TEST_DRIVE, S.USERID");
 		sql.append(" FROM MNEME_SUBMISSION S ");
 		sql.append(where);
 		if (order != null)
