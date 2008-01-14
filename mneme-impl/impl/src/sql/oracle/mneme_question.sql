@@ -3,7 +3,7 @@
 -- $Id$
 --**********************************************************************************
 --
--- Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+-- Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 -- 
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -29,12 +29,12 @@ CREATE TABLE MNEME_QUESTION
 	CREATED_BY_DATE		NUMBER NOT NULL,
 	CREATED_BY_USER		VARCHAR2 (99) NOT NULL,
 	DESCRIPTION			VARCHAR2 (255) NULL,
-	EXPLAIN_REASON		CHAR (1) NOT NULL CHECK (HISTORICAL IN (0, 1)),
+	EXPLAIN_REASON		CHAR (1) NOT NULL CHECK (EXPLAIN_REASON IN ('0', '1')),
 	FEEDBACK			CLOB,
 	HINTS				CLOB,
-	HISTORICAL			CHAR (1) NOT NULL CHECK (HISTORICAL IN (0, 1)),
+	HISTORICAL			CHAR (1) NOT NULL CHECK (HISTORICAL IN ('0', '1')),
 	ID					NUMBER NOT NULL PRIMARY KEY,
-	MINT				CHAR (1) NOT NULL CHECK (MINT IN (0, 1)),
+	MINT				CHAR (1) NOT NULL CHECK (MINT IN ('0', '1')),
 	MODIFIED_BY_DATE	NUMBER NOT NULL,
 	MODIFIED_BY_USER	VARCHAR2 (99) NOT NULL,
 	POOL_ID				NUMBER NULL,
