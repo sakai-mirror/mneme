@@ -119,7 +119,7 @@ public interface QuestionStorage
 	 * @param sort
 	 *        The sort criteria.
 	 * @param questionType
-	 *        The (optional) quesiton type; if specified, only questions of this type are included.
+	 *        The (optional) question type; if specified, only questions of this type are included.
 	 * @param pageNum
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize

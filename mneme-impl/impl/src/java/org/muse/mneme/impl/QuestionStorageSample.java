@@ -55,7 +55,8 @@ public class QuestionStorageSample implements QuestionStorage
 	/** Dependency: AttachmentService */
 	protected AttachmentService attachmentService = null;
 
-	protected boolean fakedAlready = false;
+	/** for now, lets stop faking it... (helps in testing in isolation from a pool service). */
+	protected boolean fakedAlready = true;
 
 	protected Object idGenerator = new Object();
 

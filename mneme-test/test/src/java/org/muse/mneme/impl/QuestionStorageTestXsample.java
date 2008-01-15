@@ -51,6 +51,7 @@ public class QuestionStorageTestXsample extends QuestionStorageTestX
 	protected QuestionStorage setupQuestionStorage()
 	{
 		QuestionStorageSample s = new QuestionStorageSample();
+		s.setMnemeService(mnemeService);
 		s.init();
 
 		return s;
