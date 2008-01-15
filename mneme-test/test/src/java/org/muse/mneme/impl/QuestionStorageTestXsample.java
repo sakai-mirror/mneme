@@ -24,8 +24,6 @@ package org.muse.mneme.impl;
 import org.apache.commons.dbcp.SakaiBasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.muse.mneme.impl.QuestionStorage;
-import org.muse.mneme.impl.QuestionStorageSample;
 
 /**
  * Test QuestionStorageSample
@@ -48,6 +46,16 @@ public class QuestionStorageTestXsample extends QuestionStorageTestX
 		return null;
 	}
 
+	protected PoolStorage setupPoolStorage()
+	{
+		PoolStorageSample s = new PoolStorageSample();
+		s.setPoolService(null);
+		s.setQuestionService(null);
+		s.init();
+
+		return s;
+	}
+
 	protected QuestionStorage setupQuestionStorage()
 	{
 		QuestionStorageSample s = new QuestionStorageSample();
@@ -55,6 +63,11 @@ public class QuestionStorageTestXsample extends QuestionStorageTestX
 		s.init();
 
 		return s;
+	}
+
+	protected void teardownPoolStorage()
+	{
+		((PoolStorageSample) poolStorage).destroy();
 	}
 
 	protected void teardownQuestionStorage()

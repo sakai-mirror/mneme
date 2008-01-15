@@ -23,13 +23,16 @@ package org.muse.mneme.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
 import org.apache.commons.dbcp.SakaiBasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.Translation;
 import org.sakaiproject.authz.api.FunctionManager;
 import org.sakaiproject.db.impl.BasicSqlService;
 import org.sakaiproject.event.api.UsageSessionService;
@@ -93,13 +96,15 @@ public abstract class QuestionStorageTestX extends TestCase
 
 	protected final static String CONTEXT = "JUNIT_TEST_JUNIT";
 
+	protected MnemeServiceImpl mnemeService = null;
+
+	protected PoolStorage poolStorage = null;
+
 	protected SqlServiceTest sqlService = null;
 
 	protected QuestionStorage storage = null;
 
 	protected ThreadLocalComponent thread_localManager = null;
-
-	protected MnemeServiceImpl mnemeService = null;
 
 	/**
 	 * @param arg0
@@ -144,6 +149,72 @@ public abstract class QuestionStorageTestX extends TestCase
 		// it should not exist
 		exists = this.storage.existsQuestion(question.getId());
 		assertTrue(exists == Boolean.FALSE);
+	}
+
+	/**
+	 * Test copyPoolQuestions()
+	 * 
+	 * @throws Exception
+	 */
+	public void test002copyPoolQuestions() throws Exception
+	{
+		// make pools
+		PoolImpl source = this.poolStorage.newPool();
+		source.setContext(CONTEXT);
+		source.setTitle(CONTEXT);
+		source.getCreatedBy().setDate(new Date());
+		source.getCreatedBy().setUserId("admin");
+		source.getModifiedBy().setDate(new Date());
+		source.getModifiedBy().setUserId("admin");
+		this.poolStorage.savePool(source);
+
+		PoolImpl dest = this.poolStorage.newPool();
+		dest.setContext(CONTEXT);
+		dest.setTitle(CONTEXT);
+		dest.getCreatedBy().setDate(new Date());
+		dest.getCreatedBy().setUserId("admin");
+		dest.getModifiedBy().setDate(new Date());
+		dest.getModifiedBy().setUserId("admin");
+		this.poolStorage.savePool(dest);
+
+		// copy nothing
+		Map<String, String> oldToNew = new HashMap<String, String>();
+		List<Translation> translations = new ArrayList<Translation>();
+
+		this.storage.copyPoolQuestions("admin", source, dest, false, null, null);
+		this.storage.copyPoolQuestions("admin", source, dest, false, oldToNew, null);
+		this.storage.copyPoolQuestions("admin", source, dest, false, null, translations);
+
+		oldToNew.clear();
+		translations.clear();
+		this.storage.copyPoolQuestions("admin", source, dest, false, oldToNew, translations);
+		assertTrue(oldToNew.isEmpty());
+		assertTrue(translations.isEmpty());
+
+		// put in a question - mint
+		QuestionImpl question = this.storage.newQuestion();
+		question.initContext(CONTEXT);
+		question.setPool(source);
+		question.getCreatedBy().setDate(new Date());
+		question.getCreatedBy().setUserId("admin");
+		question.getModifiedBy().setDate(new Date());
+		question.getModifiedBy().setUserId("admin");
+		this.storage.saveQuestion(question);
+
+		oldToNew.clear();
+		translations.clear();
+		this.storage.copyPoolQuestions("admin", source, dest, false, oldToNew, translations);
+		assertTrue(oldToNew.isEmpty());
+
+		// make the mint not mint
+		question = this.storage.getQuestion(question.getId());
+		question.initMint(Boolean.FALSE);
+		this.storage.saveQuestion(question);
+
+		oldToNew.clear();
+		translations.clear();
+		this.storage.copyPoolQuestions("admin", source, dest, false, oldToNew, translations);
+		assertTrue(oldToNew.get(question.getId()) != null);
 	}
 
 	/**
@@ -212,15 +283,22 @@ public abstract class QuestionStorageTestX extends TestCase
 			sqlService = sql;
 		}
 
+		// we need a pool storage
+		PoolStorage ps = setupPoolStorage();
+		poolStorage = ps;
+
 		// finally, our target...
 		QuestionStorage s = setupQuestionStorage();
 		storage = s;
 
 		// clean up from any prior tests
 		storage.clearContext(CONTEXT);
+		poolStorage.clearContext(CONTEXT);
 	}
 
 	protected abstract SakaiBasicDataSource setupDataSource();
+
+	protected abstract PoolStorage setupPoolStorage();
 
 	protected abstract QuestionStorage setupQuestionStorage();
 
@@ -230,8 +308,10 @@ public abstract class QuestionStorageTestX extends TestCase
 	{
 		// clean up from any prior tests
 		storage.clearContext(CONTEXT);
+		poolStorage.clearContext(CONTEXT);
 
 		teardownQuestionStorage();
+		teardownPoolStorage();
 
 		if (mnemeService != null) mnemeService.destroy();
 		if (sqlService != null) sqlService.destroy();
@@ -239,6 +319,8 @@ public abstract class QuestionStorageTestX extends TestCase
 
 		super.tearDown();
 	}
+
+	protected abstract void teardownPoolStorage();
 
 	protected abstract void teardownQuestionStorage();
 
