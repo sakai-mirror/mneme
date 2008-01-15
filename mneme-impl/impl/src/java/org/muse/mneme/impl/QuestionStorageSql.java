@@ -46,10 +46,10 @@ import org.sakaiproject.util.StringUtil;
 /**
  * QuestionStorageMysql handles storage for questions under MySQL.
  */
-public class QuestionStorageMysql implements QuestionStorage
+public class QuestionStorageSql implements QuestionStorage
 {
 	/** Our logger. */
-	private static Log M_log = LogFactory.getLog(QuestionStorageMysql.class);
+	private static Log M_log = LogFactory.getLog(QuestionStorageSql.class);
 
 	/** Dependency: AttachmentService */
 	protected AttachmentService attachmentService = null;

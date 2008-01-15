@@ -29,7 +29,7 @@ import org.muse.mneme.api.Question;
 /**
  * SubmissionStorageMysql implements SubmissionStorage for Oracle.
  */
-public class SubmissionStorageOracle extends SubmissionStorageMysql implements SubmissionStorage
+public class SubmissionStorageOracle extends SubmissionStorageSql implements SubmissionStorage
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(SubmissionStorageOracle.class);

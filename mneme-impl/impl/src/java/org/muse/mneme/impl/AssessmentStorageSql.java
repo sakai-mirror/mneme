@@ -57,10 +57,10 @@ import org.sakaiproject.util.ResourceLoader;
 /**
  * AssessmentStorageMysql implements AssessmentStorage for MySQL.
  */
-public class AssessmentStorageMysql implements AssessmentStorage
+public class AssessmentStorageSql implements AssessmentStorage
 {
 	/** Our logger. */
-	private static Log M_log = LogFactory.getLog(AssessmentStorageMysql.class);
+	private static Log M_log = LogFactory.getLog(AssessmentStorageSql.class);
 
 	/** Dependency: AssessmentService. */
 	protected AssessmentService assessmentService = null;

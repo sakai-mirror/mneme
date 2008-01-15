@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.impl.PoolImpl;
 import org.muse.mneme.impl.PoolStorage;
-import org.muse.mneme.impl.PoolStorageMysql;
+import org.muse.mneme.impl.PoolStorageSql;
 import org.sakaiproject.db.impl.BasicSqlService;
 import org.sakaiproject.event.api.UsageSessionService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;

@@ -25,7 +25,7 @@ import org.apache.commons.dbcp.SakaiBasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.impl.PoolStorage;
-import org.muse.mneme.impl.PoolStorageMysql;
+import org.muse.mneme.impl.PoolStorageSql;
 
 /**
  * Test PoolStorageMySql<br />
@@ -76,7 +76,7 @@ public class PoolStorageTestXmysql extends PoolStorageTestX
 
 	protected PoolStorage setupPoolStorage()
 	{
-		PoolStorageMysql s = new PoolStorageMysql();
+		PoolStorageSql s = new PoolStorageSql();
 		s.setAutoDdl("true");
 		s.setPoolService(null);
 		s.setQuestionService(null);
@@ -89,7 +89,7 @@ public class PoolStorageTestXmysql extends PoolStorageTestX
 
 	protected void teardownPoolStorage()
 	{
-		((PoolStorageMysql) storage).destroy();
+		((PoolStorageSql) storage).destroy();
 	}
 
 	protected String vendor()

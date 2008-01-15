@@ -37,10 +37,10 @@ import org.sakaiproject.thread_local.api.ThreadLocalManager;
 /**
  * PoolStorageMysql implements PoolStorage in mysql.
  */
-public class PoolStorageMysql implements PoolStorage
+public class PoolStorageSql implements PoolStorage
 {
 	/** Our logger. */
-	private static Log M_log = LogFactory.getLog(PoolStorageMysql.class);
+	private static Log M_log = LogFactory.getLog(PoolStorageSql.class);
 
 	/** Configuration: to run the ddl on init or not. */
 	protected boolean autoDdl = false;

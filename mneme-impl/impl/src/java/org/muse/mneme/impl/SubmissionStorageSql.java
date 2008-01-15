@@ -48,10 +48,10 @@ import org.sakaiproject.util.StringUtil;
 /**
  * SubmissionStorageMysql handles submission storage for mysql.
  */
-public class SubmissionStorageMysql implements SubmissionStorage
+public class SubmissionStorageSql implements SubmissionStorage
 {
 	/** Our logger. */
-	private static Log M_log = LogFactory.getLog(SubmissionStorageMysql.class);
+	private static Log M_log = LogFactory.getLog(SubmissionStorageSql.class);
 
 	/** Dependency: AssessmentService. */
 	protected AssessmentService assessmentService = null;

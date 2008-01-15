@@ -25,7 +25,7 @@ import org.apache.commons.dbcp.SakaiBasicDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.impl.PoolStorage;
-import org.muse.mneme.impl.PoolStorageMysql;
+import org.muse.mneme.impl.PoolStorageSql;
 import org.muse.mneme.impl.PoolStorageSample;
 
 /**

@@ -32,7 +32,7 @@ import org.muse.mneme.api.Question;
 /**
  * AssessmentStorageOracle implements AssessmentStorage for Oracle.
  */
-public class AssessmentStorageOracle extends AssessmentStorageMysql implements AssessmentStorage
+public class AssessmentStorageOracle extends AssessmentStorageSql implements AssessmentStorage
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(AssessmentStorageOracle.class);
