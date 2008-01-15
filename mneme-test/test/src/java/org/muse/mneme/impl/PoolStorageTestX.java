@@ -19,7 +19,7 @@
  *
  **********************************************************************************/
 
-package org.muse.mneme.test;
+package org.muse.mneme.impl;
 
 import java.util.Date;
 import java.util.List;

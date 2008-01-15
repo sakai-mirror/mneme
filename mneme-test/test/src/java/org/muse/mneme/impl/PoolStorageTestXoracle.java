@@ -19,7 +19,7 @@
  *
  **********************************************************************************/
 
-package org.muse.mneme.test;
+package org.muse.mneme.impl;
 
 import org.apache.commons.dbcp.SakaiBasicDataSource;
 import org.apache.commons.logging.Log;

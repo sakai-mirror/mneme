@@ -347,9 +347,9 @@ public class PoolImpl implements Pool
 	}
 
 	/**
-	 * Clear the mint setting. Note: made public for testing.
+	 * Clear the mint setting.
 	 */
-	public void clearMint()
+	protected void clearMint()
 	{
 		this.mint = Boolean.FALSE;
 	}
