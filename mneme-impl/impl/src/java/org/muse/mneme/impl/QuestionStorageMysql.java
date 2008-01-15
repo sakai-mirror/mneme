@@ -75,6 +75,20 @@ public class QuestionStorageMysql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clearContext(final String context)
+	{
+		this.sqlService.transact(new Runnable()
+		{
+			public void run()
+			{
+				clearContextTx(context);
+			}
+		}, "clearContext: " + context.toString());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void clearStaleMintQuestions(final Date stale)
 	{
 		this.sqlService.transact(new Runnable()
@@ -532,6 +546,24 @@ public class QuestionStorageMysql implements QuestionStorage
 	public void setThreadLocalManager(ThreadLocalManager service)
 	{
 		threadLocalManager = service;
+	}
+
+	/**
+	 * Transaction code for clearContext()
+	 */
+	protected void clearContextTx(String context)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_QUESTION");
+		sql.append(" WHERE CONTEXT=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = context;
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("clearContext: dbWrite failed");
+		}
 	}
 
 	/**

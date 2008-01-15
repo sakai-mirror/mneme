@@ -36,6 +36,14 @@ import org.muse.mneme.api.Translation;
 public interface QuestionStorage
 {
 	/**
+	 * Clear out all questions from the context.
+	 * 
+	 * @param context
+	 *        The context.
+	 */
+	void clearContext(String context);
+
+	/**
 	 * Clear out any mint objects that are old enough to be considered abandoned.
 	 * 
 	 * @param stale

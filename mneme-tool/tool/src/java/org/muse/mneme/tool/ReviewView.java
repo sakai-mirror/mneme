@@ -33,10 +33,12 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Answer;
+import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
@@ -49,11 +51,14 @@ public class ReviewView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(ReviewView.class);
 
-	/** Assessment service. */
-	protected MnemeService assessmentService = null;
+	/** Dependency: AssessmentService. */
+	protected AssessmentService assessmentService = null;
 
 	/** Event tracking service. */
 	protected EventTrackingService eventTrackingService = null;
+
+	/** Dependency: SubmissionService. */
+	protected SubmissionService submissionService = null;
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
@@ -84,7 +89,7 @@ public class ReviewView extends ControllerImpl
 		context.put("actionTitle", messages.getString("question-header-review"));
 
 		// collect the submission
-		Submission submission = assessmentService.getSubmission(submissionId);
+		Submission submission = submissionService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			// redirect to error
@@ -92,7 +97,7 @@ public class ReviewView extends ControllerImpl
 			return;
 		}
 
-		if (!assessmentService.allowReviewSubmission(submission))
+		if (!submissionService.allowReviewSubmission(submission))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -157,7 +162,7 @@ public class ReviewView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(MnemeService service)
+	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
 	}
@@ -171,6 +176,17 @@ public class ReviewView extends ControllerImpl
 	public void setEventTrackingService(EventTrackingService service)
 	{
 		this.eventTrackingService = service;
+	}
+
+	/**
+	 * Set the submission service.
+	 * 
+	 * @param service
+	 *        The submission service.
+	 */
+	public void setSubmissionService(SubmissionService service)
+	{
+		this.submissionService = service;
 	}
 
 	/**

@@ -35,6 +35,20 @@ public class SubmissionStorageOracle extends SubmissionStorageMysql implements S
 	private static Log M_log = LogFactory.getLog(SubmissionStorageOracle.class);
 
 	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		// if we are auto-creating our schema, check and create
+		if (autoDdl)
+		{
+			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_submission");
+		}
+
+		M_log.info("init()");
+	}
+
+	/**
 	 * Insert a new pool (transaction code).
 	 * 
 	 * @param pool

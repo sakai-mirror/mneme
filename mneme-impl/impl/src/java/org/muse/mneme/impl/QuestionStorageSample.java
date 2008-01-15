@@ -78,6 +78,28 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public void clearContext(String context)
+	{
+		// find them
+		List<String> delete = new ArrayList<String>();
+		for (QuestionImpl question : this.questions.values())
+		{
+			if (question.getContext().equals(context))
+			{
+				delete.add(question.getId());
+			}
+		}
+
+		// remove them
+		for (String id : delete)
+		{
+			this.questions.remove(id);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void clearStaleMintQuestions(Date stale)
 	{
 		// find them

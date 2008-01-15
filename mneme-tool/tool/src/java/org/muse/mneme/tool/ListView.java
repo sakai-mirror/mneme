@@ -31,7 +31,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
@@ -43,8 +45,11 @@ public class ListView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(ListView.class);
 
-	/** Assessment service. */
-	protected MnemeService assessmentService = null;
+	/** Dependency: AssessmentService. */
+	protected AssessmentService assessmentService = null;
+
+	/** Dependency: SubmissionService. */
+	protected SubmissionService submissionService = null;
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
@@ -91,7 +96,7 @@ public class ListView extends ControllerImpl
 			return;
 		}
 
-		MnemeService.GetUserContextSubmissionsSort sort = MnemeService.GetUserContextSubmissionsSort.title_a;
+		SubmissionService.GetUserContextSubmissionsSort sort = SubmissionService.GetUserContextSubmissionsSort.title_a;
 		if (sortCode != null)
 		{
 			context.put("sort_column", sortCode.charAt(0));
@@ -100,41 +105,41 @@ public class ListView extends ControllerImpl
 			// 0 is title
 			if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
 			{
-				sort = MnemeService.GetUserContextSubmissionsSort.title_a;
+				sort = SubmissionService.GetUserContextSubmissionsSort.title_a;
 			}
 			else if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'D'))
 			{
-				sort = MnemeService.GetUserContextSubmissionsSort.title_d;
+				sort = SubmissionService.GetUserContextSubmissionsSort.title_d;
 			}
 
 			// 1 is status
 			else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'A'))
 			{
-				sort = MnemeService.GetUserContextSubmissionsSort.status_a;
+				sort = SubmissionService.GetUserContextSubmissionsSort.status_a;
 			}
 			else if ((sortCode.charAt(0) == '1') && (sortCode.charAt(1) == 'D'))
 			{
-				sort = MnemeService.GetUserContextSubmissionsSort.status_d;
+				sort = SubmissionService.GetUserContextSubmissionsSort.status_d;
 			}
 
 			// 2 is due date
 			else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'A'))
 			{
-				sort = MnemeService.GetUserContextSubmissionsSort.dueDate_a;
+				sort = SubmissionService.GetUserContextSubmissionsSort.dueDate_a;
 			}
 			else if ((sortCode.charAt(0) == '2') && (sortCode.charAt(1) == 'D'))
 			{
-				sort = MnemeService.GetUserContextSubmissionsSort.dueDate_d;
+				sort = SubmissionService.GetUserContextSubmissionsSort.dueDate_d;
 			}
-			
+
 			// 3 is type
 			else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'A'))
 			{
-				sort = MnemeService.GetUserContextSubmissionsSort.type_a;
+				sort = SubmissionService.GetUserContextSubmissionsSort.type_a;
 			}
 			else if ((sortCode.charAt(0) == '3') && (sortCode.charAt(1) == 'D'))
 			{
-				sort = MnemeService.GetUserContextSubmissionsSort.type_d;
+				sort = SubmissionService.GetUserContextSubmissionsSort.type_d;
 			}
 
 			else
@@ -150,12 +155,12 @@ public class ListView extends ControllerImpl
 		{
 			context.put("sort_column", '1');
 			context.put("sort_direction", 'D');
-			sort = MnemeService.GetUserContextSubmissionsSort.status_d;
+			sort = SubmissionService.GetUserContextSubmissionsSort.status_d;
 		}
 
 		// collect information: submissions / assessments
 		// TODO: get unpublished as well for test drive
-		List submissions = assessmentService.getUserContextSubmissions(toolManager.getCurrentPlacement().getContext(), null, sort);
+		List<Submission> submissions = this.submissionService.getUserContextSubmissions(toolManager.getCurrentPlacement().getContext(), null, sort);
 		context.put("submissions", submissions);
 
 		// disable the tool navigation to this view
@@ -187,7 +192,7 @@ public class ListView extends ControllerImpl
 	{
 		// read form
 		String destination = this.uiService.decode(req, context);
-		
+
 		// go there
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
@@ -198,9 +203,20 @@ public class ListView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(MnemeService service)
+	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the submission service.
+	 * 
+	 * @param service
+	 *        The submission service.
+	 */
+	public void setSubmissionService(SubmissionService service)
+	{
+		this.submissionService = service;
 	}
 
 	/**

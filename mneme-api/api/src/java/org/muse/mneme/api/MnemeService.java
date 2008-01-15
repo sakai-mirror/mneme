@@ -24,10 +24,9 @@ package org.muse.mneme.api;
 import java.util.List;
 
 /**
- * MnemeService is the overall service interface for Mneme, providing some application specific support<br />
- * as well as covering the 4 major services of the application.
+ * MnemeService is the overall service interface for Mneme, providing some application specific support.
  */
-public interface MnemeService extends PoolService, QuestionService, SubmissionService, AssessmentService
+public interface MnemeService
 {
 	/** The type string for this application: should not change over time as it may be stored in various parts of persistent entities. */
 	static final String APPLICATION_ID = "sakai:mneme";

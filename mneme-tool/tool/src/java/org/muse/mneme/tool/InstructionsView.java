@@ -30,8 +30,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
@@ -44,8 +46,11 @@ public class InstructionsView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(InstructionsView.class);
 
-	/** Assessment service. */
-	protected MnemeService assessmentService = null;
+	/** Dependency: AssessmentService. */
+	protected AssessmentService assessmentService = null;
+
+	/** Dependency: SubmissionService. */
+	protected SubmissionService submissionService = null;
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
@@ -73,7 +78,7 @@ public class InstructionsView extends ControllerImpl
 		String returnDestination = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
 
 		// collect the submission
-		Submission submission = assessmentService.getSubmission(submissionId);
+		Submission submission = submissionService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			// redirect to error
@@ -81,7 +86,7 @@ public class InstructionsView extends ControllerImpl
 			return;
 		}
 
-		if (!assessmentService.allowCompleteSubmission(submission))
+		if (!submissionService.allowCompleteSubmission(submission))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -134,7 +139,7 @@ public class InstructionsView extends ControllerImpl
 		}
 
 		// this post is from the timer, and completes the submission
-		TocView.submissionCompletePost(req, res, context, submissionId, this.uiService, this.assessmentService);
+		TocView.submissionCompletePost(req, res, context, submissionId, this.uiService, this.submissionService);
 	}
 
 	/**
@@ -143,9 +148,20 @@ public class InstructionsView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(MnemeService service)
+	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the submission service.
+	 * 
+	 * @param service
+	 *        The submission service.
+	 */
+	public void setSubmissionService(SubmissionService service)
+	{
+		this.submissionService = service;
 	}
 
 	/**

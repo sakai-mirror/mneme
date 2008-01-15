@@ -30,9 +30,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.SubmissionService;
 
 /**
  * The /error view for the mneme tool.
@@ -42,8 +44,8 @@ public class ErrorView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(ErrorView.class);
 
-	/** Assessment service. */
-	protected MnemeService assessmentService = null;
+	/** Dependency: SubmissionService. */
+	protected SubmissionService submissionService = null;
 
 	/**
 	 * Shutdown.
@@ -123,7 +125,7 @@ public class ErrorView extends ControllerImpl
 				if (param != null)
 				{
 					// treat the param as a submission id
-					Submission s = assessmentService.getSubmission(param);
+					Submission s = submissionService.getSubmission(param);
 					if (s != null)
 					{
 						Question question = s.getFirstIncompleteQuestion();
@@ -197,13 +199,13 @@ public class ErrorView extends ControllerImpl
 	}
 
 	/**
-	 * Set the assessment service.
+	 * Set the submission service.
 	 * 
 	 * @param service
-	 *        The assessment service.
+	 *        The submission service.
 	 */
-	public void setAssessmentService(MnemeService service)
+	public void setSubmissionService(SubmissionService service)
 	{
-		this.assessmentService = service;
+		this.submissionService = service;
 	}
 }

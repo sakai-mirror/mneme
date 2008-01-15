@@ -33,9 +33,11 @@ import org.muse.ambrosia.api.UiService;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCompletedException;
+import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
@@ -60,7 +62,7 @@ public class TocView extends ControllerImpl
 	 *        the selected submission id.
 	 */
 	protected static void submissionCompletePost(HttpServletRequest req, HttpServletResponse res, Context context, String submissionId,
-			UiService uiService, MnemeService assessmentService) throws IOException
+			UiService uiService, SubmissionService assessmentService) throws IOException
 	{
 		// if (!context.getPostExpected())
 		// {
@@ -125,8 +127,11 @@ public class TocView extends ControllerImpl
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 	}
 
-	/** Assessment service. */
-	protected MnemeService assessmentService = null;
+	/** Dependency: AssessmentService. */
+	protected AssessmentService assessmentService = null;
+
+	/** Dependency: SubmissionService. */
+	protected SubmissionService submissionService = null;
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
@@ -152,7 +157,7 @@ public class TocView extends ControllerImpl
 
 		String submissionId = params[2];
 
-		Submission submission = assessmentService.getSubmission(submissionId);
+		Submission submission = submissionService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			// redirect to error
@@ -160,7 +165,7 @@ public class TocView extends ControllerImpl
 			return;
 		}
 
-		if (!assessmentService.allowCompleteSubmission(submission))
+		if (!submissionService.allowCompleteSubmission(submission))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -223,7 +228,7 @@ public class TocView extends ControllerImpl
 		String submissionId = params[2];
 
 		// this post is from the timer, or the "submit" button, and completes the submission
-		submissionCompletePost(req, res, context, submissionId, this.uiService, this.assessmentService);
+		submissionCompletePost(req, res, context, submissionId, this.uiService, this.submissionService);
 	}
 
 	/**
@@ -232,9 +237,20 @@ public class TocView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(MnemeService service)
+	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the submission service.
+	 * 
+	 * @param service
+	 *        The submission service.
+	 */
+	public void setSubmissionService(SubmissionService service)
+	{
+		this.submissionService = service;
 	}
 
 	/**

@@ -36,12 +36,13 @@ import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentClosedException;
 import org.muse.mneme.api.AssessmentPermissionException;
-import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCompletedException;
+import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
@@ -53,8 +54,11 @@ public class QuestionView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(QuestionView.class);
 
-	/** Assessment service. */
-	protected MnemeService assessmentService = null;
+	/** Dependency: AssessmentService. */
+	protected AssessmentService assessmentService = null;
+
+	/** Dependency: SubmissionService. */
+	protected SubmissionService submissionService = null;
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
@@ -81,7 +85,7 @@ public class QuestionView extends ControllerImpl
 		String submissionId = params[2];
 		String questionSelector = params[3];
 
-		Submission submission = assessmentService.getSubmission(submissionId);
+		Submission submission = submissionService.getSubmission(submissionId);
 
 		if (submission == null)
 		{
@@ -162,7 +166,7 @@ public class QuestionView extends ControllerImpl
 		List<Answer> answers = new ArrayList<Answer>();
 
 		// get the submission
-		Submission submission = assessmentService.getSubmission(submissionId);
+		Submission submission = submissionService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			// redirect to error
@@ -209,7 +213,7 @@ public class QuestionView extends ControllerImpl
 		// submit all answers
 		try
 		{
-			assessmentService.submitAnswers(answers, answersComplete, complete);
+			submissionService.submitAnswers(answers, answersComplete, complete);
 
 			// if there was an upload error, send to the upload error
 			if ((req.getAttribute("upload.status") != null) && (!req.getAttribute("upload.status").equals("ok")))
@@ -221,12 +225,12 @@ public class QuestionView extends ControllerImpl
 			if (destination.equals("SUBMIT"))
 			{
 				// get the submission again, to make sure that the answers we just posted are reflected
-				submission = assessmentService.getSubmission(submissionId);
+				submission = submissionService.getSubmission(submissionId);
 
 				// if linear, or the submission is all answered, we can complete the submission and go to submitted
 				if ((!submission.getAssessment().getRandomAccess()) || (submission.getIsAnswered()))
 				{
-					assessmentService.completeSubmission(submission);
+					submissionService.completeSubmission(submission);
 
 					destination = "/submitted/" + submissionId;
 				}
@@ -262,9 +266,20 @@ public class QuestionView extends ControllerImpl
 	 * @param service
 	 *        The assessment service.
 	 */
-	public void setAssessmentService(MnemeService service)
+	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the submission service.
+	 * 
+	 * @param service
+	 *        The submission service.
+	 */
+	public void setSubmissionService(SubmissionService service)
+	{
+		this.submissionService = service;
 	}
 
 	/**
@@ -291,7 +306,7 @@ public class QuestionView extends ControllerImpl
 	protected String questionChooseDestination(Context context, String destination, String questionSelector, String submissionId)
 	{
 		// get the submission
-		Submission submission = assessmentService.getSubmission(submissionId);
+		Submission submission = submissionService.getSubmission(submissionId);
 		if (submission == null)
 		{
 			return "/error/" + Errors.invalid;
@@ -444,7 +459,7 @@ public class QuestionView extends ControllerImpl
 		// put in the selector
 		context.put("questionSelector", questionSelector);
 
-		if (!assessmentService.allowCompleteSubmission(submission))
+		if (!submissionService.allowCompleteSubmission(submission))
 		{
 			return Errors.unauthorized;
 		}
