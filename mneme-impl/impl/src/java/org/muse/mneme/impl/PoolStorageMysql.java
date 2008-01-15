@@ -208,13 +208,16 @@ public class PoolStorageMysql implements PoolStorage
 	 */
 	public void init()
 	{
-		// if we are auto-creating our schema, check and create
-		if (autoDdl)
+		if (this.sqlService.getVendor().equals("mysql"))
 		{
-			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_pool");
-		}
+			// if we are auto-creating our schema, check and create
+			if (autoDdl)
+			{
+				this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_pool");
+			}
 
-		M_log.info("init()");
+			M_log.info("init()");
+		}
 	}
 
 	/**

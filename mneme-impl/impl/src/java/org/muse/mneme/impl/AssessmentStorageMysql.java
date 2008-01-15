@@ -281,16 +281,19 @@ public class AssessmentStorageMysql implements AssessmentStorage
 	 */
 	public void init()
 	{
-		// if we are auto-creating our schema, check and create
-		if (autoDdl)
+		if (this.sqlService.getVendor().equals("mysql"))
 		{
-			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_assessment");
+			// if we are auto-creating our schema, check and create
+			if (autoDdl)
+			{
+				this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_assessment");
+			}
+
+			// messages
+			if (this.bundle != null) this.messages = new ResourceLoader(this.bundle);
+
+			M_log.info("init()");
 		}
-
-		// messages
-		if (this.bundle != null) this.messages = new ResourceLoader(this.bundle);
-
-		M_log.info("init()");
 	}
 
 	/**

@@ -26,6 +26,8 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
+import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.Question;
 
 /**
  * AssessmentStorageOracle implements AssessmentStorage for Oracle.
@@ -200,6 +202,46 @@ public class AssessmentStorageOracle extends AssessmentStorageMysql implements A
 		for (Part part : assessment.getParts().getParts())
 		{
 			insertAssessmentPartTx(assessment, part);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void removeDependencyTx(Pool pool)
+	{
+		// remove from non-live assessments part details that use the pool
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ASSESSMENT_PART_DETAIL");
+		sql.append(" WHERE ASSESSMENT_ID IN (SELECT ID FROM MNEME_ASSESSMENT WHERE LOCKED='0')");
+		sql.append(" AND POOL_ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(pool.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
+		{
+			throw new RuntimeException("removeDependencyTx(pool): db write failed");
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void removeDependencyTx(Question question)
+	{
+		// remove from in non-live assessments part details that use the question
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ASSESSMENT_PART_DETAIL");
+		sql.append(" WHERE ASSESSMENT_ID IN (SELECT ID FROM MNEME_ASSESSMENT WHERE LOCKED='0')");
+		sql.append(" AND QUESTION_ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(question.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
+		{
+			throw new RuntimeException("removeDependencyTx(question): db write failed");
 		}
 	}
 }

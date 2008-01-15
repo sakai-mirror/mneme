@@ -39,13 +39,16 @@ public class SubmissionStorageOracle extends SubmissionStorageMysql implements S
 	 */
 	public void init()
 	{
-		// if we are auto-creating our schema, check and create
-		if (autoDdl)
+		if (this.sqlService.getVendor().equals("oracle"))
 		{
-			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_submission");
-		}
+			// if we are auto-creating our schema, check and create
+			if (autoDdl && this.sqlService.getVendor().equals("oracle"))
+			{
+				this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_submission");
+			}
 
-		M_log.info("init()");
+			M_log.info("init()");
+		}
 	}
 
 	/**
@@ -147,7 +150,7 @@ public class SubmissionStorageOracle extends SubmissionStorageMysql implements S
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM MNEME_ANSWER");
 		sql.append(" WHERE SUBMISSION_ID IN");
-		sql.append(" (SELET ID FROM MNEME_SUBMISSION WHERE ASSESSMENT_ID=? AND TEST_DRIVE='1')");
+		sql.append(" (SELECT ID FROM MNEME_SUBMISSION WHERE ASSESSMENT_ID=? AND TEST_DRIVE='1')");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(assessment.getId());
@@ -177,7 +180,7 @@ public class SubmissionStorageOracle extends SubmissionStorageMysql implements S
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM MNEME_ANSWER");
 		sql.append(" WHERE SUBMISSION_ID IN");
-		sql.append(" (SELET ID FROM MNEME_SUBMISSION WHERE CONTEXT=? AND TEST_DRIVE='1')");
+		sql.append(" (SELECT ID FROM MNEME_SUBMISSION WHERE CONTEXT=? AND TEST_DRIVE='1')");
 
 		Object[] fields = new Object[1];
 		fields[0] = context;

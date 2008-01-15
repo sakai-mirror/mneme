@@ -198,7 +198,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		{
 			sql.append(" AND S.RELEASED='1'");
 		}
-		sql.append(" GROUP BY S.ID");
+		sql.append(" GROUP BY S.ID, S.USERID, S.EVAL_SCORE");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(assessment.getId());
@@ -343,7 +343,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		sql.append("SELECT S.ID, S.EVAL_SCORE, SUM(A.EVAL_SCORE), SUM(A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
 		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID");
 		sql.append(" WHERE S.ASSESSMENT_ID=? AND S.USERID=? AND S.COMPLETE='1'");
-		sql.append(" GROUP BY S.ID");
+		sql.append(" GROUP BY S.ID, S.EVAL_SCORE");
 
 		Object[] fields = new Object[2];
 		fields[0] = Long.valueOf(assessment.getId());
@@ -414,7 +414,7 @@ public class SubmissionStorageMysql implements SubmissionStorage
 		sql.append("SELECT S.EVAL_SCORE, SUM(A.EVAL_SCORE), SUM(A.AUTO_SCORE) FROM MNEME_SUBMISSION S");
 		sql.append(" JOIN  MNEME_ANSWER A ON S.ID=A.SUBMISSION_ID");
 		sql.append(" WHERE S.ID=?");
-		sql.append(" GROUP BY S.ID");
+		sql.append(" GROUP BY S.ID, S.EVAL_SCORE");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(submission.getId());
@@ -520,14 +520,17 @@ public class SubmissionStorageMysql implements SubmissionStorage
 	 */
 	public void init()
 	{
-		// if we are auto-creating our schema, check and create
-		if (autoDdl)
+		if (this.sqlService.getVendor().equals("mysql"))
 		{
-			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_submission");
-			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_submission_1_0-1_1");
-		}
+			// if we are auto-creating our schema, check and create
+			if (autoDdl)
+			{
+				this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_submission");
+				this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_submission_1_0-1_1");
+			}
 
-		M_log.info("init()");
+			M_log.info("init()");
+		}
 	}
 
 	/**

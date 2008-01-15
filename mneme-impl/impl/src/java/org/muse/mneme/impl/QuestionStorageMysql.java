@@ -407,13 +407,16 @@ public class QuestionStorageMysql implements QuestionStorage
 	 */
 	public void init()
 	{
-		// if we are auto-creating our schema, check and create
-		if (autoDdl)
+		if (this.sqlService.getVendor().equals("mysql"))
 		{
-			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_question");
-		}
+			// if we are auto-creating our schema, check and create
+			if (autoDdl)
+			{
+				this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_question");
+			}
 
-		M_log.info("init()");
+			M_log.info("init()");
+		}
 	}
 
 	/**
