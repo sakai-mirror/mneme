@@ -92,6 +92,11 @@ public interface AssessmentStorage
 	List<AssessmentImpl> getContextAssessments(String context, AssessmentService.AssessmentsSort sort, Boolean publishedOnly);
 
 	/**
+	 * Initialize.
+	 */
+	void init();
+
+	/**
 	 * Set this assessment to be live.
 	 * 
 	 * @param assessment

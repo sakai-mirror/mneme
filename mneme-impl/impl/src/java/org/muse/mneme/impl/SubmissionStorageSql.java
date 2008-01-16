@@ -46,9 +46,9 @@ import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.util.StringUtil;
 
 /**
- * SubmissionStorageMysql handles submission storage for mysql.
+ * SubmissionStorageMysql handles submission storage for SQL databases.
  */
-public class SubmissionStorageSql implements SubmissionStorage
+public abstract class SubmissionStorageSql implements SubmissionStorage
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(SubmissionStorageSql.class);
@@ -516,24 +516,6 @@ public class SubmissionStorageSql implements SubmissionStorage
 	}
 
 	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		if (this.sqlService.getVendor().equals("mysql"))
-		{
-			// if we are auto-creating our schema, check and create
-			if (autoDdl)
-			{
-				this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_submission");
-				this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_submission_1_0-1_1");
-			}
-
-			M_log.info("init()");
-		}
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public AnswerImpl newAnswer()
@@ -814,41 +796,7 @@ public class SubmissionStorageSql implements SubmissionStorage
 	 * @param pool
 	 *        The pool.
 	 */
-	protected void insertAnswerTx(AnswerImpl answer)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_ANSWER (");
-		sql.append(" ANSWERED, AUTO_SCORE, GUEST, EVAL_ATRIB_DATE, EVAL_ATRIB_USER, EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE,");
-		sql.append(" PART_ID, QUESTION_ID, QUESTION_TYPE, REASON, REVIEW, SUBMISSION_ID, SUBMITTED_DATE)");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-
-		Object[] fields = new Object[15];
-		fields[0] = answer.getIsAnswered();
-		fields[1] = answer.getAutoScore();
-		fields[2] = SqlHelper.encodeStringArray(answer.getTypeSpecificAnswer().getData());
-		fields[3] = (answer.getEvaluation().getAttribution().getDate() == null) ? null : answer.getEvaluation().getAttribution().getDate().getTime();
-		fields[4] = answer.getEvaluation().getAttribution().getUserId();
-		fields[5] = answer.getEvaluation().getComment();
-		fields[6] = answer.getEvaluation().getEvaluated() ? "1" : "0";
-		fields[7] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
-		fields[8] = Long.valueOf(answer.getPartId());
-		Question q = answer.getQuestion();
-		fields[9] = Long.valueOf(q.getId());
-		fields[10] = q.getType();
-		fields[11] = answer.getReason();
-		fields[12] = answer.getMarkedForReview() ? "1" : "0";
-		fields[13] = Long.valueOf(answer.getSubmission().getId());
-		fields[14] = (answer.getSubmittedDate() == null) ? null : answer.getSubmittedDate().getTime();
-
-		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
-		if (id == null)
-		{
-			throw new RuntimeException("insertPoolTx: dbInsert failed");
-		}
-
-		// set the answer's id
-		answer.initId(id.toString());
-	}
+	protected abstract void insertAnswerTx(AnswerImpl answer);
 
 	/**
 	 * Insert a new submission.
@@ -873,41 +821,7 @@ public class SubmissionStorageSql implements SubmissionStorage
 	 * @param submission
 	 *        The submission.
 	 */
-	protected void insertSubmissionTx(SubmissionImpl submission)
-	{
-		// new submissions have no answers yet
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_SUBMISSION (");
-		sql.append(" ASSESSMENT_ID, COMPLETE, CONTEXT, EVAL_ATRIB_DATE, EVAL_ATRIB_USER,");
-		sql.append(" EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE, RELEASED, START_DATE, SUBMITTED_DATE, TEST_DRIVE, USERID )");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)");
-
-		Object[] fields = new Object[13];
-		fields[0] = Long.valueOf(submission.getAssessment().getId());
-		fields[1] = submission.getIsComplete() ? "1" : "0";
-		fields[2] = submission.getAssessment().getContext();
-		fields[3] = (submission.getEvaluation().getAttribution().getDate() == null) ? null : submission.getEvaluation().getAttribution().getDate()
-				.getTime();
-		fields[4] = submission.getEvaluation().getAttribution().getUserId();
-		fields[5] = submission.getEvaluation().getComment();
-		fields[6] = submission.getEvaluation().getEvaluated() ? "1" : "0";
-		fields[7] = submission.getEvaluation().getScore() == null ? null : Float.valueOf(submission.getEvaluation().getScore());
-		fields[8] = submission.getIsReleased() ? "1" : "0";
-		fields[9] = (submission.getStartDate() == null) ? null : submission.getStartDate().getTime();
-		fields[10] = (submission.getSubmittedDate() == null) ? null : submission.getSubmittedDate().getTime();
-		fields[11] = submission.getIsTestDrive() ? "1" : "0";
-		fields[12] = submission.getUserId();
-
-		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
-		if (id == null)
-		{
-			throw new RuntimeException("insertSubmissionTx: dbInsert failed");
-		}
-
-		// set the submission's id
-		submission.initId(id.toString());
-	}
+	protected abstract void insertSubmissionTx(SubmissionImpl submission);
 
 	/**
 	 * Read an submission
@@ -1048,62 +962,12 @@ public class SubmissionStorageSql implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void removeTestDriveSubmissionsTx(Assessment assessment)
-	{
-		// answer
-		StringBuilder sql = new StringBuilder();
-		sql.append("DELETE FROM MNEME_ANSWER");
-		sql.append(" USING MNEME_ANSWER, MNEME_SUBMISSION");
-		sql.append(" WHERE MNEME_ANSWER.SUBMISSION_ID=MNEME_SUBMISSION.ID AND MNEME_SUBMISSION.ASSESSMENT_ID=? AND MNEME_SUBMISSION.TEST_DRIVE='1'");
-
-		Object[] fields = new Object[1];
-		fields[0] = Long.valueOf(assessment.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
-		{
-			throw new RuntimeException("removeTestDriveSubmissions(answer): db write failed");
-		}
-
-		// submission
-		sql = new StringBuilder();
-		sql.append("DELETE FROM MNEME_SUBMISSION");
-		sql.append(" WHERE MNEME_SUBMISSION.ASSESSMENT_ID=? AND MNEME_SUBMISSION.TEST_DRIVE='1'");
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
-		{
-			throw new RuntimeException("removeTestDriveSubmissions(submission): db write failed");
-		}
-	}
+	protected abstract void removeTestDriveSubmissionsTx(Assessment assessment);
 
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void removeTestDriveSubmissionsTx(String context)
-	{
-		// answer
-		StringBuilder sql = new StringBuilder();
-		sql.append("DELETE FROM MNEME_ANSWER");
-		sql.append(" USING MNEME_ANSWER, MNEME_SUBMISSION");
-		sql.append(" WHERE MNEME_ANSWER.SUBMISSION_ID=MNEME_SUBMISSION.ID AND MNEME_SUBMISSION.CONTEXT=? AND MNEME_SUBMISSION.TEST_DRIVE='1'");
-
-		Object[] fields = new Object[1];
-		fields[0] = context;
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
-		{
-			throw new RuntimeException("removeTestDriveSubmissions(context,answer): db write failed");
-		}
-
-		// submission
-		sql = new StringBuilder();
-		sql.append("DELETE FROM MNEME_SUBMISSION");
-		sql.append(" WHERE MNEME_SUBMISSION.CONTEXT=? AND MNEME_SUBMISSION.TEST_DRIVE='1'");
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields, null))
-		{
-			throw new RuntimeException("removeTestDriveSubmissions(context,submission): db write failed");
-		}
-	}
+	protected abstract void removeTestDriveSubmissionsTx(String context);
 
 	/**
 	 * Update an existing submission answer.

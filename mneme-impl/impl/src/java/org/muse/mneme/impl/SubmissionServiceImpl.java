@@ -1423,6 +1423,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 			if (storage == null) M_log.warn("no storage set: " + this.storageKey);
 
+			storage.init();
+
 			// start the checking thread
 			if (timeoutCheckMs > 0)
 			{

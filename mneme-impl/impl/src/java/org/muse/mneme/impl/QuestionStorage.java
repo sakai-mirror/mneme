@@ -165,6 +165,11 @@ public interface QuestionStorage
 	QuestionImpl getQuestion(String id);
 
 	/**
+	 * Initialize.
+	 */
+	void init();
+
+	/**
 	 * Move a question from one pool to another.
 	 * 
 	 * @param question

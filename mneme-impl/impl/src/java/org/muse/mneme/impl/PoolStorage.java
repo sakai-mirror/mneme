@@ -95,6 +95,11 @@ public interface PoolStorage
 	List<PoolImpl> getPools(String context);
 
 	/**
+	 * Initialize.
+	 */
+	void init();
+
+	/**
 	 * Construct a new pool object.
 	 * 
 	 * @return A pool object.

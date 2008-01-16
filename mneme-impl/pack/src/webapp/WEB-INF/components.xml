@@ -56,12 +56,11 @@
 				<entry key="oracle"><ref bean="org.muse.mneme.impl.PoolStorageOracle"/></entry>
 			</map>
 		</property>
-		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
+		<property name="storageKey"><value>SQL</value></property> <!-- use sample to choose the sample impl -->
  	</bean>
 
 	<bean id="org.muse.mneme.impl.PoolStorageSample"
 		class="org.muse.mneme.impl.PoolStorageSample"
-		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
 
@@ -71,7 +70,6 @@
 
 	<bean id="org.muse.mneme.impl.PoolStorageMysql"
 		class="org.muse.mneme.impl.PoolStorageMysql"
-		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
 
@@ -86,7 +84,6 @@
 
 	<bean id="org.muse.mneme.impl.PoolStorageOracle"
 		class="org.muse.mneme.impl.PoolStorageOracle"
-		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
 
@@ -124,12 +121,11 @@
 				<entry key="oracle"><ref bean="org.muse.mneme.impl.QuestionStorageOracle"/></entry>
 			</map>
 		</property>
-		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
+		<property name="storageKey"><value>SQL</value></property> <!-- use sample to choose the sample impl -->
 	</bean>
 
 	<bean id="org.muse.mneme.impl.QuestionStorageSample"
 		class="org.muse.mneme.impl.QuestionStorageSample"
-		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
 
@@ -142,7 +138,6 @@
 
 	<bean id="org.muse.mneme.impl.QuestionStorageMysql"
 		class="org.muse.mneme.impl.QuestionStorageMysql"
-		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
 
@@ -159,7 +154,6 @@
 
 	<bean id="org.muse.mneme.impl.QuestionStorageOracle"
 		class="org.muse.mneme.impl.QuestionStorageOracle"
-		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
 
@@ -217,12 +211,11 @@
 				<entry key="oracle"><ref bean="org.muse.mneme.impl.SubmissionStorageOracle"/></entry>
 			</map>
 		</property>
-		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
+		<property name="storageKey"><value>SQL</value></property> <!-- use sample to choose the sample impl -->
 	</bean>
 
 	<bean id="org.muse.mneme.impl.SubmissionStorageSample"
 		class="org.muse.mneme.impl.SubmissionStorageSample"
-		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
 
@@ -235,7 +228,6 @@
 
 	<bean id="org.muse.mneme.impl.SubmissionStorageMysql"
 		class="org.muse.mneme.impl.SubmissionStorageMysql"
-		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
 
@@ -253,7 +245,6 @@
 
 	<bean id="org.muse.mneme.impl.SubmissionStorageOracle"
 		class="org.muse.mneme.impl.SubmissionStorageOracle"
-		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
 
@@ -296,12 +287,11 @@
 				<entry key="oracle"><ref bean="org.muse.mneme.impl.AssessmentStorageOracle"/></entry>
 			</map>
 		</property>
-		<property name="storageKey"><value>sample</value></property> <!-- use SQL to choose a SQL vendor based storage -->
+		<property name="storageKey"><value>SQL</value></property> <!-- use sample to choose the sample impl -->
 	</bean>
 
 	<bean id="org.muse.mneme.impl.AssessmentStorageSample"
 		class="org.muse.mneme.impl.AssessmentStorageSample"
-		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
 
@@ -315,7 +305,6 @@
 
 	<bean id="org.muse.mneme.impl.AssessmentStorageMysql"
 		class="org.muse.mneme.impl.AssessmentStorageMysql"
-		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
 
@@ -333,7 +322,6 @@
 
 	<bean id="org.muse.mneme.impl.AssessmentStorageOracle"
 		class="org.muse.mneme.impl.AssessmentStorageOracle"
-		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
 

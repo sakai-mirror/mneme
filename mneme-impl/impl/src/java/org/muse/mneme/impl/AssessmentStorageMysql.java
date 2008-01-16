@@ -31,12 +31,12 @@ import org.muse.mneme.api.Question;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
- * AssessmentStorageOracle implements AssessmentStorage for Oracle.
+ * AssessmentStorageOracle implements AssessmentStorage for MySQL.
  */
-public class AssessmentStorageOracle extends AssessmentStorageSql implements AssessmentStorage
+public class AssessmentStorageMysql extends AssessmentStorageSql implements AssessmentStorage
 {
 	/** Our logger. */
-	private static Log M_log = LogFactory.getLog(AssessmentStorageOracle.class);
+	private static Log M_log = LogFactory.getLog(AssessmentStorageMysql.class);
 
 	/**
 	 * Final initialization, once all dependencies are set.
@@ -63,19 +63,15 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 	 */
 	protected void insertAssessmentAccessTx(AssessmentImpl assessment, AssessmentAccessImpl access)
 	{
-		// get the next id
-		Long id = this.sqlService.getNextSequence("MNEME_ASSESSMENT_ACCESS_SEQ", null);
-
 		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_ASSESSMENT_ACCESS (ID,");
+		sql.append("INSERT INTO MNEME_ASSESSMENT_ACCESS (");
 		sql.append(" ASSESSMENT_ID, DATES_ACCEPT_UNTIL, DATES_DUE, DATES_OPEN,");
 		sql.append(" OVERRIDE_ACCEPT_UNTIL, OVERRIDE_DUE, OVERRIDE_OPEN, OVERRIDE_PASSWORD,");
 		sql.append(" OVERRIDE_TIME_LIMIT, OVERRIDE_TRIES, PASSWORD, TIME_LIMIT, TRIES, USERS)");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[15];
+		Object[] fields = new Object[14];
 		int i = 0;
-		fields[i++] = id;
 		fields[i++] = Long.valueOf(assessment.getId());
 		fields[i++] = (access.getAcceptUntilDate() == null) ? null : access.getAcceptUntilDate().getTime();
 		fields[i++] = (access.getDueDate() == null) ? null : access.getDueDate().getTime();
@@ -91,9 +87,10 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 		fields[i++] = access.getTries();
 		fields[i++] = SqlHelper.encodeStringArray(access.getUsers().toArray(new String[access.getUsers().size()]));
 
-		if (!this.sqlService.dbWrite(null, sql.toString(), fields))
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
 		{
-			throw new RuntimeException("insertAssessmentAccessTx: dbWrite failed");
+			throw new RuntimeException("insertAssessmentAccessTx: dbInsert failed");
 		}
 
 		// set the access's id
@@ -110,26 +107,23 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 	 */
 	protected void insertAssessmentPartTx(AssessmentImpl assessment, Part part)
 	{
-		// get the next id
-		Long id = this.sqlService.getNextSequence("MNEME_ASSESSMENT_PART_SEQ", null);
-
 		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_ASSESSMENT_PART (ID,");
+		sql.append("INSERT INTO MNEME_ASSESSMENT_PART (");
 		sql.append(" ASSESSMENT_ID, PRESENTATION_TEXT, SEQUENCE, TITLE, TYPE, RANDOMIZE)");
-		sql.append(" VALUES(?,?,?,?,?,?,?)");
+		sql.append(" VALUES(?,?,?,?,?,?)");
 
-		Object[] fields = new Object[7];
-		fields[0] = id;
-		fields[1] = Long.valueOf(assessment.getId());
-		fields[2] = part.getPresentation().getText();
-		fields[3] = part.getOrdering().getPosition();
-		fields[4] = part.getTitle();
-		fields[5] = (part instanceof ManualPart) ? "M" : "D";
-		fields[6] = (part instanceof ManualPart) ? (((ManualPart) part).getRandomize() ? "1" : "0") : "0";
+		Object[] fields = new Object[6];
+		fields[0] = Long.valueOf(assessment.getId());
+		fields[1] = part.getPresentation().getText();
+		fields[2] = part.getOrdering().getPosition();
+		fields[3] = part.getTitle();
+		fields[4] = (part instanceof ManualPart) ? "M" : "D";
+		fields[5] = (part instanceof ManualPart) ? (((ManualPart) part).getRandomize() ? "1" : "0") : "0";
 
-		if (!this.sqlService.dbWrite(null, sql.toString(), fields))
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
 		{
-			throw new RuntimeException("insertAssessmentPartsTx: dbWrite failed");
+			throw new RuntimeException("insertAssessmentPartsTx: dbInsert failed");
 		}
 
 		// set the part's id
@@ -147,11 +141,8 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 	 */
 	protected void insertAssessmentTx(AssessmentImpl assessment)
 	{
-		// get the next id
-		Long id = this.sqlService.getNextSequence("MNEME_ASSESSMENT_SEQ", null);
-
 		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_ASSESSMENT (ID,");
+		sql.append("INSERT INTO MNEME_ASSESSMENT (");
 		sql.append(" ARCHIVED, CONTEXT, CREATED_BY_DATE, CREATED_BY_USER,");
 		sql.append(" DATES_ACCEPT_UNTIL, DATES_ARCHIVED, DATES_DUE, DATES_OPEN,");
 		sql.append(" GRADING_ANONYMOUS, GRADING_AUTO_RELEASE, GRADING_GRADEBOOK, GRADING_REJECTED,");
@@ -160,11 +151,10 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 		sql.append(" PUBLISHED, QUESTION_GROUPING, RANDOM_ACCESS,");
 		sql.append(" REVIEW_DATE, REVIEW_SHOW_CORRECT, REVIEW_SHOW_FEEDBACK, REVIEW_TIMING,");
 		sql.append(" SHOW_HINTS, SUBMIT_PRES_TEXT, TIME_LIMIT, TITLE, TRIES, TYPE)");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[36];
+		Object[] fields = new Object[35];
 		int i = 0;
-		fields[i++] = id;
 		fields[i++] = assessment.getArchived() ? "1" : "0";
 		fields[i++] = assessment.getContext();
 		fields[i++] = assessment.getCreatedBy().getDate().getTime();
@@ -202,9 +192,10 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 		fields[i++] = assessment.getTries();
 		fields[i++] = assessment.getType().toString();
 
-		if (!this.sqlService.dbWrite(null, sql.toString(), fields))
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
 		{
-			throw new RuntimeException("updateAssessmentTx: dbWrite failed");
+			throw new RuntimeException("updateAssessmentTx: dbInsert failed");
 		}
 
 		// set the assessment's id
@@ -228,10 +219,11 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 	 */
 	protected void removeDependencyTx(Pool pool)
 	{
-		// remove from non-live assessments part details that use the pool
+		// remove from in non-live assessments part details that use the pool
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM MNEME_ASSESSMENT_PART_DETAIL");
-		sql.append(" WHERE ASSESSMENT_ID IN (SELECT ID FROM MNEME_ASSESSMENT WHERE LOCKED='0')");
+		sql.append(" USING MNEME_ASSESSMENT_PART_DETAIL, MNEME_ASSESSMENT");
+		sql.append(" WHERE MNEME_ASSESSMENT_PART_DETAIL.ASSESSMENT_ID=MNEME_ASSESSMENT.ID AND MNEME_ASSESSMENT.LOCKED='0'");
 		sql.append(" AND POOL_ID=?");
 
 		Object[] fields = new Object[1];
@@ -251,7 +243,8 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 		// remove from in non-live assessments part details that use the question
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM MNEME_ASSESSMENT_PART_DETAIL");
-		sql.append(" WHERE ASSESSMENT_ID IN (SELECT ID FROM MNEME_ASSESSMENT WHERE LOCKED='0')");
+		sql.append(" USING MNEME_ASSESSMENT_PART_DETAIL, MNEME_ASSESSMENT");
+		sql.append(" WHERE MNEME_ASSESSMENT_PART_DETAIL.ASSESSMENT_ID=MNEME_ASSESSMENT.ID AND MNEME_ASSESSMENT.LOCKED='0'");
 		sql.append(" AND QUESTION_ID=?");
 
 		Object[] fields = new Object[1];

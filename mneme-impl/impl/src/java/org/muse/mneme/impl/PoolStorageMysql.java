@@ -25,12 +25,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * PoolStorageMysql implements PoolStorage for Oracle.
+ * PoolStorageMysql implements PoolStorage for MySQL.
  */
-public class PoolStorageOracle extends PoolStorageSql implements PoolStorage
+public class PoolStorageMysql extends PoolStorageSql implements PoolStorage
 {
 	/** Our logger. */
-	private static Log M_log = LogFactory.getLog(PoolStorageOracle.class);
+	private static Log M_log = LogFactory.getLog(PoolStorageMysql.class);
 
 	/**
 	 * Final initialization, once all dependencies are set.
@@ -54,32 +54,29 @@ public class PoolStorageOracle extends PoolStorageSql implements PoolStorage
 	 */
 	protected void insertPoolTx(PoolImpl pool)
 	{
-		// get the next id
-		Long id = this.sqlService.getNextSequence("MNEME_POOL_SEQ", null);
-
 		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_POOL (ID,");
+		sql.append("INSERT INTO MNEME_POOL (");
 		sql.append(" CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, DIFFICULTY, HISTORICAL,");
 		sql.append(" MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POINTS, TITLE )");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[12];
-		fields[0] = id;
-		fields[1] = pool.getContext();
-		fields[2] = pool.getCreatedBy().getDate().getTime();
-		fields[3] = pool.getCreatedBy().getUserId();
-		fields[4] = pool.getDescription();
-		fields[5] = pool.getDifficulty().toString();
-		fields[6] = pool.getIsHistorical() ? "1" : "0";
-		fields[7] = pool.getMint() ? "1" : "0";
-		fields[8] = pool.getModifiedBy().getDate().getTime();
-		fields[9] = pool.getModifiedBy().getUserId();
-		fields[10] = pool.getPointsEdit();
-		fields[11] = pool.getTitle();
+		Object[] fields = new Object[11];
+		fields[0] = pool.getContext();
+		fields[1] = pool.getCreatedBy().getDate().getTime();
+		fields[2] = pool.getCreatedBy().getUserId();
+		fields[3] = pool.getDescription();
+		fields[4] = pool.getDifficulty().toString();
+		fields[5] = pool.getIsHistorical() ? "1" : "0";
+		fields[6] = pool.getMint() ? "1" : "0";
+		fields[7] = pool.getModifiedBy().getDate().getTime();
+		fields[8] = pool.getModifiedBy().getUserId();
+		fields[9] = pool.getPointsEdit();
+		fields[10] = pool.getTitle();
 
-		if (!this.sqlService.dbWrite(null, sql.toString(), fields))
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
 		{
-			throw new RuntimeException("insertPoolTx: dbWrite failed");
+			throw new RuntimeException("insertPoolTx: dbInsert failed");
 		}
 
 		// set the pool's id

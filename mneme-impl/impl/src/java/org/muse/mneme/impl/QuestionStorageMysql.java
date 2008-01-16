@@ -28,12 +28,12 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Pool;
 
 /**
- * QuestionStorageMysql implements QuestionStorage for Oracle.
+ * QuestionStorageMysql implements QuestionStorage for MySQL.
  */
-public class QuestionStorageOracle extends QuestionStorageSql implements QuestionStorage
+public class QuestionStorageMysql extends QuestionStorageSql implements QuestionStorage
 {
 	/** Our logger. */
-	private static Log M_log = LogFactory.getLog(QuestionStorageOracle.class);
+	private static Log M_log = LogFactory.getLog(QuestionStorageMysql.class);
 
 	/**
 	 * Final initialization, once all dependencies are set.
@@ -58,10 +58,10 @@ public class QuestionStorageOracle extends QuestionStorageSql implements Questio
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_QUESTION");
-		sql.append(" (ID, CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
+		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
 		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
 		sql.append(" TYPE, GUEST)");
-		sql.append(" SELECT MNEME_QUESTION_SEQ.NEXTVAL,");
+		sql.append(" SELECT");
 		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, '1', Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
@@ -73,7 +73,7 @@ public class QuestionStorageOracle extends QuestionStorageSql implements Questio
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
-			throw new RuntimeException("copyPoolQuestionsTx: dbWrite failed");
+			throw new RuntimeException("copyPoolQuestionsTx: db write failed");
 		}
 	}
 
@@ -86,10 +86,10 @@ public class QuestionStorageOracle extends QuestionStorageSql implements Questio
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_QUESTION");
-		sql.append(" (ID, CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
+		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
 		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
 		sql.append(" TYPE, GUEST)");
-		sql.append(" SELECT MNEME_QUESTION_SEQ.NEXTVAL,");
+		sql.append(" SELECT");
 		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, Q.HISTORICAL, Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
@@ -101,7 +101,7 @@ public class QuestionStorageOracle extends QuestionStorageSql implements Questio
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
-			throw new RuntimeException("copyPoolQuestionsTx: dbWrite failed");
+			throw new RuntimeException("copyPoolQuestionsTx: db write failed");
 		}
 	}
 
@@ -119,15 +119,12 @@ public class QuestionStorageOracle extends QuestionStorageSql implements Questio
 	{
 		Date now = new Date();
 
-		// get the next id
-		Long id = this.sqlService.getNextSequence("MNEME_QUESTION_SEQ", null);
-
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_QUESTION");
-		sql.append(" (ID, CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
+		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
 		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
 		sql.append(" TYPE, GUEST)");
-		sql.append(" SELECT " + id + ",");
+		sql.append(" SELECT");
 		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, '1', Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
@@ -137,9 +134,10 @@ public class QuestionStorageOracle extends QuestionStorageSql implements Questio
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(qid);
 
-		if (!this.sqlService.dbWrite(null, sql.toString(), fields))
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
 		{
-			throw new RuntimeException("copyQuestionTx: dbWrite failed");
+			throw new RuntimeException("copyQuestionTx: db write failed");
 		}
 
 		return id.toString();
@@ -159,15 +157,12 @@ public class QuestionStorageOracle extends QuestionStorageSql implements Questio
 	{
 		Date now = new Date();
 
-		// get the next id
-		Long id = this.sqlService.getNextSequence("MNEME_QUESTION_SEQ", null);
-
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_QUESTION");
-		sql.append(" (ID, CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
+		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
 		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
 		sql.append(" TYPE, GUEST)");
-		sql.append(" SELECT " + id + ",");
+		sql.append(" SELECT");
 		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, Q.HISTORICAL, Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
@@ -177,9 +172,10 @@ public class QuestionStorageOracle extends QuestionStorageSql implements Questio
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(qid);
 
-		if (!this.sqlService.dbWrite(null, sql.toString(), fields))
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
 		{
-			throw new RuntimeException("copyQuestionTx: dbWrite failed");
+			throw new RuntimeException("copyQuestionTx: db write failed");
 		}
 
 		return id.toString();
@@ -193,37 +189,34 @@ public class QuestionStorageOracle extends QuestionStorageSql implements Questio
 	 */
 	protected void insertQuestionTx(QuestionImpl question)
 	{
-		// get the next id
-		Long id = this.sqlService.getNextSequence("MNEME_QUESTION_SEQ", null);
-
 		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_QUESTION (ID,");
+		sql.append("INSERT INTO MNEME_QUESTION (");
 		sql.append(" CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
 		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
 		sql.append(" TYPE, GUEST )");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[16];
-		fields[0] = id;
-		fields[1] = question.getContext();
-		fields[2] = question.getCreatedBy().getDate().getTime();
-		fields[3] = question.getCreatedBy().getUserId();
-		fields[4] = limit(question.getDescription(), 255);
-		fields[5] = question.getExplainReason() ? "1" : "0";
-		fields[6] = question.getFeedback();
-		fields[7] = question.getHints();
-		fields[8] = question.getIsHistorical() ? "1" : "0";
-		fields[9] = question.getMint() ? "1" : "0";
-		fields[10] = question.getModifiedBy().getDate().getTime();
-		fields[11] = question.getModifiedBy().getUserId();
-		fields[12] = (question.poolId == null) ? null : Long.valueOf(question.poolId);
-		fields[13] = question.getPresentation().getText();
-		fields[14] = question.getType();
-		fields[15] = SqlHelper.encodeStringArray(question.getTypeSpecificQuestion().getData());
+		Object[] fields = new Object[15];
+		fields[0] = question.getContext();
+		fields[1] = question.getCreatedBy().getDate().getTime();
+		fields[2] = question.getCreatedBy().getUserId();
+		fields[3] = limit(question.getDescription(), 255);
+		fields[4] = question.getExplainReason() ? "1" : "0";
+		fields[5] = question.getFeedback();
+		fields[6] = question.getHints();
+		fields[7] = question.getIsHistorical() ? "1" : "0";
+		fields[8] = question.getMint() ? "1" : "0";
+		fields[9] = question.getModifiedBy().getDate().getTime();
+		fields[10] = question.getModifiedBy().getUserId();
+		fields[11] = (question.poolId == null) ? null : Long.valueOf(question.poolId);
+		fields[12] = question.getPresentation().getText();
+		fields[13] = question.getType();
+		fields[14] = SqlHelper.encodeStringArray(question.getTypeSpecificQuestion().getData());
 
-		if (!this.sqlService.dbWrite(null, sql.toString(), fields))
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
 		{
-			throw new RuntimeException("insertQuestionTx: dbWrite failed");
+			throw new RuntimeException("insertQuestionTx: db write failed");
 		}
 
 		// set the question's id

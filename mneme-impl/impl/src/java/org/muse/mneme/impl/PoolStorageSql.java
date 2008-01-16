@@ -35,9 +35,9 @@ import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 
 /**
- * PoolStorageMysql implements PoolStorage in mysql.
+ * PoolStorageMysql implements PoolStorage in SQL databases.
  */
-public class PoolStorageSql implements PoolStorage
+public abstract class PoolStorageSql implements PoolStorage
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(PoolStorageSql.class);
@@ -201,23 +201,6 @@ public class PoolStorageSql implements PoolStorage
 		fields[0] = context;
 
 		return readPools(whereOrder.toString(), fields);
-	}
-
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		if (this.sqlService.getVendor().equals("mysql"))
-		{
-			// if we are auto-creating our schema, check and create
-			if (autoDdl)
-			{
-				this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_pool");
-			}
-
-			M_log.info("init()");
-		}
 	}
 
 	/**
@@ -522,36 +505,7 @@ public class PoolStorageSql implements PoolStorage
 	 * @param pool
 	 *        The pool.
 	 */
-	protected void insertPoolTx(PoolImpl pool)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_POOL (");
-		sql.append(" CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, DIFFICULTY, HISTORICAL,");
-		sql.append(" MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POINTS, TITLE )");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?)");
-
-		Object[] fields = new Object[11];
-		fields[0] = pool.getContext();
-		fields[1] = pool.getCreatedBy().getDate().getTime();
-		fields[2] = pool.getCreatedBy().getUserId();
-		fields[3] = pool.getDescription();
-		fields[4] = pool.getDifficulty().toString();
-		fields[5] = pool.getIsHistorical() ? "1" : "0";
-		fields[6] = pool.getMint() ? "1" : "0";
-		fields[7] = pool.getModifiedBy().getDate().getTime();
-		fields[8] = pool.getModifiedBy().getUserId();
-		fields[9] = pool.getPointsEdit();
-		fields[10] = pool.getTitle();
-
-		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
-		if (id == null)
-		{
-			throw new RuntimeException("insertPoolTx: dbInsert failed");
-		}
-
-		// set the pool's id
-		pool.initId(id.toString());
-	}
+	protected abstract void insertPoolTx(PoolImpl pool);
 
 	/**
 	 * Read a pool manifest

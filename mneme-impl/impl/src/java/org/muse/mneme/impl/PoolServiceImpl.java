@@ -252,6 +252,8 @@ public class PoolServiceImpl implements PoolService
 			// messages
 			if (this.bundle != null) this.messages = new ResourceLoader(this.bundle);
 
+			storage.init();
+
 			M_log.info("init(): storage: " + this.storage);
 		}
 		catch (Throwable t)

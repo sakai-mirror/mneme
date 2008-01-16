@@ -328,6 +328,8 @@ public class AssessmentServiceImpl implements AssessmentService
 
 			if (storage == null) M_log.warn("no storage set: " + this.storageKey);
 
+			storage.init();
+
 			M_log.info("init(): storage: " + this.storage);
 		}
 		catch (Throwable t)

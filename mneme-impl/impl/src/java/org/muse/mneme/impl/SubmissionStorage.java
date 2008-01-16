@@ -188,6 +188,11 @@ public interface SubmissionStorage
 	List<String> getUsersSubmitted(Assessment assessment);
 
 	/**
+	 * Initialize.
+	 */
+	void init();
+
+	/**
 	 * Construct a new Answer object.
 	 * 
 	 * @return A new Answer object.

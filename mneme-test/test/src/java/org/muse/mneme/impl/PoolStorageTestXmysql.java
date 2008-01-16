@@ -76,7 +76,7 @@ public class PoolStorageTestXmysql extends PoolStorageTestX
 
 	protected PoolStorage setupPoolStorage()
 	{
-		PoolStorageSql s = new PoolStorageSql();
+		PoolStorageMysql s = new PoolStorageMysql();
 		s.setAutoDdl("true");
 		s.setPoolService(null);
 		s.setQuestionService(null);
