@@ -111,9 +111,9 @@ public class RemoveView extends ControllerImpl
 //			for (Iterator i = site.getRoles().iterator(); i.hasNext();)
 //			{
 //				Role role = (Role) i.next();
-//				role.disallowFunction("mnene.grade");
-//				role.disallowFunction("mnene.submit");
-//				role.disallowFunction("mnene.manage");
+//				role.disallowFunction("mneme.grade");
+//				role.disallowFunction("mneme.submit");
+//				role.disallowFunction("mneme.manage");
 //			}
 
 //			// work around a "feature" of the Site impl - role changes do not trigger an azg save

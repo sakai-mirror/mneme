@@ -24,7 +24,7 @@ package org.muse.mneme.api;
 import java.util.List;
 
 /**
- * ImportService provides support for import into Mnene.
+ * ImportService provides support for import into Mneme.
  */
 public interface ImportService
 {
