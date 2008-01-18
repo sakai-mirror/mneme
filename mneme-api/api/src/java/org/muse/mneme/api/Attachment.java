@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,21 +22,28 @@
 package org.muse.mneme.api;
 
 /**
- * Ent is even smaller than Entity - just something with an id and description.
+ * Attachment models an attachment.
  */
-public interface Ent
+public interface Attachment
 {
 	/**
-	 * Access the description.
+	 * Access the display name.
 	 * 
-	 * @return The description.
+	 * @return The display name;
 	 */
-	String getDescription();
+	String getName();
 
 	/**
-	 * Access the id.
+	 * Access the reference string.
 	 * 
-	 * @return The id;
+	 * @return the reference string.
 	 */
-	String getId();
+	String getReference();
+
+	/**
+	 * Access the full access URL.
+	 * 
+	 * @return the full access URL.
+	 */
+	String getUrl();
 }

@@ -23,6 +23,7 @@ package org.muse.mneme.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.Attachment;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Translation;
 import org.sakaiproject.authz.api.SecurityAdvisor;
@@ -215,6 +217,79 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	public void destroy()
 	{
 		M_log.info("destroy()");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Attachment> findImages(String application, String context, String prefix)
+	{
+		// permission
+		pushAdvisor();
+
+		List<Attachment> rv = new ArrayList<Attachment>();
+
+		try
+		{
+			// TODO: filter images
+
+			// form the content hosting path to the docs collection
+			String docsCollection = "/private/";
+			docsCollection += application + "/";
+			docsCollection += context + "/";
+			if ((prefix != null) && (prefix.length() > 0))
+			{
+				docsCollection += prefix + "/";
+			}
+
+			// get the members of this collection
+			ContentCollection docs = contentHostingService.getCollection(docsCollection);
+			List members = docs.getMemberResources();
+			for (Object m : members)
+			{
+				if (m instanceof ContentCollection)
+				{
+					// get the member within
+					ContentCollection holder = (ContentCollection) m;
+					List innerMembers = holder.getMemberResources();
+					for (Object mm : innerMembers)
+					{
+						if (mm instanceof ContentResource)
+						{
+							ContentResource doc = (ContentResource) mm;
+							String ref = doc.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+							String url = doc.getUrl(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+							Attachment a = new AttachmentImpl(doc.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME), ref, url);
+							rv.add(a);
+						}
+					}
+				}
+
+				else if (m instanceof ContentResource)
+				{
+					ContentResource doc = (ContentResource) m;
+					String ref = doc.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+					String url = doc.getUrl(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+					Attachment a = new AttachmentImpl(doc.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME), ref, url);
+					rv.add(a);
+				}
+			}
+		}
+		catch (IdUnusedException e)
+		{
+		}
+		catch (TypeException e)
+		{
+		}
+		catch (PermissionException e)
+		{
+		}
+		finally
+		{
+			popAdvisor();
+		}
+
+		return rv;
 	}
 
 	/**
@@ -417,7 +492,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 
 				// harvest also the mneme docs references
 				if (index == -1) index = ref.indexOf("/access/mneme/content/");
-				
+
 				// TODO: further filter to docs root and context (optional)
 				if (index != -1)
 				{

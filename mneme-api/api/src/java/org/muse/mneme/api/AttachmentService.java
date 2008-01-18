@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,19 @@ public interface AttachmentService
 	 * @return The Reference to the added attachment.
 	 */
 	Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, Reference resource);
+
+	/**
+	 * Find all the image attachments in the docs area of the application for this context.
+	 * 
+	 * @param application
+	 *        The application prefix for the collection in private.
+	 * @param context
+	 *        The context associated with the attachment.
+	 * @param prefix
+	 *        Any prefix path for within the context are of the application in private.
+	 * @return A List of Attachments to the image type attachments.
+	 */
+	List<Attachment> findImages(String application, String context, String prefix);
 
 	/**
 	 * Form a Reference object from a reference string.
