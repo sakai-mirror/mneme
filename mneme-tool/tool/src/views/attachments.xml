@@ -38,6 +38,17 @@
 
 	<container>
 
+		<!-- upload -->
+		<fileUpload>
+			<title>
+				<message selector="upload-title" />
+			</title>
+			<upload>
+				<message selector="upload-button" />
+			</upload>
+			<model ref="upload.upload" />
+		</fileUpload>
+
 		<!-- the list of attachments -->
 		<entityList style="FLAT">
 			<iterator name="attachment">

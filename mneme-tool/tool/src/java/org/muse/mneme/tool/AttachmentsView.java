@@ -34,6 +34,7 @@ import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.Attachment;
 import org.muse.mneme.api.AttachmentService;
+import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
@@ -75,6 +76,9 @@ public class AttachmentsView extends ControllerImpl
 
 		// render
 		uiService.render(ui, context);
+
+		// we do NOT want to be kept track of as the current destination, since we are a popup in another window.
+		uiService.undoPrepareGet(req, res);
 	}
 
 	/**
@@ -91,8 +95,27 @@ public class AttachmentsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// we need no parameters ?
+		// if (params.length != 2)
+		// {
+		// throw new IllegalArgumentException();
+		// }
+
+		// for the upload of attachments
+		Upload upload = new Upload(this.toolManager.getCurrentPlacement().getContext(), AttachmentService.DOCS_AREA, false, this.attachmentService);
+		context.put("upload", upload);
+
 		// read the form
 		String destination = uiService.decode(req, context);
+
+		// check for file upload error
+		boolean uploadError = ((req.getAttribute("upload.status") != null) && (!req.getAttribute("upload.status").equals("ok")));
+
+		// save the attachments upload
+		if (upload.getUpload() != null)
+		{
+			Reference ref = upload.getUpload();
+		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
