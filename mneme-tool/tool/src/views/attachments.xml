@@ -75,6 +75,12 @@
 						</navigation>
 					</container>
 				</column>
+				<modelColumn>
+					<title>
+						<message selector="attachment-name" />
+					</title>
+					<model type="icon" ref="attachment.url" />
+				</modelColumn>
 			</columns>
 		</entityList>
 

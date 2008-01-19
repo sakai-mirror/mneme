@@ -21,6 +21,16 @@
 
 package org.muse.mneme.impl;
 
+import java.awt.Container;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.MediaTracker;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -76,6 +86,10 @@ import org.sakaiproject.util.StringUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGEncodeParam;
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
+
 /**
  * AttachmentServiceImpl implements AttachmentService.
  */
@@ -83,6 +97,8 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(AttachmentServiceImpl.class);
+
+	protected final static String PROP_THUMB = "attachment:thumb";
 
 	protected final static String PROP_UNIQUE_HOLDER = "attachment:unique";
 
@@ -134,14 +150,23 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			return null;
 		}
 
-		Reference rv = doAdd(name, type, body, size, application, context, prefix, uniqueHolder);
+		Reference rv = doAdd(contentHostingId(name, application, context, prefix, uniqueHolder), name, type, body, size, false);
 
 		// if this failed, and we are not using a uniqueHolder, try it with a uniqueHolder
 		if ((rv == null) && !uniqueHolder)
 		{
-			rv = doAdd(name, type, body, size, application, context, prefix, true);
+			rv = doAdd(contentHostingId(name, application, context, prefix, true), name, type, body, size, false);
 		}
 
+		// if we added one
+		if (rv != null)
+		{
+			// if it is an image
+			if (type.toLowerCase().startsWith("image/"))
+			{
+				addThumb(rv, name, body);
+			}
+		}
 		return rv;
 	}
 
@@ -168,12 +193,22 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			byte[] body = resource.getContent();
 			String name = resource.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME);
 
-			Reference rv = doAdd(name, type, body, size, application, context, prefix, uniqueHolder);
+			Reference rv = doAdd(contentHostingId(name, application, context, prefix, uniqueHolder), name, type, body, size, false);
 
 			// if this failed, and we are not using a uniqueHolder, try it with a uniqueHolder
 			if ((rv == null) && !uniqueHolder)
 			{
-				rv = doAdd(name, type, body, size, application, context, prefix, true);
+				rv = doAdd(contentHostingId(name, application, context, prefix, true), name, type, body, size, false);
+			}
+
+			// if we added one
+			if (rv != null)
+			{
+				// if it is an image
+				if (type.toLowerCase().startsWith("image/"))
+				{
+					addThumb(rv, name, body);
+				}
 			}
 
 			return rv;
@@ -231,8 +266,6 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 
 		try
 		{
-			// TODO: filter images
-
 			// form the content hosting path to the docs collection
 			String docsCollection = "/private/";
 			docsCollection += application + "/";
@@ -256,22 +289,14 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 					{
 						if (mm instanceof ContentResource)
 						{
-							ContentResource doc = (ContentResource) mm;
-							String ref = doc.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
-							String url = doc.getUrl(ContentHostingService.PROP_ALTERNATE_REFERENCE);
-							Attachment a = new AttachmentImpl(doc.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME), ref, url);
-							rv.add(a);
+							filterNonThumbImages(rv, (ContentResource) mm);
 						}
 					}
 				}
 
 				else if (m instanceof ContentResource)
 				{
-					ContentResource doc = (ContentResource) m;
-					String ref = doc.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
-					String url = doc.getUrl(ContentHostingService.PROP_ALTERNATE_REFERENCE);
-					Attachment a = new AttachmentImpl(doc.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME), ref, url);
-					rv.add(a);
+					filterNonThumbImages(rv, (ContentResource) m);
 				}
 			}
 		}
@@ -774,6 +799,41 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
+	 * Add a thumbnail for the image at this reference with this name and contents.
+	 * 
+	 * @param resource
+	 *        The image resource reference.
+	 * @param name
+	 *        The original file name.
+	 * @param body
+	 *        The image bytes.
+	 * @return A reference to the thumbnail, or null if not made.
+	 */
+	protected Reference addThumb(Reference resource, String name, byte[] body)
+	{
+		Reference ref = this.getReference(resource.getId());
+		String thumbId = ref.getId() + "_thumb.jpg";
+		String thumbName = name + "_thumb.jpg";
+		try
+		{
+			byte[] thumb = makeThumb(body, 80, 80, 0.75f);
+			Reference thumbRef = doAdd(thumbId, thumbName, "image/jpeg", thumb, thumb.length, true);
+
+			return thumbRef;
+		}
+		catch (IOException e)
+		{
+			M_log.warn("addAttachment: thumbing: " + e.toString());
+		}
+		catch (InterruptedException e)
+		{
+			M_log.warn("addAttachment: thumbing: " + e.toString());
+		}
+
+		return null;
+	}
+
+	/**
 	 * Assure that a collection with this name exists in the container collection: create it if it is missing.
 	 * 
 	 * @param container
@@ -850,16 +910,10 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
-	 * Perform the add.
+	 * Compute the content hosting id.
 	 * 
 	 * @param name
 	 *        The file name.
-	 * @param type
-	 *        The mime type.
-	 * @param body
-	 *        The body bytes.
-	 * @param size
-	 *        The body size.
 	 * @param application
 	 *        The application prefix for the collection in private.
 	 * @param context
@@ -868,13 +922,10 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 *        Any prefix path for within the context are of the application in private.
 	 * @param uniqueHolder
 	 *        If true, a uniquely named folder is created to hold the resource.
-	 * @return The Reference to the added attachment.
+	 * @return
 	 */
-	protected Reference doAdd(String name, String type, byte[] body, long size, String application, String context, String prefix,
-			boolean uniqueHolder)
+	protected String contentHostingId(String name, String application, String context, String prefix, boolean uniqueHolder)
 	{
-		pushAdvisor();
-
 		// form the content hosting path, and make sure all the folders exist
 		String contentPath = "/private/";
 		assureCollection(contentPath, application, false);
@@ -895,9 +946,39 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 
 		contentPath += name;
 
+		return contentPath;
+	}
+
+	/**
+	 * Perform the add.
+	 * 
+	 * @param id
+	 *        The content hosting id.
+	 * @param name
+	 *        The simple file name.
+	 * @param type
+	 *        The mime type.
+	 * @param body
+	 *        The body bytes.
+	 * @param size
+	 *        The body size.
+	 * @param application
+	 *        The application prefix for the collection in private.
+	 * @param context
+	 *        The context associated with the attachment.
+	 * @param prefix
+	 *        Any prefix path for within the context are of the application in private.
+	 * @param uniqueHolder
+	 *        If true, a uniquely named folder is created to hold the resource.
+	 * @return The Reference to the added attachment.
+	 */
+	protected Reference doAdd(String id, String name, String type, byte[] body, long size, boolean thumb)
+	{
+		pushAdvisor();
+
 		try
 		{
-			ContentResourceEdit edit = contentHostingService.addResource(contentPath);
+			ContentResourceEdit edit = contentHostingService.addResource(id);
 			edit.setContent(body);
 			edit.setContentType(type);
 			ResourcePropertiesEdit props = edit.getPropertiesEdit();
@@ -906,6 +987,11 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			props.addProperty(ContentHostingService.PROP_ALTERNATE_REFERENCE, AttachmentService.REFERENCE_ROOT);
 
 			props.addProperty(ResourceProperties.PROP_DISPLAY_NAME, name);
+
+			if (thumb)
+			{
+				props.addProperty(PROP_THUMB, PROP_THUMB);
+			}
 
 			contentHostingService.commitResource(edit);
 
@@ -953,6 +1039,89 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		}
 
 		return null;
+	}
+
+	/**
+	 * If the document is an image and not a thumbnail, add it to the attachments.
+	 * 
+	 * @param attachments
+	 *        The list of attachments.
+	 * @param doc
+	 *        The resource.
+	 */
+	protected void filterNonThumbImages(List<Attachment> attachments, ContentResource doc)
+	{
+		// only images
+		if (doc.getContentType().toLowerCase().startsWith("image/"))
+		{
+			// not thumbs
+			if (doc.getProperties().getProperty(this.PROP_THUMB) == null)
+			{
+				String ref = doc.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+				String url = doc.getUrl(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+				Attachment a = new AttachmentImpl(doc.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME), ref, url);
+				attachments.add(a);
+			}
+		}
+	}
+
+	/**
+	 * Create a thumbnail image from the full image in the byte[], of the desired width and height and quality, preserving aspect ratio.
+	 * 
+	 * @param full
+	 *        The full image bytes.
+	 * @param width
+	 *        The desired max width (pixels).
+	 * @param height
+	 *        The desired max height (pixels).
+	 * @param quality
+	 *        The JPEG quality (0 - 1).
+	 * @return The thumbnail JPEG as a byte[].
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	protected byte[] makeThumb(byte[] full, int width, int height, float quality) throws IOException, InterruptedException
+	{
+		// read the image from the byte array, waiting till it's processed
+		Image fullImage = Toolkit.getDefaultToolkit().createImage(full);
+		MediaTracker tracker = new MediaTracker(new Container());
+		tracker.addImage(fullImage, 0);
+		tracker.waitForID(0);
+
+		// get the full image dimensions
+		int fullWidth = fullImage.getWidth(null);
+		int fullHeight = fullImage.getHeight(null);
+
+		// preserve the aspect of the full image, not exceeding the thumb dimensions
+		if (fullWidth > fullHeight)
+		{
+			// full width will take the full desired width, set the appropriate height
+			height = (int) ((((float) width) / ((float) fullWidth)) * ((float) fullHeight));
+		}
+		else
+		{
+			// full height will take the full desired height, set the appropriate width
+			width = (int) ((((float) height) / ((float) fullHeight)) * ((float) fullWidth));
+		}
+
+		// draw the scaled thumb
+		BufferedImage thumbImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2D = thumbImage.createGraphics();
+		g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g2D.drawImage(fullImage, 0, 0, width, height, null);
+
+		// encode as jpeg to a byte array
+		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+		BufferedOutputStream out = new BufferedOutputStream(byteStream);
+		JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+		JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(thumbImage);
+		param.setQuality(quality, false);
+		encoder.setJPEGEncodeParam(param);
+		encoder.encode(thumbImage);
+		out.close();
+		byte[] thumb = byteStream.toByteArray();
+
+		return thumb;
 	}
 
 	/**
