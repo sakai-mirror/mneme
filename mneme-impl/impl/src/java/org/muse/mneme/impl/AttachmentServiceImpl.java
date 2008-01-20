@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +51,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Attachment;
 import org.muse.mneme.api.AttachmentService;
+import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Translation;
 import org.sakaiproject.authz.api.SecurityAdvisor;
-import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.content.api.ContentCollectionEdit;
@@ -117,6 +118,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/** Dependency: SecurityService */
 	protected SecurityService securityService = null;
 
+	/** Dependency: SecurityService */
+	protected org.sakaiproject.authz.api.SecurityService securityServiceSakai = null;
+
 	/** Dependency: ServerConfigurationService */
 	protected ServerConfigurationService serverConfigurationService = null;
 
@@ -128,46 +132,56 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, FileItem file)
 	{
-		String name = file.getName();
-		if (name != null)
+		pushAdvisor();
+
+		try
 		{
-			name = massageName(name);
-		}
-
-		String type = file.getContentType();
-
-		// TODO: change to file.getInputStream() for after Sakai 2.3 more efficient support
-		// InputStream body = file.getInputStream();
-		byte[] body = file.get();
-
-		long size = file.getSize();
-
-		// detect no file selected
-		if ((name == null) || (type == null) || (body == null) || (size == 0))
-		{
-			// TODO: if using input stream, close it
-			// if (body != null) body.close();
-			return null;
-		}
-
-		Reference rv = doAdd(contentHostingId(name, application, context, prefix, uniqueHolder), name, type, body, size, false);
-
-		// if this failed, and we are not using a uniqueHolder, try it with a uniqueHolder
-		if ((rv == null) && !uniqueHolder)
-		{
-			rv = doAdd(contentHostingId(name, application, context, prefix, true), name, type, body, size, false);
-		}
-
-		// if we added one
-		if (rv != null)
-		{
-			// if it is an image
-			if (type.toLowerCase().startsWith("image/"))
+			String name = file.getName();
+			if (name != null)
 			{
-				addThumb(rv, name, body);
+				name = massageName(name);
 			}
+
+			String type = file.getContentType();
+
+			// TODO: change to file.getInputStream() for after Sakai 2.3 more efficient support
+			// InputStream body = file.getInputStream();
+			byte[] body = file.get();
+
+			long size = file.getSize();
+
+			// detect no file selected
+			if ((name == null) || (type == null) || (body == null) || (size == 0))
+			{
+				// TODO: if using input stream, close it
+				// if (body != null) body.close();
+				return null;
+			}
+
+			Reference rv = doAdd(contentHostingId(name, application, context, prefix, uniqueHolder), name, type, body, size, false);
+
+			// if this failed, and we are not using a uniqueHolder, try it with a uniqueHolder
+			if ((rv == null) && !uniqueHolder)
+			{
+				rv = doAdd(contentHostingId(name, application, context, prefix, true), name, type, body, size, false);
+			}
+
+			// if we added one
+			if (rv != null)
+			{
+				// if it is an image
+				if (type.toLowerCase().startsWith("image/"))
+				{
+					addThumb(rv, name, body);
+				}
+			}
+
+			return rv;
 		}
-		return rv;
+		finally
+		{
+			popAdvisor();
+		}
 	}
 
 	/**
@@ -605,9 +619,11 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	public void removeAttachment(Reference ref)
 	{
 		pushAdvisor();
-		String id = entityManager.newReference(ref.getId()).getId();
+
 		try
 		{
+			String id = entityManager.newReference(ref.getId()).getId();
+
 			// check if this has a unique containing collection
 			ContentResource resource = this.contentHostingService.getResource(id);
 			ContentCollection collection = resource.getContainingCollection();
@@ -690,6 +706,17 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	public void setSecurityService(SecurityService service)
 	{
 		securityService = service;
+	}
+
+	/**
+	 * Dependency: SecurityService.
+	 * 
+	 * @param service
+	 *        The SecurityService.
+	 */
+	public void setSecurityServiceSakai(org.sakaiproject.authz.api.SecurityService service)
+	{
+		securityServiceSakai = service;
 	}
 
 	/**
@@ -875,24 +902,24 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			}
 			catch (IdInvalidException e2)
 			{
-				M_log.warn("init: creating our root collection: " + e2.toString());
+				M_log.warn("assureCollection: " + e2.toString());
 			}
 			catch (PermissionException e2)
 			{
-				M_log.warn("init: creating our root collection: " + e2.toString());
+				M_log.warn("assureCollection: " + e2.toString());
 			}
 			catch (InconsistentException e2)
 			{
-				M_log.warn("init: creating our root collection: " + e2.toString());
+				M_log.warn("assureCollection: " + e2.toString());
 			}
 		}
 		catch (TypeException e)
 		{
-			M_log.warn("init: checking our root collection: " + e.toString());
+			M_log.warn("assureCollection(2): " + e.toString());
 		}
 		catch (PermissionException e)
 		{
-			M_log.warn("init: checking our root collection: " + e.toString());
+			M_log.warn("assureCollection(2): " + e.toString());
 		}
 	}
 
@@ -905,8 +932,11 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	protected boolean checkSecurity(Reference ref)
 	{
-		// TODO:
-		return true;
+		if (this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, ref.getContext()))
+			return true;
+		if (this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, ref.getContext()))
+			return true;
+		return false;
 	}
 
 	/**
@@ -974,8 +1004,6 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	protected Reference doAdd(String id, String name, String type, byte[] body, long size, boolean thumb)
 	{
-		pushAdvisor();
-
 		try
 		{
 			ContentResourceEdit edit = contentHostingService.addResource(id);
@@ -1034,8 +1062,6 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			// catch (IOException e)
 			// {
 			// }
-
-			popAdvisor();
 		}
 
 		return null;
@@ -1159,7 +1185,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	protected void popAdvisor()
 	{
-		securityService.popAdvisor();
+		securityServiceSakai.popAdvisor();
 	}
 
 	/**
@@ -1168,7 +1194,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	protected void pushAdvisor()
 	{
 		// setup a security advisor
-		securityService.pushAdvisor(new SecurityAdvisor()
+		securityServiceSakai.pushAdvisor(new SecurityAdvisor()
 		{
 			public SecurityAdvice isAllowed(String userId, String function, String reference)
 			{
