@@ -49,6 +49,9 @@ public interface AttachmentService
 	/** Prefix for the submissions upload area in MnemeDocs. */
 	static final String SUBMISSIONS_AREA = "submissions";
 
+	/** The text added to the main URL to form the thumnail URL. */
+	public final static String THUMB_SUFFIX = "_thumb.jpg";
+
 	/**
 	 * Add an attachment from an uploaded file.
 	 * 

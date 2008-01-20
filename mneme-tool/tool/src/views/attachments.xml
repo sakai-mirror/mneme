@@ -51,36 +51,77 @@
 
 		<!-- the list of attachments -->
 		<entityList style="FLAT">
-			<iterator name="attachment">
-				<model ref="attachments" />
+			<iterator name="row">
+				<model ref="attachments.rows" />
 			</iterator>
 			<emptyTitle>
 				<message selector="no-attachments" />
 			</emptyTitle>
 			<columns>
-				<column>
-					<title>
-						<message selector="attachment-name" />
-					</title>
+
+				<column centered="TRUE">
 					<container>
 						<navigation style="LINK" submit="TRIGGER">
 							<title>
 								<message>
-									<model ref="attachment.name" />
+									<model type="image" ref="row.col01.thumbUrl">
+										<caption>
+											<message>
+												<model ref="row.col01.name" />
+											</message>
+										</caption>
+									</model>
 								</message>
 							</title>
 							<destination template="ambrosiaChooseAttachment('{0}');">
-								<model ref="attachment.url" />
+								<model ref="row.col01.url" />
 							</destination>
 						</navigation>
 					</container>
 				</column>
-				<modelColumn>
-					<title>
-						<message selector="attachment-name" />
-					</title>
-					<model type="icon" ref="attachment.url" />
-				</modelColumn>
+
+				<column centered="TRUE">
+					<container>
+						<navigation style="LINK" submit="TRIGGER">
+							<title>
+								<message>
+									<model type="image" ref="row.col02.thumbUrl">
+										<caption>
+											<message>
+												<model ref="row.col02.name" />
+											</message>
+										</caption>
+									</model>
+								</message>
+							</title>
+							<destination template="ambrosiaChooseAttachment('{0}');">
+								<model ref="row.col02.url" />
+							</destination>
+						</navigation>
+					</container>
+				</column>
+
+				<column centered="TRUE">
+					<container>
+						<navigation style="LINK" submit="TRIGGER">
+							<title>
+								<message>
+									<model type="image" ref="row.col03.thumbUrl">
+										<caption>
+											<message>
+												<model ref="row.col03.name" />
+											</message>
+										</caption>
+									</model>
+								</message>
+							</title>
+							<destination template="ambrosiaChooseAttachment('{0}');">
+								<model ref="row.col03.url" />
+							</destination>
+						</navigation>
+					</container>
+				</column>
+
 			</columns>
 		</entityList>
 

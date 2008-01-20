@@ -812,8 +812,8 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	protected Reference addThumb(Reference resource, String name, byte[] body)
 	{
 		Reference ref = this.getReference(resource.getId());
-		String thumbId = ref.getId() + "_thumb.jpg";
-		String thumbName = name + "_thumb.jpg";
+		String thumbId = ref.getId() + THUMB_SUFFIX;
+		String thumbName = name + THUMB_SUFFIX;
 		try
 		{
 			byte[] thumb = makeThumb(body, 80, 80, 0.75f);

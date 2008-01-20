@@ -41,6 +41,13 @@ public interface Attachment
 	String getReference();
 
 	/**
+	 * Access the full access URL to the thumbnail representation of the attachment.
+	 * 
+	 * @return the full access URL to the thumbnail representation of the attachment.
+	 */
+	String getThumbUrl();
+
+	/**
 	 * Access the full access URL.
 	 * 
 	 * @return the full access URL.

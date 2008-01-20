@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Grid;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.Attachment;
@@ -72,7 +73,12 @@ public class AttachmentsView extends ControllerImpl
 		List<Attachment> attachments = this.attachmentService.findImages(AttachmentService.MNEME_APPLICATION, this.toolManager.getCurrentPlacement()
 				.getContext(), AttachmentService.DOCS_AREA);
 
-		context.put("attachments", attachments);
+		// load them into a 3 column grid
+		Grid grid = this.uiService.newGrid();
+		grid.setWidth(3);
+		grid.load(attachments);
+
+		context.put("attachments", grid);
 
 		// render
 		uiService.render(ui, context);

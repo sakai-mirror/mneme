@@ -22,6 +22,7 @@
 package org.muse.mneme.impl;
 
 import org.muse.mneme.api.Attachment;
+import org.muse.mneme.api.AttachmentService;
 
 /**
  * AttachmentImpl implements Attachment
@@ -81,6 +82,14 @@ public class AttachmentImpl implements Attachment
 	public String getReference()
 	{
 		return this.ref;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getThumbUrl()
+	{
+		return this.url + AttachmentService.THUMB_SUFFIX;
 	}
 
 	/**
