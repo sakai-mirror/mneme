@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,15 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import org.muse.mneme.api.Attribution;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionPoolService;
 import org.muse.mneme.api.QuestionService;
-import org.muse.mneme.api.QuestionService.FindQuestionsSort;
 
 /**
  * PoolImpl implements Pool
@@ -60,9 +62,8 @@ public class PoolImpl implements Pool
 
 	protected Float points = null;
 
-	protected transient PoolServiceImpl poolService = null;
-
-	protected transient QuestionService questionService = null;
+	/** Dependency: QuestionPoolService */
+	protected transient QuestionPoolService questionService = null;
 
 	protected String title = null;
 
@@ -80,11 +81,8 @@ public class PoolImpl implements Pool
 	/**
 	 * Construct.
 	 */
-	public PoolImpl(PoolServiceImpl service, QuestionService questionService)
+	public PoolImpl()
 	{
-		this.poolService = service;
-		this.questionService = questionService;
-
 		this.createdBy = new AttributionImpl(this.changed);
 		this.modifiedBy = new AttributionImpl(this.changed);
 	}
@@ -94,7 +92,21 @@ public class PoolImpl implements Pool
 	 */
 	public List<String> drawQuestionIds(long seed, Integer numQuestions)
 	{
-		return this.poolService.drawQuestionIds(this, seed, numQuestions);
+		if (numQuestions == null) throw new IllegalArgumentException();
+		if (numQuestions.intValue() <= 0) throw new IllegalArgumentException();
+
+		List<String> rv = getAllQuestionIds();
+
+		// randomize the questions in the copy
+		Collections.shuffle(rv, new Random(seed));
+
+		// cut off the number of questions we want
+		if (rv.size() > numQuestions)
+		{
+			rv = rv.subList(0, numQuestions);
+		}
+
+		return rv;
 	}
 
 	/**
@@ -112,7 +124,7 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Question> findQuestions(FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
+	public List<Question> findQuestions(QuestionService.FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
 		return this.questionService.findQuestions(this, sort, search, null, pageNum, pageSize);
 	}
@@ -122,7 +134,18 @@ public class PoolImpl implements Pool
 	 */
 	public List<String> getAllQuestionIds()
 	{
-		return this.poolService.getAllQuestionIds(this);
+		List<String> rv = null;
+
+		if (getIsHistorical())
+		{
+			rv = new ArrayList<String>(getFrozenManifest());
+		}
+		else
+		{
+			rv = this.questionService.getPoolQuestionIds(this);
+		}
+
+		return rv;
 	}
 
 	/**
@@ -194,7 +217,18 @@ public class PoolImpl implements Pool
 	 */
 	public Integer getNumQuestions()
 	{
-		return this.poolService.getPoolSize(this);
+		Integer rv = null;
+
+		if (getIsHistorical())
+		{
+			rv = getFrozenManifest().size();
+		}
+		else
+		{
+			rv = this.questionService.countQuestions(this, null, null);
+		}
+
+		return rv;
 	}
 
 	/**
@@ -320,6 +354,17 @@ public class PoolImpl implements Pool
 		this.points = points;
 
 		this.changed.setChanged();
+	}
+
+	/**
+	 * Dependency: QuestionService.
+	 * 
+	 * @param service
+	 *        The QuestionService.
+	 */
+	public void setQuestionService(QuestionPoolService service)
+	{
+		this.questionService = service;
 	}
 
 	/**
@@ -449,7 +494,6 @@ public class PoolImpl implements Pool
 		this.mint = other.mint;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
 		this.points = other.points;
-		this.poolService = other.poolService;
 		this.frozenManifest = new ArrayList<String>(other.frozenManifest);
 		this.title = other.title;
 	}

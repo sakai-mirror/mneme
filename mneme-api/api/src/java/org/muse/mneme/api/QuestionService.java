@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,8 @@ import java.util.List;
 /**
  * QuestionService provides services around question management for Mneme.
  */
-public interface QuestionService
+public interface QuestionService extends QuestionPoolService
 {
-	/**
-	 * Sort options for findQuestions()
-	 */
-	enum FindQuestionsSort
-	{
-		cdate_a, cdate_d, description_a, description_d, pool_difficulty_a, pool_difficulty_d, pool_points_a, pool_points_d, pool_title_a, pool_title_d, type_a, type_d;
-	}
-
 	/**
 	 * Check if the current user is allowed to edit this question.
 	 * 
@@ -78,19 +70,6 @@ public interface QuestionService
 	/**
 	 * Count the questions with this criteria.
 	 * 
-	 * @param pool
-	 *        The pool criteria - count questions from this pool only.
-	 * @param search
-	 *        The search criteria.
-	 * @param questionType
-	 *        The (optional) quesiton type; if specified, only questions of this type are included.
-	 * @return The questions in this pool with this criteria.
-	 */
-	Integer countQuestions(Pool pool, String search, String questionType);
-
-	/**
-	 * Count the questions with this criteria.
-	 * 
 	 * @param context
 	 *        The context - count questions from all pools in this context.
 	 * @param search
@@ -113,25 +92,6 @@ public interface QuestionService
 	/**
 	 * Locate a list of questions with this criteria.
 	 * 
-	 * @param pool
-	 *        The pool criteria - get questions from this pool only.
-	 * @param sort
-	 *        The sort criteria.
-	 * @param search
-	 *        The search criteria.
-	 * @param questionType
-	 *        The (optional) quesiton type; if specified, only questions of this type are included.
-	 * @param pageNum
-	 *        The page number (1 based) to display, or null to disable paging and get them all.
-	 * @param pageSize
-	 *        The number of items for the requested page, or null if we are not paging.
-	 * @return a list of questions that meet the criteria.
-	 */
-	List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize);
-
-	/**
-	 * Locate a list of questions with this criteria.
-	 * 
 	 * @param context
 	 *        The context - get questions from all pools in the context.
 	 * @param sort
@@ -139,7 +99,7 @@ public interface QuestionService
 	 * @param search
 	 *        The search criteria.
 	 * @param questionType
-	 *        The (optional) quesiton type; if specified, only questions of this type are included.
+	 *        The (optional) question type; if specified, only questions of this type are included.
 	 * @param pageNum
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize

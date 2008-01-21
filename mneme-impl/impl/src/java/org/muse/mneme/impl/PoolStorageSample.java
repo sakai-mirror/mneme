@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,10 @@ import org.muse.mneme.api.PoolService;
 import org.sakaiproject.util.StringUtil;
 
 /**
- * PoolStorageSample defines a sample storage for PoolStorage.
+ * PoolStorageSample defines a sample storage for PoolStorage.<br />
+ * newPool() must be added to clear the abstract.
  */
-public class PoolStorageSample implements PoolStorage
+public abstract class PoolStorageSample implements PoolStorage
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(PoolStorageSample.class);
@@ -50,10 +51,6 @@ public class PoolStorageSample implements PoolStorage
 	protected long nextId = 100;
 
 	protected Map<String, PoolImpl> pools = new LinkedHashMap<String, PoolImpl>();
-
-	protected PoolServiceImpl poolService = null;
-
-	protected QuestionServiceImpl questionService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -234,14 +231,6 @@ public class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public PoolImpl newPool()
-	{
-		return new PoolImpl(this.poolService, this.questionService);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public PoolImpl newPool(PoolImpl pool)
 	{
 		return new PoolImpl(pool);
@@ -275,22 +264,6 @@ public class PoolStorageSample implements PoolStorage
 		}
 
 		this.pools.put(pool.getId(), newPool(pool));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setPoolService(PoolServiceImpl service)
-	{
-		this.poolService = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setQuestionService(QuestionServiceImpl service)
-	{
-		this.questionService = service;
 	}
 
 	protected void fakeIt()

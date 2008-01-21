@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * PoolStorageMysql implements PoolStorage for MySQL.
  */
-public class PoolStorageMysql extends PoolStorageSql implements PoolStorage
+public abstract class PoolStorageMysql extends PoolStorageSql implements PoolStorage
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(PoolStorageMysql.class);

@@ -30,6 +30,14 @@ import org.apache.commons.logging.LogFactory;
  */
 public class QuestionStorageTestXsample extends QuestionStorageTestX
 {
+	public class MyPoolStorageSample extends PoolStorageSample
+	{
+		public PoolImpl newPool()
+		{
+			return new PoolImpl();
+		}
+	}
+
 	/** Logger. */
 	private static final Log log = LogFactory.getLog(QuestionStorageTestXsample.class);
 
@@ -48,9 +56,7 @@ public class QuestionStorageTestXsample extends QuestionStorageTestX
 
 	protected PoolStorage setupPoolStorage()
 	{
-		PoolStorageSample s = new PoolStorageSample();
-		s.setPoolService(null);
-		s.setQuestionService(null);
+		PoolStorageSample s = new MyPoolStorageSample();
 		s.init();
 
 		return s;

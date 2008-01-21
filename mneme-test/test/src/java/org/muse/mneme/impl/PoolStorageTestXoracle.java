@@ -34,6 +34,14 @@ import org.muse.mneme.impl.PoolStorageOracle;
  */
 public class PoolStorageTestXoracle extends PoolStorageTestX
 {
+	public class MyPoolStorageOracle extends PoolStorageOracle
+	{
+		public PoolImpl newPool()
+		{
+			return new PoolImplLazyManifest();
+		}
+	}
+
 	/** Logger. */
 	private static final Log log = LogFactory.getLog(PoolStorageTestXoracle.class);
 
@@ -76,10 +84,8 @@ public class PoolStorageTestXoracle extends PoolStorageTestX
 
 	protected PoolStorage setupPoolStorage()
 	{
-		PoolStorageOracle s = new PoolStorageOracle();
+		PoolStorageOracle s = new MyPoolStorageOracle();
 		s.setAutoDdl("true");
-		s.setPoolService(null);
-		s.setQuestionService(null);
 		s.setSqlService(sqlService);
 		s.setThreadLocalManager(thread_localManager);
 		s.init();

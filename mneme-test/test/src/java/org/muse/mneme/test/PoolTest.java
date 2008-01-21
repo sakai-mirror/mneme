@@ -21,25 +21,64 @@
 
 package org.muse.mneme.test;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionPoolService;
 import org.muse.mneme.impl.PoolImpl;
 
 /**
- * Test Pool.<br />
- * Note: drawQuestionIds, findQuestions, getAllQuestionIds, getNumQuestions are all service covers, not tested.
+ * Test Pool.
  */
 public class PoolTest extends TestCase
 {
+	public class MyQuestionService implements QuestionPoolService
+	{
+		/**
+		 * {@inheritDoc}
+		 */
+		public Integer countQuestions(Pool pool, String search, String questionType)
+		{
+			return Integer.valueOf(5);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize)
+		{
+			return new ArrayList<Question>();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public List<String> getPoolQuestionIds(Pool pool)
+		{
+			List<String> rv = new ArrayList<String>();
+			rv.add("1");
+			rv.add("2");
+			rv.add("3");
+			rv.add("4");
+			rv.add("5");
+
+			return rv;
+		}
+	}
+
 	/** Logger. */
 	private static final Log log = LogFactory.getLog(PoolTest.class);
 
 	protected Pool pool = null;
+
+	protected QuestionPoolService questionPoolService = null;
 
 	/**
 	 * @param arg0
@@ -47,6 +86,72 @@ public class PoolTest extends TestCase
 	public PoolTest(String arg0)
 	{
 		super(arg0);
+	}
+
+	public void testAttribution1() throws Exception
+	{
+		Date now = new Date();
+		final String TESTER = "tester";
+
+		pool.getCreatedBy().setDate(now);
+		pool.getCreatedBy().setUserId(TESTER);
+		assertTrue(pool.getCreatedBy().getDate().equals(now));
+		assertTrue(pool.getCreatedBy().getUserId().equals(TESTER));
+
+		// too long (length=100)
+		final String OVERLONG = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
+		final String JUSTRIGHT = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
+
+		pool.getCreatedBy().setUserId(JUSTRIGHT);
+		assertTrue(pool.getCreatedBy().getUserId().equals(JUSTRIGHT));
+
+		try
+		{
+			pool.getCreatedBy().setUserId(OVERLONG);
+			fail("expected illegal argument");
+		}
+		catch (IllegalArgumentException e)
+		{
+		}
+		assertTrue(pool.getCreatedBy().getUserId().equals(JUSTRIGHT));
+
+		pool.getCreatedBy().setDate(null);
+		pool.getCreatedBy().setUserId(null);
+		assertTrue(pool.getCreatedBy().getDate() == null);
+		assertTrue(pool.getCreatedBy().getUserId() == null);
+	}
+
+	public void testAttribution2() throws Exception
+	{
+		Date now = new Date();
+		final String TESTER = "tester";
+
+		pool.getModifiedBy().setDate(now);
+		pool.getModifiedBy().setUserId(TESTER);
+		assertTrue(pool.getModifiedBy().getDate().equals(now));
+		assertTrue(pool.getModifiedBy().getUserId().equals(TESTER));
+
+		// too long (length=100)
+		final String OVERLONG = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
+		final String JUSTRIGHT = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
+
+		pool.getModifiedBy().setUserId(JUSTRIGHT);
+		assertTrue(pool.getModifiedBy().getUserId().equals(JUSTRIGHT));
+
+		try
+		{
+			pool.getModifiedBy().setUserId(OVERLONG);
+			fail("expected illegal argument");
+		}
+		catch (IllegalArgumentException e)
+		{
+		}
+		assertTrue(pool.getModifiedBy().getUserId().equals(JUSTRIGHT));
+
+		pool.getModifiedBy().setDate(null);
+		pool.getModifiedBy().setUserId(null);
+		assertTrue(pool.getModifiedBy().getDate() == null);
+		assertTrue(pool.getModifiedBy().getUserId() == null);
 	}
 
 	/**
@@ -165,76 +270,73 @@ public class PoolTest extends TestCase
 		assertTrue(pool.getDifficulty() == 5);
 	}
 
+	public void testDrawQuestionIds() throws Exception
+	{
+		// 0 - 5,3,2,4,1
+		// 22 - 5,4,2,1,3
+		List<String> ids = pool.drawQuestionIds(22l, Integer.valueOf(3));
+		assertTrue(ids != null);
+		assertTrue(ids.size() == 3);
+		assertTrue(ids.get(0).equals("5"));
+		assertTrue(ids.get(1).equals("4"));
+		assertTrue(ids.get(2).equals("2"));
+
+		ids = pool.drawQuestionIds(0l, Integer.valueOf(1));
+		assertTrue(ids != null);
+		assertTrue(ids.size() == 1);
+		assertTrue(ids.get(0).equals("5"));
+
+		try
+		{
+			ids = pool.drawQuestionIds(0l, Integer.valueOf(-1));
+			fail("excepted IllegalArgumentException");
+		}
+		catch (IllegalArgumentException e)
+		{
+		}
+
+		try
+		{
+			ids = pool.drawQuestionIds(0l, null);
+			fail("excepted IllegalArgumentException");
+		}
+		catch (IllegalArgumentException e)
+		{
+		}
+
+		ids = pool.drawQuestionIds(22l, Integer.valueOf(50));
+		assertTrue(ids != null);
+		assertTrue(ids.size() == 5);
+		assertTrue(ids.get(0).equals("5"));
+		assertTrue(ids.get(1).equals("4"));
+		assertTrue(ids.get(2).equals("2"));
+		assertTrue(ids.get(3).equals("1"));
+		assertTrue(ids.get(4).equals("3"));
+	}
+
 	public void testFlags() throws Exception
 	{
 		assertTrue(pool.getMint().equals(Boolean.TRUE));
 		assertTrue(pool.getIsHistorical().equals(Boolean.FALSE));
 	}
 
-	public void testAttribution1() throws Exception
+	public void testGetAllQuestionIds() throws Exception
 	{
-		Date now = new Date();
-		final String TESTER = "tester";
-
-		pool.getCreatedBy().setDate(now);
-		pool.getCreatedBy().setUserId(TESTER);
-		assertTrue(pool.getCreatedBy().getDate().equals(now));
-		assertTrue(pool.getCreatedBy().getUserId().equals(TESTER));
-
-		// too long (length=100)
-		final String OVERLONG = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
-		final String JUSTRIGHT = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
-
-		pool.getCreatedBy().setUserId(JUSTRIGHT);
-		assertTrue(pool.getCreatedBy().getUserId().equals(JUSTRIGHT));
-
-		try
-		{
-			pool.getCreatedBy().setUserId(OVERLONG);
-			fail("expected illegal argument");
-		}
-		catch (IllegalArgumentException e)
-		{
-		}
-		assertTrue(pool.getCreatedBy().getUserId().equals(JUSTRIGHT));
-
-		pool.getCreatedBy().setDate(null);
-		pool.getCreatedBy().setUserId(null);
-		assertTrue(pool.getCreatedBy().getDate() == null);
-		assertTrue(pool.getCreatedBy().getUserId() == null);
+		List<String> ids = pool.getAllQuestionIds();
+		assertTrue(ids != null);
+		assertTrue(ids.size() == 5);
+		assertTrue(ids.get(0).equals("1"));
+		assertTrue(ids.get(1).equals("2"));
+		assertTrue(ids.get(2).equals("3"));
+		assertTrue(ids.get(3).equals("4"));
+		assertTrue(ids.get(4).equals("5"));
 	}
 
-	public void testAttribution2() throws Exception
+	public void testGetNumQuestions() throws Exception
 	{
-		Date now = new Date();
-		final String TESTER = "tester";
-
-		pool.getModifiedBy().setDate(now);
-		pool.getModifiedBy().setUserId(TESTER);
-		assertTrue(pool.getModifiedBy().getDate().equals(now));
-		assertTrue(pool.getModifiedBy().getUserId().equals(TESTER));
-
-		// too long (length=100)
-		final String OVERLONG = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
-		final String JUSTRIGHT = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
-
-		pool.getModifiedBy().setUserId(JUSTRIGHT);
-		assertTrue(pool.getModifiedBy().getUserId().equals(JUSTRIGHT));
-
-		try
-		{
-			pool.getModifiedBy().setUserId(OVERLONG);
-			fail("expected illegal argument");
-		}
-		catch (IllegalArgumentException e)
-		{
-		}
-		assertTrue(pool.getModifiedBy().getUserId().equals(JUSTRIGHT));
-
-		pool.getModifiedBy().setDate(null);
-		pool.getModifiedBy().setUserId(null);
-		assertTrue(pool.getModifiedBy().getDate() == null);
-		assertTrue(pool.getModifiedBy().getUserId() == null);
+		Integer count = pool.getNumQuestions();
+		assertTrue(count != null);
+		assertTrue(count.intValue() == 5);
 	}
 
 	/**
@@ -365,7 +467,11 @@ public class PoolTest extends TestCase
 	{
 		super.setUp();
 
-		pool = new PoolImpl(null, null);
+		questionPoolService = new MyQuestionService();
+
+		PoolImpl p = new PoolImpl();
+		p.setQuestionService(questionPoolService);
+		pool = p;
 	}
 
 	/**

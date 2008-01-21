@@ -34,6 +34,14 @@ import org.muse.mneme.impl.PoolStorageSql;
  */
 public class PoolStorageTestXmysql extends PoolStorageTestX
 {
+	public class MyPoolStorageMysql extends PoolStorageMysql
+	{
+		public PoolImpl newPool()
+		{
+			return new PoolImplLazyManifest();
+		}
+	}
+
 	/** Logger. */
 	private static final Log log = LogFactory.getLog(PoolStorageTestXmysql.class);
 
@@ -76,10 +84,8 @@ public class PoolStorageTestXmysql extends PoolStorageTestX
 
 	protected PoolStorage setupPoolStorage()
 	{
-		PoolStorageMysql s = new PoolStorageMysql();
+		PoolStorageMysql s = new MyPoolStorageMysql();
 		s.setAutoDdl("true");
-		s.setPoolService(null);
-		s.setQuestionService(null);
 		s.setSqlService(sqlService);
 		s.setThreadLocalManager(thread_localManager);
 		s.init();

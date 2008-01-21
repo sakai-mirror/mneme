@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,9 @@ package org.muse.mneme.impl;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -179,6 +177,14 @@ public class PoolServiceImpl implements PoolService
 		}
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<String> getManifest(Pool pool)
+	{
+		return this.storage.getManifest(pool.getId());
 	}
 
 	/**
@@ -619,44 +625,6 @@ public class PoolServiceImpl implements PoolService
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	protected List<String> drawQuestionIds(Pool pool, long seed, Integer numQuestions)
-	{
-		List<String> rv = getAllQuestionIds(pool);
-
-		// randomize the questions in the copy
-		Collections.shuffle(rv, new Random(seed));
-
-		// cut off the number of questions we want
-		if (rv.size() > numQuestions)
-		{
-			rv = rv.subList(0, numQuestions);
-		}
-
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected List<String> getAllQuestionIds(Pool pool)
-	{
-		List<String> rv = null;
-
-		if ((pool != null) && (pool.getIsHistorical()))
-		{
-			rv = new ArrayList<String>(((PoolImpl) pool).getFrozenManifest());
-		}
-		else
-		{
-			rv = this.questionService.getPoolQuestions(pool);
-		}
-
-		return rv;
-	}
-
-	/**
 	 * Form an pool reference for this pool id.
 	 * 
 	 * @param poolId
@@ -667,29 +635,6 @@ public class PoolServiceImpl implements PoolService
 	{
 		String ref = MnemeService.REFERENCE_ROOT + "/" + MnemeService.POOL_TYPE + "/" + poolId;
 		return ref;
-	}
-
-	/**
-	 * Count the questions in a pool.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @return The number of questions in the pool.
-	 */
-	protected Integer getPoolSize(Pool pool)
-	{
-		Integer rv = null;
-
-		if (pool.getIsHistorical())
-		{
-			rv = ((PoolImpl) pool).getFrozenManifest().size();
-		}
-		else
-		{
-			rv = this.questionService.countQuestions(pool, null, null);
-		}
-
-		return rv;
 	}
 
 	/**

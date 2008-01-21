@@ -334,6 +334,24 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<String> getPoolQuestionIds(Pool pool)
+	{
+		// check the cache (return a copy)
+		String key = cacheKeyPoolQuestions(pool.getId());
+		List<String> rv = (List<String>) this.threadLocalManager.get(key);
+		if (rv != null) return new ArrayList<String>(rv);
+
+		rv = this.storage.getPoolQuestions(pool);
+
+		// cache (a copy)
+		this.threadLocalManager.set(key, new ArrayList<String>(rv));
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Question getQuestion(String questionId)
 	{
 		if (questionId == null) throw new IllegalArgumentException();
@@ -783,28 +801,6 @@ public class QuestionServiceImpl implements QuestionService
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
-	}
-
-	/**
-	 * Find all the questions in the pool
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @return The List of question ids that are in the pool.
-	 */
-	protected List<String> getPoolQuestions(Pool pool)
-	{
-		// check the cache (return a copy)
-		String key = cacheKeyPoolQuestions(pool.getId());
-		List<String> rv = (List<String>) this.threadLocalManager.get(key);
-		if (rv != null) return new ArrayList<String>(rv);
-
-		rv = this.storage.getPoolQuestions(pool);
-
-		// cache (a copy)
-		this.threadLocalManager.set(key, new ArrayList<String>(rv));
-
-		return rv;
 	}
 
 	/**

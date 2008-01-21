@@ -23,8 +23,6 @@ package org.muse.mneme.api;
 
 import java.util.List;
 
-import org.muse.mneme.api.QuestionService.FindQuestionsSort;
-
 /**
  * Pool defines the question pools.
  */
@@ -54,7 +52,7 @@ public interface Pool
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @return a list of questions that meet the criteria.
 	 */
-	List<Question> findQuestions(FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
+	List<Question> findQuestions(QuestionService.FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize);
 
 	/**
 	 * Access all questions.
@@ -66,7 +64,7 @@ public interface Pool
 	/**
 	 * Access the context of this pool.
 	 * 
-	 * @return The pool's context string.  Will not be null.
+	 * @return The pool's context string. Will not be null.
 	 */
 	String getContext();
 
@@ -152,7 +150,7 @@ public interface Pool
 	 * Set the context of this pool.
 	 * 
 	 * @param context
-	 *        The pool's context string.  Must be <=99 characters in length.
+	 *        The pool's context string. Must be <=99 characters in length.
 	 */
 	void setContext(String context);
 

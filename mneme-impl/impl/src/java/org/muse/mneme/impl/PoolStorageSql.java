@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,8 @@ import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 
 /**
- * PoolStorageMysql implements PoolStorage in SQL databases.
+ * PoolStorageMysql implements PoolStorage in SQL databases.<br />
+ * newPool() must be added to clear the abstract.
  */
 public abstract class PoolStorageSql implements PoolStorage
 {
@@ -44,12 +45,6 @@ public abstract class PoolStorageSql implements PoolStorage
 
 	/** Configuration: to run the ddl on init or not. */
 	protected boolean autoDdl = false;
-
-	/** Dependency: PoolService. */
-	protected PoolServiceImpl poolService = null;
-
-	/** Dependency: QuestionService. */
-	protected QuestionServiceImpl questionService = null;
 
 	/** Dependency: SqlService. */
 	protected SqlService sqlService = null;
@@ -206,14 +201,6 @@ public abstract class PoolStorageSql implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public PoolImpl newPool()
-	{
-		return new PoolImplLazyManifest(this.poolService, this.questionService, this);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public PoolImpl newPool(PoolImpl pool)
 	{
 		return new PoolImplLazyManifest(pool);
@@ -274,22 +261,6 @@ public abstract class PoolStorageSql implements PoolStorage
 	public void setAutoDdl(String value)
 	{
 		autoDdl = new Boolean(value).booleanValue();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setPoolService(PoolServiceImpl service)
-	{
-		this.poolService = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setQuestionService(QuestionServiceImpl service)
-	{
-		this.questionService = service;
 	}
 
 	/**

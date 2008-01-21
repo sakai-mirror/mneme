@@ -33,6 +33,21 @@
  		<property name="idManager"><ref bean="org.sakaiproject.id.api.IdManager"/></property>
 	</bean>
 
+	<bean id="org.muse.mneme.api.Pool"
+		class="org.muse.mneme.impl.PoolImpl"
+		singleton="false">
+
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
+ 	</bean>
+
+	<bean id="org.muse.mneme.api.Pool_Lazy"
+		class="org.muse.mneme.impl.PoolImplLazyManifest"
+		singleton="false">
+
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
+		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
+  	</bean>
+
 	<bean id="org.muse.mneme.api.PoolService"
 		class="org.muse.mneme.impl.PoolServiceImpl"
 		init-method="init"
@@ -66,8 +81,7 @@
 		destroy-method="destroy"
 		singleton="true">
 
-		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
-		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
+		<lookup-method name="newPool" bean="org.muse.mneme.api.Pool" />
 	</bean>
 
 	<bean id="org.muse.mneme.impl.PoolStorageMysql"
@@ -75,9 +89,8 @@
 		destroy-method="destroy"
 		singleton="true">
 
-		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
-		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
-		
+		<lookup-method name="newPool" bean="org.muse.mneme.api.Pool_Lazy" />
+
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
 
@@ -89,9 +102,8 @@
 		destroy-method="destroy"
 		singleton="true">
 
-		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
-		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
-		
+		<lookup-method name="newPool" bean="org.muse.mneme.api.Pool_Lazy" />
+
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
 

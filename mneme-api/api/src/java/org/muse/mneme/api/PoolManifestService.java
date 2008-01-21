@@ -19,56 +19,22 @@
  *
  **********************************************************************************/
 
-package org.muse.mneme.impl;
+package org.muse.mneme.api;
 
-import org.apache.commons.dbcp.SakaiBasicDataSource;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.List;
 
 /**
- * Test PoolStorageSample
+ * PoolManifestService provides the manifest access method of the PoolService.<br />
+ * Usually use the full PoolService.
  */
-public class PoolStorageTestXsample extends PoolStorageTestX
+public interface PoolManifestService
 {
-	public class MyPoolStorageSample extends PoolStorageSample
-	{
-		public PoolImpl newPool()
-		{
-			return new PoolImpl();
-		}
-	}
-
-	/** Logger. */
-	private static final Log log = LogFactory.getLog(PoolStorageTestXsample.class);
-
 	/**
-	 * @param arg0
+	 * Access a pool manifest.
+	 * 
+	 * @param pool
+	 *        The pool.
+	 * @return The pool manifest for this pool, empty if not found or no manifest.
 	 */
-	public PoolStorageTestXsample(String arg0)
-	{
-		super(arg0);
-	}
-
-	protected SakaiBasicDataSource setupDataSource()
-	{
-		return null;
-	}
-
-	protected PoolStorage setupPoolStorage()
-	{
-		PoolStorageSample s = new MyPoolStorageSample();
-		s.init();
-
-		return s;
-	}
-
-	protected void teardownPoolStorage()
-	{
-		((PoolStorageSample) storage).destroy();
-	}
-
-	protected String vendor()
-	{
-		return null;
-	}
+	List<String> getManifest(Pool pool);
 }
