@@ -66,7 +66,7 @@ public interface Pool
 	/**
 	 * Access the context of this pool.
 	 * 
-	 * @return The pool's context string.
+	 * @return The pool's context string.  Will not be null.
 	 */
 	String getContext();
 
@@ -152,7 +152,7 @@ public interface Pool
 	 * Set the context of this pool.
 	 * 
 	 * @param context
-	 *        The pool's context string.
+	 *        The pool's context string.  Must be <=99 characters in length.
 	 */
 	void setContext(String context);
 
@@ -181,7 +181,7 @@ public interface Pool
 	 * 
 	 * @param points.
 	 *        The number of points for each question in this pool.<br />
-	 *        Must be >= 0, otherwise ignored. May not be null.
+	 *        Must be >= 0, <= 10000, otherwise set to nearest valid value. May not be null.
 	 */
 	void setPoints(Float points);
 
@@ -190,7 +190,7 @@ public interface Pool
 	 * 
 	 * @param points.
 	 *        The number of points for each question in this pool, or null to have none set.<br />
-	 *        Must be >= 0, otherwise ignored. May be null.
+	 *        Must be >= 0, <= 10000, otherwise set to nearest valid value. May be null.
 	 */
 	void setPointsEdit(Float points);
 

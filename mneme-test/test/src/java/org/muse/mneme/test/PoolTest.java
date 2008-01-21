@@ -21,6 +21,8 @@
 
 package org.muse.mneme.test;
 
+import java.util.Date;
+
 import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
@@ -29,7 +31,8 @@ import org.muse.mneme.api.Pool;
 import org.muse.mneme.impl.PoolImpl;
 
 /**
- * Test Pool
+ * Test Pool.<br />
+ * Note: drawQuestionIds, findQuestions, getAllQuestionIds, getNumQuestions are all service covers, not tested.
  */
 public class PoolTest extends TestCase
 {
@@ -44,6 +47,48 @@ public class PoolTest extends TestCase
 	public PoolTest(String arg0)
 	{
 		super(arg0);
+	}
+
+	/**
+	 * Test the context: normal, untrimmed, all blanks, too long
+	 * 
+	 * @throws Exception
+	 */
+	public void testContext() throws Exception
+	{
+		// normal
+		final String CONTEXT_NORMAL = "context";
+		pool.setContext(CONTEXT_NORMAL);
+		assertTrue(pool.getContext().equals(CONTEXT_NORMAL));
+		pool.setTitle(null);
+		assertTrue(pool.getTitle() == null);
+
+		// null
+		pool.setContext(null);
+		assertTrue(pool.getContext().equals(""));
+		pool.setContext("");
+		assertTrue(pool.getContext().equals(""));
+
+		// all blanks - no trimming, please
+		final String BLANKS = "     ";
+		pool.setContext(BLANKS);
+		assertTrue(pool.getContext().equals(BLANKS));
+
+		// too long (length=100)
+		final String OVERLONG = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
+		final String JUSTRIGHT = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
+		try
+		{
+			pool.setContext(OVERLONG);
+			fail("expecting IllegalArgumentException");
+		}
+		catch (IllegalArgumentException e)
+		{
+		}
+		assertTrue(pool.getContext().equals(BLANKS));
+
+		pool.setContext(JUSTRIGHT);
+		assertTrue(pool.getContext().equals(JUSTRIGHT));
 	}
 
 	/**
@@ -120,6 +165,78 @@ public class PoolTest extends TestCase
 		assertTrue(pool.getDifficulty() == 5);
 	}
 
+	public void testFlags() throws Exception
+	{
+		assertTrue(pool.getMint().equals(Boolean.TRUE));
+		assertTrue(pool.getIsHistorical().equals(Boolean.FALSE));
+	}
+
+	public void testAttribution1() throws Exception
+	{
+		Date now = new Date();
+		final String TESTER = "tester";
+
+		pool.getCreatedBy().setDate(now);
+		pool.getCreatedBy().setUserId(TESTER);
+		assertTrue(pool.getCreatedBy().getDate().equals(now));
+		assertTrue(pool.getCreatedBy().getUserId().equals(TESTER));
+
+		// too long (length=100)
+		final String OVERLONG = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
+		final String JUSTRIGHT = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
+
+		pool.getCreatedBy().setUserId(JUSTRIGHT);
+		assertTrue(pool.getCreatedBy().getUserId().equals(JUSTRIGHT));
+
+		try
+		{
+			pool.getCreatedBy().setUserId(OVERLONG);
+			fail("expected illegal argument");
+		}
+		catch (IllegalArgumentException e)
+		{
+		}
+		assertTrue(pool.getCreatedBy().getUserId().equals(JUSTRIGHT));
+
+		pool.getCreatedBy().setDate(null);
+		pool.getCreatedBy().setUserId(null);
+		assertTrue(pool.getCreatedBy().getDate() == null);
+		assertTrue(pool.getCreatedBy().getUserId() == null);
+	}
+
+	public void testAttribution2() throws Exception
+	{
+		Date now = new Date();
+		final String TESTER = "tester";
+
+		pool.getModifiedBy().setDate(now);
+		pool.getModifiedBy().setUserId(TESTER);
+		assertTrue(pool.getModifiedBy().getDate().equals(now));
+		assertTrue(pool.getModifiedBy().getUserId().equals(TESTER));
+
+		// too long (length=100)
+		final String OVERLONG = "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
+		final String JUSTRIGHT = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
+
+		pool.getModifiedBy().setUserId(JUSTRIGHT);
+		assertTrue(pool.getModifiedBy().getUserId().equals(JUSTRIGHT));
+
+		try
+		{
+			pool.getModifiedBy().setUserId(OVERLONG);
+			fail("expected illegal argument");
+		}
+		catch (IllegalArgumentException e)
+		{
+		}
+		assertTrue(pool.getModifiedBy().getUserId().equals(JUSTRIGHT));
+
+		pool.getModifiedBy().setDate(null);
+		pool.getModifiedBy().setUserId(null);
+		assertTrue(pool.getModifiedBy().getDate() == null);
+		assertTrue(pool.getModifiedBy().getUserId() == null);
+	}
+
 	/**
 	 * Test the points
 	 * 
@@ -158,7 +275,7 @@ public class PoolTest extends TestCase
 		assertTrue(pool.getPointsEdit().equals(ZERO));
 
 		// big number
-		final Float BIG = Float.MAX_VALUE;
+		final Float BIG = Float.valueOf(10000.0f);
 		pool.setPoints(BIG);
 		assertTrue(pool.getPoints().equals(BIG));
 		assertTrue(pool.getPointsEdit().equals(BIG));
@@ -168,7 +285,25 @@ public class PoolTest extends TestCase
 		assertTrue(pool.getPoints().equals(BIG));
 		assertTrue(pool.getPointsEdit().equals(BIG));
 
+		// out of range
+		pool.setPoints(Float.valueOf(-1.0f));
+		assertTrue(pool.getPoints().equals(ZERO));
+		assertTrue(pool.getPointsEdit().equals(ZERO));
+
+		pool.setPointsEdit(Float.valueOf(-1.0f));
+		assertTrue(pool.getPoints().equals(ZERO));
+		assertTrue(pool.getPointsEdit().equals(ZERO));
+
+		pool.setPoints(Float.valueOf(10001.0f));
+		assertTrue(pool.getPoints().equals(BIG));
+		assertTrue(pool.getPointsEdit().equals(BIG));
+
+		pool.setPointsEdit(Float.valueOf(10001.0f));
+		assertTrue(pool.getPoints().equals(BIG));
+		assertTrue(pool.getPointsEdit().equals(BIG));
+
 		// null
+		pool.setPoints(ONE_FIVE);
 		try
 		{
 			pool.setPoints(null);
@@ -177,8 +312,8 @@ public class PoolTest extends TestCase
 		catch (IllegalArgumentException e)
 		{
 		}
-		assertTrue(pool.getPoints().equals(BIG));
-		assertTrue(pool.getPointsEdit().equals(BIG));
+		assertTrue(pool.getPoints().equals(ONE_FIVE));
+		assertTrue(pool.getPointsEdit().equals(ONE_FIVE));
 
 		// null, but allowed
 		pool.setPointsEdit(null);
@@ -187,12 +322,6 @@ public class PoolTest extends TestCase
 
 		// value using set setPointsEdit
 		pool.setPointsEdit(ONE_FIVE);
-		assertTrue(pool.getPoints().equals(ONE_FIVE));
-		assertTrue(pool.getPointsEdit().equals(ONE_FIVE));
-
-		// negative (ignored)
-		final Float NEGATIVE = -1.5f;
-		pool.setPoints(NEGATIVE);
 		assertTrue(pool.getPoints().equals(ONE_FIVE));
 		assertTrue(pool.getPointsEdit().equals(ONE_FIVE));
 	}

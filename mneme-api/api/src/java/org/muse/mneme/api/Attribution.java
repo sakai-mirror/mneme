@@ -54,7 +54,7 @@ public interface Attribution
 	 * Set the user id.
 	 * 
 	 * @param userId
-	 *        The user id.
+	 *        The user id. Must be <= 99 characters long.
 	 */
 	void setUserId(String userId);
 }

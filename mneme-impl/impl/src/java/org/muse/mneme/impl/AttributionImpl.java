@@ -105,6 +105,7 @@ public class AttributionImpl implements Attribution
 	 */
 	public void setUserId(String userId)
 	{
+		if ((userId != null) && (userId.length() > 99)) throw new IllegalArgumentException();
 		if (!Different.different(this.userId, userId)) return;
 		this.userId = userId;
 

@@ -235,6 +235,7 @@ public class PoolImpl implements Pool
 	public void setContext(String context)
 	{
 		if (context == null) context = "";
+		if (context.length() > 99) throw new IllegalArgumentException();
 		if (this.context.equals(context)) return;
 
 		this.context = context;
@@ -286,7 +287,8 @@ public class PoolImpl implements Pool
 	public void setPoints(Float points)
 	{
 		if (points == null) throw new IllegalArgumentException();
-		if (points < 0) return;
+		if (points.floatValue() < 0) points = Float.valueOf(0.0f);
+		if (points.floatValue() > 10000) points = Float.valueOf(10000.0f);
 
 		// massage points - 2 decimal places
 		points = Float.valueOf(((float) Math.round(points.floatValue() * 100.0f)) / 100.0f);
@@ -304,6 +306,8 @@ public class PoolImpl implements Pool
 	public void setPointsEdit(Float points)
 	{
 		if ((points != null) && (points < 0f)) return;
+		if ((points != null) && (points.floatValue() < 0)) points = Float.valueOf(0.0f);
+		if ((points != null) && (points.floatValue() > 10000)) points = Float.valueOf(10000.0f);
 
 		// massage points - 2 decimal places
 		if (points != null)
