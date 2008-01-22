@@ -414,7 +414,7 @@ public abstract class PoolStorageTestX extends TestCase
 		pool1 = this.storage.getPool(pool1.getId());
 
 		// create a copy
-		PoolImpl pool = this.storage.newPool(pool1);
+		PoolImpl pool = this.storage.clone(pool1);
 		assertTrue(pool != null);
 		assertTrue(pool.getId() != null);
 		assertTrue(pool.getId().equals(pool1.getId()));

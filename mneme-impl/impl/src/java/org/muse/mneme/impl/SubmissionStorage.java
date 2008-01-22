@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,15 @@ import org.muse.mneme.api.Submission;
  */
 public interface SubmissionStorage
 {
+	/**
+	 * Construct a new Submission object as a copy of another.
+	 * 
+	 * @param other
+	 *        The submission to copy.
+	 * @return A new Submission object.
+	 */
+	SubmissionImpl clone(SubmissionImpl other);
+
 	/**
 	 * Find the question ids that have been used in submissions in this assessment part.
 	 * 
@@ -205,15 +214,6 @@ public interface SubmissionStorage
 	 * @return A new Submission object.
 	 */
 	SubmissionImpl newSubmission();
-
-	/**
-	 * Construct a new Submission object as a copy of another.
-	 * 
-	 * @param other
-	 *        The submisison to copy.
-	 * @return A new Submission object.
-	 */
-	SubmissionImpl newSubmission(SubmissionImpl other);
 
 	/**
 	 * Remove any test-drive submissions for this assessment.

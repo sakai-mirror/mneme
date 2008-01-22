@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,14 @@ public class AssessmentStorageSample implements AssessmentStorage
 		{
 			this.assessments.remove(id);
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentImpl clone(AssessmentImpl assessment)
+	{
+		return new AssessmentImpl(assessment);
 	}
 
 	/**
@@ -398,14 +406,6 @@ public class AssessmentStorageSample implements AssessmentStorage
 	public AssessmentImpl newAssessment()
 	{
 		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService, this.messages);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public AssessmentImpl newAssessment(AssessmentImpl assessment)
-	{
-		return new AssessmentImpl(assessment);
 	}
 
 	/**

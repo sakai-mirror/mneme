@@ -52,6 +52,15 @@ public interface QuestionStorage
 	void clearStaleMintQuestions(Date stale);
 
 	/**
+	 * Construct a new question object that is a copy of another.
+	 * 
+	 * @param question
+	 *        The question to copy.
+	 * @return A question object.
+	 */
+	QuestionImpl clone(QuestionImpl question);
+
+	/**
 	 * Create a new question that is a copy of each question in the pool.
 	 * 
 	 * @param userId
@@ -185,15 +194,6 @@ public interface QuestionStorage
 	 * @return A question object.
 	 */
 	QuestionImpl newQuestion();
-
-	/**
-	 * Construct a new question object that is a copy of another.
-	 * 
-	 * @param question
-	 *        The question to copy.
-	 * @return A question object.
-	 */
-	QuestionImpl newQuestion(QuestionImpl question);
 
 	/**
 	 * Remove a question from storage.

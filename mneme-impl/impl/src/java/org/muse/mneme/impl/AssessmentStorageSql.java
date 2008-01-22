@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,6 @@ import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
-import org.sakaiproject.util.ResourceLoader;
 
 /**
  * AssessmentStorageMysql implements AssessmentStorage for SQL databases.
@@ -101,6 +100,14 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 				clearStaleMintQuestionsTx(stale);
 			}
 		}, "clearStaleMintQuestions: " + stale.toString());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentImpl clone(AssessmentImpl assessment)
+	{
+		return new AssessmentImpl(assessment);
 	}
 
 	/**
@@ -296,14 +303,6 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	public AssessmentImpl newAssessment()
 	{
 		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService, this.messages);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public AssessmentImpl newAssessment(AssessmentImpl assessment)
-	{
-		return new AssessmentImpl(assessment);
 	}
 
 	/**

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,7 +247,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (rv != null)
 		{
 			// return a copy
-			return this.storage.newAssessment(rv);
+			return this.storage.clone(rv);
 		}
 
 		if (M_log.isDebugEnabled()) M_log.debug("getAssessment: " + id);
@@ -255,7 +255,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		rv = this.storage.getAssessment(id);
 
 		// thread-local cache (a copy)
-		if (rv != null) this.threadLocalManager.set(key, this.storage.newAssessment(rv));
+		if (rv != null) this.threadLocalManager.set(key, this.storage.clone(rv));
 
 		return rv;
 	}
@@ -740,7 +740,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		String userId = sessionManager.getCurrentSessionUserId();
 		Date now = new Date();
 
-		AssessmentImpl rv = this.storage.newAssessment((AssessmentImpl) assessment);
+		AssessmentImpl rv = this.storage.clone((AssessmentImpl) assessment);
 
 		// clear the id to make it a new one
 		rv.id = null;

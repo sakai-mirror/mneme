@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,15 @@ public interface PoolStorage
 	 *        The time to compare to the create date; before this they are stale.
 	 */
 	void clearStaleMintPools(Date stale);
+
+	/**
+	 * Construct a new pool object as a copy of another.
+	 * 
+	 * @param pool
+	 *        The pool to copy.
+	 * @return A pool object.
+	 */
+	PoolImpl clone(PoolImpl pool);
 
 	/**
 	 * Check if a pool by this id exists.
@@ -105,15 +114,6 @@ public interface PoolStorage
 	 * @return A pool object.
 	 */
 	PoolImpl newPool();
-
-	/**
-	 * Construct a new pool object as a copy of another.
-	 * 
-	 * @param pool
-	 *        The pool to copy.
-	 * @return A pool object.
-	 */
-	PoolImpl newPool(PoolImpl pool);
 
 	/**
 	 * Remove a pool from storage.

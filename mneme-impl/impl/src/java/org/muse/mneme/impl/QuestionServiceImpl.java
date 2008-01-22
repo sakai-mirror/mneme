@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,7 +177,7 @@ public class QuestionServiceImpl implements QuestionService
 		this.submissionService.removeTestDriveSubmissions(destination.getContext());
 
 		// create a copy of the question
-		QuestionImpl rv = this.storage.newQuestion((QuestionImpl) question);
+		QuestionImpl rv = this.storage.clone((QuestionImpl) question);
 
 		// clear the id to make it new
 		rv.id = null;
@@ -362,7 +362,7 @@ public class QuestionServiceImpl implements QuestionService
 		if (rv != null)
 		{
 			// return a copy
-			return this.storage.newQuestion(rv);
+			return this.storage.clone(rv);
 		}
 
 		if (M_log.isDebugEnabled()) M_log.debug("getQuestion: " + questionId);
@@ -370,7 +370,7 @@ public class QuestionServiceImpl implements QuestionService
 		rv = this.storage.getQuestion(questionId);
 
 		// thread-local cache (a copy)
-		if (rv != null) this.threadLocalManager.set(key, this.storage.newQuestion(rv));
+		if (rv != null) this.threadLocalManager.set(key, this.storage.clone(rv));
 
 		return rv;
 	}

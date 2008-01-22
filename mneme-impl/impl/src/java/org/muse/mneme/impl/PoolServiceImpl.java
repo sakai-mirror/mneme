@@ -173,7 +173,7 @@ public class PoolServiceImpl implements PoolService
 		for (Pool pool : rv)
 		{
 			String key = cacheKey(pool.getId());
-			this.threadLocalManager.set(key, this.storage.newPool((PoolImpl) pool));
+			this.threadLocalManager.set(key, this.storage.clone((PoolImpl) pool));
 		}
 
 		return rv;
@@ -200,7 +200,7 @@ public class PoolServiceImpl implements PoolService
 		if (rv != null)
 		{
 			// return a copy
-			return this.storage.newPool(rv);
+			return this.storage.clone(rv);
 		}
 
 		if (M_log.isDebugEnabled()) M_log.debug("getPool: " + poolId);
@@ -208,7 +208,7 @@ public class PoolServiceImpl implements PoolService
 		rv = this.storage.getPool(poolId);
 
 		// thread-local cache (a copy)
-		if (rv != null) this.threadLocalManager.set(key, this.storage.newPool(rv));
+		if (rv != null) this.threadLocalManager.set(key, this.storage.clone(rv));
 
 		return rv;
 	}
@@ -522,7 +522,7 @@ public class PoolServiceImpl implements PoolService
 		Date now = new Date();
 
 		// make a copy of the pool
-		PoolImpl rv = storage.newPool((PoolImpl) pool);
+		PoolImpl rv = storage.clone((PoolImpl) pool);
 
 		// clear the id to make it a new one
 		rv.id = null;

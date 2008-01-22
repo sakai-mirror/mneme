@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,15 @@ public interface AssessmentStorage
 	 *        The time to compare to the create date; before this they are stale.
 	 */
 	void clearStaleMintAssessments(Date stale);
+
+	/**
+	 * Construct a new Assessment object that is a copy of another.
+	 * 
+	 * @param assessment
+	 *        The assessment to copy.
+	 * @return A new Assessment object.
+	 */
+	AssessmentImpl clone(AssessmentImpl assessment);
 
 	/**
 	 * Count the assessments in a context that are not archived.
@@ -110,15 +119,6 @@ public interface AssessmentStorage
 	 * @return A new Assessment object.
 	 */
 	AssessmentImpl newAssessment();
-
-	/**
-	 * Construct a new Assessment object that is a copy of another.
-	 * 
-	 * @param assessment
-	 *        The assessment to copy.
-	 * @return A new Assessment object.
-	 */
-	AssessmentImpl newAssessment(AssessmentImpl assessment);
 
 	/**
 	 * Remove a assessment from storage.

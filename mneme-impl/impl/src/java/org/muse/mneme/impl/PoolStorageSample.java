@@ -36,8 +36,7 @@ import org.muse.mneme.api.PoolService;
 import org.sakaiproject.util.StringUtil;
 
 /**
- * PoolStorageSample defines a sample storage for PoolStorage.<br />
- * newPool() must be added to clear the abstract.
+ * PoolStorageSample defines a sample storage for PoolStorage.
  */
 public abstract class PoolStorageSample implements PoolStorage
 {
@@ -97,6 +96,14 @@ public abstract class PoolStorageSample implements PoolStorage
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public PoolImpl clone(PoolImpl pool)
+	{
+		return new PoolImpl(pool);
+	}
+
+	/**
 	 * Returns to uninitialized state.
 	 */
 	public void destroy()
@@ -130,7 +137,7 @@ public abstract class PoolStorageSample implements PoolStorage
 		{
 			if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
 			{
-				rv.add(newPool(pool));
+				rv.add(clone(pool));
 			}
 		}
 
@@ -196,7 +203,7 @@ public abstract class PoolStorageSample implements PoolStorage
 		if (rv == null) return null;
 
 		// return a copy
-		rv = newPool(rv);
+		rv = clone(rv);
 		return rv;
 	}
 
@@ -213,7 +220,7 @@ public abstract class PoolStorageSample implements PoolStorage
 		{
 			if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
 			{
-				rv.add(newPool(pool));
+				rv.add(clone(pool));
 			}
 		}
 
@@ -231,10 +238,7 @@ public abstract class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public PoolImpl newPool(PoolImpl pool)
-	{
-		return new PoolImpl(pool);
-	}
+	public abstract PoolImpl newPool();
 
 	/**
 	 * {@inheritDoc}
@@ -263,7 +267,7 @@ public abstract class PoolStorageSample implements PoolStorage
 			pool.initId("b" + Long.toString(id));
 		}
 
-		this.pools.put(pool.getId(), newPool(pool));
+		this.pools.put(pool.getId(), clone(pool));
 	}
 
 	protected void fakeIt()

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,14 @@ public class SubmissionStorageSample implements SubmissionStorage
 	protected Map<String, SubmissionImpl> submissions = new LinkedHashMap<String, SubmissionImpl>();
 
 	protected SubmissionServiceImpl submissionService = null;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public SubmissionImpl clone(SubmissionImpl other)
+	{
+		return new SubmissionImpl(other);
+	}
 
 	/**
 	 * Returns to uninitialized state.
@@ -401,14 +409,6 @@ public class SubmissionStorageSample implements SubmissionStorage
 	public SubmissionImpl newSubmission()
 	{
 		return new SubmissionImpl(assessmentService, securityService, submissionService, sessionManager);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public SubmissionImpl newSubmission(SubmissionImpl other)
-	{
-		return new SubmissionImpl(other);
 	}
 
 	// /**

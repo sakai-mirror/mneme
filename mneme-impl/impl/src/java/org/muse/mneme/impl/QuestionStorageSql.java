@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,6 +98,15 @@ public abstract class QuestionStorageSql implements QuestionStorage
 				clearStaleMintQuestionsTx(stale);
 			}
 		}, "clearStaleMintQuestions: " + stale.toString());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public QuestionImpl clone(QuestionImpl question)
+	{
+		QuestionImpl rv = new QuestionImpl(question);
+		return rv;
 	}
 
 	/**
@@ -422,15 +431,6 @@ public abstract class QuestionStorageSql implements QuestionStorage
 	public QuestionImpl newQuestion()
 	{
 		QuestionImpl rv = new QuestionImpl(poolService, questionService, submissionService);
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public QuestionImpl newQuestion(QuestionImpl question)
-	{
-		QuestionImpl rv = new QuestionImpl(question);
 		return rv;
 	}
 

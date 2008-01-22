@@ -35,8 +35,7 @@ import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 
 /**
- * PoolStorageMysql implements PoolStorage in SQL databases.<br />
- * newPool() must be added to clear the abstract.
+ * PoolStorageMysql implements PoolStorage in SQL databases
  */
 public abstract class PoolStorageSql implements PoolStorage
 {
@@ -78,6 +77,14 @@ public abstract class PoolStorageSql implements PoolStorage
 				clearStaleMintPoolsTx(stale);
 			}
 		}, "clearStaleMintPools: " + stale.toString());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public PoolImpl clone(PoolImpl pool)
+	{
+		return new PoolImplLazyManifest(pool);
 	}
 
 	/**
@@ -201,10 +208,7 @@ public abstract class PoolStorageSql implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public PoolImpl newPool(PoolImpl pool)
-	{
-		return new PoolImplLazyManifest(pool);
-	}
+	public abstract PoolImpl newPool();
 
 	/**
 	 * {@inheritDoc}

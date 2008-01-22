@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1158,7 +1158,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (rv != null)
 		{
 			// return a copy
-			return this.storage.newSubmission(rv);
+			return this.storage.clone(rv);
 		}
 
 		// recognize phantom ids
@@ -1184,7 +1184,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		rv = this.storage.getSubmission(id);
 
 		// thread-local cache (a copy)
-		if (rv != null) this.threadLocalManager.set(key, this.storage.newSubmission(rv));
+		if (rv != null) this.threadLocalManager.set(key, this.storage.clone(rv));
 
 		return rv;
 	}
