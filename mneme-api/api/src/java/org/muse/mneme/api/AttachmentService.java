@@ -87,7 +87,20 @@ public interface AttachmentService
 	Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, Reference resource);
 
 	/**
-	 * Find all the image attachments in the docs area of the application for this context.
+	 * Find all the attachments in the docs area of the application for this context. Skip image thumbs.
+	 * 
+	 * @param application
+	 *        The application prefix for the collection in private.
+	 * @param context
+	 *        The context associated with the attachment.
+	 * @param prefix
+	 *        Any prefix path for within the context are of the application in private.
+	 * @return A List of Attachments to the attachments.
+	 */
+	List<Attachment> findFiles(String application, String context, String prefix);
+
+	/**
+	 * Find all the image attachments in the docs area of the application for this context. Skip image thumbs.
 	 * 
 	 * @param application
 	 *        The application prefix for the collection in private.

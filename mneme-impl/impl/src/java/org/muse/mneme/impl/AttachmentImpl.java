@@ -33,6 +33,8 @@ public class AttachmentImpl implements Attachment
 
 	protected String ref = null;
 
+	protected String type = null;
+
 	protected String url = null;
 
 	/**
@@ -49,11 +51,12 @@ public class AttachmentImpl implements Attachment
 	/**
 	 * Construct.
 	 */
-	public AttachmentImpl(String name, String ref, String url)
+	public AttachmentImpl(String name, String ref, String url, String type)
 	{
 		this.name = name;
 		this.ref = ref;
 		this.url = url;
+		this.type = type.toLowerCase();
 	}
 
 	/**
@@ -89,7 +92,13 @@ public class AttachmentImpl implements Attachment
 	 */
 	public String getThumbUrl()
 	{
-		return this.url + AttachmentService.THUMB_SUFFIX;
+		// for non-images, return null
+		if (this.type.startsWith("image/"))
+		{
+			return this.url + AttachmentService.THUMB_SUFFIX;
+		}
+
+		return null;
 	}
 
 	/**
@@ -134,6 +143,7 @@ public class AttachmentImpl implements Attachment
 	{
 		this.name = other.name;
 		this.ref = other.ref;
+		this.type = other.type;
 		this.url = other.url;
 	}
 }

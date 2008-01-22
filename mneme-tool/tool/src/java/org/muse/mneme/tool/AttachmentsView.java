@@ -69,16 +69,37 @@ public class AttachmentsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// collect the attachments in this context
-		List<Attachment> attachments = this.attachmentService.findImages(AttachmentService.MNEME_APPLICATION, this.toolManager.getCurrentPlacement()
-				.getContext(), AttachmentService.DOCS_AREA);
+		if (params.length != 3)
+		{
+			throw new IllegalArgumentException();
+		}
+		String type = params[2];
 
-		// load them into a 3 column grid
+		// get getting called twice for some reason...
+		if (type.equals("null")) return;
+
+		// collect the attachments in this context
+		List<Attachment> attachments = null;
+
+		if (type.equals("image"))
+		{
+			attachments = this.attachmentService.findImages(AttachmentService.MNEME_APPLICATION, this.toolManager.getCurrentPlacement().getContext(),
+					AttachmentService.DOCS_AREA);
+		}
+		else
+		{
+			attachments = this.attachmentService.findFiles(AttachmentService.MNEME_APPLICATION, this.toolManager.getCurrentPlacement().getContext(),
+					AttachmentService.DOCS_AREA);
+		}
+
+		// load them into a 4 column grid
 		Grid grid = this.uiService.newGrid();
-		grid.setWidth(3);
+		grid.setWidth(4);
 		grid.load(attachments);
 
 		context.put("attachments", grid);
+
+		context.put("title", messages.getString("title_" + type));
 
 		// render
 		uiService.render(ui, context);
@@ -101,11 +122,15 @@ public class AttachmentsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need no parameters ?
-		// if (params.length != 2)
-		// {
-		// throw new IllegalArgumentException();
-		// }
+		// one parameter
+		if (params.length != 3)
+		{
+			throw new IllegalArgumentException();
+		}
+		String type = params[2];
+
+		// get getting called twice for some reason...
+		if (type.equals("null")) return;
 
 		// for the upload of attachments
 		Upload upload = new Upload(this.toolManager.getCurrentPlacement().getContext(), AttachmentService.DOCS_AREA, false, this.attachmentService);

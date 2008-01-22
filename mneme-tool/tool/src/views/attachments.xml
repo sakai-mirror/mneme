@@ -33,97 +33,201 @@
 	<header>
 		<message selector="attachments-header">
 			<model type="icon" icon="/icons/folder_page.png" />
+			<model ref="title" />
 		</message>
 	</header>
 
 	<container>
 
-		<!-- upload -->
-		<fileUpload>
-			<title>
-				<message selector="upload-title" />
+		<section>
+			<title highlighted="TRUE">
+				<message selector="upload-instructions" />
 			</title>
-			<upload>
-				<message selector="upload-button" />
-			</upload>
-			<model ref="upload.upload" />
-		</fileUpload>
+			<container>
 
-		<!-- the list of attachments -->
-		<entityList style="FLAT">
-			<iterator name="row">
-				<model ref="attachments.rows" />
-			</iterator>
-			<emptyTitle>
-				<message selector="no-attachments" />
-			</emptyTitle>
-			<columns>
+				<!-- upload -->
+				<instructions>
+					<message selector="upload-title" />
+				</instructions>
+				<fileUpload>
+					<upload>
+						<message selector="upload-button" />
+					</upload>
+					<model ref="upload.upload" />
+				</fileUpload>
 
-				<column centered="TRUE">
-					<container>
-						<navigation style="LINK" submit="TRIGGER">
-							<title>
-								<message>
-									<model type="image" ref="row.col01.thumbUrl">
-										<caption>
-											<message>
-												<model ref="row.col01.name" />
-											</message>
-										</caption>
-									</model>
-								</message>
-							</title>
-							<destination template="ambrosiaChooseAttachment('{0}');">
-								<model ref="row.col01.url" />
-							</destination>
-						</navigation>
-					</container>
-				</column>
+			</container>
+		</section>
 
-				<column centered="TRUE">
-					<container>
-						<navigation style="LINK" submit="TRIGGER">
-							<title>
-								<message>
-									<model type="image" ref="row.col02.thumbUrl">
-										<caption>
-											<message>
-												<model ref="row.col02.name" />
-											</message>
-										</caption>
-									</model>
-								</message>
-							</title>
-							<destination template="ambrosiaChooseAttachment('{0}');">
-								<model ref="row.col02.url" />
-							</destination>
-						</navigation>
-					</container>
-				</column>
+		<section>
+			<title highlighted="TRUE">
+				<message selector="pick-instructions" />
+			</title>
+			<container>
 
-				<column centered="TRUE">
-					<container>
-						<navigation style="LINK" submit="TRIGGER">
-							<title>
-								<message>
-									<model type="image" ref="row.col03.thumbUrl">
-										<caption>
-											<message>
-												<model ref="row.col03.name" />
-											</message>
-										</caption>
-									</model>
-								</message>
-							</title>
-							<destination template="ambrosiaChooseAttachment('{0}');">
-								<model ref="row.col03.url" />
-							</destination>
-						</navigation>
-					</container>
-				</column>
+				<!-- the list of attachments -->
+				<entityList style="FLAT">
+					<iterator name="row">
+						<model ref="attachments.rows" />
+					</iterator>
+					<emptyTitle>
+						<message selector="no-attachments" />
+					</emptyTitle>
+					<columns>
 
-			</columns>
-		</entityList>
+						<column centered="TRUE" bottomed="TRUE">
+							<container>
+								<navigation style="LINK" submit="TRIGGER">
+									<title>
+										<message>
+											<model type="image" ref="row.col01.thumbUrl">
+												<caption>
+													<message>
+														<model ref="row.col01.name" />
+													</message>
+												</caption>
+											</model>
+										</message>
+									</title>
+									<destination template="ambrosiaChooseAttachment('{0}');">
+										<model ref="row.col01.url" />
+									</destination>
+									<included>
+										<hasValueDecision model="row.col01.thumbUrl" />
+									</included>
+								</navigation>
+								<navigation style="LINK" submit="TRIGGER">
+									<title>
+										<message>
+											<model ref="row.col01.name" />
+										</message>
+									</title>
+									<destination template="ambrosiaChooseAttachment('{0}');">
+										<model ref="row.col01.url" />
+									</destination>
+									<included>
+										<hasValueDecision reversed="TRUE" model="row.col01.thumbUrl" />
+									</included>
+								</navigation>
+							</container>
+						</column>
+
+						<column centered="TRUE" bottomed="TRUE">
+							<container>
+								<navigation style="LINK" submit="TRIGGER">
+									<title>
+										<message>
+											<model type="image" ref="row.col02.thumbUrl">
+												<caption>
+													<message>
+														<model ref="row.col02.name" />
+													</message>
+												</caption>
+											</model>
+										</message>
+									</title>
+									<destination template="ambrosiaChooseAttachment('{0}');">
+										<model ref="row.col02.url" />
+									</destination>
+									<included>
+										<hasValueDecision model="row.col02.thumbUrl" />
+									</included>
+								</navigation>
+								<navigation style="LINK" submit="TRIGGER">
+									<title>
+										<message>
+											<model ref="row.col02.name" />
+										</message>
+									</title>
+									<destination template="ambrosiaChooseAttachment('{0}');">
+										<model ref="row.col02.url" />
+									</destination>
+									<included>
+										<hasValueDecision reversed="TRUE" model="row.col02.thumbUrl" />
+									</included>
+								</navigation>
+							</container>
+						</column>
+
+						<column centered="TRUE" bottomed="TRUE">
+							<container>
+								<navigation style="LINK" submit="TRIGGER">
+									<title>
+										<message>
+											<model type="image" ref="row.col03.thumbUrl">
+												<caption>
+													<message>
+														<model ref="row.col03.name" />
+													</message>
+												</caption>
+											</model>
+										</message>
+									</title>
+									<destination template="ambrosiaChooseAttachment('{0}');">
+										<model ref="row.col03.url" />
+									</destination>
+									<included>
+										<hasValueDecision model="row.col03.thumbUrl" />
+									</included>
+								</navigation>
+								<navigation style="LINK" submit="TRIGGER">
+									<title>
+										<message>
+											<model ref="row.col03.name" />
+										</message>
+									</title>
+									<destination template="ambrosiaChooseAttachment('{0}');">
+										<model ref="row.col03.url" />
+									</destination>
+									<included>
+										<hasValueDecision reversed="TRUE" model="row.col03.thumbUrl" />
+									</included>
+								</navigation>
+							</container>
+						</column>
+
+						<column centered="TRUE" bottomed="TRUE">
+							<container>
+								<navigation style="LINK" submit="TRIGGER">
+									<title>
+										<message>
+											<model type="image" ref="row.col04.thumbUrl">
+												<caption>
+													<message>
+														<model ref="row.col04.name" />
+													</message>
+												</caption>
+											</model>
+										</message>
+									</title>
+									<destination template="ambrosiaChooseAttachment('{0}');">
+										<model ref="row.col04.url" />
+									</destination>
+									<included>
+										<hasValueDecision model="row.col04.thumbUrl" />
+									</included>
+								</navigation>
+								<navigation style="LINK" submit="TRIGGER">
+									<title>
+										<message>
+											<model ref="row.col04.name" />
+										</message>
+									</title>
+									<destination template="ambrosiaChooseAttachment('{0}');">
+										<model ref="row.col04.url" />
+									</destination>
+									<included>
+										<hasValueDecision reversed="TRUE" model="row.col04.thumbUrl" />
+									</included>
+								</navigation>
+							</container>
+						</column>
+
+					</columns>
+				</entityList>
+
+			</container>
+		</section>
 
 		<!-- navigations -->
 		<navigationBar id="nav">

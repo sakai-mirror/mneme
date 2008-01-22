@@ -271,64 +271,17 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<Attachment> findFiles(String application, String context, String prefix)
+	{
+		return findTypes(application, context, prefix, null);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Attachment> findImages(String application, String context, String prefix)
 	{
-		// permission
-		pushAdvisor();
-
-		List<Attachment> rv = new ArrayList<Attachment>();
-
-		try
-		{
-			// form the content hosting path to the docs collection
-			String docsCollection = "/private/";
-			docsCollection += application + "/";
-			docsCollection += context + "/";
-			if ((prefix != null) && (prefix.length() > 0))
-			{
-				docsCollection += prefix + "/";
-			}
-
-			// get the members of this collection
-			ContentCollection docs = contentHostingService.getCollection(docsCollection);
-			List members = docs.getMemberResources();
-			for (Object m : members)
-			{
-				if (m instanceof ContentCollection)
-				{
-					// get the member within
-					ContentCollection holder = (ContentCollection) m;
-					List innerMembers = holder.getMemberResources();
-					for (Object mm : innerMembers)
-					{
-						if (mm instanceof ContentResource)
-						{
-							filterNonThumbImages(rv, (ContentResource) mm);
-						}
-					}
-				}
-
-				else if (m instanceof ContentResource)
-				{
-					filterNonThumbImages(rv, (ContentResource) m);
-				}
-			}
-		}
-		catch (IdUnusedException e)
-		{
-		}
-		catch (TypeException e)
-		{
-		}
-		catch (PermissionException e)
-		{
-		}
-		finally
-		{
-			popAdvisor();
-		}
-
-		return rv;
+		return findTypes(application, context, prefix, "image/");
 	}
 
 	/**
@@ -1068,27 +1021,103 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
-	 * If the document is an image and not a thumbnail, add it to the attachments.
+	 * If the document matches typePrefix and not a thumbnail, add it to the attachments.
 	 * 
 	 * @param attachments
 	 *        The list of attachments.
 	 * @param doc
 	 *        The resource.
+	 * @param typePrefix
+	 *        if null, match any type, else match only the types that match this prefix.
 	 */
-	protected void filterNonThumbImages(List<Attachment> attachments, ContentResource doc)
+	protected void filterNonThumbTypes(List<Attachment> attachments, ContentResource doc, String typePrefix)
 	{
-		// only images
-		if (doc.getContentType().toLowerCase().startsWith("image/"))
+		// only matching types
+		if ((typePrefix == null) || (doc.getContentType().toLowerCase().startsWith(typePrefix.toLowerCase())))
 		{
 			// not thumbs
 			if (doc.getProperties().getProperty(this.PROP_THUMB) == null)
 			{
 				String ref = doc.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
 				String url = doc.getUrl(ContentHostingService.PROP_ALTERNATE_REFERENCE);
-				Attachment a = new AttachmentImpl(doc.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME), ref, url);
+				Attachment a = new AttachmentImpl(doc.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME), ref, url, doc
+						.getContentType());
 				attachments.add(a);
 			}
 		}
+	}
+
+	/**
+	 * Find all the attachments in the docs area of the application for this context. Skip image thumbs. Select only those matching type.
+	 * 
+	 * @param application
+	 *        The application prefix for the collection in private.
+	 * @param context
+	 *        The context associated with the attachment.
+	 * @param prefix
+	 *        Any prefix path for within the context are of the application in private.
+	 * @param typePrefix
+	 *        if null, all but the thumbs. Otherwise only those matching the prefix in mime type.
+	 * @return A List of Attachments to the attachments.
+	 */
+	protected List<Attachment> findTypes(String application, String context, String prefix, String typePrefix)
+	{
+		// permission
+		pushAdvisor();
+
+		List<Attachment> rv = new ArrayList<Attachment>();
+
+		try
+		{
+			// form the content hosting path to the docs collection
+			String docsCollection = "/private/";
+			docsCollection += application + "/";
+			docsCollection += context + "/";
+			if ((prefix != null) && (prefix.length() > 0))
+			{
+				docsCollection += prefix + "/";
+			}
+
+			// get the members of this collection
+			ContentCollection docs = contentHostingService.getCollection(docsCollection);
+			List members = docs.getMemberResources();
+			for (Object m : members)
+			{
+				if (m instanceof ContentCollection)
+				{
+					// get the member within
+					ContentCollection holder = (ContentCollection) m;
+					List innerMembers = holder.getMemberResources();
+					for (Object mm : innerMembers)
+					{
+						if (mm instanceof ContentResource)
+						{
+							filterNonThumbTypes(rv, (ContentResource) mm, typePrefix);
+						}
+					}
+				}
+
+				else if (m instanceof ContentResource)
+				{
+					filterNonThumbTypes(rv, (ContentResource) m, typePrefix);
+				}
+			}
+		}
+		catch (IdUnusedException e)
+		{
+		}
+		catch (TypeException e)
+		{
+		}
+		catch (PermissionException e)
+		{
+		}
+		finally
+		{
+			popAdvisor();
+		}
+
+		return rv;
 	}
 
 	/**
