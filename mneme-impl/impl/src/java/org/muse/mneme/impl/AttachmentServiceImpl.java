@@ -1162,7 +1162,6 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		// draw the scaled thumb
 		BufferedImage thumbImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2D = thumbImage.createGraphics();
-		g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		g2D.drawImage(fullImage, 0, 0, width, height, null);
 
 		// encode as jpeg to a byte array
