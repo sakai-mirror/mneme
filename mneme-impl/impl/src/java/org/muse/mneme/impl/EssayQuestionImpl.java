@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,7 @@
 
 package org.muse.mneme.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.muse.ambrosia.api.Attachments;
-import org.muse.ambrosia.api.AttachmentsEdit;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.FileUpload;
 import org.muse.ambrosia.api.HtmlEdit;
@@ -40,10 +36,7 @@ import org.muse.ambrosia.api.UiService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
-import org.muse.mneme.impl.MatchQuestionImpl.MatchQuestionPair;
 import org.sakaiproject.i18n.InternationalizedMessages;
-import org.sakaiproject.util.FormattedText;
-import org.sakaiproject.util.StringUtil;
 
 /**
  * EssayQuestionImpl handles questions for the essay question type.
@@ -241,7 +234,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getDescription()
 	{
-		return FormattedText.convertFormattedTextToPlaintext(this.question.getPresentation().getText());
+		return this.question.getPresentation().getText();
 	}
 
 	/**

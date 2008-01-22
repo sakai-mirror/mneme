@@ -66,9 +66,6 @@ public abstract class QuestionStorageSql implements QuestionStorage
 	/** Dependency: SqlService. */
 	protected SqlService sqlService = null;
 
-	/** Dependency: SubmissionService */
-	protected SubmissionService submissionService = null;
-
 	/** Dependency: ThreadLocalManager. */
 	protected ThreadLocalManager threadLocalManager = null;
 
@@ -428,11 +425,7 @@ public abstract class QuestionStorageSql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public QuestionImpl newQuestion()
-	{
-		QuestionImpl rv = new QuestionImpl(poolService, questionService, submissionService);
-		return rv;
-	}
+	public abstract QuestionImpl newQuestion();
 
 	/**
 	 * {@inheritDoc}
@@ -510,17 +503,6 @@ public abstract class QuestionStorageSql implements QuestionStorage
 	public void setSqlService(SqlService service)
 	{
 		this.sqlService = service;
-	}
-
-	/**
-	 * Dependency: SubmissionService.
-	 * 
-	 * @param service
-	 *        The SubmissionService.
-	 */
-	public void setSubmissionService(SubmissionService service)
-	{
-		this.submissionService = service;
 	}
 
 	/**

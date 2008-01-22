@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,6 @@ import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.id.api.IdManager;
-import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -596,7 +595,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getDescription()
 	{
-		return FormattedText.convertFormattedTextToPlaintext(this.question.getPresentation().getText());
+		return this.question.getPresentation().getText();
 	}
 
 	/**

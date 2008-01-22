@@ -40,14 +40,13 @@ import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
-import org.muse.mneme.api.SubmissionService;
 import org.muse.mneme.api.Translation;
 import org.sakaiproject.util.StringUtil;
 
 /**
  * QuestionStorageSample defines a sample storage for questions.
  */
-public class QuestionStorageSample implements QuestionStorage
+public abstract class QuestionStorageSample implements QuestionStorage
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(QuestionStorageSample.class);
@@ -69,12 +68,6 @@ public class QuestionStorageSample implements QuestionStorage
 	protected PoolService poolService = null;
 
 	protected Map<String, QuestionImpl> questions = new LinkedHashMap<String, QuestionImpl>();
-
-	/** Dependency: QuestionService */
-	protected QuestionService questionService = null;
-
-	/** Dependency: SubmissionService */
-	protected SubmissionService submissionService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -335,11 +328,7 @@ public class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public QuestionImpl newQuestion()
-	{
-		QuestionImpl rv = new QuestionImpl(poolService, questionService, submissionService);
-		return rv;
-	}
+	public abstract QuestionImpl newQuestion();
 
 	/**
 	 * {@inheritDoc}
@@ -414,28 +403,6 @@ public class QuestionStorageSample implements QuestionStorage
 	public void setPoolService(PoolService service)
 	{
 		this.poolService = service;
-	}
-
-	/**
-	 * Dependency: QuestionService.
-	 * 
-	 * @param service
-	 *        The QuestionService.
-	 */
-	public void setQuestionService(QuestionService service)
-	{
-		this.questionService = service;
-	}
-
-	/**
-	 * Dependency: SubmissionService.
-	 * 
-	 * @param service
-	 *        The SubmissionService.
-	 */
-	public void setSubmissionService(SubmissionService service)
-	{
-		this.submissionService = service;
 	}
 
 	protected void fakeIt()

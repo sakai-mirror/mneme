@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,9 @@ public interface Question
 	Ordering<Question> getAssessmentOrdering();
 
 	/**
-	 * Access the context of this pool.
+	 * Access the context of this question.
 	 * 
-	 * @return The pool's context string.
+	 * @return The question's context string.
 	 */
 	String getContext();
 
@@ -48,7 +48,7 @@ public interface Question
 	Attribution getCreatedBy();
 
 	/**
-	 * Access the description of the question.
+	 * Access the description of the question.  Will be <= 255 characters plain text.
 	 * 
 	 * @return The description of the question.
 	 */

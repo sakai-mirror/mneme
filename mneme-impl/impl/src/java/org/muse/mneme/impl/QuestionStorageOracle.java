@@ -30,7 +30,7 @@ import org.muse.mneme.api.Pool;
 /**
  * QuestionStorageMysql implements QuestionStorage for Oracle.
  */
-public class QuestionStorageOracle extends QuestionStorageSql implements QuestionStorage
+public abstract class QuestionStorageOracle extends QuestionStorageSql implements QuestionStorage
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(QuestionStorageOracle.class);

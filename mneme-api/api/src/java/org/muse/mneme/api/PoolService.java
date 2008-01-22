@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * PoolService provides services around question pool management for Mneme.
  */
-public interface PoolService extends PoolManifestService
+public interface PoolService extends PoolManifestService, PoolGetService
 {
 	/**
 	 * Sort options for findPools()
@@ -84,15 +84,6 @@ public interface PoolService extends PoolManifestService
 	 * @return a list of pools that meet the criteria.
 	 */
 	List<Pool> findPools(String context, FindPoolsSort sort, String search);
-
-	/**
-	 * Access a pool by id.
-	 * 
-	 * @param poolId
-	 *        The pool ID.
-	 * @return The Pool with this id, or null if not found.
-	 */
-	Pool getPool(String poolId);
 
 	/**
 	 * Get all the pools available to the context (excluding mints and historicals).

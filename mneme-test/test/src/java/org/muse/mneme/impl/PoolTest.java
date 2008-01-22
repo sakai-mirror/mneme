@@ -155,7 +155,7 @@ public class PoolTest extends TestCase
 	}
 
 	/**
-	 * Test the context: normal, untrimmed, all blanks, too long
+	 * Test the context
 	 * 
 	 * @throws Exception
 	 */
@@ -165,8 +165,6 @@ public class PoolTest extends TestCase
 		final String CONTEXT_NORMAL = "context";
 		pool.setContext(CONTEXT_NORMAL);
 		assertTrue(pool.getContext().equals(CONTEXT_NORMAL));
-		pool.setTitle(null);
-		assertTrue(pool.getTitle() == null);
 
 		// null
 		pool.setContext(null);

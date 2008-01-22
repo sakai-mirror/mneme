@@ -34,7 +34,17 @@ public class QuestionStorageTestXsample extends QuestionStorageTestX
 	{
 		public PoolImpl newPool()
 		{
+			// TODO: setters
 			return new PoolImpl();
+		}
+	}
+
+	public class MyQuestionStorageSample extends QuestionStorageSample
+	{
+		public QuestionImpl newQuestion()
+		{
+			// TODO: setters
+			return new QuestionImpl();
 		}
 	}
 
@@ -64,7 +74,7 @@ public class QuestionStorageTestXsample extends QuestionStorageTestX
 
 	protected QuestionStorage setupQuestionStorage()
 	{
-		QuestionStorageSample s = new QuestionStorageSample();
+		QuestionStorageSample s = new MyQuestionStorageSample();
 		s.setMnemeService(mnemeService);
 		s.init();
 

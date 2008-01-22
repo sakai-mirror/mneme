@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * QuestionService provides services around question management for Mneme.
  */
-public interface QuestionService extends QuestionPoolService
+public interface QuestionService extends QuestionPoolService, QuestionGetService
 {
 	/**
 	 * Check if the current user is allowed to edit this question.
@@ -107,15 +107,6 @@ public interface QuestionService extends QuestionPoolService
 	 * @return a list of questions that meet the criteria.
 	 */
 	List<Question> findQuestions(String context, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize);
-
-	/**
-	 * Access a question by id.
-	 * 
-	 * @param questionId
-	 *        The question id.
-	 * @return The Question with this id, or null if not found.
-	 */
-	Question getQuestion(String questionId);
 
 	/**
 	 * Move a question from one pool to another.

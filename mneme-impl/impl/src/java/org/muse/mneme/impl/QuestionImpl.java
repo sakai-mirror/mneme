@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,17 @@ import org.muse.mneme.api.Attribution;
 import org.muse.mneme.api.Ordering;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
+import org.muse.mneme.api.PoolGetService;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionGetService;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
+import org.muse.mneme.api.SubmissionUnscoredQuestionService;
 import org.muse.mneme.api.TypeSpecificQuestion;
+import org.sakaiproject.util.FormattedText;
 
 /**
  * QuestionImpl implements Question
@@ -259,35 +263,28 @@ public class QuestionImpl implements Question
 
 	protected String poolId = null;
 
-	protected transient PoolService poolService = null;
+	/** Dependency: PoolGetService. */
+	protected transient PoolGetService poolService = null;
 
 	protected PresentationImpl presentation = null;
 
 	protected TypeSpecificQuestion questionHandler = null;
 
-	protected transient QuestionService questionService = null;
+	/** Dependency: QuestionGetService. */
+	protected transient QuestionGetService questionService = null;
 
 	protected transient Submission submissionContext = null;
 
-	protected transient SubmissionService submissionService = null;
+	/** Dependency: SubmissionUnscoredQuestionService. */
+	protected transient SubmissionUnscoredQuestionService submissionService = null;
 
 	protected String type = null;
 
 	/**
 	 * Construct.
-	 * 
-	 * @param poolService
-	 *        the PoolService.
-	 * @param questionService
-	 *        The QuestionService.
-	 * @param submissionService
-	 *        The SubmissionService.
 	 */
-	public QuestionImpl(PoolService poolService, QuestionService questionService, SubmissionService submissionService)
+	public QuestionImpl()
 	{
-		this.poolService = poolService;
-		this.questionService = questionService;
-		this.submissionService = submissionService;
 		this.presentation = new PresentationImpl(this.changed);
 	}
 
@@ -343,7 +340,16 @@ public class QuestionImpl implements Question
 	 */
 	public String getDescription()
 	{
-		return this.questionHandler.getDescription();
+		String rv = this.questionHandler.getDescription();
+		if (rv == null) return rv;
+
+		// strip any html
+		rv = FormattedText.convertFormattedTextToPlaintext(rv);
+
+		// trim to max length
+		if (rv.length() > 255) rv = rv.substring(0, 255);
+
+		return rv;
 	}
 
 	/**
@@ -544,6 +550,39 @@ public class QuestionImpl implements Question
 		this.context = pool.getContext();
 
 		this.changed.setChanged();
+	}
+
+	/**
+	 * Dependency: PoolGetService.
+	 * 
+	 * @param service
+	 *        The PoolGetService.
+	 */
+	public void setPoolService(PoolGetService service)
+	{
+		this.poolService = service;
+	}
+
+	/**
+	 * Dependency: QuestionGetService.
+	 * 
+	 * @param service
+	 *        The QuestionGetService.
+	 */
+	public void setQuestionService(QuestionGetService service)
+	{
+		this.questionService = service;
+	}
+
+	/**
+	 * Dependency: SubmissionUnscoredQuestionService.
+	 * 
+	 * @param service
+	 *        The SubmissionUnscoredQuestionService.
+	 */
+	public void setSubmissionService(SubmissionUnscoredQuestionService service)
+	{
+		this.submissionService = service;
 	}
 
 	/**

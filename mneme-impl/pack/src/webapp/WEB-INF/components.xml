@@ -110,6 +110,15 @@
 		<property name="autoDdl"><value>${auto.ddl}</value></property>
 	</bean>
 
+	<bean id="org.muse.mneme.api.Question"
+		class="org.muse.mneme.impl.QuestionImpl"
+		singleton="false">
+
+ 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
+		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
+ 		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
+ 	</bean>
+
 	<bean id="org.muse.mneme.api.QuestionService"
 		class="org.muse.mneme.impl.QuestionServiceImpl"
 		init-method="init"
@@ -143,11 +152,11 @@
 		destroy-method="destroy"
 		singleton="true">
 
+		<lookup-method name="newQuestion" bean="org.muse.mneme.api.Question" />
+
 		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
 		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
-		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
-		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
 	</bean>
 
 	<bean id="org.muse.mneme.impl.QuestionStorageMysql"
@@ -155,10 +164,11 @@
 		destroy-method="destroy"
 		singleton="true">
 
+		<lookup-method name="newQuestion" bean="org.muse.mneme.api.Question" />
+
 		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
-		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
 
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
  		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
@@ -171,10 +181,11 @@
 		destroy-method="destroy"
 		singleton="true">
 
+		<lookup-method name="newQuestion" bean="org.muse.mneme.api.Question" />
+
 		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
-		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
 
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
  		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>

@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * SubmissionService manages submissions.
  */
-public interface SubmissionService
+public interface SubmissionService extends SubmissionUnscoredQuestionService
 {
 	/**
 	 * Sort options for findAssessmentSubmissionsSort() status is GradingSubmissionStatus
@@ -284,17 +284,6 @@ public interface SubmissionService
 	 * @return A Map of keyed by user id to that user's highest Float submission score for the assessment.
 	 */
 	Map<String, Float> getAssessmentHighestScores(Assessment assessment, Boolean releasedOnly);
-
-	/**
-	 * Check if there are any completed submissions that have any null scores for answered answers to this question for this assessment.
-	 * 
-	 * @param assessment
-	 *        The assessment.
-	 * @param question
-	 *        The question.
-	 * @return TRUE if there are unscored submissions to this assessment, FALSE if not.
-	 */
-	Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question);
 
 	/**
 	 * Get the total scores for all completed submissions to this assessment.
