@@ -76,7 +76,12 @@ public class AttachmentsView extends ControllerImpl
 		String type = params[2];
 
 		// get getting called twice for some reason...
-		if (type.equals("null")) return;
+		if (type.equals("null"))
+		{
+			M_log.warn("get: /null detected");
+			uiService.undoPrepareGet(req, res);
+			return;
+		}
 
 		// collect the attachments in this context
 		List<Attachment> attachments = null;
@@ -130,7 +135,11 @@ public class AttachmentsView extends ControllerImpl
 		String type = params[2];
 
 		// get getting called twice for some reason...
-		if (type.equals("null")) return;
+		if (type.equals("null"))
+		{
+			M_log.warn("post: /null detected");
+			return;
+		}
 
 		// for the upload of attachments
 		Upload upload = new Upload(this.toolManager.getCurrentPlacement().getContext(), AttachmentService.DOCS_AREA, false, this.attachmentService);
