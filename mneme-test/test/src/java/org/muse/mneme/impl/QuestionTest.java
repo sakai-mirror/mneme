@@ -105,8 +105,7 @@ public class QuestionTest extends TestCase
 		 */
 		public Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
 		{
-			// TODO Auto-generated method stub
-			return null;
+			return Boolean.TRUE;
 		}
 	}
 
@@ -197,6 +196,56 @@ public class QuestionTest extends TestCase
 		assertTrue(question.getModifiedBy().getUserId() == null);
 	}
 
+	public void testChanged() throws Exception
+	{
+		question.changed.clearChanged();
+		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
+		question.changed.setChanged();
+		assertTrue(question.getIsChanged().equals(Boolean.TRUE));
+
+		question.changed.clearChanged();
+		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
+		question.setChanged();
+		assertTrue(question.getIsChanged().equals(Boolean.TRUE));
+
+		question.setExplainReason(Boolean.TRUE);
+		question.changed.clearChanged();
+		question.setExplainReason(Boolean.TRUE);
+		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
+		question.setExplainReason(Boolean.FALSE);
+		assertTrue(question.getIsChanged().equals(Boolean.TRUE));
+
+		question.setFeedback("");
+		question.changed.clearChanged();
+		question.setFeedback("");
+		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
+		question.setFeedback("x");
+		assertTrue(question.getIsChanged().equals(Boolean.TRUE));
+
+		question.setHints("");
+		question.changed.clearChanged();
+		question.setHints("");
+		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
+		question.setHints("x");
+		assertTrue(question.getIsChanged().equals(Boolean.TRUE));
+
+		Pool p1 = this.poolGetService.getPool("1");
+		Pool p2 = this.poolGetService.getPool("2");
+		question.setPool(p1);
+		question.changed.clearChanged();
+		question.setPool(p1);
+		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
+		question.setPool(p2);
+		assertTrue(question.getIsChanged().equals(Boolean.TRUE));
+
+		question.getPresentation().setText("");
+		question.changed.clearChanged();
+		question.getPresentation().setText("");
+		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
+		question.getPresentation().setText("x");
+		assertTrue(question.getIsChanged().equals(Boolean.TRUE));
+	}
+
 	/**
 	 * Test the context
 	 * 
@@ -214,7 +263,7 @@ public class QuestionTest extends TestCase
 		assertTrue(question.getContext().equals("context"));
 	}
 
-	public void testGetDescription() throws Exception
+	public void testDescription() throws Exception
 	{
 		// String[] data = new String[0];
 		// question.getTypeSpecificQuestion().setData(data);
@@ -241,9 +290,154 @@ public class QuestionTest extends TestCase
 		assertTrue(question.getDescription().equals(""));
 		question.getPresentation().setText(TITLE_JUSTRIGHT);
 		assertTrue(question.getDescription().equals(TITLE_JUSTRIGHT));
-		
+
 		question.getPresentation().setText("<p>this is some <b>html</b></p>");
 		assertTrue(question.getDescription().equals("this is some html"));
+	}
+
+	public void testExplainReason() throws Exception
+	{
+		// default
+		assertTrue(question.getExplainReason().equals(Boolean.FALSE));
+
+		try
+		{
+			question.setExplainReason(null);
+			fail("expected IllegalArgumentExceptionn");
+		}
+		catch (IllegalArgumentException e)
+		{
+		}
+
+		question.setExplainReason(Boolean.TRUE);
+		assertTrue(question.getExplainReason().equals(Boolean.TRUE));
+
+		question.setExplainReason(Boolean.FALSE);
+		assertTrue(question.getExplainReason().equals(Boolean.FALSE));
+	}
+
+	public void testFeedback() throws Exception
+	{
+		// default
+		assertTrue(question.getFeedback() == null);
+
+		question.setFeedback(null);
+		assertTrue(question.getFeedback() == null);
+
+		question.setFeedback("");
+		assertTrue(question.getFeedback().equals(""));
+
+		question.setFeedback("feedback");
+		assertTrue(question.getFeedback().equals("feedback"));
+
+		question.setFeedback("   feedback   ");
+		assertTrue(question.getFeedback().equals("   feedback   "));
+
+		final String CHARS260 = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
+		question.setFeedback(CHARS260);
+		assertTrue(question.getFeedback().equals(CHARS260));
+
+		question.setFeedback("<p>this is some <b>html</b></p>");
+		assertTrue(question.getFeedback().equals("<p>this is some <b>html</b></p>"));
+	}
+
+	public void testGetHasUnscoredSubmissions() throws Exception
+	{
+		assert (question.getHasUnscoredSubmissions().equals(Boolean.TRUE));
+	}
+
+	public void testHints() throws Exception
+	{
+		// default
+		assertTrue(question.getHints() == null);
+
+		question.setHints(null);
+		assertTrue(question.getHints() == null);
+
+		question.setHints("");
+		assertTrue(question.getHints().equals(""));
+
+		question.setHints("feedback");
+		assertTrue(question.getHints().equals("feedback"));
+
+		question.setHints("   feedback   ");
+		assertTrue(question.getHints().equals("   feedback   "));
+
+		final String CHARS260 = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
+		question.setHints(CHARS260);
+		assertTrue(question.getHints().equals(CHARS260));
+
+		question.setHints("<p>this is some <b>html</b></p>");
+		assertTrue(question.getHints().equals("<p>this is some <b>html</b></p>"));
+	}
+
+	public void testHistorical() throws Exception
+	{
+		assertTrue(question.getIsHistorical().equals(Boolean.FALSE));
+
+		question.initHistorical(Boolean.TRUE);
+		assertTrue(question.getIsHistorical().equals(Boolean.TRUE));
+
+		question.initHistorical(Boolean.FALSE);
+		assertTrue(question.getIsHistorical().equals(Boolean.FALSE));
+	}
+
+	public void testId() throws Exception
+	{
+		question.initId("1");
+		assertTrue(question.getId().equals("1"));
+	}
+
+	public void testMint() throws Exception
+	{
+		assertTrue(question.getMint().equals(Boolean.TRUE));
+
+		question.initMint(Boolean.FALSE);
+		assertTrue(question.getMint().equals(Boolean.FALSE));
+
+		question.initMint(Boolean.TRUE);
+		assertTrue(question.getMint().equals(Boolean.TRUE));
+
+		question.clearMint();
+		assertTrue(question.getMint().equals(Boolean.FALSE));
+	}
+
+	public void testPlugin() throws Exception
+	{
+		assertTrue(question.getType().equals("mneme:TrueFalse"));
+		assertTrue(question.getTypeName().equals("True / False"));
+	}
+
+	public void testPool() throws Exception
+	{
+		Pool pool = poolGetService.getPool("1");
+		question.setPool(pool);
+		assertTrue(question.getPool().getId().equals("1"));
+	}
+
+	public void testPresentation() throws Exception
+	{
+		assertTrue(question.getPresentation() != null);
+		assertTrue(question.getPresentation().getText() == null);
+
+		question.getPresentation().setText("");
+		assertTrue(question.getPresentation().getText().equals(""));
+
+		question.getPresentation().setText(null);
+		assertTrue(question.getPresentation().getText() == null);
+
+		question.getPresentation().setText("the question");
+		assertTrue(question.getPresentation().getText().equals("the question"));
+
+		question.getPresentation().setText("  title   ");
+		assertTrue(question.getPresentation().getText().equals("  title   "));
+
+		final String CHARS260 = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
+		question.getPresentation().setText(CHARS260);
+		assertTrue(question.getPresentation().getText().equals(CHARS260));
+
+		question.getPresentation().setText("<p>this is some <b>html</b></p>");
+		assertTrue(question.getPresentation().getText().equals("<p>this is some <b>html</b></p>"));
 	}
 
 	/**
@@ -300,6 +494,7 @@ public class QuestionTest extends TestCase
 		q.setPoolService(poolGetService);
 		q.setSubmissionService(submissionUnscoredQuestionService);
 		q.initTypeSpecificQuestion(tf.newQuestion(q));
+		q.initType(tf.getType());
 		question = q;
 	}
 

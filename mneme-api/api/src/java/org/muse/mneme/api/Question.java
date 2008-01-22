@@ -172,7 +172,7 @@ public interface Question
 	void setChanged();
 
 	/**
-	 * Set the explain-reason setting.
+	 * Set the explain-reason setting.  The default value if never set is FALSE.
 	 * 
 	 * @param explainReason
 	 *        TRUE if this question also collects "reason" from the user, FALSE if not.
