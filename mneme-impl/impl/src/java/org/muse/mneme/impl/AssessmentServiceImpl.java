@@ -352,6 +352,13 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		AssessmentImpl rv = this.storage.newAssessment();
 		rv.setContext(context);
+
+		// if we have a gradebook, enable gb integration
+		if (this.gradesService.available(context))
+		{
+			rv.getGrading().setGradebookIntegration(Boolean.TRUE);
+		}
+
 		save(rv);
 
 		return rv;
