@@ -319,6 +319,18 @@
 						<model ref="assessment.id" />
 					</destination>
 				</navigation>
+				<divider />
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
+					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
+						<model ref="sort_grades" />
+						<model ref="assessment.id" />
+						<model ref="question.id" />
+						<model ref="sort_column" />
+						<model ref="sort_direction" />
+						<model type="paging" ref="paging" />
+					</destination>
+					<icon icon="/icons/save.png" style="LEFT" />
+				</navigation>
 			</container>
 		</navigationBar>
 	</container>
