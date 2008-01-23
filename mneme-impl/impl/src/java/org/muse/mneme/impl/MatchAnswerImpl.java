@@ -188,10 +188,11 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 				{
 					total += partial;
 				}
-				else
-				{
-					total -= partial;
-				}
+				// Note: as of 1.1, MN-565, we no longer penalize for incorrect answers
+				// else
+				// {
+				// total -= partial;
+				// }
 			}
 		}
 
