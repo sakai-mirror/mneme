@@ -96,6 +96,8 @@ public class SectionScoreDelegate extends FormatDelegateImpl
 
 		Boolean review = (Boolean) context.get("review");
 
+		String selector = "worth-points";
+
 		// if we are doing review and the submission has been graded
 		if ((review != null) && review && submission.getIsReleased())
 		{
@@ -117,13 +119,20 @@ public class SectionScoreDelegate extends FormatDelegateImpl
 
 			rv.append("<img src=\"" + context.get("sakai.return.url") + "/icons/grade.png\" alt=\"" + context.getMessages().getString("score")
 					+ "\" />");
-			rv.append(context.getMessages().getString("score") + ": " + formatScore(score));
+			rv.append(context.getMessages().getString("score") + ":&nbsp;" + formatScore(score) + "&nbsp;&nbsp;&nbsp;");
+
+			selector = "of-points";
 		}
 
 		// add the total possible points for the section
-		rv
-				.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> " + formatScore(part.getTotalPoints())
-						+ ")");
+		Float score = part.getTotalPoints();
+		if (score.equals(Float.valueOf((1))))
+		{
+			selector += "-singular";
+		}
+		Object[] args = new Object[1];
+		args[0] = formatScore(score);
+		rv.append(context.getMessages().getFormattedMessage(selector, args));
 
 		return rv.toString();
 	}

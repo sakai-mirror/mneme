@@ -489,12 +489,13 @@ public class PoolImpl implements Pool
 		this.context = other.context;
 		this.description = other.description;
 		this.difficulty = other.difficulty;
+		this.frozenManifest = new ArrayList<String>(other.frozenManifest);
 		this.historical = other.historical;
 		this.id = other.id;
 		this.mint = other.mint;
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
 		this.points = other.points;
-		this.frozenManifest = new ArrayList<String>(other.frozenManifest);
+		this.questionService = other.questionService;
 		this.title = other.title;
 	}
 }

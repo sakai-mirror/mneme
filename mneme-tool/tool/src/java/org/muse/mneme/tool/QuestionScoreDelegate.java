@@ -48,7 +48,7 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 	protected static String formatScore(Float score)
 	{
 		if (score == null) return "-";
-	
+
 		// round to a single place
 		String rv = Float.toString(Math.round(score * 100.0f) / 100.0f);
 
@@ -90,7 +90,7 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 		{
 			submission = (Submission) o;
 		}
-		
+
 		Assessment assessment = null;
 		if (submission != null)
 		{
@@ -98,7 +98,7 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 		}
 		else
 		{
-			o =  context.get("assessment");
+			o = context.get("assessment");
 			if (o instanceof Assessment)
 			{
 				assessment = (Assessment) o;
@@ -113,6 +113,8 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 		if (review == null) review = Boolean.FALSE;
 		Boolean grading = (Boolean) context.get("grading");
 		if (grading == null) grading = Boolean.FALSE;
+
+		String selector = "worth-points";
 
 		// if we are doing review just now, and if we are needing review and it's set, and if the submission has been graded
 		if ((review || grading) && (submission != null) && (submission.getIsReleased() || grading))
@@ -140,13 +142,21 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 					}
 				}
 
-				rv.append(context.getMessages().getString("score") + ": " + formatScore(score));
+				rv.append(context.getMessages().getString("score") + ":&nbsp;" + formatScore(score) + "&nbsp;&nbsp;&nbsp;");
+				
+				selector = "of-points";
 			}
 		}
 
 		// add the possible points for the question
-		rv.append(" (<span style=\"font-size:80%\">" + context.getMessages().getString("max") + "</span> "
-				+ formatScore(question.getPool().getPoints()) + ")");
+		Float score = question.getPool().getPoints();
+		if (score.equals(Float.valueOf(1)))
+		{
+			selector += "-singular";
+		}
+		Object[] args = new Object[1];
+		args[0] = formatScore(score);
+		rv.append(context.getMessages().getFormattedMessage(selector, args));
 
 		return rv.toString();
 	}

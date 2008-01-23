@@ -111,6 +111,11 @@
 					<model type="icon" icon="/icons/test.png" />
 					<model ref="submission.assessment.title" missing="no-title" />
 					<model ref="submission.assessment.parts.totalPoints" delegate="FormatScore" tool="sakai.mneme" />
+					<selectors>
+						<selector selector="instructions-test-title-singular">
+							<compareDecision constant="1.0" model="submission.assessment.parts.totalPoints" />
+						</selector>
+					</selectors>
 				</message>
 			</title>
 			<container>
