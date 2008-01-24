@@ -21,6 +21,7 @@
 
 package org.muse.mneme.impl;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -109,7 +110,7 @@ public class SqlHelper
 	}
 
 	/**
-	 * Read a Boolean (encoded in a bit or tinyint or string field) from the results set.
+	 * Read a Boolean (encoded in a bit or tinyint or string field or whatever) from the results set.
 	 * 
 	 * @param results
 	 *        The result set.
@@ -131,6 +132,10 @@ public class SqlHelper
 		else if (o instanceof Integer)
 		{
 			rv = Boolean.valueOf(((Integer) o).intValue() == 1);
+		}
+		else if (o instanceof BigDecimal)
+		{
+			rv = Boolean.valueOf(((BigDecimal) o).intValue() == 1);
 		}
 		else if (o instanceof String)
 		{
