@@ -497,7 +497,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		if (this.shuffleChoices && (this.question.getPart() != null) && (this.question.getPart().getAssessment().getSubmissionContext() != null))
 		{
 			// set the seed based on the submission id
-			long seed = this.question.getPart().getAssessment().getSubmissionContext().getId().hashCode();
+			long seed = (this.question.getId() + "_" + this.question.getPart().getAssessment().getSubmissionContext().getId()).hashCode();
 
 			// mix up the answers
 			Collections.shuffle(rv, new Random(seed));

@@ -634,8 +634,8 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		long seed = this.question.getId().hashCode();
 		if ((this.question.getPart() != null) && (this.question.getPart().getAssessment().getSubmissionContext() != null))
 		{
-			// set the seed based on the submission id
-			seed = this.question.getPart().getAssessment().getSubmissionContext().getId().hashCode();
+			// set the seed based on the submission id and the question
+			seed = (this.question.getId() + "_" + this.question.getPart().getAssessment().getSubmissionContext().getId()).hashCode();
 		}
 		Random sequence = new Random(seed);
 
