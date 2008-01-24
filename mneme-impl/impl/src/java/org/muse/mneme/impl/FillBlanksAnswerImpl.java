@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,7 +181,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 
 		List<Boolean> rv = new ArrayList<Boolean>(size);
 
-		// if not answerd
+		// if not answered
 		if (this.answers == null)
 		{
 			for (int i = 0; i < size; i++)
@@ -392,6 +392,9 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		String[] valid = correct.split("\\|");
 		for (String test : valid)
 		{
+			// ignore leading and trailing white space
+			test = trim(test);
+
 			// prepare the test as a regex, quoting all non-wildcards, changing the wildcard "*" into a regex ".+"
 			StringBuffer regex = new StringBuffer();
 			String[] parts = test.replaceAll("\\*", "|*|").split("\\|");
@@ -432,6 +435,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		try
 		{
 			// allow dot or comma for decimal point
+			// TODO: this needs to be changed to respect locale, not just replace commas! -ggolden
 			answer = answer.replace(',', '.');
 			correct = correct.replace(',', '.');
 
@@ -445,8 +449,8 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 			if (correct.indexOf("|") != -1)
 			{
 				String[] parts = correct.split("\\|");
-				range[0] = Float.parseFloat(parts[0]);
-				range[1] = Float.parseFloat(parts[1]);
+				range[0] = Float.parseFloat(trim(parts[0]));
+				range[1] = Float.parseFloat(trim(parts[1]));
 
 				// make sure [0] <= [1]
 				if (range[0].floatValue() > range[1].floatValue())
@@ -460,7 +464,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 			// otherwise use the single value for both sides of the range
 			else
 			{
-				range[0] = range[1] = Float.parseFloat(correct);
+				range[0] = range[1] = Float.parseFloat(trim(correct));
 			}
 
 			// test
@@ -474,5 +478,18 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 		}
 
 		return false;
+	}
+
+	/**
+	 * Trim the source from any blanks, and convert any html blanks to real ones.
+	 * 
+	 * @param source
+	 *        The source string.
+	 * @return The trimmed source.
+	 */
+	protected String trim(String source)
+	{
+		String rv = source.replace("&nbsp;", " ").trim();
+		return rv;
 	}
 }
