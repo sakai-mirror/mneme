@@ -192,6 +192,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		edit.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.inline.toString(), SubmissionType.both.toString())
 				.setProperty(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
 		edit.setProperty(this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
+		edit.setTextOnly();
 		answerSection.add(edit);
 
 		// the upload

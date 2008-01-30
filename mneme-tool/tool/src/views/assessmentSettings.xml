@@ -26,6 +26,11 @@
 
 <interface focus="title">
 
+	<!-- attachment picker view -->
+	<attachmentPicker>
+		<destination template="/attachments" />
+	</attachmentPicker>
+
 	<!--mode bar-->
 	<modeContainer>
 		<alias to="ToolModeFragment" toolId="sakai.mneme" />
