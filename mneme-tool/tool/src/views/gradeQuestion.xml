@@ -7,7 +7,7 @@
 	* $Id: gradeQuestion.xml 11997 2007-09-13 18:13:11Z maheshwarirashmi@foothill.edu $
 	***********************************************************************************
 	*
-	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 	* 
 	* Licensed under the Apache License, Version 2.0 (the "License");
 	* you may not use this file except in compliance with the License.
@@ -57,6 +57,9 @@
 				<message selector="assessment-total-points">
 					<model ref="assessment.Parts.totalPoints" />
 				</message>
+				<included>
+					<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+				</included>
 			</text>
 		</container>
 	</subHeader>
@@ -91,6 +94,9 @@
 				<message selector="submission-question-pts">
 					<model ref="question.pool.points" />
 				</message>
+				<included>
+					<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+				</included>
 			</title>
 			<container>
 				<!-- type-specific question viewing -->
@@ -268,6 +274,9 @@
 							</message>
 						</text>
 					</container>
+					<included>
+						<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+					</included>
 				</column>
 				<column>
 					<title>
@@ -302,6 +311,9 @@
 							</destination>
 						</desc>
 					</sort>
+					<included>
+						<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+					</included>
 				</column>
 			</columns>
 		</entityList>

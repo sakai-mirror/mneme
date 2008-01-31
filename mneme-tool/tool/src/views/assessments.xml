@@ -62,7 +62,10 @@
 							<included>
 								<decision model="assessment.isLive" />
 								<decision model="assessment.isValid" />
-								<decision reversed="TRUE" model="assessment.hasUnscoredSubmissions" />
+								<orDecision>
+									<compareDecision model="assessment.type" constant="survey" />
+									<decision reversed="TRUE" model="assessment.hasUnscoredSubmissions" />
+								</orDecision>
 							</included>
 						</navigation>
 						<navigation style="LINK" submit="TRUE" description="live-alt">
@@ -73,6 +76,7 @@
 							<included>
 								<decision model="assessment.isLive" />
 								<decision model="assessment.isValid" />
+								<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
 								<decision model="assessment.hasUnscoredSubmissions" />
 							</included>
 						</navigation>

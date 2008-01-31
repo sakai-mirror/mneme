@@ -7,7 +7,7 @@
 	* $Id$
 	***********************************************************************************
 	*
-	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 	* 
 	* Licensed under the Apache License, Version 2.0 (the "License");
 	* you may not use this file except in compliance with the License.
@@ -52,6 +52,9 @@
 				<message selector="assessment-total-points">
 					<model ref="assessment.Parts.totalPoints" />
 				</message>
+				<included>
+					<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+				</included>
 			</text>
 		</container>
 	</subHeader>
@@ -117,8 +120,11 @@
 							</container>
 						</model>
 					</message>
+					<included>
+						<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+					</included>
 				</text>
-				<!-- toggle to show instructinos -->
+				<!-- toggle to show instructions -->
 				<toggle target="comments" title="add-comments-toggle" style="LINK">
 					<icon icon="/icons/note.png" style="LEFT" />
 				</toggle>
@@ -341,6 +347,9 @@
 							<compareDecision model="submission.gradingStatus" constant="inProgress" />
 						</orDecision>
 					</entityIncluded>
+					<included>
+						<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+					</included>
 				</modelColumn>
 				<column>
 					<title>
@@ -378,6 +387,9 @@
 					<entityIncluded selector="dash">
 						<compareDecision reversed="TRUE" model="submission.gradingStatus" constant="inProgress" />
 					</entityIncluded>
+					<included>
+						<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+					</included>
 				</column>
 				<column>
 					<container>
@@ -403,6 +415,9 @@
 					<entityIncluded>
 						<decision model="submission.hasUnscoredAnswers" />
 					</entityIncluded>
+					<included>
+						<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+					</included>
 				</column>
 			</columns>
 		</entityList>
