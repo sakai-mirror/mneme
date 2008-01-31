@@ -56,8 +56,8 @@
 					<model ref="assessment.title" />
 					<model ref="assessment.parts.totalPoints" delegate="FormatScore" tool="sakai.mneme" />
 					<selectors>
-						<selector selector="enter-test-title-singular">
-							<compareDecision constant="1.0" model="assessment.parts.totalPoints" />
+						<selector selector="enter-test-title-survey">
+							<compareDecision model="assessment.type" constant="survey" />
 						</selector>
 					</selectors>
 				</message>

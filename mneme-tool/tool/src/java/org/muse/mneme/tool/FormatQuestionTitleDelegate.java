@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
+import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Question;
 
 /**
@@ -66,11 +67,20 @@ public class FormatQuestionTitleDelegate extends FormatDelegateImpl
 			args[1] = question.getPart().getNumQuestions();
 		}
 
-		// use the QuestionScore formater to get the points with possible score
-		QuestionScoreDelegate qs = new QuestionScoreDelegate();
-		args[2] = qs.format(context, value);
+		// use the QuestionScore formatter to get the points with possible score
+		if (question.getPart().getAssessment().getType() != AssessmentType.survey)
+		{
+			QuestionScoreDelegate qs = new QuestionScoreDelegate();
+			args[2] = qs.format(context, value);
+		}
 
-		return context.getMessages().getFormattedMessage("format-question-title", args);
+		String template = "format-question-title";
+		if (question.getPart().getAssessment().getType() == AssessmentType.survey)
+		{
+			template += "-survey";
+		}
+
+		return context.getMessages().getFormattedMessage(template, args);
 	}
 
 	/**

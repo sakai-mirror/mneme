@@ -25,8 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
-import org.muse.mneme.api.MnemeService;
-import org.muse.mneme.api.AssessmentSubmissionStatus;
+import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Submission;
 
 /**
@@ -83,7 +82,10 @@ public class FormatListGradeDelegate extends FormatDelegateImpl
 		{
 			if (submission.getIsReleased())
 			{
-				return formatScore(submission.getTotalScore());
+				if (submission.getAssessment().getType() != AssessmentType.survey)
+				{
+					return formatScore(submission.getTotalScore());
+				}
 			}
 			else
 			{

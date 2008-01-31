@@ -112,6 +112,9 @@
 					<model ref="submission.assessment.title" missing="no-title" />
 					<model ref="submission.assessment.parts.totalPoints" delegate="FormatScore" tool="sakai.mneme" />
 					<selectors>
+						<selector selector="instructions-test-title-survey">
+							<compareDecision model="submission.assessment.type" constant="survey" />
+						</selector>
 						<selector selector="instructions-test-title-singular">
 							<compareDecision constant="1.0" model="submission.assessment.parts.totalPoints" />
 						</selector>
@@ -147,8 +150,8 @@
 					<model type="text" ref="part.title" />
 					<model ref="part" delegate="SectionScore" tool="sakai.mneme" />
 					<selectors>
-						<selector selector="instructions-part-title-no-title">
-							<hasValueDecision reversed="TRUE" model="part.title" />
+						<selector selector="instructions-part-title-survey">
+							<compareDecision model="submission.assessment.type" constant="survey" />
 						</selector>
 					</selectors>
 				</message>

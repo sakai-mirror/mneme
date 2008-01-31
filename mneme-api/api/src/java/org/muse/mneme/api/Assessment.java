@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,14 @@ public interface Assessment
 	 * @return The submitable status
 	 */
 	AcceptSubmitStatus getAcceptSubmitStatus();
+
+	/**
+	 * Check if student identities are invisible to the grader when grading.<br />
+	 * Use this instead of the AssessmentGrading version for logic, use the other for editing settings.
+	 * 
+	 * @return TRUE if student identities are invisible to the grader when grading, FALSE if not.
+	 */
+	Boolean getAnonymous();
 
 	/**
 	 * Check if the assessment is archived.
@@ -262,7 +270,7 @@ public interface Assessment
 	/**
 	 * Access the title of this assessment.
 	 * 
-	 * @return The assessment's title.  Will be blank (never null) if not defined.
+	 * @return The assessment's title. Will be blank (never null) if not defined.
 	 */
 	String getTitle();
 

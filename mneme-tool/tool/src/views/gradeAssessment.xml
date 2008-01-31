@@ -151,7 +151,7 @@
 						<message selector="submission-username" />
 					</title>
 					<included>
-						<decision reversed="TRUE" model="assessment.grading.anonymous" />
+						<decision reversed="TRUE" model="assessment.anonymous" />
 					</included>
 					<entityNavigations>
 						<navigation style="LINK" submit="TRUE">
@@ -202,7 +202,7 @@
 						<message selector="submission-username" />
 					</title>
 					<included>
-						<decision model="assessment.grading.anonymous" />
+						<decision model="assessment.anonymous" />
 					</included>
 					<entityNavigations>
 						<navigation style="LINK" submit="TRUE">

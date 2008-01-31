@@ -72,7 +72,7 @@
 						<model type="userInfo" selector="DISPLAYNAME" ref="submission.userId" />
 					</message>
 					<included>
-						<decision reversed="TRUE" model="submission.assessment.grading.anonymous" />
+						<decision reversed="TRUE" model="submission.assessment.anonymous" />
 					</included>
 				</text>
 				<text>

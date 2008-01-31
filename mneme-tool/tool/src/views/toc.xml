@@ -117,6 +117,11 @@
 					<model ref="submission.assessment" delegate="QuestionsAnswered" tool="sakai.mneme" />
 					<model ref="submission.assessment.parts.numQuestions" />
 					<model ref="submission" delegate="SubmissionScore" tool="sakai.mneme" />
+					<selectors>
+						<selector selector="toc-section-title-survey">
+							<compareDecision model="submission.assessment.type" constant="survey" />
+						</selector>
+					</selectors>
 				</message>
 			</title>
 			<included>
@@ -147,8 +152,8 @@
 										<model ref="question.part.numQuestions" />
 										<model ref="question.part" delegate="SectionScore" tool="sakai.mneme" />
 										<selectors>
-											<selector selector="toc-questions-title-no-title">
-												<hasValueDecision reversed="TRUE" model="question.part.title" />
+											<selector selector="toc-questions-title-survey">
+												<compareDecision model="submission.assessment.type" constant="survey" />
 											</selector>
 										</selectors>
 									</message>
@@ -180,6 +185,11 @@
 								<model delegate="FormatQuestionNumber" tool="sakai.mneme" />
 								<model type="text" stripHtml="TRUE" max="60" ref="question.description" missing="no-title" />
 								<model delegate="QuestionScore" tool="sakai.mneme" />
+								<selectors>
+									<selector selector="toc-question-entry-survey">
+										<compareDecision model="submission.assessment.type" constant="survey" />
+									</selector>
+								</selectors>
 							</message>
 							<entityNavigations>
 								<navigation>
@@ -200,6 +210,11 @@
 								<model delegate="FormatQuestionNumber" tool="sakai.mneme" />
 								<model type="text" stripHtml="TRUE" max="60" ref="question.description" />
 								<model delegate="QuestionScore" tool="sakai.mneme" />
+								<selectors>
+									<selector selector="toc-question-entry-survey">
+										<compareDecision model="submission.assessment.type" constant="survey" />
+									</selector>
+								</selectors>
 							</message>
 							<entityNavigations>
 								<navigation>
@@ -221,6 +236,11 @@
 								<model delegate="FormatQuestionNumber" tool="sakai.mneme" />
 								<model type="text" stripHtml="TRUE" max="60" ref="question.description" missing="no-title" />
 								<model delegate="QuestionScore" tool="sakai.mneme" />
+								<selectors>
+									<selector selector="toc-question-entry-survey">
+										<compareDecision model="submission.assessment.type" constant="survey" />
+									</selector>
+								</selectors>
 							</message>
 							<entityNavigations>
 								<navigation>

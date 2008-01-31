@@ -118,14 +118,14 @@
 										<message template="assignment" />
 									</valueMessage>
 								</selectionChoice>
-								<!-- <selectionChoice>
+								<selectionChoice>
 									<displayMessage>
-									<message selector="assessment-type-survey" />
+										<message selector="assessment-type-survey" />
 									</displayMessage>
 									<valueMessage>
-									<message template="survey" />
+										<message template="survey" />
 									</valueMessage>
-									</selectionChoice> -->
+								</selectionChoice>
 							</selectionChoices>
 							<readOnly>
 								<decision model="assessment.isLocked" />

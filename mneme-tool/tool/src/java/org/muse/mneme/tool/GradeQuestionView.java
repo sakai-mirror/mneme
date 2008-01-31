@@ -114,7 +114,7 @@ public class GradeQuestionView extends ControllerImpl
 		}
 		if (sortCode == null)
 		{
-			if (assessment.getGrading().getAnonymous())
+			if (assessment.getAnonymous())
 			{
 				sortCode = "1A";
 			}

@@ -7,7 +7,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,8 +123,8 @@
 					<model type="text" ref="part.title" />
 					<model ref="part" delegate="SectionScore" tool="sakai.mneme" />
 					<selectors>
-						<selector selector="instructions-part-title-no-title">
-							<hasValueDecision reversed="TRUE" model="part.title" />
+						<selector selector="instructions-part-title-survey">
+							<compareDecision model="submission.assessment.type" constant="survey" />
 						</selector>
 					</selectors>
 				</message>

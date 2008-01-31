@@ -38,6 +38,7 @@ import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
 import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.UiService;
+import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
@@ -275,20 +276,28 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		selection.setReadOnly(this.uiService.newTrueDecision());
 		selection.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswer"));
 
-		AndDecision and = this.uiService.newAndDecision();
-		Decision[] decisionsAnd = new Decision[2];
-		decisionsAnd[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
-		decisionsAnd[1] = this.uiService.newDecision().setProperty(
+		// should we show correct marks?
+		AndDecision mayReviewAndShowCorrect = this.uiService.newAndDecision();
+		Decision[] decisionsMayReviewAndShowCorrect = new Decision[2];
+		decisionsMayReviewAndShowCorrect[0] = this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
+		decisionsMayReviewAndShowCorrect[1] = this.uiService.newDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
-		and.setRequirements(decisionsAnd);
+		mayReviewAndShowCorrect.setRequirements(decisionsMayReviewAndShowCorrect);
 
 		OrDecision or = this.uiService.newOrDecision();
 		Decision[] decisionsOr = new Decision[2];
 		decisionsOr[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
-		decisionsOr[1] = and;
+		decisionsOr[1] = mayReviewAndShowCorrect;
 		or.setOptions(decisionsOr);
 
-		selection.setCorrectDecision(or);
+		Decision[] decisionsShowCorrect = new Decision[2];
+		decisionsShowCorrect[0] = this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed();
+		decisionsShowCorrect[1] = or;
+		Decision showCorrect = this.uiService.newAndDecision().setRequirements(decisionsShowCorrect);
+
+		selection.setCorrectDecision(showCorrect);
 
 		Text answerKey = this.uiService.newText();
 		PropertyReference[] refs = new PropertyReference[2];
@@ -300,7 +309,11 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		orInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
 		orInc[1] = this.uiService.newDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
-		answerKey.setIncluded(this.uiService.newOrDecision().setOptions(orInc));
+		Decision[] andInc = new Decision[2];
+		andInc[0] = this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed();
+		andInc[1] = this.uiService.newOrDecision().setOptions(orInc);
+		answerKey.setIncluded(this.uiService.newAndDecision().setRequirements(andInc));
 
 		Section first = this.uiService.newSection();
 		first.add(question).add(attachments).add(selection);
