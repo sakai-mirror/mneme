@@ -823,6 +823,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
 		selCol.setReadOnly(this.uiService.newTrueDecision());
 		selCol.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswers"));
+		selCol.setCorrectDecision(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed());
 		entityList.addColumn(selCol);
 
 		// use the choice id instead of the entity list row number for the auto col (since we removed stuff).
@@ -867,6 +869,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
 		selCol.setReadOnly(this.uiService.newTrueDecision());
 		selCol.setCorrect(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
+		selCol.setCorrectDecision(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("question.part.assessment.type")).setReversed());
 		entityList.addColumn(selCol);
 
 		AutoColumn autoCol = this.uiService.newAutoColumn();
@@ -886,6 +890,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		first.add(question).add(attachments).add(entityList);
 
 		Section second = this.uiService.newSection();
+		second.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("question.part.assessment.type")).setReversed());
 		second.add(answerKey);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second);

@@ -908,6 +908,8 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		correctCol.setEntityIncluded(this.uiService.newHasValueDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("pair.match")), null);
 		correctCol.add(correct).add(incorrect);
+		correctCol.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed());
 		entityList.addColumn(correctCol);
 
 		// match
@@ -947,6 +949,8 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		answerKey.setText("answer-key", refs);
 
 		Section answerKeySection = this.uiService.newSection();
+		answerKeySection.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed());
 		answerKeySection.add(answerKey);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(matchSection).add(answerKeySection);
@@ -1017,6 +1021,8 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		answerKey.setText("answer-key", refs);
 
 		Section answerKeySection = this.uiService.newSection();
+		answerKeySection.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("question.part.assessment.type")).setReversed());
 		answerKeySection.add(answerKey);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(quesitonSection).add(matchSection).add(answerKeySection);

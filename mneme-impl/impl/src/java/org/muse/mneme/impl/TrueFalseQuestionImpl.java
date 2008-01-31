@@ -380,6 +380,8 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
 		selCol.setReadOnly(this.uiService.newTrueDecision());
 		selCol.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswer"));
+		selCol.setCorrectDecision(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed());
 		entityList.addColumn(selCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
@@ -408,6 +410,8 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		selection.addSelection(this.uiService.newMessage().setMessage("false"), this.uiService.newMessage().setTemplate("false"));
 		selection.setReadOnly(this.uiService.newTrueDecision());
 		selection.setCorrect(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer"));
+		selection.setCorrectDecision(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("question.part.assessment.type")).setReversed());
 
 		Text answerKey = this.uiService.newText();
 		PropertyReference[] refs = new PropertyReference[2];
@@ -419,6 +423,8 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		first.add(question).add(attachments).add(selection);
 
 		Section second = this.uiService.newSection();
+		second.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("question.part.assessment.type")).setReversed());
 		second.add(answerKey);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second);

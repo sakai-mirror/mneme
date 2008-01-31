@@ -78,14 +78,16 @@ public class FormatListGradeDelegate extends FormatDelegateImpl
 		if (!(value instanceof Submission)) return context.getMessages().getString("dash");
 		Submission submission = (Submission) value;
 
+		if (submission.getAssessment().getType() == AssessmentType.survey)
+		{
+			return context.getMessages().getString("na");
+		}
+
 		if (submission.getIsComplete())
 		{
 			if (submission.getIsReleased())
 			{
-				if (submission.getAssessment().getType() != AssessmentType.survey)
-				{
-					return formatScore(submission.getTotalScore());
-				}
+				return formatScore(submission.getTotalScore());
 			}
 			else
 			{

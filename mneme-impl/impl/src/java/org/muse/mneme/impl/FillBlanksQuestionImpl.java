@@ -458,6 +458,8 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		fillIn.setCorrectDecision(this.uiService.newTrueDecision());
 		fillIn.setReadOnly(this.uiService.newTrueDecision());
 		fillIn.setCorrect(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.entryCorrects"));
+		fillIn.setCorrectDecision(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed());
 
 		return this.uiService.newFragment().setMessages(this.messages).add(fillIn);
 	}
@@ -479,6 +481,8 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		first.add(fillIn);
 
 		Section second = this.uiService.newSection();
+		second.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("question.part.assessment.type")).setReversed());
 		second.add(answerKey);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second);
