@@ -1,9 +1,9 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/contrib/muse/mneme/trunk/mneme-tool/tool/src/java/org/muse/mneme/tool/GradeQuestionView.java $
- * $Id: GradeQuestionView.java 11997 2007-09-13 18:13:11Z maheshwarirashmi@foothill.edu $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
