@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,20 @@ public interface TypeSpecificQuestion extends Cloneable
 	 * @return A description of the question.
 	 */
 	String getDescription();
+
+	/**
+	 * Check if the question supports a correct answer or not. Survey questions, for example, to not support a correct answer.
+	 * 
+	 * @return TRUE if the question supports a correct answer, FALSE if not.
+	 */
+	Boolean getHasCorrect();
+
+	/**
+	 * Check if the question type supports points, or if it does not.
+	 * 
+	 * @return TRUE if the question type supports points, FALSE if it does not.
+	 */
+	Boolean getHasPoints();
 
 	/**
 	 * Access the plugin for this type.

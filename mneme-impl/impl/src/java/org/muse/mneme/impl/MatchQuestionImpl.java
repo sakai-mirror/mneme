@@ -611,6 +611,22 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasCorrect()
+	{
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasPoints()
+	{
+		return Boolean.TRUE;
+	}
+
+	/**
 	 * Access the pairs as an entity (MatchQuestionChoice) list in as-authored order.
 	 * 
 	 * @return The pairs as an entity (MatchQuestionChoice) list in as-authored order.
@@ -775,8 +791,8 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		or.setOptions(decisionsOr);
 
 		Decision[] decisionsShowCorrect = new Decision[2];
-		decisionsShowCorrect[0] = this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed();
+		decisionsShowCorrect[0] = this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.hasCorrect"));
 		decisionsShowCorrect[1] = or;
 		Decision showCorrect = this.uiService.newAndDecision().setRequirements(decisionsShowCorrect);
 
@@ -825,8 +841,7 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		orInc[1] = this.uiService.newDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
 		Decision[] andInc = new Decision[2];
-		andInc[0] = this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed();
+		andInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.question.hasCorrect"));
 		andInc[1] = this.uiService.newOrDecision().setOptions(orInc);
 		answerKey.setIncluded(this.uiService.newAndDecision().setRequirements(andInc));
 
@@ -908,8 +923,8 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		correctCol.setEntityIncluded(this.uiService.newHasValueDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("pair.match")), null);
 		correctCol.add(correct).add(incorrect);
-		correctCol.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed());
+		correctCol.setIncluded(this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.hasCorrect")));
 		entityList.addColumn(correctCol);
 
 		// match
@@ -949,8 +964,8 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		answerKey.setText("answer-key", refs);
 
 		Section answerKeySection = this.uiService.newSection();
-		answerKeySection.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed());
+		answerKeySection.setIncluded(this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.hasCorrect")));
 		answerKeySection.add(answerKey);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(matchSection).add(answerKeySection);
@@ -1021,8 +1036,8 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		answerKey.setText("answer-key", refs);
 
 		Section answerKeySection = this.uiService.newSection();
-		answerKeySection.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("question.part.assessment.type")).setReversed());
+		answerKeySection.setIncluded(this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.hasCorrect")));
 		answerKeySection.add(answerKey);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(quesitonSection).add(matchSection).add(answerKeySection);

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,11 +119,15 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Float getAutoScore()
 	{
+		Question question = this.answer.getQuestion();
+
+		// no point questions and questions that have no correct answer have no score
+		if ((!question.getHasPoints()) || (!question.getHasCorrect())) return Float.valueOf(0f);
+
 		// correct?
 		boolean correct = false;
 		if (this.answerData != null)
 		{
-			Question question = this.answer.getQuestion();
 			Boolean correctAnswer = Boolean.valueOf(((TrueFalseQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswer());
 			correct = this.answerData.equals(correctAnswer);
 		}
@@ -131,7 +135,7 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 		// full credit for correct answer, 0 for incorrect
 		if (correct)
 		{
-			return answer.getQuestion().getPool().getPoints();
+			return question.getPoints();
 		}
 
 		return 0f;

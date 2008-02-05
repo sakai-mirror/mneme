@@ -7,7 +7,7 @@
 	* $Id$
 	***********************************************************************************
 	*
-	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 	* 
 	* Licensed under the Apache License, Version 2.0 (the "License");
 	* you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@
 					<model ref="part.title" />
 				</textEdit>
 
-				<!-- toggle to show instructinos -->
+				<!-- toggle to show instructions -->
 				<toggle target="instructions" title="edit-instructions" style="LINK">
 					<icon icon="/icons/section.png" style="LEFT" />
 					<included>
@@ -185,13 +185,25 @@
 							<title>
 								<message selector="points" />
 							</title>
-							<model ref="question.pool.points" />
+							<model ref="question.points" />
+							<entityIncluded selector="na">
+								<decision model="question.hasPoints" />
+							</entityIncluded>
+							<included>
+								<decision model="assessment.hasPoints" />
+							</included>
 						</modelColumn>
 						<modelColumn em="5">
 							<title>
 								<message selector="difficulty" />
 							</title>
 							<model ref="question.pool.difficulty" />
+							<entityIncluded selector="na">
+								<decision model="question.hasPoints" />
+							</entityIncluded>
+							<included>
+								<decision model="assessment.hasPoints" />
+							</included>
 						</modelColumn>
 					</columns>
 				</entityList>
@@ -200,6 +212,11 @@
 					<message selector="totals">
 						<model ref="part.numQuestions" />
 						<model ref="part.totalPoints" />
+						<selectors>
+							<selector selector="total-questions">
+								<decision reversed="TRUE" model="assessment.hasPoints" />
+							</selector>
+						</selectors>
 					</message>
 				</text>
 

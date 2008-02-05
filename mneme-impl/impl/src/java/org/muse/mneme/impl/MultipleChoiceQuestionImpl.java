@@ -648,6 +648,22 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasCorrect()
+	{
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasPoints()
+	{
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public QuestionPlugin getPlugin()
 	{
 		return this.plugin;
@@ -700,8 +716,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		or.setOptions(decisionsOr);
 
 		Decision[] decisionsShowCorrect = new Decision[2];
-		decisionsShowCorrect[0] = this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed();
+		decisionsShowCorrect[0] = this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.hasCorrect"));
 		decisionsShowCorrect[1] = or;
 		Decision showCorrect = this.uiService.newAndDecision().setRequirements(decisionsShowCorrect);
 
@@ -727,8 +743,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		orInc[1] = this.uiService.newDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
 		Decision[] andInc = new Decision[2];
-		andInc[0] = this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed();
+		andInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.question.hasCorrect"));
 		andInc[1] = this.uiService.newOrDecision().setOptions(orInc);
 		answerKey.setIncluded(this.uiService.newAndDecision().setRequirements(andInc));
 
@@ -823,8 +838,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
 		selCol.setReadOnly(this.uiService.newTrueDecision());
 		selCol.setCorrect(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.correctAnswers"));
-		selCol.setCorrectDecision(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed());
+		selCol.setCorrectDecision(this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.hasCorrect")));
 		entityList.addColumn(selCol);
 
 		// use the choice id instead of the entity list row number for the auto col (since we removed stuff).
@@ -869,8 +884,9 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
 		selCol.setReadOnly(this.uiService.newTrueDecision());
 		selCol.setCorrect(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
-		selCol.setCorrectDecision(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("question.part.assessment.type")).setReversed());
+		selCol
+				.setCorrectDecision(this.uiService.newDecision().setProperty(
+						this.uiService.newPropertyReference().setReference("question.hasCorrect")));
 		entityList.addColumn(selCol);
 
 		AutoColumn autoCol = this.uiService.newAutoColumn();
@@ -890,8 +906,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		first.add(question).add(attachments).add(entityList);
 
 		Section second = this.uiService.newSection();
-		second.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("question.part.assessment.type")).setReversed());
+		second.setIncluded(this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("question.hasCorrect")));
 		second.add(answerKey);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second);

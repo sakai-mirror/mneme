@@ -88,6 +88,13 @@ public interface Assessment
 	Boolean getHasMultipleTries();
 
 	/**
+	 * Check if the assessment supports points, or if it does not. Survey type assessments, for example, do not support points.
+	 * 
+	 * @return TRUE if the question supports points, FALSE if it does not.
+	 */
+	Boolean getHasPoints();
+
+	/**
 	 * Check if we have a time limmit.
 	 * 
 	 * @return TRUE if a time limit is defined, FALSE if not.

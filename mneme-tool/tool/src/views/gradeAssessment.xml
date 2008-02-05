@@ -53,7 +53,7 @@
 					<model ref="assessment.Parts.totalPoints" />
 				</message>
 				<included>
-					<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+					<decision model="assessment.hasPoints" />
 				</included>
 			</text>
 		</container>
@@ -121,7 +121,7 @@
 						</model>
 					</message>
 					<included>
-						<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+						<decision model="assessment.hasPoints" />
 					</included>
 				</text>
 				<!-- toggle to show instructions -->
@@ -348,7 +348,7 @@
 						</orDecision>
 					</entityIncluded>
 					<included>
-						<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+						<decision model="assessment.hasPoints" />
 					</included>
 				</modelColumn>
 				<column>
@@ -388,7 +388,7 @@
 						<compareDecision reversed="TRUE" model="submission.gradingStatus" constant="inProgress" />
 					</entityIncluded>
 					<included>
-						<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+						<decision model="assessment.hasPoints" />
 					</included>
 				</column>
 				<column>
@@ -416,7 +416,7 @@
 						<decision model="submission.hasUnscoredAnswers" />
 					</entityIncluded>
 					<included>
-						<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+						<decision model="assessment.hasPoints" />
 					</included>
 				</column>
 			</columns>

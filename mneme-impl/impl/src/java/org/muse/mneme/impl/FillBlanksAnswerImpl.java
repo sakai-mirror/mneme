@@ -126,11 +126,16 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	 */
 	public Float getAutoScore()
 	{
+		Question question = this.answer.getQuestion();
+
+		// no point questions and questions that have no correct answer have no score
+		if ((!question.getHasPoints()) || (!question.getHasCorrect())) return Float.valueOf(0f);
+
 		// partial credit for each correct answer, 0 for each incorrect, floor at 0.
 		List<Boolean> corrects = getEntryCorrects();
 
 		// each correct gets a part of the total points
-		float partial = (corrects.size() > 0) ? answer.getQuestion().getPool().getPoints() / corrects.size() : 0f;
+		float partial = (corrects.size() > 0) ? question.getPoints() / corrects.size() : 0f;
 
 		float total = 0f;
 		for (Boolean correct : corrects)

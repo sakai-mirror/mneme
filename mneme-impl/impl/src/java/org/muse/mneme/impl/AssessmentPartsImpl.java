@@ -329,6 +329,9 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 */
 	public Float getTotalPoints()
 	{
+		// no point assessments have no points
+		if (!this.assessment.getHasPoints()) return Float.valueOf(0f);
+
 		float rv = 0f;
 		for (Part part : this.parts)
 		{

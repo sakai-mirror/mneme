@@ -333,6 +333,9 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 */
 	public Float getTotalPoints()
 	{
+		// no point assessments have no points
+		if (!this.assessment.getHasPoints()) return Float.valueOf(0f);
+
 		float total = 0f;
 		for (PoolDraw draw : this.pools)
 		{

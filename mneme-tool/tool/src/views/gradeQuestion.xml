@@ -58,7 +58,7 @@
 					<model ref="assessment.Parts.totalPoints" />
 				</message>
 				<included>
-					<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+					<decision model="assessment.hasPoints" />
 				</included>
 			</text>
 		</container>
@@ -92,10 +92,10 @@
 		<section>
 			<title>
 				<message selector="submission-question-pts">
-					<model ref="question.pool.points" />
+					<model ref="question.points" />
 				</message>
 				<included>
-					<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+					<decision model="assessment.hasPoints" />
 				</included>
 			</title>
 			<container>
@@ -275,7 +275,7 @@
 						</text>
 					</container>
 					<included>
-						<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+						<decision model="assessment.hasPoints" />
 					</included>
 				</column>
 				<column>
@@ -312,7 +312,7 @@
 						</desc>
 					</sort>
 					<included>
-						<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+						<decision model="assessment.hasPoints" />
 					</included>
 				</column>
 			</columns>

@@ -123,8 +123,8 @@
 					<model type="text" ref="part.title" />
 					<model ref="part" delegate="SectionScore" tool="sakai.mneme" />
 					<selectors>
-						<selector selector="instructions-part-title-survey">
-							<compareDecision model="submission.assessment.type" constant="survey" />
+						<selector selector="instructions-part-title-no-points">
+							<decision reversed="TRUE" model="submission.assessment.hasPoints" />
 						</selector>
 					</selectors>
 				</message>

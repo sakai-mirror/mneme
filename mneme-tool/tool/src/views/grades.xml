@@ -196,7 +196,7 @@
 								<model ref="assessment.id" />
 							</destination>
 							<included>
-								<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+								<decision model="assessment.hasPoints" />
 								<decision model="assessment.hasUnscoredSubmissions" />
 							</included>
 						</navigation>
@@ -210,7 +210,7 @@
 							<included>
 								<decision model="assessment.isLive" />
 								<orDecision>
-									<compareDecision model="assessment.type" constant="survey" />
+									<decision reversed="TRUE" model="assessment.hasPoints" />
 									<decision reversed="TRUE" model="assessment.hasUnscoredSubmissions" />
 								</orDecision>
 							</included>

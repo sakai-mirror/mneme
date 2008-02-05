@@ -170,11 +170,14 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	{
 		Question question = this.answer.getQuestion();
 
+		// no point questions and questions that have no correct answer have no score
+		if ((!question.getHasPoints()) || (!question.getHasCorrect())) return Float.valueOf(0f);
+
 		// the defined pairs
 		List<MatchQuestionPair> pairs = ((MatchQuestionImpl) question.getTypeSpecificQuestion()).getPairs();
 
 		// each correct / incorrect uses a portion of the total points
-		float partial = (pairs.size() > 0) ? question.getPool().getPoints() / pairs.size() : 0f;
+		float partial = (pairs.size() > 0) ? question.getPoints() / pairs.size() : 0f;
 
 		float total = 0f;
 		for (MatchQuestionPair pair : pairs)

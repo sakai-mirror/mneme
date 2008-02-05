@@ -149,7 +149,7 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 		}
 
 		// add the possible points for the question
-		Float score = question.getPool().getPoints();
+		Float score = question.getPoints();
 		if (score.equals(Float.valueOf(1)))
 		{
 			selector += "-singular";

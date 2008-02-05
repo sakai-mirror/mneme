@@ -302,7 +302,7 @@
 							<title>
 								<message selector="question-points" />
 							</title>
-							<model ref="question.pool.points" />
+							<model ref="question.points" />
 							<sort submit="TRUE">
 								<active>
 									<compareDecision model="sort_column" constant="2" />

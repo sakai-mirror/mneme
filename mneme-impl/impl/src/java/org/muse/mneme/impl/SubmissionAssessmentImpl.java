@@ -170,6 +170,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasPoints()
+	{
+		return getAssessment().getHasPoints();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getHasTimeLimit()
 	{
 		// if the main (historical) has no limit, we ignore any special access defined

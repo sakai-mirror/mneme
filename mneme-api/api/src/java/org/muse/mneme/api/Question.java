@@ -48,7 +48,7 @@ public interface Question
 	Attribution getCreatedBy();
 
 	/**
-	 * Access the description of the question.  Will be <= 255 characters plain text.
+	 * Access the description of the question. Will be <= 255 characters plain text.
 	 * 
 	 * @return The description of the question.
 	 */
@@ -69,7 +69,21 @@ public interface Question
 	String getFeedback();
 
 	/**
-	 * Check if there are any completed submissions to this question's assessment that have any null scores for answered answers to this quesiton.
+	 * Check if the question supports a correct answer or not. Survey questions, for example, to not support a correct answer.
+	 * 
+	 * @return TRUE if the question supports a correct answer, FALSE if not.
+	 */
+	Boolean getHasCorrect();
+
+	/**
+	 * Check if the question supports points, or if it does not. Survey questions, for example, do not support points.
+	 * 
+	 * @return TRUE if the question supports points, FALSE if it does not.
+	 */
+	Boolean getHasPoints();
+
+	/**
+	 * Check if there are any completed submissions to this question's assessment that have any null scores for answered answers to this question.
 	 * 
 	 * @return TRUE if there are unscored submissions to this assessment, FALSE if not.
 	 */
@@ -104,6 +118,13 @@ public interface Question
 	Boolean getIsHistorical();
 
 	/**
+	 * Check if the question is marked as a survey question.
+	 * 
+	 * @return TRUE if the question is marked as a survey question, FALSE if not.
+	 */
+	Boolean getIsSurvey();
+
+	/**
 	 * Check if the end user has never made initial settings.
 	 * 
 	 * @return TRUE if this has not been modified since creation, FALSE if it has.
@@ -130,6 +151,13 @@ public interface Question
 	 * @return The ordering information within the part in the assessment.
 	 */
 	Ordering<Question> getPartOrdering();
+
+	/**
+	 * Access the number of points for the question.
+	 * 
+	 * @return The number of points for the question, or 0 if no points are set or supported.
+	 */
+	Float getPoints();
 
 	/**
 	 * Access the question pool that holds this question.
@@ -172,7 +200,7 @@ public interface Question
 	void setChanged();
 
 	/**
-	 * Set the explain-reason setting.  The default value if never set is FALSE.
+	 * Set the explain-reason setting. The default value if never set is FALSE.
 	 * 
 	 * @param explainReason
 	 *        TRUE if this question also collects "reason" from the user, FALSE if not.
@@ -194,6 +222,14 @@ public interface Question
 	 *        The hints text for the question.
 	 */
 	void setHints(String hints);
+
+	/**
+	 * Mark the question as a survey question or not. The default is to be not marked as a survey question.
+	 * 
+	 * @param isSurvey
+	 *        if TRUE, mark the question as a survey question, if FALSE, as not.
+	 */
+	void setIsSurvey(Boolean isSurvey);
 
 	/**
 	 * Set the question pool that holds this question.

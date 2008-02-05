@@ -53,7 +53,7 @@
 					<model ref="assessment.Parts.totalPoints" />
 				</message>
 				<included>
-					<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+					<decision model="assessment.hasPoints" />
 				</included>
 			</text>
 		</container>
@@ -114,7 +114,7 @@
 								</navigation>
 							</navigations>
 							<entityIncluded>
-								<compareDecision reversed="TRUE" model="assessment.type" constant="survey" />
+								<decision model="assessment.hasPoints" />
 								<decision model="question.hasUnscoredSubmissions" />
 							</entityIncluded>
 						</column>

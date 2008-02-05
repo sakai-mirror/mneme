@@ -50,7 +50,7 @@ import org.sakaiproject.util.StringUtil;
  */
 public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 {
-	/** TRUE means any order is ok, FALSE means it is not */
+	/** TRUE means any order is OK, FALSE means it is not */
 	protected Boolean anyOrder = Boolean.FALSE;
 
 	/** TRUE means answer is case sensitive, FALSE means it is not */
@@ -299,6 +299,22 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasCorrect()
+	{
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasPoints()
+	{
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public QuestionPlugin getPlugin()
 	{
 		return this.plugin;
@@ -367,8 +383,8 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		or.setOptions(decisionsOr);
 
 		Decision[] decisionsShowCorrect = new Decision[2];
-		decisionsShowCorrect[0] = this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed();
+		decisionsShowCorrect[0] = this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.hasCorrect")).setReversed();
 		decisionsShowCorrect[1] = or;
 		Decision showCorrect = this.uiService.newAndDecision().setRequirements(decisionsShowCorrect);
 
@@ -392,8 +408,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
 
 		Decision[] andInc = new Decision[2];
-		andInc[0] = this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed();
+		andInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.question.hasCorrect"));
 		andInc[1] = this.uiService.newOrDecision().setOptions(orInc);
 		answerKey.setIncluded(this.uiService.newAndDecision().setRequirements(andInc));
 
@@ -458,8 +473,8 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		fillIn.setCorrectDecision(this.uiService.newTrueDecision());
 		fillIn.setReadOnly(this.uiService.newTrueDecision());
 		fillIn.setCorrect(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.entryCorrects"));
-		fillIn.setCorrectDecision(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.type")).setReversed());
+		fillIn.setCorrectDecision(this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.hasCorrect")));
 
 		return this.uiService.newFragment().setMessages(this.messages).add(fillIn);
 	}
@@ -481,8 +496,9 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		first.add(fillIn);
 
 		Section second = this.uiService.newSection();
-		second.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(AssessmentType.survey.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("question.part.assessment.type")).setReversed());
+		second
+				.setIncluded(this.uiService.newDecision().setProperty(
+						this.uiService.newPropertyReference().setReference("question.hasCorrect")));
 		second.add(answerKey);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second);

@@ -289,6 +289,14 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasPoints()
+	{
+		return Boolean.valueOf(this.type != AssessmentType.survey);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getHasTimeLimit()
 	{
 		return Boolean.valueOf(this.timeLimit != null);

@@ -57,7 +57,7 @@
 					<model ref="submission.assessment.Parts.totalPoints" />
 				</message>
 				<included>
-					<compareDecision reversed="TRUE" model="submission.assessment.type" constant="survey" />
+					<decision model="submission.assessment.hasPoints" />
 				</included>
 			</text>
 		</container>
@@ -117,8 +117,8 @@
 					<model type="text" ref="answer.question.part.title" />
 					<model ref="answer.question.part" delegate="SectionScore" tool="sakai.mneme" />
 					<selectors>
-						<selector selector="instructions-part-title-survey">
-							<compareDecision model="submission.assessment.type" constant="survey" />
+						<selector selector="instructions-part-title-no-points">
+							<decision reversed="TRUE" model="submission.assessment.hasPoints" />
 						</selector>
 					</selectors>
 				</message>
@@ -159,8 +159,8 @@
 								</container>
 							</model>
 							<selectors>
-								<selector selector="question-header-survey">
-									<compareDecision model="submission.assessment.type" constant="survey" />
+								<selector selector="question-header-no-points">
+									<decision reversed="TRUE" model="submission.assessment.hasPoints" />
 								</selector>
 							</selectors>
 						</message>
@@ -240,8 +240,8 @@
 						</container>
 					</model>
 					<selectors>
-						<selector selector="final-score-survey">
-							<compareDecision model="submission.assessment.type" constant="survey" />
+						<selector selector="final-score-no-points">
+							<decision reversed="TRUE" model="submission.assessment.hasPoints" />
 						</selector>
 					</selectors>
 				</message>

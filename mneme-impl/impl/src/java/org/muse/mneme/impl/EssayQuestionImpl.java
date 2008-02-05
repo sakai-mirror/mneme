@@ -239,6 +239,22 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasCorrect()
+	{
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasPoints()
+	{
+		return Boolean.TRUE;
+	}
+
+	/**
 	 * @return the modelAnswer (rich text)
 	 */
 	public String getModelAnswer()

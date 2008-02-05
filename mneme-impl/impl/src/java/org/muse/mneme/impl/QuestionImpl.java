@@ -28,13 +28,10 @@ import org.muse.mneme.api.Ordering;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolGetService;
-import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGetService;
-import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.SubmissionService;
 import org.muse.mneme.api.SubmissionUnscoredQuestionService;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.util.FormattedText;
@@ -278,6 +275,8 @@ public class QuestionImpl implements Question
 	/** Dependency: SubmissionUnscoredQuestionService. */
 	protected transient SubmissionUnscoredQuestionService submissionService = null;
 
+	protected Boolean survey = Boolean.FALSE;
+
 	protected String type = null;
 
 	/**
@@ -371,6 +370,30 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasCorrect()
+	{
+		// survey marked questions do not support correct answers
+		if (this.survey) return Boolean.FALSE;
+
+		// otherwise check with the type handler
+		return this.questionHandler.getHasCorrect();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasPoints()
+	{
+		// survey marked questions do not support points
+		if (this.survey) return Boolean.FALSE;
+
+		// otherwise check with the type handler
+		return this.questionHandler.getHasPoints();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getHasUnscoredSubmissions()
 	{
 		if (this.partContext != null)
@@ -416,6 +439,14 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsSurvey()
+	{
+		return this.survey;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getMint()
 	{
 		return this.mint;
@@ -443,6 +474,16 @@ public class QuestionImpl implements Question
 	public Ordering<Question> getPartOrdering()
 	{
 		return this.partOrdering;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getPoints()
+	{
+		if (!getHasPoints()) return Float.valueOf(0f);
+
+		return getPool().getPoints();
 	}
 
 	/**
@@ -534,6 +575,19 @@ public class QuestionImpl implements Question
 		if (!Different.different(hints, this.hints)) return;
 
 		this.hints = hints;
+
+		this.changed.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setIsSurvey(Boolean isSurvey)
+	{
+		if (isSurvey == null) throw new IllegalArgumentException();
+		if (!Different.different(isSurvey, this.survey)) return;
+
+		this.survey = isSurvey;
 
 		this.changed.setChanged();
 	}
@@ -740,6 +794,7 @@ public class QuestionImpl implements Question
 		this.questionService = other.questionService;
 		this.submissionContext = other.submissionContext;
 		this.submissionService = other.submissionService;
+		this.survey = other.survey;
 		this.type = other.type;
 	}
 }

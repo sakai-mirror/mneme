@@ -41,7 +41,7 @@ import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
 
 /**
- * LikertScaleQuestionImpl handles questions for the Likert question type.
+ * LikertScaleQuestionImpl handles questions for the Likert Scale question type.
  */
 public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 {
@@ -276,6 +276,22 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	public String getDescription()
 	{
 		return this.question.getPresentation().getText();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasCorrect()
+	{
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getHasPoints()
+	{
+		return Boolean.FALSE;
 	}
 
 	/**

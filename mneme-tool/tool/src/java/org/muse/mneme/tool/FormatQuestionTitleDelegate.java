@@ -68,16 +68,16 @@ public class FormatQuestionTitleDelegate extends FormatDelegateImpl
 		}
 
 		// use the QuestionScore formatter to get the points with possible score
-		if (question.getPart().getAssessment().getType() != AssessmentType.survey)
+		if (question.getPart().getAssessment().getHasPoints() && question.getHasPoints())
 		{
 			QuestionScoreDelegate qs = new QuestionScoreDelegate();
 			args[2] = qs.format(context, value);
 		}
 
 		String template = "format-question-title";
-		if (question.getPart().getAssessment().getType() == AssessmentType.survey)
+		if ((!question.getPart().getAssessment().getHasPoints()) || (!question.getHasPoints()))
 		{
-			template += "-survey";
+			template += "-no-points";
 		}
 
 		return context.getMessages().getFormattedMessage(template, args);

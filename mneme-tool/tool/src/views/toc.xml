@@ -118,8 +118,8 @@
 					<model ref="submission.assessment.parts.numQuestions" />
 					<model ref="submission" delegate="SubmissionScore" tool="sakai.mneme" />
 					<selectors>
-						<selector selector="toc-section-title-survey">
-							<compareDecision model="submission.assessment.type" constant="survey" />
+						<selector selector="toc-section-title-no-points">
+							<decision reversed="TRUE" model="submission.assessment.hasPoints" />
 						</selector>
 					</selectors>
 				</message>
@@ -152,8 +152,8 @@
 										<model ref="question.part.numQuestions" />
 										<model ref="question.part" delegate="SectionScore" tool="sakai.mneme" />
 										<selectors>
-											<selector selector="toc-questions-title-survey">
-												<compareDecision model="submission.assessment.type" constant="survey" />
+											<selector selector="toc-questions-title-no-points">
+												<decision reversed="TRUE" model="submission.assessment.hasPoints" />
 											</selector>
 										</selectors>
 									</message>
@@ -186,8 +186,8 @@
 								<model type="text" stripHtml="TRUE" max="60" ref="question.description" missing="no-title" />
 								<model delegate="QuestionScore" tool="sakai.mneme" />
 								<selectors>
-									<selector selector="toc-question-entry-survey">
-										<compareDecision model="submission.assessment.type" constant="survey" />
+									<selector selector="toc-question-entry-no-points">
+										<decision reversed="TRUE" model="submission.assessment.hasPoints" />
 									</selector>
 								</selectors>
 							</message>
@@ -211,8 +211,8 @@
 								<model type="text" stripHtml="TRUE" max="60" ref="question.description" />
 								<model delegate="QuestionScore" tool="sakai.mneme" />
 								<selectors>
-									<selector selector="toc-question-entry-survey">
-										<compareDecision model="submission.assessment.type" constant="survey" />
+									<selector selector="toc-question-entry-no-points">
+										<decision reversed="TRUE" model="submission.assessment.hasPoints" />
 									</selector>
 								</selectors>
 							</message>
@@ -237,8 +237,8 @@
 								<model type="text" stripHtml="TRUE" max="60" ref="question.description" missing="no-title" />
 								<model delegate="QuestionScore" tool="sakai.mneme" />
 								<selectors>
-									<selector selector="toc-question-entry-survey">
-										<compareDecision model="submission.assessment.type" constant="survey" />
+									<selector selector="toc-question-entry-no-points">
+										<decision reversed="TRUE" model="submission.assessment.hasPoints" />
 									</selector>
 								</selectors>
 							</message>

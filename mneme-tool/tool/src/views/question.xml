@@ -123,7 +123,7 @@
 			<included>
 				<decision model="review" />
 				<decision reversed="TRUE" model="submission.isReleased" />
-				<compareDecision reversed="TRUE" model="submission.assessment.type" constant="survey" />
+				<decision model="submission.assessment.hasPoints" />
 			</included>
 		</alert>
 
@@ -135,8 +135,8 @@
 					<model ref="submission.assessment.title" />
 					<model type="html" ref="submission" delegate="SubmissionScore" tool="sakai.mneme" />
 					<selectors>
-						<selector selector="question-test-title-survey">
-							<compareDecision model="submission.assessment.type" constant="survey" />
+						<selector selector="question-test-title-no-points">
+							<decision reversed="TRUE" model="submission.assessment.hasPoints" />
 						</selector>
 					</selectors>
 				</message>
@@ -208,8 +208,8 @@
 					<model type="text" ref="answer.question.part.title" />
 					<model ref="answer.question.part" delegate="SectionScore" tool="sakai.mneme" />
 					<selectors>
-						<selector selector="instructions-part-title-survey">
-							<compareDecision model="submission.assessment.type" constant="survey" />
+						<selector selector="instructions-part-title-no-points">
+							<decision reversed="TRUE" model="submission.assessment.hasPoints" />
 						</selector>
 					</selectors>
 				</message>

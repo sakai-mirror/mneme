@@ -220,17 +220,16 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	 */
 	public Float getTotalPoints()
 	{
+		// no point assessments have no points
+		if (!this.assessment.getHasPoints()) return Float.valueOf(0f);
+
 		float total = 0f;
 		for (PoolPick pick : this.questions)
 		{
 			QuestionImpl question = (QuestionImpl) this.questionService.getQuestion(pick.getQuestionId());
 			if (question != null)
 			{
-				Pool pool = question.getPool();
-				if (pool != null)
-				{
-					total += pool.getPoints();
-				}
+				total += question.getPoints();
 			}
 		}
 
