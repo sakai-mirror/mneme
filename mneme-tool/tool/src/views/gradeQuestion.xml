@@ -321,7 +321,7 @@
 		<!--navigation-->
 		<navigationBar>
 			<container>
-				<pager paging="paging">
+				<pager paging="paging" submit="TRUE">
 					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
 						<model ref="sort_grades" />
 						<model ref="assessment.id" />
