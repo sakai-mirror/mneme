@@ -196,6 +196,9 @@
 							<title>
 								<message selector="points" />
 							</title>
+							<included>
+								<decision model="assessment.hasPoints" />
+							</included>
 							<model ref="draw.pool.points" />
 
 							<!--  TODO  -->
@@ -230,6 +233,9 @@
 							<title>
 								<message selector="difficulty" />
 							</title>
+							<included>
+								<decision model="assessment.hasPoints" />
+							</included>
 							<model ref="draw.pool.difficulty" />
 						</modelColumn>
 					</columns>

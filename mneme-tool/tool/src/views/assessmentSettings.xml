@@ -94,6 +94,10 @@
 								<decision model="assessment.isLocked" />
 								<compareDecision model="assessment.type" constant="survey" />
 							</readOnly>
+							<destination template="/assessment_settings/{0}/{1}">
+								<model ref="sort" />
+								<model ref="assessment.id" />
+							</destination>
 						</selection>
 
 						<!-- if invalid -->
@@ -485,6 +489,11 @@
 						<model ref="assessment.parts.numParts" />
 						<model ref="assessment.parts.numQuestions" />
 						<model ref="assessment.parts.totalPoints" />
+						<selectors>
+							<selector selector="summary-no-points">
+								<decision reversed="TRUE" model="assessment.hasPoints" />
+							</selector>
+						</selectors>
 					</message>
 				</text>
 

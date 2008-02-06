@@ -56,6 +56,11 @@
 					<model type="icon" icon="/icons/test.png" />
 					<model ref="assessment.title" />
 					<model type="html" ref="assessment" delegate="SubmissionScore" tool="sakai.mneme" />
+					<selectors>
+						<selector selector="assessment-preview-assessment-title-no-points">
+							<decision reversed="TRUE" model="assessment.hasPoints" />
+						</selector>
+					</selectors>
 				</message>
 			</title>
 			<container>

@@ -97,7 +97,7 @@ public class AssessmentSettingsView extends ControllerImpl
 		}
 
 		// format part list of zero parts
-		if (assessment.getParts().getHasZeroPointParts())
+		if (assessment.getHasPoints() && assessment.getParts().getHasZeroPointParts())
 		{
 			StringBuilder buf = new StringBuilder("<ul>");
 			Object args[] = new Object[1];
