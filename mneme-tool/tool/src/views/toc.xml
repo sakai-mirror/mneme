@@ -187,7 +187,10 @@
 								<model delegate="QuestionScore" tool="sakai.mneme" />
 								<selectors>
 									<selector selector="toc-question-entry-no-points">
-										<decision reversed="TRUE" model="submission.assessment.hasPoints" />
+										<orDecision>
+											<decision reversed="TRUE" model="submission.assessment.hasPoints" />
+											<decision reversed="TRUE" model="question.hasPoints" />
+										</orDecision>
 									</selector>
 								</selectors>
 							</message>
@@ -212,7 +215,10 @@
 								<model delegate="QuestionScore" tool="sakai.mneme" />
 								<selectors>
 									<selector selector="toc-question-entry-no-points">
-										<decision reversed="TRUE" model="submission.assessment.hasPoints" />
+										<orDecision>
+											<decision reversed="TRUE" model="submission.assessment.hasPoints" />
+											<decision reversed="TRUE" model="question.hasPoints" />
+										</orDecision>
 									</selector>
 								</selectors>
 							</message>
@@ -238,7 +244,10 @@
 								<model delegate="QuestionScore" tool="sakai.mneme" />
 								<selectors>
 									<selector selector="toc-question-entry-no-points">
-										<decision reversed="TRUE" model="submission.assessment.hasPoints" />
+										<orDecision>
+											<decision reversed="TRUE" model="submission.assessment.hasPoints" />
+											<decision reversed="TRUE" model="question.hasPoints" />
+										</orDecision>
 									</selector>
 								</selectors>
 							</message>

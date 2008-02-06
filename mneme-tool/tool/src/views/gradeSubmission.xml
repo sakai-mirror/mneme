@@ -160,7 +160,10 @@
 							</model>
 							<selectors>
 								<selector selector="question-header-no-points">
-									<decision reversed="TRUE" model="submission.assessment.hasPoints" />
+									<orDecision>
+										<decision reversed="TRUE" model="submission.assessment.hasPoints" />
+										<decision reversed="TRUE" model="answer.question.hasPoints" />
+									</orDecision>
 								</selector>
 							</selectors>
 						</message>

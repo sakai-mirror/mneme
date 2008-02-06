@@ -95,6 +95,7 @@
 					<model ref="question.points" />
 				</message>
 				<included>
+					<decision model="question.hasPoints" />
 					<decision model="assessment.hasPoints" />
 				</included>
 			</title>
@@ -275,6 +276,7 @@
 						</text>
 					</container>
 					<included>
+						<decision model="question.hasPoints" />
 						<decision model="assessment.hasPoints" />
 					</included>
 				</column>
@@ -312,6 +314,7 @@
 						</desc>
 					</sort>
 					<included>
+						<decision model="question.hasPoints" />
 						<decision model="assessment.hasPoints" />
 					</included>
 				</column>
