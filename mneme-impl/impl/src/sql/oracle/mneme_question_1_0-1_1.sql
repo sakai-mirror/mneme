@@ -23,4 +23,4 @@
 -- Mneme Question DDL changes between 1.0 and 1.1
 -----------------------------------------------------------------------------
 
-ALTER TABLE MNEME_QUESTION ADD (SURVEY CHAR (1) NOT NULL DEFAULT '0' CHECK (SURVEY IN ('0', '1')));
+ALTER TABLE MNEME_QUESTION ADD (SURVEY CHAR (1) DEFAULT '0' NOT NULL CHECK (SURVEY IN ('0', '1')));
