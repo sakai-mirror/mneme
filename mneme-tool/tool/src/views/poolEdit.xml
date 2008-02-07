@@ -132,6 +132,23 @@
 								<model ref="sort_direction" />
 								<model type="paging" ref="paging" />
 							</destination>
+							<included>
+								<decision reversed="TRUE" model="question.isSurvey" />
+							</included>
+						</navigation>
+						<navigation style="LINK" submit="TRUE" description="view-question">
+							<icon icon="/icons/survey_view.png" style="LEFT" />
+							<destination template="/question_preview/{0}/pool_edit/{1}/{2}/{3}{4}/{5}">
+								<model ref="question.id" />
+								<model ref="poolsSortCode" />
+								<model ref="pool.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model type="paging" ref="paging" />
+							</destination>
+							<included>
+								<decision model="question.isSurvey" />
+							</included>
 						</navigation>
 					</navigations>
 				</column>

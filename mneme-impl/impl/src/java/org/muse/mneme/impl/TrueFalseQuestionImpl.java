@@ -173,10 +173,9 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		selection.addSelection(this.uiService.newMessage().setMessage("true"), this.uiService.newMessage().setTemplate("true"));
 		selection.addSelection(this.uiService.newMessage().setMessage("false"), this.uiService.newMessage().setTemplate("false"));
 		selection.setTitle("correct-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
+		selection.setReadOnly(this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("question.isSurvey")));
 
 		Section section = this.uiService.newSection();
-		section.setIncluded(this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("question.isSurvey"))
-				.setReversed());
 		section.add(selection);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(section);

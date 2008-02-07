@@ -79,6 +79,18 @@
 		<section>
 			<container>
 				<instructions>
+					<message selector="survey-instructions">
+						<model type="icon" icon="/icons/survey_type.png" />
+					</message>
+				</instructions>
+			</container>
+			<included>
+				<compareDecision model="assessment.type" constant="survey" />
+			</included>
+		</section>
+		<section>
+			<container>
+				<instructions>
 					<message selector="linear-instructions">
 						<model type="icon" icon="/icons/linear.png" />
 						<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
