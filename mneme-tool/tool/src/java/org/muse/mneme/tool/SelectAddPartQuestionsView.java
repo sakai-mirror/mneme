@@ -84,8 +84,9 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page, [7] our type filter, [8] our pool filter
-		if (params.length < 5 || params.length > 9) throw new IllegalArgumentException();
+		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page, [7] our type filter,
+		// [8] our pool filter [9] our survey filter (B-both, A-assessment, S-survey)
+		if (params.length < 5 || params.length > 10) throw new IllegalArgumentException();
 
 		// assessment view sort
 		String assessmentSort = params[2];
@@ -135,6 +136,9 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		context.put("poolFilter", poolFilter);
 		Pool pool = poolFilter.equals("0") ? null : this.poolService.getPool(poolFilter);
 
+		String surveyFilter = (params.length > 9) ? params[9] : "B";
+		context.put("surveyFilter", surveyFilter);
+
 		// the pools
 		List<Pool> pools = this.poolService.getPools(toolManager.getCurrentPlacement().getContext());
 		context.put("pools", pools);
@@ -174,19 +178,24 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 
 		// the paging is now more accurate than our current destination - we may have asked for page 1, but have to deliver page 0 if we have nothing
 		// get a new destination
-		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page, [7] our type filter, [8] our pool filter
+		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page, [7] our type filter, [8] our pool filter, [9] survey filter
 		String newDestination = "/" + params[1] + "/" + params[2] + "/" + params[3] + "/" + params[4] + "/" + sortCode + "/"
-				+ paging.getCurrent().toString() + "-" + paging.getSize().toString() + "/" + typeFilter + "/" + poolFilter;
+				+ paging.getCurrent().toString() + "-" + paging.getSize().toString() + "/" + typeFilter + "/" + poolFilter + "/" + surveyFilter;
 
-		// for the selected question type - pre-select the top of the list
+		// for the selected question type
 		Value value = this.uiService.newValue();
 		value.setValue(newDestination);
 		context.put("selectedQuestionType", value);
 
-		// for the selected pool - pre-select the top of the list
+		// for the selected pool
 		value = this.uiService.newValue();
 		value.setValue(newDestination);
 		context.put("selectedPool", value);
+
+		// for the survey filter
+		value = this.uiService.newValue();
+		value.setValue(newDestination);
+		context.put("selectedQuestionSurvey", value);
 
 		// render
 		uiService.render(ui, context);
@@ -206,8 +215,9 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page, [7] our type filter, [8] our pool filter
-		if (params.length < 5 || params.length > 9) throw new IllegalArgumentException();
+		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page, [7] our type filter,
+		// [8] our pool filter [9] our survey filter
+		if (params.length < 5 || params.length > 10) throw new IllegalArgumentException();
 
 		String assessmentId = params[3];
 		Assessment assessment = assessmentService.getAssessment(assessmentId);
