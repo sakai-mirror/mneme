@@ -181,7 +181,7 @@ public abstract class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countContextQuestions(String context, String questionType)
+	public Integer countContextQuestions(String context, String questionType, Boolean survey)
 	{
 		int count = 0;
 		for (QuestionImpl question : this.questions.values())
@@ -190,6 +190,7 @@ public abstract class QuestionStorageSample implements QuestionStorage
 			if (question.getMint()) continue;
 			if (!question.getContext().equals(context)) continue;
 			if ((questionType != null) && (!question.getType().equals(questionType))) continue;
+			if ((survey != null) && (question.getIsSurvey() != survey)) continue;
 
 			count++;
 		}
@@ -200,7 +201,7 @@ public abstract class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPoolQuestions(Pool pool, String questionType)
+	public Integer countPoolQuestions(Pool pool, String questionType, Boolean survey)
 	{
 		int count = 0;
 		for (QuestionImpl question : this.questions.values())
@@ -208,6 +209,7 @@ public abstract class QuestionStorageSample implements QuestionStorage
 			if (question.getMint()) continue;
 			if (!question.getPool().equals(pool)) continue;
 			if ((questionType != null) && (!question.getType().equals(questionType))) continue;
+			if ((survey != null) && (question.getIsSurvey() != survey)) continue;
 
 			count++;
 		}
@@ -226,7 +228,7 @@ public abstract class QuestionStorageSample implements QuestionStorage
 		{
 			if (!pool.getIsHistorical())
 			{
-				rv.put(pool.getId(), countPoolQuestions(pool, null));
+				rv.put(pool.getId(), countPoolQuestions(pool, null, null));
 			}
 		}
 
@@ -258,18 +260,18 @@ public abstract class QuestionStorageSample implements QuestionStorage
 	 * {@inheritDoc}
 	 */
 	public List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum,
-			Integer pageSize)
+			Integer pageSize, Boolean survey)
 	{
-		return findQuestions(context, null, sort, questionType, pageNum, pageSize);
+		return findQuestions(context, null, sort, questionType, pageNum, pageSize, survey);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum,
-			Integer pageSize)
+			Integer pageSize, Boolean survey)
 	{
-		return findQuestions(null, pool, sort, questionType, pageNum, pageSize);
+		return findQuestions(null, pool, sort, questionType, pageNum, pageSize, survey);
 	}
 
 	/**
@@ -580,7 +582,7 @@ public abstract class QuestionStorageSample implements QuestionStorage
 	 * {@inheritDoc}
 	 */
 	protected List<QuestionImpl> findQuestions(String context, Pool pool, final QuestionService.FindQuestionsSort sort, String questionType,
-			Integer pageNum, Integer pageSize)
+			Integer pageNum, Integer pageSize, Boolean survey)
 	{
 		if (context == null && pool == null) throw new IllegalArgumentException();
 		if (context != null && pool != null) throw new IllegalArgumentException();
@@ -596,6 +598,8 @@ public abstract class QuestionStorageSample implements QuestionStorage
 			if ((questionType != null) && (!question.getType().equals(questionType))) continue;
 			if ((pool != null) && (!question.getPool().equals(pool))) continue;
 			if ((context != null) && (!question.getContext().equals(context))) continue;
+
+			if ((survey != null) && (question.getIsSurvey() != survey)) continue;
 
 			rv.add(new QuestionImpl(question));
 		}

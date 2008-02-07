@@ -86,10 +86,12 @@ public interface QuestionStorage
 	 * @param context
 	 *        The context.
 	 * @param questionType
-	 *        The (optional) quesiton type; if specified, only questions of this type are included.
+	 *        The (optional) question type; if specified, only questions of this type are included.
+	 * @param survey
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both. s *
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countContextQuestions(String context, String questionType);
+	Integer countContextQuestions(String context, String questionType, Boolean survey);
 
 	/**
 	 * Count the questions in this pool
@@ -97,10 +99,12 @@ public interface QuestionStorage
 	 * @param pool
 	 *        The pool.
 	 * @param questionType
-	 *        The (optional) quesiton type; if specified, only questions of this type are included.
+	 *        The (optional) question type; if specified, only questions of this type are included.
+	 * @param survey
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both. s *
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countPoolQuestions(Pool pool, String questionType);
+	Integer countPoolQuestions(Pool pool, String questionType, Boolean survey);
 
 	/**
 	 * Count the questions in the non-historical pools of this context
@@ -133,10 +137,12 @@ public interface QuestionStorage
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
+	 * @param survey
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both. s *
 	 * @return The list of questions.
 	 */
 	List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum,
-			Integer pageSize);
+			Integer pageSize, Boolean survey);
 
 	/**
 	 * Find all the questions in the Pool, sorted and paged.
@@ -146,14 +152,17 @@ public interface QuestionStorage
 	 * @param sort
 	 *        The sort criteria.
 	 * @param questionType
-	 *        The (optional) quesiton type; if specified, only questions of this type are included.
+	 *        The (optional) question type; if specified, only questions of this type are included.
 	 * @param pageNum
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
+	 * @param survey
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both. s *
 	 * @return The list of questions.
 	 */
-	List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum, Integer pageSize);
+	List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum, Integer pageSize,
+			Boolean Survey);
 
 	/**
 	 * Find all the questions in the pool

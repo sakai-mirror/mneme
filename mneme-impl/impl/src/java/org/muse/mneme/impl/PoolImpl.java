@@ -126,7 +126,7 @@ public class PoolImpl implements Pool
 	 */
 	public List<Question> findQuestions(QuestionService.FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
-		return this.questionService.findQuestions(this, sort, search, null, pageNum, pageSize);
+		return this.questionService.findQuestions(this, sort, search, null, pageNum, pageSize, null);
 	}
 
 	/**
@@ -225,7 +225,7 @@ public class PoolImpl implements Pool
 		}
 		else
 		{
-			rv = this.questionService.countQuestions(this, null, null);
+			rv = this.questionService.countQuestions(this, null, null, null);
 		}
 
 		return rv;

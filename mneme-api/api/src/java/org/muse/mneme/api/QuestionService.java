@@ -75,10 +75,12 @@ public interface QuestionService extends QuestionPoolService, QuestionGetService
 	 * @param search
 	 *        The search criteria.
 	 * @param questionType
-	 *        The (optional) quesiton type; if specified, only questions of this type are included.
+	 *        The (optional) question type; if specified, only questions of this type are included.
+	 * @param survey
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both. s *
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countQuestions(String context, String search, String questionType);
+	Integer countQuestions(String context, String search, String questionType, Boolean surveyOnly);
 
 	/**
 	 * Check if a question exists.
@@ -104,9 +106,12 @@ public interface QuestionService extends QuestionPoolService, QuestionGetService
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
+	 * @param survey
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both. s *
 	 * @return a list of questions that meet the criteria.
 	 */
-	List<Question> findQuestions(String context, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize);
+	List<Question> findQuestions(String context, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize,
+			Boolean surveys);
 
 	/**
 	 * Move a question from one pool to another.

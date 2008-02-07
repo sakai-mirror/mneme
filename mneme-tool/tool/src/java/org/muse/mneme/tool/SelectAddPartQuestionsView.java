@@ -49,7 +49,7 @@ import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
- * The /pools view for the mneme tool.
+ * The /select_add_mpart_question view for the mneme tool.
  */
 public class SelectAddPartQuestionsView extends ControllerImpl
 {
@@ -143,16 +143,27 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		List<Pool> pools = this.poolService.getPools(toolManager.getCurrentPlacement().getContext());
 		context.put("pools", pools);
 
+		// survey filter
+		Boolean surveyFilterValue = null;
+		if ("A".equals(surveyFilter))
+		{
+			surveyFilterValue = Boolean.FALSE;
+		}
+		else if ("S".equals(surveyFilter))
+		{
+			surveyFilterValue = Boolean.TRUE;
+		}
+
 		// paging
 		Integer maxQuestions = null;
 		if (pool == null)
 		{
 			maxQuestions = this.questionService.countQuestions(this.toolManager.getCurrentPlacement().getContext(), null,
-					(typeFilter.equals("0") ? null : typeFilter));
+					(typeFilter.equals("0") ? null : typeFilter), surveyFilterValue);
 		}
 		else
 		{
-			maxQuestions = this.questionService.countQuestions(pool, null, (typeFilter.equals("0") ? null : typeFilter));
+			maxQuestions = this.questionService.countQuestions(pool, null, (typeFilter.equals("0") ? null : typeFilter), surveyFilterValue);
 		}
 		String pagingParameter = "1-30";
 		if (params.length > 6) pagingParameter = params[6];
@@ -167,12 +178,12 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		if (pool == null)
 		{
 			questions = questionService.findQuestions(this.toolManager.getCurrentPlacement().getContext(), sort, null, (typeFilter.equals("0") ? null
-					: typeFilter), paging.getCurrent(), paging.getSize());
+					: typeFilter), paging.getCurrent(), paging.getSize(), surveyFilterValue);
 		}
 		else
 		{
 			questions = questionService.findQuestions(pool, sort, null, (typeFilter.equals("0") ? null : typeFilter), paging.getCurrent(), paging
-					.getSize());
+					.getSize(), surveyFilterValue);
 		}
 		context.put("questions", questions);
 

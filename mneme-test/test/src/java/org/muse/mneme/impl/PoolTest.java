@@ -44,7 +44,7 @@ public class PoolTest extends TestCase
 		/**
 		 * {@inheritDoc}
 		 */
-		public Integer countQuestions(Pool pool, String search, String questionType)
+		public Integer countQuestions(Pool pool, String search, String questionType, Boolean survey)
 		{
 			return Integer.valueOf(5);
 		}
@@ -52,7 +52,7 @@ public class PoolTest extends TestCase
 		/**
 		 * {@inheritDoc}
 		 */
-		public List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize)
+		public List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize, Boolean survey)
 		{
 			return new ArrayList<Question>();
 		}

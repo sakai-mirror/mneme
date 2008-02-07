@@ -46,9 +46,11 @@ public interface QuestionPoolService
 	 *        The search criteria.
 	 * @param questionType
 	 *        The (optional) question type; if specified, only questions of this type are included.
+	 * @param survey
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countQuestions(Pool pool, String search, String questionType);
+	Integer countQuestions(Pool pool, String search, String questionType, Boolean survey);
 
 	/**
 	 * Locate a list of questions with this criteria.
@@ -65,9 +67,12 @@ public interface QuestionPoolService
 	 *        The page number (1 based) to display, or null to disable paging and get them all.
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
+	 * @param survey
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
 	 * @return a list of questions that meet the criteria.
 	 */
-	List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize);
+	List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize,
+			Boolean survey);
 
 	/**
 	 * Find all the questions (ids) in the pool
