@@ -441,7 +441,11 @@ public class QuestionImpl implements Question
 	 */
 	public Boolean getIsSurvey()
 	{
-		return this.survey;
+		// if marked survey
+		if (this.survey) return Boolean.TRUE;
+
+		// if not, be survey if the this type always is
+		return this.questionHandler.getIsSurvey();
 	}
 
 	/**

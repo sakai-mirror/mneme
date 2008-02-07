@@ -175,6 +175,8 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		selection.setTitle("correct-answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png"));
 
 		Section section = this.uiService.newSection();
+		section.setIncluded(this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("question.isSurvey"))
+				.setReversed());
 		section.add(selection);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(section);
@@ -202,6 +204,11 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	 */
 	public String getCorrectAnswer()
 	{
+		if (!this.question.getHasCorrect())
+		{
+			return "";
+		}
+
 		return this.correctAnswer.toString();
 	}
 
@@ -262,6 +269,14 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	public Boolean getHasPoints()
 	{
 		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsSurvey()
+	{
+		return Boolean.FALSE;
 	}
 
 	/**

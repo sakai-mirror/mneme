@@ -67,6 +67,40 @@
 			</container>
 		</navigationBar>
 
+		<!-- survey -->
+		<section>
+			<container>
+				<selection>
+					<title>
+						<message selector="question-author-survey-header">
+							<model type="icon" icon="/icons/survey_type.png" />
+						</message>
+					</title>
+					<selectionChoices>
+						<selectionChoice>
+							<displayMessage>
+								<message selector="question-author-survey">
+									<selectors>
+										<selector selector="question-author-survey-selected">
+											<decision model="question.isSurvey" />
+										</selector>
+									</selectors>
+								</message>
+							</displayMessage>
+							<valueMessage>
+								<message template="true" />
+							</valueMessage>
+						</selectionChoice>
+					</selectionChoices>
+					<model ref="question.isSurvey" />
+					<readOnly>
+						<decision model="question.typeSpecificQuestion.isSurvey" />
+					</readOnly>
+					<destination template="STAY" />
+				</selection>
+			</container>
+		</section>
+
 		<!-- generic presentation -->
 		<section>
 			<container>

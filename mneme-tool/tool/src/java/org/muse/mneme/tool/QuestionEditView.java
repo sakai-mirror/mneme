@@ -129,8 +129,8 @@ public class QuestionEditView extends ControllerImpl
 			return;
 		}
 
-		// if destination became null, stay here
-		if (destination == null)
+		// if destination became null, or is the stay here
+		if ((destination == null) || ("STAY".equals(destination)))
 		{
 			destination = context.getDestination();
 		}

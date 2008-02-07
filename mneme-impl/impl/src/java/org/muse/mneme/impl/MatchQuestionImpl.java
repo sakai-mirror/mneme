@@ -627,6 +627,14 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsSurvey()
+	{
+		return Boolean.FALSE;
+	}
+
+	/**
 	 * Access the pairs as an entity (MatchQuestionChoice) list in as-authored order.
 	 * 
 	 * @return The pairs as an entity (MatchQuestionChoice) list in as-authored order.

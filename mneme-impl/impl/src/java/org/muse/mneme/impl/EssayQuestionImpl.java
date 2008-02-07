@@ -255,6 +255,14 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsSurvey()
+	{
+		return Boolean.FALSE;
+	}
+
+	/**
 	 * @return the modelAnswer (rich text)
 	 */
 	public String getModelAnswer()

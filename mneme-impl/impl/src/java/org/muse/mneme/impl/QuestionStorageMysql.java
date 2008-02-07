@@ -44,6 +44,7 @@ public abstract class QuestionStorageMysql extends QuestionStorageSql implements
 		if (autoDdl)
 		{
 			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_question");
+			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_question_1_0-1_1");
 		}
 
 		M_log.info("init()");
@@ -60,12 +61,12 @@ public abstract class QuestionStorageMysql extends QuestionStorageSql implements
 		sql.append("INSERT INTO MNEME_QUESTION");
 		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
 		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
-		sql.append(" TYPE, GUEST)");
+		sql.append(" SURVEY, TYPE, GUEST)");
 		sql.append(" SELECT");
 		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, '1', Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
-		sql.append(" Q.PRESENTATION_TEXT, Q.TYPE, Q.GUEST");
+		sql.append(" Q.PRESENTATION_TEXT, Q.SURVEY, Q.TYPE, Q.GUEST");
 		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=?");
 
 		Object[] fields = new Object[1];
@@ -88,12 +89,12 @@ public abstract class QuestionStorageMysql extends QuestionStorageSql implements
 		sql.append("INSERT INTO MNEME_QUESTION");
 		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
 		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
-		sql.append(" TYPE, GUEST)");
+		sql.append(" SURVEY, TYPE, GUEST)");
 		sql.append(" SELECT");
 		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, Q.HISTORICAL, Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
-		sql.append(" Q.PRESENTATION_TEXT, Q.TYPE, Q.GUEST");
+		sql.append(" Q.PRESENTATION_TEXT, Q.SURVEY, Q.TYPE, Q.GUEST");
 		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=?");
 
 		Object[] fields = new Object[1];
@@ -123,12 +124,12 @@ public abstract class QuestionStorageMysql extends QuestionStorageSql implements
 		sql.append("INSERT INTO MNEME_QUESTION");
 		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
 		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
-		sql.append(" TYPE, GUEST)");
+		sql.append(" SURVEY, TYPE, GUEST)");
 		sql.append(" SELECT");
 		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, '1', Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
-		sql.append(" Q.PRESENTATION_TEXT, Q.TYPE, Q.GUEST");
+		sql.append(" Q.PRESENTATION_TEXT, Q.SURVEY, Q.TYPE, Q.GUEST");
 		sql.append(" FROM MNEME_QUESTION Q WHERE Q.ID=?");
 
 		Object[] fields = new Object[1];
@@ -161,12 +162,12 @@ public abstract class QuestionStorageMysql extends QuestionStorageSql implements
 		sql.append("INSERT INTO MNEME_QUESTION");
 		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
 		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
-		sql.append(" TYPE, GUEST)");
+		sql.append(" SURVEY, TYPE, GUEST)");
 		sql.append(" SELECT");
 		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, Q.HISTORICAL, Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
-		sql.append(" Q.PRESENTATION_TEXT, Q.TYPE, Q.GUEST");
+		sql.append(" Q.PRESENTATION_TEXT, Q.SURVEY, Q.TYPE, Q.GUEST");
 		sql.append(" FROM MNEME_QUESTION Q WHERE Q.ID=?");
 
 		Object[] fields = new Object[1];
@@ -193,10 +194,10 @@ public abstract class QuestionStorageMysql extends QuestionStorageSql implements
 		sql.append("INSERT INTO MNEME_QUESTION (");
 		sql.append(" CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
 		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
-		sql.append(" TYPE, GUEST )");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" SURVEY, TYPE, GUEST )");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[15];
+		Object[] fields = new Object[16];
 		fields[0] = question.getContext();
 		fields[1] = question.getCreatedBy().getDate().getTime();
 		fields[2] = question.getCreatedBy().getUserId();
@@ -210,8 +211,9 @@ public abstract class QuestionStorageMysql extends QuestionStorageSql implements
 		fields[10] = question.getModifiedBy().getUserId();
 		fields[11] = (question.poolId == null) ? null : Long.valueOf(question.poolId);
 		fields[12] = question.getPresentation().getText();
-		fields[13] = question.getType();
-		fields[14] = SqlHelper.encodeStringArray(question.getTypeSpecificQuestion().getData());
+		fields[13] = question.getIsSurvey() ? "1" : "0";
+		fields[14] = question.getType();
+		fields[15] = SqlHelper.encodeStringArray(question.getTypeSpecificQuestion().getData());
 
 		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
 		if (id == null)

@@ -75,7 +75,7 @@ public interface TypeSpecificQuestion extends Cloneable
 	String getDescription();
 
 	/**
-	 * Check if the question supports a correct answer or not. Survey questions, for example, to not support a correct answer.
+	 * Check if the question supports a correct answer or not. Survey questions, for example, do not support a correct answer.
 	 * 
 	 * @return TRUE if the question supports a correct answer, FALSE if not.
 	 */
@@ -87,6 +87,13 @@ public interface TypeSpecificQuestion extends Cloneable
 	 * @return TRUE if the question type supports points, FALSE if it does not.
 	 */
 	Boolean getHasPoints();
+
+	/**
+	 * Check if the question type is always a survey question.
+	 * 
+	 * @return TRUE if the question type is always a survey question, FALSE if not.
+	 */
+	Boolean getIsSurvey();
 
 	/**
 	 * Access the plugin for this type.

@@ -427,6 +427,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		correct.setLabel("correct");
 		correct.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
 		correct.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
+		correct.setIncluded(this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("question.isSurvey"))
+				.setReversed());
 		choicesList.addColumn(correct);
 
 		// A. B. C. column
@@ -565,11 +567,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	public Set<Integer> getCorrectAnswerSet()
 	{
 		Set rv = new HashSet<Integer>();
-		for (MultipleChoiceQuestionChoice choice : this.answerChoices)
+		if (this.question.getHasCorrect())
 		{
-			if (choice.getCorrect())
+			for (MultipleChoiceQuestionChoice choice : this.answerChoices)
 			{
-				rv.add(Integer.valueOf(choice.getId()));
+				if (choice.getCorrect())
+				{
+					rv.add(Integer.valueOf(choice.getId()));
+				}
 			}
 		}
 
@@ -659,6 +664,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	public Boolean getHasPoints()
 	{
 		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsSurvey()
+	{
+		return Boolean.FALSE;
 	}
 
 	/**

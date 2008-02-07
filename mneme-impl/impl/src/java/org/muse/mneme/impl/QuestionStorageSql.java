@@ -725,7 +725,7 @@ public abstract class QuestionStorageSql implements QuestionStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT Q.CONTEXT, Q.CREATED_BY_DATE, Q.CREATED_BY_USER, Q.EXPLAIN_REASON, Q.FEEDBACK,");
 		sql.append(" Q.HINTS, Q.HISTORICAL, Q.ID, Q.MINT, Q.MODIFIED_BY_DATE, Q.MODIFIED_BY_USER, Q.POOL_ID,");
-		sql.append(" Q.PRESENTATION_TEXT, Q.TYPE, Q.GUEST");
+		sql.append(" Q.PRESENTATION_TEXT, Q.SURVEY, Q.TYPE, Q.GUEST");
 		sql.append(" FROM MNEME_QUESTION Q ");
 		sql.append(whereOrder);
 
@@ -750,8 +750,9 @@ public abstract class QuestionStorageSql implements QuestionStorage
 					question.getModifiedBy().setUserId(SqlHelper.readString(result, 11));
 					question.initPool(SqlHelper.readId(result, 12));
 					question.getPresentation().setText(SqlHelper.readString(result, 13));
-					qService.setType(SqlHelper.readString(result, 14), question);
-					question.getTypeSpecificQuestion().setData(SqlHelper.decodeStringArray(StringUtil.trimToNull(result.getString(15))));
+					question.setIsSurvey(SqlHelper.readBoolean(result, 14));
+					qService.setType(SqlHelper.readString(result, 15), question);
+					question.getTypeSpecificQuestion().setData(SqlHelper.decodeStringArray(StringUtil.trimToNull(result.getString(16))));
 
 					question.changed.clearChanged();
 					rv.add(question);
@@ -926,10 +927,10 @@ public abstract class QuestionStorageSql implements QuestionStorage
 		sql.append("UPDATE MNEME_QUESTION SET");
 		sql.append(" CONTEXT=?, DESCRIPTION=?, EXPLAIN_REASON=?, FEEDBACK=?, HINTS=?, HISTORICAL=?,");
 		sql.append(" MINT=?, MODIFIED_BY_DATE=?, MODIFIED_BY_USER=?, POOL_ID=?,");
-		sql.append(" PRESENTATION_TEXT=?, GUEST=?");
+		sql.append(" PRESENTATION_TEXT=?, SURVEY=?, GUEST=?");
 		sql.append(" WHERE ID=?");
 
-		Object[] fields = new Object[13];
+		Object[] fields = new Object[14];
 		fields[0] = question.getContext();
 		fields[1] = limit(question.getDescription(), 255);
 		fields[2] = question.getExplainReason() ? "1" : "0";
@@ -941,8 +942,9 @@ public abstract class QuestionStorageSql implements QuestionStorage
 		fields[8] = question.getModifiedBy().getUserId();
 		fields[9] = (question.poolId == null) ? null : Long.valueOf(question.poolId);
 		fields[10] = question.getPresentation().getText();
-		fields[11] = SqlHelper.encodeStringArray(question.getTypeSpecificQuestion().getData());
-		fields[12] = Long.valueOf(question.getId());
+		fields[11] = question.getIsSurvey() ? "1" : "0";
+		fields[12] = SqlHelper.encodeStringArray(question.getTypeSpecificQuestion().getData());
+		fields[13] = Long.valueOf(question.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{

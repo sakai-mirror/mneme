@@ -297,6 +297,14 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsSurvey()
+	{
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public QuestionPlugin getPlugin()
 	{
 		return this.plugin;

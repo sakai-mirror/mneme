@@ -3,7 +3,7 @@
 -- $Id$
 --**********************************************************************************
 --
--- Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+-- Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 -- 
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ CREATE TABLE MNEME_QUESTION
 	MODIFIED_BY_USER	VARCHAR (99) NOT NULL,
 	POOL_ID				BIGINT UNSIGNED NULL,
 	PRESENTATION_TEXT	TEXT,
+	SURVEY				CHAR (1) NOT NULL CHECK (SURVEY IN (0, 1)),
 	TYPE				VARCHAR (99) NOT NULL,
 	GUEST				MEDIUMTEXT
 );

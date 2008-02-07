@@ -3,7 +3,7 @@
 -- $Id$
 --**********************************************************************************
 --
--- Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
+-- Copyright (c) 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 -- 
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -20,35 +20,7 @@
 --*********************************************************************************/
 
 -----------------------------------------------------------------------------
--- Mneme Question DDL
+-- Mneme Question DDL changes between 1.0 and 1.1
 -----------------------------------------------------------------------------
 
-CREATE TABLE MNEME_QUESTION
-(
-	CONTEXT				VARCHAR2 (99) NOT NULL,
-	CREATED_BY_DATE		NUMBER NOT NULL,
-	CREATED_BY_USER		VARCHAR2 (99) NOT NULL,
-	DESCRIPTION			VARCHAR2 (255 CHAR) NULL,
-	EXPLAIN_REASON		CHAR (1) NOT NULL CHECK (EXPLAIN_REASON IN ('0', '1')),
-	FEEDBACK			CLOB,
-	HINTS				CLOB,
-	HISTORICAL			CHAR (1) NOT NULL CHECK (HISTORICAL IN ('0', '1')),
-	ID					NUMBER NOT NULL PRIMARY KEY,
-	MINT				CHAR (1) NOT NULL CHECK (MINT IN ('0', '1')),
-	MODIFIED_BY_DATE	NUMBER NOT NULL,
-	MODIFIED_BY_USER	VARCHAR2 (99) NOT NULL,
-	POOL_ID				NUMBER NULL,
-	PRESENTATION_TEXT	CLOB,
-	SURVEY				CHAR (1) NOT NULL CHECK (SURVEY IN ('0', '1')),
-	TYPE				VARCHAR2 (99) NOT NULL,
-	GUEST				CLOB
-);
-
-CREATE SEQUENCE MNEME_QUESTION_SEQ;
-
-CREATE INDEX MNEME_QUESTION_IDX_MHP ON MNEME_QUESTION
-(
-	MINT		ASC,
-	HISTORICAL	ASC,
-	POOL_ID		ASC
-);
+ALTER TABLE MNEME_QUESTION ADD (SURVEY CHAR (1) NOT NULL DEFAULT '0' CHECK (SURVEY IN (0, 1)));
