@@ -22,15 +22,14 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import org.muse.mneme.api.Attribution;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPoolService;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.Shuffler;
 
 /**
  * PoolImpl implements Pool
@@ -90,7 +89,7 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> drawQuestionIds(long seed, Integer numQuestions)
+	public List<String> drawQuestionIds(Shuffler shuffler, Integer numQuestions)
 	{
 		if (numQuestions == null) throw new IllegalArgumentException();
 		if (numQuestions.intValue() <= 0) throw new IllegalArgumentException();
@@ -98,7 +97,7 @@ public class PoolImpl implements Pool
 		List<String> rv = getAllQuestionIds();
 
 		// randomize the questions in the copy
-		Collections.shuffle(rv, new Random(seed));
+		shuffler.shuffle(rv);
 
 		// cut off the number of questions we want
 		if (rv.size() > numQuestions)

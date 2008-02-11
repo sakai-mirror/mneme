@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,13 @@ public interface Pool
 	/**
 	 * Draw questions based on this random seed.
 	 * 
-	 * @param seed
-	 *        The random seed.
+	 * @param shuffler
+	 *        The shuffler.
 	 * @param numQuestions
 	 *        The number of questions to draw.
 	 * @return A List of question ids drawn from the pool.
 	 */
-	List<String> drawQuestionIds(long seed, Integer numQuestions);
+	List<String> drawQuestionIds(Shuffler shuffler, Integer numQuestions);
 
 	/**
 	 * Locate a list of questions in this pool with this criteria.

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import junit.framework.TestCase;
 
@@ -32,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPoolService;
+import org.muse.mneme.api.Shuffler;
 import org.muse.mneme.impl.PoolImpl;
 
 /**
@@ -52,7 +55,8 @@ public class PoolTest extends TestCase
 		/**
 		 * {@inheritDoc}
 		 */
-		public List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize, Boolean survey)
+		public List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize,
+				Boolean survey)
 		{
 			return new ArrayList<Question>();
 		}
@@ -70,6 +74,24 @@ public class PoolTest extends TestCase
 			rv.add("5");
 
 			return rv;
+		}
+	}
+
+	protected class ShufflerImpl implements Shuffler
+	{
+		protected long seed = 0;
+
+		public ShufflerImpl(long seed)
+		{
+			this.seed = seed;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void shuffle(List<? extends Object> source)
+		{
+			Collections.shuffle(source, new Random(this.seed));
 		}
 	}
 
@@ -272,21 +294,21 @@ public class PoolTest extends TestCase
 	{
 		// 0 - 5,3,2,4,1
 		// 22 - 5,4,2,1,3
-		List<String> ids = pool.drawQuestionIds(22l, Integer.valueOf(3));
+		List<String> ids = pool.drawQuestionIds(new ShufflerImpl(22l), Integer.valueOf(3));
 		assertTrue(ids != null);
 		assertTrue(ids.size() == 3);
 		assertTrue(ids.get(0).equals("5"));
 		assertTrue(ids.get(1).equals("4"));
 		assertTrue(ids.get(2).equals("2"));
 
-		ids = pool.drawQuestionIds(0l, Integer.valueOf(1));
+		ids = pool.drawQuestionIds(new ShufflerImpl(0l), Integer.valueOf(1));
 		assertTrue(ids != null);
 		assertTrue(ids.size() == 1);
 		assertTrue(ids.get(0).equals("5"));
 
 		try
 		{
-			ids = pool.drawQuestionIds(0l, Integer.valueOf(-1));
+			ids = pool.drawQuestionIds(new ShufflerImpl(0l), Integer.valueOf(-1));
 			fail("excepted IllegalArgumentException");
 		}
 		catch (IllegalArgumentException e)
@@ -295,14 +317,14 @@ public class PoolTest extends TestCase
 
 		try
 		{
-			ids = pool.drawQuestionIds(0l, null);
+			ids = pool.drawQuestionIds(new ShufflerImpl(0l), null);
 			fail("excepted IllegalArgumentException");
 		}
 		catch (IllegalArgumentException e)
 		{
 		}
 
-		ids = pool.drawQuestionIds(22l, Integer.valueOf(50));
+		ids = pool.drawQuestionIds(new ShufflerImpl(22l), Integer.valueOf(50));
 		assertTrue(ids != null);
 		assertTrue(ids.size() == 5);
 		assertTrue(ids.get(0).equals("5"));

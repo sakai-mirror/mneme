@@ -22,8 +22,10 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +36,7 @@ import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.Shuffler;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 
@@ -124,6 +127,114 @@ public abstract class PartImpl implements Part, Changeable
 		protected void initParts(List<Part> parts)
 		{
 			this.parts = parts;
+		}
+	}
+
+	protected class ShufflerImpl implements Shuffler
+	{
+		protected boolean old = false;
+
+		protected long seed = 0;
+
+		public ShufflerImpl(PartImpl part)
+		{
+			if (part.assessment.getSubmissionContext() != null)
+			{
+				String crossoverIdStr = ((SubmissionServiceImpl) part.submissionService).get106ShuffleCrossoverId();
+				if (crossoverIdStr != null)
+				{
+					Long crossoverId = Long.valueOf(crossoverIdStr);
+					Long subId = Long.valueOf(part.assessment.getSubmissionContext().getId());
+					if (subId <= crossoverId) this.old = true;
+				}
+			}
+
+			if (this.old)
+			{
+				this.seed = seed_105(part);
+			}
+			else
+			{
+				this.seed = seed_106(part);
+			}
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void shuffle(List<? extends Object> source)
+		{
+			// the old, 1.0.5 and before way of shuffling
+			if (this.old)
+			{
+				Collections.shuffle(source, new Random(this.seed));
+			}
+
+			else
+			{
+				// we get much better results with 3 than 2 - use a null to pad it out, then remove it after shuffle
+				if (source.size() == 2)
+				{
+					source.add(null);
+					Collections.shuffle(source, new Random(this.seed));
+					source.remove(null);
+				}
+				else
+				{
+					Collections.shuffle(source, new Random(this.seed));
+				}
+			}
+		}
+
+		/**
+		 * Compute a seed based on the submission or part for randomization.<br />
+		 * This is how it was done in 1.0.5 and before.
+		 * 
+		 * @return The seed based on the submission or part for randomization.
+		 */
+		protected long seed_105(PartImpl part)
+		{
+			// set the seed based on the id of the submission context,
+			// so each submission has a different unique ordering
+			long seed = 0;
+			if (part.assessment.getSubmissionContext() != null)
+			{
+				seed = part.assessment.getSubmissionContext().getId().hashCode();
+			}
+
+			// if no submission context, just the part id
+			else
+			{
+				seed = part.id.hashCode();
+			}
+
+			return seed;
+		}
+
+		/**
+		 * Compute a seed based on the submission or part for randomization.
+		 * 
+		 * @return The seed based on the submission or part for randomization.
+		 */
+		protected long seed_106(PartImpl part)
+		{
+			// set the seed based on the id of the submission context,
+			// so each submission has a different unique ordering,
+			// and on the part id, so that each part's draws are different within the same submission.
+			long seed = 0;
+			if (part.assessment.getSubmissionContext() != null)
+			{
+				String key = part.assessment.getSubmissionContext().getId() + "_" + part.id;
+				seed = key.hashCode();
+			}
+
+			// if no submission context, just the part id
+			else
+			{
+				seed = part.id.hashCode();
+			}
+
+			return seed;
 		}
 	}
 
@@ -401,30 +512,6 @@ public abstract class PartImpl implements Part, Changeable
 	protected void initId(String id)
 	{
 		this.id = id;
-	}
-
-	/**
-	 * Compute a seed based on the submission or part for randomization.
-	 * 
-	 * @return The seed based on the submission or part for randomization.
-	 */
-	protected long seed()
-	{
-		// set the seed based on the id of the submission context,
-		// so each submission has a different unique ordering
-		long seed = 0;
-		if (this.assessment.getSubmissionContext() != null)
-		{
-			seed = this.assessment.getSubmissionContext().getId().hashCode();
-		}
-
-		// if no submission context, just the part id
-		else
-		{
-			seed = this.id.hashCode();
-		}
-
-		return seed;
 	}
 
 	/**

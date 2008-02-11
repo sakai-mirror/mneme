@@ -92,6 +92,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/** Dependency: SessionManager */
 	protected SessionManager sessionManager = null;
 
+	/** The submission id which is the last to get pre 1.0.6 shuffle behavior. If null, all get the new behavior. */
+	protected String shuffle106CrossoverId = null;
+
 	/** Dependency: SqlService */
 	protected SqlService sqlService = null;
 
@@ -1595,6 +1598,17 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
+	 * Set the submission id which is the last to get pre 1.0.6 shuffle behavior. If missing, all get the new behavior.
+	 * 
+	 * @param id
+	 *        The submission id.
+	 */
+	public void set106ShuffleCrossoverId(String id)
+	{
+		this.shuffle106CrossoverId = id;
+	}
+
+	/**
 	 * Dependency: AssessmentService.
 	 * 
 	 * @param service
@@ -2046,6 +2060,16 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (remaining < 0) remaining = 0;
 
 		return Integer.valueOf(remaining);
+	}
+
+	/**
+	 * Access the submission id which is the last to get pre 1.0.6 shuffle behavior. If null, all get the new behavior.
+	 * 
+	 * @return id The submission id.
+	 */
+	protected String get106ShuffleCrossoverId()
+	{
+		return this.shuffle106CrossoverId;
 	}
 
 	/**
