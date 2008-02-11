@@ -29,6 +29,7 @@ import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.QuestionService.FindQuestionsSort;
+import org.muse.mneme.api.Shuffler;
 
 /**
  * PoolImpl implements Pool
@@ -92,9 +93,9 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> drawQuestionIds(long seed, Integer numQuestions)
+	public List<String> drawQuestionIds(Shuffler shuffler, Integer numQuestions)
 	{
-		return this.poolService.drawQuestionIds(this, seed, numQuestions);
+		return this.poolService.drawQuestionIds(this, shuffler, numQuestions);
 	}
 
 	/**

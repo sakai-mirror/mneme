@@ -33,6 +33,7 @@ import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.Shuffler;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 
@@ -419,7 +420,8 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		List<PoolPick> rv = new ArrayList<PoolPick>(this.questions);
 
 		// randomize the questions in the copy
-		Collections.shuffle(rv, new Random(seed()));
+		Shuffler shuffler = new ShufflerImpl(this);
+		shuffler.shuffle(rv, this.id);
 
 		return rv;
 	}

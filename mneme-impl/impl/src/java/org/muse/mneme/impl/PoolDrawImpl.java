@@ -29,6 +29,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Shuffler;
 
 /**
  * PoolDrawImpl implements PoolDraw
@@ -117,7 +118,7 @@ public class PoolDrawImpl implements PoolDraw
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> drawQuestionIds(long seed)
+	public List<String> drawQuestionIds(Shuffler shuffler)
 	{
 		Pool pool = getPool();
 		if (pool == null) return new ArrayList<String>();
@@ -126,7 +127,7 @@ public class PoolDrawImpl implements PoolDraw
 		List<String> manualQuestionIds = ((AssessmentPartsImpl) this.assessment.getParts()).getPoolPicks(pool);
 
 		int size = this.numQuestions + manualQuestionIds.size();
-		List<String> rv = pool.drawQuestionIds(seed, size);
+		List<String> rv = pool.drawQuestionIds(shuffler, size);
 
 		// we need to remove from rv any manual questions used in the assessment
 		rv.removeAll(manualQuestionIds);

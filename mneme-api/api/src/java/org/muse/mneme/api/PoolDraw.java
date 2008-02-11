@@ -31,11 +31,11 @@ public interface PoolDraw
 	/**
 	 * Draw questions based on this random seed.
 	 * 
-	 * @param seed
-	 *        The random seed.
+	 * @param shuffler
+	 *        The shuffler.
 	 * @return A List of question ids drawn from the pool.
 	 */
-	List<String> drawQuestionIds(long seed);
+	List<String> drawQuestionIds(Shuffler shuffler);
 
 	/**
 	 * Access all questions.

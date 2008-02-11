@@ -36,6 +36,7 @@ import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.Shuffler;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Translation;
 import org.sakaiproject.db.api.SqlService;
@@ -619,12 +620,12 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	protected List<String> drawQuestionIds(Pool pool, long seed, Integer numQuestions)
+	protected List<String> drawQuestionIds(Pool pool, Shuffler shuffler, Integer numQuestions)
 	{
 		List<String> rv = getAllQuestionIds(pool);
 
 		// randomize the questions in the copy
-		Collections.shuffle(rv, new Random(seed));
+		shuffler.shuffle(rv, pool.getId());
 
 		// cut off the number of questions we want
 		if (rv.size() > numQuestions)

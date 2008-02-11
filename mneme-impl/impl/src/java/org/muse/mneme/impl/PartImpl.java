@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +36,7 @@ import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.Shuffler;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 
@@ -124,6 +127,69 @@ public abstract class PartImpl implements Part, Changeable
 		protected void initParts(List<Part> parts)
 		{
 			this.parts = parts;
+		}
+	}
+
+	protected class ShufflerImpl implements Shuffler
+	{
+		protected boolean old = false;
+
+		protected String seedRoot = null;
+
+		public ShufflerImpl(PartImpl part)
+		{
+			if (part.assessment.getSubmissionContext() != null)
+			{
+				String crossoverIdStr = ((SubmissionServiceImpl) part.submissionService).get106ShuffleCrossoverId();
+				if (crossoverIdStr != null)
+				{
+					Long crossoverId = Long.valueOf(crossoverIdStr);
+					Long subId = Long.valueOf(part.assessment.getSubmissionContext().getId());
+					if (subId <= crossoverId) this.old = true;
+				}
+			}
+
+			// use the submission id as the seed root if available
+			if (part.assessment.getSubmissionContext() != null)
+			{
+				this.seedRoot = part.assessment.getSubmissionContext().getId();
+			}
+
+			// if no submission context, just the part id
+			else
+			{
+				this.seedRoot = part.id;
+			}
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void shuffle(List<? extends Object> source, String seedExtension)
+		{
+			// the old, 1.0.5 and before way of shuffling (ignore the seed extension, nothing fancy)
+			if (this.old)
+			{
+				Collections.shuffle(source, new Random(this.seedRoot.hashCode()));
+			}
+
+			else
+			{
+				// use the root and the extension, if given
+				String seed = this.seedRoot + ((seedExtension != null) ? ("_" + seedExtension) : "");
+
+				// we get much better results with 3 than 2 - use a null to pad it out, then remove it after shuffle
+				if (source.size() == 2)
+				{
+					source.add(null);
+					Collections.shuffle(source, new Random(seed.hashCode()));
+					source.remove(null);
+				}
+				else
+				{
+					Collections.shuffle(source, new Random(seed.hashCode()));
+				}
+			}
 		}
 	}
 
@@ -401,30 +467,6 @@ public abstract class PartImpl implements Part, Changeable
 	protected void initId(String id)
 	{
 		this.id = id;
-	}
-
-	/**
-	 * Compute a seed based on the submission or part for randomization.
-	 * 
-	 * @return The seed based on the submission or part for randomization.
-	 */
-	protected long seed()
-	{
-		// set the seed based on the id of the submission context,
-		// so each submission has a different unique ordering
-		long seed = 0;
-		if (this.assessment.getSubmissionContext() != null)
-		{
-			seed = this.assessment.getSubmissionContext().getId().hashCode();
-		}
-
-		// if no submission context, just the part id
-		else
-		{
-			seed = this.id.hashCode();
-		}
-
-		return seed;
 	}
 
 	/**

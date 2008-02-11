@@ -36,6 +36,7 @@ import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.Shuffler;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.util.StringUtil;
@@ -447,13 +448,13 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 	 */
 	protected List<PoolPick> getQuestionPickOrder()
 	{
-		long seed = seed();
+		Shuffler shuffler = new ShufflerImpl(this);
 
 		// random draw from the pools, randomize the results
 		List<PoolPick> rv = new ArrayList<PoolPick>();
 		for (PoolDraw draw : this.pools)
 		{
-			List<String> draws = draw.drawQuestionIds(seed);
+			List<String> draws = draw.drawQuestionIds(shuffler);
 			for (String id : draws)
 			{
 				PoolPick pick = new PoolPick(this.questionService, id, draw.getPoolId());
@@ -462,7 +463,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		}
 
 		// randomize the questions in the copy
-		Collections.shuffle(rv, new Random(seed));
+		shuffler.shuffle(rv, this.id);
 
 		return rv;
 	}
