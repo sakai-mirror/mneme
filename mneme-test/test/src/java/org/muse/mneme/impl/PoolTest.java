@@ -89,7 +89,7 @@ public class PoolTest extends TestCase
 		/**
 		 * {@inheritDoc}
 		 */
-		public void shuffle(List<? extends Object> source)
+		public void shuffle(List<? extends Object> source, String extra)
 		{
 			Collections.shuffle(source, new Random(this.seed));
 		}

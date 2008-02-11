@@ -180,7 +180,7 @@ public class ShuffleTest extends TestCase
 	{
 		int size = 2;
 		int draw = 1;
-		int sample = 5000;
+		int sample = 50;
 		// int unique = 52134;
 		// int unique = 0;
 		int unique = 107341;
