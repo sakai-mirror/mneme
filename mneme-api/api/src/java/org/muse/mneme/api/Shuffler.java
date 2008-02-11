@@ -33,6 +33,8 @@ public interface Shuffler
 	 * 
 	 * @param source
 	 *        The list to shuffle.
+	 * @param seedExtension
+	 *        An optional string to add the to root seed string to form the seed.
 	 */
-	void shuffle(List<? extends Object> source);
+	void shuffle(List<? extends Object> source, String seedExtension);
 }

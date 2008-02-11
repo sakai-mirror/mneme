@@ -97,7 +97,7 @@ public class PoolImpl implements Pool
 		List<String> rv = getAllQuestionIds();
 
 		// randomize the questions in the copy
-		shuffler.shuffle(rv);
+		shuffler.shuffle(rv, this.id);
 
 		// cut off the number of questions we want
 		if (rv.size() > numQuestions)

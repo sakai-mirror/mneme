@@ -420,7 +420,7 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 
 		// randomize the questions in the copy
 		Shuffler shuffler = new ShufflerImpl(this);
-		shuffler.shuffle(rv);
+		shuffler.shuffle(rv, this.id);
 
 		return rv;
 	}

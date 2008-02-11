@@ -466,7 +466,7 @@ public class DrawPartImpl extends PartImpl implements DrawPart
 		}
 
 		// randomize the questions in the copy
-		shuffler.shuffle(rv);
+		shuffler.shuffle(rv, this.id);
 
 		return rv;
 	}

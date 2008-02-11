@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ public abstract class PartImpl implements Part, Changeable
 	{
 		protected boolean old = false;
 
-		protected long seed = 0;
+		protected String seedRoot = null;
 
 		public ShufflerImpl(PartImpl part)
 		{
@@ -149,92 +149,47 @@ public abstract class PartImpl implements Part, Changeable
 				}
 			}
 
-			if (this.old)
+			// use the submission id as the seed root if available
+			if (part.assessment.getSubmissionContext() != null)
 			{
-				this.seed = seed_105(part);
+				this.seedRoot = part.assessment.getSubmissionContext().getId();
 			}
+
+			// if no submission context, just the part id
 			else
 			{
-				this.seed = seed_106(part);
+				this.seedRoot = part.id;
 			}
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
-		public void shuffle(List<? extends Object> source)
+		public void shuffle(List<? extends Object> source, String seedExtension)
 		{
-			// the old, 1.0.5 and before way of shuffling
+			// the old, 1.0.5 and before way of shuffling (ignore the seed extension, nothing fancy)
 			if (this.old)
 			{
-				Collections.shuffle(source, new Random(this.seed));
+				Collections.shuffle(source, new Random(this.seedRoot.hashCode()));
 			}
 
 			else
 			{
+				// use the root and the extension, if given
+				String seed = this.seedRoot + ((seedExtension != null) ? ("_" + seedExtension) : "");
+
 				// we get much better results with 3 than 2 - use a null to pad it out, then remove it after shuffle
 				if (source.size() == 2)
 				{
 					source.add(null);
-					Collections.shuffle(source, new Random(this.seed));
+					Collections.shuffle(source, new Random(seed.hashCode()));
 					source.remove(null);
 				}
 				else
 				{
-					Collections.shuffle(source, new Random(this.seed));
+					Collections.shuffle(source, new Random(seed.hashCode()));
 				}
 			}
-		}
-
-		/**
-		 * Compute a seed based on the submission or part for randomization.<br />
-		 * This is how it was done in 1.0.5 and before.
-		 * 
-		 * @return The seed based on the submission or part for randomization.
-		 */
-		protected long seed_105(PartImpl part)
-		{
-			// set the seed based on the id of the submission context,
-			// so each submission has a different unique ordering
-			long seed = 0;
-			if (part.assessment.getSubmissionContext() != null)
-			{
-				seed = part.assessment.getSubmissionContext().getId().hashCode();
-			}
-
-			// if no submission context, just the part id
-			else
-			{
-				seed = part.id.hashCode();
-			}
-
-			return seed;
-		}
-
-		/**
-		 * Compute a seed based on the submission or part for randomization.
-		 * 
-		 * @return The seed based on the submission or part for randomization.
-		 */
-		protected long seed_106(PartImpl part)
-		{
-			// set the seed based on the id of the submission context,
-			// so each submission has a different unique ordering,
-			// and on the part id, so that each part's draws are different within the same submission.
-			long seed = 0;
-			if (part.assessment.getSubmissionContext() != null)
-			{
-				String key = part.assessment.getSubmissionContext().getId() + "_" + part.id;
-				seed = key.hashCode();
-			}
-
-			// if no submission context, just the part id
-			else
-			{
-				seed = part.id.hashCode();
-			}
-
-			return seed;
 		}
 	}
 
