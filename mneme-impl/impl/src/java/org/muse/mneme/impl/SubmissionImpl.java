@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -232,6 +232,27 @@ public class SubmissionImpl implements Submission
 		total = Math.round(total * 100.0f) / 100.0f;
 
 		return Float.valueOf(total);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Answer> getAnswersOrdered()
+	{
+		List<Answer> answers = new ArrayList<Answer>();
+		for (Part part : getAssessment().getParts().getParts())
+		{
+			for (Question question : part.getQuestions())
+			{
+				Answer answer = getAnswer(question);
+				if (answer != null)
+				{
+					answers.add(answer);
+				}
+			}
+		}
+
+		return answers;
 	}
 
 	/**

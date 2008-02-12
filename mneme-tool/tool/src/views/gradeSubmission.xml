@@ -106,7 +106,7 @@
 		</section>
 
 		<section>
-			<iterator name="answer" model="submission.answers" />
+			<iterator name="answer" model="submission.answersOrdered" />
 
 			<!-- section title -->
 			<title>

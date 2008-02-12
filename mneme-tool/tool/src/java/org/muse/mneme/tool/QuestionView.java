@@ -527,15 +527,7 @@ public class QuestionView extends ControllerImpl
 		{
 			// TODO: assure the test is by-test
 
-			// get all the answers to all the questions in all sections
-			for (Part part : submission.getAssessment().getParts().getParts())
-			{
-				for (Question question : part.getQuestions())
-				{
-					Answer answer = submission.getAnswer(question);
-					answers.add(answer);
-				}
-			}
+			answers.addAll(submission.getAnswersOrdered());
 		}
 
 		context.put("answers", answers);

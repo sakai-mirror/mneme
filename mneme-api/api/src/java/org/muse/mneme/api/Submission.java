@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,9 +61,9 @@ public interface Submission
 	Answer getAnswer(String answerId);
 
 	/**
-	 * Access the submission's answers.
+	 * Access the submission's answers.  Order is not specified.
 	 * 
-	 * @return The submission's answers.
+	 * @return The submission's answers in some order.
 	 */
 	List<Answer> getAnswers();
 
@@ -73,6 +73,13 @@ public interface Submission
 	 * @return The auto score for this submission, or 0 if there is none.
 	 */
 	Float getAnswersAutoScore();
+	
+	/**
+	 * Access the submission's answers in assessment delivery order.
+	 * 
+	 * @return The submission's answers in assessment delivery order.
+	 */
+	List<Answer> getAnswersOrdered();
 
 	/**
 	 * Access the assessment that this is a submission to.
