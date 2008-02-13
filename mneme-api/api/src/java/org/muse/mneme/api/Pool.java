@@ -28,6 +28,14 @@ import java.util.List;
  */
 public interface Pool
 {
+	/** for getNumQuestionsSurvey. */
+	public class PoolCounts
+	{
+		public Integer assessment;
+
+		public Integer survey;
+	};
+
 	/**
 	 * Draw questions based on this random seed.
 	 * 
@@ -124,6 +132,13 @@ public interface Pool
 	 * @return The number of questions currently defined in the pool.
 	 */
 	Integer getNumQuestions();
+
+	/**
+	 * Access the number of questions currently defined in the pool, counting survey and non-survey separately.
+	 * 
+	 * @return the number of assessment questions and the number of survey questions.
+	 */
+	PoolCounts getNumQuestionsSurvey();
 
 	/**
 	 * Access the number of points for each question in this pool.

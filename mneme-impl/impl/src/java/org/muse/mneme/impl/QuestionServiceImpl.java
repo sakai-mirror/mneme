@@ -212,40 +212,84 @@ public class QuestionServiceImpl implements QuestionService
 		if (pool == null) throw new IllegalArgumentException();
 
 		// check the thread-local cache
-		String key = cacheKeyPoolCount(pool.getId(), questionType, survey);
-		Integer rv = (Integer) this.threadLocalManager.get(key);
-		if (rv != null) return rv;
+		String key = cacheKeyPoolCount(pool.getId(), questionType);
+		Pool.PoolCounts sizes = (Pool.PoolCounts) this.threadLocalManager.get(key);
+		if (sizes != null)
+		{
+			if (survey == null)
+			{
+				return Integer.valueOf(sizes.assessment + sizes.survey);
+			}
+			else if (survey)
+			{
+				return sizes.survey;
+			}
+			else
+			{
+				return sizes.assessment;
+			}
+		}
 
-		if (questionType == null)
+		if ((questionType == null) && (survey == null) && (!pool.getIsHistorical()))
 		{
 			// anticipate that we will want more than just this pool; read the counts of the pools of the context
 			if (M_log.isDebugEnabled()) M_log.debug("countQuestions: pre-caching for context: " + pool.getContext() + " pool: " + pool.getId());
 
-			Map<String, Integer> counts = this.storage.countPoolQuestions(pool.getContext());
+			Map<String, Pool.PoolCounts> counts = this.storage.countPoolQuestions(pool.getContext());
 
 			// and cache them
 			for (Map.Entry entry : counts.entrySet())
 			{
-				key = cacheKeyPoolCount((String) entry.getKey(), questionType, survey);
+				key = cacheKeyPoolCount((String) entry.getKey(), questionType);
 				this.threadLocalManager.set(key, entry.getValue());
 			}
 
 			// TODO: search
 
 			// check the thread-local cache
-			key = cacheKeyPoolCount(pool.getId(), questionType, survey);
-			rv = (Integer) this.threadLocalManager.get(key);
-			if (rv != null) return rv;
+			key = cacheKeyPoolCount(pool.getId(), questionType);
+			sizes = (Pool.PoolCounts) this.threadLocalManager.get(key);
+			if (sizes != null)
+			{
+				if (survey == null)
+				{
+					return Integer.valueOf(sizes.assessment + sizes.survey);
+				}
+				else if (survey)
+				{
+					return sizes.survey;
+				}
+				else
+				{
+					return sizes.assessment;
+				}
+			}
 		}
 
 		if (M_log.isDebugEnabled()) M_log.debug("countQuestions: pool: " + pool.getId());
-		rv = this.storage.countPoolQuestions(pool, questionType, survey);
+		sizes = this.storage.countPoolQuestions(pool, questionType);
 
 		// cache
-		key = cacheKeyPoolCount(pool.getId(), questionType, survey);
-		this.threadLocalManager.set(key, rv);
+		key = cacheKeyPoolCount(pool.getId(), questionType);
+		this.threadLocalManager.set(key, sizes);
 
-		return rv;
+		if (sizes != null)
+		{
+			if (survey == null)
+			{
+				return Integer.valueOf(sizes.assessment + sizes.survey);
+			}
+			else if (survey)
+			{
+				return sizes.survey;
+			}
+			else
+			{
+				return sizes.assessment;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -258,7 +302,7 @@ public class QuestionServiceImpl implements QuestionService
 		// TODO: search
 
 		// check the thread-local cache
-		String key = cacheKeyContextCount(context, survey);
+		String key = cacheKeyContextCount(context, questionType, survey);
 		Integer rv = (Integer) this.threadLocalManager.get(key);
 		if (rv != null) return rv;
 
@@ -679,9 +723,10 @@ public class QuestionServiceImpl implements QuestionService
 	 *        The pool id.
 	 * @return The cache key.
 	 */
-	protected String cacheKeyContextCount(String context, Boolean survey)
+	protected String cacheKeyContextCount(String context, String questionType, Boolean survey)
 	{
-		return "mneme:question:context:count:" + context + ((survey == null) ? "" : (":" + survey));
+		return "mneme:question:context:count:" + context + ((questionType == null) ? "" : (":" + questionType))
+				+ ((survey == null) ? "" : (":" + survey));
 	}
 
 	/**
@@ -691,10 +736,9 @@ public class QuestionServiceImpl implements QuestionService
 	 *        The pool id.
 	 * @return The cache key.
 	 */
-	protected String cacheKeyPoolCount(String poolId, String questionType, Boolean survey)
+	protected String cacheKeyPoolCount(String poolId, String questionType)
 	{
-		return "mneme:question:pool:count:" + poolId + ((questionType == null) ? "" : (":" + questionType))
-				+ ((survey == null) ? "" : (":" + survey));
+		return "mneme:question:pool:count:" + poolId + ((questionType == null) ? "" : (":" + questionType));
 	}
 
 	/**
@@ -760,15 +804,14 @@ public class QuestionServiceImpl implements QuestionService
 
 		// clear caches
 		this.threadLocalManager.set(cacheKey(question.getId()), null);
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), null, null), null);
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), null, Boolean.FALSE), null);
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), null, Boolean.TRUE), null);
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), question.getType(), null), null);
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), question.getType(), Boolean.FALSE), null);
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), question.getType(), Boolean.TRUE), null);
-		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), null), null);
-		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), Boolean.FALSE), null);
-		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), Boolean.TRUE), null);
+		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), null), null);
+		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), question.getType()), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), null, null), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), null, Boolean.FALSE), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), null, Boolean.TRUE), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), question.getType(), null), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), question.getType(), Boolean.FALSE), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), question.getType(), Boolean.TRUE), null);
 		this.threadLocalManager.set(this.cacheKeyPoolQuestions(question.getPool().getId()), null);
 
 		// event
@@ -803,15 +846,14 @@ public class QuestionServiceImpl implements QuestionService
 
 		// clear thread-local caches
 		this.threadLocalManager.set(cacheKey(question.getId()), null);
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), null, null), null);
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), null, Boolean.FALSE), null);
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), null, Boolean.TRUE), null);
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), question.getType(), null), null);
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), question.getType(), Boolean.FALSE), null);
-		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), question.getType(), Boolean.TRUE), null);
-		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), null), null);
-		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), Boolean.FALSE), null);
-		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), Boolean.TRUE), null);
+		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), null), null);
+		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId(), question.getType()), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), null, null), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), null, Boolean.FALSE), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), null, Boolean.TRUE), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), question.getType(), null), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), question.getType(), Boolean.FALSE), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext(), question.getType(), Boolean.TRUE), null);
 		this.threadLocalManager.set(this.cacheKeyPoolQuestions(question.getPool().getId()), null);
 
 		// event

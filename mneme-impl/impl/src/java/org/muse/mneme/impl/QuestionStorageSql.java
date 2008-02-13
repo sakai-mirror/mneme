@@ -143,12 +143,18 @@ public abstract class QuestionStorageSql implements QuestionStorage
 						if (asHistory)
 						{
 							newId = copyQuestionHistoricalTx(userId, qid, destination);
-							oldToNew.put(qid, newId);
+							if (oldToNew != null)
+							{
+								oldToNew.put(qid, newId);
+							}
 						}
 						else
 						{
 							newId = copyQuestionTx(userId, qid, destination);
-							oldToNew.put(qid, newId);
+							if (oldToNew != null)
+							{
+								oldToNew.put(qid, newId);
+							}
 						}
 
 						// translate attachments
@@ -208,23 +214,19 @@ public abstract class QuestionStorageSql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPoolQuestions(Pool pool, String questionType, Boolean survey)
+	public Pool.PoolCounts countPoolQuestions(Pool pool, String questionType)
 	{
 		int extras = 0;
 
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT COUNT(1) FROM MNEME_QUESTION Q");
+		sql.append("SELECT Q.SURVEY, COUNT(1) FROM MNEME_QUESTION Q");
 		sql.append(" WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=?");
 		if (questionType != null)
 		{
 			sql.append(" AND Q.TYPE=?");
 			extras++;
 		}
-		if (survey != null)
-		{
-			sql.append(" AND Q.SURVEY=?");
-			extras++;
-		}
+		sql.append(" GROUP BY Q.SURVEY");
 
 		Object[] fields = new Object[1 + extras];
 		fields[0] = Long.valueOf(pool.getId());
@@ -233,37 +235,60 @@ public abstract class QuestionStorageSql implements QuestionStorage
 		{
 			fields[pos++] = questionType;
 		}
-		if (survey != null)
-		{
-			fields[pos++] = survey ? "1" : "0";
-		}
 
-		List results = this.sqlService.dbRead(sql.toString(), fields, null);
-		if (results.size() > 0)
+		final Pool.PoolCounts rv = new Pool.PoolCounts();
+		rv.assessment = 0;
+		rv.survey = 0;
+		List results = this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
-			return Integer.valueOf((String) results.get(0));
-		}
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					Boolean survey = SqlHelper.readBoolean(result, 1);
+					Integer count = SqlHelper.readInteger(result, 2);
+					if (count != null)
+					{
+						if ((survey != null) && survey)
+						{
+							rv.survey += count;
+						}
+						else
+						{
+							rv.assessment += count;
+						}
+					}
 
-		return Integer.valueOf(0);
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("countPoolQuestions: " + e);
+					return null;
+				}
+			}
+		});
+
+		return rv;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Map<String, Integer> countPoolQuestions(String context)
+	public Map<String, Pool.PoolCounts> countPoolQuestions(String context)
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT P.ID, COUNT(Q.ID)");
+		sql.append("SELECT P.ID, Q.SURVEY, COUNT(Q.ID)");
 		sql.append(" FROM MNEME_POOL P");
 		sql.append(" LEFT OUTER JOIN MNEME_QUESTION Q");
 		sql.append(" ON Q.MINT='0' AND Q.HISTORICAL='0' AND Q.POOL_ID=P.ID");
 		sql.append(" WHERE P.CONTEXT=? AND P.MINT='0' AND P.HISTORICAL='0'");
-		sql.append(" GROUP BY P.ID");
+		sql.append(" GROUP BY P.ID, Q.SURVEY");
 
 		Object[] fields = new Object[1];
 		fields[0] = context;
 
-		final Map<String, Integer> rv = new HashMap<String, Integer>();
+		final Map<String, Pool.PoolCounts> rv = new HashMap<String, Pool.PoolCounts>();
 		List results = this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)
@@ -271,8 +296,29 @@ public abstract class QuestionStorageSql implements QuestionStorage
 				try
 				{
 					String id = SqlHelper.readId(result, 1);
-					Integer count = Integer.valueOf(result.getInt(2));
-					rv.put(id, count);
+					Boolean survey = SqlHelper.readBoolean(result, 2);
+					Integer count = SqlHelper.readInteger(result, 3);
+
+					Pool.PoolCounts counts = rv.get(id);
+					if (counts == null)
+					{
+						counts = new Pool.PoolCounts();
+						counts.assessment = 0;
+						counts.survey = 0;
+						rv.put(id, counts);
+					}
+
+					if (count != null)
+					{
+						if ((survey != null) && survey)
+						{
+							counts.survey += count;
+						}
+						else
+						{
+							counts.assessment += count;
+						}
+					}
 
 					return null;
 				}

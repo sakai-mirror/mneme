@@ -233,6 +233,18 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
+	public PoolCounts getNumQuestionsSurvey()
+	{
+		PoolCounts rv = new PoolCounts();
+		rv.assessment = this.questionService.countQuestions(this, null, null, Boolean.FALSE);
+		rv.survey = this.questionService.countQuestions(this, null, null, Boolean.TRUE);
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Float getPoints()
 	{
 		return this.points == null ? Float.valueOf(0f) : this.points;

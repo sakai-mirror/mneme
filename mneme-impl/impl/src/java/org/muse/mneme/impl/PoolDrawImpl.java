@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
@@ -195,7 +196,30 @@ public class PoolDrawImpl implements PoolDraw
 		Pool pool = getPool();
 		if (pool != null)
 		{
-			int size = pool.getNumQuestions();
+			// if pool is mixed survey, count only survey for survey, non-survey for non-survey
+			Pool.PoolCounts sizes = pool.getNumQuestionsSurvey();
+			int size = 0;
+
+			// if uniform, count them all
+			if ((sizes.assessment == 0) || (sizes.survey == 0))
+			{
+				size = sizes.assessment + sizes.survey;
+			}
+
+			// if not uniform, use the count that matches the assessment
+			else
+			{
+				if (this.assessment.getType() == AssessmentType.survey)
+				{
+					size = sizes.survey;
+				}
+				else
+				{
+					size = sizes.assessment;
+				}
+			}
+
+			// int size = pool.getNumQuestions();
 			size -= ((AssessmentPartsImpl) this.assessment.getParts()).countPoolPicks(pool);
 
 			return Integer.valueOf(size);

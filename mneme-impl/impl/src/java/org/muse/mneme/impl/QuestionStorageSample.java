@@ -201,34 +201,41 @@ public abstract class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countPoolQuestions(Pool pool, String questionType, Boolean survey)
+	public Pool.PoolCounts countPoolQuestions(Pool pool, String questionType)
 	{
-		int count = 0;
+		Pool.PoolCounts counts = new Pool.PoolCounts();
+		counts.assessment = 0;
+		counts.survey = 0;
 		for (QuestionImpl question : this.questions.values())
 		{
 			if (question.getMint()) continue;
 			if (!question.getPool().equals(pool)) continue;
 			if ((questionType != null) && (!question.getType().equals(questionType))) continue;
-			if ((survey != null) && (question.getIsSurvey() != survey)) continue;
-
-			count++;
+			if (question.getIsSurvey())
+			{
+				counts.survey++;
+			}
+			else
+			{
+				counts.assessment++;
+			}
 		}
 
-		return count;
+		return counts;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Map<String, Integer> countPoolQuestions(String context)
+	public Map<String, Pool.PoolCounts> countPoolQuestions(String context)
 	{
-		Map<String, Integer> rv = new HashMap<String, Integer>();
+		Map<String, Pool.PoolCounts> rv = new HashMap<String, Pool.PoolCounts>();
 		List<Pool> pools = this.poolService.findPools(context, null, null);
 		for (Pool pool : pools)
 		{
 			if (!pool.getIsHistorical())
 			{
-				rv.put(pool.getId(), countPoolQuestions(pool, null, null));
+				rv.put(pool.getId(), countPoolQuestions(pool, null));
 			}
 		}
 

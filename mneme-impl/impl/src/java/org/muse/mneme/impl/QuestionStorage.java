@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,32 +88,30 @@ public interface QuestionStorage
 	 * @param questionType
 	 *        The (optional) question type; if specified, only questions of this type are included.
 	 * @param survey
-	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both. s *
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
 	 * @return The questions in this pool with this criteria.
 	 */
 	Integer countContextQuestions(String context, String questionType, Boolean survey);
 
 	/**
-	 * Count the questions in this pool
+	 * Count the questions in this pool - separate counts for survey and non-survey.
 	 * 
 	 * @param pool
 	 *        The pool.
 	 * @param questionType
 	 *        The (optional) question type; if specified, only questions of this type are included.
-	 * @param survey
-	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both. s *
-	 * @return The questions in this pool with this criteria.
+	 * @return The questions in this pool with this criteria, separate assessment and survey counts.
 	 */
-	Integer countPoolQuestions(Pool pool, String questionType, Boolean survey);
+	Pool.PoolCounts countPoolQuestions(Pool pool, String questionType);
 
 	/**
-	 * Count the questions in the non-historical pools of this context
+	 * Count the questions in the non-historical pools of this context - separate counts for survey and non-survey.
 	 * 
 	 * @param context
 	 *        The context.
-	 * @return A Map of the pool id -> count.
+	 * @return A Map of the pool id -> count, separate assessment and survey counts.
 	 */
-	Map<String, Integer> countPoolQuestions(String context);
+	Map<String, Pool.PoolCounts> countPoolQuestions(String context);
 
 	/**
 	 * Check if a question by this id exists.
