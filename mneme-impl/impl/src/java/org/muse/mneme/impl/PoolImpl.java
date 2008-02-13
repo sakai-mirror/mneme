@@ -89,12 +89,12 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> drawQuestionIds(Shuffler shuffler, Integer numQuestions)
+	public List<String> drawQuestionIds(Shuffler shuffler, Integer numQuestions, Boolean survey)
 	{
 		if (numQuestions == null) throw new IllegalArgumentException();
 		if (numQuestions.intValue() <= 0) throw new IllegalArgumentException();
 
-		List<String> rv = getAllQuestionIds();
+		List<String> rv = getAllQuestionIds(survey);
 
 		// randomize the questions in the copy
 		shuffler.shuffle(rv, this.id);
@@ -131,7 +131,7 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getAllQuestionIds()
+	public List<String> getAllQuestionIds(Boolean survey)
 	{
 		List<String> rv = null;
 
@@ -141,7 +141,7 @@ public class PoolImpl implements Pool
 		}
 		else
 		{
-			rv = this.questionService.getPoolQuestionIds(this);
+			rv = this.questionService.getPoolQuestionIds(this, survey);
 		}
 
 		return rv;
@@ -479,7 +479,7 @@ public class PoolImpl implements Pool
 		if (this.historical) return false;
 
 		// suck in the current question manifest
-		this.frozenManifest = current.getAllQuestionIds();
+		this.frozenManifest = current.getAllQuestionIds(null);
 
 		// mark as historical
 		this.historical = Boolean.TRUE;

@@ -79,7 +79,9 @@ public interface QuestionPoolService
 	 * 
 	 * @param pool
 	 *        The pool.
+	 * @param survey
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
 	 * @return The List of question ids that are in the pool.
 	 */
-	List<String> getPoolQuestionIds(Pool pool);
+	List<String> getPoolQuestionIds(Pool pool, Boolean survey);
 }

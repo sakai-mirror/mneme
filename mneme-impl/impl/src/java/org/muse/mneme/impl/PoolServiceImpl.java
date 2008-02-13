@@ -569,7 +569,7 @@ public class PoolServiceImpl implements PoolService
 	protected void doRemove(PoolImpl pool)
 	{
 		// remove each of our questions
-		List<String> qids = pool.getAllQuestionIds();
+		List<String> qids = pool.getAllQuestionIds(null);
 		for (String qid : qids)
 		{
 			Question q = this.questionService.getQuestion(qid);

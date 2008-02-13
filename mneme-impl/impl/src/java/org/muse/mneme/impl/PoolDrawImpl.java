@@ -128,7 +128,16 @@ public class PoolDrawImpl implements PoolDraw
 		List<String> manualQuestionIds = ((AssessmentPartsImpl) this.assessment.getParts()).getPoolPicks(pool);
 
 		int size = this.numQuestions + manualQuestionIds.size();
-		List<String> rv = pool.drawQuestionIds(shuffler, size);
+
+		// for a uniform pool, draw from any survey or not; otherwise match the draw to the assessment type
+		Pool.PoolCounts counts = pool.getNumQuestionsSurvey();
+		Boolean survey = null;
+		if ((counts.assessment != 0) && (counts.survey != 0))
+		{
+			survey = Boolean.valueOf(this.assessment.getType() == AssessmentType.survey);
+		}
+
+		List<String> rv = pool.drawQuestionIds(shuffler, size, survey);
 
 		// we need to remove from rv any manual questions used in the assessment
 		rv.removeAll(manualQuestionIds);
@@ -161,7 +170,7 @@ public class PoolDrawImpl implements PoolDraw
 		Pool pool = getPool();
 		if (pool == null) return new ArrayList<String>();
 
-		return pool.getAllQuestionIds();
+		return pool.getAllQuestionIds(null);
 	}
 
 	/**

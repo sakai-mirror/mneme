@@ -116,7 +116,7 @@ public abstract class QuestionStorageSql implements QuestionStorage
 		List<String> qids = null;
 		if ((oldToNew != null) || ((attachmentTranslations != null) && (!attachmentTranslations.isEmpty())))
 		{
-			qids = source.getAllQuestionIds();
+			qids = source.getAllQuestionIds(null);
 		}
 		final List<String> poolQids = qids;
 
@@ -462,12 +462,23 @@ public abstract class QuestionStorageSql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getPoolQuestions(Pool pool)
+	public List<String> getPoolQuestions(Pool pool, Boolean survey)
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT Q.ID");
 		sql.append(" FROM MNEME_QUESTION Q ");
 		sql.append(" WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=?");
+		if (survey != null)
+		{
+			if (survey)
+			{
+				sql.append(" AND Q.SURVEY='1'");
+			}
+			else
+			{
+				sql.append(" AND Q.SURVEY='0'");
+			}
+		}
 		sql.append(" ORDER BY Q.CREATED_BY_DATE ASC");
 
 		Object[] fields = new Object[1];

@@ -43,9 +43,11 @@ public interface Pool
 	 *        The shuffler.
 	 * @param numQuestions
 	 *        The number of questions to draw.
+	 * @param survey
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
 	 * @return A List of question ids drawn from the pool.
 	 */
-	List<String> drawQuestionIds(Shuffler shuffler, Integer numQuestions);
+	List<String> drawQuestionIds(Shuffler shuffler, Integer numQuestions, Boolean survey);
 
 	/**
 	 * Locate a list of questions in this pool with this criteria.
@@ -65,9 +67,11 @@ public interface Pool
 	/**
 	 * Access all questions.
 	 * 
+	 * @param survey
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
 	 * @return A List of question ids from the pool.
 	 */
-	List<String> getAllQuestionIds();
+	List<String> getAllQuestionIds(Boolean survey);
 
 	/**
 	 * Access the context of this pool.

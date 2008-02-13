@@ -284,13 +284,17 @@ public abstract class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getPoolQuestions(Pool pool)
+	public List<String> getPoolQuestions(Pool pool, Boolean survey)
 	{
 		List<String> rv = new ArrayList<String>();
 		for (QuestionImpl question : this.questions.values())
 		{
 			if ((!question.getMint()) && (question.getPool().equals(pool)))
 			{
+				if (survey != null)
+				{
+					if (survey != question.getIsSurvey()) continue;
+				}
 				rv.add(question.getId());
 			}
 		}
