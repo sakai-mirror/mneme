@@ -513,4 +513,13 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	{
 		this.uiService = service;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewStatsUi()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

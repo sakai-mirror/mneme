@@ -38,7 +38,6 @@ import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
 import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.UiService;
-import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
@@ -456,6 +455,39 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		second.add(answerKey);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewStatsUi()
+	{
+		EntityList entityList = this.uiService.newEntityList();
+		entityList.setStyle(EntityList.Style.form);
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice");
+		entityList.setEmptyTitle("no-answer");
+
+		SelectionColumn selCol = this.uiService.newSelectionColumn();
+		selCol.setSingle();
+		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
+		selCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer"));
+		selCol.setReadOnly(this.uiService.newTrueDecision());
+		selCol.setCorrect(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswer"));
+		selCol
+				.setCorrectDecision(this.uiService.newDecision().setProperty(
+						this.uiService.newPropertyReference().setReference("question.hasCorrect")));
+		entityList.addColumn(selCol);
+
+		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		entityList.addColumn(propCol);
+
+		propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.id").setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatPercent", "sakai.mneme")));
+		entityList.addColumn(propCol);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
 	}
 
 	/**

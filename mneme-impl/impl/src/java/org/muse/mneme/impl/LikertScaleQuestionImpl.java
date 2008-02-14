@@ -527,6 +527,35 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Component getViewStatsUi()
+	{
+		EntityList entityList = this.uiService.newEntityList();
+		entityList.setStyle(EntityList.Style.form);
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice");
+		entityList.setEmptyTitle("no-answer");
+
+		SelectionColumn selCol = this.uiService.newSelectionColumn();
+		selCol.setSingle();
+		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
+		// selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
+		selCol.setReadOnly(this.uiService.newTrueDecision());
+		entityList.addColumn(selCol);
+
+		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		entityList.addColumn(propCol);
+
+		propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.id").setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatPercent", "sakai.mneme")));
+		entityList.addColumn(propCol);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setData(String[] data)
 	{
 		if ((data != null) && (data.length == 1))

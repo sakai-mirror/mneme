@@ -1114,4 +1114,13 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	{
 		this.uiService = service;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewStatsUi()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -926,6 +926,50 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewStatsUi()
+	{
+		EntityList entityList = this.uiService.newEntityList();
+		entityList.setStyle(EntityList.Style.form);
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesAsAuthored"), "choice");
+		entityList.setEmptyTitle("no-answer");
+
+		SelectionColumn selCol = this.uiService.newSelectionColumn();
+		if (this.singleCorrect)
+		{
+			selCol.setSingle();
+		}
+		else
+		{
+			selCol.setMultiple();
+		}
+		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
+		selCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
+		selCol.setReadOnly(this.uiService.newTrueDecision());
+		selCol.setCorrect(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
+		selCol
+				.setCorrectDecision(this.uiService.newDecision().setProperty(
+						this.uiService.newPropertyReference().setReference("question.hasCorrect")));
+		entityList.addColumn(selCol);
+
+		AutoColumn autoCol = this.uiService.newAutoColumn();
+		autoCol.setProperty(this.uiService.newPropertyReference().setReference("choice.id"));
+		entityList.addColumn(autoCol);
+
+		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		entityList.addColumn(propCol);
+
+		propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.id").setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatPercent", "sakai.mneme")));
+		entityList.addColumn(propCol);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+	}
+
+	/**
 	 * Set the entire set of choices to these values.
 	 * 
 	 * @param choices

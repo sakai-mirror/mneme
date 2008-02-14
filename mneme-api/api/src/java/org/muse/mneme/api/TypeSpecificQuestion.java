@@ -152,6 +152,13 @@ public interface TypeSpecificQuestion extends Cloneable
 	Component getViewQuestionUi();
 
 	/**
+	 * Access the user interface component for statistics view of this question type.
+	 * 
+	 * @return The user interface component for statistics view of this question type.
+	 */
+	Component getViewStatsUi();
+
+	/**
 	 * Restore settings from this array of strings, created by getData()
 	 * 
 	 * @param data

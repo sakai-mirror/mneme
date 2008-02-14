@@ -7,7 +7,7 @@
 	* $Id$
 	***********************************************************************************
 	*
-	* Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* Copyright (c) 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 	* 
 	* Licensed under the Apache License, Version 2.0 (the "License");
 	* you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@
 	*
 	**********************************************************************************/
 -->
-
 <interface>
 
 	<!--mode bar-->
@@ -32,12 +31,12 @@
 	</modeContainer>
 
 	<title>
-		<message selector="grading-assessment-title" />
+		<message selector="assessment-stats-title" />
 	</title>
 
 	<header>
-		<message selector="grading-assessment-header">
-			<model type="icon" icon="/icons/grade_questions.png" />
+		<message selector="assessment-stats-header">
+			<model type="icon" icon="/icons/stats.png" />
 		</message>
 	</header>
 
@@ -74,84 +73,83 @@
 				</navigation>
 				<navigation disabled="TRUE" title="bar" />
 				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description"
-					submit="FALSE" disabled="TRUE">
-					<icon icon="/icons/grade_questions.png" style="LEFT" />
-				</navigation>
-				<navigation disabled="TRUE" title="bar" />
-				<navigation title="grade-stats-title" style="LINK" accessKey="grade-stats-access" description="grade-stats-description"
 					submit="TRUE">
-					<icon icon="/icons/stats.png" style="LEFT" />
-					<destination template="/assessment_stats/{0}/{1}">
+					<icon icon="/icons/grade_questions.png" style="LEFT" />
+					<destination template="/grade_questions_list/{0}/{1}">
 						<model ref="sort_grades" />
 						<model ref="assessment.id" />
 					</destination>
+				</navigation>
+				<navigation disabled="TRUE" title="bar" />
+				<navigation title="grade-stats-title" style="LINK" accessKey="grade-stats-access" description="grade-stats-description" submit="TRUE"
+					disabled="TRUE">
+					<icon icon="/icons/stats.png" style="LEFT" />
 				</navigation>
 			</container>
 		</navigationBar>
 
 		<section>
-			<iterator name="part" model="assessment.parts.parts" />
+			<iterator name="part" model="assessment.parts.parts">
+				<empty>
+					<message selector="no-parts" />
+				</empty>
+			</iterator>
 			<title>
-				<message selector="question-list-part-title">
+				<message selector="part-title">
 					<model ref="part.ordering.position" />
 					<model ref="assessment.parts.size" />
 					<model ref="part.title" />
 					<selectors>
-						<selector selector="question-list-part-title-no-title">
+						<selector selector="part-title-no-title">
 							<hasValueDecision reversed="TRUE" model="part.title" />
 						</selector>
 					</selectors>
 				</message>
 			</title>
+
 			<container>
-				<entityList>
+
+				<!-- part presentation -->
+				<text model="part.presentation.text">
+					<included>
+						<decision model="assessment.parts.showPresentation" />
+					</included>
+				</text>
+				<attachments title="attachments" model="part.presentation.attachments">
+					<included>
+						<hasValueDecision model="part.presentation.attachments" />
+						<decision model="assessment.parts.showPresentation" />
+					</included>
+				</attachments>
+
+				<section>
 					<iterator name="question" model="part.questionsUsed">
 						<empty>
 							<message selector="no-answers" />
 						</empty>
 					</iterator>
-					<columns>
-						<column pixels="16">
-							<navigations>
-								<navigation style="LINK" submit="FALSE">
-									<icon icon="/icons/grade.png" />
-									<destination template="/grade_question/{0}/{1}/{2}">
-										<model ref="sort_grades" />
-										<model ref="assessment.id" />
-										<model ref="question.id" />
-									</destination>
-								</navigation>
-							</navigations>
-							<entityIncluded>
-								<decision model="assessment.hasPoints" />
-								<decision model="question.hasUnscoredSubmissions" />
-							</entityIncluded>
-						</column>
-						<column>
-							<navigations>
-								<navigation style="LINK" submit="FALSE">
-									<title>
-										<message>
-											<model ref="question.description" type="text" missing="no-title" stripHtml="TRUE" max="60" />
-										</message>
-									</title>
-									<destination template="/grade_question/{0}/{1}/{2}">
-										<model ref="sort_grades" />
-										<model ref="assessment.id" />
-										<model ref="question.id" />
-									</destination>
-								</navigation>
-							</navigations>
-						</column>
-					</columns>
-				</entityList>
+
+					<!-- question header -->
+					<title highlighted="TRUE">
+						<message selector="question-header">
+							<model type="html" ref="question" delegate="FormatQuestionTitle" tool="sakai.mneme" />
+						</message>
+					</title>
+
+					<container>
+
+						<!-- Question specific stats -->
+						<modelComponent model="question.typeSpecificQuestion.viewStatsUi" />
+
+					</container>
+				</section>
 			</container>
 		</section>
 
-		<!-- navigation -->
-		<navigationBar>
+		<!--navigation-->
+		<navigationBar id="nav">
 			<container>
-				<navigation title="grade-return-title" style="BUTTON" accessKey="grade-return-access" description="grade-return-description">
+				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/grades/{0}">
 						<model ref="sort_grades" />

@@ -38,7 +38,7 @@
 
 	<header>
 		<message selector="grading-assessment-header-question">
-			<model type="icon" icon="/icons/grade.png" />
+			<model type="icon" icon="/icons/grade_questions.png" />
 		</message>
 	</header>
 
@@ -82,6 +82,15 @@
 					submit="TRUE">
 					<icon icon="/icons/grade_questions.png" style="LEFT" />
 					<destination template="/grade_questions_list/{0}/{1}">
+						<model ref="sort_grades" />
+						<model ref="assessment.id" />
+					</destination>
+				</navigation>
+				<navigation disabled="TRUE" title="bar" />
+				<navigation title="grade-stats-title" style="LINK" accessKey="grade-stats-access" description="grade-stats-description"
+					submit="TRUE">
+					<icon icon="/icons/stats.png" style="LEFT" />
+					<destination template="/assessment_stats/{0}/{1}">
 						<model ref="sort_grades" />
 						<model ref="assessment.id" />
 					</destination>

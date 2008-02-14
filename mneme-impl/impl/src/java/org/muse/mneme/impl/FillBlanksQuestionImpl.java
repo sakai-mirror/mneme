@@ -596,4 +596,13 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	{
 		this.uiService = service;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewStatsUi()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

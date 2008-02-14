@@ -21,12 +21,15 @@
 
 package org.muse.mneme.tool;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
-import org.muse.mneme.api.AssessmentType;
+import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.Submission;
 
 /**
  * The "FormatScore" format delegate for the mneme tool.
@@ -55,7 +58,15 @@ public class FormatQuestionTitleDelegate extends FormatDelegateImpl
 		Question question = (Question) value;
 		Boolean continuous = question.getPart().getAssessment().getParts().getContinuousNumbering();
 
-		Object[] args = new Object[3];
+		// "submissions" is the List<Submission> of submissions (optional)
+		Object o = context.get("submissions");
+		List<Submission> submissions = null;
+		if ((o != null) && (o instanceof List))
+		{
+			submissions = (List<Submission>) o;
+		}
+
+		Object[] args = new Object[4];
 		if (continuous)
 		{
 			args[0] = question.getAssessmentOrdering().getPosition();
@@ -78,6 +89,27 @@ public class FormatQuestionTitleDelegate extends FormatDelegateImpl
 		if ((!question.getPart().getAssessment().getHasPoints()) || (!question.getHasPoints()))
 		{
 			template += "-no-points";
+		}
+
+		// if we have submissions in the context, count the answers given in them to this question
+		if (submissions != null)
+		{
+			template += "-count";
+			int total = 0;
+			for (Submission s : submissions)
+			{
+				Answer a = s.getAnswer(question);
+				if (a != null)
+				{
+					total++;
+				}
+			}
+
+			if (total == 1)
+			{
+				template += "1";
+			}
+			args[3] = Integer.valueOf(total);
 		}
 
 		return context.getMessages().getFormattedMessage(template, args);
