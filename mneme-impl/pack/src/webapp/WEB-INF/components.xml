@@ -535,4 +535,40 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 
+	<bean id="AccessFillinPositions"
+			class="org.muse.mneme.impl.AccessFillinPositionsDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>AccessFillinPositions</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
+	<bean id="AccessFillinPositionValues"
+			class="org.muse.mneme.impl.AccessFillinPositionValuesDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>AccessFillinPositionValues</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
+	<bean id="FormatFillinPositionPercents"
+			class="org.muse.mneme.impl.FormatFillinPositionPercentsDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>FormatFillinPositionPercents</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
 </beans>

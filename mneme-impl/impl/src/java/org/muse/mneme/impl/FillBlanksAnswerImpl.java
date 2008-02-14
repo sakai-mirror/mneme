@@ -325,7 +325,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	 *        The set of answers already processed.
 	 * @return TRUE if the answer is correct, FALSE if not.
 	 */
-	protected Boolean answerCorrect(String answer, String correctPattern, boolean caseSensitive, boolean anyOrder, boolean textual,
+	protected static Boolean answerCorrect(String answer, String correctPattern, boolean caseSensitive, boolean anyOrder, boolean textual,
 			List<String> correctAnswers, List<String> priorAnswers)
 	{
 		if (!anyOrder)
@@ -391,7 +391,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	 *        if we should be case sensitive.
 	 * @return true if the answer is correct, false if not
 	 */
-	protected boolean isFillInAnswerCorrect(String answer, String correct, boolean caseSensitive)
+	protected static boolean isFillInAnswerCorrect(String answer, String correct, boolean caseSensitive)
 	{
 		// get the set of valid answers from the correct answer pattern (each one may have wild cards)
 		String[] valid = correct.split("\\|");
@@ -435,7 +435,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	 *        The correct answer pattern (with option bars).
 	 * @return true if the answer is correct, false if not
 	 */
-	protected boolean isNumericAnswerCorrect(String answer, String correct)
+	protected static boolean isNumericAnswerCorrect(String answer, String correct)
 	{
 		try
 		{
@@ -492,7 +492,7 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	 *        The source string.
 	 * @return The trimmed source.
 	 */
-	protected String trim(String source)
+	protected static String trim(String source)
 	{
 		String rv = source.replace("&nbsp;", " ").trim();
 		return rv;

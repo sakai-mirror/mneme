@@ -27,11 +27,13 @@ import java.util.List;
 import org.muse.ambrosia.api.AndDecision;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Decision;
+import org.muse.ambrosia.api.EntityList;
 import org.muse.ambrosia.api.FillIn;
 import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.OrDecision;
 import org.muse.ambrosia.api.Overlay;
+import org.muse.ambrosia.api.PropertyColumn;
 import org.muse.ambrosia.api.PropertyReference;
 import org.muse.ambrosia.api.Section;
 import org.muse.ambrosia.api.Selection;
@@ -551,12 +553,35 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		section.add(fillIn);
 		section.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 
+		Section positions = this.uiService.newSection();
+		iteratorRef = this.uiService.newPropertyReference().setReference("question").setFormatDelegate(
+				this.uiService.getFormatDelegate("AccessFillinPositions", "sakai.mneme"));
+		positions.setIterator(iteratorRef, "position", null);
+		positions.setTitle("position", this.uiService.newPropertyReference().setReference("position"));
+
+		EntityList entityList = this.uiService.newEntityList();
+		entityList.setStyle(EntityList.Style.form);
+		entityList.setIterator(this.uiService.newPropertyReference().setFormatDelegate(
+				this.uiService.getFormatDelegate("AccessFillinPositionValues", "sakai.mneme")), "answer");
+		entityList.setEmptyTitle("no-answer");
+
+		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newPropertyReference().setReference("answer"));
+		entityList.addColumn(propCol);
+
+		propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newPropertyReference().setReference("answer").setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatFillinPositionPercents", "sakai.mneme")));
+		entityList.addColumn(propCol);
+
+		positions.add(entityList);
+
 		Text unanswered = this.uiService.newText().setText(
 				null,
 				this.uiService.newHtmlPropertyReference().setFormatDelegate(
 						this.uiService.getFormatDelegate("FormatUnansweredPercent", "sakai.mneme")));
 
-		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second).add(section).add(unanswered);
+		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second).add(section).add(positions).add(unanswered);
 	}
 
 	/**

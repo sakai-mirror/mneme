@@ -28,17 +28,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
-import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.TypeSpecificQuestion;
 
 /**
- * The "AccessSubmissionsQuestionAnswers" format delegate for the mneme tool.
+ * The "AccessFillinPositionsDelegate" format delegate for the mneme tool.
  */
-public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
+public class AccessFillinPositionsDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(AccessSubmissionsQuestionAnswersDelegate.class);
+	private static Log M_log = LogFactory.getLog(AccessFillinPositionsDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -61,27 +60,24 @@ public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
 	 */
 	public Object formatObject(Context context, Object value)
 	{
-		// value is the submissions list
+		// value is the question
 		if (value == null) return null;
-		if (!(value instanceof List)) return value;
-		List<Submission> submissions = (List<Submission>) value;
+		if (!(value instanceof Question)) return null;
+		Question question = (Question) value;
 
-		// "question" is the Question
-		Object o = context.get("question");
-		if (!(o instanceof Question)) return value;
-		Question question = (Question) o;
+		TypeSpecificQuestion tsq = question.getTypeSpecificQuestion();
+		if (!(tsq instanceof FillBlanksQuestionImpl)) return null;
 
-		List<Answer> answers = new ArrayList<Answer>();
-		for (Submission s : submissions)
+		FillBlanksQuestionImpl plugin = (FillBlanksQuestionImpl) tsq;
+
+		List<String> corrects = plugin.getCorrectAnswers();
+		List<Integer> rv = new ArrayList<Integer>();
+		for (int i = 1; i <= corrects.size(); i++)
 		{
-			Answer a = s.getAnswer(question);
-			if (a != null)
-			{
-				answers.add(a);
-			}
+			rv.add(Integer.valueOf(i));
 		}
 
-		return answers;
+		return rv;
 	}
 
 	/**

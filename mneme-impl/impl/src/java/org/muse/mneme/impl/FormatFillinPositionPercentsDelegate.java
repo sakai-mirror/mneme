@@ -21,7 +21,6 @@
 
 package org.muse.mneme.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -33,12 +32,12 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
 
 /**
- * The "AccessSubmissionsQuestionAnswers" format delegate for the mneme tool.
+ * The "FormatFillinPositionPercents" format delegate for the mneme tool.
  */
-public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
+public class FormatFillinPositionPercentsDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(AccessSubmissionsQuestionAnswersDelegate.class);
+	private static Log M_log = LogFactory.getLog(FormatFillinPositionPercentsDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -53,7 +52,67 @@ public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
 	 */
 	public String format(Context context, Object value)
 	{
-		return value.toString();
+		// value is the answer text
+		if (value == null) return null;
+		if (!(value instanceof String)) return value.toString();
+		String target = (String) value;
+
+		// "question" is the Question
+		Object o = context.get("question");
+		if (!(o instanceof Question)) return null;
+		Question question = (Question) o;
+
+		// "submissions" is the Submissions list
+		o = context.get("submissions");
+		if (!(o instanceof List)) return null;
+		List<Submission> submissions = (List<Submission>) o;
+
+		// "position" is the 1 based fill-in position
+		o = context.get("position");
+		if (!(o instanceof Integer)) return null;
+		Integer position = (Integer) o;
+		int pos = position - 1;
+
+		int count = 0;
+		int total = 0;
+		for (Submission s : submissions)
+		{
+			Answer a = s.getAnswer(question);
+			if (a != null)
+			{
+				total++;
+
+				if (a.getIsAnswered())
+				{
+					// does the answer's value match our target answer?
+					// Note: assume that the answer for this position is the nth data element
+					String[] answers = a.getTypeSpecificAnswer().getData();
+					if ((answers != null) && (answers.length > pos))
+					{
+						if (answers[pos].equals(target))
+						{
+							count++;
+						}
+					}
+				}
+			}
+		}
+
+		if (total > 0)
+		{
+			// percent
+			int pct = (count * 100) / total;
+
+			Object[] args = new Object[2];
+			args[0] = Integer.valueOf(pct);
+			args[1] = Integer.valueOf(count);
+
+			String template = "format-percent";
+			return context.getMessages().getFormattedMessage(template, args);
+		}
+
+		String template = "format-percent-none";
+		return context.getMessages().getString(template);
 	}
 
 	/**
@@ -61,27 +120,7 @@ public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
 	 */
 	public Object formatObject(Context context, Object value)
 	{
-		// value is the submissions list
-		if (value == null) return null;
-		if (!(value instanceof List)) return value;
-		List<Submission> submissions = (List<Submission>) value;
-
-		// "question" is the Question
-		Object o = context.get("question");
-		if (!(o instanceof Question)) return value;
-		Question question = (Question) o;
-
-		List<Answer> answers = new ArrayList<Answer>();
-		for (Submission s : submissions)
-		{
-			Answer a = s.getAnswer(question);
-			if (a != null)
-			{
-				answers.add(a);
-			}
-		}
-
-		return answers;
+		return value.toString();
 	}
 
 	/**

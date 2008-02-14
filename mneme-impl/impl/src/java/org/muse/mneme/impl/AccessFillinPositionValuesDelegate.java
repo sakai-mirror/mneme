@@ -22,6 +22,7 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -31,14 +32,15 @@ import org.muse.ambrosia.util.FormatDelegateImpl;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.TypeSpecificQuestion;
 
 /**
- * The "AccessSubmissionsQuestionAnswers" format delegate for the mneme tool.
+ * The "AccessFillinPositionValues" format delegate for the mneme tool.
  */
-public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
+public class AccessFillinPositionValuesDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(AccessSubmissionsQuestionAnswersDelegate.class);
+	private static Log M_log = LogFactory.getLog(AccessFillinPositionValuesDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -61,27 +63,45 @@ public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
 	 */
 	public Object formatObject(Context context, Object value)
 	{
-		// value is the submissions list
-		if (value == null) return null;
-		if (!(value instanceof List)) return value;
-		List<Submission> submissions = (List<Submission>) value;
+		// ignore value
 
 		// "question" is the Question
 		Object o = context.get("question");
-		if (!(o instanceof Question)) return value;
+		if (!(o instanceof Question)) return null;
 		Question question = (Question) o;
 
-		List<Answer> answers = new ArrayList<Answer>();
+		// "submissions" is the Submissions list
+		o = context.get("submissions");
+		if (!(o instanceof List)) return null;
+		List<Submission> submissions = (List<Submission>) o;
+
+		// "position" is the 1 based fill-in position
+		o = context.get("position");
+		if (!(o instanceof Integer)) return null;
+		Integer position = (Integer) o;
+		int pos = position - 1;
+
+		List<String> rv = new ArrayList<String>();
 		for (Submission s : submissions)
 		{
 			Answer a = s.getAnswer(question);
 			if (a != null)
 			{
-				answers.add(a);
+				if (a.getIsAnswered())
+				{
+					String[] answers = a.getTypeSpecificAnswer().getData();
+					if ((answers != null) && (answers.length > pos))
+					{
+						String answer = answers[pos];
+						if (!rv.contains(answer)) rv.add(answer);
+					}
+				}
 			}
 		}
 
-		return answers;
+		Collections.sort(rv);
+
+		return rv;
 	}
 
 	/**
