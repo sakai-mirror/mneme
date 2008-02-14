@@ -38,7 +38,6 @@ import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.Toggle;
 import org.muse.ambrosia.api.UiService;
-import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
@@ -515,6 +514,49 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Component getViewStatsUi()
+	{
+		FillIn fillIn = this.uiService.newFillIn();
+		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.questionText"));
+		fillIn.setWidth(20);
+		fillIn.setReadOnly(this.uiService.newTrueDecision());
+
+		Text answerKey = this.uiService.newText();
+		PropertyReference[] refs = new PropertyReference[2];
+		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
+		refs[1] = this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
+		answerKey.setText("answer-key", refs);
+
+		Section first = this.uiService.newSection();
+		first.add(fillIn);
+
+		Section second = this.uiService.newSection();
+		second.setIncluded(this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("question.hasCorrect")));
+		second.add(answerKey);
+
+		fillIn = this.uiService.newFillIn();
+		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.questionText"));
+		fillIn.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
+		fillIn.setWidth(20);
+		fillIn.setCorrectDecision(this.uiService.newTrueDecision());
+		fillIn.setReadOnly(this.uiService.newTrueDecision());
+		fillIn.setCorrect(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.entryCorrects"));
+		fillIn.setCorrectDecision(this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.hasCorrect")));
+
+		Section section = this.uiService.newSection();
+		PropertyReference iteratorRef = this.uiService.newPropertyReference().setReference("submissions").setFormatDelegate(
+				this.uiService.getFormatDelegate("AccessSubmissionsQuestionAnswers", "sakai.mneme"));
+		section.setIterator(iteratorRef, "answer", this.uiService.newMessage().setMessage("no-answers"));
+		section.add(fillIn);
+		section.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
+
+		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second).add(section);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setAnyOrder(String anyOrder)
 	{
 		if (anyOrder == null) throw new IllegalArgumentException();
@@ -595,14 +637,5 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	public void setUi(UiService service)
 	{
 		this.uiService = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Component getViewStatsUi()
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 }
