@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,13 +56,21 @@ public class SubmissionStatusDelegate extends FormatDelegateImpl
 		StringBuilder rv = new StringBuilder();
 		if (submission.getGradingStatus().equals(GradingSubmissionStatus.released))
 		{
-			rv.append("<img src=\"" + context.get("sakai.return.url") + "/icons/correct.png\" alt=\"" + context.getMessages().getString("grade-status-released")
-					+ "\" />");
+			rv.append("<img src=\"" + context.get("sakai.return.url") + "/icons/correct.png\" alt=\""
+					+ context.getMessages().getString("grade-status-released") + "\" />");
 			rv.append(" ");
 		}
-		rv.append(context.getMessages().getString("grade-status-"+ submission.getGradingStatus().toString()));
+		rv.append(context.getMessages().getString("grade-status-" + submission.getGradingStatus().toString()));
 
 		return rv.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object formatObject(Context context, Object value)
+	{
+		return value;
 	}
 
 	/**

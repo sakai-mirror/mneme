@@ -499,4 +499,28 @@
 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
 	</bean>
 
+	<bean id="AccessSubmissionsQuestionAnswers"
+			class="org.muse.mneme.impl.AccessSubmissionsQuestionAnswersDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>AccessSubmissionsQuestionAnswers</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
+	<bean id="FormatPercent"
+			class="org.muse.mneme.impl.FormatPercentDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>FormatPercent</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
 </beans>

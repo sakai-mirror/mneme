@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class FormatPartSummaryDelegate extends FormatDelegateImpl
 
 			args[0] = ((p.getDraws().size() == 1) ? "" : "s");
 			args[1] = p.getNumQuestions().toString();
-			
+
 			StringBuffer buf = new StringBuffer();
 			for (PoolDraw draw : p.getDraws())
 			{
@@ -84,13 +84,21 @@ public class FormatPartSummaryDelegate extends FormatDelegateImpl
 					buf.append(", ");
 				}
 			}
-			if (buf.length() > 0) buf.setLength(buf.length()-2);
+			if (buf.length() > 0) buf.setLength(buf.length() - 2);
 			args[2] = buf.toString();
 
 			return context.getMessages().getFormattedMessage("draw-part-summary", args);
 		}
 
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object formatObject(Context context, Object value)
+	{
+		return value;
 	}
 
 	/**

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,15 +46,6 @@ public class FormatListDecorationDelegate extends FormatDelegateImpl
 	}
 
 	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
-		super.init();
-		M_log.info("init()");
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public String format(Context context, Object value)
@@ -84,10 +75,10 @@ public class FormatListDecorationDelegate extends FormatDelegateImpl
 			case overdueReady:
 			{
 				return "<img src=\"" + context.get("sakai.return.url") + "/icons/exit.gif\" alt=\""
-				+ context.getMessages().getString("format-list-decoration-inprogress") + "\" />" + "<img src=\""
-				+ context.get("sakai.return.url") + "/icons/warning.png\" alt=\""
-				+ context.getMessages().getString("format-list-decoration-urgent") + "\" />" + "<br /><span style=\"font-size:smaller\">"
-				+ context.getMessages().getString("format-list-decoration-overdue-ready") + "</span>";
+						+ context.getMessages().getString("format-list-decoration-inprogress") + "\" />" + "<img src=\""
+						+ context.get("sakai.return.url") + "/icons/warning.png\" alt=\""
+						+ context.getMessages().getString("format-list-decoration-urgent") + "\" />" + "<br /><span style=\"font-size:smaller\">"
+						+ context.getMessages().getString("format-list-decoration-overdue-ready") + "</span>";
 			}
 
 			case inProgressAlert:
@@ -139,5 +130,22 @@ public class FormatListDecorationDelegate extends FormatDelegateImpl
 		}
 
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object formatObject(Context context, Object value)
+	{
+		return value;
+	}
+
+	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		super.init();
+		M_log.info("init()");
 	}
 }

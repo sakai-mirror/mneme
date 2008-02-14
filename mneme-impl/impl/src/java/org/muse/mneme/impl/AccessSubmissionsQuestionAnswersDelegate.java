@@ -19,8 +19,9 @@
  *
  **********************************************************************************/
 
-package org.muse.mneme.tool;
+package org.muse.mneme.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -32,12 +33,12 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
 
 /**
- * The "FormatPercentDelegate" format delegate for the mneme tool.
+ * The "AccessSubmissionsQuestionAnswers" format delegate for the mneme tool.
  */
-public class FormatPercentDelegate extends FormatDelegateImpl
+public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(FormatPercentDelegate.class);
+	private static Log M_log = LogFactory.getLog(AccessSubmissionsQuestionAnswersDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -52,61 +53,35 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 	 */
 	public String format(Context context, Object value)
 	{
+		return value.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object formatObject(Context context, Object value)
+	{
 		// value is the answer text
 		if (value == null) return null;
-		if (!(value instanceof String)) return value.toString();
-		String target = (String) value;
-
-		// "submissions" is the List<Submission> of submissions
-		Object o = context.get("submissions");
-		if (!(o instanceof List)) return value.toString();
-		List<Submission> submissions = (List<Submission>) o;
+		if (!(value instanceof List)) return value;
+		List<Submission> submissions = (List<Submission>) value;
 
 		// "question" is the Question
-		o = context.get("question");
-		if (!(o instanceof Question)) return value.toString();
+		Object o = context.get("question");
+		if (!(o instanceof Question)) return value;
 		Question question = (Question) o;
 
-		int count = 0;
-		int total = 0;
+		List<Answer> answers = new ArrayList<Answer>();
 		for (Submission s : submissions)
 		{
 			Answer a = s.getAnswer(question);
 			if (a != null)
 			{
-				total++;
-
-				// does the answer's value match our target answer?
-				// Note: assume that the answer is one of the getData() strings
-				String[] answers = a.getTypeSpecificAnswer().getData();
-				if ((answers != null) && (answers.length > 0))
-				{
-					for (int i = 0; i < answers.length; i++)
-					{
-						if (answers[i].equals(target))
-						{
-							count++;
-						}
-					}
-				}
+				answers.add(a);
 			}
 		}
 
-		if (total > 0)
-		{
-			// percent
-			int pct = (count * 100) / total;
-
-			Object[] args = new Object[2];
-			args[0] = Integer.valueOf(pct);
-			args[1] = Integer.valueOf(count);
-
-			String template = "format-percent";
-			return context.getMessages().getFormattedMessage(template, args);
-		}
-
-		String template = "format-percent-none";
-		return context.getMessages().getString(template);
+		return answers;
 	}
 
 	/**

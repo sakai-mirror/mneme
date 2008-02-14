@@ -28,6 +28,7 @@ import org.muse.ambrosia.api.HtmlEdit;
 import org.muse.ambrosia.api.Instructions;
 import org.muse.ambrosia.api.Navigation;
 import org.muse.ambrosia.api.Overlay;
+import org.muse.ambrosia.api.PropertyReference;
 import org.muse.ambrosia.api.Section;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.Text;
@@ -463,6 +464,80 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Component getViewStatsUi()
+	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.presentation.attachments")));
+
+		Section questionSection = this.uiService.newSection();
+		questionSection.add(question).add(attachments);
+
+		// submission type
+		Selection type = uiService.newSelection();
+		type.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.submissionType"));
+		type.addSelection(this.uiService.newMessage().setMessage("inline"), this.uiService.newMessage().setTemplate("inline"));
+		type.addSelection(this.uiService.newMessage().setMessage("inline-attachments"), this.uiService.newMessage().setTemplate("both"));
+		type.addSelection(this.uiService.newMessage().setMessage("attachments"), this.uiService.newMessage().setTemplate("attachments"));
+		type.setReadOnly(this.uiService.newTrueDecision());
+		type.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
+
+		Section typeSection = this.uiService.newSection();
+		typeSection.add(type);
+
+		// model answer
+		Text modelAnswerTitle = this.uiService.newText();
+		modelAnswerTitle.setText("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
+
+		Text modelAnswer = this.uiService.newText();
+		modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
+
+		// overlay for the model answer
+		Overlay modelAnswerOverlay = this.uiService.newOverlay();
+		modelAnswerOverlay.setId("modelanswer");
+		modelAnswerOverlay.add(modelAnswerTitle).add(modelAnswer).add(this.uiService.newGap());
+		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("close").setIcon("/icons/close.png",
+				Navigation.IconStyle.left));
+
+		// control to show the model answer
+		Toggle showModelAnswer = this.uiService.newToggle();
+		showModelAnswer.setTarget("modelanswer");
+		showModelAnswer.setTitle("view-model-answer");
+		showModelAnswer.setIcon("/icons/model_answer.png", Navigation.IconStyle.left);
+
+		Section showModelAnswerSection = this.uiService.newSection();
+		showModelAnswerSection.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer")));
+		showModelAnswerSection.add(modelAnswerOverlay).add(showModelAnswer);
+
+		Text answer = this.uiService.newText();
+		answer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
+
+		Attachments uploaded = this.uiService.newAttachments();
+		uploaded.setTitle("uploaded-title");
+		uploaded.setAttachments(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded"), "attachment");
+		uploaded.setSize(false).setTimestamp(false);
+		uploaded.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.attachments.toString(),
+				SubmissionType.both.toString()).setProperty(
+				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
+
+		Section section = this.uiService.newSection();
+		PropertyReference iteratorRef = this.uiService.newPropertyReference().setReference("submissions").setFormatDelegate(
+				this.uiService.getFormatDelegate("AccessSubmissionsQuestionAnswers", "sakai.mneme"));
+		section.setIterator(iteratorRef, "answer", this.uiService.newMessage().setMessage("no-answers"));
+		section.add(answer).add(uploaded);
+		section.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
+
+		return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(typeSection).add(showModelAnswerSection).add(section);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setData(String[] data)
 	{
 		if ((data != null) && (data.length == 2))
@@ -512,14 +587,5 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	public void setUi(UiService service)
 	{
 		this.uiService = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Component getViewStatsUi()
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

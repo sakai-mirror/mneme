@@ -31,7 +31,7 @@
 			init-method="init"
 			destroy-method="destroy"
 			singleton="true"
-			depends-on="FormatQuestionTitle, FormatPercent">
+			depends-on="FormatQuestionTitle">
 
 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService" /></property>
 		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService" /></property>
@@ -44,18 +44,6 @@
 		<property name="shared"><value>mneme</value></property>
 		<property name="components"><value>assessmentStats.xml</value></property>
  		<property name="docsPath"><value>/private/mneme/{CONTEXT}/docs/</value></property>
-	</bean>
-
-	<bean id="FormatPercent"
-			class="org.muse.mneme.tool.FormatPercentDelegate"
-			init-method="init"
-			destroy-method="destroy"
-			singleton="true">
-
- 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
-
- 		<property name="id"><value>FormatPercent</value></property>
- 		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 
 </beans>
