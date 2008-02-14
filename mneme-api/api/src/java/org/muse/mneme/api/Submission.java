@@ -43,11 +43,11 @@ public interface Submission
 	void consolidateTotalScore();
 
 	/**
-	 * Find (or create) the answer for this question.
+	 * Find the answer for this question.
 	 * 
 	 * @param question
 	 *        The assessment question for which this will be an answer.
-	 * @return The answer for this question.
+	 * @return The answer for this question, or null if there is none.
 	 */
 	Answer getAnswer(Question question);
 

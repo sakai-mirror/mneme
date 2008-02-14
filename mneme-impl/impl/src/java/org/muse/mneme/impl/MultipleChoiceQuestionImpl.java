@@ -930,6 +930,14 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewStatsUi()
 	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.presentation.attachments")));
+
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesAsAuthored"), "choice");
@@ -966,7 +974,20 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 				this.uiService.getFormatDelegate("FormatPercent", "sakai.mneme")));
 		entityList.addColumn(propCol);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+		Text answerKey = this.uiService.newText();
+		PropertyReference[] refs = new PropertyReference[2];
+		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
+		refs[1] = this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
+		answerKey.setText("answer-key", refs);
+
+		Section first = this.uiService.newSection();
+		first.add(question).add(attachments).add(entityList);
+
+		Section second = this.uiService.newSection();
+		second.setIncluded(this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("question.hasCorrect")));
+		second.add(answerKey);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second);
 	}
 
 	/**

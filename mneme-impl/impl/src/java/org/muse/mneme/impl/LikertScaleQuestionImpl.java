@@ -529,6 +529,14 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewStatsUi()
 	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.presentation.attachments")));
+
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
 		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice");
@@ -550,7 +558,10 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 				this.uiService.getFormatDelegate("FormatPercent", "sakai.mneme")));
 		entityList.addColumn(propCol);
 
-		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+		Section section = this.uiService.newSection();
+		section.add(question).add(attachments).add(entityList);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(section);
 	}
 
 	/**

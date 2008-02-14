@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
 import org.muse.mneme.api.Answer;
+import org.muse.mneme.api.DrawPart;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
 
@@ -110,6 +111,11 @@ public class FormatQuestionTitleDelegate extends FormatDelegateImpl
 				template += "1";
 			}
 			args[3] = Integer.valueOf(total);
+
+			if (question.getPart() instanceof DrawPart)
+			{
+				template += "-draw";
+			}
 		}
 
 		return context.getMessages().getFormattedMessage(template, args);
