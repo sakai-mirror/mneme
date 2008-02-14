@@ -523,4 +523,16 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 
+	<bean id="FormatUnansweredPercent"
+			class="org.muse.mneme.impl.FormatUnansweredPercentDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>FormatUnansweredPercent</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
 </beans>

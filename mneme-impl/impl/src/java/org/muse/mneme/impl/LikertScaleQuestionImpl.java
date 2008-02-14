@@ -558,8 +558,13 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 				this.uiService.getFormatDelegate("FormatPercent", "sakai.mneme")));
 		entityList.addColumn(propCol);
 
+		Text unanswered = this.uiService.newText().setText(
+				null,
+				this.uiService.newHtmlPropertyReference().setFormatDelegate(
+						this.uiService.getFormatDelegate("FormatUnansweredPercent", "sakai.mneme")));
+
 		Section section = this.uiService.newSection();
-		section.add(question).add(attachments).add(entityList);
+		section.add(question).add(attachments).add(entityList).add(unanswered);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(section);
 	}

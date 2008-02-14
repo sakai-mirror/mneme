@@ -34,10 +34,10 @@ import org.muse.mneme.api.Submission;
 /**
  * The "FormatPercentDelegate" format delegate for the mneme tool.
  */
-public class FormatPercentDelegate extends FormatDelegateImpl
+public class FormatUnansweredPercentDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(FormatPercentDelegate.class);
+	private static Log M_log = LogFactory.getLog(FormatUnansweredPercentDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -52,19 +52,16 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 	 */
 	public String format(Context context, Object value)
 	{
-		// value is the answer text
-		if (value == null) return null;
-		if (!(value instanceof String)) return value.toString();
-		String target = (String) value;
+		// ignore value
 
 		// "submissions" is the List<Submission> of submissions
 		Object o = context.get("submissions");
-		if (!(o instanceof List)) return value.toString();
+		if (!(o instanceof List)) return null;
 		List<Submission> submissions = (List<Submission>) o;
 
 		// "question" is the Question
 		o = context.get("question");
-		if (!(o instanceof Question)) return value.toString();
+		if (!(o instanceof Question)) return null;
 		Question question = (Question) o;
 
 		int count = 0;
@@ -76,27 +73,20 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 			{
 				total++;
 
-				if (a.getIsAnswered())
+				if (!a.getIsAnswered())
 				{
-					// does the answer's value match our target answer?
-					// Note: assume that the answer is one of the getData() strings
-					String[] answers = a.getTypeSpecificAnswer().getData();
-					if ((answers != null) && (answers.length > 0))
-					{
-						for (int i = 0; i < answers.length; i++)
-						{
-							if (answers[i].equals(target))
-							{
-								count++;
-							}
-						}
-					}
+					count++;
 				}
 			}
 		}
 
 		if (total > 0)
 		{
+			if (count == 0)
+			{
+				return context.getMessages().getString("format-unanswered-percent-none");				
+			}
+
 			// percent
 			int pct = (count * 100) / total;
 
@@ -104,12 +94,11 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 			args[0] = Integer.valueOf(pct);
 			args[1] = Integer.valueOf(count);
 
-			String template = "format-percent";
+			String template = "format-unanswered-percent";
 			return context.getMessages().getFormattedMessage(template, args);
 		}
 
-		String template = "format-percent-none";
-		return context.getMessages().getString(template);
+		return context.getMessages().getString("format-percent-none");
 	}
 
 	/**

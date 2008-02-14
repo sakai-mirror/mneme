@@ -551,7 +551,12 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		section.add(fillIn);
 		section.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 
-		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second).add(section);
+		Text unanswered = this.uiService.newText().setText(
+				null,
+				this.uiService.newHtmlPropertyReference().setFormatDelegate(
+						this.uiService.getFormatDelegate("FormatUnansweredPercent", "sakai.mneme")));
+
+		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second).add(section).add(unanswered);
 	}
 
 	/**

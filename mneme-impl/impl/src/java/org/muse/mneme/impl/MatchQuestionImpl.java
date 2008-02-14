@@ -1143,7 +1143,12 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		section.add(matchSection).add(answerKeySection);
 		section.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 
-		return this.uiService.newFragment().setMessages(this.messages).add(section);
+		Text unanswered = this.uiService.newText().setText(
+				null,
+				this.uiService.newHtmlPropertyReference().setFormatDelegate(
+						this.uiService.getFormatDelegate("FormatUnansweredPercent", "sakai.mneme")));
+
+		return this.uiService.newFragment().setMessages(this.messages).add(section).add(unanswered);
 	}
 
 	/**

@@ -980,8 +980,13 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		refs[1] = this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
 		answerKey.setText("answer-key", refs);
 
+		Text unanswered = this.uiService.newText().setText(
+				null,
+				this.uiService.newHtmlPropertyReference().setFormatDelegate(
+						this.uiService.getFormatDelegate("FormatUnansweredPercent", "sakai.mneme")));
+
 		Section first = this.uiService.newSection();
-		first.add(question).add(attachments).add(entityList);
+		first.add(question).add(attachments).add(entityList).add(unanswered);
 
 		Section second = this.uiService.newSection();
 		second.setIncluded(this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("question.hasCorrect")));
