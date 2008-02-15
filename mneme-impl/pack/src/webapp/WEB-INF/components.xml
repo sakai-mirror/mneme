@@ -571,4 +571,16 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 
+	<bean id="FormatFillinPositionCorrect"
+			class="org.muse.mneme.impl.FormatFillinPositionCorrectDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>FormatFillinPositionCorrect</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
 </beans>

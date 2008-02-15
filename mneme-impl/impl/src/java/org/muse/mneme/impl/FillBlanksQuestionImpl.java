@@ -154,6 +154,10 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 		if (answerKey.length() > 0) answerKey.setLength(answerKey.length() - 2);
 
+		if (this.anyOrder) answerKey.append(this.messages.getString("any-order-key"));
+		if (this.caseSensitive) answerKey.append(this.messages.getString("case-sensitive-key"));
+		if (!this.responseTextual) answerKey.append(this.messages.getString("numeric-key"));
+
 		return answerKey.toString();
 	}
 
@@ -536,25 +540,8 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		second.setIncluded(this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("question.hasCorrect")));
 		second.add(answerKey);
 
-		fillIn = this.uiService.newFillIn();
-		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.questionText"));
-		fillIn.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
-		fillIn.setWidth(20);
-		fillIn.setCorrectDecision(this.uiService.newTrueDecision());
-		fillIn.setReadOnly(this.uiService.newTrueDecision());
-		fillIn.setCorrect(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.entryCorrects"));
-		fillIn.setCorrectDecision(this.uiService.newDecision().setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.hasCorrect")));
-
-		Section section = this.uiService.newSection();
-		PropertyReference iteratorRef = this.uiService.newPropertyReference().setReference("submissions").setFormatDelegate(
-				this.uiService.getFormatDelegate("AccessSubmissionsQuestionAnswers", "sakai.mneme"));
-		section.setIterator(iteratorRef, "answer", this.uiService.newMessage().setMessage("no-answers"));
-		section.add(fillIn);
-		section.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
-
 		Section positions = this.uiService.newSection();
-		iteratorRef = this.uiService.newPropertyReference().setReference("question").setFormatDelegate(
+		PropertyReference iteratorRef = this.uiService.newPropertyReference().setReference("question").setFormatDelegate(
 				this.uiService.getFormatDelegate("AccessFillinPositions", "sakai.mneme"));
 		positions.setIterator(iteratorRef, "position", null);
 		positions.setTitle("position", this.uiService.newPropertyReference().setReference("position"));
@@ -566,6 +553,11 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		entityList.setEmptyTitle("no-answer");
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newPropertyReference().setReference("answer").setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatFillinPositionCorrect", "sakai.mneme")));
+		entityList.addColumn(propCol);
+
+		propCol = this.uiService.newPropertyColumn();
 		propCol.setProperty(this.uiService.newPropertyReference().setReference("answer"));
 		entityList.addColumn(propCol);
 
@@ -581,7 +573,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 				this.uiService.newHtmlPropertyReference().setFormatDelegate(
 						this.uiService.getFormatDelegate("FormatUnansweredPercent", "sakai.mneme")));
 
-		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second).add(section).add(positions).add(unanswered);
+		return this.uiService.newFragment().setMessages(this.messages).add(first).add(second).add(positions).add(unanswered);
 	}
 
 	/**

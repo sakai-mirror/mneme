@@ -81,6 +81,11 @@ public class AccessFillinPositionValuesDelegate extends FormatDelegateImpl
 		Integer position = (Integer) o;
 		int pos = position - 1;
 
+		TypeSpecificQuestion tsq = question.getTypeSpecificQuestion();
+		if (!(tsq instanceof FillBlanksQuestionImpl)) return null;
+		FillBlanksQuestionImpl plugin = (FillBlanksQuestionImpl) tsq;
+		boolean caseSensitive = Boolean.valueOf(plugin.getCaseSensitive());
+
 		List<String> rv = new ArrayList<String>();
 		for (Submission s : submissions)
 		{
@@ -93,7 +98,11 @@ public class AccessFillinPositionValuesDelegate extends FormatDelegateImpl
 					if ((answers != null) && (answers.length > pos))
 					{
 						String answer = answers[pos];
-						if (!rv.contains(answer)) rv.add(answer);
+						if (answer != null)
+						{
+							if (!caseSensitive) answer = answer.toLowerCase();
+							if (!rv.contains(answer)) rv.add(answer);
+						}
 					}
 				}
 			}

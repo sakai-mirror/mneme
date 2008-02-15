@@ -21,24 +21,23 @@
 
 package org.muse.mneme.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
-import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.TypeSpecificQuestion;
 
 /**
- * The "FormatFillinPositionPercents" format delegate for the mneme tool.
+ * The "FormatFillinPositionCorrect" format delegate for the mneme tool.
  */
-public class FormatFillinPositionPercentsDelegate extends FormatDelegateImpl
+public class FormatFillinPositionCorrectDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(FormatFillinPositionPercentsDelegate.class);
+	private static Log M_log = LogFactory.getLog(FormatFillinPositionCorrectDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -65,13 +64,10 @@ public class FormatFillinPositionPercentsDelegate extends FormatDelegateImpl
 
 		TypeSpecificQuestion tsq = question.getTypeSpecificQuestion();
 		if (!(tsq instanceof FillBlanksQuestionImpl)) return null;
-		FillBlanksQuestionImpl plugin = (FillBlanksQuestionImpl) tsq;
-		boolean caseSensitive = Boolean.valueOf(plugin.getCaseSensitive());
 
-		// "submissions" is the Submissions list
-		o = context.get("submissions");
-		if (!(o instanceof List)) return null;
-		List<Submission> submissions = (List<Submission>) o;
+		FillBlanksQuestionImpl plugin = (FillBlanksQuestionImpl) tsq;
+
+		List<String> corrects = plugin.getCorrectAnswers();
 
 		// "position" is the 1 based fill-in position
 		o = context.get("position");
@@ -79,56 +75,55 @@ public class FormatFillinPositionPercentsDelegate extends FormatDelegateImpl
 		Integer position = (Integer) o;
 		int pos = position - 1;
 
-		int count = 0;
-		int total = 0;
-		for (Submission s : submissions)
-		{
-			Answer a = s.getAnswer(question);
-			if (a != null)
-			{
-				total++;
+		boolean anyOrder = Boolean.valueOf(plugin.getAnyOrder());
+		boolean caseSensitive = Boolean.valueOf(plugin.getCaseSensitive());
+		boolean textual = Boolean.valueOf(plugin.getResponseTextual());
 
-				if (a.getIsAnswered())
+		Boolean correct = null;
+		if (question.getHasCorrect() && (corrects != null))
+		{
+			if (!anyOrder)
+			{
+				if (corrects.size() > pos)
 				{
-					// does the answer's value match our target answer?
-					// Note: assume that the answer for this position is the nth data element
-					String[] answers = a.getTypeSpecificAnswer().getData();
-					if ((answers != null) && (answers.length > pos) && (answers[pos] != null))
+					// for any order, target can match any corrects position
+					correct = FillBlanksAnswerImpl.answerCorrect(target, corrects.get(pos), caseSensitive, false, textual, new ArrayList<String>(),
+							new ArrayList<String>());
+				}
+			}
+			else
+			{
+				correct = Boolean.FALSE;
+				for (String aCorrect : corrects)
+				{
+					boolean thisCorrect = FillBlanksAnswerImpl.answerCorrect(target, aCorrect, caseSensitive, false, textual,
+							new ArrayList<String>(), new ArrayList<String>());
+					if (thisCorrect)
 					{
-						if (caseSensitive)
-						{
-							if (answers[pos].equals(target))
-							{
-								count++;
-							}
-						}
-						else
-						{
-							if (answers[pos].equalsIgnoreCase(target))
-							{
-								count++;
-							}
-						}
+						correct = Boolean.TRUE;
+						break;
 					}
 				}
 			}
 		}
 
-		if (total > 0)
+		if (correct != null)
 		{
-			// percent
-			int pct = (count * 100) / total;
-
-			Object[] args = new Object[2];
-			args[0] = Integer.valueOf(pct);
-			args[1] = Integer.valueOf(count);
-
-			String template = "format-percent";
-			return context.getMessages().getFormattedMessage(template, args);
+			if (correct)
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.png\" alt=\"" + context.getMessages().getString("correct")
+						+ "\" title=\"" + context.getMessages().getString("correct") + "\"/>";
+			}
+			else
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/incorrect.png\" alt=\""
+						+ context.getMessages().getString("incorrect") + "\" title=\"" + context.getMessages().getString("incorrect") + "\"/>";
+			}
 		}
-
-		String template = "format-percent-none";
-		return context.getMessages().getString(template);
+		else
+		{
+			return "<div style=\"float:left;width:16px\">&nbsp;</div>";
+		}
 	}
 
 	/**
