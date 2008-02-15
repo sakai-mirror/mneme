@@ -268,6 +268,25 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getGradebookIntegration()
+	{
+		// if not set for gb
+		if (!this.grading.getGradebookIntegration()) return Boolean.FALSE;
+
+		// set for gb, but...
+
+		// not if we don't support points
+		if (!getHasPoints()) return Boolean.FALSE;
+
+		// or don't have points
+		if (!(getParts().getTotalPoints().floatValue() > 0f)) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public AssessmentGrading getGrading()
 	{
 		return this.grading;

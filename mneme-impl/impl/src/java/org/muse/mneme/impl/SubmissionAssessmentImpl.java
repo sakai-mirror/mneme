@@ -154,6 +154,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getGradebookIntegration()
+	{
+		return this.getAssessment().getGradebookIntegration();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public AssessmentGrading getGrading()
 	{
 		return getAssessment().getGrading();

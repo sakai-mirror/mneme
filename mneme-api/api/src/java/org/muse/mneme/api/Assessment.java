@@ -74,6 +74,13 @@ public interface Assessment
 	AssessmentDates getDates();
 
 	/**
+	 * Check if grades are to be sent to the Gradebook application, considering type, points, hasPoints, and the grades setting.
+	 * 
+	 * @return TRUE if the assessment's grades are to be placed into the Gradebook, FALSE if not.
+	 */
+	Boolean getGradebookIntegration();
+
+	/**
 	 * Access the assessment grading settings.
 	 * 
 	 * @return The assessment grading settings.
