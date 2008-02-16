@@ -21,24 +21,23 @@
 
 package org.muse.mneme.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
-import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.TypeSpecificQuestion;
+import org.muse.mneme.impl.MatchQuestionImpl.MatchQuestionPair;
 
 /**
- * The "AccessSubmissionsQuestionAnswers" format delegate for the mneme tool.
+ * The "FormatMatchChoice" format delegate for the mneme tool.
  */
-public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
+public class FormatMatchChoiceDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(AccessSubmissionsQuestionAnswersDelegate.class);
+	private static Log M_log = LogFactory.getLog(FormatMatchChoiceDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -53,7 +52,37 @@ public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
 	 */
 	public String format(Context context, Object value)
 	{
-		return value.toString();
+		// value is the choice id
+		if (value == null) return null;
+		if (!(value instanceof String)) return value.toString();
+		String choiceId = (String) value;
+
+		// "question" is the Question
+		Object o = context.get("question");
+		if (o == null) return value.toString();
+		if (!(o instanceof Question)) return value.toString();
+		Question question = (Question) o;
+
+		TypeSpecificQuestion tsq = question.getTypeSpecificQuestion();
+		if (!(tsq instanceof MatchQuestionImpl)) return value.toString();
+
+		MatchQuestionImpl plugin = (MatchQuestionImpl) tsq;
+		List<MatchQuestionPair> pairs = plugin.getPairs();
+
+		if ((plugin.distractor != null) && (plugin.distractor.getChoiceId().equals(choiceId)))
+		{
+			return FormatMatchMatchDelegate.stripP(plugin.distractor.getChoice());
+		}
+
+		for (MatchQuestionPair pair : pairs)
+		{
+			if (pair.getChoiceId().equals(choiceId))
+			{
+				return FormatMatchMatchDelegate.stripP(pair.getChoice());
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -61,28 +90,7 @@ public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
 	 */
 	public Object formatObject(Context context, Object value)
 	{
-		// value is the submissions list
-		if (value == null) return null;
-		if (!(value instanceof List)) return value;
-		List<Submission> submissions = (List<Submission>) value;
-
-		// "question" is the Question
-		Object o = context.get("question");
-		if (o == null) return value;
-		if (!(o instanceof Question)) return value;
-		Question question = (Question) o;
-
-		List<Answer> answers = new ArrayList<Answer>();
-		for (Submission s : submissions)
-		{
-			Answer a = s.getAnswer(question);
-			if (a != null)
-			{
-				answers.add(a);
-			}
-		}
-
-		return answers;
+		return value;
 	}
 
 	/**

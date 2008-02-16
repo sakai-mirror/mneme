@@ -583,4 +583,76 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 
+	<bean id="AccessMatchMatches"
+			class="org.muse.mneme.impl.AccessMatchMatchesDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>AccessMatchMatches</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
+	<bean id="AccessMatchChoices"
+			class="org.muse.mneme.impl.AccessMatchChoicesDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>AccessMatchChoices</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
+	<bean id="FormatMatchMatch"
+			class="org.muse.mneme.impl.FormatMatchMatchDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>FormatMatchMatch</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
+	<bean id="FormatMatchChoice"
+			class="org.muse.mneme.impl.FormatMatchChoiceDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>FormatMatchChoice</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
+	<bean id="FormatMatchCorrect"
+			class="org.muse.mneme.impl.FormatMatchCorrectDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>FormatMatchCorrect</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
+	<bean id="FormatMatchPercents"
+			class="org.muse.mneme.impl.FormatMatchPercentsDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>FormatMatchPercents</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
 </beans>

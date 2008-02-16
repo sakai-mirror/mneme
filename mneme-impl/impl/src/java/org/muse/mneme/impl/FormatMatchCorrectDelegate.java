@@ -27,17 +27,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
-import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.TypeSpecificQuestion;
+import org.muse.mneme.impl.MatchQuestionImpl.MatchQuestionPair;
 
 /**
- * The "FormatPercentDelegate" format delegate for the mneme tool.
+ * The "FormatMatchCorrect" format delegate for the mneme tool.
  */
-public class FormatUnansweredPercentDelegate extends FormatDelegateImpl
+public class FormatMatchCorrectDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(FormatUnansweredPercentDelegate.class);
+	private static Log M_log = LogFactory.getLog(FormatMatchCorrectDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -54,53 +54,60 @@ public class FormatUnansweredPercentDelegate extends FormatDelegateImpl
 	{
 		// ignore value
 
-		// "submissions" is the List<Submission> of submissions
-		Object o = context.get("submissions");
-		if (o == null) return null;
-		if (!(o instanceof List)) return null;
-		List<Submission> submissions = (List<Submission>) o;
-
 		// "question" is the Question
-		o = context.get("question");
+		Object o = context.get("question");
 		if (o == null) return null;
 		if (!(o instanceof Question)) return null;
 		Question question = (Question) o;
 
-		int count = 0;
-		int total = 0;
-		for (Submission s : submissions)
-		{
-			Answer a = s.getAnswer(question);
-			if (a != null)
-			{
-				total++;
+		// "match" is the match id
+		o = context.get("match");
+		if (o == null) return null;
+		if (!(o instanceof String)) return null;
+		String matchId = (String) o;
 
-				if (!a.getIsAnswered())
+		// "choice" is the choice id
+		o = context.get("choice");
+		if (o == null) return null;
+		if (!(o instanceof String)) return null;
+		String choiceId = (String) o;
+
+		if (question.getHasCorrect())
+		{
+			TypeSpecificQuestion tsq = question.getTypeSpecificQuestion();
+			if (!(tsq instanceof MatchQuestionImpl)) return null;
+
+			MatchQuestionImpl plugin = (MatchQuestionImpl) tsq;
+			List<MatchQuestionPair> pairs = plugin.getPairs();
+
+			boolean correct = false;
+			for (MatchQuestionPair pair : pairs)
+			{
+				if (pair.getId().equals(matchId))
 				{
-					count++;
+					if (pair.getCorrectChoiceId().equals(choiceId))
+					{
+						correct = true;
+						break;
+					}
 				}
 			}
-		}
 
-		if (total > 0)
-		{
-			if (count == 0)
+			if (correct)
 			{
-				return context.getMessages().getString("format-unanswered-percent-none");
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/correct.png\" alt=\"" + context.getMessages().getString("correct")
+						+ "\" title=\"" + context.getMessages().getString("correct") + "\"/>";
 			}
-
-			// percent
-			int pct = (count * 100) / total;
-
-			Object[] args = new Object[2];
-			args[0] = Integer.valueOf(pct);
-			args[1] = Integer.valueOf(count);
-
-			String template = "format-unanswered-percent";
-			return context.getMessages().getFormattedMessage(template, args);
+			else
+			{
+				return "<img src=\"" + context.get("sakai.return.url") + "/icons/incorrect.png\" alt=\""
+						+ context.getMessages().getString("incorrect") + "\" title=\"" + context.getMessages().getString("incorrect") + "\"/>";
+			}
 		}
-
-		return context.getMessages().getString("format-percent-none");
+		else
+		{
+			return "<div style=\"float:left;width:16px\">&nbsp;</div>";
+		}
 	}
 
 	/**
@@ -108,7 +115,7 @@ public class FormatUnansweredPercentDelegate extends FormatDelegateImpl
 	 */
 	public Object formatObject(Context context, Object value)
 	{
-		return value;
+		return value.toString();
 	}
 
 	/**

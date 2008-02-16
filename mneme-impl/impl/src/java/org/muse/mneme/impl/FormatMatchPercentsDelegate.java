@@ -33,12 +33,12 @@ import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.TypeSpecificQuestion;
 
 /**
- * The "FormatFillinPositionPercents" format delegate for the mneme tool.
+ * The "FormatMatchPercents" format delegate for the mneme tool.
  */
-public class FormatFillinPositionPercentsDelegate extends FormatDelegateImpl
+public class FormatMatchPercentsDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(FormatFillinPositionPercentsDelegate.class);
+	private static Log M_log = LogFactory.getLog(FormatMatchPercentsDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -53,34 +53,35 @@ public class FormatFillinPositionPercentsDelegate extends FormatDelegateImpl
 	 */
 	public String format(Context context, Object value)
 	{
-		// value is the answer text
-		if (value == null) return null;
-		if (!(value instanceof String)) return value.toString();
-		String target = (String) value;
+		// ignore value
 
 		// "question" is the Question
 		Object o = context.get("question");
-		if (o == null) return value.toString();
-		if (!(o instanceof Question)) return value.toString();
+		if (o == null) return null;
+		if (!(o instanceof Question)) return null;
 		Question question = (Question) o;
 
 		TypeSpecificQuestion tsq = question.getTypeSpecificQuestion();
-		if (!(tsq instanceof FillBlanksQuestionImpl)) return value.toString();
-		FillBlanksQuestionImpl plugin = (FillBlanksQuestionImpl) tsq;
-		boolean caseSensitive = Boolean.valueOf(plugin.getCaseSensitive());
+		if (!(tsq instanceof MatchQuestionImpl)) return null;
+		MatchQuestionImpl plugin = (MatchQuestionImpl) tsq;
 
 		// "submissions" is the Submissions list
 		o = context.get("submissions");
-		if (o == null) return value.toString();
-		if (!(o instanceof List)) return value.toString();
+		if (o == null) return null;
+		if (!(o instanceof List)) return null;
 		List<Submission> submissions = (List<Submission>) o;
 
-		// "position" is the 1 based fill-in position
-		o = context.get("position");
-		if (o == null) return value.toString();
-		if (!(o instanceof Integer)) return value.toString();
-		Integer position = (Integer) o;
-		int pos = position - 1;
+		// "match" is the match id
+		o = context.get("match");
+		if (o == null) return null;
+		if (!(o instanceof String)) return null;
+		String matchId = (String) o;
+
+		// "choice" is the choice id
+		o = context.get("choice");
+		if (o == null) return null;
+		if (!(o instanceof String)) return null;
+		String choiceId = (String) o;
 
 		int count = 0;
 		int total = 0;
@@ -93,23 +94,21 @@ public class FormatFillinPositionPercentsDelegate extends FormatDelegateImpl
 
 				if (a.getIsAnswered())
 				{
-					// does the answer's value match our target answer?
-					// Note: assume that the answer for this position is the nth data element
+					// does this answer's entry for this match id = the choice id?
+					// Note: assume that the answer data is match id, choice id, etc...
 					String[] answers = a.getTypeSpecificAnswer().getData();
-					if ((answers != null) && (answers.length > pos) && (answers[pos] != null))
+					if (answers != null)
 					{
-						if (caseSensitive)
+						for (int i = 0; i < answers.length; i++)
 						{
-							if (answers[pos].equals(target))
+							String answerMatchId = answers[i++];
+							String answerChoiceId = answers[i];
+							if ((answerMatchId != null) && (answerMatchId.equals(matchId)))
 							{
-								count++;
-							}
-						}
-						else
-						{
-							if (answers[pos].equalsIgnoreCase(target))
-							{
-								count++;
+								if ((answerChoiceId != null) && (answerChoiceId.equals(choiceId)))
+								{
+									count++;
+								}
 							}
 						}
 					}

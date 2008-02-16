@@ -67,22 +67,25 @@ public class AccessFillinPositionValuesDelegate extends FormatDelegateImpl
 
 		// "question" is the Question
 		Object o = context.get("question");
-		if (!(o instanceof Question)) return null;
+		if (o == null) return value;
+		if (!(o instanceof Question)) return value;
 		Question question = (Question) o;
 
 		// "submissions" is the Submissions list
 		o = context.get("submissions");
-		if (!(o instanceof List)) return null;
+		if (o == null) return value;
+		if (!(o instanceof List)) return value;
 		List<Submission> submissions = (List<Submission>) o;
 
 		// "position" is the 1 based fill-in position
 		o = context.get("position");
-		if (!(o instanceof Integer)) return null;
+		if (o == null) return value;
+		if (!(o instanceof Integer)) return value;
 		Integer position = (Integer) o;
 		int pos = position - 1;
 
 		TypeSpecificQuestion tsq = question.getTypeSpecificQuestion();
-		if (!(tsq instanceof FillBlanksQuestionImpl)) return null;
+		if (!(tsq instanceof FillBlanksQuestionImpl)) return value;
 		FillBlanksQuestionImpl plugin = (FillBlanksQuestionImpl) tsq;
 		boolean caseSensitive = Boolean.valueOf(plugin.getCaseSensitive());
 

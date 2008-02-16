@@ -59,11 +59,12 @@ public class FormatFillinPositionCorrectDelegate extends FormatDelegateImpl
 
 		// "question" is the Question
 		Object o = context.get("question");
-		if (!(o instanceof Question)) return null;
+		if (o == null) return value.toString();
+		if (!(o instanceof Question)) return value.toString();
 		Question question = (Question) o;
 
 		TypeSpecificQuestion tsq = question.getTypeSpecificQuestion();
-		if (!(tsq instanceof FillBlanksQuestionImpl)) return null;
+		if (!(tsq instanceof FillBlanksQuestionImpl)) return value.toString();
 
 		FillBlanksQuestionImpl plugin = (FillBlanksQuestionImpl) tsq;
 
@@ -71,7 +72,7 @@ public class FormatFillinPositionCorrectDelegate extends FormatDelegateImpl
 
 		// "position" is the 1 based fill-in position
 		o = context.get("position");
-		if (!(o instanceof Integer)) return null;
+		if (!(o instanceof Integer)) return value.toString();
 		Integer position = (Integer) o;
 		int pos = position - 1;
 

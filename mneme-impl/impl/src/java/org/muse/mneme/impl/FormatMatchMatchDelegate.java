@@ -21,24 +21,23 @@
 
 package org.muse.mneme.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
-import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
-import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.TypeSpecificQuestion;
+import org.muse.mneme.impl.MatchQuestionImpl.MatchQuestionPair;
 
 /**
- * The "AccessSubmissionsQuestionAnswers" format delegate for the mneme tool.
+ * The "FormatMatchMatch" format delegate for the mneme tool.
  */
-public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
+public class FormatMatchMatchDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(AccessSubmissionsQuestionAnswersDelegate.class);
+	private static Log M_log = LogFactory.getLog(FormatMatchMatchDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -53,7 +52,50 @@ public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
 	 */
 	public String format(Context context, Object value)
 	{
-		return value.toString();
+		// value is the match id
+		if (value == null) return null;
+		if (!(value instanceof String)) return value.toString();
+		String matchId = (String) value;
+
+		// "question" is the Question
+		Object o = context.get("question");
+		if (o == null) return value.toString();
+		if (!(o instanceof Question)) return value.toString();
+		Question question = (Question) o;
+
+		TypeSpecificQuestion tsq = question.getTypeSpecificQuestion();
+		if (!(tsq instanceof MatchQuestionImpl)) return value.toString();
+
+		MatchQuestionImpl plugin = (MatchQuestionImpl) tsq;
+		List<MatchQuestionPair> pairs = plugin.getPairs();
+
+		for (MatchQuestionPair pair : pairs)
+		{
+			if (pair.getId().equals(matchId))
+			{
+				return stripP(pair.getMatch());
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * If source is surrounded by htnl paragraph marks, remove them.
+	 * 
+	 * @param source
+	 *        The source string.
+	 * @return The source string with surrounding html paragraph marks removed.
+	 */
+	public static String stripP(String source)
+	{
+		int start = 0;
+		if (source.startsWith("<p>")) start += 3;
+
+		int end = source.length();
+		if (source.endsWith("</p>")) end -= 4;
+
+		return source.substring(start, end);
 	}
 
 	/**
@@ -61,28 +103,7 @@ public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
 	 */
 	public Object formatObject(Context context, Object value)
 	{
-		// value is the submissions list
-		if (value == null) return null;
-		if (!(value instanceof List)) return value;
-		List<Submission> submissions = (List<Submission>) value;
-
-		// "question" is the Question
-		Object o = context.get("question");
-		if (o == null) return value;
-		if (!(o instanceof Question)) return value;
-		Question question = (Question) o;
-
-		List<Answer> answers = new ArrayList<Answer>();
-		for (Submission s : submissions)
-		{
-			Answer a = s.getAnswer(question);
-			if (a != null)
-			{
-				answers.add(a);
-			}
-		}
-
-		return answers;
+		return value;
 	}
 
 	/**

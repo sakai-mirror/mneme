@@ -62,11 +62,11 @@ public class AccessFillinPositionsDelegate extends FormatDelegateImpl
 	{
 		// value is the question
 		if (value == null) return null;
-		if (!(value instanceof Question)) return null;
+		if (!(value instanceof Question)) return value;
 		Question question = (Question) value;
 
 		TypeSpecificQuestion tsq = question.getTypeSpecificQuestion();
-		if (!(tsq instanceof FillBlanksQuestionImpl)) return null;
+		if (!(tsq instanceof FillBlanksQuestionImpl)) return value;
 
 		FillBlanksQuestionImpl plugin = (FillBlanksQuestionImpl) tsq;
 

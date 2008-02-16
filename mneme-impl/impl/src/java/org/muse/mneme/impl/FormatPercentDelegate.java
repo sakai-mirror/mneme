@@ -59,11 +59,13 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 
 		// "submissions" is the List<Submission> of submissions
 		Object o = context.get("submissions");
+		if (o == null) return value.toString();
 		if (!(o instanceof List)) return value.toString();
 		List<Submission> submissions = (List<Submission>) o;
 
 		// "question" is the Question
 		o = context.get("question");
+		if (o == null) return value.toString();
 		if (!(o instanceof Question)) return value.toString();
 		Question question = (Question) o;
 

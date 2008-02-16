@@ -44,7 +44,6 @@ import org.muse.ambrosia.api.Section;
 import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.UiService;
-import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
@@ -1056,99 +1055,52 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewStatsUi()
 	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.presentation.attachments")));
+
+		Section quesitonSection = this.uiService.newSection();
+		quesitonSection.add(question).add(attachments);
+
+		Section matches = this.uiService.newSection();
+		PropertyReference iteratorRef = this.uiService.newPropertyReference().setReference("question").setFormatDelegate(
+				this.uiService.getFormatDelegate("AccessMatchMatches", "sakai.mneme"));
+		matches.setIterator(iteratorRef, "match", null);
+		matches.setTitle("match-summary", this.uiService.newPropertyReference().setReference("match").setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatMatchMatch", "sakai.mneme")));
+
 		EntityList entityList = this.uiService.newEntityList();
 		entityList.setStyle(EntityList.Style.form);
-		entityList.setIterator(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.pairsForDelivery")
-				.setIndexReference("id"), "pair");
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("question").setFormatDelegate(
+				this.uiService.getFormatDelegate("AccessMatchChoices", "sakai.mneme")), "choice");
 
-		// match display
-		PropertyColumn matchLabel = this.uiService.newPropertyColumn();
-		matchLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.matchLabel"));
-		entityList.addColumn(matchLabel);
+		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newPropertyReference().setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatMatchCorrect", "sakai.mneme")));
+		entityList.addColumn(propCol);
 
-		PropertyColumn match = this.uiService.newPropertyColumn();
-		match.setTitle("match");
-		match.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.match"));
-		entityList.addColumn(match);
+		propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newPropertyReference().setReference("choice").setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatMatchChoice", "sakai.mneme")));
+		entityList.addColumn(propCol);
 
-		// correct / incorrect
-		Text correct = this.uiService.newText();
-		correct.setText(null, this.uiService.newIconPropertyReference().setIcon("!/ambrosia_library/icons/correct.png"));
-		correct.setIncluded(this.uiService.newCompareDecision().setEqualsProperty(
-				this.uiService.newPropertyReference().setReference("pair.correctChoiceId")).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
-						this.uiService.newPropertyReference().setReference("pair.id"))));
+		propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newPropertyReference().setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatMatchPercents", "sakai.mneme")));
+		entityList.addColumn(propCol);
 
-		Text incorrect = this.uiService.newText();
-		incorrect.setText(null, this.uiService.newIconPropertyReference().setIcon("!/ambrosia_library/icons/incorrect.png"));
-		incorrect.setIncluded(this.uiService.newCompareDecision().setEqualsProperty(
-				this.uiService.newPropertyReference().setReference("pair.correctChoiceId")).setReversed().setProperty(
-				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
-						this.uiService.newPropertyReference().setReference("pair.id"))));
-
-		EntityListColumn correctCol = this.uiService.newEntityListColumn();
-		correctCol.setWidth(16);
-		correctCol.setEntityIncluded(this.uiService.newHasValueDecision().setProperty(
-				this.uiService.newPropertyReference().setReference("pair.match")), null);
-		correctCol.add(correct).add(incorrect);
-		correctCol.setIncluded(this.uiService.newDecision().setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.hasCorrect")));
-		entityList.addColumn(correctCol);
-
-		// match
-		Selection selection = this.uiService.newSelection();
-		selection.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer.{0}.value").addProperty(
-				this.uiService.newPropertyReference().setReference("pair.id")));
-		selection.setSelectionModel(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.pairsForDelivery"),
-				"choice", this.uiService.newMessage().setMessage(null, this.uiService.newPropertyReference().setReference("choice.choiceId")),
-				this.uiService.newMessage().setMessage(null, this.uiService.newPropertyReference().setReference("choice.choiceLabel")));
-		selection.setOrientation(Selection.Orientation.dropdown);
-		selection.setReadOnly(this.uiService.newTrueDecision());
-		selection.addSelection(this.uiService.newMessage().setMessage("select"), null);
-
-		EntityListColumn matchCol = this.uiService.newEntityListColumn();
-		matchCol.add(selection);
-		matchCol.setEntityIncluded(
-				this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("pair.match")), null);
-		entityList.addColumn(matchCol);
-
-		// choice display
-		PropertyColumn choiceLabel = this.uiService.newPropertyColumn();
-		choiceLabel.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choiceLabel"));
-		entityList.addColumn(choiceLabel);
-
-		PropertyColumn choice = this.uiService.newPropertyColumn();
-		choice.setTitle("choice");
-		choice.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
-		entityList.addColumn(choice);
-
-		Section matchSection = this.uiService.newSection();
-		matchSection.add(entityList);
-
-		Text answerKey = this.uiService.newText();
-		PropertyReference[] refs = new PropertyReference[2];
-		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
-		refs[1] = this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.answerKey");
-		answerKey.setText("answer-key", refs);
-
-		Section answerKeySection = this.uiService.newSection();
-		answerKeySection.setIncluded(this.uiService.newDecision().setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.hasCorrect")));
-		answerKeySection.add(answerKey);
-
-		Section section = this.uiService.newSection();
-		PropertyReference iteratorRef = this.uiService.newPropertyReference().setReference("submissions").setFormatDelegate(
-				this.uiService.getFormatDelegate("AccessSubmissionsQuestionAnswers", "sakai.mneme"));
-		section.setIterator(iteratorRef, "answer", this.uiService.newMessage().setMessage("no-answers"));
-		section.add(matchSection).add(answerKeySection);
-		section.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
+		matches.add(entityList);
 
 		Text unanswered = this.uiService.newText().setText(
 				null,
 				this.uiService.newHtmlPropertyReference().setFormatDelegate(
 						this.uiService.getFormatDelegate("FormatUnansweredPercent", "sakai.mneme")));
 
-		return this.uiService.newFragment().setMessages(this.messages).add(section).add(unanswered);
+		return this.uiService.newFragment().setMessages(this.messages).add(quesitonSection).add(matches).add(unanswered);
 	}
 
 	/**
