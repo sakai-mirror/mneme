@@ -345,56 +345,25 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 	}
 
 	/**
-	 * Count the number of question picks from this pool.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @return The number of question picks from this pool.
-	 */
-	protected int countPoolPicks(Pool pool)
-	{
-		int count = 0;
-		for (PoolPick pick : this.questions)
-		{
-			String poolId = null;
-			Question question = this.questionService.getQuestion(pick.getQuestionId());
-			if (question != null)
-			{
-				poolId = question.getPool().getId();
-			}
-
-			if ((poolId != null) && (poolId.equals(pool.getId())))
-			{
-				count++;
-			}
-		}
-
-		return count;
-	}
-
-	/**
 	 * Get the question ids that are manually selected from this pool.
 	 * 
 	 * @param pool
 	 *        The pool.
+	 * @param survey
+	 *        if null, consider all questions; else consider only questions that match survey in their survey setting.
 	 * @return The question ids that are manually selected from this pool.
 	 */
-	protected List<String> getPoolPicks(Pool pool)
+	protected List<String> getPoolPicks(Pool pool, Boolean survey)
 	{
 		List<String> rv = new ArrayList<String>();
 		for (PoolPick pick : this.questions)
 		{
-			String poolId = null;
 			Question question = this.questionService.getQuestion(pick.getQuestionId());
-			if (question != null)
-			{
-				poolId = question.getPool().getId();
-			}
+			if (question == null) continue;
+			if ((survey != null) && (!question.getIsSurvey().equals(survey))) continue;
+			if (!question.getPool().getId().equals(pool.getId())) continue;
 
-			if ((poolId != null) && (poolId.equals(pool.getId())))
-			{
-				rv.add(pick.getQuestionId());
-			}
+			rv.add(pick.getQuestionId());
 		}
 
 		return rv;

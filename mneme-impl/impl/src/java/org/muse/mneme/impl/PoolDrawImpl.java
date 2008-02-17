@@ -124,11 +124,6 @@ public class PoolDrawImpl implements PoolDraw
 		Pool pool = getPool();
 		if (pool == null) return new ArrayList<String>();
 
-		// we need to overdraw by the number of manual questions this assessment uses from the pool
-		List<String> manualQuestionIds = ((AssessmentPartsImpl) this.assessment.getParts()).getPoolPicks(pool);
-
-		int size = this.numQuestions + manualQuestionIds.size();
-
 		// for a uniform pool, draw from any survey or not; otherwise match the draw to the assessment type
 		Pool.PoolCounts counts = pool.getNumQuestionsSurvey();
 		Boolean survey = null;
@@ -136,6 +131,11 @@ public class PoolDrawImpl implements PoolDraw
 		{
 			survey = Boolean.valueOf(this.assessment.getType() == AssessmentType.survey);
 		}
+
+		// we need to overdraw by the number of manual questions this assessment uses from the pool
+		List<String> manualQuestionIds = ((AssessmentPartsImpl) this.assessment.getParts()).getPoolPicks(pool, survey);
+
+		int size = this.numQuestions + manualQuestionIds.size();
 
 		List<String> rv = pool.drawQuestionIds(shuffler, size, survey);
 
@@ -205,31 +205,37 @@ public class PoolDrawImpl implements PoolDraw
 		Pool pool = getPool();
 		if (pool != null)
 		{
-			// if pool is mixed survey, count only survey for survey, non-survey for non-survey
-			Pool.PoolCounts sizes = pool.getNumQuestionsSurvey();
+			// for a uniform pool, draw from any survey or not; otherwise match the draw to the assessment type
+			Pool.PoolCounts counts = pool.getNumQuestionsSurvey();
+			Boolean survey = null;
+			if ((counts.assessment != 0) && (counts.survey != 0))
+			{
+				survey = Boolean.valueOf(this.assessment.getType() == AssessmentType.survey);
+			}
+
 			int size = 0;
 
 			// if uniform, count them all
-			if ((sizes.assessment == 0) || (sizes.survey == 0))
+			if (survey == null)
 			{
-				size = sizes.assessment + sizes.survey;
+				size = counts.assessment + counts.survey;
 			}
 
 			// if not uniform, use the count that matches the assessment
 			else
 			{
-				if (this.assessment.getType() == AssessmentType.survey)
+				if (survey)
 				{
-					size = sizes.survey;
+					size = counts.survey;
 				}
 				else
 				{
-					size = sizes.assessment;
+					size = counts.assessment;
 				}
 			}
 
 			// int size = pool.getNumQuestions();
-			size -= ((AssessmentPartsImpl) this.assessment.getParts()).countPoolPicks(pool);
+			size -= ((AssessmentPartsImpl) this.assessment.getParts()).getPoolPicks(pool, survey).size();
 
 			return Integer.valueOf(size);
 		}

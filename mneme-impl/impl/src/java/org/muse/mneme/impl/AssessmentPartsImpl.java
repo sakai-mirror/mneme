@@ -494,29 +494,6 @@ public class AssessmentPartsImpl implements AssessmentParts
 	}
 
 	/**
-	 * Count the number of question picks from this pool, from all parts.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 * @return The number of question picks from this pool, from all parts.
-	 */
-	protected int countPoolPicks(Pool pool)
-	{
-		int count = 0;
-
-		// only for manual parts
-		for (Part part : this.parts)
-		{
-			if (part instanceof ManualPartImpl)
-			{
-				count += ((ManualPartImpl) part).countPoolPicks(pool);
-			}
-		}
-
-		return count;
-	}
-
-	/**
 	 * Access the deleted parts.
 	 * 
 	 * @return The List of deleted parts.
@@ -531,9 +508,11 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 * 
 	 * @param pool
 	 *        The pool.
+	 * @param survey
+	 *        if null, consider all questions; else consider only questions that match survey in their survey setting.
 	 * @return The question ids that are manually selected from this pool, from all parts.
 	 */
-	protected List<String> getPoolPicks(Pool pool)
+	protected List<String> getPoolPicks(Pool pool, Boolean survey)
 	{
 		List<String> rv = new ArrayList<String>();
 
@@ -542,7 +521,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 		{
 			if (part instanceof ManualPartImpl)
 			{
-				rv.addAll(((ManualPartImpl) part).getPoolPicks(pool));
+				rv.addAll(((ManualPartImpl) part).getPoolPicks(pool, survey));
 			}
 		}
 
