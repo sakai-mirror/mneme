@@ -102,7 +102,10 @@
 		</countdownTimer>
 
 		<!-- final review instructions -->
-		<alert selector="final-instructions">
+		<alert>
+			<message selector="final-instructions">
+				<model type="enum" messageRoot="assessment-type-" ref="submission.assessment.type" />
+			</message>
 			<included>
 				<decision model="finalReview" />
 			</included>
