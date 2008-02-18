@@ -73,29 +73,11 @@ public class FormatMatchMatchDelegate extends FormatDelegateImpl
 		{
 			if (pair.getId().equals(matchId))
 			{
-				return stripP(pair.getMatch());
+				return pair.getMatch();
 			}
 		}
 
 		return null;
-	}
-
-	/**
-	 * If source is surrounded by htnl paragraph marks, remove them.
-	 * 
-	 * @param source
-	 *        The source string.
-	 * @return The source string with surrounding html paragraph marks removed.
-	 */
-	public static String stripP(String source)
-	{
-		int start = 0;
-		if (source.startsWith("<p>")) start += 3;
-
-		int end = source.length();
-		if (source.endsWith("</p>")) end -= 4;
-
-		return source.substring(start, end);
 	}
 
 	/**

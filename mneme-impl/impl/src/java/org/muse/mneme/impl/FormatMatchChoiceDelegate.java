@@ -71,14 +71,14 @@ public class FormatMatchChoiceDelegate extends FormatDelegateImpl
 
 		if ((plugin.distractor != null) && (plugin.distractor.getChoiceId().equals(choiceId)))
 		{
-			return FormatMatchMatchDelegate.stripP(plugin.distractor.getChoice());
+			return plugin.distractor.getChoice();
 		}
 
 		for (MatchQuestionPair pair : pairs)
 		{
 			if (pair.getChoiceId().equals(choiceId))
 			{
-				return FormatMatchMatchDelegate.stripP(pair.getChoice());
+				return pair.getChoice();
 			}
 		}
 

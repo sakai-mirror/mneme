@@ -632,7 +632,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(autoCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setStripP().setReference("choice.text"));
 		entityList.addColumn(propCol);
 
 		Section section = this.uiService.newSection();
@@ -741,7 +741,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(autoCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setStripP().setReference("choice.text"));
 		entityList.addColumn(propCol);
 
 		Text answerKey = this.uiService.newText();
@@ -860,7 +860,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(autoCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setStripP().setReference("choice.text"));
 		entityList.addColumn(propCol);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
@@ -905,7 +905,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(autoCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setStripP().setReference("choice.text"));
 		entityList.addColumn(propCol);
 
 		Text answerKey = this.uiService.newText();
@@ -965,7 +965,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(autoCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
-		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setStripP().setReference("choice.text"));
 		entityList.addColumn(propCol);
 
 		propCol = this.uiService.newPropertyColumn();
