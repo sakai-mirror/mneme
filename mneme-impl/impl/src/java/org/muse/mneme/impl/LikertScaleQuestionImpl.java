@@ -554,8 +554,15 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(propCol);
 
 		propCol = this.uiService.newPropertyColumn();
+		propCol.setRight();
 		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.id").setFormatDelegate(
 				this.uiService.getFormatDelegate("FormatPercent", "sakai.mneme")));
+		entityList.addColumn(propCol);
+
+		propCol = this.uiService.newPropertyColumn();
+		propCol.setRight();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.id").setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatCount", "sakai.mneme")));
 		entityList.addColumn(propCol);
 
 		Text unanswered = this.uiService.newText().setText(

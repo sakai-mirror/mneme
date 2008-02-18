@@ -1089,8 +1089,15 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(propCol);
 
 		propCol = this.uiService.newPropertyColumn();
+		propCol.setRight();
 		propCol.setProperty(this.uiService.newPropertyReference().setFormatDelegate(
 				this.uiService.getFormatDelegate("FormatMatchPercents", "sakai.mneme")));
+		entityList.addColumn(propCol);
+
+		propCol = this.uiService.newPropertyColumn();
+		propCol.setRight();
+		propCol.setProperty(this.uiService.newPropertyReference().setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatMatchCount", "sakai.mneme")));
 		entityList.addColumn(propCol);
 
 		matches.add(entityList);

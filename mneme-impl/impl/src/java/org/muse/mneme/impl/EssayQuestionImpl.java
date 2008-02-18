@@ -530,15 +530,18 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 				this.uiService.getFormatDelegate("AccessSubmissionsQuestionAnswers", "sakai.mneme"));
 		section.setIterator(iteratorRef, "answer", this.uiService.newMessage().setMessage("no-answers"));
 		section.add(answer).add(uploaded);
-		section.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
+		section.setTitle("answer-summary");
 
+		Section unansweredSection = this.uiService.newSection();
+		unansweredSection.setTitle("unanswered-summary");
 		Text unanswered = this.uiService.newText().setText(
 				null,
 				this.uiService.newHtmlPropertyReference().setFormatDelegate(
 						this.uiService.getFormatDelegate("FormatUnansweredPercent", "sakai.mneme")));
+		unansweredSection.add(unanswered);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(typeSection).add(showModelAnswerSection).add(section)
-				.add(unanswered);
+				.add(unansweredSection);
 	}
 
 	/**

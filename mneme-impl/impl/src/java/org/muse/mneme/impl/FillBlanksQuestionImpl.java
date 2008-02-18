@@ -562,8 +562,15 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(propCol);
 
 		propCol = this.uiService.newPropertyColumn();
+		propCol.setRight();
 		propCol.setProperty(this.uiService.newPropertyReference().setReference("answer").setFormatDelegate(
 				this.uiService.getFormatDelegate("FormatFillinPositionPercents", "sakai.mneme")));
+		entityList.addColumn(propCol);
+
+		propCol = this.uiService.newPropertyColumn();
+		propCol.setRight();
+		propCol.setProperty(this.uiService.newPropertyReference().setReference("answer").setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatFillinPositionCount", "sakai.mneme")));
 		entityList.addColumn(propCol);
 
 		positions.add(entityList);

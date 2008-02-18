@@ -30,14 +30,15 @@ import org.muse.ambrosia.util.FormatDelegateImpl;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.TypeSpecificQuestion;
 
 /**
- * The "FormatPercent" format delegate for the mneme tool.
+ * The "FormatFillinPositionCount" format delegate for the mneme tool.
  */
-public class FormatPercentDelegate extends FormatDelegateImpl
+public class FormatFillinPositionCountDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(FormatPercentDelegate.class);
+	private static Log M_log = LogFactory.getLog(FormatFillinPositionCountDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -57,17 +58,29 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 		if (!(value instanceof String)) return value.toString();
 		String target = (String) value;
 
-		// "submissions" is the List<Submission> of submissions
-		Object o = context.get("submissions");
+		// "question" is the Question
+		Object o = context.get("question");
+		if (o == null) return value.toString();
+		if (!(o instanceof Question)) return value.toString();
+		Question question = (Question) o;
+
+		TypeSpecificQuestion tsq = question.getTypeSpecificQuestion();
+		if (!(tsq instanceof FillBlanksQuestionImpl)) return value.toString();
+		FillBlanksQuestionImpl plugin = (FillBlanksQuestionImpl) tsq;
+		boolean caseSensitive = Boolean.valueOf(plugin.getCaseSensitive());
+
+		// "submissions" is the Submissions list
+		o = context.get("submissions");
 		if (o == null) return value.toString();
 		if (!(o instanceof List)) return value.toString();
 		List<Submission> submissions = (List<Submission>) o;
 
-		// "question" is the Question
-		o = context.get("question");
+		// "position" is the 1 based fill-in position
+		o = context.get("position");
 		if (o == null) return value.toString();
-		if (!(o instanceof Question)) return value.toString();
-		Question question = (Question) o;
+		if (!(o instanceof Integer)) return value.toString();
+		Integer position = (Integer) o;
+		int pos = position - 1;
 
 		int count = 0;
 		int total = 0;
@@ -81,13 +94,20 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 				if (a.getIsAnswered())
 				{
 					// does the answer's value match our target answer?
-					// Note: assume that the answer is one of the getData() strings
+					// Note: assume that the answer for this position is the nth data element
 					String[] answers = a.getTypeSpecificAnswer().getData();
-					if ((answers != null) && (answers.length > 0))
+					if ((answers != null) && (answers.length > pos) && (answers[pos] != null))
 					{
-						for (int i = 0; i < answers.length; i++)
+						if (caseSensitive)
 						{
-							if (answers[i].equals(target))
+							if (answers[pos].equals(target))
+							{
+								count++;
+							}
+						}
+						else
+						{
+							if (answers[pos].equalsIgnoreCase(target))
 							{
 								count++;
 							}
@@ -99,13 +119,10 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 
 		if (total > 0)
 		{
-			// percent
-			int pct = (count * 100) / total;
-
 			Object[] args = new Object[1];
-			args[0] = Integer.valueOf(pct);
+			args[0] = Integer.valueOf(count);
 
-			String template = "format-percent";
+			String template = "format-count";
 			return context.getMessages().getFormattedMessage(template, args);
 		}
 
@@ -118,7 +135,7 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 	 */
 	public Object formatObject(Context context, Object value)
 	{
-		return value;
+		return value.toString();
 	}
 
 	/**

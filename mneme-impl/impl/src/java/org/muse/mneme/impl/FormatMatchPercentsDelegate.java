@@ -121,9 +121,8 @@ public class FormatMatchPercentsDelegate extends FormatDelegateImpl
 			// percent
 			int pct = (count * 100) / total;
 
-			Object[] args = new Object[2];
+			Object[] args = new Object[1];
 			args[0] = Integer.valueOf(pct);
-			args[1] = Integer.valueOf(count);
 
 			String template = "format-percent";
 			return context.getMessages().getFormattedMessage(template, args);

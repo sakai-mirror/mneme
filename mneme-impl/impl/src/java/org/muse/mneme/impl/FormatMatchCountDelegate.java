@@ -30,14 +30,15 @@ import org.muse.ambrosia.util.FormatDelegateImpl;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.TypeSpecificQuestion;
 
 /**
- * The "FormatPercent" format delegate for the mneme tool.
+ * The "FormatMatchCount" format delegate for the mneme tool.
  */
-public class FormatPercentDelegate extends FormatDelegateImpl
+public class FormatMatchCountDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(FormatPercentDelegate.class);
+	private static Log M_log = LogFactory.getLog(FormatMatchCountDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -52,22 +53,35 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 	 */
 	public String format(Context context, Object value)
 	{
-		// value is the answer text
-		if (value == null) return null;
-		if (!(value instanceof String)) return value.toString();
-		String target = (String) value;
-
-		// "submissions" is the List<Submission> of submissions
-		Object o = context.get("submissions");
-		if (o == null) return value.toString();
-		if (!(o instanceof List)) return value.toString();
-		List<Submission> submissions = (List<Submission>) o;
+		// ignore value
 
 		// "question" is the Question
-		o = context.get("question");
-		if (o == null) return value.toString();
-		if (!(o instanceof Question)) return value.toString();
+		Object o = context.get("question");
+		if (o == null) return null;
+		if (!(o instanceof Question)) return null;
 		Question question = (Question) o;
+
+		TypeSpecificQuestion tsq = question.getTypeSpecificQuestion();
+		if (!(tsq instanceof MatchQuestionImpl)) return null;
+		MatchQuestionImpl plugin = (MatchQuestionImpl) tsq;
+
+		// "submissions" is the Submissions list
+		o = context.get("submissions");
+		if (o == null) return null;
+		if (!(o instanceof List)) return null;
+		List<Submission> submissions = (List<Submission>) o;
+
+		// "match" is the match id
+		o = context.get("match");
+		if (o == null) return null;
+		if (!(o instanceof String)) return null;
+		String matchId = (String) o;
+
+		// "choice" is the choice id
+		o = context.get("choice");
+		if (o == null) return null;
+		if (!(o instanceof String)) return null;
+		String choiceId = (String) o;
 
 		int count = 0;
 		int total = 0;
@@ -80,16 +94,21 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 
 				if (a.getIsAnswered())
 				{
-					// does the answer's value match our target answer?
-					// Note: assume that the answer is one of the getData() strings
+					// does this answer's entry for this match id = the choice id?
+					// Note: assume that the answer data is match id, choice id, etc...
 					String[] answers = a.getTypeSpecificAnswer().getData();
-					if ((answers != null) && (answers.length > 0))
+					if (answers != null)
 					{
 						for (int i = 0; i < answers.length; i++)
 						{
-							if (answers[i].equals(target))
+							String answerMatchId = answers[i++];
+							String answerChoiceId = answers[i];
+							if ((answerMatchId != null) && (answerMatchId.equals(matchId)))
 							{
-								count++;
+								if ((answerChoiceId != null) && (answerChoiceId.equals(choiceId)))
+								{
+									count++;
+								}
 							}
 						}
 					}
@@ -99,13 +118,10 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 
 		if (total > 0)
 		{
-			// percent
-			int pct = (count * 100) / total;
-
 			Object[] args = new Object[1];
-			args[0] = Integer.valueOf(pct);
+			args[0] = Integer.valueOf(count);
 
-			String template = "format-percent";
+			String template = "format-count";
 			return context.getMessages().getFormattedMessage(template, args);
 		}
 
@@ -118,7 +134,7 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 	 */
 	public Object formatObject(Context context, Object value)
 	{
-		return value;
+		return value.toString();
 	}
 
 	/**

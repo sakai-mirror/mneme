@@ -515,6 +515,18 @@
  		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 
+	<bean id="FormatCount"
+			class="org.muse.mneme.impl.FormatCountDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>FormatCount</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
 	<bean id="FormatUnansweredPercent"
 			class="org.muse.mneme.impl.FormatUnansweredPercentDelegate"
 			init-method="init"
@@ -560,6 +572,18 @@
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
 
  		<property name="id"><value>FormatFillinPositionPercents</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
+	<bean id="FormatFillinPositionCount"
+			class="org.muse.mneme.impl.FormatFillinPositionCountDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>FormatFillinPositionCount</value></property>
  		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 
@@ -644,6 +668,18 @@
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
 
  		<property name="id"><value>FormatMatchPercents</value></property>
+ 		<property name="toolId"><value>sakai.mneme</value></property>
+	</bean>
+
+	<bean id="FormatMatchCount"
+			class="org.muse.mneme.impl.FormatMatchCountDelegate"
+			init-method="init"
+			destroy-method="destroy"
+			singleton="true">
+
+ 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
+
+ 		<property name="id"><value>FormatMatchCount</value></property>
  		<property name="toolId"><value>sakai.mneme</value></property>
 	</bean>
 

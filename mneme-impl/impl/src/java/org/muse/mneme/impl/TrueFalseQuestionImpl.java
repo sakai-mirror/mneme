@@ -491,8 +491,15 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(propCol);
 
 		propCol = this.uiService.newPropertyColumn();
+		propCol.setRight();
 		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.id").setFormatDelegate(
 				this.uiService.getFormatDelegate("FormatPercent", "sakai.mneme")));
+		entityList.addColumn(propCol);
+
+		propCol = this.uiService.newPropertyColumn();
+		propCol.setRight();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.id").setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatCount", "sakai.mneme")));
 		entityList.addColumn(propCol);
 
 		Text answerKey = this.uiService.newText();
@@ -505,7 +512,7 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 				null,
 				this.uiService.newHtmlPropertyReference().setFormatDelegate(
 						this.uiService.getFormatDelegate("FormatUnansweredPercent", "sakai.mneme")));
-		
+
 		Section first = this.uiService.newSection();
 		first.add(question).add(attachments).add(entityList).add(unanswered);
 

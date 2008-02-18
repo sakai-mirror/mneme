@@ -48,7 +48,6 @@ import org.muse.ambrosia.api.Selection;
 import org.muse.ambrosia.api.SelectionColumn;
 import org.muse.ambrosia.api.Text;
 import org.muse.ambrosia.api.UiService;
-import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
@@ -970,8 +969,15 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(propCol);
 
 		propCol = this.uiService.newPropertyColumn();
+		propCol.setRight();
 		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.id").setFormatDelegate(
 				this.uiService.getFormatDelegate("FormatPercent", "sakai.mneme")));
+		entityList.addColumn(propCol);
+
+		propCol = this.uiService.newPropertyColumn();
+		propCol.setRight();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.id").setFormatDelegate(
+				this.uiService.getFormatDelegate("FormatCount", "sakai.mneme")));
 		entityList.addColumn(propCol);
 
 		Text answerKey = this.uiService.newText();

@@ -32,12 +32,12 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
 
 /**
- * The "FormatPercent" format delegate for the mneme tool.
+ * The "FormatCount" format delegate for the mneme tool.
  */
-public class FormatPercentDelegate extends FormatDelegateImpl
+public class FormatCountDelegate extends FormatDelegateImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(FormatPercentDelegate.class);
+	private static Log M_log = LogFactory.getLog(FormatCountDelegate.class);
 
 	/**
 	 * Shutdown.
@@ -99,13 +99,10 @@ public class FormatPercentDelegate extends FormatDelegateImpl
 
 		if (total > 0)
 		{
-			// percent
-			int pct = (count * 100) / total;
-
 			Object[] args = new Object[1];
-			args[0] = Integer.valueOf(pct);
+			args[0] = Integer.valueOf(count);
 
-			String template = "format-percent";
+			String template = "format-count";
 			return context.getMessages().getFormattedMessage(template, args);
 		}
 
