@@ -85,17 +85,18 @@ public abstract class QuestionStorageOracle extends QuestionStorageSql implement
 	{
 		Date now = new Date();
 
+		// Note: adding the order by (?) gave an oracle error ORA-02287, leading to the REST 
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_QUESTION");
 		sql.append(" (ID, CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
 		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
 		sql.append(" SURVEY, TYPE, GUEST)");
-		sql.append(" SELECT MNEME_QUESTION_SEQ.NEXTVAL,");
+		sql.append(" SELECT MNEME_QUESTION_SEQ.NEXTVAL, REST.* FROM (SELECT");
 		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, Q.HISTORICAL, Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
 		sql.append(" Q.PRESENTATION_TEXT, Q.SURVEY, Q.TYPE, Q.GUEST");
-		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=? ORDER BY Q.ID ASC");
+		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=? ORDER BY Q.ID ASC) REST");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(source.getId());
