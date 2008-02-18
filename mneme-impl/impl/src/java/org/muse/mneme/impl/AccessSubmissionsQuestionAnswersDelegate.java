@@ -75,6 +75,9 @@ public class AccessSubmissionsQuestionAnswersDelegate extends FormatDelegateImpl
 		List<Answer> answers = new ArrayList<Answer>();
 		for (Submission s : submissions)
 		{
+			if (s.getIsPhantom()) continue;
+			if (!s.getIsComplete()) continue;
+
 			Answer a = s.getAnswer(question);
 			if (a != null)
 			{

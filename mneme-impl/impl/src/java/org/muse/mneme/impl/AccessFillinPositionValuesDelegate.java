@@ -92,6 +92,9 @@ public class AccessFillinPositionValuesDelegate extends FormatDelegateImpl
 		List<String> rv = new ArrayList<String>();
 		for (Submission s : submissions)
 		{
+			if (s.getIsPhantom()) continue;
+			if (!s.getIsComplete()) continue;
+
 			Answer a = s.getAnswer(question);
 			if (a != null)
 			{

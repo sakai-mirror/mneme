@@ -61,7 +61,7 @@ public interface Submission
 	Answer getAnswer(String answerId);
 
 	/**
-	 * Access the submission's answers.  Order is not specified.
+	 * Access the submission's answers. Order is not specified.
 	 * 
 	 * @return The submission's answers in some order.
 	 */
@@ -73,7 +73,7 @@ public interface Submission
 	 * @return The auto score for this submission, or 0 if there is none.
 	 */
 	Float getAnswersAutoScore();
-	
+
 	/**
 	 * Access the submission's answers in assessment delivery order.
 	 * 
@@ -191,6 +191,13 @@ public interface Submission
 	 * @return TRUE if the submission is over, FALSE if not.
 	 */
 	Boolean getIsOver(Date asOf, long grace);
+
+	/**
+	 * Check if the submission is a phantom; a place-holder for a user who has not yet submitted.
+	 * 
+	 * @return TRUE if the submission is phantom, FALSE if not.
+	 */
+	Boolean getIsPhantom();
 
 	/**
 	 * Check if the submission has been released or not.

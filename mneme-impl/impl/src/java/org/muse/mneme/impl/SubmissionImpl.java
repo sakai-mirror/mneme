@@ -616,6 +616,14 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsPhantom()
+	{
+		return this.id.startsWith(SubmissionService.PHANTOM_PREFIX);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsReleased()
 	{
 		return this.released;
@@ -1082,16 +1090,6 @@ public class SubmissionImpl implements Submission
 	protected Boolean getIsChanged()
 	{
 		return this.releasedChanged.getChanged() || this.evaluation.getIsChanged();
-	}
-
-	/**
-	 * Check if the submission is a phantom.
-	 * 
-	 * @return TRUE if the submission is phantom, FALSE if not.
-	 */
-	protected Boolean getIsPhantom()
-	{
-		return this.id.startsWith(SubmissionService.PHANTOM_PREFIX);
 	}
 
 	/**

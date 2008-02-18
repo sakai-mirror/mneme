@@ -55,6 +55,13 @@
 					<decision model="assessment.hasPoints" />
 				</included>
 			</text>
+			<text>
+				<message selector="assessment-pct-complete">
+					<model ref="complete-percent" />
+					<model ref="complete-complete" />
+					<model ref="complete-total" />
+				</message>
+			</text>
 		</container>
 	</subHeader>
 

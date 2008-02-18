@@ -86,6 +86,9 @@ public class FormatFillinPositionPercentsDelegate extends FormatDelegateImpl
 		int total = 0;
 		for (Submission s : submissions)
 		{
+			if (s.getIsPhantom()) continue;
+			if (!s.getIsComplete()) continue;
+
 			Answer a = s.getAnswer(question);
 			if (a != null)
 			{

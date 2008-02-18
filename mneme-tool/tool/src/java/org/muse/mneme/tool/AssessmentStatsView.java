@@ -22,7 +22,9 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,7 +34,6 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
-import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
@@ -98,6 +99,8 @@ public class AssessmentStatsView extends ControllerImpl
 				SubmissionService.FindAssessmentSubmissionsSort.sdate_a, Boolean.FALSE, null, null, null);
 		context.put("submissions", submissions);
 
+		computePercentComplete(submissions, context);
+
 		uiService.render(ui, context);
 	}
 
@@ -149,5 +152,40 @@ public class AssessmentStatsView extends ControllerImpl
 	public void setToolManager(ToolManager toolManager)
 	{
 		this.toolManager = toolManager;
+	}
+
+	/**
+	 * Compute the percent complete for the set of submission.
+	 * 
+	 * @param submissions
+	 *        The submissions.
+	 * @param context
+	 *        The context.
+	 */
+	protected void computePercentComplete(List<Submission> submissions, Context context)
+	{
+		Set<String> users = new HashSet<String>();
+		int complete = 0;
+		for (Submission s : submissions)
+		{
+			// if we have never seen this user before
+			if (!users.contains(s.getUserId()))
+			{
+				// if non-phantom and complete, count it
+				if ((!s.getIsPhantom()) && s.getIsComplete())
+				{
+					complete++;
+				}
+
+				users.add(s.getUserId());
+			}
+		}
+
+		// percent
+		int pct = (complete * 100) / users.size();
+
+		context.put("complete-percent", Integer.valueOf(pct));
+		context.put("complete-complete", Integer.valueOf(complete));
+		context.put("complete-total", Integer.valueOf(users.size()));
 	}
 }
