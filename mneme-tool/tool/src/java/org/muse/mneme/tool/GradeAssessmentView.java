@@ -40,6 +40,7 @@ import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.ToolManager;
@@ -121,6 +122,13 @@ public class GradeAssessmentView extends ControllerImpl
 		if ((params.length > 6) && (!params[6].equals("official")))
 		{
 			allUid = params[6];
+		}
+		
+		// for a survey, ignore official
+		if (assessment.getType() == AssessmentType.survey)
+		{
+			official = Boolean.FALSE;
+			allUid = null;
 		}
 
 		// get the size

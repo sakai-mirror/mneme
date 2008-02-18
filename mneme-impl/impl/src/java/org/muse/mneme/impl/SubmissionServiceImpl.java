@@ -922,7 +922,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			working = sortByGradingSubmissionStatus((sort == FindAssessmentSubmissionsSort.status_d), working);
 		}
 
-		// find our submission
+		// find our submission by id
 		Submission prev = null;
 		Submission next = null;
 		boolean done = false;
@@ -937,7 +937,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				break;
 			}
 
-			if (s.getUserId().equals(submission.getUserId()))
+			if (s.getId().equals(submission.getId()))
 			{
 				done = true;
 			}
@@ -947,9 +947,45 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			}
 		}
 
+		// if we didn't find it by id, find it by user id
+		if (!done)
+		{
+			next = null;
+			prev = null;
+			for (Submission s : working)
+			{
+				// TODO: we should not have to filter these out...
+				if (((SubmissionImpl) s).getIsPhantom()) continue;
+
+				if (done)
+				{
+					next = s;
+					break;
+				}
+
+				if (s.getUserId().equals(submission.getUserId()))
+				{
+					done = true;
+				}
+				else
+				{
+					prev = s;
+				}
+			}
+
+		}
+
 		String[] rv = new String[2];
-		rv[0] = ((prev == null) ? null : prev.getId());
-		rv[1] = ((next == null) ? null : next.getId());
+		if (!done)
+		{
+			rv[0] = null;
+			rv[1] = null;
+		}
+		else
+		{
+			rv[0] = ((prev == null) ? null : prev.getId());
+			rv[1] = ((next == null) ? null : next.getId());
+		}
 
 		return rv;
 	}

@@ -32,6 +32,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.ToolManager;
@@ -104,7 +105,10 @@ public class GradeSubmissionView extends ControllerImpl
 		}
 		if (sort != null)
 		{
-			String[] nextPrev = submissionService.findPrevNextSubmissionIds(submission, sort, Boolean.TRUE);
+			// one submission per user (i.e. 'official' only), except for survey, where we consider them all
+			Boolean official = Boolean.valueOf(submission.getAssessment().getType() != AssessmentType.survey);
+
+			String[] nextPrev = submissionService.findPrevNextSubmissionIds(submission, sort, official);
 			if (nextPrev[0] != null) context.put("prev", nextPrev[0]);
 			if (nextPrev[1] != null) context.put("next", nextPrev[1]);
 
