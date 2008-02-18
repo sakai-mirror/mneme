@@ -250,28 +250,6 @@ public abstract class PoolStorageTestX extends TestCase
 	}
 
 	/**
-	 * Test getManifest()
-	 * 
-	 * @throws Exception
-	 */
-	public void test004getManifest() throws Exception
-	{
-		// create a pool
-		PoolImpl pool = this.storage.newPool();
-		pool.setContext(CONTEXT);
-		pool.setTitle(CONTEXT);
-		pool.getCreatedBy().setDate(new Date());
-		pool.getCreatedBy().setUserId("admin");
-		pool.getModifiedBy().setDate(new Date());
-		pool.getModifiedBy().setUserId("admin");
-		this.storage.savePool(pool);
-
-		List<String> manifest = this.storage.getManifest(pool.getId());
-		assertTrue(manifest != null);
-		assertTrue(manifest.size() == 0);
-	}
-
-	/**
 	 * Test getPool()
 	 * 
 	 * @throws Exception

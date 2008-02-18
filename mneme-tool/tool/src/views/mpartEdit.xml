@@ -160,6 +160,21 @@
 										<model ref="assessment.id" />
 										<model ref="part.id" />
 									</destination>
+									<included>
+										<decision reversed="TRUE" model="question.isSurvey" />
+									</included>
+								</navigation>
+								<navigation style="LINK" submit="TRUE" description="survey-preview">
+									<icon icon="/icons/survey_view.png" style="LEFT" />
+									<destination template="/question_preview/{0}/part_edit/{1}/{2}/{3}">
+										<model ref="question.id" />
+										<model ref="assessmentSort" />
+										<model ref="assessment.id" />
+										<model ref="part.id" />
+									</destination>
+									<included>
+										<decision model="question.isSurvey" />
+									</included>
 								</navigation>
 							</navigations>
 						</column>

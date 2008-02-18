@@ -40,14 +40,6 @@
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
  	</bean>
 
-	<bean id="org.muse.mneme.api.Pool_Lazy"
-		class="org.muse.mneme.impl.PoolImplLazyManifest"
-		singleton="false">
-
-		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
-		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
-  	</bean>
-
 	<bean id="org.muse.mneme.api.PoolService"
 		class="org.muse.mneme.impl.PoolServiceImpl"
 		init-method="init"
@@ -89,7 +81,7 @@
 		destroy-method="destroy"
 		singleton="true">
 
-		<lookup-method name="newPool" bean="org.muse.mneme.api.Pool_Lazy" />
+		<lookup-method name="newPool" bean="org.muse.mneme.api.Pool" />
 
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>
@@ -102,7 +94,7 @@
 		destroy-method="destroy"
 		singleton="true">
 
-		<lookup-method name="newPool" bean="org.muse.mneme.api.Pool_Lazy" />
+		<lookup-method name="newPool" bean="org.muse.mneme.api.Pool" />
 
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>

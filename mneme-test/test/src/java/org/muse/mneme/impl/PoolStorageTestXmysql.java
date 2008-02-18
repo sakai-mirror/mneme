@@ -38,7 +38,7 @@ public class PoolStorageTestXmysql extends PoolStorageTestX
 	{
 		public PoolImpl newPool()
 		{
-			return new PoolImplLazyManifest();
+			return new PoolImpl();
 		}
 	}
 

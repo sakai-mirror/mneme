@@ -182,14 +182,6 @@ public class PoolServiceImpl implements PoolService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getManifest(Pool pool)
-	{
-		return this.storage.getManifest(pool.getId());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Pool getPool(String poolId)
 	{
 		if (poolId == null) throw new IllegalArgumentException();

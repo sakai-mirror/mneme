@@ -84,7 +84,7 @@ public abstract class PoolStorageSql implements PoolStorage
 	 */
 	public PoolImpl clone(PoolImpl pool)
 	{
-		return new PoolImplLazyManifest(pool);
+		return new PoolImpl(pool);
 	}
 
 	/**
@@ -160,30 +160,6 @@ public abstract class PoolStorageSql implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getManifest(String poolId)
-	{
-		// for thread-local caching
-		String key = cacheKey(poolId);
-
-		// check the thread-local cache
-		List<String> rv = (List<String>) this.threadLocalManager.get(key);
-		if (rv != null)
-		{
-			// return a copy
-			return new ArrayList<String>(rv);
-		}
-
-		rv = readManifest(poolId);
-
-		// thread-local cache (a copy)
-		this.threadLocalManager.set(key, new ArrayList<String>(rv));
-
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public PoolImpl getPool(String poolId)
 	{
 		return readPool(poolId);
@@ -216,10 +192,6 @@ public abstract class PoolStorageSql implements PoolStorage
 	public void removePool(PoolImpl pool)
 	{
 		deletePool(pool);
-		if (pool.getIsHistorical())
-		{
-			deletePoolManifest(pool);
-		}
 	}
 
 	/**
@@ -231,28 +203,12 @@ public abstract class PoolStorageSql implements PoolStorage
 		if (pool.getId() == null)
 		{
 			insertPool(pool);
-
-			// if newly made historical
-			if (((PoolImplLazyManifest) pool).getNewlyHistorical())
-			{
-				// save the manifest
-				insertManifest(pool);
-				((PoolImplLazyManifest) pool).clearNewlyHistorical();
-			}
 		}
 
 		// for existing pools
 		else
 		{
 			updatePool(pool);
-
-			// if newly made historical
-			if (((PoolImplLazyManifest) pool).getNewlyHistorical())
-			{
-				// save the manifest
-				insertManifest(pool);
-				((PoolImplLazyManifest) pool).clearNewlyHistorical();
-			}
 		}
 	}
 
@@ -284,19 +240,6 @@ public abstract class PoolStorageSql implements PoolStorage
 	public void setThreadLocalManager(ThreadLocalManager service)
 	{
 		threadLocalManager = service;
-	}
-
-	/**
-	 * Form a key for caching a pool.
-	 * 
-	 * @param poolId
-	 *        The pool id.
-	 * @return The cache key.
-	 */
-	protected String cacheKey(String poolId)
-	{
-		String key = "mneme:pool:manifest:" + poolId;
-		return key;
 	}
 
 	/**
@@ -355,44 +298,6 @@ public abstract class PoolStorageSql implements PoolStorage
 	}
 
 	/**
-	 * Delete a pool.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 */
-	protected void deletePoolManifest(final PoolImpl pool)
-	{
-		this.sqlService.transact(new Runnable()
-		{
-			public void run()
-			{
-				deletePoolManifestTx(pool);
-			}
-		}, "deletePoolManifest: " + pool.getId());
-	}
-
-	/**
-	 * Delete a pool (transaction code).
-	 * 
-	 * @param pool
-	 *        The pool.
-	 */
-	protected void deletePoolManifestTx(PoolImpl pool)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("DELETE FROM MNEME_POOL_MANIFEST");
-		sql.append(" WHERE POOL_ID=?");
-
-		Object[] fields = new Object[1];
-		fields[0] = Long.valueOf(pool.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("deletePoolManifestTx: db write failed");
-		}
-	}
-
-	/**
 	 * Delete a pool (transaction code).
 	 * 
 	 * @param pool
@@ -410,50 +315,6 @@ public abstract class PoolStorageSql implements PoolStorage
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
 			throw new RuntimeException("deletePoolTx: db write failed");
-		}
-	}
-
-	/**
-	 * Insert a new pool manifest.
-	 * 
-	 * @param pool
-	 *        The pool.
-	 */
-	protected void insertManifest(final PoolImpl pool)
-	{
-		this.sqlService.transact(new Runnable()
-		{
-			public void run()
-			{
-				insertManifestTx(pool);
-			}
-		}, "insertManifest: " + pool.getId());
-	}
-
-	/**
-	 * Insert a new pool manifest (transaction code).
-	 * 
-	 * @param pool
-	 *        The pool.
-	 */
-	protected void insertManifestTx(PoolImpl pool)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_POOL_MANIFEST (");
-		sql.append(" POOL_ID, QUESTION_ID )");
-		sql.append(" VALUES(?,?)");
-
-		Object[] fields = new Object[2];
-		fields[0] = Long.valueOf(pool.getId());
-
-		for (String qid : pool.getFrozenManifest())
-		{
-			fields[1] = Long.valueOf(qid);
-
-			if (!this.sqlService.dbWrite(sql.toString(), fields))
-			{
-				throw new RuntimeException("insertManifestTx: db write failed");
-			}
 		}
 	}
 
@@ -481,43 +342,6 @@ public abstract class PoolStorageSql implements PoolStorage
 	 *        The pool.
 	 */
 	protected abstract void insertPoolTx(PoolImpl pool);
-
-	/**
-	 * Read a pool manifest
-	 * 
-	 * @param id
-	 *        The pool id.
-	 * @return The pool manifest.
-	 */
-	protected List<String> readManifest(String id)
-	{
-		final List<String> rv = new ArrayList<String>();
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT M.QUESTION_ID FROM MNEME_POOL_MANIFEST M WHERE M.POOL_ID = ? ORDER BY M.QUESTION_ID ASC");
-		Object[] fields = new Object[1];
-		fields[0] = Long.valueOf(id);
-		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
-		{
-			public Object readSqlResultRecord(ResultSet result)
-			{
-				try
-				{
-					String qid = SqlHelper.readId(result, 1);
-					if (qid != null) rv.add(qid);
-
-					return null;
-				}
-				catch (SQLException e)
-				{
-					M_log.warn("readManifest: " + e);
-					return null;
-				}
-			}
-		});
-
-		return rv;
-	}
 
 	/**
 	 * Read a pool

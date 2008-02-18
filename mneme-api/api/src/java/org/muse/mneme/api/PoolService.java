@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * PoolService provides services around question pool management for Mneme.
  */
-public interface PoolService extends PoolManifestService, PoolGetService
+public interface PoolService extends PoolGetService
 {
 	/**
 	 * Sort options for findPools()

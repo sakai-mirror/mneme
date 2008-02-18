@@ -41,6 +41,7 @@ public abstract class PoolStorageMysql extends PoolStorageSql implements PoolSto
 		if (autoDdl)
 		{
 			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_pool");
+			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_pool_1_0-1_1");
 		}
 
 		M_log.info("init()");

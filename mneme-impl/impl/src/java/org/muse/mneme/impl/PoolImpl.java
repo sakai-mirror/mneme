@@ -21,7 +21,6 @@
 
 package org.muse.mneme.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.muse.mneme.api.Attribution;
@@ -46,9 +45,6 @@ public class PoolImpl implements Pool
 	protected String description = null;
 
 	protected Integer difficulty = Integer.valueOf(3);
-
-	/** optional list of questions - if null, use the live query from the services to find the questions. */
-	protected List<String> frozenManifest = new ArrayList<String>();
 
 	protected Boolean historical = Boolean.FALSE;
 
@@ -133,16 +129,7 @@ public class PoolImpl implements Pool
 	 */
 	public List<String> getAllQuestionIds(Boolean survey)
 	{
-		List<String> rv = null;
-
-		if (getIsHistorical())
-		{
-			rv = new ArrayList<String>(getFrozenManifest());
-		}
-		else
-		{
-			rv = this.questionService.getPoolQuestionIds(this, survey);
-		}
+		List<String> rv = this.questionService.getPoolQuestionIds(this, survey);
 
 		return rv;
 	}
@@ -216,16 +203,7 @@ public class PoolImpl implements Pool
 	 */
 	public Integer getNumQuestions()
 	{
-		Integer rv = null;
-
-		if (getIsHistorical())
-		{
-			rv = getFrozenManifest().size();
-		}
-		else
-		{
-			rv = this.questionService.countQuestions(this, null, null, null);
-		}
+		Integer rv = this.questionService.countQuestions(this, null, null, null);
 
 		return rv;
 	}
@@ -425,16 +403,6 @@ public class PoolImpl implements Pool
 	}
 
 	/**
-	 * Access the optional question id list.
-	 * 
-	 * @return The question id list, or empty if questions are taken live from the services.
-	 */
-	protected List<String> getFrozenManifest()
-	{
-		return this.frozenManifest;
-	}
-
-	/**
 	 * Establish the historical settings.
 	 * 
 	 * @param historical
@@ -478,9 +446,6 @@ public class PoolImpl implements Pool
 	{
 		if (this.historical) return false;
 
-		// suck in the current question manifest
-		this.frozenManifest = current.getAllQuestionIds(null);
-
 		// mark as historical
 		this.historical = Boolean.TRUE;
 
@@ -500,7 +465,6 @@ public class PoolImpl implements Pool
 		this.context = other.context;
 		this.description = other.description;
 		this.difficulty = other.difficulty;
-		this.frozenManifest = new ArrayList<String>(other.frozenManifest);
 		this.historical = other.historical;
 		this.id = other.id;
 		this.mint = other.mint;

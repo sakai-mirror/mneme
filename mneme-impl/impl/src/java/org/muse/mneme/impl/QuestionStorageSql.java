@@ -479,7 +479,7 @@ public abstract class QuestionStorageSql implements QuestionStorage
 				sql.append(" AND Q.SURVEY='0'");
 			}
 		}
-		sql.append(" ORDER BY Q.CREATED_BY_DATE ASC");
+		sql.append(" ORDER BY Q.ID ASC");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(pool.getId());

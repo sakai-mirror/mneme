@@ -184,17 +184,6 @@ public abstract class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getManifest(String poolId)
-	{
-		PoolImpl rv = this.pools.get(poolId);
-		if (rv == null) return new ArrayList<String>();
-
-		return rv.getFrozenManifest();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public PoolImpl getPool(String poolId)
 	{
 		fakeIt();

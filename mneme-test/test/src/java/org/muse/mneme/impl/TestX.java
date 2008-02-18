@@ -99,7 +99,77 @@ public abstract class TestX extends TestCase
 		}
 	}
 
-	protected abstract SakaiBasicDataSource setupDataSource();
+	protected SakaiBasicDataSource setupDataSource()
+	{
+		if (vendor().equals("oracle"))
+		{
+			return setupDataSourceOracle();
+		}
+		else if (vendor().equals("mysql"))
+		{
+			return setupDataSourceMysql();
+		}
+
+		return null;
+	}
+
+	protected SakaiBasicDataSource setupDataSourceMysql()
+	{
+		// a data source (see db/pack/components.xml javax.sql.BaseDataSource)
+		SakaiBasicDataSource ds = new SakaiBasicDataSource();
+		ds.setDriverClassName("com.mysql.jdbc.Driver");
+		ds.setUrl("jdbc:mysql://127.0.0.1:3306/sakai?useUnicode=true&characterEncoding=UTF-8");
+		ds.setUsername("sakaiuser");
+		ds.setPassword("password");
+		ds.setInitialSize(10);
+		ds.setMaxActive(10);
+		ds.setMaxIdle(10);
+		ds.setMinIdle(10);
+		ds.setMaxWait(300000);
+		ds.setNumTestsPerEvictionRun(3);
+		ds.setTestOnBorrow(true);
+		ds.setTestOnReturn(false);
+		ds.setTestWhileIdle(false);
+		ds.setValidationQuery("select 1 from DUAL");
+		ds.setDefaultAutoCommit(false);
+		ds.setDefaultReadOnly(false);
+		ds.setDefaultTransactionIsolationString("TRANSACTION_READ_COMMITTED");
+		ds.setPoolPreparedStatements(false);
+		ds.setMaxOpenPreparedStatements(0);
+		ds.setMinEvictableIdleTimeMillis(1800000);
+		ds.setTimeBetweenEvictionRunsMillis(900000);
+
+		return ds;
+	}
+
+	protected SakaiBasicDataSource setupDataSourceOracle()
+	{
+		// a data source (see db/pack/components.xml javax.sql.BaseDataSource)
+		SakaiBasicDataSource ds = new SakaiBasicDataSource();
+		ds.setDriverClassName("oracle.jdbc.driver.OracleDriver");
+		ds.setUrl("jdbc:oracle:thin:@localhost:11004:sakaidev");
+		ds.setUsername("ggolden");
+		ds.setPassword("ggolden");
+		ds.setInitialSize(10);
+		ds.setMaxActive(10);
+		ds.setMaxIdle(10);
+		ds.setMinIdle(10);
+		ds.setMaxWait(300000);
+		ds.setNumTestsPerEvictionRun(3);
+		ds.setTestOnBorrow(true);
+		ds.setTestOnReturn(false);
+		ds.setTestWhileIdle(false);
+		ds.setValidationQuery("select 1 from DUAL");
+		ds.setDefaultAutoCommit(false);
+		ds.setDefaultReadOnly(false);
+		ds.setDefaultTransactionIsolationString("TRANSACTION_READ_COMMITTED");
+		ds.setPoolPreparedStatements(false);
+		ds.setMaxOpenPreparedStatements(0);
+		ds.setMinEvictableIdleTimeMillis(1800000);
+		ds.setTimeBetweenEvictionRunsMillis(900000);
+
+		return ds;
+	}
 
 	/**
 	 * @param arg0

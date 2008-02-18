@@ -77,15 +77,6 @@ public interface PoolStorage
 	List<PoolImpl> findPools(String context, PoolService.FindPoolsSort sort);
 
 	/**
-	 * Access a pool manifest.
-	 * 
-	 * @param poolId
-	 *        The pool id.
-	 * @return The pool manifest from the pool with this id, empty if not found or no manifest.
-	 */
-	List<String> getManifest(String poolId);
-
-	/**
 	 * Access a pool by id.
 	 * 
 	 * @param poolId

@@ -67,7 +67,7 @@ public abstract class QuestionStorageMysql extends QuestionStorageSql implements
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, '1', Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
 		sql.append(" Q.PRESENTATION_TEXT, Q.SURVEY, Q.TYPE, Q.GUEST");
-		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=?");
+		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=? ORDER BY Q.ID ASC");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(source.getId());
@@ -95,7 +95,7 @@ public abstract class QuestionStorageMysql extends QuestionStorageSql implements
 		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, Q.HISTORICAL, Q.MINT,");
 		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
 		sql.append(" Q.PRESENTATION_TEXT, Q.SURVEY, Q.TYPE, Q.GUEST");
-		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=?");
+		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=? ORDER BY Q.ID ASC");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(source.getId());
