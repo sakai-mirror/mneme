@@ -38,7 +38,7 @@
 	<!-- title & header-->
 	<title>
 		<message selector="instructions-title">
-			<model ref="submission.assessment.title" />
+			<model ref="submission.assessment.title" type="text" />
 		</message>
 	</title>
 	<header>
@@ -51,7 +51,7 @@
 		<container>
 			<text>
 				<message>
-					<model ref="submission.assessment.title" missing="no-title" />
+					<model ref="submission.assessment.title" type="text" missing="no-title" />
 				</message>
 			</text>
 		</container>

@@ -40,7 +40,7 @@
 		<message selector="question-title">
 			<model ref="actionTitle" />
 			<model type="enum" messageRoot="assessment-type-" ref="submission.assessment.type" />
-			<model ref="submission.assessment.title" />
+			<model ref="submission.assessment.title" type="text" />
 		</message>
 	</title>
 
@@ -56,7 +56,7 @@
 		<container>
 			<text>
 				<message>
-					<model ref="submission.assessment.title" missing="no-title" />
+					<model ref="submission.assessment.title" type="text" missing="no-title" />
 				</message>
 			</text>
 		</container>
@@ -132,7 +132,7 @@
 			<title>
 				<message selector="question-test-title">
 					<model type="icon" icon="/icons/test.png" />
-					<model ref="submission.assessment.title" />
+					<model ref="submission.assessment.title" type="text" />
 					<model type="html" ref="submission" delegate="SubmissionScore" tool="sakai.mneme" />
 					<selectors>
 						<selector selector="question-test-title-no-points">
@@ -315,7 +315,7 @@
 									<readOnly>
 										<decision model="review" />
 									</readOnly>
-									<model type="text" ref="answer.reason" />
+									<model type="text" edit="TRUE" ref="answer.reason" />
 								</textEdit>
 							</container>
 							<included>

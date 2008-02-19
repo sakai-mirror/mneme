@@ -38,8 +38,8 @@
 		<container>
 			<text>
 				<message selector="select-add-to">
-					<model ref="part.title" missing="no-title" />
-					<model ref="assessment.title" missing="no-title" />
+					<model ref="part.title" missing="no-title" type="text" />
+					<model ref="assessment.title" type="text" missing="no-title" />
 				</message>
 			</text>
 		</container>
@@ -93,7 +93,9 @@
 													</message>
 												</valueMessage>
 												<displayMessage>
-													<message model="pool.title" />
+													<message>
+														<model ref="pool.title" type="text" />
+													</message>
 												</displayMessage>
 											</selectionModel>
 										</selection>
@@ -323,7 +325,7 @@
 							<title>
 								<message selector="question-pool-title" />
 							</title>
-							<model ref="question.pool.title" missing="no-title" />
+							<model ref="question.pool.title" type="text" missing="no-title" />
 							<sort submit="TRUE">
 								<active>
 									<compareDecision model="sort_column" constant="0" />

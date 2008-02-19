@@ -49,7 +49,7 @@
 		<container>
 			<text>
 				<message>
-					<model ref="submission.assessment.title" />
+					<model ref="submission.assessment.title" type="text" />
 				</message>
 			</text>
 			<text>

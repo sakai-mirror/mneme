@@ -51,7 +51,7 @@
 		<container>
 			<text>
 				<message>
-					<model ref="question.pool.title" missing="no-title" />
+					<model ref="question.pool.title" type="text" missing="no-title" />
 				</message>
 			</text>
 			<text selector="blank" />

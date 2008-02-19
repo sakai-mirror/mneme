@@ -42,7 +42,7 @@
 		<container>
 			<text>
 				<message>
-					<model ref="assessment.title" missing="no-title" />
+					<model ref="assessment.title" type="text" missing="no-title" />
 				</message>
 			</text>
 		</container>
@@ -70,7 +70,7 @@
 
 				<!-- title -->
 				<textEdit id="title" title="part-title" rows="1" cols="40">
-					<model ref="part.title" />
+					<model ref="part.title" type="text" />
 				</textEdit>
 
 				<!-- toggle to show instructions -->
@@ -194,7 +194,7 @@
 							<title>
 								<message selector="pool" />
 							</title>
-							<model ref="question.pool.title" missing="no-title" />
+							<model ref="question.pool.title" type="text" missing="no-title" />
 						</modelColumn>
 						<modelColumn em="5">
 							<title>

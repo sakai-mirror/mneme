@@ -48,7 +48,9 @@
 		<section>
 			<container>
 
-				<textEdit title="pool-title" model="pool.title" rows="1" cols="40" />
+				<textEdit title="pool-title" rows="1" cols="40">
+					<model ref="pool.title" type="text" />
+				</textEdit>
 
 				<textEdit title="pool-description" model="pool.description" rows="5" cols="40" />
 

@@ -38,7 +38,7 @@
 	<!-- title and header -->
 	<title>
 		<message selector="instructions-title">
-			<model ref="submission.assessment.title" />
+			<model ref="submission.assessment.title" type="text" />
 		</message>
 	</title>
 
@@ -109,7 +109,7 @@
 			<title>
 				<message selector="instructions-test-title">
 					<model type="icon" icon="/icons/test.png" />
-					<model ref="submission.assessment.title" missing="no-title" />
+					<model ref="submission.assessment.title" type="text" missing="no-title" />
 					<model ref="submission.assessment.parts.totalPoints" delegate="FormatScore" tool="sakai.mneme" />
 					<selectors>
 						<selector selector="instructions-test-title-no-points">

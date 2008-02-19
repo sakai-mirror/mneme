@@ -110,7 +110,7 @@
 					<title>
 						<message selector="assessment-title" />
 					</title>
-					<model ref="assessment.title" missing="no-title" />
+					<model ref="assessment.title" type="text" missing="no-title" />
 				</modelColumn>
 				<modelColumn>
 					<title>

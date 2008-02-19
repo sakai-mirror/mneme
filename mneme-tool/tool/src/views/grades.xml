@@ -125,7 +125,7 @@
 						<navigation style="LINK" submit="TRUE">
 							<title>
 								<message>
-									<model ref="assessment.title" missing="no-title" />
+									<model ref="assessment.title" type="text" missing="no-title" />
 								</message>
 							</title>
 							<destination template="/grade_assessment/{0}{1}/{2}">

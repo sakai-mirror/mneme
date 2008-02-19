@@ -31,9 +31,9 @@ import org.sakaiproject.user.api.User;
 public interface Assessment
 {
 	/**
-	 * Get the submitable status for the assessment - this indicates if we are expecting submissions now.
+	 * Get the submit-able status for the assessment - this indicates if we are expecting submissions now.
 	 * 
-	 * @return The submitable status
+	 * @return The submit-able status
 	 */
 	AcceptSubmitStatus getAcceptSubmitStatus();
 
@@ -186,7 +186,7 @@ public interface Assessment
 	AssessmentPassword getPassword();
 
 	/**
-	 * Access the assessment's presentation; the rich tet and attachments that describe the assessment.
+	 * Access the assessment's presentation; the rich text and attachments that describe the assessment.
 	 * 
 	 * @return The assessment's presentation.
 	 */
@@ -202,12 +202,12 @@ public interface Assessment
 	/**
 	 * Access how questions are to be grouped per page for delivery..
 	 * 
-	 * @return The question gropuing setting.
+	 * @return The question grouping setting.
 	 */
 	QuestionGrouping getQuestionGrouping();
 
 	/**
-	 * Access the random access flag that controlls an assessment taker's random or linear access to the questions of the assessment.
+	 * Access the random access flag that controls an assessment taker's random or linear access to the questions of the assessment.
 	 * 
 	 * @return TRUE if random question access is supported, FALSE if only linear question access is supported.
 	 */

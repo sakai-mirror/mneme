@@ -34,13 +34,13 @@
 	<!-- title & header-->
 	<title>
 		<message selector="assessment-preview-title">
-			<model ref="assessment.title" />
+			<model ref="assessment.title" type="text" />
 		</message>
 	</title>
 	<header>
 		<message selector="assessment-preview-header">
 			<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
-			<model ref="assessment.title" />
+			<model ref="assessment.title" type="text" />
 		</message>
 	</header>
 
@@ -54,7 +54,7 @@
 			<title>
 				<message selector="assessment-preview-assessment-title">
 					<model type="icon" icon="/icons/test.png" />
-					<model ref="assessment.title" />
+					<model ref="assessment.title" type="text" />
 					<model type="html" ref="assessment" delegate="SubmissionScore" tool="sakai.mneme" />
 					<selectors>
 						<selector selector="assessment-preview-assessment-title-no-points">

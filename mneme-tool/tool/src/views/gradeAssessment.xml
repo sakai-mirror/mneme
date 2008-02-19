@@ -45,7 +45,7 @@
 		<container>
 			<text>
 				<message>
-					<model ref="assessment.title" />
+					<model ref="assessment.title" type="text" />
 				</message>
 			</text>
 			<text>

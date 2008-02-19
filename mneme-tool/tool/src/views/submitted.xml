@@ -52,7 +52,7 @@
 		<container>
 			<text>
 				<message>
-					<model ref="submission.assessment.title" missing="no-title" />
+					<model ref="submission.assessment.title" type="text" missing="no-title" />
 				</message>
 			</text>
 		</container>

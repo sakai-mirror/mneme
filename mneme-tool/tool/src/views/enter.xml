@@ -37,7 +37,7 @@
 
 	<title>
 		<message selector="enter-title">
-			<model ref="assessment.title" />
+			<model ref="assessment.title" type="text" />
 		</message>
 	</title>
 
@@ -53,7 +53,7 @@
 			<title highlighted="TRUE">
 				<message selector="enter-test-title">
 					<model type="icon" icon="/icons/test.png" />
-					<model ref="assessment.title" />
+					<model ref="assessment.title" type="text" />
 					<model ref="assessment.parts.totalPoints" delegate="FormatScore" tool="sakai.mneme" />
 					<selectors>
 						<selector selector="enter-test-title-no-points">

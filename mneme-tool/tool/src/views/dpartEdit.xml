@@ -42,7 +42,7 @@
 		<container>
 			<text>
 				<message>
-					<model ref="assessment.title" missing="no-title" />
+					<model ref="assessment.title" type="text" missing="no-title" />
 				</message>
 			</text>
 		</container>
@@ -70,10 +70,10 @@
 
 				<!-- title -->
 				<textEdit id="title" title="part-title" rows="1" cols="40">
-					<model ref="part.title" />
+					<model ref="part.title" type="text" />
 				</textEdit>
 
-				<!-- toggle to show instructinos -->
+				<!-- toggle to show instructions -->
 				<toggle target="instructions" title="edit-instructions" style="LINK">
 					<icon icon="/icons/section.png" style="LEFT" />
 					<included>
@@ -154,7 +154,7 @@
 							<title>
 								<message selector="pool" />
 							</title>
-							<model ref="draw.pool.title" missing="no-title" />
+							<model ref="draw.pool.title" type="text" missing="no-title" />
 							<sort submit="TRUE">
 								<active>
 									<compareDecision model="sort_column" constant="0" />

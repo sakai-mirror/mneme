@@ -210,7 +210,7 @@
 						<navigation style="LINK" submit="TRUE">
 							<title>
 								<message>
-									<model ref="assessment.title" missing="no-title" />
+									<model type="text" ref="assessment.title" missing="no-title" />
 								</message>
 							</title>
 							<destination template="/assessment_edit/{0}{1}/{2}">

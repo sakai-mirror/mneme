@@ -37,7 +37,9 @@
 
 	<!-- title and header -->
 	<title>
-		<message selector="toc-title" model="submission.assessment.title" />
+		<message selector="toc-title">
+			<model ref="submission.assessment.title" type="text" />
+		</message>
 	</title>
 
 	<header>
@@ -116,7 +118,7 @@
 			<title>
 				<message selector="toc-section-title">
 					<model type="icon" icon="/icons/test.png" />
-					<model ref="submission.assessment.title" />
+					<model ref="submission.assessment.title" type="text" />
 					<model ref="submission.assessment" delegate="QuestionsAnswered" tool="sakai.mneme" />
 					<model ref="submission.assessment.parts.numQuestions" />
 					<model ref="submission" delegate="SubmissionScore" tool="sakai.mneme" />
@@ -150,7 +152,7 @@
 									<message selector="toc-questions-title">
 										<model type="icon" icon="/icons/section.png" />
 										<model ref="question.part.ordering.position" />
-										<model ref="question.part.title" />
+										<model ref="question.part.title" type="text" />
 										<model ref="question.part" delegate="QuestionsAnswered" tool="sakai.mneme" />
 										<model ref="question.part.numQuestions" />
 										<model ref="question.part" delegate="SectionScore" tool="sakai.mneme" />

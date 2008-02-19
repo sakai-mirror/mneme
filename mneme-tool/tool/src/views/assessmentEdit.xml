@@ -139,7 +139,7 @@
 
 						<!-- title -->
 						<textEdit id="title" title="test-title" rows="1" cols="40">
-							<model ref="assessment.title" />
+							<model ref="assessment.title" type="text"/>
 						</textEdit>
 
 						<!-- toggle to show instructions -->
@@ -246,7 +246,7 @@
 							<title>
 								<message selector="part-title" />
 							</title>
-							<model ref="part.title" missing="no-title" />
+							<model ref="part.title" type="text" missing="no-title" />
 							<entityNavigations>
 								<navigation submit="TRUE">
 									<destination template="/part_edit/{0}/{1}/{2}">

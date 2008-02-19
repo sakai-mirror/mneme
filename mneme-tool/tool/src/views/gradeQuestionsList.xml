@@ -45,7 +45,7 @@
 		<container>
 			<text>
 				<message>
-					<model ref="assessment.title" />
+					<model ref="assessment.title" type="text" />
 				</message>
 			</text>
 			<text>
@@ -95,7 +95,7 @@
 				<message selector="question-list-part-title">
 					<model ref="part.ordering.position" />
 					<model ref="assessment.parts.size" />
-					<model ref="part.title" />
+					<model ref="part.title" type="text" />
 					<selectors>
 						<selector selector="question-list-part-title-no-title">
 							<hasValueDecision reversed="TRUE" model="part.title" />

@@ -87,7 +87,7 @@
 					<title>
 						<message selector="list-header-title" />
 					</title>
-					<model ref="submission.assessment.title" missing="no-title"/>
+					<model ref="submission.assessment.title" type="text" missing="no-title"/>
 					<sort>
 						<active>
 							<compareDecision model="sort_column" constant="0" />
