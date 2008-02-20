@@ -3,7 +3,7 @@
 -- $Id$
 --**********************************************************************************
 --
--- Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+-- Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 -- 
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ DROP TABLE MNEME_ASSESSMENT_PART;
 DROP TABLE MNEME_ASSESSMENT_ACCESS;
 DROP TABLE MNEME_ASSESSMENT;
 
-DROP TABLE MNEME_POOL_MANIFEST;
 DROP TABLE MNEME_POOL;
 
 DROP TABLE MNEME_QUESTION;

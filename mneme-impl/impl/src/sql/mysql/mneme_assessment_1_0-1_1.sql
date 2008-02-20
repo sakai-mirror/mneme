@@ -3,7 +3,7 @@
 -- $Id$
 --**********************************************************************************
 --
--- Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
+-- Copyright (c) 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 -- 
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -20,35 +20,13 @@
 --*********************************************************************************/
 
 -----------------------------------------------------------------------------
--- Mneme Question DDL
+-- Mneme Assessment DDL changes between 1.0 and 1.1
 -----------------------------------------------------------------------------
 
-CREATE TABLE MNEME_QUESTION
-(
-	CONTEXT				VARCHAR (99) NOT NULL,
-	CREATED_BY_DATE		BIGINT NOT NULL,
-	CREATED_BY_USER		VARCHAR (99) NOT NULL,
-	DESCRIPTION			VARCHAR (255) NULL,
-	EXPLAIN_REASON		CHAR (1) NOT NULL CHECK (EXPLAIN_REASON IN (0, 1)),
-	FEEDBACK			LONGTEXT,
-	HINTS				LONGTEXT,
-	HISTORICAL			CHAR (1) NOT NULL CHECK (HISTORICAL IN (0, 1)),
-	ID					BIGINT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-	MINT				CHAR (1) NOT NULL CHECK (MINT IN (0, 1)),
-	MODIFIED_BY_DATE	BIGINT NOT NULL,
-	MODIFIED_BY_USER	VARCHAR (99) NOT NULL,
-	POOL_ID				BIGINT UNSIGNED NULL,
-	PRESENTATION_TEXT	LONGTEXT,
-	SURVEY				CHAR (1) NOT NULL CHECK (SURVEY IN (0, 1)),
-	TYPE				VARCHAR (99) NOT NULL,
-	GUEST				LONGTEXT
-);
+ALTER TABLE MNEME_ASSESSMENT
+	CHANGE PRESENTATION_TEXT PRESENTATION_TEXT LONGTEXT,
+	CHANGE SUBMIT_PRES_TEXT SUBMIT_PRES_TEXT LONGTEXT;
 
-CREATE INDEX MNEME_QUESTION_IDX_MHPS ON MNEME_QUESTION
-(
-	MINT		ASC,
-	HISTORICAL	ASC,
-	POOL_ID		ASC,
-	SURVEY		ASC
-);
+ALTER TABLE MNEME_ASSESSMENT_ACCESS CHANGE USERS USERS LONGTEXT;
 
+ALTER TABLE MNEME_ASSESSMENT_PART CHANGE PRESENTATION_TEXT PRESENTATION_TEXT LONGTEXT;

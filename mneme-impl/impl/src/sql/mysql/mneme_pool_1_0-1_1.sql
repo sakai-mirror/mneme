@@ -24,3 +24,5 @@
 -----------------------------------------------------------------------------
 
 DROP TABLE MNEME_POOL_MANIFEST;
+
+ALTER TABLE MNEME_POOL CHANGE DESCRIPTION DESCRIPTION LONGTEXT;
