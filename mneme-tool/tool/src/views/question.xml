@@ -306,7 +306,7 @@
 						<!-- reason for delivery -->
 						<section>
 							<container>
-								<textEdit rows="5" cols="60">
+								<htmlEdit textOnly="TRUE">
 									<title>
 										<message selector="question-rationale">
 											<model type="icon" icon="/icons/reason.png" />
@@ -315,8 +315,8 @@
 									<readOnly>
 										<decision model="review" />
 									</readOnly>
-									<model type="text" edit="TRUE" ref="answer.reason" />
-								</textEdit>
+									<model type="html" ref="answer.reason" />
+								</htmlEdit>
 							</container>
 							<included>
 								<decision reversed="TRUE" model="review" />
@@ -334,7 +334,7 @@
 										</message>
 									</title>
 									<message>
-										<model type="text" ref="answer.reason" />
+										<model type="html" ref="answer.reason" />
 									</message>
 								</text>
 							</container>

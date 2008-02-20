@@ -64,14 +64,14 @@
 						<!-- instructions overlay -->
 						<overlay id="instructions">
 							<container>
-								<htmlEdit title="test-instructions" rows="8" cols="60" small="TRUE">
+								<htmlEdit title="test-instructions" small="TRUE">
 									<model type="html" ref="assessment.presentation.text" />
 								</htmlEdit>
 								<!-- 
 									<attachments title="attachments" model="assessment.presentation.attachments" name="attachment">
 									<navigations>
 									<navigation destination="REMOVE" title="remove-attachment" style="LINK"
-									description="remove-attachment-description" submit="TRUE" small="true">
+									description="remove-attachment-description" submit="TRUE" small="TRUE">
 									<icon icon="/icons/delete.png" style="NONE" />
 									<destination template="REMOVE:{0}">
 									<model ref="attachment.reference" />
@@ -138,7 +138,7 @@
 						</selection>
 
 						<!-- title -->
-						<textEdit id="title" title="test-title" rows="1" cols="40">
+						<textEdit id="title" title="test-title" cols="40">
 							<model ref="assessment.title" type="text"/>
 						</textEdit>
 

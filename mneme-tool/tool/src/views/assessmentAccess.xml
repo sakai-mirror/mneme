@@ -143,13 +143,13 @@
 						</selectionChoice>
 					</selectionChoices>
 				</selection>
-				<textEdit rows="1" cols="16">
+				<textEdit cols="16">
 					<title>
 						<message selector="password">
 							<model type="icon" icon="/icons/password.png" />
 						</message>
 					</title>
-					<model ref="access.passwordValue" />
+					<model type="text" ref="access.passwordValue" />
 				</textEdit>
 
 				<!-- navigation -->

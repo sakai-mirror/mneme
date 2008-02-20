@@ -90,7 +90,7 @@ public interface Pool
 	/**
 	 * Access the description of the pool.
 	 * 
-	 * @return The description of the pool (plain text).
+	 * @return The description of the pool (rich text / html).
 	 */
 	String getDescription();
 

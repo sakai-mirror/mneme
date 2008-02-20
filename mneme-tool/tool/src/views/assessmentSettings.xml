@@ -49,7 +49,7 @@
 	<container>
 
 		<!-- title -->
-		<textEdit id="title" title="title" rows="1" cols="40">
+		<textEdit id="title" title="title" cols="40">
 			<model ref="assessment.title" type="text" />
 		</textEdit>
 
@@ -327,13 +327,13 @@
 					</container>
 				</section>
 
-				<textEdit rows="1" cols="16">
+				<textEdit cols="16">
 					<title>
 						<message selector="password">
 							<model type="icon" icon="/icons/password.png" />
 						</message>
 					</title>
-					<model ref="assessment.password.password" />
+					<model ref="assessment.password.password" type="text" />
 				</textEdit>
 
 			</container>

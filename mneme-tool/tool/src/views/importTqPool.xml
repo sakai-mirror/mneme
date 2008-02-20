@@ -64,7 +64,7 @@
 							<message model="pool.id" />
 						</valueMessage>
 						<displayMessage>
-							<message model="pool.description" />
+							<message model="pool.description" type="text" />
 						</displayMessage>
 					</selectionModel>
 				</selection>

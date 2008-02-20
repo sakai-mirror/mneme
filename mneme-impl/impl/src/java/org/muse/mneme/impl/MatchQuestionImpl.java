@@ -438,7 +438,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 
 		EntityListColumn col = this.uiService.newEntityListColumn();
 		HtmlEdit edit = this.uiService.newHtmlEdit();
-		edit.setSize(8, 25);
 		edit.setSmall();
 		edit.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.choice"));
 		col.setTitle("choice");
@@ -447,7 +446,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 
 		col = this.uiService.newEntityListColumn();
 		edit = this.uiService.newHtmlEdit();
-		edit.setSize(8, 25);
 		edit.setSmall();
 		edit.setProperty(this.uiService.newHtmlPropertyReference().setReference("pair.match"));
 		col.setTitle("match");
@@ -465,7 +463,6 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 
 		HtmlEdit distractor = this.uiService.newHtmlEdit();
 		distractor.setTitle("distractor", this.uiService.newIconPropertyReference().setIcon("/icons/distractor_add.png"));
-		distractor.setSize(8, 25);
 		distractor.setSmall();
 		distractor.setProperty(this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.distractor"));
 

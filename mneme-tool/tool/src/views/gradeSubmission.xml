@@ -184,7 +184,7 @@
 										</message>
 									</title>
 									<message>
-										<model type="text" ref="answer.reason" />
+										<model type="html" ref="answer.reason" />
 									</message>
 								</text>
 							</container>

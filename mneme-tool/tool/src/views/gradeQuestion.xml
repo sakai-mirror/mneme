@@ -252,7 +252,7 @@
 								</message>
 							</title>
 							<message>
-								<model type="text" ref="answer.reason" />
+								<model type="html" ref="answer.reason" />
 							</message>
 							<included>
 								<hasValueDecision model="answer.reason" />
@@ -261,7 +261,7 @@
 						<!-- evaluation -->
 						<section>
 							<container>
-								<htmlEdit rows="8" cols="40" small="TRUE">
+								<htmlEdit small="TRUE">
 									<model type="html" ref="answer.evaluation.comment" />
 									<title>
 										<message selector="submission-evaluation">

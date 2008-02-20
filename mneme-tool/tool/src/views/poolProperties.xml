@@ -48,11 +48,13 @@
 		<section>
 			<container>
 
-				<textEdit title="pool-title" rows="1" cols="40">
-					<model ref="pool.title" type="text" />
+				<textEdit title="pool-title" cols="40">
+					<model type="text" ref="pool.title" />
 				</textEdit>
 
-				<textEdit title="pool-description" model="pool.description" rows="5" cols="40" />
+				<htmlEdit title="pool-description" small="TRUE" textOnly="TRUE">
+					<model type="html" ref="pool.description" />
+				</htmlEdit>
 
 				<floatEdit title="pool-points" model="pool.pointsEdit" cols="6">
 					<onEmptyAlert>
