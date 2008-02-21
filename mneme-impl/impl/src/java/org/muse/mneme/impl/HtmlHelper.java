@@ -21,22 +21,22 @@
 
 package org.muse.mneme.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.htmlcleaner.HtmlCleaner;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.output.EscapeStrategy;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
-import org.jdom.xpath.XPath;
+import org.jaxen.JaxenException;
+import org.jaxen.XPath;
+import org.jaxen.dom.DOMXPath;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.tidy.TidyHelper;
 
 /**
  * HtmlHelper has some utility methods for working with user entered HTML.
@@ -56,27 +56,24 @@ public class HtmlHelper
 	public static String clean(String source)
 	{
 		if (source == null) return null;
-
+/*
 		try
 		{
 			// parse possibly dirty html
-			HtmlCleaner cleaner = new HtmlCleaner(source);
-
-			//cleaner.setRecognizeUnicodeChars(true);
-			//cleaner.setAdvancedXmlEscape(true);
-			cleaner.setTranslateSpecialEntities(true);
-
-			// clean it up
-			cleaner.clean();
-
-			String pretty = cleaner.getPrettyXmlAsString();
-			// System.out.println(pretty);
-
-			// make a DOM for further processing
-			Document doc = cleaner.createJDom();
+			TidyHelper tidy = new TidyHelper();
+			ByteArrayInputStream bais = new ByteArrayInputStream(source.getBytes("UTF-8"));
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			PrintWriter pw = new PrintWriter(baos);
+			tidy.setErrout(pw);
+			tidy.setQuiet(true);
+			tidy.setXHTML(true);
+			// tidy.setRawOut(true);
+			// tidy.setTidyMark(false);
+			// tidy.setXmlOut(true);
+			Document doc = tidy.parseDOM(bais, null);
 
 			// assure target=_blank in all anchors
-			XPath x = XPath.newInstance("//a");
+			XPath x = new DOMXPath("//a");
 			List l = x.selectNodes(doc);
 			for (Object o : l)
 			{
@@ -86,34 +83,35 @@ public class HtmlHelper
 
 			// find the part we will save
 			Element rvElement = null;
-			XPath x2 = XPath.newInstance("/html/body");
+			XPath x2 = new DOMXPath("/html/body");
 			l = x2.selectNodes(doc);
 			Element body = (Element) l.get(0);
-			if ((body.getContent().size() == 1) && (body.getChildren().size() == 1)
-					&& (((Element) (body.getChildren().get(0))).getName().equals("p")))
+			if ((body.getChildNodes().getLength() == 1) && (((Node) (body.getChildNodes().item(0))).getNodeType() == Node.ELEMENT_NODE)
+					&& (((Node) (body.getChildNodes().item(0))).getNodeName().equals("p")))
 			{
-				rvElement = (Element) body.getChildren().get(0);
+				rvElement = (Element) body.getChildNodes().item(0);
 			}
 
 			// otherwise use the body, but change it to a paragraph
 			else
 			{
-				body.setName("p");
-				rvElement = body;
+				rvElement = doc.createElement("p");
+				NodeList nodes = body.getChildNodes();
+				for (int i = 0; i < nodes.getLength(); i++)
+				{
+					Node child = nodes.item(i);
+					rvElement.appendChild(child);
+				}
 			}
 
-			// write to a string
-			// Format format = Format.getRawFormat().setEscapeStrategy(new EscapeStrategy()
-			// {
-			// public boolean shouldEscape(char arg0)
-			// {
-			// return false;
-			// }
-			// });
-			XMLOutputter xmlOut = new XMLOutputter();
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			xmlOut.output(rvElement, baos);
+			baos = new ByteArrayOutputStream();
+			tidy.pprintNode(tidy.getConfiguration(), rvElement, baos);
 			String rv = baos.toString("UTF-8");
+			rv = rv.trim();
+//			rv = rv.replaceAll(">\n<", "><");
+//			rv = rv.replaceAll(">\n", ">");
+//			rv = rv.replaceAll("\n", " ");
+			rv = rv.replaceAll("\n", " ");
 
 			return rv;
 		}
@@ -121,15 +119,11 @@ public class HtmlHelper
 		{
 			M_log.warn(e);
 		}
-		catch (ParserConfigurationException e)
+		catch (JaxenException e)
 		{
 			M_log.warn(e);
 		}
-		catch (JDOMException e)
-		{
-			M_log.warn(e);
-		}
-
+*/
 		return source;
 	}
 }
