@@ -177,8 +177,7 @@ public interface Pool
 	 * Set the description of the pool.
 	 * 
 	 * @param description
-	 *        The description of the pool.<br />
-	 *        Truncated to 255 characters, trimmed, if all blank, set to null.
+	 *        html text.
 	 */
 	void setDescription(String description);
 

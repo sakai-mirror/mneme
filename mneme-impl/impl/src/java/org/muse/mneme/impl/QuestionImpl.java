@@ -564,6 +564,9 @@ public class QuestionImpl implements Question
 	 */
 	public void setFeedback(String feedback)
 	{
+		// clean up the feedback
+		feedback = HtmlHelper.clean(feedback);
+
 		if (!Different.different(feedback, this.feedback)) return;
 
 		this.feedback = feedback;
@@ -576,6 +579,9 @@ public class QuestionImpl implements Question
 	 */
 	public void setHints(String hints)
 	{
+		// clean up the hints
+		hints = HtmlHelper.clean(hints);
+
 		if (!Different.different(hints, this.hints)) return;
 
 		this.hints = hints;

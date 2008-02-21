@@ -271,13 +271,8 @@ public class PoolImpl implements Pool
 	 */
 	public void setDescription(String description)
 	{
-		// massage the description
-		if (description != null)
-		{
-			description = description.trim();
-			if (description.length() > 255) description = description.substring(0, 255);
-			if (description.length() == 0) description = null;
-		}
+		// clean up the description
+		description = HtmlHelper.clean(description);
 
 		if (!Different.different(this.description, description)) return;
 

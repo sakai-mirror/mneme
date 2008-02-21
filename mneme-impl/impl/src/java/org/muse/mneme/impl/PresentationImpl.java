@@ -114,6 +114,9 @@ public class PresentationImpl implements Presentation
 	 */
 	public void setText(String text)
 	{
+		// clean up the text
+		text = HtmlHelper.clean(text);
+
 		if (!Different.different(this.text, text)) return;
 
 		this.text = text;

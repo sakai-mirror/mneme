@@ -562,6 +562,9 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	 */
 	public void setModelAnswer(String modelAnswer)
 	{
+		// clean up the modelAnswer
+		modelAnswer = HtmlHelper.clean(modelAnswer);
+
 		if (!Different.different(modelAnswer, this.modelAnswer)) return;
 
 		this.modelAnswer = modelAnswer;

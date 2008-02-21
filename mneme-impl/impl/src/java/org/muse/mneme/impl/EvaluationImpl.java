@@ -96,6 +96,9 @@ public class EvaluationImpl implements Evaluation
 	 */
 	public void setComment(String comment)
 	{
+		// clean up the comment
+		comment = HtmlHelper.clean(comment);
+
 		if (!Different.different(this.comment, comment)) return;
 
 		this.comment = comment;

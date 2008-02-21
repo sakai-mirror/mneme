@@ -212,6 +212,9 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void setAnswerData(String answerData)
 	{
+		// clean up the answerData
+		answerData = HtmlHelper.clean(answerData);
+
 		if (!Different.different(this.answerData, answerData)) return;
 
 		this.answerData = answerData;
