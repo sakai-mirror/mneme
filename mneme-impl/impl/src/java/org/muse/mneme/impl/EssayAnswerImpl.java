@@ -208,12 +208,11 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * Set the answerData
 	 * 
-	 * @param answerData
+	 * @param answerData. Must be well formed HTML or plain text.
 	 */
 	public void setAnswerData(String answerData)
 	{
-		// clean up the answerData
-		answerData = HtmlHelper.clean(answerData);
+		answerData = StringUtil.trimToNull(answerData);
 
 		if (!Different.different(this.answerData, answerData)) return;
 

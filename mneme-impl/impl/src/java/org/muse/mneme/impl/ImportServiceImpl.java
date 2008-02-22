@@ -545,12 +545,14 @@ public class ImportServiceImpl implements ImportService
 		EssayQuestionImpl e = (EssayQuestionImpl) (question.getTypeSpecificQuestion());
 
 		// set the text
-		question.getPresentation().setText(these[0].questionChoiceText + attachments);
+		String clean = HtmlHelper.clean(these[0].questionChoiceText + attachments);
+		question.getPresentation().setText(clean);
 
 		// model answer
 		if (these[0].answerMatchText != null)
 		{
-			e.setModelAnswer(these[0].answerMatchText);
+			clean = HtmlHelper.clean(these[0].answerMatchText);
+			e.setModelAnswer(clean);
 		}
 
 		// type
@@ -646,7 +648,8 @@ public class ImportServiceImpl implements ImportService
 		}
 
 		// set the text
-		f.setText(questionText + attachments);
+		String clean = HtmlHelper.clean(questionText + attachments);
+		f.setText(clean);
 
 		return question;
 	}
@@ -742,7 +745,8 @@ public class ImportServiceImpl implements ImportService
 		LikertScaleQuestionImpl l = (LikertScaleQuestionImpl) (question.getTypeSpecificQuestion());
 
 		// set the text
-		question.getPresentation().setText(these[0].questionChoiceText + attachments);
+		String clean = HtmlHelper.clean(these[0].questionChoiceText + attachments);
+		question.getPresentation().setText(clean);
 
 		// set the scale
 		l.setScale(scale);
@@ -789,7 +793,8 @@ public class ImportServiceImpl implements ImportService
 		MatchQuestionImpl m = (MatchQuestionImpl) (question.getTypeSpecificQuestion());
 
 		// set the text
-		question.getPresentation().setText(these[0].instruction + attachments);
+		String clean = HtmlHelper.clean(these[0].instruction + attachments);
+		question.getPresentation().setText(clean);
 
 		// set the # pairs
 		m.consolidate("INIT:" + these.length);
@@ -798,8 +803,11 @@ public class ImportServiceImpl implements ImportService
 		List<MatchQuestionImpl.MatchQuestionPair> pairs = m.getPairs();
 		for (int index = 0; index < these.length; index++)
 		{
-			pairs.get(index).setChoice(these[index].questionChoiceText);
-			pairs.get(index).setMatch(these[index].answerMatchText);
+			clean = HtmlHelper.clean(these[index].questionChoiceText);
+			pairs.get(index).setChoice(clean);
+
+			clean = HtmlHelper.clean(these[index].answerMatchText);
+			pairs.get(index).setMatch(clean);
 		}
 
 		return question;
@@ -861,7 +869,8 @@ public class ImportServiceImpl implements ImportService
 		MultipleChoiceQuestionImpl mc = (MultipleChoiceQuestionImpl) (question.getTypeSpecificQuestion());
 
 		// set the text
-		question.getPresentation().setText(these[0].questionChoiceText + attachments);
+		String clean = HtmlHelper.clean(these[0].questionChoiceText + attachments);
+		question.getPresentation().setText(clean);
 
 		// randomize
 		if (these[0].randomize != null) mc.setShuffleChoices(these[0].randomize.toString());
@@ -875,7 +884,8 @@ public class ImportServiceImpl implements ImportService
 		{
 			if (these[index].answerMatchText != null)
 			{
-				choices.add(these[index].answerMatchText);
+				clean = HtmlHelper.clean(these[index].answerMatchText);
+				choices.add(clean);
 			}
 		}
 		mc.setAnswerChoices(choices);
@@ -996,7 +1006,8 @@ public class ImportServiceImpl implements ImportService
 		TrueFalseQuestionImpl tf = (TrueFalseQuestionImpl) (question.getTypeSpecificQuestion());
 
 		// set the text
-		question.getPresentation().setText(these[0].questionChoiceText + attachments);
+		String clean = HtmlHelper.clean(these[0].questionChoiceText + attachments);
+		question.getPresentation().setText(clean);
 
 		// the correct answer
 		tf.setCorrectAnswer((((these[0].correct != null) && (these[0].correct.booleanValue()))) ? Boolean.TRUE.toString() : Boolean.FALSE.toString());

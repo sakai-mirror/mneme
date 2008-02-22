@@ -38,6 +38,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * EssayQuestionImpl handles questions for the essay question type.
@@ -558,13 +559,12 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	 * Set the model answer.
 	 * 
 	 * @param modelAnswer
-	 *        The model answer.
+	 *        The model answer. Must be well formed HTML or plain text.
 	 */
 	public void setModelAnswer(String modelAnswer)
 	{
-		// clean up the modelAnswer
-		modelAnswer = HtmlHelper.clean(modelAnswer);
-
+		modelAnswer = StringUtil.trimToNull(modelAnswer);
+		
 		if (!Different.different(modelAnswer, this.modelAnswer)) return;
 
 		this.modelAnswer = modelAnswer;

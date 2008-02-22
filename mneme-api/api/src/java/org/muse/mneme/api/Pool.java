@@ -177,7 +177,7 @@ public interface Pool
 	 * Set the description of the pool.
 	 * 
 	 * @param description
-	 *        html text.
+	 *        html text.  Must be well formed HTML or plain text.
 	 */
 	void setDescription(String description);
 

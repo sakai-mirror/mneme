@@ -35,6 +35,7 @@ import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionUnscoredQuestionService;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.util.FormattedText;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * QuestionImpl implements Question
@@ -564,9 +565,8 @@ public class QuestionImpl implements Question
 	 */
 	public void setFeedback(String feedback)
 	{
-		// clean up the feedback
-		feedback = HtmlHelper.clean(feedback);
-
+		feedback = StringUtil.trimToNull(feedback);
+		
 		if (!Different.different(feedback, this.feedback)) return;
 
 		this.feedback = feedback;
@@ -579,9 +579,8 @@ public class QuestionImpl implements Question
 	 */
 	public void setHints(String hints)
 	{
-		// clean up the hints
-		hints = HtmlHelper.clean(hints);
-
+		hints = StringUtil.trimToNull(hints);
+		
 		if (!Different.different(hints, this.hints)) return;
 
 		this.hints = hints;

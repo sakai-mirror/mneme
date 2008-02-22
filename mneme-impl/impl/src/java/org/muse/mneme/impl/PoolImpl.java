@@ -29,6 +29,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPoolService;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.Shuffler;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * PoolImpl implements Pool
@@ -271,8 +272,7 @@ public class PoolImpl implements Pool
 	 */
 	public void setDescription(String description)
 	{
-		// clean up the description
-		description = HtmlHelper.clean(description);
+		description = StringUtil.trimToNull(description);
 
 		if (!Different.different(this.description, description)) return;
 

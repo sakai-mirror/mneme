@@ -133,7 +133,7 @@ public interface Answer
 	 * Set the reason text, if any, provided as part of this answer.
 	 * 
 	 * @param reason
-	 *        The answer's reason text, or null if there is none.
+	 *        The answer's reason text, or null if there is none.  Must be well formed HTML or plain text.
 	 */
 	void setReason(String reason);
 

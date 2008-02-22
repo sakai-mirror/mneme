@@ -211,7 +211,7 @@ public interface Question
 	 * Set the feedback (rich) text for the question.
 	 * 
 	 * @param feedback
-	 *        The feedback text for the question.
+	 *        The feedback text for the question.  Must be well formed HTML or plain text.
 	 */
 	void setFeedback(String feedback);
 
@@ -219,7 +219,7 @@ public interface Question
 	 * Set the hints (rich) text for the question.
 	 * 
 	 * @param hints
-	 *        The hints text for the question.
+	 *        The hints text for the question.  Must be well formed HTML or plain text.
 	 */
 	void setHints(String hints);
 

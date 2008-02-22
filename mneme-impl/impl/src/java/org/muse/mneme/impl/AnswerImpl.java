@@ -260,8 +260,7 @@ public class AnswerImpl implements Answer
 	 */
 	public void setReason(String reason)
 	{
-		// clean up the reason
-		reason = HtmlHelper.clean(reason);
+		reason = StringUtil.trimToNull(reason);
 
 		if (!StringUtil.different(this.reason, reason)) return;
 

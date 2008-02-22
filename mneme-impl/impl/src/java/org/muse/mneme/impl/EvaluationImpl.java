@@ -24,6 +24,7 @@ package org.muse.mneme.impl;
 import org.muse.mneme.api.Attribution;
 import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.Evaluation;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * EvaluationImpl implements Evaluation
@@ -96,9 +97,8 @@ public class EvaluationImpl implements Evaluation
 	 */
 	public void setComment(String comment)
 	{
-		// clean up the comment
-		comment = HtmlHelper.clean(comment);
-
+		comment = StringUtil.trimToNull(comment);
+		
 		if (!Different.different(this.comment, comment)) return;
 
 		this.comment = comment;

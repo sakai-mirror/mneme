@@ -72,7 +72,7 @@ public interface Presentation
 	 * Set the rich text (html) part of the presentation.
 	 * 
 	 * @param text
-	 *        The rich text (html) part of the presentation.
+	 *        The rich text (html) part of the presentation.  Must be well formed HTML or plain text.
 	 */
 	void setText(String text);
 }

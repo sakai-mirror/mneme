@@ -28,6 +28,7 @@ import java.util.List;
 import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.Presentation;
 import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * PresentationImpl implements Presentation
@@ -114,9 +115,8 @@ public class PresentationImpl implements Presentation
 	 */
 	public void setText(String text)
 	{
-		// clean up the text
-		text = HtmlHelper.clean(text);
-
+		text = StringUtil.trimToNull(text);
+		
 		if (!Different.different(this.text, text)) return;
 
 		this.text = text;

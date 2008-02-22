@@ -58,7 +58,7 @@ public interface Evaluation
 	 * Set the rich text (html) comment.
 	 * 
 	 * @param comment
-	 *        The rich text (html) comment.
+	 *        The rich text (html) comment. Must be well formed HTML or plain text.
 	 */
 	void setComment(String comment);
 
