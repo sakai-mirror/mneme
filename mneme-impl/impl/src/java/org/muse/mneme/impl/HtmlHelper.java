@@ -34,9 +34,7 @@ import org.jaxen.XPath;
 import org.jaxen.dom.DOMXPath;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.tidy.TidyHelper;
+import org.w3c.tidy.Tidy;
 
 /**
  * HtmlHelper has some utility methods for working with user entered HTML.
@@ -56,20 +54,17 @@ public class HtmlHelper
 	public static String clean(String source)
 	{
 		if (source == null) return null;
-/*
+
 		try
 		{
 			// parse possibly dirty html
-			TidyHelper tidy = new TidyHelper();
+			Tidy tidy = new Tidy();
 			ByteArrayInputStream bais = new ByteArrayInputStream(source.getBytes("UTF-8"));
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			PrintWriter pw = new PrintWriter(baos);
 			tidy.setErrout(pw);
 			tidy.setQuiet(true);
 			tidy.setXHTML(true);
-			// tidy.setRawOut(true);
-			// tidy.setTidyMark(false);
-			// tidy.setXmlOut(true);
 			Document doc = tidy.parseDOM(bais, null);
 
 			// assure target=_blank in all anchors
@@ -81,37 +76,20 @@ public class HtmlHelper
 				e.setAttribute("target", "_blank");
 			}
 
-			// find the part we will save
-			Element rvElement = null;
-			XPath x2 = new DOMXPath("/html/body");
-			l = x2.selectNodes(doc);
-			Element body = (Element) l.get(0);
-			if ((body.getChildNodes().getLength() == 1) && (((Node) (body.getChildNodes().item(0))).getNodeType() == Node.ELEMENT_NODE)
-					&& (((Node) (body.getChildNodes().item(0))).getNodeName().equals("p")))
-			{
-				rvElement = (Element) body.getChildNodes().item(0);
-			}
-
-			// otherwise use the body, but change it to a paragraph
-			else
-			{
-				rvElement = doc.createElement("p");
-				NodeList nodes = body.getChildNodes();
-				for (int i = 0; i < nodes.getLength(); i++)
-				{
-					Node child = nodes.item(i);
-					rvElement.appendChild(child);
-				}
-			}
-
+			// get the whole thing in a string
 			baos = new ByteArrayOutputStream();
-			tidy.pprintNode(tidy.getConfiguration(), rvElement, baos);
-			String rv = baos.toString("UTF-8");
-			rv = rv.trim();
-//			rv = rv.replaceAll(">\n<", "><");
-//			rv = rv.replaceAll(">\n", ">");
-//			rv = rv.replaceAll("\n", " ");
-			rv = rv.replaceAll("\n", " ");
+			tidy.pprint(doc, baos);
+			String all = baos.toString("UTF-8");
+			String rv = null;
+
+			// find the substring between <body> and </body>
+			int start = all.indexOf("<body>");
+			if (start != -1)
+			{
+				start += "<body>".length();
+				int end = all.lastIndexOf("</body>");
+				rv = all.substring(start, end);
+			}
 
 			return rv;
 		}
@@ -123,7 +101,7 @@ public class HtmlHelper
 		{
 			M_log.warn(e);
 		}
-*/
-		return source;
+
+		return null;
 	}
 }
