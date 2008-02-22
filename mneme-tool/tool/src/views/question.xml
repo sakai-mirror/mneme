@@ -306,7 +306,7 @@
 						<!-- reason for delivery -->
 						<section>
 							<container>
-								<htmlEdit textOnly="TRUE">
+								<htmlEdit>
 									<title>
 										<message selector="question-rationale">
 											<model type="icon" icon="/icons/reason.png" />

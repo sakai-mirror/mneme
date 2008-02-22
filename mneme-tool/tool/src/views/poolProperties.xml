@@ -7,7 +7,7 @@
 	* $Id$
 	***********************************************************************************
 	*
-	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 	* 
 	* Licensed under the Apache License, Version 2.0 (the "License");
 	* you may not use this file except in compliance with the License.
@@ -25,6 +25,11 @@
 -->
 
 <interface>
+
+	<!-- attachment picker view -->
+	<attachmentPicker>
+		<destination template="/attachments" />
+	</attachmentPicker>
 
 	<!--mode bar-->
 	<modeContainer>
@@ -52,7 +57,7 @@
 					<model type="text" ref="pool.title" />
 				</textEdit>
 
-				<htmlEdit title="pool-description" small="TRUE" textOnly="TRUE">
+				<htmlEdit title="pool-description" small="TRUE">
 					<model type="html" ref="pool.description" />
 				</htmlEdit>
 
