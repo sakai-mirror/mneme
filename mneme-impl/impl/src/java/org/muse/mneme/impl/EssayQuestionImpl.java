@@ -527,6 +527,11 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		PropertyReference iteratorRef = this.uiService.newPropertyReference().setReference("submissions").setFormatDelegate(
 				this.uiService.getFormatDelegate("AccessSubmissionsQuestionAnswers", "sakai.mneme"));
 		section.setIterator(iteratorRef, "answer", this.uiService.newMessage().setMessage("no-answers"));
+		section.setEntityIncluded(this.uiService.newOrDecision().setOptions(
+				this.uiService.newHasValueDecision().setProperty(
+						this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData")),
+				this.uiService.newHasValueDecision().setProperty(
+						this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded"))));
 		section.add(answer).add(uploaded);
 		section.setTitle("answer-summary");
 
@@ -563,7 +568,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	public void setModelAnswer(String modelAnswer)
 	{
 		modelAnswer = StringUtil.trimToNull(modelAnswer);
-		
+
 		if (!Different.different(modelAnswer, this.modelAnswer)) return;
 
 		this.modelAnswer = modelAnswer;
