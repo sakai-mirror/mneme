@@ -667,6 +667,33 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getInvalidMessage()
+	{
+		boolean invalidText = this.question.getPresentation().getText() == null;
+		boolean invalidChoices = this.answerChoices.size() < 2;
+
+		if (!invalidText && !invalidChoices) return null;
+
+		StringBuilder rv = new StringBuilder();
+		rv.append("<ul>");
+
+		if (invalidText)
+		{
+			rv.append(this.messages.getString("invalid-text"));
+		}
+
+		if (invalidChoices)
+		{
+			rv.append(this.messages.getString("invalid-choices"));
+		}
+
+		rv.append("</ul>");
+		return rv.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsSurvey()
 	{
 		return Boolean.FALSE;

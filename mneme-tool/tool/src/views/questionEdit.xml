@@ -67,6 +67,22 @@
 			</container>
 		</navigationBar>
 
+		<!--  if invalid -->
+		<section>
+			<container>
+				<text>
+					<message selector="invalid-question">
+						<model type="icon" icon="/icons/warning.png" />
+						<model type="html" ref="question.typeSpecificQuestion.invalidMessage" />
+					</message>
+				</text>
+			</container>
+			<included>
+				<decision model="question.isValid" reversed="TRUE" />
+				<decision model="question.mint" reversed="TRUE" />
+			</included>
+		</section>
+
 		<!-- survey -->
 		<section>
 			<container>

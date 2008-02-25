@@ -677,4 +677,13 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	{
 		this.uiService = service;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getInvalidMessage()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

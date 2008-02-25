@@ -297,8 +297,30 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getInvalidMessage()
+	{
+		// we need text
+		if (this.question.getPresentation().getText() == null) return "<ul>" + this.messages.getString("invalid") + "</ul>";
+
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsSurvey()
 	{
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsValid()
+	{
+		// we need the text set
+		if (this.question.getPresentation().getText() == null) return Boolean.FALSE;
+
 		return Boolean.TRUE;
 	}
 
@@ -614,16 +636,5 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	public void setUi(UiService service)
 	{
 		this.uiService = service;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getIsValid()
-	{
-		// we need the text set
-		if (this.question.getPresentation().getText() == null) return Boolean.FALSE;
-
-		return Boolean.TRUE;
 	}
 }

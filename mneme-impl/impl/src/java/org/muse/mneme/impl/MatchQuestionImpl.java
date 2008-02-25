@@ -625,6 +625,34 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getInvalidMessage()
+	{
+		boolean invalidText = this.question.getPresentation().getText() == null;
+		boolean invalidPairs = this.pairs.size() < 2;
+		if (!invalidText && !invalidPairs) return null;
+
+		StringBuilder rv = new StringBuilder();
+		rv.append("<ul>");
+
+		if (invalidText)
+		{
+			rv.append(this.messages.getString("invalid-text"));
+		}
+
+		if (invalidPairs)
+		{
+			rv.append(this.messages.getString("invalid-pairs"));
+		}
+
+		// TODO: more
+
+		rv.append("</ul>");
+		return rv.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsSurvey()
 	{
 		return Boolean.FALSE;

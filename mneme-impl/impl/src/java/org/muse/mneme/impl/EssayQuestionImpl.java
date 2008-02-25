@@ -256,6 +256,17 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getInvalidMessage()
+	{
+		// we need text
+		if (this.question.getPresentation().getText() == null) return "<ul>" + this.messages.getString("invalid") + "</ul>";
+
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsSurvey()
 	{
 		return Boolean.FALSE;

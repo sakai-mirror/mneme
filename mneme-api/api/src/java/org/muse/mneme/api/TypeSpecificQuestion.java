@@ -89,6 +89,13 @@ public interface TypeSpecificQuestion extends Cloneable
 	Boolean getHasPoints();
 
 	/**
+	 * Get a message describing what is wrong with the question.
+	 * 
+	 * @return A localized message describing what is wrong with the question, or null if the question is valid.
+	 */
+	String getInvalidMessage();
+
+	/**
 	 * Check if the question type is always a survey question.
 	 * 
 	 * @return TRUE if the question type is always a survey question, FALSE if not.
