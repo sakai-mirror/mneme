@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,13 +124,12 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 			return messages.getFormattedMessage("invalid-part-empty", args);
 		}
 
-		// the questions must exist
+		// the questions must exist and be valid
 		for (PoolPick pick : this.questions)
 		{
-			if (!this.questionService.existsQuestion(pick.getQuestionId()))
-			{
-				return messages.getFormattedMessage("invalid-manual-part-deleted-question", args);
-			}
+			Question question = this.questionService.getQuestion(pick.getQuestionId());
+			if (question == null) return messages.getFormattedMessage("invalid-manual-part-deleted-question", args);
+			if (!question.getIsValid()) return messages.getFormattedMessage("invalid-manual-part-invalid-question", args);
 		}
 
 		return null;
@@ -144,13 +143,12 @@ public class ManualPartImpl extends PartImpl implements ManualPart
 		// we must have questions
 		if (this.questions.isEmpty()) return Boolean.FALSE;
 
-		// the questions must exist
+		// the questions must exist and be valid
 		for (PoolPick pick : this.questions)
 		{
-			if (!this.questionService.existsQuestion(pick.getQuestionId()))
-			{
-				return Boolean.FALSE;
-			}
+			Question question = this.questionService.getQuestion(pick.getQuestionId());
+			if (question == null) return Boolean.FALSE;
+			if (!question.getIsValid()) return Boolean.FALSE;
 		}
 
 		return Boolean.TRUE;

@@ -102,7 +102,7 @@ public class AssessmentInvalidView extends ControllerImpl
 
 						if (part instanceof ManualPart)
 						{
-							// manual parts go invalid when they have no questions
+							// manual parts go invalid when they have no or invalid questions
 							msg.append("<li>" + msgs.getFormattedMessage("invalid-mpart", args) + "</li>");
 						}
 						else if (part instanceof DrawPart)

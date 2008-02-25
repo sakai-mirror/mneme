@@ -156,6 +156,16 @@
 							<model ref="part.questionOrder" />
 						</orderColumn>
 						<column pixels="16">
+							<container>
+								<warning>
+									<message selector="invalid-question" />
+								</warning>
+							</container>
+							<entityIncluded>
+								<decision reversed="TRUE" model="question.isValid" />
+							</entityIncluded>
+						</column>
+						<column pixels="16">
 							<navigations>
 								<navigation style="LINK" submit="TRUE" description="question-preview">
 									<icon icon="/icons/preview.png" style="LEFT" />
