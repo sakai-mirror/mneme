@@ -125,6 +125,13 @@ public interface Question
 	Boolean getIsSurvey();
 
 	/**
+	 * Check if the question is valid.
+	 * 
+	 * @return TRUE if the question is valid, FALSE if not.
+	 */
+	Boolean getIsValid();
+
+	/**
 	 * Check if the end user has never made initial settings.
 	 * 
 	 * @return TRUE if this has not been modified since creation, FALSE if it has.
@@ -211,7 +218,7 @@ public interface Question
 	 * Set the feedback (rich) text for the question.
 	 * 
 	 * @param feedback
-	 *        The feedback text for the question.  Must be well formed HTML or plain text.
+	 *        The feedback text for the question. Must be well formed HTML or plain text.
 	 */
 	void setFeedback(String feedback);
 
@@ -219,7 +226,7 @@ public interface Question
 	 * Set the hints (rich) text for the question.
 	 * 
 	 * @param hints
-	 *        The hints text for the question.  Must be well formed HTML or plain text.
+	 *        The hints text for the question. Must be well formed HTML or plain text.
 	 */
 	void setHints(String hints);
 

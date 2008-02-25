@@ -116,7 +116,7 @@ public abstract class QuestionStorageSql implements QuestionStorage
 		List<String> qids = null;
 		if ((oldToNew != null) || ((attachmentTranslations != null) && (!attachmentTranslations.isEmpty())))
 		{
-			qids = source.getAllQuestionIds(null);
+			qids = source.getAllQuestionIds(null, null);
 		}
 		final List<String> poolQids = qids;
 
@@ -179,27 +179,32 @@ public abstract class QuestionStorageSql implements QuestionStorage
 		sql.append("SELECT COUNT(1) FROM MNEME_QUESTION Q");
 		sql.append(" LEFT OUTER JOIN MNEME_POOL P ON Q.POOL_ID=P.ID");
 		sql.append(" WHERE Q.MINT='0' AND Q.HISTORICAL='0' AND P.CONTEXT=?");
-		if (questionType != null)
-		{
-			sql.append(" AND Q.TYPE=?");
-			extras++;
-		}
 		if (survey != null)
 		{
 			sql.append(" AND Q.SURVEY=?");
+			extras++;
+		}
+		else
+		{
+			sql.append(" AND Q.SURVEY IN ('0','1')");
+		}
+		sql.append(" AND Q.VALID='1'");
+		if (questionType != null)
+		{
+			sql.append(" AND Q.TYPE=?");
 			extras++;
 		}
 
 		Object[] fields = new Object[1 + extras];
 		fields[0] = context;
 		int pos = 1;
-		if (questionType != null)
-		{
-			fields[pos++] = questionType;
-		}
 		if (survey != null)
 		{
 			fields[pos++] = survey ? "1" : "0";
+		}
+		if (questionType != null)
+		{
+			fields[pos++] = questionType;
 		}
 
 		List results = this.sqlService.dbRead(sql.toString(), fields, null);
@@ -214,13 +219,24 @@ public abstract class QuestionStorageSql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Pool.PoolCounts countPoolQuestions(Pool pool, String questionType)
+	public Pool.PoolCounts countPoolQuestions(Pool pool, String questionType, Boolean valid)
 	{
 		int extras = 0;
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT Q.SURVEY, COUNT(1) FROM MNEME_QUESTION Q");
 		sql.append(" WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=?");
+		if (valid != null)
+		{
+			if (valid)
+			{
+				sql.append(" AND Q.VALID='1'");
+			}
+			else
+			{
+				sql.append(" AND Q.VALID='0'");
+			}
+		}
 		if (questionType != null)
 		{
 			sql.append(" AND Q.TYPE=?");
@@ -370,7 +386,8 @@ public abstract class QuestionStorageSql implements QuestionStorage
 		// the where and order by
 		StringBuilder whereOrder = new StringBuilder();
 		whereOrder.append("LEFT OUTER JOIN MNEME_POOL P ON Q.POOL_ID=P.ID WHERE Q.MINT='0' AND Q.HISTORICAL='0' AND P.CONTEXT=?"
-				+ ((questionType != null) ? " AND Q.TYPE=?" : "") + ((survey != null) ? " AND Q.SURVEY=?" : "") + " ORDER BY ");
+				+ ((survey != null) ? " AND Q.SURVEY=?" : " AND Q.SURVEY IN ('0','1')") + " AND Q.VALID='1'"
+				+ ((questionType != null) ? " AND Q.TYPE=?" : "") + " ORDER BY ");
 		whereOrder.append(sortToSql(sort));
 
 		int extras = 0;
@@ -380,13 +397,13 @@ public abstract class QuestionStorageSql implements QuestionStorage
 		Object[] fields = new Object[1 + extras];
 		fields[0] = context;
 		int pos = 1;
-		if (questionType != null)
-		{
-			fields[pos++] = questionType;
-		}
 		if (survey != null)
 		{
 			fields[pos++] = survey ? "1" : "0";
+		}
+		if (questionType != null)
+		{
+			fields[pos++] = questionType;
 		}
 
 		List<QuestionImpl> rv = readQuestions(whereOrder.toString(), fields);
@@ -462,7 +479,7 @@ public abstract class QuestionStorageSql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getPoolQuestions(Pool pool, Boolean survey)
+	public List<String> getPoolQuestions(Pool pool, Boolean survey, Boolean valid)
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT Q.ID");
@@ -477,6 +494,17 @@ public abstract class QuestionStorageSql implements QuestionStorage
 			else
 			{
 				sql.append(" AND Q.SURVEY='0'");
+			}
+		}
+		if (valid != null)
+		{
+			if (valid)
+			{
+				sql.append(" AND Q.VALID='1'");
+			}
+			else
+			{
+				sql.append(" AND Q.VALID='0'");
 			}
 		}
 		sql.append(" ORDER BY Q.ID ASC");
@@ -1034,10 +1062,10 @@ public abstract class QuestionStorageSql implements QuestionStorage
 		sql.append("UPDATE MNEME_QUESTION SET");
 		sql.append(" CONTEXT=?, DESCRIPTION=?, EXPLAIN_REASON=?, FEEDBACK=?, HINTS=?, HISTORICAL=?,");
 		sql.append(" MINT=?, MODIFIED_BY_DATE=?, MODIFIED_BY_USER=?, POOL_ID=?,");
-		sql.append(" PRESENTATION_TEXT=?, SURVEY=?, GUEST=?");
+		sql.append(" PRESENTATION_TEXT=?, SURVEY=?, VALID=?, GUEST=?");
 		sql.append(" WHERE ID=?");
 
-		Object[] fields = new Object[14];
+		Object[] fields = new Object[15];
 		fields[0] = question.getContext();
 		fields[1] = limit(question.getDescription(), 255);
 		fields[2] = question.getExplainReason() ? "1" : "0";
@@ -1050,8 +1078,9 @@ public abstract class QuestionStorageSql implements QuestionStorage
 		fields[9] = (question.poolId == null) ? null : Long.valueOf(question.poolId);
 		fields[10] = question.getPresentation().getText();
 		fields[11] = question.getIsSurvey() ? "1" : "0";
-		fields[12] = SqlHelper.encodeStringArray(question.getTypeSpecificQuestion().getData());
-		fields[13] = Long.valueOf(question.getId());
+		fields[12] = question.getIsValid() ? "1" : "0";
+		fields[13] = SqlHelper.encodeStringArray(question.getTypeSpecificQuestion().getData());
+		fields[14] = Long.valueOf(question.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{

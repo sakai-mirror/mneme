@@ -66,6 +66,24 @@
 				<message selector="no-questions" />
 			</emptyTitle>
 			<columns>
+				<column pixels="16">
+					<navigations>
+						<navigation style="LINK" submit="TRUE" description="invalid-alt">
+							<icon icon="/icons/warning.png" style="LEFT" />
+							<destination template="/question_edit/{0}/{1}/{2}{3}/{4}/{5}">
+								<model ref="poolsSortCode" />
+								<model ref="pool.id" />
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+								<model type="paging" ref="paging" />
+								<model ref="question.id" />
+							</destination>
+							<included>
+								<decision reversed="TRUE" model="question.isValid" />
+							</included>
+						</navigation>
+					</navigations>
+				</column>
 				<selectionColumn multiple="TRUE" pixels="16">
 					<value>
 						<model type="text" ref="question.id" />

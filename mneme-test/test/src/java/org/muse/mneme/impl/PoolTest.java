@@ -47,7 +47,7 @@ public class PoolTest extends TestCase
 		/**
 		 * {@inheritDoc}
 		 */
-		public Integer countQuestions(Pool pool, String search, String questionType, Boolean survey)
+		public Integer countQuestions(Pool pool, String search, String questionType, Boolean survey, Boolean valid)
 		{
 			return Integer.valueOf(5);
 		}
@@ -64,7 +64,7 @@ public class PoolTest extends TestCase
 		/**
 		 * {@inheritDoc}
 		 */
-		public List<String> getPoolQuestionIds(Pool pool, Boolean survey)
+		public List<String> getPoolQuestionIds(Pool pool, Boolean survey, Boolean valid)
 		{
 			List<String> rv = new ArrayList<String>();
 			rv.add("1");
@@ -342,7 +342,7 @@ public class PoolTest extends TestCase
 
 	public void testGetAllQuestionIds() throws Exception
 	{
-		List<String> ids = pool.getAllQuestionIds(null);
+		List<String> ids = pool.getAllQuestionIds(null, null);
 		assertTrue(ids != null);
 		assertTrue(ids.size() == 5);
 		assertTrue(ids.get(0).equals("1"));

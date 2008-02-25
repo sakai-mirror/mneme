@@ -68,7 +68,7 @@ public interface QuestionService extends QuestionPoolService, QuestionGetService
 	Question copyQuestion(Question question, Pool pool) throws AssessmentPermissionException;
 
 	/**
-	 * Count the questions with this criteria.
+	 * Count the valid questions with this criteria.
 	 * 
 	 * @param context
 	 *        The context - count questions from all pools in this context.
@@ -92,7 +92,7 @@ public interface QuestionService extends QuestionPoolService, QuestionGetService
 	Boolean existsQuestion(String questionid);
 
 	/**
-	 * Locate a list of questions with this criteria.
+	 * Locate a list of valid questions with this criteria.
 	 * 
 	 * @param context
 	 *        The context - get questions from all pools in the context.

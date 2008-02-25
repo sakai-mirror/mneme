@@ -91,7 +91,7 @@ public class PoolImpl implements Pool
 		if (numQuestions == null) throw new IllegalArgumentException();
 		if (numQuestions.intValue() <= 0) throw new IllegalArgumentException();
 
-		List<String> rv = getAllQuestionIds(survey);
+		List<String> rv = getAllQuestionIds(survey, Boolean.TRUE);
 
 		// randomize the questions in the copy
 		shuffler.shuffle(rv, this.id);
@@ -128,9 +128,9 @@ public class PoolImpl implements Pool
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<String> getAllQuestionIds(Boolean survey)
+	public List<String> getAllQuestionIds(Boolean survey, Boolean valid)
 	{
-		List<String> rv = this.questionService.getPoolQuestionIds(this, survey);
+		List<String> rv = this.questionService.getPoolQuestionIds(this, survey, valid);
 
 		return rv;
 	}
@@ -204,7 +204,7 @@ public class PoolImpl implements Pool
 	 */
 	public Integer getNumQuestions()
 	{
-		Integer rv = this.questionService.countQuestions(this, null, null, null);
+		Integer rv = this.questionService.countQuestions(this, null, null, null, null);
 
 		return rv;
 	}
@@ -215,8 +215,8 @@ public class PoolImpl implements Pool
 	public PoolCounts getNumQuestionsSurvey()
 	{
 		PoolCounts rv = new PoolCounts();
-		rv.assessment = this.questionService.countQuestions(this, null, null, Boolean.FALSE);
-		rv.survey = this.questionService.countQuestions(this, null, null, Boolean.TRUE);
+		rv.assessment = this.questionService.countQuestions(this, null, null, Boolean.FALSE, Boolean.TRUE);
+		rv.survey = this.questionService.countQuestions(this, null, null, Boolean.TRUE, Boolean.TRUE);
 
 		return rv;
 	}

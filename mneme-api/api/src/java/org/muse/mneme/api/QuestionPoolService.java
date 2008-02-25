@@ -48,9 +48,11 @@ public interface QuestionPoolService
 	 *        The (optional) question type; if specified, only questions of this type are included.
 	 * @param survey
 	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countQuestions(Pool pool, String search, String questionType, Boolean survey);
+	Integer countQuestions(Pool pool, String search, String questionType, Boolean survey, Boolean Valid);
 
 	/**
 	 * Locate a list of questions with this criteria.
@@ -81,7 +83,9 @@ public interface QuestionPoolService
 	 *        The pool.
 	 * @param survey
 	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
 	 * @return The List of question ids that are in the pool.
 	 */
-	List<String> getPoolQuestionIds(Pool pool, Boolean survey);
+	List<String> getPoolQuestionIds(Pool pool, Boolean survey, Boolean valid);
 }

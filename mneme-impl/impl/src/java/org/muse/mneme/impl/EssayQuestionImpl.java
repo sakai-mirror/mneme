@@ -262,6 +262,17 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsValid()
+	{
+		// we need presentation set
+		if (this.question.getPresentation().getText() == null) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
 	 * @return the modelAnswer (rich text)
 	 */
 	public String getModelAnswer()

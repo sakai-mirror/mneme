@@ -170,7 +170,7 @@ public class PoolDrawImpl implements PoolDraw
 		Pool pool = getPool();
 		if (pool == null) return new ArrayList<String>();
 
-		return pool.getAllQuestionIds(null);
+		return pool.getAllQuestionIds(null, Boolean.TRUE);
 	}
 
 	/**

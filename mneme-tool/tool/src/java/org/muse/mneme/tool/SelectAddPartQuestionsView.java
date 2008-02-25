@@ -163,7 +163,7 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		}
 		else
 		{
-			maxQuestions = this.questionService.countQuestions(pool, null, (typeFilter.equals("0") ? null : typeFilter), surveyFilterValue);
+			maxQuestions = this.questionService.countQuestions(pool, null, (typeFilter.equals("0") ? null : typeFilter), surveyFilterValue, Boolean.TRUE);
 		}
 		String pagingParameter = "1-30";
 		if (params.length > 6) pagingParameter = params[6];

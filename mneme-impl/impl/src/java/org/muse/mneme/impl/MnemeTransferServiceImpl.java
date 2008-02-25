@@ -322,7 +322,7 @@ public class MnemeTransferServiceImpl implements EntityTransferrer, EntityProduc
 
 		for (Pool pool : pools)
 		{
-			List<String> qids = ((PoolImpl) pool).getAllQuestionIds(null);
+			List<String> qids = ((PoolImpl) pool).getAllQuestionIds(null, null);
 			for (String qid : qids)
 			{
 				Question question = this.questionService.getQuestion(qid);

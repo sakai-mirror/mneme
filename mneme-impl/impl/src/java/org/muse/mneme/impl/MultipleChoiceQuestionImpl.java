@@ -675,6 +675,20 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsValid()
+	{
+		// we need text
+		if (this.question.getPresentation().getText() == null) return Boolean.FALSE;
+
+		// we need 2 or more choices
+		if (this.answerChoices.size() < 2) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public QuestionPlugin getPlugin()
 	{
 		return this.plugin;

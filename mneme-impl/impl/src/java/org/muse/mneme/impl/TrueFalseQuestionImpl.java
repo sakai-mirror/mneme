@@ -280,6 +280,17 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsValid()
+	{
+		// we need text
+		if (this.question.getPresentation().getText() == null) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public QuestionPlugin getPlugin()
 	{
 		return this.plugin;

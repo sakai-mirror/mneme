@@ -452,6 +452,14 @@ public class QuestionImpl implements Question
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsValid()
+	{
+		return this.questionHandler.getIsValid();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getMint()
 	{
 		return this.mint;

@@ -96,6 +96,13 @@ public interface TypeSpecificQuestion extends Cloneable
 	Boolean getIsSurvey();
 
 	/**
+	 * Check if this question definition is valid.
+	 * 
+	 * @return TRUE if this question definition is valid, FALSE if not.
+	 */
+	Boolean getIsValid();
+
+	/**
 	 * Access the plugin for this type.
 	 * 
 	 * @return The plugin for this type.

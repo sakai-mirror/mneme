@@ -615,4 +615,15 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 	{
 		this.uiService = service;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsValid()
+	{
+		// we need the text set
+		if (this.question.getPresentation().getText() == null) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
 }

@@ -329,6 +329,17 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsValid()
+	{
+		// TODO: the text must be defined and valid
+		if (this.text == null) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public QuestionPlugin getPlugin()
 	{
 		return this.plugin;

@@ -81,7 +81,7 @@ public interface QuestionStorage
 			List<Translation> attachmentTranslations);
 
 	/**
-	 * Count the questions in this context.
+	 * Count the valid questions in this context.
 	 * 
 	 * @param context
 	 *        The context.
@@ -100,9 +100,11 @@ public interface QuestionStorage
 	 *        The pool.
 	 * @param questionType
 	 *        The (optional) question type; if specified, only questions of this type are included.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
 	 * @return The questions in this pool with this criteria, separate assessment and survey counts.
 	 */
-	Pool.PoolCounts countPoolQuestions(Pool pool, String questionType);
+	Pool.PoolCounts countPoolQuestions(Pool pool, String questionType, Boolean valid);
 
 	/**
 	 * Count the questions in the non-historical pools of this context - separate counts for survey and non-survey.
@@ -123,7 +125,7 @@ public interface QuestionStorage
 	Boolean existsQuestion(String id);
 
 	/**
-	 * Find all the questions in the context, sorted and paged.
+	 * Find all the valid questions in the context, sorted and paged.
 	 * 
 	 * @param context
 	 *        The context.
@@ -169,9 +171,11 @@ public interface QuestionStorage
 	 *        The pool.
 	 * @param survey
 	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
 	 * @return The List of question ids that are in the pool.
 	 */
-	List<String> getPoolQuestions(Pool pool, Boolean Survey);
+	List<String> getPoolQuestions(Pool pool, Boolean Survey, Boolean valid);
 
 	/**
 	 * Access a question by id.

@@ -631,6 +631,22 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsValid()
+	{
+		// text must be defined
+		if (this.question.getPresentation().getText() == null) return Boolean.FALSE;
+
+		// we need more than one pair defined
+		if (this.pairs.size() < 2) return Boolean.FALSE;
+
+		// TODO: more?
+
+		return Boolean.TRUE;
+	}
+
+	/**
 	 * Access the pairs as an entity (MatchQuestionChoice) list in as-authored order.
 	 * 
 	 * @return The pairs as an entity (MatchQuestionChoice) list in as-authored order.

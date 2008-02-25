@@ -37,7 +37,7 @@ public interface Pool
 	};
 
 	/**
-	 * Draw questions based on this random seed.
+	 * Draw valid questions based on this random seed.
 	 * 
 	 * @param shuffler
 	 *        The shuffler.
@@ -69,9 +69,11 @@ public interface Pool
 	 * 
 	 * @param survey
 	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
 	 * @return A List of question ids from the pool.
 	 */
-	List<String> getAllQuestionIds(Boolean survey);
+	List<String> getAllQuestionIds(Boolean survey, Boolean valid);
 
 	/**
 	 * Access the context of this pool.
@@ -138,7 +140,7 @@ public interface Pool
 	Integer getNumQuestions();
 
 	/**
-	 * Access the number of questions currently defined in the pool, counting survey and non-survey separately.
+	 * Access the number of valid questions currently defined in the pool, counting survey and non-survey separately.
 	 * 
 	 * @return the number of assessment questions and the number of survey questions.
 	 */
