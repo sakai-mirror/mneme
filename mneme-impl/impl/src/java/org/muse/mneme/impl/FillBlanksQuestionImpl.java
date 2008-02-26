@@ -321,6 +321,15 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getInvalidMessage()
+	{
+		String invalidMsg = isValid(this.text);
+		return invalidMsg;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getIsSurvey()
 	{
 		return Boolean.FALSE;
@@ -331,8 +340,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Boolean getIsValid()
 	{
-		// TODO: the text must be defined and valid
-		if (this.text == null) return Boolean.FALSE;
+		if (isValid(this.text) != null) return Boolean.FALSE;
 
 		return Boolean.TRUE;
 	}
@@ -679,11 +687,119 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Check the text for a valid fillin question.
+	 * 
+	 * @param text
+	 *        The question text.
+	 * @return a localized error message if invalid, or null if valid.
 	 */
-	public String getInvalidMessage()
+	protected String isValid(String text)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if (text == null) return "<ul>" + this.messages.getString("invalid-null-text") + "</ul>";
+
+		// strip surrounding <p>
+		int start = 0;
+		if (text.startsWith("<p>")) start += 3;
+		int end = text.length();
+		if (text.endsWith("</p>")) end -= 4;
+		text = text.substring(start, end);
+
+		// deal with html spaces
+		text = text.replace("&nbsp;", " ");
+
+		boolean invalidInsideEmpty = false;
+		boolean invalidOutsideEmpty = false;
+		boolean invalidUnbalanced = false;
+		boolean invalidNoFillins = false;
+
+		boolean outsideTextSeen = false;
+		boolean insideTextSeen = false;
+		boolean fillinSeen = false;
+
+		boolean insideBrackets = false;
+		for (int i = 0; i < text.length(); i++)
+		{
+			char c = text.charAt(i);
+
+			// if we are outside of brackets, see if we are going inside, and check if we have outside text
+			if (!insideBrackets)
+			{
+				if (c == '{')
+				{
+					insideBrackets = true;
+					insideTextSeen = false;
+				}
+				else
+				{
+					if (c == '}')
+					{
+						invalidUnbalanced = true;
+						break;
+					}
+
+					outsideTextSeen = true;
+				}
+			}
+
+			// if we are inside a bracket, see if we are at the end bracket, and make sure there was text
+			else
+			{
+				if (c == '}')
+				{
+					// if we did not see text in the brackets, we have an error
+					if (!insideTextSeen) invalidInsideEmpty = true;
+
+					insideBrackets = false;
+					fillinSeen = true;
+				}
+				else
+				{
+					if (c == '{')
+					{
+						invalidUnbalanced = true;
+						break;
+					}
+
+					// white space does not count
+					if (!Character.isWhitespace(c))
+					{
+						insideTextSeen = true;
+					}
+				}
+			}
+		}
+
+		// if we did not see any text outside the brackets, this is an error
+		if (!outsideTextSeen) invalidOutsideEmpty = true;
+
+		// if we ended inside, this is an error
+		if (insideBrackets) invalidUnbalanced = true;
+
+		// if we saw no fill in, this is an error
+		if (!fillinSeen) invalidNoFillins = true;
+
+		// if we are valid
+		if (!(invalidInsideEmpty || invalidOutsideEmpty || invalidUnbalanced || invalidNoFillins)) return null;
+
+		// collect the errors
+		StringBuilder rv = new StringBuilder();
+		if (invalidUnbalanced)
+		{
+			rv.append(this.messages.getString("invalid-unbalanced"));
+		}
+		if (invalidInsideEmpty)
+		{
+			rv.append(this.messages.getString("invalid-inside-empty"));
+		}
+		if (invalidOutsideEmpty)
+		{
+			rv.append(this.messages.getString("invalid-outside-empty"));
+		}
+		if (invalidNoFillins)
+		{
+			rv.append(this.messages.getString("invalid-no-fillins"));
+		}
+
+		return "<ul>" + rv.toString() + "</ul>";
 	}
 }

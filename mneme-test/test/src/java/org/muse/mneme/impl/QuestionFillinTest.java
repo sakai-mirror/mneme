@@ -150,6 +150,77 @@ public class QuestionFillinTest extends TestCase
 		super(arg0);
 	}
 
+	public void testValidate() throws Exception
+	{
+		String[] data = new String[4];
+		data[0] = "false"; // any order
+		data[1] = "false"; // case sensitive
+		data[2] = "true"; // textual
+		data[3] = "roses are {red} and violets are {blue|purple}."; // text
+		question.getTypeSpecificQuestion().setData(data);
+		assertTrue(question.getIsValid());
+
+		data[3] = "roses are {red } and violets are {blue |purple}."; // text
+		question.getTypeSpecificQuestion().setData(data);
+		assertTrue(question.getIsValid());
+
+		data[3] = "roses are {&nbsp;red} and violets are {blue |&nbsp;purple }."; // text
+		question.getTypeSpecificQuestion().setData(data);
+		assertTrue(question.getIsValid());
+
+		data[3] = "roses are {red and violets are {blue|purple}.";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+
+		data[3] = "roses are red} and violets are {blue|purple}.";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+
+		data[3] = "roses are {red}";
+		question.getTypeSpecificQuestion().setData(data);
+		assertTrue(question.getIsValid());
+
+		data[3] = "roses are {red";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+
+		data[3] = "roses are red}";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+
+		data[3] = "roses are red{";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+
+		data[3] = "roses are red";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+
+		data[3] = "{red}";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+
+		data[3] = "{}";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+
+		data[3] = "roses are {} and violets are {}.";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+
+		data[3] = "roses are {  } and violets are {  }.";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+
+		data[3] = "roses are {&nbsp;} and violets are {&nbsp; }.";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+
+		data[3] = "";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+	}
+
 	public void test001() throws Exception
 	{
 		String[] data = new String[4];
@@ -611,6 +682,55 @@ public class QuestionFillinTest extends TestCase
 		answers[0] = "4.5";
 		answer.answerHandler.setData(answers);
 		assertTrue(answer.answerHandler.getAutoScore().equals(Float.valueOf(10)));
+	}
+
+	public void test012() throws Exception
+	{
+		String[] data = new String[4];
+		data[0] = "false"; // any order
+		data[1] = "false"; // case sensitive
+		data[2] = "true"; // textual
+		data[3] = "roses are {&nbsp;&nbsp;red&nbsp; &nbsp;} and violets are {&nbsp;&nbsp; blue &nbsp; | &nbsp;  purple&nbsp;&nbsp;&nbsp;}."; // text
+		question.getTypeSpecificQuestion().setData(data);
+
+		AnswerImpl answer = new MyAnswerImpl(null);
+		answer.answerHandler = fillBlanksPlugin.newAnswer(answer);
+
+		String[] answers = new String[2];
+		answers[0] = "red";
+		answers[1] = "purple";
+		answer.answerHandler.setData(answers);
+		assertTrue(answer.answerHandler.getAutoScore().equals(Float.valueOf(10)));
+
+		answers[0] = "red";
+		answers[1] = "blue";
+		answer.answerHandler.setData(answers);
+		assertTrue(answer.answerHandler.getAutoScore().equals(Float.valueOf(10)));
+
+		answers[0] = "redx";
+		answers[1] = "blue";
+		answer.answerHandler.setData(answers);
+		assertTrue(answer.answerHandler.getAutoScore().equals(Float.valueOf(5)));
+
+		answers[0] = "red";
+		answers[1] = "bluex";
+		answer.answerHandler.setData(answers);
+		assertTrue(answer.answerHandler.getAutoScore().equals(Float.valueOf(5)));
+
+		answers[0] = "redx";
+		answers[1] = "bluex";
+		answer.answerHandler.setData(answers);
+		assertTrue(answer.answerHandler.getAutoScore().equals(Float.valueOf(0)));
+
+		answers[0] = "red";
+		answers[1] = "purple";
+		answer.answerHandler.setData(answers);
+		assertTrue(answer.answerHandler.getAutoScore().equals(Float.valueOf(10)));
+
+		answers[0] = "redx";
+		answers[1] = "blue|purple";
+		answer.answerHandler.setData(answers);
+		assertTrue(answer.answerHandler.getAutoScore().equals(Float.valueOf(0)));
 	}
 
 	/**

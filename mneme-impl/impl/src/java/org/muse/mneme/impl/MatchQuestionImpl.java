@@ -629,7 +629,18 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 	{
 		boolean invalidText = this.question.getPresentation().getText() == null;
 		boolean invalidPairs = this.pairs.size() < 2;
-		if (!invalidText && !invalidPairs) return null;
+
+		boolean invalidPartialPairs = false;
+		for (MatchQuestionPair pair : this.pairs)
+		{
+			if ((pair.choice == null) || (pair.match == null))
+			{
+				invalidPartialPairs = true;
+				break;
+			}
+		}
+
+		if (!(invalidText || invalidPairs || invalidPartialPairs)) return null;
 
 		StringBuilder rv = new StringBuilder();
 		rv.append("<ul>");
@@ -644,7 +655,10 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 			rv.append(this.messages.getString("invalid-pairs"));
 		}
 
-		// TODO: more
+		if (invalidPartialPairs)
+		{
+			rv.append(this.messages.getString("invalid-partial"));
+		}
 
 		rv.append("</ul>");
 		return rv.toString();
@@ -669,7 +683,16 @@ public class MatchQuestionImpl implements TypeSpecificQuestion
 		// we need more than one pair defined
 		if (this.pairs.size() < 2) return Boolean.FALSE;
 
-		// TODO: more?
+		boolean invalidPartialPairs = false;
+		for (MatchQuestionPair pair : this.pairs)
+		{
+			if ((pair.choice == null) || (pair.match == null))
+			{
+				invalidPartialPairs = true;
+				break;
+			}
+		}
+		if (invalidPartialPairs) return Boolean.FALSE;
 
 		return Boolean.TRUE;
 	}
