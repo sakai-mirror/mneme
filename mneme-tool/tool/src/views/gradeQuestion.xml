@@ -269,6 +269,7 @@
 											</container>
 										</model>
 										<model ref="answer.autoScore" missing="dash" />
+										<model ref="question.points" />
 									</message>
 									<included>
 										<decision model="question.hasPoints" />
