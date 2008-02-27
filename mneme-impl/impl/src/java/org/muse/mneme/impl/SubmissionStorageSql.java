@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
@@ -55,6 +56,9 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 
 	/** Dependency: AssessmentService. */
 	protected AssessmentService assessmentService = null;
+
+	/** Dependency: AttachmentService. */
+	protected AttachmentService attachmentService = null;
 
 	/** Configuration: to run the ddl on init or not. */
 	protected boolean autoDdl = false;
@@ -396,7 +400,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		{
 			String sid = (String) entry.getKey();
 			Float total = (Float) entry.getValue();
-			if (highestId == null)
+			if (highestTotal == null)
 			{
 				highestId = sid;
 				highestTotal = total;
@@ -526,18 +530,12 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public AnswerImpl newAnswer()
-	{
-		return new AnswerImpl(mnemeService);
-	}
+	public abstract AnswerImpl newAnswer();
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public SubmissionImpl newSubmission()
-	{
-		return new SubmissionImpl(assessmentService, securityService, submissionService, sessionManager);
-	}
+	public abstract SubmissionImpl newSubmission();
 
 	/**
 	 * {@inheritDoc}
@@ -665,6 +663,17 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * Dependency: AttachmentService.
+	 * 
+	 * @param service
+	 *        The AttachmentService.
+	 */
+	public void setAttachmentService(AttachmentService service)
+	{
+		attachmentService = service;
 	}
 
 	/**
@@ -863,7 +872,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		// submissions
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT S.ASSESSMENT_ID, S.COMPLETE, S.EVAL_ATRIB_DATE,");
-		sql.append(" S.EVAL_ATRIB_USER, S.EVAL_COMMENT, S.EVAL_EVALUATED, S.EVAL_SCORE,");
+		sql.append(" S.EVAL_ATRIB_USER, S.EVAL_ATTACHMENTS, S.EVAL_COMMENT, S.EVAL_EVALUATED, S.EVAL_SCORE,");
 		sql.append(" S.ID, S.RELEASED, S.START_DATE, S.SUBMITTED_DATE, S.TEST_DRIVE, S.USERID");
 		sql.append(" FROM MNEME_SUBMISSION S ");
 		sql.append(where);
@@ -885,6 +894,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 					submission.setIsComplete(SqlHelper.readBoolean(result, i++));
 					((AttributionImpl) submission.getEvaluation().getAttribution()).initDate(SqlHelper.readDate(result, i++));
 					((AttributionImpl) submission.getEvaluation().getAttribution()).initUserId(SqlHelper.readString(result, i++));
+					((EvaluationImpl) submission.getEvaluation()).setAttachments(SqlHelper.readReferences(result, i++, attachmentService));
 					((EvaluationImpl) submission.getEvaluation()).initComment(SqlHelper.readString(result, i++));
 					((EvaluationImpl) submission.getEvaluation()).initEvaluated(SqlHelper.readBoolean(result, i++));
 					((EvaluationImpl) submission.getEvaluation()).initScore(SqlHelper.readFloat(result, i++));
@@ -911,7 +921,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 
 		// read all the answers for these submissions
 		sql = new StringBuilder();
-		sql.append("SELECT A.GUEST, A.EVAL_ATRIB_DATE, A.EVAL_ATRIB_USER, A.EVAL_COMMENT, A.EVAL_EVALUATED,");
+		sql.append("SELECT A.GUEST, A.EVAL_ATRIB_DATE, A.EVAL_ATRIB_USER, A.EVAL_ATTACHMENTS, A.EVAL_COMMENT, A.EVAL_EVALUATED,");
 		sql.append(" A.EVAL_SCORE, A.ID, A.PART_ID, A.QUESTION_ID, A.QUESTION_TYPE, A.REASON, A.REVIEW,");
 		sql.append(" A.SUBMISSION_ID, A.SUBMITTED_DATE");
 		sql.append(" FROM MNEME_ANSWER A");
@@ -925,22 +935,23 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 			{
 				try
 				{
-					String sid = SqlHelper.readId(result, 13);
+					String sid = SqlHelper.readId(result, 14);
 					SubmissionImpl s = submissions.get(sid);
 					AnswerImpl a = newAnswer();
 
 					((AttributionImpl) a.getEvaluation().getAttribution()).initDate(SqlHelper.readDate(result, 2));
 					((AttributionImpl) a.getEvaluation().getAttribution()).initUserId(SqlHelper.readString(result, 3));
-					((EvaluationImpl) a.getEvaluation()).initComment(SqlHelper.readString(result, 4));
-					((EvaluationImpl) a.getEvaluation()).initEvaluated(SqlHelper.readBoolean(result, 5));
-					((EvaluationImpl) a.getEvaluation()).initScore(SqlHelper.readFloat(result, 6));
-					a.initId(SqlHelper.readId(result, 7));
-					a.initPartId(SqlHelper.readId(result, 8));
-					a.initQuestion(SqlHelper.readId(result, 9), SqlHelper.readString(result, 10));
+					((EvaluationImpl) a.getEvaluation()).setAttachments(SqlHelper.readReferences(result, 4, attachmentService));
+					((EvaluationImpl) a.getEvaluation()).initComment(SqlHelper.readString(result, 5));
+					((EvaluationImpl) a.getEvaluation()).initEvaluated(SqlHelper.readBoolean(result, 6));
+					((EvaluationImpl) a.getEvaluation()).initScore(SqlHelper.readFloat(result, 7));
+					a.initId(SqlHelper.readId(result, 8));
+					a.initPartId(SqlHelper.readId(result, 9));
+					a.initQuestion(SqlHelper.readId(result, 10), SqlHelper.readString(result, 11));
 					a.getTypeSpecificAnswer().setData(SqlHelper.decodeStringArray(StringUtil.trimToNull(result.getString(1))));
-					a.setReason(SqlHelper.readString(result, 11));
-					a.setMarkedForReview(SqlHelper.readBoolean(result, 12));
-					a.setSubmittedDate(SqlHelper.readDate(result, 14));
+					a.setReason(SqlHelper.readString(result, 12));
+					a.setMarkedForReview(SqlHelper.readBoolean(result, 13));
+					a.setSubmittedDate(SqlHelper.readDate(result, 15));
 
 					a.clearIsChanged();
 					a.initSubmission(s);
@@ -1013,17 +1024,18 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("UPDATE MNEME_ANSWER SET");
-		sql.append(" AUTO_SCORE=?, EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_COMMENT=?, EVAL_EVALUATED=?, EVAL_SCORE=?");
+		sql.append(" AUTO_SCORE=?, EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_ATTACHMENTS=?, EVAL_COMMENT=?, EVAL_EVALUATED=?, EVAL_SCORE=?");
 		sql.append(" WHERE ID=?");
 
-		Object[] fields = new Object[7];
+		Object[] fields = new Object[8];
 		fields[0] = answer.getAutoScore();
 		fields[1] = (answer.getEvaluation().getAttribution().getDate() == null) ? null : answer.getEvaluation().getAttribution().getDate().getTime();
 		fields[2] = answer.getEvaluation().getAttribution().getUserId();
-		fields[3] = answer.getEvaluation().getComment();
-		fields[4] = answer.getEvaluation().getEvaluated() ? "1" : "0";
-		fields[5] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
-		fields[6] = Long.valueOf(answer.getId());
+		fields[3] = SqlHelper.encodeReferences(answer.getEvaluation().getAttachments());
+		fields[4] = answer.getEvaluation().getComment();
+		fields[5] = answer.getEvaluation().getEvaluated() ? "1" : "0";
+		fields[6] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
+		fields[7] = Long.valueOf(answer.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
@@ -1041,23 +1053,24 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("UPDATE MNEME_ANSWER SET");
-		sql.append(" ANSWERED=?, AUTO_SCORE=?, GUEST=?, EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_COMMENT=?, EVAL_EVALUATED=?,");
+		sql.append(" ANSWERED=?, AUTO_SCORE=?, GUEST=?, EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_ATTACHMENTS=?, EVAL_COMMENT=?, EVAL_EVALUATED=?,");
 		sql.append(" EVAL_SCORE=?, REASON=?, REVIEW=?, SUBMITTED_DATE=?");
 		sql.append(" WHERE ID=?");
 
-		Object[] fields = new Object[12];
+		Object[] fields = new Object[13];
 		fields[0] = answer.getIsAnswered();
 		fields[1] = answer.getAutoScore();
 		fields[2] = SqlHelper.encodeStringArray(answer.getTypeSpecificAnswer().getData());
 		fields[3] = (answer.getEvaluation().getAttribution().getDate() == null) ? null : answer.getEvaluation().getAttribution().getDate().getTime();
 		fields[4] = answer.getEvaluation().getAttribution().getUserId();
-		fields[5] = answer.getEvaluation().getComment();
-		fields[6] = answer.getEvaluation().getEvaluated() ? "1" : "0";
-		fields[7] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
-		fields[8] = answer.getReason();
-		fields[9] = answer.getMarkedForReview() ? "1" : "0";
-		fields[10] = (answer.getSubmittedDate() == null) ? null : answer.getSubmittedDate().getTime();
-		fields[11] = Long.valueOf(answer.getId());
+		fields[5] = SqlHelper.encodeReferences(answer.getEvaluation().getAttachments());
+		fields[6] = answer.getEvaluation().getComment();
+		fields[7] = answer.getEvaluation().getEvaluated() ? "1" : "0";
+		fields[8] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
+		fields[9] = answer.getReason();
+		fields[10] = answer.getMarkedForReview() ? "1" : "0";
+		fields[11] = (answer.getSubmittedDate() == null) ? null : answer.getSubmittedDate().getTime();
+		fields[12] = Long.valueOf(answer.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
@@ -1109,17 +1122,18 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("UPDATE MNEME_SUBMISSION SET");
-		sql.append(" EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_COMMENT=?, EVAL_EVALUATED=?, EVAL_SCORE=?");
+		sql.append(" EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_ATTACHMENTS=?, EVAL_COMMENT=?, EVAL_EVALUATED=?, EVAL_SCORE=?");
 		sql.append(" WHERE ID=?");
 
-		Object[] fields = new Object[6];
+		Object[] fields = new Object[7];
 		fields[0] = (submission.getEvaluation().getAttribution().getDate() == null) ? null : submission.getEvaluation().getAttribution().getDate()
 				.getTime();
 		fields[1] = submission.getEvaluation().getAttribution().getUserId();
-		fields[2] = submission.getEvaluation().getComment();
-		fields[3] = submission.getEvaluation().getEvaluated() ? "1" : "0";
-		fields[4] = submission.getEvaluation().getScore() == null ? null : Float.valueOf(submission.getEvaluation().getScore());
-		fields[5] = Long.valueOf(submission.getId());
+		fields[2] = SqlHelper.encodeReferences(submission.getEvaluation().getAttachments());
+		fields[3] = submission.getEvaluation().getComment();
+		fields[4] = submission.getEvaluation().getEvaluated() ? "1" : "0";
+		fields[5] = submission.getEvaluation().getScore() == null ? null : Float.valueOf(submission.getEvaluation().getScore());
+		fields[6] = Long.valueOf(submission.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
@@ -1177,21 +1191,22 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("UPDATE MNEME_SUBMISSION SET");
-		sql.append(" COMPLETE=?, EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_COMMENT=?, EVAL_EVALUATED=?,");
+		sql.append(" COMPLETE=?, EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_ATTACHMENTS=?, EVAL_COMMENT=?, EVAL_EVALUATED=?,");
 		sql.append(" EVAL_SCORE=?, RELEASED=?, SUBMITTED_DATE=?");
 		sql.append(" WHERE ID=?");
 
-		Object[] fields = new Object[9];
+		Object[] fields = new Object[10];
 		fields[0] = submission.getIsComplete() ? "1" : "0";
 		fields[1] = (submission.getEvaluation().getAttribution().getDate() == null) ? null : submission.getEvaluation().getAttribution().getDate()
 				.getTime();
 		fields[2] = submission.getEvaluation().getAttribution().getUserId();
-		fields[3] = submission.getEvaluation().getComment();
-		fields[4] = submission.getEvaluation().getEvaluated() ? "1" : "0";
-		fields[5] = submission.getEvaluation().getScore() == null ? null : Float.valueOf(submission.getEvaluation().getScore());
-		fields[6] = submission.getIsReleased() ? "1" : "0";
-		fields[7] = (submission.getSubmittedDate() == null) ? null : submission.getSubmittedDate().getTime();
-		fields[8] = Long.valueOf(submission.getId());
+		fields[3] = SqlHelper.encodeReferences(submission.getEvaluation().getAttachments());
+		fields[4] = submission.getEvaluation().getComment();
+		fields[5] = submission.getEvaluation().getEvaluated() ? "1" : "0";
+		fields[6] = submission.getEvaluation().getScore() == null ? null : Float.valueOf(submission.getEvaluation().getScore());
+		fields[7] = submission.getIsReleased() ? "1" : "0";
+		fields[8] = (submission.getSubmittedDate() == null) ? null : submission.getSubmittedDate().getTime();
+		fields[9] = Long.valueOf(submission.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
+import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentType;
+import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
@@ -49,6 +52,9 @@ public class GradeSubmissionView extends ControllerImpl
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
+
+	/** AttachmentService service. */
+	protected AttachmentService attachmentService = null;
 
 	/** Submission Service */
 	protected SubmissionService submissionService = null;
@@ -171,6 +177,38 @@ public class GradeSubmissionView extends ControllerImpl
 		// read form
 		String destination = this.uiService.decode(req, context);
 
+		// check for remove
+		if (destination.startsWith("REMOVE:"))
+		{
+			String[] parts = StringUtil.splitFirst(destination, ":");
+			if (parts.length == 2)
+			{
+				parts = StringUtil.splitFirst(parts[1], ":");
+				if (parts.length == 2)
+				{
+					Reference ref = this.attachmentService.getReference(parts[1]);
+					this.attachmentService.removeAttachment(ref);
+
+					// if this is for the overall evaluation
+					if (parts[0].equals("SUBMISSION"))
+					{
+						submission.getEvaluation().removeAttachment(ref);
+					}
+					else
+					{
+						// find the answer, id=parts[0], ref=parts[1]
+						Answer answer = submission.getAnswer(parts[0]);
+						if (answer != null)
+						{
+							answer.getEvaluation().removeAttachment(ref);
+						}
+					}
+				}
+			}
+
+			destination = context.getDestination();
+		}
+
 		// save graded submission
 		try
 		{
@@ -179,6 +217,13 @@ public class GradeSubmissionView extends ControllerImpl
 		catch (AssessmentPermissionException e)
 		{
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		// if there was an upload error, send to the upload error
+		if ((req.getAttribute("upload.status") != null) && (!req.getAttribute("upload.status").equals("ok")))
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.upload + "/" + req.getAttribute("upload.limit"))));
 			return;
 		}
 
@@ -192,6 +237,17 @@ public class GradeSubmissionView extends ControllerImpl
 	public void setAssessmentService(AssessmentService assessmentService)
 	{
 		this.assessmentService = assessmentService;
+	}
+
+	/**
+	 * Set the AttachmentService.
+	 * 
+	 * @param service
+	 *        the AttachmentService.
+	 */
+	public void setAttachmentService(AttachmentService service)
+	{
+		this.attachmentService = service;
 	}
 
 	/**

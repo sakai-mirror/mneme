@@ -31,6 +31,7 @@ import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentSubmissionStatus;
+import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.Expiration;
 import org.muse.mneme.api.GradingSubmissionStatus;
@@ -57,6 +58,8 @@ public class SubmissionImpl implements Submission
 	protected SubmissionAssessmentImpl assessment = null;
 
 	protected transient AssessmentService assessmentService = null;
+
+	protected transient AttachmentService attachmentService = null;
 
 	protected transient String bestSubmissionId = null;
 
@@ -91,17 +94,10 @@ public class SubmissionImpl implements Submission
 	protected String userId = null;
 
 	/**
-	 * Construct
+	 * Construct.
 	 */
-	public SubmissionImpl(AssessmentService assessmentService, SecurityService securityService, SubmissionServiceImpl submissionService,
-			SessionManager sessionManager)
+	public SubmissionImpl()
 	{
-		this.assessmentService = assessmentService;
-		this.securityService = securityService;
-		this.submissionService = submissionService;
-		this.sessionManager = sessionManager;
-		this.assessment = new SubmissionAssessmentImpl(null, this, this.assessmentService);
-		this.evaluation = new SubmissionEvaluationImpl(this);
 	}
 
 	/**
@@ -964,6 +960,37 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		this.assessment = new SubmissionAssessmentImpl(null, this, this.assessmentService);
+		this.evaluation = new SubmissionEvaluationImpl(this, this.attachmentService);
+	}
+
+	/**
+	 * Dependency: AssessmentService.
+	 * 
+	 * @param service
+	 *        The AssessmentService.
+	 */
+	public void setAssessmentService(AssessmentService service)
+	{
+		this.assessmentService = service;
+	}
+
+	/**
+	 * Dependency: AttachmentService.
+	 * 
+	 * @param service
+	 *        The AttachmentService.
+	 */
+	public void setAttachmentService(AttachmentService service)
+	{
+		this.attachmentService = service;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void setIsComplete(Boolean complete)
@@ -986,11 +1013,44 @@ public class SubmissionImpl implements Submission
 	}
 
 	/**
+	 * Dependency: SecurityService.
+	 * 
+	 * @param service
+	 *        The SecurityService.
+	 */
+	public void setSecurityService(SecurityService service)
+	{
+		this.securityService = service;
+	}
+
+	/**
+	 * Dependency: SessionManager.
+	 * 
+	 * @param service
+	 *        The SessionManager.
+	 */
+	public void setSessionManager(SessionManager service)
+	{
+		this.sessionManager = service;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void setStartDate(Date startDate)
 	{
 		this.startDate = startDate;
+	}
+
+	/**
+	 * Dependency: SubmissionService.
+	 * 
+	 * @param service
+	 *        The SubmissionService.
+	 */
+	public void setSubmissionService(SubmissionServiceImpl service)
+	{
+		this.submissionService = service;
 	}
 
 	/**
@@ -1236,6 +1296,7 @@ public class SubmissionImpl implements Submission
 	{
 		this.assessment = new SubmissionAssessmentImpl(other.assessment, this);
 		this.assessmentService = other.assessmentService;
+		this.attachmentService = other.attachmentService;
 		this.bestSubmissionId = other.bestSubmissionId;
 		this.evaluation = new SubmissionEvaluationImpl(other.evaluation, this);
 		this.released = other.released;

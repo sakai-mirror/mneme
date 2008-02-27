@@ -115,7 +115,7 @@ public class QuestionFillinTest extends TestCase
 	{
 		public MyAnswerImpl(MnemeService service)
 		{
-			super(service);
+			setMnemeService(service);
 		}
 
 		/**

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.muse.mneme.api.AttachmentService;
+import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -71,6 +73,29 @@ public class SqlHelper
 	}
 
 	/**
+	 * Encode a list of References into a string array encoded string.
+	 * 
+	 * @param references
+	 *        The references.
+	 * @return The string array encoded string.
+	 */
+	public static String encodeReferences(List<Reference> references)
+	{
+		if ((references == null) || (references.isEmpty())) return null;
+
+		String[] refs = new String[references.size()];
+		int i = 0;
+		for (Reference ref : references)
+		{
+			refs[i++] = ref.getReference();
+		}
+
+		String encoded = encodeStringArray(refs);
+
+		return encoded;
+	}
+
+	/**
 	 * Encode a string array into a single string
 	 * 
 	 * @param data
@@ -89,24 +114,6 @@ public class SqlHelper
 		}
 
 		return rv.toString();
-	}
-
-	/**
-	 * Read a Boolean (encoded as '0' '1') from the results set.
-	 * 
-	 * @param results
-	 *        The result set.
-	 * @param index
-	 *        The index.
-	 * @return The Boolean.
-	 * @throws SQLException
-	 */
-	public static Boolean readBoolean(ResultSet result, int index) throws SQLException
-	{
-		String s = result.getString(index);
-		if (s == null) return null;
-		Boolean rv = Boolean.valueOf(s.equals("1"));
-		return rv;
 	}
 
 	/**
@@ -162,6 +169,24 @@ public class SqlHelper
 	}
 
 	/**
+	 * Read a Boolean (encoded as '0' '1') from the results set.
+	 * 
+	 * @param results
+	 *        The result set.
+	 * @param index
+	 *        The index.
+	 * @return The Boolean.
+	 * @throws SQLException
+	 */
+	public static Boolean readBoolean(ResultSet result, int index) throws SQLException
+	{
+		String s = result.getString(index);
+		if (s == null) return null;
+		Boolean rv = Boolean.valueOf(s.equals("1"));
+		return rv;
+	}
+
+	/**
 	 * Read a long from the result set, and convert to a null (if 0) or a Date.
 	 * 
 	 * @param results
@@ -176,6 +201,30 @@ public class SqlHelper
 		long time = result.getLong(index);
 		if (time == 0) return null;
 		return new Date(time);
+	}
+
+	/**
+	 * Read a float from the results set. null is treated as null.
+	 * 
+	 * @param results
+	 *        The result set.
+	 * @param index
+	 *        The index.
+	 * @return The Float.
+	 * @throws SQLException
+	 */
+	public static Float readFloat(ResultSet result, int index) throws SQLException
+	{
+		String str = StringUtil.trimToNull(result.getString(index));
+		if (str == null) return null;
+		try
+		{
+			return Float.valueOf(str);
+		}
+		catch (NumberFormatException e)
+		{
+			return null;
+		}
 	}
 
 	/**
@@ -244,27 +293,26 @@ public class SqlHelper
 	}
 
 	/**
-	 * Read a float from the results set. null is treated as null.
+	 * Read a string-array-encoded set of references.
 	 * 
 	 * @param results
 	 *        The result set.
 	 * @param index
 	 *        The index.
-	 * @return The Float.
+	 * @return The List<Reference> of references.
 	 * @throws SQLException
 	 */
-	public static Float readFloat(ResultSet result, int index) throws SQLException
+	public static List<Reference> readReferences(ResultSet result, int index, AttachmentService attachmentService) throws SQLException
 	{
-		String str = StringUtil.trimToNull(result.getString(index));
-		if (str == null) return null;
-		try
+		String data = readString(result, index);
+		String[] refs = decodeStringArray(data);
+		List<Reference> rv = new ArrayList<Reference>();
+		for (String ref : refs)
 		{
-			return Float.valueOf(str);
+			rv.add(attachmentService.getReference(ref));
 		}
-		catch (NumberFormatException e)
-		{
-			return null;
-		}
+
+		return rv;
 	}
 
 	/**

@@ -269,6 +269,29 @@
 										</message>
 									</title>
 								</htmlEdit>
+								<fileUpload>
+									<model ref="answer.evaluation.upload" />
+									<title>
+										<message selector="upload-evaluation" />
+									</title>
+									<upload>
+										<message selector="upload-button" />
+									</upload>
+								</fileUpload>
+								<attachments model="answer.evaluation.attachments" name="attachment">
+									<navigations>
+										<navigation title="remove-attachment" style="LINK" description="remove-attachment-description" submit="TRUE"
+											small="TRUE">
+											<icon icon="/icons/delete.png" style="NONE" />
+											<destination template="REMOVE:{0}:{1}">
+												<model ref="answer.id" />
+												<model ref="attachment.reference" />
+											</destination>
+											<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif"
+												selector="confirm-remove-attachment" />
+										</navigation>
+									</navigations>
+								</attachments>
 							</container>
 						</section>
 					</container>

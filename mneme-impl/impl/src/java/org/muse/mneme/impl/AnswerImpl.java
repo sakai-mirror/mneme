@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.AnswerEvaluation;
+import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
@@ -44,7 +45,9 @@ public class AnswerImpl implements Answer
 
 	protected TypeSpecificAnswer answerHandler = null;
 
-	protected AnswerEvaluationImpl evaluation = new AnswerEvaluationImpl(this);
+	protected transient AttachmentService attachmentService = null;
+
+	protected AnswerEvaluationImpl evaluation = null;
 
 	/** Set when there's a change in the generic part of the answer. */
 	protected transient boolean genericChanged = false;
@@ -67,24 +70,22 @@ public class AnswerImpl implements Answer
 
 	/**
 	 * Construct.
+	 */
+	public AnswerImpl()
+	{
+
+	}
+
+	/**
+	 * Construct.
 	 * 
 	 * @param other
 	 *        The other to copy.
 	 */
 	public AnswerImpl(AnswerImpl other, Submission owner)
 	{
-		set(other, owner);
-	}
 
-	/**
-	 * Construct.
-	 * 
-	 * @param mnemeService
-	 *        The MnemeService
-	 */
-	public AnswerImpl(MnemeService mnemeService)
-	{
-		this.mnemeService = mnemeService;
+		set(other, owner);
 	}
 
 	/**
@@ -244,6 +245,25 @@ public class AnswerImpl implements Answer
 	}
 
 	/**
+	 * Final initialization, once all dependencies are set.
+	 */
+	public void init()
+	{
+		this.evaluation = new AnswerEvaluationImpl(this, this.attachmentService);
+	}
+
+	/**
+	 * Dependency: AttachmentService.
+	 * 
+	 * @param service
+	 *        The AttachmentService.
+	 */
+	public void setAttachmentService(AttachmentService service)
+	{
+		this.attachmentService = service;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void setMarkedForReview(Boolean forReview)
@@ -253,6 +273,17 @@ public class AnswerImpl implements Answer
 
 		this.markedForReview = forReview;
 		this.genericChanged = true;
+	}
+
+	/**
+	 * Dependency: MnemeService.
+	 * 
+	 * @param service
+	 *        The MnemeService.
+	 */
+	public void setMnemeService(MnemeService service)
+	{
+		this.mnemeService = service;
 	}
 
 	/**
@@ -423,6 +454,7 @@ public class AnswerImpl implements Answer
 	 */
 	protected void set(AnswerImpl other, Submission owner)
 	{
+		this.attachmentService = other.attachmentService;
 		if (other.answerHandler != null) this.answerHandler = (TypeSpecificAnswer) (other.answerHandler.clone(this));
 		this.evaluation = new AnswerEvaluationImpl(other.evaluation);
 		this.id = other.id;

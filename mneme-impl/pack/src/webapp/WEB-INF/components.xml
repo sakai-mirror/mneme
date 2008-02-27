@@ -202,15 +202,35 @@
 		<property name="userDirectoryService"><ref bean="org.sakaiproject.user.api.UserDirectoryService"/></property>
 	</bean>
 
-	<bean id="org.muse.mneme.api.SubmissionService"
+	<bean id="org.muse.mneme.api.Answer"
+		class="org.muse.mneme.impl.AnswerImpl"
+		init-method="init"
+		singleton="false">
+
+		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
+		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
+ 	</bean>
+ 
+	<bean id="org.muse.mneme.api.Submission"
+		class="org.muse.mneme.impl.SubmissionImpl"
+		init-method="init"
+		singleton="false">
+
+		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
+		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
+		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
+ 		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
+ 	</bean>
+
+ 	<bean id="org.muse.mneme.api.SubmissionService"
 		class="org.muse.mneme.impl.SubmissionServiceImpl"
 		init-method="init"
 		destroy-method="destroy"
 		singleton="true">
-		
+
 		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
 		<property name="gradesService"><ref bean="org.muse.mneme.api.GradesService"/></property>
-		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
 
@@ -236,6 +256,9 @@
 		destroy-method="destroy"
 		singleton="true">
 
+		<lookup-method name="newAnswer" bean="org.muse.mneme.api.Answer" />
+		<lookup-method name="newSubmission" bean="org.muse.mneme.api.Submission" />
+
 		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
 		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
@@ -248,7 +271,11 @@
 		destroy-method="destroy"
 		singleton="true">
 
+		<lookup-method name="newAnswer" bean="org.muse.mneme.api.Answer" />
+		<lookup-method name="newSubmission" bean="org.muse.mneme.api.Submission" />
+
 		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
 		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
 		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
@@ -265,7 +292,11 @@
 		destroy-method="destroy"
 		singleton="true">
 
+		<lookup-method name="newAnswer" bean="org.muse.mneme.api.Answer" />
+		<lookup-method name="newSubmission" bean="org.muse.mneme.api.Submission" />
+
 		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
 		<property name="mnemeService"><ref bean="org.muse.mneme.api.MnemeService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
 		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>

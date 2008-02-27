@@ -39,9 +39,12 @@ import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -54,6 +57,9 @@ public class GradeQuestionView extends ControllerImpl
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
+
+	/** AttachmentService service. */
+	protected AttachmentService attachmentService = null;
 
 	/** Submission Service */
 	protected SubmissionService submissionService = null;
@@ -123,7 +129,7 @@ public class GradeQuestionView extends ControllerImpl
 				sortCode = "0A";
 			}
 		}
-		
+
 		// parse into a sort
 		SubmissionService.FindAssessmentSubmissionsSort sort = null;
 		if ((sortCode.charAt(0) == '0') && (sortCode.charAt(1) == 'A'))
@@ -166,8 +172,7 @@ public class GradeQuestionView extends ControllerImpl
 		context.put("paging", paging);
 
 		// get the answers - from all submissions
-		List<Answer> answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, paging.getCurrent(), paging
-				.getSize());
+		List<Answer> answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, paging.getCurrent(), paging.getSize());
 		context.put("answers", answers);
 
 		uiService.render(ui, context);
@@ -218,6 +223,33 @@ public class GradeQuestionView extends ControllerImpl
 		// read form
 		String destination = this.uiService.decode(req, context);
 
+		// check for remove
+		if (destination.startsWith("REMOVE:"))
+		{
+			String[] parts = StringUtil.splitFirst(destination, ":");
+			if (parts.length == 2)
+			{
+				parts = StringUtil.splitFirst(parts[1], ":");
+				if (parts.length == 2)
+				{
+					// find the answer, id=parts[0], ref=parts[1]
+					for (Object o : answers.getSet())
+					{
+						Answer answer = (Answer) o;
+						if (answer.getId().equals(parts[0]))
+						{
+							Reference ref = this.attachmentService.getReference(parts[1]);
+							answer.getEvaluation().removeAttachment(ref);
+							this.attachmentService.removeAttachment(ref);
+							break;
+						}
+					}
+				}
+			}
+
+			destination = context.getDestination();
+		}
+
 		// save
 		try
 		{
@@ -230,33 +262,57 @@ public class GradeQuestionView extends ControllerImpl
 			return;
 		}
 
+		// if there was an upload error, send to the upload error
+		if ((req.getAttribute("upload.status") != null) && (!req.getAttribute("upload.status").equals("ok")))
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.upload + "/" + req.getAttribute("upload.limit"))));
+			return;
+		}
+
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
-	 * @param assessmentService
-	 *        the assessmentService to set
+	 * Set the AssessmentService.
+	 * 
+	 * @param service
+	 *        the AssessmentService.
 	 */
-	public void setAssessmentService(AssessmentService assessmentService)
+	public void setAssessmentService(AssessmentService service)
 	{
-		this.assessmentService = assessmentService;
+		this.assessmentService = service;
 	}
 
 	/**
-	 * @param submissionService
-	 *        the submissionService to set
+	 * Set the AttachmentService.
+	 * 
+	 * @param service
+	 *        the AttachmentService.
 	 */
-	public void setSubmissionService(SubmissionService submissionService)
+	public void setAttachmentService(AttachmentService service)
 	{
-		this.submissionService = submissionService;
+		this.attachmentService = service;
 	}
 
 	/**
-	 * @param toolManager
-	 *        the toolManager to set
+	 * Set the SubmissionService.
+	 * 
+	 * @param service
+	 *        the SubmissionService.
 	 */
-	public void setToolManager(ToolManager toolManager)
+	public void setSubmissionService(SubmissionService service)
 	{
-		this.toolManager = toolManager;
+		this.submissionService = service;
+	}
+
+	/**
+	 * Set the ToolManager.
+	 * 
+	 * @param service
+	 *        the ToolManager.
+	 */
+	public void setToolManager(ToolManager service)
+	{
+		this.toolManager = service;
 	}
 }

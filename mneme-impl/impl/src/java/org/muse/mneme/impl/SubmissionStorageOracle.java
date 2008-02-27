@@ -29,7 +29,7 @@ import org.muse.mneme.api.Question;
 /**
  * SubmissionStorageMysql implements SubmissionStorage for Oracle.
  */
-public class SubmissionStorageOracle extends SubmissionStorageSql implements SubmissionStorage
+public abstract class SubmissionStorageOracle extends SubmissionStorageSql implements SubmissionStorage
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(SubmissionStorageOracle.class);
@@ -61,28 +61,29 @@ public class SubmissionStorageOracle extends SubmissionStorageSql implements Sub
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_ANSWER (ID, ");
-		sql.append(" ANSWERED, AUTO_SCORE, GUEST, EVAL_ATRIB_DATE, EVAL_ATRIB_USER, EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE,");
+		sql.append(" ANSWERED, AUTO_SCORE, GUEST, EVAL_ATRIB_DATE, EVAL_ATRIB_USER, EVAL_ATTACHMENTS, EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE,");
 		sql.append(" PART_ID, QUESTION_ID, QUESTION_TYPE, REASON, REVIEW, SUBMISSION_ID, SUBMITTED_DATE)");
 		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[16];
+		Object[] fields = new Object[17];
 		fields[0] = id;
 		fields[1] = answer.getIsAnswered();
 		fields[2] = answer.getAutoScore();
 		fields[3] = SqlHelper.encodeStringArray(answer.getTypeSpecificAnswer().getData());
 		fields[4] = (answer.getEvaluation().getAttribution().getDate() == null) ? null : answer.getEvaluation().getAttribution().getDate().getTime();
 		fields[5] = answer.getEvaluation().getAttribution().getUserId();
-		fields[6] = answer.getEvaluation().getComment();
-		fields[7] = answer.getEvaluation().getEvaluated() ? "1" : "0";
-		fields[8] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
-		fields[9] = Long.valueOf(answer.getPartId());
+		fields[6] = SqlHelper.encodeReferences(answer.getEvaluation().getAttachments());
+		fields[7] = answer.getEvaluation().getComment();
+		fields[8] = answer.getEvaluation().getEvaluated() ? "1" : "0";
+		fields[9] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
+		fields[10] = Long.valueOf(answer.getPartId());
 		Question q = answer.getQuestion();
-		fields[10] = Long.valueOf(q.getId());
-		fields[11] = q.getType();
-		fields[12] = answer.getReason();
-		fields[13] = answer.getMarkedForReview() ? "1" : "0";
-		fields[14] = Long.valueOf(answer.getSubmission().getId());
-		fields[15] = (answer.getSubmittedDate() == null) ? null : answer.getSubmittedDate().getTime();
+		fields[11] = Long.valueOf(q.getId());
+		fields[12] = q.getType();
+		fields[13] = answer.getReason();
+		fields[14] = answer.getMarkedForReview() ? "1" : "0";
+		fields[15] = Long.valueOf(answer.getSubmission().getId());
+		fields[16] = (answer.getSubmittedDate() == null) ? null : answer.getSubmittedDate().getTime();
 
 		if (!this.sqlService.dbWrite(null, sql.toString(), fields))
 		{
@@ -108,11 +109,11 @@ public class SubmissionStorageOracle extends SubmissionStorageSql implements Sub
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_SUBMISSION (ID,");
-		sql.append(" ASSESSMENT_ID, COMPLETE, CONTEXT, EVAL_ATRIB_DATE, EVAL_ATRIB_USER,");
+		sql.append(" ASSESSMENT_ID, COMPLETE, CONTEXT, EVAL_ATRIB_DATE, EVAL_ATRIB_USER, EVAL_ATTACHMENTS,");
 		sql.append(" EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE, RELEASED, START_DATE, SUBMITTED_DATE, TEST_DRIVE, USERID )");
 		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[14];
+		Object[] fields = new Object[15];
 		fields[0] = id;
 		fields[1] = Long.valueOf(submission.getAssessment().getId());
 		fields[2] = submission.getIsComplete() ? "1" : "0";
@@ -120,14 +121,15 @@ public class SubmissionStorageOracle extends SubmissionStorageSql implements Sub
 		fields[4] = (submission.getEvaluation().getAttribution().getDate() == null) ? null : submission.getEvaluation().getAttribution().getDate()
 				.getTime();
 		fields[5] = submission.getEvaluation().getAttribution().getUserId();
-		fields[6] = submission.getEvaluation().getComment();
-		fields[7] = submission.getEvaluation().getEvaluated() ? "1" : "0";
-		fields[8] = submission.getEvaluation().getScore() == null ? null : Float.valueOf(submission.getEvaluation().getScore());
-		fields[9] = submission.getIsReleased() ? "1" : "0";
-		fields[10] = (submission.getStartDate() == null) ? null : submission.getStartDate().getTime();
-		fields[11] = (submission.getSubmittedDate() == null) ? null : submission.getSubmittedDate().getTime();
-		fields[12] = submission.getIsTestDrive() ? "1" : "0";
-		fields[13] = submission.getUserId();
+		fields[6] = SqlHelper.encodeReferences(submission.getEvaluation().getAttachments());
+		fields[7] = submission.getEvaluation().getComment();
+		fields[8] = submission.getEvaluation().getEvaluated() ? "1" : "0";
+		fields[9] = submission.getEvaluation().getScore() == null ? null : Float.valueOf(submission.getEvaluation().getScore());
+		fields[10] = submission.getIsReleased() ? "1" : "0";
+		fields[11] = (submission.getStartDate() == null) ? null : submission.getStartDate().getTime();
+		fields[12] = (submission.getSubmittedDate() == null) ? null : submission.getSubmittedDate().getTime();
+		fields[13] = submission.getIsTestDrive() ? "1" : "0";
+		fields[14] = submission.getUserId();
 
 		if (!this.sqlService.dbWrite(null, sql.toString(), fields))
 		{

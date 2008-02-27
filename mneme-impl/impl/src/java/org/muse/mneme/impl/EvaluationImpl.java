@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,23 @@
 
 package org.muse.mneme.impl;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.muse.mneme.api.Attribution;
 import org.muse.mneme.api.Changeable;
 import org.muse.mneme.api.Evaluation;
+import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.util.StringUtil;
 
 /**
  * EvaluationImpl implements Evaluation
  */
-public class EvaluationImpl implements Evaluation
+public abstract class EvaluationImpl implements Evaluation
 {
+	protected List<Reference> attachments = new ArrayList<Reference>();
+
 	protected AttributionImpl attribution = new AttributionImpl(null);
 
 	/** Track any changes. */
@@ -58,6 +65,23 @@ public class EvaluationImpl implements Evaluation
 	public EvaluationImpl(EvaluationImpl other)
 	{
 		set(other);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void addAttachment(Reference reference)
+	{
+		this.attachments.add(reference);
+		this.changed.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Reference> getAttachments()
+	{
+		return this.attachments;
 	}
 
 	/**
@@ -95,10 +119,39 @@ public class EvaluationImpl implements Evaluation
 	/**
 	 * {@inheritDoc}
 	 */
+	public void removeAttachment(Reference reference)
+	{
+		for (Iterator i = this.attachments.iterator(); i.hasNext();)
+		{
+			Reference ref = (Reference) i.next();
+			if (ref.getReference().equals(reference.getReference()))
+			{
+				i.remove();
+				this.changed.setChanged();
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setAttachments(List<Reference> references)
+	{
+		this.attachments = new ArrayList<Reference>();
+		if (references != null)
+		{
+			this.attachments.addAll(references);
+		}
+		this.changed.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setComment(String comment)
 	{
 		comment = StringUtil.trimToNull(comment);
-		
+
 		if (!Different.different(this.comment, comment)) return;
 
 		this.comment = comment;
@@ -205,6 +258,8 @@ public class EvaluationImpl implements Evaluation
 	 */
 	protected void set(EvaluationImpl other)
 	{
+		this.attachments = new ArrayList<Reference>(other.attachments.size());
+		this.attachments.addAll(other.attachments);
 		this.attribution = new AttributionImpl(other.attribution, null);
 		this.changed = new ChangeableImpl(other.changed);
 		this.comment = other.comment;

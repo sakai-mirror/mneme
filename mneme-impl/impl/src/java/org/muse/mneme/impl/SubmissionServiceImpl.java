@@ -80,9 +80,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/** Dependency: GradesService */
 	protected GradesService gradesService = null;
 
-	/** Dependency: MnemeService */
-	protected MnemeService mnemeService = null;
-
 	/** Dependency: QuestionService */
 	protected QuestionService questionService = null;
 
@@ -116,7 +113,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	/** How long to wait (ms) between checks for timed-out submission in the db. 0 disables. */
 	protected long timeoutCheckMs = 1000L * 300L;
 
-	/** Dependenct: UserDirectoryService. */
+	/** Dependency: UserDirectoryService. */
 	protected UserDirectoryService userDirectoryService = null;
 
 	/**
@@ -1675,17 +1672,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	public void setGradesService(GradesService service)
 	{
 		this.gradesService = service;
-	}
-
-	/**
-	 * Dependency: MnemeService.
-	 * 
-	 * @param service
-	 *        The MnemeService.
-	 */
-	public void setMnemeService(MnemeService service)
-	{
-		mnemeService = service;
 	}
 
 	/**

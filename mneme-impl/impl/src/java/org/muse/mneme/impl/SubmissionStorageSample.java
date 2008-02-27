@@ -43,7 +43,7 @@ import org.sakaiproject.tool.api.SessionManager;
 /**
  * SubmissionStorageSample defines sample storage for Submissions.
  */
-public class SubmissionStorageSample implements SubmissionStorage
+public abstract class SubmissionStorageSample implements SubmissionStorage
 {
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(SubmissionStorageSample.class);
@@ -398,18 +398,12 @@ public class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public AnswerImpl newAnswer()
-	{
-		return new AnswerImpl(mnemeService);
-	}
+	public abstract AnswerImpl newAnswer();
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public SubmissionImpl newSubmission()
-	{
-		return new SubmissionImpl(assessmentService, securityService, submissionService, sessionManager);
-	}
+	public abstract SubmissionImpl newSubmission();
 
 	// /**
 	// * {@inheritDoc}

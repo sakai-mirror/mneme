@@ -7,7 +7,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,23 +152,34 @@
 						<hasValueDecision model="submission.assessment.presentation.attachments" />
 					</included>
 				</attachments>
-				<section>
+				<section treatment="evaluation">
+					<title>
+						<message selector="question-evaluation">
+							<model type="icon" icon="/icons/note.png" />
+						</message>
+					</title>
 					<container>
-						<evaluation>
-							<title>
-								<message selector="question-evaluation">
-									<model type="icon" icon="/icons/note.png" />
-								</message>
-							</title>
+						<text>
 							<message>
 								<model type="html" ref="submission.evaluation.comment" />
+								<included>
+									<hasValueDecision model="submission.evaluation.comment" />
+								</included>
 							</message>
-						</evaluation>
+						</text>
+						<attachments title="attachments" model="submission.evaluation.attachments">
+							<included>
+								<hasValueDecision model="submission.evaluation.attachments" />
+							</included>
+						</attachments>
 					</container>
 					<included>
 						<decision model="review" />
 						<decision model="submission.isReleased" />
-						<hasValueDecision model="submission.evaluation.comment" />
+						<orDecision>
+							<hasValueDecision model="submission.evaluation.comment" />
+							<hasValueDecision model="submission.evaluation.attachments" />
+						</orDecision>
 					</included>
 				</section>
 			</container>
@@ -415,23 +426,34 @@
 						</section>
 
 						<!-- evaluation -->
-						<section>
+						<section treatment="evaluation">
+							<title>
+								<message selector="question-evaluation">
+									<model type="icon" icon="/icons/note.png" />
+								</message>
+							</title>
 							<container>
-								<evaluation>
-									<title>
-										<message selector="question-evaluation">
-											<model type="icon" icon="/icons/note.png" />
-										</message>
-									</title>
+								<text>
 									<message>
 										<model type="html" ref="answer.evaluation.comment" />
+										<included>
+											<hasValueDecision model="answer.evaluation.comment" />
+										</included>
 									</message>
-								</evaluation>
+								</text>
+								<attachments title="attachments" model="answer.evaluation.attachments">
+									<included>
+										<hasValueDecision model="answer.evaluation.attachments" />
+									</included>
+								</attachments>
 							</container>
 							<included>
 								<decision model="review" />
 								<decision model="submission.isReleased" />
-								<hasValueDecision model="answer.evaluation.comment" />
+								<orDecision>
+									<hasValueDecision model="answer.evaluation.comment" />
+									<hasValueDecision model="answer.evaluation.attachments" />
+								</orDecision>
 							</included>
 						</section>
 
