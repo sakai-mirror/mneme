@@ -211,7 +211,7 @@
 										</model>
 										<model type="component">
 											<container>
-												<floatEdit model="answer.totalScore" cols="6" />
+												<floatEdit model="answer.totalScore" defaultValue="answer.autoScore" sumTo="total" cols="6" />
 											</container>
 										</model>
 										<model ref="answer.autoScore" missing="dash" />
