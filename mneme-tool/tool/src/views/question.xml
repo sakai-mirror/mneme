@@ -147,7 +147,7 @@
 						<model type="html" ref="submission.assessment.presentation.text" />
 					</message>
 				</text>
-				<attachments title="attachments" model="submission.assessment.presentation.attachments">
+				<attachments model="submission.assessment.presentation.attachments">
 					<included>
 						<hasValueDecision model="submission.assessment.presentation.attachments" />
 					</included>
@@ -167,7 +167,7 @@
 								</included>
 							</message>
 						</text>
-						<attachments title="attachments" model="submission.evaluation.attachments">
+						<attachments model="submission.evaluation.attachments">
 							<included>
 								<hasValueDecision model="submission.evaluation.attachments" />
 							</included>
@@ -249,7 +249,7 @@
 						<decision model="answer.question.part.assessment.parts.showPresentation" />
 					</included>
 				</text>
-				<attachments title="attachments" model="answer.question.part.presentation.attachments">
+				<attachments model="answer.question.part.presentation.attachments">
 					<included>
 						<hasValueDecision model="answer.question.part.presentation.attachments" />
 						<decision model="answer.question.partOrdering.isFirst" />
@@ -441,7 +441,7 @@
 										</included>
 									</message>
 								</text>
-								<attachments title="attachments" model="answer.evaluation.attachments">
+								<attachments model="answer.evaluation.attachments">
 									<included>
 										<hasValueDecision model="answer.evaluation.attachments" />
 									</included>
