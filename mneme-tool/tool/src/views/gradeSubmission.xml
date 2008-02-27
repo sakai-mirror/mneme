@@ -152,20 +152,7 @@
 					<!-- question header -->
 					<title highlighted="TRUE">
 						<message selector="question-header">
-							<model type="html" ref="answer.question" delegate="FormatQuestionTitle" tool="sakai.mneme" />
-							<model type="component">
-								<container>
-									<floatEdit model="answer.totalScore" defaultValue="answer.autoScore" sumTo="total" cols="6" />
-								</container>
-							</model>
-							<selectors>
-								<selector selector="question-header-no-points">
-									<orDecision>
-										<decision reversed="TRUE" model="submission.assessment.hasPoints" />
-										<decision reversed="TRUE" model="answer.question.hasPoints" />
-									</orDecision>
-								</selector>
-							</selectors>
+							<model type="html" ref="answer.question" delegate="FormatQuestionTitlePositional" tool="sakai.mneme" />
 						</message>
 					</title>
 
@@ -215,6 +202,26 @@
 						<!-- evaluation -->
 						<section>
 							<container>
+								<text>
+									<message selector="auto-eval-score">
+										<model type="icon" icon="/icons/grade.png">
+											<title>
+												<message selector="score" />
+											</title>
+										</model>
+										<model type="component">
+											<container>
+												<floatEdit model="answer.totalScore" cols="6" />
+											</container>
+										</model>
+										<model ref="answer.autoScore" missing="dash" />
+										<model ref="answer.question.points" />
+									</message>
+									<included>
+										<decision model="answer.question.hasPoints" />
+										<decision model="submission.assessment.hasPoints" />
+									</included>
+								</text>
 								<htmlEdit>
 									<model type="html" ref="answer.evaluation.comment" />
 									<title>
@@ -234,8 +241,8 @@
 								</fileUpload>
 								<attachments model="answer.evaluation.attachments" name="attachment">
 									<navigations>
-										<navigation title="remove-attachment" style="LINK"
-											description="remove-attachment-description" submit="TRUE" small="TRUE">
+										<navigation title="remove-attachment" style="LINK" description="remove-attachment-description" submit="TRUE"
+											small="TRUE">
 											<icon icon="/icons/delete.png" style="NONE" />
 											<destination template="REMOVE:{0}:{1}">
 												<model ref="answer.id" />
