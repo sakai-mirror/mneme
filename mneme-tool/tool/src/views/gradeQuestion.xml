@@ -211,14 +211,15 @@
 						<text selector="anonymous" />
 					</container>
 				</column>
-				<column wrap="FALSE">
+				<column>
 					<title>
-						<message selector="submission-finished" />
+						<message selector="submission-answer" />
 					</title>
 					<container>
+						<!-- completed date -->
 						<text>
-							<message>
-								<model type="date" twoLine="TRUE" ref="answer.submission.submittedDate" />
+							<message selector="submission-finished-date">
+								<model type="date" ref="answer.submission.submittedDate" />
 							</message>
 							<included>
 								<decision reversed="TRUE" model="answer.submission.isCompletedLate" />
@@ -226,42 +227,55 @@
 						</text>
 						<text>
 							<message selector="submission-finished-date-late">
-								<model type="date" twoLine="TRUE" ref="answer.submission.submittedDate" />
+								<model type="date" ref="answer.submission.submittedDate" />
 							</message>
 							<included>
 								<decision model="answer.submission.isCompletedLate" />
 							</included>
 						</text>
-					</container>
-					<entityIncluded>
-						<decision model="answer.submission.isComplete" />
-					</entityIncluded>
-				</column>
-				<column>
-					<title>
-						<message selector="submission-answer" />
-					</title>
-					<container>
-						<!-- Answer type-specific viewing -->
-						<modelComponent model="answer.question.typeSpecificQuestion.viewAnswerUi" />
-						<!-- reason -->
-						<text>
-							<title>
-								<message selector="question-rationale">
-									<model type="icon" icon="/icons/reason.png" />
-								</message>
-							</title>
-							<message>
-								<model type="html" ref="answer.reason" />
-							</message>
-							<included>
-								<hasValueDecision model="answer.reason" />
-							</included>
-						</text>
+						<section>
+							<container>
+								<!-- Answer type-specific viewing -->
+								<modelComponent model="answer.question.typeSpecificQuestion.viewAnswerUi" />
+								<!-- reason -->
+								<text>
+									<title>
+										<message selector="question-rationale">
+											<model type="icon" icon="/icons/reason.png" />
+										</message>
+									</title>
+									<message>
+										<model type="html" ref="answer.reason" />
+									</message>
+									<included>
+										<hasValueDecision model="answer.reason" />
+									</included>
+								</text>
+							</container>
+						</section>
 						<!-- evaluation -->
 						<section>
 							<container>
-								<htmlEdit small="TRUE">
+								<text>
+									<message selector="auto-eval-score">
+										<model type="icon" icon="/icons/grade.png">
+											<title>
+												<message selector="score" />
+											</title>
+										</model>
+										<model type="component">
+											<container>
+												<floatEdit model="answer.totalScore" cols="6" />
+											</container>
+										</model>
+										<model ref="answer.autoScore" missing="dash" />
+									</message>
+									<included>
+										<decision model="question.hasPoints" />
+										<decision model="assessment.hasPoints" />
+									</included>
+								</text>
+								<htmlEdit>
 									<model type="html" ref="answer.evaluation.comment" />
 									<title>
 										<message selector="submission-evaluation">
@@ -295,60 +309,6 @@
 							</container>
 						</section>
 					</container>
-				</column>
-				<column>
-					<title>
-						<message selector="submission-score" />
-					</title>
-					<container>
-						<text>
-							<message selector="auto-score">
-								<model ref="answer.autoScore" missing="dash" />
-							</message>
-						</text>
-					</container>
-					<included>
-						<decision model="question.hasPoints" />
-						<decision model="assessment.hasPoints" />
-					</included>
-				</column>
-				<column>
-					<title>
-						<message selector="submission-final" />
-					</title>
-					<container>
-						<floatEdit model="answer.totalScore" cols="6" />
-					</container>
-					<sort submit="TRUE">
-						<active>
-							<compareDecision model="sort_column" constant="1" />
-						</active>
-						<direction>
-							<compareDecision model="sort_direction" constant="A" />
-						</direction>
-						<asc icon="/icons/sortascending.gif">
-							<message selector="asc" />
-							<destination template="/grade_question/{0}/{1}/{2}/1A/{3}">
-								<model ref="sort_grades" />
-								<model ref="assessment.id" />
-								<model ref="question.id" />
-								<model type="paging" ref="paging" selector="FIRST" />
-							</destination>
-						</asc>
-						<desc icon="/icons/sortdescending.gif">
-							<message selector="desc" />
-							<destination template="/grade_question/{0}/{1}/{2}/1D/{3}">
-								<model ref="sort_grades" />
-								<model ref="assessment.id" />
-								<model ref="question.id" />
-								<model type="paging" ref="paging" selector="FIRST" />
-							</destination>
-						</desc>
-					</sort>
-					<included>
-						<decision model="question.hasPoints" />
-						<decision model="assessment.hasPoints" />
-					</included>
 				</column>
 			</columns>
 		</entityList>
