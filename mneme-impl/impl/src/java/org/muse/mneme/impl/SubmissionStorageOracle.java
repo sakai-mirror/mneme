@@ -63,7 +63,7 @@ public abstract class SubmissionStorageOracle extends SubmissionStorageSql imple
 		sql.append("INSERT INTO MNEME_ANSWER (ID, ");
 		sql.append(" ANSWERED, AUTO_SCORE, GUEST, EVAL_ATRIB_DATE, EVAL_ATRIB_USER, EVAL_ATTACHMENTS, EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE,");
 		sql.append(" PART_ID, QUESTION_ID, QUESTION_TYPE, REASON, REVIEW, SUBMISSION_ID, SUBMITTED_DATE)");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
 		Object[] fields = new Object[17];
 		fields[0] = id;
@@ -110,8 +110,8 @@ public abstract class SubmissionStorageOracle extends SubmissionStorageSql imple
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_SUBMISSION (ID,");
 		sql.append(" ASSESSMENT_ID, COMPLETE, CONTEXT, EVAL_ATRIB_DATE, EVAL_ATRIB_USER, EVAL_ATTACHMENTS,");
-		sql.append(" EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE, RELEASED, START_DATE, SUBMITTED_DATE, TEST_DRIVE, USERID )");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" EVAL_COMMENT, EVAL_EVALUATED, EVAL_SCORE, RELEASED, START_DATE, SUBMITTED_DATE, TEST_DRIVE, USERID)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
 		Object[] fields = new Object[15];
 		fields[0] = id;
