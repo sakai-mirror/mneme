@@ -255,6 +255,10 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 			String tmp = alltext.substring(alltextLeftIndex + 1, alltextRightIndex);
 			alltext = alltext.substring(alltextRightIndex + 1);
+
+			tmp = tmp.replace("&nbsp;", " ");
+			tmp = tmp.trim();
+			if (tmp.length() == 0) tmp = "*";
 			correctAnswers.add(tmp);
 
 			// there are no more "}", exit loop
@@ -365,7 +369,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	{
 		if (this.text == null) return null;
 
-		if (!getIsValid()) return this.text; 
+		if (!getIsValid()) return this.text;
 
 		String text = this.text;
 		StringBuffer rv = new StringBuffer();
@@ -712,13 +716,11 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		// deal with html spaces
 		text = text.replace("&nbsp;", " ");
 
-		boolean invalidInsideEmpty = false;
 		boolean invalidOutsideEmpty = false;
 		boolean invalidUnbalanced = false;
 		boolean invalidNoFillins = false;
 
 		boolean outsideTextSeen = false;
-		boolean insideTextSeen = false;
 		boolean fillinSeen = false;
 
 		boolean insideBrackets = false;
@@ -732,7 +734,6 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 				if (c == '{')
 				{
 					insideBrackets = true;
-					insideTextSeen = false;
 				}
 				else
 				{
@@ -746,14 +747,11 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 				}
 			}
 
-			// if we are inside a bracket, see if we are at the end bracket, and make sure there was text
+			// if we are inside a bracket, see if we are at the end bracket
 			else
 			{
 				if (c == '}')
 				{
-					// if we did not see text in the brackets, we have an error
-					if (!insideTextSeen) invalidInsideEmpty = true;
-
 					insideBrackets = false;
 					fillinSeen = true;
 				}
@@ -763,12 +761,6 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 					{
 						invalidUnbalanced = true;
 						break;
-					}
-
-					// white space does not count
-					if (!Character.isWhitespace(c))
-					{
-						insideTextSeen = true;
 					}
 				}
 			}
@@ -784,17 +776,13 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		if (!fillinSeen) invalidNoFillins = true;
 
 		// if we are valid
-		if (!(invalidInsideEmpty || invalidOutsideEmpty || invalidUnbalanced || invalidNoFillins)) return null;
+		if (!(invalidOutsideEmpty || invalidUnbalanced || invalidNoFillins)) return null;
 
 		// collect the errors
 		StringBuilder rv = new StringBuilder();
 		if (invalidUnbalanced)
 		{
 			rv.append(this.messages.getString("invalid-unbalanced"));
-		}
-		if (invalidInsideEmpty)
-		{
-			rv.append(this.messages.getString("invalid-inside-empty"));
 		}
 		if (invalidOutsideEmpty)
 		{
