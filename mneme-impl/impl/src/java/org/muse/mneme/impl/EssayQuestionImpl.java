@@ -147,6 +147,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 
 		// model answer
 		HtmlEdit modelAnswer = this.uiService.newHtmlEdit();
+		modelAnswer.setSize(14, 100);
 		modelAnswer.setProperty(this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
 		modelAnswer.setTitle("model-answer-edit", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 
@@ -189,6 +190,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		// the text entry
 		HtmlEdit edit = this.uiService.newHtmlEdit();
 		edit.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
+		edit.setSize(14, 100);
 		edit.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.inline.toString(), SubmissionType.both.toString())
 				.setProperty(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
 		edit.setProperty(this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));

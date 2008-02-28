@@ -120,7 +120,7 @@
 		<!-- generic presentation -->
 		<section>
 			<container>
-				<htmlEdit title="question-presentation">
+				<htmlEdit rows="14" cols="100" title="question-presentation">
 					<model type="html" ref="question.presentation.text" />
 				</htmlEdit>
 			</container>

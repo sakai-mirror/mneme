@@ -176,6 +176,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	{
 		// question (with instructions)
 		HtmlEdit question = uiService.newHtmlEdit();
+		question.setSize(14, 100);
 		question.setProperty(this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.text"));
 		question.setTitle("question");
 
