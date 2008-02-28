@@ -82,7 +82,7 @@ public interface AssessmentStorage
 	 * Access a assessment by id.
 	 * 
 	 * @param id
-	 *        the submiassessmentssion id.
+	 *        the assessment id.
 	 * @return The assessment with this id, or null if not found.
 	 */
 	AssessmentImpl getAssessment(String id);
