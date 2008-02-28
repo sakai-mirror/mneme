@@ -253,7 +253,7 @@
 							</included>
 						</text>
 						<text>
-							<message selector="submission-finished-date-late">
+							<message selector="submission-finished-date-late-list">
 								<model type="date" ref="submission.submittedDate" />
 							</message>
 							<included>
