@@ -56,7 +56,7 @@ public class PoolTest extends TestCase
 		 * {@inheritDoc}
 		 */
 		public List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize,
-				Boolean survey)
+				Boolean survey, Boolean valid)
 		{
 			return new ArrayList<Question>();
 		}

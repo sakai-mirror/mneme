@@ -71,10 +71,12 @@ public interface QuestionPoolService
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @param survey
 	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
 	 * @return a list of questions that meet the criteria.
 	 */
 	List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize,
-			Boolean survey);
+			Boolean survey, Boolean valid);
 
 	/**
 	 * Find all the questions (ids) in the pool

@@ -81,7 +81,7 @@ public interface QuestionStorage
 			List<Translation> attachmentTranslations);
 
 	/**
-	 * Count the valid questions in this context.
+	 * Count the questions in this context.
 	 * 
 	 * @param context
 	 *        The context.
@@ -89,9 +89,11 @@ public interface QuestionStorage
 	 *        The (optional) question type; if specified, only questions of this type are included.
 	 * @param survey
 	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countContextQuestions(String context, String questionType, Boolean survey);
+	Integer countContextQuestions(String context, String questionType, Boolean survey, Boolean valid);
 
 	/**
 	 * Count the questions in this pool - separate counts for survey and non-survey.
@@ -111,9 +113,11 @@ public interface QuestionStorage
 	 * 
 	 * @param context
 	 *        The context.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
 	 * @return A Map of the pool id -> count, separate assessment and survey counts.
 	 */
-	Map<String, Pool.PoolCounts> countPoolQuestions(String context);
+	Map<String, Pool.PoolCounts> countPoolQuestions(String context, Boolean valid);
 
 	/**
 	 * Check if a question by this id exists.
@@ -139,10 +143,12 @@ public interface QuestionStorage
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @param survey
 	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
 	 * @return The list of questions.
 	 */
 	List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum,
-			Integer pageSize, Boolean survey);
+			Integer pageSize, Boolean survey, Boolean valid);
 
 	/**
 	 * Find all the questions in the Pool, sorted and paged.
@@ -159,10 +165,12 @@ public interface QuestionStorage
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @param survey
 	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
 	 * @return The list of questions.
 	 */
 	List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum, Integer pageSize,
-			Boolean Survey);
+			Boolean survey, Boolean valid);
 
 	/**
 	 * Find all the questions in the pool

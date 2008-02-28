@@ -159,11 +159,12 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		if (pool == null)
 		{
 			maxQuestions = this.questionService.countQuestions(this.toolManager.getCurrentPlacement().getContext(), null,
-					(typeFilter.equals("0") ? null : typeFilter), surveyFilterValue);
+					(typeFilter.equals("0") ? null : typeFilter), surveyFilterValue, Boolean.TRUE);
 		}
 		else
 		{
-			maxQuestions = this.questionService.countQuestions(pool, null, (typeFilter.equals("0") ? null : typeFilter), surveyFilterValue, Boolean.TRUE);
+			maxQuestions = this.questionService.countQuestions(pool, null, (typeFilter.equals("0") ? null : typeFilter), surveyFilterValue,
+					Boolean.TRUE);
 		}
 		String pagingParameter = "1-30";
 		if (params.length > 6) pagingParameter = params[6];
@@ -178,12 +179,12 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		if (pool == null)
 		{
 			questions = questionService.findQuestions(this.toolManager.getCurrentPlacement().getContext(), sort, null, (typeFilter.equals("0") ? null
-					: typeFilter), paging.getCurrent(), paging.getSize(), surveyFilterValue);
+					: typeFilter), paging.getCurrent(), paging.getSize(), surveyFilterValue, Boolean.TRUE);
 		}
 		else
 		{
 			questions = questionService.findQuestions(pool, sort, null, (typeFilter.equals("0") ? null : typeFilter), paging.getCurrent(), paging
-					.getSize(), surveyFilterValue);
+					.getSize(), surveyFilterValue, Boolean.TRUE);
 		}
 		context.put("questions", questions);
 

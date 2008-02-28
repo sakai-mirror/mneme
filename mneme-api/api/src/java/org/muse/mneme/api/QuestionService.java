@@ -68,7 +68,7 @@ public interface QuestionService extends QuestionPoolService, QuestionGetService
 	Question copyQuestion(Question question, Pool pool) throws AssessmentPermissionException;
 
 	/**
-	 * Count the valid questions with this criteria.
+	 * Count the questions with this criteria.
 	 * 
 	 * @param context
 	 *        The context - count questions from all pools in this context.
@@ -77,10 +77,12 @@ public interface QuestionService extends QuestionPoolService, QuestionGetService
 	 * @param questionType
 	 *        The (optional) question type; if specified, only questions of this type are included.
 	 * @param survey
-	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both. s *
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
 	 * @return The questions in this pool with this criteria.
 	 */
-	Integer countQuestions(String context, String search, String questionType, Boolean surveyOnly);
+	Integer countQuestions(String context, String search, String questionType, Boolean surveyOnly, Boolean valid);
 
 	/**
 	 * Check if a question exists.
@@ -107,11 +109,13 @@ public interface QuestionService extends QuestionPoolService, QuestionGetService
 	 * @param pageSize
 	 *        The number of items for the requested page, or null if we are not paging.
 	 * @param survey
-	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both. s *
+	 *        if TRUE, include only survey questions, if FALSE, include only assessment questions, if NULL, include both.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
 	 * @return a list of questions that meet the criteria.
 	 */
 	List<Question> findQuestions(String context, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize,
-			Boolean surveys);
+			Boolean surveys, Boolean valid);
 
 	/**
 	 * Move a question from one pool to another.
@@ -137,6 +141,17 @@ public interface QuestionService extends QuestionPoolService, QuestionGetService
 	 *         if the current user is not allowed to create a new question.
 	 */
 	Question newQuestion(Pool pool, String type) throws AssessmentPermissionException;
+
+	/**
+	 * Pre-count and thread-cache all the questions in all the pools in the context, separating survey and non-survey.<br />
+	 * Good if we are going to subsequently call on these counts for each pool in this request.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @param valid
+	 *        if TRUE, include only valid questions, if FALSE, include only invalid questions, if NULL, include both.
+	 */
+	void preCountContextQuestions(String context, Boolean valid);
 
 	/**
 	 * Remove this question.

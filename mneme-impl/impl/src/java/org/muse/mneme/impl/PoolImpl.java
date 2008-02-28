@@ -122,7 +122,7 @@ public class PoolImpl implements Pool
 	 */
 	public List<Question> findQuestions(QuestionService.FindQuestionsSort sort, String search, Integer pageNum, Integer pageSize)
 	{
-		return this.questionService.findQuestions(this, sort, search, null, pageNum, pageSize, null);
+		return this.questionService.findQuestions(this, sort, search, null, pageNum, pageSize, null, null);
 	}
 
 	/**

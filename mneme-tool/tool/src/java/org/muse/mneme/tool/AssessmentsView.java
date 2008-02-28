@@ -40,6 +40,7 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
@@ -54,6 +55,9 @@ public class AssessmentsView extends ControllerImpl
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
+
+	/** Dependency: Question service. */
+	protected QuestionService questionService = null;
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
@@ -156,6 +160,9 @@ public class AssessmentsView extends ControllerImpl
 
 		// disable the tool navigation to this view
 		context.put("disableAssessments", Boolean.TRUE);
+
+		// pre-read question counts per pool
+		this.questionService.preCountContextQuestions(toolManager.getCurrentPlacement().getContext(), Boolean.TRUE);
 
 		// render
 		uiService.render(ui, context);
@@ -385,6 +392,17 @@ public class AssessmentsView extends ControllerImpl
 	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * Set the QuestionService.
+	 * 
+	 * @param service
+	 *        The QuestionService.
+	 */
+	public void setQuestionService(QuestionService service)
+	{
+		this.questionService = service;
 	}
 
 	/**

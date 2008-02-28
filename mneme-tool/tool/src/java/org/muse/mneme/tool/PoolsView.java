@@ -117,6 +117,9 @@ public class PoolsView extends ControllerImpl
 		// disable the tool navigation to this view
 		context.put("disablePools", Boolean.TRUE);
 
+		// pre-read question counts per pool
+		this.questionService.preCountContextQuestions(toolManager.getCurrentPlacement().getContext(), null);
+
 		// render
 		uiService.render(ui, context);
 	}

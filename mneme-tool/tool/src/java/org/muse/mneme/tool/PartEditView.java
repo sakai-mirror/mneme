@@ -48,6 +48,7 @@ import org.muse.mneme.api.Part;
 import org.muse.mneme.api.PoolDraw;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.QuestionService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 import org.springframework.core.io.ClassPathResource;
@@ -64,6 +65,9 @@ public class PartEditView extends ControllerImpl
 	protected AssessmentService assessmentService = null;
 
 	protected PoolService poolService = null;
+
+	/** Dependency: Question service. */
+	protected QuestionService questionService = null;
 
 	/** tool manager */
 	protected ToolManager toolManager = null;
@@ -137,44 +141,6 @@ public class PartEditView extends ControllerImpl
 		{
 			getManual(assessment, (ManualPart) part, req, res, context, params);
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void getDraw(Assessment assessment, DrawPart part, String sortCode, Context context) throws IOException
-	{
-		// sort
-		if ((sortCode == null) || (sortCode.length() != 2))
-		{
-			throw new IllegalArgumentException();
-		}
-		context.put("sort_column", sortCode.charAt(0));
-		context.put("sort_direction", sortCode.charAt(1));
-		PoolService.FindPoolsSort sort = findSortCode(sortCode);
-
-		// get the pool draw list
-		// - all the pools for the user (select, sort, page) crossed with this part's actual draws
-		// - these are virtual draws, not part of the DrawPart
-		List<PoolDraw> draws = getDraws(assessment, part, sort);
-		context.put("draws", draws);
-
-		// render
-		uiService.render(ui, context);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void getManual(Assessment assessment, ManualPart part, HttpServletRequest req, HttpServletResponse res, Context context, String[] params)
-			throws IOException
-	{
-		// checkboxes to remove questions
-		Values values = uiService.newValues();
-		context.put("questionIds", values);
-
-		// render
-		uiService.render(ui2, context);
 	}
 
 	/**
@@ -365,6 +331,17 @@ public class PartEditView extends ControllerImpl
 	}
 
 	/**
+	 * Set the QuestionService.
+	 * 
+	 * @param service
+	 *        The QuestionService.
+	 */
+	public void setQuestionService(QuestionService service)
+	{
+		this.questionService = service;
+	}
+
+	/**
 	 * @param toolManager
 	 *        the toolManager to set
 	 */
@@ -406,6 +383,33 @@ public class PartEditView extends ControllerImpl
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	protected void getDraw(Assessment assessment, DrawPart part, String sortCode, Context context) throws IOException
+	{
+		// sort
+		if ((sortCode == null) || (sortCode.length() != 2))
+		{
+			throw new IllegalArgumentException();
+		}
+		context.put("sort_column", sortCode.charAt(0));
+		context.put("sort_direction", sortCode.charAt(1));
+		PoolService.FindPoolsSort sort = findSortCode(sortCode);
+
+		// pre-read question counts per pool
+		this.questionService.preCountContextQuestions(toolManager.getCurrentPlacement().getContext(), Boolean.TRUE);
+
+		// get the pool draw list
+		// - all the pools for the user (select, sort, page) crossed with this part's actual draws
+		// - these are virtual draws, not part of the DrawPart
+		List<PoolDraw> draws = getDraws(assessment, part, sort);
+		context.put("draws", draws);
+
+		// render
+		uiService.render(ui, context);
+	}
+
+	/**
 	 * Get the draw of pools. If the assessment is live, just get the used pools, else get that joined with all possible pools.
 	 * 
 	 * @param assessment
@@ -428,5 +432,19 @@ public class PartEditView extends ControllerImpl
 		// - these are virtual draws, not part of the DrawPart
 		List<PoolDraw> draws = part.getDrawsForPools(toolManager.getCurrentPlacement().getContext(), sort, null);
 		return draws;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void getManual(Assessment assessment, ManualPart part, HttpServletRequest req, HttpServletResponse res, Context context, String[] params)
+			throws IOException
+	{
+		// checkboxes to remove questions
+		Values values = uiService.newValues();
+		context.put("questionIds", values);
+
+		// render
+		uiService.render(ui2, context);
 	}
 }

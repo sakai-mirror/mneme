@@ -181,7 +181,7 @@ public abstract class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Integer countContextQuestions(String context, String questionType, Boolean survey)
+	public Integer countContextQuestions(String context, String questionType, Boolean survey, Boolean valid)
 	{
 		int count = 0;
 		for (QuestionImpl question : this.questions.values())
@@ -191,7 +191,7 @@ public abstract class QuestionStorageSample implements QuestionStorage
 			if (!question.getContext().equals(context)) continue;
 			if ((questionType != null) && (!question.getType().equals(questionType))) continue;
 			if ((survey != null) && (question.getIsSurvey() != survey)) continue;
-			if (!question.getIsValid()) continue;
+			if ((valid != null) && (question.getIsValid() != valid)) continue;
 
 			count++;
 		}
@@ -229,7 +229,7 @@ public abstract class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Map<String, Pool.PoolCounts> countPoolQuestions(String context)
+	public Map<String, Pool.PoolCounts> countPoolQuestions(String context, Boolean valid)
 	{
 		Map<String, Pool.PoolCounts> rv = new HashMap<String, Pool.PoolCounts>();
 		List<Pool> pools = this.poolService.findPools(context, null, null);
@@ -237,7 +237,7 @@ public abstract class QuestionStorageSample implements QuestionStorage
 		{
 			if (!pool.getIsHistorical())
 			{
-				rv.put(pool.getId(), countPoolQuestions(pool, null, null));
+				rv.put(pool.getId(), countPoolQuestions(pool, null, valid));
 			}
 		}
 
@@ -269,18 +269,18 @@ public abstract class QuestionStorageSample implements QuestionStorage
 	 * {@inheritDoc}
 	 */
 	public List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum,
-			Integer pageSize, Boolean survey)
+			Integer pageSize, Boolean survey, Boolean valid)
 	{
-		return findQuestions(context, null, sort, questionType, pageNum, pageSize, survey, Boolean.TRUE);
+		return findQuestions(context, null, sort, questionType, pageNum, pageSize, survey, valid);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public List<QuestionImpl> findPoolQuestions(Pool pool, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum,
-			Integer pageSize, Boolean survey)
+			Integer pageSize, Boolean survey, Boolean valid)
 	{
-		return findQuestions(null, pool, sort, questionType, pageNum, pageSize, survey, null);
+		return findQuestions(null, pool, sort, questionType, pageNum, pageSize, survey, valid);
 	}
 
 	/**
