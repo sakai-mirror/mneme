@@ -94,7 +94,7 @@ public interface QuestionService extends QuestionPoolService, QuestionGetService
 	Boolean existsQuestion(String questionid);
 
 	/**
-	 * Locate a list of valid questions with this criteria.
+	 * Locate a list of questions with this criteria.
 	 * 
 	 * @param context
 	 *        The context - get questions from all pools in the context.

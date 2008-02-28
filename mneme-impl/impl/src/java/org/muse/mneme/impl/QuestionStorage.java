@@ -129,7 +129,7 @@ public interface QuestionStorage
 	Boolean existsQuestion(String id);
 
 	/**
-	 * Find all the valid questions in the context, sorted and paged.
+	 * Find all the questions in the context, sorted and paged.
 	 * 
 	 * @param context
 	 *        The context.
