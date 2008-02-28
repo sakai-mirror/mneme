@@ -7,7 +7,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,22 @@
 
 		<!-- repeat the nav up top -->
 		<alias to="nav" />
+
+		<!--  if invalid -->
+		<section>
+			<container>
+				<text>
+					<message selector="invalid-question">
+						<model type="icon" icon="/icons/warning.png" />
+						<model type="html" ref="question.typeSpecificQuestion.invalidMessage" />
+					</message>
+				</text>
+			</container>
+			<included>
+				<decision model="question.isValid" reversed="TRUE" />
+				<decision model="question.mint" reversed="TRUE" />
+			</included>
+		</section>
 
 		<!-- Question specific delivery -->
 		<modelComponent model="question.typeSpecificQuestion.viewQuestionUi" />

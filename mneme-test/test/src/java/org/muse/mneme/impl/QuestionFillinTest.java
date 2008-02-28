@@ -221,6 +221,23 @@ public class QuestionFillinTest extends TestCase
 		assertFalse(question.getIsValid());
 	}
 
+	public void testValidateB() throws Exception
+	{
+		String[] data = new String[4];
+		data[0] = "false"; // any order
+		data[1] = "false"; // case sensitive
+		data[2] = "true"; // textual
+		data[3] = "Violets are {blue).";
+		question.getTypeSpecificQuestion().setData(data);
+		assertFalse(question.getIsValid());
+		assertTrue(question.getDescription(), question.getDescription().equals("Violets are {blue)."));
+
+		data[3] = "Violets are {blue}.";
+		question.getTypeSpecificQuestion().setData(data);
+		assertTrue(question.getIsValid());
+		assertTrue(question.getDescription(), question.getDescription().equals("Violets are {}."));
+	}
+
 	public void test001() throws Exception
 	{
 		String[] data = new String[4];

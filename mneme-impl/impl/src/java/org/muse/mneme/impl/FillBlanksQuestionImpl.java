@@ -245,6 +245,8 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	{
 		List<String> correctAnswers = new ArrayList<String>();
 
+		if (!getIsValid()) return correctAnswers;
+
 		String alltext = getText();
 		while (alltext.indexOf("{") > -1)
 		{
@@ -362,6 +364,8 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	public String getQuestionText()
 	{
 		if (this.text == null) return null;
+
+		if (!getIsValid()) return this.text; 
 
 		String text = this.text;
 		StringBuffer rv = new StringBuffer();
