@@ -25,7 +25,6 @@ import java.awt.Container;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
-import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
@@ -53,6 +52,8 @@ import org.muse.mneme.api.Attachment;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.SecurityService;
+import org.muse.mneme.api.Submission;
+import org.muse.mneme.api.SubmissionService;
 import org.muse.mneme.api.Translation;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.component.api.ServerConfigurationService;
@@ -127,6 +128,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/** Dependency: SessionManager */
 	protected SessionManager sessionManager = null;
 
+	/** Dependency: SubmissionService */
+	protected SubmissionService submissionService = null;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -166,6 +170,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 				rv = doAdd(contentHostingId(name, application, context, prefix, true), name, type, body, size, false);
 			}
 
+			// TODO: we might not want a thumb (such as for submission uploads to essay/task
 			// if we added one
 			if (rv != null)
 			{
@@ -658,7 +663,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public void setSecurityService(SecurityService service)
 	{
-		securityService = service;
+		this.securityService = service;
 	}
 
 	/**
@@ -669,7 +674,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public void setSecurityServiceSakai(org.sakaiproject.authz.api.SecurityService service)
 	{
-		securityServiceSakai = service;
+		this.securityServiceSakai = service;
 	}
 
 	/**
@@ -680,7 +685,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public void setServerConfigurationService(ServerConfigurationService service)
 	{
-		serverConfigurationService = service;
+		this.serverConfigurationService = service;
 	}
 
 	/**
@@ -691,7 +696,18 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	public void setSessionManager(SessionManager service)
 	{
-		sessionManager = service;
+		this.sessionManager = service;
+	}
+
+	/**
+	 * Dependency: SubmissionService.
+	 * 
+	 * @param service
+	 *        The SubmissionService.
+	 */
+	public void setSubmissionService(SubmissionService service)
+	{
+		this.submissionService = service;
 	}
 
 	/**
@@ -885,10 +901,35 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	protected boolean checkSecurity(Reference ref)
 	{
-		if (this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, ref.getContext()))
-			return true;
-		if (this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.SUBMIT_PERMISSION, ref.getContext()))
-			return true;
+		String userId = this.sessionManager.getCurrentSessionUserId();
+		String context = ref.getContext();
+
+		String[] parts = StringUtil.split(ref.getId(), "/");
+		if ((parts.length == 9) && (SUBMISSIONS_AREA.equals(parts[5])))
+		{
+			// manage or grade permission for the context is still a winner
+			if (this.securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context)) return true;
+			if (this.securityService.checkSecurity(userId, MnemeService.GRADE_PERMISSION, context)) return true;
+
+			// otherwise, user must be submission user and have submit permission
+			if (this.securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, context))
+			{
+				Submission submission = this.submissionService.getSubmission(parts[6]);
+				if (submission != null)
+				{
+					if (submission.getUserId().equals(userId))
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		// this is how we used to do it, without a submission id in the ref
+		if (this.securityService.checkSecurity(userId, MnemeService.MANAGE_PERMISSION, context)) return true;
+		if (this.securityService.checkSecurity(userId, MnemeService.SUBMIT_PERMISSION, context)) return true;
 		return false;
 	}
 
@@ -917,8 +958,21 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		contentPath += context + "/";
 		if ((prefix != null) && (prefix.length() > 0))
 		{
-			assureCollection(contentPath, prefix, false);
-			contentPath += prefix + "/";
+			// allow multi-part prefix
+			if (prefix.indexOf('/') != -1)
+			{
+				String[] prefixes = StringUtil.split(prefix, "/");
+				for (String pre : prefixes)
+				{
+					assureCollection(contentPath, pre, false);
+					contentPath += pre + "/";
+				}
+			}
+			else
+			{
+				assureCollection(contentPath, prefix, false);
+				contentPath += prefix + "/";
+			}
 		}
 		if (uniqueHolder)
 		{
@@ -959,7 +1013,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	{
 		try
 		{
-			ContentResourceEdit edit = contentHostingService.addResource(id);
+			ContentResourceEdit edit = this.contentHostingService.addResource(id);
 			edit.setContent(body);
 			edit.setContentType(type);
 			ResourcePropertiesEdit props = edit.getPropertiesEdit();
@@ -974,7 +1028,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 				props.addProperty(PROP_THUMB, PROP_THUMB);
 			}
 
-			contentHostingService.commitResource(edit);
+			this.contentHostingService.commitResource(edit);
 
 			String ref = edit.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
 			Reference reference = entityManager.newReference(ref);

@@ -46,10 +46,10 @@ public interface AttachmentService
 	/** This string starts the references to uploaded resources. */
 	static final String REFERENCE_ROOT = "/mneme";
 
-	/** Prefix for the submissions upload area in MnemeDocs. */
+	/** Prefix for the submissions upload area in MnemeDocs: in 1.1 and later, expect another path component with the submission id. */
 	static final String SUBMISSIONS_AREA = "submissions";
 
-	/** The text added to the main URL to form the thumnail URL. */
+	/** The text added to the main URL to form the thumb-nail URL. */
 	public final static String THUMB_SUFFIX = "_thumb.jpg";
 
 	/**

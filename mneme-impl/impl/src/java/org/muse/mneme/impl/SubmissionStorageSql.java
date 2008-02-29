@@ -341,7 +341,15 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 	 */
 	public SubmissionImpl getSubmission(String id)
 	{
-		return readSubmission(id);
+		try
+		{
+			Long lid = Long.valueOf(id);
+			return readSubmission(lid);
+		}
+		catch (NumberFormatException e)
+		{
+			return null;
+		}
 	}
 
 	/**
@@ -839,11 +847,11 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 	 *        The submission id.
 	 * @return The submission.
 	 */
-	protected SubmissionImpl readSubmission(String id)
+	protected SubmissionImpl readSubmission(Long id)
 	{
 		String where = "WHERE S.ID = ?";
 		Object[] fields = new Object[1];
-		fields[0] = Long.valueOf(id);
+		fields[0] = id;
 		List<SubmissionImpl> rv = readSubmissions(where, null, fields);
 		if (rv.size() > 0)
 		{

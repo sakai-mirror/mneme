@@ -78,7 +78,7 @@ public class AnswerEvaluationImpl extends EvaluationImpl implements AnswerEvalua
 	public void setUpload(FileItem file)
 	{
 		Reference reference = this.attachmentService.addAttachment(AttachmentService.MNEME_APPLICATION, getAnswer().getSubmission().getAssessment()
-				.getContext(), AttachmentService.SUBMISSIONS_AREA, true, file);
+				.getContext(), AttachmentService.SUBMISSIONS_AREA + "/" + getAnswer().getSubmission().getId(), true, file);
 		if (reference != null)
 		{
 			this.attachments.add(reference);

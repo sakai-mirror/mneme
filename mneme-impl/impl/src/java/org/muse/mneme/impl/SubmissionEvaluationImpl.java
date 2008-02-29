@@ -77,7 +77,7 @@ public class SubmissionEvaluationImpl extends EvaluationImpl implements Submissi
 	public void setUpload(FileItem file)
 	{
 		Reference reference = this.attachmentService.addAttachment(AttachmentService.MNEME_APPLICATION, getSubmission().getAssessment().getContext(),
-				AttachmentService.SUBMISSIONS_AREA, true, file);
+				AttachmentService.SUBMISSIONS_AREA + "/" + getSubmission().getId(), true, file);
 		if (reference != null)
 		{
 			this.attachments.add(reference);

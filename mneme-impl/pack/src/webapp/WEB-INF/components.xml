@@ -24,6 +24,7 @@
 			singleton="true">
 
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
+ 		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
 
 		<property name="securityServiceSakai"><ref bean="org.sakaiproject.authz.api.SecurityService"/></property>
 		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>

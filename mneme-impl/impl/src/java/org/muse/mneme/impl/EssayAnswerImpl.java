@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,7 +208,8 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * Set the answerData
 	 * 
-	 * @param answerData. Must be well formed HTML or plain text.
+	 * @param answerData.
+	 *        Must be well formed HTML or plain text.
 	 */
 	public void setAnswerData(String answerData)
 	{
@@ -247,7 +248,7 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	public void setUpload(FileItem file)
 	{
 		Reference reference = this.attachmentService.addAttachment(AttachmentService.MNEME_APPLICATION, this.answer.getSubmission().getAssessment()
-				.getContext(), AttachmentService.SUBMISSIONS_AREA, true, file);
+				.getContext(), AttachmentService.SUBMISSIONS_AREA + "/" + this.answer.getSubmission().getId(), true, file);
 		if (reference != null)
 		{
 			this.uploads.add(reference);
