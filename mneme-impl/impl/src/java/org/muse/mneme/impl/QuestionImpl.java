@@ -278,6 +278,8 @@ public class QuestionImpl implements Question
 
 	protected Boolean survey = Boolean.FALSE;
 
+	protected boolean surveyChanged = false;
+
 	protected String type = null;
 
 	/**
@@ -426,7 +428,7 @@ public class QuestionImpl implements Question
 	 */
 	public Boolean getIsChanged()
 	{
-		return this.changed.getChanged();
+		return this.changed.getChanged() || this.surveyChanged;
 	}
 
 	/**
@@ -574,7 +576,7 @@ public class QuestionImpl implements Question
 	public void setFeedback(String feedback)
 	{
 		feedback = StringUtil.trimToNull(feedback);
-		
+
 		if (!Different.different(feedback, this.feedback)) return;
 
 		this.feedback = feedback;
@@ -588,7 +590,7 @@ public class QuestionImpl implements Question
 	public void setHints(String hints)
 	{
 		hints = StringUtil.trimToNull(hints);
-		
+
 		if (!Different.different(hints, this.hints)) return;
 
 		this.hints = hints;
@@ -606,7 +608,8 @@ public class QuestionImpl implements Question
 
 		this.survey = isSurvey;
 
-		this.changed.setChanged();
+		// this.changed.setChanged();
+		this.surveyChanged = true;
 	}
 
 	/**
@@ -662,6 +665,7 @@ public class QuestionImpl implements Question
 	protected void clearChanged()
 	{
 		this.changed.clearChanged();
+		this.surveyChanged = false;
 	}
 
 	/**
@@ -670,6 +674,16 @@ public class QuestionImpl implements Question
 	protected void clearMint()
 	{
 		this.mint = Boolean.FALSE;
+	}
+
+	/**
+	 * Check if there was a survey change but no other change
+	 * 
+	 * @return TRUE if there was a survey change but no other change, FALSE if not.
+	 */
+	protected Boolean getSurveyOnlyChanged()
+	{
+		return this.surveyChanged && (!this.changed.getChanged());
 	}
 
 	/**
@@ -812,6 +826,7 @@ public class QuestionImpl implements Question
 		this.submissionContext = other.submissionContext;
 		this.submissionService = other.submissionService;
 		this.survey = other.survey;
+		this.surveyChanged = other.surveyChanged;
 		this.type = other.type;
 	}
 }

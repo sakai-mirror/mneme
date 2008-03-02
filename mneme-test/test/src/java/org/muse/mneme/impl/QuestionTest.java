@@ -198,32 +198,32 @@ public class QuestionTest extends TestCase
 
 	public void testChanged() throws Exception
 	{
-		question.changed.clearChanged();
+		question.clearChanged();
 		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
-		question.changed.setChanged();
+		question.setChanged();
 		assertTrue(question.getIsChanged().equals(Boolean.TRUE));
 
-		question.changed.clearChanged();
+		question.clearChanged();
 		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
 		question.setChanged();
 		assertTrue(question.getIsChanged().equals(Boolean.TRUE));
 
 		question.setExplainReason(Boolean.TRUE);
-		question.changed.clearChanged();
+		question.clearChanged();
 		question.setExplainReason(Boolean.TRUE);
 		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
 		question.setExplainReason(Boolean.FALSE);
 		assertTrue(question.getIsChanged().equals(Boolean.TRUE));
 
 		question.setFeedback("");
-		question.changed.clearChanged();
+		question.clearChanged();
 		question.setFeedback("");
 		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
 		question.setFeedback("x");
 		assertTrue(question.getIsChanged().equals(Boolean.TRUE));
 
 		question.setHints("");
-		question.changed.clearChanged();
+		question.clearChanged();
 		question.setHints("");
 		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
 		question.setHints("x");
@@ -232,14 +232,14 @@ public class QuestionTest extends TestCase
 		Pool p1 = this.poolGetService.getPool("1");
 		Pool p2 = this.poolGetService.getPool("2");
 		question.setPool(p1);
-		question.changed.clearChanged();
+		question.clearChanged();
 		question.setPool(p1);
 		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
 		question.setPool(p2);
 		assertTrue(question.getIsChanged().equals(Boolean.TRUE));
 
 		question.getPresentation().setText("");
-		question.changed.clearChanged();
+		question.clearChanged();
 		question.getPresentation().setText("");
 		assertTrue(question.getIsChanged().equals(Boolean.FALSE));
 		question.getPresentation().setText("x");

@@ -917,7 +917,7 @@ public abstract class QuestionStorageSql implements QuestionStorage
 					qService.setType(SqlHelper.readString(result, 15), question);
 					question.getTypeSpecificQuestion().setData(SqlHelper.decodeStringArray(StringUtil.trimToNull(result.getString(16))));
 
-					question.changed.clearChanged();
+					question.clearChanged();
 					rv.add(question);
 
 					return null;

@@ -603,7 +603,11 @@ public class QuestionServiceImpl implements QuestionService
 		// if any changes made, clear mint
 		if (question.getIsChanged())
 		{
-			((QuestionImpl) question).clearMint();
+			// if other than just a survey change
+			if (!((QuestionImpl) question).getSurveyOnlyChanged())
+			{
+				((QuestionImpl) question).clearMint();
+			}
 		}
 
 		// otherwise we don't save: but if mint, we delete
