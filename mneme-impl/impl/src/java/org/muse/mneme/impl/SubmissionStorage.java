@@ -240,14 +240,6 @@ public interface SubmissionStorage
 	void saveAnswers(List<Answer> answers);
 
 	/**
-	 * Save evaluation changes made to these answers.
-	 * 
-	 * @param answers
-	 *        the answers with evaluations to save.
-	 */
-	void saveAnswersEvaluation(List<Answer> answers);
-
-	/**
 	 * Save changes made to this submission.
 	 * 
 	 * @param submission

@@ -175,6 +175,9 @@ public class GradeQuestionView extends ControllerImpl
 		List<Answer> answers = this.submissionService.findSubmissionAnswers(assessment, question, sort, paging.getCurrent(), paging.getSize());
 		context.put("answers", answers);
 
+		// so we know we are grading
+		context.put("grading", Boolean.TRUE);
+
 		uiService.render(ui, context);
 	}
 

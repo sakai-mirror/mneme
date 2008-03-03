@@ -597,17 +597,6 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void saveAnswersEvaluation(List<Answer> answers)
-	{
-		for (Answer a : answers)
-		{
-			updateAnswerEval((AnswerImpl) a);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void saveSubmission(SubmissionImpl submission)
 	{
 		// if new
@@ -1003,52 +992,6 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 				updateAnswerTx(answer);
 			}
 		}, "updateAnswer: " + answer.getId());
-	}
-
-	/**
-	 * Update an existing submission answer evaluation.
-	 * 
-	 * @param answer
-	 *        The answer.
-	 */
-	protected void updateAnswerEval(final AnswerImpl answer)
-	{
-		this.sqlService.transact(new Runnable()
-		{
-			public void run()
-			{
-				updateAnswerEvalTx(answer);
-			}
-		}, "updateAnswer: " + answer.getId());
-	}
-
-	/**
-	 * Update an existing submission answer eval. (transaction code).
-	 * 
-	 * @param answer
-	 *        The answer.
-	 */
-	protected void updateAnswerEvalTx(AnswerImpl answer)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE MNEME_ANSWER SET");
-		sql.append(" AUTO_SCORE=?, EVAL_ATRIB_DATE=?, EVAL_ATRIB_USER=?, EVAL_ATTACHMENTS=?, EVAL_COMMENT=?, EVAL_EVALUATED=?, EVAL_SCORE=?");
-		sql.append(" WHERE ID=?");
-
-		Object[] fields = new Object[8];
-		fields[0] = answer.getAutoScore();
-		fields[1] = (answer.getEvaluation().getAttribution().getDate() == null) ? null : answer.getEvaluation().getAttribution().getDate().getTime();
-		fields[2] = answer.getEvaluation().getAttribution().getUserId();
-		fields[3] = SqlHelper.encodeReferences(answer.getEvaluation().getAttachments());
-		fields[4] = answer.getEvaluation().getComment();
-		fields[5] = answer.getEvaluation().getEvaluated() ? "1" : "0";
-		fields[6] = answer.getEvaluation().getScore() == null ? null : Float.valueOf(answer.getEvaluation().getScore());
-		fields[7] = Long.valueOf(answer.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("updateAnswerEvalTx: db write failed");
-		}
 	}
 
 	/**

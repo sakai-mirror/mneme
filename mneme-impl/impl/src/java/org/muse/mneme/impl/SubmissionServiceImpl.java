@@ -516,7 +516,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		{
 			Answer answer = (Answer) i.next();
 
-			if (((EvaluationImpl) answer.getEvaluation()).getIsChanged())
+			if ((((EvaluationImpl) answer.getEvaluation()).getIsChanged()) || answer.getIsChanged())
 			{
 				// set attribution
 				answer.getEvaluation().getAttribution().setDate(now);
@@ -524,6 +524,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 				// clear changed flag
 				((EvaluationImpl) answer.getEvaluation()).clearIsChanged();
+				((AnswerImpl) answer).clearIsChanged();
 
 				// clear the answer's submission from the thread-local cache
 				String key = cacheKey(answer.getSubmission().getId());
@@ -540,7 +541,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// save the answers
 		if (!work.isEmpty())
 		{
-			this.storage.saveAnswersEvaluation(work);
+			this.storage.saveAnswers(work);
 
 			// TODO: events? single event?
 			// eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()),
@@ -568,7 +569,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		if (M_log.isDebugEnabled()) M_log.debug("evaluateSubmission: " + submission.getId());
 
-		// consoliate the total score
+		// consolidate the total score
 		submission.consolidateTotalScore();
 
 		// check for changes
@@ -578,7 +579,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		{
 			for (Answer answer : submission.getAnswers())
 			{
-				if (((EvaluationImpl) answer.getEvaluation()).getIsChanged())
+				if ((((EvaluationImpl) answer.getEvaluation()).getIsChanged()) || answer.getIsChanged())
 				{
 					changed = true;
 					break;
@@ -664,7 +665,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		{
 			Answer answer = (Answer) i.next();
 
-			if (((EvaluationImpl) answer.getEvaluation()).getIsChanged())
+			if ((((EvaluationImpl) answer.getEvaluation()).getIsChanged()) || answer.getIsChanged())
 			{
 				// set attribution
 				answer.getEvaluation().getAttribution().setDate(now);
@@ -672,6 +673,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 				// clear the changed flag
 				((EvaluationImpl) answer.getEvaluation()).clearIsChanged();
+				((AnswerImpl) answer).clearIsChanged();
 			}
 
 			else
@@ -688,7 +690,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		}
 		if (!work.isEmpty())
 		{
-			this.storage.saveAnswersEvaluation(work);
+			this.storage.saveAnswers(work);
 		}
 
 		// save the released setting if changed

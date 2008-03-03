@@ -319,10 +319,35 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 
 		Section answerSection = this.uiService.newSection();
 
+		// for review mode, show just the evaluated answer text, if released
 		Text answer = this.uiService.newText();
 		answer.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
-		answer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
+		answer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerEvaluated"));
+		answer.setIncluded(this.uiService.newDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.submission.isReleased")), this.uiService.newHasValueDecision()
+				.setProperty(this.uiService.newPropertyReference().setReference("review")), this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData")));
 		answerSection.add(answer);
+
+		// or if not released, the actual answer text
+		Text answer2 = this.uiService.newText();
+		answer2.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
+		answer2.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
+		answer2.setIncluded(this.uiService.newDecision().setReversed().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.submission.isReleased")), this.uiService.newHasValueDecision()
+				.setProperty(this.uiService.newPropertyReference().setReference("review")), this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData")));
+		answerSection.add(answer2);
+
+		// for grading, include the editor for marking up the answer
+		HtmlEdit edit = this.uiService.newHtmlEdit();
+		edit.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
+		edit.setSize(14, 100);
+		edit.setIncluded(this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("grading")),
+				this.uiService.newHasValueDecision().setProperty(
+						this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData")));
+		edit.setProperty(this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerEvaluated"));
+		answerSection.add(edit);
 
 		Attachments uploaded = this.uiService.newAttachments();
 		uploaded.setTitle("uploaded-title");
@@ -413,8 +438,16 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewAnswerUi()
 	{
-		Text answer = this.uiService.newText();
-		answer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
+		// Text answer = this.uiService.newText();
+		// answer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
+
+		// editor for marking up the answer
+		HtmlEdit answer = this.uiService.newHtmlEdit();
+		answer.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
+		answer.setSize(14, 100);
+		answer.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData")));
+		answer.setProperty(this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerEvaluated"));
 
 		Attachments uploaded = this.uiService.newAttachments();
 		uploaded.setTitle("uploaded-title");

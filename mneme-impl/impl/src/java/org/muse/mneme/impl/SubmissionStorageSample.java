@@ -501,26 +501,6 @@ public abstract class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void saveAnswersEvaluation(List<Answer> answers)
-	{
-		for (Answer a : answers)
-		{
-			// find the submission
-			SubmissionImpl s = this.submissions.get(a.getSubmission().getId());
-			if (s != null)
-			{
-				AnswerImpl oldAnswer = (AnswerImpl) s.getAnswer(a.getQuestion());
-				if (oldAnswer != null)
-				{
-					oldAnswer.evaluation.set(((AnswerImpl) a).evaluation);
-				}
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void saveSubmission(SubmissionImpl submission)
 	{
 		// assign an id

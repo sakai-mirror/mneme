@@ -50,6 +50,9 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	/** The String answer as entered by the user. */
 	protected String answerData = null;
 
+	/** The String answer as entered by the user and subsequently marked up by an evaluation. */
+	protected String answerEvaluated = null;
+
 	/** Dependency: AttachmentService. */
 	protected AttachmentService attachmentService = null;
 
@@ -83,6 +86,7 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	{
 		this.answer = answer;
 		this.answerData = other.answerData;
+		this.answerEvaluated = other.answerEvaluated;
 		this.uploads.addAll(other.uploads);
 		this.changed = other.changed;
 		this.attachmentService = other.attachmentService;
@@ -154,6 +158,20 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	}
 
 	/**
+	 * @return The answer data as evaluated.
+	 */
+	public String getAnswerEvaluated()
+	{
+		// if we have no evaluation yet, start with the raw answer data
+		if (this.answerEvaluated == null)
+		{
+			return this.answerData;
+		}
+
+		return this.answerEvaluated;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public Float getAutoScore()
@@ -167,9 +185,10 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	 */
 	public String[] getData()
 	{
-		String[] rv = new String[1 + this.uploads.size()];
+		String[] rv = new String[2 + this.uploads.size()];
 		rv[0] = this.answerData;
-		int i = 1;
+		rv[1] = this.answerEvaluated;
+		int i = 2;
 		for (Reference ref : this.uploads)
 		{
 			rv[i++] = ref.getReference();
@@ -222,19 +241,50 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	}
 
 	/**
+	 * Set the answer data marked up with evaluation
+	 * 
+	 * @param answerData.
+	 *        Must be well formed HTML or plain text.
+	 */
+	public void setAnswerEvaluated(String evaluated)
+	{
+		String current = getAnswerEvaluated();
+		evaluated = StringUtil.trimToNull(evaluated);
+
+		if (!Different.different(current, evaluated)) return;
+
+		this.answerEvaluated = evaluated;
+		this.changed = true;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void setData(String[] data)
 	{
 		this.answerData = null;
+		this.answerEvaluated = null;
 		this.uploads.clear();
-		if ((data != null) && (data.length >= 1))
+
+		if ((data != null) && (data.length > 0))
 		{
 			this.answerData = data[0];
-			for (int index = 1; index < data.length; index++)
+
+			// if data[1] is not a reference, it is the answerEvaluated (references must start with a slash)
+			if (data.length > 1)
 			{
-				Reference ref = this.attachmentService.getReference(data[index]);
-				uploads.add(ref);
+				int start = 1;
+				if ((data[1] == null) || (!data[1].startsWith("/")))
+				{
+					this.answerEvaluated = data[1];
+					start = 2;
+				}
+
+				for (int index = start; index < data.length; index++)
+				{
+					Reference ref = this.attachmentService.getReference(data[index]);
+					uploads.add(ref);
+				}
 			}
 		}
 	}
