@@ -350,12 +350,10 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		answerSection.add(edit);
 
 		Attachments uploaded = this.uiService.newAttachments();
-		uploaded.setTitle("uploaded-title");
 		uploaded.setAttachments(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded"), "attachment");
 		uploaded.setSize(false).setTimestamp(false);
-		uploaded.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.attachments.toString(),
-				SubmissionType.both.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
+		uploaded.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded")));
 		answerSection.add(uploaded);
 
 		// if no submission
@@ -438,9 +436,6 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	 */
 	public Component getViewAnswerUi()
 	{
-		// Text answer = this.uiService.newText();
-		// answer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
-
 		// editor for marking up the answer
 		HtmlEdit answer = this.uiService.newHtmlEdit();
 		answer.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
@@ -450,12 +445,10 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		answer.setProperty(this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerEvaluated"));
 
 		Attachments uploaded = this.uiService.newAttachments();
-		uploaded.setTitle("uploaded-title");
 		uploaded.setAttachments(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded"), "attachment");
 		uploaded.setSize(false).setTimestamp(false);
-		uploaded.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.attachments.toString(),
-				SubmissionType.both.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
+		uploaded.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded")));
 
 		return this.uiService.newFragment().setMessages(this.messages).add(answer).add(uploaded);
 	}
@@ -573,12 +566,10 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		answer.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
 
 		Attachments uploaded = this.uiService.newAttachments();
-		uploaded.setTitle("uploaded-title");
 		uploaded.setAttachments(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded"), "attachment");
 		uploaded.setSize(false).setTimestamp(false);
-		uploaded.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.attachments.toString(),
-				SubmissionType.both.toString()).setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
+		uploaded.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded")));
 
 		Section section = this.uiService.newSection();
 		PropertyReference iteratorRef = this.uiService.newPropertyReference().setReference("submissions").setFormatDelegate(
