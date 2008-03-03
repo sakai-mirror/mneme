@@ -44,7 +44,6 @@ public abstract class QuestionStorageOracle extends QuestionStorageSql implement
 		if (autoDdl)
 		{
 			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_question");
-			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_question_1_0-1_1");
 		}
 
 		M_log.info("init()");
