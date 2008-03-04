@@ -48,12 +48,15 @@
 
 	<build>
 
+		<!--
 		<unitTestSourceDirectory>src/java</unitTestSourceDirectory>
 		<unitTest>
 			<includes>
 				<include>**/*Test.java</include>
 			</includes>
 		</unitTest>
+		 -->
+
 		<resources>
 			<resource>
 				<directory>${basedir}/src/config</directory>
@@ -63,6 +66,7 @@
 				</includes>
 			</resource>
 		</resources>
+
 	</build>
 
 </project>
