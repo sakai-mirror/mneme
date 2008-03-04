@@ -48,7 +48,6 @@ public class AssessmentStorageMysql extends AssessmentStorageSql implements Asse
 		if (autoDdl)
 		{
 			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_assessment");
-			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_assessment_1_0-1_1");
 		}
 
 		// messages
