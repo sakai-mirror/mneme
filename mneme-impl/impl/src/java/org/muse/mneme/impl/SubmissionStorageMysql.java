@@ -43,7 +43,6 @@ public abstract class SubmissionStorageMysql extends SubmissionStorageSql implem
 		if (autoDdl)
 		{
 			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_submission");
-			this.sqlService.ddl(this.getClass().getClassLoader(), "mneme_submission_1_0-1_1");
 		}
 
 		M_log.info("init()");
