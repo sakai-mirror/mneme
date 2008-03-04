@@ -360,6 +360,14 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<String> findAllNonHistoricalIds()
+	{
+		return this.storage.findAllNonHistoricalIds();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<Question> findQuestions(Pool pool, FindQuestionsSort sort, String search, String questionType, Integer pageNum, Integer pageSize,
 			Boolean survey, Boolean valid)
 	{
@@ -385,6 +393,25 @@ public class QuestionServiceImpl implements QuestionService
 		if (M_log.isDebugEnabled()) M_log.debug("findQuestions: context: " + context);
 
 		return new ArrayList<Question>(this.storage.findContextQuestions(context, sort, questionType, pageNum, pageSize, survey, valid));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void forceSave(Question question) throws AssessmentPermissionException
+	{
+		// security check
+		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, question.getContext());
+
+		// save
+		((QuestionImpl) question).clearChanged();
+		this.storage.saveQuestion((QuestionImpl) question);
+
+		// clear thread-local caches
+		this.threadLocalManager.set(cacheKey(question.getId()), null);
+		this.threadLocalManager.set(this.cacheKeyPoolCount(question.getPool().getId()), null);
+		this.threadLocalManager.set(this.cacheKeyContextCount(question.getContext()), null);
+		this.threadLocalManager.set(this.cacheKeyPoolQuestions(question.getPool().getId()), null);
 	}
 
 	/**

@@ -106,6 +106,18 @@
 					</container>
 				</section>
 
+				<section>
+					<title highlighted="TRUE">
+						<message selector="question-cleanup" />
+					</title>
+					<container>
+						<instructions selector="question-cleanup-instructions" />
+						<navigation title="question-cleanup" style="LINK" destination="QUESTION_CLEANUP" submit="TRUE">
+							<confirm decision="TRUE" cancelSelector="cancel" selector="question-cleanup-confirm" />
+						</navigation>
+					</container>
+				</section>
+
 			</container>
 		</section>
 

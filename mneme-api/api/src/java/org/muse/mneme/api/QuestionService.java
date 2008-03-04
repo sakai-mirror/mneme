@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * QuestionService provides services around question management for Mneme.
  */
-public interface QuestionService extends QuestionPoolService, QuestionGetService
+public interface QuestionService extends QuestionPoolService, QuestionGetService, QuestionAdminService
 {
 	/**
 	 * Check if the current user is allowed to edit this question.

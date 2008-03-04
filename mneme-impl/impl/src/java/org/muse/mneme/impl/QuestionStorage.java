@@ -129,6 +129,13 @@ public interface QuestionStorage
 	Boolean existsQuestion(String id);
 
 	/**
+	 * Find all the non-historical question ids.
+	 * 
+	 * @return a List of the non-historical question ids.
+	 */
+	List<String> findAllNonHistoricalIds();
+
+	/**
 	 * Find all the questions in the context, sorted and paged.
 	 * 
 	 * @param context

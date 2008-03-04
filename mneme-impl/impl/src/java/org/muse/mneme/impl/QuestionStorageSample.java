@@ -268,6 +268,23 @@ public abstract class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<String> findAllNonHistoricalIds()
+	{
+		List<String> rv = new ArrayList<String>();
+		for (QuestionImpl question : this.questions.values())
+		{
+			if (!question.getIsHistorical())
+			{
+				rv.add(question.getId());
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<QuestionImpl> findContextQuestions(String context, QuestionService.FindQuestionsSort sort, String questionType, Integer pageNum,
 			Integer pageSize, Boolean survey, Boolean valid)
 	{

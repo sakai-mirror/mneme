@@ -507,6 +507,40 @@ public abstract class QuestionStorageSql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<String> findAllNonHistoricalIds()
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT Q.ID");
+		sql.append(" FROM MNEME_QUESTION Q ");
+		sql.append(" WHERE Q.MINT IN ('0', '1') AND Q.HISTORICAL='0'");
+		sql.append(" ORDER BY Q.ID ASC");
+
+		final List<String> rv = new ArrayList<String>();
+		this.sqlService.dbRead(sql.toString(), null, new SqlReader()
+		{
+			public Object readSqlResultRecord(ResultSet result)
+			{
+				try
+				{
+					String qid = SqlHelper.readId(result, 1);
+					rv.add(qid);
+
+					return null;
+				}
+				catch (SQLException e)
+				{
+					M_log.warn("findAllNonHistoricalIds: " + e);
+					return null;
+				}
+			}
+		});
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<String> getPoolQuestions(Pool pool, Boolean survey, Boolean valid)
 	{
 		StringBuilder sql = new StringBuilder();

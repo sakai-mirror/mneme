@@ -169,6 +169,13 @@ public class HomeView extends ControllerImpl
 			}
 		}
 
+		else if ("QUESTION_CLEANUP".equals(destination))
+		{
+			destination = "/question_cleanup";
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+
 		destination = "/home";
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
