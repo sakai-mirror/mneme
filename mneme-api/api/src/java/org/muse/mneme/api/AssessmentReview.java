@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,21 +36,21 @@ public interface AssessmentReview
 	Date getDate();
 
 	/**
-	 * Check if review is eanbled right now for this assessment, considering when now is and all the review settings.
+	 * Check if review is enabled right now for this assessment, considering when now is and all the review settings.
 	 * 
 	 * @return TRUE if feedback is enabled right now, FALSE if not.
 	 */
 	Boolean getNowAvailable();
 
 	/**
-	 * Access the setting that controlls if review includes correct-answer based information (checks and xes, answer key, item scores).
+	 * Access the setting that controls if review includes correct-answer based information (checks and x-es, answer key, item scores).
 	 * 
 	 * @return TRUE to include correct-answer based review, FALSE to not.
 	 */
-	Boolean getShowCorrectAnswer();
+	ReviewShowCorrect getShowCorrectAnswer();
 
 	/**
-	 * Access setting that controlls if review includes the authored correct / incorrect feedback.
+	 * Access setting that controls if review includes the authored correct / incorrect feedback.
 	 * 
 	 * @return TRUE to include the correct / incorrect feedback in review, FALSE to not.
 	 */
@@ -72,15 +72,15 @@ public interface AssessmentReview
 	void setDate(Date date);
 
 	/**
-	 * Set the setting that controlls if review includes correct-answer based information (checks and xes, answer key, item scores).
+	 * Set the setting that controls if review includes correct-answer based information (checks and xes, answer key, item scores).
 	 * 
 	 * @param setting
-	 *        TRUE to include correct-answer based review, FALSE to not.
+	 *        the setting.
 	 */
-	void setShowCorrectAnswer(Boolean setting);
+	void setShowCorrectAnswer(ReviewShowCorrect setting);
 
 	/**
-	 * Set setting that controlls if review includes the authored correct / incorrect feedback.
+	 * Set setting that controls if review includes the authored correct / incorrect feedback.
 	 * 
 	 * @param setting
 	 *        TRUE to include the correct / incorrect feedback in review, FALSE to not.

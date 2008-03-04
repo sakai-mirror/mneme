@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,6 +93,13 @@ public interface Answer
 	String getReason();
 
 	/**
+	 * Check if this answer should show correct answer in review, based on the assessment setting and answer correctness.
+	 * 
+	 * @return TRUE if the answer should show correct answer in review, FALSE if not.
+	 */
+	Boolean getShowCorrectReview();
+
+	/**
 	 * Access the back pointer to the submission.
 	 * 
 	 * @return The the back pointer to the submission.
@@ -133,7 +140,7 @@ public interface Answer
 	 * Set the reason text, if any, provided as part of this answer.
 	 * 
 	 * @param reason
-	 *        The answer's reason text, or null if there is none.  Must be well formed HTML or plain text.
+	 *        The answer's reason text, or null if there is none. Must be well formed HTML or plain text.
 	 */
 	void setReason(String reason);
 

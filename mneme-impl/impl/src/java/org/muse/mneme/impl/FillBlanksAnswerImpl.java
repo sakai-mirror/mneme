@@ -41,271 +41,6 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(FillBlanksAnswerImpl.class);
 
-	/** The answer this is a helper for. */
-	protected transient Answer answer = null;
-
-	/** String array of user answers */
-	protected String[] answers = null;
-
-	/** Set when the answer has been changed. */
-	protected boolean changed = false;
-
-	/**
-	 * Construct.
-	 * 
-	 * @param answer
-	 *        The answer this is a helper for.
-	 */
-	public FillBlanksAnswerImpl(Answer answer)
-	{
-		this.answer = answer;
-	}
-
-	/**
-	 * Construct.
-	 * 
-	 * @param answer
-	 *        The answer this is a helper for.
-	 * @param other
-	 *        The other to copy.
-	 */
-	public FillBlanksAnswerImpl(Answer answer, FillBlanksAnswerImpl other)
-	{
-		this.answer = answer;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void clearIsChanged()
-	{
-		this.changed = false;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Object clone(Answer answer)
-	{
-		try
-		{
-			// get an exact, bit-by-bit copy
-			Object rv = super.clone();
-
-			// nothing to deep copy TODO: answers?
-
-			((FillBlanksAnswerImpl) rv).answer = answer;
-
-			return rv;
-		}
-		catch (CloneNotSupportedException e)
-		{
-			return null;
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void consolidate(String destination)
-	{
-	}
-
-	/**
-	 * Access the currently selected answer as a string.
-	 * 
-	 * @return The answer.
-	 */
-	public String[] getAnswers()
-	{
-		return this.answers;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Float getAutoScore()
-	{
-		Question question = this.answer.getQuestion();
-
-		// no point questions and questions that have no correct answer have no score
-		if ((!question.getHasPoints()) || (!question.getHasCorrect())) return Float.valueOf(0f);
-
-		// partial credit for each correct answer, 0 for each incorrect, floor at 0.
-		List<Boolean> corrects = getEntryCorrects();
-
-		// each correct gets a part of the total points
-		float partial = (corrects.size() > 0) ? question.getPoints() / corrects.size() : 0f;
-
-		float total = 0f;
-		for (Boolean correct : corrects)
-		{
-			if (correct) total += partial;
-		}
-
-		// round away bogus decimals
-		total = Math.round(total * 100.0f) / 100.0f;
-
-		return Float.valueOf(total);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String[] getData()
-	{
-		int size = (this.answers == null) ? 0 : this.answers.length;
-
-		String[] rv = new String[size];
-		for (int i = 0; i < size; i++)
-		{
-			rv[i] = this.answers[i];
-		}
-
-		return rv;
-	}
-
-	/**
-	 * Get an Boolean for each possible fill-in blank.
-	 * 
-	 * @return A list of Boolean, one for each possible fill-in blank, TRUE if the entry was made and is correct, FALSE if not.
-	 */
-	public List<Boolean> getEntryCorrects()
-	{
-		// this.answers has an entry for each blank - null or filled in. Or is null if we have not been answered.
-
-		// we need an answer for each fill-in. The correct answers will give us that size
-		Question question = answer.getQuestion();
-		List<String> correctAnswers = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswers();
-		int size = correctAnswers.size();
-
-		// Get all other question properties
-		boolean caseSensitive = Boolean.parseBoolean(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCaseSensitive());
-		boolean anyOrder = Boolean.parseBoolean(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getAnyOrder());
-		boolean textual = Boolean.parseBoolean(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getResponseTextual());
-
-		List<Boolean> rv = new ArrayList<Boolean>(size);
-
-		// if not answered
-		if (this.answers == null)
-		{
-			for (int i = 0; i < size; i++)
-			{
-				rv.add(Boolean.FALSE);
-			}
-
-			return rv;
-		}
-
-		// we have answers
-		if (this.answers.length != size)
-		{
-			M_log.warn("getEntryCorrects: answers length: " + this.answers.length + " != correct answers length: " + size);
-		}
-
-		List<String> priorAnswers = new ArrayList<String>(size);
-		for (int i = 0; i < size; i++)
-		{
-			String answer = answers[i];
-			if (answer == null)
-			{
-				rv.add(Boolean.FALSE);
-			}
-			else
-			{
-				String correctAnswer = correctAnswers.get(i);
-				rv.add(answerCorrect(answer, correctAnswer, caseSensitive, anyOrder, textual, correctAnswers, priorAnswers));
-				priorAnswers.add(answer);
-			}
-		}
-
-		return rv;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getIsAnswered()
-	{
-		return this.answers != null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getIsChanged()
-	{
-		return this.changed;
-	}
-
-	/**
-	 * Set the answers
-	 * 
-	 * @param answers
-	 *        array of strings
-	 */
-	public void setAnswers(String[] answers)
-	{
-		if ((answers == null) || (answers.length == 0)) return;
-
-		// massage the answers
-		for (int i = 0; i < answers.length; i++)
-		{
-			answers[i] = StringUtil.trimToNull(answers[i]);
-		}
-
-		// if we have no answers yet, and we have none from these, ignore
-		if (this.answers == null)
-		{
-			boolean allNull = true;
-			for (String s : answers)
-			{
-				if (s != null)
-				{
-					allNull = false;
-					break;
-				}
-			}
-
-			if (allNull) return;
-		}
-
-		// check for a change
-		if ((this.answers != null) && (answers.length == this.answers.length))
-		{
-			boolean changed = false;
-			for (int i = 0; i < this.answers.length; i++)
-			{
-				if (Different.different(answers[i], this.answers[i]))
-				{
-					changed = true;
-					break;
-				}
-			}
-
-			if (!changed) return;
-		}
-
-		this.answers = answers;
-		this.changed = true;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setData(String[] data)
-	{
-		this.answers = null;
-		if ((data != null) && (data.length > 0))
-		{
-			this.answers = new String[data.length];
-			for (int i = 0; i < data.length; i++)
-			{
-				this.answers[i] = data[i];
-			}
-		}
-	}
-
 	/**
 	 * Check if this answer is correct.
 	 * 
@@ -496,5 +231,292 @@ public class FillBlanksAnswerImpl implements TypeSpecificAnswer
 	{
 		String rv = source.replace("&nbsp;", " ").trim();
 		return rv;
+	}
+
+	/** The answer this is a helper for. */
+	protected transient Answer answer = null;
+
+	/** String array of user answers */
+	protected String[] answers = null;
+
+	/** Set when the answer has been changed. */
+	protected boolean changed = false;
+
+	/**
+	 * Construct.
+	 * 
+	 * @param answer
+	 *        The answer this is a helper for.
+	 */
+	public FillBlanksAnswerImpl(Answer answer)
+	{
+		this.answer = answer;
+	}
+
+	/**
+	 * Construct.
+	 * 
+	 * @param answer
+	 *        The answer this is a helper for.
+	 * @param other
+	 *        The other to copy.
+	 */
+	public FillBlanksAnswerImpl(Answer answer, FillBlanksAnswerImpl other)
+	{
+		this.answer = answer;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void clearIsChanged()
+	{
+		this.changed = false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object clone(Answer answer)
+	{
+		try
+		{
+			// get an exact, bit-by-bit copy
+			Object rv = super.clone();
+
+			// nothing to deep copy TODO: answers?
+
+			((FillBlanksAnswerImpl) rv).answer = answer;
+
+			return rv;
+		}
+		catch (CloneNotSupportedException e)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void consolidate(String destination)
+	{
+	}
+
+	/**
+	 * Access the currently selected answer as a string.
+	 * 
+	 * @return The answer.
+	 */
+	public String[] getAnswers()
+	{
+		return this.answers;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getAutoScore()
+	{
+		Question question = this.answer.getQuestion();
+
+		// no point questions and questions that have no correct answer have no score
+		if ((!question.getHasPoints()) || (!question.getHasCorrect())) return Float.valueOf(0f);
+
+		// partial credit for each correct answer, 0 for each incorrect, floor at 0.
+		List<Boolean> corrects = getEntryCorrects();
+
+		// each correct gets a part of the total points
+		float partial = (corrects.size() > 0) ? question.getPoints() / corrects.size() : 0f;
+
+		float total = 0f;
+		for (Boolean correct : corrects)
+		{
+			if (correct) total += partial;
+		}
+
+		// round away bogus decimals
+		total = Math.round(total * 100.0f) / 100.0f;
+
+		return Float.valueOf(total);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getCompletelyCorrect()
+	{
+		// if the question has no correct answer
+		Question question = this.answer.getQuestion();
+		if (!question.getHasCorrect()) return null;
+
+		// if unanswered
+		if (!this.getIsAnswered()) return Boolean.FALSE;
+
+		// if any part incorrect
+		List<Boolean> corrects = getEntryCorrects();
+		for (Boolean correct : corrects)
+		{
+			if ((correct == null) || (!correct)) return Boolean.FALSE;
+		}
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String[] getData()
+	{
+		int size = (this.answers == null) ? 0 : this.answers.length;
+
+		String[] rv = new String[size];
+		for (int i = 0; i < size; i++)
+		{
+			rv[i] = this.answers[i];
+		}
+
+		return rv;
+	}
+
+	/**
+	 * Get an Boolean for each possible fill-in blank.
+	 * 
+	 * @return A list of Boolean, one for each possible fill-in blank, TRUE if the entry was made and is correct, FALSE if not.
+	 */
+	public List<Boolean> getEntryCorrects()
+	{
+		// this.answers has an entry for each blank - null or filled in. Or is null if we have not been answered.
+
+		// we need an answer for each fill-in. The correct answers will give us that size
+		Question question = answer.getQuestion();
+		List<String> correctAnswers = ((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswers();
+		int size = correctAnswers.size();
+
+		// Get all other question properties
+		boolean caseSensitive = Boolean.parseBoolean(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getCaseSensitive());
+		boolean anyOrder = Boolean.parseBoolean(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getAnyOrder());
+		boolean textual = Boolean.parseBoolean(((FillBlanksQuestionImpl) question.getTypeSpecificQuestion()).getResponseTextual());
+
+		List<Boolean> rv = new ArrayList<Boolean>(size);
+
+		// if not answered
+		if (this.answers == null)
+		{
+			for (int i = 0; i < size; i++)
+			{
+				rv.add(Boolean.FALSE);
+			}
+
+			return rv;
+		}
+
+		// we have answers
+		if (this.answers.length != size)
+		{
+			M_log.warn("getEntryCorrects: answers length: " + this.answers.length + " != correct answers length: " + size);
+		}
+
+		List<String> priorAnswers = new ArrayList<String>(size);
+		for (int i = 0; i < size; i++)
+		{
+			String answer = answers[i];
+			if (answer == null)
+			{
+				rv.add(Boolean.FALSE);
+			}
+			else
+			{
+				String correctAnswer = correctAnswers.get(i);
+				rv.add(answerCorrect(answer, correctAnswer, caseSensitive, anyOrder, textual, correctAnswers, priorAnswers));
+				priorAnswers.add(answer);
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsAnswered()
+	{
+		return this.answers != null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsChanged()
+	{
+		return this.changed;
+	}
+
+	/**
+	 * Set the answers
+	 * 
+	 * @param answers
+	 *        array of strings
+	 */
+	public void setAnswers(String[] answers)
+	{
+		if ((answers == null) || (answers.length == 0)) return;
+
+		// massage the answers
+		for (int i = 0; i < answers.length; i++)
+		{
+			answers[i] = StringUtil.trimToNull(answers[i]);
+		}
+
+		// if we have no answers yet, and we have none from these, ignore
+		if (this.answers == null)
+		{
+			boolean allNull = true;
+			for (String s : answers)
+			{
+				if (s != null)
+				{
+					allNull = false;
+					break;
+				}
+			}
+
+			if (allNull) return;
+		}
+
+		// check for a change
+		if ((this.answers != null) && (answers.length == this.answers.length))
+		{
+			boolean changed = false;
+			for (int i = 0; i < this.answers.length; i++)
+			{
+				if (Different.different(answers[i], this.answers[i]))
+				{
+					changed = true;
+					break;
+				}
+			}
+
+			if (!changed) return;
+		}
+
+		this.answers = answers;
+		this.changed = true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setData(String[] data)
+	{
+		this.answers = null;
+		if ((data != null) && (data.length > 0))
+		{
+			this.answers = new String[data.length];
+			for (int i = 0; i < data.length; i++)
+			{
+				this.answers[i] = data[i];
+			}
+		}
 	}
 }

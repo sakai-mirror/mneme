@@ -32,6 +32,7 @@ import org.muse.mneme.api.MnemeService;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
+import org.muse.mneme.api.ReviewShowCorrect;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.TypeSpecificAnswer;
 import org.sakaiproject.util.StringUtil;
@@ -184,6 +185,21 @@ public class AnswerImpl implements Answer
 	public String getReason()
 	{
 		return this.reason;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getShowCorrectReview()
+	{
+		ReviewShowCorrect show = this.getQuestion().getPart().getAssessment().getReview().getShowCorrectAnswer();
+		if (show.equals(ReviewShowCorrect.yes)) return Boolean.TRUE;
+		if (show.equals(ReviewShowCorrect.no)) return Boolean.FALSE;
+
+		// for the correct only setting, check answer (complete) correctness
+		Boolean correct = this.answerHandler.getCompletelyCorrect();
+		if ((correct != null) && correct.booleanValue()) return Boolean.TRUE;
+		return Boolean.FALSE;
 	}
 
 	/**

@@ -28,6 +28,7 @@ import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Part;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.ReviewShowCorrect;
 import org.sakaiproject.util.ResourceLoader;
 
 /**
@@ -192,7 +193,8 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 		fields[i++] = assessment.getQuestionGrouping().toString();
 		fields[i++] = assessment.getRandomAccess() ? "1" : "0";
 		fields[i++] = (assessment.getReview().getDate() == null) ? null : assessment.getReview().getDate().getTime();
-		fields[i++] = assessment.getReview().getShowCorrectAnswer() ? "1" : "0";
+		fields[i++] = assessment.getReview().getShowCorrectAnswer().equals(ReviewShowCorrect.yes) ? "1" : (assessment.getReview()
+				.getShowCorrectAnswer().equals(ReviewShowCorrect.no) ? "0" : "C");
 		fields[i++] = assessment.getReview().getShowFeedback() ? "1" : "0";
 		fields[i++] = assessment.getReview().getTiming().toString();
 		fields[i++] = assessment.getShowHints() ? "1" : "0";

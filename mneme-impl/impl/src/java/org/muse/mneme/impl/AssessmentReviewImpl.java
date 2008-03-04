@@ -25,6 +25,7 @@ import java.util.Date;
 
 import org.muse.mneme.api.AssessmentReview;
 import org.muse.mneme.api.Changeable;
+import org.muse.mneme.api.ReviewShowCorrect;
 import org.muse.mneme.api.ReviewTiming;
 
 /**
@@ -38,7 +39,7 @@ public class AssessmentReviewImpl implements AssessmentReview
 
 	protected Changeable owner = null;
 
-	protected Boolean showCorrectAnswer = Boolean.TRUE;
+	protected ReviewShowCorrect showCorrectAnswer = ReviewShowCorrect.yes;
 
 	protected Boolean showFeedback = Boolean.TRUE;
 
@@ -117,7 +118,7 @@ public class AssessmentReviewImpl implements AssessmentReview
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getShowCorrectAnswer()
+	public ReviewShowCorrect getShowCorrectAnswer()
 	{
 		return this.showCorrectAnswer;
 	}
@@ -153,7 +154,7 @@ public class AssessmentReviewImpl implements AssessmentReview
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setShowCorrectAnswer(Boolean setting)
+	public void setShowCorrectAnswer(ReviewShowCorrect setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
 		if (this.showCorrectAnswer.equals(setting)) return;

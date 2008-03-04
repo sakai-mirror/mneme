@@ -211,6 +211,37 @@ public class MatchAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getCompletelyCorrect()
+	{
+		// if there is no correct
+		Question question = this.answer.getQuestion();
+		if (!question.getHasCorrect()) return null;
+
+		// if unanswered
+		if (!this.getIsAnswered()) return Boolean.FALSE;
+
+		// check each defined pair
+		List<MatchQuestionPair> pairs = ((MatchQuestionImpl) question.getTypeSpecificQuestion()).getPairs();
+		for (MatchQuestionPair pair : pairs)
+		{
+			// get the answer for this pair
+			Value selection = this.answerData.get(pair.getId());
+			if (selection != null)
+			{
+				String value = selection.getValue();
+				if ((value == null) || (!value.equals(pair.getCorrectChoiceId())))
+				{
+					return Boolean.FALSE;
+				}
+			}
+		}
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String[] getData()
 	{
 		int size = this.answerData.size() * 2;

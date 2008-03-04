@@ -415,7 +415,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		decisionsMayReviewAndShowCorrect[0] = this.uiService.newDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.submission.mayReview"));
 		decisionsMayReviewAndShowCorrect[1] = this.uiService.newDecision().setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+				this.uiService.newPropertyReference().setReference("answer.showCorrectReview"));
 		mayReviewAndShowCorrect.setRequirements(decisionsMayReviewAndShowCorrect);
 
 		OrDecision or = this.uiService.newOrDecision();
@@ -447,7 +447,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		Decision[] orInc = new Decision[2];
 		orInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
 		orInc[1] = this.uiService.newDecision().setProperty(
-				this.uiService.newPropertyReference().setReference("answer.question.part.assessment.review.showCorrectAnswer"));
+				this.uiService.newPropertyReference().setReference("answer.showCorrectReview"));
 
 		Decision[] andInc = new Decision[2];
 		andInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.question.hasCorrect"));

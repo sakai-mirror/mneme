@@ -144,6 +144,29 @@ public class TrueFalseAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getCompletelyCorrect()
+	{
+		// if the question has no correct answer
+		Question question = this.answer.getQuestion();
+		if (!question.getHasCorrect()) return null;
+
+		// if unanswered
+		if (!this.getIsAnswered()) return Boolean.FALSE;
+
+		// correct?
+		boolean correct = false;
+		if (this.answerData != null)
+		{
+			Boolean correctAnswer = Boolean.valueOf(((TrueFalseQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswer());
+			correct = this.answerData.equals(correctAnswer);
+		}
+
+		return Boolean.valueOf(correct);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String[] getData()
 	{
 		String[] rv = null;

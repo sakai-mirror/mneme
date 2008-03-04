@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,6 +164,31 @@ public class MultipleChoiceAnswerImpl implements TypeSpecificAnswer
 		total = Math.round(total * 100.0f) / 100.0f;
 
 		return Float.valueOf(total);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getCompletelyCorrect()
+	{
+		// if the question has no correct answer
+		Question question = this.answer.getQuestion();
+		if (!question.getHasCorrect()) return null;
+
+		// if unanswered
+		if (!this.getIsAnswered()) return Boolean.FALSE;
+
+		// count the number of correct answers
+		Set<Integer> correctAnswers = ((MultipleChoiceQuestionImpl) question.getTypeSpecificQuestion()).getCorrectAnswerSet();
+		for (Integer answer : this.answerData)
+		{
+			if (!correctAnswers.contains(answer))
+			{
+				return Boolean.FALSE;
+			}
+		}
+
+		return Boolean.TRUE;
 	}
 
 	/**

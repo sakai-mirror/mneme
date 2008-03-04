@@ -46,6 +46,7 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.ReviewShowCorrect;
 import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.db.api.SqlReader;
@@ -899,7 +900,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 					assessment.setQuestionGrouping(QuestionGrouping.valueOf(SqlHelper.readString(result, i++)));
 					assessment.setRandomAccess(SqlHelper.readBoolean(result, i++));
 					assessment.getReview().setDate(SqlHelper.readDate(result, i++));
-					assessment.getReview().setShowCorrectAnswer(SqlHelper.readBoolean(result, i++));
+					assessment.getReview().setShowCorrectAnswer(readReviewShowCorrect(result, i++));
 					assessment.getReview().setShowFeedback(SqlHelper.readBoolean(result, i++));
 					assessment.getReview().setTiming(ReviewTiming.valueOf(SqlHelper.readString(result, i++)));
 					assessment.setShowHints(SqlHelper.readBoolean(result, i++));
@@ -1066,6 +1067,25 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	}
 
 	/**
+	 * Read a review show correct value from the db
+	 * 
+	 * @param results
+	 *        The result set.
+	 * @param index
+	 *        The index.
+	 * @return The ReviewShowCorrect value.
+	 * @throws SQLException
+	 */
+	protected ReviewShowCorrect readReviewShowCorrect(ResultSet result, int index) throws SQLException
+	{
+		String s = result.getString(index);
+		if (s == null) return null;
+		if (s.equals("0")) return ReviewShowCorrect.no;
+		if (s.equals("C")) return ReviewShowCorrect.correct_only;
+		return ReviewShowCorrect.yes;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	protected abstract void removeDependencyTx(Pool pool);
@@ -1209,7 +1229,8 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		fields[i++] = assessment.getQuestionGrouping().toString();
 		fields[i++] = assessment.getRandomAccess() ? "1" : "0";
 		fields[i++] = (assessment.getReview().getDate() == null) ? null : assessment.getReview().getDate().getTime();
-		fields[i++] = assessment.getReview().getShowCorrectAnswer() ? "1" : "0";
+		fields[i++] = assessment.getReview().getShowCorrectAnswer().equals(ReviewShowCorrect.yes) ? "1" : (assessment.getReview()
+				.getShowCorrectAnswer().equals(ReviewShowCorrect.no) ? "0" : "C");
 		fields[i++] = assessment.getReview().getShowFeedback() ? "1" : "0";
 		fields[i++] = assessment.getReview().getTiming().toString();
 		fields[i++] = assessment.getShowHints() ? "1" : "0";

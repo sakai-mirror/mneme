@@ -228,17 +228,33 @@
 							</selectionChoices>
 						</selection>
 						<selection>
+							<model ref="assessment.review.showCorrectAnswer" />
 							<selectionChoices>
 								<selectionChoice>
 									<displayMessage>
 										<message selector="showAnswerKey" />
 									</displayMessage>
 									<valueMessage>
-										<message template="true" />
+										<message template="yes" />
+									</valueMessage>
+								</selectionChoice>
+								<selectionChoice>
+									<displayMessage>
+										<message selector="correctAnswerKey" />
+									</displayMessage>
+									<valueMessage>
+										<message template="correct_only" />
+									</valueMessage>
+								</selectionChoice>
+								<selectionChoice>
+									<displayMessage>
+										<message selector="noAnswerKey" />
+									</displayMessage>
+									<valueMessage>
+										<message template="no" />
 									</valueMessage>
 								</selectionChoice>
 							</selectionChoices>
-							<model ref="assessment.review.showCorrectAnswer" />
 						</selection>
 						<selection>
 							<selectionChoices>

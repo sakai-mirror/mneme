@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,13 @@ public interface TypeSpecificAnswer extends Cloneable
 	 * @return The answer's auto-score.
 	 */
 	Float getAutoScore();
+
+	/**
+	 * Check if the answer if completely correct.
+	 * 
+	 * @return TRUE if the answer is answered and completely correct, FALSE if not. If there is no correct answer, returns null.
+	 */
+	Boolean getCompletelyCorrect();
 
 	/**
 	 * Access the type specific answer data as an array of strings that can be restored with setData()

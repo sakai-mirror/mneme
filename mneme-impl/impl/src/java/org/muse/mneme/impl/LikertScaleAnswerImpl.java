@@ -120,7 +120,14 @@ public class LikertScaleAnswerImpl implements TypeSpecificAnswer
 	{
 		// never has points
 		return Float.valueOf(0f);
-		// return this.answer.getQuestion().getPoints();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getCompletelyCorrect()
+	{
+		return null;
 	}
 
 	/**

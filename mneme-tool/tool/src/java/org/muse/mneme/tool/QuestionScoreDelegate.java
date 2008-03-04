@@ -25,10 +25,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.FormatDelegateImpl;
+import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.Question;
+import org.muse.mneme.api.ReviewShowCorrect;
 import org.muse.mneme.api.Submission;
-import org.muse.mneme.api.Answer;
 
 /**
  * The "FormatQuestionDecoration" format delegate for the mneme tool.
@@ -119,32 +120,38 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 		// if we are doing review just now, and if we are needing review and it's set, and if the submission has been graded
 		if ((review || grading) && (submission != null) && (submission.getIsReleased() || grading))
 		{
-			// if we are doing question score feedback
-			if (assessment.getReview().getShowCorrectAnswer() || grading)
+			// find the answer
+			Answer answer = null;
+			for (Answer a : submission.getAnswers())
 			{
-				// the auto-scores for this answered question
-				Float score = null;
-
-				// find the answer to this question (don't create it!)
-				for (Answer answer : submission.getAnswers())
+				if (a.getQuestion().equals(question))
 				{
-					if (answer.getQuestion().equals(question))
-					{
-						if (grading)
-						{
-							score = answer.getAutoScore();
-						}
-						else
-						{
-							score = answer.getTotalScore();
-						}
-						break;
-					}
+					answer = a;
+					break;
 				}
+			}
 
-				rv.append(context.getMessages().getString("score") + ":&nbsp;" + formatScore(score) + "&nbsp;&nbsp;&nbsp;");
+			if (answer != null)
+			{
+				// if we are doing question score feedback
+				if (answer.getShowCorrectReview() || grading)
+				{
+					// the auto-scores for this answered question
+					Float score = null;
 
-				selector = "of-points";
+					if (grading)
+					{
+						score = answer.getAutoScore();
+					}
+					else
+					{
+						score = answer.getTotalScore();
+					}
+
+					rv.append(context.getMessages().getString("score") + ":&nbsp;" + formatScore(score) + "&nbsp;&nbsp;&nbsp;");
+
+					selector = "of-points";
+				}
 			}
 		}
 

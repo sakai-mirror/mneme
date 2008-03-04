@@ -47,6 +47,7 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.ReviewShowCorrect;
 import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.i18n.InternationalizedMessages;
@@ -637,7 +638,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.getGrading().setGradebookIntegration(Boolean.FALSE);
 			a.getGrading().setAnonymous(Boolean.FALSE);
 			a.getPresentation().setText("This is assessment one.");
-			a.getReview().setShowCorrectAnswer(Boolean.TRUE);
+			a.getReview().setShowCorrectAnswer(ReviewShowCorrect.yes);
 			a.getReview().setShowFeedback(Boolean.TRUE);
 			a.getReview().setTiming(ReviewTiming.graded);
 			a.getSubmitPresentation().setText("Thanks for all the fish!");
@@ -699,7 +700,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.getGrading().setGradebookIntegration(Boolean.FALSE);
 			a.getGrading().setAnonymous(Boolean.TRUE);
 			a.getPresentation().setText("This is assessment two.");
-			a.getReview().setShowCorrectAnswer(Boolean.TRUE);
+			a.getReview().setShowCorrectAnswer(ReviewShowCorrect.yes);
 			a.getReview().setShowFeedback(Boolean.TRUE);
 			a.getReview().setTiming(ReviewTiming.submitted);
 			a.getSubmitPresentation().setText("Have a nice day!");
@@ -740,7 +741,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 			a.getGrading().setGradebookIntegration(Boolean.FALSE);
 			a.getGrading().setAnonymous(Boolean.TRUE);
 			a.getPresentation().setText("This is assessment three.");
-			a.getReview().setShowCorrectAnswer(Boolean.TRUE);
+			a.getReview().setShowCorrectAnswer(ReviewShowCorrect.yes);
 			a.getReview().setShowFeedback(Boolean.TRUE);
 			a.getReview().setTiming(ReviewTiming.submitted);
 			a.getSubmitPresentation().setText("Have a nice day!");

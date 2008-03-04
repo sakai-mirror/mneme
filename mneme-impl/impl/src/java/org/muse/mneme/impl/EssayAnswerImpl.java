@@ -183,6 +183,14 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getCompletelyCorrect()
+	{
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String[] getData()
 	{
 		String[] rv = new String[2 + this.uploads.size()];
