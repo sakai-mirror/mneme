@@ -178,11 +178,16 @@
 					</selectionChoices>
 				</selection>
 
-				<section>
+				<section treatment="indented">
+					<title>
+						<message selector="reviewOptions">
+							<model type="icon" icon="/icons/markedforreview.png" />
+						</message>
+					</title>
 					<container>
 						<selection>
 							<title>
-								<message selector="reviewOptions">
+								<message selector="reviewOptionsWhen">
 									<model type="icon" icon="/icons/markedforreview.png" />
 								</message>
 							</title>
@@ -228,6 +233,11 @@
 							</selectionChoices>
 						</selection>
 						<selection>
+							<title>
+								<message selector="reviewOptionsWhat">
+									<model type="icon" icon="/icons/markedforreview.png" />
+								</message>
+							</title>
 							<model ref="assessment.review.showCorrectAnswer" />
 							<selectionChoices>
 								<selectionChoice>
@@ -324,7 +334,7 @@
 							</included>
 						</selection>
 
-						<selection title="anonymous">
+						<selection title="anonymous-header">
 							<selectionChoices>
 								<selectionChoice>
 									<displayMessage>
