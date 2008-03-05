@@ -207,7 +207,7 @@
 						</desc>
 					</sort>
 					<container>
-						<navigation style="LINK" submit="TRUE">
+						<navigation style="LINK" submit="TRUE" wrap="TRUE">
 							<title>
 								<message>
 									<model type="text" ref="assessment.title" missing="no-title" />
@@ -221,7 +221,7 @@
 						</navigation>
 					</container>
 				</column>
-				<column em="16">
+				<column em="8">
 					<title>
 						<message selector="assessment-odate" />
 					</title>
@@ -247,7 +247,7 @@
 						</dateEdit>
 					</container>
 				</column>
-				<column em="16">
+				<column em="8">
 					<title>
 						<message selector="assessment-ddate" />
 					</title>
@@ -270,6 +270,16 @@
 					<container>
 						<dateEdit>
 							<model ref="assessment.dates.dueDate" type="date" />
+						</dateEdit>
+					</container>
+				</column>
+				<column em="8">
+					<title>
+						<message selector="assessment-adate" />
+					</title>
+					<container>
+						<dateEdit>
+							<model ref="assessment.dates.acceptUntilDate" type="date" />
 						</dateEdit>
 					</container>
 				</column>
