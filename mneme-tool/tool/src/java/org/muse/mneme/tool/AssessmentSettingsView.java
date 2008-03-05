@@ -36,6 +36,7 @@ import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.GradesService;
 import org.muse.mneme.api.Part;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -121,6 +122,10 @@ public class AssessmentSettingsView extends ControllerImpl
 		// check if we have gradebook
 		context.put("gradebookAvailable", this.gradesService.available(assessment.getContext()));
 
+		// if we have a focus parameter
+		String focus = req.getParameter("focus");
+		if (focus != null) context.addFocusId(focus);
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -193,6 +198,19 @@ public class AssessmentSettingsView extends ControllerImpl
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
 			return;
+		}
+
+		// if destination became null
+		if (destination == null)
+		{
+			destination = context.getDestination();
+		}
+
+		// if destination is stay here
+		else if (destination.startsWith("STAY:"))
+		{
+			String[] parts = StringUtil.splitFirst(destination,":");
+			destination = context.getDestination() + "?focus=" + parts[1];
 		}
 
 		// redirect to the next destination
