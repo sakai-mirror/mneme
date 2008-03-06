@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,29 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 		this.owner.setChanged();
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public AssessmentAccess assureUserAccess(String userId)
+	{
+		for (AssessmentAccess access : this.specialAccess)
+		{
+			// look for one with ONLY this one user
+			List<String> users = access.getUsers();
+			if ((users.size() == 1) && (users.get(0).equals(userId))) return access;
+		}
+
+		// TODO: what if there's one for this user and others... remove the user from that? Start the new one from that?
+
+		// we need to create one
+		AssessmentAccess access = addAccess();
+		List<String> userIds = new ArrayList<String>(1);
+		userIds.add(userId);
+		access.setUsers(userIds);
+
+		return access;
 	}
 
 	/**

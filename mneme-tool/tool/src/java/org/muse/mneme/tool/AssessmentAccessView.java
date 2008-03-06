@@ -35,6 +35,7 @@ import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -61,8 +62,8 @@ public class AssessmentAccessView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need 3 parameters: sort, aid, access id
-		if (params.length != 5)
+		// we need 3 parameters: sort, aid, access id - all else is a return url
+		if (params.length < 5)
 		{
 			throw new IllegalArgumentException();
 		}
@@ -79,15 +80,6 @@ public class AssessmentAccessView extends ControllerImpl
 			return;
 		}
 
-		// get the access
-		AssessmentAccess access = assessment.getSpecialAccess().getAccess(accessId);
-		if (access == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
 		// security check
 		if (!assessmentService.allowEditAssessment(assessment))
 		{
@@ -96,10 +88,62 @@ public class AssessmentAccessView extends ControllerImpl
 			return;
 		}
 
+		// if access id is actually a user id, find the access that is for this user (only)
+		AssessmentAccess access = null;
+		if (accessId.startsWith("USER:"))
+		{
+			String[] parts = StringUtil.splitFirst(accessId, ":");
+			access = assessment.getSpecialAccess().assureUserAccess(parts[1]);
+
+			// this may have altered the assessment - save
+			try
+			{
+				this.assessmentService.saveAssessment(assessment);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+			catch (AssessmentPolicyException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+				return;
+			}
+
+			// don't let the user be changed
+			context.put("fixed_user", parts[1]);
+		}
+		else
+		{
+			access = assessment.getSpecialAccess().getAccess(accessId);
+		}
+
+		if (access == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
 		// setup the model
 		context.put("assessment", assessment);
 		context.put("access", access);
 		context.put("sort", sort);
+
+		// return
+		String destination = null;
+		if (params.length > 5)
+		{
+			destination = "/" + StringUtil.unsplit(params, 5, params.length - 5, "/");
+		}
+		else
+		{
+			destination = "/assessment_special/" + sort + "/" + assessment.getId();
+		}
+		context.put("return", destination);
 
 		// render
 		uiService.render(ui, context);
@@ -120,7 +164,7 @@ public class AssessmentAccessView extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		// we need 3 parameters: sort, aid, access id
-		if (params.length != 5)
+		if (params.length < 5)
 		{
 			throw new IllegalArgumentException();
 		}
@@ -137,20 +181,29 @@ public class AssessmentAccessView extends ControllerImpl
 			return;
 		}
 
-		// get the access
-		AssessmentAccess access = assessment.getSpecialAccess().getAccess(accessId);
-		if (access == null)
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
-			return;
-		}
-
 		// security check
 		if (!assessmentService.allowEditAssessment(assessment))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
+		// if access id is actually a user id, find the access that is for this user (only),
+		AssessmentAccess access = null;
+		if (accessId.startsWith("USER:"))
+		{
+			String[] parts = StringUtil.splitFirst(accessId, ":");
+			access = assessment.getSpecialAccess().assureUserAccess(parts[1]);
+		}
+		else
+		{
+			access = assessment.getSpecialAccess().getAccess(accessId);
+		}
+		if (access == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
 			return;
 		}
 

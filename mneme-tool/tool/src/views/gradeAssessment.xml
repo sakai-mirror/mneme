@@ -428,6 +428,21 @@
 						<decision model="assessment.hasPoints" />
 					</included>
 				</column>
+				<column pixels="16">
+					<navigations>
+						<navigation style="LINK" submit="TRUE" description="special-access">
+							<icon icon="/icons/access.png" style="LEFT" />
+							<destination template="/assessment_access/X/{0}/USER:{1}{2}">
+								<model ref="submission.assessment.id" />
+								<model ref="submission.userId" />
+								<model ref="sakai_destination" />
+							</destination>
+						</navigation>
+					</navigations>
+					<included>
+						<decision reversed="TRUE" model="assessment.anonymous" />
+					</included>
+				</column>
 			</columns>
 		</entityList>
 

@@ -667,22 +667,30 @@ public class AssessmentAccessImpl implements AssessmentAccess, Changeable
 		// has anything changed?
 		if ((newIds == null) && this.userIds.isEmpty()) return;
 		boolean changed = false;
-		for (String newId : newIds)
+		if (newIds != null)
 		{
-			if (!this.userIds.contains(newId))
+			for (String newId : newIds)
 			{
-				changed = true;
-				break;
+				if (!this.userIds.contains(newId))
+				{
+					changed = true;
+					break;
+				}
+			}
+			for (String oldId : this.userIds)
+			{
+				if (!newIds.contains(oldId))
+				{
+					changed = true;
+					break;
+				}
 			}
 		}
-		for (String oldId : this.userIds)
+		else
 		{
-			if (!newIds.contains(oldId))
-			{
-				changed = true;
-				break;
-			}
+			if (!this.userIds.isEmpty()) changed = true;
 		}
+
 		if (!changed) return;
 
 		this.userIds.clear();

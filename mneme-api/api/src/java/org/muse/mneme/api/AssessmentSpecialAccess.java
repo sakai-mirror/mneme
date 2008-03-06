@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,15 @@ public interface AssessmentSpecialAccess
 	 * @return The new special access.
 	 */
 	AssessmentAccess addAccess();
+
+	/**
+	 * Find the special access that applies to this user id, creating one if one is not found.
+	 * 
+	 * @param userId
+	 *        The user id to look for.
+	 * @return The special access for this userId, perhaps new.
+	 */
+	AssessmentAccess assureUserAccess(String userId);
 
 	/**
 	 * Remove all special access.
