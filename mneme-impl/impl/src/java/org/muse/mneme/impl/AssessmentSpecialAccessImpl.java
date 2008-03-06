@@ -99,12 +99,28 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 			if ((users.size() == 1) && (users.get(0).equals(userId))) return access;
 		}
 
-		// TODO: what if there's one for this user and others... remove the user from that? Start the new one from that?
-
-		// we need to create one
-		AssessmentAccess access = addAccess();
+		// the user list of one
 		List<String> userIds = new ArrayList<String>(1);
 		userIds.add(userId);
+
+		// see if there's one that pertains to this user, although it is not only for this user - add a copy if so
+		AssessmentAccess access = getUserAccess(userId);
+		if (access != null)
+		{
+			// make a copy
+			access = new AssessmentAccessImpl(this.assessment, (AssessmentAccessImpl) access, this.owner);
+			((AssessmentAccessImpl) access).id = null;
+			this.specialAccess.add(access);
+			this.owner.setChanged();
+		}
+
+		// else we need to create a new one
+		else
+		{
+			access = addAccess();
+		}
+
+		// set the user
 		access.setUsers(userIds);
 
 		return access;
@@ -173,6 +189,48 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 
 				return;
 			}
+		}
+	}
+
+	/**
+	 * Make sure no other access is defined for the users in this one.
+	 * 
+	 * @param target
+	 *        The access
+	 */
+	protected void assureSingleAccessForUser(AssessmentAccess target)
+	{
+		List<AssessmentAccess> toRemove = new ArrayList<AssessmentAccess>();
+
+		for (AssessmentAccess access : this.specialAccess)
+		{
+			// skip the target
+			if (access.equals(target)) continue;
+
+			// check each of the target's users
+			for (String userId : target.getUsers())
+			{
+				// if this access was for that user
+				if (access.isForUser(userId))
+				{
+					// remove the user from the access
+					List<String> userIds = access.getUsers();
+					userIds.remove(userId);
+					((AssessmentAccessImpl) access).setChanged();
+
+					// if the result is an access empty of users, remove it
+					if (access.getUsers().isEmpty())
+					{
+						toRemove.add(access);
+					}
+				}
+			}
+		}
+
+		// remove those we cleared out all users from
+		for (AssessmentAccess access : toRemove)
+		{
+			removeAccess(access);
 		}
 	}
 

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -660,6 +660,21 @@ public class AssessmentAccessImpl implements AssessmentAccess, Changeable
 	}
 
 	/**
+	 * Init the user list.
+	 * 
+	 * @param ids
+	 *        The user list.
+	 */
+	protected void initUsers(List<String> ids)
+	{
+		this.userIds.clear();
+		if (ids != null)
+		{
+			this.userIds.addAll(ids);
+		}
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void setUsers(List<String> newIds)
@@ -701,6 +716,9 @@ public class AssessmentAccessImpl implements AssessmentAccess, Changeable
 
 		this.owner.setChanged();
 		setChanged();
+
+		// make sure that this access is the only one that pertains to these users
+		((AssessmentSpecialAccessImpl) this.assessment.getSpecialAccess()).assureSingleAccessForUser(this);
 	}
 
 	/**

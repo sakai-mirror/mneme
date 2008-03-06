@@ -1043,7 +1043,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 					access.setPasswordValue(SqlHelper.readString(result, 12));
 					access.setTimeLimit(SqlHelper.readLong(result, 13));
 					access.setTries(SqlHelper.readInteger(result, 14));
-					access.setUsers(Arrays.asList(SqlHelper.decodeStringArray(SqlHelper.readString(result, 15))));
+					((AssessmentAccessImpl) access).initUsers(Arrays.asList(SqlHelper.decodeStringArray(SqlHelper.readString(result, 15))));
 
 					a.changed.clearChanged();
 
