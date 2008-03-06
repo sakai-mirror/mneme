@@ -430,13 +430,27 @@
 				</column>
 				<column pixels="16">
 					<navigations>
-						<navigation style="LINK" submit="TRUE" description="special-access">
-							<icon icon="/icons/access.png" style="LEFT" />
+						<navigation style="LINK" submit="TRUE" description="special-access-view">
+							<icon icon="/icons/access_view.png" style="LEFT" />
 							<destination template="/assessment_access/X/{0}/USER:{1}{2}">
 								<model ref="submission.assessment.id" />
 								<model ref="submission.userId" />
 								<model ref="sakai_destination" />
 							</destination>
+							<included>
+								<decision model="submission" delegate="UserSpecialAccess" tool="sakai.mneme" />
+							</included>
+						</navigation>
+						<navigation style="LINK" submit="TRUE" description="special-access-add">
+							<icon icon="/icons/access_add.png" style="LEFT" />
+							<destination template="/assessment_access/X/{0}/USER:{1}{2}">
+								<model ref="submission.assessment.id" />
+								<model ref="submission.userId" />
+								<model ref="sakai_destination" />
+							</destination>
+							<included>
+								<decision reversed="TRUE" model="submission" delegate="UserSpecialAccess" tool="sakai.mneme"/>
+							</included>
 						</navigation>
 					</navigations>
 					<included>

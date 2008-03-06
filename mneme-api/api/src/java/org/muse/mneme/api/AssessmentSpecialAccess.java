@@ -66,6 +66,13 @@ public interface AssessmentSpecialAccess
 	AssessmentAccess getAccess(String id);
 
 	/**
+	 * Check if there is any special access defined
+	 * 
+	 * @return TRUE if special access is defined, FALSE if not.
+	 */
+	Boolean getIsDefined();
+
+	/**
 	 * Find the special access that applies to this user id.
 	 * 
 	 * @param userId

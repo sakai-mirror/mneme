@@ -162,6 +162,14 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getIsDefined()
+	{
+		return Boolean.valueOf(!this.specialAccess.isEmpty());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public AssessmentAccess getUserAccess(String userId)
 	{
 		for (AssessmentAccess access : this.specialAccess)
