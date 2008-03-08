@@ -229,55 +229,57 @@
 									<valueMessage>
 										<message template="never" />
 									</valueMessage>
+									<container separate="TRUE" reversed="TRUE">
+										<selection>
+											<title>
+												<message selector="reviewOptionsWhat">
+													<model type="icon" icon="/icons/markedforreview.png" />
+												</message>
+											</title>
+											<model ref="assessment.review.showCorrectAnswer" />
+											<selectionChoices>
+												<selectionChoice>
+													<displayMessage>
+														<message selector="showAnswerKey" />
+													</displayMessage>
+													<valueMessage>
+														<message template="yes" />
+													</valueMessage>
+												</selectionChoice>
+												<selectionChoice>
+													<displayMessage>
+														<message selector="correctAnswerKey" />
+													</displayMessage>
+													<valueMessage>
+														<message template="correct_only" />
+													</valueMessage>
+												</selectionChoice>
+												<selectionChoice>
+													<displayMessage>
+														<message selector="noAnswerKey" />
+													</displayMessage>
+													<valueMessage>
+														<message template="no" />
+													</valueMessage>
+												</selectionChoice>
+											</selectionChoices>
+										</selection>
+										<selection>
+											<selectionChoices>
+												<selectionChoice>
+													<displayMessage>
+														<message selector="showFeedback" />
+													</displayMessage>
+													<valueMessage>
+														<message template="true" />
+													</valueMessage>
+												</selectionChoice>
+											</selectionChoices>
+											<model ref="assessment.review.showFeedback" />
+										</selection>
+									</container>
 								</selectionChoice>
 							</selectionChoices>
-						</selection>
-						<selection>
-							<title>
-								<message selector="reviewOptionsWhat">
-									<model type="icon" icon="/icons/markedforreview.png" />
-								</message>
-							</title>
-							<model ref="assessment.review.showCorrectAnswer" />
-							<selectionChoices>
-								<selectionChoice>
-									<displayMessage>
-										<message selector="showAnswerKey" />
-									</displayMessage>
-									<valueMessage>
-										<message template="yes" />
-									</valueMessage>
-								</selectionChoice>
-								<selectionChoice>
-									<displayMessage>
-										<message selector="correctAnswerKey" />
-									</displayMessage>
-									<valueMessage>
-										<message template="correct_only" />
-									</valueMessage>
-								</selectionChoice>
-								<selectionChoice>
-									<displayMessage>
-										<message selector="noAnswerKey" />
-									</displayMessage>
-									<valueMessage>
-										<message template="no" />
-									</valueMessage>
-								</selectionChoice>
-							</selectionChoices>
-						</selection>
-						<selection>
-							<selectionChoices>
-								<selectionChoice>
-									<displayMessage>
-										<message selector="showFeedback" />
-									</displayMessage>
-									<valueMessage>
-										<message template="true" />
-									</valueMessage>
-								</selectionChoice>
-							</selectionChoices>
-							<model ref="assessment.review.showFeedback" />
 						</selection>
 					</container>
 				</section>

@@ -156,7 +156,7 @@ public class AssessmentReviewImpl implements AssessmentReview
 	 */
 	public void setShowCorrectAnswer(ReviewShowCorrect setting)
 	{
-		if (setting == null) throw new IllegalArgumentException();
+		if (setting == null) return;
 		if (this.showCorrectAnswer.equals(setting)) return;
 
 		this.showCorrectAnswer = setting;
@@ -169,7 +169,7 @@ public class AssessmentReviewImpl implements AssessmentReview
 	 */
 	public void setShowFeedback(Boolean setting)
 	{
-		if (setting == null) throw new IllegalArgumentException();
+		if (setting == null) return;
 		if (this.showFeedback.equals(setting)) return;
 
 		this.showFeedback = setting;
