@@ -49,12 +49,14 @@
 	<build>
 
 		<!--
+
 		<unitTestSourceDirectory>src/java</unitTestSourceDirectory>
 		<unitTest>
 			<includes>
 				<include>**/*Test.java</include>
 			</includes>
 		</unitTest>
+
 		 -->
 
 		<resources>
