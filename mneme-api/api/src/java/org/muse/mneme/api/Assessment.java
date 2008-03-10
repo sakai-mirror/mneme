@@ -270,7 +270,7 @@ public interface Assessment
 	/**
 	 * Get a list of Users who can submit.
 	 * 
-	 * @return a List of Users who can submit.
+	 * @return a List of Users who can submit, sorted by user sort name.
 	 */
 	List<User> getSubmitUsers();
 

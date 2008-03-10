@@ -22,6 +22,8 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -297,7 +299,16 @@ public class AssessmentServiceImpl implements AssessmentService
 		// turn into users
 		List<User> users = this.userDirectoryService.getUsers(ids);
 
-		// TODO: sort!
+		// sort - by user sort name
+		Collections.sort(users, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				int rv = ((User) arg0).getSortName().compareTo(((User) arg1).getSortName());
+				return rv;
+			}
+		});
+
 		return users;
 	}
 
@@ -527,8 +538,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		// or we are retracting (we need to add the entry back in that we just removed)
 		// report the assessment and all completed submissions to the grades authority
 		if (titleChanged || dueChanged || release || retract || (publishedChanged && assessment.getPublished())
-				|| (validityChanged && nowValid && assessment.getPublished())
-				|| (gbIntegrationChanged && assessment.getGradebookIntegration()))
+				|| (validityChanged && nowValid && assessment.getPublished()) || (gbIntegrationChanged && assessment.getGradebookIntegration()))
 		{
 			if (assessment.getIsValid() && assessment.getGradebookIntegration() && assessment.getPublished())
 			{

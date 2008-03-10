@@ -138,7 +138,7 @@ public interface AssessmentService
 	 * 
 	 * @param context
 	 *        The context.
-	 * @return a List of Users who can submit in this context.
+	 * @return a List of Users who can submit in this context, sorted by user sort name.
 	 */
 	List<User> getSubmitUsers(String context);
 
