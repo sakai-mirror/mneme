@@ -548,6 +548,13 @@
 					<icon icon="/icons/return.png" style="LEFT" />
 				</navigation>
 				<divider />
+				<navigation title="test-drive" accessKey="test-drive-access" description="test-drive-description" style="BUTTON" submit="TRUE">
+					<destination template="/enter/{0}">
+						<model ref="assessment.id" />
+					</destination>
+					<icon icon="/icons/test_drive.png" style="LEFT" />
+				</navigation>
+				<divider />
 				<navigation title="publish" accessKey="publish-access" description="publish-description" style="BUTTON" submit="TRUE"
 					destination="PUBLISH">
 					<icon icon="/icons/OK.png" style="LEFT" />
@@ -567,6 +574,13 @@
 						<model ref="sort" />
 					</destination>
 					<icon icon="/icons/return.png" style="LEFT" />
+				</navigation>
+				<divider />
+				<navigation title="test-drive" accessKey="test-drive-access" description="test-drive-description" style="BUTTON" submit="TRUE">
+					<destination template="/enter/{0}">
+						<model ref="assessment.id" />
+					</destination>
+					<icon icon="/icons/test_drive.png" style="LEFT" />
 				</navigation>
 			</container>
 			<included>

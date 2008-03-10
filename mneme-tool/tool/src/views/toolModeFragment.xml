@@ -7,7 +7,7 @@
 * $Id$
 ***********************************************************************************
 *
-* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+* Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 * 
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@
 				</navigation>
 				<navigation title="delivery-nav-title" destination="/list" style="LINK" accessKey="delivery-nav-access-key"
 					description="delivery-nav-description" submit="TRUE">
-					<icon icon="/icons/preview.png" style="LEFT" />
+					<icon icon="/icons/test_drive.png" style="LEFT" />
 					<disabled>
 						<hasValueDecision model="disableDelivery" />
 					</disabled>
