@@ -929,6 +929,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		{
 			// TODO: we should not have to filter these out...
 			if (((SubmissionImpl) s).getIsPhantom()) continue;
+			if (!((SubmissionImpl) s).getIsComplete()) continue;
 
 			if (done)
 			{
@@ -955,6 +956,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			{
 				// TODO: we should not have to filter these out...
 				if (((SubmissionImpl) s).getIsPhantom()) continue;
+				if (!((SubmissionImpl) s).getIsComplete()) continue;
 
 				if (done)
 				{
