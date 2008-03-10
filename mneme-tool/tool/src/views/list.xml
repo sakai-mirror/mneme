@@ -171,7 +171,7 @@
 					<title>
 						<message selector="list-header-open" />
 					</title>
-					<model type="date" twoLine="TRUE" missing="dash" ref="submission.assessment.dates.openDate" />
+					<model type="date" twoLine="TRUE" missing="assume-open" ref="submission.assessment.dates.openDate" />
 				</modelColumn>
 
 				<!-- due date -->
@@ -198,7 +198,7 @@
 					<container>
 						<text>
 							<message>
-								<model type="date" twoLine="TRUE" missing="dash" ref="submission.assessment.dates.dueDate" />
+								<model type="date" twoLine="TRUE" missing="assume-open" ref="submission.assessment.dates.dueDate" />
 							</message>
 							<included>
 								<andDecision reversed="TRUE">

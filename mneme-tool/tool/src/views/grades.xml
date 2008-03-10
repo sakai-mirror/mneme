@@ -156,7 +156,7 @@
 							<destination template="/grades/1D" />
 						</desc>
 					</sort>
-					<model ref="assessment.dates.openDate" type="date" missing="dash" />
+					<model ref="assessment.dates.openDate" type="date" missing="assume-open" />
 				</modelColumn>
 				<modelColumn wrap="FALSE">
 					<title>
@@ -178,7 +178,7 @@
 							<destination template="/grades/0D" />
 						</desc>
 					</sort>
-					<model ref="assessment.dates.dueDate" type="date" missing="dash" />
+					<model ref="assessment.dates.dueDate" type="date" missing="assume-open" />
 				</modelColumn>
 				<modelColumn>
 					<title>

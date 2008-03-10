@@ -99,7 +99,7 @@
 					<title>
 						<message selector="open" />
 					</title>
-					<model ref="access.openDate" type="date" twoLine="TRUE" missing="none" />
+					<model ref="access.openDate" type="date" twoLine="TRUE" missing="assume-open" />
 					<entityIncluded>
 						<decision model="access.overrideOpenDate" />
 						<message selector="dash" />
@@ -109,7 +109,7 @@
 					<title>
 						<message selector="due" />
 					</title>
-					<model ref="access.dueDate" type="date" twoLine="TRUE" missing="none" />
+					<model ref="access.dueDate" type="date" twoLine="TRUE" missing="assume-open" />
 					<entityIncluded>
 						<decision model="access.overrideDueDate" />
 						<message selector="dash" />
@@ -119,7 +119,7 @@
 					<title>
 						<message selector="accept-until" />
 					</title>
-					<model ref="access.acceptUntilDate" type="date" twoLine="TRUE" missing="none" />
+					<model ref="access.acceptUntilDate" type="date" twoLine="TRUE" missing="assume-due" />
 					<entityIncluded>
 						<decision model="access.overrideAcceptUntilDate" />
 						<message selector="dash" />
