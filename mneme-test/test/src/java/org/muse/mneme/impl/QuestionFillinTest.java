@@ -204,17 +204,18 @@ public class QuestionFillinTest extends TestCase
 		question.getTypeSpecificQuestion().setData(data);
 		assertFalse(question.getIsValid());
 
+		// we accept this now, assuming the missing "*"s
 		data[3] = "roses are {} and violets are {}.";
 		question.getTypeSpecificQuestion().setData(data);
-		assertFalse(question.getIsValid());
+		assertTrue(question.getIsValid());
 
 		data[3] = "roses are {  } and violets are {  }.";
 		question.getTypeSpecificQuestion().setData(data);
-		assertFalse(question.getIsValid());
+		assertTrue(question.getIsValid());
 
 		data[3] = "roses are {&nbsp;} and violets are {&nbsp; }.";
 		question.getTypeSpecificQuestion().setData(data);
-		assertFalse(question.getIsValid());
+		assertTrue(question.getIsValid());
 
 		data[3] = "";
 		question.getTypeSpecificQuestion().setData(data);

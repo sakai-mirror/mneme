@@ -271,14 +271,13 @@ public class QuestionTest extends TestCase
 		assertTrue(question.getDescription() == null);
 
 		question.getPresentation().setText("");
-		assertTrue(question.getDescription() != null);
-		assertTrue(question.getDescription().equals(""));
+		assertTrue(question.getDescription() == null);
 
 		question.getPresentation().setText("the question");
 		assertTrue(question.getDescription().equals("the question"));
 
 		question.getPresentation().setText("  title   ");
-		assertTrue(question.getDescription().equals("  title   "));
+		assertTrue(question.getDescription().equals("title"));
 
 		final String TITLE_OVERLONG = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
 		final String TITLE_JUSTRIGHT = "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345";
@@ -287,7 +286,7 @@ public class QuestionTest extends TestCase
 		assertTrue(question.getDescription().equals(TITLE_JUSTRIGHT));
 
 		question.getPresentation().setText("");
-		assertTrue(question.getDescription().equals(""));
+		assertTrue(question.getDescription() == null);
 		question.getPresentation().setText(TITLE_JUSTRIGHT);
 		assertTrue(question.getDescription().equals(TITLE_JUSTRIGHT));
 
@@ -325,13 +324,13 @@ public class QuestionTest extends TestCase
 		assertTrue(question.getFeedback() == null);
 
 		question.setFeedback("");
-		assertTrue(question.getFeedback().equals(""));
+		assertTrue(question.getFeedback() == null);
 
 		question.setFeedback("feedback");
 		assertTrue(question.getFeedback().equals("feedback"));
 
 		question.setFeedback("   feedback   ");
-		assertTrue(question.getFeedback().equals("   feedback   "));
+		assertTrue(question.getFeedback().equals("feedback"));
 
 		final String CHARS260 = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
 		question.setFeedback(CHARS260);
@@ -355,13 +354,13 @@ public class QuestionTest extends TestCase
 		assertTrue(question.getHints() == null);
 
 		question.setHints("");
-		assertTrue(question.getHints().equals(""));
+		assertTrue(question.getHints() == null);
 
 		question.setHints("feedback");
 		assertTrue(question.getHints().equals("feedback"));
 
 		question.setHints("   feedback   ");
-		assertTrue(question.getHints().equals("   feedback   "));
+		assertTrue(question.getHints().equals("feedback"));
 
 		final String CHARS260 = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
 		question.setHints(CHARS260);
@@ -421,7 +420,7 @@ public class QuestionTest extends TestCase
 		assertTrue(question.getPresentation().getText() == null);
 
 		question.getPresentation().setText("");
-		assertTrue(question.getPresentation().getText().equals(""));
+		assertTrue(question.getPresentation().getText() == null);
 
 		question.getPresentation().setText(null);
 		assertTrue(question.getPresentation().getText() == null);
@@ -430,7 +429,7 @@ public class QuestionTest extends TestCase
 		assertTrue(question.getPresentation().getText().equals("the question"));
 
 		question.getPresentation().setText("  title   ");
-		assertTrue(question.getPresentation().getText().equals("  title   "));
+		assertTrue(question.getPresentation().getText().equals("title"));
 
 		final String CHARS260 = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
 		question.getPresentation().setText(CHARS260);
