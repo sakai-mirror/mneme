@@ -251,6 +251,34 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 	}
 
 	/**
+	 * Before saving the assessment, remove any saved (i.e. with id) definitions with no settings or no users.
+	 */
+	protected void consolidate()
+	{
+		// if any stored definitions override nothing, or have no users, remove them
+		for (Iterator i = this.specialAccess.iterator(); i.hasNext();)
+		{
+			AssessmentAccess access = (AssessmentAccess) i.next();
+			if (access.getId() == null) continue;
+
+			boolean remove = access.getUsers().isEmpty();
+
+			if (!remove)
+			{
+				remove = (!access.getOverrideAcceptUntilDate()) && (!access.getOverrideDueDate()) && (!access.getOverrideOpenDate())
+						&& (!access.getOverridePassword()) && (!access.getOverrideTimeLimit()) && (!access.getOverrideTries());
+			}
+
+			if (remove)
+			{
+				i.remove();
+				this.owner.setChanged();
+				this.deleted.add(access);
+			}
+		}
+	}
+
+	/**
 	 * Access the deleted definitions.
 	 * 
 	 * @return The List of deleted definitions.

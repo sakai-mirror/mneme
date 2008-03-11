@@ -417,6 +417,9 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (assessment == null) throw new IllegalArgumentException();
 		if (assessment.getId() == null) throw new IllegalArgumentException();
 
+		// check for empty special access
+		((AssessmentSpecialAccessImpl) assessment.getSpecialAccess()).consolidate();
+
 		// if any changes made, clear mint
 		if (assessment.getIsChanged())
 		{
