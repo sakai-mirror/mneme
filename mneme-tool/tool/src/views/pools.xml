@@ -75,6 +75,9 @@
 					</entityActions>
 				</selectionColumn>
 				<modelColumn pixels="16">
+					<title>
+						<message selector="pool-edit" />
+					</title>
 					<navigations>
 						<navigation style="LINK" description="pool-edit-description">
 							<icon icon="/icons/edit.png" style="LEFT" />
