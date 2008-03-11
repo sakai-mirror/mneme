@@ -81,22 +81,25 @@ public class FormatQuestionDecorationDelegate extends FormatDelegateImpl
 		// if not found, or not answered, use the unanswered icon
 		if (!answered)
 		{
-			return "<img src=\"" + context.get("sakai.return.url") + "/icons/unanswered.png\" alt=\""
-					+ context.getMessages().getString("format-question-decoration-unanswered") + "\" />";
+			return "<img src=\"" + context.get("sakai.return.url") + "/icons/unanswered.png\" title=\""
+					+ context.getMessages().getString("format-question-decoration-unanswered") + "\" alt=\""
+					+ context.getMessages().getString("format-question-decoration-unanswered") + "\"/>";
 		}
 
 		// if mark for review, use that icon
 		else if (markForReview)
 		{
-			return "<img src=\"" + context.get("sakai.return.url") + "/icons/markedforreview.png\" alt=\""
-					+ context.getMessages().getString("format-question-decoration-mark-for-review") + "\" />";
+			return "<img src=\"" + context.get("sakai.return.url") + "/icons/markedforreview.png\" title=\""
+					+ context.getMessages().getString("format-question-decoration-mark-for-review") + "\" alt=\""
+					+ context.getMessages().getString("format-question-decoration-mark-for-review") + "\"/>";
 		}
 
 		// if rationale is needed and not present, use the no-rationale icon
 		else if (missingReason)
 		{
-			return "<img src=\"" + context.get("sakai.return.url") + "/icons/reason.png\" alt=\""
-					+ context.getMessages().getString("format-question-decoration-rationale") + "\" />";
+			return "<img src=\"" + context.get("sakai.return.url") + "/icons/reason.png\" title=\""
+					+ context.getMessages().getString("format-question-decoration-rationale") + "\" alt=\""
+					+ context.getMessages().getString("format-question-decoration-rationale") + "\"/>";
 		}
 
 		return null;

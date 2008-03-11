@@ -120,7 +120,7 @@
 										<decision model="assessment.isLocked" />
 									</included>
 								</instructions>
-								<navigation title="select-questions" style="LINK" description="select-questions-description" submit="TRUE">
+								<navigation title="select-questions" style="LINK" submit="TRUE">
 									<destination template="/select_add_mpart_question/{0}/{1}/{2}">
 										<model ref="assessmentSort" />
 										<model ref="assessment.id" />
@@ -132,7 +132,7 @@
 									</included>
 								</navigation>
 								<navigation destination="DELETEQ" selectRequirement="SOME" selectRequirementMessage="remove-failed-requirements"
-									title="remove-question" style="LINK" description="remove-question-description" submit="TRUE">
+									title="remove-question" style="LINK" submit="TRUE">
 									<icon icon="/icons/page_delete.png" style="LEFT" />
 									<included>
 										<decision reversed="TRUE" model="assessment.isLocked" />

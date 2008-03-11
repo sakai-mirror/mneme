@@ -147,7 +147,7 @@
 
 						<!-- title -->
 						<textEdit id="title" title="test-title" cols="40">
-							<model ref="assessment.title" type="text"/>
+							<model ref="assessment.title" type="text" />
 						</textEdit>
 
 						<!-- toggle to show instructions -->
@@ -202,14 +202,13 @@
 									</included>
 								</instructions>
 								<!-- these two are not dependent, but put here for desired presentation order of actions -->
-								<navigation destination="MANUAL" title="manual-select" style="LINK" description="manual-select-description"
-									submit="TRUE">
+								<navigation destination="MANUAL" title="manual-select" style="LINK" submit="TRUE">
 									<icon icon="/icons/add_manual_add.png" style="LEFT" />
 									<included>
 										<decision reversed="TRUE" model="assessment.isLocked" />
 									</included>
 								</navigation>
-								<navigation destination="DRAW" title="random-draw" style="LINK" description="random-draw-description" submit="TRUE">
+								<navigation destination="DRAW" title="random-draw" style="LINK" submit="TRUE">
 									<icon icon="/icons/add_draw_add.png" style="LEFT" />
 									<included>
 										<decision reversed="TRUE" model="assessment.isLocked" />
@@ -217,7 +216,7 @@
 								</navigation>
 								<!-- delete is dependent, and desired to go last  -->
 								<navigation destination="DELETE" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements"
-									title="delete-part" style="LINK" description="part-delete-description" submit="TRUE">
+									title="delete-part" style="LINK" submit="TRUE">
 									<icon icon="/icons/delete.png" style="LEFT" />
 									<included>
 										<decision reversed="TRUE" model="assessment.isLocked" />

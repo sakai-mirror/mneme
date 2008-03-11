@@ -69,8 +69,7 @@
 		<!--navigation-->
 		<navigationBar>
 			<container>
-				<navigation title="grade-submission-title" style="LINK" accessKey="grade-submission-access" description="grade-submission-description"
-					submit="TRUE">
+				<navigation title="grade-submission-title" style="LINK" accessKey="grade-submission-access" submit="TRUE">
 					<icon icon="/icons/grade_student.png" style="LEFT" />
 					<destination template="/grade_assessment/{0}/{1}">
 						<model ref="sort_grades" />
@@ -78,8 +77,7 @@
 					</destination>
 				</navigation>
 				<navigation disabled="TRUE" title="bar" />
-				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" description="grade-questions-description"
-					submit="TRUE">
+				<navigation title="grade-questions-title" style="LINK" accessKey="grade-questions-access" submit="TRUE">
 					<icon icon="/icons/grade_questions.png" style="LEFT" />
 					<destination template="/grade_questions_list/{0}/{1}">
 						<model ref="sort_grades" />
@@ -87,8 +85,7 @@
 					</destination>
 				</navigation>
 				<navigation disabled="TRUE" title="bar" />
-				<navigation title="grade-stats-title" style="LINK" accessKey="grade-stats-access" description="grade-stats-description"
-					submit="TRUE">
+				<navigation title="grade-stats-title" style="LINK" accessKey="grade-stats-access" submit="TRUE">
 					<icon icon="/icons/stats.png" style="LEFT" />
 					<destination template="/assessment_stats/{0}/{1}">
 						<model ref="sort_grades" />

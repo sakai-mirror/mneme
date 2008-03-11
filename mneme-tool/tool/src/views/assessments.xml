@@ -113,11 +113,11 @@
 					</value>
 					<model ref="ids.values" />
 					<entityActions>
-						<navigation destination="ADD" title="add-test" style="LINK" description="add-test-description" submit="TRUE">
+						<navigation destination="ADD" title="add-test" style="LINK" submit="TRUE">
 							<icon icon="/icons/document_add.png" style="LEFT" />
 						</navigation>
-						<navigation destination="DELETE" title="delete-tests" style="LINK" description="delete-tests-description" submit="TRUE"
-							selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements">
+						<navigation destination="DELETE" title="delete-tests" style="LINK" submit="TRUE" selectRequirement="SOME"
+							selectRequirementMessage="delete-failed-requirements">
 							<icon icon="/icons/delete.png" style="LEFT" />
 							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif">
 								<message selector="confirm-delete">
@@ -125,17 +125,17 @@
 								</message>
 							</confirm>
 						</navigation>
-						<navigation destination="UNPUBLISH" title="unpublish-tests" style="LINK" description="unpublish-tests-description"
-							submit="TRUE" selectRequirement="SOME" selectRequirementMessage="unpublish-failed-requirements">
+						<navigation destination="UNPUBLISH" title="unpublish-tests" style="LINK" submit="TRUE" selectRequirement="SOME"
+							selectRequirementMessage="unpublish-failed-requirements">
 							<icon icon="/icons/publish_rmv.png" style="LEFT" />
 							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-unpublish" />
 						</navigation>
-						<navigation destination="ARCHIVE" title="archive-tests" style="LINK" description="archive-tests-description" submit="TRUE"
-							selectRequirement="SOME" selectRequirementMessage="archive-failed-requirements">
+						<navigation destination="ARCHIVE" title="archive-tests" style="LINK" submit="TRUE" selectRequirement="SOME"
+							selectRequirementMessage="archive-failed-requirements">
 							<icon icon="/icons/make_inactive.png" style="LEFT" />
 							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-archive" />
 						</navigation>
-						<navigation title="restore-tests" style="LINK" description="restore-tests-description" submit="TRUE">
+						<navigation title="restore-tests" style="LINK" submit="TRUE">
 							<icon icon="/icons/restore.png" style="LEFT" />
 							<destination template="/assessments_restore/{0}{1}">
 								<model ref="sort_column" />

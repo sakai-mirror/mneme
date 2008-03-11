@@ -53,19 +53,19 @@
 					</value>
 					<model ref="poolids.values" />
 					<entityActions>
-						<navigation title="add-pool-title" style="LINK" description="add-pool-description" submit="TRUE" destination="ADD">
+						<navigation title="add-pool-title" style="LINK" submit="TRUE" destination="ADD">
 							<icon icon="/icons/document_add.png" style="LEFT" />
 						</navigation>
 						<navigation selectRequirement="MULTIPLE" selectRequirementMessage="combine-failed-requirements" title="combine-title"
-							style="LINK" description="combine-description" disabled="FALSE" submit="TRUE" destination="COMBINE">
+							style="LINK" disabled="FALSE" submit="TRUE" destination="COMBINE">
 							<icon icon="/icons/combine_pools.png" style="LEFT" />
 						</navigation>
 						<navigation selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements" title="delete-title" style="LINK"
-							description="delete-description" submit="TRUE" destination="DELETE">
+							submit="TRUE" destination="DELETE">
 							<icon icon="/icons/delete.png" style="LEFT" />
 							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-delete" />
 						</navigation>
-						<navigation title="import-title" style="LINK" description="import-description" submit="TRUE">
+						<navigation title="import-title" style="LINK" submit="TRUE">
 							<destination template="/import_pool/{0}{1}">
 								<model ref="sort_column" />
 								<model ref="sort_direction" />

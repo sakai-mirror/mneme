@@ -90,7 +90,7 @@
 					</value>
 					<model ref="questionids.values" />
 					<entityActions>
-						<navigation submit="TRUE" style="LINK" title="add-question-title" description="add-question-description">
+						<navigation submit="TRUE" style="LINK" title="add-question-title">
 							<destination template="/select_question_type/{0}/{1}/{2}{3}/{4}">
 								<model ref="poolsSortCode" />
 								<model ref="pool.id" />
@@ -101,7 +101,7 @@
 							<icon icon="/icons/add_qst.png" style="LEFT" />
 						</navigation>
 						<navigation title="move-to-pool" selectRequirement="SOME" selectRequirementMessage="move-failed-requirements" style="LINK"
-							description="move-to-pool-description" disabled="FALSE" submit="TRUE">
+							disabled="FALSE" submit="TRUE">
 							<icon icon="/icons/page_go.png" style="LEFT" />
 							<destination template="/question_move/{0}/{1}/{2}{3}/{4}">
 								<model ref="poolsSortCode" />
@@ -112,7 +112,7 @@
 							</destination>
 						</navigation>
 						<navigation title="copy-to-pool" selectRequirement="SOME" selectRequirementMessage="copy-failed-requirements" style="LINK"
-							description="copy-to-pool-description" submit="TRUE">
+							submit="TRUE">
 							<icon icon="/icons/copy.png" style="LEFT" />
 							<destination template="/question_copy/{0}/{1}/{2}{3}/{4}">
 								<model ref="poolsSortCode" />
@@ -123,7 +123,7 @@
 							</destination>
 						</navigation>
 						<navigation title="delete-title" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements" style="LINK"
-							description="delete-description" submit="TRUE" destination="DELETE">
+							submit="TRUE" destination="DELETE">
 							<icon icon="/icons/delete.png" style="LEFT" />
 							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-delete" />
 						</navigation>
@@ -258,7 +258,7 @@
 		<!--navigation-->
 		<navigationBar>
 			<container>
-				<navigation title="return" style="BUTTON" submit="FALSE">
+				<navigation title="return" accessKey="return-access" description="return-description" style="BUTTON" submit="FALSE">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<!--destination template="/pools" /-->
 					<destination template="/pools/{0}">
