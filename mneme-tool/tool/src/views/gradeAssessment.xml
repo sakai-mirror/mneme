@@ -402,14 +402,8 @@
 				</column>
 				<column>
 					<container>
-						<text>
-							<message>
-								<model type="icon" icon="/icons/grade.png" />
-							</message>
-						</text>
-					</container>
-					<entityNavigations>
-						<navigation style="LINK" submit="TRUE">
+						<navigation style="LINK" submit="TRUE" description="unscored-alt">
+							<icon icon="/icons/grade.png" />
 							<destination template="/grade_submission/{0}/{1}/grade_assessment/{2}/{3}/{4}{5}/{6}">
 								<model ref="submission.id" />
 								<model ref="sort" />
@@ -420,7 +414,7 @@
 								<model type="paging" ref="paging" />
 							</destination>
 						</navigation>
-					</entityNavigations>
+					</container>
 					<entityIncluded>
 						<decision model="submission.hasUnscoredAnswers" />
 					</entityIncluded>

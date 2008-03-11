@@ -113,7 +113,7 @@
 					<columns>
 						<column pixels="16">
 							<navigations>
-								<navigation style="LINK" submit="FALSE">
+								<navigation style="LINK" submit="FALSE" description="unscored-alt">
 									<icon icon="/icons/grade.png" />
 									<destination template="/grade_question/{0}/{1}/{2}">
 										<model ref="sort_grades" />

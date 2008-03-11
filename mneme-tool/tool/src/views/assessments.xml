@@ -69,7 +69,7 @@
 								</orDecision>
 							</included>
 						</navigation>
-						<navigation style="LINK" submit="TRUE" description="live-alt">
+						<navigation style="LINK" submit="TRUE" description="unscored-alt">
 							<icon icon="/icons/grade.png" style="LEFT" />
 							<destination template="/grade_assessment/0A/{0}">
 								<model ref="assessment.id" />
