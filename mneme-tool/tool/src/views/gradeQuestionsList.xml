@@ -148,7 +148,7 @@
 		<!-- navigation -->
 		<navigationBar>
 			<container>
-				<navigation title="grade-return-title" style="BUTTON" accessKey="grade-return-access" description="grade-return-description">
+				<navigation title="return" style="BUTTON" accessKey="return-access" description="return-description">
 					<icon icon="/icons/return.png" style="LEFT" />
 					<destination template="/grades/{0}">
 						<model ref="sort_grades" />
