@@ -575,6 +575,49 @@ public class AssessmentServiceImpl implements AssessmentService
 				this.submissionService.releaseSubmissions(assessment, Boolean.FALSE);
 			}
 		}
+
+		// our change might make other gradebook-invalid assessments valid - only if we were in the gb to stat with
+		if ((current != null) && current.getPublished() && current.getGradebookIntegration() && (!current.getArchived()) && current.getIsValid())
+		{
+			if (titleChanged || (publishedChanged && (!assessment.getPublished())) || (archivedChanged && assessment.getArchived())
+					|| (gbIntegrationChanged && (!assessment.getGradebookIntegration())))
+			{
+
+				// get all context assessments that are invalid due to gb integration
+				List<AssessmentImpl> gbInvalid = this.storage.getContextGbInvalidAssessments(assessment.getContext());
+
+				// for each one
+				for (AssessmentImpl a : gbInvalid)
+				{
+					// clear the invalid (so it does not trigger the getIsValid call)
+					((AssessmentGradingImpl) (a.getGrading())).initGradebookRejectedAssessment(Boolean.FALSE);
+
+					if (a.getIsValid() && a.getGradebookIntegration() && a.getPublished())
+					{
+						try
+						{
+							// we should not be in the gb!
+							if (this.gradesService.assessmentReported(a))
+							{
+								throw new GradesRejectsAssessmentException();
+							}
+
+							// try to get into the gb
+							this.gradesService.initAssessmentGrades(a);
+
+							// report any completed official submissions
+							this.gradesService.reportAssessmentGrades(a);
+
+							// save (the invalid flag is cleared)
+							save((AssessmentImpl) a);
+						}
+						catch (GradesRejectsAssessmentException e)
+						{
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**

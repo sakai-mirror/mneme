@@ -379,6 +379,30 @@ public class AssessmentStorageSample implements AssessmentStorage
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public List<AssessmentImpl> getContextGbInvalidAssessments(String context)
+	{
+		fakeIt();
+
+		List<AssessmentImpl> rv = new ArrayList<AssessmentImpl>();
+
+		for (AssessmentImpl assessment : this.assessments.values())
+		{
+			if (assessment.getContext().equals(context))
+			{
+				// filter out all but gb invalid
+				if (assessment.getGrading().getGradebookRejectedAssessment())
+				{
+					rv.add(new AssessmentImpl(assessment));
+				}
+			}
+		}
+
+		return rv;
+	}
+
+	/**
 	 * Final initialization, once all dependencies are set.
 	 */
 	public void init()

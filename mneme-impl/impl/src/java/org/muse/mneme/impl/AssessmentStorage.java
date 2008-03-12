@@ -101,6 +101,15 @@ public interface AssessmentStorage
 	List<AssessmentImpl> getContextAssessments(String context, AssessmentService.AssessmentsSort sort, Boolean publishedOnly);
 
 	/**
+	 * Get all the assessments defined in this context, that are invalid due to gb integration.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return The list of Assessments defined in the context, that are invalid due to gb integration.
+	 */
+	List<AssessmentImpl> getContextGbInvalidAssessments(String context);
+
+	/**
 	 * Initialize.
 	 */
 	void init();

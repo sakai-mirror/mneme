@@ -266,7 +266,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		Object[] fields = new Object[1];
 		fields[0] = context;
 
-		List<AssessmentImpl> rv = readAssessments(where, order.toString(), fields);
+		List<AssessmentImpl> rv = readAssessments(where, (order != null) ? order.toString() : null, fields);
 
 		// since valid is not stored on the db, filter invalid ones out if desired
 		if (publishedOnly)
@@ -280,6 +280,21 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 				}
 			}
 		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<AssessmentImpl> getContextGbInvalidAssessments(String context)
+	{
+		String where = "WHERE A.CONTEXT=? AND A.GRADING_REJECTED='1'";
+
+		Object[] fields = new Object[1];
+		fields[0] = context;
+
+		List<AssessmentImpl> rv = readAssessments(where, null, fields);
 
 		return rv;
 	}
