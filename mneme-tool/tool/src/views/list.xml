@@ -265,7 +265,7 @@
 					<container>
 						<text>
 							<message>
-								<model type="duration" concise="TRUE" missing="dash" ref="submission.assessment.timeLimit" />
+								<model type="duration" concise="TRUE" missing="infinite" ref="submission.assessment.timeLimit" />
 							</message>
 							<included>
 								<decision reversed="TRUE" model="submission.mayContinue" />
