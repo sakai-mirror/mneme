@@ -366,8 +366,13 @@ public class SubmissionImpl implements Submission
 		// the end might be from a time limit, or because we are near the closed date
 		long endTime = 0;
 
-		// see if the assessment has a hard submission cutoff date
-		Date closedDate = getAssessment().getDates().getSubmitUntilDate();
+		// see if the assessment has a hard submission cutoff date (ignore for test drive)
+		
+		Date closedDate = null;
+		if (!getIsTestDrive())
+		{
+			closedDate = getAssessment().getDates().getSubmitUntilDate();
+		}
 		rv.time = closedDate;
 
 		// if we have a time limit, compute the end time based on that limit
@@ -939,12 +944,15 @@ public class SubmissionImpl implements Submission
 			rv = new Date(getStartDate().getTime() + a.getTimeLimit());
 		}
 
-		// for hard submit-until date
-		if (a.getDates().getSubmitUntilDate() != null)
+		// for hard submit-until date (for test drive, ignore)
+		if (!getIsTestDrive())
 		{
-			if ((rv == null) || (a.getDates().getSubmitUntilDate().before(rv)))
+			if (a.getDates().getSubmitUntilDate() != null)
 			{
-				rv = a.getDates().getSubmitUntilDate();
+				if ((rv == null) || (a.getDates().getSubmitUntilDate().before(rv)))
+				{
+					rv = a.getDates().getSubmitUntilDate();
+				}
 			}
 		}
 
