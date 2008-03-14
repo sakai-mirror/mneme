@@ -73,6 +73,13 @@ public interface AssessmentSpecialAccess
 	Boolean getIsDefined();
 
 	/**
+	 * Access the special access defined for the assessment, sorted by user sort display.
+	 * 
+	 * @return A List of the special access defined for the assessment, sorted by user sort display.
+	 */
+	List<AssessmentAccess> getOrderedAccess();
+
+	/**
 	 * Find the special access that applies to this user id.
 	 * 
 	 * @param userId

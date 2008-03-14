@@ -57,7 +57,7 @@
 
 		<!-- the list of special access definitions -->
 		<entityList style="FLAT">
-			<iterator name="access" model="assessment.specialAccess.access" />
+			<iterator name="access" model="assessment.specialAccess.orderedAccess" />
 			<emptyTitle>
 				<message selector="no-access" />
 			</emptyTitle>

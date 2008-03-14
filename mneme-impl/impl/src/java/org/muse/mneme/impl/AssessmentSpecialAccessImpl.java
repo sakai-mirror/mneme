@@ -22,6 +22,8 @@
 package org.muse.mneme.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -29,6 +31,8 @@ import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentSpecialAccess;
 import org.muse.mneme.api.Changeable;
+import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.cover.UserDirectoryService;
 
 /**
  * AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
@@ -165,6 +169,67 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 	public Boolean getIsDefined()
 	{
 		return Boolean.valueOf(!this.specialAccess.isEmpty());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<AssessmentAccess> getOrderedAccess()
+	{
+		List<AssessmentAccess> rv = new ArrayList<AssessmentAccess>(this.specialAccess);
+
+		// sort
+		Collections.sort(rv, new Comparator()
+		{
+			public int compare(Object arg0, Object arg1)
+			{
+				AssessmentAccess a0 = (AssessmentAccess) arg0;
+				AssessmentAccess a1 = (AssessmentAccess) arg1;
+				List<User> users0 = UserDirectoryService.getUsers(a0.getUsers());
+				List<User> users1 = UserDirectoryService.getUsers(a1.getUsers());
+
+				// sort the multiple lists to find the first one to use
+				if (users0.size() > 1)
+				{
+					Collections.sort(users0, new Comparator()
+					{
+						public int compare(Object arg0, Object arg1)
+						{
+							int rv = ((User) arg0).getSortName().compareTo(((User) arg1).getSortName());
+							return rv;
+						}
+					});
+				}
+
+				if (users1.size() > 1)
+				{
+					Collections.sort(users1, new Comparator()
+					{
+						public int compare(Object arg0, Object arg1)
+						{
+							int rv = ((User) arg0).getSortName().compareTo(((User) arg1).getSortName());
+							return rv;
+						}
+					});
+				}
+
+				if ((users0.isEmpty()) && (users1.isEmpty()))
+				{
+					return 0;
+				}
+				else if (users0.isEmpty())
+				{
+					return -1;
+				}
+				else if (users1.isEmpty())
+				{
+					return 1;
+				}
+				return users0.get(0).getSortName().compareTo(users1.get(0).getSortName());
+			}
+		});
+
+		return rv;
 	}
 
 	/**
