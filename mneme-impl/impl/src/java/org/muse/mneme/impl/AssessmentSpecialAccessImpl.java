@@ -26,13 +26,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentAccess;
 import org.muse.mneme.api.AssessmentSpecialAccess;
 import org.muse.mneme.api.Changeable;
+import org.muse.mneme.api.MnemeService;
+import org.muse.mneme.api.SecurityService;
 import org.sakaiproject.user.api.User;
-import org.sakaiproject.user.cover.UserDirectoryService;
+import org.sakaiproject.user.api.UserDirectoryService;
 
 /**
  * AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
@@ -50,6 +53,12 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 
 	/** The special access definitions. */
 	protected List<AssessmentAccess> specialAccess = new ArrayList<AssessmentAccess>();
+
+	/** Dependency: SecurityService. */
+	protected transient SecurityService securityService = null;
+
+	/** Dependency: UserDirectoryService. */
+	protected transient UserDirectoryService userDirectoryService = null;
 
 	/**
 	 * Construct.
@@ -72,10 +81,13 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 	 * @param owner
 	 *        The change reporting entity.
 	 */
-	public AssessmentSpecialAccessImpl(Assessment assessment, Changeable owner)
+	public AssessmentSpecialAccessImpl(Assessment assessment, Changeable owner, SecurityService securityService,
+			UserDirectoryService userDirectoryService)
 	{
 		this.owner = owner;
 		this.assessment = assessment;
+		this.securityService = securityService;
+		this.userDirectoryService = userDirectoryService;
 	}
 
 	/**
@@ -133,6 +145,57 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 	/**
 	 * {@inheritDoc}
 	 */
+	public void assureValidUsers()
+	{
+		// get all possible users who can submit
+		Set<String> userIds = this.securityService.getUsersIsAllowed(MnemeService.SUBMIT_PERMISSION, assessment.getContext());
+
+		// filter out any userIds that are not currently defined
+		List<User> users = this.userDirectoryService.getUsers(userIds);
+		userIds.clear();
+		for (User user : users)
+		{
+			userIds.add(user.getId());
+		}
+
+		// clear out any users not defined and permitted
+		List<AssessmentAccess> toRemove = new ArrayList<AssessmentAccess>();
+		for (AssessmentAccess access : this.specialAccess)
+		{
+			List<String> accessUsers = new ArrayList<String>(access.getUsers());
+			for (Iterator i = accessUsers.iterator(); i.hasNext();)
+			{
+				String uid = (String) i.next();
+
+				if (!userIds.contains(uid))
+				{
+					i.remove();
+				}
+			}
+
+			// if none left, remove it
+			if (accessUsers.isEmpty())
+			{
+				toRemove.add(access);
+			}
+
+			// otherwise update the users
+			else
+			{
+				access.setUsers(accessUsers);
+			}
+		}
+
+		// remove any that need removing
+		for (AssessmentAccess access : toRemove)
+		{
+			removeAccess(access);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void clear()
 	{
 		if (this.specialAccess.isEmpty()) return;
@@ -185,8 +248,8 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 			{
 				AssessmentAccess a0 = (AssessmentAccess) arg0;
 				AssessmentAccess a1 = (AssessmentAccess) arg1;
-				List<User> users0 = UserDirectoryService.getUsers(a0.getUsers());
-				List<User> users1 = UserDirectoryService.getUsers(a1.getUsers());
+				List<User> users0 = userDirectoryService.getUsers(a0.getUsers());
+				List<User> users1 = userDirectoryService.getUsers(a1.getUsers());
 
 				// sort the multiple lists to find the first one to use
 				if (users0.size() > 1)
@@ -362,6 +425,8 @@ public class AssessmentSpecialAccessImpl implements AssessmentSpecialAccess
 	protected void set(Assessment assessment, AssessmentSpecialAccessImpl other)
 	{
 		this.specialAccess.clear();
+		this.securityService = other.securityService;
+		this.userDirectoryService = other.userDirectoryService;
 		for (AssessmentAccess access : other.specialAccess)
 		{
 			this.specialAccess.add(new AssessmentAccessImpl(assessment, (AssessmentAccessImpl) access, this.owner));

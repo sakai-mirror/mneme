@@ -45,6 +45,11 @@ public interface AssessmentSpecialAccess
 	AssessmentAccess assureUserAccess(String userId);
 
 	/**
+	 * Make sure any undefined user ids or users without permissions are removed.
+	 */
+	void assureValidUsers();
+
+	/**
 	 * Remove all special access.
 	 */
 	void clear();

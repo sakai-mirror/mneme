@@ -48,11 +48,13 @@ import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.ReviewShowCorrect;
 import org.muse.mneme.api.ReviewTiming;
+import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.db.api.SqlReader;
 import org.sakaiproject.db.api.SqlService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
+import org.sakaiproject.user.api.UserDirectoryService;
 
 /**
  * AssessmentStorageMysql implements AssessmentStorage for SQL databases.
@@ -80,6 +82,9 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	/** Dependency: QuestionService. */
 	protected QuestionService questionService = null;
 
+	/** Dependency: SecuritySevice. */
+	protected SecurityService securityService = null;
+
 	/** Dependency: SqlService. */
 	protected SqlService sqlService = null;
 
@@ -87,6 +92,9 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 
 	/** Dependency: ThreadLocalManager. */
 	protected ThreadLocalManager threadLocalManager = null;
+
+	/** Dependency: UserDirectoryService. */
+	protected UserDirectoryService userDirectoryService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -318,7 +326,8 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	 */
 	public AssessmentImpl newAssessment()
 	{
-		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService, this.messages);
+		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService, this.securityService,
+				this.userDirectoryService, this.messages);
 	}
 
 	/**
@@ -445,6 +454,17 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	}
 
 	/**
+	 * Set the SecurityService.
+	 * 
+	 * @param service
+	 *        The PoolService.
+	 */
+	public void setSecurityService(SecurityService service)
+	{
+		this.securityService = service;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void setSqlService(SqlService service)
@@ -472,6 +492,17 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	public void setThreadLocalManager(ThreadLocalManager service)
 	{
 		threadLocalManager = service;
+	}
+
+	/**
+	 * Set the UserDirectoryService.
+	 * 
+	 * @param service
+	 *        The UserDirectoryService.
+	 */
+	public void setUserDirectoryService(UserDirectoryService service)
+	{
+		this.userDirectoryService = service;
 	}
 
 	/**

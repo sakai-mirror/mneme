@@ -49,8 +49,10 @@ import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
 import org.muse.mneme.api.ReviewShowCorrect;
 import org.muse.mneme.api.ReviewTiming;
+import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.StringUtil;
 
@@ -86,7 +88,13 @@ public class AssessmentStorageSample implements AssessmentStorage
 
 	protected QuestionService questionService = null;
 
+	/** Dependency: SecuritySevice. */
+	protected SecurityService securityService = null;
+
 	protected SubmissionService submissionService = null;
+
+	/** Dependency: UserDirectoryService. */
+	protected UserDirectoryService userDirectoryService = null;
 
 	/**
 	 * {@inheritDoc}
@@ -430,7 +438,8 @@ public class AssessmentStorageSample implements AssessmentStorage
 	 */
 	public AssessmentImpl newAssessment()
 	{
-		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService, this.messages);
+		return new AssessmentImpl(this.assessmentService, this.poolService, this.questionService, this.submissionService, this.securityService,
+				this.userDirectoryService, this.messages);
 	}
 
 	/**
@@ -616,6 +625,17 @@ public class AssessmentStorageSample implements AssessmentStorage
 	}
 
 	/**
+	 * Set the SecurityService.
+	 * 
+	 * @param service
+	 *        The PoolService.
+	 */
+	public void setSecurityService(SecurityService service)
+	{
+		this.securityService = service;
+	}
+
+	/**
 	 * Set the SubmissionService.
 	 * 
 	 * @param service
@@ -624,6 +644,17 @@ public class AssessmentStorageSample implements AssessmentStorage
 	public void setSubmissionService(SubmissionService service)
 	{
 		this.submissionService = service;
+	}
+
+	/**
+	 * Set the UserDirectoryService.
+	 * 
+	 * @param service
+	 *        The UserDirectoryService.
+	 */
+	public void setUserDirectoryService(UserDirectoryService service)
+	{
+		this.userDirectoryService = service;
 	}
 
 	protected void fakeIt()

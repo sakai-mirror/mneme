@@ -2117,6 +2117,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// get all possible users who can submit
 		Set<String> userIds = this.securityService.getUsersIsAllowed(MnemeService.SUBMIT_PERMISSION, assessment.getContext());
 
+		// filter out any userIds that are not currently defined
+		List<User> users = this.userDirectoryService.getUsers(userIds);
+		userIds.clear();
+		for (User user : users)
+		{
+			userIds.add(user.getId());
+		}
+
 		// if any user is not represented in the submissions we found, add an empty submission
 		for (String userId : userIds)
 		{
@@ -2134,6 +2142,17 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			{
 				SubmissionImpl s = this.getPhantomSubmission(userId, assessment);
 				rv.add(s);
+			}
+		}
+
+		// filter out any submissions found that are not for one of the users in the userIds list (they may have lost permission)
+		for (Iterator i = rv.iterator(); i.hasNext();)
+		{
+			SubmissionImpl submission = (SubmissionImpl) i.next();
+
+			if (!userIds.contains(submission.getUserId()))
+			{
+				i.remove();
 			}
 		}
 

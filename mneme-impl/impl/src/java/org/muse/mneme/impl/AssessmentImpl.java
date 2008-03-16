@@ -49,10 +49,12 @@ import org.muse.mneme.api.Presentation;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionGrouping;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.user.api.User;
+import org.sakaiproject.user.api.UserDirectoryService;
 
 /**
  * AssessmentImpl implements Assessment
@@ -121,6 +123,8 @@ public class AssessmentImpl implements Assessment
 
 	protected AssessmentReview review = null;
 
+	protected transient SecurityService securityService = null;
+
 	protected Boolean showHints = Boolean.FALSE;
 
 	protected AssessmentSpecialAccess specialAccess = null;
@@ -142,17 +146,22 @@ public class AssessmentImpl implements Assessment
 
 	protected AssessmentType type = AssessmentType.test;
 
+	protected transient UserDirectoryService userDirectoryService = null;
+
 	/**
 	 * Construct
 	 */
 	public AssessmentImpl(AssessmentService assessmentService, PoolService poolService, QuestionService questionService,
-			SubmissionService submissionService, InternationalizedMessages messages)
+			SubmissionService submissionService, SecurityService securityService, UserDirectoryService userDirectoryService,
+			InternationalizedMessages messages)
 	{
 		this.assessmentService = assessmentService;
 		this.poolService = (PoolServiceImpl) poolService;
 		this.submissionService = submissionService;
 		this.questionService = questionService;
 		this.messages = messages;
+		this.submitPresentation = new PresentationImpl(this.changed);
+		this.userDirectoryService = userDirectoryService;
 
 		this.createdBy = new AttributionImpl(this.changed);
 		this.dates = new AssessmentDatesImpl(this, this.changed);
@@ -162,8 +171,8 @@ public class AssessmentImpl implements Assessment
 		this.password = new AssessmentPasswordImpl(this.changed);
 		this.presentation = new PresentationImpl(this.changed);
 		this.review = new AssessmentReviewImpl(this, this.changed);
-		this.specialAccess = new AssessmentSpecialAccessImpl(this, this.changed);
-		this.submitPresentation = new PresentationImpl(this.changed);
+		this.securityService = securityService;
+		this.specialAccess = new AssessmentSpecialAccessImpl(this, this.changed, this.securityService, this.userDirectoryService);
 	}
 
 	/**
@@ -1028,11 +1037,13 @@ public class AssessmentImpl implements Assessment
 		this.submissionContext = other.submissionContext;
 		this.submissionService = other.submissionService;
 		this.submitPresentation = new PresentationImpl((PresentationImpl) other.submitPresentation, this.changed);
+		this.securityService = other.securityService;
 		this.specialAccess = new AssessmentSpecialAccessImpl(this, (AssessmentSpecialAccessImpl) other.specialAccess, this.changed);
 		this.timeLimit = other.timeLimit;
 		this.title = other.title;
 		this.titleWas = other.titleWas;
 		this.tries = other.tries;
 		this.type = other.type;
+		this.userDirectoryService = other.userDirectoryService;
 	}
 }

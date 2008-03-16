@@ -88,6 +88,9 @@ public class AssessmentSpecialView extends ControllerImpl
 			return;
 		}
 
+		// make sure any undefined user ids or users without permissions are removed
+		assessment.getSpecialAccess().assureValidUsers();
+
 		// collect information: the selected assessment
 		context.put("assessment", assessment);
 		context.put("sort", sort);
@@ -158,6 +161,9 @@ public class AssessmentSpecialView extends ControllerImpl
 					}
 				}
 			}
+
+			// make sure any undefined user ids or users without permissions are removed
+			assessment.getSpecialAccess().assureValidUsers();
 
 			// save
 			try
