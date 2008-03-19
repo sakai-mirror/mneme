@@ -258,6 +258,8 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		selCol.setSingle();
 		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
+		selCol.setOnEmptyAlert(this.uiService.newDecision().setReversed().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.submission.assessment.randomAccess")), "linear-missing");
 		entityList.addColumn(selCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
