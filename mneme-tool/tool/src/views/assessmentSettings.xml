@@ -49,7 +49,7 @@
 	<container>
 
 		<!-- title -->
-		<textEdit id="title" title="title" cols="40" destination="STAY:title">
+		<textEdit id="title" title="title" cols="40">
 			<model ref="assessment.title" type="text" />
 		</textEdit>
 
@@ -107,15 +107,15 @@
 							</included>
 						</warning>
 
-						<dateEdit id="odate" title="open-date" destination="STAY:odate">
+						<dateEdit id="odate" title="open-date">
 							<model ref="assessment.dates.openDate" type="date" />
 						</dateEdit>
 
-						<dateEdit id="ddate" title="due-date" destination="STAY:ddate">
+						<dateEdit id="ddate" title="due-date">
 							<model ref="assessment.dates.dueDate" type="date" />
 						</dateEdit>
 
-						<dateEdit id="adate" title="test-acceptUntilDate" destination="STAY:adate">
+						<dateEdit id="adate" title="test-acceptUntilDate">
 							<model ref="assessment.dates.acceptUntilDate" type="date" />
 						</dateEdit>
 					</container>
@@ -318,7 +318,7 @@
 								<decision model="assessment.grading.isValid" reversed="TRUE" />
 							</included>
 						</warning>
-						<selection id="gb" title="sendgbook" destination="STAY:gb">
+						<selection id="gb" title="sendgbook">
 							<selectionChoices>
 								<selectionChoice>
 									<displayMessage>
