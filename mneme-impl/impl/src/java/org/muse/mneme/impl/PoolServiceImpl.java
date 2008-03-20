@@ -113,7 +113,14 @@ public class PoolServiceImpl implements PoolService
 		Date stale = new Date();
 		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
 
-		this.storage.clearStaleMintPools(stale);
+		// get the list of pools that are stale mint
+		List<PoolImpl> pools = this.storage.getStaleMintPools(stale);
+
+		// delete each one
+		for (PoolImpl pool : pools)
+		{
+			doRemove(pool);
+		}
 	}
 
 	/**

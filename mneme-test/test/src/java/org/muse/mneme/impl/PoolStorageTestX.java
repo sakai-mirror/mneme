@@ -83,42 +83,42 @@ public abstract class PoolStorageTestX extends TestCase
 		super(arg0);
 	}
 
-	/**
-	 * Test clearStaleMintPools()
-	 * 
-	 * @throws Exception
-	 */
-	public void test001clearStaleMintPools() throws Exception
-	{
-		// create a pool - leave it mint - make it old
-		Date old = new Date(new Date().getTime() - (2 * 24 * 60 * 60 * 1000));
-		PoolImpl pool = this.storage.newPool();
-		pool.setContext(CONTEXT);
-		pool.setTitle(CONTEXT);
-		pool.getCreatedBy().setDate(old);
-		pool.getCreatedBy().setUserId("admin");
-		pool.getModifiedBy().setDate(old);
-		pool.getModifiedBy().setUserId("admin");
-		this.storage.savePool(pool);
-
-		// it should now exist
-		Boolean exists = this.storage.existsPool(pool.getId());
-		assertTrue(exists == Boolean.TRUE);
-
-		// this should leave the pool in place
-		this.storage.clearStaleMintPools(old);
-
-		// it should now exist
-		exists = this.storage.existsPool(pool.getId());
-		assertTrue(exists == Boolean.TRUE);
-
-		// this should remove it
-		this.storage.clearStaleMintPools(new Date());
-
-		// it should not exist
-		exists = this.storage.existsPool(pool.getId());
-		assertTrue(exists == Boolean.FALSE);
-	}
+//	/**
+//	 * Test clearStaleMintPools()
+//	 * 
+//	 * @throws Exception
+//	 */
+//	public void test001clearStaleMintPools() throws Exception
+//	{
+//		// create a pool - leave it mint - make it old
+//		Date old = new Date(new Date().getTime() - (2 * 24 * 60 * 60 * 1000));
+//		PoolImpl pool = this.storage.newPool();
+//		pool.setContext(CONTEXT);
+//		pool.setTitle(CONTEXT);
+//		pool.getCreatedBy().setDate(old);
+//		pool.getCreatedBy().setUserId("admin");
+//		pool.getModifiedBy().setDate(old);
+//		pool.getModifiedBy().setUserId("admin");
+//		this.storage.savePool(pool);
+//
+//		// it should now exist
+//		Boolean exists = this.storage.existsPool(pool.getId());
+//		assertTrue(exists == Boolean.TRUE);
+//
+//		// this should leave the pool in place
+//		this.storage.clearStaleMintPools(old);
+//
+//		// it should now exist
+//		exists = this.storage.existsPool(pool.getId());
+//		assertTrue(exists == Boolean.TRUE);
+//
+//		// this should remove it
+//		this.storage.clearStaleMintPools(new Date());
+//
+//		// it should not exist
+//		exists = this.storage.existsPool(pool.getId());
+//		assertTrue(exists == Boolean.FALSE);
+//	}
 
 	/**
 	 * Test existsPool() removePool() savePool()

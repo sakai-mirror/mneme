@@ -40,14 +40,6 @@ public interface PoolStorage
 	void clearContext(String context);
 
 	/**
-	 * Clear out any mint objects that are old enough to be considered abandoned.
-	 * 
-	 * @param stale
-	 *        The time to compare to the create date; before this they are stale.
-	 */
-	void clearStaleMintPools(Date stale);
-
-	/**
 	 * Construct a new pool object as a copy of another.
 	 * 
 	 * @param pool
@@ -93,6 +85,15 @@ public interface PoolStorage
 	 * @return The List of Pools in the context.
 	 */
 	List<PoolImpl> getPools(String context);
+
+	/**
+	 * Get any pools that are mint and old enough to be considered abandoned.
+	 * 
+	 * @param stale
+	 *        The time to compare to the create date; before this they are stale.
+	 * @return The list of stale mint pools.
+	 */
+	List<PoolImpl> getStaleMintPools(Date stale);
 
 	/**
 	 * Initialize.

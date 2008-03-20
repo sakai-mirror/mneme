@@ -76,28 +76,6 @@ public abstract class PoolStorageSample implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void clearStaleMintPools(Date stale)
-	{
-		// find them
-		List<String> delete = new ArrayList<String>();
-		for (PoolImpl pool : this.pools.values())
-		{
-			if (pool.getMint() && pool.getCreatedBy().getDate().before(stale))
-			{
-				delete.add(pool.getId());
-			}
-		}
-
-		// remove them
-		for (String id : delete)
-		{
-			this.pools.remove(id);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public PoolImpl clone(PoolImpl pool)
 	{
 		return new PoolImpl(pool);
@@ -208,6 +186,24 @@ public abstract class PoolStorageSample implements PoolStorage
 		for (PoolImpl pool : this.pools.values())
 		{
 			if ((!pool.historical) && (!pool.getMint()) && pool.getContext().equals(context))
+			{
+				rv.add(clone(pool));
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<PoolImpl> getStaleMintPools(Date stale)
+	{
+		List<PoolImpl> rv = new ArrayList<PoolImpl>();
+
+		for (PoolImpl pool : this.pools.values())
+		{
+			if (pool.getMint() && pool.getCreatedBy().getDate().before(stale))
 			{
 				rv.add(clone(pool));
 			}

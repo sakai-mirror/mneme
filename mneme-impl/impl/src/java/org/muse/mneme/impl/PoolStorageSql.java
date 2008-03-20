@@ -68,20 +68,6 @@ public abstract class PoolStorageSql implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void clearStaleMintPools(final Date stale)
-	{
-		this.sqlService.transact(new Runnable()
-		{
-			public void run()
-			{
-				clearStaleMintPoolsTx(stale);
-			}
-		}, "clearStaleMintPools: " + stale.toString());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public PoolImpl clone(PoolImpl pool)
 	{
 		return new PoolImpl(pool);
@@ -184,6 +170,20 @@ public abstract class PoolStorageSql implements PoolStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<PoolImpl> getStaleMintPools(final Date stale)
+	{
+		StringBuilder whereOrder = new StringBuilder();
+		whereOrder.append("WHERE MINT='1' AND CREATED_BY_DATE < ?");
+
+		Object[] fields = new Object[1];
+		fields[0] = stale.getTime();
+
+		return readPools(whereOrder.toString(), fields);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public abstract PoolImpl newPool();
 
 	/**
@@ -257,26 +257,6 @@ public abstract class PoolStorageSql implements PoolStorage
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
 			throw new RuntimeException("clearContextTx: dbWrite failed");
-		}
-	}
-
-	/**
-	 * Transaction code for clearStaleMintPools()
-	 */
-	protected void clearStaleMintPoolsTx(Date stale)
-	{
-		// if (pool.getMint() && pool.getCreatedBy().getDate().before(stale))
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("DELETE FROM MNEME_POOL");
-		sql.append(" WHERE MINT='1' AND CREATED_BY_DATE < ?");
-
-		Object[] fields = new Object[1];
-		fields[0] = stale.getTime();
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("clearStaleMintPoolsTx: db write failed");
 		}
 	}
 
