@@ -1610,7 +1610,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 					// complete this submission, using the exact 'over' date for the final date
 					Date over = submission.getWhenOver();
-					autoCompleteSubmission(over, submission);
+					if (over != null)
+					{
+						autoCompleteSubmission(over, submission);
+					}
 				}
 			}
 			catch (Throwable e)
@@ -2425,7 +2428,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// TODO: tune this so more is done in the db, fewer are read -ggolden
 		List<SubmissionImpl> all = this.storage.getOpenSubmissions();
 
-		// filter out the ones we really want
+		// filter the ones we really want
 		List<Submission> rv = new ArrayList<Submission>();
 		for (Submission submission : all)
 		{
@@ -2442,15 +2445,17 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				}
 			}
 
-			// for past submit-until date
-			if (submission.getAssessment().getDates().getSubmitUntilDate() != null)
+			// for past submit-until date (ignore test drives)
+			if (!submission.getIsTestDrive())
 			{
-				if (asOf.getTime() > (submission.getAssessment().getDates().getSubmitUntilDate().getTime() + grace))
+				if (submission.getAssessment().getDates().getSubmitUntilDate() != null)
 				{
-					selected = true;
+					if (asOf.getTime() > (submission.getAssessment().getDates().getSubmitUntilDate().getTime() + grace))
+					{
+						selected = true;
+					}
 				}
 			}
-
 			// TODO: what about unpublished? archived?
 
 			if (selected) rv.add(submission);
