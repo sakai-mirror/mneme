@@ -42,6 +42,7 @@ import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.StringUtil;
@@ -60,6 +61,12 @@ public class GradeQuestionView extends ControllerImpl
 
 	/** AttachmentService service. */
 	protected AttachmentService attachmentService = null;
+
+	/** Configuration: the page size for the view. */
+	protected int pageSize = 10;
+
+	/** Dependency: ServerConfigurationService. */
+	protected ServerConfigurationService serverConfigurationService = null;
 
 	/** Submission Service */
 	protected SubmissionService submissionService = null;
@@ -164,7 +171,7 @@ public class GradeQuestionView extends ControllerImpl
 		if (params.length > 6) pagingParameter = params[6];
 		if (pagingParameter == null)
 		{
-			pagingParameter = "1-30";
+			pagingParameter = "1-" + Integer.toString(this.pageSize);
 		}
 		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxAnswers);
@@ -187,6 +194,8 @@ public class GradeQuestionView extends ControllerImpl
 	public void init()
 	{
 		super.init();
+		String pageSize = StringUtil.trimToNull(this.serverConfigurationService.getString("pageSize@org.muse.mneme.tool.GradeQuestionView"));
+		if (pageSize != null) setPageSize(pageSize);
 		M_log.info("init()");
 	}
 
@@ -295,6 +304,29 @@ public class GradeQuestionView extends ControllerImpl
 	public void setAttachmentService(AttachmentService service)
 	{
 		this.attachmentService = service;
+	}
+
+	/**
+	 * Set the the page size for the view.
+	 * 
+	 * @param time
+	 *        The the page size for the view.
+	 */
+	public void setPageSize(String size)
+	{
+		this.pageSize = Integer.parseInt(size);
+		if (this.pageSize < 1) this.pageSize = 10;
+	}
+
+	/**
+	 * Set the ServerConfigurationService.
+	 * 
+	 * @param service
+	 *        the ServerConfigurationService.
+	 */
+	public void setServerConfigurationService(ServerConfigurationService service)
+	{
+		this.serverConfigurationService = service;
 	}
 
 	/**
