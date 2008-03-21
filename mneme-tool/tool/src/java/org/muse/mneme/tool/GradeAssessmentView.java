@@ -43,6 +43,7 @@ import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
@@ -57,6 +58,12 @@ public class GradeAssessmentView extends ControllerImpl
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
+
+	/** Configuration: the page size for the view. */
+	protected int pageSize = 30;
+
+	/** Dependency: ServerConfigurationService. */
+	protected ServerConfigurationService serverConfigurationService = null;
 
 	/** Submission Service */
 	protected SubmissionService submissionService = null;
@@ -113,7 +120,7 @@ public class GradeAssessmentView extends ControllerImpl
 		if (params.length > 5) pagingParameter = params[5];
 		if (pagingParameter == null)
 		{
-			pagingParameter = "1-30";
+			pagingParameter = "1-" + Integer.toString(this.pageSize);
 		}
 
 		// official or all
@@ -123,7 +130,7 @@ public class GradeAssessmentView extends ControllerImpl
 		{
 			allUid = params[6];
 		}
-		
+
 		// for a survey, ignore official
 		if (assessment.getType() == AssessmentType.survey)
 		{
@@ -155,6 +162,8 @@ public class GradeAssessmentView extends ControllerImpl
 	public void init()
 	{
 		super.init();
+		String pageSize = StringUtil.trimToNull(this.serverConfigurationService.getString("pageSize@org.muse.mneme.tool.GradeAssessmentView"));
+		if (pageSize != null) setPageSize(pageSize);
 		M_log.info("init()");
 	}
 
@@ -297,6 +306,29 @@ public class GradeAssessmentView extends ControllerImpl
 	public void setAssessmentService(AssessmentService assessmentService)
 	{
 		this.assessmentService = assessmentService;
+	}
+
+	/**
+	 * Set the the page size for the view.
+	 * 
+	 * @param time
+	 *        The the page size for the view.
+	 */
+	public void setPageSize(String size)
+	{
+		this.pageSize = Integer.parseInt(size);
+		if (this.pageSize < 1) this.pageSize = 30;
+	}
+
+	/**
+	 * Set the ServerConfigurationService.
+	 * 
+	 * @param service
+	 *        the ServerConfigurationService.
+	 */
+	public void setServerConfigurationService(ServerConfigurationService service)
+	{
+		this.serverConfigurationService = service;
 	}
 
 	/**

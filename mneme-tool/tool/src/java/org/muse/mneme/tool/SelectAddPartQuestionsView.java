@@ -45,7 +45,9 @@ import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.QuestionService;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -62,11 +64,17 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	/** Dependency: mneme service. */
 	protected MnemeService mnemeService = null;
 
+	/** Configuration: the page size for the view. */
+	protected int pageSize = 30;
+
 	/** Dependency: PoolService. */
 	protected PoolService poolService = null;
 
 	/** Dependency: Question service. */
 	protected QuestionService questionService = null;
+
+	/** Dependency: ServerConfigurationService. */
+	protected ServerConfigurationService serverConfigurationService = null;
 
 	/** Dependency: ToolManager */
 	protected ToolManager toolManager = null;
@@ -166,7 +174,7 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 			maxQuestions = this.questionService.countQuestions(pool, null, (typeFilter.equals("0") ? null : typeFilter), surveyFilterValue,
 					Boolean.TRUE);
 		}
-		String pagingParameter = "1-30";
+		String pagingParameter = "1-" + Integer.toString(this.pageSize);
 		if (params.length > 6) pagingParameter = params[6];
 		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxQuestions);
@@ -219,6 +227,8 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	public void init()
 	{
 		super.init();
+		String pageSize = StringUtil.trimToNull(this.serverConfigurationService.getString("pageSize@org.muse.mneme.tool.SelectAddPartQuestionsView"));
+		if (pageSize != null) setPageSize(pageSize);
 		M_log.info("init()");
 	}
 
@@ -306,6 +316,18 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	}
 
 	/**
+	 * Set the the page size for the view.
+	 * 
+	 * @param time
+	 *        The the page size for the view.
+	 */
+	public void setPageSize(String size)
+	{
+		this.pageSize = Integer.parseInt(size);
+		if (this.pageSize < 1) this.pageSize = 30;
+	}
+
+	/**
 	 * Set the PoolService.
 	 * 
 	 * @param service
@@ -325,6 +347,17 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	public void setQuestionService(QuestionService service)
 	{
 		this.questionService = service;
+	}
+
+	/**
+	 * Set the ServerConfigurationService.
+	 * 
+	 * @param service
+	 *        the ServerConfigurationService.
+	 */
+	public void setServerConfigurationService(ServerConfigurationService service)
+	{
+		this.serverConfigurationService = service;
 	}
 
 	/**

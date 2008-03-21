@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
@@ -50,11 +51,17 @@ public class PoolEditView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(PoolEditView.class);
 
+	/** Configuration: the page size for the view. */
+	protected int pageSize = 30;
+
 	/** Pool Service */
 	protected PoolService poolService = null;
 
 	/** Question Service */
 	protected QuestionService questionService = null;
+
+	/** Dependency: ServerConfigurationService. */
+	protected ServerConfigurationService serverConfigurationService = null;
 
 	/** Dependency: ToolManager */
 	protected ToolManager toolManager = null;
@@ -127,7 +134,7 @@ public class PoolEditView extends ControllerImpl
 		}
 
 		// paging
-		String pagingParameter = "1-30";
+		String pagingParameter = "1-" + Integer.toString(this.pageSize);
 		if (params.length > 5) pagingParameter = params[5];
 		Integer maxQuestions = this.questionService.countQuestions(pool, null, null, null, null);
 		Paging paging = uiService.newPaging();
@@ -148,6 +155,8 @@ public class PoolEditView extends ControllerImpl
 	public void init()
 	{
 		super.init();
+		String pageSize = StringUtil.trimToNull(this.serverConfigurationService.getString("pageSize@org.muse.mneme.tool.PoolEditView"));
+		if (pageSize != null) setPageSize(pageSize);
 		M_log.info("init()");
 	}
 
@@ -248,6 +257,18 @@ public class PoolEditView extends ControllerImpl
 	}
 
 	/**
+	 * Set the the page size for the view.
+	 * 
+	 * @param time
+	 *        The the page size for the view.
+	 */
+	public void setPageSize(String size)
+	{
+		this.pageSize = Integer.parseInt(size);
+		if (this.pageSize < 1) this.pageSize = 30;
+	}
+
+	/**
 	 * @param poolService
 	 *        the poolService to set
 	 */
@@ -263,6 +284,17 @@ public class PoolEditView extends ControllerImpl
 	public void setQuestionService(QuestionService questionService)
 	{
 		this.questionService = questionService;
+	}
+
+	/**
+	 * Set the ServerConfigurationService.
+	 * 
+	 * @param service
+	 *        the ServerConfigurationService.
+	 */
+	public void setServerConfigurationService(ServerConfigurationService service)
+	{
+		this.serverConfigurationService = service;
 	}
 
 	/**
