@@ -149,7 +149,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(answerId);
 
-		List<SubmissionImpl> submissions = readSubmissions(where.toString(), null, fields);
+		List<SubmissionImpl> submissions = readSubmissions(where.toString(), null, fields, true);
 		if (submissions.size() > 0)
 		{
 			// find the answer
@@ -170,7 +170,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(assessment.getId());
 
-		List<SubmissionImpl> rv = readSubmissions(where, order, fields);
+		List<SubmissionImpl> rv = readSubmissions(where, order, fields, true);
 		return rv;
 	}
 
@@ -309,7 +309,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(assessment.getId());
 
-		List<SubmissionImpl> rv = readSubmissions(where, order, fields);
+		List<SubmissionImpl> rv = readSubmissions(where, order, fields, true);
 		return rv;
 	}
 
@@ -322,7 +322,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		String where = "WHERE S.COMPLETE='0'";
 		String order = "ORDER BY S.SUBMITTED_DATE ASC";
 
-		List<SubmissionImpl> rv = readSubmissions(where, order, null);
+		List<SubmissionImpl> rv = readSubmissions(where, order, null, false);
 		return rv;
 	}
 
@@ -492,7 +492,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		fields[0] = Long.valueOf(assessment.getId());
 		fields[1] = userId;
 
-		List<SubmissionImpl> rv = readSubmissions(where, order, fields);
+		List<SubmissionImpl> rv = readSubmissions(where, order, fields, true);
 		return rv;
 	}
 
@@ -514,7 +514,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		fields[0] = context;
 		fields[1] = userId;
 
-		List<SubmissionImpl> rv = readSubmissions(where.toString(), order, fields);
+		List<SubmissionImpl> rv = readSubmissions(where.toString(), order, fields, true);
 		return rv;
 	}
 
@@ -609,7 +609,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		// reject phantoms
 		else if (submission.getId().startsWith(SubmissionService.PHANTOM_PREFIX))
 		{
-			// lets not save phanton submissions
+			// lets not save phantom submissions
 			throw new IllegalArgumentException();
 		}
 
@@ -841,7 +841,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		String where = "WHERE S.ID = ?";
 		Object[] fields = new Object[1];
 		fields[0] = id;
-		List<SubmissionImpl> rv = readSubmissions(where, null, fields);
+		List<SubmissionImpl> rv = readSubmissions(where, null, fields, true);
 		if (rv.size() > 0)
 		{
 			return rv.get(0);
@@ -859,9 +859,11 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 	 *        The order clause
 	 * @param fields
 	 *        The bind variables.
+	 * @param complete
+	 *        if true, read the complete submission, else skip the answers.
 	 * @return The submissions.
 	 */
-	protected List<SubmissionImpl> readSubmissions(String where, String order, Object[] fields)
+	protected List<SubmissionImpl> readSubmissions(String where, String order, Object[] fields, final boolean complete)
 	{
 		final List<SubmissionImpl> rv = new ArrayList<SubmissionImpl>();
 		final Map<String, SubmissionImpl> submissions = new HashMap<String, SubmissionImpl>();
@@ -906,6 +908,12 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 					rv.add(submission);
 					submissions.put(submission.getId(), submission);
 
+					// if we are not going to read in the answers, hobble the submission so nobody trys to use them
+					if (!complete)
+					{
+						submission.answers = null;
+					}
+
 					return null;
 				}
 				catch (SQLException e)
@@ -916,53 +924,56 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 			}
 		});
 
-		// read all the answers for these submissions
-		sql = new StringBuilder();
-		sql.append("SELECT A.GUEST, A.EVAL_ATRIB_DATE, A.EVAL_ATRIB_USER, A.EVAL_ATTACHMENTS, A.EVAL_COMMENT, A.EVAL_EVALUATED,");
-		sql.append(" A.EVAL_SCORE, A.ID, A.PART_ID, A.QUESTION_ID, A.QUESTION_TYPE, A.REASON, A.REVIEW,");
-		sql.append(" A.SUBMISSION_ID, A.SUBMITTED_DATE");
-		sql.append(" FROM MNEME_ANSWER A");
-		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID ");
-		sql.append(where);
-		sql.append(" ORDER BY A.SUBMISSION_ID ASC");
-
-		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
+		if (complete)
 		{
-			public Object readSqlResultRecord(ResultSet result)
+			// read all the answers for these submissions
+			sql = new StringBuilder();
+			sql.append("SELECT A.GUEST, A.EVAL_ATRIB_DATE, A.EVAL_ATRIB_USER, A.EVAL_ATTACHMENTS, A.EVAL_COMMENT, A.EVAL_EVALUATED,");
+			sql.append(" A.EVAL_SCORE, A.ID, A.PART_ID, A.QUESTION_ID, A.QUESTION_TYPE, A.REASON, A.REVIEW,");
+			sql.append(" A.SUBMISSION_ID, A.SUBMITTED_DATE");
+			sql.append(" FROM MNEME_ANSWER A");
+			sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID ");
+			sql.append(where);
+			sql.append(" ORDER BY A.SUBMISSION_ID ASC");
+
+			this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 			{
-				try
+				public Object readSqlResultRecord(ResultSet result)
 				{
-					String sid = SqlHelper.readId(result, 14);
-					SubmissionImpl s = submissions.get(sid);
-					AnswerImpl a = newAnswer();
+					try
+					{
+						String sid = SqlHelper.readId(result, 14);
+						SubmissionImpl s = submissions.get(sid);
+						AnswerImpl a = newAnswer();
 
-					((AttributionImpl) a.getEvaluation().getAttribution()).initDate(SqlHelper.readDate(result, 2));
-					((AttributionImpl) a.getEvaluation().getAttribution()).initUserId(SqlHelper.readString(result, 3));
-					((EvaluationImpl) a.getEvaluation()).setAttachments(SqlHelper.readReferences(result, 4, attachmentService));
-					((EvaluationImpl) a.getEvaluation()).initComment(SqlHelper.readString(result, 5));
-					((EvaluationImpl) a.getEvaluation()).initEvaluated(SqlHelper.readBoolean(result, 6));
-					((EvaluationImpl) a.getEvaluation()).initScore(SqlHelper.readFloat(result, 7));
-					a.initId(SqlHelper.readId(result, 8));
-					a.initPartId(SqlHelper.readId(result, 9));
-					a.initQuestion(SqlHelper.readId(result, 10), SqlHelper.readString(result, 11));
-					a.getTypeSpecificAnswer().setData(SqlHelper.decodeStringArray(StringUtil.trimToNull(result.getString(1))));
-					a.setReason(SqlHelper.readString(result, 12));
-					a.setMarkedForReview(SqlHelper.readBoolean(result, 13));
-					a.setSubmittedDate(SqlHelper.readDate(result, 15));
+						((AttributionImpl) a.getEvaluation().getAttribution()).initDate(SqlHelper.readDate(result, 2));
+						((AttributionImpl) a.getEvaluation().getAttribution()).initUserId(SqlHelper.readString(result, 3));
+						((EvaluationImpl) a.getEvaluation()).setAttachments(SqlHelper.readReferences(result, 4, attachmentService));
+						((EvaluationImpl) a.getEvaluation()).initComment(SqlHelper.readString(result, 5));
+						((EvaluationImpl) a.getEvaluation()).initEvaluated(SqlHelper.readBoolean(result, 6));
+						((EvaluationImpl) a.getEvaluation()).initScore(SqlHelper.readFloat(result, 7));
+						a.initId(SqlHelper.readId(result, 8));
+						a.initPartId(SqlHelper.readId(result, 9));
+						a.initQuestion(SqlHelper.readId(result, 10), SqlHelper.readString(result, 11));
+						a.getTypeSpecificAnswer().setData(SqlHelper.decodeStringArray(StringUtil.trimToNull(result.getString(1))));
+						a.setReason(SqlHelper.readString(result, 12));
+						a.setMarkedForReview(SqlHelper.readBoolean(result, 13));
+						a.setSubmittedDate(SqlHelper.readDate(result, 15));
 
-					a.clearIsChanged();
-					a.initSubmission(s);
-					s.initAnswer(a);
+						a.clearIsChanged();
+						a.initSubmission(s);
+						s.initAnswer(a);
 
-					return null;
+						return null;
+					}
+					catch (SQLException e)
+					{
+						M_log.warn("readSubmissions(answers): " + e);
+						return null;
+					}
 				}
-				catch (SQLException e)
-				{
-					M_log.warn("readSubmissions(answers): " + e);
-					return null;
-				}
-			}
-		});
+			});
+		}
 
 		return rv;
 	}
