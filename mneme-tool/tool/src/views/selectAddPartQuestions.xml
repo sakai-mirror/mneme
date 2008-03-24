@@ -71,7 +71,7 @@
 															<model ref="part.id" />
 															<model ref="sort_column" />
 															<model ref="sort_direction" />
-															<model type="paging" ref="paging" />
+															<model type="paging" ref="paging" selector="FIRST" />
 															<model ref="typeFilter" />
 															<model ref="surveyFilter" />
 														</message>
@@ -86,7 +86,7 @@
 														<model ref="part.id" />
 														<model ref="sort_column" />
 														<model ref="sort_direction" />
-														<model type="paging" ref="paging" />
+														<model type="paging" ref="paging" selector="FIRST" />
 														<model ref="typeFilter" />
 														<model ref="pool.id" />
 														<model ref="surveyFilter" />
@@ -121,7 +121,7 @@
 															<model ref="part.id" />
 															<model ref="sort_column" />
 															<model ref="sort_direction" />
-															<model type="paging" ref="paging" />
+															<model type="paging" ref="paging" selector="FIRST" />
 															<model ref="poolFilter" />
 															<model ref="surveyFilter" />
 														</message>
@@ -136,7 +136,7 @@
 														<model ref="part.id" />
 														<model ref="sort_column" />
 														<model ref="sort_direction" />
-														<model type="paging" ref="paging" />
+														<model type="paging" ref="paging" selector="FIRST" />
 														<model ref="type.type" />
 														<model ref="poolFilter" />
 														<model ref="surveyFilter" />
@@ -169,7 +169,7 @@
 															<model ref="part.id" />
 															<model ref="sort_column" />
 															<model ref="sort_direction" />
-															<model type="paging" ref="paging" />
+															<model type="paging" ref="paging" selector="FIRST" />
 															<model ref="typeFilter" />
 															<model ref="poolFilter" />
 														</message>
@@ -186,7 +186,7 @@
 															<model ref="part.id" />
 															<model ref="sort_column" />
 															<model ref="sort_direction" />
-															<model type="paging" ref="paging" />
+															<model type="paging" ref="paging" selector="FIRST" />
 															<model ref="typeFilter" />
 															<model ref="poolFilter" />
 														</message>
@@ -203,7 +203,7 @@
 															<model ref="part.id" />
 															<model ref="sort_column" />
 															<model ref="sort_direction" />
-															<model type="paging" ref="paging" />
+															<model type="paging" ref="paging" selector="FIRST" />
 															<model ref="typeFilter" />
 															<model ref="poolFilter" />
 														</message>
