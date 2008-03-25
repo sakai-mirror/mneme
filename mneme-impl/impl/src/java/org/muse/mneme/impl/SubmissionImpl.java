@@ -367,7 +367,7 @@ public class SubmissionImpl implements Submission
 		long endTime = 0;
 
 		// see if the assessment has a hard submission cutoff date (ignore for test drive)
-		
+
 		Date closedDate = null;
 		if (!getIsTestDrive())
 		{
@@ -1105,9 +1105,12 @@ public class SubmissionImpl implements Submission
 	{
 		this.releasedChanged.clearChanged();
 		this.evaluation.clearIsChanged();
-		for (Answer a : this.answers)
+		if (this.answers != null)
 		{
-			((AnswerImpl) a).clearIsChanged();
+			for (Answer a : this.answers)
+			{
+				((AnswerImpl) a).clearIsChanged();
+			}
 		}
 	}
 

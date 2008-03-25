@@ -1588,7 +1588,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			{
 				if (M_log.isDebugEnabled()) M_log.debug("run: running");
 
-				// get a list of submission ids that are open, timed, and well expired (considering double our grace period),
+				// get a list of submissions that are open, timed, and well expired (considering double our grace period),
 				// or open and past an accept-until date
 				List<Submission> submissions = getTimedOutSubmissions(2 * MnemeService.GRACE);
 

@@ -119,7 +119,8 @@ public interface SubmissionStorage
 	List<SubmissionImpl> getAssessmentSubmissions(Assessment assessment);
 
 	/**
-	 * Get all the in-progress (open) submissions (all users, all assessments, all contexts).
+	 * Get all the in-progress (open) submissions (all users, all assessments, all contexts).<br />
+	 * Note: the submission answers are not needed nor read in.
 	 * 
 	 * @return The list of all in-progress (open) submissions.
 	 */
