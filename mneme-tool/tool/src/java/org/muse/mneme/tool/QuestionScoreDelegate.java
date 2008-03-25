@@ -46,9 +46,9 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 	 *        The score to format.
 	 * @return The formatted score
 	 */
-	protected static String formatScore(Float score)
+	protected static String formatScore(Context context, Float score)
 	{
-		if (score == null) return "-";
+		if (score == null) return context.getMessages().getString("question-score-ungraded");
 
 		// round to a single place
 		String rv = Float.toString(Math.round(score * 100.0f) / 100.0f);
@@ -148,7 +148,7 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 						score = answer.getTotalScore();
 					}
 
-					rv.append(context.getMessages().getString("score") + ":&nbsp;" + formatScore(score) + "&nbsp;&nbsp;&nbsp;");
+					rv.append(context.getMessages().getString("score") + ":&nbsp;" + formatScore(context, score) + "&nbsp;&nbsp;&nbsp;");
 
 					selector = "of-points";
 				}
@@ -162,7 +162,7 @@ public class QuestionScoreDelegate extends FormatDelegateImpl
 			selector += "-singular";
 		}
 		Object[] args = new Object[1];
-		args[0] = formatScore(score);
+		args[0] = formatScore(context, score);
 		rv.append(context.getMessages().getFormattedMessage(selector, args));
 
 		return rv.toString();

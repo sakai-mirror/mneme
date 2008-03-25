@@ -105,6 +105,7 @@ public class SectionScoreDelegate extends FormatDelegateImpl
 			float score = 0;
 
 			// find the section's answers to AssessmentQuestions that are in this section.
+			boolean partial = false;
 			for (Answer answer : submission.getAnswers())
 			{
 				if (answer.getQuestion().getPart().equals(part))
@@ -114,6 +115,10 @@ public class SectionScoreDelegate extends FormatDelegateImpl
 					{
 						score += answerScore.floatValue();
 					}
+					else
+					{
+						partial = true;
+					}
 				}
 			}
 
@@ -122,6 +127,10 @@ public class SectionScoreDelegate extends FormatDelegateImpl
 			rv.append(context.getMessages().getString("score") + ":&nbsp;" + formatScore(score) + "&nbsp;&nbsp;&nbsp;");
 
 			selector = "of-points";
+			if (partial)
+			{
+				selector += "-partial";
+			}
 		}
 
 		// add the total possible points for the section

@@ -113,6 +113,12 @@ public class SubmissionScoreDelegate extends FormatDelegateImpl
 			rv.append(context.getMessages().getString("grade") + ":&nbsp;" + formatScore(score) + "&nbsp;&nbsp;&nbsp;");
 
 			selector = "of-points";
+
+			boolean partial = submission.getHasUnscoredAnswers();
+			if (partial)
+			{
+				selector += "-partial";
+			}
 		}
 
 		// add the total possible points for the assessment
