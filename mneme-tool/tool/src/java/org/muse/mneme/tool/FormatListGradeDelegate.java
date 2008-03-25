@@ -87,7 +87,16 @@ public class FormatListGradeDelegate extends FormatDelegateImpl
 		{
 			if (submission.getIsReleased())
 			{
-				return formatScore(submission.getTotalScore());
+				if (submission.getHasUnscoredAnswers())
+				{
+					Object[] args = new Object[1];
+					args[0] = formatScore(submission.getTotalScore());
+					return context.getMessages().getFormattedMessage("format-list-grade-partial", args);
+				}
+				else
+				{
+					return formatScore(submission.getTotalScore());
+				}
 			}
 			else
 			{
