@@ -157,6 +157,9 @@
 					<model type="paging" ref="paging" />
 					<model ref="view" />
 				</destination>
+				<sizeOptions>
+					<model ref="pageSizes" />
+				</sizeOptions>
 			</pager>
 			<columns>
 				<modelColumn>
@@ -464,6 +467,9 @@
 						<model type="paging" ref="paging" />
 						<model ref="view" />
 					</destination>
+					<sizeOptions>
+						<model ref="pageSizes" />
+					</sizeOptions>
 				</pager>
 				<divider />
 				<navigation title="done" style="BUTTON" accessKey="done-access" description="done-description" submit="TRUE">

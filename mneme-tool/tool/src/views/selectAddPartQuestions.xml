@@ -228,6 +228,9 @@
 							<model ref="poolFilter" />
 							<model ref="surveyFilter" />
 						</destination>
+						<sizeOptions>
+							<model ref="pageSizes" />
+						</sizeOptions>
 					</pager>
 					<iterator name="question" model="questions" />
 					<columns>
