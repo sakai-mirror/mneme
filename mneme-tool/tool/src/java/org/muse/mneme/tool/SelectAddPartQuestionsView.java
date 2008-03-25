@@ -22,6 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -64,8 +65,8 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	/** Dependency: mneme service. */
 	protected MnemeService mnemeService = null;
 
-	/** Configuration: the page size for the view. */
-	protected int pageSize = 30;
+	/** Configuration: the page sizes for the view. */
+	protected List<Integer> pageSizes = new ArrayList<Integer>();
 
 	/** Dependency: PoolService. */
 	protected PoolService poolService = null;
@@ -174,7 +175,7 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 			maxQuestions = this.questionService.countQuestions(pool, null, (typeFilter.equals("0") ? null : typeFilter), surveyFilterValue,
 					Boolean.TRUE);
 		}
-		String pagingParameter = "1-" + Integer.toString(this.pageSize);
+		String pagingParameter = "1-" + Integer.toString(this.pageSizes.get(0));
 		if (params.length > 6) pagingParameter = params[6];
 		Paging paging = uiService.newPaging();
 		paging.setMaxItems(maxQuestions);
@@ -187,12 +188,13 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		if (pool == null)
 		{
 			questions = questionService.findQuestions(this.toolManager.getCurrentPlacement().getContext(), sort, null, (typeFilter.equals("0") ? null
-					: typeFilter), paging.getCurrent(), paging.getSize(), surveyFilterValue, Boolean.TRUE);
+					: typeFilter), paging.getSize() == 0 ? null : paging.getCurrent(), paging.getSize() == 0 ? null : paging.getSize(),
+					surveyFilterValue, Boolean.TRUE);
 		}
 		else
 		{
-			questions = questionService.findQuestions(pool, sort, null, (typeFilter.equals("0") ? null : typeFilter), paging.getCurrent(), paging
-					.getSize(), surveyFilterValue, Boolean.TRUE);
+			questions = questionService.findQuestions(pool, sort, null, (typeFilter.equals("0") ? null : typeFilter), paging.getSize() == 0 ? null
+					: paging.getCurrent(), paging.getSize() == 0 ? null : paging.getSize(), surveyFilterValue, Boolean.TRUE);
 		}
 		context.put("questions", questions);
 
@@ -217,6 +219,12 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		value.setValue(newDestination);
 		context.put("selectedQuestionSurvey", value);
 
+		// pages sizes
+		if (this.pageSizes.size() > 1)
+		{
+			context.put("pageSizes", this.pageSizes);
+		}
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -229,6 +237,12 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		super.init();
 		String pageSize = StringUtil.trimToNull(this.serverConfigurationService.getString("pageSize@org.muse.mneme.tool.SelectAddPartQuestionsView"));
 		if (pageSize != null) setPageSize(pageSize);
+
+		if (this.pageSizes.isEmpty())
+		{
+			this.pageSizes.add(Integer.valueOf(30));
+		}
+
 		M_log.info("init()");
 	}
 
@@ -318,13 +332,17 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 	/**
 	 * Set the the page size for the view.
 	 * 
-	 * @param time
-	 *        The the page size for the view.
+	 * @param sizes
+	 *        The the page sizes for the view - integers, comma separated.
 	 */
-	public void setPageSize(String size)
+	public void setPageSize(String sizes)
 	{
-		this.pageSize = Integer.parseInt(size);
-		if (this.pageSize < 1) this.pageSize = 30;
+		this.pageSizes.clear();
+		String[] parts = StringUtil.split(sizes, ",");
+		for (String part : parts)
+		{
+			this.pageSizes.add(Integer.valueOf(part));
+		}
 	}
 
 	/**

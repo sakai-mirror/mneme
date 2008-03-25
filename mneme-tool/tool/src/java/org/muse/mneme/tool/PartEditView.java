@@ -32,7 +32,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Component;
 import org.muse.ambrosia.api.Context;
-import org.muse.ambrosia.api.Paging;
 import org.muse.ambrosia.api.PopulatingSet;
 import org.muse.ambrosia.api.Values;
 import org.muse.ambrosia.api.PopulatingSet.Factory;

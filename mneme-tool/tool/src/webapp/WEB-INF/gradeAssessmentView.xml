@@ -39,7 +39,7 @@
 		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager" /></property>
 		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService" /></property>
 
-		<property name="pageSize"><value>30</value></property>
+		<property name="pageSize"><value>30,100,0</value></property>
 		<property name="toolId"><value>sakai.mneme</value></property>
 		<property name="path"><value>grade_assessment</value></property>
 		<property name="bundle"><value>gradeAssessment</value></property>

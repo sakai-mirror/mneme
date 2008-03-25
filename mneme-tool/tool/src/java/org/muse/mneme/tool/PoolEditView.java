@@ -22,6 +22,7 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,8 +52,8 @@ public class PoolEditView extends ControllerImpl
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(PoolEditView.class);
 
-	/** Configuration: the page size for the view. */
-	protected int pageSize = 30;
+	/** Configuration: the page sizes for the view. */
+	protected List<Integer> pageSizes = new ArrayList<Integer>();
 
 	/** Pool Service */
 	protected PoolService poolService = null;
@@ -134,7 +135,7 @@ public class PoolEditView extends ControllerImpl
 		}
 
 		// paging
-		String pagingParameter = "1-" + Integer.toString(this.pageSize);
+		String pagingParameter = "1-" + Integer.toString(this.pageSizes.get(0));
 		if (params.length > 5) pagingParameter = params[5];
 		Integer maxQuestions = this.questionService.countQuestions(pool, null, null, null, null);
 		Paging paging = uiService.newPaging();
@@ -143,8 +144,15 @@ public class PoolEditView extends ControllerImpl
 		context.put("paging", paging);
 
 		// get questions
-		List<Question> questions = questionService.findQuestions(pool, sort, null, null, paging.getCurrent(), paging.getSize(), null, null);
+		List<Question> questions = questionService.findQuestions(pool, sort, null, null, paging.getSize() == 0 ? null : paging.getCurrent(), paging
+				.getSize() == 0 ? null : paging.getSize(), null, null);
 		context.put("questions", questions);
+
+		// pages sizes
+		if (this.pageSizes.size() > 1)
+		{
+			context.put("pageSizes", this.pageSizes);
+		}
 
 		uiService.render(ui, context);
 	}
@@ -157,6 +165,12 @@ public class PoolEditView extends ControllerImpl
 		super.init();
 		String pageSize = StringUtil.trimToNull(this.serverConfigurationService.getString("pageSize@org.muse.mneme.tool.PoolEditView"));
 		if (pageSize != null) setPageSize(pageSize);
+
+		if (this.pageSizes.isEmpty())
+		{
+			this.pageSizes.add(Integer.valueOf(30));
+		}
+
 		M_log.info("init()");
 	}
 
@@ -259,13 +273,17 @@ public class PoolEditView extends ControllerImpl
 	/**
 	 * Set the the page size for the view.
 	 * 
-	 * @param time
-	 *        The the page size for the view.
+	 * @param sizes
+	 *        The the page sizes for the view - integers, comma separated.
 	 */
-	public void setPageSize(String size)
+	public void setPageSize(String sizes)
 	{
-		this.pageSize = Integer.parseInt(size);
-		if (this.pageSize < 1) this.pageSize = 30;
+		this.pageSizes.clear();
+		String[] parts = StringUtil.split(sizes, ",");
+		for (String part : parts)
+		{
+			this.pageSizes.add(Integer.valueOf(part));
+		}
 	}
 
 	/**
