@@ -173,10 +173,22 @@
 								<durationEdit>
 									<model ref="assessment.timeLimit" type="duration" />
 								</durationEdit>
+								<toggle target="instructions" title="instructions" style="LINK" />
 							</container>
 						</selectionChoice>
 					</selectionChoices>
 				</selection>
+
+				<!-- timed instructions overlay -->
+				<overlay id="instructions">
+					<container>
+						<text selector="timed-instructions" />
+						<gap />
+						<toggle target="instructions" title="close" style="LINK">
+							<icon icon="/icons/close.png" style="LEFT" />
+						</toggle>
+					</container>
+				</overlay>
 
 				<section treatment="indented">
 					<title>
