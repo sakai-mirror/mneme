@@ -543,9 +543,12 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		{
 			this.storage.saveAnswers(work);
 
-			// TODO: events? single event?
-			// eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()),
-			// true));
+			// events - for each answer, grade for the answer's submission
+			for (Answer answer : work)
+			{
+				eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(answer.getSubmission()
+						.getId()), true));
+			}
 		}
 
 		// push each submission modified to the gb
@@ -653,8 +656,10 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				this.gradesService.reportSubmissionGrade(temp);
 			}
 
-			// TODO: which event? event track it
-			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_ENTER, getSubmissionReference(temp.getId()), true));
+			// event track it as auto-complete and graded
+			eventTrackingService.post(eventTrackingService
+					.newEvent(MnemeService.SUBMISSION_AUTO_COMPLETE, getSubmissionReference(temp.getId()), true));
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(temp.getId()), true));
 
 			return;
 		}
@@ -780,9 +785,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 				// save
 				this.storage.saveSubmissionEvaluation(submission);
-			}
 
-			// TODO: event? s?
+				// event
+				eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()),
+						true));
+			}
 		}
 
 		// release the grades to the grading authority
@@ -1517,13 +1524,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// save release info
 			this.storage.saveSubmissionReleased(submission);
 
+			// event
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
+
 			// push the grade
 			if (!submission.getIsTestDrive())
 			{
 				this.gradesService.reportSubmissionGrade(submission);
 			}
-
-			// TODO: event? s?
 		}
 	}
 

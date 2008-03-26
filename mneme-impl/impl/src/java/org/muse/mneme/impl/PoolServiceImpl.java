@@ -139,7 +139,7 @@ public class PoolServiceImpl implements PoolService
 		Pool rv = doCopyPool(context, pool, false, null, true, null);
 
 		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(rv.getId()), true));
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_NEW, getPoolReference(rv.getId()), true));
 
 		return rv;
 	}
@@ -304,9 +304,6 @@ public class PoolServiceImpl implements PoolService
 		securityService.secure(sessionManager.getCurrentSessionUserId(), MnemeService.MANAGE_PERMISSION, pool.getContext());
 
 		doRemove((PoolImpl) pool);
-
-		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
 	}
 
 	/**
@@ -586,6 +583,9 @@ public class PoolServiceImpl implements PoolService
 
 		// remove the pool
 		storage.removePool(pool);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_DELETE, getPoolReference(pool.getId()), true));
 	}
 
 	/**
@@ -599,11 +599,18 @@ public class PoolServiceImpl implements PoolService
 		String userId = sessionManager.getCurrentSessionUserId();
 		Date now = new Date();
 
+		String event = MnemeService.POOL_EDIT;
+
 		// if the pool is new (i.e. no id), set the createdBy information, if not already set
-		if ((pool.getId() == null) && (pool.getCreatedBy().getUserId() == null))
+		if (pool.getId() == null)
 		{
-			pool.getCreatedBy().setDate(now);
-			pool.getCreatedBy().setUserId(userId);
+			if (pool.getCreatedBy().getUserId() == null)
+			{
+				pool.getCreatedBy().setDate(now);
+				pool.getCreatedBy().setUserId(userId);
+			}
+
+			event = MnemeService.POOL_NEW;
 		}
 
 		// update last modified information
@@ -620,7 +627,7 @@ public class PoolServiceImpl implements PoolService
 		storage.savePool(pool);
 
 		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_EDIT, getPoolReference(pool.getId()), true));
+		eventTrackingService.post(eventTrackingService.newEvent(event, getPoolReference(pool.getId()), true));
 	}
 
 	/**

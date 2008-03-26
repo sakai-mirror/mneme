@@ -185,6 +185,8 @@ public class AssessmentServiceImpl implements AssessmentService
 		if (M_log.isDebugEnabled()) M_log.debug("clearStaleMintAssessments");
 
 		this.storage.clearStaleMintAssessments(stale);
+
+		// TODO: generate a delete event for any deleted
 	}
 
 	/**
@@ -406,7 +408,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		this.storage.removeAssessment((AssessmentImpl) assessment);
 
 		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_EDIT, getAssessmentReference(assessment.getId()), true));
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_DELETE, getAssessmentReference(assessment.getId()), true));
 	}
 
 	/**
@@ -438,6 +440,10 @@ public class AssessmentServiceImpl implements AssessmentService
 				this.threadLocalManager.set(cacheKey(assessment.getId()), null);
 
 				this.storage.removeAssessment((AssessmentImpl) assessment);
+
+				// event
+				eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_DELETE, getAssessmentReference(assessment.getId()),
+						true));
 			}
 
 			return;
@@ -514,6 +520,21 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// save the changes
 		save((AssessmentImpl) assessment);
+
+		// event for change in published
+		if (publishedChanged)
+		{
+			if (assessment.getPublished())
+			{
+				eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_PUBLISH, getAssessmentReference(assessment.getId()),
+						true));
+			}
+			else
+			{
+				eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_UNPUBLISH,
+						getAssessmentReference(assessment.getId()), true));
+			}
+		}
 
 		// if the name or due date has changed, or we are retracting submissions, or we are now unpublished,
 		// or we are now invalid, or we have just been archived, or we are now not gradebook integrated,
@@ -868,7 +889,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		this.storage.saveAssessment(rv);
 
 		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_EDIT, getAssessmentReference(rv.getId()), true));
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_NEW, getAssessmentReference(rv.getId()), true));
 
 		return rv;
 	}
@@ -953,11 +974,18 @@ public class AssessmentServiceImpl implements AssessmentService
 		Date now = new Date();
 		String userId = sessionManager.getCurrentSessionUserId();
 
+		String event = MnemeService.ASSESSMENT_EDIT;
+
 		// if the assessment is new (i.e. no id), set the createdBy information, if not already set
-		if ((assessment.getId() == null) && (assessment.getCreatedBy().getUserId() == null))
+		if (assessment.getId() == null)
 		{
-			assessment.getCreatedBy().setDate(now);
-			assessment.getCreatedBy().setUserId(userId);
+			if (assessment.getCreatedBy().getUserId() == null)
+			{
+				assessment.getCreatedBy().setDate(now);
+				assessment.getCreatedBy().setUserId(userId);
+			}
+
+			event = MnemeService.ASSESSMENT_NEW;
 		}
 
 		// update last modified information
@@ -971,6 +999,6 @@ public class AssessmentServiceImpl implements AssessmentService
 		this.storage.saveAssessment(assessment);
 
 		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_EDIT, getAssessmentReference(assessment.getId()), true));
+		eventTrackingService.post(eventTrackingService.newEvent(event, getAssessmentReference(assessment.getId()), true));
 	}
 }
