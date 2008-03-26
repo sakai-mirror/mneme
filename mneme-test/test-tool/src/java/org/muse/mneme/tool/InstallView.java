@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,6 +36,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.sakaiproject.authz.api.Role;
 import org.sakaiproject.authz.api.SecurityService;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.site.api.Site;
@@ -42,6 +45,7 @@ import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 
 /**
  * The /install view for the mneme admin tool.
@@ -57,121 +61,17 @@ public class InstallView extends ControllerImpl
 	/** The tool manager. */
 	protected static ToolManager toolManager = null;
 
-	/**
-	 * Add Mneme to the named context.
-	 * 
-	 * @param context
-	 *        The context id.
-	 */
-	protected static String installMneme(String context)
-	{
-		if (siteService.isSpecialSite(context))
-		{
-			return "Site " + context + " is special - skipping.";
-		}
+	/** Configuration: the list of standard access class role names. */
+	protected List<String> accessRoles = new ArrayList<String>();
 
-		// get the Test Center tool
-		Tool tcTool = toolManager.getTool("sakai.mneme");
-
-		try
-		{
-			Site site = siteService.getSite(context);
-
-			// find the site page with Mneme already
-			boolean mnemeFound = false;
-			for (Iterator i = site.getPages().iterator(); i.hasNext();)
-			{
-				SitePage page = (SitePage) i.next();
-				String[] mnemeToolIds = {"sakai.mneme"};
-				Collection mnemeTools = page.getTools(mnemeToolIds);
-				if (!mnemeTools.isEmpty())
-				{
-					mnemeFound = true;
-					break;
-				}
-			}
-
-			if (mnemeFound)
-			{
-				return "Test Center already installed in site " + site.getTitle() + " (" + context + ")";
-			}
-
-			// add a new page
-			SitePage newPage = site.addPage();
-			newPage.setTitle(tcTool.getTitle());
-			// TODO: newPage.setPosition(?);
-
-			// add the tool
-			ToolConfiguration config = newPage.addTool();
-			config.setTitle(tcTool.getTitle());
-			config.setTool("sakai.mneme", tcTool);
-
-			// add permissions to realm
-			for (Iterator i = site.getRoles().iterator(); i.hasNext();)
-			{
-				Role role = (Role) i.next();
-				if (manageRole(role.getId()))
-				{
-					role.allowFunction("mneme.manage");
-					role.allowFunction("mneme.grade");
-				}
-				else if (submitRole(role.getId()))
-				{
-					role.allowFunction("mneme.submit");
-				}
-			}
-
-			// work around a "feature" of the Site impl - role changes do not trigger an azg save
-			site.setMaintainRole(site.getMaintainRole());
-
-			// save the site
-			siteService.save(site);
-
-			return "Test Center installed in site " + site.getTitle() + " (" + context + ")";
-		}
-		catch (IdUnusedException e)
-		{
-			return e.toString();
-		}
-		catch (PermissionException e)
-		{
-			return e.toString();
-		}
-	}
-
-	/**
-	 * Is the roleId a mneme manage role?
-	 * 
-	 * @param roleId
-	 *        The role id.
-	 * @return true if this is a manage role, false if not.
-	 */
-	protected static boolean manageRole(String roleId)
-	{
-		if (roleId.equalsIgnoreCase("maintain")) return true;
-		if (roleId.equalsIgnoreCase("instructor")) return true;
-		if (roleId.equalsIgnoreCase("teaching assistant")) return true;
-
-		return false;
-	}
-
-	/**
-	 * Is the roleId a mneme submit role?
-	 * 
-	 * @param roleId
-	 *        The role id.
-	 * @return true if this is a submit role, false if not.
-	 */
-	protected static boolean submitRole(String roleId)
-	{
-		if (roleId.equalsIgnoreCase("access")) return true;
-		if (roleId.equalsIgnoreCase("student")) return true;
-
-		return false;
-	}
+	/** Configuration: the list of standard maintain class role names. */
+	protected List<String> maintainRoles = new ArrayList<String>();
 
 	/** The security service. */
 	protected SecurityService securityService = null;
+
+	/** Dependency: ServerConfigurationService. */
+	protected ServerConfigurationService serverConfigurationService = null;
 
 	/**
 	 * Shutdown.
@@ -216,6 +116,22 @@ public class InstallView extends ControllerImpl
 	{
 		super.init();
 
+		// configure the access roles
+		String roles = StringUtil.trimToNull(this.serverConfigurationService.getString("accessRoles@org.muse.mneme.tool.InstallView"));
+		if (roles != null) setAccessRoles(roles);
+		if (this.accessRoles.isEmpty())
+		{
+			setAccessRoles("access,student");
+		}
+
+		// configure the maintain roles
+		roles = StringUtil.trimToNull(this.serverConfigurationService.getString("maintainRoless@org.muse.mneme.tool.InstallView"));
+		if (roles != null) setMaintainRoles(roles);
+		if (this.maintainRoles.isEmpty())
+		{
+			setMaintainRoles("maintain,instructor,teaching assistant");
+		}
+
 		M_log.info("init()");
 	}
 
@@ -228,6 +144,40 @@ public class InstallView extends ControllerImpl
 	}
 
 	/**
+	 * Set the access class role names with a comma separated list.
+	 * 
+	 * @param ids
+	 *        The comma separated list of the standard access class role names.
+	 */
+	public void setAccessRoles(String ids)
+	{
+		this.accessRoles.clear();
+
+		String[] parts = StringUtil.split(ids, ",");
+		for (String id : parts)
+		{
+			this.accessRoles.add(id.toLowerCase());
+		}
+	}
+
+	/**
+	 * Set the maintain class role names with a comma separated list.
+	 * 
+	 * @param ids
+	 *        The comma separated list of the standard maintain class role names.
+	 */
+	public void setMaintainRoles(String ids)
+	{
+		this.maintainRoles.clear();
+
+		String[] parts = StringUtil.split(ids, ",");
+		for (String id : parts)
+		{
+			this.maintainRoles.add(id.toLowerCase());
+		}
+	}
+
+	/**
 	 * Set the security service.
 	 * 
 	 * @param service
@@ -236,6 +186,17 @@ public class InstallView extends ControllerImpl
 	public void setSecurityService(SecurityService service)
 	{
 		this.securityService = service;
+	}
+
+	/**
+	 * Set the ServerConfigurationService.
+	 * 
+	 * @param service
+	 *        the ServerConfigurationService.
+	 */
+	public void setServerConfigurationService(ServerConfigurationService service)
+	{
+		this.serverConfigurationService = service;
 	}
 
 	/**
@@ -258,5 +219,117 @@ public class InstallView extends ControllerImpl
 	public void setToolManager(ToolManager service)
 	{
 		this.toolManager = service;
+	}
+
+	/**
+	 * Is the roleId a access class role?
+	 * 
+	 * @param roleId
+	 *        The role id.
+	 * @return true if this is a access class role, false if not.
+	 */
+	protected boolean accessRole(String roleId)
+	{
+		if (this.accessRoles.contains(roleId.toLowerCase())) return true;
+		return false;
+	}
+
+	/**
+	 * Add Mneme to the named context.
+	 * 
+	 * @param context
+	 *        The context id.
+	 */
+	protected String installMneme(String context)
+	{
+		if (siteService.isSpecialSite(context) || "!admin".equals(context))
+		{
+			return "Site " + context + " is special - skipping.";
+		}
+		if (siteService.isUserSite(context))
+		{
+			return "Site " + context + " is a myWorkspace - skipping.";
+		}
+
+		// get the Test Center tool
+		Tool tcTool = toolManager.getTool("sakai.mneme");
+
+		try
+		{
+			Site site = siteService.getSite(context);
+
+			// find the site page with Mneme already
+			boolean mnemeFound = false;
+			for (Iterator i = site.getPages().iterator(); i.hasNext();)
+			{
+				SitePage page = (SitePage) i.next();
+				String[] mnemeToolIds = {"sakai.mneme"};
+				Collection mnemeTools = page.getTools(mnemeToolIds);
+				if (!mnemeTools.isEmpty())
+				{
+					mnemeFound = true;
+					break;
+				}
+			}
+
+			if (mnemeFound)
+			{
+				return "Test Center already installed in site " + site.getTitle() + " (" + context + ")";
+			}
+
+			// add a new page
+			SitePage newPage = site.addPage();
+			newPage.setTitle(tcTool.getTitle());
+			// TODO: newPage.setPosition(?);
+
+			// add the tool
+			ToolConfiguration config = newPage.addTool();
+			config.setTitle(tcTool.getTitle());
+			config.setTool("sakai.mneme", tcTool);
+
+			// add permissions to realm
+			for (Iterator i = site.getRoles().iterator(); i.hasNext();)
+			{
+				Role role = (Role) i.next();
+				if (this.maintainRole(role.getId()))
+				{
+					role.allowFunction("mneme.manage");
+					role.allowFunction("mneme.grade");
+				}
+				else if (this.accessRole(role.getId()))
+				{
+					role.allowFunction("mneme.submit");
+				}
+			}
+
+			// work around a "feature" of the Site impl - role changes do not trigger an azg save
+			site.setMaintainRole(site.getMaintainRole());
+
+			// save the site
+			siteService.save(site);
+
+			return "Test Center installed in site " + site.getTitle() + " (" + context + ")";
+		}
+		catch (IdUnusedException e)
+		{
+			return e.toString();
+		}
+		catch (PermissionException e)
+		{
+			return e.toString();
+		}
+	}
+
+	/**
+	 * Is the roleId a maintain class role?
+	 * 
+	 * @param roleId
+	 *        The role id.
+	 * @return true if this is a maintain class role, false if not.
+	 */
+	protected boolean maintainRole(String roleId)
+	{
+		if (this.maintainRoles.contains(roleId.toLowerCase())) return true;
+		return false;
 	}
 }

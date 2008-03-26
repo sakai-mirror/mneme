@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,9 @@ public class InstallBulkView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(InstallBulkView.class);
+
+	/** Dependency: the InstallView. */
+	protected InstallView installView = null;
 
 	/** The security service. */
 	protected SecurityService securityService = null;
@@ -107,6 +110,17 @@ public class InstallBulkView extends ControllerImpl
 	}
 
 	/**
+	 * Set the InstallView.
+	 * 
+	 * @param view
+	 *        The InstallView.
+	 */
+	public void setInstallView(InstallView view)
+	{
+		this.installView = view;
+	}
+
+	/**
 	 * Set the security service.
 	 * 
 	 * @param service
@@ -139,16 +153,6 @@ public class InstallBulkView extends ControllerImpl
 		StringBuffer rv = new StringBuffer();
 		rv.append("Installing Test Center:<br />");
 
-		// find all the sites that ?
-		// TODO: ?
-		// StringBuffer statement = new StringBuffer();
-		// statement.append("SELECT S.SITE_ID ");
-		// statement.append("FROM SAKAI_SITE S ");
-		// statement.append("LEFT OUTER JOIN SAKAI_SITE_TOOL A ON S.SITE_ID = A.SITE_ID AND A.REGISTRATION = 'sakai.samigo' ");
-		// statement.append("LEFT OUTER JOIN SAKAI_SITE_TOOL B ON S.SITE_ID = B.SITE_ID AND B.REGISTRATION = 'sakai.mneme' ");
-		// statement.append("WHERE A.REGISTRATION IS NOT NULL AND B.REGISTRATION IS NULL");
-		// List sites = sqlService.dbRead(statement.toString(), null, null);
-
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT S.SITE_ID ");
 		sql.append(" FROM SAKAI_SITE S ");
@@ -163,7 +167,7 @@ public class InstallBulkView extends ControllerImpl
 		for (Iterator i = sites.iterator(); i.hasNext();)
 		{
 			String site = (String) i.next();
-			String res = InstallView.installMneme(site);
+			String res = this.installView.installMneme(site);
 			rv.append(res);
 			rv.append("<br />");
 		}

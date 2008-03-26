@@ -6,7 +6,7 @@
 	* $Id$
 	***********************************************************************************
 	*
-	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 	* 
 	* Licensed under the Apache License, Version 2.0 (the "License");
 	* you may not use this file except in compliance with the License.
@@ -32,6 +32,18 @@
 			<container>
 
 				<section>
+					<title highlighted="TRUE">
+						<message selector="install-templates" />
+					</title>
+					<container>
+						<instructions selector="install-templates-instructions" />
+						<navigation title="install-templates" style="LINK" destination="INSTALL_TEMPLATES" submit="TRUE">
+							<confirm decision="TRUE" cancelSelector="cancel" selector="install-templates-confirm" />
+						</navigation>
+					</container>
+				</section>
+
+				<section>
 					<title selector="install-context" highlighted="TRUE">
 						<message selector="install-context" />
 					</title>
@@ -48,21 +60,6 @@
 
 				<section>
 					<title highlighted="TRUE">
-						<message selector="remove-context" />
-					</title>
-					<container>
-						<instructions selector="remove-context-instructions" />
-						<textEdit title="remove-value" rows="1" cols="40">
-							<model ref="removeValue.value" />
-						</textEdit>
-						<navigation title="remove-context" style="LINK" destination="REMOVE" submit="TRUE">
-							<confirm decision="TRUE" cancelSelector="cancel" selector="remove-context-confirm" />
-						</navigation>
-					</container>
-				</section>
-
-				<section>
-					<title highlighted="TRUE">
 						<message selector="install-bulk" />
 					</title>
 					<container>
@@ -72,36 +69,6 @@
 						</textEdit>
 						<navigation title="install-bulk" style="LINK" destination="INSTALL_BULK" submit="TRUE">
 							<confirm decision="TRUE" cancelSelector="cancel" selector="install-bulk-confirm" />
-						</navigation>
-					</container>
-				</section>
-
-				<section>
-					<title highlighted="TRUE">
-						<message selector="swap-bulk" />
-					</title>
-					<container>
-						<instructions selector="swap-bulk-instructions" />
-						<textEdit title="swap-bulk-value" rows="1" cols="40">
-							<model ref="swapBulkValue.value" />
-						</textEdit>
-						<navigation title="swap-bulk" style="LINK" destination="SWAP_BULK" submit="TRUE">
-							<confirm decision="TRUE" cancelSelector="cancel" selector="swap-bulk-confirm" />
-						</navigation>
-					</container>
-				</section>
-
-				<section>
-					<title highlighted="TRUE">
-						<message selector="remove-bulk" />
-					</title>
-					<container>
-						<instructions selector="remove-bulk-instructions" />
-						<textEdit title="remove-bulk-value" rows="1" cols="40">
-							<model ref="removeBulkValue.value" />
-						</textEdit>
-						<navigation title="remove-bulk" style="LINK" destination="REMOVE_BULK" submit="TRUE">
-							<confirm decision="TRUE" cancelSelector="cancel" selector="remove-bulk-confirm" />
 						</navigation>
 					</container>
 				</section>
