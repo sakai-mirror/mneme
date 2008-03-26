@@ -593,6 +593,9 @@
 						<model ref="assessment.id" />
 					</destination>
 					<icon icon="/icons/test_drive.png" style="LEFT" />
+					<included>
+						<decision model="assessment.isValid" />
+					</included>
 				</navigation>
 			</container>
 			<included>
