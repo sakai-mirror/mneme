@@ -1552,7 +1552,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		// TODO: only for the "official" one ? submissions = officialize(submissions);
 
-		// retract them all, offical or not
+		// retract them all, official or not
 		for (SubmissionImpl submission : submissions)
 		{
 			if (!submission.getIsReleased()) continue;
@@ -1570,13 +1570,14 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			// save the released info
 			this.storage.saveSubmissionReleased(submission);
 
+			// event
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()), true));
+
 			// pull the grade
 			if (!submission.getIsTestDrive())
 			{
 				this.gradesService.retractSubmissionGrade(submission);
 			}
-
-			// TODO: event? s?
 		}
 	}
 

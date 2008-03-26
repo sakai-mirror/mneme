@@ -39,8 +39,9 @@ public interface AssessmentStorage
 	 * 
 	 * @param stale
 	 *        The time to compare to the create date; before this they are stale.
+	 * @return the List of assessment ids deleted.
 	 */
-	void clearStaleMintAssessments(Date stale);
+	List<String> clearStaleMintAssessments(Date stale);
 
 	/**
 	 * Construct a new Assessment object that is a copy of another.

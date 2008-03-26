@@ -86,15 +86,19 @@ public abstract class QuestionStorageSql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void clearStaleMintQuestions(final Date stale)
+	public List<String> clearStaleMintQuestions(final Date stale)
 	{
+		final List<String> rv = new ArrayList<String>();
+
 		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
-				clearStaleMintQuestionsTx(stale);
+				clearStaleMintQuestionsTx(stale, rv);
 			}
 		}, "clearStaleMintQuestions: " + stale.toString());
+
+		return rv;
 	}
 
 	/**
@@ -109,63 +113,50 @@ public abstract class QuestionStorageSql implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void copyPoolQuestions(final String userId, final Pool source, final Pool destination, final boolean asHistory,
+	public List<String> copyPoolQuestions(final String userId, final Pool source, final Pool destination, final boolean asHistory,
 			final Map<String, String> oldToNew, final List<Translation> attachmentTranslations)
 	{
 		// get source's question ids
-		List<String> qids = null;
-		if ((oldToNew != null) || ((attachmentTranslations != null) && (!attachmentTranslations.isEmpty())))
-		{
-			qids = source.getAllQuestionIds(null, null);
-		}
-		final List<String> poolQids = qids;
+		final List<String> poolQids = source.getAllQuestionIds(null, null);
+
+		final List<String> rv = new ArrayList<String>();
 
 		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
-				if ((oldToNew == null) && ((attachmentTranslations == null) || attachmentTranslations.isEmpty()))
+				for (String qid : poolQids)
 				{
+					String newId = null;
 					if (asHistory)
 					{
-						copyPoolQuestionsHistoricalTx(userId, source, destination);
+						newId = copyQuestionHistoricalTx(userId, qid, destination);
+						if (oldToNew != null)
+						{
+							oldToNew.put(qid, newId);
+						}
 					}
 					else
 					{
-						copyPoolQuestionsTx(userId, source, destination);
+						newId = copyQuestionTx(userId, qid, destination);
+						if (oldToNew != null)
+						{
+							oldToNew.put(qid, newId);
+						}
 					}
-				}
-				else
-				{
-					for (String qid : poolQids)
-					{
-						String newId = null;
-						if (asHistory)
-						{
-							newId = copyQuestionHistoricalTx(userId, qid, destination);
-							if (oldToNew != null)
-							{
-								oldToNew.put(qid, newId);
-							}
-						}
-						else
-						{
-							newId = copyQuestionTx(userId, qid, destination);
-							if (oldToNew != null)
-							{
-								oldToNew.put(qid, newId);
-							}
-						}
 
-						// translate attachments
-						if (attachmentTranslations != null)
-						{
-							translateQuestionAttachmentsTx(newId, attachmentTranslations);
-						}
+					rv.add(newId);
+
+					// translate attachments
+					if (attachmentTranslations != null)
+					{
+						translateQuestionAttachmentsTx(newId, attachmentTranslations);
 					}
 				}
 			}
 		}, "copyPoolQuestions: " + source.getId());
+
+		return rv;
 	}
 
 	/**
@@ -734,30 +725,27 @@ public abstract class QuestionStorageSql implements QuestionStorage
 	/**
 	 * Transaction code for clearStaleMintQuestions()
 	 */
-	protected void clearStaleMintQuestionsTx(Date stale)
+	protected void clearStaleMintQuestionsTx(Date stale, List<String> ids)
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("DELETE FROM MNEME_QUESTION");
-		sql.append(" WHERE MINT='1' AND CREATED_BY_DATE < ?");
 
 		Object[] fields = new Object[1];
 		fields[0] = stale.getTime();
+
+		sql.append("SELECT ID FROM MNEME_QUESTION");
+		sql.append(" WHERE MINT='1' AND CREATED_BY_DATE < ?");
+		List<String> rv = this.sqlService.dbRead(sql.toString(), fields, null);
+		ids.addAll(rv);
+
+		sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_QUESTION");
+		sql.append(" WHERE MINT='1' AND CREATED_BY_DATE < ?");
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
 			throw new RuntimeException("clearStaleMintQuestionsTx: db write failed");
 		}
 	}
-
-	/**
-	 * copyPoolQuestions (transaction code)
-	 */
-	protected abstract void copyPoolQuestionsHistoricalTx(String userId, Pool source, Pool destination);
-
-	/**
-	 * copyPoolQuestions (transaction code)
-	 */
-	protected abstract void copyPoolQuestionsTx(String userId, Pool source, Pool destination);
 
 	/**
 	 * Insert a new question as a copy of another question, marked as history (copyPoolQuestions transaction code).

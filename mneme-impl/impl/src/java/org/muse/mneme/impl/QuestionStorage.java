@@ -48,8 +48,9 @@ public interface QuestionStorage
 	 * 
 	 * @param stale
 	 *        The time to compare to the create date; before this they are stale.
+	 * @return A List of the question ids cleared.
 	 */
-	void clearStaleMintQuestions(Date stale);
+	List<String> clearStaleMintQuestions(Date stale);
 
 	/**
 	 * Construct a new question object that is a copy of another.
@@ -76,8 +77,9 @@ public interface QuestionStorage
 	 *        copied.
 	 * @param attachmentTranslations
 	 *        A list of Translations for attachments and embedded media.
+	 * @return A List of the ids of the new questions created.
 	 */
-	void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew,
+	List<String> copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew,
 			List<Translation> attachmentTranslations);
 
 	/**

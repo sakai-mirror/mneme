@@ -184,9 +184,13 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		if (M_log.isDebugEnabled()) M_log.debug("clearStaleMintAssessments");
 
-		this.storage.clearStaleMintAssessments(stale);
+		List<String> ids = this.storage.clearStaleMintAssessments(stale);
 
-		// TODO: generate a delete event for any deleted
+		// events
+		for (String id : ids)
+		{
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.ASSESSMENT_DELETE, getAssessmentReference(id), true));
+		}
 	}
 
 	/**

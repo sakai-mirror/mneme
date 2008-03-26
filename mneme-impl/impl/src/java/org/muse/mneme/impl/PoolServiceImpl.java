@@ -138,9 +138,6 @@ public class PoolServiceImpl implements PoolService
 
 		Pool rv = doCopyPool(context, pool, false, null, true, null);
 
-		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_NEW, getPoolReference(rv.getId()), true));
-
 		return rv;
 	}
 
@@ -551,6 +548,12 @@ public class PoolServiceImpl implements PoolService
 		{
 			rv.makeHistorical(rv);
 			storage.savePool((PoolImpl) rv);
+		}
+
+		// event for non-history pools
+		else
+		{
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.POOL_NEW, getPoolReference(rv.getId()), true));
 		}
 
 		return rv;

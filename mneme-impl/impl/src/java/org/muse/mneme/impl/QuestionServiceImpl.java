@@ -161,9 +161,13 @@ public class QuestionServiceImpl implements QuestionService
 		Date stale = new Date();
 		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
 
-		this.storage.clearStaleMintQuestions(stale);
-		
-		// TODO: generate delete events for those cleared
+		List<String> ids = this.storage.clearStaleMintQuestions(stale);
+
+		// generate events for any deleted
+		for (String id : ids)
+		{
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_DELETE, getQuestionReference(id), true));
+		}
 	}
 
 	/**
@@ -185,9 +189,13 @@ public class QuestionServiceImpl implements QuestionService
 		// the new questions in the destination pool may invalidate test-drive submissions in the context
 		this.submissionService.removeTestDriveSubmissions(destination.getContext());
 
-		this.storage.copyPoolQuestions(userId, source, destination, false, null, null);
+		List<String> ids = this.storage.copyPoolQuestions(userId, source, destination, false, null, null);
 
-		// TODO: event?
+		// generate events for any created
+		for (String id : ids)
+		{
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_NEW, getQuestionReference(id), true));
+		}
 	}
 
 	/**
@@ -861,10 +869,17 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("copyPoolQuestionsHistorical: source: " + source.getId() + " destination: " + destination.getId());
 
-		this.storage.copyPoolQuestions(sessionManager.getCurrentSessionUserId(), source, destination, asHistory, oldToNew, attachmentTranslations);
+		List<String> ids = this.storage.copyPoolQuestions(sessionManager.getCurrentSessionUserId(), source, destination, asHistory, oldToNew,
+				attachmentTranslations);
 
-		// TODO: for non history, generate create event for each question?
-		// eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_NEW, getQuestionReference(question.getId()), true));
+		if (!asHistory)
+		{
+			// generate events for any created
+			for (String id : ids)
+			{
+				eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_NEW, getQuestionReference(id), true));
+			}
+		}
 	}
 
 	/**
