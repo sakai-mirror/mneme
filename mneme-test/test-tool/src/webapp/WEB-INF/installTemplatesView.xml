@@ -7,7 +7,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,19 +26,22 @@
 
 <beans>
 
-	<bean id="org.muse.mneme.tool.RemoveView"
-			class="org.muse.mneme.tool.RemoveView"
+	<bean id="org.muse.mneme.tool.InstallTemplatesView"
+			class="org.muse.mneme.tool.InstallTemplatesView"
 			init-method="init"
 			destroy-method="destroy"
 			singleton="true">
 
 		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
-		<property name="siteService"><ref bean="org.sakaiproject.site.api.SiteService"/></property>
+		<property name="authzGroupService"><ref bean="org.sakaiproject.authz.api.AuthzGroupService"/></property>
 		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
 		<property name="securityService"><ref bean="org.sakaiproject.authz.api.SecurityService"/></property>
+		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService" /></property>
+		<property name="installView"><ref bean="org.muse.mneme.tool.InstallView"/></property>
 
+		<property name="templates"><value>!site.template,!site.template.course</value></property>
  		<property name="toolId"><value>sakai.mneme.admin</value></property>
- 		<property name="path"><value>remove</value></property>
+ 		<property name="path"><value>install_templates</value></property>
  		<property name="bundle"><value>home</value></property>
 		<property name="components"><value>confirm.xml</value></property>
 	</bean>

@@ -103,14 +103,8 @@ public class HomeView extends ControllerImpl
 		// read form
 		Value installValue = this.uiService.newValue();
 		context.put("installValue", installValue);
-		Value removeValue = this.uiService.newValue();
-		context.put("removeValue", removeValue);
 		Value installBulkValue = this.uiService.newValue();
 		context.put("installBulkValue", installBulkValue);
-		Value swapBulkValue = this.uiService.newValue();
-		context.put("swapBulkValue", swapBulkValue);
-		Value removeBulkValue = this.uiService.newValue();
-		context.put("removeBulkValue", removeBulkValue);
 
 		String destination = uiService.decode(req, context);
 
@@ -120,17 +114,6 @@ public class HomeView extends ControllerImpl
 			{
 				// add the specs
 				destination = "/install/" + installValue.getValue();
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-		}
-
-		else if ("REMOVE".equals(destination))
-		{
-			if (removeValue.getValue() != null)
-			{
-				// add the specs
-				destination = "/remove/" + removeValue.getValue();
 				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 				return;
 			}
@@ -147,31 +130,16 @@ public class HomeView extends ControllerImpl
 			}
 		}
 
-		else if ("SWAP_BULK".equals(destination))
-		{
-			if (swapBulkValue.getValue() != null)
-			{
-				// add the specs
-				destination = "/swap_bulk/" + swapBulkValue.getValue();
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-		}
-
-		else if ("REMOVE_BULK".equals(destination))
-		{
-			if (removeBulkValue.getValue() != null)
-			{
-				// add the specs
-				destination = "/remove_bulk/" + removeBulkValue.getValue();
-				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
-				return;
-			}
-		}
-
 		else if ("QUESTION_CLEANUP".equals(destination))
 		{
 			destination = "/question_cleanup";
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+			return;
+		}
+
+		else if ("INSTALL_TEMPLATES".equals(destination))
+		{
+			destination = "/install_templates";
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 			return;
 		}

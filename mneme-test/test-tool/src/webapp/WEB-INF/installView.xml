@@ -7,7 +7,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,10 @@
 		<property name="siteService"><ref bean="org.sakaiproject.site.api.SiteService"/></property>
 		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
 		<property name="securityService"><ref bean="org.sakaiproject.authz.api.SecurityService"/></property>
+		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService" /></property>
 
+		<property name="maintainRoles"><value>maintain,instructor,teaching assistant</value></property>
+		<property name="accessRoles"><value>access,student</value></property>
  		<property name="toolId"><value>sakai.mneme.admin</value></property>
  		<property name="path"><value>install</value></property>
  		<property name="bundle"><value>home</value></property>
