@@ -507,7 +507,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		{
 			where.append(" AND AA.PUBLISHED='1'");
 		}
-		where.append(" WHERE S.CONTEXT=? AND S.USERID=?");
+		where.append(" WHERE S.CONTEXT=? AND TEST_DRIVE IN ('0','1') AND S.USERID=?");
 		String order = "ORDER BY S.SUBMITTED_DATE ASC";
 
 		Object[] fields = new Object[2];
