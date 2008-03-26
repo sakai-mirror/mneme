@@ -99,8 +99,10 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void clearStaleMintAssessments(Date stale)
+	public List<String> clearStaleMintAssessments(Date stale)
 	{
+		List<String> rv = new ArrayList<String>();
+
 		// find them
 		List<String> delete = new ArrayList<String>();
 		for (AssessmentImpl assessment : this.assessments.values())
@@ -115,7 +117,10 @@ public class AssessmentStorageSample implements AssessmentStorage
 		for (String id : delete)
 		{
 			this.assessments.remove(id);
+			rv.add(id);
 		}
+
+		return rv;
 	}
 
 	/**

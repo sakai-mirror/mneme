@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,23 @@ public interface MnemeService
 	/** The type string for this application: should not change over time as it may be stored in various parts of persistent entities. */
 	static final String APPLICATION_ID = "sakai:mneme";
 
+	/** Event tracking event for deleting an assessment. */
+	static final String ASSESSMENT_DELETE = "mneme.assessment.delete";
+
 	/** Event tracking event for changing an assessment. */
-	static final String ASSESSMENT_EDIT = "mneme.manage";
+	static final String ASSESSMENT_EDIT = "mneme.assessment.edit";
+
+	/** Event tracking event for creating an assessment. */
+	static final String ASSESSMENT_NEW = "mneme.assessment.new";
+
+	/** Event tracking event for publishing an assessment. */
+	static final String ASSESSMENT_PUBLISH = "mneme.assessment.publish";
 
 	/** The sub-type for assessment in references (/mneme/assessment/...) */
 	static final String ASSESSMENT_TYPE = "assessment";
+
+	/** Event tracking event for un-publishing an assessment. */
+	static final String ASSESSMENT_UNPUBLISH = "mneme.assessment.unpublish";
 
 	/** The number of ms we allow answers and completions of submissions after hard deadlines. */
 	static final long GRACE = 2 * 60 * 1000;
@@ -46,14 +58,26 @@ public interface MnemeService
 	/** The security function used to check if users can manage tests. */
 	static final String MANAGE_PERMISSION = "mneme.manage";
 
+	/** Event tracking event for deleting a pool. */
+	static final String POOL_DELETE = "mneme.pool.delete";
+
 	/** Event tracking event for changing a pool. */
 	static final String POOL_EDIT = "mneme.pool.edit";
+
+	/** Event tracking event for creating a pool. */
+	static final String POOL_NEW = "mneme.pool.new";
 
 	/** The sub-type for pool in references (/mneme/pool/...) */
 	static final String POOL_TYPE = "pool";
 
+	/** Event tracking event for deleting a question. */
+	static final String QUESTION_DELETE = "mneme.question.delete";
+
 	/** Event tracking event for changing a question. */
-	static final String QUESTION_EDIT = "mneme.manage";
+	static final String QUESTION_EDIT = "mneme.question.edit";
+
+	/** Event tracking event for creating a question. */
+	static final String QUESTION_NEW = "mneme.question.new";
 
 	/** The sub-type for question in references (/mneme/question/...) */
 	static final String QUESTION_TYPE = "question";

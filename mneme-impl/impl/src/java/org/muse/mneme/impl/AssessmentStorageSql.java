@@ -99,16 +99,19 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void clearStaleMintAssessments(final Date stale)
+	public List<String> clearStaleMintAssessments(final Date stale)
 	{
+		final List<String> rv = new ArrayList<String>();
 
 		this.sqlService.transact(new Runnable()
 		{
 			public void run()
 			{
-				clearStaleMintQuestionsTx(stale);
+				clearStaleMintQuestionsTx(stale, rv);
 			}
 		}, "clearStaleMintQuestions: " + stale.toString());
+
+		return rv;
 	}
 
 	/**
@@ -508,50 +511,22 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	/**
 	 * Transaction code for clearStaleMintQuestions()
 	 */
-	protected void clearStaleMintQuestionsTx(Date stale)
+	protected void clearStaleMintQuestionsTx(Date stale, List<String> ids)
 	{
+		// Note: for now, lets assume that a mint assessment can have no parts or access, else its not mint! -ggolden
+
 		Object[] fields = new Object[1];
 		fields[0] = stale.getTime();
 
-		// Note: for now, lets assume that a mint assessment can have no parts or access, else its not mint! -ggolden
-		// // access
-		// StringBuilder sql = new StringBuilder();
-		// sql.append("DELETE FROM MNEME_ASSESSMENT_ACCESS");
-		// sql.append(" USING MNEME_ASSESSMENT_ACCESS, MNEME_ASSESSMENT");
-		// sql.append(" WHERE MNEME_ASSESSMENT_ACCESS.ASSESSMENT_ID=MNEME_ASSESSMENT.ID");
-		// sql.append(" AND MNEME_ASSESSMENT.MINT='1' AND MNEME_ASSESSMENT.CREATED_BY_DATE < ?");
-		//
-		// if (!this.sqlService.dbWrite(sql.toString(), fields))
-		// {
-		// throw new RuntimeException("clearStaleMintQuestionsTx(access): db write failed");
-		// }
-		//
-		// // part detail
-		// sql = new StringBuilder();
-		// sql.append("DELETE FROM MNEME_ASSESSMENT_PART_DETAIL");
-		// sql.append(" USING MNEME_ASSESSMENT_PART_DETAIL, MNEME_ASSESSMENT");
-		// sql.append(" WHERE MNEME_ASSESSMENT_PART_DETAIL.ASSESSMENT_ID=MNEME_ASSESSMENT.ID");
-		// sql.append(" AND MNEME_ASSESSMENT.MINT='1' AND MNEME_ASSESSMENT.CREATED_BY_DATE < ?");
-		//
-		// if (!this.sqlService.dbWrite(sql.toString(), fields))
-		// {
-		// throw new RuntimeException("clearStaleMintQuestionsTx(part detail): db write failed");
-		// }
-		//
-		// // parts
-		// sql = new StringBuilder();
-		// sql.append("DELETE FROM MNEME_ASSESSMENT_PART");
-		// sql.append(" USING MNEME_ASSESSMENT_PART, MNEME_ASSESSMENT");
-		// sql.append(" WHERE MNEME_ASSESSMENT_PART.ASSESSMENT_ID=MNEME_ASSESSMENT.ID");
-		// sql.append(" AND MNEME_ASSESSMENT.MINT='1' AND MNEME_ASSESSMENT.CREATED_BY_DATE < ?");
-		//
-		// if (!this.sqlService.dbWrite(sql.toString(), fields))
-		// {
-		// throw new RuntimeException("clearStaleMintQuestionsTx(access): db write failed");
-		// }
+		StringBuilder sql = new StringBuilder();
+
+		sql.append("SELECT ID FROM MNEME_ASSESSMENT");
+		sql.append(" WHERE MINT='1' AND CREATED_BY_DATE < ?");
+		List<String> rv = this.sqlService.dbRead(sql.toString(), fields, null);
+		ids.addAll(rv);
 
 		// assessments
-		StringBuilder sql = new StringBuilder();
+		sql = new StringBuilder();
 		sql.append("DELETE FROM MNEME_ASSESSMENT");
 		sql.append(" WHERE MINT='1' AND CREATED_BY_DATE < ?");
 

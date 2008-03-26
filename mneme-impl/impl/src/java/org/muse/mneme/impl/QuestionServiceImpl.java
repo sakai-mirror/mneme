@@ -161,7 +161,13 @@ public class QuestionServiceImpl implements QuestionService
 		Date stale = new Date();
 		stale.setTime(stale.getTime() - (1000l * 60l * 60l * 24l));
 
-		this.storage.clearStaleMintQuestions(stale);
+		List<String> ids = this.storage.clearStaleMintQuestions(stale);
+
+		// generate events for any deleted
+		for (String id : ids)
+		{
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_DELETE, getQuestionReference(id), true));
+		}
 	}
 
 	/**
@@ -183,9 +189,13 @@ public class QuestionServiceImpl implements QuestionService
 		// the new questions in the destination pool may invalidate test-drive submissions in the context
 		this.submissionService.removeTestDriveSubmissions(destination.getContext());
 
-		this.storage.copyPoolQuestions(userId, source, destination, false, null, null);
+		List<String> ids = this.storage.copyPoolQuestions(userId, source, destination, false, null, null);
 
-		// TODO: event?
+		// generate events for any created
+		for (String id : ids)
+		{
+			eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_NEW, getQuestionReference(id), true));
+		}
 	}
 
 	/**
@@ -230,7 +240,7 @@ public class QuestionServiceImpl implements QuestionService
 		this.storage.saveQuestion((QuestionImpl) rv);
 
 		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(rv.getId()), true));
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_NEW, getQuestionReference(rv.getId()), true));
 
 		return rv;
 	}
@@ -546,6 +556,9 @@ public class QuestionServiceImpl implements QuestionService
 
 		// do the move
 		this.storage.moveQuestion(question, pool);
+
+		// event
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
 	}
 
 	/**
@@ -647,6 +660,9 @@ public class QuestionServiceImpl implements QuestionService
 
 				// Note: mint questions cannot have already been dependened on, so we can just forget about it.
 				this.storage.removeQuestion((QuestionImpl) question);
+
+				// event
+				eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_DELETE, getQuestionReference(question.getId()), true));
 			}
 
 			return;
@@ -853,7 +869,17 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		if (M_log.isDebugEnabled()) M_log.debug("copyPoolQuestionsHistorical: source: " + source.getId() + " destination: " + destination.getId());
 
-		this.storage.copyPoolQuestions(sessionManager.getCurrentSessionUserId(), source, destination, asHistory, oldToNew, attachmentTranslations);
+		List<String> ids = this.storage.copyPoolQuestions(sessionManager.getCurrentSessionUserId(), source, destination, asHistory, oldToNew,
+				attachmentTranslations);
+
+		if (!asHistory)
+		{
+			// generate events for any created
+			for (String id : ids)
+			{
+				eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_NEW, getQuestionReference(id), true));
+			}
+		}
 	}
 
 	/**
@@ -889,7 +915,7 @@ public class QuestionServiceImpl implements QuestionService
 		this.threadLocalManager.set(this.cacheKeyPoolQuestions(question.getPool().getId()), null);
 
 		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
+		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_DELETE, getQuestionReference(question.getId()), true));
 	}
 
 	/**
@@ -903,11 +929,18 @@ public class QuestionServiceImpl implements QuestionService
 		String userId = sessionManager.getCurrentSessionUserId();
 		Date now = new Date();
 
+		String event = MnemeService.QUESTION_EDIT;
+
 		// if the question is new (i.e. no id), set the createdBy information, if not already set
-		if ((question.getId() == null) && (question.getCreatedBy().getUserId() == null))
+		if (question.getId() == null)
 		{
-			question.getCreatedBy().setDate(now);
-			question.getCreatedBy().setUserId(userId);
+			if (question.getCreatedBy().getUserId() == null)
+			{
+				question.getCreatedBy().setDate(now);
+				question.getCreatedBy().setUserId(userId);
+			}
+
+			event = MnemeService.QUESTION_NEW;
 		}
 
 		// update last modified information
@@ -925,7 +958,7 @@ public class QuestionServiceImpl implements QuestionService
 		this.threadLocalManager.set(this.cacheKeyPoolQuestions(question.getPool().getId()), null);
 
 		// event
-		eventTrackingService.post(eventTrackingService.newEvent(MnemeService.QUESTION_EDIT, getQuestionReference(question.getId()), true));
+		eventTrackingService.post(eventTrackingService.newEvent(event, getQuestionReference(question.getId()), true));
 	}
 
 	/**

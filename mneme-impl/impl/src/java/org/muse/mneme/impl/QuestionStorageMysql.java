@@ -50,62 +50,6 @@ public abstract class QuestionStorageMysql extends QuestionStorageSql implements
 	}
 
 	/**
-	 * copyPoolQuestions (transaction code)
-	 */
-	protected void copyPoolQuestionsHistoricalTx(String userId, Pool source, Pool destination)
-	{
-		Date now = new Date();
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_QUESTION");
-		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
-		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
-		sql.append(" SURVEY, TYPE, VALID, GUEST)");
-		sql.append(" SELECT");
-		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
-		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, '1', Q.MINT,");
-		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
-		sql.append(" Q.PRESENTATION_TEXT, Q.SURVEY, Q.TYPE, Q.VALID, Q.GUEST");
-		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=? ORDER BY Q.ID ASC");
-
-		Object[] fields = new Object[1];
-		fields[0] = Long.valueOf(source.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("copyPoolQuestionsTx: db write failed");
-		}
-	}
-
-	/**
-	 * copyPoolQuestions (transaction code)
-	 */
-	protected void copyPoolQuestionsTx(String userId, Pool source, Pool destination)
-	{
-		Date now = new Date();
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_QUESTION");
-		sql.append(" (CONTEXT, CREATED_BY_DATE, CREATED_BY_USER, DESCRIPTION, EXPLAIN_REASON, FEEDBACK,");
-		sql.append(" HINTS, HISTORICAL, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER, POOL_ID, PRESENTATION_TEXT,");
-		sql.append(" SURVEY, TYPE, VALID, GUEST)");
-		sql.append(" SELECT");
-		sql.append(" '" + destination.getContext() + "', " + now.getTime() + ", '" + userId + "',");
-		sql.append(" Q.DESCRIPTION, Q.EXPLAIN_REASON, Q.FEEDBACK, Q.HINTS, Q.HISTORICAL, Q.MINT,");
-		sql.append(" '" + now.getTime() + "', '" + userId + "', " + destination.getId() + ",");
-		sql.append(" Q.PRESENTATION_TEXT, Q.SURVEY, Q.TYPE, Q.VALID, Q.GUEST");
-		sql.append(" FROM MNEME_QUESTION Q WHERE Q.MINT='0' AND Q.HISTORICAL IN ('0','1') AND Q.POOL_ID=? ORDER BY Q.ID ASC");
-
-		Object[] fields = new Object[1];
-		fields[0] = Long.valueOf(source.getId());
-
-		if (!this.sqlService.dbWrite(sql.toString(), fields))
-		{
-			throw new RuntimeException("copyPoolQuestionsTx: db write failed");
-		}
-	}
-
-	/**
 	 * Insert a new question as a copy of another question, marked as history (copyPoolQuestions transaction code).
 	 * 
 	 * @param userId

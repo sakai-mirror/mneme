@@ -94,8 +94,10 @@ public abstract class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void clearStaleMintQuestions(Date stale)
+	public List<String> clearStaleMintQuestions(Date stale)
 	{
+		List<String> rv = new ArrayList<String>();
+
 		// find them
 		List<String> delete = new ArrayList<String>();
 		for (QuestionImpl question : this.questions.values())
@@ -110,7 +112,10 @@ public abstract class QuestionStorageSample implements QuestionStorage
 		for (String id : delete)
 		{
 			this.questions.remove(id);
+			rv.add(id);
 		}
+
+		return rv;
 	}
 
 	/**
@@ -125,9 +130,11 @@ public abstract class QuestionStorageSample implements QuestionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew,
+	public List<String> copyPoolQuestions(String userId, Pool source, Pool destination, boolean asHistory, Map<String, String> oldToNew,
 			List<Translation> attachmentTranslations)
 	{
+		List<String> rv = new ArrayList<String>();
+
 		List<QuestionImpl> questions = new ArrayList<QuestionImpl>(this.questions.values());
 		for (QuestionImpl question : questions)
 		{
@@ -170,12 +177,16 @@ public abstract class QuestionStorageSample implements QuestionStorage
 				// save
 				saveQuestion(q);
 
+				rv.add(q.getId());
+
 				if (oldToNew != null)
 				{
 					oldToNew.put(question.getId(), q.getId());
 				}
 			}
 		}
+
+		return rv;
 	}
 
 	/**

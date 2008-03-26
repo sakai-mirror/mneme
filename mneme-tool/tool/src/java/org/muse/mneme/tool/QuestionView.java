@@ -35,6 +35,7 @@ import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentClosedException;
+import org.muse.mneme.api.AssessmentCompletedException;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.Part;
@@ -94,9 +95,32 @@ public class QuestionView extends ControllerImpl
 			return;
 		}
 
-		// handle our 'z' selector - redirect to the appropriate question for this submission
+		// handle our 'z' selector - redirect to the appropriate question to re-enterthis submission
 		if ("z".equals(questionSelector))
 		{
+			try
+			{
+				this.submissionService.enterSubmission(submission);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
+			}
+			catch (AssessmentClosedException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+			catch (AssessmentCompletedException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+				return;
+			}
+
 			redirectToQuestion(req, res, submission, true, false);
 			return;
 		}
