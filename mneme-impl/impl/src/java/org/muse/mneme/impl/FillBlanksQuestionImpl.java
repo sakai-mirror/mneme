@@ -44,6 +44,7 @@ import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionPlugin;
 import org.muse.mneme.api.TypeSpecificQuestion;
 import org.sakaiproject.i18n.InternationalizedMessages;
+import org.sakaiproject.util.FormattedText;
 import org.sakaiproject.util.StringUtil;
 
 /**
@@ -247,26 +248,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 		if (!getIsValid()) return correctAnswers;
 
-		String alltext = getText();
-		while (alltext.indexOf("{") > -1)
-		{
-			int alltextLeftIndex = alltext.indexOf("{");
-			int alltextRightIndex = alltext.indexOf("}");
-
-			String tmp = alltext.substring(alltextLeftIndex + 1, alltextRightIndex);
-			alltext = alltext.substring(alltextRightIndex + 1);
-
-			tmp = tmp.replace("&nbsp;", " ");
-			tmp = tmp.trim();
-			if (tmp.length() == 0) tmp = "*";
-			correctAnswers.add(tmp);
-
-			// there are no more "}", exit loop
-			if (alltextRightIndex == -1)
-			{
-				break;
-			}
-		}
+		parseCorrectAnswers(correctAnswers);
 
 		return correctAnswers;
 	}
@@ -441,7 +423,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		Text answerKey = this.uiService.newText();
 		PropertyReference[] refs = new PropertyReference[2];
 		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
-		refs[1] = this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.answerKey");
+		refs[1] = this.uiService.newTextPropertyReference().setReference("answer.question.typeSpecificQuestion.answerKey");
 		answerKey.setText("answer-key", refs);
 
 		Decision[] orInc = new Decision[2];
@@ -531,7 +513,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		Text answerKey = this.uiService.newText();
 		PropertyReference[] refs = new PropertyReference[2];
 		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
-		refs[1] = this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
+		refs[1] = this.uiService.newTextPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
 		answerKey.setText("answer-key", refs);
 
 		Section first = this.uiService.newSection();
@@ -557,7 +539,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		Text answerKey = this.uiService.newText();
 		PropertyReference[] refs = new PropertyReference[2];
 		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
-		refs[1] = this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
+		refs[1] = this.uiService.newTextPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
 		answerKey.setText("answer-key", refs);
 
 		Section first = this.uiService.newSection();
@@ -719,6 +701,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		boolean invalidOutsideEmpty = false;
 		boolean invalidUnbalanced = false;
 		boolean invalidNoFillins = false;
+		boolean invalidOpenAnswerInAssessment = false;
 
 		boolean outsideTextSeen = false;
 		boolean fillinSeen = false;
@@ -775,8 +758,23 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		// if we saw no fill in, this is an error
 		if (!fillinSeen) invalidNoFillins = true;
 
+		// if so far valid, check for any * choices for non-survey questions
+		if ((!this.question.getIsSurvey()) && !(invalidOutsideEmpty || invalidUnbalanced || invalidNoFillins))
+		{
+			List<String> answers = new ArrayList<String>();
+			parseCorrectAnswers(answers);
+			for (String answer : answers)
+			{
+				if ("*".equals(answer))
+				{
+					invalidOpenAnswerInAssessment = true;
+					break;
+				}
+			}
+		}
+
 		// if we are valid
-		if (!(invalidOutsideEmpty || invalidUnbalanced || invalidNoFillins)) return null;
+		if (!(invalidOutsideEmpty || invalidUnbalanced || invalidNoFillins || invalidOpenAnswerInAssessment)) return null;
 
 		// collect the errors
 		StringBuilder rv = new StringBuilder();
@@ -792,7 +790,48 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		{
 			rv.append(this.messages.getString("invalid-no-fillins"));
 		}
+		if (invalidOpenAnswerInAssessment)
+		{
+			rv.append(this.messages.getString("invalid-open-assessment"));
+		}
 
 		return "<ul>" + rv.toString() + "</ul>";
+	}
+
+	/**
+	 * Parse out the correct answers into a list.
+	 * 
+	 * @param correctAnswers
+	 *        The correct answers list.
+	 */
+	protected void parseCorrectAnswers(List<String> correctAnswers)
+	{
+		String alltext = getText();
+		while (alltext.indexOf("{") > -1)
+		{
+			int alltextLeftIndex = alltext.indexOf("{");
+			int alltextRightIndex = alltext.indexOf("}");
+
+			String tmp = alltext.substring(alltextLeftIndex + 1, alltextRightIndex);
+			alltext = alltext.substring(alltextRightIndex + 1);
+
+			// clean up any html in the answer
+			tmp = FormattedText.convertFormattedTextToPlaintext(tmp);
+			
+			// Note: convertFormattedTextToPlaintext converts %nbsp; to unicode 160
+			tmp = tmp.replace((char)160, ' ');
+			tmp = tmp.replace("\n", " ");
+			tmp = tmp.replace("\r", " ");
+			tmp = tmp.replace("&nbsp;", " ");
+			tmp = tmp.trim();
+			if (tmp.length() == 0) tmp = "*";
+			correctAnswers.add(tmp);
+
+			// there are no more "}", exit loop
+			if (alltextRightIndex == -1)
+			{
+				break;
+			}
+		}
 	}
 }
