@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.muse.test-center</groupId>
+		<artifactId>test-center</artifactId>
+		<version>1.1.0</version>
+		<relativePath>..\pom.xml</relativePath>
+	</parent>
+
+	<name>Mneme - Test Center</name>
+	<groupId>org.muse.mneme</groupId>
+	<artifactId>mneme</artifactId>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>mneme-api/api</module>
+		<module>mneme-impl/impl</module>
+		<module>mneme-impl/pack</module>
+		<module>mneme-tool/tool</module>
+		<module>mneme-test/test-tool</module>
+	</modules>
+
+</project>
