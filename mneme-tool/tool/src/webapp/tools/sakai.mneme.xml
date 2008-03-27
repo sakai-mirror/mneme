@@ -4,14 +4,12 @@
 
 	<tool
 			id="sakai.mneme"
-			title="Test Center"
-			description="Test Center"
+			title="Tasks, Tests, &amp; Surveys"
+			description="For authoring, publishing, delivering, and grading assessments."
 	>
 
 		<category name="course" />
 		<category name="project" />
-
-		<configuration name="functions.require" value="" />
 
 	</tool>
 
