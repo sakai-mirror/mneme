@@ -72,8 +72,4 @@ svn merge -r18632:18633 https://source.sakaiproject.org/svn/site/trunk
 #U    site-impl/impl/src/java/org/sakaiproject/site/impl/BaseSitePage.java
 cd ..
 #
-#Patch Samigo for conditional visibility in the portal (creators only)
-cd sam
-patch -p0 < ../mneme/patch/sam_portal_patch.txt
-cd ..
 
