@@ -198,11 +198,11 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		}
 		context.put("questions", questions);
 
-		// the paging is now more accurate than our current destination - we may have asked for page 1, but have to deliver page 0 if we have nothing
-		// get a new destination
+		// compute the current destination, except for being at page one
+		// this will match "current" in the filter dropdown values, which are all set to send to page one.
 		// [2]sort for /assessment, [3]aid |[4] pid |optional->| [5]our sort, [6]our page, [7] our type filter, [8] our pool filter, [9] survey filter
-		String newDestination = "/" + params[1] + "/" + params[2] + "/" + params[3] + "/" + params[4] + "/" + sortCode + "/"
-				+ paging.getCurrent().toString() + "-" + paging.getSize().toString() + "/" + typeFilter + "/" + poolFilter + "/" + surveyFilter;
+		String newDestination = "/" + params[1] + "/" + params[2] + "/" + params[3] + "/" + params[4] + "/" + sortCode + "/" + "1" + "-"
+				+ paging.getSize().toString() + "/" + typeFilter + "/" + poolFilter + "/" + surveyFilter;
 
 		// for the selected question type
 		Value value = this.uiService.newValue();
