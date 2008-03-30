@@ -4,8 +4,8 @@
 
 	<tool
 			id="sakai.mneme"
-			title="Tasks, Tests, &amp; Surveys"
-			description="For authoring, publishing, delivering, and grading assessments."
+			title="Tasks, Tests and Surveys"
+			description="For authoring, publishing, delivering and grading assessments."
 	>
 
 		<category name="course" />
