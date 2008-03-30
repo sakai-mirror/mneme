@@ -120,7 +120,7 @@ public class InstallTemplatesView extends ControllerImpl
 		if (templates != null) setTemplates(templates);
 		if (this.templateIds.isEmpty())
 		{
-			setTemplates("!site.template,!site.template.course");
+			setTemplates("!site.template,!site.template.course,!site.template.project");
 		}
 
 		M_log.info("init()");
