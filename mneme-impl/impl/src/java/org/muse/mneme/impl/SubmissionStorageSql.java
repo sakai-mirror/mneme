@@ -930,7 +930,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 			sql = new StringBuilder();
 			sql.append("SELECT A.GUEST, A.EVAL_ATRIB_DATE, A.EVAL_ATRIB_USER, A.EVAL_ATTACHMENTS, A.EVAL_COMMENT, A.EVAL_EVALUATED,");
 			sql.append(" A.EVAL_SCORE, A.ID, A.PART_ID, A.QUESTION_ID, A.QUESTION_TYPE, A.REASON, A.REVIEW,");
-			sql.append(" A.SUBMISSION_ID, A.SUBMITTED_DATE");
+			sql.append(" A.SUBMISSION_ID, A.SUBMITTED_DATE, A.AUTO_SCORE");
 			sql.append(" FROM MNEME_ANSWER A");
 			sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID ");
 			sql.append(where);
@@ -959,6 +959,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 						a.setReason(SqlHelper.readString(result, 12));
 						a.setMarkedForReview(SqlHelper.readBoolean(result, 13));
 						a.setSubmittedDate(SqlHelper.readDate(result, 15));
+						a.initStoredAutoScore(SqlHelper.readFloat(result, 16));
 
 						a.clearIsChanged();
 						a.initSubmission(s);

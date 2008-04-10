@@ -1852,6 +1852,13 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			if (!anyChange) return;
 		}
 
+		// make sure that all the answers have a "stored" auto-score based on the current answer
+		// (which may become the stored auto-score if we write the answers when the submission is complete)
+		for (Answer answer : answers)
+		{
+			((AnswerImpl) answer).initStoredAutoScore(((AnswerImpl) answer).computeAutoScore());
+		}
+
 		// TODO: Assume these are all to the same submission... test this?
 		Submission submission = getSubmission(answers.get(0).getSubmission().getId());
 		Assessment assessment = submission.getAssessment();
