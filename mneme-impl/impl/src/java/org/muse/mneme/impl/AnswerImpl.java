@@ -65,6 +65,9 @@ public class AnswerImpl implements Answer
 
 	protected String reason = null;
 
+	/** The auto-score as stored on the db - freeze and use after the submission is complete. */
+	protected Float storedAutoScore = null;
+
 	protected Submission submission = null;
 
 	protected Date submittedDate = null;
@@ -106,13 +109,10 @@ public class AnswerImpl implements Answer
 	 */
 	public Float getAutoScore()
 	{
-		Float score = this.answerHandler.getAutoScore();
-		if (score == null) return null;
+		// if the submission has been completed, use the last stored auto score
+		if (this.submission.getIsComplete()) return this.storedAutoScore;
 
-		// round
-		float newScore = Math.round(score * 100.0f) / 100.0f;
-
-		return Float.valueOf(newScore);
+		return computeAutoScore();
 	}
 
 	/**
@@ -362,6 +362,22 @@ public class AnswerImpl implements Answer
 	}
 
 	/**
+	 * Compute the auto-score
+	 * 
+	 * @return The auto-score.
+	 */
+	protected Float computeAutoScore()
+	{
+		Float score = this.answerHandler.getAutoScore();
+		if (score == null) return null;
+
+		// round
+		float newScore = Math.round(score * 100.0f) / 100.0f;
+
+		return Float.valueOf(newScore);
+	}
+
+	/**
 	 * Access the part id.
 	 * 
 	 * @return The part id.
@@ -438,6 +454,17 @@ public class AnswerImpl implements Answer
 		{
 			M_log.warn("initQuestion: no plugin for type: " + type);
 		}
+	}
+
+	/**
+	 * Init the stored auto-score.
+	 * 
+	 * @param score
+	 *        The stored auto-score.
+	 */
+	protected void initStoredAutoScore(Float score)
+	{
+		this.storedAutoScore = score;
 	}
 
 	/**
