@@ -506,6 +506,7 @@ public class AnswerImpl implements Answer
 		this.partId = other.partId;
 		this.questionId = other.questionId;
 		this.reason = other.reason;
+		this.storedAutoScore = other.storedAutoScore;
 		this.submission = owner;
 		this.submittedDate = other.submittedDate;
 	}
