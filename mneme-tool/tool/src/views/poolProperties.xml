@@ -57,7 +57,7 @@
 					<model type="text" ref="pool.title" />
 				</textEdit>
 
-				<htmlEdit title="pool-description" rows="8" cols="60" small="TRUE">
+				<htmlEdit title="pool-description" size="SMALL">
 					<model type="html" ref="pool.description" />
 				</htmlEdit>
 
