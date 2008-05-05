@@ -222,7 +222,7 @@
 										<decision model="submission.assessment.hasPoints" />
 									</included>
 								</text>
-								<htmlEdit optional="TRUE">
+								<htmlEdit>
 									<model type="html" ref="answer.evaluation.comment" />
 									<title>
 										<message selector="question-evaluation">
