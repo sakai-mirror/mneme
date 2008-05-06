@@ -100,6 +100,14 @@ public abstract class EvaluationImpl implements Evaluation
 		return this.comment;
 	}
 
+	public Boolean getDefined()
+	{
+		if (this.comment != null) return Boolean.TRUE;
+		if (!this.attachments.isEmpty()) return Boolean.TRUE;
+
+		return Boolean.FALSE;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
