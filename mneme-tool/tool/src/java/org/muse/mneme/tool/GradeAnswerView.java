@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Answer;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
-import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.AttachmentService;
+import org.muse.mneme.api.Question;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.entity.api.Reference;
@@ -43,12 +43,12 @@ import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
- * The /grade_submission view for the mneme tool.
+ * The /grade_answer view for the mneme tool.
  */
-public class GradeSubmissionView extends ControllerImpl
+public class GradeAnswerView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(GradeSubmissionView.class);
+	private static Log M_log = LogFactory.getLog(GradeAnswerView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
@@ -75,8 +75,8 @@ public class GradeSubmissionView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]sid, [3]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
-		if (params.length < 3) throw new IllegalArgumentException();
+		// [2]sid, [3] answerId, [4]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
+		if (params.length < 4) throw new IllegalArgumentException();
 
 		Submission submission = this.submissionService.getSubmission(params[2]);
 		if (submission == null)
@@ -95,11 +95,41 @@ public class GradeSubmissionView extends ControllerImpl
 
 		context.put("submission", submission);
 
-		// next and prev, based on the sort
+		// get answer id from [3]
+		String answerId = params[3];
+		Answer answer = submission.getAnswer(answerId);
+		if (answer == null)
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+		context.put("answer", answer);
+
+		// compute next and prev answers
+		Question nextQuestion = answer.getQuestion().getAssessmentOrdering().getNext();
+		if (nextQuestion != null)
+		{
+			Answer nextAnswer = submission.getAnswer(nextQuestion);
+			if (nextAnswer != null)
+			{
+				context.put("next", nextAnswer.getId());
+			}
+		}
+
+		Question prevQuestion = answer.getQuestion().getAssessmentOrdering().getPrevious();
+		if (prevQuestion != null)
+		{
+			Answer prevAnswer = submission.getAnswer(prevQuestion);
+			if (prevAnswer != null)
+			{
+				context.put("prev", prevAnswer.getId());
+			}
+		}
+
 		String sortCode = "userName_a";
 		SubmissionService.FindAssessmentSubmissionsSort sort = null;
-		int destinationStartsAt = 4;
-		if (params.length > 3) sortCode = params[3];
+		int destinationStartsAt = 5;
+		if (params.length > 4) sortCode = params[4];
 		try
 		{
 			sort = SubmissionService.FindAssessmentSubmissionsSort.valueOf(sortCode);
@@ -107,17 +137,8 @@ public class GradeSubmissionView extends ControllerImpl
 		catch (IllegalArgumentException e)
 		{
 			// no sort, so it must be part of destination
-			destinationStartsAt = 3;
+			destinationStartsAt = 4;
 			sortCode = "userName_a";
-		}
-		if (sort != null)
-		{
-			// one submission per user (i.e. 'official' only), except for survey, where we consider them all
-			Boolean official = Boolean.valueOf(submission.getAssessment().getType() != AssessmentType.survey);
-
-			String[] nextPrev = submissionService.findPrevNextSubmissionIds(submission, sort, official);
-			if (nextPrev[0] != null) context.put("prev", nextPrev[0]);
-			if (nextPrev[1] != null) context.put("next", nextPrev[1]);
 		}
 		context.put("sort", sortCode);
 
@@ -154,8 +175,8 @@ public class GradeSubmissionView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]sid, [3]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
-		if (params.length < 3) throw new IllegalArgumentException();
+		// [2]sid, [3] answerId, [4]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
+		if (params.length < 4) throw new IllegalArgumentException();
 
 		Submission submission = this.submissionService.getSubmission(params[2]);
 		if (submission == null)
@@ -173,6 +194,16 @@ public class GradeSubmissionView extends ControllerImpl
 		}
 
 		context.put("submission", submission);
+
+		// get answer id from [3]
+		String answerId = params[3];
+		Answer answer = submission.getAnswer(answerId);
+		if (answer == null)
+		{
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+		context.put("answer", answer);
 
 		// read form
 		String destination = this.uiService.decode(req, context);
@@ -197,10 +228,10 @@ public class GradeSubmissionView extends ControllerImpl
 					else
 					{
 						// find the answer, id=parts[0], ref=parts[1]
-						Answer answer = submission.getAnswer(parts[0]);
-						if (answer != null)
+						Answer a = submission.getAnswer(parts[0]);
+						if (a != null)
 						{
-							answer.getEvaluation().removeAttachment(ref);
+							a.getEvaluation().removeAttachment(ref);
 						}
 					}
 				}

@@ -423,7 +423,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		Text answerKey = this.uiService.newText();
 		PropertyReference[] refs = new PropertyReference[2];
 		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
-		refs[1] = this.uiService.newTextPropertyReference().setReference("answer.question.typeSpecificQuestion.answerKey");
+		refs[1] = this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.answerKey");
 		answerKey.setText("answer-key", refs);
 
 		Decision[] orInc = new Decision[2];
@@ -513,7 +513,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		Text answerKey = this.uiService.newText();
 		PropertyReference[] refs = new PropertyReference[2];
 		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
-		refs[1] = this.uiService.newTextPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
+		refs[1] = this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
 		answerKey.setText("answer-key", refs);
 
 		Section first = this.uiService.newSection();
@@ -539,7 +539,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		Text answerKey = this.uiService.newText();
 		PropertyReference[] refs = new PropertyReference[2];
 		refs[0] = this.uiService.newIconPropertyReference().setIcon("/icons/answer_key.png");
-		refs[1] = this.uiService.newTextPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
+		refs[1] = this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.answerKey");
 		answerKey.setText("answer-key", refs);
 
 		Section first = this.uiService.newSection();

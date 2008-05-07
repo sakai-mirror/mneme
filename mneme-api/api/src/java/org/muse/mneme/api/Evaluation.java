@@ -69,6 +69,13 @@ public interface Evaluation
 	String getComment();
 
 	/**
+	 * Check if the evaluation is defined - comment or attachment.
+	 * 
+	 * @return TRUE if there is a comment or attachment, FALSE if neither.
+	 */
+	Boolean getDefined();
+
+	/**
 	 * Access the evaluated flag.
 	 * 
 	 * @return TRUE if marked evaluated, FALSE if not.
@@ -121,5 +128,4 @@ public interface Evaluation
 	 *        The score.
 	 */
 	void setScore(Float score);
-
 }
