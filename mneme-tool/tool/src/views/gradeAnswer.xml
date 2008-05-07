@@ -23,7 +23,7 @@
 	*
 	**********************************************************************************/
 -->
-<interface>
+<interface focus="comments">
 
 	<!-- attachment picker view -->
 	<attachmentPicker>
@@ -69,66 +69,11 @@
 		<!-- repeat the nav up top -->
 		<alias to="nav" />
 
-		<!-- evaluation -->
-		<section>
-			<container>
-				<text>
-					<message selector="auto-eval-score">
-						<model type="icon" icon="/icons/grade.png">
-							<title>
-								<message selector="score" />
-							</title>
-						</model>
-						<model type="component">
-							<container>
-								<floatEdit model="answer.totalScore" defaultValue="answer.autoScore" sumTo="total" cols="6" />
-							</container>
-						</model>
-						<model ref="answer.autoScore" missing="dash" />
-						<model ref="answer.question.points" />
-					</message>
-					<included>
-						<decision model="answer.question.hasPoints" />
-						<decision model="submission.assessment.hasPoints" />
-					</included>
-				</text>
-				<htmlEdit>
-					<model type="html" ref="answer.evaluation.comment" />
-					<title>
-						<message selector="question-evaluation">
-							<model type="icon" icon="/icons/note.png" />
-						</message>
-					</title>
-				</htmlEdit>
-				<fileUpload>
-					<model ref="answer.evaluation.upload" />
-					<title>
-						<message selector="upload-evaluation" />
-					</title>
-					<upload>
-						<message selector="upload-button" />
-					</upload>
-				</fileUpload>
-				<attachments model="answer.evaluation.attachments" name="attachment">
-					<navigations>
-						<navigation title="remove-attachment" style="LINK" description="remove-attachment-description" submit="TRUE" small="TRUE">
-							<icon icon="/icons/delete.png" style="NONE" />
-							<destination template="REMOVE:{0}:{1}">
-								<model ref="answer.id" />
-								<model ref="attachment.reference" />
-							</destination>
-							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-remove-attachment" />
-						</navigation>
-					</navigations>
-				</attachments>
-			</container>
-		</section>
-
 		<section>
 
-			<title highlighted="TRUE">
+<!-- 		<title highlighted="TRUE">
 				<message selector="submission" />
-			</title>
+			</title> -->
 
 			<container>
 				<text>
@@ -218,6 +163,61 @@
 					</included>
 				</section>
 
+			</container>
+		</section>
+
+		<!-- evaluation -->
+		<section>
+			<container>
+				<text>
+					<message selector="auto-eval-score">
+						<model type="icon" icon="/icons/grade.png">
+							<title>
+								<message selector="score" />
+							</title>
+						</model>
+						<model type="component">
+							<container>
+								<floatEdit model="answer.totalScore" defaultValue="answer.autoScore" sumTo="total" cols="6" />
+							</container>
+						</model>
+						<model ref="answer.autoScore" missing="dash" />
+						<model ref="answer.question.points" />
+					</message>
+					<included>
+						<decision model="answer.question.hasPoints" />
+						<decision model="submission.assessment.hasPoints" />
+					</included>
+				</text>
+				<htmlEdit id="comments">
+					<model type="html" ref="answer.evaluation.comment" />
+					<title>
+						<message selector="question-evaluation">
+							<model type="icon" icon="/icons/note.png" />
+						</message>
+					</title>
+				</htmlEdit>
+				<fileUpload>
+					<model ref="answer.evaluation.upload" />
+					<title>
+						<message selector="upload-evaluation" />
+					</title>
+					<upload>
+						<message selector="upload-button" />
+					</upload>
+				</fileUpload>
+				<attachments model="answer.evaluation.attachments" name="attachment">
+					<navigations>
+						<navigation title="remove-attachment" style="LINK" description="remove-attachment-description" submit="TRUE" small="TRUE">
+							<icon icon="/icons/delete.png" style="NONE" />
+							<destination template="REMOVE:{0}:{1}">
+								<model ref="answer.id" />
+								<model ref="attachment.reference" />
+							</destination>
+							<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-remove-attachment" />
+						</navigation>
+					</navigations>
+				</attachments>
 			</container>
 		</section>
 
