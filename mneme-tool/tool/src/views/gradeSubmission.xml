@@ -106,8 +106,10 @@
 		</section>
 
 		<section>
-			<iterator name="answer" model="submission.answersOrdered" />
-
+			<iterator name="answer">
+				<model ref="answers" indexRef="id"/>
+			</iterator >
+<!--  indexRef="id" -->
 			<!-- section title -->
 			<title>
 				<message selector="instructions-part-title">
@@ -129,13 +131,6 @@
 					<decision model="answer.question.part.assessment.parts.showPresentation" />
 				</included>
 			</title>
-
-			<!-- page anchor to be able to return to this particular question -->
-			<anchor>
-				<message>
-					<model ref="answer.id" />
-				</message>
-			</anchor>
 
 			<container>
 
@@ -229,30 +224,37 @@
 										<decision model="submission.assessment.hasPoints" />
 									</included>
 								</text>
-								<navigation title="add-comments" style="LINK" description="add-comments-description" submit="TRUE">
-									<icon icon="/icons/add_comments.png" style="LEFT" />
-									<destination template="/grade_answer/{0}/{1}/{2}{3}">
-										<model ref="submission.id" />
-										<model ref="answer.id" />
-										<model ref="sort" />
-										<model ref="return" />
-									</destination>
-									<included>
-										<decision reversed="TRUE" model="answer.evaluation.defined" />
-									</included>
-								</navigation>
-								<navigation title="view-comments" style="LINK" description="view-comments-description" submit="TRUE">
-									<icon icon="/icons/view_comments.png" style="LEFT" />
-									<destination template="/grade_answer/{0}/{1}/{2}{3}">
-										<model ref="submission.id" />
-										<model ref="answer.id" />
-										<model ref="sort" />
-										<model ref="return" />
-									</destination>
-									<included>
-										<decision model="answer.evaluation.defined" />
-									</included>
-								</navigation>
+								<htmlEdit>
+									<model type="html" ref="answer.evaluation.comment" />
+									<title>
+										<message selector="question-evaluation">
+											<model type="icon" icon="/icons/note.png" />
+										</message>
+									</title>
+								</htmlEdit>
+								<fileUpload>
+									<model ref="answer.evaluation.upload" />
+									<title>
+										<message selector="upload-evaluation" />
+									</title>
+									<upload>
+										<message selector="upload-button" />
+									</upload>
+								</fileUpload>
+								<attachments model="answer.evaluation.attachments" name="attachment">
+									<navigations>
+										<navigation title="remove-attachment" style="LINK" description="remove-attachment-description" submit="TRUE"
+											small="TRUE">
+											<icon icon="/icons/delete.png" style="NONE" />
+											<destination template="REMOVE:{0}:{1}">
+												<model ref="answer.id" />
+												<model ref="attachment.reference" />
+											</destination>
+											<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif"
+												selector="confirm-remove-attachment" />
+										</navigation>
+									</navigations>
+								</attachments>
 							</container>
 						</section>
 
@@ -356,13 +358,30 @@
 		<!--navigation-->
 		<navigationBar id="nav">
 			<container>
+				<text selector="questions" />
+				<pager paging="paging" submit="TRUE">
+					<destination template="/grade_submission/{0}/{1}/{2}{3}">
+						<model ref="submission.id" />
+						<model type="paging" ref="paging" />
+						<model ref="sort" />
+						<model ref="return" />
+					</destination>
+					<sizeOptions>
+						<model ref="pageSizes" />
+					</sizeOptions>
+				</pager>
+				<divider />
+				<navigation disabled="TRUE" title="bar" />
+				<divider />
+				<text selector="submissions" />
 				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
 					<disabled>
 						<hasValueDecision model="prev" reversed="TRUE" />
 					</disabled>
 					<icon icon="/icons/previous.png" style="LEFT" />
-					<destination template="/grade_submission/{0}/{1}{2}">
+					<destination template="/grade_submission/{0}/{1}/{2}{3}">
 						<model ref="prev" />
+						<model type="paging" ref="paging" selector="FIRST" />
 						<model ref="sort" />
 						<model ref="return" />
 					</destination>
@@ -381,8 +400,9 @@
 						<hasValueDecision model="next" reversed="TRUE" />
 					</disabled>
 					<icon icon="/icons/next.png" style="LEFT" />
-					<destination template="/grade_submission/{0}/{1}{2}">
+					<destination template="/grade_submission/{0}/{1}/{2}{3}">
 						<model ref="next" />
+						<model type="paging" ref="paging" selector="FIRST" />
 						<model ref="sort" />
 						<model ref="return" />
 					</destination>

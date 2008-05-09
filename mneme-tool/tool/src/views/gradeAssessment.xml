@@ -171,7 +171,7 @@
 					</included>
 					<entityNavigations>
 						<navigation style="LINK" submit="TRUE">
-							<destination template="/grade_submission/{0}/{1}/grade_assessment/{2}/{3}/{4}{5}/{6}">
+							<destination template="/grade_submission/{0}/-/{1}/grade_assessment/{2}/{3}/{4}{5}/{6}">
 								<model ref="submission.id" />
 								<model ref="sort" />
 								<model ref="sort_grades" />
@@ -222,7 +222,7 @@
 					</included>
 					<entityNavigations>
 						<navigation style="LINK" submit="TRUE">
-							<destination template="/grade_submission/{0}/{1}/grade_assessment/{2}/{3}/{4}{5}/{6}">
+							<destination template="/grade_submission/{0}/-/{1}/grade_assessment/{2}/{3}/{4}{5}/{6}">
 								<model ref="submission.id" />
 								<model ref="sort" />
 								<model ref="sort_grades" />
@@ -405,7 +405,7 @@
 					<container>
 						<navigation style="LINK" submit="TRUE" description="unscored-alt">
 							<icon icon="/icons/grade.png" />
-							<destination template="/grade_submission/{0}/{1}/grade_assessment/{2}/{3}/{4}{5}/{6}">
+							<destination template="/grade_submission/{0}/-/{1}/grade_assessment/{2}/{3}/{4}{5}/{6}">
 								<model ref="submission.id" />
 								<model ref="sort" />
 								<model ref="sort_grades" />
