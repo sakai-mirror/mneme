@@ -107,9 +107,9 @@
 
 		<section>
 			<iterator name="answer">
-				<model ref="answers" indexRef="id"/>
-			</iterator >
-<!--  indexRef="id" -->
+				<model ref="answers" indexRef="id" />
+			</iterator>
+			<!--  indexRef="id" -->
 			<!-- section title -->
 			<title>
 				<message selector="instructions-part-title">
@@ -265,22 +265,10 @@
 
 		<!--  overall -->
 		<section>
-			<!-- final score in the title -->
 			<title highlighted="TRUE">
-				<message selector="final-score">
-					<model ref="submission.assessment.parts.totalPoints" />
-					<model type="component">
-						<container>
-							<floatEdit id="total" model="submission.totalScore" cols="6" />
-						</container>
-					</model>
-					<selectors>
-						<selector selector="final-score-no-points">
-							<decision reversed="TRUE" model="submission.assessment.hasPoints" />
-						</selector>
-					</selectors>
-				</message>
+				<message selector="overall" />
 			</title>
+
 			<container>
 
 				<!-- overall comments -->
@@ -322,6 +310,25 @@
 				<!-- evaluated and released -->
 				<section>
 					<container>
+						<!-- final score -->
+						<text>
+							<message selector="final-score">
+								<model type="icon" icon="/icons/grade.png">
+									<title>
+										<message selector="score" />
+									</title>
+								</model>
+								<model type="component">
+									<container>
+										<floatEdit id="total" model="submission.totalScore" cols="6" />
+									</container>
+								</model>
+								<model ref="submission.assessment.Parts.totalPoints" />
+							</message>
+							<included>
+								<decision model="submission.assessment.hasPoints" />
+							</included>
+						</text>
 						<!--mark as evaluated -->
 						<selection>
 							<selectionChoices>
@@ -370,8 +377,6 @@
 						<model ref="pageSizes" />
 					</sizeOptions>
 				</pager>
-				<divider />
-				<navigation disabled="TRUE" title="bar" />
 				<divider />
 				<text selector="submissions" />
 				<navigation title="prev" style="BUTTON" accessKey="prev-access" description="prev-description" submit="TRUE">
