@@ -142,7 +142,7 @@
 					</included>
 					<entityNavigations>
 						<navigation submit="TRUE">
-							<destination template="/grade_submission/{0}/grade_question/{1}/{2}/{3}/{4}{5}/{6}">
+							<destination template="/grade_submission/{0}/-/grade_question/{1}/{2}/{3}/{4}{5}/{6}">
 								<model ref="answer.submission.id" />
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
@@ -193,7 +193,7 @@
 					</included>
 					<entityNavigations>
 						<navigation submit="TRUE">
-							<destination template="/grade_submission/{0}/grade_question/{1}/{2}/{3}/{4}{5}/{6}">
+							<destination template="/grade_submission/{0}/-/grade_question/{1}/{2}/{3}/{4}{5}/{6}">
 								<model ref="answer.submission.id" />
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />

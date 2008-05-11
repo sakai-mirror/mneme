@@ -22,6 +22,9 @@
 package org.muse.mneme.tool;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,14 +32,20 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
+import org.muse.ambrosia.api.Paging;
+import org.muse.ambrosia.api.PopulatingSet;
+import org.muse.ambrosia.api.PopulatingSet.Factory;
+import org.muse.ambrosia.api.PopulatingSet.Id;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Answer;
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionService;
+import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.StringUtil;
@@ -55,6 +64,15 @@ public class GradeSubmissionView extends ControllerImpl
 
 	/** AttachmentService service. */
 	protected AttachmentService attachmentService = null;
+
+	/** The default page size. */
+	protected Integer defaultPageSize = null;
+
+	/** Configuration: the page sizes for the view. */
+	protected List<Integer> pageSizes = new ArrayList<Integer>();
+
+	/** Dependency: ServerConfigurationService. */
+	protected ServerConfigurationService serverConfigurationService = null;
 
 	/** Submission Service */
 	protected SubmissionService submissionService = null;
@@ -75,8 +93,8 @@ public class GradeSubmissionView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]sid, [3]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
-		if (params.length < 3) throw new IllegalArgumentException();
+		// [2]sid, [3] paging, [4]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
+		if (params.length < 4) throw new IllegalArgumentException();
 
 		Submission submission = this.submissionService.getSubmission(params[2]);
 		if (submission == null)
@@ -98,8 +116,8 @@ public class GradeSubmissionView extends ControllerImpl
 		// next and prev, based on the sort
 		String sortCode = "userName_a";
 		SubmissionService.FindAssessmentSubmissionsSort sort = null;
-		int destinationStartsAt = 4;
-		if (params.length > 3) sortCode = params[3];
+		int destinationStartsAt = 5;
+		if (params.length > 3) sortCode = params[4];
 		try
 		{
 			sort = SubmissionService.FindAssessmentSubmissionsSort.valueOf(sortCode);
@@ -107,7 +125,7 @@ public class GradeSubmissionView extends ControllerImpl
 		catch (IllegalArgumentException e)
 		{
 			// no sort, so it must be part of destination
-			destinationStartsAt = 3;
+			destinationStartsAt = 4;
 			sortCode = "userName_a";
 		}
 		if (sort != null)
@@ -134,6 +152,44 @@ public class GradeSubmissionView extends ControllerImpl
 		}
 		context.put("return", destination);
 
+		// paging parameter
+		String pagingParameter = null;
+		if (params.length > 3) pagingParameter = params[3];
+		if ((pagingParameter == null) || (pagingParameter.length() == 0) || (pagingParameter.equals("-")))
+		{
+			pagingParameter = "1-" + Integer.toString(this.defaultPageSize);
+		}
+
+		// paging
+		Paging paging = uiService.newPaging();
+		paging.setMaxItems(submission.getAnswers().size());
+		paging.setCurrentAndSize(pagingParameter);
+		context.put("paging", paging);
+
+		// pages sizes
+		if (this.pageSizes.size() > 1)
+		{
+			context.put("pageSizes", this.pageSizes);
+		}
+
+		// pick the page of answers
+		List<Answer> answers = submission.getAnswersOrdered();
+		if (paging.getSize() != 0)
+		{
+			// start at ((pageNum-1)*pageSize)
+			int start = ((paging.getCurrent().intValue() - 1) * paging.getSize().intValue());
+			if (start < 0) start = 0;
+			if (start > answers.size()) start = answers.size() - 1;
+
+			// end at ((pageNum)*pageSize)-1, or max-1, (note: subList is not inclusive for the end position)
+			int end = paging.getCurrent().intValue() * paging.getSize().intValue();
+			if (end < 0) end = 0;
+			if (end > answers.size()) end = answers.size();
+
+			answers = answers.subList(start, end);
+		}
+		context.put("answers", answers);
+
 		// needed by some of the delegates to show the score
 		context.put("grading", Boolean.TRUE);
 
@@ -146,6 +202,20 @@ public class GradeSubmissionView extends ControllerImpl
 	public void init()
 	{
 		super.init();
+
+		String pageSize = StringUtil.trimToNull(this.serverConfigurationService.getString("pageSize@org.muse.mneme.tool.GradeSubmissionView"));
+		if (pageSize != null) setPageSize(pageSize);
+
+		if (this.pageSizes.isEmpty())
+		{
+			this.pageSizes.add(Integer.valueOf(1));
+			this.pageSizes.add(Integer.valueOf(25));
+			this.pageSizes.add(Integer.valueOf(50));
+			this.pageSizes.add(Integer.valueOf(100));
+			this.pageSizes.add(Integer.valueOf(0));
+			this.defaultPageSize = Integer.valueOf(50);
+		}
+
 		M_log.info("init()");
 	}
 
@@ -154,10 +224,10 @@ public class GradeSubmissionView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]sid, [3]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
-		if (params.length < 3) throw new IllegalArgumentException();
+		// [2]sid, [3] paging, [4]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
+		if (params.length < 4) throw new IllegalArgumentException();
 
-		Submission submission = this.submissionService.getSubmission(params[2]);
+		final Submission submission = this.submissionService.getSubmission(params[2]);
 		if (submission == null)
 		{
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
@@ -173,6 +243,23 @@ public class GradeSubmissionView extends ControllerImpl
 		}
 
 		context.put("submission", submission);
+
+		// so we can deal with the answers by id
+		PopulatingSet answers = uiService.newPopulatingSet(new Factory()
+		{
+			public Object get(String id)
+			{
+				Answer answer = submission.getAnswer(id);
+				return answer;
+			}
+		}, new Id()
+		{
+			public String getId(Object o)
+			{
+				return ((Answer) o).getId();
+			}
+		});
+		context.put("answers", answers);
 
 		// read form
 		String destination = this.uiService.decode(req, context);
@@ -248,6 +335,47 @@ public class GradeSubmissionView extends ControllerImpl
 	public void setAttachmentService(AttachmentService service)
 	{
 		this.attachmentService = service;
+	}
+
+	/**
+	 * Set the the page size for the view.
+	 * 
+	 * @param sizes
+	 *        The the page sizes for the view - integers, comma separated.
+	 */
+	public void setPageSize(String sizes)
+	{
+		this.pageSizes.clear();
+		String[] parts = StringUtil.split(sizes, ",");
+		for (String part : parts)
+		{
+			this.pageSizes.add(Integer.valueOf(part));
+		}
+
+		if (!this.pageSizes.isEmpty())
+		{
+			// use the first as the default
+			this.defaultPageSize = this.pageSizes.get(0);
+
+			// sort, putting 0 (all) at the end
+			Collections.sort(this.pageSizes);
+			if (this.pageSizes.get(0).equals(Integer.valueOf(0)))
+			{
+				this.pageSizes.remove(0);
+				this.pageSizes.add(Integer.valueOf(0));
+			}
+		}
+	}
+
+	/**
+	 * Set the ServerConfigurationService.
+	 * 
+	 * @param service
+	 *        the ServerConfigurationService.
+	 */
+	public void setServerConfigurationService(ServerConfigurationService service)
+	{
+		this.serverConfigurationService = service;
 	}
 
 	/**
