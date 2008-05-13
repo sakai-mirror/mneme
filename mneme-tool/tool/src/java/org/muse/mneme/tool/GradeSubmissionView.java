@@ -213,7 +213,7 @@ public class GradeSubmissionView extends ControllerImpl
 			this.pageSizes.add(Integer.valueOf(50));
 			this.pageSizes.add(Integer.valueOf(100));
 			this.pageSizes.add(Integer.valueOf(0));
-			this.defaultPageSize = Integer.valueOf(50);
+			this.defaultPageSize = Integer.valueOf(25);
 		}
 
 		M_log.info("init()");
