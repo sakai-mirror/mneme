@@ -35,15 +35,20 @@ import java.util.regex.Matcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentPolicyException;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Ent;
 import org.muse.mneme.api.ImportService;
+import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Translation;
 import org.sakaiproject.assignment.api.Assignment;
@@ -389,13 +394,38 @@ public class ImportServiceImpl implements ImportService
 			question.getTypeSpecificQuestion().consolidate("");
 			this.questionService.saveQuestion(question);
 
-			// TODO:
 			// create the assessment
+			Assessment assessment = this.assessmentService.newAssessment(context);
+			assessment.setType(AssessmentType.assignment);
+			assessment.setTitle(content.getTitle());
+			assessment.getGrading().setAutoRelease(Boolean.FALSE);
+			if (assignment.getOpenTime() != null)
+			{
+				assessment.getDates().setOpenDate(new Date(assignment.getOpenTime().getTime()));
+			}
+			if (assignment.getDueTime() != null)
+			{
+				assessment.getDates().setDueDate(new Date(assignment.getDueTime().getTime()));
+			}
+			if (assignment.getDropDeadTime() != null)
+			{
+				assessment.getDates().setAcceptUntilDate(new Date(assignment.getDropDeadTime().getTime()));
+			}
+			assessment.setRequireHonorPledge(Boolean.valueOf(content.getHonorPledge() > 1));
+			assessment.getReview().setTiming(ReviewTiming.graded);
+			assessment.getGrading().setGradebookIntegration(Boolean.TRUE);
+			ManualPart part = assessment.getParts().addManualPart();
+			part.addQuestion(question);
+
+			this.assessmentService.saveAssessment(assessment);
 		}
 		catch (IdUnusedException e)
 		{
 		}
 		catch (PermissionException e)
+		{
+		}
+		catch (AssessmentPolicyException e)
 		{
 		}
 	}
