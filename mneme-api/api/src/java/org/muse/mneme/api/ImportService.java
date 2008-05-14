@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,24 @@ import java.util.List;
  */
 public interface ImportService
 {
+	/**
+	 * The the Assignments in this context that can be imported as pools.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return A list of Assignments "Ent"s (id and description).
+	 */
+	List<Ent> getAssignments(String context);
+
+	/**
+	 * The the sites where this user has Assignment authoring permissions.
+	 * 
+	 * @param userId
+	 *        The user id.
+	 * @return A list of Assignment site "Ent"s (id and description).
+	 */
+	List<Ent> getAssignmentSites(String userId);
+
 	/**
 	 * The the Samigo assessments in this context that can be imported as pools.
 	 * 
@@ -66,6 +84,18 @@ public interface ImportService
 	 *         if the user does not have permission to create pools and questions.
 	 */
 	void importAssessment(String id, String context) throws AssessmentPermissionException;
+
+	/**
+	 * Import the Assignment with this id into this context as a pool.
+	 * 
+	 * @param id
+	 *        The id of the Assignment to import.
+	 * @param context
+	 *        The context where the new pool will live.
+	 * @throws AssessmentPermissionException
+	 *         if the user does not have permission to create pools and questions.
+	 */
+	void importAssignment(String id, String context) throws AssessmentPermissionException;
 
 	/**
 	 * Import the Samigo pool with this id into this context

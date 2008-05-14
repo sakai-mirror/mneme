@@ -497,11 +497,13 @@
 		destroy-method="destroy"
 		singleton="true">
 
+		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
 		<property name="attachmentService"><ref bean="org.muse.mneme.api.AttachmentService"/></property>
 		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
 		<property name="securityService"><ref bean="org.muse.mneme.api.SecurityService"/></property>
 		<property name="questionService"><ref bean="org.muse.mneme.api.QuestionService"/></property>
 
+		<property name="assignmentService"><ref bean="org.sakaiproject.assignment.api.AssignmentService"/></property>
 		<property name="authzGroupService"><ref bean="org.sakaiproject.authz.api.AuthzGroupService"/></property>
 		<property name="entityManager"><ref bean="org.sakaiproject.entity.api.EntityManager"/></property>
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
