@@ -48,11 +48,6 @@
 				<text>
 					<message selector="select-sites" />
 				</text>
-				<divider />
-				<navigation title="current" style="LINK" accessKey="current-access" description="current-description" submit="TRUE">
-					<icon icon="/icons/OK.png" style="LEFT" />
-					<destination template="CURRENT" />
-				</navigation>
 			</container>
 		</navigationBar>
 

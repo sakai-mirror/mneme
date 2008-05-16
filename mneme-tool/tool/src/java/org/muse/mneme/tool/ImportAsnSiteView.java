@@ -132,10 +132,6 @@ public class ImportAsnSiteView extends ControllerImpl
 			String siteId = selectedSite.getValue();
 			destination = "/import_assignment/" + poolsSort + "/" + siteId;
 		}
-		else if ("CURRENT".equals(destination))
-		{
-			destination = "/import_assignment/" + poolsSort + "/" + toolManager.getCurrentPlacement().getContext();
-		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}

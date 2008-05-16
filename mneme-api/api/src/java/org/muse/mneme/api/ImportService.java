@@ -92,10 +92,12 @@ public interface ImportService
 	 *        The id of the Assignment to import.
 	 * @param context
 	 *        The context where the new pool will live.
+	 * @param draftSource
+	 *        if true, the source Assignment will be changed to draft and removed from the gradebook
 	 * @throws AssessmentPermissionException
 	 *         if the user does not have permission to create pools and questions.
 	 */
-	void importAssignment(String id, String context) throws AssessmentPermissionException;
+	void importAssignment(String id, String context, boolean draftSource) throws AssessmentPermissionException;
 
 	/**
 	 * Import the Samigo pool with this id into this context

@@ -42,6 +42,7 @@ import org.muse.mneme.api.AssessmentService;
 import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Ent;
+import org.muse.mneme.api.GradesService;
 import org.muse.mneme.api.ImportService;
 import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Pool;
@@ -53,6 +54,7 @@ import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Translation;
 import org.sakaiproject.assignment.api.Assignment;
 import org.sakaiproject.assignment.api.AssignmentContent;
+import org.sakaiproject.assignment.api.AssignmentEdit;
 import org.sakaiproject.assignment.api.AssignmentService;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.content.cover.ContentTypeImageService;
@@ -65,6 +67,7 @@ import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.exception.InUseException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.site.api.SiteService;
@@ -157,6 +160,9 @@ public class ImportServiceImpl implements ImportService
 
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
+
+	/** Dependency: GradesService */
+	protected GradesService gradesService = null;
 
 	/** Messages. */
 	protected transient InternationalizedMessages messages = null;
@@ -318,7 +324,7 @@ public class ImportServiceImpl implements ImportService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void importAssignment(String id, String context) throws AssessmentPermissionException
+	public void importAssignment(String id, String context, boolean draftSource) throws AssessmentPermissionException
 	{
 		try
 		{
@@ -330,11 +336,13 @@ public class ImportServiceImpl implements ImportService
 			Pool pool = this.poolService.newPool(context);
 			pool.setTitle(addDate("import-assignment-text", assignment.getTitle(), new Date()));
 			pool.setPoints(Float.valueOf(content.getMaxGradePointDisplay()));
+			boolean noPoints = pool.getPoints().floatValue() == 0;
 
 			// pool.setDescription(info.description);
 			this.poolService.savePool(pool);
 
 			// create the question (essay)
+			// TODO: essay or task?
 			Question question = this.questionService.newQuestion(pool, "mneme:Essay");
 			EssayQuestionImpl e = (EssayQuestionImpl) (question.getTypeSpecificQuestion());
 
@@ -372,20 +380,24 @@ public class ImportServiceImpl implements ImportService
 			EssayQuestionImpl.SubmissionType type = EssayQuestionImpl.SubmissionType.none;
 			switch (content.getTypeOfSubmission())
 			{
-				case Assignment.ATTACHMENT_ONLY_ASSIGNMENT_SUBMISSION:
+				case 2 /* Assignment.ATTACHMENT_ONLY_ASSIGNMENT_SUBMISSION */:
 				{
 					type = EssayQuestionImpl.SubmissionType.attachments;
 					break;
 				}
-				case Assignment.TEXT_ONLY_ASSIGNMENT_SUBMISSION:
+				case 1 /* Assignment.TEXT_ONLY_ASSIGNMENT_SUBMISSION */:
 				{
 					type = EssayQuestionImpl.SubmissionType.inline;
 					break;
 				}
-				case Assignment.TEXT_AND_ATTACHMENT_ASSIGNMENT_SUBMISSION:
+				case 3 /* Assignment.TEXT_AND_ATTACHMENT_ASSIGNMENT_SUBMISSION */:
 				{
 					type = EssayQuestionImpl.SubmissionType.both;
 					break;
+				}
+				case 4 /* Assignment.NON_ELECTRONIC_SUBMISSION */:
+				{
+					type = EssayQuestionImpl.SubmissionType.none;
 				}
 			}
 			e.setSubmissionType(type);
@@ -413,11 +425,34 @@ public class ImportServiceImpl implements ImportService
 			}
 			assessment.setRequireHonorPledge(Boolean.valueOf(content.getHonorPledge() > 1));
 			assessment.getReview().setTiming(ReviewTiming.graded);
-			assessment.getGrading().setGradebookIntegration(Boolean.TRUE);
+
+			boolean sendToGb = !("no".equals(assignment.getProperties().getProperty("new_assignment_add_to_gradebook")));
+			if (noPoints) sendToGb = false;
+			assessment.getGrading().setGradebookIntegration(Boolean.valueOf(sendToGb));
+
 			ManualPart part = assessment.getParts().addManualPart();
 			part.addQuestion(question);
 
 			this.assessmentService.saveAssessment(assessment);
+
+			// if requested, and the assessment was send to gb, change it to not.
+			if (draftSource)
+			{
+				// change to no gradebook, and draft
+				AssignmentEdit edit = this.assignmentService.editAssignment(assignment.getReference());
+				edit.getPropertiesEdit().addProperty("new_assignment_add_to_gradebook", "no");
+				edit.setDraft(true);
+				this.assignmentService.commitEdit(edit);
+
+				// clear from the gradebook if we are set to go in there
+				// Note: Mneme associates with the gb by title, but assignments uses the assignment reference string,
+				// so we will change the title to the reference string for this (and then throw the change away)
+				assessment.setTitle(assignment.getReference());
+				if (sendToGb && this.gradesService.assessmentReported(assessment))
+				{
+					this.gradesService.retractAssessmentGrades(assessment);
+				}
+			}
 		}
 		catch (IdUnusedException e)
 		{
@@ -426,6 +461,9 @@ public class ImportServiceImpl implements ImportService
 		{
 		}
 		catch (AssessmentPolicyException e)
+		{
+		}
+		catch (InUseException e)
 		{
 		}
 	}
@@ -531,6 +569,17 @@ public class ImportServiceImpl implements ImportService
 	public void setEventTrackingService(EventTrackingService service)
 	{
 		eventTrackingService = service;
+	}
+
+	/**
+	 * Dependency: GradesService.
+	 * 
+	 * @param service
+	 *        The GradesService.
+	 */
+	public void setGradesService(GradesService service)
+	{
+		gradesService = service;
 	}
 
 	/**

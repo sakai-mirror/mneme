@@ -115,7 +115,12 @@ public class ImportAssignmentView extends ControllerImpl
 		String poolsSort = params[2];
 		String sourceContext = params[3];
 
-		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		String toolContext = toolManager.getCurrentPlacement().getContext();
+
+		// if the source is the same site as this one, we will draftSource when we import
+		boolean draftSource = (sourceContext.equals(toolContext));
+
+		if (!this.poolService.allowManagePools(toolContext))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
@@ -135,7 +140,7 @@ public class ImportAssignmentView extends ControllerImpl
 			{
 				try
 				{
-					 this.importService.importAssignment(id, toolManager.getCurrentPlacement().getContext());
+					this.importService.importAssignment(id, toolContext, draftSource);
 				}
 				catch (AssessmentPermissionException e)
 				{
