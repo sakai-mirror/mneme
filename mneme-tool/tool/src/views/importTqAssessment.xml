@@ -55,6 +55,9 @@
 			<container>
 
 				<selection>
+					<title>
+						<message selector="select-all" />
+					</title>
 					<model ref="selectedAssessments.values" />
 					<singleSelect>
 						<decision type="true" reversed="TRUE" />
