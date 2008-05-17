@@ -341,9 +341,8 @@ public class ImportServiceImpl implements ImportService
 			// pool.setDescription(info.description);
 			this.poolService.savePool(pool);
 
-			// create the question (essay)
-			// TODO: essay or task?
-			Question question = this.questionService.newQuestion(pool, "mneme:Essay");
+			// create the question (task)
+			Question question = this.questionService.newQuestion(pool, "mneme:Task");
 			EssayQuestionImpl e = (EssayQuestionImpl) (question.getTypeSpecificQuestion());
 
 			// copy over attachments from the assignment
