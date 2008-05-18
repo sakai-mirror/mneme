@@ -43,34 +43,36 @@
 
 	<container>
 
-		<navigationBar>
-			<container>
-				<text>
-					<message selector="select-assignments" />
-				</text>
-			</container>
-		</navigationBar>
-
 		<section>
 			<container>
 
-				<selection>
-					<title>
-						<message selector="select-all" />
-					</title>
-					<model ref="selectedAssignments.values" />
-					<singleSelect>
-						<decision type="true" reversed="TRUE" />
-					</singleSelect>
-					<selectionModel model="assignments" name="assignment">
-						<valueMessage>
-							<message model="assignment.id" />
-						</valueMessage>
-						<displayMessage>
-							<message model="assignment.description" />
-						</displayMessage>
-					</selectionModel>
-				</selection>
+				<!-- the list of assignments from the site -->
+				<entityList style="FLAT">
+					<iterator name="assignment">
+						<model ref="assignments" />
+					</iterator>
+					<entityActions>
+						<instructions>
+							<message selector="select-assignments" />
+						</instructions>
+					</entityActions>
+					<emptyTitle>
+						<message selector="no-assignments" />
+					</emptyTitle>
+					<columns>
+						<selectionColumn multiple="TRUE" pixels="16">
+							<value>
+								<model type="text" ref="assignment.id" />
+							</value>
+							<model ref="selectedAssignments.values" />
+						</selectionColumn>
+						<modelColumn model="assignment.description">
+							<title>
+								<message selector="assignment" />
+							</title>
+						</modelColumn>
+					</columns>
+				</entityList>
 
 			</container>
 		</section>

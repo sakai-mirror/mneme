@@ -7,7 +7,7 @@
 	* $Id$
 	***********************************************************************************
 	*
-	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 	* 
 	* Licensed under the Apache License, Version 2.0 (the "License");
 	* you may not use this file except in compliance with the License.
@@ -43,34 +43,36 @@
 
 	<container>
 
-		<navigationBar>
-			<container>
-				<text>
-					<message selector="select-assessments" />
-				</text>
-			</container>
-		</navigationBar>
-
 		<section>
 			<container>
 
-				<selection>
-					<title>
-						<message selector="select-all" />
-					</title>
-					<model ref="selectedAssessments.values" />
-					<singleSelect>
-						<decision type="true" reversed="TRUE" />
-					</singleSelect>
-					<selectionModel model="assessments" name="assessment">
-						<valueMessage>
-							<message model="assessment.id" />
-						</valueMessage>
-						<displayMessage>
-							<message model="assessment.description" />
-						</displayMessage>
-					</selectionModel>
-				</selection>
+				<!-- the list of assessments from the site -->
+				<entityList style="FLAT">
+					<iterator name="assessment">
+						<model ref="assessments" />
+					</iterator>
+					<entityActions>
+						<instructions>
+							<message selector="select-assessments" />
+						</instructions>
+					</entityActions>
+					<emptyTitle>
+						<message selector="no-assessments" />
+					</emptyTitle>
+					<columns>
+						<selectionColumn multiple="TRUE" pixels="16">
+							<value>
+								<model type="text" ref="assessment.id" />
+							</value>
+							<model ref="selectedAssessments.values" />
+						</selectionColumn>
+						<modelColumn model="assessment.description">
+							<title>
+								<message selector="assessment" />
+							</title>
+						</modelColumn>
+					</columns>
+				</entityList>
 
 			</container>
 		</section>
