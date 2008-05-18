@@ -7,7 +7,7 @@
 	* $Id$
 	***********************************************************************************
 	*
-	* Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* Copyright (c) 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 	* 
 	* Licensed under the Apache License, Version 2.0 (the "License");
 	* you may not use this file except in compliance with the License.
@@ -32,11 +32,11 @@
 	</modeContainer>
 
 	<title>
-		<message selector="import-tq-assessment-title" />
+		<message selector="import-assignment-title" />
 	</title>
 
 	<header>
-		<message selector="import-tq-assessment-header">
+		<message selector="import-assignment-header">
 			<model type="icon" icon="/icons/import_export.png" />
 		</message>
 	</header>
@@ -46,29 +46,29 @@
 		<section>
 			<container>
 
-				<!-- the list of assessments from the site -->
+				<!-- the list of assignments from the site -->
 				<entityList style="FLAT">
-					<iterator name="assessment">
-						<model ref="assessments" />
+					<iterator name="assignment">
+						<model ref="assignments" />
 					</iterator>
 					<entityActions>
 						<instructions>
-							<message selector="select-assessments" />
+							<message selector="select-assignments" />
 						</instructions>
 					</entityActions>
 					<emptyTitle>
-						<message selector="no-assessments" />
+						<message selector="no-assignments" />
 					</emptyTitle>
 					<columns>
 						<selectionColumn multiple="TRUE" pixels="16">
 							<value>
-								<model type="text" ref="assessment.id" />
+								<model type="text" ref="assignment.id" />
 							</value>
-							<model ref="selectedAssessments.values" />
+							<model ref="selectedAssignments.values" />
 						</selectionColumn>
-						<modelColumn model="assessment.description">
+						<modelColumn model="assignment.description">
 							<title>
-								<message selector="assessment" />
+								<message selector="assignment" />
 							</title>
 						</modelColumn>
 					</columns>

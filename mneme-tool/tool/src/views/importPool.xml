@@ -7,7 +7,7 @@
 	* $Id$
 	***********************************************************************************
 	*
-	* Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 	* 
 	* Licensed under the Apache License, Version 2.0 (the "License");
 	* you may not use this file except in compliance with the License.
@@ -65,6 +65,16 @@
 				</navigation>
 				<instructions>
 					<message selector="import-tq-assessment-questions-instructions" />
+				</instructions>
+				<gap />
+				<navigation title="import-asn-sites" style="LINK">
+					<icon icon="/icons/import_assessment.png" style="LEFT" />
+					<destination template="/import_asn_site/{0}">
+						<model ref="poolsSort" />
+					</destination>
+				</navigation>
+				<instructions>
+					<message selector="import-asn-sites-instructions" />
 				</instructions>
 			</container>
 		</section>

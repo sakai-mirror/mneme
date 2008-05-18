@@ -7,7 +7,7 @@
 	* $Id$
 	***********************************************************************************
 	*
-	* Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
+	* Copyright (c) 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
 	* 
 	* Licensed under the Apache License, Version 2.0 (the "License");
 	* you may not use this file except in compliance with the License.
@@ -32,47 +32,42 @@
 	</modeContainer>
 
 	<title>
-		<message selector="import-tq-assessment-title" />
+		<message selector="import-asn-site-title" />
 	</title>
 
 	<header>
-		<message selector="import-tq-assessment-header">
+		<message selector="import-asn-site-header">
 			<model type="icon" icon="/icons/import_export.png" />
 		</message>
 	</header>
 
 	<container>
 
+		<navigationBar>
+			<container>
+				<text>
+					<message selector="select-sites" />
+				</text>
+			</container>
+		</navigationBar>
+
 		<section>
 			<container>
 
-				<!-- the list of assessments from the site -->
-				<entityList style="FLAT">
-					<iterator name="assessment">
-						<model ref="assessments" />
-					</iterator>
-					<entityActions>
-						<instructions>
-							<message selector="select-assessments" />
-						</instructions>
-					</entityActions>
-					<emptyTitle>
-						<message selector="no-assessments" />
-					</emptyTitle>
-					<columns>
-						<selectionColumn multiple="TRUE" pixels="16">
-							<value>
-								<model type="text" ref="assessment.id" />
-							</value>
-							<model ref="selectedAssessments.values" />
-						</selectionColumn>
-						<modelColumn model="assessment.description">
-							<title>
-								<message selector="assessment" />
-							</title>
-						</modelColumn>
-					</columns>
-				</entityList>
+				<selection>
+					<model ref="selectedSite.value" />
+					<singleSelect>
+						<decision type="true" />
+					</singleSelect>
+					<selectionModel model="sites" name="site">
+						<valueMessage>
+							<message model="site.id" />
+						</valueMessage>
+						<displayMessage>
+							<message model="site.description" />
+						</displayMessage>
+					</selectionModel>
+				</selection>
 
 			</container>
 		</section>

@@ -27,22 +27,35 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentPermissionException;
+import org.muse.mneme.api.AssessmentPolicyException;
+import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.AssessmentType;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.Ent;
+import org.muse.mneme.api.GradesService;
 import org.muse.mneme.api.ImportService;
+import org.muse.mneme.api.ManualPart;
 import org.muse.mneme.api.Pool;
 import org.muse.mneme.api.PoolService;
 import org.muse.mneme.api.Question;
 import org.muse.mneme.api.QuestionService;
+import org.muse.mneme.api.ReviewTiming;
 import org.muse.mneme.api.SecurityService;
 import org.muse.mneme.api.Translation;
+import org.sakaiproject.assignment.api.Assignment;
+import org.sakaiproject.assignment.api.AssignmentContent;
+import org.sakaiproject.assignment.api.AssignmentEdit;
+import org.sakaiproject.assignment.api.AssignmentService;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.content.cover.ContentTypeImageService;
 import org.sakaiproject.db.api.SqlReader;
@@ -53,6 +66,9 @@ import org.sakaiproject.entity.api.EntityPropertyTypeException;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.event.api.EventTrackingService;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.exception.InUseException;
+import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.i18n.InternationalizedMessages;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
@@ -124,6 +140,12 @@ public class ImportServiceImpl implements ImportService
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(ImportServiceImpl.class);
 
+	/** Dependency: AssessmentService */
+	protected AssessmentService assessmentService = null;
+
+	/** Dependency: AssignmentService */
+	protected AssignmentService assignmentService = null;
+
 	/** Dependency: AttachmentService */
 	protected AttachmentService attachmentService = null;
 
@@ -138,6 +160,9 @@ public class ImportServiceImpl implements ImportService
 
 	/** Dependency: EventTrackingService */
 	protected EventTrackingService eventTrackingService = null;
+
+	/** Dependency: GradesService */
+	protected GradesService gradesService = null;
 
 	/** Messages. */
 	protected transient InternationalizedMessages messages = null;
@@ -169,6 +194,55 @@ public class ImportServiceImpl implements ImportService
 	public void destroy()
 	{
 		M_log.info("destroy()");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Ent> getAssignments(String context)
+	{
+		if (context == null) throw new IllegalArgumentException();
+
+		List<Ent> rv = readAssignments(context);
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Ent> getAssignmentSites(String userId)
+	{
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		List<Ent> rv = new ArrayList<Ent>();
+
+		// get the authz groups in which this user has assignment permission
+		Set refs = this.authzGroupService.getAuthzGroupsIsAllowed(userId, "asn.new", null);
+		for (Object o : refs)
+		{
+			String ref = (String) o;
+
+			// each is a site ref
+			Reference siteRef = this.entityManager.newReference(ref);
+
+			// get the site display
+			String display = this.siteService.getSiteDisplay(siteRef.getId());
+
+			// take only the site title (between first and last quotes)
+			int firstPos = display.indexOf("\"");
+			int lastPos = display.lastIndexOf("\"");
+			if ((firstPos != -1) && (lastPos != -1))
+			{
+				display = display.substring(firstPos + 1, lastPos);
+			}
+
+			// record for return
+			Ent ent = new EntImpl(siteRef.getId(), display);
+			rv.add(ent);
+		}
+
+		return rv;
 	}
 
 	/**
@@ -250,6 +324,152 @@ public class ImportServiceImpl implements ImportService
 	/**
 	 * {@inheritDoc}
 	 */
+	public void importAssignment(String id, String context, boolean draftSource) throws AssessmentPermissionException
+	{
+		try
+		{
+			// get the Assignment
+			Assignment assignment = this.assignmentService.getAssignment(id);
+			AssignmentContent content = assignment.getContent();
+
+			// create the pool
+			Pool pool = this.poolService.newPool(context);
+			pool.setTitle(addDate("import-assignment-text", assignment.getTitle(), new Date()));
+			pool.setPoints(Float.valueOf(content.getMaxGradePointDisplay()));
+			boolean noPoints = pool.getPoints().floatValue() == 0;
+
+			// pool.setDescription(info.description);
+			this.poolService.savePool(pool);
+
+			// create the question (task)
+			Question question = this.questionService.newQuestion(pool, "mneme:Task");
+			EssayQuestionImpl e = (EssayQuestionImpl) (question.getTypeSpecificQuestion());
+
+			// copy over attachments from the assignment
+			Set<String> docs = new LinkedHashSet<String>();
+			for (Reference ref : (List<Reference>) content.getAttachments())
+			{
+				docs.add(ref.getReference());
+			}
+			List<Translation> translations = importEmbeddedDocs(docs, pool.getContext());
+
+			// format references
+			StringBuilder attachments = new StringBuilder();
+			for (String ref : docs)
+			{
+				// translate the old refs to their new locations
+				for (Translation t : translations)
+				{
+					ref = t.translate(ref);
+				}
+				attachments.append(formatRef(ref));
+			}
+
+			if (attachments.length() > 0)
+			{
+				attachments.insert(0, "<p><ul>");
+				attachments.append("</ul></p>");
+			}
+
+			// set the text
+			String clean = HtmlHelper.clean(content.getInstructions() + attachments.toString());
+			question.getPresentation().setText(clean);
+
+			// type
+			EssayQuestionImpl.SubmissionType type = EssayQuestionImpl.SubmissionType.none;
+			switch (content.getTypeOfSubmission())
+			{
+				case 2 /* Assignment.ATTACHMENT_ONLY_ASSIGNMENT_SUBMISSION */:
+				{
+					type = EssayQuestionImpl.SubmissionType.attachments;
+					break;
+				}
+				case 1 /* Assignment.TEXT_ONLY_ASSIGNMENT_SUBMISSION */:
+				{
+					type = EssayQuestionImpl.SubmissionType.inline;
+					break;
+				}
+				case 3 /* Assignment.TEXT_AND_ATTACHMENT_ASSIGNMENT_SUBMISSION */:
+				{
+					type = EssayQuestionImpl.SubmissionType.both;
+					break;
+				}
+				case 4 /* Assignment.NON_ELECTRONIC_SUBMISSION */:
+				{
+					type = EssayQuestionImpl.SubmissionType.none;
+				}
+			}
+			e.setSubmissionType(type);
+
+			// save
+			question.getTypeSpecificQuestion().consolidate("");
+			this.questionService.saveQuestion(question);
+
+			// create the assessment
+			Assessment assessment = this.assessmentService.newAssessment(context);
+			assessment.setType(AssessmentType.assignment);
+			assessment.setTitle(content.getTitle());
+			assessment.getGrading().setAutoRelease(Boolean.FALSE);
+			if (assignment.getOpenTime() != null)
+			{
+				assessment.getDates().setOpenDate(new Date(assignment.getOpenTime().getTime()));
+			}
+			if (assignment.getDueTime() != null)
+			{
+				assessment.getDates().setDueDate(new Date(assignment.getDueTime().getTime()));
+			}
+			if (assignment.getDropDeadTime() != null)
+			{
+				assessment.getDates().setAcceptUntilDate(new Date(assignment.getDropDeadTime().getTime()));
+			}
+			assessment.setRequireHonorPledge(Boolean.valueOf(content.getHonorPledge() > 1));
+			assessment.getReview().setTiming(ReviewTiming.graded);
+
+			boolean sendToGb = !("no".equals(assignment.getProperties().getProperty("new_assignment_add_to_gradebook")));
+			if (noPoints) sendToGb = false;
+			assessment.getGrading().setGradebookIntegration(Boolean.valueOf(sendToGb));
+
+			ManualPart part = assessment.getParts().addManualPart();
+			part.addQuestion(question);
+
+			this.assessmentService.saveAssessment(assessment);
+
+			// if requested, and the assessment was send to gb, change it to not.
+			if (draftSource)
+			{
+				// change to no gradebook, and draft
+				AssignmentEdit edit = this.assignmentService.editAssignment(assignment.getReference());
+				edit.getPropertiesEdit().addProperty("new_assignment_add_to_gradebook", "no");
+				edit.setDraft(true);
+				this.assignmentService.commitEdit(edit);
+
+				// clear from the gradebook if we are set to go in there
+				// Note: Mneme associates with the gb by title, but assignments uses the assignment reference string,
+				// so we will change the title to the reference string for this (and then throw the change away)
+				assessment.setTitle(assignment.getReference());
+				if (sendToGb && this.gradesService.assessmentReported(assessment))
+				{
+					this.gradesService.retractAssessmentGrades(assessment);
+				}
+			}
+		}
+		catch (IdUnusedException e)
+		{
+		}
+		catch (PermissionException e)
+		{
+		}
+		catch (AssessmentPolicyException e)
+		{
+		}
+		catch (InUseException e)
+		{
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void importPool(String id, String context) throws AssessmentPermissionException
 	{
 		// create the pool
@@ -271,6 +491,28 @@ public class ImportServiceImpl implements ImportService
 		if (this.bundle != null) this.messages = new ResourceLoader(this.bundle);
 
 		M_log.info("init()");
+	}
+
+	/**
+	 * Dependency: AssessmentService.
+	 * 
+	 * @param service
+	 *        The AssessmentService.
+	 */
+	public void setAssessmentService(AssessmentService service)
+	{
+		this.assessmentService = service;
+	}
+
+	/**
+	 * Dependency: AssignmentService.
+	 * 
+	 * @param service
+	 *        The AssignmentService.
+	 */
+	public void setAssignmentService(AssignmentService service)
+	{
+		assignmentService = service;
 	}
 
 	/**
@@ -326,6 +568,17 @@ public class ImportServiceImpl implements ImportService
 	public void setEventTrackingService(EventTrackingService service)
 	{
 		eventTrackingService = service;
+	}
+
+	/**
+	 * Dependency: GradesService.
+	 * 
+	 * @param service
+	 *        The GradesService.
+	 */
+	public void setGradesService(GradesService service)
+	{
+		gradesService = service;
 	}
 
 	/**
@@ -1037,46 +1290,7 @@ public class ImportServiceImpl implements ImportService
 				}
 				else
 				{
-					Reference ref = this.entityManager.newReference(a.ref);
-
-					// if we can't get the properties, assume that the attachment is to a deleted entity and skip it
-					ResourceProperties props = ref.getProperties();
-					if (props != null)
-					{
-						try
-						{
-							// for folders
-							if (props.getBooleanProperty(ResourceProperties.PROP_IS_COLLECTION))
-							{
-								attachmentsHtml.append("<li><img src=\"/library/image/" + ContentTypeImageService.getContentTypeImage("folder")
-										+ "\" border=\"0\" />&nbsp;");
-							}
-
-							// otherwise lookup the icon from the mime type
-							else
-							{
-								String type = props.getProperty(ResourceProperties.PROP_CONTENT_TYPE);
-								attachmentsHtml.append("<li><img src=\"/library/image/" + ContentTypeImageService.getContentTypeImage(type)
-										+ "\" border=\"0\" alt=\"" + type + "\"/>&nbsp;");
-							}
-
-							// the link
-							attachmentsHtml.append("<a href=\"" + ref.getUrl() + "\" target=\"_blank\" title=\""
-									+ Validator.escapeHtml(props.getPropertyFormatted("DAV:displayname")) + "\">"
-									+ Validator.escapeHtml(props.getPropertyFormatted("DAV:displayname")) + "</a>");
-
-							// size
-							attachmentsHtml.append("&nbsp;(" + props.getPropertyFormatted(ResourceProperties.PROP_CONTENT_LENGTH) + ")");
-
-							attachmentsHtml.append("</li>");
-						}
-						catch (EntityPropertyNotDefinedException e)
-						{
-						}
-						catch (EntityPropertyTypeException e)
-						{
-						}
-					}
+					attachmentsHtml.append(formatRef(a.ref));
 				}
 			}
 		}
@@ -1087,6 +1301,60 @@ public class ImportServiceImpl implements ImportService
 		}
 
 		return attachmentsHtml.toString();
+	}
+
+	/**
+	 * Form html for one attachment from a ref.
+	 * 
+	 * @param refStr
+	 *        The reference string.
+	 * @return The html for attachment.
+	 */
+	protected String formatRef(String refStr)
+	{
+		StringBuilder rv = new StringBuilder();
+
+		Reference ref = this.entityManager.newReference(refStr);
+
+		// if we can't get the properties, assume that the attachment is to a deleted entity and skip it
+		ResourceProperties props = ref.getProperties();
+		if (props != null)
+		{
+			try
+			{
+				// for folders
+				if (props.getBooleanProperty(ResourceProperties.PROP_IS_COLLECTION))
+				{
+					rv.append("<li><img src=\"/library/image/" + ContentTypeImageService.getContentTypeImage("folder") + "\" border=\"0\" />&nbsp;");
+				}
+
+				// otherwise lookup the icon from the mime type
+				else
+				{
+					String type = props.getProperty(ResourceProperties.PROP_CONTENT_TYPE);
+					rv.append("<li><img src=\"/library/image/" + ContentTypeImageService.getContentTypeImage(type) + "\" border=\"0\" alt=\"" + type
+							+ "\"/>&nbsp;");
+				}
+
+				// the link
+				rv.append("<a href=\"" + ref.getUrl() + "\" target=\"_blank\" title=\""
+						+ Validator.escapeHtml(props.getPropertyFormatted("DAV:displayname")) + "\">"
+						+ Validator.escapeHtml(props.getPropertyFormatted("DAV:displayname")) + "</a>");
+
+				// size
+				rv.append("&nbsp;(" + props.getPropertyFormatted(ResourceProperties.PROP_CONTENT_LENGTH) + ")");
+
+				rv.append("</li>");
+			}
+			catch (EntityPropertyNotDefinedException e)
+			{
+			}
+			catch (EntityPropertyTypeException e)
+			{
+			}
+		}
+
+		return rv.toString();
 	}
 
 	/**
@@ -1558,7 +1826,29 @@ public class ImportServiceImpl implements ImportService
 	}
 
 	/**
-	 * Read the Samigo assessmentss for this context.
+	 * Read the Assignments for this context.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return The list of Ents describing the assignments for this context.
+	 */
+	protected List<Ent> readAssignments(String context)
+	{
+		List<Ent> rv = new ArrayList<Ent>();
+
+		Iterator i = this.assignmentService.getAssignmentsForContext(context);
+		while (i.hasNext())
+		{
+			Assignment a = (Assignment) i.next();
+			Ent ent = new EntImpl(a.getId(), a.getTitle());
+			rv.add(ent);
+		}
+
+		return rv;
+	}
+
+	/**
+	 * Read the Samigo assessments for this context.
 	 * 
 	 * @param context
 	 *        The context.

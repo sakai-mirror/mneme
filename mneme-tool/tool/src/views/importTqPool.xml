@@ -43,31 +43,36 @@
 
 	<container>
 
-		<navigationBar>
-			<container>
-				<text>
-					<message selector="select-pools" />
-				</text>
-			</container>
-		</navigationBar>
-
 		<section>
 			<container>
 
-				<selection>
-					<model ref="selectedPools.values" />
-					<singleSelect>
-						<decision type="true" reversed="TRUE" />
-					</singleSelect>
-					<selectionModel model="pools" name="pool">
-						<valueMessage>
-							<message model="pool.id" />
-						</valueMessage>
-						<displayMessage>
-							<message model="pool.description" type="text" />
-						</displayMessage>
-					</selectionModel>
-				</selection>
+				<!-- the list of assessments from the site -->
+				<entityList style="FLAT">
+					<iterator name="pool">
+						<model ref="pools" />
+					</iterator>
+					<entityActions>
+						<instructions>
+							<message selector="select-pools" />
+						</instructions>
+					</entityActions>
+					<emptyTitle>
+						<message selector="no-pools" />
+					</emptyTitle>
+					<columns>
+						<selectionColumn multiple="TRUE" pixels="16">
+							<value>
+								<model type="text" ref="pool.id" />
+							</value>
+							<model ref="selectedPools.values" />
+						</selectionColumn>
+						<modelColumn model="pool.description">
+							<title>
+								<message selector="pool" />
+							</title>
+						</modelColumn>
+					</columns>
+				</entityList>
 
 			</container>
 		</section>
