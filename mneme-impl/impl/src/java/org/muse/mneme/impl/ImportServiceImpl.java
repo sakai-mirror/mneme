@@ -25,6 +25,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -137,6 +139,18 @@ public class ImportServiceImpl implements ImportService
 		Integer type;
 	}
 
+	/**
+	 * Sort the Ents by description, case insensitive
+	 */
+	protected class EntComparator implements Comparator
+	{
+		public int compare(Object arg0, Object arg1)
+		{
+			int rv = ((Ent) arg0).getDescription().toLowerCase().compareTo(((Ent) arg1).getDescription().toLowerCase());
+			return rv;
+		}
+	}
+
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(ImportServiceImpl.class);
 
@@ -205,6 +219,9 @@ public class ImportServiceImpl implements ImportService
 
 		List<Ent> rv = readAssignments(context);
 
+		// sort
+		Collections.sort(rv, new EntComparator());
+
 		return rv;
 	}
 
@@ -242,6 +259,9 @@ public class ImportServiceImpl implements ImportService
 			rv.add(ent);
 		}
 
+		// sort
+		Collections.sort(rv, new EntComparator());
+
 		return rv;
 	}
 
@@ -254,6 +274,8 @@ public class ImportServiceImpl implements ImportService
 
 		List<Ent> rv = readSamigoAssessments(context);
 
+		Collections.sort(rv, new EntComparator());
+
 		return rv;
 	}
 
@@ -265,6 +287,9 @@ public class ImportServiceImpl implements ImportService
 		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
 
 		List<Ent> rv = readSamigoPools(userId);
+
+		// sort
+		Collections.sort(rv, new EntComparator());
 
 		return rv;
 	}
@@ -302,6 +327,9 @@ public class ImportServiceImpl implements ImportService
 			Ent ent = new EntImpl(siteRef.getId(), display);
 			rv.add(ent);
 		}
+
+		// sort
+		Collections.sort(rv, new EntComparator());
 
 		return rv;
 	}
