@@ -62,6 +62,16 @@
 		<section>
 			<container>
 
+				<!-- timed instructions overlay -->
+				<overlay id="instructions">
+					<container>
+						<text selector="timed-instructions" />
+						<gap />
+						<toggle target="instructions" title="close" style="LINK">
+							<icon icon="/icons/close.png" style="LEFT" />
+						</toggle>
+					</container>
+				</overlay>
 				<selection orientation="DROPDOWN" height="5" title="users">
 					<singleSelect>
 						<decision type="true" reversed="TRUE" />
@@ -126,16 +136,6 @@
 						<decision model="assessment.hasTimeLimit" />
 					</included>
 				</selection>
-				<!-- timed instructions overlay -->
-				<overlay id="instructions">
-					<container>
-						<text selector="timed-instructions" />
-						<gap />
-						<toggle target="instructions" title="close" style="LINK">
-							<icon icon="/icons/close.png" style="LEFT" />
-						</toggle>
-					</container>
-				</overlay>
 				<selection title="allowTries">
 					<model ref="access.hasTriesLimit" />
 					<selectionChoices>
