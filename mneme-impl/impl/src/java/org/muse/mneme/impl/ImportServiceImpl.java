@@ -335,7 +335,10 @@ public class ImportServiceImpl implements ImportService
 			// create the pool
 			Pool pool = this.poolService.newPool(context);
 			pool.setTitle(addDate("import-assignment-text", assignment.getTitle(), new Date()));
-			pool.setPoints(Float.valueOf(content.getMaxGradePointDisplay()));
+			if (content.getTypeOfGrade() == 3/* Assignment.SCORE_GRADE_TYPE */)
+			{
+				pool.setPoints(Float.valueOf(content.getMaxGradePointDisplay()));
+			}
 			boolean noPoints = pool.getPoints().floatValue() == 0;
 
 			// pool.setDescription(info.description);
