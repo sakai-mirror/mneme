@@ -515,6 +515,9 @@ public class SubmissionImpl implements Submission
 	public Boolean getHasUnscoredAnswers()
 	{
 		if (!getIsComplete()) return Boolean.FALSE;
+		
+		// if the overall score has been set, none of the answers are considered unscored
+		if (this.evaluation.getScore() != null) return Boolean.FALSE;
 
 		for (Answer answer : getAnswers())
 		{

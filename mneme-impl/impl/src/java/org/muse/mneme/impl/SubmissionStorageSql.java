@@ -182,7 +182,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT COUNT(1) FROM MNEME_ANSWER A");
 		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=? AND S.COMPLETE='1' AND S.TEST_DRIVE='0'");
-		sql.append(" WHERE A.ANSWERED='1' AND A.EVAL_SCORE IS NULL AND A.AUTO_SCORE IS NULL");
+		sql.append(" WHERE A.ANSWERED='1' AND A.EVAL_SCORE IS NULL AND A.AUTO_SCORE IS NULL AND S.EVAL_SCORE IS NULL");
 
 		Object[] fields = new Object[1];
 		fields[0] = Long.valueOf(assessment.getId());
@@ -271,7 +271,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT COUNT(1) FROM MNEME_ANSWER A");
 		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=? AND COMPLETE='1'");
-		sql.append(" WHERE A.QUESTION_ID=? AND A.ANSWERED='1' AND A.EVAL_SCORE IS NULL AND A.AUTO_SCORE IS NULL");
+		sql.append(" WHERE A.QUESTION_ID=? AND A.ANSWERED='1' AND A.EVAL_SCORE IS NULL AND A.AUTO_SCORE IS NULL AND S.EVAL_SCORE IS NULL");
 
 		Object[] fields = new Object[2];
 		fields[0] = Long.valueOf(assessment.getId());
