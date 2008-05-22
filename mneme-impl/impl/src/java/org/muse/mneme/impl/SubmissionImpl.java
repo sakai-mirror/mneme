@@ -91,6 +91,8 @@ public class SubmissionImpl implements Submission
 	/** A value sent to setTotalScore before it is applied. */
 	protected transient Float totalScoreToBe = null;
 
+	protected transient boolean totalScoreToBeSet = false;
+
 	protected String userId = null;
 
 	/**
@@ -128,37 +130,75 @@ public class SubmissionImpl implements Submission
 	 */
 	public void consolidateTotalScore()
 	{
-		if (this.totalScoreToBe == null) return;
+		// skip for phantoms
+		if (this.getIsPhantom()) return;
 
-		// the current answer total score
-		float curAnswerScore = 0;
-		for (Answer answer : answers)
+		// check if there was a total score set
+		if (!this.totalScoreToBeSet) return;
+		this.totalScoreToBeSet = false;
+
+		// adjust either the submission evaluation, or the single answer's evaluation if
+		// there is a single answer only, and the submission's evaluation has not yet been set
+		if (!getEvaluationUsed())
 		{
-			Float answerScore = answer.getTotalScore();
-			if (answerScore != null)
+			// if null, clear the score
+			if (this.totalScoreToBe == null)
 			{
-				curAnswerScore += answerScore.floatValue();
+				this.answers.get(0).getEvaluation().setScore(null);
+			}
+
+			// otherwise use this as the answer score
+			// Note: setting the final to be 0 will not cause a null answer score to become 0 from null
+			// (the grade_asssessment UI shows 0 for final score when there is no auto score and no evaluations set)
+			else if ((this.totalScoreToBe.floatValue() != 0f) || (this.answers.get(0).getEvaluation().getScore() != null))
+			{
+				this.answers.get(0).getEvaluation().setScore(this.totalScoreToBe);
 			}
 		}
 
-		// the current total score, including the answer total and any current evaluation
-		float curTotalScore = curAnswerScore;
-		if (this.evaluation.getScore() != null)
+		else
 		{
-			curTotalScore += this.evaluation.getScore().floatValue();
+			// take a null to mean clear the evaluation adjustment
+			if (this.totalScoreToBe == null)
+			{
+				this.evaluation.setScore(null);
+			}
+
+			// compute the new adjustment to achieve this final score
+			else
+			{
+
+				// the current answer total score
+				float curAnswerScore = 0;
+				for (Answer answer : answers)
+				{
+					Float answerScore = answer.getTotalScore();
+					if (answerScore != null)
+					{
+						curAnswerScore += answerScore.floatValue();
+					}
+				}
+
+				// the current total score, including the answer total and any current evaluation
+				float curTotalScore = curAnswerScore;
+				if (this.evaluation.getScore() != null)
+				{
+					curTotalScore += this.evaluation.getScore().floatValue();
+				}
+
+				float total = this.totalScoreToBe.floatValue();
+				this.totalScoreToBe = null;
+
+				// if the current total is the total we want, we are done
+				if (curTotalScore == total) return;
+
+				// adjust to remove the current answer score
+				total -= curAnswerScore;
+
+				// set this as the new total score
+				this.evaluation.setScore(total);
+			}
 		}
-
-		float total = this.totalScoreToBe.floatValue();
-		this.totalScoreToBe = null;
-
-		// if the current total is the total we want, we are done
-		if (curTotalScore == total) return;
-
-		// adjust to remove the current answer score
-		total -= curAnswerScore;
-
-		// set this as the new total score
-		this.evaluation.setScore(total);
 	}
 
 	/**
@@ -356,6 +396,17 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getEvaluationUsed()
+	{
+		// multiple answers or evaluation already in use
+		if ((this.answers.size() > 1) || (this.getEvaluation().getDefined())) return Boolean.TRUE;
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Expiration getExpiration()
 	{
 		// TODO: thread caching
@@ -515,7 +566,7 @@ public class SubmissionImpl implements Submission
 	public Boolean getHasUnscoredAnswers()
 	{
 		if (!getIsComplete()) return Boolean.FALSE;
-		
+
 		// if the overall score has been set, none of the answers are considered unscored
 		if (this.evaluation.getScore() != null) return Boolean.FALSE;
 
@@ -1077,20 +1128,9 @@ public class SubmissionImpl implements Submission
 	 */
 	public void setTotalScore(Float score)
 	{
-		// take a null to mean clear the evaluation adjustment
-		if (score == null)
-		{
-			if (!this.getIsPhantom() && this.getEvaluation().getScore() != null)
-			{
-				this.evaluation.setScore(null);
-			}
-		}
-
-		else
-		{
-			// save to process in consolidate
-			this.totalScoreToBe = score;
-		}
+		// save to process in consolidate
+		this.totalScoreToBe = score;
+		this.totalScoreToBeSet = true;
 	}
 
 	/**

@@ -742,53 +742,113 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// process all submissions, official or not
 		for (SubmissionImpl submission : submissions)
 		{
-			// if there's a comment to set, append it
-			if (comment != null)
+			// for single answer submissions that have no submission evaluation
+			if (!submission.getEvaluationUsed())
 			{
-				String newComment = submission.evaluation.getComment();
-				if (newComment == null)
+				Answer answer = submission.answers.get(0);
+
+				// if there's a comment to set, append it
+				if (comment != null)
 				{
-					newComment = comment;
-				}
-				else
-				{
-					newComment += comment;
+					String newComment = answer.getEvaluation().getComment();
+					if (newComment == null)
+					{
+						newComment = comment;
+					}
+					else
+					{
+						newComment += comment;
+					}
+
+					answer.getEvaluation().setComment(newComment);
 				}
 
-				submission.evaluation.setComment(newComment);
+				// if there's a score to set, add it
+				if (score != null)
+				{
+					float total = score;
+					if (answer.getEvaluation().getScore() != null)
+					{
+						total += answer.getEvaluation().getScore();
+					}
+					answer.getEvaluation().setScore(total);
+				}
+
+				// save (if changed)
+				if (((EvaluationImpl) answer.getEvaluation()).getIsChanged())
+				{
+					// set the attribution
+					answer.getEvaluation().getAttribution().setDate(now);
+					answer.getEvaluation().getAttribution().setUserId(userId);
+
+					// clear the changed flag
+					((EvaluationImpl) answer.getEvaluation()).clearIsChanged();
+
+					// clear the cache
+					String key = cacheKey(submission.getId());
+					this.threadLocalManager.set(key, null);
+
+					// save
+					List<Answer> answers = new ArrayList(1);
+					answers.add(answer);
+					this.storage.saveAnswers(answers);
+
+					// event
+					eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE,
+							getSubmissionReference(submission.getId()), true));
+				}
 			}
 
-			// if there's a score to set, add it
-			if (score != null)
+			else
 			{
-				float total = score;
-				if (submission.evaluation.getScore() != null)
+				// if there's a comment to set, append it
+				if (comment != null)
 				{
-					total += submission.evaluation.getScore();
+					String newComment = submission.evaluation.getComment();
+					if (newComment == null)
+					{
+						newComment = comment;
+					}
+					else
+					{
+						newComment += comment;
+					}
+
+					submission.evaluation.setComment(newComment);
 				}
-				submission.evaluation.setScore(total);
-			}
 
-			// save the submission evaluation (if changed)
-			if (((EvaluationImpl) submission.getEvaluation()).getIsChanged())
-			{
-				// set the attribution
-				submission.evaluation.getAttribution().setDate(now);
-				submission.evaluation.getAttribution().setUserId(userId);
+				// if there's a score to set, add it
+				if (score != null)
+				{
+					float total = score;
+					if (submission.evaluation.getScore() != null)
+					{
+						total += submission.evaluation.getScore();
+					}
+					submission.evaluation.setScore(total);
+				}
 
-				// clear the changed flag
-				((EvaluationImpl) submission.getEvaluation()).clearIsChanged();
+				// save the submission evaluation (if changed)
+				if (((EvaluationImpl) submission.getEvaluation()).getIsChanged())
+				{
+					// set the attribution
+					submission.evaluation.getAttribution().setDate(now);
+					submission.evaluation.getAttribution().setUserId(userId);
 
-				// clear the cache
-				String key = cacheKey(submission.getId());
-				this.threadLocalManager.set(key, null);
+					// clear the changed flag
+					((EvaluationImpl) submission.getEvaluation()).clearIsChanged();
 
-				// save
-				this.storage.saveSubmissionEvaluation(submission);
+					// clear the cache
+					String key = cacheKey(submission.getId());
+					this.threadLocalManager.set(key, null);
 
-				// event
-				eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE, getSubmissionReference(submission.getId()),
-						true));
+					// save
+					this.storage.saveSubmissionEvaluation(submission);
+
+					// event
+					eventTrackingService.post(eventTrackingService.newEvent(MnemeService.SUBMISSION_GRADE,
+							getSubmissionReference(submission.getId()), true));
+				}
 			}
 		}
 

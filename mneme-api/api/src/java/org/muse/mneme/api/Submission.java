@@ -117,6 +117,14 @@ public interface Submission
 	SubmissionEvaluation getEvaluation();
 
 	/**
+	 * Check if the submission evaluation is used.<br />
+	 * This is not so if it has not yet been set and the assessment has only a single question.
+	 * 
+	 * @return TRUE if the evaluation is used, FALSE if not.
+	 */
+	Boolean getEvaluationUsed();
+
+	/**
 	 * Access the expiration information for the submission.
 	 * 
 	 * @return The expiration information for the submission.
