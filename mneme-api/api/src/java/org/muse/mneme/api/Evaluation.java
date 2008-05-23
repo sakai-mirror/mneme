@@ -69,9 +69,9 @@ public interface Evaluation
 	String getComment();
 
 	/**
-	 * Check if the evaluation is defined - comment or attachment.
+	 * Check if the evaluation is defined - score, comment or attachment.
 	 * 
-	 * @return TRUE if there is a comment or attachment, FALSE if neither.
+	 * @return TRUE if there is a score, comment or attachment, FALSE if none.
 	 */
 	Boolean getDefined();
 

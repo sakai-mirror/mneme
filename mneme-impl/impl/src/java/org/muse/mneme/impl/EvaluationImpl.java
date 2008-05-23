@@ -102,6 +102,7 @@ public abstract class EvaluationImpl implements Evaluation
 
 	public Boolean getDefined()
 	{
+		if (this.score != null) return Boolean.TRUE;
 		if (this.comment != null) return Boolean.TRUE;
 		if (!this.attachments.isEmpty()) return Boolean.TRUE;
 

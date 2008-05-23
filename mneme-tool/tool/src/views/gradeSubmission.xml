@@ -305,6 +305,9 @@
 							</navigations>
 						</attachments>
 					</container>
+					<included>
+						<decision model="submission.evaluationUsed" />
+					</included>
 				</section>
 
 				<!-- evaluated and released -->
@@ -327,6 +330,7 @@
 							</message>
 							<included>
 								<decision model="submission.assessment.hasPoints" />
+								<decision model="submission.evaluationUsed" />
 							</included>
 						</text>
 						<!--mark as evaluated -->

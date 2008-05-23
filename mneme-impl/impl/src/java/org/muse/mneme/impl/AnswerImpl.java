@@ -339,15 +339,24 @@ public class AnswerImpl implements Answer
 			float total = score.floatValue();
 
 			// adjust to remove the current auto score
-			if (getAutoScore() != null)
+			Float auto = getAutoScore();
+			if (auto != null)
 			{
-				total -= getAutoScore().floatValue();
+				total -= auto.floatValue();
 			}
 
 			// round away bogus decimals
 			total = Math.round(total * 100.0f) / 100.0f;
 
-			this.evaluation.setScore(Float.valueOf(total));
+			// if the auto score exists and is the entire desired score, null out the evaluation adjustment
+			if ((total == 0f) && (auto != null))
+			{
+				this.evaluation.setScore(null);
+			}
+			else
+			{
+				this.evaluation.setScore(Float.valueOf(total));
+			}
 		}
 	}
 

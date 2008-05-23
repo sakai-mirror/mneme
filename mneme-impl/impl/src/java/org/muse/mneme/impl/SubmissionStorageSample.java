@@ -157,7 +157,8 @@ public abstract class SubmissionStorageSample implements SubmissionStorage
 		for (SubmissionImpl submission : this.submissions.values())
 		{
 			// if any for this assessment are complete and not released, the assessment is not fully released
-			if (submission.getAssessment().equals(assessment) && submission.getIsComplete() && (!submission.getIsTestDrive()))
+			if (submission.getAssessment().equals(assessment) && submission.getIsComplete() && (!submission.getIsTestDrive())
+					&& (submission.getEvaluation().getScore() == null))
 			{
 				for (Answer answer : submission.getAnswers())
 				{
@@ -215,7 +216,7 @@ public abstract class SubmissionStorageSample implements SubmissionStorage
 		for (SubmissionImpl submission : this.submissions.values())
 		{
 			// if any submissions that are for this assessment are complete and not released, the assessment is not fully released
-			if (submission.getAssessment().equals(assessment) && submission.getIsComplete())
+			if (submission.getAssessment().equals(assessment) && submission.getIsComplete() && (submission.getEvaluation().getScore() == null))
 			{
 				for (Answer answer : submission.getAnswers())
 				{
