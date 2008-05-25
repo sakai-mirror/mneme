@@ -449,9 +449,9 @@ public class ImportServiceImpl implements ImportService
 			{
 				assessment.getDates().setDueDate(new Date(assignment.getDueTime().getTime()));
 			}
-			if (assignment.getDropDeadTime() != null)
+			if (assignment.getCloseTime() != null)
 			{
-				assessment.getDates().setAcceptUntilDate(new Date(assignment.getDropDeadTime().getTime()));
+				assessment.getDates().setAcceptUntilDate(new Date(assignment.getCloseTime().getTime()));
 			}
 			assessment.setRequireHonorPledge(Boolean.valueOf(content.getHonorPledge() > 1));
 			assessment.getReview().setTiming(ReviewTiming.graded);
