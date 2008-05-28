@@ -48,6 +48,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.muse.ambrosia.util.EscapeRefUrl;
 import org.muse.mneme.api.Attachment;
 import org.muse.mneme.api.AttachmentService;
 import org.muse.mneme.api.MnemeService;
@@ -821,10 +822,13 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 						translated = translation.translate(translated);
 					}
 
+					// URL encode translated
+					String escaped = EscapeRefUrl.escapeUrl(translated);
+
 					// if changed, replace
 					if (!normal.equals(translated))
 					{
-						m.appendReplacement(sb, Matcher.quoteReplacement(m.group(1) + "=\"" + ref.substring(0, index + 7) + translated + "\""));
+						m.appendReplacement(sb, Matcher.quoteReplacement(m.group(1) + "=\"" + ref.substring(0, index + 7) + escaped + "\""));
 					}
 				}
 			}
@@ -1143,7 +1147,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			{
 				String ref = doc.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
 				String url = doc.getUrl(ContentHostingService.PROP_ALTERNATE_REFERENCE);
-				Attachment a = new AttachmentImpl(doc.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME), ref, url, doc
+				String escapedUrl = EscapeRefUrl.escapeRefUrl(ref, url);
+
+				Attachment a = new AttachmentImpl(doc.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME), ref, escapedUrl, doc
 						.getContentType());
 				attachments.add(a);
 			}
