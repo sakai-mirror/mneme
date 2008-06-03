@@ -249,6 +249,13 @@ public class GradeQuestionView extends ControllerImpl
 		// read form
 		String destination = this.uiService.decode(req, context);
 
+		// post-process the answers
+		for (Object o : answers.getSet())
+		{
+			Answer a = (Answer) o;
+			a.getTypeSpecificAnswer().consolidate(destination);
+		}
+
 		// check for remove
 		if (destination.startsWith("REMOVE:"))
 		{
@@ -273,6 +280,11 @@ public class GradeQuestionView extends ControllerImpl
 				}
 			}
 
+			destination = context.getDestination();
+		}
+
+		else if (destination.startsWith("STAY_"))
+		{
 			destination = context.getDestination();
 		}
 

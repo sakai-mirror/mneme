@@ -128,7 +128,7 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void consolidate(String destination)
 	{
-		// check for remove
+		// check for remove (delivery)
 		if (destination.startsWith("STAY_REMOVE:"))
 		{
 			String[] parts = StringUtil.splitFirst(destination, ":");
@@ -144,6 +144,22 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 
 						this.changed = true;
 					}
+				}
+			}
+		}
+		
+		// check for delete annotation (grading)
+		else if (destination.startsWith("STAY_DELETE_ANNOTATION:"))
+		{
+			String[] parts = StringUtil.splitFirst(destination, ":");
+			if (parts.length == 2)
+			{
+				// if our id is selected, clear our annotation
+				String aid = parts[1];
+				if (this.answer.getId().equals(aid))
+				{
+					this.answerEvaluated = null;
+					this.changed = true;
 				}
 			}
 		}
