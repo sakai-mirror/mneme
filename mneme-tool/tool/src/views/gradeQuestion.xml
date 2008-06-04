@@ -115,6 +115,12 @@
 			<iterator name="answer">
 				<model ref="answers" indexRef="id" />
 			</iterator>
+			<!-- page anchor to be able to return to this particular answer -->
+			<anchor>
+				<message>
+					<model ref="answer.id" />
+				</message>
+			</anchor>
 			<pager paging="paging" submit="TRUE">
 				<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
 					<model ref="sort_grades" />

@@ -285,7 +285,14 @@ public class GradeQuestionView extends ControllerImpl
 
 		else if (destination.startsWith("STAY_"))
 		{
+			String[] parts = StringUtil.splitFirst(destination, ":");
+
 			destination = context.getDestination();
+
+			if (parts.length == 2)
+			{
+				destination += "#" + parts[1];
+			}
 		}
 
 		// save

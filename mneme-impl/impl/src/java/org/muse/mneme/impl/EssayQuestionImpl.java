@@ -348,21 +348,17 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		delAnnotation.setDestination(this.uiService.newDestination().setDestination("STAY_DELETE_ANNOTATION:{0}",
 				this.uiService.newPropertyReference().setReference("answer.id")));
 		delAnnotation.setConfirm(this.uiService.newTrueDecision(), "cancel", "/icons/cancel.gif", "confirm-delete-annotation");
-		Section annotationSection = this.uiService.newSection().setTreatment("indented");
-		annotationSection.setIncluded(this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("grading")),
-				this.uiService.newHasValueDecision().setProperty(
-						this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData")));
-		annotationSection.add(delAnnotation);
 
 		// for grading, include the editor for marking up the answer
 		HtmlEdit edit = this.uiService.newHtmlEdit();
 		edit.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
 		edit.setSize(HtmlEdit.Sizes.tall);
+		edit.setProperty(this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerEvaluated"));
 		edit.setIncluded(this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("grading")),
 				this.uiService.newHasValueDecision().setProperty(
 						this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData")));
-		edit.setProperty(this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerEvaluated"));
-		answerSection.add(edit).add(annotationSection);
+		edit.addAction(delAnnotation);
+		answerSection.add(edit);
 
 		Attachments uploaded = this.uiService.newAttachments();
 		uploaded.setAttachments(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded"), "attachment");
@@ -458,8 +454,6 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		delAnnotation.setDestination(this.uiService.newDestination().setDestination("STAY_DELETE_ANNOTATION:{0}",
 				this.uiService.newPropertyReference().setReference("answer.id")));
 		delAnnotation.setConfirm(this.uiService.newTrueDecision(), "cancel", "/icons/cancel.gif", "confirm-delete-annotation");
-		Section annotationSection = this.uiService.newSection().setTreatment("indented");
-		annotationSection.add(delAnnotation);
 
 		// editor for marking up the answer
 		HtmlEdit answer = this.uiService.newHtmlEdit();
@@ -468,6 +462,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		answer.setIncluded(this.uiService.newHasValueDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData")));
 		answer.setProperty(this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerEvaluated"));
+		answer.addAction(delAnnotation);
 
 		Attachments uploaded = this.uiService.newAttachments();
 		uploaded.setAttachments(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded"), "attachment");
@@ -475,7 +470,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		uploaded.setIncluded(this.uiService.newHasValueDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded")));
 
-		return this.uiService.newFragment().setMessages(this.messages).add(answer).add(annotationSection).add(uploaded);
+		return this.uiService.newFragment().setMessages(this.messages).add(answer).add(uploaded);
 	}
 
 	/**

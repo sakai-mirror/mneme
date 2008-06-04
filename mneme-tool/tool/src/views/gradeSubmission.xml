@@ -158,6 +158,13 @@
 						</message>
 					</title>
 
+					<!-- page anchor to be able to return to this particular answer -->
+					<anchor>
+						<message>
+							<model ref="answer.id" />
+						</message>
+					</anchor>
+
 					<container>
 
 						<!-- Question specific review -->
