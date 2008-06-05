@@ -45,6 +45,7 @@ import org.muse.mneme.api.Submission;
 import org.muse.mneme.api.SubmissionCompletedException;
 import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -337,9 +338,20 @@ public class QuestionView extends ControllerImpl
 		}
 
 		// if we are staying heres
-		if (destination.startsWith("STAY"))
+		if (destination.startsWith("STAY_"))
 		{
-			return context.getDestination();
+			String rv = context.getDestination();
+
+			String[] parts = StringUtil.splitFirst(destination, ":");
+			if (parts.length == 2)
+			{
+				String[] anchor = StringUtil.splitFirst(parts[1], ":");
+				if (anchor.length > 0)
+				{
+					rv += "#" + anchor[0];
+				}
+			}
+			return rv;
 		}
 
 		// for requests for a single question

@@ -247,13 +247,16 @@
 									<upload>
 										<message selector="upload-button" />
 									</upload>
+									<destination template="STAY_UPLOAD:{0}">
+										<model ref="answer.id" />
+									</destination>
 								</fileUpload>
 								<attachments model="answer.evaluation.attachments" name="attachment">
 									<navigations>
 										<navigation title="remove-attachment" style="LINK" description="remove-attachment-description" submit="TRUE"
 											small="TRUE">
 											<icon icon="/icons/delete.png" style="NONE" />
-											<destination template="REMOVE:{0}:{1}">
+											<destination template="STAY_REMOVE:{0}:{1}">
 												<model ref="answer.id" />
 												<model ref="attachment.reference" />
 											</destination>
@@ -276,6 +279,10 @@
 				<message selector="overall" />
 			</title>
 
+			<anchor>
+				<message selector="submission-anchor" />
+			</anchor>
+
 			<container>
 
 				<!-- overall comments -->
@@ -297,13 +304,14 @@
 							<upload>
 								<message selector="upload-button" />
 							</upload>
+							<destination template="STAY_UPLOAD:SUBMISSION" />
 						</fileUpload>
 						<attachments model="submission.evaluation.attachments" name="attachment">
 							<navigations>
 								<navigation title="remove-attachment" style="LINK" description="remove-attachment-description" submit="TRUE"
 									small="TRUE">
 									<icon icon="/icons/delete.png" style="NONE" />
-									<destination template="REMOVE:SUBMISSION:{0}">
+									<destination template="STAY_REMOVE:SUBMISSION:{0}">
 										<model ref="attachment.reference" />
 									</destination>
 									<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif"

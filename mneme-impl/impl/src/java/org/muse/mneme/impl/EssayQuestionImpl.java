@@ -206,6 +206,8 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		upload.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.attachments.toString(),
 				SubmissionType.both.toString()).setProperty(
 				this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
+		upload.setDestination(this.uiService.newDestination().setDestination("STAY_UPLOAD:{0}",
+				this.uiService.newPropertyReference().setReference("answer.question.id")));
 
 		Attachments uploaded = this.uiService.newAttachments();
 		uploaded.setAttachments(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.uploaded"), "attachment");
@@ -217,7 +219,8 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		Navigation remove = this.uiService.newNavigation();
 		remove.setTitle("upload-remove").setStyle(Navigation.Style.link).setSubmit().setSmall();
 		remove.setIcon("/icons/delete.png", Navigation.IconStyle.none);
-		remove.setDestination(this.uiService.newDestination().setDestination("STAY_REMOVE:{0}",
+		remove.setDestination(this.uiService.newDestination().setDestination("STAY_REMOVE:{0}:{1}",
+				this.uiService.newPropertyReference().setReference("answer.question.id"),
 				this.uiService.newPropertyReference().setReference("attachment.reference")));
 		remove.setConfirm(this.uiService.newTrueDecision(), "cancel", "/icons/cancel.gif", "confirm-remove");
 		uploaded.addNavigation(remove);

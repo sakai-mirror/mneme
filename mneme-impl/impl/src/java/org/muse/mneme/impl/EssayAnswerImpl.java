@@ -134,20 +134,25 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 			String[] parts = StringUtil.splitFirst(destination, ":");
 			if (parts.length == 2)
 			{
-				for (Iterator i = this.uploads.iterator(); i.hasNext();)
+				String[] parts2 = StringUtil.splitFirst(parts[1], ":");
+				if (parts2.length == 2)
 				{
-					Reference ref = (Reference) i.next();
-					if (ref.getReference().equals(parts[1]))
+					String refStr = parts2[1];
+					for (Iterator i = this.uploads.iterator(); i.hasNext();)
 					{
-						i.remove();
-						this.attachmentService.removeAttachment(ref);
+						Reference ref = (Reference) i.next();
+						if (ref.getReference().equals(refStr))
+						{
+							i.remove();
+							this.attachmentService.removeAttachment(ref);
 
-						this.changed = true;
+							this.changed = true;
+						}
 					}
 				}
 			}
 		}
-		
+
 		// check for delete annotation (grading)
 		else if (destination.startsWith("STAY_DELETE_ANNOTATION:"))
 		{

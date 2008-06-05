@@ -256,8 +256,10 @@ public class GradeQuestionView extends ControllerImpl
 			a.getTypeSpecificAnswer().consolidate(destination);
 		}
 
+		String newDestination = null;
+
 		// check for remove
-		if (destination.startsWith("REMOVE:"))
+		if (destination.startsWith("STAY_REMOVE:"))
 		{
 			String[] parts = StringUtil.splitFirst(destination, ":");
 			if (parts.length == 2)
@@ -280,20 +282,25 @@ public class GradeQuestionView extends ControllerImpl
 				}
 			}
 
-			destination = context.getDestination();
+			newDestination = context.getDestination();
 		}
 
-		else if (destination.startsWith("STAY_"))
+		if (destination.startsWith("STAY_"))
 		{
 			String[] parts = StringUtil.splitFirst(destination, ":");
 
-			destination = context.getDestination();
-
+			newDestination = context.getDestination();
 			if (parts.length == 2)
 			{
-				destination += "#" + parts[1];
+				String[] anchor = StringUtil.splitFirst(parts[1], ":");
+				if (anchor.length > 0)
+				{
+					newDestination += "#" + anchor[0];
+				}
 			}
 		}
+
+		if (newDestination != null) destination = newDestination;
 
 		// save
 		try
