@@ -23,7 +23,7 @@
 	*
 	**********************************************************************************/
 -->
-<interface>
+<interface anchor="anchor">
 
 	<!-- attachment picker view -->
 	<attachmentPicker>
@@ -386,7 +386,7 @@
 			<container>
 				<text selector="questions" />
 				<pager paging="paging" submit="TRUE">
-					<destination template="/grade_submission/{0}/{1}/{2}{3}">
+					<destination template="/grade_submission/{0}/{1}/-/{2}{3}">
 						<model ref="submission.id" />
 						<model type="paging" ref="paging" />
 						<model ref="sort" />
@@ -403,7 +403,7 @@
 						<hasValueDecision model="prev" reversed="TRUE" />
 					</disabled>
 					<icon icon="/icons/previous.png" style="LEFT" />
-					<destination template="/grade_submission/{0}/{1}/{2}{3}">
+					<destination template="/grade_submission/{0}/{1}/-/{2}{3}">
 						<model ref="prev" />
 						<model type="paging" ref="paging" selector="FIRST" />
 						<model ref="sort" />
@@ -424,7 +424,7 @@
 						<hasValueDecision model="next" reversed="TRUE" />
 					</disabled>
 					<icon icon="/icons/next.png" style="LEFT" />
-					<destination template="/grade_submission/{0}/{1}/{2}{3}">
+					<destination template="/grade_submission/{0}/{1}/-/{2}{3}">
 						<model ref="next" />
 						<model type="paging" ref="paging" selector="FIRST" />
 						<model ref="sort" />

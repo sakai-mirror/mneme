@@ -78,14 +78,24 @@ public class QuestionView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need two parameters (sid/quesiton selector)
-		if (params.length != 4)
+		// we need two parameters (sid/question selector) and optional anchor
+		if ((params.length != 4) && (params.length != 5))
 		{
 			throw new IllegalArgumentException();
 		}
 
 		String submissionId = params[2];
 		String questionSelector = params[3];
+		String anchor = (params.length == 5) ? params[4] : null;
+
+		// adjust the current destination to remove the anchor
+		String curDestination = context.getDestination();
+		if (anchor != null)
+		{
+			int pos = curDestination.lastIndexOf("/");
+			curDestination = curDestination.substring(0, pos);
+		}
+		context.put("curDestination", curDestination);
 
 		Submission submission = submissionService.getSubmission(submissionId);
 
@@ -96,7 +106,7 @@ public class QuestionView extends ControllerImpl
 			return;
 		}
 
-		// handle our 'z' selector - redirect to the appropriate question to re-enterthis submission
+		// handle our 'z' selector - redirect to the appropriate question to re-enter this submission
 		if ("z".equals(questionSelector))
 		{
 			try
@@ -153,6 +163,8 @@ public class QuestionView extends ControllerImpl
 			context.put("maintainer", Boolean.TRUE);
 		}
 
+		if (anchor != null) context.put("anchor", anchor);
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -171,14 +183,23 @@ public class QuestionView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// we need two parameters (sid/quesiton selector)
-		if (params.length != 4)
+		// we need two parameters (sid/question selector) and optional anchor
+		if ((params.length != 4) && (params.length != 5))
 		{
 			throw new IllegalArgumentException();
 		}
 
 		String submissionId = params[2];
 		String questionSelector = params[3];
+		String anchor = (params.length == 5) ? params[4] : null;
+
+		// adjust the current destination to remove the anchor
+		String curDestination = context.getDestination();
+		if (anchor != null)
+		{
+			int pos = curDestination.lastIndexOf("/");
+			curDestination = curDestination.substring(0, pos);
+		}
 
 		// if (!context.getPostExpected())
 		// {
@@ -233,7 +254,7 @@ public class QuestionView extends ControllerImpl
 		}
 
 		// where are we going?
-		destination = questionChooseDestination(context, destination, questionSelector, submissionId);
+		destination = questionChooseDestination(context, destination, questionSelector, submissionId, curDestination);
 
 		// submit all answers
 		try
@@ -327,8 +348,11 @@ public class QuestionView extends ControllerImpl
 	 *        Which question(s) to put on the page: q followed by a questionId picks one, s followed by a sectionId picks a sections
 	 * @param submisssionId
 	 *        The selected submission id.
+	 * @param curDestination
+	 *        The current destination, adjusted to remove anchor.
 	 */
-	protected String questionChooseDestination(Context context, String destination, String questionSelector, String submissionId)
+	protected String questionChooseDestination(Context context, String destination, String questionSelector, String submissionId,
+			String curDestination)
 	{
 		// get the submission
 		Submission submission = submissionService.getSubmission(submissionId);
@@ -340,7 +364,7 @@ public class QuestionView extends ControllerImpl
 		// if we are staying heres
 		if (destination.startsWith("STAY_"))
 		{
-			String rv = context.getDestination();
+			String rv = curDestination;
 
 			String[] parts = StringUtil.splitFirst(destination, ":");
 			if (parts.length == 2)
@@ -348,7 +372,7 @@ public class QuestionView extends ControllerImpl
 				String[] anchor = StringUtil.splitFirst(parts[1], ":");
 				if (anchor.length > 0)
 				{
-					rv += "#" + anchor[0];
+					rv += "/" + anchor[0];
 				}
 			}
 			return rv;
@@ -635,20 +659,20 @@ public class QuestionView extends ControllerImpl
 					{
 						destination = "/question/" + submission.getId() + "/p" + question.getPart().getId();
 
-						// include the question target if not the first quesiton in the part
+						// include the question target if not the first question in the part
 						if (!question.getPartOrdering().getIsFirst())
 						{
-							destination = destination + "#" + question.getId();
+							destination = destination + "/" + question.getId();
 						}
 					}
 					else
 					{
 						destination = "/question/" + submission.getId() + "/a";
 
-						// include the question target if not the first quesiton in the assessment
+						// include the question target if not the first question in the assessment
 						if (!question.getAssessmentOrdering().getIsFirst())
 						{
-							destination = destination + "#" + question.getId();
+							destination = destination + "/" + question.getId();
 						}
 					}
 				}

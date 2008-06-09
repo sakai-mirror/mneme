@@ -93,8 +93,8 @@ public class GradeSubmissionView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]sid, [3] paging, [4]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
-		if (params.length < 4) throw new IllegalArgumentException();
+		// [2]sid, [3] paging, [4] anchor, [5]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
+		if (params.length < 5) throw new IllegalArgumentException();
 
 		Submission submission = this.submissionService.getSubmission(params[2]);
 		if (submission == null)
@@ -116,8 +116,8 @@ public class GradeSubmissionView extends ControllerImpl
 		// next and prev, based on the sort
 		String sortCode = "userName_a";
 		SubmissionService.FindAssessmentSubmissionsSort sort = null;
-		int destinationStartsAt = 5;
-		if (params.length > 3) sortCode = params[4];
+		int destinationStartsAt = 6;
+		if (params.length > 4) sortCode = params[5];
 		try
 		{
 			sort = SubmissionService.FindAssessmentSubmissionsSort.valueOf(sortCode);
@@ -125,7 +125,7 @@ public class GradeSubmissionView extends ControllerImpl
 		catch (IllegalArgumentException e)
 		{
 			// no sort, so it must be part of destination
-			destinationStartsAt = 4;
+			destinationStartsAt = 5;
 			sortCode = "userName_a";
 		}
 		if (sort != null)
@@ -190,6 +190,9 @@ public class GradeSubmissionView extends ControllerImpl
 		}
 		context.put("answers", answers);
 
+		String anchor = params[4];
+		if (!anchor.equals("-")) context.put("anchor", anchor);
+
 		// needed by some of the delegates to show the score
 		context.put("grading", Boolean.TRUE);
 
@@ -224,8 +227,8 @@ public class GradeSubmissionView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]sid, [3] paging, [4]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
-		if (params.length < 4) throw new IllegalArgumentException();
+		// [2]sid, [3] paging, [4] anchor, [5]next/prev sort (optional- leave out to disable next/prev), optionally followed by a return destination
+		if (params.length < 5) throw new IllegalArgumentException();
 
 		final Submission submission = this.submissionService.getSubmission(params[2]);
 		if (submission == null)
@@ -271,8 +274,6 @@ public class GradeSubmissionView extends ControllerImpl
 			a.getTypeSpecificAnswer().consolidate(destination);
 		}
 
-		String newDestination = null;
-
 		// check for remove
 		if (destination.startsWith("STAY_REMOVE:"))
 		{
@@ -301,26 +302,26 @@ public class GradeSubmissionView extends ControllerImpl
 					}
 				}
 			}
-
-			newDestination = context.getDestination();
 		}
 
 		if (destination.startsWith("STAY_"))
 		{
-			String[] parts = StringUtil.splitFirst(destination, ":");
+			String newAnchor = "-";
 
-			newDestination = context.getDestination();
+			String[] parts = StringUtil.splitFirst(destination, ":");
 			if (parts.length == 2)
 			{
 				String[] anchor = StringUtil.splitFirst(parts[1], ":");
 				if (anchor.length > 0)
 				{
-					newDestination += "#" + anchor[0];
+					newAnchor = anchor[0];
 				}
 			}
-		}
 
-		if (newDestination != null) destination = newDestination;
+			// rebuild the current destination with the new anchor
+			params[4] = newAnchor;
+			destination = StringUtil.unsplit(params, "/");
+		}
 
 		// save graded submission
 		try
