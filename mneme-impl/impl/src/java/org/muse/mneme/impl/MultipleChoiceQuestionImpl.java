@@ -422,6 +422,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		else
 		{
 			correct.setMultiple();
+			correct.setSelectAll(false);
 		}
 		correct.setLabel("correct");
 		correct.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
@@ -622,6 +623,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		else
 		{
 			selCol.setMultiple();
+			selCol.setSelectAll(false);
 		}
 		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
@@ -748,6 +750,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		else
 		{
 			selCol.setMultiple();
+			selCol.setSelectAll(false);
 		}
 		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
@@ -886,6 +889,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		else
 		{
 			selCol.setMultiple();
+			selCol.setSelectAll(false);
 		}
 		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
@@ -932,6 +936,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		else
 		{
 			selCol.setMultiple();
+			selCol.setSelectAll(false);
 		}
 		selCol.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
@@ -991,6 +996,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		else
 		{
 			selCol.setMultiple();
+			selCol.setSelectAll(false);
 		}
 		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.correctAnswers"));
