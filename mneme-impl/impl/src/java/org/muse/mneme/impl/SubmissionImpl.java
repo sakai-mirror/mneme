@@ -130,12 +130,12 @@ public class SubmissionImpl implements Submission
 	 */
 	public void consolidateTotalScore()
 	{
+		// skip for phantoms
+		if (this.getIsPhantom()) return;
+
 		// check if there was a total score set
 		if (!this.totalScoreToBeSet) return;
 		this.totalScoreToBeSet = false;
-
-		// skip for phantoms if null
-		if ((this.totalScoreToBe == null) && this.getIsPhantom()) return;
 
 		// adjust either the submission evaluation, or the single answer's evaluation if
 		// there is a single answer only, and the submission's evaluation has not yet been set
@@ -398,8 +398,8 @@ public class SubmissionImpl implements Submission
 	 */
 	public Boolean getEvaluationUsed()
 	{
-		// multiple answers or evaluation already in use (or phantom)
-		if ((this.answers.size() > 1) || (this.getEvaluation().getDefined()) || this.getIsPhantom()) return Boolean.TRUE;
+		// multiple answers or evaluation already in use
+		if ((this.answers.size() > 1) || (this.getEvaluation().getDefined())) return Boolean.TRUE;
 
 		return Boolean.FALSE;
 	}
