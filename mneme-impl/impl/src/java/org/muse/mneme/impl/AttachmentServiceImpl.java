@@ -117,6 +117,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/** Dependency: IdManager. */
 	protected IdManager idManager = null;
 
+	/** Configuration: to make thumbs for images or not. */
+	protected boolean makeThumbs = false;
+
 	/** Dependency: SecurityService */
 	protected SecurityService securityService = null;
 
@@ -528,7 +531,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			// register as an entity producer
 			entityManager.registerEntityProducer(this, REFERENCE_ROOT);
 
-			M_log.info("init()");
+			M_log.info("init(): thumbs: " + this.makeThumbs);
 		}
 		catch (Throwable t)
 		{
@@ -654,6 +657,17 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	public void setIdManager(IdManager idManager)
 	{
 		this.idManager = idManager;
+	}
+
+	/**
+	 * Set the make thumbs setting
+	 * 
+	 * @param value
+	 *        the string of the boolean for the make thumbs setting.
+	 */
+	public void setMakeThumbs(String value)
+	{
+		this.makeThumbs = Boolean.valueOf(value);
 	}
 
 	/**
@@ -811,6 +825,9 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 */
 	protected Reference addThumb(Reference resource, String name, byte[] body)
 	{
+		// if disabled
+		if (!this.makeThumbs) return null;
+
 		Reference ref = this.getReference(resource.getId());
 		String thumbId = ref.getId() + THUMB_SUFFIX;
 		String thumbName = name + THUMB_SUFFIX;
