@@ -32,6 +32,8 @@
 		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
 		<property name="contentHostingService"><ref bean="org.sakaiproject.content.api.ContentHostingService"/></property>
  		<property name="idManager"><ref bean="org.sakaiproject.id.api.IdManager"/></property>
+ 		
+ 		<property name="makeThumbs"><value>false</value></property>
 	</bean>
 
 	<bean id="org.muse.mneme.api.Pool"
