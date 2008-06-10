@@ -376,17 +376,29 @@ public class ImportServiceImpl implements ImportService
 			Question question = this.questionService.newQuestion(pool, "mneme:Task");
 			EssayQuestionImpl e = (EssayQuestionImpl) (question.getTypeSpecificQuestion());
 
-			// copy over attachments from the assignment
+			// find the assignment attachments
 			Set<String> docs = new LinkedHashSet<String>();
 			for (Reference ref : (List<Reference>) content.getAttachments())
 			{
 				docs.add(ref.getReference());
 			}
+			
+			// remember just the attachments
+			Set<String> attachmentDocs = new LinkedHashSet<String>();
+			attachmentDocs.addAll(docs);
+
+			// find the embedded documents in the question text
+			docs.addAll(this.attachmentService.harvestAttachmentsReferenced(content.getInstructions(), true));
+
+			// import the embedded documents and attachments
 			List<Translation> translations = importEmbeddedDocs(docs, pool.getContext());
 
-			// format references
+			// convert the question text's embedded documents to reference the harvested documents
+			String questionText = this.attachmentService.translateEmbeddedReferences(content.getInstructions(), translations);
+
+			// format attachments references to add to the text
 			StringBuilder attachments = new StringBuilder();
-			for (String ref : docs)
+			for (String ref : attachmentDocs)
 			{
 				// translate the old refs to their new locations
 				for (Translation t : translations)
@@ -402,8 +414,10 @@ public class ImportServiceImpl implements ImportService
 				attachments.append("</ul></p>");
 			}
 
+			// clean the text
+			String clean = HtmlHelper.clean(questionText + attachments.toString());
+
 			// set the text
-			String clean = HtmlHelper.clean(content.getInstructions() + attachments.toString());
 			question.getPresentation().setText(clean);
 
 			// type
