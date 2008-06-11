@@ -24,7 +24,7 @@
 	**********************************************************************************/
 -->
 
-<interface autoComplete="FALSE">
+<interface autoComplete="FALSE" anchor="anchor">
 
 	<!--mode bar-->
 	<modeContainer>
@@ -560,7 +560,7 @@
 					<icon icon="/icons/test.png" style="LEFT" />
 					<destination template="/instructions/{0}{1}">
 						<model ref="submission.id" />
-						<model ref="sakai_destination" />
+						<model ref="curDestination" />
 					</destination>
 				</navigation>
 			</container>

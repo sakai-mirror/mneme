@@ -24,7 +24,7 @@
 	**********************************************************************************/
 -->
 
-<interface>
+<interface anchor="anchor">
 
 	<!-- attachment picker view -->
 	<attachmentPicker>
@@ -115,8 +115,14 @@
 			<iterator name="answer">
 				<model ref="answers" indexRef="id" />
 			</iterator>
+			<!-- page anchor to be able to return to this particular answer -->
+			<anchor>
+				<message>
+					<model ref="answer.id" />
+				</message>
+			</anchor>
 			<pager paging="paging" submit="TRUE">
-				<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
+				<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}/-">
 					<model ref="sort_grades" />
 					<model ref="assessment.id" />
 					<model ref="question.id" />
@@ -142,7 +148,7 @@
 					</included>
 					<entityNavigations>
 						<navigation submit="TRUE">
-							<destination template="/grade_submission/{0}/-/grade_question/{1}/{2}/{3}/{4}{5}/{6}">
+							<destination template="/grade_submission/{0}/-/-/grade_question/{1}/{2}/{3}/{4}{5}/{6}/-">
 								<model ref="answer.submission.id" />
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
@@ -166,7 +172,7 @@
 						</direction>
 						<asc icon="/icons/sortascending.gif">
 							<message selector="asc" />
-							<destination template="/grade_question/{0}/{1}/{2}/0A/{3}">
+							<destination template="/grade_question/{0}/{1}/{2}/0A/{3}/-">
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
@@ -175,7 +181,7 @@
 						</asc>
 						<desc icon="/icons/sortdescending.gif">
 							<message selector="desc" />
-							<destination template="/grade_question/{0}/{1}/{2}/0D/{3}">
+							<destination template="/grade_question/{0}/{1}/{2}/0D/{3}/-">
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
 								<model ref="question.id" />
@@ -193,7 +199,7 @@
 					</included>
 					<entityNavigations>
 						<navigation submit="TRUE">
-							<destination template="/grade_submission/{0}/-/grade_question/{1}/{2}/{3}/{4}{5}/{6}">
+							<destination template="/grade_submission/{0}/-/-/grade_question/{1}/{2}/{3}/{4}{5}/{6}/-">
 								<model ref="answer.submission.id" />
 								<model ref="sort_grades" />
 								<model ref="assessment.id" />
@@ -292,13 +298,16 @@
 									<upload>
 										<message selector="upload-button" />
 									</upload>
+									<destination template="STAY_UPLOAD:{0}">
+										<model ref="answer.id" />
+									</destination>
 								</fileUpload>
 								<attachments model="answer.evaluation.attachments" name="attachment">
 									<navigations>
 										<navigation title="remove-attachment" style="LINK" description="remove-attachment-description" submit="TRUE"
 											small="TRUE">
 											<icon icon="/icons/delete.png" style="NONE" />
-											<destination template="REMOVE:{0}:{1}">
+											<destination template="STAY_REMOVE:{0}:{1}">
 												<model ref="answer.id" />
 												<model ref="attachment.reference" />
 											</destination>
@@ -318,7 +327,7 @@
 		<navigationBar>
 			<container>
 				<pager paging="paging" submit="TRUE">
-					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
+					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}/-">
 						<model ref="sort_grades" />
 						<model ref="assessment.id" />
 						<model ref="question.id" />
@@ -340,7 +349,7 @@
 				</navigation>
 				<divider />
 				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE">
-					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}">
+					<destination template="/grade_question/{0}/{1}/{2}/{3}{4}/{5}/-">
 						<model ref="sort_grades" />
 						<model ref="assessment.id" />
 						<model ref="question.id" />

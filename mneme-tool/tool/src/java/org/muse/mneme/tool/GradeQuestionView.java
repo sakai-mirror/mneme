@@ -88,7 +88,7 @@ public class GradeQuestionView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]grades sort code, [3]aid, [4]qid, |optional ->| [5]sort, [6]page
+		// [2]grades sort code, [3]aid, [4]qid, |optional ->| [5]sort, [6]page, [7] anchor
 		if (params.length < 5) throw new IllegalArgumentException();
 
 		// check for user permission to access the assessments for grading
@@ -193,6 +193,15 @@ public class GradeQuestionView extends ControllerImpl
 			context.put("pageSizes", this.pageSizes);
 		}
 
+		if (params.length > 7)
+		{
+			String anchor = params[7];
+			if (!anchor.equals("-"))
+			{
+				context.put("anchor", anchor);
+			}
+		}
+
 		uiService.render(ui, context);
 	}
 
@@ -218,7 +227,7 @@ public class GradeQuestionView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2]grades sort code, [3]aid, [4]qid, |optional ->| [5]sort, [6]page
+		// [2]grades sort code, [3]aid, [4]qid, |optional ->| [5]sort, [6]page, [7] anchor
 		if (params.length < 5) throw new IllegalArgumentException();
 
 		// check for user permission to access the assessments for grading
@@ -249,8 +258,17 @@ public class GradeQuestionView extends ControllerImpl
 		// read form
 		String destination = this.uiService.decode(req, context);
 
+		// post-process the answers
+		for (Object o : answers.getSet())
+		{
+			Answer a = (Answer) o;
+			a.getTypeSpecificAnswer().consolidate(destination);
+		}
+
+		String newDestination = null;
+
 		// check for remove
-		if (destination.startsWith("REMOVE:"))
+		if (destination.startsWith("STAY_REMOVE:"))
 		{
 			String[] parts = StringUtil.splitFirst(destination, ":");
 			if (parts.length == 2)
@@ -272,8 +290,66 @@ public class GradeQuestionView extends ControllerImpl
 					}
 				}
 			}
+		}
 
-			destination = context.getDestination();
+		if (destination.startsWith("STAY_"))
+		{
+			String newAnchor = "-";
+
+			String[] parts = StringUtil.splitFirst(destination, ":");
+			if (parts.length == 2)
+			{
+				String[] anchor = StringUtil.splitFirst(parts[1], ":");
+				if (anchor.length > 0)
+				{
+					newAnchor = anchor[0];
+				}
+			}
+
+			// rebuild the current destination with the new anchor
+			if (params.length > 7)
+			{
+				params[7] = newAnchor;
+				destination = StringUtil.unsplit(params, "/");
+			}
+			else
+			{
+				// assessment
+				Assessment assessment = this.assessmentService.getAssessment(params[3]);
+				if (assessment == null)
+				{
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+					return;
+				}
+
+				// sort code
+				String sortCode = null;
+				if (params.length > 5)
+				{
+					sortCode = params[5];
+				}
+				if (sortCode == null)
+				{
+					if (assessment.getAnonymous())
+					{
+						sortCode = "1A";
+					}
+					else
+					{
+						sortCode = "0A";
+					}
+				}
+
+				// paging parameter
+				String pagingParameter = null;
+				if (params.length > 6) pagingParameter = params[6];
+				if (pagingParameter == null)
+				{
+					pagingParameter = "1-" + Integer.toString(this.pageSizes.get(0));
+				}
+
+				destination = context.getDestination() + "/" + sortCode + "/" + pagingParameter + "/" + newAnchor;
+			}
 		}
 
 		// save

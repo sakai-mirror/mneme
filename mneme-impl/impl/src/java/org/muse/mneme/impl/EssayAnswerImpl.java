@@ -128,22 +128,43 @@ public class EssayAnswerImpl implements TypeSpecificAnswer
 	 */
 	public void consolidate(String destination)
 	{
-		// check for remove
+		// check for remove (delivery)
 		if (destination.startsWith("STAY_REMOVE:"))
 		{
 			String[] parts = StringUtil.splitFirst(destination, ":");
 			if (parts.length == 2)
 			{
-				for (Iterator i = this.uploads.iterator(); i.hasNext();)
+				String[] parts2 = StringUtil.splitFirst(parts[1], ":");
+				if (parts2.length == 2)
 				{
-					Reference ref = (Reference) i.next();
-					if (ref.getReference().equals(parts[1]))
+					String refStr = parts2[1];
+					for (Iterator i = this.uploads.iterator(); i.hasNext();)
 					{
-						i.remove();
-						this.attachmentService.removeAttachment(ref);
+						Reference ref = (Reference) i.next();
+						if (ref.getReference().equals(refStr))
+						{
+							i.remove();
+							this.attachmentService.removeAttachment(ref);
 
-						this.changed = true;
+							this.changed = true;
+						}
 					}
+				}
+			}
+		}
+
+		// check for delete annotation (grading)
+		else if (destination.startsWith("STAY_DELETE_ANNOTATION:"))
+		{
+			String[] parts = StringUtil.splitFirst(destination, ":");
+			if (parts.length == 2)
+			{
+				// if our id is selected, clear our annotation
+				String aid = parts[1];
+				if (this.answer.getId().equals(aid))
+				{
+					this.answerEvaluated = null;
+					this.changed = true;
 				}
 			}
 		}

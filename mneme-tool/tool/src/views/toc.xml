@@ -229,7 +229,7 @@
 							</message>
 							<entityNavigations>
 								<navigation>
-									<destination template="/question/{0}/p{1}#{2}">
+									<destination template="/question/{0}/p{1}/{2}">
 										<model ref="submission.id" />
 										<model ref="question.part.id" />
 										<model ref="question.id" />
@@ -258,7 +258,7 @@
 							</message>
 							<entityNavigations>
 								<navigation>
-									<destination template="/question/{0}/a#{1}">
+									<destination template="/question/{0}/a/{1}">
 										<model ref="submission.id" />
 										<model ref="question.id" />
 									</destination>

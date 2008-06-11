@@ -23,7 +23,7 @@
 	*
 	**********************************************************************************/
 -->
-<interface>
+<interface anchor="anchor">
 
 	<!-- attachment picker view -->
 	<attachmentPicker>
@@ -158,6 +158,13 @@
 						</message>
 					</title>
 
+					<!-- page anchor to be able to return to this particular answer -->
+					<anchor>
+						<message>
+							<model ref="answer.id" />
+						</message>
+					</anchor>
+
 					<container>
 
 						<!-- Question specific review -->
@@ -240,13 +247,16 @@
 									<upload>
 										<message selector="upload-button" />
 									</upload>
+									<destination template="STAY_UPLOAD:{0}">
+										<model ref="answer.id" />
+									</destination>
 								</fileUpload>
 								<attachments model="answer.evaluation.attachments" name="attachment">
 									<navigations>
 										<navigation title="remove-attachment" style="LINK" description="remove-attachment-description" submit="TRUE"
 											small="TRUE">
 											<icon icon="/icons/delete.png" style="NONE" />
-											<destination template="REMOVE:{0}:{1}">
+											<destination template="STAY_REMOVE:{0}:{1}">
 												<model ref="answer.id" />
 												<model ref="attachment.reference" />
 											</destination>
@@ -269,6 +279,10 @@
 				<message selector="overall" />
 			</title>
 
+			<anchor>
+				<message selector="submission-anchor" />
+			</anchor>
+
 			<container>
 
 				<!-- overall comments -->
@@ -290,13 +304,14 @@
 							<upload>
 								<message selector="upload-button" />
 							</upload>
+							<destination template="STAY_UPLOAD:SUBMISSION" />
 						</fileUpload>
 						<attachments model="submission.evaluation.attachments" name="attachment">
 							<navigations>
 								<navigation title="remove-attachment" style="LINK" description="remove-attachment-description" submit="TRUE"
 									small="TRUE">
 									<icon icon="/icons/delete.png" style="NONE" />
-									<destination template="REMOVE:SUBMISSION:{0}">
+									<destination template="STAY_REMOVE:SUBMISSION:{0}">
 										<model ref="attachment.reference" />
 									</destination>
 									<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif"
@@ -371,7 +386,7 @@
 			<container>
 				<text selector="questions" />
 				<pager paging="paging" submit="TRUE">
-					<destination template="/grade_submission/{0}/{1}/{2}{3}">
+					<destination template="/grade_submission/{0}/{1}/-/{2}{3}">
 						<model ref="submission.id" />
 						<model type="paging" ref="paging" />
 						<model ref="sort" />
@@ -388,7 +403,7 @@
 						<hasValueDecision model="prev" reversed="TRUE" />
 					</disabled>
 					<icon icon="/icons/previous.png" style="LEFT" />
-					<destination template="/grade_submission/{0}/{1}/{2}{3}">
+					<destination template="/grade_submission/{0}/{1}/-/{2}{3}">
 						<model ref="prev" />
 						<model type="paging" ref="paging" selector="FIRST" />
 						<model ref="sort" />
@@ -409,7 +424,7 @@
 						<hasValueDecision model="next" reversed="TRUE" />
 					</disabled>
 					<icon icon="/icons/next.png" style="LEFT" />
-					<destination template="/grade_submission/{0}/{1}/{2}{3}">
+					<destination template="/grade_submission/{0}/{1}/-/{2}{3}">
 						<model ref="next" />
 						<model type="paging" ref="paging" selector="FIRST" />
 						<model ref="sort" />
