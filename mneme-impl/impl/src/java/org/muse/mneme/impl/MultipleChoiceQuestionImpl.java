@@ -438,8 +438,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		// choice text column
 		EntityListColumn choiceText = this.uiService.newEntityListColumn();
 		HtmlEdit edit = this.uiService.newHtmlEdit();
-		edit.setSize(8, 50);
-		edit.setSmall();
+		edit.setSize(HtmlEdit.Sizes.small);
 		edit.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
 		choiceText.add(edit);
 		choicesList.addColumn(choiceText);
@@ -628,6 +627,8 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		}
 		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers"));
+		selCol.setOnEmptyAlert(this.uiService.newDecision().setReversed().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.submission.assessment.randomAccess")), "linear-missing");
 		entityList.addColumn(selCol);
 
 		AutoColumn autoCol = this.uiService.newAutoColumn();
@@ -796,8 +797,7 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 
 		Decision[] orInc = new Decision[2];
 		orInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
-		orInc[1] = this.uiService.newDecision().setProperty(
-				this.uiService.newPropertyReference().setReference("answer.showCorrectReview"));
+		orInc[1] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.showCorrectReview"));
 		Decision[] andInc = new Decision[2];
 		andInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.question.hasCorrect"));
 		andInc[1] = this.uiService.newOrDecision().setOptions(orInc);

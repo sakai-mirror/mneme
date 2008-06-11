@@ -177,7 +177,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 	{
 		// question (with instructions)
 		HtmlEdit question = uiService.newHtmlEdit();
-		question.setSize(14, 100);
+		question.setSize(HtmlEdit.Sizes.tall);
 		question.setProperty(this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.text"));
 		question.setTitle("question");
 
@@ -276,6 +276,9 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("answer.question.typeSpecificQuestion.questionText"))
 				.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answers")).setWidth(20);
 		fillIn.setWidth(20);
+
+		fillIn.setOnEmptyAlert(this.uiService.newDecision().setReversed().setProperty(
+				this.uiService.newPropertyReference().setReference("answer.submission.assessment.randomAccess")), "linear-missing");
 
 		Section section = this.uiService.newSection();
 		section.add(fillIn);
@@ -428,8 +431,7 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 		Decision[] orInc = new Decision[2];
 		orInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("grading"));
-		orInc[1] = this.uiService.newDecision().setProperty(
-				this.uiService.newPropertyReference().setReference("answer.showCorrectReview"));
+		orInc[1] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.showCorrectReview"));
 
 		Decision[] andInc = new Decision[2];
 		andInc[0] = this.uiService.newDecision().setProperty(this.uiService.newPropertyReference().setReference("answer.question.hasCorrect"));

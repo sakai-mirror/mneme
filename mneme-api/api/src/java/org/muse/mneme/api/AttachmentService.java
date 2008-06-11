@@ -87,6 +87,27 @@ public interface AttachmentService
 	Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, Reference resource);
 
 	/**
+	 * Add an attachment from an uploaded file.
+	 * 
+	 * @param application
+	 *        The application prefix for the collection in private.
+	 * @param context
+	 *        The context associated with the attachment.
+	 * @param prefix
+	 *        Any prefix path for within the context are of the application in private.
+	 * @param uniqueHolder
+	 *        If true, a uniquely named folder is created to hold the resource.
+	 * @param name
+	 *        The attachment file name.
+	 * @param body
+	 *        The attachment body bytes.
+	 * @param type
+	 *        The attacment file mime type.
+	 * @return The Reference to the added attachment.
+	 */
+	Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, String name, byte[] body, String type);
+
+	/**
 	 * Find all the attachments in the docs area of the application for this context. Skip image thumbs.
 	 * 
 	 * @param application

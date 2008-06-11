@@ -106,7 +106,7 @@ public class TaskQuestionImpl extends EssayQuestionImpl
 
 		// model answer
 		HtmlEdit modelAnswer = this.uiService.newHtmlEdit();
-		modelAnswer.setSize(14, 100);
+		modelAnswer.setSize(HtmlEdit.Sizes.tall);
 		modelAnswer.setProperty(this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
 		modelAnswer.setTitle("model-answer-edit", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 

@@ -545,6 +545,9 @@
 				<navigation title="save-exit" accessKey="save-exit-access" description="save-exit-description" style="BUTTON" submit="TRUE"
 					destination="/list">
 					<icon icon="/icons/exit.gif" style="LEFT" />
+					<validate>
+						<trueDecision reversed="TRUE" />
+					</validate>
 				</navigation>
 				<navigation title="finish-exam" accessKey="finish-exam-access" description="finish-exam-description" style="BUTTON" submit="TRUE"
 					destination="SUBMIT" id="finish">
@@ -554,6 +557,9 @@
 							<model type="enum" messageRoot="assessment-type-" ref="submission.assessment.type" />
 						</message>
 					</confirm>
+					<validate>
+						<trueDecision reversed="TRUE" />
+					</validate>
 				</navigation>
 				<divider />
 				<navigation title="instructions" accessKey="instructions-access" style="LINK" submit="TRUE">
@@ -562,6 +568,9 @@
 						<model ref="submission.id" />
 						<model ref="curDestination" />
 					</destination>
+					<validate>
+						<trueDecision reversed="TRUE" />
+					</validate>
 				</navigation>
 			</container>
 		</navigationBar>

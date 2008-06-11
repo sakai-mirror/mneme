@@ -72,7 +72,7 @@
 						<!-- instructions overlay -->
 						<overlay id="instructions">
 							<container>
-								<htmlEdit title="test-instructions" rows="8" cols="60" small="TRUE">
+								<htmlEdit title="test-instructions" size="SMALL">
 									<model type="html" ref="assessment.presentation.text" />
 								</htmlEdit>
 								<!-- 
