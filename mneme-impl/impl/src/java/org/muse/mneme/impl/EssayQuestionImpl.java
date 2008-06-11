@@ -347,7 +347,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		// for grading, command to delete annotation
 		Navigation delAnnotation = this.uiService.newNavigation();
 		delAnnotation.setTitle("delete-annotation").setStyle(Navigation.Style.link).setSubmit();
-		delAnnotation.setIcon("/icons/delete.png", Navigation.IconStyle.left);
+		delAnnotation.setIcon("/icons/comments_erase.png", Navigation.IconStyle.left);
 		delAnnotation.setDestination(this.uiService.newDestination().setDestination("STAY_DELETE_ANNOTATION:{0}",
 				this.uiService.newPropertyReference().setReference("answer.id")));
 		delAnnotation.setConfirm(this.uiService.newTrueDecision(), "cancel", "/icons/cancel.gif", "confirm-delete-annotation");
@@ -453,7 +453,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		// command to delete annotation
 		Navigation delAnnotation = this.uiService.newNavigation();
 		delAnnotation.setTitle("delete-annotation").setStyle(Navigation.Style.link).setSubmit();
-		delAnnotation.setIcon("/icons/delete.png", Navigation.IconStyle.left);
+		delAnnotation.setIcon("/icons/comments_erase.png", Navigation.IconStyle.left);
 		delAnnotation.setDestination(this.uiService.newDestination().setDestination("STAY_DELETE_ANNOTATION:{0}",
 				this.uiService.newPropertyReference().setReference("answer.id")));
 		delAnnotation.setConfirm(this.uiService.newTrueDecision(), "cancel", "/icons/cancel.gif", "confirm-delete-annotation");
