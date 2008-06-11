@@ -33,7 +33,7 @@
 		<property name="contentHostingService"><ref bean="org.sakaiproject.content.api.ContentHostingService"/></property>
  		<property name="idManager"><ref bean="org.sakaiproject.id.api.IdManager"/></property>
  		
- 		<property name="makeThumbs"><value>false</value></property>
+ 		<property name="makeThumbs"><value>true</value></property>
 	</bean>
 
 	<bean id="org.muse.mneme.api.Pool"
