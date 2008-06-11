@@ -118,7 +118,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	protected IdManager idManager = null;
 
 	/** Configuration: to make thumbs for images or not. */
-	protected boolean makeThumbs = false;
+	protected boolean makeThumbs = true;
 
 	/** Dependency: SecurityService */
 	protected SecurityService securityService = null;
