@@ -264,55 +264,6 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/**
 	 * {@inheritDoc}
 	 */
-	public Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, String name, byte[] body, String type)
-	{
-		pushAdvisor();
-
-		try
-		{
-			if (name != null)
-			{
-				name = massageName(name);
-			}
-
-			long size = body.length;
-
-			// detect no file selected
-			if ((name == null) || (type == null) || (body == null) || (size == 0))
-			{
-				return null;
-			}
-
-			Reference rv = doAdd(contentHostingId(name, application, context, prefix, uniqueHolder), name, type, body, size, false);
-
-			// if this failed, and we are not using a uniqueHolder, try it with a uniqueHolder
-			if ((rv == null) && !uniqueHolder)
-			{
-				rv = doAdd(contentHostingId(name, application, context, prefix, true), name, type, body, size, false);
-			}
-
-			// TODO: we might not want a thumb (such as for submission uploads to essay/task
-			// if we added one
-			if (rv != null)
-			{
-				// if it is an image
-				if (type.toLowerCase().startsWith("image/"))
-				{
-					addThumb(rv, name, body);
-				}
-			}
-
-			return rv;
-		}
-		finally
-		{
-			popAdvisor();
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public String archive(String siteId, Document doc, Stack stack, String archivePath, List attachments)
 	{
 		return null;
