@@ -147,7 +147,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 
 		// model answer
 		HtmlEdit modelAnswer = this.uiService.newHtmlEdit();
-		modelAnswer.setSize(14, 100);
+		modelAnswer.setSize(HtmlEdit.Sizes.tall);
 		modelAnswer.setProperty(this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
 		modelAnswer.setTitle("model-answer-edit", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
 
@@ -190,7 +190,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		// the text entry
 		HtmlEdit edit = this.uiService.newHtmlEdit();
 		edit.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
-		edit.setSize(14, 100);
+		edit.setSize(HtmlEdit.Sizes.tall);
 		edit.setIncluded(this.uiService.newCompareDecision().setEqualsConstant(SubmissionType.inline.toString(), SubmissionType.both.toString())
 				.setProperty(this.uiService.newPropertyReference().setReference("answer.question.typeSpecificQuestion.submissionType")));
 		edit.setProperty(this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerData"));
@@ -353,7 +353,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		// for grading, include the editor for marking up the answer
 		HtmlEdit edit = this.uiService.newHtmlEdit();
 		edit.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
-		edit.setSize(14, 100);
+		edit.setSize(HtmlEdit.Sizes.tall);
 		edit.setProperty(this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerEvaluated"));
 		edit.setIncluded(this.uiService.newHasValueDecision().setProperty(this.uiService.newPropertyReference().setReference("grading")),
 				this.uiService.newHasValueDecision().setProperty(
@@ -459,7 +459,7 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 		// editor for marking up the answer
 		HtmlEdit answer = this.uiService.newHtmlEdit();
 		answer.setTitle("answer", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
-		answer.setSize(14, 100);
+		answer.setSize(HtmlEdit.Sizes.tall);
 		answer.setIncluded(this.uiService.newHasValueDecision().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answerData")));
 		answer.setProperty(this.uiService.newHtmlPropertyReference().setReference("answer.typeSpecificAnswer.answerEvaluated"));
