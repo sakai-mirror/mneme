@@ -134,25 +134,38 @@ public class SubmissionImpl implements Submission
 		if (!this.totalScoreToBeSet) return;
 		this.totalScoreToBeSet = false;
 
-		// skip for phantoms if null
-		if ((this.totalScoreToBe == null) && this.getIsPhantom()) return;
+		// for phantoms
+		if (this.getIsPhantom())
+		{
+			// if we have a value to set, phantoms get their evaluation set
+			if (this.totalScoreToBe != null)
+			{
+				this.evaluation.setScore(this.totalScoreToBe);
+			}
+
+			return;
+		}
 
 		// adjust either the submission evaluation, or the single answer's evaluation if
 		// there is a single answer only, and the submission's evaluation has not yet been set
 		if (!getEvaluationUsed())
 		{
-			// if null, clear the score
-			if (this.totalScoreToBe == null)
+			// we need to have an answer
+			if (this.answers.size() > 0)
 			{
-				this.answers.get(0).getEvaluation().setScore(null);
-			}
+				// if null, clear the score
+				if (this.totalScoreToBe == null)
+				{
+					this.answers.get(0).getEvaluation().setScore(null);
+				}
 
-			// otherwise use this as the answer score
-			// Note: setting the final to be 0 will not cause a null answer score to become 0 from null
-			// (the grade_asssessment UI shows 0 for final score when there is no auto score and no evaluations set)
-			else if ((this.totalScoreToBe.floatValue() != 0f) || (this.answers.get(0).getEvaluation().getScore() != null))
-			{
-				this.answers.get(0).getEvaluation().setScore(this.totalScoreToBe);
+				// otherwise use this as the answer score
+				// Note: setting the final to be 0 will not cause a null answer score to become 0 from null
+				// (the grade_asssessment UI shows 0 for final score when there is no auto score and no evaluations set)
+				else if ((this.totalScoreToBe.floatValue() != 0f) || (this.answers.get(0).getEvaluation().getScore() != null))
+				{
+					this.answers.get(0).getEvaluation().setScore(this.totalScoreToBe);
+				}
 			}
 		}
 
@@ -167,7 +180,6 @@ public class SubmissionImpl implements Submission
 			// compute the new adjustment to achieve this final score
 			else
 			{
-
 				// the current answer total score
 				float curAnswerScore = 0;
 				for (Answer answer : answers)
