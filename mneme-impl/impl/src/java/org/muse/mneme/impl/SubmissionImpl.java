@@ -153,18 +153,33 @@ public class SubmissionImpl implements Submission
 			// we need to have an answer
 			if (this.answers.size() > 0)
 			{
-				// if null, clear the score
+				Answer answer = answers.get(0);
+
+				// if null, clear the evaluation score
 				if (this.totalScoreToBe == null)
 				{
-					this.answers.get(0).getEvaluation().setScore(null);
+					answer.getEvaluation().setScore(null);
 				}
 
-				// otherwise use this as the answer score
-				// Note: setting the final to be 0 will not cause a null answer score to become 0 from null
-				// (the grade_asssessment UI shows 0 for final score when there is no auto score and no evaluations set)
-				else if ((this.totalScoreToBe.floatValue() != 0f) || (this.answers.get(0).getEvaluation().getScore() != null))
+				else
 				{
-					this.answers.get(0).getEvaluation().setScore(this.totalScoreToBe);
+					// the final score "to be" will contain the auto-score for the answer (if there is one) - remove it
+					float evalScore = this.totalScoreToBe.floatValue();
+					Float autoScore = answer.getAutoScore();
+					if (autoScore != null)
+					{
+						evalScore -= autoScore.floatValue();
+					}
+
+					// round away bogus decimals
+					evalScore = Math.round(evalScore * 100.0f) / 100.0f;
+
+					// Note: setting the final to be 0 will not cause a null answer score to become 0 from null
+					// (the grade_asssessment UI shows 0 for final score when there is no auto score and no evaluations set)
+					if ((evalScore != 0f) || (answer.getEvaluation().getScore() != null))
+					{
+						answer.getEvaluation().setScore(evalScore);
+					}
 				}
 			}
 		}
