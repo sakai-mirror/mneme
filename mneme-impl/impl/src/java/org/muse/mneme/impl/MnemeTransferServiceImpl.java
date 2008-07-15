@@ -393,6 +393,15 @@ public class MnemeTransferServiceImpl implements EntityTransferrer, EntityProduc
 	/**
 	 * {@inheritDoc}
 	 */
+	public void transferCopyEntities(String fromContext, String toContext, List ids, boolean cleanup)
+	{
+		// TODO: implement cleanup?
+		transferCopyEntities(fromContext, toContext, ids);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean willArchiveMerge()
 	{
 		return false;
