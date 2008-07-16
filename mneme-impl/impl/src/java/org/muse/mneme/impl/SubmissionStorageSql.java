@@ -177,10 +177,10 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getAssessmentHasUnscoredSubmissions(Assessment assessment)
+	public List<String> getAssessmentHasUnscoredSubmissions(Assessment assessment)
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT COUNT(1) FROM MNEME_ANSWER A");
+		sql.append("SELECT DISTINCT S.USERID FROM MNEME_ANSWER A");
 		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=? AND S.COMPLETE='1' AND S.TEST_DRIVE='0'");
 		sql.append(" WHERE A.ANSWERED='1' AND A.EVAL_SCORE IS NULL AND A.AUTO_SCORE IS NULL AND S.EVAL_SCORE IS NULL");
 
@@ -188,13 +188,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		fields[0] = Long.valueOf(assessment.getId());
 
 		List results = this.sqlService.dbRead(sql.toString(), fields, null);
-		if (results.size() > 0)
-		{
-			int size = Integer.parseInt((String) results.get(0));
-			return Boolean.valueOf(size > 0);
-		}
-
-		return Boolean.FALSE;
+		return results;
 	}
 
 	/**
@@ -266,10 +260,10 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
+	public List<String> getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT COUNT(1) FROM MNEME_ANSWER A");
+		sql.append("SELECT DISTINCT S.USERID FROM MNEME_ANSWER A");
 		sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID AND S.ASSESSMENT_ID=? AND COMPLETE='1'");
 		sql.append(" WHERE A.QUESTION_ID=? AND A.ANSWERED='1' AND A.EVAL_SCORE IS NULL AND A.AUTO_SCORE IS NULL AND S.EVAL_SCORE IS NULL");
 
@@ -278,13 +272,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 		fields[1] = Long.valueOf(question.getId());
 
 		List results = this.sqlService.dbRead(sql.toString(), fields, null);
-		if (results.size() > 0)
-		{
-			int size = Integer.parseInt((String) results.get(0));
-			return Boolean.valueOf(size > 0);
-		}
-
-		return Boolean.FALSE;
+		return results;
 	}
 
 	/**

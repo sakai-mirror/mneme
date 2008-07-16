@@ -151,8 +151,10 @@ public abstract class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getAssessmentHasUnscoredSubmissions(Assessment assessment)
+	public List<String> getAssessmentHasUnscoredSubmissions(Assessment assessment)
 	{
+		List<String> rv = new ArrayList<String>();
+
 		// check the submissions to this assessment
 		for (SubmissionImpl submission : this.submissions.values())
 		{
@@ -164,13 +166,16 @@ public abstract class SubmissionStorageSample implements SubmissionStorage
 				{
 					if ((answer.getIsAnswered()) && (answer.getTotalScore() == null))
 					{
-						return Boolean.TRUE;
+						if (!rv.contains(submission.getUserId()))
+						{
+							rv.add(submission.getUserId());
+						}
 					}
 				}
 			}
 		}
 
-		return Boolean.FALSE;
+		return rv;
 	}
 
 	/**
@@ -210,8 +215,10 @@ public abstract class SubmissionStorageSample implements SubmissionStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
+	public List<String> getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question)
 	{
+		List<String> rv = new ArrayList<String>();
+
 		// check the submissions to this assessment
 		for (SubmissionImpl submission : this.submissions.values())
 		{
@@ -222,13 +229,16 @@ public abstract class SubmissionStorageSample implements SubmissionStorage
 				{
 					if ((answer.getQuestion().equals(question)) && (answer.getIsAnswered()) && (answer.getTotalScore() == null))
 					{
-						return Boolean.TRUE;
+						if (!rv.contains(submission.getUserId()))
+						{
+							rv.add(submission.getUserId());
+						}
 					}
 				}
 			}
 		}
 
-		return Boolean.FALSE;
+		return rv;
 	}
 
 	/**

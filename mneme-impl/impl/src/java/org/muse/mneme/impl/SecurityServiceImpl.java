@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
 package org.muse.mneme.impl;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
@@ -31,6 +32,7 @@ import org.muse.mneme.api.AssessmentPermissionException;
 import org.muse.mneme.api.SecurityService;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.thread_local.api.ThreadLocalManager;
 
 /**
  * SecurityServiceImpl implements Mneme's SecurityService
@@ -48,6 +50,9 @@ public class SecurityServiceImpl implements SecurityService
 
 	/** Dependency: SiteService */
 	protected SiteService siteService = null;
+
+	/** Dependency: ThreadLocalManager */
+	protected ThreadLocalManager threadLocalManager = null;
 
 	/**
 	 * {@inheritDoc}
@@ -83,6 +88,13 @@ public class SecurityServiceImpl implements SecurityService
 	 */
 	public Set<String> getUsersIsAllowed(String function, String context)
 	{
+		// check the cache
+		String key = function + "@" + context;
+		Set<String> cached = (Set<String>) this.threadLocalManager.get(key);
+
+		// if found, return a copy
+		if (cached != null) return new HashSet(cached);
+
 		// form the azGroups for a context-as-implemented-by-site
 		Collection azGroups = new Vector(2);
 		azGroups.add(siteService.siteReference(context));
@@ -90,6 +102,9 @@ public class SecurityServiceImpl implements SecurityService
 
 		// get the user ids who can
 		Set userIds = authzGroupService.getUsersIsAllowed(function, azGroups);
+
+		// cache
+		this.threadLocalManager.set(key, new HashSet(userIds));
 
 		return userIds;
 	}
@@ -144,5 +159,16 @@ public class SecurityServiceImpl implements SecurityService
 	public void setSiteService(SiteService service)
 	{
 		siteService = service;
+	}
+
+	/**
+	 * Dependency: ThreadLocalManager.
+	 * 
+	 * @param service
+	 *        The ThreadLocalManager.
+	 */
+	public void setThreadLocalManager(ThreadLocalManager service)
+	{
+		this.threadLocalManager = service;
 	}
 }

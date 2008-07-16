@@ -76,9 +76,9 @@ public interface SubmissionStorage
 	/**
 	 * Check if there are any completed submissions that have any null scores for answered answers for this assessment.
 	 * 
-	 * @return TRUE if there are unscored submissions to this assessment, FALSE if not.
+	 * @return a list of user ids of the users with unscored submissions to this assessment.
 	 */
-	Boolean getAssessmentHasUnscoredSubmissions(Assessment assessment);
+	List<String> getAssessmentHasUnscoredSubmissions(Assessment assessment);
 
 	/**
 	 * Find the highest submission score for each user who has submitted to the assessment.
@@ -94,9 +94,9 @@ public interface SubmissionStorage
 	/**
 	 * Check if there are any completed submissions that have any null scores for answered answers to this question for this assessment.
 	 * 
-	 * @return TRUE if there are unscored submissions to this assessment, FALSE if not.
+	 * @return A list of user ids for users with unscored submissions to this assessment.
 	 */
-	Boolean getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question);
+	List<String> getAssessmentQuestionHasUnscoredSubmissions(Assessment assessment, Question question);
 
 	/**
 	 * Access all the submission scores to this assessment.

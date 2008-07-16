@@ -1145,7 +1145,23 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 		if (M_log.isDebugEnabled()) M_log.debug("getAssessmentHasUnscoredSubmissions:" + assessment.getId());
 
-		return this.storage.getAssessmentHasUnscoredSubmissions(assessment);
+		// get all the user ids with submissions that are unscored
+		List<String> ids = this.storage.getAssessmentHasUnscoredSubmissions(assessment);
+		if (!ids.isEmpty())
+		{
+			// get all possible users who can submit
+			Set<String> participants = this.securityService.getUsersIsAllowed(MnemeService.SUBMIT_PERMISSION, assessment.getContext());
+
+			for (String id : ids)
+			{
+				if (participants.contains(id))
+				{
+					return Boolean.TRUE;
+				}
+			}
+		}
+
+		return Boolean.FALSE;
 	}
 
 	/**
@@ -1185,7 +1201,23 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		if (M_log.isDebugEnabled())
 			M_log.debug("getAssessmentQuestionHasUnscoredSubmissions:" + assessment.getId() + " question: " + question.getId());
 
-		return this.storage.getAssessmentQuestionHasUnscoredSubmissions(assessment, question);
+		// get all the user ids with submissions that are unscored
+		List<String> ids = this.storage.getAssessmentQuestionHasUnscoredSubmissions(assessment, question);
+		if (!ids.isEmpty())
+		{
+			// get all possible users who can submit
+			Set<String> participants = this.securityService.getUsersIsAllowed(MnemeService.SUBMIT_PERMISSION, assessment.getContext());
+
+			for (String id : ids)
+			{
+				if (participants.contains(id))
+				{
+					return Boolean.TRUE;
+				}
+			}
+		}
+
+		return Boolean.FALSE;
 	}
 
 	/**
@@ -2134,8 +2166,8 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
-	 * Check how many additional submissions are allowed to this assessment by this user.<br />
-	 * If the user has no permission to submit, has submitted the maximum, or the assessment is closed for submissions as of this time, return 0.
+	 * Check how many additional submissions are allowed to this assessment by this user.<br /> If the user has no permission to submit, has submitted
+	 * the maximum, or the assessment is closed for submissions as of this time, return 0.
 	 * 
 	 * @param submission
 	 *        The submission.
@@ -2565,8 +2597,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 	/**
 	 * Clump a list of all submissions from a user in a context, which may include many to the same assessment, into a list of official ones, with
-	 * siblings.<br />
-	 * Clumping is by assessment.
+	 * siblings.<br /> Clumping is by assessment.
 	 * 
 	 * @param all
 	 *        The list of all submissions.
