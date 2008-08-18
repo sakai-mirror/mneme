@@ -81,6 +81,14 @@ public class AssessmentsView extends ControllerImpl
 			throw new IllegalArgumentException();
 		}
 
+		// security
+		if (!this.assessmentService.allowManageAssessments(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
 		// default is due date, ascending
 		String sortCode = (params.length > 2) ? params[2] : "0A";
 		if (sortCode.length() != 2)
@@ -188,9 +196,6 @@ public class AssessmentsView extends ControllerImpl
 			throw new IllegalArgumentException();
 		}
 
-		// default is due date, ascending
-		String sort = (params.length > 2) ? params[2] : "0A";
-
 		// security check
 		if (!assessmentService.allowManageAssessments(this.toolManager.getCurrentPlacement().getContext()))
 		{
@@ -198,6 +203,9 @@ public class AssessmentsView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
+
+		// default is due date, ascending
+		String sort = (params.length > 2) ? params[2] : "0A";
 
 		// for the selected select
 		Values values = this.uiService.newValues();

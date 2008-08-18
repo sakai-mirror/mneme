@@ -445,6 +445,30 @@ public class TrueFalseQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Component getViewDeliveryUi()
+	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.presentation.attachments")));
+
+		Selection selection = this.uiService.newSelection();
+		selection.addSelection(this.uiService.newMessage().setMessage("true"), this.uiService.newMessage().setTemplate("true"));
+		selection.addSelection(this.uiService.newMessage().setMessage("false"), this.uiService.newMessage().setTemplate("false"));
+		selection.setReadOnly(this.uiService.newTrueDecision());
+
+		Section first = this.uiService.newSection();
+		first.add(question).add(attachments).add(selection);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(first);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Component getViewQuestionUi()
 	{
 		Text question = this.uiService.newText();

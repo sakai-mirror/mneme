@@ -541,6 +541,29 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 	}
 
 	/**
+	 * Access the choices, as an entity (MultipleChoiceQuestionChoice) list. Shuffle if set, even if not in a submission context.
+	 * 
+	 * @return The choices as an entity (MultipleChoiceQuestionChoice) list.
+	 */
+	public List<MultipleChoiceQuestionChoice> getChoicesShuffled()
+	{
+		// get the list in order
+		List<MultipleChoiceQuestionChoice> rv = getChoicesAsAuthored();
+
+		// shuffle them if desired (and we are in a submission context)
+		if (this.shuffleChoices && (this.question.getPart() != null))
+		{
+			// set the seed
+			long seed = this.question.getId().hashCode();
+
+			// mix up the answers
+			Collections.shuffle(rv, new Random(seed));
+		}
+
+		return rv;
+	}
+
+	/**
 	 * Access the correct answers as an array.
 	 * 
 	 * @return The correct answers.
@@ -909,6 +932,50 @@ public class MultipleChoiceQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(propCol);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewDeliveryUi()
+	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.presentation.attachments")));
+
+		EntityList entityList = this.uiService.newEntityList();
+		entityList.setStyle(EntityList.Style.form);
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choicesShuffled"), "choice");
+
+		SelectionColumn selCol = this.uiService.newSelectionColumn();
+		if (this.singleCorrect)
+		{
+			selCol.setSingle();
+		}
+		else
+		{
+			selCol.setMultiple();
+			selCol.setSelectAll(false);
+		}
+		selCol.setValueProperty(this.uiService.newPropertyReference().setReference("choice.id"));
+		selCol.setReadOnly(this.uiService.newTrueDecision());
+		entityList.addColumn(selCol);
+
+		AutoColumn autoCol = this.uiService.newAutoColumn();
+		entityList.addColumn(autoCol);
+
+		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setStripP().setReference("choice.text"));
+		entityList.addColumn(propCol);
+
+		Section first = this.uiService.newSection();
+		first.add(question).add(attachments).add(entityList);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(first);
 	}
 
 	/**

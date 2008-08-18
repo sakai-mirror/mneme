@@ -77,6 +77,14 @@ public class SelectQuestionType extends ControllerImpl
 	{
 		if (params.length != 6) throw new IllegalArgumentException();
 
+		// security
+		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
 		StringBuilder prevDestinationParamPath = new StringBuilder();
 		prevDestinationParamPath.append(params[2]);
 		for (int i = 3; i < 6; i++)
@@ -115,6 +123,14 @@ public class SelectQuestionType extends ControllerImpl
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
 		if (params.length != 6) throw new IllegalArgumentException();
+
+		// security
+		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
 
 		// for the selected question type
 		Value value = this.uiService.newValue();

@@ -152,11 +152,18 @@ public interface TypeSpecificQuestion extends Cloneable
 	Boolean getUseReason();
 
 	/**
-	 * Access the user interface component for question view of this question type.
+	 * Access the user interface component for answer view of this question type.
 	 * 
-	 * @return The user interface component for question view of this question type.
+	 * @return The user interface component for answer view of this question type.
 	 */
 	Component getViewAnswerUi();
+
+	/**
+	 * Access the user interface component for view-only delivery of this question type.
+	 * 
+	 * @return The user interface component for view-only delivery of this question type.
+	 */
+	Component getViewDeliveryUi();
 
 	/**
 	 * Access the user interface component for question view of this question type.

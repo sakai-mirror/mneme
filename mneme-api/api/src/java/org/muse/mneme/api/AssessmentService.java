@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,15 @@ public interface AssessmentService
 	Boolean allowEditAssessment(Assessment assessment);
 
 	/**
+	 * Check if the user is allowed as a guest.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return TRUE if the user is allowed, FALSE if not.
+	 */
+	Boolean allowGuest(String context);
+
+	/**
 	 * Check if the user is allowed to list delivery assessments in this context.
 	 * 
 	 * @param context
@@ -80,8 +89,7 @@ public interface AssessmentService
 	void clearStaleMintAssessments();
 
 	/**
-	 * Create a new Assessment in the context that is a copy of another.<br />
-	 * The new assessment is non-archived and un-published.
+	 * Create a new Assessment in the context that is a copy of another.<br /> The new assessment is non-archived and un-published.
 	 * 
 	 * @param context
 	 *        The context in which the assessment lives.

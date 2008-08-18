@@ -260,6 +260,7 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
 		selCol.setOnEmptyAlert(this.uiService.newDecision().setReversed().setProperty(
 				this.uiService.newPropertyReference().setReference("answer.submission.assessment.randomAccess")), "linear-missing");
+
 		entityList.addColumn(selCol);
 
 		PropertyColumn propCol = this.uiService.newPropertyColumn();
@@ -512,6 +513,40 @@ public class LikertScaleQuestionImpl implements TypeSpecificQuestion
 		entityList.addColumn(propCol);
 
 		return this.uiService.newFragment().setMessages(this.messages).add(entityList);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewDeliveryUi()
+	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.presentation.attachments")));
+
+		EntityList entityList = this.uiService.newEntityList();
+		entityList.setStyle(EntityList.Style.form);
+		entityList.setIterator(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.choices"), "choice");
+
+		SelectionColumn selCol = this.uiService.newSelectionColumn();
+		selCol.setSingle();
+		selCol.setValueProperty(this.uiService.newTextPropertyReference().setReference("choice.id"));
+		selCol.setProperty(this.uiService.newPropertyReference().setReference("answer.typeSpecificAnswer.answer"));
+		selCol.setReadOnly(this.uiService.newTrueDecision());
+		entityList.addColumn(selCol);
+
+		PropertyColumn propCol = this.uiService.newPropertyColumn();
+		propCol.setProperty(this.uiService.newHtmlPropertyReference().setReference("choice.text"));
+		entityList.addColumn(propCol);
+
+		Section section = this.uiService.newSection();
+		section.add(question).add(attachments).add(entityList);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(section);
 	}
 
 	/**

@@ -81,12 +81,27 @@ public class MnemeServlet extends AmbrosiaServlet
 	 */
 	protected String getDefaultView()
 	{
+		String context = this.toolManager.getCurrentPlacement().getContext();
+
 		// if the user can manage, start in /assessments
-		if (this.assessmentService.allowManageAssessments(this.toolManager.getCurrentPlacement().getContext()))
+		if (this.assessmentService.allowManageAssessments(context))
 		{
 			return "assessments";
 		}
+		
+		// otherwise, if the user can see the delivery list, go there
+		if (this.assessmentService.allowListDeliveryAssessment(context))
+		{
+			return "list";
+		}
 
+		// see if there is guest access
+		if (this.assessmentService.allowGuest(context))
+		{
+			return "guest_list";
+		}
+
+		// no access - let the default view handle it
 		return this.defaultView;
 	}
 }

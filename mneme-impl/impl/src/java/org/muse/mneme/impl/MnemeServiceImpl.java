@@ -127,6 +127,7 @@ public class MnemeServiceImpl implements MnemeService, Runnable
 		{
 			// register functions
 			functionManager.registerFunction(GRADE_PERMISSION);
+			functionManager.registerFunction(GUEST_PERMISSION);
 			functionManager.registerFunction(MANAGE_PERMISSION);
 			functionManager.registerFunction(SUBMIT_PERMISSION);
 

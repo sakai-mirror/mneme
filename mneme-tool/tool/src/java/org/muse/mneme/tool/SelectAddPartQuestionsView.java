@@ -112,6 +112,14 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		}
 		context.put("assessment", assessment);
 
+		// security check
+		if (!assessmentService.allowEditAssessment(assessment))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
 		// part
 		String partId = params[4];
 		ManualPart part = (ManualPart) assessment.getParts().getPart(params[4]);
@@ -261,6 +269,14 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		// security check
+		if (!assessmentService.allowEditAssessment(assessment))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 

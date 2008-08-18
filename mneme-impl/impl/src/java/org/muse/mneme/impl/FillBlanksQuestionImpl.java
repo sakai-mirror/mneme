@@ -505,6 +505,22 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 		return this.uiService.newFragment().setMessages(this.messages).add(fillIn);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getViewDeliveryUi()
+	{
+		FillIn fillIn = this.uiService.newFillIn();
+		fillIn.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.questionText"));
+		fillIn.setWidth(20);
+		fillIn.setReadOnly(this.uiService.newTrueDecision());
+
+		Section first = this.uiService.newSection();
+		first.add(fillIn);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(first);
+	}
+
 	public Component getViewQuestionUi()
 	{
 		FillIn fillIn = this.uiService.newFillIn();
@@ -819,9 +835,9 @@ public class FillBlanksQuestionImpl implements TypeSpecificQuestion
 
 			// clean up any html in the answer
 			tmp = FormattedText.convertFormattedTextToPlaintext(tmp);
-			
+
 			// Note: convertFormattedTextToPlaintext converts %nbsp; to unicode 160
-			tmp = tmp.replace((char)160, ' ');
+			tmp = tmp.replace((char) 160, ' ');
 			tmp = tmp.replace("\n", " ");
 			tmp = tmp.replace("\r", " ");
 			tmp = tmp.replace("&nbsp;", " ");

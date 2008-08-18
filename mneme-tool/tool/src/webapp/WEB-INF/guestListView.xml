@@ -7,7 +7,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * Copyright (c) 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,23 @@
 
 <beans>
 
-	<bean id="org.muse.mneme.tool.ImportPoolView"
-			class="org.muse.mneme.tool.ImportPoolView"
+	<bean id="org.muse.mneme.tool.GuestListView"
+			class="org.muse.mneme.tool.GuestListView"
 			init-method="init"
 			destroy-method="destroy"
-			singleton="true">
+			singleton="true"
+			depends-on="FormatListDecoration,FormatListGrade">
 
  		<property name="ui"><ref bean="org.muse.ambrosia.api.UiService"/></property>
-  		<property name="poolService"><ref bean="org.muse.mneme.api.PoolService"/></property>
-  		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
+ 		<property name="assessmentService"><ref bean="org.muse.mneme.api.AssessmentService"/></property>
+ 		<property name="submissionService"><ref bean="org.muse.mneme.api.SubmissionService"/></property>
+ 		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
  
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="path"><value>import_pool</value></property>
- 		<property name="bundle"><value>importPool</value></property>
+ 		<property name="path"><value>guest_list</value></property>
+ 		<property name="bundle"><value>guestList</value></property>
 		<property name="shared"><value>mneme</value></property>
-		<property name="components"><value>importPool.xml</value></property>
+		<property name="components"><value>guestList.xml</value></property>
  		<property name="docsPath"><value>/private/mneme/{CONTEXT}/docs/</value></property>
 	</bean>
 

@@ -33,6 +33,7 @@ import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
 import org.muse.mneme.api.Assessment;
 import org.muse.mneme.api.AssessmentService;
+import org.muse.mneme.api.SubmissionService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
@@ -46,6 +47,9 @@ public class GradesView extends ControllerImpl
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
+
+	/** Submission Service */
+	protected SubmissionService submissionService = null;
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
@@ -67,6 +71,14 @@ public class GradesView extends ControllerImpl
 		if ((params.length != 2) && (params.length != 3))
 		{
 			throw new IllegalArgumentException();
+		}
+
+		// security
+		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
 		}
 
 		// sort
@@ -106,6 +118,14 @@ public class GradesView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// security
+		if (!this.submissionService.allowEvaluate(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
 		// read the form
 		String destination = uiService.decode(req, context);
 
@@ -121,6 +141,15 @@ public class GradesView extends ControllerImpl
 	public void setAssessmentService(AssessmentService service)
 	{
 		this.assessmentService = service;
+	}
+
+	/**
+	 * @param submissionService
+	 *        the submissionService to set
+	 */
+	public void setSubmissionService(SubmissionService submissionService)
+	{
+		this.submissionService = submissionService;
 	}
 
 	/**

@@ -77,6 +77,14 @@ public class QuestionsCopyMoveView extends ControllerImpl
 			throw new IllegalArgumentException();
 		}
 
+		// check security
+		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
 		String questionIds = params[6];
 
 		// put the extra parameters all together
@@ -158,6 +166,14 @@ public class QuestionsCopyMoveView extends ControllerImpl
 		if ((params.length != 7) && (params.length != 8))
 		{
 			throw new IllegalArgumentException();
+		}
+
+		// check security
+		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
 		}
 
 		String questionIds = params[6];

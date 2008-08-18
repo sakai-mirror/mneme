@@ -127,6 +127,22 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean allowGuest(String context)
+	{
+		if (context == null) throw new IllegalArgumentException();
+		String userId = sessionManager.getCurrentSessionUserId();
+
+		if (M_log.isDebugEnabled()) M_log.debug("allowGuest: " + context + ": " + userId);
+
+		// check permission - user must have GUEST_PERMISSION in the context
+		boolean ok = securityService.checkSecurity(userId, MnemeService.GUEST_PERMISSION, context);
+
+		return ok;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean allowListDeliveryAssessment(String context)
 	{
 		if (context == null) throw new IllegalArgumentException();

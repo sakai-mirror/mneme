@@ -37,8 +37,8 @@ public interface Submission
 	Boolean completeIfOver();
 
 	/**
-	 * Process the total score set by setTotalScore.<br />
-	 * Call after all answer scores are set, or automatically when saved (SubmissionService.evaluateSubmission).
+	 * Process the total score set by setTotalScore.<br /> Call after all answer scores are set, or automatically when saved
+	 * (SubmissionService.evaluateSubmission).
 	 */
 	void consolidateTotalScore();
 
@@ -117,8 +117,7 @@ public interface Submission
 	SubmissionEvaluation getEvaluation();
 
 	/**
-	 * Check if the submission evaluation is used.<br />
-	 * This is not so if it has not yet been set and the assessment has only a single question.
+	 * Check if the submission evaluation is used.<br /> This is not so if it has not yet been set and the assessment has only a single question.
 	 * 
 	 * @return TRUE if the evaluation is used, FALSE if not.
 	 */
@@ -251,6 +250,13 @@ public interface Submission
 	Boolean getMayContinue();
 
 	/**
+	 * Check if the submission's may be viewed by a guest. The submission is assumed to be a placeholder.
+	 * 
+	 * @return TRUE if the submission's assessment may be viewed as a guest, FALSE if not.
+	 */
+	Boolean getMayGuestView();
+
+	/**
 	 * Check if the submission may be reviewed - the user must be the submission user, and the submission must be complete and not from a retracted
 	 * assessment.
 	 * 
@@ -296,8 +302,7 @@ public interface Submission
 
 	/**
 	 * Access the total score of the submission - the total of the auto scores from the answers and the evaluation scores from the answers and
-	 * overall.<br />
-	 * If the submission is "phantom" the total score will be null.
+	 * overall.<br /> If the submission is "phantom" the total score will be null.
 	 * 
 	 * @return The total score of the submission, or 0 if there is no score, or null if the submission is phantom.
 	 */

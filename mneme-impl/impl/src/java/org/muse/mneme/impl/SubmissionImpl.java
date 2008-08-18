@@ -876,6 +876,32 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getMayGuestView()
+	{
+		// ASSSUMPTION: this will be a placeholder submission
+
+		// not yet started
+		if (getStartDate() != null) return Boolean.FALSE;
+
+		// published
+		if (!getAssessment().getPublished()) return Boolean.FALSE;
+
+		// valid
+		if (!getAssessment().getIsValid()) return Boolean.FALSE;
+
+		// assessment is open
+		if (!getAssessment().getDates().getIsOpen(Boolean.FALSE)) return Boolean.FALSE;
+
+		// permission - userId must have GUEST_PERMISSION in the context of the assessment
+		if (!this.securityService.checkSecurity(this.sessionManager.getCurrentSessionUserId(), MnemeService.GUEST_PERMISSION, getAssessment()
+				.getContext())) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getMayReview()
 	{
 		// same user

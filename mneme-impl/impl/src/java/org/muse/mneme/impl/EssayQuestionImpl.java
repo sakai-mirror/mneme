@@ -479,6 +479,62 @@ public class EssayQuestionImpl implements TypeSpecificQuestion
 	/**
 	 * {@inheritDoc}
 	 */
+	public Component getViewDeliveryUi()
+	{
+		Text question = this.uiService.newText();
+		question.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.presentation.text"));
+
+		Attachments attachments = this.uiService.newAttachments();
+		attachments.setAttachments(this.uiService.newPropertyReference().setReference("question.presentation.attachments"), null);
+		attachments.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.presentation.attachments")));
+
+		Section questionSection = this.uiService.newSection();
+		questionSection.add(question).add(attachments);
+
+		// submission type
+		Selection type = uiService.newSelection();
+		type.setProperty(this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.submissionType"));
+		type.addSelection(this.uiService.newMessage().setMessage("inline"), this.uiService.newMessage().setTemplate("inline"));
+		type.addSelection(this.uiService.newMessage().setMessage("inline-attachments"), this.uiService.newMessage().setTemplate("both"));
+		type.addSelection(this.uiService.newMessage().setMessage("attachments"), this.uiService.newMessage().setTemplate("attachments"));
+		type.setReadOnly(this.uiService.newTrueDecision());
+		type.setTitle("submission", this.uiService.newIconPropertyReference().setIcon("/icons/answer.png"));
+
+		Section typeSection = this.uiService.newSection();
+		typeSection.add(type);
+
+		// model answer
+		Text modelAnswerTitle = this.uiService.newText();
+		modelAnswerTitle.setText("model-answer", this.uiService.newIconPropertyReference().setIcon("/icons/model_answer.png"));
+
+		Text modelAnswer = this.uiService.newText();
+		modelAnswer.setText(null, this.uiService.newHtmlPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer"));
+
+		// overlay for the model answer
+		Overlay modelAnswerOverlay = this.uiService.newOverlay();
+		modelAnswerOverlay.setId("modelanswer");
+		modelAnswerOverlay.add(modelAnswerTitle).add(modelAnswer).add(this.uiService.newGap());
+		modelAnswerOverlay.add(this.uiService.newToggle().setTarget("modelanswer").setTitle("close").setIcon("/icons/close.png",
+				Navigation.IconStyle.left));
+
+		// control to show the model answer
+		Toggle showModelAnswer = this.uiService.newToggle();
+		showModelAnswer.setTarget("modelanswer");
+		showModelAnswer.setTitle("view-model-answer");
+		showModelAnswer.setIcon("/icons/model_answer.png", Navigation.IconStyle.left);
+
+		Section showModelAnswerSection = this.uiService.newSection();
+		showModelAnswerSection.setIncluded(this.uiService.newHasValueDecision().setProperty(
+				this.uiService.newPropertyReference().setReference("question.typeSpecificQuestion.modelAnswer")));
+		showModelAnswerSection.add(modelAnswerOverlay).add(showModelAnswer);
+
+		return this.uiService.newFragment().setMessages(this.messages).add(questionSection).add(typeSection).add(showModelAnswerSection);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Component getViewQuestionUi()
 	{
 		Text question = this.uiService.newText();

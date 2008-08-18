@@ -55,6 +55,9 @@ public interface MnemeService
 	/** The security function used to check if users can grade tests. */
 	static final String GRADE_PERMISSION = "mneme.grade";
 
+	/** The security function used to check if users have guest access. */
+	static final String GUEST_PERMISSION = "mneme.guest";
+
 	/** The security function used to check if users can manage tests. */
 	static final String MANAGE_PERMISSION = "mneme.manage";
 

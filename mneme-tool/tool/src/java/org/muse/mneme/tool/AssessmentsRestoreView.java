@@ -66,6 +66,14 @@ public class AssessmentsRestoreView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
+		// security
+		if (!this.assessmentService.allowManageAssessments(toolManager.getCurrentPlacement().getContext()))
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+			return;
+		}
+
 		// we carry a sort for the /tests mode
 		String sort = "";
 		if (params.length == 3)

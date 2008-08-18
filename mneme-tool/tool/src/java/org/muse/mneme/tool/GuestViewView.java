@@ -3,14 +3,14 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
- *
+ * Copyright (c) 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,20 +30,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.muse.ambrosia.api.Context;
 import org.muse.ambrosia.util.ControllerImpl;
-import org.muse.mneme.api.PoolService;
+import org.muse.mneme.api.Assessment;
+import org.muse.mneme.api.AssessmentService;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
- * The /import_pool view for the mneme tool.
+ * The /guest_view view for the mneme tool.
  */
-public class ImportPoolView extends ControllerImpl
+public class GuestViewView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(ImportPoolView.class);
+	private static Log M_log = LogFactory.getLog(GuestViewView.class);
 
-	/** Pool Service */
-	protected PoolService poolService = null;
+	/** Assessment service. */
+	protected AssessmentService assessmentService = null;
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
@@ -61,22 +63,44 @@ public class ImportPoolView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pools sort
-		if (params.length != 3)
+		// we need an aid, then any number of parameters to form the return destination
+		if (params.length < 3)
 		{
 			throw new IllegalArgumentException();
 		}
 
-		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		String assessmentId = params[2];
+
+		String destination = null;
+		if (params.length > 3)
+		{
+			destination = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
+		}
+
+		// if not specified, go to the main guest page
+		else
+		{
+			destination = "/guest_view";
+		}
+
+		Assessment assessment = this.assessmentService.getAssessment(assessmentId);
+		if (assessment == null)
+		{
+			// redirect to error
+			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+			return;
+		}
+
+		// security check
+		if (!this.assessmentService.allowGuest(this.toolManager.getCurrentPlacement().getContext()))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
-		String poolsSort = params[2];
-
-		context.put("poolsSort", poolsSort);
+		context.put("assessment", assessment);
+		context.put("return", destination);
 
 		// render
 		uiService.render(ui, context);
@@ -96,34 +120,28 @@ public class ImportPoolView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pools sort
-		if (params.length != 3)
+		// we need an aid, then any number of parameters to form the return destination
+		if (params.length < 2)
 		{
 			throw new IllegalArgumentException();
 		}
 
-		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
-		{
-			// redirect to error
-			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-			return;
-		}
+		// read form
+		String destination = this.uiService.decode(req, context);
 
-		// String poolsSort = params[2];
-
-		// read the form
-		String destination = uiService.decode(req, context);
-
+		// go there!
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
 	}
 
 	/**
-	 * @param poolService
-	 *        the poolService to set
+	 * Set the assessment service.
+	 * 
+	 * @param service
+	 *        The assessment service.
 	 */
-	public void setPoolService(PoolService poolService)
+	public void setAssessmentService(AssessmentService service)
 	{
-		this.poolService = poolService;
+		this.assessmentService = service;
 	}
 
 	/**
