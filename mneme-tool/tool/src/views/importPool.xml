@@ -52,6 +52,7 @@
 
 		<section>
 			<container>
+			<!--
 				<navigation title="import-qti" style="LINK">
 					<icon icon="/icons/import_pool.png" style="LEFT" />
 					<destination template="/import_qti/{0}">
@@ -62,6 +63,7 @@
 					<message selector="import-qti-instructions" />
 				</instructions>
 				<gap />
+			-->
 				<navigation title="import-tq-pools" style="LINK">
 					<icon icon="/icons/import_pool.png" style="LEFT" />
 					<destination template="/import_tq_pool/{0}">
