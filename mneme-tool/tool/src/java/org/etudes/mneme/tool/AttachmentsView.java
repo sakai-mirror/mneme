@@ -40,6 +40,7 @@ import org.etudes.mneme.api.Attachment;
 import org.etudes.mneme.api.AttachmentService;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -72,7 +73,8 @@ public class AttachmentsView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		if (params.length != 3)
+		// one parameter (optionally the rest is a temp CHS reference)
+		if (params.length < 3)
 		{
 			throw new IllegalArgumentException();
 		}
@@ -84,6 +86,35 @@ public class AttachmentsView extends ControllerImpl
 			M_log.warn("get: /null detected");
 			uiService.undoPrepareGet(req, res);
 			return;
+		}
+
+		context.put("type", type);
+
+		// get the reference to the temp.
+		if (params.length > 3)
+		{
+			String tempRef = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
+
+			// get the file name
+			String fileName = this.attachmentService.getTempFileName(tempRef);
+
+			// get getting called twice for some reason...
+			if (fileName == null)
+			{
+				M_log.warn("get: /null detected");
+				uiService.undoPrepareGet(req, res);
+				return;
+			}
+
+			context.put("tempName", fileName);
+			context.put("tempRef", tempRef);
+
+			// to be able to show both thumbs
+			List<Attachment> tempAttachments = this.attachmentService.getTempAttachments(tempRef);
+			Grid grid = this.uiService.newGrid();
+			grid.setWidth(2);
+			grid.load(tempAttachments);
+			context.put("tempAttachments", grid);
 		}
 
 		// collect the attachments in this context
@@ -130,8 +161,8 @@ public class AttachmentsView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// one parameter
-		if (params.length != 3)
+		// one parameter (optionally the rest is a temp CHS reference)
+		if (params.length < 3)
 		{
 			throw new IllegalArgumentException();
 		}
@@ -151,13 +182,45 @@ public class AttachmentsView extends ControllerImpl
 		// read the form
 		String destination = uiService.decode(req, context);
 
-		// check for file upload error
-		boolean uploadError = ((req.getAttribute("upload.status") != null) && (!req.getAttribute("upload.status").equals("ok")));
-
-		// save the attachments upload
-		if (upload.getUpload() != null)
+		// get the reference to the temp.
+		if (params.length > 3)
 		{
-			Reference ref = upload.getUpload();
+			String tempRef = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
+
+			// special destinations
+			if ("REPLACE".equals(destination))
+			{
+				// promote the resource from temporary
+				this.attachmentService.replaceWithTemp(tempRef);
+			}
+			else if ("RENAME".equals(destination))
+			{
+				// save the temporary with a new name
+			}
+			else if ("DISCARD".equals(destination))
+			{
+				this.attachmentService.removeTemp(tempRef);
+			}
+
+			destination = "/" + params[1] + "/" + params[2];
+		}
+
+		else
+		{
+			// check for file upload error
+			boolean uploadError = ((req.getAttribute("upload.status") != null) && (!req.getAttribute("upload.status").equals("ok")));
+
+			// save the attachments upload
+			if (upload.getUpload() != null)
+			{
+				Reference ref = upload.getUpload();
+
+				// setup the flow for upload name conflict resulting in a temporary file
+				if (this.attachmentService.isTemporary(ref.getReference()))
+				{
+					destination = "/" + params[1] + "/" + params[2] + ref.getReference();
+				}
+			}
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));

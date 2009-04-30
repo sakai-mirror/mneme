@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2008 Etudes, Inc.
+ * Copyright (c) 2008, 2009 Etudes, Inc.
  * 
  * Portions completed before September 1, 2008
  * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
@@ -104,8 +104,13 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/** Our logger. */
 	private static Log M_log = LogFactory.getLog(AttachmentServiceImpl.class);
 
+	/** CHS resource property key for temporary files, set with the desired CHS ID. */
+	protected final static String PROP_TEMPORARY = "attachment:temp";
+
+	/** CHS resource property key for thumbs. */
 	protected final static String PROP_THUMB = "attachment:thumb";
 
+	/** CHS resource property key for collections that are created to make file names unique. */
 	protected final static String PROP_UNIQUE_HOLDER = "attachment:unique";
 
 	/** The chunk size used when streaming (100k). */
@@ -169,12 +174,13 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 				return null;
 			}
 
-			Reference rv = doAdd(contentHostingId(name, application, context, prefix, uniqueHolder), name, type, body, size, false);
+			String desiredId = contentHostingId(name, application, context, prefix, uniqueHolder, false);
+			Reference rv = doAdd(desiredId, name, type, body, size, false, null);
 
-			// if this failed, and we are not using a uniqueHolder, try it with a uniqueHolder
+			// if this failed, put it in the temporary holding area
 			if ((rv == null) && !uniqueHolder)
 			{
-				rv = doAdd(contentHostingId(name, application, context, prefix, true), name, type, body, size, false);
+				rv = doAdd(contentHostingId(name, application, context, prefix, false, true), name, type, body, size, false, desiredId);
 			}
 
 			// TODO: we might not want a thumb (such as for submission uploads to essay/task
@@ -209,7 +215,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			// if from our docs, convert into a content hosting ref
 			if (resourceRef.getType().equals(APPLICATION_ID))
 			{
-				resourceRef = entityManager.newReference(resourceRef.getId());
+				resourceRef = this.entityManager.newReference(resourceRef.getId());
 			}
 
 			// make sure we can read!
@@ -219,12 +225,13 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			byte[] body = resource.getContent();
 			String name = resource.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME);
 
-			Reference rv = doAdd(contentHostingId(name, application, context, prefix, uniqueHolder), name, type, body, size, false);
+			String desiredId = contentHostingId(name, application, context, prefix, uniqueHolder, false);
+			Reference rv = doAdd(desiredId, name, type, body, size, false, null);
 
-			// if this failed, and we are not using a uniqueHolder, try it with a uniqueHolder
+			// if this failed, and we are not using a uniqueHolder, put it in temp
 			if ((rv == null) && !uniqueHolder)
 			{
-				rv = doAdd(contentHostingId(name, application, context, prefix, true), name, type, body, size, false);
+				rv = doAdd(contentHostingId(name, application, context, prefix, false, true), name, type, body, size, false, desiredId);
 			}
 
 			// if we added one
@@ -286,12 +293,13 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 				return null;
 			}
 
-			Reference rv = doAdd(contentHostingId(name, application, context, prefix, uniqueHolder), name, type, body, size, false);
+			String desiredId = contentHostingId(name, application, context, prefix, uniqueHolder, false);
+			Reference rv = doAdd(desiredId, name, type, body, size, false, null);
 
-			// if this failed, and we are not using a uniqueHolder, try it with a uniqueHolder
+			// if this failed, and we are not using a uniqueHolder, put it in temp
 			if ((rv == null) && !uniqueHolder)
 			{
-				rv = doAdd(contentHostingId(name, application, context, prefix, true), name, type, body, size, false);
+				rv = doAdd(contentHostingId(name, application, context, prefix, false, true), name, type, body, size, false, desiredId);
 			}
 
 			// TODO: we might not want a thumb (such as for submission uploads to essay/task
@@ -512,6 +520,126 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<Attachment> getTempAttachments(String ref)
+	{
+		List<Attachment> rv = new ArrayList<Attachment>();
+		try
+		{
+			pushAdvisor();
+
+			// get a Reference to the temp resource
+			Reference resourceRef = this.entityManager.newReference(ref);
+			if (resourceRef.getType().equals(APPLICATION_ID))
+			{
+				resourceRef = this.entityManager.newReference(resourceRef.getId());
+			}
+
+			// get the resource
+			ContentResource resource = this.contentHostingService.getResource(resourceRef.getId());
+
+			String altRef = resource.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+			String url = resource.getUrl(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+			String escapedUrl = EscapeRefUrl.escapeRefUrl(ref, url);
+
+			Attachment a = new AttachmentImpl(resource.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME), altRef, escapedUrl,
+					resource.getContentType());
+			rv.add(a);
+
+			// get the resource id
+			String resourceId = resource.getProperties().getProperty(this.PROP_TEMPORARY);
+
+			// get the resource
+			resource = this.contentHostingService.getResource(resourceId);
+			altRef = resource.getReference(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+			url = resource.getUrl(ContentHostingService.PROP_ALTERNATE_REFERENCE);
+			escapedUrl = EscapeRefUrl.escapeRefUrl(ref, url);
+
+			a = new AttachmentImpl(resource.getProperties().getProperty(ResourceProperties.PROP_DISPLAY_NAME), altRef, escapedUrl, resource
+					.getContentType());
+			rv.add(a);
+		}
+		catch (PermissionException e)
+		{
+			M_log.warn(e);
+		}
+		catch (IdUnusedException e)
+		{
+		}
+		catch (TypeException e)
+		{
+			M_log.warn(e);
+		}
+		finally
+		{
+			popAdvisor();
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getTempFileName(String ref)
+	{
+		String id = this.getTempDesiredId(ref);
+		if (id == null) return null;
+
+		// return just the last part of the full path
+		String[] parts = StringUtil.split(id, "/");
+		return parts[parts.length - 1];
+	}
+
+	/**
+	 * Get the resource id that this temp resource wants to be.
+	 * 
+	 * @param ref
+	 *        The reference to the temp resource.
+	 * @return The resource id.
+	 */
+	protected String getTempDesiredId(String ref)
+	{
+		try
+		{
+			pushAdvisor();
+
+			// get a Reference to the resource
+			Reference resourceRef = this.entityManager.newReference(ref);
+			if (resourceRef.getType().equals(APPLICATION_ID))
+			{
+				resourceRef = this.entityManager.newReference(resourceRef.getId());
+			}
+
+			// get the resource
+			ContentResource resource = this.contentHostingService.getResource(resourceRef.getId());
+
+			// get the name
+			String id = resource.getProperties().getProperty(this.PROP_TEMPORARY);
+
+			return id;
+		}
+		catch (PermissionException e)
+		{
+			M_log.warn(e);
+		}
+		catch (IdUnusedException e)
+		{
+		}
+		catch (TypeException e)
+		{
+			M_log.warn(e);
+		}
+		finally
+		{
+			popAdvisor();
+		}
+
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Set<String> harvestAttachmentsReferenced(String data, boolean normalize)
 	{
 		Set<String> rv = new HashSet<String>();
@@ -594,6 +722,19 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean isTemporary(String id)
+	{
+		String[] parts = StringUtil.split(id, "/");
+
+		// i.e. /mneme/content/private/mneme/temp/121290812093812093812038
+		if ((parts.length == 7) && (TEMPORARY.equals(parts[5]))) return Boolean.TRUE;
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String merge(String siteId, Element root, String archivePath, String fromSiteId, Map attachmentNames, Map userIdTrans,
 			Set userListAllowImport)
 	{
@@ -671,6 +812,99 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		catch (TypeException e)
 		{
 			M_log.warn("removeAttachment: " + e.toString());
+		}
+		finally
+		{
+			popAdvisor();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeTemp(String ref)
+	{
+		pushAdvisor();
+
+		try
+		{
+			// get a Reference to the temp resource
+			Reference tempRef = this.entityManager.newReference(ref);
+			if (tempRef.getType().equals(APPLICATION_ID))
+			{
+				tempRef = this.entityManager.newReference(tempRef.getId());
+			}
+			String id = tempRef.getId();
+
+			// remove the resource
+			this.contentHostingService.removeResource(id);
+
+			// try for a removal of the thumb
+			this.contentHostingService.removeResource(id + THUMB_SUFFIX);
+		}
+		catch (PermissionException e)
+		{
+		}
+		catch (InUseException e)
+		{
+			M_log.warn("removeAttachment: " + e.toString());
+		}
+		catch (IdUnusedException e)
+		{
+		}
+		catch (TypeException e)
+		{
+			M_log.warn("removeAttachment: " + e.toString());
+		}
+		finally
+		{
+			popAdvisor();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void replaceWithTemp(String ref)
+	{
+		try
+		{
+			pushAdvisor();
+
+			// get a Reference to the temp resource
+			Reference tempRef = this.entityManager.newReference(ref);
+			if (tempRef.getType().equals(APPLICATION_ID))
+			{
+				tempRef = this.entityManager.newReference(tempRef.getId());
+			}
+
+			// get the temp resource
+			ContentResource tempResource = this.contentHostingService.getResource(tempRef.getId());
+
+			// get the id of the resource to replace
+			String permId = tempResource.getProperties().getProperty(this.PROP_TEMPORARY);
+
+			// replace the main resource
+			replaceResourceWithTemp(tempResource.getId(), permId);
+
+			// for images, replace the thumb as well
+			if (tempResource.getContentType().toLowerCase().startsWith("image/"))
+			{
+				String thumbTempId = tempResource.getId() + THUMB_SUFFIX;
+				String thumbPermId = permId + THUMB_SUFFIX;
+				replaceResourceWithTemp(thumbTempId, thumbPermId);
+			}
+		}
+		catch (PermissionException e)
+		{
+			M_log.warn(e);
+		}
+		catch (IdUnusedException e)
+		{
+		}
+		catch (TypeException e)
+		{
+			M_log.warn(e);
 		}
 		finally
 		{
@@ -883,10 +1117,18 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		Reference ref = this.getReference(resource.getId());
 		String thumbId = ref.getId() + THUMB_SUFFIX;
 		String thumbName = name + THUMB_SUFFIX;
+
+		// transfer the desired id if present
+		String desiredId = resource.getProperties().getProperty(PROP_TEMPORARY);
+		if (desiredId != null)
+		{
+			desiredId += THUMB_SUFFIX;
+		}
+
 		try
 		{
 			byte[] thumb = makeThumb(body, 80, 80, 0.75f);
-			Reference thumbRef = doAdd(thumbId, thumbName, "image/jpeg", thumb, thumb.length, true);
+			Reference thumbRef = doAdd(thumbId, thumbName, "image/jpeg", thumb, thumb.length, true, desiredId);
 
 			return thumbRef;
 		}
@@ -978,6 +1220,20 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 		String context = ref.getContext();
 
 		String[] parts = StringUtil.split(ref.getId(), "/");
+
+		// special "temp" handling
+		if ((parts.length == 6) && (this.TEMPORARY.equals(parts[4])))
+		{
+			// get the resource
+			String id = getTempDesiredId(ref.getReference());
+			if (id != null)
+			{
+				// base security on that
+				parts = StringUtil.split(id, "/");
+				if (parts.length > 3) context = parts[3];
+			}
+		}
+
 		if ((parts.length == 9) && (SUBMISSIONS_AREA.equals(parts[5])))
 		{
 			// manage or grade permission for the context is still a winner
@@ -1019,42 +1275,58 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 *        Any prefix path for within the context are of the application in private.
 	 * @param uniqueHolder
 	 *        If true, a uniquely named folder is created to hold the resource.
+	 * @param temporary
+	 *        if true, put the file in the temporary area.
 	 * @return
 	 */
-	protected String contentHostingId(String name, String application, String context, String prefix, boolean uniqueHolder)
+	protected String contentHostingId(String name, String application, String context, String prefix, boolean uniqueHolder, boolean temporary)
 	{
 		// form the content hosting path, and make sure all the folders exist
 		String contentPath = "/private/";
 		assureCollection(contentPath, application, false);
 		contentPath += application + "/";
-		assureCollection(contentPath, context, false);
-		contentPath += context + "/";
-		if ((prefix != null) && (prefix.length() > 0))
+
+		if (temporary)
 		{
-			// allow multi-part prefix
-			if (prefix.indexOf('/') != -1)
-			{
-				String[] prefixes = StringUtil.split(prefix, "/");
-				for (String pre : prefixes)
-				{
-					assureCollection(contentPath, pre, false);
-					contentPath += pre + "/";
-				}
-			}
-			else
-			{
-				assureCollection(contentPath, prefix, false);
-				contentPath += prefix + "/";
-			}
-		}
-		if (uniqueHolder)
-		{
+			assureCollection(contentPath, TEMPORARY, true);
+			contentPath += TEMPORARY + "/";
+
 			String uuid = this.idManager.createUuid();
-			assureCollection(contentPath, uuid, true);
-			contentPath += uuid + "/";
+			contentPath += uuid;
 		}
 
-		contentPath += name;
+		else
+		{
+			assureCollection(contentPath, context, false);
+			contentPath += context + "/";
+
+			if ((prefix != null) && (prefix.length() > 0))
+			{
+				// allow multi-part prefix
+				if (prefix.indexOf('/') != -1)
+				{
+					String[] prefixes = StringUtil.split(prefix, "/");
+					for (String pre : prefixes)
+					{
+						assureCollection(contentPath, pre, false);
+						contentPath += pre + "/";
+					}
+				}
+				else
+				{
+					assureCollection(contentPath, prefix, false);
+					contentPath += prefix + "/";
+				}
+			}
+			if (uniqueHolder)
+			{
+				String uuid = this.idManager.createUuid();
+				assureCollection(contentPath, uuid, true);
+				contentPath += uuid + "/";
+			}
+
+			contentPath += name;
+		}
 
 		return contentPath;
 	}
@@ -1082,7 +1354,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	 *        If true, a uniquely named folder is created to hold the resource.
 	 * @return The Reference to the added attachment.
 	 */
-	protected Reference doAdd(String id, String name, String type, byte[] body, long size, boolean thumb)
+	protected Reference doAdd(String id, String name, String type, byte[] body, long size, boolean thumb, String tempDesiredId)
 	{
 		try
 		{
@@ -1099,6 +1371,11 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 			if (thumb)
 			{
 				props.addProperty(PROP_THUMB, PROP_THUMB);
+			}
+
+			if (tempDesiredId != null)
+			{
+				props.addProperty(PROP_TEMPORARY, tempDesiredId);
 			}
 
 			this.contentHostingService.commitResource(edit);
@@ -1308,8 +1585,7 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 	}
 
 	/**
-	 * Trim the name to only the characters after the last slash of either kind.<br />
-	 * Remove junk from uploaded file names.
+	 * Trim the name to only the characters after the last slash of either kind.<br /> Remove junk from uploaded file names.
 	 * 
 	 * @param name
 	 *        The string to trim.
@@ -1358,5 +1634,74 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 				return SecurityAdvice.ALLOWED;
 			}
 		});
+	}
+
+	/**
+	 * Replace the CHS resource called "permId" with the one called "tempId".
+	 * 
+	 * @param tempId
+	 *        The temporary CHS resource ID.
+	 * @param permId
+	 *        The CHS resource that is getting replaced.
+	 */
+	protected void replaceResourceWithTemp(String tempId, String permId)
+	{
+		// delete the resource that is getting replaced
+		try
+		{
+			this.contentHostingService.removeResource(permId);
+		}
+		catch (PermissionException e)
+		{
+			M_log.warn(e);
+		}
+		catch (IdUnusedException e)
+		{
+		}
+		catch (TypeException e)
+		{
+			M_log.warn(e);
+		}
+		catch (InUseException e)
+		{
+			M_log.warn(e);
+		}
+
+		// rename the temp resource
+		try
+		{
+			this.contentHostingService.rename(tempId, permId);
+		}
+		catch (IdUnusedException e)
+		{
+		}
+		catch (PermissionException e)
+		{
+			M_log.warn(e);
+		}
+		catch (TypeException e)
+		{
+			M_log.warn(e);
+		}
+		catch (InUseException e)
+		{
+			M_log.warn(e);
+		}
+		catch (OverQuotaException e)
+		{
+			M_log.warn(e);
+		}
+		catch (InconsistentException e)
+		{
+			M_log.warn(e);
+		}
+		catch (IdUsedException e)
+		{
+			M_log.warn(e);
+		}
+		catch (ServerOverloadException e)
+		{
+			M_log.warn(e);
+		}
 	}
 }

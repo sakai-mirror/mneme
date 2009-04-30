@@ -52,8 +52,11 @@ public interface AttachmentService
 	/** Prefix for the submissions upload area in MnemeDocs: in 1.1 and later, expect another path component with the submission id. */
 	static final String SUBMISSIONS_AREA = "submissions";
 
+	/** Prefix for the temporary upload area in MnemeDocs. */
+	static final String TEMPORARY = "temp";
+
 	/** The text added to the main URL to form the thumb-nail URL. */
-	public final static String THUMB_SUFFIX = "_thumb.jpg";
+	static final String THUMB_SUFFIX = "_thumb.jpg";
 
 	/**
 	 * Add an attachment from an uploaded file.
@@ -105,7 +108,7 @@ public interface AttachmentService
 	 * @param body
 	 *        The attachment body bytes.
 	 * @param type
-	 *        The attacment file mime type.
+	 *        The attachment file mime type.
 	 * @return The Reference to the added attachment.
 	 */
 	Reference addAttachment(String application, String context, String prefix, boolean uniqueHolder, String name, byte[] body, String type);
@@ -146,9 +149,26 @@ public interface AttachmentService
 	Reference getReference(String refString);
 
 	/**
-	 * Collect all the attachment references in the html data:<br />
-	 * Anything referenced by a src= or href=. in our content docs, or in a site content area <br />
-	 * Ignore anything in a myWorkspace content area or the public content area.
+	 * Get a pair of Attachment objects for the temporary resource.
+	 * 
+	 * @param ref
+	 *        The temporary file reference.
+	 * @return two Attachment objects; [0] for the temporary, [1] for the existing resource it would replace.
+	 */
+	List<Attachment> getTempAttachments(String ref);
+
+	/**
+	 * Get the file name that this temporary file wants to be.
+	 * 
+	 * @param ref
+	 *        The ref to the temporary file.
+	 * @return The temporary file's desired file name.
+	 */
+	String getTempFileName(String ref);
+
+	/**
+	 * Collect all the attachment references in the html data:<br /> Anything referenced by a src= or href=. in our content docs, or in a site content
+	 * area <br /> Ignore anything in a myWorkspace content area or the public content area.
 	 * 
 	 * @param data
 	 *        The data string.
@@ -159,6 +179,15 @@ public interface AttachmentService
 	Set<String> harvestAttachmentsReferenced(String data, boolean normalize);
 
 	/**
+	 * Tell if this CHS id is a temporary resource.
+	 * 
+	 * @param ref
+	 *        The CHS (alternate, i.e. 'mneme') ref.
+	 * @return TRUE if the ref is from a temporary resource, FALSE if not.
+	 */
+	Boolean isTemporary(String ref);
+
+	/**
 	 * Remove this attachment.
 	 * 
 	 * @param ref
@@ -167,8 +196,24 @@ public interface AttachmentService
 	void removeAttachment(Reference ref);
 
 	/**
-	 * Translate any embedded attachment references in the html data, based on the set of translations.<br />
-	 * Uses the same rules to find the references as harvestAttachmentsReferenced.
+	 * Remove a temporary resource.
+	 * 
+	 * @param ref
+	 *        The temporary resource reference.
+	 */
+	void removeTemp(String ref);
+
+	/**
+	 * Replace a resource with the temporary resource that was made because of the name conflict with the resource.
+	 * 
+	 * @param ref
+	 *        The reference to the temporary resource.
+	 */
+	void replaceWithTemp(String ref);
+
+	/**
+	 * Translate any embedded attachment references in the html data, based on the set of translations.<br /> Uses the same rules to find the
+	 * references as harvestAttachmentsReferenced.
 	 * 
 	 * @param data
 	 *        The html data.
