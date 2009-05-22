@@ -21,8 +21,8 @@
 
 package org.etudes.mneme.impl;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +48,7 @@ import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.StringUtil;
+import org.sakaiproject.util.Validator;
 
 /**
  * <p>
@@ -624,13 +625,13 @@ public class ImportTextServiceImpl implements ImportTextService
 			if (parts.length > 1) 
 			{
 				text = parts[1].trim();
-				clean = HtmlHelper.clean(text);
+				clean = Validator.escapeHtml(text);
 			}
 			else
 				return false;
 		}
 		else
-			clean = HtmlHelper.clean(text);
+			clean = Validator.escapeHtml(text);
 		
 		question.getPresentation().setText(clean);
 
@@ -640,13 +641,13 @@ public class ImportTextServiceImpl implements ImportTextService
 		// add feedback
 		if (StringUtil.trimToNull(feedback) != null)
 		{
-			question.setFeedback(HtmlHelper.clean(feedback));
+			question.setFeedback(Validator.escapeHtml(feedback));
 		}
 		
 		// add hints
 		if (StringUtil.trimToNull(hints) != null)
 		{
-			question.setHints(HtmlHelper.clean(hints));
+			question.setHints(Validator.escapeHtml(hints));
 		}
 		
 		// explain reason
@@ -777,7 +778,7 @@ public class ImportTextServiceImpl implements ImportTextService
 			}
 						
 			answerChoice = line.substring(answer[0].length()).trim();
-			clean = HtmlHelper.clean(answerChoice);
+			clean = Validator.escapeHtml(answerChoice);
 			choices.add(clean);
 			answersIndex++;
 		}
@@ -797,13 +798,13 @@ public class ImportTextServiceImpl implements ImportTextService
 			if (parts.length > 1) 
 			{
 				text = parts[1].trim();
-				clean = HtmlHelper.clean(text);
+				clean = Validator.escapeHtml(text);
 			}
 			else
 				return false;
 		}
 		else
-			clean = HtmlHelper.clean(text);
+			clean = Validator.escapeHtml(text);
 
 		question.getPresentation().setText(clean);
 
@@ -822,6 +823,9 @@ public class ImportTextServiceImpl implements ImportTextService
 		// find the answers
 		for (Integer answerIndex : multipleAnswers)
 		{
+			if (choicesAuthored.size() < answerIndex)
+				return false;
+			
 			correctAnswers.add(Integer.valueOf(choicesAuthored.get(answerIndex).getId()));
 		}
 		
@@ -840,13 +844,13 @@ public class ImportTextServiceImpl implements ImportTextService
 		// add feedback
 		if (StringUtil.trimToNull(feedback) != null)
 		{
-			question.setFeedback(HtmlHelper.clean(feedback));
+			question.setFeedback(Validator.escapeHtml(feedback));
 		}
 		
 		// add hints
 		if (StringUtil.trimToNull(hints) != null)
 		{
-			question.setHints(HtmlHelper.clean(hints));
+			question.setHints(Validator.escapeHtml(hints));
 		}
 		
 		// explain reason
@@ -963,13 +967,13 @@ public class ImportTextServiceImpl implements ImportTextService
 			if (parts.length > 1) 
 			{
 				text = parts[1].trim();
-				clean = HtmlHelper.clean(text);
+				clean = Validator.escapeHtml(text);
 			}
 			else
 				return false;
 		}
 		else
-			clean = HtmlHelper.clean(text);
+			clean = Validator.escapeHtml(text);
 		
 		question.getPresentation().setText(clean);
 				
@@ -979,19 +983,19 @@ public class ImportTextServiceImpl implements ImportTextService
 		// add model answer
 		if (StringUtil.trimToNull(modelAnswer) != null)
 		{
-			e.setModelAnswer(HtmlHelper.clean(modelAnswer));
+			e.setModelAnswer(Validator.escapeHtml(modelAnswer));
 		}
 		
 		// add feedback
 		if (StringUtil.trimToNull(feedback) != null)
 		{
-			question.setFeedback(HtmlHelper.clean(feedback));
+			question.setFeedback(Validator.escapeHtml(feedback));
 		}
 		
 		// add hints
 		if (StringUtil.trimToNull(hints) != null)
 		{
-			question.setHints(HtmlHelper.clean(hints));
+			question.setHints(Validator.escapeHtml(hints));
 		}
 		
 		// explain reason
@@ -1279,13 +1283,13 @@ public class ImportTextServiceImpl implements ImportTextService
 			if (parts.length > 1) 
 			{
 				questionText = parts[1].trim();
-				clean = HtmlHelper.clean(questionText);
+				clean = Validator.escapeHtml(questionText);
 			}
 			else
 				return false;
 		}
 		else
-			clean = HtmlHelper.clean(questionText);
+			clean = Validator.escapeHtml(questionText);
 		
 		f.setText(clean);
 		
@@ -1295,13 +1299,13 @@ public class ImportTextServiceImpl implements ImportTextService
 		// add feedback
 		if (StringUtil.trimToNull(feedback) != null)
 		{
-			question.setFeedback(HtmlHelper.clean(feedback));
+			question.setFeedback(Validator.escapeHtml(feedback));
 		}
 		
 		// add hints
 		if (StringUtil.trimToNull(hints) != null)
 		{
-			question.setHints(HtmlHelper.clean(hints));
+			question.setHints(Validator.escapeHtml(hints));
 		}
 		
 		// explain reason
@@ -1346,8 +1350,8 @@ public class ImportTextServiceImpl implements ImportTextService
 		String hints = null;
 		boolean isSurvey = false;
 		String distractor = null;
-		Map<String, String> choicePairs = new HashMap<String, String>();
-		Map<String, String> drawChoicePairs = new HashMap<String, String>();
+		Map<String, String> choicePairs = new LinkedHashMap<String, String>();
+		Map<String, String> drawChoicePairs = new LinkedHashMap<String, String>();
 		
 		boolean drawMatchNumberFormatEstablished = false, numberFormatEstablished = false;
 		
@@ -1506,13 +1510,13 @@ public class ImportTextServiceImpl implements ImportTextService
 			if (parts.length > 1) 
 			{
 				text = parts[1].trim();
-				clean = HtmlHelper.clean(text);
+				clean = Validator.escapeHtml(text);
 			}
 			else
 				return false;
 		}
 		else
-			clean = HtmlHelper.clean(text);
+			clean = Validator.escapeHtml(text);
 		
 		question.getPresentation().setText(clean);
 		
@@ -1525,7 +1529,7 @@ public class ImportTextServiceImpl implements ImportTextService
 		int index = 0;
 		for (String key : choicePairs.keySet())
 		{
-			clean = HtmlHelper.clean(key);
+			clean = Validator.escapeHtml(key);
 			pairs.get(index).setMatch(clean);
 			
 			if (drawChoicePairs.size() > 0)
@@ -1539,7 +1543,7 @@ public class ImportTextServiceImpl implements ImportTextService
 			if(StringUtil.trimToNull(value) == null)
 				return false;
 			
-			clean = HtmlHelper.clean(value);
+			clean = Validator.escapeHtml(value);
 			pairs.get(index).setChoice(clean);
 			
 			index++;				
@@ -1551,13 +1555,13 @@ public class ImportTextServiceImpl implements ImportTextService
 		// add feedback
 		if (StringUtil.trimToNull(feedback) != null)
 		{
-			question.setFeedback(HtmlHelper.clean(feedback));
+			question.setFeedback(Validator.escapeHtml(feedback));
 		}
 		
 		// add hints
 		if (StringUtil.trimToNull(hints) != null)
 		{
-			question.setHints(HtmlHelper.clean(hints));
+			question.setHints(Validator.escapeHtml(hints));
 		}
 		
 		// survey

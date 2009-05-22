@@ -56,6 +56,7 @@ import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.StringUtil;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -187,6 +188,7 @@ public class ImportQtiServiceImpl implements ImportQtiService
 		{
 			XPath itemPath = new DOMXPath("//item");
 			List items = itemPath.selectNodes(doc);
+			
 			for (Object oItem : items)
 			{
 				Element item = (Element) oItem;
@@ -195,6 +197,13 @@ public class ImportQtiServiceImpl implements ImportQtiService
 				if (processSamigoMultipleChoice(item, pool, pointsAverage)) continue;
 				if (processSamigoSurvey(item, pool)) continue;
 				if (processSamigoFillIn(item, pool, pointsAverage)) continue;
+				
+				// process Respondous 3.5 type of format
+				if (processRespondousTrueFalse(item, pool, pointsAverage)) continue;
+				if (processRespondousMultipleChoice(item, pool, pointsAverage)) continue;
+				if (processRespondousEssay(item, pool)) continue;
+				if (processRespondousFillIn(item, pool, pointsAverage)) continue;
+				if (processRespondousMatching(item, pool, pointsAverage)) continue;
 
 				M_log.warn("item recognized: " + item.getAttribute("ident"));
 			}
@@ -1084,6 +1093,1102 @@ public class ImportQtiServiceImpl implements ImportQtiService
 		catch (JaxenException e) 
 		{
 			
+			return false;
+		}
+	}
+	
+	/**
+	 * Process this item if it is recognized as a Respondous true false.
+	 * 
+	 * @param item
+	 *        The QTI item from the QTI file DOM.
+	 * @param pool
+	 *        The pool to add the question to.
+	 * @param pointsAverage
+	 *        A running average to contribute the question's point value to for the pool.
+	 * @return true if successfully recognized and processed, false if not.
+	 */
+	protected boolean processRespondousTrueFalse(Element item, Pool pool, Average pointsAverage) throws AssessmentPermissionException
+	{
+		// the attributes of a true/false question
+		String presentation = null;
+		boolean rationale = false;
+		boolean isTrue = true;
+		String feedback = null;
+		String hint = null;
+		boolean survey = false;
+		float points = 0.0f;
+		String itemId = null;
+
+		// item identifier
+		itemId = StringUtil.trimToNull(item.getAttribute("ident"));
+		
+		try
+		{				
+			// presentation text
+			// Respondous is using the format - presentation/material/mattext
+			XPath presentationTextPath = new DOMXPath("presentation/material/mattext");
+			List presentationMaterialTexts = presentationTextPath.selectNodes(item);
+			StringBuilder presentationTextBuilder = new StringBuilder();
+			for (Object presentationMaterialText : presentationMaterialTexts)
+			{
+				Element presentationTextElement = (Element) presentationMaterialText;
+				XPath matTextPath = new DOMXPath(".");
+				String matText = StringUtil.trimToNull(matTextPath.stringValueOf(presentationTextElement));
+				
+				if (matText != null)
+					presentationTextBuilder.append(matText);
+			}
+			presentation = presentationTextBuilder.toString();
+			
+			if (presentation == null)
+			{
+				// QTI format - presentation/flow/material/mattext
+				presentationTextPath = new DOMXPath("presentation/flow/material/mattext");
+				presentation = StringUtil.trimToNull(presentationTextPath.stringValueOf(item));
+			}
+			
+			if (presentation == null) return false;
+			
+			// reponse_lid
+			XPath reponseLidPath = new DOMXPath("presentation//response_lid");
+			List responseLids = reponseLidPath.selectNodes(item);
+			
+			if ((responseLids.size() == 0) || (responseLids.size() > 1)) 
+				return false;
+			
+			Element responseLidElement = (Element) responseLids.get(0);
+			String rcardinality = StringUtil.trimToNull(responseLidElement.getAttribute("rcardinality"));
+			
+			if (rcardinality == null)
+				return false;
+			
+			if (!"Single".equalsIgnoreCase(rcardinality))
+				return false;
+			
+			// answers - w/ id
+			Map<String, String> answerMap = new HashMap<String, String>();
+			XPath answersPath = new DOMXPath(".//render_choice//response_label");
+			List answers = answersPath.selectNodes(responseLidElement);
+			for (Object oAnswer : answers)
+			{
+				Element answerElement = (Element) oAnswer;
+
+				String id = StringUtil.trimToNull(answerElement.getAttribute("ident"));
+
+				XPath answerMaterialPath = new DOMXPath(".//material//mattext");
+				String answer = combineHits(answerMaterialPath, answerElement);
+				if (answer != null)
+				{
+					answerMap.put(id, answer);
+				}
+			}
+			
+			boolean falseSeen = false;
+			boolean trueSeen = false;
+			if (answerMap.size() != 2) return false;
+			for (String key : answerMap.keySet())
+			{
+				String value = answerMap.get(key);
+				if ("true".equalsIgnoreCase(value)) 
+					trueSeen = true;
+				else if ("false".equalsIgnoreCase(value)) 
+					falseSeen = true;
+				else
+					return false;
+			}
+			if (!falseSeen) return false;
+			if (!trueSeen) return false;
+			
+			// score declaration - decvar
+			XPath scoreDecVarPath = new DOMXPath("resprocessing/outcomes/decvar");
+			Element scoreDecVarElement = (Element) scoreDecVarPath.selectSingleNode(item);
+			
+			if (scoreDecVarElement == null)
+				return false;
+			
+			String vartype = StringUtil.trimToNull(scoreDecVarElement.getAttribute("vartype"));
+			
+			if ((vartype != null) && !("Integer".equalsIgnoreCase(vartype) || "Decimal".equalsIgnoreCase(vartype)))
+				return false;
+			
+			// correct answer
+			XPath respConditionPath = new DOMXPath("resprocessing/respcondition");
+			List responses = respConditionPath.selectNodes(item);
+			
+			if (responses == null || responses.size() == 0)
+				return false;
+			
+			for (Object oResponse : responses)
+			{
+				Element responseElement = (Element) oResponse;
+
+				XPath responsePath = new DOMXPath("conditionvar/varequal");
+				String responseText = StringUtil.trimToNull(responsePath.stringValueOf(responseElement));
+				
+				if (responseText != null)
+				{
+					if (!answerMap.containsKey(responseText))
+						return false;
+		
+					// score
+					XPath setVarPath = new DOMXPath("setvar");
+					Element setVarElement = (Element) setVarPath.selectSingleNode(responseElement);
+					
+					if (setVarElement == null)
+						return false;
+					
+					if ("Set".equalsIgnoreCase(setVarElement.getAttribute("action")))
+					{
+						isTrue = Boolean.valueOf(answerMap.get(responseText));
+						String pointsValue = StringUtil.trimToNull(setVarElement.getTextContent());
+						
+						if (pointsValue == null)
+							return false;
+						
+						try
+						{
+							points = Float.valueOf(pointsValue);
+						}
+						catch (NumberFormatException e)
+						{
+							return false;
+						}
+						
+						// feedback optional and can be Response, Solution, Hint
+						XPath displayFeedbackPath = new DOMXPath("displayfeedback");
+						Element displayFeedbackElement = (Element) displayFeedbackPath.selectSingleNode(responseElement);
+						
+						if (displayFeedbackElement == null)
+							continue;
+						
+						String feedbackType = StringUtil.trimToNull(displayFeedbackElement.getAttribute("feedbacktype"));
+						
+						if (feedbackType == null || "Response".equalsIgnoreCase(feedbackType))
+						{
+							String linkRefId = StringUtil.trimToNull(displayFeedbackElement.getAttribute("linkrefid"));
+							
+							if (linkRefId == null)
+								continue;
+							
+							XPath itemfeedbackPath = new DOMXPath("//itemfeedback[@ident='"+ linkRefId +"']");
+							Element feedbackElement = (Element)itemfeedbackPath.selectSingleNode(item);
+							
+							if (feedbackElement == null)
+								continue;
+							
+							XPath feedbackTextPath = new DOMXPath("material/mattext");
+							String feedbackText = StringUtil.trimToNull(feedbackTextPath.stringValueOf(feedbackElement));
+							
+							feedback = feedbackText;
+						}
+					}
+				}
+			}
+			
+			// create the question
+			Question question = this.questionService.newQuestion(pool, "mneme:TrueFalse");
+			TrueFalseQuestionImpl tf = (TrueFalseQuestionImpl) (question.getTypeSpecificQuestion());
+
+			// set the text
+			String clean = HtmlHelper.clean(presentation);
+			question.getPresentation().setText(clean);
+
+			// the correct answer
+			tf.setCorrectAnswer(Boolean.toString(isTrue));
+
+			// reason
+			question.setExplainReason(Boolean.valueOf(rationale));
+
+			// feedback
+			if (feedback != null)
+			{
+				question.setFeedback(HtmlHelper.clean(feedback));
+			}
+
+			// save
+			question.getTypeSpecificQuestion().consolidate("");
+			this.questionService.saveQuestion(question);
+
+			// add to the points average
+			pointsAverage.add(points);
+			
+			return true;
+						
+		} catch (JaxenException e)
+		{
+			return false;
+		}
+	}
+	
+	/**
+	 * Process the item if it is recognized as a Respondous multiple choice.
+	 * 
+	 * @param item
+	 *        The QTI item from the QTI file DOM.
+	 * @param pool
+	 *        The pool to add the question to.
+	 * @param pointsAverage
+	 *        A running average to contribute the question's point value to for the pool.
+	 */
+	protected boolean processRespondousMultipleChoice(Element item, Pool pool, Average pointsAverage) throws AssessmentPermissionException
+	{
+		try
+		{
+			// the attributes of a multiple choice question
+			String presentation = null;
+			boolean rationale = false;
+			String feedback = null;
+			String hint = null;
+			boolean survey = false;
+			float points = 0.0f;
+			float maxPoints = 0.0f;
+			String externalId = null;
+			boolean shuffle = true;
+			boolean singleAnswer = true;
+			
+			externalId = StringUtil.trimToNull(item.getAttribute("ident"));
+			
+			// presentation text
+			// Respondous is using the format - presentation/material/mattext
+			XPath presentationTextPath = new DOMXPath("presentation/material/mattext");
+			List presentationMaterialTexts = presentationTextPath.selectNodes(item);
+			StringBuilder presentationTextBuilder = new StringBuilder();
+			for (Object presentationMaterialText : presentationMaterialTexts)
+			{
+				Element presentationTextElement = (Element) presentationMaterialText;
+				XPath matTextPath = new DOMXPath(".");
+				String matText = StringUtil.trimToNull(matTextPath.stringValueOf(presentationTextElement));
+				
+				if (matText != null)
+					presentationTextBuilder.append(matText);
+			}
+			presentation = presentationTextBuilder.toString();
+			
+			if (presentation == null)
+			{
+				// QTI format - presentation/flow/material/mattext
+				presentationTextPath = new DOMXPath("presentation/flow/material/mattext");
+				presentation = StringUtil.trimToNull(presentationTextPath.stringValueOf(item));
+			}
+			
+			if (presentation == null) return false;
+			
+			// reponse_lid
+			XPath reponseLidPath = new DOMXPath("presentation//response_lid");
+			List responseLids = reponseLidPath.selectNodes(item);
+			
+			if ((responseLids.size() == 0) || (responseLids.size() > 1)) 
+				return false;
+			
+			Element responseLidElement = (Element) responseLids.get(0);
+			String rcardinality = StringUtil.trimToNull(responseLidElement.getAttribute("rcardinality"));
+			
+			if (rcardinality == null)
+				return false;
+			
+			if (!("Single".equalsIgnoreCase(rcardinality) || "Multiple".equalsIgnoreCase(rcardinality)))
+				return false;
+			
+			if ("Multiple".equalsIgnoreCase(rcardinality))
+				singleAnswer = false;
+			
+			// answers - w/ id
+			Map<String, String> answerMap = new LinkedHashMap<String, String>();
+			XPath answersPath = new DOMXPath(".//render_choice//response_label");
+			List answers = answersPath.selectNodes(responseLidElement);
+			for (Object oAnswer : answers)
+			{
+				Element answerElement = (Element) oAnswer;
+
+				String id = StringUtil.trimToNull(answerElement.getAttribute("ident"));
+
+				XPath answerMaterialPath = new DOMXPath(".//material//mattext");
+				String answer = combineHits(answerMaterialPath, answerElement);
+				if (answer != null)
+				{
+					answerMap.put(id, answer);
+				}
+			}
+			
+			if (answerMap.size() < 2) return false;
+				
+			// score declaration - decvar
+			XPath scoreDecVarPath = new DOMXPath("resprocessing/outcomes/decvar");
+			Element scoreDecVarElement = (Element) scoreDecVarPath.selectSingleNode(item);
+			
+			if (scoreDecVarElement == null)
+				return false;
+			
+			String vartype = StringUtil.trimToNull(scoreDecVarElement.getAttribute("vartype"));
+			
+			if ((vartype != null) && !("Integer".equalsIgnoreCase(vartype) || "Decimal".equalsIgnoreCase(vartype)))
+				return false;
+			
+			String maxValue = StringUtil.trimToNull(scoreDecVarElement.getAttribute("maxvalue"));
+			String minValue = StringUtil.trimToNull(scoreDecVarElement.getAttribute("minvalue"));
+			
+			if (!singleAnswer && ((maxValue == null) || (minValue == null)))
+				return false;
+			
+			if (!singleAnswer)
+			{
+				try
+				{
+					maxPoints = Float.valueOf(maxValue);
+				}
+				catch (NumberFormatException e)
+				{
+					return false;
+				}
+			}
+			
+			// correct answer
+			XPath respConditionPath = new DOMXPath("resprocessing/respcondition");
+			List responses = respConditionPath.selectNodes(item);
+			
+			// correct answers
+			Set<String> responseAnswers = new HashSet<String>();
+			
+			if (responses == null || responses.size() == 0)
+				return false;
+			
+			for (Object oResponse : responses)
+			{
+				Element responseElement = (Element) oResponse;
+
+				XPath responsePath = new DOMXPath("conditionvar/varequal");
+				String responseText = StringUtil.trimToNull(responsePath.stringValueOf(responseElement));
+				
+				if (responseText != null)
+				{
+					if (!answerMap.containsKey(responseText))
+						return false;
+		
+					// score
+					XPath setVarPath = new DOMXPath("setvar");
+					Element setVarElement = (Element) setVarPath.selectSingleNode(responseElement);
+					
+					if (setVarElement == null)
+						return false;
+					
+					if ("Set".equalsIgnoreCase(setVarElement.getAttribute("action")))
+					{
+						//this is the answer for multiple choice - single answer
+						if (singleAnswer)
+						{
+							if (responseAnswers.size() > 0)
+								return false;
+							
+							responseAnswers.add(responseText);
+						} 
+						else
+							return false;
+						
+						String pointsValue = StringUtil.trimToNull(setVarElement.getTextContent());
+						
+						if (pointsValue == null)
+							return false;
+						
+						try
+						{
+							points = Float.valueOf(pointsValue);
+						}
+						catch (NumberFormatException e)
+						{
+							return false;
+						}
+						
+						// feedback optional and can be Response, Solution, Hint
+						XPath displayFeedbackPath = new DOMXPath("displayfeedback");
+						Element displayFeedbackElement = (Element) displayFeedbackPath.selectSingleNode(responseElement);
+						
+						if (displayFeedbackElement == null)
+							continue;
+						
+						String feedbackType = StringUtil.trimToNull(displayFeedbackElement.getAttribute("feedbacktype"));
+						
+						if (feedbackType == null || "Response".equalsIgnoreCase(feedbackType))
+						{
+							String linkRefId = StringUtil.trimToNull(displayFeedbackElement.getAttribute("linkrefid"));
+							
+							if (linkRefId == null)
+								continue;
+							
+							XPath itemfeedbackPath = new DOMXPath("//itemfeedback[@ident='"+ linkRefId +"']");
+							Element feedbackElement = (Element)itemfeedbackPath.selectSingleNode(item);
+							
+							if (feedbackElement == null)
+								continue;
+							
+							XPath feedbackTextPath = new DOMXPath("material/mattext");
+							String feedbackText = StringUtil.trimToNull(feedbackTextPath.stringValueOf(feedbackElement));
+							
+							feedback = feedbackText;
+						}
+					} 
+					else if (!singleAnswer && "Add".equalsIgnoreCase(setVarElement.getAttribute("action")))
+					{
+						String pointsValue = StringUtil.trimToNull(setVarElement.getTextContent());
+						
+						if (pointsValue == null)
+							return false;
+						
+						float resPoints = 0.0f;
+						
+						try
+						{
+							resPoints = Float.valueOf(pointsValue);
+						}
+						catch (NumberFormatException e)
+						{
+							return false;
+						}
+						
+						if (resPoints <= 0)
+							continue;
+						
+						responseAnswers.add(responseText);
+						points += resPoints;
+																	
+						// feedback optional and can be Response, Solution, Hint
+						XPath displayFeedbackPath = new DOMXPath("displayfeedback");
+						Element displayFeedbackElement = (Element) displayFeedbackPath.selectSingleNode(responseElement);
+						
+						if (displayFeedbackElement == null)
+							continue;
+						
+						// only one feedback is added as feed back is repeated in Respondous
+						if ((feedback != null) && (feedback.length() > 0))
+							continue;
+						
+						String feedbackType = StringUtil.trimToNull(displayFeedbackElement.getAttribute("feedbacktype"));
+						
+						if (feedbackType == null || "Response".equalsIgnoreCase(feedbackType))
+						{
+							String linkRefId = StringUtil.trimToNull(displayFeedbackElement.getAttribute("linkrefid"));
+							
+							if (linkRefId == null)
+								continue;
+							
+							XPath itemfeedbackPath = new DOMXPath("//itemfeedback[@ident='"+ linkRefId +"']");
+							Element feedbackElement = (Element)itemfeedbackPath.selectSingleNode(item);
+							
+							if (feedbackElement == null)
+								continue;
+							
+							XPath feedbackTextPath = new DOMXPath("material/mattext");
+							String feedbackText = StringUtil.trimToNull(feedbackTextPath.stringValueOf(feedbackElement));
+							
+							feedback = feedbackText;
+						}
+					}
+				}
+			}
+			
+			if (responseAnswers.size() == 0)
+				return false;
+			
+			if (!singleAnswer)
+			{
+				maxPoints = Float.valueOf(((float) Math.round(maxPoints * 100.0f)) / 100.0f);
+				//points = Float.valueOf(((float) Math.round(points * 100.0f)) / 100.0f);
+				
+				/*if (maxPoints != points)
+					return false;*/
+				
+				points = maxPoints;
+			}
+							
+			// create the question
+			Question question = this.questionService.newQuestion(pool, "mneme:MultipleChoice");
+			MultipleChoiceQuestionImpl mc = (MultipleChoiceQuestionImpl) (question.getTypeSpecificQuestion());
+
+			// set the text
+			String clean = HtmlHelper.clean(presentation);
+			question.getPresentation().setText(clean);
+
+			// randomize
+			mc.setShuffleChoices(Boolean.toString(shuffle));
+
+			// single / multiple select
+			mc.setSingleCorrect(Boolean.toString(singleAnswer));
+
+			// set the choices
+			List<String> choices = new ArrayList<String>();
+			for (String key : answerMap.keySet())
+			{
+				String value = answerMap.get(key);
+
+				clean = HtmlHelper.clean(value);
+				choices.add(clean);
+			}
+			mc.setAnswerChoices(choices);
+
+			
+			List<MultipleChoiceQuestionImpl.MultipleChoiceQuestionChoice> choicesAuthored = mc.getChoicesAsAuthored();
+			// corrects
+			Set<Integer> correctAnswers = new HashSet<Integer>();
+					
+			for (String oCorrect : responseAnswers)
+			{
+				String correctKey = StringUtil.trimToNull(oCorrect);
+				if (correctKey != null)
+				{
+					String correctValue = answerMap.get(correctKey);
+
+					// find this answer
+					for (int index = 0; index < choicesAuthored.size(); index++)
+					{
+						MultipleChoiceQuestionImpl.MultipleChoiceQuestionChoice choice = choicesAuthored.get(index);
+						if (choice.getText().equals(correctValue))
+						{
+							// use this answer's id
+							correctAnswers.add(Integer.valueOf(choice.getId()));
+						}
+					}
+				}
+			}
+			
+			// the correct answers
+			mc.setCorrectAnswerSet(correctAnswers);
+
+			// reason
+			question.setExplainReason(Boolean.valueOf(rationale));
+
+			// feedback
+			if (feedback != null)
+			{
+				question.setFeedback(HtmlHelper.clean(feedback));
+			}
+
+			// save
+			question.getTypeSpecificQuestion().consolidate("");
+			this.questionService.saveQuestion(question);
+
+			// add to the points average
+			pointsAverage.add(points);
+			
+			return true;
+		}
+		catch(JaxenException e)
+		{
+			return false;
+		}
+	}
+	
+	/**
+	 * Process the item if it is recognized as a Respondous Essay question.
+	 * 
+	 * @param item
+	 *        The QTI item from the QTI file DOM.
+	 * @param pool
+	 *        The pool to add the question to.
+	 * @param pointsAverage
+	 *        A running average to contribute the question's point value to for the pool.
+	 */
+	protected boolean processRespondousEssay(Element item, Pool pool) throws AssessmentPermissionException
+	{
+		try
+		{
+			// the attributes of a survey question
+			String presentation = null;
+			String feedback = null;
+			String externalId = null;
+
+			externalId = StringUtil.trimToNull(item.getAttribute("ident"));
+			
+			// presentation text
+			// Respondous is using the format - presentation/material/mattext
+			XPath presentationTextPath = new DOMXPath("presentation/material/mattext");
+			List presentationMaterialTexts = presentationTextPath.selectNodes(item);
+			StringBuilder presentationTextBuilder = new StringBuilder();
+			for (Object presentationMaterialText : presentationMaterialTexts)
+			{
+				Element presentationTextElement = (Element) presentationMaterialText;
+				XPath matTextPath = new DOMXPath(".");
+				String matText = StringUtil.trimToNull(matTextPath.stringValueOf(presentationTextElement));
+				
+				if (matText != null)
+					presentationTextBuilder.append(matText);
+			}
+			presentation = presentationTextBuilder.toString();
+			
+			if (presentation == null)
+			{
+				// QTI format - presentation/flow/material/mattext
+				presentationTextPath = new DOMXPath("presentation/flow/material/mattext");
+				presentation = StringUtil.trimToNull(presentationTextPath.stringValueOf(item));
+			}
+			
+			if (presentation == null) return false;
+			
+			// reponse_str/response_fib
+			XPath renderFibPath = new DOMXPath("presentation/response_str/render_fib");
+			Element responseFib = (Element) renderFibPath.selectSingleNode(item);
+			
+			if (responseFib == null)
+				return false;
+			
+			Attr promptAttr = responseFib.getAttributeNode("prompt");
+			Attr rowsAttr = responseFib.getAttributeNode("rows");
+			Attr columnsAttr = responseFib.getAttributeNode("columns");
+			
+			if (promptAttr == null || rowsAttr == null || columnsAttr == null)
+				return false;
+			
+			if (!"Box".equalsIgnoreCase(promptAttr.getValue().trim()))
+				return false;
+			
+			// create the question
+			Question question = this.questionService.newQuestion(pool, "mneme:Essay");
+			EssayQuestionImpl e = (EssayQuestionImpl) (question.getTypeSpecificQuestion());
+			
+			String clean = HtmlHelper.clean(presentation);
+			
+			question.getPresentation().setText(clean);
+			
+			// type
+			e.setSubmissionType(EssayQuestionImpl.SubmissionType.inline);
+			
+			XPath itemfeedbackPath = new DOMXPath("itemfeedback/material/mattext");
+			feedback = StringUtil.trimToNull(itemfeedbackPath.stringValueOf(item));
+			
+			// add feedback
+			if (StringUtil.trimToNull(feedback) != null)
+			{
+				question.setFeedback(HtmlHelper.clean(feedback));
+			}
+							
+			// save
+			question.getTypeSpecificQuestion().consolidate("");
+			this.questionService.saveQuestion(question);
+			
+			return true;
+		}
+		catch(JaxenException e)
+		{
+			return false;
+		}
+	}
+	
+	/**
+	 * Process this item if it is recognized as a Respondous Fill in the blank.
+	 * 
+	 * @param item
+	 *        The QTI item from the QTI file DOM.
+	 * @param pool
+	 *        The pool to add the question to.
+	 * @param pointsAverage
+	 *        A running average to contribute the question's point value to for the pool.
+	 * @return true if successfully recognized and processed, false if not.
+	 */
+	protected boolean processRespondousFillIn(Element item, Pool pool, Average pointsAverage) throws AssessmentPermissionException 
+	{
+		// the attributes of a Fill In the Blank question
+		boolean caseSensitive = false;
+		boolean mutuallyExclusive = false;
+		String presentation = null;
+		float points = 0.0f;
+		String feedback = null;
+		boolean isResponseTextual = false;
+		
+		String externalId = null;
+		List<String> answers = new ArrayList<String>();
+		
+		try 
+		{
+			//identifier
+			externalId = StringUtil.trimToNull(item.getAttribute("ident"));
+			
+			// presentation text
+			// Respondous is using the format - presentation/material/mattext
+			XPath presentationTextPath = new DOMXPath("presentation/material/mattext");
+			List presentationMaterialTexts = presentationTextPath.selectNodes(item);
+			StringBuilder presentationTextBuilder = new StringBuilder();
+			for (Object presentationMaterialText : presentationMaterialTexts)
+			{
+				Element presentationTextElement = (Element) presentationMaterialText;
+				XPath matTextPath = new DOMXPath(".");
+				String matText = StringUtil.trimToNull(matTextPath.stringValueOf(presentationTextElement));
+				
+				if (matText != null)
+					presentationTextBuilder.append(matText);
+			}
+			presentation = presentationTextBuilder.toString();
+			
+			if (presentation == null)
+			{
+				// QTI format - presentation/flow/material/mattext
+				presentationTextPath = new DOMXPath("presentation/flow/material/mattext");
+				presentation = StringUtil.trimToNull(presentationTextPath.stringValueOf(item));
+			}
+			
+			if (presentation == null) return false;
+			
+			// reponse_str/response_fib
+			XPath renderFibPath = new DOMXPath("presentation/response_str/render_fib");
+			Element responseFib = (Element) renderFibPath.selectSingleNode(item);
+			
+			if (responseFib == null)
+				return false;
+			
+			Attr promptAttr = responseFib.getAttributeNode("prompt");
+			Attr rowsAttr = responseFib.getAttributeNode("rows");
+			Attr columnsAttr = responseFib.getAttributeNode("columns");
+			
+			if (promptAttr == null || rowsAttr != null || columnsAttr != null)
+				return false;
+			
+			if (!"Box".equalsIgnoreCase(promptAttr.getValue().trim()))
+				return false;
+			
+			// score declaration - decvar
+			XPath scoreDecVarPath = new DOMXPath("resprocessing/outcomes/decvar");
+			Element scoreDecVarElement = (Element) scoreDecVarPath.selectSingleNode(item);
+			
+			if (scoreDecVarElement == null)
+				return false;
+			
+			String vartype = StringUtil.trimToNull(scoreDecVarElement.getAttribute("vartype"));
+			
+			if ((vartype != null) && !("Integer".equalsIgnoreCase(vartype) || "Decimal".equalsIgnoreCase(vartype)))
+				return false;
+			
+			String maxValue = StringUtil.trimToNull(scoreDecVarElement.getAttribute("maxvalue"));
+			String minValue = StringUtil.trimToNull(scoreDecVarElement.getAttribute("minvalue"));
+			
+			if (maxValue == null || minValue == null)
+				return false;
+			
+			try
+			{
+				points = Float.valueOf(maxValue);
+			}
+			catch (NumberFormatException e)
+			{
+				return false;
+			}
+			
+			// correct answer
+			XPath respConditionPath = new DOMXPath("resprocessing/respcondition");
+			List responses = respConditionPath.selectNodes(item);
+			
+			if (responses == null || responses.size() == 0)
+				return false;
+			
+			for (Object oResponse : responses)
+			{
+				Element responseElement = (Element) oResponse;
+
+				XPath responsePath = new DOMXPath("conditionvar/varequal");
+				String responseText = StringUtil.trimToNull(responsePath.stringValueOf(responseElement));
+				
+				if (responseText != null)
+				{
+					// score
+					XPath setVarPath = new DOMXPath("setvar");
+					Element setVarElement = (Element) setVarPath.selectSingleNode(responseElement);
+					
+					if (setVarElement == null)
+						return false;
+					
+					if ("Add".equalsIgnoreCase(setVarElement.getAttribute("action")))
+					{
+						String pointsValue = StringUtil.trimToNull(setVarElement.getTextContent());
+						
+						if (pointsValue == null)
+							return false;
+						
+						answers.add(responseText.trim());
+						
+						// feedback optional and can be Response, Solution, Hint
+						XPath displayFeedbackPath = new DOMXPath("displayfeedback");
+						Element displayFeedbackElement = (Element) displayFeedbackPath.selectSingleNode(responseElement);
+						
+						if (displayFeedbackElement == null)
+							continue;
+						
+						String feedbackType = StringUtil.trimToNull(displayFeedbackElement.getAttribute("feedbacktype"));
+						
+						if (feedbackType == null || "Response".equalsIgnoreCase(feedbackType))
+						{
+							String linkRefId = StringUtil.trimToNull(displayFeedbackElement.getAttribute("linkrefid"));
+							
+							if (linkRefId == null)
+								continue;
+							
+							XPath itemfeedbackPath = new DOMXPath("//itemfeedback[@ident='"+ linkRefId +"']");
+							Element feedbackElement = (Element)itemfeedbackPath.selectSingleNode(item);
+							
+							if (feedbackElement == null)
+								continue;
+							
+							XPath feedbackTextPath = new DOMXPath("material/mattext");
+							String feedbackText = StringUtil.trimToNull(feedbackTextPath.stringValueOf(feedbackElement));
+							
+							feedback = feedbackText;
+						}
+					}
+				}
+			}
+			
+			if (answers.size() == 0)
+				return false;
+			
+			// create the question
+			Question question = this.questionService.newQuestion(pool, "mneme:FillBlanks");
+			FillBlanksQuestionImpl f = (FillBlanksQuestionImpl) (question.getTypeSpecificQuestion());
+			
+			// case sensitive
+			f.setCaseSensitive(Boolean.FALSE.toString());
+			
+			//mutually exclusive
+			f.setAnyOrder(Boolean.FALSE.toString());
+			
+			StringBuffer buildAnswers = new StringBuffer();
+			buildAnswers.append("{");
+			for (String answer : answers)
+			{
+				if (!isResponseTextual)
+				{
+					try
+					{
+						Float.parseFloat(answer);
+					}
+					catch (NumberFormatException e)
+					{
+						isResponseTextual = true;
+					}
+				}
+				buildAnswers.append(answer);
+				buildAnswers.append("|");
+			}
+			buildAnswers.replace(buildAnswers.length() - 1, buildAnswers.length(), "}");
+			String questionText = presentation.concat(buildAnswers.toString());
+			
+			String clean = HtmlHelper.clean(questionText);
+			
+			f.setText(clean);
+			
+			// text or numeric
+			f.setResponseTextual(Boolean.toString(isResponseTextual));
+			
+			// add feedback
+			if (StringUtil.trimToNull(feedback) != null)
+			{
+				question.setFeedback(HtmlHelper.clean(feedback));
+			}
+						
+			// save
+			question.getTypeSpecificQuestion().consolidate("");
+			this.questionService.saveQuestion(question);
+			
+			// add to the points average
+			pointsAverage.add(points);
+			
+			return true;
+		}
+		catch(JaxenException e)
+		{
+			return false;
+		}
+	}
+	
+	/**
+	 * Process this item if it is recognized as a Respondous Matching question.
+	 * 
+	 * @param item
+	 *        The QTI item from the QTI file DOM.
+	 * @param pool
+	 *        The pool to add the question to.
+	 * @param pointsAverage
+	 *        A running average to contribute the question's point value to for the pool.
+	 * @return true if successfully recognized and processed, false if not.
+	 */
+	protected boolean processRespondousMatching(Element item, Pool pool, Average pointsAverage) throws AssessmentPermissionException 
+	{
+		String externalId = null;
+		String presentation = null;
+		String feedback = null;
+		float points = 0.0f;
+		
+		try 
+		{
+			//identifier
+			externalId = StringUtil.trimToNull(item.getAttribute("ident"));
+			
+			// presentation text
+			// Respondous is using the format - presentation/material/mattext
+			XPath presentationTextPath = new DOMXPath("presentation/material/mattext");
+			List presentationMaterialTexts = presentationTextPath.selectNodes(item);
+			StringBuilder presentationTextBuilder = new StringBuilder();
+			for (Object presentationMaterialText : presentationMaterialTexts)
+			{
+				Element presentationTextElement = (Element) presentationMaterialText;
+				XPath matTextPath = new DOMXPath(".");
+				String matText = StringUtil.trimToNull(matTextPath.stringValueOf(presentationTextElement));
+				
+				if (matText != null)
+					presentationTextBuilder.append(matText);
+			}
+			presentation = presentationTextBuilder.toString();
+			
+			if (presentation == null)
+			{
+				// QTI format - presentation/flow/material/mattext
+				presentationTextPath = new DOMXPath("presentation/flow/material/mattext");
+				presentation = StringUtil.trimToNull(presentationTextPath.stringValueOf(item));
+			}
+			
+			if (presentation == null) return false;
+			
+			// reponse_lid
+			XPath reponseLidPath = new DOMXPath("presentation//response_lid");
+			List responseLids = reponseLidPath.selectNodes(item);
+			
+			if (responseLids.size() == 0) 
+				return false;
+			
+			Map<String, String> matchPresentations = new LinkedHashMap<String, String>();
+			Map<String, Object> matchChoices = new HashMap<String, Object>();
+			
+			for (Object responseLid : responseLids)
+			{
+				Element responseLidElement = (Element) responseLid;
+				
+				String identifier = responseLidElement.getAttribute("ident");
+				
+				if (StringUtil.trimToNull(identifier) == null)
+					continue;
+				
+				XPath matchPresentationPath = new DOMXPath("material/mattext");
+				String matchPresentationText = StringUtil.trimToNull(matchPresentationPath.stringValueOf(responseLidElement));
+				
+				matchPresentations.put(identifier, matchPresentationText);
+				
+				// response_label
+				XPath reponseChoicePath = new DOMXPath("render_choice/response_label");
+				List reponseChoices = reponseChoicePath.selectNodes(responseLidElement);
+				
+				Map<String, String> answerChoices = new HashMap<String, String>();
+				for (Object reponseChoice : reponseChoices)
+				{
+					Element reponseChoiceElement = (Element) reponseChoice;
+					
+					String responseChoiceId = reponseChoiceElement.getAttribute("ident");
+					
+					if (StringUtil.trimToNull(responseChoiceId) == null)
+						continue;
+					
+					XPath choicePresentation = new DOMXPath("material/mattext");
+					String matchChoicesText = StringUtil.trimToNull(choicePresentation.stringValueOf(reponseChoiceElement));
+					
+					if (StringUtil.trimToNull(matchChoicesText) == null)
+						continue;
+					
+					answerChoices.put(responseChoiceId, matchChoicesText);
+				}
+				matchChoices.put(identifier, answerChoices);
+			}
+			
+			Map<String, String> matchAnswers = new HashMap<String, String>();
+			
+			for (String matchPresId : matchPresentations.keySet())
+			{
+				// resprocessing
+				XPath reponseAnswerPath = new DOMXPath("resprocessing//conditionvar/varequal[@respident='"+ matchPresId +"']");
+				List reponseAnswers = reponseAnswerPath.selectNodes(item);
+				
+				for (Object answer : reponseAnswers)
+				{
+					Element answerElement = (Element) answer;
+					
+					if (answerElement == null)
+						continue;
+					
+					XPath setvarPath = new DOMXPath("../../setvar");
+					Element setvarElement = (Element)setvarPath.selectSingleNode(answerElement);
+					
+					if (setvarElement == null)
+						continue;
+					
+					if (!"setvar".equalsIgnoreCase(setvarElement.getNodeName()))
+						continue;
+					
+					if (!"Respondus_Correct".equalsIgnoreCase(setvarElement.getAttribute("varname")))
+						continue;
+					
+					matchAnswers.put(matchPresId, answerElement.getTextContent());
+				}
+			}
+			
+			XPath pointsPath = new DOMXPath("resprocessing/outcomes/decvar[@varname='Respondus_Correct']/@maxvalue");
+			String pointsValue = StringUtil.trimToNull(pointsPath.stringValueOf(item));
+			
+			try
+			{
+				if (pointsValue != null)
+					points = Float.valueOf(pointsValue);
+			}
+			catch (NumberFormatException e)
+			{
+				return false;
+			}
+			
+			if (matchAnswers.size() != matchPresentations.size())
+				return false;
+			
+			// create the question
+			Question question = this.questionService.newQuestion(pool, "mneme:Match");
+			MatchQuestionImpl m = (MatchQuestionImpl) (question.getTypeSpecificQuestion());
+			
+			String clean = HtmlHelper.clean(presentation);
+			
+			question.getPresentation().setText(clean);
+			
+			m.consolidate("INIT:" + matchPresentations.size());
+			
+			// set the pair values
+			List<MatchQuestionImpl.MatchQuestionPair> pairs = m.getPairs();
+			String value;
+			int index = 0;
+			for (String key : matchPresentations.keySet())
+			{
+				clean = HtmlHelper.clean(matchPresentations.get(key));
+				pairs.get(index).setMatch(clean);
+				
+				Map choices = (Map) matchChoices.get(key);
+				value = (String) choices.get(matchAnswers.get(key));
+				
+				if(StringUtil.trimToNull(value) == null)
+					return false;
+				
+				clean = HtmlHelper.clean(value);
+				pairs.get(index).setChoice(clean);
+				
+				index++;				
+			}
+			
+			XPath itemfeedbackPath = new DOMXPath("itemfeedback/material/mattext");
+			feedback = StringUtil.trimToNull(itemfeedbackPath.stringValueOf(item));
+			
+			if (feedback != null)
+			{
+				question.setFeedback(HtmlHelper.clean(feedback));
+			}
+			
+			// save
+			question.getTypeSpecificQuestion().consolidate("");
+			this.questionService.saveQuestion(question);
+			
+			// add to the points average
+			pointsAverage.add(points);
+			
+			return true;
+		}
+		catch(JaxenException e)
+		{
 			return false;
 		}
 	}
