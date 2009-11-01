@@ -7,11 +7,8 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2008 Etudes, Inc.
+ * Copyright (c) 2009 Etudes, Inc.
  * 
- * Portions completed before September 1, 2008
- * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,21 +26,23 @@
 
 <beans>
 
-	<bean id="org.etudes.mneme.tool.QuestionEditView"
-			class="org.etudes.mneme.tool.QuestionEditView"
+	<bean id="org.etudes.mneme.tool.DrawQuestionsView"
+			class="org.etudes.mneme.tool.DrawQuestionsView"
 			init-method="init"
 			destroy-method="destroy"
 			singleton="true">
 
  		<property name="ui"><ref bean="org.etudes.ambrosia.api.UiService"/></property>
- 		<property name="mnemeService"><ref bean="org.etudes.mneme.api.MnemeService" /></property>
+  		<property name="toolManager"><ref bean="org.sakaiproject.tool.api.ToolManager"/></property>
+ 		<property name="assessmentService"><ref bean="org.etudes.mneme.api.AssessmentService"/></property>
+ 		<property name="poolService"><ref bean="org.etudes.mneme.api.PoolService"/></property>
  		<property name="questionService"><ref bean="org.etudes.mneme.api.QuestionService"/></property>
- 	 
+ 
  		<property name="toolId"><value>sakai.mneme</value></property>
- 		<property name="path"><value>question_edit</value></property>
- 		<property name="bundle"><value>questionEdit</value></property>
-		<property name="shared"><value>mneme</value></property>
-		<property name="components"><value>questionEdit.xml</value></property>
+ 		<property name="path"><value>draw_questions</value></property>
+ 		<property name="bundle"><value>drawQuestions</value></property>
+ 		<property name="shared"><value>mneme</value></property>
+		<property name="components"><value>drawQuestions.xml</value></property>
  		<property name="docsPath"><value>/private/mneme/{CONTEXT}/docs/</value></property>
 	</bean>
 

@@ -42,15 +42,15 @@ import org.etudes.mneme.api.AssessmentService;
 import org.etudes.mneme.api.AssessmentSpecialAccess;
 import org.etudes.mneme.api.AssessmentType;
 import org.etudes.mneme.api.Attribution;
-import org.etudes.mneme.api.DrawPart;
-import org.etudes.mneme.api.ManualPart;
 import org.etudes.mneme.api.Part;
+import org.etudes.mneme.api.PartDetail;
 import org.etudes.mneme.api.Pool;
 import org.etudes.mneme.api.PoolDraw;
 import org.etudes.mneme.api.PoolService;
 import org.etudes.mneme.api.Presentation;
 import org.etudes.mneme.api.Question;
 import org.etudes.mneme.api.QuestionGrouping;
+import org.etudes.mneme.api.QuestionPick;
 import org.etudes.mneme.api.QuestionService;
 import org.etudes.mneme.api.SecurityService;
 import org.etudes.mneme.api.Submission;
@@ -956,10 +956,12 @@ public class AssessmentImpl implements Assessment
 		{
 			((PartImpl) part).changed = true;
 
-			if (part instanceof DrawPart)
+			for (PartDetail detail : part.getDetails())
 			{
-				for (PoolDraw draw : ((DrawPartImpl) part).pools)
+				if (detail instanceof PoolDraw)
 				{
+					PoolDraw draw = (PoolDraw) detail;
+
 					// if we have not yet made a history for this pool, do so
 					Pool history = histories.get(draw.getPoolId());
 					if (history == null)
@@ -971,15 +973,14 @@ public class AssessmentImpl implements Assessment
 					}
 					draw.setPool(history);
 				}
-			}
-			else if (part instanceof ManualPart)
-			{
-				for (PoolPick pick : ((ManualPartImpl) part).questions)
+				else if (detail instanceof QuestionPick)
 				{
+					QuestionPick pick = (QuestionPick) detail;
+
 					Question q = this.questionService.getQuestion(pick.getQuestionId());
 					if (q != null)
 					{
-						// make sure we have this question's comlete pool
+						// make sure we have this question's complete pool
 						Pool history = histories.get(q.getPool().getId());
 						if (history == null)
 						{
@@ -994,7 +995,7 @@ public class AssessmentImpl implements Assessment
 						String historicalQid = oldToNew.get(q.getId());
 						if (historicalQid != null)
 						{
-							pick.setQuestion(historicalQid);
+							pick.setQuestionId(historicalQid);
 						}
 					}
 				}

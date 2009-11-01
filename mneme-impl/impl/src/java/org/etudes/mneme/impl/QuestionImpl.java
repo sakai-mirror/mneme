@@ -34,6 +34,7 @@ import org.etudes.mneme.api.PoolGetService;
 import org.etudes.mneme.api.Presentation;
 import org.etudes.mneme.api.Question;
 import org.etudes.mneme.api.QuestionGetService;
+import org.etudes.mneme.api.QuestionPick;
 import org.etudes.mneme.api.Submission;
 import org.etudes.mneme.api.SubmissionUnscoredQuestionService;
 import org.etudes.mneme.api.TypeSpecificQuestion;
@@ -147,7 +148,7 @@ public class QuestionImpl implements Question
 		{
 			if (question.partContext == null) return true;
 
-			List<PoolPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
+			List<QuestionPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
 			if (question.getId().equals(questions.get(0).getQuestionId())) return true;
 
 			return false;
@@ -160,7 +161,7 @@ public class QuestionImpl implements Question
 		{
 			if (question.partContext == null) return true;
 
-			List<PoolPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
+			List<QuestionPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
 			if (question.getId().equals(questions.get(questions.size() - 1).getQuestionId())) return true;
 
 			return false;
@@ -173,9 +174,9 @@ public class QuestionImpl implements Question
 		{
 			if (question.partContext == null) return null;
 
-			List<PoolPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
+			List<QuestionPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
 			int index = 0;
-			for (PoolPick pick : questions)
+			for (QuestionPick pick : questions)
 			{
 				if (pick.getQuestionId().equals(question.getId()))
 				{
@@ -196,9 +197,9 @@ public class QuestionImpl implements Question
 		{
 			if (question.partContext == null) return new Integer(1);
 
-			List<PoolPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
+			List<QuestionPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
 			int index = 0;
-			for (PoolPick pick : questions)
+			for (QuestionPick pick : questions)
 			{
 				if (pick.getQuestionId().equals(question.getId()))
 				{
@@ -217,9 +218,9 @@ public class QuestionImpl implements Question
 		{
 			if (question.partContext == null) return null;
 
-			List<PoolPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
+			List<QuestionPick> questions = ((PartImpl) question.getPart()).getQuestionPickOrder();
 			int index = 0;
-			for (PoolPick pick : questions)
+			for (QuestionPick pick : questions)
 			{
 				if (pick.getQuestionId().equals(question.getId()))
 				{

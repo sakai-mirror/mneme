@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2008 Etudes, Inc.
+ * Copyright (c) 2008, 2009 Etudes, Inc.
  * 
  * Portions completed before September 1, 2008
  * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
@@ -40,14 +40,22 @@ import org.etudes.mneme.api.Shuffler;
  */
 public class PoolDrawImpl implements PoolDraw
 {
+	/** The Assessment context for this draw. */
 	protected transient Assessment assessment = null;
 
+	/** Part detail id. */
+	protected String id = null;
+
+	/** The number of questions to draw from the pool. */
 	protected Integer numQuestions = null;
 
+	/** The original pool id. */
 	protected String origPoolId = null;
 
+	/** The actual pool id. */
 	protected String poolId = null;
 
+	/** Dependency: PoolService. */
 	protected PoolService poolService = null;
 
 	/**
@@ -81,6 +89,8 @@ public class PoolDrawImpl implements PoolDraw
 	 *        The Assessment.
 	 * @param poolService
 	 *        The PoolService.
+	 * @param id
+	 *        the detail id.
 	 * @param pool
 	 *        The pool to draw from.
 	 * @param numQuestions
@@ -93,6 +103,7 @@ public class PoolDrawImpl implements PoolDraw
 		this.poolId = pool.getId();
 		this.origPoolId = pool.getId();
 		this.numQuestions = numQuestions;
+		this.poolService = poolService;
 	}
 
 	/**
@@ -102,21 +113,25 @@ public class PoolDrawImpl implements PoolDraw
 	 *        The Assessment.
 	 * @param poolService
 	 *        The PoolService.
+	 * @param id
+	 *        the detail id.
 	 * @param poolId
 	 *        The pool to draw from.
 	 * @param origPoolId
-	 *        The orig pool id.
+	 *        The original pool id.
 	 * @param numQuestions
 	 *        The number of questions to draw.
 	 */
-	public PoolDrawImpl(Assessment assessment, PoolService poolService, String poolId, String origPoolId, Integer numQuestions)
+	public PoolDrawImpl(Assessment assessment, PoolService poolService, String id, String poolId, String origPoolId, Integer numQuestions)
 	{
 		this(assessment, poolService);
 		if (poolId == null) throw new IllegalArgumentException();
 		if (origPoolId == null) throw new IllegalArgumentException();
+		this.id = id;
 		this.poolId = poolId;
 		this.origPoolId = origPoolId;
 		this.numQuestions = numQuestions;
+		this.poolService = poolService;
 	}
 
 	/**
@@ -136,7 +151,7 @@ public class PoolDrawImpl implements PoolDraw
 		}
 
 		// we need to overdraw by the number of manual questions this assessment uses from the pool
-		List<String> manualQuestionIds = ((AssessmentPartsImpl) this.assessment.getParts()).getPoolPicks(pool, survey);
+		List<String> manualQuestionIds = ((AssessmentPartsImpl) this.assessment.getParts()).getQuestionPicksFromPool(pool, survey);
 
 		int size = this.numQuestions + manualQuestionIds.size();
 
@@ -159,7 +174,7 @@ public class PoolDrawImpl implements PoolDraw
 	 */
 	public boolean equals(Object obj)
 	{
-		// two PartImpls are equals if they have the same pool
+		// equal if they have the same pool
 		if (this == obj) return true;
 		if ((obj == null) || (obj.getClass() != this.getClass())) return false;
 		return this.poolId.equals(((PoolDrawImpl) obj).poolId);
@@ -179,9 +194,70 @@ public class PoolDrawImpl implements PoolDraw
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getDescription()
+	{
+		// use the pool description
+		Pool pool = this.poolService.getPool(this.origPoolId);
+		if (pool == null) return "?";
+		return pool.getDescription();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getId()
+	{
+		return this.id;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getInvalidMessage()
+	{
+		if (getIsValid()) return null;
+		return "?";
+		// TODO:...
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsSpecific()
+	{
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsValid()
+	{
+		// we need a valid pool and a positive count that is within the pool's question limit
+		if (this.poolId == null) return Boolean.FALSE;
+		if (this.numQuestions == null) return Boolean.FALSE;
+		if (this.numQuestions.intValue() <= 0) return Boolean.FALSE;
+		// TODO: make sure the question count is valid for this test within the pool's current question count, considering manual picks...
+		Pool p = getPool();
+		if (p == null) return Boolean.FALSE;
+
+		return Boolean.TRUE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer getNumQuestions()
 	{
 		return this.numQuestions;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getOrigPoolId()
+	{
+		return this.origPoolId;
 	}
 
 	/**
@@ -237,8 +313,7 @@ public class PoolDrawImpl implements PoolDraw
 				}
 			}
 
-			// int size = pool.getNumQuestions();
-			size -= ((AssessmentPartsImpl) this.assessment.getParts()).getPoolPicks(pool, survey).size();
+			size -= ((AssessmentPartsImpl) this.assessment.getParts()).getQuestionPicksFromPool(pool, survey).size();
 
 			return Integer.valueOf(size);
 		}
@@ -249,9 +324,64 @@ public class PoolDrawImpl implements PoolDraw
 	/**
 	 * {@inheritDoc}
 	 */
+	public Float getTotalPoints()
+	{
+		// TODO: allow to override....
+
+		if ((this.numQuestions == null) || (this.numQuestions == 0)) return Float.valueOf(0);
+
+		// pool's point value * num questions
+		Pool pool = this.poolService.getPool(this.origPoolId);
+		if (pool == null) return Float.valueOf(0);
+
+		float poolPoints = pool.getPoints().floatValue();
+		return Float.valueOf(poolPoints * this.numQuestions.intValue());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getType()
+	{
+		// use the constant "draw"
+		// TODO: need a message bundle
+		return "<i>draw</i>";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public int hashCode()
 	{
+		if (this.poolId == null) return "null".hashCode();
 		return this.poolId.hashCode();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean restoreToOriginal(Map<String, String> poolIdMap, Map<String, String> questionIdMap)
+	{
+		// if the map is present, translate to another pool id
+		if (poolIdMap != null)
+		{
+			String translated = poolIdMap.get(this.origPoolId);
+			if (translated != null)
+			{
+				this.origPoolId = translated;
+			}
+		}
+
+		// if there has been no change, we are done.
+		if (this.poolId.equals(this.origPoolId)) return true;
+
+		// check that the original pool is available
+		Pool pool = this.poolService.getPool(this.origPoolId);
+		if ((pool == null) || (pool.getIsHistorical())) return false;
+
+		// set it
+		this.poolId = this.origPoolId;
+		return true;
 	}
 
 	/**
@@ -270,11 +400,22 @@ public class PoolDrawImpl implements PoolDraw
 		if (pool == null) throw new IllegalArgumentException();
 		this.poolId = pool.getId();
 
-		// set the orig only once
+		// set the original only once
 		if (this.origPoolId == null)
 		{
 			this.origPoolId = pool.getId();
 		}
+	}
+
+	/**
+	 * Initialize the detail id.
+	 * 
+	 * @param id
+	 *        The detail id.
+	 */
+	protected void initId(String id)
+	{
+		this.id = id;
 	}
 
 	/**
@@ -285,40 +426,10 @@ public class PoolDrawImpl implements PoolDraw
 	 */
 	protected void set(PoolDrawImpl other)
 	{
+		this.id = other.id;
 		this.numQuestions = other.numQuestions;
 		this.origPoolId = other.origPoolId;
 		this.poolId = other.poolId;
 		this.poolService = other.poolService;
-	}
-
-	/**
-	 * Restore the pool id to the original value.
-	 * 
-	 * @param idMap
-	 *        A map from old pool id to new pool id - translate the origPoolId through the map if present.
-	 * @return true if successful, false if the original pool is not available.
-	 */
-	protected boolean setOrig(Map<String, String> idMap)
-	{
-		// if the map is present, translate to another pool id
-		if (idMap != null)
-		{
-			String translated = idMap.get(this.origPoolId);
-			if (translated != null)
-			{
-				this.origPoolId = translated;
-			}
-		}
-
-		// if there has been no change, we are done.
-		if (this.poolId.equals(this.origPoolId)) return true;
-
-		// check that the original pool is available
-		Pool pool = this.poolService.getPool(this.origPoolId);
-		if ((pool == null) || (pool.getIsHistorical())) return false;
-
-		// set it
-		this.poolId = this.origPoolId;
-		return true;
 	}
 }

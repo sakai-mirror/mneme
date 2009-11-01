@@ -7,7 +7,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2008 Etudes, Inc.
+ * Copyright (c) 2008, 2009 Etudes, Inc.
  * 
  * Portions completed before September 1, 2008
  * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
@@ -65,7 +65,8 @@
 	</title>
 
 	<container>
-		<navigationBar />
+		<!-- repeat the nav up top -->
+		<alias to="nav" />
 
 		<section>
 			<container>
@@ -175,19 +176,19 @@
 		<section>
 			<container>
 
-				<!-- the list of parts -->
+				<!-- the list of details (questions) -->
 				<entityList style="FLAT">
 					<title>
-						<message selector="add-parts" />
+						<message selector="questions" />
 					</title>
-					<iterator name="part" model="assessment.parts.parts" />
+					<iterator name="detail" model="assessment.parts.details" />
 					<emptyTitle>
-						<message selector="no-parts" />
+						<message selector="no-details" />
 					</emptyTitle>
 					<columns>
 						<selectionColumn multiple="TRUE" pixels="16">
 							<value>
-								<model ref="part.id" />
+								<model ref="detail.id" />
 							</value>
 							<readOnly>
 								<decision model="assessment.isLocked" />
@@ -197,7 +198,7 @@
 							<entityActions>
 								<!--  inform if live -->
 								<instructions>
-									<message selector="live-warning-parts">
+									<message selector="live-warning">
 										<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
 									</message>
 									<included>
@@ -205,7 +206,13 @@
 									</included>
 								</instructions>
 								<!-- these two are not dependent, but put here for desired presentation order of actions -->
-								<navigation destination="MANUAL" title="manual-select" style="LINK" submit="TRUE">
+								<navigation destination="ADD" title="add" style="LINK" submit="TRUE">
+									<icon icon="/icons/add_qst.png" style="LEFT" />
+									<included>
+										<decision reversed="TRUE" model="assessment.isLocked" />
+									</included>
+								</navigation>
+								<navigation destination="SELECT" title="manual-select" style="LINK" submit="TRUE">
 									<icon icon="/icons/add_manual_add.png" style="LEFT" />
 									<included>
 										<decision reversed="TRUE" model="assessment.isLocked" />
@@ -218,22 +225,34 @@
 									</included>
 								</navigation>
 								<!-- delete is dependent, and desired to go last  -->
-								<navigation destination="DELETE" selectRequirement="SOME" selectRequirementMessage="delete-failed-requirements"
-									title="delete-part" style="LINK" submit="TRUE">
+								<navigation destination="REMOVE" selectRequirement="SOME" selectRequirementMessage="remove-failed-requirements"
+									title="remove" style="LINK" submit="TRUE">
 									<icon icon="/icons/delete.png" style="LEFT" />
 									<included>
 										<decision reversed="TRUE" model="assessment.isLocked" />
 									</included>
-									<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-delete" />
+									<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-remove" />
 								</navigation>
 							</entityActions>
 						</selectionColumn>
 						<orderColumn em="4">
 							<title>
+								<message selector="part" />
+							</title>
+							<value>
+								<model ref="detail.id" />
+							</value>
+							<model ref="assessment.parts.order" />
+							<included>
+								<decision reversed="TRUE" model="assessment.isLocked" />
+							</included>
+						</orderColumn>
+						<orderColumn em="4">
+							<title>
 								<message selector="part-order" />
 							</title>
 							<value>
-								<model ref="part.id" />
+								<model ref="detail.id" />
 							</value>
 							<model ref="assessment.parts.order" />
 							<included>
@@ -242,42 +261,95 @@
 						</orderColumn>
 						<column pixels="16">
 							<entityIncluded>
-								<decision reversed="TRUE" model="part.isValid" />
+								<decision reversed="TRUE" model="detail.isValid" />
 							</entityIncluded>
 							<container>
 								<warning>
 									<message>
-										<model ref="part.invalidMessage" />
+										<model ref="detail.invalidMessage" />
 									</message>
 								</warning>
 							</container>
 						</column>
-						<modelColumn>
-							<title>
-								<message selector="part-title" />
-							</title>
-							<model ref="part.title" type="text" missing="no-title" />
-							<entityNavigations>
-								<navigation submit="TRUE">
-									<destination template="/part_edit/{0}/{1}/{2}">
+						<column pixels="16">
+							<entityIncluded>
+								<decision model="detail.isSpecific" />
+							</entityIncluded>
+							<navigations>
+								<navigation style="LINK" submit="TRUE" description="question-preview">
+									<icon icon="/icons/preview.png" style="LEFT" />
+									<destination template="/question_preview/{0}/assessment_edit/{1}/{2}">
+										<model ref="detail.questionId" />
 										<model ref="sortcode" />
 										<model ref="assessment.id" />
-										<model ref="part.id" />
+									</destination>
+									<included>
+										<decision reversed="TRUE" model="detail.question.isSurvey" />
+									</included>
+								</navigation>
+								<navigation style="LINK" submit="TRUE" description="survey-preview">
+									<icon icon="/icons/survey_view.png" style="LEFT" />
+									<destination template="/question_preview/{0}/assessment_edit/{1}/{2}">
+										<model ref="detail.questionId" />
+										<model ref="sortcode" />
+										<model ref="assessment.id" />
+									</destination>
+									<included>
+										<decision model="detail.question.isSurvey" />
+									</included>
+								</navigation>
+							</navigations>
+						</column>
+						<modelColumn>
+							<title>
+								<message selector="description" />
+							</title>
+							<model ref="detail.description" type="text" missing="no-title" stripHtml="TRUE" max="60" />
+							<entityNavigations>
+								<navigation submit="TRUE">
+									<included>
+										<decision model="detail.isSpecific" />
+									</included>
+									<destination template="/question_edit/{0}/assessment_edit/{1}/{2}">
+										<model ref="detail.questionId" />
+										<model ref="sortcode" />
+										<model ref="assessment.id" />
 									</destination>
 								</navigation>
 							</entityNavigations>
 						</modelColumn>
-						<modelColumn>
+						<modelColumn em="10">
 							<title>
-								<message selector="part-summary" />
+								<message selector="detail-type" />
 							</title>
-							<model ref="part" delegate="FormatPartSummary" tool="sakai.mneme" />
+							<model ref="detail.type" />
 						</modelColumn>
 						<modelColumn>
 							<title>
-								<message selector="part-points" />
+								<message selector="pool" />
 							</title>
-							<model ref="part.totalPoints" />
+							<model ref="detail.pool.title" type="text" missing="no-title" />
+						</modelColumn>
+						<modelColumn>
+							<title>
+								<message selector="num-questions" />
+							</title>
+							<model ref="detail.numQuestions" />
+						</modelColumn>
+						<modelColumn>
+							<title>
+								<message selector="points" />
+							</title>
+							<model ref="detail.totalPoints" />
+							<included>
+								<decision model="assessment.hasPoints" />
+							</included>
+						</modelColumn>
+						<modelColumn em="5">
+							<title>
+								<message selector="difficulty" />
+							</title>
+							<model ref="detail.pool.difficulty" />
 							<included>
 								<decision model="assessment.hasPoints" />
 							</included>
@@ -299,7 +371,7 @@
 		</section>
 
 		<!-- navigations -->
-		<navigationBar>
+		<navigationBar id="nav">
 			<container>
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<icon icon="/icons/return.png" style="LEFT" />

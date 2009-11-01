@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2008 Etudes, Inc.
+ * Copyright (c) 2008, 2009 Etudes, Inc.
  * 
  * Portions completed before September 1, 2008
  * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
@@ -40,11 +40,8 @@ import org.etudes.mneme.api.Assessment;
 import org.etudes.mneme.api.AssessmentAccess;
 import org.etudes.mneme.api.AssessmentService;
 import org.etudes.mneme.api.AssessmentType;
-import org.etudes.mneme.api.DrawPart;
-import org.etudes.mneme.api.ManualPart;
 import org.etudes.mneme.api.Part;
 import org.etudes.mneme.api.Pool;
-import org.etudes.mneme.api.PoolDraw;
 import org.etudes.mneme.api.PoolService;
 import org.etudes.mneme.api.Question;
 import org.etudes.mneme.api.QuestionGrouping;
@@ -749,58 +746,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	 * @param assessment
 	 *        The assessment.
 	 */
-	protected void insertAssessmentPartDetailTx(AssessmentImpl assessment, Part part)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO MNEME_ASSESSMENT_PART_DETAIL (");
-		sql.append(" ASSESSMENT_ID, NUM_QUESTIONS_SEQ, ORIG_PID, ORIG_QID, PART_ID, POOL_ID, QUESTION_ID)");
-		sql.append(" VALUES(?,?,?,?,?,?,?)");
-
-		Object[] fields = new Object[7];
-		fields[0] = Long.valueOf(assessment.getId());
-
-		if (part instanceof ManualPartImpl)
-		{
-			ManualPartImpl mpart = (ManualPartImpl) part;
-			int seq = 0;
-			for (PoolPick pick : mpart.questions)
-			{
-				seq++;
-				int i = 1;
-				fields[i++] = Integer.valueOf(seq);
-				fields[i++] = null;
-				fields[i++] = (pick.origQuestionId == null) ? null : Long.valueOf(pick.origQuestionId);
-				fields[i++] = Long.valueOf(part.getId());
-				fields[i++] = null;
-				fields[i++] = Long.valueOf(pick.questionId);
-
-				if (!this.sqlService.dbWrite(null, sql.toString(), fields))
-				{
-					throw new RuntimeException("insertAssessmentDrawPickTx: dbWrite failed");
-				}
-			}
-		}
-
-		else if (part instanceof DrawPartImpl)
-		{
-			DrawPartImpl dpart = (DrawPartImpl) part;
-			for (PoolDraw draw : dpart.pools)
-			{
-				int i = 1;
-				fields[i++] = Integer.valueOf(draw.getNumQuestions());
-				fields[i++] = ((PoolDrawImpl) draw).origPoolId == null ? null : Long.valueOf(((PoolDrawImpl) draw).origPoolId);
-				fields[i++] = null;
-				fields[i++] = Long.valueOf(part.getId());
-				fields[i++] = Long.valueOf(draw.getPoolId());
-				fields[i++] = null;
-
-				if (!this.sqlService.dbWrite(null, sql.toString(), fields))
-				{
-					throw new RuntimeException("insertAssessmentDrawPickTx: dbWrite failed");
-				}
-			}
-		}
-	}
+	protected abstract void insertAssessmentPartDetailTx(AssessmentImpl assessment, Part part);
 
 	/**
 	 * Insert a new assessment's parts (transaction code).
@@ -844,7 +790,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	 * 
 	 * @param id
 	 *        The assessment id.
-	 * @return The assesment.
+	 * @return The assessment.
 	 */
 	protected AssessmentImpl readAssessment(String id)
 	{
@@ -963,16 +909,8 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 					String aid = SqlHelper.readId(result, 1);
 					AssessmentImpl a = assessments.get(aid);
 					String type = result.getString(5);
-					Part part = null;
-					if ("M".equals(type))
-					{
-						part = a.getParts().addManualPart();
-						((ManualPart) part).setRandomize(SqlHelper.readBoolean(result, 6));
-					}
-					else
-					{
-						part = a.getParts().addDrawPart();
-					}
+					Part part = a.getParts().addPart();
+					part.setRandomize(SqlHelper.readBoolean(result, 6));
 
 					((PartImpl) part).initId(SqlHelper.readId(result, 2));
 					part.getPresentation().setText(SqlHelper.readString(result, 3));
@@ -993,7 +931,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		// read all the part details for these assessments
 		sql = new StringBuilder();
 		sql.append("SELECT P.ASSESSMENT_ID, P.NUM_QUESTIONS_SEQ, P.ORIG_PID, P.ORIG_QID, P.PART_ID,");
-		sql.append(" P.POOL_ID, P.QUESTION_ID");
+		sql.append(" P.POOL_ID, P.QUESTION_ID, P.ID");
 		sql.append(" FROM MNEME_ASSESSMENT_PART_DETAIL P");
 		sql.append(" JOIN MNEME_ASSESSMENT A ON P.ASSESSMENT_ID=A.ID ");
 		sql.append(where);
@@ -1009,19 +947,23 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 					String pid = SqlHelper.readId(result, 5);
 					Part p = a.getParts().getPart(pid);
 
-					if (p instanceof DrawPart)
+					Integer numQuestions = SqlHelper.readInteger(result, 2);
+					String origPoolId = SqlHelper.readId(result, 3);
+					String origQid = SqlHelper.readId(result, 4);
+					String poolId = SqlHelper.readId(result, 6);
+					String questionId = SqlHelper.readId(result, 7);
+					String detailId = SqlHelper.readId(result, 8);
+					if (questionId != null)
 					{
-						Integer numQuestions = SqlHelper.readInteger(result, 2);
-						String origPoolId = SqlHelper.readId(result, 3);
-						String poolId = SqlHelper.readId(result, 6);
-						((DrawPartImpl) p).initDraw(poolId, origPoolId, numQuestions);
+						((PartImpl) p).initPick(detailId, questionId, origQid);
 					}
-					else if (p instanceof ManualPart)
+					else if (poolId != null)
 					{
-						String questionId = SqlHelper.readId(result, 7);
-						String origQid = SqlHelper.readId(result, 4);
-						String poolId = SqlHelper.readId(result, 6);
-						((ManualPartImpl) p).initPick(questionId, origQid, poolId);
+						((PartImpl) p).initDraw(detailId, poolId, origPoolId, numQuestions);
+					}
+					else
+					{
+						M_log.warn("no pool no question: part: " + pid);
 					}
 
 					return null;
@@ -1034,7 +976,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 			}
 		});
 
-		// read all the access for these assesments
+		// read all the access for these assessments
 		sql = new StringBuilder();
 		sql.append("SELECT X.ASSESSMENT_ID, X.DATES_ACCEPT_UNTIL, X.DATES_DUE, X.DATES_OPEN, X.ID,");
 		sql.append(" X.OVERRIDE_ACCEPT_UNTIL, X.OVERRIDE_DUE, X.OVERRIDE_OPEN, X.OVERRIDE_PASSWORD,");
@@ -1194,7 +1136,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		fields[0] = part.getPresentation().getText();
 		fields[1] = part.getOrdering().getPosition();
 		fields[2] = part.getTitle();
-		fields[3] = (part instanceof ManualPart) ? (((ManualPart) part).getRandomize() ? "1" : "0") : "0";
+		fields[3] = part.getRandomize() ? "1" : "0";
 		fields[4] = Long.valueOf(part.getId());
 
 		if (!this.sqlService.dbWrite(null, sql.toString(), fields))

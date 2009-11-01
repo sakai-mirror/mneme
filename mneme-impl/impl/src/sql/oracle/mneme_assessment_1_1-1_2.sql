@@ -23,16 +23,8 @@
 -- Mneme Assessment DDL changes between 1.1 and 1.2
 -----------------------------------------------------------------------------
 
-CREATE INDEX MNEME_ASSESSMENT_PART_DETAIL_IDX_QID ON MNEME_ASSESSMENT_PART_DETAIL
-(
-	QUESTION_ID	ASC
-);
+CREATE SEQUENCE MNEME_ASSESSMENT_DETAIL_SEQ;
 
-CREATE INDEX MNEME_ASSESSMENT_PART_DETAIL_IDX_POOLID ON MNEME_ASSESSMENT_PART_DETAIL
-(
-	POOL_ID	ASC
-);
+-- TODO:add to MNEME_ASSESSMENT_PART_DETAIL:	ID						NUMBER NOT NULL PRIMARY KEY,
+-- then populate from the above sequence...
 
--- Note: this will populate the new ID field sequentially across the current set of detail records
-ALTER TABLE MNEME_ASSESSMENT_PART_DETAIL
-	ADD (ID BIGINT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY);

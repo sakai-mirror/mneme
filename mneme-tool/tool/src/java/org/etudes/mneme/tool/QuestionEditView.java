@@ -25,6 +25,7 @@
 package org.etudes.mneme.tool;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,9 +33,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.etudes.ambrosia.api.Context;
+import org.etudes.ambrosia.api.Value;
 import org.etudes.ambrosia.util.ControllerImpl;
 import org.etudes.mneme.api.AssessmentPermissionException;
+import org.etudes.mneme.api.MnemeService;
 import org.etudes.mneme.api.Question;
+import org.etudes.mneme.api.QuestionPlugin;
 import org.etudes.mneme.api.QuestionService;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
@@ -46,6 +50,9 @@ public class QuestionEditView extends ControllerImpl
 {
 	/** Our log. */
 	private static Log M_log = LogFactory.getLog(QuestionEditView.class);
+
+	/** Dependency: mneme service. */
+	protected MnemeService mnemeService = null;
 
 	/** Question Service */
 	protected QuestionService questionService = null;
@@ -63,13 +70,26 @@ public class QuestionEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pool_sort / [3] pool_id / [4] question_sort / [5] question_page / [6] question_id
-		if ((params.length != 7)) throw new IllegalArgumentException();
-		String questionId = params[6];
+		// we need a qid, then any number of parameters to form the return destination
+		if (params.length < 3)
+		{
+			throw new IllegalArgumentException();
+		}
 
-		// put the extra parameters all together
-		String extras = StringUtil.unsplit(params, 2, 4, "/");
-		context.put("extras", extras);
+		String destination = null;
+		if (params.length > 3)
+		{
+			destination = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
+		}
+
+		// if not specified, go to the main pools page
+		else
+		{
+			destination = "/pools";
+		}
+		context.put("return", destination);
+
+		String questionId = params[2];
 
 		// get the question to work on
 		Question question = this.questionService.getQuestion(questionId);
@@ -85,6 +105,15 @@ public class QuestionEditView extends ControllerImpl
 
 		// put the question in the context
 		context.put("question", question);
+
+		// the question types
+		List<QuestionPlugin> questionTypes = this.mnemeService.getQuestionPlugins();
+		context.put("questionTypes", questionTypes);
+
+		// select the question's current type
+		Value value = this.uiService.newValue();
+		value.setValue(question.getType());
+		context.put("selectedQuestionType", value);
 
 		uiService.render(ui, context);
 	}
@@ -103,9 +132,13 @@ public class QuestionEditView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pool_sort / [3] pool_id / [4] question_sort / [5] question_page / [6] question_id
-		if ((params.length != 7)) throw new IllegalArgumentException();
-		String questionId = params[6];
+		// we need a question id, then any number of parameters to form the return destination
+		if (params.length < 3)
+		{
+			throw new IllegalArgumentException();
+		}
+
+		String questionId = params[2];
 
 		// get the question to work on
 		Question question = this.questionService.getQuestion(questionId);
@@ -113,6 +146,10 @@ public class QuestionEditView extends ControllerImpl
 
 		// put the question in the context
 		context.put("question", question);
+
+		// for the selected question type
+		Value newType = this.uiService.newValue();
+		context.put("selectedQuestionType", newType);
 
 		// read form
 		String destination = this.uiService.decode(req, context);
@@ -123,7 +160,16 @@ public class QuestionEditView extends ControllerImpl
 		// save
 		try
 		{
-			this.questionService.saveQuestion(question);
+			if ("RETYPE".equals(destination))
+			{
+				// save and re-type
+				this.questionService.saveQuestionAsType(question, newType.getValue());
+			}
+			else
+			{
+				// just save
+				this.questionService.saveQuestion(question);
+			}
 		}
 		catch (AssessmentPermissionException e)
 		{
@@ -133,13 +179,22 @@ public class QuestionEditView extends ControllerImpl
 		}
 
 		// if destination became null, or is the stay here
-		if ((destination == null) || ("STAY".equals(destination)))
+		if ((destination == null) || ("STAY".equals(destination) || "RETYPE".equals(destination)))
 		{
 			destination = context.getDestination();
 		}
 
 		// redirect
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+	}
+
+	/**
+	 * @param mnemeService
+	 *        the mnemeService to set
+	 */
+	public void setMnemeService(MnemeService mnemeService)
+	{
+		this.mnemeService = mnemeService;
 	}
 
 	/**
