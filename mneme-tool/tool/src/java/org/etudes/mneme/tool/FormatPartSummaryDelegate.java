@@ -73,11 +73,17 @@ public class FormatPartSummaryDelegate extends FormatDelegateImpl
 			}
 		}
 
+		// deal with single / plural!
+		String template = "fmt-part-summary";
+		template += (part.getNumQuestions().intValue() == 1) ? "s" : "p";
+		template += (draws == 1) ? "s" : "p";
+		template += (picks == 1) ? "s" : "p";
+
 		Object[] args = new Object[3];
 		args[0] = part.getNumQuestions().toString();
 		args[1] = Integer.valueOf(draws);
 		args[2] = Integer.valueOf(picks);
-		return context.getMessages().getFormattedMessage("part-summary", args);
+		return context.getMessages().getFormattedMessage(template, args);
 	}
 
 	/**

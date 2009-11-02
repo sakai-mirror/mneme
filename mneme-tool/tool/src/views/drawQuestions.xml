@@ -38,7 +38,7 @@
 
 	<header>
 		<message selector="drawQuestions-header">
-			<model type="icon" icon="/icons/edit.png" />
+			<model type="icon" icon="/icons/add_draw_add.png" />
 		</message>
 	</header>
 
@@ -46,7 +46,6 @@
 		<container>
 			<text>
 				<message selector="draw-add-to">
-					<model ref="part.title" missing="no-title" type="text" />
 					<model ref="assessment.title" type="text" missing="no-title" />
 				</message>
 			</text>
@@ -55,18 +54,33 @@
 
 	<container>
 
-		<navigationBar />
+		<selection title="parts">
+			<model ref="partId.value" />
+			<selectionModel name="forpart" model="assessment.parts.parts">
+				<valueMessage>
+					<message model="forpart.id" />
+				</valueMessage>
+				<displayMessage>
+					<message model="forpart.tag" />
+				</displayMessage>
+			</selectionModel>
+			<selectionChoices>
+				<selectionChoice>
+					<displayMessage>
+						<message selector="new-part" />
+					</displayMessage>
+					<valueMessage>
+						<message template="0" />
+					</valueMessage>
+				</selectionChoice>
+			</selectionChoices>
+		</selection>
 
 		<section>
 			<container>
 
 				<!-- the list of ALL pools, with those selected for this assessment checked and their "draw" filled in -->
 				<entityList style="FLAT">
-					<title>
-						<message selector="drawQuestions-instructions">
-							<model type="icon" icon="/icons/add_random.png" />
-						</message>
-					</title>
 					<emptyTitle>
 						<message selector="no-pools" />
 					</emptyTitle>

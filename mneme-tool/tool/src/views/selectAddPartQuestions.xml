@@ -41,13 +41,35 @@
 		<container>
 			<text>
 				<message selector="select-add-to">
-					<model ref="part.title" missing="no-title" type="text" />
 					<model ref="assessment.title" type="text" missing="no-title" />
 				</message>
 			</text>
 		</container>
 	</subHeader>
 	<container>
+
+		<selection title="parts">
+			<model ref="partId.value" />
+			<selectionModel name="forpart" model="assessment.parts.parts">
+				<valueMessage>
+					<message model="forpart.id" />
+				</valueMessage>
+				<displayMessage>
+					<message model="forpart.tag" />
+				</displayMessage>
+			</selectionModel>
+			<selectionChoices>
+				<selectionChoice>
+					<displayMessage>
+						<message selector="new-part" />
+					</displayMessage>
+					<valueMessage>
+						<message template="0" />
+					</valueMessage>
+				</selectionChoice>
+			</selectionChoices>
+		</selection>
+
 		<section>
 			<container>
 				<!-- the list of the selected questions -->

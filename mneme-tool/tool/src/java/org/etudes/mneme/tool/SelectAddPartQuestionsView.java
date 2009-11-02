@@ -215,8 +215,8 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 
 		// compute the current destination, except for being at page one
 		// this will match "current" in the filter drop-down values, which are all set to send to page one.
-		String newDestination = "/" + params[1] + "/" + params[2] + "/" + params[3] + "/" + sortCode + "/" + "1" + "-"
-				+ paging.getSize().toString() + "/" + typeFilter + "/" + poolFilter + "/" + surveyFilter + destination;
+		String newDestination = "/" + params[1] + "/" + params[2] + "/" + params[3] + "/" + sortCode + "/" + "1" + "-" + paging.getSize().toString()
+				+ "/" + typeFilter + "/" + poolFilter + "/" + surveyFilter + destination;
 
 		// for the selected question type
 		Value value = this.uiService.newValue();
@@ -238,6 +238,11 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		{
 			context.put("pageSizes", this.pageSizes);
 		}
+
+		// for the selected "for" part
+		value = this.uiService.newValue();
+		value.setValue(part.getId());
+		context.put("partId", value);
 
 		// render
 		uiService.render(ui, context);
@@ -299,8 +304,54 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		Values values = this.uiService.newValues();
 		context.put("questionids", values);
 
+		// for the selected "for" part
+		Value value = this.uiService.newValue();
+		context.put("partId", value);
+
 		// read form
 		String destination = this.uiService.decode(req, context);
+
+		// get the new part id
+		String newPartId = value.getValue();
+		if (!part.getId().equals(newPartId))
+		{
+			// create a new part?
+			if ("0".equals(newPartId))
+			{
+				try
+				{
+					Part created = assessment.getParts().addPart();
+					this.assessmentService.saveAssessment(assessment);
+					newPartId = created.getId();
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+				catch (AssessmentPolicyException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+					return;
+				}
+			}
+
+			Part newPart = assessment.getParts().getPart(newPartId);
+			if (newPart != null)
+			{
+				part = newPart;
+
+				// adjust the destination to use this part, if the destination is back to me
+				String[] destParts = StringUtil.split(destination, "/");
+				if (destParts[1].equals("select_add_mpart_question"))
+				{
+					destParts[3] = part.getId();
+					destination = StringUtil.unsplit(destParts, 0, destParts.length, "/");
+				}
+			}
+		}
 
 		for (String id : values.getValues())
 		{

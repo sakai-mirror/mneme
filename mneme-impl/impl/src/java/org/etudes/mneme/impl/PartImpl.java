@@ -630,6 +630,17 @@ public class PartImpl implements Part, Changeable
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getTag()
+	{
+		if ((this.title != null) && (this.title.length() > 0)) return this.title;
+		Object[] args = new Object[1];
+		args[0] = this.getOrdering().getPosition().toString();
+		return this.messages.getFormattedMessage("part-tag", args);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getTitle()
 	{
 		return this.title;
@@ -927,7 +938,7 @@ public class PartImpl implements Part, Changeable
 		this.submissionService = other.submissionService;
 		this.title = other.title;
 		this.messages = other.messages;
-		
+
 		this.details = new ArrayList<PartDetail>(other.details.size());
 		for (PartDetail detail : other.getDetails())
 		{

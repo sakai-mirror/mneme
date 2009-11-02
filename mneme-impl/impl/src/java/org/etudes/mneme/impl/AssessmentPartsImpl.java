@@ -251,6 +251,8 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 */
 	public Part getFirst()
 	{
+		if (this.parts.isEmpty()) return null;
+
 		return this.parts.get(0);
 	}
 

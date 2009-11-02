@@ -153,6 +153,11 @@ public interface Part
 	Boolean getRandomize();
 
 	/**
+	 * @return a non empty string describing the part; either the title, or text based on the part position.
+	 */
+	String getTag();
+	
+	/**
 	 * Access the title.
 	 * 
 	 * @return The title.

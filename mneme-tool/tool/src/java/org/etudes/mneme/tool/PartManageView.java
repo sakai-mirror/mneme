@@ -3,11 +3,8 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2008, 2009 Etudes, Inc.
+ * Copyright (c) 2009 Etudes, Inc.
  * 
- * Portions completed before September 1, 2008
- * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +29,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.etudes.ambrosia.api.Context;
+import org.etudes.ambrosia.api.PopulatingSet;
 import org.etudes.ambrosia.api.Values;
+import org.etudes.ambrosia.api.PopulatingSet.Factory;
+import org.etudes.ambrosia.api.PopulatingSet.Id;
 import org.etudes.ambrosia.util.ControllerImpl;
 import org.etudes.mneme.api.Assessment;
 import org.etudes.mneme.api.AssessmentPermissionException;
@@ -40,23 +40,18 @@ import org.etudes.mneme.api.AssessmentPolicyException;
 import org.etudes.mneme.api.AssessmentService;
 import org.etudes.mneme.api.AttachmentService;
 import org.etudes.mneme.api.Part;
-import org.etudes.mneme.api.Pool;
-import org.etudes.mneme.api.PoolService;
-import org.etudes.mneme.api.Question;
-import org.etudes.mneme.api.QuestionService;
 import org.sakaiproject.entity.api.EntityManager;
-import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
- * The /assessment_edit view for the mneme tool.
+ * The /part_manage view for the mneme tool.
  */
-public class AssessmentEditView extends ControllerImpl
+public class PartManageView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(AssessmentEditView.class);
+	private static Log M_log = LogFactory.getLog(PartManageView.class);
 
 	/** Assessment service. */
 	protected AssessmentService assessmentService = null;
@@ -66,12 +61,6 @@ public class AssessmentEditView extends ControllerImpl
 
 	/** Dependency: EntityManager. */
 	protected EntityManager entityManager = null;
-
-	/** Dependency: Pool service. */
-	protected PoolService poolService = null;
-
-	/** Dependency: Question service. */
-	protected QuestionService questionService = null;
 
 	/** tool manager reference. */
 	protected ToolManager toolManager = null;
@@ -89,15 +78,27 @@ public class AssessmentEditView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// sort, aid
-		if (params.length != 4)
+		// aid, return
+		if (params.length < 3)
 		{
 			throw new IllegalArgumentException();
 		}
-		String sort = params[2];
-		String assessmentId = params[3];
 
-		Assessment assessment = assessmentService.getAssessment(assessmentId);
+		String assessmentId = params[2];
+		String destination = null;
+		if (params.length > 3)
+		{
+			destination = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
+		}
+
+		// if not specified, go to the main assessment_edit view
+		else
+		{
+			destination = "/assessment_edit/" + assessmentId;
+		}
+		context.put("return", destination);
+
+		final Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
 			// redirect to error
@@ -113,31 +114,32 @@ public class AssessmentEditView extends ControllerImpl
 			return;
 		}
 
-//		// clear the assessment of any empty parts (if not mint, which would end up causing it to become a stale mint and vanish!)
-//		if (!assessment.getMint())
-//		{
-//			try
-//			{
-//				assessment.getParts().removeEmptyParts();
-//				this.assessmentService.saveAssessment(assessment);
-//			}
-//			catch (AssessmentPermissionException e)
-//			{
-//				// redirect to error
-//				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-//				return;
-//			}
-//			catch (AssessmentPolicyException e)
-//			{
-//				// redirect to error
-//				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
-//				return;
-//			}
-//		}
+		// // clear the assessment of any empty parts (if not mint, which would end up causing it to become a stale mint and vanish!)
+		// if (!assessment.getMint())
+		// {
+		// try
+		// {
+		// assessment.getParts().removeEmptyParts();
+		// this.assessmentService.saveAssessment(assessment);
+		// }
+		// catch (AssessmentPermissionException e)
+		// {
+		// // redirect to error
+		// res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+		// return;
+		// }
+		// catch (AssessmentPolicyException e)
+		// {
+		// // redirect to error
+		// res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+		// return;
+		// }
+		// }
+
+		context.put("parts", assessment.getParts().getParts());
 
 		// collect information: the selected assessment
 		context.put("assessment", assessment);
-		context.put("sortcode", sort);
 
 		// value holders for the selection check boxes
 		Values values = this.uiService.newValues();
@@ -161,15 +163,27 @@ public class AssessmentEditView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// sort, aid
-		if (params.length != 4)
+		// aid, return
+		if (params.length < 3)
 		{
 			throw new IllegalArgumentException();
 		}
-		String sort = params[2];
-		String assessmentId = params[3];
 
-		Assessment assessment = assessmentService.getAssessment(assessmentId);
+		String assessmentId = params[2];
+
+		String returnDestination = null;
+		if (params.length > 3)
+		{
+			returnDestination = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
+		}
+
+		// if not specified, go to the main assessment_edit view
+		else
+		{
+			returnDestination = "/assessment_edit/" + assessmentId;
+		}
+
+		final Assessment assessment = assessmentService.getAssessment(assessmentId);
 		if (assessment == null)
 		{
 			// redirect to error
@@ -184,6 +198,23 @@ public class AssessmentEditView extends ControllerImpl
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
+
+		// for editing the parts titles
+		PopulatingSet parts = uiService.newPopulatingSet(new Factory()
+		{
+			public Object get(String id)
+			{
+				Part part = assessment.getParts().getPart(id);
+				return part;
+			}
+		}, new Id()
+		{
+			public String getId(Object o)
+			{
+				return ((Part) o).getId();
+			}
+		});
+		context.put("parts", parts);
 
 		// setup the model: the selected assessment
 		context.put("assessment", assessment);
@@ -205,116 +236,63 @@ public class AssessmentEditView extends ControllerImpl
 			assessment.getPresentation().addAttachment(upload.getUpload());
 		}
 
-		// handle an attachments remove
-		if (destination.startsWith("REMOVE:"))
-		{
-			String[] parts = StringUtil.split(destination, ":");
-			if (parts.length != 2)
-			{
-				throw new IllegalArgumentException();
-			}
-			String refString = parts[1];
-			Reference ref = this.entityManager.newReference(refString);
-
-			// remove from the assessment
-			assessment.getPresentation().removeAttachment(ref);
-
-			// remove the attachment
-			// TODO: really?
-			this.attachmentService.removeAttachment(ref);
-
-			// stay here
-			destination = context.getDestination();
-		}
+		// // handle an attachments remove
+		// if (destination.startsWith("REMOVE:"))
+		// {
+		// String[] parts = StringUtil.split(destination, ":");
+		// if (parts.length != 2)
+		// {
+		// throw new IllegalArgumentException();
+		// }
+		// String refString = parts[1];
+		// Reference ref = this.entityManager.newReference(refString);
+		//
+		// // remove from the assessment
+		// assessment.getPresentation().removeAttachment(ref);
+		//
+		// // remove the attachment
+		// // TODO: really?
+		// this.attachmentService.removeAttachment(ref);
+		//
+		// // stay here
+		// destination = context.getDestination();
+		// }
 
 		try
 		{
 			if (destination.equals("ADD"))
 			{
-				// use the first part, adding one if needed
-				// TODO: which part to use?
-				Part part = assessment.getParts().getFirst();
-				if (part == null)
-				{
-					part = assessment.getParts().addPart();
-				}
-
-				// the assessment's pool TODO:
-				String pid = "1";
-				Pool pool = this.poolService.getPool(pid);
-
-				// create a question - type? TODO:
-				String type = "mneme:MultipleChoice";
-				// create the question of the appropriate type (all the way to save)
-				Question newQuestion = null;
-				try
-				{
-					newQuestion = this.questionService.newQuestion(pool, type);
-				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
-
-				// add the question to the part
-				part.addPickDetail(newQuestion);
-
-				// save the assessment
+				assessment.getParts().addPart();
 				this.assessmentService.saveAssessment(assessment);
 
-				// create URL for add questions /select_question_type/POOL/RETURN
-				destination = "/question_edit/" + newQuestion.getId() + "/assessment_edit/" + sort + "/" + assessmentId;
+				destination = context.getDestination();
 			}
 
-			else if (destination.equals("DRAW"))
+			else if (destination.equals("DELETE"))
 			{
-				// use the first part, adding one if needed
-				Part part = assessment.getParts().getFirst();
-				if (part == null)
-				{
-					part = assessment.getParts().addPart();
-					this.assessmentService.saveAssessment(assessment);
-				}
-
-				// create URL for select questions
-				destination = "/draw_questions/" + assessmentId + "/" + part.getId() + "/0A/" + "assessment_edit/" + sort + "/" + assessmentId;
-			}
-
-			else if (destination.equals("SELECT"))
-			{
-				// use the first part, adding one if needed
-				Part part = assessment.getParts().getFirst();
-				if (part == null)
-				{
-					part = assessment.getParts().addPart();
-					this.assessmentService.saveAssessment(assessment);
-				}
-
-				// create URL for select questions
-				destination = "/select_add_mpart_question/" + assessmentId + "/" + part.getId() + "/0A/-/0/0/B/" + "assessment_edit/" + sort + "/"
-						+ assessmentId;
-			}
-
-			else if (destination.equals("REMOVE"))
-			{
-				// detail ids selected for removal
 				for (String id : values.getValues())
 				{
-					assessment.getParts().removeDetail(id);
+					Part part = assessment.getParts().getPart(id);
+					if (part == null)
+					{
+						// redirect to error
+						res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.invalid)));
+						return;
+					}
+
+					// remove part
+					assessment.getParts().removePart(part);
 				}
 				this.assessmentService.saveAssessment(assessment);
 
 				destination = context.getDestination();
 			}
 
-			else if (destination.equals("PARTS"))
+			else if (destination.equals("SAVE"))
 			{
-				// save the assessment
 				this.assessmentService.saveAssessment(assessment);
 
-				destination = "/part_manage/" + assessmentId + "/assessment_edit/" + sort + "/" + assessmentId;
+				destination = context.getDestination();
 			}
 
 			else if (destination.equals("INSTRUCTIONS"))
@@ -322,7 +300,7 @@ public class AssessmentEditView extends ControllerImpl
 				// save the assessment
 				this.assessmentService.saveAssessment(assessment);
 
-				destination = "/instructions_edit/" + assessmentId + "/assessment_edit/" + sort + "/" + assessmentId;
+				destination = "/instructions_edit/" + assessmentId + "/part_manage/" + assessmentId + returnDestination;
 			}
 
 			else
@@ -381,24 +359,6 @@ public class AssessmentEditView extends ControllerImpl
 	}
 
 	/**
-	 * @param poolService
-	 *        the poolService to set
-	 */
-	public void setPoolService(PoolService poolService)
-	{
-		this.poolService = poolService;
-	}
-
-	/**
-	 * @param questionService
-	 *        the questionService to set
-	 */
-	public void setQuestionService(QuestionService questionService)
-	{
-		this.questionService = questionService;
-	}
-
-	/**
 	 * Set the tool manager.
 	 * 
 	 * @param manager
@@ -408,5 +368,4 @@ public class AssessmentEditView extends ControllerImpl
 	{
 		toolManager = manager;
 	}
-
 }

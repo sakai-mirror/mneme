@@ -73,43 +73,6 @@
 				<section>
 					<container>
 
-						<!-- instructions overlay -->
-						<overlay id="instructions">
-							<container>
-								<htmlEdit title="test-instructions" size="FULL">
-									<model type="html" ref="assessment.presentation.text" />
-								</htmlEdit>
-								<!-- 
-									<attachments title="attachments" model="assessment.presentation.attachments" name="attachment">
-									<navigations>
-									<navigation destination="REMOVE" title="remove-attachment" style="LINK"
-									description="remove-attachment-description" submit="TRUE" small="TRUE">
-									<icon icon="/icons/delete.png" style="NONE" />
-									<destination template="REMOVE:{0}">
-									<model ref="attachment.reference" />
-									</destination>
-									<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif"
-									selector="confirm-remove-attachment" />
-									</navigation>
-									</navigations>
-									</attachments>
-									<fileUpload>
-									<model ref="upload.upload" />
-									<title>
-									<message selector="upload-attachment" />
-									</title>
-									<upload>
-									<message selector="upload-button" />
-									</upload>
-									</fileUpload>
-								-->
-								<gap />
-								<toggle target="instructions" title="close" style="LINK">
-									<icon icon="/icons/close.png" style="LEFT" />
-								</toggle>
-							</container>
-						</overlay>
-
 						<!-- type -->
 						<selection id="type" title="type">
 							<model ref="assessment.type" />
@@ -154,19 +117,19 @@
 							<model ref="assessment.title" type="text" />
 						</textEdit>
 
-						<!-- toggle to show instructions -->
-						<toggle target="instructions" title="edit-instructions" style="LINK">
+						<navigation destination="INSTRUCTIONS" title="edit-instructions" style="LINK" submit="TRUE">
 							<icon icon="/icons/test.png" style="LEFT" />
 							<included>
-								<hasValueDecision model="assessment.presentation.text" />
+								<decision reversed="TRUE" model="assessment.isLocked" />
 							</included>
-						</toggle>
-						<toggle target="instructions" title="add-instructions" style="LINK">
-							<icon icon="/icons/test.png" style="LEFT" />
+						</navigation>
+
+						<navigation destination="PARTS" title="manage-parts" style="LINK" submit="TRUE">
+							<icon icon="/icons/add_qst.png" style="LEFT" />
 							<included>
-								<hasValueDecision reversed="TRUE" model="assessment.presentation.text" />
+								<decision reversed="TRUE" model="assessment.isLocked" />
 							</included>
-						</toggle>
+						</navigation>
 
 					</container>
 				</section>

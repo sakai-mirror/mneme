@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.etudes.ambrosia.api.Context;
 import org.etudes.ambrosia.api.PopulatingSet;
+import org.etudes.ambrosia.api.Value;
 import org.etudes.ambrosia.api.PopulatingSet.Factory;
 import org.etudes.ambrosia.api.PopulatingSet.Id;
 import org.etudes.ambrosia.util.ControllerImpl;
@@ -142,6 +143,11 @@ public class DrawQuestionsView extends ControllerImpl
 		List<PoolDraw> draws = getDraws(assessment, sort);
 		context.put("draws", draws);
 
+		// for the selected "for" part
+		Value value = this.uiService.newValue();
+		value.setValue(part.getId());
+		context.put("partId", value);
+
 		// render
 		uiService.render(ui, context);
 	}
@@ -213,8 +219,54 @@ public class DrawQuestionsView extends ControllerImpl
 		});
 		context.put("draws", draws);
 
+		// for the selected "for" part
+		Value value = this.uiService.newValue();
+		context.put("partId", value);
+
 		// read the form
 		String destination = uiService.decode(req, context);
+
+		// get the new part id
+		String newPartId = value.getValue();
+		if (!part.getId().equals(newPartId))
+		{
+			// create a new part?
+			if ("0".equals(newPartId))
+			{
+				try
+				{
+					Part created = assessment.getParts().addPart();
+					this.assessmentService.saveAssessment(assessment);
+					newPartId = created.getId();
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+				catch (AssessmentPolicyException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+					return;
+				}
+			}
+
+			Part newPart = assessment.getParts().getPart(newPartId);
+			if (newPart != null)
+			{
+				part = newPart;
+
+				// adjust the destination to use this part, if the destination is back to me
+				String[] destParts = StringUtil.split(destination, "/");
+				if (destParts[1].equals("draw_questions"))
+				{
+					destParts[3] = part.getId();
+					destination = StringUtil.unsplit(destParts, 0, destParts.length, "/");
+				}
+			}
+		}
 
 		// update the draws in the assessment parts
 		assessment.getParts().updateDraws(new ArrayList<PoolDraw>(draws.getSet()));
