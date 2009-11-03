@@ -269,7 +269,7 @@ public class DrawQuestionsView extends ControllerImpl
 		}
 
 		// update the draws in the assessment parts
-		assessment.getParts().updateDraws(new ArrayList<PoolDraw>(draws.getSet()));
+		assessment.getParts().updateDraws(new ArrayList<PoolDraw>(draws.getSet()), part);
 
 		// commit the save
 		try

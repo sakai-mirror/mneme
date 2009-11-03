@@ -358,63 +358,6 @@ public class AssessmentPartsImpl implements AssessmentParts
 	/**
 	 * {@inheritDoc}
 	 */
-	public void updateDraws(List<PoolDraw> draws)
-	{
-		for (PoolDraw newDraw : draws)
-		{
-			// if it is empty, make sure it is removed from any part
-			if ((newDraw.getNumQuestions() == null) || (newDraw.getNumQuestions().intValue() == 0))
-			{
-				for (Part part : this.parts)
-				{
-					part.removeDrawDetail(newDraw.getPool());
-				}
-			}
-
-			// if it has count, see if we need to update its presence in a part
-			else
-			{
-				boolean used = false;
-				for (Part part : this.parts)
-				{
-					for (PartDetail detail : part.getDetails())
-					{
-						if (detail instanceof PoolDraw)
-						{
-							PoolDraw oldDraw = (PoolDraw) detail;
-
-							// is this pool drawn in the part?
-							if (oldDraw.getPoolId().equals(newDraw.getPoolId()))
-							{
-								used = true;
-
-								// is the count different?
-								if (oldDraw.getNumQuestions().intValue() != newDraw.getNumQuestions().intValue())
-								{
-									// update the part
-									part.addDrawDetail(newDraw.getPool(), newDraw.getNumQuestions());
-								}
-							}
-						}
-					}
-				}
-
-				// if we didn't find that it was used, add it to part 1, creating the part if needed
-				if (!used)
-				{
-					if (getParts().isEmpty())
-					{
-						addPart();
-					}
-					getParts().get(0).addDrawDetail(newDraw.getPool(), newDraw.getNumQuestions());
-				}
-			}
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Integer getNumQuestions()
 	{
 		int rv = 0;
@@ -681,6 +624,63 @@ public class AssessmentPartsImpl implements AssessmentParts
 		this.showPresentation = setting;
 
 		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void updateDraws(List<PoolDraw> draws, Part partForNewDraws)
+	{
+		for (PoolDraw newDraw : draws)
+		{
+			// if it is empty, make sure it is removed from any part
+			if ((newDraw.getNumQuestions() == null) || (newDraw.getNumQuestions().intValue() == 0))
+			{
+				for (Part part : this.parts)
+				{
+					part.removeDrawDetail(newDraw.getPool());
+				}
+			}
+
+			// if it has count, see if we need to update its presence in a part
+			else
+			{
+				boolean used = false;
+				for (Part part : this.parts)
+				{
+					for (PartDetail detail : part.getDetails())
+					{
+						if (detail instanceof PoolDraw)
+						{
+							PoolDraw oldDraw = (PoolDraw) detail;
+
+							// is this pool drawn in the part?
+							if (oldDraw.getPoolId().equals(newDraw.getPoolId()))
+							{
+								used = true;
+
+								// is the count different?
+								if (oldDraw.getNumQuestions().intValue() != newDraw.getNumQuestions().intValue())
+								{
+									// update the part
+									part.addDrawDetail(newDraw.getPool(), newDraw.getNumQuestions());
+								}
+							}
+						}
+					}
+				}
+
+				// if we didn't find that it was used, add it to part 1, creating the part if needed
+				if ((!used) && (partForNewDraws != null) && (partForNewDraws.getAssessment() == assessment))
+				{
+					if (getParts().isEmpty())
+					{
+						addPart();
+					}
+					partForNewDraws.addDrawDetail(newDraw.getPool(), newDraw.getNumQuestions());
+				}
+			}
+		}
 	}
 
 	/**

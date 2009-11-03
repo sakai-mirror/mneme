@@ -229,10 +229,12 @@ public interface AssessmentParts
 	 * Apply the set of draws in the list to the parts.<br />
 	 * If the draw has no count, and the pool is in a part, remove it.<br />
 	 * If the draw has a count, and the pool is already drawn in a part, make sure the count matches.<br />
-	 * Any additional draws not in parts get added to part 1, created if needed.
+	 * Any additional draws not in parts get added to the indicated part.
 	 * 
 	 * @param draws
 	 *        The list of (virtual) draws.
+	 * @param partForNewDraws
+	 *        The part to get any new draws.
 	 */
-	void updateDraws(List<PoolDraw> draws);
+	void updateDraws(List<PoolDraw> draws, Part partForNewDraws);
 }
