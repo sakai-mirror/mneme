@@ -37,6 +37,7 @@ import org.etudes.mneme.api.AssessmentDates;
 import org.etudes.mneme.api.AssessmentGrading;
 import org.etudes.mneme.api.AssessmentParts;
 import org.etudes.mneme.api.AssessmentPassword;
+import org.etudes.mneme.api.AssessmentPermissionException;
 import org.etudes.mneme.api.AssessmentReview;
 import org.etudes.mneme.api.AssessmentService;
 import org.etudes.mneme.api.AssessmentSpecialAccess;
@@ -108,6 +109,9 @@ public class AssessmentImpl implements Assessment
 	protected AssessmentPartsImpl parts = null;
 
 	protected AssessmentPassword password = null;
+
+	/** The auto-pool for this assessment. */
+	protected String poolId = null;
 
 	protected transient PoolServiceImpl poolService = null;
 
@@ -435,6 +439,30 @@ public class AssessmentImpl implements Assessment
 	public AssessmentPassword getPassword()
 	{
 		return this.password;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Pool getPool()
+	{
+		if (this.poolId == null)
+		{
+			try
+			{
+				Pool pool = this.poolService.newPool(this.context);
+				this.poolId = pool.getId();
+				pool.setTitle(this.title);
+				this.poolService.savePool(pool);
+				this.changed.setChanged();
+			}
+			catch (AssessmentPermissionException e)
+			{
+				M_log.warn("getPool: " + e.toString());
+			}
+		}
+
+		return this.poolService.getPool(this.poolId);
 	}
 
 	/**
@@ -902,6 +930,17 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
+	 * Initialize the poolId field.
+	 * 
+	 * @param poolId
+	 *        The poolId.
+	 */
+	protected void initPool(String poolId)
+	{
+		this.poolId = poolId;
+	}
+
+	/**
 	 * Establish the published setting.
 	 * 
 	 * @param published
@@ -1029,6 +1068,7 @@ public class AssessmentImpl implements Assessment
 		this.modifiedBy = new AttributionImpl((AttributionImpl) other.modifiedBy, this.changed);
 		this.parts = new AssessmentPartsImpl(this, (AssessmentPartsImpl) other.parts, this.changed);
 		this.password = new AssessmentPasswordImpl((AssessmentPasswordImpl) other.password, this.changed);
+		this.poolId = other.poolId;
 		this.poolService = other.poolService;
 		this.presentation = new PresentationImpl((PresentationImpl) other.presentation, this.changed);
 		this.published = other.published;

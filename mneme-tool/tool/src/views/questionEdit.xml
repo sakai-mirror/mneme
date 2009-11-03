@@ -64,15 +64,10 @@
 	</subHeader>
 
 	<container>
-		<navigationBar>
-			<container>
-				<text>
-					<message selector="question-types" />
-				</text>
-			</container>
-		</navigationBar>
+		<!-- repeat the nav up top -->
+		<alias to="nav" />
 
-		<selection>
+		<selection title="question-types">
 			<model ref="selectedQuestionType.value" />
 			<selectionModel model="questionTypes" name="type">
 				<valueMessage>
@@ -84,12 +79,6 @@
 			</selectionModel>
 			<destination template="RETYPE" />
 		</selection>
-
-		<navigationBar>
-			<container>
-				<text model="question.typeName" />
-			</container>
-		</navigationBar>
 
 		<!--  if invalid -->
 		<section>
@@ -218,7 +207,7 @@
 		</section>
 
 		<!-- navigation -->
-		<navigationBar>
+		<navigationBar id="nav">
 			<container>
 				<navigation title="done" accessKey="done-access" description="done-description" style="BUTTON" submit="TRUE">
 					<destination template="{0}">
@@ -228,9 +217,7 @@
 				</navigation>
 				<divider />
 				<navigation title="add" accessKey="add-access" description="add-description" style="BUTTON" submit="TRUE">
-					<destination template="/select_question_type/{0}">
-						<model ref="extras" />
-					</destination>
+					<destination template="ADD" />
 					<icon icon="/icons/add.png" style="LEFT" />
 				</navigation>
 			</container>

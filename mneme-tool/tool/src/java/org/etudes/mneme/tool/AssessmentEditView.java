@@ -239,9 +239,8 @@ public class AssessmentEditView extends ControllerImpl
 					part = assessment.getParts().addPart();
 				}
 
-				// the assessment's pool TODO:
-				String pid = "1";
-				Pool pool = this.poolService.getPool(pid);
+				// the assessment's pool
+				Pool pool = assessment.getPool();
 
 				// create a question - type? TODO:
 				String type = "mneme:MultipleChoice";

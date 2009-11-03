@@ -44,7 +44,7 @@ import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
- * The question edit view for the mneme tool.
+ * The question_edit view for the mneme tool.
  */
 public class QuestionEditView extends ControllerImpl
 {
@@ -138,6 +138,18 @@ public class QuestionEditView extends ControllerImpl
 			throw new IllegalArgumentException();
 		}
 
+		String returnDestination = null;
+		if (params.length > 3)
+		{
+			returnDestination = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
+		}
+
+		// if not specified, go to the main pools page
+		else
+		{
+			returnDestination = "/pools";
+		}
+
 		String questionId = params[2];
 
 		// get the question to work on
@@ -165,10 +177,33 @@ public class QuestionEditView extends ControllerImpl
 				// save and re-type
 				this.questionService.saveQuestionAsType(question, newType.getValue());
 			}
+
 			else
 			{
 				// just save
 				this.questionService.saveQuestion(question);
+			}
+
+			if ("ADD".equals(destination))
+			{
+				destination = null;
+
+				// setup a new question of the same type in the same pool
+				try
+				{
+					Question newQuestion = this.questionService.newQuestion(question.getPool(), question.getType());
+
+					// TODO: added to any assessment part?
+
+					// edit it
+					destination = "/question_edit/" + newQuestion.getId() + returnDestination;
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
 			}
 		}
 		catch (AssessmentPermissionException e)

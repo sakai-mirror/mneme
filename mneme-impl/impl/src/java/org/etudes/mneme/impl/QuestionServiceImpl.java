@@ -662,7 +662,8 @@ public class QuestionServiceImpl implements QuestionService
 		if (((QuestionImpl) question).getIsHistorical()) throw new IllegalArgumentException();
 
 		// change the question type - preserve any data we can
-		// TODO:
+		setType(newType, (QuestionImpl) question);
+		question.setChanged();
 
 		// save, but don't clear mint
 		saveTheQuestion(question, false);
@@ -977,30 +978,27 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		if (question == null) throw new IllegalArgumentException();
 
-		if (processMint)
+		// if any changes made, clear mint
+		if (question.getIsChanged())
 		{
-			// if any changes made, clear mint
-			if (question.getIsChanged())
+			// if other than just a survey change
+			if (!((QuestionImpl) question).getSurveyOnlyChanged())
 			{
-				// if other than just a survey change
-				if (!((QuestionImpl) question).getSurveyOnlyChanged())
-				{
-					((QuestionImpl) question).clearMint();
-				}
+				((QuestionImpl) question).clearMint();
+			}
+		}
+
+		// otherwise we don't save: but if mint, we delete
+		else
+		{
+			// if mint, delete instead of save
+			if (processMint && (((QuestionImpl) question).getMint()))
+			{
+				if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: deleting mint: " + question.getId());
+				this.removeQuestion(question);
 			}
 
-			// otherwise we don't save: but if mint, we delete
-			else
-			{
-				// if mint, delete instead of save
-				if (((QuestionImpl) question).getMint())
-				{
-					if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: deleting mint: " + question.getId());
-					this.removeQuestion(question);
-				}
-
-				return;
-			}
+			return;
 		}
 
 		if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: " + question.getId());

@@ -830,7 +830,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		sql.append(" A.PARTS_CONTINUOUS, A.PARTS_SHOW_PRES, A.PASSWORD, A.PRESENTATION_TEXT,");
 		sql.append(" A.PUBLISHED, A.QUESTION_GROUPING, A.RANDOM_ACCESS,");
 		sql.append(" A.REVIEW_DATE, A.REVIEW_SHOW_CORRECT, A.REVIEW_SHOW_FEEDBACK, A.REVIEW_TIMING,");
-		sql.append(" A.SHOW_HINTS, A.SUBMIT_PRES_TEXT, A.TIME_LIMIT, A.TITLE, A.TRIES, A.TYPE");
+		sql.append(" A.SHOW_HINTS, A.SUBMIT_PRES_TEXT, A.TIME_LIMIT, A.TITLE, A.TRIES, A.TYPE, A.POOL");
 		sql.append(" FROM MNEME_ASSESSMENT A ");
 		sql.append(where);
 		if (order != null) sql.append(order);
@@ -879,6 +879,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 					assessment.initTitle(SqlHelper.readString(result, i++));
 					assessment.setTries(SqlHelper.readInteger(result, i++));
 					assessment.setType(AssessmentType.valueOf(SqlHelper.readString(result, i++)));
+					assessment.initPool(SqlHelper.readId(result, i++));
 
 					rv.add(assessment);
 					assessments.put(assessment.getId(), assessment);
@@ -1165,10 +1166,10 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		sql.append(" PARTS_CONTINUOUS=?, PARTS_SHOW_PRES=?, PASSWORD=?, PRESENTATION_TEXT=?,");
 		sql.append(" PUBLISHED=?, QUESTION_GROUPING=?, RANDOM_ACCESS=?,");
 		sql.append(" REVIEW_DATE=?, REVIEW_SHOW_CORRECT=?, REVIEW_SHOW_FEEDBACK=?, REVIEW_TIMING=?,");
-		sql.append(" SHOW_HINTS=?, SUBMIT_PRES_TEXT=?, TIME_LIMIT=?, TITLE=?, TRIES=?, TYPE=?");
+		sql.append(" SHOW_HINTS=?, SUBMIT_PRES_TEXT=?, TIME_LIMIT=?, TITLE=?, TRIES=?, TYPE=?, POOL=?");
 		sql.append(" WHERE ID=?");
 
-		Object[] fields = new Object[34];
+		Object[] fields = new Object[35];
 		int i = 0;
 		fields[i++] = assessment.getArchived() ? "1" : "0";
 		fields[i++] = assessment.getContext();
@@ -1205,6 +1206,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		fields[i++] = assessment.getTitle();
 		fields[i++] = assessment.getTries();
 		fields[i++] = assessment.getType().toString();
+		fields[i++] = ((AssessmentImpl) assessment).poolId == null ? null : Long.valueOf(((AssessmentImpl) assessment).poolId);
 		fields[i++] = Long.valueOf(assessment.getId());
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
