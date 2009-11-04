@@ -177,7 +177,7 @@
 					<model type="text" ref="question.description" missing="no-title" stripHtml="TRUE" max="60" />
 					<entityNavigations>
 						<navigation>
-							<destination template="/question_edit/{5}/pool_edit/{0}/{1}/{2}{3}/{4}">
+							<destination template="/question_edit/{5}/0/0/pool_edit/{0}/{1}/{2}{3}/{4}">
 								<model ref="poolsSortCode" />
 								<model ref="pool.id" />
 								<model ref="sort_column" />

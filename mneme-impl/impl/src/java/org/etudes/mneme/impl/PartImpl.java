@@ -322,7 +322,7 @@ public class PartImpl implements Part, Changeable
 		}
 
 		// add this to the details
-		PoolDraw rv = new PoolDrawImpl(this.assessment, this.poolService, pool, numQuestions);
+		PoolDraw rv = new PoolDrawImpl(this.assessment, this, this.poolService, pool, numQuestions);
 		getDetails().add(rv);
 
 		// this is a change that cannot be made to live tests
@@ -354,7 +354,7 @@ public class PartImpl implements Part, Changeable
 		}
 
 		// add this to the details
-		QuestionPick rv = new QuestionPickImpl(this.questionService, question.getId());
+		QuestionPick rv = new QuestionPickImpl(this, this.questionService, question.getId());
 		getDetails().add(rv);
 
 		// this is a change that cannot be made to live tests
@@ -800,7 +800,7 @@ public class PartImpl implements Part, Changeable
 				List<String> draws = draw.getAllQuestionIds();
 				for (String id : draws)
 				{
-					QuestionPick pick = new QuestionPickImpl(this.questionService, null, id, draw.getPoolId());
+					QuestionPick pick = new QuestionPickImpl(this, this.questionService, null, id, draw.getPoolId());
 					rv.add(pick);
 				}
 			}
@@ -834,7 +834,7 @@ public class PartImpl implements Part, Changeable
 				List<String> draws = draw.drawQuestionIds(shuffler);
 				for (String id : draws)
 				{
-					QuestionPick pick = new QuestionPickImpl(this.questionService, null, id, draw.getPoolId());
+					QuestionPick pick = new QuestionPickImpl(this, this.questionService, null, id, draw.getPoolId());
 					rv.add(pick);
 				}
 			}
@@ -891,7 +891,7 @@ public class PartImpl implements Part, Changeable
 	 */
 	protected void initDraw(String id, String poolId, String origPoolId, Integer numQuestions)
 	{
-		PoolDraw draw = new PoolDrawImpl(this.assessment, this.poolService, id, poolId, origPoolId, numQuestions);
+		PoolDraw draw = new PoolDrawImpl(this.assessment, this, this.poolService, id, poolId, origPoolId, numQuestions);
 		getDetails().add(draw);
 	}
 
@@ -918,7 +918,7 @@ public class PartImpl implements Part, Changeable
 	 */
 	protected void initPick(String id, String questionId, String origQuestionId)
 	{
-		QuestionPick pick = new QuestionPickImpl(this.questionService, id, questionId, origQuestionId);
+		QuestionPick pick = new QuestionPickImpl(this, this.questionService, id, questionId, origQuestionId);
 		getDetails().add(pick);
 	}
 
@@ -944,11 +944,11 @@ public class PartImpl implements Part, Changeable
 		{
 			if (detail instanceof PoolDraw)
 			{
-				getDetails().add(new PoolDrawImpl(this.assessment, (PoolDrawImpl) detail));
+				getDetails().add(new PoolDrawImpl(this.assessment, this, (PoolDrawImpl) detail));
 			}
 			else if (detail instanceof QuestionPick)
 			{
-				getDetails().add(new QuestionPickImpl((QuestionPickImpl) detail));
+				getDetails().add(new QuestionPickImpl(this, (QuestionPickImpl) detail));
 			}
 		}
 	}

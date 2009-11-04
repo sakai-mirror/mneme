@@ -300,7 +300,7 @@ public class PoolEditView extends ControllerImpl
 			String returnDest = StringUtil.unsplit(params, "/");
 
 			// create URL for add questions /select_question_type/POOL/RETURN
-			destination = "/question_edit/" + newQuestion.getId() + returnDest;
+			destination = "/question_edit/" + newQuestion.getId() + "/0/0" + returnDest;
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));

@@ -67,6 +67,31 @@
 		<!-- repeat the nav up top -->
 		<alias to="nav" />
 
+		<selection title="parts">
+			<included>
+				<hasValueDecision model="assessment" />
+			</included>
+			<model ref="partId.value" />
+			<selectionModel name="forpart" model="assessment.parts.parts">
+				<valueMessage>
+					<message model="forpart.id" />
+				</valueMessage>
+				<displayMessage>
+					<message model="forpart.tag" />
+				</displayMessage>
+			</selectionModel>
+			<selectionChoices>
+				<selectionChoice>
+					<displayMessage>
+						<message selector="new-part" />
+					</displayMessage>
+					<valueMessage>
+						<message template="0" />
+					</valueMessage>
+				</selectionChoice>
+			</selectionChoices>
+		</selection>
+
 		<selection title="question-types">
 			<model ref="selectedQuestionType.value" />
 			<selectionModel model="questionTypes" name="type">

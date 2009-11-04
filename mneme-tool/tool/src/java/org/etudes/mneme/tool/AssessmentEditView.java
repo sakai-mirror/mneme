@@ -113,27 +113,27 @@ public class AssessmentEditView extends ControllerImpl
 			return;
 		}
 
-//		// clear the assessment of any empty parts (if not mint, which would end up causing it to become a stale mint and vanish!)
-//		if (!assessment.getMint())
-//		{
-//			try
-//			{
-//				assessment.getParts().removeEmptyParts();
-//				this.assessmentService.saveAssessment(assessment);
-//			}
-//			catch (AssessmentPermissionException e)
-//			{
-//				// redirect to error
-//				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-//				return;
-//			}
-//			catch (AssessmentPolicyException e)
-//			{
-//				// redirect to error
-//				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
-//				return;
-//			}
-//		}
+		// // clear the assessment of any empty parts (if not mint, which would end up causing it to become a stale mint and vanish!)
+		// if (!assessment.getMint())
+		// {
+		// try
+		// {
+		// assessment.getParts().removeEmptyParts();
+		// this.assessmentService.saveAssessment(assessment);
+		// }
+		// catch (AssessmentPermissionException e)
+		// {
+		// // redirect to error
+		// res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+		// return;
+		// }
+		// catch (AssessmentPolicyException e)
+		// {
+		// // redirect to error
+		// res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
+		// return;
+		// }
+		// }
 
 		// collect information: the selected assessment
 		context.put("assessment", assessment);
@@ -232,15 +232,15 @@ public class AssessmentEditView extends ControllerImpl
 			if (destination.equals("ADD"))
 			{
 				// use the first part, adding one if needed
-				// TODO: which part to use?
 				Part part = assessment.getParts().getFirst();
 				if (part == null)
 				{
 					part = assessment.getParts().addPart();
 				}
 
-				// the assessment's pool
+				// the assessment's pool, saving in case this is the creation of the pool
 				Pool pool = assessment.getPool();
+				this.assessmentService.saveAssessment(assessment);
 
 				// create a question - type? TODO:
 				String type = "mneme:MultipleChoice";
@@ -257,14 +257,9 @@ public class AssessmentEditView extends ControllerImpl
 					return;
 				}
 
-				// add the question to the part
-				part.addPickDetail(newQuestion);
-
-				// save the assessment
-				this.assessmentService.saveAssessment(assessment);
-
-				// create URL for add questions /select_question_type/POOL/RETURN
-				destination = "/question_edit/" + newQuestion.getId() + "/assessment_edit/" + sort + "/" + assessmentId;
+				// create URL for add questions
+				destination = "/question_edit/" + newQuestion.getId() + "/" + assessmentId + "/" + part.getId() + "/assessment_edit/" + sort + "/"
+						+ assessmentId;
 			}
 
 			else if (destination.equals("DRAW"))

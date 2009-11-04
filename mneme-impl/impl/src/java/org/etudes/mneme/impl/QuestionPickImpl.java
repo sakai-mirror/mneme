@@ -23,6 +23,7 @@ package org.etudes.mneme.impl;
 
 import java.util.Map;
 
+import org.etudes.mneme.api.Part;
 import org.etudes.mneme.api.Pool;
 import org.etudes.mneme.api.Question;
 import org.etudes.mneme.api.QuestionPick;
@@ -39,6 +40,9 @@ public class QuestionPickImpl implements QuestionPick
 	/** The original question id. */
 	protected String origQuestionId = null;
 
+	/** The part context for this draw. */
+	protected transient Part part = null;
+
 	/** The actual question id. */
 	protected String questionId = null;
 
@@ -48,38 +52,47 @@ public class QuestionPickImpl implements QuestionPick
 	/**
 	 * Construct.
 	 * 
+	 * @param part
+	 *        The part.
 	 * @param other
 	 *        The other to copy.
 	 */
-	public QuestionPickImpl(QuestionPickImpl other)
+	public QuestionPickImpl(Part part, QuestionPickImpl other)
 	{
+		this.part = part;
 		set(other);
 	}
 
 	/**
 	 * Construct.
 	 * 
+	 * @param part
+	 *        The part.
 	 * @param questionService
 	 *        The QuestionService.
 	 */
-	public QuestionPickImpl(QuestionService questionService)
+	public QuestionPickImpl(Part part, QuestionService questionService)
 	{
 		if (questionService == null) throw new IllegalArgumentException();
+		this.part = part;
 		this.questionService = questionService;
 	}
 
 	/**
 	 * Construct.
 	 * 
+	 * @param part
+	 *        The part.
 	 * @param questionService
 	 *        The QuestionService.
 	 * @param questionId
 	 *        The question id.
 	 */
-	public QuestionPickImpl(QuestionService questionService, String questionId)
+	public QuestionPickImpl(Part part, QuestionService questionService, String questionId)
 	{
 		if (questionService == null) throw new IllegalArgumentException();
 		if (questionId == null) throw new IllegalArgumentException();
+		this.part = part;
 		this.questionId = questionId;
 		this.origQuestionId = questionId;
 		this.questionService = questionService;
@@ -88,6 +101,8 @@ public class QuestionPickImpl implements QuestionPick
 	/**
 	 * Construct.
 	 * 
+	 * @param part
+	 *        The part.
 	 * @param questionService
 	 *        The QuestionService.
 	 * @param id
@@ -99,11 +114,12 @@ public class QuestionPickImpl implements QuestionPick
 	 * @param poolId
 	 *        The pool.
 	 */
-	public QuestionPickImpl(QuestionService questionService, String id, String questionId, String origQid)
+	public QuestionPickImpl(Part part, QuestionService questionService, String id, String questionId, String origQid)
 	{
 		if (questionService == null) throw new IllegalArgumentException();
 		if (questionId == null) throw new IllegalArgumentException();
 		if (origQid == null) throw new IllegalArgumentException();
+		this.part = part;
 		this.id = id;
 		this.questionId = questionId;
 		this.origQuestionId = origQid;
@@ -185,6 +201,14 @@ public class QuestionPickImpl implements QuestionPick
 	public String getOrigQuestionId()
 	{
 		return this.origQuestionId;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Part getPart()
+	{
+		return this.part;
 	}
 
 	/**

@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.etudes.mneme.api.Assessment;
 import org.etudes.mneme.api.AssessmentType;
+import org.etudes.mneme.api.Part;
 import org.etudes.mneme.api.Pool;
 import org.etudes.mneme.api.PoolDraw;
 import org.etudes.mneme.api.PoolService;
@@ -52,6 +53,9 @@ public class PoolDrawImpl implements PoolDraw
 	/** The original pool id. */
 	protected String origPoolId = null;
 
+	/** The part context for this draw. */
+	protected transient Part part = null;
+
 	/** The actual pool id. */
 	protected String poolId = null;
 
@@ -61,24 +65,34 @@ public class PoolDrawImpl implements PoolDraw
 	/**
 	 * Construct.
 	 * 
+	 * @param assessment
+	 *        The Assessment.
+	 * @param part
+	 *        The part.
 	 * @param other
 	 *        The other to copy.
 	 */
-	public PoolDrawImpl(Assessment assessment, PoolDrawImpl other)
+	public PoolDrawImpl(Assessment assessment, Part part, PoolDrawImpl other)
 	{
 		this.assessment = assessment;
+		this.part = part;
 		set(other);
 	}
 
 	/**
 	 * Construct.
 	 * 
+	 * @param assessment
+	 *        The Assessment.
+	 * @param part
+	 *        The part.
 	 * @param poolService
 	 *        The PoolService.
 	 */
-	public PoolDrawImpl(Assessment assessment, PoolService poolService)
+	public PoolDrawImpl(Assessment assessment, Part part, PoolService poolService)
 	{
 		this.assessment = assessment;
+		this.part = part;
 		this.poolService = poolService;
 	}
 
@@ -87,6 +101,8 @@ public class PoolDrawImpl implements PoolDraw
 	 * 
 	 * @param assessment
 	 *        The Assessment.
+	 * @param part
+	 *        The part.
 	 * @param poolService
 	 *        The PoolService.
 	 * @param id
@@ -96,9 +112,9 @@ public class PoolDrawImpl implements PoolDraw
 	 * @param numQuestions
 	 *        The number of questions to draw.
 	 */
-	public PoolDrawImpl(Assessment assessment, PoolService poolService, Pool pool, Integer numQuestions)
+	public PoolDrawImpl(Assessment assessment, Part part, PoolService poolService, Pool pool, Integer numQuestions)
 	{
-		this(assessment, poolService);
+		this(assessment, part, poolService);
 		if (pool == null) throw new IllegalArgumentException();
 		this.poolId = pool.getId();
 		this.origPoolId = pool.getId();
@@ -111,6 +127,8 @@ public class PoolDrawImpl implements PoolDraw
 	 * 
 	 * @param assessment
 	 *        The Assessment.
+	 * @param part
+	 *        The part.
 	 * @param poolService
 	 *        The PoolService.
 	 * @param id
@@ -122,9 +140,9 @@ public class PoolDrawImpl implements PoolDraw
 	 * @param numQuestions
 	 *        The number of questions to draw.
 	 */
-	public PoolDrawImpl(Assessment assessment, PoolService poolService, String id, String poolId, String origPoolId, Integer numQuestions)
+	public PoolDrawImpl(Assessment assessment, Part part, PoolService poolService, String id, String poolId, String origPoolId, Integer numQuestions)
 	{
-		this(assessment, poolService);
+		this(assessment, part, poolService);
 		if (poolId == null) throw new IllegalArgumentException();
 		if (origPoolId == null) throw new IllegalArgumentException();
 		this.id = id;
@@ -258,6 +276,14 @@ public class PoolDrawImpl implements PoolDraw
 	public String getOrigPoolId()
 	{
 		return this.origPoolId;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Part getPart()
+	{
+		return this.part;
 	}
 
 	/**

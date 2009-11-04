@@ -67,6 +67,11 @@ public interface PartDetail
 	Integer getNumQuestions();
 
 	/**
+	 * @return The Part in which this detail resides.
+	 */
+	Part getPart();
+
+	/**
 	 * Access the pool associated with this detail (the question's pool or the pool to draw from).
 	 * 
 	 * @return The pool.

@@ -273,10 +273,11 @@
 									<included>
 										<decision model="detail.isSpecific" />
 									</included>
-									<destination template="/question_edit/{0}/assessment_edit/{1}/{2}">
+									<destination template="/question_edit/{0}/{2}/{3}/assessment_edit/{1}/{2}">
 										<model ref="detail.questionId" />
 										<model ref="sortcode" />
 										<model ref="assessment.id" />
+										<model ref="detail.part.id" />
 									</destination>
 								</navigation>
 							</entityNavigations>

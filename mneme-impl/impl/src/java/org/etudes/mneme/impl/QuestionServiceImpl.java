@@ -663,7 +663,6 @@ public class QuestionServiceImpl implements QuestionService
 
 		// change the question type - preserve any data we can
 		setType(newType, (QuestionImpl) question);
-		question.setChanged();
 
 		// save, but don't clear mint
 		saveTheQuestion(question, false);
@@ -989,10 +988,10 @@ public class QuestionServiceImpl implements QuestionService
 		}
 
 		// otherwise we don't save: but if mint, we delete
-		else
+		if (processMint && (!question.getIsChanged()))
 		{
 			// if mint, delete instead of save
-			if (processMint && (((QuestionImpl) question).getMint()))
+			if (((QuestionImpl) question).getMint())
 			{
 				if (M_log.isDebugEnabled()) M_log.debug("saveQuestion: deleting mint: " + question.getId());
 				this.removeQuestion(question);
