@@ -39,22 +39,13 @@ import org.etudes.mneme.api.Shuffler;
 /**
  * PoolDrawImpl implements PoolDraw
  */
-public class PoolDrawImpl implements PoolDraw
+public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 {
-	/** The Assessment context for this draw. */
-	protected transient Assessment assessment = null;
-
-	/** Part detail id. */
-	protected String id = null;
-
 	/** The number of questions to draw from the pool. */
 	protected Integer numQuestions = null;
 
 	/** The original pool id. */
 	protected String origPoolId = null;
-
-	/** The part context for this draw. */
-	protected transient Part part = null;
 
 	/** The actual pool id. */
 	protected String poolId = null;
@@ -62,37 +53,34 @@ public class PoolDrawImpl implements PoolDraw
 	/** Dependency: PoolService. */
 	protected PoolService poolService = null;
 
+	/** The assessment context. */
+	protected transient Assessment assessment = null;
+
 	/**
 	 * Construct.
 	 * 
-	 * @param assessment
-	 *        The Assessment.
 	 * @param part
 	 *        The part.
 	 * @param other
 	 *        The other to copy.
 	 */
-	public PoolDrawImpl(Assessment assessment, Part part, PoolDrawImpl other)
+	public PoolDrawImpl(Part part, PoolDrawImpl other)
 	{
-		this.assessment = assessment;
-		this.part = part;
+		super(part);
 		set(other);
 	}
 
 	/**
 	 * Construct.
 	 * 
-	 * @param assessment
-	 *        The Assessment.
 	 * @param part
 	 *        The part.
 	 * @param poolService
 	 *        The PoolService.
 	 */
-	public PoolDrawImpl(Assessment assessment, Part part, PoolService poolService)
+	public PoolDrawImpl(Part part, PoolService poolService)
 	{
-		this.assessment = assessment;
-		this.part = part;
+		super(part);
 		this.poolService = poolService;
 	}
 
@@ -100,7 +88,7 @@ public class PoolDrawImpl implements PoolDraw
 	 * Construct.
 	 * 
 	 * @param assessment
-	 *        The Assessment.
+	 *        The assessment context.
 	 * @param part
 	 *        The part.
 	 * @param poolService
@@ -114,19 +102,17 @@ public class PoolDrawImpl implements PoolDraw
 	 */
 	public PoolDrawImpl(Assessment assessment, Part part, PoolService poolService, Pool pool, Integer numQuestions)
 	{
-		this(assessment, part, poolService);
+		this(part, poolService);
 		if (pool == null) throw new IllegalArgumentException();
+		this.assessment = assessment;
 		this.poolId = pool.getId();
 		this.origPoolId = pool.getId();
 		this.numQuestions = numQuestions;
-		this.poolService = poolService;
 	}
 
 	/**
 	 * Construct.
 	 * 
-	 * @param assessment
-	 *        The Assessment.
 	 * @param part
 	 *        The part.
 	 * @param poolService
@@ -140,16 +126,15 @@ public class PoolDrawImpl implements PoolDraw
 	 * @param numQuestions
 	 *        The number of questions to draw.
 	 */
-	public PoolDrawImpl(Assessment assessment, Part part, PoolService poolService, String id, String poolId, String origPoolId, Integer numQuestions)
+	public PoolDrawImpl(Part part, PoolService poolService, String id, String poolId, String origPoolId, Integer numQuestions)
 	{
-		this(assessment, part, poolService);
+		this(part, poolService);
 		if (poolId == null) throw new IllegalArgumentException();
 		if (origPoolId == null) throw new IllegalArgumentException();
 		this.id = id;
 		this.poolId = poolId;
 		this.origPoolId = origPoolId;
 		this.numQuestions = numQuestions;
-		this.poolService = poolService;
 	}
 
 	/**
@@ -165,11 +150,11 @@ public class PoolDrawImpl implements PoolDraw
 		Boolean survey = null;
 		if ((counts.assessment != 0) && (counts.survey != 0))
 		{
-			survey = Boolean.valueOf(this.assessment.getType() == AssessmentType.survey);
+			survey = Boolean.valueOf(this.part.getAssessment().getType() == AssessmentType.survey);
 		}
 
 		// we need to overdraw by the number of manual questions this assessment uses from the pool
-		List<String> manualQuestionIds = ((AssessmentPartsImpl) this.assessment.getParts()).getQuestionPicksFromPool(pool, survey);
+		List<String> manualQuestionIds = ((AssessmentPartsImpl) this.part.getAssessment().getParts()).getQuestionPicksFromPool(pool, survey);
 
 		int size = this.numQuestions + manualQuestionIds.size();
 
@@ -218,14 +203,6 @@ public class PoolDrawImpl implements PoolDraw
 		Pool pool = this.poolService.getPool(this.origPoolId);
 		if (pool == null) return "?";
 		return pool.getDescription();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getId()
-	{
-		return this.id;
 	}
 
 	/**
@@ -281,14 +258,6 @@ public class PoolDrawImpl implements PoolDraw
 	/**
 	 * {@inheritDoc}
 	 */
-	public Part getPart()
-	{
-		return this.part;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Pool getPool()
 	{
 		return poolService.getPool(this.poolId);
@@ -315,7 +284,7 @@ public class PoolDrawImpl implements PoolDraw
 			Boolean survey = null;
 			if ((counts.assessment != 0) && (counts.survey != 0))
 			{
-				survey = Boolean.valueOf(this.assessment.getType() == AssessmentType.survey);
+				survey = Boolean.valueOf(this.part.getAssessment().getType() == AssessmentType.survey);
 			}
 
 			int size = 0;
@@ -339,7 +308,13 @@ public class PoolDrawImpl implements PoolDraw
 				}
 			}
 
-			size -= ((AssessmentPartsImpl) this.assessment.getParts()).getQuestionPicksFromPool(pool, survey).size();
+			// reduce by the number of picks from this pool in the assessment
+			Assessment assessment = this.assessment;
+			if ((assessment == null) && (this.part != null)) assessment = this.part.getAssessment();
+			if (assessment != null)
+			{
+				size -= ((AssessmentPartsImpl) assessment.getParts()).getQuestionPicksFromPool(pool, survey).size();
+			}
 
 			return Integer.valueOf(size);
 		}
@@ -434,17 +409,6 @@ public class PoolDrawImpl implements PoolDraw
 	}
 
 	/**
-	 * Initialize the detail id.
-	 * 
-	 * @param id
-	 *        The detail id.
-	 */
-	protected void initId(String id)
-	{
-		this.id = id;
-	}
-
-	/**
 	 * Set as a copy of another.
 	 * 
 	 * @param other
@@ -452,7 +416,7 @@ public class PoolDrawImpl implements PoolDraw
 	 */
 	protected void set(PoolDrawImpl other)
 	{
-		this.id = other.id;
+		super.set(other);
 		this.numQuestions = other.numQuestions;
 		this.origPoolId = other.origPoolId;
 		this.poolId = other.poolId;

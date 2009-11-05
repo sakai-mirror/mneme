@@ -32,16 +32,10 @@ import org.etudes.mneme.api.QuestionService;
 /**
  * QuestionPickImpl implements QuestionPick.
  */
-public class QuestionPickImpl implements QuestionPick
+public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 {
-	/** Part detail id. */
-	protected String id = null;
-
 	/** The original question id. */
 	protected String origQuestionId = null;
-
-	/** The part context for this draw. */
-	protected transient Part part = null;
 
 	/** The actual question id. */
 	protected String questionId = null;
@@ -59,7 +53,7 @@ public class QuestionPickImpl implements QuestionPick
 	 */
 	public QuestionPickImpl(Part part, QuestionPickImpl other)
 	{
-		this.part = part;
+		super(part);
 		set(other);
 	}
 
@@ -73,6 +67,7 @@ public class QuestionPickImpl implements QuestionPick
 	 */
 	public QuestionPickImpl(Part part, QuestionService questionService)
 	{
+		super(part);
 		if (questionService == null) throw new IllegalArgumentException();
 		this.part = part;
 		this.questionService = questionService;
@@ -90,6 +85,7 @@ public class QuestionPickImpl implements QuestionPick
 	 */
 	public QuestionPickImpl(Part part, QuestionService questionService, String questionId)
 	{
+		super(part);
 		if (questionService == null) throw new IllegalArgumentException();
 		if (questionId == null) throw new IllegalArgumentException();
 		this.part = part;
@@ -116,6 +112,7 @@ public class QuestionPickImpl implements QuestionPick
 	 */
 	public QuestionPickImpl(Part part, QuestionService questionService, String id, String questionId, String origQid)
 	{
+		super(part);
 		if (questionService == null) throw new IllegalArgumentException();
 		if (questionId == null) throw new IllegalArgumentException();
 		if (origQid == null) throw new IllegalArgumentException();
@@ -146,14 +143,6 @@ public class QuestionPickImpl implements QuestionPick
 		Question q = this.questionService.getQuestion(this.questionId);
 		if (q == null) return "?";
 		return q.getDescription();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getId()
-	{
-		return this.id;
 	}
 
 	/**
@@ -201,14 +190,6 @@ public class QuestionPickImpl implements QuestionPick
 	public String getOrigQuestionId()
 	{
 		return this.origQuestionId;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Part getPart()
-	{
-		return this.part;
 	}
 
 	/**
@@ -327,17 +308,6 @@ public class QuestionPickImpl implements QuestionPick
 	}
 
 	/**
-	 * Initialize the detail id.
-	 * 
-	 * @param id
-	 *        The detail id.
-	 */
-	protected void initId(String id)
-	{
-		this.id = id;
-	}
-
-	/**
 	 * Set as a copy of another.
 	 * 
 	 * @param other
@@ -345,7 +315,7 @@ public class QuestionPickImpl implements QuestionPick
 	 */
 	protected void set(QuestionPickImpl other)
 	{
-		this.id = other.id;
+		super.set(other);
 		this.origQuestionId = other.origQuestionId;
 		this.questionId = other.questionId;
 		this.questionService = other.questionService;

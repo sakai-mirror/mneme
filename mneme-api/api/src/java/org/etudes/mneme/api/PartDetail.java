@@ -50,6 +50,11 @@ public interface PartDetail
 	String getInvalidMessage();
 
 	/**
+	 * @return TRUE if this detail is the first in the part, FALSE if not.
+	 */
+	Boolean getIsFirst();
+
+	/**
 	 * @return True if the detail is specific to a question, false if it is general to a set of questions (i.e. a random draw).
 	 */
 	Boolean getIsSpecific();
@@ -65,6 +70,13 @@ public interface PartDetail
 	 * @return The number of questions this detail adds to the part.
 	 */
 	Integer getNumQuestions();
+
+	/**
+	 * Access the ordering information within the part.
+	 * 
+	 * @return The ordering information within the part.
+	 */
+	Ordering<PartDetail> getOrdering();
 
 	/**
 	 * @return The Part in which this detail resides.

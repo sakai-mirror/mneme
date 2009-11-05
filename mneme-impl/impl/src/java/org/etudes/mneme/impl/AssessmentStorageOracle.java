@@ -119,10 +119,10 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_ASSESSMENT_PART_DETAIL (ID,");
-		sql.append(" ASSESSMENT_ID, NUM_QUESTIONS_SEQ, ORIG_PID, ORIG_QID, PART_ID, POOL_ID, QUESTION_ID)");
-		sql.append(" VALUES(?,?,?,?,?,?,?)");
+		sql.append(" ASSESSMENT_ID, NUM_QUESTIONS_SEQ, ORIG_PID, ORIG_QID, PART_ID, POOL_ID, QUESTION_ID, SEQ)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[8];
+		Object[] fields = new Object[9];
 		fields[0] = id;
 		fields[1] = Long.valueOf(assessment.getId());
 
@@ -136,12 +136,13 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 			{
 				QuestionPick pick = (QuestionPick) detail;
 
-				fields[i++] = Integer.valueOf(seq);
+				fields[i++] = Integer.valueOf(1);
 				fields[i++] = null;
 				fields[i++] = (pick.getOrigQuestionId() == null) ? null : Long.valueOf(pick.getOrigQuestionId());
 				fields[i++] = Long.valueOf(part.getId());
 				fields[i++] = null;
 				fields[i++] = Long.valueOf(pick.getQuestionId());
+				fields[i++] = Integer.valueOf(seq);
 			}
 
 			else if (detail instanceof PoolDraw)
@@ -154,6 +155,7 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 				fields[i++] = Long.valueOf(part.getId());
 				fields[i++] = Long.valueOf(draw.getPoolId());
 				fields[i++] = null;
+				fields[i++] = Integer.valueOf(seq);
 			}
 
 			if (!this.sqlService.dbWrite(null, sql.toString(), fields))
@@ -162,14 +164,7 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 			}
 
 			// set the detail's id
-			if (detail instanceof QuestionPickImpl)
-			{
-				((QuestionPickImpl) detail).initId(id.toString());
-			}
-			else if (detail instanceof PoolDrawImpl)
-			{
-				((PoolDrawImpl) detail).initId(id.toString());
-			}
+			((PartDetailImpl) detail).initId(id.toString());
 		}
 	}
 

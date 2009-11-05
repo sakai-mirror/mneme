@@ -136,6 +136,24 @@ public class AssessmentPartsImpl implements AssessmentParts
 	/**
 	 * {@inheritDoc}
 	 */
+	public PartDetail getDetailId(String id)
+	{
+		List<PartDetail> rv = new ArrayList<PartDetail>();
+
+		for (Part part : getParts())
+		{
+			for (PartDetail detail : part.getDetails())
+			{
+				if (id.equals(detail.getId())) return detail;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<PartDetail> getDetails()
 	{
 		List<PartDetail> rv = new ArrayList<PartDetail>();

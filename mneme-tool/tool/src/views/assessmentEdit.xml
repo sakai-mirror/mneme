@@ -125,7 +125,7 @@
 						</navigation>
 
 						<navigation destination="PARTS" title="manage-parts" style="LINK" submit="TRUE">
-							<icon icon="/icons/add_qst.png" style="LEFT" />
+							<icon icon="/icons/manage-parts.png" style="LEFT" />
 							<included>
 								<decision reversed="TRUE" model="assessment.isLocked" />
 							</included>
@@ -145,6 +145,23 @@
 						<message selector="questions" />
 					</title>
 					<iterator name="detail" model="assessment.parts.details" />
+
+					<!-- part title -->
+					<headings>
+						<heading>
+							<decision model="detail.isFirst" />
+							<navigation style="LINK">
+								<title>
+									<message selector="part-title">
+										<model type="icon" icon="/icons/section.png" />
+										<model ref="detail.part.ordering.position" />
+										<model ref="detail.part.title" type="text" />
+									</message>
+								</title>
+							</navigation>
+						</heading>
+					</headings>
+
 					<emptyTitle>
 						<message selector="no-details" />
 					</emptyTitle>
@@ -198,30 +215,28 @@
 								</navigation>
 							</entityActions>
 						</selectionColumn>
-						<orderColumn em="4">
-							<title>
-								<message selector="part" />
-							</title>
-							<value>
-								<model ref="detail.id" />
-							</value>
-							<model ref="assessment.parts.order" />
-							<included>
-								<decision reversed="TRUE" model="assessment.isLocked" />
-							</included>
-						</orderColumn>
-						<orderColumn em="4">
+						<column>
 							<title>
 								<message selector="part-order" />
 							</title>
-							<value>
-								<model ref="detail.id" />
-							</value>
-							<model ref="assessment.parts.order" />
-							<included>
-								<decision reversed="TRUE" model="assessment.isLocked" />
-							</included>
-						</orderColumn>
+							<container>
+								<selection orientation="DROPDOWN" height="1">
+									<model ref="detail.ordering.position" />
+									<selectionModel name="pos" model="detail.ordering.positions">
+										<valueMessage>
+											<message model="pos" />
+										</valueMessage>
+										<displayMessage>
+											<message model="pos" />
+										</displayMessage>
+									</selectionModel>
+									<readOnly>
+										<decision model="assessment.isLocked" />
+									</readOnly>
+									<destination template="REORDER" />
+								</selection>
+							</container>
+						</column>
 						<column pixels="16">
 							<entityIncluded>
 								<decision reversed="TRUE" model="detail.isValid" />
@@ -267,7 +282,7 @@
 							<title>
 								<message selector="description" />
 							</title>
-							<model ref="detail.description" type="text" missing="no-title" stripHtml="TRUE" max="60" />
+							<model ref="detail.description" type="text" missing="random-draw-description" stripHtml="TRUE" max="60" />
 							<entityNavigations>
 								<navigation submit="TRUE">
 									<included>
@@ -305,15 +320,6 @@
 								<message selector="points" />
 							</title>
 							<model ref="detail.totalPoints" />
-							<included>
-								<decision model="assessment.hasPoints" />
-							</included>
-						</modelColumn>
-						<modelColumn em="5">
-							<title>
-								<message selector="difficulty" />
-							</title>
-							<model ref="detail.pool.difficulty" />
 							<included>
 								<decision model="assessment.hasPoints" />
 							</included>

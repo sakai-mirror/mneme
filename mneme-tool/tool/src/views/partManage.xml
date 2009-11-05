@@ -62,7 +62,7 @@
 			<container>
 
 				<navigation destination="INSTRUCTIONS" title="edit-instructions" style="LINK" submit="TRUE">
-					<icon icon="/icons/section.png" style="LEFT" />
+					<icon icon="/icons/test.png" style="LEFT" />
 					<included>
 						<decision reversed="TRUE" model="assessment.isLocked" />
 					</included>

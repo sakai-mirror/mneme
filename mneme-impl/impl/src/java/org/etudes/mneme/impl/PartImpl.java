@@ -891,7 +891,7 @@ public class PartImpl implements Part, Changeable
 	 */
 	protected void initDraw(String id, String poolId, String origPoolId, Integer numQuestions)
 	{
-		PoolDraw draw = new PoolDrawImpl(this.assessment, this, this.poolService, id, poolId, origPoolId, numQuestions);
+		PoolDraw draw = new PoolDrawImpl(this, this.poolService, id, poolId, origPoolId, numQuestions);
 		getDetails().add(draw);
 	}
 
@@ -944,7 +944,7 @@ public class PartImpl implements Part, Changeable
 		{
 			if (detail instanceof PoolDraw)
 			{
-				getDetails().add(new PoolDrawImpl(this.assessment, this, (PoolDrawImpl) detail));
+				getDetails().add(new PoolDrawImpl(this, (PoolDrawImpl) detail));
 			}
 			else if (detail instanceof QuestionPick)
 			{

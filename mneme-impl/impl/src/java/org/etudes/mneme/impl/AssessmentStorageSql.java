@@ -936,7 +936,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		sql.append(" FROM MNEME_ASSESSMENT_PART_DETAIL P");
 		sql.append(" JOIN MNEME_ASSESSMENT A ON P.ASSESSMENT_ID=A.ID ");
 		sql.append(where);
-		sql.append(" ORDER BY P.ASSESSMENT_ID ASC, P.NUM_QUESTIONS_SEQ ASC");
+		sql.append(" ORDER BY P.ASSESSMENT_ID ASC, P.SEQ ASC");
 		this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 		{
 			public Object readSqlResultRecord(ResultSet result)

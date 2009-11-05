@@ -46,6 +46,13 @@ public interface AssessmentParts
 	Boolean getContinuousNumbering();
 
 	/**
+	 * Access the part detail with this id.
+	 * 
+	 * @return The part detail with this id, or null if not found.
+	 */
+	PartDetail getDetailId(String id);
+
+	/**
 	 * Access all the part details in a single ordered (by part and sequence) list.
 	 * 
 	 * @return The list of all part details.
@@ -215,7 +222,7 @@ public interface AssessmentParts
 	 * @param partIds
 	 *        A list of the part ids in order.
 	 */
-	void setOrder(String[] partIds);
+	void setOrder(String[] detailIds);
 
 	/**
 	 * Set the show-presentation setting; this controls the display of each part's presentation.
