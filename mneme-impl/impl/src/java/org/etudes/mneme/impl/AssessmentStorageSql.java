@@ -912,6 +912,16 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 					String type = result.getString(5);
 					Part part = a.getParts().addPart();
 					part.setRandomize(SqlHelper.readBoolean(result, 6));
+					
+					// old types M and D were not setting randomize - D should be random, M not
+					if ("M".equals(type))
+					{
+						part.setRandomize(Boolean.FALSE);
+					}
+					else if ("D".equals(type))
+					{
+						part.setRandomize(Boolean.TRUE);
+					}
 
 					((PartImpl) part).initId(SqlHelper.readId(result, 2));
 					part.getPresentation().setText(SqlHelper.readString(result, 3));
@@ -1130,15 +1140,16 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("UPDATE MNEME_ASSESSMENT_PART SET");
-		sql.append(" PRESENTATION_TEXT=?, SEQUENCE=?, TITLE=?, RANDOMIZE=?");
+		sql.append(" PRESENTATION_TEXT=?, SEQUENCE=?, TITLE=?, RANDOMIZE=?, TYPE=?");
 		sql.append(" WHERE ID=?");
 
-		Object[] fields = new Object[5];
+		Object[] fields = new Object[6];
 		fields[0] = part.getPresentation().getText();
 		fields[1] = part.getOrdering().getPosition();
 		fields[2] = part.getTitle();
 		fields[3] = part.getRandomize() ? "1" : "0";
-		fields[4] = Long.valueOf(part.getId());
+		fields[4] = "H";
+		fields[5] = Long.valueOf(part.getId());
 
 		if (!this.sqlService.dbWrite(null, sql.toString(), fields))
 		{

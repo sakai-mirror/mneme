@@ -116,7 +116,6 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 		if (questionService == null) throw new IllegalArgumentException();
 		if (questionId == null) throw new IllegalArgumentException();
 		if (origQid == null) throw new IllegalArgumentException();
-		this.part = part;
 		this.id = id;
 		this.questionId = questionId;
 		this.origQuestionId = origQid;

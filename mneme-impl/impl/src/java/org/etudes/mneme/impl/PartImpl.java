@@ -800,7 +800,7 @@ public class PartImpl implements Part, Changeable
 				List<String> draws = draw.getAllQuestionIds();
 				for (String id : draws)
 				{
-					QuestionPick pick = new QuestionPickImpl(this, this.questionService, null, id, draw.getPoolId());
+					QuestionPick pick = new QuestionPickImpl(this, this.questionService, null, id, id);
 					rv.add(pick);
 				}
 			}
@@ -834,7 +834,7 @@ public class PartImpl implements Part, Changeable
 				List<String> draws = draw.drawQuestionIds(shuffler);
 				for (String id : draws)
 				{
-					QuestionPick pick = new QuestionPickImpl(this, this.questionService, null, id, draw.getPoolId());
+					QuestionPick pick = new QuestionPickImpl(this, this.questionService, null, id, id);
 					rv.add(pick);
 				}
 			}
@@ -849,8 +849,11 @@ public class PartImpl implements Part, Changeable
 			}
 		}
 
-		// randomize the questions
-		shuffler.shuffle(rv, this.id);
+		// randomize the questions if set
+		if (getRandomize())
+		{
+			shuffler.shuffle(rv, this.id);
+		}
 
 		return rv;
 	}

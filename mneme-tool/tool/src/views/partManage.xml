@@ -148,6 +148,26 @@
 								</textEdit>
 							</container>
 						</column>
+						<column>
+							<title>
+								<message selector="randomize" />
+							</title>
+							<container>
+								<selection>
+									<selectionChoices>
+										<selectionChoice>
+											<displayMessage>
+												<message tempalte="" />
+											</displayMessage>
+											<valueMessage>
+												<message template="true" />
+											</valueMessage>
+										</selectionChoice>
+									</selectionChoices>
+									<model ref="part.randomize" />
+								</selection>
+							</container>
+						</column>
 						<modelColumn>
 							<title>
 								<message selector="part-summary" />

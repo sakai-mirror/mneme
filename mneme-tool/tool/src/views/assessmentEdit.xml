@@ -204,6 +204,13 @@
 										<decision reversed="TRUE" model="assessment.isLocked" />
 									</included>
 								</navigation>
+								<navigation destination="MOVE" title="move-to-part" selectRequirement="SOME"
+									selectRequirementMessage="move-failed-requirements" style="LINK" submit="TRUE">
+									<icon icon="/icons/page_go.png" style="LEFT" />
+									<included>
+										<decision reversed="TRUE" model="assessment.isLocked" />
+									</included>
+								</navigation>
 								<!-- delete is dependent, and desired to go last  -->
 								<navigation destination="REMOVE" selectRequirement="SOME" selectRequirementMessage="remove-failed-requirements"
 									title="remove" style="LINK" submit="TRUE">

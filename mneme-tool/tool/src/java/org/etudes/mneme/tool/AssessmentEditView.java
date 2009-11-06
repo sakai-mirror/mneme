@@ -327,6 +327,15 @@ public class AssessmentEditView extends ControllerImpl
 				destination = context.getDestination();
 			}
 
+			else if (destination.equals("MOVE"))
+			{
+				// save the assessment
+				this.assessmentService.saveAssessment(assessment);
+
+				// TODO: destination to the part pick view
+				destination = context.getDestination();
+			}
+
 			else
 			{
 				this.assessmentService.saveAssessment(assessment);
