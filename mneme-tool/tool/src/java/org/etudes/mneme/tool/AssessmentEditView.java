@@ -332,8 +332,17 @@ public class AssessmentEditView extends ControllerImpl
 				// save the assessment
 				this.assessmentService.saveAssessment(assessment);
 
-				// TODO: destination to the part pick view
-				destination = context.getDestination();
+				// format the selected ids
+				StringBuilder buf = new StringBuilder();
+				for (String id : values.getValues())
+				{
+					buf.append(id);
+					buf.append("+");
+				}
+				buf.setLength(buf.length() - 1);
+
+				// destination to the detail move view
+				destination = "/detail_move/" + assessmentId + "/" + buf.toString() + "/assessment_edit/" + sort + "/" + assessmentId;
 			}
 
 			else

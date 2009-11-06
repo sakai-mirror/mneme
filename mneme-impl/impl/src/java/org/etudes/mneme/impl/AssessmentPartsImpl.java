@@ -138,8 +138,6 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 */
 	public PartDetail getDetailId(String id)
 	{
-		List<PartDetail> rv = new ArrayList<PartDetail>();
-
 		for (Part part : getParts())
 		{
 			for (PartDetail detail : part.getDetails())
@@ -504,6 +502,39 @@ public class AssessmentPartsImpl implements AssessmentParts
 		}
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void moveDetails(String[] detailIds, Part destination)
+	{
+		if (detailIds == null) throw new IllegalArgumentException();
+		if (destination == null) throw new IllegalArgumentException();
+		if (destination.getAssessment() != this.assessment) throw new IllegalArgumentException();
+
+		for (String detailId : detailIds)
+		{
+			// get the detail to move
+			PartDetail detail = getDetailId(detailId);
+			if (detail == null) continue;
+
+			// if it is in the desired part already
+			if (detail.getPart() == destination) continue;
+
+			// remove it
+			((PartImpl) detail.getPart()).setChanged();
+			detail.getPart().removeDetail(detailId);
+
+			// add it
+			((PartImpl) destination).setChanged();
+			destination.getDetails().add(detail);
+		}
+
+		// this is a change that cannot be made to live tests
+		this.assessment.lockedChanged = Boolean.TRUE;
+
+		this.owner.setChanged();
 	}
 
 	/**

@@ -186,6 +186,16 @@ public interface AssessmentParts
 	PoolDraw getVirtualDraw(Pool pool);
 
 	/**
+	 * Move the details from wherever part they reside into the destination part.
+	 * 
+	 * @param detailIds
+	 *        The detail ids array.
+	 * @param destination
+	 *        The destination part.
+	 */
+	void moveDetails(String[] detailIds, Part destination);
+
+	/**
 	 * Remove the detail with this detail id, from any part.
 	 * 
 	 * @param id
