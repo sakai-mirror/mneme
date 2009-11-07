@@ -145,16 +145,20 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 		Pool pool = getPool();
 		if (pool == null) return new ArrayList<String>();
 
+		Assessment assessment = this.assessment;
+		if ((assessment == null) && (this.part != null)) assessment = this.part.getAssessment();
+
 		// for a uniform pool, draw from any survey or not; otherwise match the draw to the assessment type
 		Pool.PoolCounts counts = pool.getNumQuestionsSurvey();
 		Boolean survey = null;
-		if ((counts.assessment != 0) && (counts.survey != 0))
+		if ((counts.assessment != 0) && (counts.survey != 0) && (assessment != null))
 		{
-			survey = Boolean.valueOf(this.part.getAssessment().getType() == AssessmentType.survey);
+			survey = Boolean.valueOf(assessment.getType() == AssessmentType.survey);
 		}
 
 		// we need to overdraw by the number of manual questions this assessment uses from the pool
-		List<String> manualQuestionIds = ((AssessmentPartsImpl) this.part.getAssessment().getParts()).getQuestionPicksFromPool(pool, survey);
+		List<String> manualQuestionIds = (assessment != null) ? ((AssessmentPartsImpl) assessment.getParts()).getQuestionPicksFromPool(pool, survey)
+				: new ArrayList<String>();
 
 		int size = this.numQuestions + manualQuestionIds.size();
 
@@ -279,12 +283,15 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 		Pool pool = getPool();
 		if (pool != null)
 		{
+			Assessment assessment = this.assessment;
+			if ((assessment == null) && (this.part != null)) assessment = this.part.getAssessment();
+
 			// for a uniform pool, draw from any survey or not; otherwise match the draw to the assessment type
 			Pool.PoolCounts counts = pool.getNumQuestionsSurvey();
 			Boolean survey = null;
-			if ((counts.assessment != 0) && (counts.survey != 0))
+			if ((counts.assessment != 0) && (counts.survey != 0) && (assessment != null))
 			{
-				survey = Boolean.valueOf(this.part.getAssessment().getType() == AssessmentType.survey);
+				survey = Boolean.valueOf(assessment.getType() == AssessmentType.survey);
 			}
 
 			int size = 0;
@@ -309,8 +316,6 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 			}
 
 			// reduce by the number of picks from this pool in the assessment
-			Assessment assessment = this.assessment;
-			if ((assessment == null) && (this.part != null)) assessment = this.part.getAssessment();
 			if (assessment != null)
 			{
 				size -= ((AssessmentPartsImpl) assessment.getParts()).getQuestionPicksFromPool(pool, survey).size();
