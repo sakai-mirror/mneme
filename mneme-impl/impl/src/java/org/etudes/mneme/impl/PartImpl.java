@@ -436,31 +436,34 @@ public class PartImpl implements Part, Changeable
 	 */
 	public String getInvalidMessage()
 	{
-		Object[] args = new Object[1];
-		args[0] = this.getOrdering().getPosition().toString();
-
 		// we must have details
 		if (getDetails().isEmpty())
 		{
+			Object[] args = new Object[1];
+			args[0] = this.getOrdering().getPosition().toString();
 			return messages.getFormattedMessage("invalid-part-empty", args);
 		}
 
 		// each draw must have enough questions to draw
+		StringBuilder buf = new StringBuilder();
 		for (PartDetail detail : getDetails())
 		{
-			if (detail instanceof PoolDraw)
+			String msg = detail.getInvalidMessage();
+			if (msg != null)
 			{
-				PoolDraw draw = (PoolDraw) detail;
-				Pool pool = draw.getPool();
-				if (pool == null)
+				if (buf.length() > 0)
 				{
-					return messages.getFormattedMessage("invalid-draw-part-deleted-pool", args);
+					buf.append("; ");
 				}
-				if (draw.getPoolNumAvailableQuestions() < draw.getNumQuestions())
-				{
-					return messages.getFormattedMessage("invalid-draw-part-overdraw", args);
-				}
+				buf.append(msg);
 			}
+		}
+		if (buf.length() > 0)
+		{
+			Object[] args = new Object[2];
+			args[0] = this.getOrdering().getPosition().toString();
+			args[1] = buf.toString();
+			return messages.getFormattedMessage("invalid-part-details", args);
 		}
 
 		return null;
@@ -474,23 +477,10 @@ public class PartImpl implements Part, Changeable
 		// we must have details
 		if (getDetails().isEmpty()) return Boolean.FALSE;
 
-		// each draw must have enough questions in the pool to draw
+		// each detail must be valid
 		for (PartDetail detail : getDetails())
 		{
-			if (detail instanceof PoolDraw)
-			{
-				PoolDraw draw = (PoolDraw) detail;
-
-				Pool pool = draw.getPool();
-				if (pool == null)
-				{
-					return Boolean.FALSE;
-				}
-				if (draw.getPoolNumAvailableQuestions() < draw.getNumQuestions())
-				{
-					return Boolean.FALSE;
-				}
-			}
+			if (!detail.getIsValid()) return Boolean.FALSE;
 		}
 
 		return Boolean.TRUE;

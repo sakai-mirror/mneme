@@ -149,9 +149,12 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 	 */
 	public String getInvalidMessage()
 	{
-		if (getIsValid()) return null;
-		return "?";
-		// TODO:...
+		// we need a valid question
+		if (this.questionId == null) return ((PartImpl) this.part).messages.getFormattedMessage("invalid-detail-missing-question", null);
+		Question q = this.questionService.getQuestion(this.questionId);
+		if (q == null) return ((PartImpl) this.part).messages.getFormattedMessage("invalid-detail-missing-question", null);
+
+		return null;
 	}
 
 	/**

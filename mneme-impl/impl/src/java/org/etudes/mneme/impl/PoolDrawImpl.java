@@ -214,9 +214,23 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	 */
 	public String getInvalidMessage()
 	{
-		if (getIsValid()) return null;
-		return "?";
-		// TODO:...
+		// we need a valid pool and a positive count that is within the pool's question limit
+		if (this.poolId == null) return ((PartImpl) this.part).messages.getFormattedMessage("invalid-detail-missing-pool", null);
+		if (this.numQuestions == null) return ((PartImpl) this.part).messages.getFormattedMessage("invalid-detail-missing-count", null);
+		if (this.numQuestions.intValue() <= 0) return ((PartImpl) this.part).messages.getFormattedMessage("invalid-detail-missing-count", null);
+
+		Pool p = getPool();
+		if (p == null) return ((PartImpl) this.part).messages.getFormattedMessage("invalid-detail-missing-pool", null);
+
+		// each draw must have enough questions in the pool to draw
+		if (getPoolNumAvailableQuestions() < getNumQuestions())
+		{
+			Object[] args = new Object[1];
+			args[0] = p.getTitle();
+			return ((PartImpl) this.part).messages.getFormattedMessage("invalid-detail-overdraw", args);
+		}
+
+		return null;
 	}
 
 	/**
@@ -236,9 +250,15 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 		if (this.poolId == null) return Boolean.FALSE;
 		if (this.numQuestions == null) return Boolean.FALSE;
 		if (this.numQuestions.intValue() <= 0) return Boolean.FALSE;
-		// TODO: make sure the question count is valid for this test within the pool's current question count, considering manual picks...
+
 		Pool p = getPool();
 		if (p == null) return Boolean.FALSE;
+
+		// each draw must have enough questions in the pool to draw
+		if (getPoolNumAvailableQuestions() < getNumQuestions())
+		{
+			return Boolean.FALSE;
+		}
 
 		return Boolean.TRUE;
 	}
