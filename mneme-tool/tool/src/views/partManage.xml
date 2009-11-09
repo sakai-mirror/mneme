@@ -110,7 +110,11 @@
 									<included>
 										<decision reversed="TRUE" model="assessment.isLocked" />
 									</included>
-									<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" selector="confirm-delete" />
+									<confirm decision="TRUE" cancelSelector="cancel" cancelIcon="/icons/cancel.gif" >
+										<message selector="confirm-delete">
+											<model type="enum" messageRoot="assessment-type-" ref="assessment.type" />
+										</message>
+									</confirm>
 								</navigation>
 							</entityActions>
 						</selectionColumn>
