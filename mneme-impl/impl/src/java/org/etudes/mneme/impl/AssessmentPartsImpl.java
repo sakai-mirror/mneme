@@ -167,6 +167,28 @@ public class AssessmentPartsImpl implements AssessmentParts
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<PartDetail> getPhantomDetails()
+	{
+		List<PartDetail> rv = new ArrayList<PartDetail>();
+
+		for (Part part : getParts())
+		{
+			if (part.getDetails().isEmpty())
+			{
+				rv.add(new EmptyPartDetailImpl(part));
+			}
+			else
+			{
+				rv.addAll(part.getDetails());
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<PoolDraw> getDraws(final PoolService.FindPoolsSort sort)
 	{
 		List<PoolDraw> rv = new ArrayList<PoolDraw>();

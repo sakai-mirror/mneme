@@ -139,6 +139,14 @@ public interface AssessmentParts
 	List<Part> getParts();
 
 	/**
+	 * Access all the part details in a single ordered (by part and sequence) list.<br />
+	 * If a part is empty, include a phantom detail for it.
+	 * 
+	 * @return The list of all part details.
+	 */
+	List<PartDetail> getPhantomDetails();
+
+	/**
 	 * Access one of the questions, by question id.
 	 * 
 	 * @param questionId

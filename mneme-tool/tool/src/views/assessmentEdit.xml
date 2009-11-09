@@ -144,12 +144,12 @@
 					<title>
 						<message selector="questions" />
 					</title>
-					<iterator name="detail" model="assessment.parts.details" />
+					<iterator name="detail" model="assessment.parts.phantomDetails" />
 
 					<!-- part title -->
 					<headings>
 						<heading>
-							<decision model="detail.isFirst" />
+							<decision model="detail.ordering.isFirst" />
 							<navigation style="LINK">
 								<title>
 									<message selector="part-title">
@@ -173,6 +173,9 @@
 							<readOnly>
 								<decision model="assessment.isLocked" />
 							</readOnly>
+							<entityIncluded>
+								<decision reversed="TRUE" model="detail.isPhantom" />
+							</entityIncluded>
 							<model ref="ids.values" />
 							<!-- entity actions -->
 							<entityActions>
@@ -226,6 +229,9 @@
 							<title>
 								<message selector="part-order" />
 							</title>
+							<entityIncluded>
+								<decision reversed="TRUE" model="detail.isPhantom" />
+							</entityIncluded>
 							<container>
 								<selection orientation="DROPDOWN" height="1">
 									<model ref="detail.ordering.position" />
@@ -311,12 +317,18 @@
 							<title>
 								<message selector="detail-type" />
 							</title>
+							<entityIncluded>
+								<decision reversed="TRUE" model="detail.isPhantom" />
+							</entityIncluded>
 							<model ref="detail.type" />
 						</modelColumn>
 						<modelColumn>
 							<title>
 								<message selector="pool" />
 							</title>
+							<entityIncluded>
+								<decision reversed="TRUE" model="detail.isPhantom" />
+							</entityIncluded>
 							<model ref="detail.pool.title" type="text" missing="no-title" />
 						</modelColumn>
 						<modelColumn>

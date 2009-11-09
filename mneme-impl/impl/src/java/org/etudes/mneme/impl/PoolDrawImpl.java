@@ -41,6 +41,9 @@ import org.etudes.mneme.api.Shuffler;
  */
 public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 {
+	/** The assessment context. */
+	protected transient Assessment assessment = null;
+
 	/** The number of questions to draw from the pool. */
 	protected Integer numQuestions = null;
 
@@ -53,8 +56,31 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	/** Dependency: PoolService. */
 	protected PoolService poolService = null;
 
-	/** The assessment context. */
-	protected transient Assessment assessment = null;
+	/**
+	 * Construct.
+	 * 
+	 * @param assessment
+	 *        The assessment context.
+	 * @param part
+	 *        The part.
+	 * @param poolService
+	 *        The PoolService.
+	 * @param id
+	 *        the detail id.
+	 * @param pool
+	 *        The pool to draw from.
+	 * @param numQuestions
+	 *        The number of questions to draw.
+	 */
+	public PoolDrawImpl(Assessment assessment, Part part, PoolService poolService, Pool pool, Integer numQuestions)
+	{
+		this(part, poolService);
+		if (pool == null) throw new IllegalArgumentException();
+		this.assessment = assessment;
+		this.poolId = pool.getId();
+		this.origPoolId = pool.getId();
+		this.numQuestions = numQuestions;
+	}
 
 	/**
 	 * Construct.
@@ -82,32 +108,6 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	{
 		super(part);
 		this.poolService = poolService;
-	}
-
-	/**
-	 * Construct.
-	 * 
-	 * @param assessment
-	 *        The assessment context.
-	 * @param part
-	 *        The part.
-	 * @param poolService
-	 *        The PoolService.
-	 * @param id
-	 *        the detail id.
-	 * @param pool
-	 *        The pool to draw from.
-	 * @param numQuestions
-	 *        The number of questions to draw.
-	 */
-	public PoolDrawImpl(Assessment assessment, Part part, PoolService poolService, Pool pool, Integer numQuestions)
-	{
-		this(part, poolService);
-		if (pool == null) throw new IllegalArgumentException();
-		this.assessment = assessment;
-		this.poolId = pool.getId();
-		this.origPoolId = pool.getId();
-		this.numQuestions = numQuestions;
 	}
 
 	/**
@@ -231,6 +231,14 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 		}
 
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsPhantom()
+	{
+		return Boolean.FALSE;
 	}
 
 	/**

@@ -69,7 +69,6 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 	{
 		super(part);
 		if (questionService == null) throw new IllegalArgumentException();
-		this.part = part;
 		this.questionService = questionService;
 	}
 
@@ -155,6 +154,14 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 		if (q == null) return ((PartImpl) this.part).messages.getFormattedMessage("invalid-detail-missing-question", null);
 
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsPhantom()
+	{
+		return Boolean.FALSE;
 	}
 
 	/**

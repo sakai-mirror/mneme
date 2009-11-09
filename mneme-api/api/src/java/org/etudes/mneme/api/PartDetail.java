@@ -50,9 +50,9 @@ public interface PartDetail
 	String getInvalidMessage();
 
 	/**
-	 * @return TRUE if this detail is the first in the part, FALSE if not.
+	 * @return TRUE for phantom details, FALSE for real ones.
 	 */
-	Boolean getIsFirst();
+	Boolean getIsPhantom();
 
 	/**
 	 * @return True if the detail is specific to a question, false if it is general to a set of questions (i.e. a random draw).

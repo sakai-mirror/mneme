@@ -48,6 +48,7 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 		 */
 		public Boolean getIsFirst()
 		{
+			if (this.detail.getIsPhantom()) return Boolean.TRUE;
 			if (this.detail.part == null) return true;
 
 			if (this.detail.equals((this.detail.part.getDetails().get(0)))) return true;
@@ -60,6 +61,7 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 		 */
 		public Boolean getIsLast()
 		{
+			if (this.detail.getIsPhantom()) return Boolean.TRUE;
 			if (this.detail.part == null) return true;
 
 			if (this.detail.equals(this.detail.part.getDetails().get(this.detail.part.getDetails().size() - 1))) return true;
@@ -72,6 +74,7 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 		 */
 		public PartDetail getNext()
 		{
+			if (this.detail.getIsPhantom()) return null;
 			if (this.detail.part == null) return null;
 
 			int index = this.detail.part.getDetails().indexOf(detail);
@@ -85,6 +88,7 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 		 */
 		public Integer getPosition()
 		{
+			if (this.detail.getIsPhantom()) return null;
 			if (this.detail.part == null) return null;
 
 			int index = this.detail.part.getDetails().indexOf(detail);
@@ -110,6 +114,7 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 		 */
 		public PartDetail getPrevious()
 		{
+			if (this.detail.getIsPhantom()) return null;
 			if (this.detail.part == null) return null;
 
 			int index = this.detail.part.getDetails().indexOf(detail);
@@ -126,6 +131,7 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 		 */
 		public void setPosition(Integer pos)
 		{
+			if (this.detail.getIsPhantom()) return;
 			if (pos == null) return;
 
 			int curPos = getPosition().intValue();
@@ -199,16 +205,6 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getIsFirst()
-	{
-		if (this.part == null) return Boolean.FALSE;
-
-		return (this.part.getDetails().get(0) == this) ? Boolean.TRUE : Boolean.FALSE;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Ordering<PartDetail> getOrdering()
 	{
 		return this.ordering;
@@ -227,6 +223,8 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 	 */
 	public void setChanged()
 	{
+		if (getIsPhantom()) return;
+
 		this.changed = true;
 		if (this.part != null)
 		{
