@@ -661,8 +661,36 @@ public class QuestionServiceImpl implements QuestionService
 	{
 		if (((QuestionImpl) question).getIsHistorical()) throw new IllegalArgumentException();
 
-		// change the question type - preserve any data we can
-		setType(newType, (QuestionImpl) question);
+		// if there is really a type change
+		if (!question.getType().equals(newType))
+		{
+			// special cases
+			TypeSpecificQuestion oldHandler = question.getTypeSpecificQuestion();
+
+			// fillin's question text is not in the presentation
+			String presentationText = null;
+			if (oldHandler instanceof FillBlanksQuestionImpl)
+			{
+				presentationText = ((FillBlanksQuestionImpl) oldHandler).getText();
+			}
+
+			// change the question type - preserve any data we can
+			setType(newType, (QuestionImpl) question);
+
+			// special cases
+			TypeSpecificQuestion newHandler = question.getTypeSpecificQuestion();
+
+			// fillin's question text is not in the presentation
+			if (newHandler instanceof FillBlanksQuestionImpl)
+			{
+				((FillBlanksQuestionImpl) newHandler).setText(question.getPresentation().getText());
+				question.getPresentation().setText(null);
+			}
+			else if (oldHandler instanceof FillBlanksQuestionImpl)
+			{
+				question.getPresentation().setText(presentationText);
+			}
+		}
 
 		// save, but don't clear mint
 		saveTheQuestion(question, false);

@@ -295,6 +295,9 @@
 									<included>
 										<decision model="detail.isSpecific" />
 									</included>
+									<disabled>
+										<decision model="assessment.isLocked" />
+									</disabled>
 									<destination template="/question_edit/{0}/{2}/{3}/assessment_edit/{1}/{2}">
 										<model ref="detail.questionId" />
 										<model ref="sortcode" />
