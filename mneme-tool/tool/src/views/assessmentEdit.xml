@@ -295,7 +295,7 @@
 							<title>
 								<message selector="description" />
 							</title>
-							<model ref="detail.description" type="text" missing="random-draw-description" stripHtml="TRUE" max="60" />
+							<model ref="detail.description" type="html" max="60" />
 							<entityNavigations>
 								<navigation submit="TRUE">
 									<included>

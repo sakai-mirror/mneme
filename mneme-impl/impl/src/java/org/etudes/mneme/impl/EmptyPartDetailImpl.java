@@ -80,8 +80,7 @@ public class EmptyPartDetailImpl extends PartDetailImpl implements PartDetail
 	 */
 	public String getDescription()
 	{
-		// TODO: message
-		return "empty part";
+		return ((PartImpl) this.part).messages.getFormattedMessage("phantom-description", null);
 	}
 
 	/**

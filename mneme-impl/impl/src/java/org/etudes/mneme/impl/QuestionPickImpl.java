@@ -28,6 +28,7 @@ import org.etudes.mneme.api.Pool;
 import org.etudes.mneme.api.Question;
 import org.etudes.mneme.api.QuestionPick;
 import org.etudes.mneme.api.QuestionService;
+import org.sakaiproject.util.FormattedText;
 
 /**
  * QuestionPickImpl implements QuestionPick.
@@ -140,7 +141,12 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 		// use the question description
 		Question q = this.questionService.getQuestion(this.questionId);
 		if (q == null) return "?";
-		return q.getDescription();
+
+		// String html
+		String value = FormattedText.convertFormattedTextToPlaintext(q.getDescription());
+		value = value.replace("\n", " ");
+
+		return value;
 	}
 
 	/**

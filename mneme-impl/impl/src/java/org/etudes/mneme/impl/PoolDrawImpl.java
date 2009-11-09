@@ -203,10 +203,7 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	 */
 	public String getDescription()
 	{
-		// use the pool description
-		Pool pool = this.poolService.getPool(this.origPoolId);
-		if (pool == null) return "?";
-		return pool.getDescription();
+		return ((PartImpl) this.part).messages.getFormattedMessage("random-draw-description", null);
 	}
 
 	/**
@@ -377,9 +374,7 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	 */
 	public String getType()
 	{
-		// use the constant "draw"
-		// TODO: need a message bundle
-		return "<i>draw</i>";
+		return ((PartImpl) this.part).messages.getFormattedMessage("random-draw-type", null);
 	}
 
 	/**
