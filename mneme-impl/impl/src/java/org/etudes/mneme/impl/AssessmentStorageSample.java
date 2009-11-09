@@ -537,6 +537,11 @@ public class AssessmentStorageSample implements AssessmentStorage
 		for (Part part : assessment.getParts().getParts())
 		{
 			((PartImpl) part).clearChanged();
+			((PartImpl) part).clearDeleted();
+			for (PartDetail detail : part.getDetails())
+			{
+				((PartDetailImpl) detail).clearChanged();
+			}
 		}
 		((AssessmentPartsImpl) assessment.getParts()).clearDeleted();
 
@@ -585,6 +590,8 @@ public class AssessmentStorageSample implements AssessmentStorage
 				((AssessmentAccessImpl) access).initId("x" + Long.toString(id));
 			}
 		}
+
+		// TODO: assign part deatil ids
 
 		// save a copy
 		AssessmentImpl copy = new AssessmentImpl(assessment);

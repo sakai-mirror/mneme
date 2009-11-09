@@ -112,7 +112,7 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 	 * @param assessment
 	 *        The assessment.
 	 */
-	protected void insertAssessmentPartDetailTx(AssessmentImpl assessment, Part part)
+	protected void insertAssessmentPartDetailTx(AssessmentImpl assessment, PartImpl part, PartDetailImpl detail)
 	{
 		// get the next id
 		Long id = this.sqlService.getNextSequence("MNEME_ASSESSMENT_DETAIL_SEQ", null);
@@ -125,47 +125,41 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 		Object[] fields = new Object[9];
 		fields[0] = id;
 		fields[1] = Long.valueOf(assessment.getId());
+		int i = 2;
 
-		int seq = 0;
-		for (PartDetail detail : part.getDetails())
+		if (detail instanceof QuestionPick)
 		{
-			seq++;
-			int i = 2;
+			QuestionPick pick = (QuestionPick) detail;
 
-			if (detail instanceof QuestionPick)
-			{
-				QuestionPick pick = (QuestionPick) detail;
-
-				fields[i++] = Integer.valueOf(1);
-				fields[i++] = null;
-				fields[i++] = (pick.getOrigQuestionId() == null) ? null : Long.valueOf(pick.getOrigQuestionId());
-				fields[i++] = Long.valueOf(part.getId());
-				fields[i++] = null;
-				fields[i++] = Long.valueOf(pick.getQuestionId());
-				fields[i++] = Integer.valueOf(seq);
-			}
-
-			else if (detail instanceof PoolDraw)
-			{
-				PoolDraw draw = (PoolDraw) detail;
-
-				fields[i++] = Integer.valueOf(draw.getNumQuestions());
-				fields[i++] = draw.getOrigPoolId() == null ? null : Long.valueOf(draw.getOrigPoolId());
-				fields[i++] = null;
-				fields[i++] = Long.valueOf(part.getId());
-				fields[i++] = Long.valueOf(draw.getPoolId());
-				fields[i++] = null;
-				fields[i++] = Integer.valueOf(seq);
-			}
-
-			if (!this.sqlService.dbWrite(null, sql.toString(), fields))
-			{
-				throw new RuntimeException("insertAssessmentPartDetailTx: dbWrite failed");
-			}
-
-			// set the detail's id
-			((PartDetailImpl) detail).initId(id.toString());
+			fields[i++] = Integer.valueOf(1);
+			fields[i++] = null;
+			fields[i++] = (pick.getOrigQuestionId() == null) ? null : Long.valueOf(pick.getOrigQuestionId());
+			fields[i++] = Long.valueOf(part.getId());
+			fields[i++] = null;
+			fields[i++] = Long.valueOf(pick.getQuestionId());
+			fields[i++] = Integer.valueOf(((PartDetailImpl) detail).getSeq());
 		}
+
+		else if (detail instanceof PoolDraw)
+		{
+			PoolDraw draw = (PoolDraw) detail;
+
+			fields[i++] = Integer.valueOf(draw.getNumQuestions());
+			fields[i++] = draw.getOrigPoolId() == null ? null : Long.valueOf(draw.getOrigPoolId());
+			fields[i++] = null;
+			fields[i++] = Long.valueOf(part.getId());
+			fields[i++] = Long.valueOf(draw.getPoolId());
+			fields[i++] = null;
+			fields[i++] = Integer.valueOf(((PartDetailImpl) detail).getSeq());
+		}
+
+		if (!this.sqlService.dbWrite(null, sql.toString(), fields))
+		{
+			throw new RuntimeException("insertAssessmentPartDetailTx: dbWrite failed");
+		}
+
+		// set the detail's id
+		((PartDetailImpl) detail).initId(id.toString());
 	}
 
 	/**
@@ -203,8 +197,11 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 		// set the part's id
 		((PartImpl) part).initId(id.toString());
 
-		// part draw-pick
-		insertAssessmentPartDetailTx(assessment, part);
+		// part details
+		for (PartDetail detail : part.getDetails())
+		{
+			insertAssessmentPartDetailTx(assessment, (PartImpl) part, (PartDetailImpl) detail);
+		}
 	}
 
 	/**

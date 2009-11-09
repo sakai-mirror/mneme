@@ -243,6 +243,27 @@ public class PartImpl implements Part, Changeable
 	/** List of part details. */
 	List<PartDetail> details = new ArrayList<PartDetail>();
 
+	/** Keep track of deleted details. */
+	protected List<PartDetail> deletedDetails = new ArrayList<PartDetail>();
+
+	/**
+	 * Clear the deleted details.
+	 */
+	protected void clearDeleted()
+	{
+		this.deletedDetails.clear();
+	}
+
+	/**
+	 * Access the deleted details.
+	 * 
+	 * @return The List of deleted details.
+	 */
+	protected List<PartDetail> getDeleted()
+	{
+		return this.deletedDetails;
+	}
+
 	/**
 	 * Construct.
 	 * 
@@ -677,6 +698,7 @@ public class PartImpl implements Part, Changeable
 			if (id.equals(detail.getId()))
 			{
 				i.remove();
+				this.deletedDetails.add(detail);
 			}
 		}
 
@@ -701,6 +723,7 @@ public class PartImpl implements Part, Changeable
 				if (draw.getPoolId().equals(pool.getId()))
 				{
 					i.remove();
+					this.deletedDetails.add(detail);
 				}
 			}
 		}
@@ -726,6 +749,7 @@ public class PartImpl implements Part, Changeable
 				if (pick.getQuestionId().equals(question.getId()))
 				{
 					i.remove();
+					this.deletedDetails.add(detail);
 				}
 			}
 		}
@@ -881,11 +905,13 @@ public class PartImpl implements Part, Changeable
 	 *        The origPoolId value
 	 * @param numQuestions
 	 *        The number of questions.
+	 * @return the new part detail.
 	 */
-	protected void initDraw(String id, String poolId, String origPoolId, Integer numQuestions)
+	protected PartDetail initDraw(String id, String poolId, String origPoolId, Integer numQuestions)
 	{
 		PoolDraw draw = new PoolDrawImpl(this, this.poolService, id, poolId, origPoolId, numQuestions);
 		getDetails().add(draw);
+		return draw;
 	}
 
 	/**
@@ -908,11 +934,13 @@ public class PartImpl implements Part, Changeable
 	 *        The questionId value.
 	 * @param origQuestionId
 	 *        The origQuestionId value
+	 * @return the new part detail.
 	 */
-	protected void initPick(String id, String questionId, String origQuestionId)
+	protected PartDetail initPick(String id, String questionId, String origQuestionId)
 	{
 		QuestionPick pick = new QuestionPickImpl(this, this.questionService, id, questionId, origQuestionId);
 		getDetails().add(pick);
+		return pick;
 	}
 
 	/**

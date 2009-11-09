@@ -135,8 +135,11 @@ public class AssessmentStorageMysql extends AssessmentStorageSql implements Asse
 		// set the part's id
 		((PartImpl) part).initId(id.toString());
 
-		// part draw-pick
-		insertAssessmentPartDetailTx(assessment, part);
+		// part details
+		for (PartDetail detail : part.getDetails())
+		{
+			insertAssessmentPartDetailTx(assessment, (PartImpl) part, (PartDetailImpl) detail);
+		}
 	}
 
 	/**
@@ -227,7 +230,7 @@ public class AssessmentStorageMysql extends AssessmentStorageSql implements Asse
 	 * @param assessment
 	 *        The assessment.
 	 */
-	protected void insertAssessmentPartDetailTx(AssessmentImpl assessment, Part part)
+	protected void insertAssessmentPartDetailTx(AssessmentImpl assessment, PartImpl part, PartDetailImpl detail)
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_ASSESSMENT_PART_DETAIL (");
@@ -235,49 +238,43 @@ public class AssessmentStorageMysql extends AssessmentStorageSql implements Asse
 		sql.append(" VALUES(?,?,?,?,?,?,?,?)");
 
 		Object[] fields = new Object[8];
-		fields[0] = Long.valueOf(assessment.getId());
+		int i = 0;
+		fields[i++] = Long.valueOf(assessment.getId());
 
-		int seq = 0;
-		for (PartDetail detail : part.getDetails())
+		if (detail instanceof QuestionPick)
 		{
-			seq++;
-			int i = 1;
+			QuestionPick pick = (QuestionPick) detail;
 
-			if (detail instanceof QuestionPick)
-			{
-				QuestionPick pick = (QuestionPick) detail;
-
-				fields[i++] = Integer.valueOf(1);
-				fields[i++] = null;
-				fields[i++] = (pick.getOrigQuestionId() == null) ? null : Long.valueOf(pick.getOrigQuestionId());
-				fields[i++] = Long.valueOf(part.getId());
-				fields[i++] = null;
-				fields[i++] = Long.valueOf(pick.getQuestionId());
-				fields[i++] = Integer.valueOf(seq);
-			}
-
-			else if (detail instanceof PoolDraw)
-			{
-				PoolDraw draw = (PoolDraw) detail;
-
-				fields[i++] = Integer.valueOf(draw.getNumQuestions());
-				fields[i++] = draw.getOrigPoolId() == null ? null : Long.valueOf(draw.getOrigPoolId());
-				fields[i++] = null;
-				fields[i++] = Long.valueOf(part.getId());
-				fields[i++] = Long.valueOf(draw.getPoolId());
-				fields[i++] = null;
-				fields[i++] = Integer.valueOf(seq);
-			}
-
-			Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
-			if (id == null)
-			{
-				throw new RuntimeException("insertAssessmentPartDetailTx: dbInsert failed");
-			}
-
-			// set the detail's id
-			((PartDetailImpl) detail).initId(id.toString());
+			fields[i++] = Integer.valueOf(1);
+			fields[i++] = null;
+			fields[i++] = (pick.getOrigQuestionId() == null) ? null : Long.valueOf(pick.getOrigQuestionId());
+			fields[i++] = Long.valueOf(part.getId());
+			fields[i++] = null;
+			fields[i++] = Long.valueOf(pick.getQuestionId());
+			fields[i++] = Integer.valueOf(((PartDetailImpl) detail).getSeq());
 		}
+
+		else if (detail instanceof PoolDraw)
+		{
+			PoolDraw draw = (PoolDraw) detail;
+
+			fields[i++] = Integer.valueOf(draw.getNumQuestions());
+			fields[i++] = draw.getOrigPoolId() == null ? null : Long.valueOf(draw.getOrigPoolId());
+			fields[i++] = null;
+			fields[i++] = Long.valueOf(part.getId());
+			fields[i++] = Long.valueOf(draw.getPoolId());
+			fields[i++] = null;
+			fields[i++] = Integer.valueOf(((PartDetailImpl) detail).getSeq());
+		}
+
+		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");
+		if (id == null)
+		{
+			throw new RuntimeException("insertAssessmentPartDetailTx: dbInsert failed");
+		}
+
+		// set the detail's id
+		((PartDetailImpl) detail).initId(id.toString());
 	}
 
 	/**

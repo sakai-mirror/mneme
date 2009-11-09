@@ -24,6 +24,7 @@ package org.etudes.mneme.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.etudes.mneme.api.Changeable;
 import org.etudes.mneme.api.Ordering;
 import org.etudes.mneme.api.Part;
 import org.etudes.mneme.api.PartDetail;
@@ -31,7 +32,7 @@ import org.etudes.mneme.api.PartDetail;
 /**
  * PartDetailImpl implements PartDetail
  */
-public abstract class PartDetailImpl implements PartDetail
+public abstract class PartDetailImpl implements PartDetail, Changeable
 {
 	public class MyOrdering implements Ordering<PartDetail>
 	{
@@ -142,10 +143,11 @@ public abstract class PartDetailImpl implements PartDetail
 
 			// this is a change that cannot be made to live tests
 			((AssessmentImpl) this.detail.part.getAssessment()).lockedChanged = Boolean.TRUE;
-
-			((PartImpl) this.detail.part).owner.setChanged();
 		}
 	}
+
+	/** True if I've been changed. */
+	protected boolean changed = false;
 
 	/** Part detail id. */
 	protected String id = null;
@@ -156,6 +158,9 @@ public abstract class PartDetailImpl implements PartDetail
 	/** The part context for this draw. */
 	protected transient Part part = null;
 
+	/** The sequence in the part at the time this was read (-1 if not set). Note: the actual sequence is the detail's position in the part's details list. */
+	protected transient int seq = -1;
+
 	/**
 	 * Construct.
 	 * 
@@ -165,6 +170,22 @@ public abstract class PartDetailImpl implements PartDetail
 	public PartDetailImpl(Part part)
 	{
 		this.part = part;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void clearChanged()
+	{
+		this.changed = false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getChanged()
+	{
+		return this.changed;
 	}
 
 	/**
@@ -202,6 +223,26 @@ public abstract class PartDetailImpl implements PartDetail
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public void setChanged()
+	{
+		this.changed = true;
+		if (this.part != null)
+		{
+			((PartImpl) this.part).setChanged();
+		}
+	}
+
+	/**
+	 * @return the as-read part sequence.
+	 */
+	protected int getSeq()
+	{
+		return this.seq;
+	}
+
+	/**
 	 * Initialize the detail id.
 	 * 
 	 * @param id
@@ -224,6 +265,17 @@ public abstract class PartDetailImpl implements PartDetail
 	}
 
 	/**
+	 * Initialize the as-read part sequence.
+	 * 
+	 * @param seq
+	 *        The sequence number.
+	 */
+	protected void initSeq(int seq)
+	{
+		this.seq = seq;
+	}
+
+	/**
 	 * Set as a copy of another.
 	 * 
 	 * @param other
@@ -232,5 +284,6 @@ public abstract class PartDetailImpl implements PartDetail
 	protected void set(PartDetailImpl other)
 	{
 		this.id = other.id;
+		this.seq = other.seq;
 	}
 }

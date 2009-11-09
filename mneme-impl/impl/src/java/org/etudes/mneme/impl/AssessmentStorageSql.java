@@ -41,10 +41,13 @@ import org.etudes.mneme.api.AssessmentAccess;
 import org.etudes.mneme.api.AssessmentService;
 import org.etudes.mneme.api.AssessmentType;
 import org.etudes.mneme.api.Part;
+import org.etudes.mneme.api.PartDetail;
 import org.etudes.mneme.api.Pool;
+import org.etudes.mneme.api.PoolDraw;
 import org.etudes.mneme.api.PoolService;
 import org.etudes.mneme.api.Question;
 import org.etudes.mneme.api.QuestionGrouping;
+import org.etudes.mneme.api.QuestionPick;
 import org.etudes.mneme.api.QuestionService;
 import org.etudes.mneme.api.ReviewShowCorrect;
 import org.etudes.mneme.api.ReviewTiming;
@@ -374,6 +377,9 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	 */
 	public void saveAssessment(AssessmentImpl assessment)
 	{
+		// set the part detail sequences
+		((AssessmentPartsImpl) assessment.getParts()).setDetailSeq();
+
 		// for new assessments
 		if (assessment.getId() == null)
 		{
@@ -386,7 +392,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 			updateAssessment(assessment);
 		}
 
-		// clear changed
+		// clear changed flags and deleted lists
 		assessment.clearChanged();
 		for (AssessmentAccess access : assessment.getSpecialAccess().getAccess())
 		{
@@ -397,6 +403,11 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		for (Part part : assessment.getParts().getParts())
 		{
 			((PartImpl) part).clearChanged();
+			((PartImpl) part).clearDeleted();
+			for (PartDetail detail : part.getDetails())
+			{
+				((PartDetailImpl) detail).clearChanged();
+			}
 		}
 		((AssessmentPartsImpl) assessment.getParts()).clearDeleted();
 	}
@@ -614,7 +625,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
-			throw new RuntimeException("deleteAssessmentDrawPickTx(assessment): db write failed");
+			throw new RuntimeException("deleteAssessmentPartDetailTx(assessment): db write failed");
 		}
 	}
 
@@ -635,7 +646,28 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
 		{
-			throw new RuntimeException("deleteAssessmentDrawPickTx(part): db write failed");
+			throw new RuntimeException("deleteAssessmentPartDetailTx(part): db write failed");
+		}
+	}
+
+	/**
+	 * Delete a detail record (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void deleteAssessmentPartDetailTx(PartDetail detail)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM MNEME_ASSESSMENT_PART_DETAIL");
+		sql.append(" WHERE ID=?");
+
+		Object[] fields = new Object[1];
+		fields[0] = Long.valueOf(detail.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("deleteAssessmentPartDetailTx(detail): db write failed");
 		}
 	}
 
@@ -745,8 +777,12 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	 * 
 	 * @param assessment
 	 *        The assessment.
+	 * @param part
+	 *        The part.
+	 * @param detail
+	 *        The detail.
 	 */
-	protected abstract void insertAssessmentPartDetailTx(AssessmentImpl assessment, Part part);
+	protected abstract void insertAssessmentPartDetailTx(AssessmentImpl assessment, PartImpl part, PartDetailImpl deatil);
 
 	/**
 	 * Insert a new assessment's parts (transaction code).
@@ -912,7 +948,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 					String type = result.getString(5);
 					Part part = a.getParts().addPart();
 					part.setRandomize(SqlHelper.readBoolean(result, 6));
-					
+
 					// old types M and D were not setting randomize - D should be random, M not
 					if ("M".equals(type))
 					{
@@ -942,7 +978,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		// read all the part details for these assessments
 		sql = new StringBuilder();
 		sql.append("SELECT P.ASSESSMENT_ID, P.NUM_QUESTIONS_SEQ, P.ORIG_PID, P.ORIG_QID, P.PART_ID,");
-		sql.append(" P.POOL_ID, P.QUESTION_ID, P.ID");
+		sql.append(" P.POOL_ID, P.QUESTION_ID, P.ID, P.SEQ");
 		sql.append(" FROM MNEME_ASSESSMENT_PART_DETAIL P");
 		sql.append(" JOIN MNEME_ASSESSMENT A ON P.ASSESSMENT_ID=A.ID ");
 		sql.append(where);
@@ -964,17 +1000,23 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 					String poolId = SqlHelper.readId(result, 6);
 					String questionId = SqlHelper.readId(result, 7);
 					String detailId = SqlHelper.readId(result, 8);
+					Integer seq = SqlHelper.readInteger(result, 9);
+					PartDetail detail = null;
 					if (questionId != null)
 					{
-						((PartImpl) p).initPick(detailId, questionId, origQid);
+						detail = ((PartImpl) p).initPick(detailId, questionId, origQid);
 					}
 					else if (poolId != null)
 					{
-						((PartImpl) p).initDraw(detailId, poolId, origPoolId, numQuestions);
+						detail = ((PartImpl) p).initDraw(detailId, poolId, origPoolId, numQuestions);
 					}
 					else
 					{
 						M_log.warn("no pool no question: part: " + pid);
+					}
+					if (detail != null)
+					{
+						((PartDetailImpl) detail).initSeq(seq.intValue());
 					}
 
 					return null;
@@ -1128,6 +1170,60 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	}
 
 	/**
+	 * Update an existing assessment access record (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param part
+	 * @param detail
+	 */
+	protected void updateAssessmentPartDetailTx(AssessmentImpl assessment, PartImpl part, PartDetailImpl detail)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL SET");
+		sql.append(" ASSESSMENT_ID=?, NUM_QUESTIONS_SEQ=?, ORIG_PID=?,");
+		sql.append(" ORIG_QID=?, PART_ID=?, POOL_ID=?, QUESTION_ID=?, SEQ=?");
+		sql.append(" WHERE ID=?");
+
+		Object[] fields = new Object[9];
+		int i = 0;
+		fields[i++] = Long.valueOf(assessment.getId());
+
+		if (detail instanceof QuestionPick)
+		{
+			QuestionPick pick = (QuestionPick) detail;
+
+			fields[i++] = Integer.valueOf(1);
+			fields[i++] = null;
+			fields[i++] = (pick.getOrigQuestionId() == null) ? null : Long.valueOf(pick.getOrigQuestionId());
+			fields[i++] = Long.valueOf(part.getId());
+			fields[i++] = null;
+			fields[i++] = Long.valueOf(pick.getQuestionId());
+			fields[i++] = Integer.valueOf(((PartDetailImpl) detail).getSeq());
+		}
+
+		else if (detail instanceof PoolDraw)
+		{
+			PoolDraw draw = (PoolDraw) detail;
+
+			fields[i++] = Integer.valueOf(draw.getNumQuestions());
+			fields[i++] = draw.getOrigPoolId() == null ? null : Long.valueOf(draw.getOrigPoolId());
+			fields[i++] = null;
+			fields[i++] = Long.valueOf(part.getId());
+			fields[i++] = Long.valueOf(draw.getPoolId());
+			fields[i++] = null;
+			fields[i++] = Integer.valueOf(((PartDetailImpl) detail).getSeq());
+		}
+
+		fields[i++] = Long.valueOf(detail.getId());
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("updateAssessmentPartDetailTx: dbInsert failed");
+		}
+	}
+
+	/**
 	 * Update an assessment part (transaction code).
 	 * 
 	 * @param part
@@ -1135,9 +1231,6 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	 */
 	protected void updateAssessmentPartTx(AssessmentImpl assessment, Part part)
 	{
-		// delete the old part pick-draw
-		deleteAssessmentPartDetailTx(part);
-
 		StringBuilder sql = new StringBuilder();
 		sql.append("UPDATE MNEME_ASSESSMENT_PART SET");
 		sql.append(" PRESENTATION_TEXT=?, SEQUENCE=?, TITLE=?, RANDOMIZE=?, TYPE=?");
@@ -1156,8 +1249,22 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 			throw new RuntimeException("updateAssessmentPartTx: dbInsert failed");
 		}
 
-		// insert the new part draw-pick
-		insertAssessmentPartDetailTx(assessment, part);
+		// details
+		for (PartDetail detail : part.getDetails())
+		{
+			if (detail.getId() == null)
+			{
+				insertAssessmentPartDetailTx(assessment, (PartImpl) part, (PartDetailImpl) detail);
+			}
+			else if (((PartDetailImpl) detail).getChanged())
+			{
+				updateAssessmentPartDetailTx(assessment, (PartImpl) part, (PartDetailImpl) detail);
+			}
+		}
+		for (PartDetail detail : ((PartImpl) part).getDeleted())
+		{
+			deleteAssessmentPartDetailTx(detail);
+		}
 	}
 
 	/**

@@ -522,13 +522,23 @@ public class AssessmentPartsImpl implements AssessmentParts
 			// if it is in the desired part already
 			if (detail.getPart() == destination) continue;
 
-			// remove it
+			// remove it - but not so it gets deleted
 			((PartImpl) detail.getPart()).setChanged();
-			detail.getPart().removeDetail(detailId);
+			for (Iterator<PartDetail> i = detail.getPart().getDetails().iterator(); i.hasNext();)
+			{
+				PartDetail d = i.next();
+				if (d == detail)
+				{
+					i.remove();
+					break;
+				}
+			}
 
 			// add it
 			((PartImpl) destination).setChanged();
 			destination.getDetails().add(detail);
+
+			((PartDetailImpl) detail).setChanged();
 		}
 
 		// this is a change that cannot be made to live tests
@@ -807,6 +817,26 @@ public class AssessmentPartsImpl implements AssessmentParts
 			newPart.initContainer(this.parts);
 			newPart.initAssessment(this.assessment);
 			this.parts.add(newPart);
+		}
+	}
+
+	/**
+	 * Update the sequence numbers for all the parts' details.
+	 */
+	protected void setDetailSeq()
+	{
+		for (Part part : this.parts)
+		{
+			int seq = 1;
+			for (PartDetail detail : part.getDetails())
+			{
+				if (((PartDetailImpl) detail).getSeq() != seq)
+				{
+					((PartDetailImpl) detail).initSeq(seq);
+					((PartDetailImpl) detail).setChanged();
+				}
+				seq++;
+			}
 		}
 	}
 }

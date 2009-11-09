@@ -407,6 +407,8 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 
 		// set it
 		this.poolId = this.origPoolId;
+		setChanged();
+
 		return true;
 	}
 
@@ -415,7 +417,10 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	 */
 	public void setNumQuestions(Integer numQuestions)
 	{
+		if (!Different.different(numQuestions, this.numQuestions)) return;
+
 		this.numQuestions = numQuestions;
+		setChanged();
 	}
 
 	/**
@@ -424,6 +429,8 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	public void setPool(Pool pool)
 	{
 		if (pool == null) throw new IllegalArgumentException();
+		if (!Different.different(pool.getId(), this.poolId)) return;
+
 		this.poolId = pool.getId();
 
 		// set the original only once
@@ -431,6 +438,8 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 		{
 			this.origPoolId = pool.getId();
 		}
+
+		setChanged();
 	}
 
 	/**

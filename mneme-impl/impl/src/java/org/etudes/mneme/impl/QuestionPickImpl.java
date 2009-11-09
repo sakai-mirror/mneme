@@ -292,6 +292,8 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 
 		// restore
 		this.questionId = this.origQuestionId;
+		setChanged();
+
 		return true;
 	}
 
@@ -300,6 +302,9 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 	 */
 	public void setQuestionId(String questionId)
 	{
+		if (questionId == null) throw new IllegalArgumentException();
+		if (!Different.different(questionId, this.questionId)) return;
+
 		this.questionId = questionId;
 
 		// set the original only once
@@ -307,6 +312,8 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 		{
 			this.origQuestionId = questionId;
 		}
+
+		setChanged();
 	}
 
 	/**
