@@ -446,13 +446,31 @@ public class AssessmentImpl implements Assessment
 	 */
 	public Pool getPool()
 	{
+		// see if the pool has been deleted - if so we will make a new one
+		if (this.poolId != null)
+		{
+			Pool pool = this.poolService.getPool(this.poolId);
+			if (pool == null)
+			{
+				this.poolId = null;
+			}
+		}
+		
 		if (this.poolId == null)
 		{
 			try
 			{
 				Pool pool = this.poolService.newPool(this.context);
 				this.poolId = pool.getId();
-				pool.setTitle(this.title);
+				if (this.title.length() > 0)
+				{
+					pool.setTitle(this.title);
+				}
+				// Note: if we don't set a >0 length title, the pool will have no changes, remain mint and disappear
+				else
+				{
+					pool.setTitle(this.messages.getFormattedMessage("assessment-pool", null));
+				}
 				this.poolService.savePool(pool);
 				this.changed.setChanged();
 			}

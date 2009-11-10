@@ -73,7 +73,7 @@
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="invalid-alt">
 							<icon icon="/icons/warning.png" style="LEFT" />
-							<destination template="/question_edit/{5}/pool_edit/{0}/{1}/{2}{3}/{4}">
+							<destination template="/question_edit/{5}/0/0/pool_edit/{0}/{1}/{2}{3}/{4}">
 								<model ref="poolsSortCode" />
 								<model ref="pool.id" />
 								<model ref="sort_column" />
