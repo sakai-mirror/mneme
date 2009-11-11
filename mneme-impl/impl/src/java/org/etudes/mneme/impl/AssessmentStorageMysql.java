@@ -234,10 +234,10 @@ public class AssessmentStorageMysql extends AssessmentStorageSql implements Asse
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_ASSESSMENT_PART_DETAIL (");
-		sql.append(" ASSESSMENT_ID, NUM_QUESTIONS_SEQ, ORIG_PID, ORIG_QID, PART_ID, POOL_ID, QUESTION_ID, SEQ)");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?)");
+		sql.append(" ASSESSMENT_ID, NUM_QUESTIONS_SEQ, ORIG_PID, ORIG_QID, PART_ID, POOL_ID, QUESTION_ID, SEQ, POINTS)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[8];
+		Object[] fields = new Object[9];
 		int i = 0;
 		fields[i++] = Long.valueOf(assessment.getId());
 
@@ -252,6 +252,7 @@ public class AssessmentStorageMysql extends AssessmentStorageSql implements Asse
 			fields[i++] = null;
 			fields[i++] = Long.valueOf(pick.getQuestionId());
 			fields[i++] = Integer.valueOf(((PartDetailImpl) detail).getSeq());
+			fields[i++] = detail.getPoints();
 		}
 
 		else if (detail instanceof PoolDraw)
@@ -265,6 +266,7 @@ public class AssessmentStorageMysql extends AssessmentStorageSql implements Asse
 			fields[i++] = Long.valueOf(draw.getPoolId());
 			fields[i++] = null;
 			fields[i++] = Integer.valueOf(((PartDetailImpl) detail).getSeq());
+			fields[i++] = detail.getPoints();
 		}
 
 		Long id = this.sqlService.dbInsert(null, sql.toString(), fields, "ID");

@@ -119,10 +119,10 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO MNEME_ASSESSMENT_PART_DETAIL (ID,");
-		sql.append(" ASSESSMENT_ID, NUM_QUESTIONS_SEQ, ORIG_PID, ORIG_QID, PART_ID, POOL_ID, QUESTION_ID, SEQ)");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?)");
+		sql.append(" ASSESSMENT_ID, NUM_QUESTIONS_SEQ, ORIG_PID, ORIG_QID, PART_ID, POOL_ID, QUESTION_ID, SEQ, POINTS)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[9];
+		Object[] fields = new Object[10];
 		fields[0] = id;
 		fields[1] = Long.valueOf(assessment.getId());
 		int i = 2;
@@ -138,6 +138,7 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 			fields[i++] = null;
 			fields[i++] = Long.valueOf(pick.getQuestionId());
 			fields[i++] = Integer.valueOf(((PartDetailImpl) detail).getSeq());
+			fields[i++] = detail.getPoints();
 		}
 
 		else if (detail instanceof PoolDraw)
@@ -151,6 +152,7 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 			fields[i++] = Long.valueOf(draw.getPoolId());
 			fields[i++] = null;
 			fields[i++] = Integer.valueOf(((PartDetailImpl) detail).getSeq());
+			fields[i++] = detail.getPoints();
 		}
 
 		if (!this.sqlService.dbWrite(null, sql.toString(), fields))
