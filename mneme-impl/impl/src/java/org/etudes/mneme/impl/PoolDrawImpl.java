@@ -277,6 +277,21 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	/**
 	 * {@inheritDoc}
 	 */
+	public Float getNonOverridePoints()
+	{
+		if ((this.numQuestions == null) || (this.numQuestions == 0)) return Float.valueOf(0);
+
+		// pool's point value * num questions
+		Pool pool = this.poolService.getPool(this.origPoolId);
+		if (pool == null) return Float.valueOf(0);
+
+		float poolPoints = pool.getPoints().floatValue();
+		return Float.valueOf(poolPoints * this.numQuestions.intValue());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer getNumQuestions()
 	{
 		return this.numQuestions;
@@ -447,21 +462,6 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 		}
 
 		setChanged();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected Float getNonOverridePoints()
-	{
-		if ((this.numQuestions == null) || (this.numQuestions == 0)) return Float.valueOf(0);
-
-		// pool's point value * num questions
-		Pool pool = this.poolService.getPool(this.origPoolId);
-		if (pool == null) return Float.valueOf(0);
-
-		float poolPoints = pool.getPoints().floatValue();
-		return Float.valueOf(poolPoints * this.numQuestions.intValue());
 	}
 
 	/**

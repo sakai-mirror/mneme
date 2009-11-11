@@ -200,6 +200,21 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 	/**
 	 * {@inheritDoc}
 	 */
+	public Float getNonOverridePoints()
+	{
+		// get the question's pool's point value
+		Question q = this.questionService.getQuestion(this.questionId);
+		if (q == null) return Float.valueOf(0);
+
+		Pool p = q.getPool();
+		if (p == null) return Float.valueOf(0);
+
+		return p.getPoints();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer getNumQuestions()
 	{
 		return Integer.valueOf(1);
@@ -340,21 +355,6 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 		}
 
 		setChanged();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected Float getNonOverridePoints()
-	{
-		// get the question's pool's point value
-		Question q = this.questionService.getQuestion(this.questionId);
-		if (q == null) return Float.valueOf(0);
-
-		Pool p = q.getPool();
-		if (p == null) return Float.valueOf(0);
-
-		return p.getPoints();
 	}
 
 	/**

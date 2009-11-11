@@ -70,6 +70,11 @@ public interface PartDetail
 	Boolean getIsValid();
 
 	/**
+	 * @return The total point value ignoring any override set.
+	 */
+	Float getNonOverridePoints();
+
+	/**
 	 * Get the number of questions this detail provides.
 	 * 
 	 * @return The number of questions this detail adds to the part.

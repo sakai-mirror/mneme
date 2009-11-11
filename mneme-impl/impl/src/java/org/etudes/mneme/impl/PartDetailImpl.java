@@ -310,11 +310,6 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 	}
 
 	/**
-	 * @return The point value ignoring any override set.
-	 */
-	abstract protected Float getNonOverridePoints();
-
-	/**
 	 * @return the as-read part sequence.
 	 */
 	protected int getSeq()

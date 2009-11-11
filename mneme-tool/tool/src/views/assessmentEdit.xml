@@ -342,28 +342,30 @@
 								<message selector="points" />
 							</title>
 							<container>
-								<floatEdit model="detail.effectivePoints" cols="6" sumTo="total"/>
+								<floatEdit model="detail.effectivePoints" cols="6" defaultValue="detail.nonOverridePoints" sumTo="total">
+									<readOnly>
+										<decision model="assessment.isLocked" />
+									</readOnly>
+								</floatEdit>
 							</container>
-							<model ref="detail.totalPoints" />
 							<included>
 								<decision model="assessment.hasPoints" />
 							</included>
 						</column>
-						<modelColumn>
-							<title>
-								<message selector="points" />
-							</title>
-							<model ref="detail.totalPoints" />
-							<included>
-								<decision model="assessment.hasPoints" />
-							</included>
-						</modelColumn>
 					</columns>
 				</entityList>
 				<text>
 					<message selector="assessment-totals">
 						<model ref="assessment.parts.numQuestions" />
-						<model ref="assessment.parts.totalPoints" />
+						<model type="component">
+							<container>
+								<floatEdit id="total" model="assessment.parts.totalPoints" cols="6" >
+									<readOnly>
+										<trueDecision />
+									</readOnly>
+								</floatEdit>								
+							</container>
+						</model>
 						<selectors>
 							<selector selector="assessment-totals-no-points">
 								<decision reversed="TRUE" model="assessment.hasPoints" />
@@ -371,12 +373,6 @@
 						</selectors>
 					</message>
 				</text>
-
-				<floatEdit id="total" model="assessment.parts.totalPoints" cols="6" >
-					<readOnly>
-						<trueDecision />
-					</readOnly>
-				</floatEdit>
 
 			</container>
 		</section>

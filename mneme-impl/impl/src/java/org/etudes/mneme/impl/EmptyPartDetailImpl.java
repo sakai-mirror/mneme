@@ -110,6 +110,14 @@ public class EmptyPartDetailImpl extends PartDetailImpl implements PartDetail
 	/**
 	 * {@inheritDoc}
 	 */
+	public Float getNonOverridePoints()
+	{
+		return Float.valueOf(0);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Integer getNumQuestions()
 	{
 		return Integer.valueOf(0);
@@ -153,13 +161,5 @@ public class EmptyPartDetailImpl extends PartDetailImpl implements PartDetail
 	public boolean restoreToOriginal(Map<String, String> poolIdMap, Map<String, String> questionIdMap)
 	{
 		return true;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected Float getNonOverridePoints()
-	{
-		return Float.valueOf(0);
 	}
 }
