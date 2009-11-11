@@ -164,6 +164,9 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 	/** The part context for this draw. */
 	protected transient Part part = null;
 
+	/** Points override value for the questions in the part. */
+	protected Float points = null;
+
 	/** The sequence in the part at the time this was read (-1 if not set). Note: the actual sequence is the detail's position in the part's details list. */
 	protected transient int seq = -1;
 
@@ -176,6 +179,20 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 	public PartDetailImpl(Part part)
 	{
 		this.part = part;
+	}
+
+	/**
+	 * Construct.
+	 * 
+	 * @param part
+	 *        The part.
+	 * @param points
+	 *        The detail points value.
+	 */
+	public PartDetailImpl(Part part, Float points)
+	{
+		this.part = part;
+		this.points = points;
 	}
 
 	/**
@@ -192,6 +209,14 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 	public Boolean getChanged()
 	{
 		return this.changed;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getEffectivePoints()
+	{
+		return this.getTotalPoints();
 	}
 
 	/**
@@ -221,6 +246,29 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 	/**
 	 * {@inheritDoc}
 	 */
+	public Float getPoints()
+	{
+		return this.points;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Float getTotalPoints()
+	{
+		// if set in the part, use this
+		Float overridePoints = getPoints();
+		if (overridePoints != null)
+		{
+			return overridePoints;
+		}
+
+		return getNonOverridePoints();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setChanged()
 	{
 		if (getIsPhantom()) return;
@@ -231,6 +279,40 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 			((PartImpl) this.part).setChanged();
 		}
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setEffectivePoints(Float points)
+	{
+		// if the points value matches the non-override points, clear the override
+		if (!Different.different(points, this.getNonOverridePoints()))
+		{
+			setPoints(null);
+		}
+
+		// otherwise, set this as the override
+		else
+		{
+			setPoints(points);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setPoints(Float points)
+	{
+		if (!Different.different(points, this.points)) return;
+
+		this.points = points;
+		setChanged();
+	}
+
+	/**
+	 * @return The point value ignoring any override set.
+	 */
+	abstract protected Float getNonOverridePoints();
 
 	/**
 	 * @return the as-read part sequence.
@@ -283,5 +365,6 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 	{
 		this.id = other.id;
 		this.seq = other.seq;
+		this.points = other.points;
 	}
 }

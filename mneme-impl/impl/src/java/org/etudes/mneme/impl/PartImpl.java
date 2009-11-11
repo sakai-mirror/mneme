@@ -343,7 +343,7 @@ public class PartImpl implements Part, Changeable
 		}
 
 		// add this to the details
-		PoolDraw rv = new PoolDrawImpl(this.assessment, this, this.poolService, pool, numQuestions);
+		PoolDraw rv = new PoolDrawImpl(this.assessment, this, this.poolService, pool, numQuestions, null);
 		getDetails().add(rv);
 
 		// this is a change that cannot be made to live tests
@@ -441,6 +441,7 @@ public class PartImpl implements Part, Changeable
 		// set the assessment, part and submission context
 		question.initSubmissionContext(this.assessment.getSubmissionContext());
 		question.initPartContext(this);
+		question.initPartDetailContext(((QuestionPickImpl) order.get(0)).getRelatedDetail());
 		return question;
 	}
 
@@ -518,6 +519,7 @@ public class PartImpl implements Part, Changeable
 		// set the assessment, part and submission context
 		question.initSubmissionContext(this.assessment.getSubmissionContext());
 		question.initPartContext(this);
+		question.initPartDetailContext(((QuestionPickImpl) order.get(order.size() - 1)).getRelatedDetail());
 
 		return question;
 	}
@@ -595,6 +597,7 @@ public class PartImpl implements Part, Changeable
 		// set the question contexts
 		question.initSubmissionContext(this.assessment.getSubmissionContext());
 		question.initPartContext(this);
+		question.initPartDetailContext(((QuestionPickImpl) found).getRelatedDetail());
 
 		return question;
 	}
@@ -614,6 +617,7 @@ public class PartImpl implements Part, Changeable
 				// set the question contexts
 				question.initSubmissionContext(this.assessment.getSubmissionContext());
 				question.initPartContext(this);
+				question.initPartDetailContext(((QuestionPickImpl) pick).getRelatedDetail());
 
 				rv.add(question);
 			}
@@ -814,7 +818,8 @@ public class PartImpl implements Part, Changeable
 				List<String> draws = draw.getAllQuestionIds();
 				for (String id : draws)
 				{
-					QuestionPick pick = new QuestionPickImpl(this, this.questionService, null, id, id);
+					QuestionPick pick = new QuestionPickImpl(this, this.questionService, null, id, id, null);
+					((QuestionPickImpl) pick).initRelatedDetail(draw);
 					rv.add(pick);
 				}
 			}
@@ -848,7 +853,8 @@ public class PartImpl implements Part, Changeable
 				List<String> draws = draw.drawQuestionIds(shuffler);
 				for (String id : draws)
 				{
-					QuestionPick pick = new QuestionPickImpl(this, this.questionService, null, id, id);
+					QuestionPick pick = new QuestionPickImpl(this, this.questionService, null, id, id, null);
+					((QuestionPickImpl) pick).initRelatedDetail(draw);
 					rv.add(pick);
 				}
 			}
@@ -905,11 +911,13 @@ public class PartImpl implements Part, Changeable
 	 *        The origPoolId value
 	 * @param numQuestions
 	 *        The number of questions.
+	 * @param points
+	 *        The detail points value.
 	 * @return the new part detail.
 	 */
-	protected PartDetail initDraw(String id, String poolId, String origPoolId, Integer numQuestions)
+	protected PartDetail initDraw(String id, String poolId, String origPoolId, Integer numQuestions, Float points)
 	{
-		PoolDraw draw = new PoolDrawImpl(this, this.poolService, id, poolId, origPoolId, numQuestions);
+		PoolDraw draw = new PoolDrawImpl(this, this.poolService, id, poolId, origPoolId, numQuestions, points);
 		getDetails().add(draw);
 		return draw;
 	}
@@ -934,11 +942,13 @@ public class PartImpl implements Part, Changeable
 	 *        The questionId value.
 	 * @param origQuestionId
 	 *        The origQuestionId value
+	 * @param points
+	 *        The detail points value.
 	 * @return the new part detail.
 	 */
-	protected PartDetail initPick(String id, String questionId, String origQuestionId)
+	protected PartDetail initPick(String id, String questionId, String origQuestionId, Float points)
 	{
-		QuestionPick pick = new QuestionPickImpl(this, this.questionService, id, questionId, origQuestionId);
+		QuestionPick pick = new QuestionPickImpl(this, this.questionService, id, questionId, origQuestionId, points);
 		getDetails().add(pick);
 		return pick;
 	}

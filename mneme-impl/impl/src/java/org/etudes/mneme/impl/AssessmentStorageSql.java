@@ -978,7 +978,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		// read all the part details for these assessments
 		sql = new StringBuilder();
 		sql.append("SELECT P.ASSESSMENT_ID, P.NUM_QUESTIONS_SEQ, P.ORIG_PID, P.ORIG_QID, P.PART_ID,");
-		sql.append(" P.POOL_ID, P.QUESTION_ID, P.ID, P.SEQ");
+		sql.append(" P.POOL_ID, P.QUESTION_ID, P.ID, P.SEQ, P.POINTS");
 		sql.append(" FROM MNEME_ASSESSMENT_PART_DETAIL P");
 		sql.append(" JOIN MNEME_ASSESSMENT A ON P.ASSESSMENT_ID=A.ID ");
 		sql.append(where);
@@ -1001,14 +1001,15 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 					String questionId = SqlHelper.readId(result, 7);
 					String detailId = SqlHelper.readId(result, 8);
 					Integer seq = SqlHelper.readInteger(result, 9);
+					Float points = SqlHelper.readFloat(result, 10);
 					PartDetail detail = null;
 					if (questionId != null)
 					{
-						detail = ((PartImpl) p).initPick(detailId, questionId, origQid);
+						detail = ((PartImpl) p).initPick(detailId, questionId, origQid, points);
 					}
 					else if (poolId != null)
 					{
-						detail = ((PartImpl) p).initDraw(detailId, poolId, origPoolId, numQuestions);
+						detail = ((PartImpl) p).initDraw(detailId, poolId, origPoolId, numQuestions, points);
 					}
 					else
 					{
@@ -1182,10 +1183,10 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("UPDATE MNEME_ASSESSMENT_PART_DETAIL SET");
 		sql.append(" ASSESSMENT_ID=?, NUM_QUESTIONS_SEQ=?, ORIG_PID=?,");
-		sql.append(" ORIG_QID=?, PART_ID=?, POOL_ID=?, QUESTION_ID=?, SEQ=?");
+		sql.append(" ORIG_QID=?, PART_ID=?, POOL_ID=?, QUESTION_ID=?, SEQ=?, POINTS=?");
 		sql.append(" WHERE ID=?");
 
-		Object[] fields = new Object[9];
+		Object[] fields = new Object[10];
 		int i = 0;
 		fields[i++] = Long.valueOf(assessment.getId());
 
@@ -1200,6 +1201,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 			fields[i++] = null;
 			fields[i++] = Long.valueOf(pick.getQuestionId());
 			fields[i++] = Integer.valueOf(((PartDetailImpl) detail).getSeq());
+			fields[i++] = detail.getPoints();
 		}
 
 		else if (detail instanceof PoolDraw)
@@ -1213,6 +1215,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 			fields[i++] = Long.valueOf(draw.getPoolId());
 			fields[i++] = null;
 			fields[i++] = Integer.valueOf(((PartDetailImpl) detail).getSeq());
+			fields[i++] = detail.getPoints();
 		}
 
 		fields[i++] = Long.valueOf(detail.getId());

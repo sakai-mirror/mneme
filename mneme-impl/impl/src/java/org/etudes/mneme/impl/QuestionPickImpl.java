@@ -24,6 +24,7 @@ package org.etudes.mneme.impl;
 import java.util.Map;
 
 import org.etudes.mneme.api.Part;
+import org.etudes.mneme.api.PartDetail;
 import org.etudes.mneme.api.Pool;
 import org.etudes.mneme.api.Question;
 import org.etudes.mneme.api.QuestionPick;
@@ -43,6 +44,9 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 
 	/** Dependency: QuestionService. */
 	protected transient QuestionService questionService = null;
+
+	/** A related detail. */
+	protected transient PartDetail relatedDetail = null;
 
 	/**
 	 * Construct.
@@ -109,10 +113,12 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 	 *        The origQuestionId value.
 	 * @param poolId
 	 *        The pool.
+	 * @param points
+	 *        The detail points value.
 	 */
-	public QuestionPickImpl(Part part, QuestionService questionService, String id, String questionId, String origQid)
+	public QuestionPickImpl(Part part, QuestionService questionService, String id, String questionId, String origQid, Float points)
 	{
-		super(part);
+		super(part, points);
 		if (questionService == null) throw new IllegalArgumentException();
 		if (questionId == null) throw new IllegalArgumentException();
 		if (origQid == null) throw new IllegalArgumentException();
@@ -247,18 +253,25 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 	/**
 	 * {@inheritDoc}
 	 */
+	public Float getQuestionPoints()
+	{
+		// a single draw, just use the total
+		return getTotalPoints();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Float getTotalPoints()
 	{
-		// TODO: allow an override...
+		// if set in the part, use this
+		Float overridePoints = getPoints();
+		if (overridePoints != null)
+		{
+			return overridePoints;
+		}
 
-		// get the question's point value
-		Question q = this.questionService.getQuestion(this.questionId);
-		if (q == null) return Float.valueOf(0);
-
-		Pool p = q.getPool();
-		if (p == null) return Float.valueOf(0);
-
-		return p.getPoints();
+		return getNonOverridePoints();
 	}
 
 	/**
@@ -327,6 +340,42 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 		}
 
 		setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected Float getNonOverridePoints()
+	{
+		// get the question's pool's point value
+		Question q = this.questionService.getQuestion(this.questionId);
+		if (q == null) return Float.valueOf(0);
+
+		Pool p = q.getPool();
+		if (p == null) return Float.valueOf(0);
+
+		return p.getPoints();
+	}
+
+	/**
+	 * @return The related detail.
+	 */
+	protected PartDetail getRelatedDetail()
+	{
+		if (this.relatedDetail == null) return this;
+
+		return this.relatedDetail;
+	}
+
+	/**
+	 * Set the related detail.
+	 * 
+	 * @param detail
+	 *        The related detail.
+	 */
+	protected void initRelatedDetail(PartDetail detail)
+	{
+		this.relatedDetail = detail;
 	}
 
 	/**

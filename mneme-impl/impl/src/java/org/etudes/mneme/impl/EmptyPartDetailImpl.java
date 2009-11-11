@@ -44,14 +44,6 @@ public class EmptyPartDetailImpl extends PartDetailImpl implements PartDetail
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getIsPhantom()
-	{
-		return Boolean.TRUE;
-	}
-
-	/**
 	 * Construct.
 	 * 
 	 * @param part
@@ -89,6 +81,14 @@ public class EmptyPartDetailImpl extends PartDetailImpl implements PartDetail
 	public String getInvalidMessage()
 	{
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getIsPhantom()
+	{
+		return Boolean.TRUE;
 	}
 
 	/**
@@ -134,7 +134,7 @@ public class EmptyPartDetailImpl extends PartDetailImpl implements PartDetail
 	/**
 	 * {@inheritDoc}
 	 */
-	public Float getTotalPoints()
+	public Float getQuestionPoints()
 	{
 		return Float.valueOf(0);
 	}
@@ -153,5 +153,13 @@ public class EmptyPartDetailImpl extends PartDetailImpl implements PartDetail
 	public boolean restoreToOriginal(Map<String, String> poolIdMap, Map<String, String> questionIdMap)
 	{
 		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected Float getNonOverridePoints()
+	{
+		return Float.valueOf(0);
 	}
 }

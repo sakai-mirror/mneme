@@ -337,6 +337,18 @@
 							</title>
 							<model ref="detail.numQuestions" />
 						</modelColumn>
+						<column>
+							<title>
+								<message selector="points" />
+							</title>
+							<container>
+								<floatEdit model="detail.effectivePoints" cols="6" sumTo="total"/>
+							</container>
+							<model ref="detail.totalPoints" />
+							<included>
+								<decision model="assessment.hasPoints" />
+							</included>
+						</column>
 						<modelColumn>
 							<title>
 								<message selector="points" />
@@ -359,6 +371,13 @@
 						</selectors>
 					</message>
 				</text>
+
+				<floatEdit id="total" model="assessment.parts.totalPoints" cols="6" >
+					<readOnly>
+						<trueDecision />
+					</readOnly>
+				</floatEdit>
+
 			</container>
 		</section>
 
@@ -370,6 +389,10 @@
 					<destination template="/assessments/{0}">
 						<model ref="sortcode" />
 					</destination>
+				</navigation>
+				<divider />
+				<navigation title="save" accessKey="save-access" description="save-description" style="BUTTON" submit="TRUE" destination="SAVE">
+					<icon icon="/icons/save.png" style="LEFT" />
 				</navigation>
 			</container>
 		</navigationBar>

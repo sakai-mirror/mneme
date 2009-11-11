@@ -264,7 +264,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 
 		for (Pool pool : allPools)
 		{
-			PoolDraw draw = new PoolDrawImpl(this.assessment, null, this.poolService, pool, null);
+			PoolDraw draw = new PoolDrawImpl(this.assessment, null, this.poolService, pool, null, null);
 			for (PartDetail detail : getDetails())
 			{
 				if (detail instanceof PoolDraw)
@@ -509,7 +509,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	 */
 	public PoolDraw getVirtualDraw(Pool pool)
 	{
-		PoolDraw rv = new PoolDrawImpl(this.assessment, null, this.poolService, pool, null);
+		PoolDraw rv = new PoolDrawImpl(this.assessment, null, this.poolService, pool, null, null);
 		for (PartDetail detail : getDetails())
 		{
 			if (detail instanceof PoolDraw)

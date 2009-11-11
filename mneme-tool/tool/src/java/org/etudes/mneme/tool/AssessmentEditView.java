@@ -319,7 +319,7 @@ public class AssessmentEditView extends ControllerImpl
 				destination = "/instructions_edit/" + assessmentId + "/assessment_edit/" + sort + "/" + assessmentId;
 			}
 
-			else if (destination.equals("REORDER"))
+			else if (destination.equals("REORDER") || (destination.equals("SAVE")))
 			{
 				// save the assessment
 				this.assessmentService.saveAssessment(assessment);

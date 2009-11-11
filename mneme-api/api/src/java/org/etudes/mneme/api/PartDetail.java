@@ -36,6 +36,11 @@ public interface PartDetail
 	String getDescription();
 
 	/**
+	 * @return the effective points value - if there is an override, use that, else use the total points computed from the question pool values.
+	 */
+	Float getEffectivePoints();
+
+	/**
 	 * Access the id of this assessment.
 	 * 
 	 * @return The assessment's id.
@@ -84,6 +89,11 @@ public interface PartDetail
 	Part getPart();
 
 	/**
+	 * @return The points set for the entire part, or null if not set.
+	 */
+	Float getPoints();
+
+	/**
 	 * Access the pool associated with this detail (the question's pool or the pool to draw from).
 	 * 
 	 * @return The pool.
@@ -96,6 +106,11 @@ public interface PartDetail
 	 * @return The pool id.
 	 */
 	String getPoolId();
+
+	/**
+	 * @return The point value for a single question in the part, or null if not set.
+	 */
+	Float getQuestionPoints();
 
 	/**
 	 * Compute the total points for the part detail.
@@ -121,4 +136,20 @@ public interface PartDetail
 	 * @return true if successful, false if not.
 	 */
 	boolean restoreToOriginal(Map<String, String> poolIdMap, Map<String, String> questionIdMap);
+
+	/**
+	 * Set the points. If it matches the non-override value, clear the override, else set this as the override value.
+	 * 
+	 * @param points
+	 *        The point value for all the questions in the part.
+	 */
+	void setEffectivePoints(Float points);
+
+	/**
+	 * Set the point value override for the questions in this part; a value for all the questions.
+	 * 
+	 * @param points
+	 *        The point value for all the questions in the part, or null to clear the setting.
+	 */
+	void setPoints(Float points);
 }

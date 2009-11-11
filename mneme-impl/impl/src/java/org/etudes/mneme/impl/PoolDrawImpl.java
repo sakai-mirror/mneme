@@ -71,10 +71,12 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	 *        The pool to draw from.
 	 * @param numQuestions
 	 *        The number of questions to draw.
+	 * @param points
+	 *        The detail points value.
 	 */
-	public PoolDrawImpl(Assessment assessment, Part part, PoolService poolService, Pool pool, Integer numQuestions)
+	public PoolDrawImpl(Assessment assessment, Part part, PoolService poolService, Pool pool, Integer numQuestions, Float points)
 	{
-		this(part, poolService);
+		this(part, poolService, points);
 		if (pool == null) throw new IllegalArgumentException();
 		this.assessment = assessment;
 		this.poolId = pool.getId();
@@ -103,10 +105,12 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	 *        The part.
 	 * @param poolService
 	 *        The PoolService.
+	 * @param points
+	 *        The detail points value.
 	 */
-	public PoolDrawImpl(Part part, PoolService poolService)
+	public PoolDrawImpl(Part part, PoolService poolService, Float points)
 	{
-		super(part);
+		super(part, points);
 		this.poolService = poolService;
 	}
 
@@ -125,10 +129,12 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	 *        The original pool id.
 	 * @param numQuestions
 	 *        The number of questions to draw.
+	 * @param points
+	 *        The detail points value.
 	 */
-	public PoolDrawImpl(Part part, PoolService poolService, String id, String poolId, String origPoolId, Integer numQuestions)
+	public PoolDrawImpl(Part part, PoolService poolService, String id, String poolId, String origPoolId, Integer numQuestions, Float points)
 	{
-		this(part, poolService);
+		this(part, poolService, points);
 		if (poolId == null) throw new IllegalArgumentException();
 		if (origPoolId == null) throw new IllegalArgumentException();
 		this.id = id;
@@ -355,18 +361,16 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	/**
 	 * {@inheritDoc}
 	 */
-	public Float getTotalPoints()
+	public Float getQuestionPoints()
 	{
-		// TODO: allow to override....
+		if ((this.numQuestions == null) || (this.numQuestions <= 0)) return Float.valueOf(0);
 
-		if ((this.numQuestions == null) || (this.numQuestions == 0)) return Float.valueOf(0);
+		float rv = getTotalPoints() / this.numQuestions.intValue();
 
-		// pool's point value * num questions
-		Pool pool = this.poolService.getPool(this.origPoolId);
-		if (pool == null) return Float.valueOf(0);
+		// round away bogus decimals
+		rv = Math.round(rv * 100.0f) / 100.0f;
 
-		float poolPoints = pool.getPoints().floatValue();
-		return Float.valueOf(poolPoints * this.numQuestions.intValue());
+		return Float.valueOf(rv);
 	}
 
 	/**
@@ -443,6 +447,21 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 		}
 
 		setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected Float getNonOverridePoints()
+	{
+		if ((this.numQuestions == null) || (this.numQuestions == 0)) return Float.valueOf(0);
+
+		// pool's point value * num questions
+		Pool pool = this.poolService.getPool(this.origPoolId);
+		if (pool == null) return Float.valueOf(0);
+
+		float poolPoints = pool.getPoints().floatValue();
+		return Float.valueOf(poolPoints * this.numQuestions.intValue());
 	}
 
 	/**
