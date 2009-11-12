@@ -256,6 +256,8 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 	 */
 	public Float getTotalPoints()
 	{
+		if (!getHasPoints().booleanValue()) return Float.valueOf(0);
+
 		// if set in the part, use this
 		Float overridePoints = getPoints();
 		if (overridePoints != null)

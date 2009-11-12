@@ -351,6 +351,9 @@
 							<included>
 								<decision model="assessment.hasPoints" />
 							</included>
+							<entityIncluded>
+								<decision model="detail.hasPoints" />
+							</entityIncluded>
 						</column>
 					</columns>
 				</entityList>

@@ -215,6 +215,26 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasPoints()
+	{
+		Pool pool = getPool();
+		if (pool == null) return Boolean.FALSE;
+
+		// if the assessment is non-survey, and the draw pool has non-survey questions, we have points
+		Assessment assessment = this.assessment;
+		if ((assessment == null) && (this.part != null)) assessment = this.part.getAssessment();
+		if (assessment == null) return Boolean.FALSE;
+		if (assessment.getType() == AssessmentType.survey) return Boolean.FALSE;
+
+		Pool.PoolCounts counts = pool.getNumQuestionsSurvey();
+		if (counts.assessment != 0) return Boolean.TRUE;
+
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getInvalidMessage()
 	{
 		// we need a valid pool and a positive count that is within the pool's question limit
@@ -280,6 +300,7 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	public Float getNonOverridePoints()
 	{
 		if ((this.numQuestions == null) || (this.numQuestions == 0)) return Float.valueOf(0);
+		if (!getHasPoints().booleanValue()) return Float.valueOf(0);
 
 		// pool's point value * num questions
 		Pool pool = this.poolService.getPool(this.origPoolId);
@@ -379,6 +400,7 @@ public class PoolDrawImpl extends PartDetailImpl implements PoolDraw
 	public Float getQuestionPoints()
 	{
 		if ((this.numQuestions == null) || (this.numQuestions <= 0)) return Float.valueOf(0);
+		if (!getHasPoints().booleanValue()) return Float.valueOf(0);
 
 		float rv = getTotalPoints() / this.numQuestions.intValue();
 

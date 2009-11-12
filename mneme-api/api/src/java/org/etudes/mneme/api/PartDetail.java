@@ -41,6 +41,13 @@ public interface PartDetail
 	Float getEffectivePoints();
 
 	/**
+	 * Check if the detail supports points, or if it does not. Survey questions, or draws of Surveys questions, for example, do not support points.
+	 * 
+	 * @return TRUE if the detail supports points, FALSE if it does not.
+	 */
+	Boolean getHasPoints();
+
+	/**
 	 * Access the id of this assessment.
 	 * 
 	 * @return The assessment's id.

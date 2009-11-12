@@ -158,6 +158,19 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasPoints()
+	{
+		if (this.questionId == null) return Boolean.FALSE;
+		Question q = this.questionService.getQuestion(this.questionId);
+		if (q == null) return Boolean.FALSE;
+
+		// if the question supports points, so does this
+		return q.getHasPoints();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getInvalidMessage()
 	{
 		// we need a valid question
@@ -205,6 +218,7 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 		// get the question's pool's point value
 		Question q = this.questionService.getQuestion(this.questionId);
 		if (q == null) return Float.valueOf(0);
+		if (!q.getHasPoints().booleanValue()) return Float.valueOf(0);
 
 		Pool p = q.getPool();
 		if (p == null) return Float.valueOf(0);
@@ -270,23 +284,10 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 	 */
 	public Float getQuestionPoints()
 	{
+		if (!getHasPoints().booleanValue()) return Float.valueOf(0);
+
 		// a single draw, just use the total
 		return getTotalPoints();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Float getTotalPoints()
-	{
-		// if set in the part, use this
-		Float overridePoints = getPoints();
-		if (overridePoints != null)
-		{
-			return overridePoints;
-		}
-
-		return getNonOverridePoints();
 	}
 
 	/**

@@ -78,6 +78,14 @@ public class EmptyPartDetailImpl extends PartDetailImpl implements PartDetail
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getHasPoints()
+	{
+		return Boolean.FALSE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getInvalidMessage()
 	{
 		return null;
