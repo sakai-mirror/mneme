@@ -966,6 +966,7 @@ public class PartImpl implements Part, Changeable
 		this.poolService = other.poolService;
 		this.presentation = new PresentationImpl(other.presentation, this);
 		this.questionService = other.questionService;
+		this.randomize = other.randomize;
 		this.submissionService = other.submissionService;
 		this.title = other.title;
 		this.messages = other.messages;
