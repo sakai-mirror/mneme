@@ -287,6 +287,10 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 	 */
 	public void setEffectivePoints(Float points)
 	{
+		// change to a reasonable range
+		if ((points != null) && (points.floatValue() < 0f)) points = Float.valueOf(0.0f);
+		if ((points != null) && (points.floatValue() > 10000f)) points = Float.valueOf(10000.0f);
+
 		// if the points value matches the non-override points, clear the override
 		if (!Different.different(points, this.getNonOverridePoints()))
 		{
@@ -306,6 +310,12 @@ public abstract class PartDetailImpl implements PartDetail, Changeable
 	public void setPoints(Float points)
 	{
 		if (!Different.different(points, this.points)) return;
+
+		// massage points - 2 decimal places
+		if (points != null)
+		{
+			points = Float.valueOf(((float) Math.round(points.floatValue() * 100.0f)) / 100.0f);
+		}
 
 		this.points = points;
 		setChanged();

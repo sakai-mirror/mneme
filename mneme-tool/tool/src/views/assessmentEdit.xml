@@ -342,10 +342,13 @@
 								<message selector="points" />
 							</title>
 							<container>
-								<floatEdit model="detail.effectivePoints" cols="6" defaultValue="detail.nonOverridePoints" sumTo="total">
+								<floatEdit model="detail.effectivePoints" cols="6" defaultValue="detail.nonOverridePoints" sumTo="total"> <!--  sumTo="total" -->
 									<readOnly>
 										<decision model="assessment.isLocked" />
 									</readOnly>
+									<minValue>
+										<model type="constant" value="0" />
+									</minValue>
 								</floatEdit>
 							</container>
 							<included>
@@ -362,11 +365,16 @@
 						<model ref="assessment.parts.numQuestions" />
 						<model type="component">
 							<container>
-								<floatEdit id="total" model="assessment.parts.totalPoints" cols="6" >
+								<!-- <floatEdit id="total" model="assessment.parts.totalPoints" cols="6" >
 									<readOnly>
 										<trueDecision />
 									</readOnly>
-								</floatEdit>								
+								</floatEdit> -->
+								<text id="total">
+									<message template="{0}">
+										<model ref="assessment.parts.totalPoints" />
+									</message>
+								</text>
 							</container>
 						</model>
 						<selectors>
