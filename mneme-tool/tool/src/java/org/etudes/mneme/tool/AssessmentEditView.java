@@ -269,8 +269,10 @@ public class AssessmentEditView extends ControllerImpl
 				if (part == null)
 				{
 					part = assessment.getParts().addPart();
-					this.assessmentService.saveAssessment(assessment);
 				}
+
+				// save
+				this.assessmentService.saveAssessment(assessment);
 
 				// create URL for select questions
 				destination = "/draw_questions/" + assessmentId + "/" + part.getId() + "/0A/" + "assessment_edit/" + sort + "/" + assessmentId;
@@ -283,8 +285,10 @@ public class AssessmentEditView extends ControllerImpl
 				if (part == null)
 				{
 					part = assessment.getParts().addPart();
-					this.assessmentService.saveAssessment(assessment);
 				}
+
+				// save
+				this.assessmentService.saveAssessment(assessment);
 
 				// create URL for select questions
 				destination = "/select_add_mpart_question/" + assessmentId + "/" + part.getId() + "/0A/-/0/0/B/" + "assessment_edit/" + sort + "/"
@@ -298,6 +302,8 @@ public class AssessmentEditView extends ControllerImpl
 				{
 					assessment.getParts().removeDetail(id);
 				}
+
+				// save
 				this.assessmentService.saveAssessment(assessment);
 
 				destination = context.getDestination();
@@ -305,7 +311,7 @@ public class AssessmentEditView extends ControllerImpl
 
 			else if (destination.equals("PARTS"))
 			{
-				// save the assessment
+				// save
 				this.assessmentService.saveAssessment(assessment);
 
 				destination = "/part_manage/" + assessmentId + "/assessment_edit/" + sort + "/" + assessmentId;
@@ -313,7 +319,7 @@ public class AssessmentEditView extends ControllerImpl
 
 			else if (destination.equals("INSTRUCTIONS"))
 			{
-				// save the assessment
+				// save
 				this.assessmentService.saveAssessment(assessment);
 
 				destination = "/instructions_edit/" + assessmentId + "/assessment_edit/" + sort + "/" + assessmentId;
@@ -321,7 +327,7 @@ public class AssessmentEditView extends ControllerImpl
 
 			else if (destination.equals("REORDER") || (destination.equals("SAVE")))
 			{
-				// save the assessment
+				// save
 				this.assessmentService.saveAssessment(assessment);
 
 				destination = context.getDestination();
@@ -329,7 +335,7 @@ public class AssessmentEditView extends ControllerImpl
 
 			else if (destination.equals("MOVE"))
 			{
-				// save the assessment
+				// save
 				this.assessmentService.saveAssessment(assessment);
 
 				// format the selected ids
