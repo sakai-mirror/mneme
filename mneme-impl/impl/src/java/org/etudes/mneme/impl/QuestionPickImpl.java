@@ -173,11 +173,13 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 	 */
 	public String getInvalidMessage()
 	{
-		// we need a valid question
+		// we need a question
 		if (this.questionId == null) return ((PartImpl) this.part).messages.getFormattedMessage("invalid-detail-missing-question", null);
 		Question q = this.questionService.getQuestion(this.questionId);
 		if (q == null) return ((PartImpl) this.part).messages.getFormattedMessage("invalid-detail-missing-question", null);
 
+		// needs to be valid
+		if (!q.getIsValid().booleanValue()) return ((PartImpl) this.part).messages.getFormattedMessage("invalid-detail-invalid-question", null);
 		return null;
 	}
 
@@ -202,11 +204,14 @@ public class QuestionPickImpl extends PartDetailImpl implements QuestionPick
 	 */
 	public Boolean getIsValid()
 	{
-		// we need a valid question
+		// we need a question
 		if (this.questionId == null) return Boolean.FALSE;
 		Question q = this.questionService.getQuestion(this.questionId);
 		if (q == null) return Boolean.FALSE;
 
+		// needs to be valid
+		if (!q.getIsValid().booleanValue()) return Boolean.FALSE;
+		
 		return Boolean.TRUE;
 	}
 

@@ -783,7 +783,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 	}
 
 	/**
-	 * Get the question ids that are manually selected from this pool, from all parts.
+	 * Get the question ids that are manually selected from this pool, from all parts. Only include valid questions.
 	 * 
 	 * @param pool
 	 *        The pool.
@@ -805,6 +805,7 @@ public class AssessmentPartsImpl implements AssessmentParts
 					QuestionPick pick = (QuestionPick) detail;
 					Question question = this.questionService.getQuestion(pick.getQuestionId());
 					if (question == null) continue;
+					if (!question.getIsValid().booleanValue()) continue;
 					if ((survey != null) && (!question.getIsSurvey().equals(survey))) continue;
 					if (!question.getPool().getId().equals(pool.getId())) continue;
 

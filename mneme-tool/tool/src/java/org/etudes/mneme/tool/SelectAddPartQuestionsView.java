@@ -197,19 +197,19 @@ public class SelectAddPartQuestionsView extends ControllerImpl
 		paging.setCurrentAndSize(pagingParameter);
 		context.put("paging", paging);
 
-		// get questions
+		// get questions - even invalids
 		List<Question> questions = null;
 
 		if (pool == null)
 		{
 			questions = questionService.findQuestions(this.toolManager.getCurrentPlacement().getContext(), sort, null, (typeFilter.equals("0") ? null
 					: typeFilter), paging.getSize() == 0 ? null : paging.getCurrent(), paging.getSize() == 0 ? null : paging.getSize(),
-					surveyFilterValue, Boolean.TRUE);
+					surveyFilterValue, null);
 		}
 		else
 		{
 			questions = questionService.findQuestions(pool, sort, null, (typeFilter.equals("0") ? null : typeFilter), paging.getSize() == 0 ? null
-					: paging.getCurrent(), paging.getSize() == 0 ? null : paging.getSize(), surveyFilterValue, Boolean.TRUE);
+					: paging.getCurrent(), paging.getSize() == 0 ? null : paging.getSize(), surveyFilterValue, null);
 		}
 		context.put("questions", questions);
 

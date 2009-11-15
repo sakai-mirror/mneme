@@ -259,6 +259,16 @@
 					</pager>
 					<iterator name="question" model="questions" />
 					<columns>
+						<column pixels="16">
+							<entityIncluded>
+								<decision reversed="TRUE" model="question.isValid" />
+							</entityIncluded>
+							<container>
+								<warning>
+									<message selector="invalid-question" />
+								</warning>
+							</container>
+						</column>
 						<selectionColumn multiple="TRUE" pixels="16">
 							<value>
 								<model type="text" ref="question.id" />
