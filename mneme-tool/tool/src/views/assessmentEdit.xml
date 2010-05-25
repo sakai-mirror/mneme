@@ -128,9 +128,6 @@
 								<model ref="sortcode" />
 								<model ref="assessment.id" />
 							</destination>
-							<readOnly>
-								<decision model="assessment.isLocked" />
-							</readOnly>
 							<included>
 								<decision model="assessment.allowedPoints" />
 							</included>
@@ -333,9 +330,6 @@
 									<included>
 										<decision model="detail.isSpecific" />
 									</included>
-									<disabled>
-										<decision model="assessment.isLocked" />
-									</disabled>
 									<destination template="/question_edit/{0}/{2}/{3}/assessment_edit/{1}/{2}">
 										<model ref="detail.questionId" />
 										<model ref="sortcode" />
@@ -344,6 +338,31 @@
 									</destination>
 								</navigation>
 							</entityNavigations>
+							<included>
+								<decision reversed="TRUE" model="assessment.isLocked" />
+							</included>
+						</modelColumn>
+						<modelColumn>
+							<title>
+								<message selector="description" />
+							</title>
+							<model ref="detail.description" type="html" max="60" />
+							<entityNavigations>
+								<navigation submit="TRUE">
+									<included>
+										<decision model="detail.isSpecific" />
+									</included>
+									<destination template="/question_fix/{0}/{2}/{3}/assessment_edit/{1}/{2}">
+										<model ref="detail.questionId" />
+										<model ref="sortcode" />
+										<model ref="assessment.id" />
+										<model ref="detail.part.id" />
+									</destination>
+								</navigation>
+							</entityNavigations>
+							<included>
+								<decision model="assessment.isLocked" />
+							</included>
 						</modelColumn>
 						<modelColumn em="10">
 							<title>
@@ -375,9 +394,6 @@
 							</title>
 							<container>
 								<floatEdit model="detail.effectivePoints" cols="6" defaultValue="detail.nonOverridePoints" sumTo="total">
-									<readOnly>
-										<decision model="assessment.isLocked" />
-									</readOnly>
 									<minValue>
 										<model type="constant" value="0" />
 									</minValue>
