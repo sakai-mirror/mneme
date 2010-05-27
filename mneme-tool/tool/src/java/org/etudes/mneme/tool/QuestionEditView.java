@@ -140,7 +140,7 @@ public class QuestionEditView extends ControllerImpl
 			// figure out the question id
 			String returnDestParts[] = StringUtil.split(destination, "/");
 			String sortCode = "0A";
-			if (returnDestParts.length > 4) sortCode = returnDestParts[4];
+			if (returnDestParts.length > 3 && (!"-".equals(returnDestParts[3]))) sortCode = returnDestParts[3];
 
 			QuestionService.FindQuestionsSort sort = PoolEditView.findSort(sortCode);
 
@@ -473,7 +473,7 @@ public class QuestionEditView extends ControllerImpl
 			// figure out the question id
 			String returnDestParts[] = StringUtil.split(returnDestination, "/");
 			String sortCode = "0A";
-			if (returnDestParts.length > 4) sortCode = returnDestParts[4];
+			if (!"-".equals(returnDestParts[3])) sortCode = returnDestParts[3];
 
 			QuestionService.FindQuestionsSort sort = PoolEditView.findSort(sortCode);
 
