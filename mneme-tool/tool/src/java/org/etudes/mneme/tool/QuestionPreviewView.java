@@ -120,7 +120,7 @@ public class QuestionPreviewView extends ControllerImpl
 			context.put("questions", questions);
 
 			// only if coming from pool_edit, we offer prev/next
-			if (destination.startsWith("/pool_edit"))
+			if (destination.startsWith("/pool_edit") || destination.startsWith("/pool_fix"))
 			{
 				figurePrevNextForPoolEdit(context, destination, question);
 			}

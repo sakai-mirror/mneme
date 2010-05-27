@@ -133,7 +133,7 @@ public class QuestionEditView extends ControllerImpl
 		context.put("question", question);
 
 		// next/prev for pools (not assessment) editing
-		if (destination.startsWith("/pool_edit"))
+		if (destination.startsWith("/pool_edit") || destination.startsWith("/pool_fix"))
 		{
 			context.put("nextPrev", Boolean.TRUE);
 
@@ -342,7 +342,7 @@ public class QuestionEditView extends ControllerImpl
 				// just save - even if historical
 				Boolean changed = question.getIsChanged();
 				this.questionService.saveQuestion(question, Boolean.TRUE);
-				
+
 				// possible re-score needed if the assessment is locked
 				if (fixMode && changed && (assessment != null) && assessment.getIsLocked())
 				{
@@ -445,7 +445,7 @@ public class QuestionEditView extends ControllerImpl
 					Question newQuestion = this.questionService.newQuestion(question.getPool(), question.getType());
 
 					// edit it
-					destination = "/question_edit/" + newQuestion.getId() + "/" + assessmentId + "/" + partId + "/" + returnDestination;
+					destination = "/" + params[1] + "/" + newQuestion.getId() + "/" + assessmentId + "/" + partId + "/" + returnDestination;
 				}
 				catch (AssessmentPermissionException e)
 				{
@@ -468,7 +468,7 @@ public class QuestionEditView extends ControllerImpl
 			return;
 		}
 
-		if ((!fixMode) && ("NEXT".equals(destination) || "PREV".equals(destination)))
+		if (("NEXT".equals(destination) || "PREV".equals(destination)))
 		{
 			// figure out the question id
 			String returnDestParts[] = StringUtil.split(returnDestination, "/");
@@ -521,7 +521,7 @@ public class QuestionEditView extends ControllerImpl
 				qid = questions.get(pos).getId();
 			}
 
-			destination = "/question_edit/" + qid + "/" + assessmentId + "/" + partId + "/" + returnDestination;
+			destination = "/" + params[1] + "/" + qid + "/" + assessmentId + "/" + partId + "/" + returnDestination;
 		}
 
 		// if destination became null, or is the stay here
@@ -534,7 +534,7 @@ public class QuestionEditView extends ControllerImpl
 		if ((!fixMode) && (!partId.equals(origPartId)))
 		{
 			String[] destParts = StringUtil.split(destination, "/");
-			if (destParts[1].equals("question_edit"))
+			if (destParts[1].equals(params[1]))
 			{
 				destParts[4] = part.getId();
 				destination = StringUtil.unsplit(destParts, 0, destParts.length, "/");

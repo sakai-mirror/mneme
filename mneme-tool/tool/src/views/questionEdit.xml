@@ -200,7 +200,10 @@
 					</selectionChoices>
 					<model ref="question.isSurvey" />
 					<readOnly>
-						<decision model="question.typeSpecificQuestion.isSurvey" />
+						<orDecision>
+							<decision model="question.typeSpecificQuestion.isSurvey" />
+							<hasValueDecision model="fix" />
+						</orDecision>
 					</readOnly>
 					<destination template="STAY" />
 				</selection>

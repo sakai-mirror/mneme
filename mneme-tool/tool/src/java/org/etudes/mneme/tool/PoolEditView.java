@@ -326,8 +326,8 @@ public class PoolEditView extends ControllerImpl
 			}
 		}
 
-		else if ((!fixMode) && ((destination.trim().startsWith("/question_copy")) || (destination.trim().startsWith("/question_move"))
-				|| (destination.trim().startsWith("/question_preview"))))
+		else if ((!fixMode) && ((destination.trim().startsWith("/question_copy")) || (destination.trim().startsWith("/question_move")))
+				|| (destination.trim().startsWith("/question_preview")))
 		{
 			// add the selected ids to the destination
 			StringBuilder buf = new StringBuilder();
