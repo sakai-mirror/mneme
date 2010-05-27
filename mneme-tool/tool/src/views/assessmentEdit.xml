@@ -272,9 +272,6 @@
 											<message model="pos.position" />
 										</displayMessage>
 									</selectionModel>
-									<readOnly>
-										<decision model="assessment.isLocked" />
-									</readOnly>
 									<destination template="REORDER" />
 								</selection>
 							</container>
