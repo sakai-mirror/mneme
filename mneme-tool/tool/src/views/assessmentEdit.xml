@@ -387,7 +387,13 @@
 						</column>
 						<modelColumn>
 							<title>
-								<message selector="pool" />
+								<message selector="pool">
+									<selectors>
+										<selector selector="from-pool">
+											<decision model="assessment.isLocked" />
+										</selector>
+									</selectors>
+								</message>
 							</title>
 							<entityIncluded>
 								<decision reversed="TRUE" model="detail.isPhantom" />

@@ -47,6 +47,11 @@
 	<header>
 		<message selector="question-edit-header">
 			<model type="icon" icon="/icons/edit.png" />
+			<selectors>
+				<selector selector="question-edit-header-historical">
+					<decision model="question.isHistorical" />
+				</selector>
+			</selectors>
 		</message>
 	</header>
 
