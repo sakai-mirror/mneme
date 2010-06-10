@@ -182,7 +182,7 @@ public class AssessmentImpl implements Assessment
 
 		this.createdBy = new AttributionImpl(this.changed);
 		this.dates = new AssessmentDatesImpl(this, this.changed);
-		this.grading = new AssessmentGradingImpl(this.changed);
+		this.grading = new AssessmentGradingImpl(this, this.changed);
 		this.modifiedBy = new AttributionImpl(this.changed);
 		this.parts = new AssessmentPartsImpl(this, questionService, submissionService, poolService, this.changed, this.messages);
 		this.password = new AssessmentPasswordImpl(this.changed);
@@ -1272,7 +1272,7 @@ public class AssessmentImpl implements Assessment
 		this.context = other.context;
 		this.createdBy = new AttributionImpl((AttributionImpl) other.createdBy, this.changed);
 		this.dates = new AssessmentDatesImpl(this, (AssessmentDatesImpl) other.dates, this.changed);
-		this.grading = new AssessmentGradingImpl((AssessmentGradingImpl) other.grading, this.changed);
+		this.grading = new AssessmentGradingImpl(this, (AssessmentGradingImpl) other.grading, this.changed);
 		this.honorPledge = other.honorPledge;
 		this.id = other.id;
 		this.lockedChanged = other.lockedChanged;

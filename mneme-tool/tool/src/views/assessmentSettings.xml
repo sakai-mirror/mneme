@@ -444,6 +444,29 @@
 					</container>
 				</section>
 
+				<section>
+					<container>
+
+						<selection title="grading-blocked-header">
+							<selectionChoices>
+								<selectionChoice>
+									<displayMessage>
+										<message selector="grading-blocked" />
+									</displayMessage>
+									<valueMessage>
+										<message template="true" />
+									</valueMessage>
+								</selectionChoice>
+							</selectionChoices>
+							<model ref="assessment.grading.blockGrading" />
+							<readOnly>
+								<decision model="assessment.isLocked" />
+							</readOnly>
+						</selection>
+
+					</container>
+				</section>
+
 				<textEdit cols="16">
 					<title>
 						<message selector="password">

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2008 Etudes, Inc.
+ * Copyright (c) 2008, 2009, 2010 Etudes, Inc.
  * 
  * Portions completed before September 1, 2008
  * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
@@ -34,10 +34,14 @@ public class AssessmentGradingImpl implements AssessmentGrading
 {
 	protected Boolean anonymous = Boolean.FALSE;
 
+	protected transient AssessmentImpl assessment = null;
+
 	protected Boolean autoRelease = Boolean.TRUE;
 
 	/** Track the original auto-release value. */
 	protected transient Boolean autoReleaseWas = Boolean.TRUE;
+
+	protected Boolean blocked = Boolean.FALSE;
 
 	protected Boolean gradebookIntegration = Boolean.FALSE;
 
@@ -54,17 +58,18 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AssessmentGradingImpl(AssessmentGradingImpl other, Changeable owner)
+	public AssessmentGradingImpl(AssessmentImpl assessment, AssessmentGradingImpl other, Changeable owner)
 	{
-		this(owner);
+		this(assessment, owner);
 		set(other);
 	}
 
 	/**
 	 * Construct.
 	 */
-	public AssessmentGradingImpl(Changeable owner)
+	public AssessmentGradingImpl(AssessmentImpl assessment, Changeable owner)
 	{
+		this.assessment = assessment;
 		this.owner = owner;
 	}
 
@@ -82,6 +87,14 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	public Boolean getAutoRelease()
 	{
 		return this.autoRelease;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getBlockGrading()
+	{
+		return this.blocked;
 	}
 
 	/**
@@ -130,6 +143,23 @@ public class AssessmentGradingImpl implements AssessmentGrading
 		if (this.autoRelease.equals(setting)) return;
 
 		this.autoRelease = setting;
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setBlockGrading(Boolean setting)
+	{
+		// for null, use the default FALSE
+		if (setting == null) setting = Boolean.FALSE;
+		if (this.blocked.equals(setting)) return;
+
+		this.blocked = setting;
+
+		// this is a change that cannot be made to locked assessments
+		this.assessment.lockedChanged = Boolean.TRUE;
 
 		this.owner.setChanged();
 	}
@@ -188,6 +218,20 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	}
 
 	/**
+	 * Init the blocked setting.
+	 * 
+	 * @param setting
+	 *        The block grading setting.
+	 */
+	protected void initBlockGrading(Boolean setting)
+	{
+		// for null, use the default FALSE
+		if (setting == null) setting = Boolean.FALSE;
+
+		this.blocked = setting;
+	}
+
+	/**
 	 * Initialize the gradebook integration, and set the "was" to the same.
 	 * 
 	 * @param gradebookIntegration
@@ -220,6 +264,7 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	{
 		this.autoRelease = other.autoRelease;
 		this.autoReleaseWas = other.autoReleaseWas;
+		this.blocked = other.blocked;
 		this.gradebookIntegration = other.gradebookIntegration;
 		this.gradebookIntegrationWas = other.gradebookIntegrationWas;
 		this.gradebookRejectedAssessment = other.gradebookRejectedAssessment;
