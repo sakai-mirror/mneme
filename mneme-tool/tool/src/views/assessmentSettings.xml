@@ -464,6 +464,12 @@
 							</readOnly>
 						</selection>
 
+						<textEdit title="results-email" cols="40">
+							<model ref="assessment.grading.resultsEmail" type="text" />
+							<readOnly>
+								<decision model="assessment.isLocked" />
+							</readOnly>
+						</textEdit>
 					</container>
 				</section>
 

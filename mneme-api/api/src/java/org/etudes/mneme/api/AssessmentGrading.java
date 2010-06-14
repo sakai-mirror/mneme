@@ -72,6 +72,16 @@ public interface AssessmentGrading
 	Boolean getIsValid();
 
 	/**
+	 * @return the email address string for sending results to.
+	 */
+	String getResultsEmail();
+
+	/**
+	 * @return TRUE if the assessment results email was sent, FALSE if not.
+	 */
+	Boolean getResultsSent();
+
+	/**
 	 * Set if student identities are invisible to the grader when grading.
 	 * 
 	 * @param setting
@@ -103,4 +113,20 @@ public interface AssessmentGrading
 	 *        TRUE if the assessment's grades are to be placed into the Gradebook, FALSE if not.
 	 */
 	void setGradebookIntegration(Boolean setting);
+
+	/**
+	 * Set the email address for sending results to.
+	 * 
+	 * @param setting
+	 *        The email address string (comma separated email addresses) for sending results to.
+	 */
+	void setResultsEmail(String setting);
+
+	/**
+	 * Set if the assessment results were email was sent.
+	 * 
+	 * @param setting
+	 *        The results were sent setting.
+	 */
+	void setResultsSent(Boolean setting);
 }

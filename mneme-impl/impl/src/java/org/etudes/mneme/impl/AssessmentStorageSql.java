@@ -922,8 +922,9 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT A.ARCHIVED, A.CONTEXT, A.CREATED_BY_DATE, A.CREATED_BY_USER,");
 		sql.append(" A.DATES_ACCEPT_UNTIL, A.DATES_ARCHIVED, A.DATES_DUE, A.DATES_OPEN,");
-		sql.append(" A.GRADING_ANONYMOUS, A.GRADING_AUTO_RELEASE, A.GRADING_GRADEBOOK, A.GRADING_REJECTED, A.GRADING_BLOCKED,");
-		sql.append(" A.HONOR_PLEDGE, A.ID, A.LIVE, A.LOCKED, A.MINT, A.MODIFIED_BY_DATE, A.MODIFIED_BY_USER,");
+		sql
+				.append(" A.GRADING_ANONYMOUS, A.GRADING_AUTO_RELEASE, A.GRADING_GRADEBOOK, A.GRADING_REJECTED, A.GRADING_BLOCKED, A.GRADING_RESULTS_EMAIL,");
+		sql.append(" A.GRADING_RESULTS_SENT, A.HONOR_PLEDGE, A.ID, A.LIVE, A.LOCKED, A.MINT, A.MODIFIED_BY_DATE, A.MODIFIED_BY_USER,");
 		sql.append(" A.PARTS_CONTINUOUS, A.PARTS_SHOW_PRES, A.PASSWORD, A.PRESENTATION_TEXT,");
 		sql.append(" A.PUBLISHED, A.QUESTION_GROUPING, A.RANDOM_ACCESS,");
 		sql.append(" A.REVIEW_DATE, A.REVIEW_SHOW_CORRECT, A.REVIEW_SHOW_FEEDBACK, A.REVIEW_TIMING,");
@@ -953,6 +954,8 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 					((AssessmentGradingImpl) (assessment.getGrading())).initGradebookIntegration(SqlHelper.readBoolean(result, i++));
 					((AssessmentGradingImpl) (assessment.getGrading())).initGradebookRejectedAssessment(SqlHelper.readBoolean(result, i++));
 					((AssessmentGradingImpl) (assessment.getGrading())).initBlockGrading(SqlHelper.readBoolean(result, i++));
+					((AssessmentGradingImpl) (assessment.getGrading())).initResultsEmail(SqlHelper.readString(result, i++));
+					((AssessmentGradingImpl) (assessment.getGrading())).initResultsSent(SqlHelper.readBoolean(result, i++));
 					assessment.setRequireHonorPledge(SqlHelper.readBoolean(result, i++));
 					assessment.initId(SqlHelper.readId(result, i++));
 					assessment.initLive(SqlHelper.readBoolean(result, i++));
@@ -1346,15 +1349,16 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		sql.append("UPDATE MNEME_ASSESSMENT SET");
 		sql.append(" ARCHIVED=?, CONTEXT=?,");
 		sql.append(" DATES_ACCEPT_UNTIL=?, DATES_ARCHIVED=?, DATES_DUE=?, DATES_OPEN=?,");
-		sql.append(" GRADING_ANONYMOUS=?, GRADING_AUTO_RELEASE=?, GRADING_GRADEBOOK=?, GRADING_REJECTED=?, GRADING_BLOCKED=?,");
-		sql.append(" HONOR_PLEDGE=?, LIVE=?, LOCKED=?, MINT=?, MODIFIED_BY_DATE=?, MODIFIED_BY_USER=?,");
+		sql
+				.append(" GRADING_ANONYMOUS=?, GRADING_AUTO_RELEASE=?, GRADING_GRADEBOOK=?, GRADING_REJECTED=?, GRADING_BLOCKED=?, GRADING_RESULTS_EMAIL=?,");
+		sql.append(" GRADING_RESULTS_SENT=?, HONOR_PLEDGE=?, LIVE=?, LOCKED=?, MINT=?, MODIFIED_BY_DATE=?, MODIFIED_BY_USER=?,");
 		sql.append(" PARTS_CONTINUOUS=?, PARTS_SHOW_PRES=?, PASSWORD=?, PRESENTATION_TEXT=?,");
 		sql.append(" PUBLISHED=?, QUESTION_GROUPING=?, RANDOM_ACCESS=?,");
 		sql.append(" REVIEW_DATE=?, REVIEW_SHOW_CORRECT=?, REVIEW_SHOW_FEEDBACK=?, REVIEW_TIMING=?,");
 		sql.append(" SHOW_HINTS=?, SHOW_MODEL_ANSWER=?, SUBMIT_PRES_TEXT=?, TIME_LIMIT=?, TITLE=?, TRIES=?, TYPE=?, POOL=?, NEEDSPOINTS=?");
 		sql.append(" WHERE ID=?");
 
-		Object[] fields = new Object[38];
+		Object[] fields = new Object[40];
 		int i = 0;
 		fields[i++] = assessment.getArchived() ? "1" : "0";
 		fields[i++] = assessment.getContext();
@@ -1367,6 +1371,8 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		fields[i++] = assessment.getGrading().getGradebookIntegration() ? "1" : "0";
 		fields[i++] = assessment.getGrading().getGradebookRejectedAssessment() ? "1" : "0";
 		fields[i++] = assessment.getGrading().getBlockGrading() ? "1" : "0";
+		fields[i++] = assessment.getGrading().getResultsEmail();
+		fields[i++] = assessment.getGrading().getResultsSent() ? "1" : "0";
 		fields[i++] = assessment.getRequireHonorPledge() ? "1" : "0";
 		fields[i++] = assessment.getIsLive() ? "1" : "0";
 		fields[i++] = assessment.getIsLocked() ? "1" : "0";

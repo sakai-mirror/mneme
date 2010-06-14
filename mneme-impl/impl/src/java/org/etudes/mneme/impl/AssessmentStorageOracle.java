@@ -221,15 +221,15 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 		sql.append("INSERT INTO MNEME_ASSESSMENT (ID,");
 		sql.append(" ARCHIVED, CONTEXT, CREATED_BY_DATE, CREATED_BY_USER,");
 		sql.append(" DATES_ACCEPT_UNTIL, DATES_ARCHIVED, DATES_DUE, DATES_OPEN,");
-		sql.append(" GRADING_ANONYMOUS, GRADING_AUTO_RELEASE, GRADING_GRADEBOOK, GRADING_REJECTED, GRADING_BLOCKED,");
-		sql.append(" HONOR_PLEDGE, LIVE, LOCKED, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER,");
+		sql.append(" GRADING_ANONYMOUS, GRADING_AUTO_RELEASE, GRADING_GRADEBOOK, GRADING_REJECTED, GRADING_BLOCKED, GRADING_RESULTS_EMAIL,");
+		sql.append(" GRADING_RESULTS_SENT, HONOR_PLEDGE, LIVE, LOCKED, MINT, MODIFIED_BY_DATE, MODIFIED_BY_USER,");
 		sql.append(" PARTS_CONTINUOUS, PARTS_SHOW_PRES, PASSWORD, PRESENTATION_TEXT,");
 		sql.append(" PUBLISHED, QUESTION_GROUPING, RANDOM_ACCESS,");
 		sql.append(" REVIEW_DATE, REVIEW_SHOW_CORRECT, REVIEW_SHOW_FEEDBACK, REVIEW_TIMING,");
 		sql.append(" SHOW_HINTS, SHOW_MODEL_ANSWER, SUBMIT_PRES_TEXT, TIME_LIMIT, TITLE, TRIES, TYPE, POOL, NEEDSPOINTS)");
-		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		sql.append(" VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
-		Object[] fields = new Object[40];
+		Object[] fields = new Object[42];
 		int i = 0;
 		fields[i++] = id;
 		fields[i++] = assessment.getArchived() ? "1" : "0";
@@ -245,6 +245,8 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 		fields[i++] = assessment.getGrading().getGradebookIntegration() ? "1" : "0";
 		fields[i++] = assessment.getGrading().getGradebookRejectedAssessment() ? "1" : "0";
 		fields[i++] = assessment.getGrading().getBlockGrading() ? "1" : "0";
+		fields[i++] = assessment.getGrading().getResultsEmail();
+		fields[i++] = assessment.getGrading().getResultsSent() ? "1" : "0";
 		fields[i++] = assessment.getRequireHonorPledge() ? "1" : "0";
 		fields[i++] = assessment.getIsLive() ? "1" : "0";
 		fields[i++] = assessment.getIsLocked() ? "1" : "0";

@@ -52,6 +52,10 @@ public class AssessmentGradingImpl implements AssessmentGrading
 
 	protected transient Changeable owner = null;
 
+	protected String resultsEmail = null;
+
+	protected Boolean resultsSent = Boolean.FALSE;
+
 	/**
 	 * Construct.
 	 * 
@@ -124,6 +128,19 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getResultsEmail()
+	{
+		return this.resultsEmail;
+	}
+
+	public Boolean getResultsSent()
+	{
+		return this.resultsSent;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setAnonymous(Boolean setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
@@ -179,6 +196,36 @@ public class AssessmentGradingImpl implements AssessmentGrading
 		{
 			this.gradebookRejectedAssessment = Boolean.FALSE;
 		}
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setResultsEmail(String setting)
+	{
+		if (!Different.different(this.resultsEmail, setting)) return;
+
+		this.resultsEmail = setting;
+
+		// this is a change that cannot be made to locked assessments
+		this.assessment.lockedChanged = Boolean.TRUE;
+
+		this.owner.setChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setResultsSent(Boolean setting)
+	{
+		// use FALSE for null
+		if (setting == null) setting = Boolean.FALSE;
+
+		if (!Different.different(this.resultsSent, setting)) return;
+
+		this.resultsSent = setting;
 
 		this.owner.setChanged();
 	}
@@ -255,6 +302,28 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	}
 
 	/**
+	 * Init the email address for sending results to.
+	 * 
+	 * @param setting
+	 *        The email address string (comma separated email addresses) for sending results to.
+	 */
+	protected void initResultsEmail(String setting)
+	{
+		this.resultsEmail = setting;
+	}
+
+	/**
+	 * Init the flag that indicates that results email has been sent.
+	 * 
+	 * @param setting
+	 *        TRUE if the results email has been sent, FALSE if not.
+	 */
+	protected void initResultsSent(Boolean setting)
+	{
+		this.resultsSent = setting;
+	}
+
+	/**
 	 * Set as a copy of another.
 	 * 
 	 * @param other
@@ -269,5 +338,7 @@ public class AssessmentGradingImpl implements AssessmentGrading
 		this.gradebookIntegrationWas = other.gradebookIntegrationWas;
 		this.gradebookRejectedAssessment = other.gradebookRejectedAssessment;
 		this.anonymous = other.anonymous;
+		this.resultsEmail = other.resultsEmail;
+		this.resultsSent = other.resultsSent;
 	}
 }

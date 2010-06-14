@@ -23,4 +23,4 @@
 -- Mneme Assessment DDL changes between 2.0 and 2.1
 -----------------------------------------------------------------------------
 
-ALTER TABLE MNEME_ASSESSMENT ADD (GRADING_BLOCKED CHAR (1));
+ALTER TABLE MNEME_ASSESSMENT ADD (GRADING_BLOCKED CHAR (1), GRADING_RESULTS_EMAIL VARCHAR(255), GRADING_RESULTS_SENT CHAR(1));
