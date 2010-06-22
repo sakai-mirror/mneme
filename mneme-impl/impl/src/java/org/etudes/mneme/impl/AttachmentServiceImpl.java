@@ -1747,8 +1747,8 @@ public class AttachmentServiceImpl implements AttachmentService, EntityProducer
 				return;
 			}
 
-			// check that the assessment is allowed to be graded
-			if (assessment.getGrading().getBlockGrading())
+			// check that this is not a formal course evaluation
+			if (assessment.getFormalCourseEval())
 			{
 				throw new EntityPermissionException(sessionManager.getCurrentSessionUserId(), "access", ref.getReference());
 			}

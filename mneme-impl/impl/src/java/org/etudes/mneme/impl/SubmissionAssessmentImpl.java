@@ -166,6 +166,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean getFormalCourseEval()
+	{
+		return this.getAssessment().getFormalCourseEval();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getGradebookIntegration()
 	{
 		return this.getAssessment().getGradebookIntegration();
@@ -415,6 +423,22 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getResultsEmail()
+	{
+		return this.getAssessment().getResultsEmail();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Boolean getResultsSent()
+	{
+		return this.getAssessment().getResultsSent();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public AssessmentReview getReview()
 	{
 		return getAssessment().getReview();
@@ -567,6 +591,14 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
+	public void setFormalCourseEval(Boolean setting)
+	{
+		throw new IllegalArgumentException();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setHasTimeLimit(Boolean hasTimeLimit)
 	{
 		throw new IllegalArgumentException();
@@ -616,6 +648,22 @@ public class SubmissionAssessmentImpl implements Assessment
 	 * {@inheritDoc}
 	 */
 	public void setRequireHonorPledge(Boolean honorPledge)
+	{
+		throw new IllegalArgumentException();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setResultsEmail(String setting)
+	{
+		throw new IllegalArgumentException();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setResultsSent(Boolean setting)
 	{
 		throw new IllegalArgumentException();
 	}

@@ -114,8 +114,8 @@ public class GradeSubmissionView extends ControllerImpl
 			return;
 		}
 
-		// check that the assessment is allowed to be graded
-		if (submission.getAssessment().getGrading().getBlockGrading())
+		// check that the assessment is not a formal course evaluation
+		if (submission.getAssessment().getFormalCourseEval())
 		{
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;

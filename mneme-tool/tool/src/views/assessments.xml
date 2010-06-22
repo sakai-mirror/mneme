@@ -294,6 +294,10 @@
 					<container>
 						<dateEdit>
 							<model ref="assessment.dates.dueDate" type="date" />
+							<readOnly>
+								<decision model="assessment.formalCourseEval" />
+								<decision model="assessment.isLocked" />
+							</readOnly>
 						</dateEdit>
 					</container>
 				</column>
@@ -304,6 +308,10 @@
 					<container>
 						<dateEdit>
 							<model ref="assessment.dates.acceptUntilDate" type="date" />
+							<readOnly>
+								<decision model="assessment.formalCourseEval" />
+								<decision model="assessment.isLocked" />
+							</readOnly>
 						</dateEdit>
 					</container>
 				</column>

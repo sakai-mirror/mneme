@@ -34,14 +34,10 @@ public class AssessmentGradingImpl implements AssessmentGrading
 {
 	protected Boolean anonymous = Boolean.FALSE;
 
-	protected transient AssessmentImpl assessment = null;
-
 	protected Boolean autoRelease = Boolean.TRUE;
 
 	/** Track the original auto-release value. */
 	protected transient Boolean autoReleaseWas = Boolean.TRUE;
-
-	protected Boolean blocked = Boolean.FALSE;
 
 	protected Boolean gradebookIntegration = Boolean.FALSE;
 
@@ -52,28 +48,23 @@ public class AssessmentGradingImpl implements AssessmentGrading
 
 	protected transient Changeable owner = null;
 
-	protected String resultsEmail = null;
-
-	protected Boolean resultsSent = Boolean.FALSE;
-
 	/**
 	 * Construct.
 	 * 
 	 * @param other
 	 *        The other to copy.
 	 */
-	public AssessmentGradingImpl(AssessmentImpl assessment, AssessmentGradingImpl other, Changeable owner)
+	public AssessmentGradingImpl(AssessmentGradingImpl other, Changeable owner)
 	{
-		this(assessment, owner);
+		this(owner);
 		set(other);
 	}
 
 	/**
 	 * Construct.
 	 */
-	public AssessmentGradingImpl(AssessmentImpl assessment, Changeable owner)
+	public AssessmentGradingImpl(Changeable owner)
 	{
-		this.assessment = assessment;
 		this.owner = owner;
 	}
 
@@ -91,14 +82,6 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	public Boolean getAutoRelease()
 	{
 		return this.autoRelease;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Boolean getBlockGrading()
-	{
-		return this.blocked;
 	}
 
 	/**
@@ -123,19 +106,6 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	public Boolean getIsValid()
 	{
 		return Boolean.valueOf(!gradebookRejectedAssessment);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getResultsEmail()
-	{
-		return this.resultsEmail;
-	}
-
-	public Boolean getResultsSent()
-	{
-		return this.resultsSent;
 	}
 
 	/**
@@ -167,23 +137,6 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setBlockGrading(Boolean setting)
-	{
-		// for null, use the default FALSE
-		if (setting == null) setting = Boolean.FALSE;
-		if (this.blocked.equals(setting)) return;
-
-		this.blocked = setting;
-
-		// this is a change that cannot be made to locked assessments
-		this.assessment.lockedChanged = Boolean.TRUE;
-
-		this.owner.setChanged();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public void setGradebookIntegration(Boolean setting)
 	{
 		if (setting == null) throw new IllegalArgumentException();
@@ -196,36 +149,6 @@ public class AssessmentGradingImpl implements AssessmentGrading
 		{
 			this.gradebookRejectedAssessment = Boolean.FALSE;
 		}
-
-		this.owner.setChanged();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setResultsEmail(String setting)
-	{
-		if (!Different.different(this.resultsEmail, setting)) return;
-
-		this.resultsEmail = setting;
-
-		// this is a change that cannot be made to locked assessments
-		this.assessment.lockedChanged = Boolean.TRUE;
-
-		this.owner.setChanged();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setResultsSent(Boolean setting)
-	{
-		// use FALSE for null
-		if (setting == null) setting = Boolean.FALSE;
-
-		if (!Different.different(this.resultsSent, setting)) return;
-
-		this.resultsSent = setting;
 
 		this.owner.setChanged();
 	}
@@ -265,20 +188,6 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	}
 
 	/**
-	 * Init the blocked setting.
-	 * 
-	 * @param setting
-	 *        The block grading setting.
-	 */
-	protected void initBlockGrading(Boolean setting)
-	{
-		// for null, use the default FALSE
-		if (setting == null) setting = Boolean.FALSE;
-
-		this.blocked = setting;
-	}
-
-	/**
 	 * Initialize the gradebook integration, and set the "was" to the same.
 	 * 
 	 * @param gradebookIntegration
@@ -302,28 +211,6 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	}
 
 	/**
-	 * Init the email address for sending results to.
-	 * 
-	 * @param setting
-	 *        The email address string (comma separated email addresses) for sending results to.
-	 */
-	protected void initResultsEmail(String setting)
-	{
-		this.resultsEmail = setting;
-	}
-
-	/**
-	 * Init the flag that indicates that results email has been sent.
-	 * 
-	 * @param setting
-	 *        TRUE if the results email has been sent, FALSE if not.
-	 */
-	protected void initResultsSent(Boolean setting)
-	{
-		this.resultsSent = setting;
-	}
-
-	/**
 	 * Set as a copy of another.
 	 * 
 	 * @param other
@@ -333,12 +220,9 @@ public class AssessmentGradingImpl implements AssessmentGrading
 	{
 		this.autoRelease = other.autoRelease;
 		this.autoReleaseWas = other.autoReleaseWas;
-		this.blocked = other.blocked;
 		this.gradebookIntegration = other.gradebookIntegration;
 		this.gradebookIntegrationWas = other.gradebookIntegrationWas;
 		this.gradebookRejectedAssessment = other.gradebookRejectedAssessment;
 		this.anonymous = other.anonymous;
-		this.resultsEmail = other.resultsEmail;
-		this.resultsSent = other.resultsSent;
 	}
 }

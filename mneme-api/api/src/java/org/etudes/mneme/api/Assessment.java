@@ -84,6 +84,11 @@ public interface Assessment
 	AssessmentDates getDates();
 
 	/**
+	 * @return TRUE if this is marked as a formal course evaluation, FALSE if not.
+	 */
+	Boolean getFormalCourseEval();
+
+	/**
 	 * Check if grades are to be sent to the Gradebook application, considering type, points, hasPoints, and the grades setting.
 	 * 
 	 * @return TRUE if the assessment's grades are to be placed into the Gradebook, FALSE if not.
@@ -257,6 +262,16 @@ public interface Assessment
 	Boolean getRequireHonorPledge();
 
 	/**
+	 * @return the email address string for sending results to.
+	 */
+	String getResultsEmail();
+
+	/**
+	 * @return TRUE if the assessment results email was sent, FALSE if not.
+	 */
+	Boolean getResultsSent();
+
+	/**
 	 * Access the assessment review settings.
 	 * 
 	 * @return The assessment review settings.
@@ -370,6 +385,14 @@ public interface Assessment
 	void setContext(String context);
 
 	/**
+	 * Set the assessment's formal course evaluation setting.
+	 * 
+	 * @param setting
+	 *        The formal course evaluation setting.
+	 */
+	void setFormalCourseEval(Boolean setting);
+
+	/**
 	 * An alternate way to clear the time limit if set to false.
 	 * 
 	 * @param hasTimeLimit
@@ -424,6 +447,22 @@ public interface Assessment
 	 *        TRUE if this assessment requires an "honor pledge" from the user, FALSE if not.
 	 */
 	void setRequireHonorPledge(Boolean honorPledge);
+
+	/**
+	 * Set the email address for sending results to.
+	 * 
+	 * @param setting
+	 *        The email address string (comma separated email addresses) for sending results to.
+	 */
+	void setResultsEmail(String setting);
+
+	/**
+	 * Set if the assessment results were email was sent.
+	 * 
+	 * @param setting
+	 *        The results were sent setting.
+	 */
+	void setResultsSent(Boolean setting);
 
 	/**
 	 * Set the "show hints" setting

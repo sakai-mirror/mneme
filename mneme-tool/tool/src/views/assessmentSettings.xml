@@ -176,15 +176,27 @@
 
 						<dateEdit id="ddate" title="due-date">
 							<model ref="assessment.dates.dueDate" type="date" />
+							<readOnly>
+								<decision model="assessment.formalCourseEval" />
+								<decision model="assessment.isLocked" />
+							</readOnly>
 						</dateEdit>
 
 						<dateEdit id="adate" title="test-acceptUntilDate">
 							<model ref="assessment.dates.acceptUntilDate" type="date" />
+							<readOnly>
+								<decision model="assessment.formalCourseEval" />
+								<decision model="assessment.isLocked" />
+							</readOnly>
 						</dateEdit>
 					</container>
 				</section>
 
 				<selection title="allowTries">
+					<readOnly>
+						<decision model="assessment.formalCourseEval" />
+						<decision model="assessment.isLocked" />
+					</readOnly>
 					<model ref="assessment.hasTriesLimit" />
 					<selectionChoices>
 						<selectionChoice>
@@ -196,6 +208,10 @@
 							</valueMessage>
 							<container>
 								<countEdit>
+									<readOnly>
+										<decision model="assessment.formalCourseEval" />
+										<decision model="assessment.isLocked" />
+									</readOnly>
 									<model ref="assessment.tries" type="count" />
 									<minValue>
 										<model type="constant" value="1" />
@@ -444,32 +460,25 @@
 					</container>
 				</section>
 
-				<section>
+				<section treatment="indented">
+					<title>
+						<message selector="results-email-header">
+							<model type="icon" icon="/icons/grade.png" />
+						</message>
+					</title>
+					<included>
+						<compareDecision model="assessment.type" constant="survey" />
+					</included>
 					<container>
 
-						<selection title="grading-blocked-header">
-							<selectionChoices>
-								<selectionChoice>
-									<displayMessage>
-										<message selector="grading-blocked" />
-									</displayMessage>
-									<valueMessage>
-										<message template="true" />
-									</valueMessage>
-								</selectionChoice>
-							</selectionChoices>
-							<model ref="assessment.grading.blockGrading" />
-							<readOnly>
-								<decision model="assessment.isLocked" />
-							</readOnly>
-						</selection>
-
 						<textEdit title="results-email" cols="40">
-							<model ref="assessment.grading.resultsEmail" type="text" />
+							<model ref="assessment.resultsEmail" type="text" />
 							<readOnly>
+								<decision model="assessment.formalCourseEval" />
 								<decision model="assessment.isLocked" />
 							</readOnly>
 						</textEdit>
+
 					</container>
 				</section>
 
@@ -481,6 +490,37 @@
 					</title>
 					<model ref="assessment.password.password" type="text" />
 				</textEdit>
+
+				<section>
+					<included>
+						<compareDecision model="assessment.type" constant="survey" />
+					</included>
+					<container>
+
+						<selection>
+							<title>
+								<message selector="formal-eval-header">
+									<model type="icon" icon="/icons/grade.png" />
+								</message>
+							</title>
+							<selectionChoices>
+								<selectionChoice>
+									<displayMessage>
+										<message selector="formal-eval" />
+									</displayMessage>
+									<valueMessage>
+										<message template="true" />
+									</valueMessage>
+								</selectionChoice>
+							</selectionChoices>
+							<model ref="assessment.formalCourseEval" />
+							<readOnly>
+								<decision model="assessment.isLocked" />
+							</readOnly>
+						</selection>
+
+					</container>
+				</section>
 
 			</container>
 		</section>

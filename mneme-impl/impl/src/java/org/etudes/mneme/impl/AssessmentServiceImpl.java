@@ -523,6 +523,13 @@ public class AssessmentServiceImpl implements AssessmentService
 			assessment.getGrading().setAutoRelease(Boolean.FALSE);
 		}
 
+		// if type is changed from survey, clear formal evaluation
+		if ((((AssessmentImpl) assessment).getTypeChanged()) && (assessment.getType() != AssessmentType.survey))
+		{
+			// formal course evaluation is only for surveys
+			assessment.setFormalCourseEval(Boolean.FALSE);
+		}
+
 		// if any changes made, clear mint
 		if (assessment.getIsChanged())
 		{
