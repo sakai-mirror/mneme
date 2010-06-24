@@ -195,7 +195,6 @@
 				<selection title="allowTries">
 					<readOnly>
 						<decision model="assessment.formalCourseEval" />
-						<decision model="assessment.isLocked" />
 					</readOnly>
 					<model ref="assessment.hasTriesLimit" />
 					<selectionChoices>
@@ -210,7 +209,6 @@
 								<countEdit>
 									<readOnly>
 										<decision model="assessment.formalCourseEval" />
-										<decision model="assessment.isLocked" />
 									</readOnly>
 									<model ref="assessment.tries" type="count" />
 									<minValue>

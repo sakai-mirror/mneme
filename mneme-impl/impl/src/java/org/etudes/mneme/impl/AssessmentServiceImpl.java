@@ -530,6 +530,12 @@ public class AssessmentServiceImpl implements AssessmentService
 			assessment.setFormalCourseEval(Boolean.FALSE);
 		}
 
+		// enforce 1 try for formal course evaluation
+		if (assessment.getFormalCourseEval())
+		{
+			assessment.setTries(1);
+		}
+
 		// if any changes made, clear mint
 		if (assessment.getIsChanged())
 		{
