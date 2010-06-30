@@ -479,6 +479,14 @@ public class AssessmentImpl implements Assessment
 		// points if needed
 		if (!this.getIsPointsValid()) return Boolean.FALSE;
 
+		// formal course evaluations must have: due or accept until dates, and must have the results email set
+		if (this.getFormalCourseEval())
+		{
+			if (this.getResultsEmail() == null) return Boolean.FALSE;
+
+			if ((this.dates.getDueDate() == null) && (this.dates.getAcceptUntilDate() == null)) return Boolean.FALSE;
+		}
+
 		return Boolean.TRUE;
 	}
 
