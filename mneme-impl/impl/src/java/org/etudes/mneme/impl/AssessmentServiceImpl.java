@@ -1120,7 +1120,10 @@ public class AssessmentServiceImpl implements AssessmentService
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Save the assessment
+	 * 
+	 * @param assessment
+	 *        The assessment.
 	 */
 	protected void save(AssessmentImpl assessment)
 	{
@@ -1155,5 +1158,41 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// event
 		eventTrackingService.post(eventTrackingService.newEvent(event, getAssessmentReference(assessment.getId()), true));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Assessment> getAssessmentsNeedingResultsEmail()
+	{
+		List<Assessment>rv = new ArrayList<Assessment>();
+
+		// this gets the candidates - but does not check the close dates
+		List<AssessmentImpl> assessments = this.storage.getAssessmentsNeedingResultsEmail();
+
+		// TODO: security?
+		
+		// filter in those that are closed now
+		for (Assessment a : assessments)
+		{
+			if (a.getDates().getIsClosed())
+			{
+				rv.add(a);
+			}
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setResultsSent(Assessment assessment, Boolean setting)
+	{
+		if (assessment == null) throw new IllegalArgumentException();
+		if (setting == null) throw new IllegalArgumentException();
+
+		// TODO: security?
+		this.storage.setResultsSent(assessment.getId(), setting);
 	}
 }

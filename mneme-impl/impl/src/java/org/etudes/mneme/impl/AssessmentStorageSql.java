@@ -223,6 +223,16 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
+	public List<AssessmentImpl> getAssessmentsNeedingResultsEmail()
+	{
+		String where = "WHERE A.RESULTS_EMAIL IS NOT NULL AND A.PUBLISHED = '1' AND A.RESULTS_SENT='0'";
+
+		return readAssessments(where, null, null);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public AssessmentImpl getAssessment(String id)
 	{
 		return readAssessment(id);
@@ -471,6 +481,14 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 			}
 		}
 		((AssessmentPartsImpl) assessment.getParts()).clearDeleted();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setResultsSent(String id, Boolean setting)
+	{
+		setResultsSentTx(id, setting);
 	}
 
 	/**
@@ -922,8 +940,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT A.ARCHIVED, A.CONTEXT, A.CREATED_BY_DATE, A.CREATED_BY_USER,");
 		sql.append(" A.DATES_ACCEPT_UNTIL, A.DATES_ARCHIVED, A.DATES_DUE, A.DATES_OPEN,");
-		sql
-				.append(" A.GRADING_ANONYMOUS, A.GRADING_AUTO_RELEASE, A.GRADING_GRADEBOOK, A.GRADING_REJECTED, A.FORMAL_EVAL, A.RESULTS_EMAIL,");
+		sql.append(" A.GRADING_ANONYMOUS, A.GRADING_AUTO_RELEASE, A.GRADING_GRADEBOOK, A.GRADING_REJECTED, A.FORMAL_EVAL, A.RESULTS_EMAIL,");
 		sql.append(" A.RESULTS_SENT, A.HONOR_PLEDGE, A.ID, A.LIVE, A.LOCKED, A.MINT, A.MODIFIED_BY_DATE, A.MODIFIED_BY_USER,");
 		sql.append(" A.PARTS_CONTINUOUS, A.PARTS_SHOW_PRES, A.PASSWORD, A.PRESENTATION_TEXT,");
 		sql.append(" A.PUBLISHED, A.QUESTION_GROUPING, A.RANDOM_ACCESS,");
@@ -1242,6 +1259,28 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	 * 
 	 * @param assessment
 	 *        The assessment.
+	 */
+	protected void setResultsSentTx(String id, Boolean setting)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE MNEME_ASSESSMENT SET RESULTS_SENT=? WHERE ID=?");
+
+		Object[] fields = new Object[2];
+		int i = 0;
+		fields[i++] = setting ? "1" : "0";
+		fields[i++] = Long.valueOf(id);
+
+		if (!this.sqlService.dbWrite(sql.toString(), fields))
+		{
+			throw new RuntimeException("setResultsSentTx: dbWrite failed");
+		}
+	}
+
+	/**
+	 * Update an existing assessment access record (transaction code).
+	 * 
+	 * @param assessment
+	 *        The assessment.
 	 * @param part
 	 * @param detail
 	 */
@@ -1349,8 +1388,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		sql.append("UPDATE MNEME_ASSESSMENT SET");
 		sql.append(" ARCHIVED=?, CONTEXT=?,");
 		sql.append(" DATES_ACCEPT_UNTIL=?, DATES_ARCHIVED=?, DATES_DUE=?, DATES_OPEN=?,");
-		sql
-				.append(" GRADING_ANONYMOUS=?, GRADING_AUTO_RELEASE=?, GRADING_GRADEBOOK=?, GRADING_REJECTED=?, FORMAL_EVAL=?, RESULTS_EMAIL=?,");
+		sql.append(" GRADING_ANONYMOUS=?, GRADING_AUTO_RELEASE=?, GRADING_GRADEBOOK=?, GRADING_REJECTED=?, FORMAL_EVAL=?, RESULTS_EMAIL=?,");
 		sql.append(" RESULTS_SENT=?, HONOR_PLEDGE=?, LIVE=?, LOCKED=?, MINT=?, MODIFIED_BY_DATE=?, MODIFIED_BY_USER=?,");
 		sql.append(" PARTS_CONTINUOUS=?, PARTS_SHOW_PRES=?, PASSWORD=?, PRESENTATION_TEXT=?,");
 		sql.append(" PUBLISHED=?, QUESTION_GROUPING=?, RANDOM_ACCESS=?,");

@@ -144,6 +144,11 @@ public interface AssessmentService
 	Assessment getAssessment(String id);
 
 	/**
+	 * @return the assessments that need to have their results email sent. These are set for results email, are closed, and not yet sent.
+	 */
+	List<Assessment> getAssessmentsNeedingResultsEmail();
+
+	/**
 	 * Get all the assessments for the context, sorted. Does not include archived assessments.
 	 * 
 	 * @param context
@@ -220,4 +225,14 @@ public interface AssessmentService
 	 *         if the changes are not allowed to be saved due to policy violation.
 	 */
 	void saveAssessment(Assessment assessment) throws AssessmentPermissionException, AssessmentPolicyException;
+
+	/**
+	 * Mark the assessment as having the results email sent.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 * @param setting
+	 *        The setting.
+	 */
+	void setResultsSent(Assessment assessment, Boolean setting);
 }

@@ -1834,10 +1834,11 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// loop till told to stop
 		while ((!threadStop) && (!Thread.currentThread().isInterrupted()))
 		{
+			if (M_log.isDebugEnabled()) M_log.debug("run: running");
+
+			// first, close as needed submissions
 			try
 			{
-				if (M_log.isDebugEnabled()) M_log.debug("run: running");
-
 				// get a list of submissions that are open, timed, and well expired (considering double our grace period),
 				// or open and past an accept-until date
 				List<Submission> submissions = getTimedOutSubmissions(2 * MnemeService.GRACE);
@@ -1864,6 +1865,33 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 					{
 						autoCompleteSubmission(over, submission);
 					}
+				}
+			}
+			catch (Throwable e)
+			{
+				M_log.warn("run: will continue: ", e);
+			}
+			finally
+			{
+				// clear out any current current bindings
+				this.threadLocalManager.clear();
+			}
+
+			// next, check for just closed assessments that need results email
+			try
+			{
+				// get a list of assessments that are set for automatic email, have not yet sent their email, and are now closed
+				// or open and past an accept-until date
+				List<Assessment> assessments = this.assessmentService.getAssessmentsNeedingResultsEmail();
+
+				// for each one, format the results and email
+				for (Assessment assessment : assessments)
+				{
+					// TODO:
+					M_log.warn("Email results for assessment: " + assessment.getId());
+
+					// mark the assessment as having the results sent
+					this.assessmentService.setResultsSent(assessment, Boolean.TRUE);
 				}
 			}
 			catch (Throwable e)
