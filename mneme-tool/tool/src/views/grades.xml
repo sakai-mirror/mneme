@@ -52,7 +52,7 @@
 				<message selector="no-assessments" />
 			</emptyTitle>
 			<entityIncluded>
-				<decision model="assessment.grading.blockGrading" reversed="TRUE" />
+				<decision model="assessment.formalCourseEval" reversed="TRUE" />
 			</entityIncluded>
 			<columns>
 				<column pixels="16">
