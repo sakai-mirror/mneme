@@ -484,11 +484,11 @@ public class AssessmentImpl implements Assessment
 		{
 			if (this.getResultsEmail() == null) return Boolean.FALSE;
 		}
-		
+
 		// results email feature needs a due or accept until date
 		if (this.getResultsEmail() != null)
 		{
-			if ((this.dates.getDueDate() == null) && (this.dates.getAcceptUntilDate() == null)) return Boolean.FALSE;		
+			if ((this.dates.getDueDate() == null) && (this.dates.getAcceptUntilDate() == null)) return Boolean.FALSE;
 		}
 
 		return Boolean.TRUE;
@@ -632,9 +632,13 @@ public class AssessmentImpl implements Assessment
 		return this.resultsEmail;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public Boolean getResultsSent()
 	{
-		return this.resultsSent;
+		// null values are just like not sent
+		return this.resultsSent == null ? Boolean.FALSE : this.resultsSent;
 	}
 
 	/**
