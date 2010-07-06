@@ -62,9 +62,11 @@ import org.etudes.mneme.api.SubmissionService;
 import org.etudes.mneme.api.TypeSpecificAnswer;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.db.api.SqlService;
+import org.sakaiproject.email.cover.EmailService;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
@@ -1887,8 +1889,7 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				// for each one, format the results and email
 				for (Assessment assessment : assessments)
 				{
-					// TODO:
-					M_log.warn("Email results for assessment: " + assessment.getId());
+					emailResults(assessment);
 
 					// mark the assessment as having the results sent
 					this.assessmentService.setResultsSent(assessment, Boolean.TRUE);
@@ -1913,6 +1914,34 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 			{
 			}
 		}
+	}
+
+	/**
+	 * Format and send a results email for this assessment.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	protected void emailResults(Assessment assessment)
+	{
+		// to
+		String to = assessment.getResultsEmail();
+
+		// from
+		String from = "\"" + ServerConfigurationService.getString("ui.service", "Sakai") + "\"<no-reply@"
+				+ ServerConfigurationService.getServerName() + ">";
+
+		// subject TODO:
+		String subject = "Course Evaluation";
+
+		// the results TODO:
+		String content = "<p>a test</p>\n <b>some bold</b><br />some \nnormal and <i>italic</i><ul><li>item one</li><li>item two</li></ul>";
+
+		// for html
+		List<String> headers = new ArrayList<String>();
+		headers.add("content-type: text/html");
+
+		EmailService.send(from, to, subject, content, null, null, headers);
 	}
 
 	/**
