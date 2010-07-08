@@ -194,6 +194,8 @@ public class AssessmentSettingsView extends ControllerImpl
 		// read the form
 		String destination = uiService.decode(req, context);
 
+		boolean sendResultsEmail = false;
+
 		// if publish, set
 		if ("PUBLISH".equals(destination))
 		{
@@ -214,6 +216,14 @@ public class AssessmentSettingsView extends ControllerImpl
 			destination = context.getDestination();
 		}
 
+		else if (destination.equals("SEND"))
+		{
+			// we will do it later, after we save
+			sendResultsEmail = true;
+
+			destination = context.getDestination();
+		}
+
 		// commit the save
 		try
 		{
@@ -230,6 +240,12 @@ public class AssessmentSettingsView extends ControllerImpl
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.policy)));
 			return;
+		}
+
+		// if we need to send the results email, do so after the save
+		if (sendResultsEmail)
+		{
+			this.assessmentService.sendResults(assessment);
 		}
 
 		// if destination became null

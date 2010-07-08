@@ -477,6 +477,13 @@
 							</readOnly>
 						</textEdit>
 
+						<navigation title="send" description="send-description" style="BUTTON" submit="TRUE" destination="SEND">
+							<icon icon="/icons/save.png" style="LEFT" />
+							<included>
+								<decision model="assessment.resultsSent" />
+							</included>
+						</navigation>
+
 					</container>
 				</section>
 

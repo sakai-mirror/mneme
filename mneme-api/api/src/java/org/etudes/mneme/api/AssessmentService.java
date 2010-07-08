@@ -227,6 +227,14 @@ public interface AssessmentService
 	void saveAssessment(Assessment assessment) throws AssessmentPermissionException, AssessmentPolicyException;
 
 	/**
+	 * If the assessment is setup for sending email results, and is closed, send the email.
+	 * 
+	 * @param assessment
+	 *        The assessment.
+	 */
+	void sendResults(Assessment assessment);
+
+	/**
 	 * Mark the assessment as having the results email sent.
 	 * 
 	 * @param assessment

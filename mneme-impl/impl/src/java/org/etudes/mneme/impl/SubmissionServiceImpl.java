@@ -1917,6 +1917,26 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 	}
 
 	/**
+	 * Prepare a display string for the date.
+	 * 
+	 * @param date
+	 *        The date.
+	 * @return The display string for the date.
+	 */
+	protected String formatDate(Date date)
+	{
+		DateFormat format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.US);
+		String display = format.format(date);
+
+		// remove seconds
+		int i = display.lastIndexOf(":");
+		if ((i == -1) || ((i + 3) >= display.length())) return display;
+
+		String rv = display.substring(0, i) + display.substring(i + 3);
+		return rv;
+	}
+
+	/**
 	 * Format and send a results email for this assessment.
 	 * 
 	 * @param assessment
@@ -1934,14 +1954,198 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		// subject TODO:
 		String subject = "Course Evaluation";
 
-		// the results TODO:
-		String content = "<p>a test</p>\n <b>some bold</b><br />some \nnormal and <i>italic</i><ul><li>item one</li><li>item two</li></ul>";
-
 		// for html
 		List<String> headers = new ArrayList<String>();
 		headers.add("content-type: text/html");
 
-		EmailService.send(from, to, subject, content, null, null, headers);
+		// collect all the submissions for the assessment
+		List<Submission> submissions = findAssessmentSubmissions(assessment, SubmissionService.FindAssessmentSubmissionsSort.sdate_a, Boolean.FALSE,
+				null, null, null);
+
+		StringBuilder content = new StringBuilder();
+
+		// the assessment title, points
+		content.append("<p>");
+		content.append(format("results-assessment-title", assessment.getTitle()));
+		if (assessment.getHasPoints())
+		{
+			content.append("<br />");
+			content.append(format("results-assessment-total-points", assessment.getParts().getTotalPoints()));
+		}
+		content.append("</p>\n");
+
+		// date prepared
+		content.append("<p>");
+		content.append(format("results-date", formatDate(new Date())));
+		content.append("</p>\n");
+
+		// for each part
+		for (Part part : assessment.getParts().getParts())
+		{
+			// part title, count, instructions
+			content.append("<p>");
+			if (part.getTitle() != null)
+			{
+				content.append(format("results-part-title", part.getOrdering().getPosition(), assessment.getParts().getSize(), part.getTitle()));
+			}
+			else
+			{
+				content.append(format("results-part-title-no-title", part.getOrdering().getPosition(), assessment.getParts().getSize()));
+			}
+
+			if (assessment.getParts().getShowPresentation())
+			{
+				content.append("<br />");
+				content.append(FormattedText.convertFormattedTextToPlaintext(part.getPresentation().getText()));
+			}
+			content.append("</p>\n");
+
+			// for each question
+			for (Question question : part.getQuestionsUsed())
+			{
+				// question text
+				content.append("<p>");
+				if (question.getTypeSpecificQuestion().getUseQuestionPresentation())
+				{
+					content.append(FormattedText.convertFormattedTextToPlaintext(question.getPresentation().getText()));
+				}
+				else
+				{
+					content.append(question.getDescription());
+				}
+
+				// summary of submissions for this question
+
+				// for t/f, likert, mc - for each option, show correct markings, text, # of submissions picking this one, and %
+				if (question.getTypeSpecificQuestion() instanceof TrueFalseQuestionImpl)
+				{
+					TrueFalseQuestionImpl tsq = (TrueFalseQuestionImpl) question.getTypeSpecificQuestion();
+					content.append("<table>\n");
+					for (TrueFalseQuestionImpl.TrueFalseQuestionChoice choice : tsq.getChoices())
+					{
+						content.append("<tr><td>");
+						content.append(FormattedText.convertFormattedTextToPlaintext(choice.getText()));
+						content.append("</td><td>");
+						content.append(formatCountPercent(question, submissions, choice.getId()));
+						content.append("</td></tr>\n");
+					}
+					content.append("</table>\n");
+				}
+
+				else if (question.getTypeSpecificQuestion() instanceof MultipleChoiceQuestionImpl)
+				{
+					MultipleChoiceQuestionImpl tsq = (MultipleChoiceQuestionImpl) question.getTypeSpecificQuestion();
+					content.append("<table>\n");
+					for (MultipleChoiceQuestionImpl.MultipleChoiceQuestionChoice choice : tsq.getChoices())
+					{
+						content.append("<tr><td>");
+						content.append(FormattedText.convertFormattedTextToPlaintext(choice.getText()));
+						content.append("</td><td>");
+						content.append(formatCountPercent(question, submissions, choice.getId()));
+						content.append("</td></tr>\n");
+					}
+					content.append("</table>\n");
+				}
+
+				else if (question.getTypeSpecificQuestion() instanceof LikertScaleQuestionImpl)
+				{
+					LikertScaleQuestionImpl tsq = (LikertScaleQuestionImpl) question.getTypeSpecificQuestion();
+					content.append("<table>\n");
+					for (LikertScaleQuestionImpl.LikertScaleQuestionChoice choice : tsq.getChoices())
+					{
+						content.append("<tr><td>");
+						content.append(FormattedText.convertFormattedTextToPlaintext(choice.getText()));
+						content.append("</td><td>");
+						content.append(formatCountPercent(question, submissions, choice.getId()));
+						content.append("</td></tr>\n");
+					}
+					content.append("</table>\n");
+				}
+
+				// for essay, task - list each submission's answer inline (attachments?)
+
+				// for matching... ???
+
+				// for fill-in... ???
+
+				content.append("</p>\n");
+			}
+
+			if (!part.getOrdering().getIsLast())
+			{
+				content.append("<hr />\n");
+			}
+		}
+
+		EmailService.send(from, to, subject, content.toString(), null, null, headers);
+	}
+
+	/**
+	 * Count the answers to this question that match this target value, formatting count and percent for display.
+	 * 
+	 * @param question
+	 *        The question.
+	 * @param submissions
+	 *        The submissions to the assessment that has this question.
+	 * @param target
+	 *        The target answer value.
+	 * @return The formatted count and percent.
+	 */
+	protected String formatCountPercent(Question question, List<Submission> submissions, String target)
+	{
+		int count = 0;
+		int total = 0;
+		for (Submission s : submissions)
+		{
+			if (s.getIsPhantom()) continue;
+			if (!s.getIsComplete()) continue;
+
+			Answer a = s.getAnswer(question);
+			if (a != null)
+			{
+				total++;
+
+				if (a.getIsAnswered())
+				{
+					// does the answer's value match our target answer?
+					// Note: assume that the answer is one of the getData() strings
+					String[] answers = a.getTypeSpecificAnswer().getData();
+					if ((answers != null) && (answers.length > 0))
+					{
+						for (int i = 0; i < answers.length; i++)
+						{
+							if (answers[i].equals(target))
+							{
+								count++;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (total > 0)
+		{
+			int pct = (count * 100) / total;
+
+			return format("results-format-count", Integer.valueOf(count), Integer.valueOf(pct));
+		}
+
+		return format("results-no-answers");
+	}
+
+	/**
+	 * Format a message with the list of arguments.
+	 * 
+	 * @param key
+	 *        The message bundle key.
+	 * @param args
+	 *        Any number of arguments for the formatted message.
+	 * @return The formatted message.
+	 */
+	protected String format(String key, Object... args)
+	{
+		return this.messages.getFormattedMessage(key, args);
 	}
 
 	/**
