@@ -868,13 +868,13 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setResultsSent(Assessment assessment, Boolean setting)
+	public void setResultsSent(Assessment assessment, Date date)
 	{
 		if (assessment == null) throw new IllegalArgumentException();
-		if (setting == null) throw new IllegalArgumentException();
+		if (date == null) throw new IllegalArgumentException();
 
 		// TODO: security?
-		this.storage.setResultsSent(assessment.getId(), setting);
+		this.storage.setResultsSent(assessment.getId(), date);
 	}
 
 	/**
@@ -1033,7 +1033,7 @@ public class AssessmentServiceImpl implements AssessmentService
 		rv.initLocked(Boolean.FALSE);
 
 		// email results not sent
-		rv.initResultsSent(Boolean.FALSE);
+		rv.initResultsSent(null);
 
 		((AssessmentGradingImpl) (rv.getGrading())).initGradebookRejectedAssessment(Boolean.FALSE);
 

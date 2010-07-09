@@ -246,7 +246,7 @@ public class AssessmentStorageOracle extends AssessmentStorageSql implements Ass
 		fields[i++] = assessment.getGrading().getGradebookRejectedAssessment() ? "1" : "0";
 		fields[i++] = assessment.getFormalCourseEval() ? "1" : "0";
 		fields[i++] = assessment.getResultsEmail();
-		fields[i++] = assessment.getResultsSent() ? "1" : "0";
+		fields[i++] = (assessment.getResultsSent() == null) ? null : assessment.getResultsSent().getTime();
 		fields[i++] = assessment.getRequireHonorPledge() ? "1" : "0";
 		fields[i++] = assessment.getIsLive() ? "1" : "0";
 		fields[i++] = assessment.getIsLocked() ? "1" : "0";

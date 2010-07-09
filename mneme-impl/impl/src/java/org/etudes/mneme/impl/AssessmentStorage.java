@@ -190,12 +190,12 @@ public interface AssessmentStorage
 	void saveAssessment(AssessmentImpl assessment);
 
 	/**
-	 * Set this assessment's results sent flag
+	 * Set the date that the results email was sent.
 	 * 
-	 * @param id
-	 *        The assessment id.
-	 * @param setting
-	 *        TRUE the "sent" setting.
+	 * @param assessment
+	 *        The assessment.
+	 * @param date
+	 *        The date, or null to indicate not sent.
 	 */
-	void setResultsSent(String id, Boolean setting);
+	void setResultsSent(String id, Date date);
 }

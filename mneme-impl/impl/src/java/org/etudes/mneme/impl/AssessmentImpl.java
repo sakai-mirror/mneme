@@ -136,7 +136,7 @@ public class AssessmentImpl implements Assessment
 
 	protected String resultsEmail = null;
 
-	protected Boolean resultsSent = Boolean.FALSE;
+	protected Date resultsSent = null;
 
 	protected AssessmentReview review = null;
 
@@ -635,10 +635,9 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getResultsSent()
+	public Date getResultsSent()
 	{
-		// null values are just like not sent
-		return this.resultsSent == null ? Boolean.FALSE : this.resultsSent;
+		return this.resultsSent;
 	}
 
 	/**
@@ -946,14 +945,11 @@ public class AssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setResultsSent(Boolean setting)
+	public void setResultsSent(Date date)
 	{
-		// use FALSE for null
-		if (setting == null) setting = Boolean.FALSE;
+		if (!Different.different(this.resultsSent, date)) return;
 
-		if (!Different.different(this.resultsSent, setting)) return;
-
-		this.resultsSent = setting;
+		this.resultsSent = date;
 
 		this.changed.setChanged();
 	}
@@ -1270,14 +1266,14 @@ public class AssessmentImpl implements Assessment
 	}
 
 	/**
-	 * Init the flag that indicates that results email has been sent.
+	 * Init the date that the last results email was sent.
 	 * 
-	 * @param setting
-	 *        TRUE if the results email has been sent, FALSE if not.
+	 * @param date
+	 *        The date that the last results email was sent.
 	 */
-	protected void initResultsSent(Boolean setting)
+	protected void initResultsSent(Date date)
 	{
-		this.resultsSent = setting;
+		this.resultsSent = date;
 	}
 
 	/**

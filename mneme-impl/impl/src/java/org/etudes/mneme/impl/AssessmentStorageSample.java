@@ -670,7 +670,7 @@ public class AssessmentStorageSample implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setResultsSent(String id, Boolean setting)
+	public void setResultsSent(String id, Date date)
 	{
 		// TODO:
 	}

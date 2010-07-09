@@ -24,6 +24,7 @@
 
 package org.etudes.mneme.api;
 
+import java.util.Date;
 import java.util.List;
 
 import org.sakaiproject.user.api.User;
@@ -267,9 +268,9 @@ public interface Assessment
 	String getResultsEmail();
 
 	/**
-	 * @return TRUE if the assessment results email was sent, FALSE if not.
+	 * @return the date when the results email was last sent, or null if it has not been sent.
 	 */
-	Boolean getResultsSent();
+	Date getResultsSent();
 
 	/**
 	 * Access the assessment review settings.
@@ -457,12 +458,12 @@ public interface Assessment
 	void setResultsEmail(String setting);
 
 	/**
-	 * Set if the assessment results were email was sent.
+	 * Set when assessment results email was last sent.
 	 * 
-	 * @param setting
-	 *        The results were sent setting.
+	 * @param date
+	 *        The date that the results email was last sent, or null to indicate that it was not sent.
 	 */
-	void setResultsSent(Boolean setting);
+	void setResultsSent(Date date);
 
 	/**
 	 * Set the "show hints" setting

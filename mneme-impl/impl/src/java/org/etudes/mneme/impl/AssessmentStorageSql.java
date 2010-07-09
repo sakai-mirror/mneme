@@ -225,7 +225,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	 */
 	public List<AssessmentImpl> getAssessmentsNeedingResultsEmail()
 	{
-		String where = "WHERE A.RESULTS_EMAIL IS NOT NULL AND A.PUBLISHED = '1' AND A.RESULTS_SENT='0'";
+		String where = "WHERE A.RESULTS_EMAIL IS NOT NULL AND A.PUBLISHED = '1' AND A.RESULTS_SENT IS NULL";
 
 		return readAssessments(where, null, null);
 	}
@@ -486,9 +486,9 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setResultsSent(String id, Boolean setting)
+	public void setResultsSent(String id, Date date)
 	{
-		setResultsSentTx(id, setting);
+		setResultsSentTx(id, date);
 	}
 
 	/**
@@ -972,7 +972,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 					((AssessmentGradingImpl) (assessment.getGrading())).initGradebookRejectedAssessment(SqlHelper.readBoolean(result, i++));
 					assessment.initFormalCourseEval(SqlHelper.readBoolean(result, i++));
 					assessment.initResultsEmail(SqlHelper.readString(result, i++));
-					assessment.initResultsSent(SqlHelper.readBoolean(result, i++));
+					assessment.initResultsSent(SqlHelper.readDate(result, i++));
 					assessment.setRequireHonorPledge(SqlHelper.readBoolean(result, i++));
 					assessment.initId(SqlHelper.readId(result, i++));
 					assessment.initLive(SqlHelper.readBoolean(result, i++));
@@ -1255,19 +1255,19 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 	}
 
 	/**
-	 * Update an existing assessment access record (transaction code).
+	 * Update the assessment email results sent date (transaction code).
 	 * 
 	 * @param assessment
 	 *        The assessment.
 	 */
-	protected void setResultsSentTx(String id, Boolean setting)
+	protected void setResultsSentTx(String id, Date date)
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("UPDATE MNEME_ASSESSMENT SET RESULTS_SENT=? WHERE ID=?");
 
 		Object[] fields = new Object[2];
 		int i = 0;
-		fields[i++] = setting ? "1" : "0";
+		fields[i++] = (date == null) ? null : date.getTime();
 		fields[i++] = Long.valueOf(id);
 
 		if (!this.sqlService.dbWrite(sql.toString(), fields))
@@ -1410,7 +1410,7 @@ public abstract class AssessmentStorageSql implements AssessmentStorage
 		fields[i++] = assessment.getGrading().getGradebookRejectedAssessment() ? "1" : "0";
 		fields[i++] = assessment.getFormalCourseEval() ? "1" : "0";
 		fields[i++] = assessment.getResultsEmail();
-		fields[i++] = assessment.getResultsSent() ? "1" : "0";
+		fields[i++] = (assessment.getResultsSent() == null) ? null : assessment.getResultsSent().getTime();
 		fields[i++] = assessment.getRequireHonorPledge() ? "1" : "0";
 		fields[i++] = assessment.getIsLive() ? "1" : "0";
 		fields[i++] = assessment.getIsLocked() ? "1" : "0";

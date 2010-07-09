@@ -477,10 +477,19 @@
 							</readOnly>
 						</textEdit>
 
-						<navigation title="send" description="send-description" style="BUTTON" submit="TRUE" destination="SEND">
-							<icon icon="/icons/save.png" style="LEFT" />
+						<instructions>
+							<message selector="results-last-sent">
+								<model type="date" ref="assessment.resultsSent" />
+							</message>
 							<included>
-								<decision model="assessment.resultsSent" />
+								<hasValueDecision model="assessment.resultsSent" />
+							</included>
+						</instructions>
+
+						<navigation title="send" description="send-description" style="BUTTON" submit="TRUE" destination="SEND">
+							<icon icon="/icons/email_go.png" style="LEFT" />
+							<included>
+								<hasValueDecision model="assessment.resultsSent" />
 							</included>
 						</navigation>
 

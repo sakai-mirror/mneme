@@ -1890,9 +1890,6 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 				for (Assessment assessment : assessments)
 				{
 					emailResults(assessment);
-
-					// mark the assessment as having the results sent
-					this.assessmentService.setResultsSent(assessment, Boolean.TRUE);
 				}
 			}
 			catch (Throwable e)
@@ -2574,6 +2571,9 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 		String content = formatter.formatResults(assessment, submissions);
 
 		EmailService.send(from, to, subject, content, null, null, headers);
+		
+		// mark the assessment as having the results sent
+		this.assessmentService.setResultsSent(assessment, new Date());
 	}
 
 	/**

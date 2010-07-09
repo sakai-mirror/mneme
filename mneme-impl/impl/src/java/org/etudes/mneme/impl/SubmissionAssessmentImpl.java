@@ -24,6 +24,7 @@
 
 package org.etudes.mneme.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -431,7 +432,7 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public Boolean getResultsSent()
+	public Date getResultsSent()
 	{
 		return this.getAssessment().getResultsSent();
 	}
@@ -663,7 +664,7 @@ public class SubmissionAssessmentImpl implements Assessment
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setResultsSent(Boolean setting)
+	public void setResultsSent(Date setting)
 	{
 		throw new IllegalArgumentException();
 	}

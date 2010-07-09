@@ -235,12 +235,12 @@ public interface AssessmentService
 	void sendResults(Assessment assessment);
 
 	/**
-	 * Mark the assessment as having the results email sent.
+	 * Set the date that the results email was sent.
 	 * 
 	 * @param assessment
 	 *        The assessment.
-	 * @param setting
-	 *        The setting.
+	 * @param date
+	 *        The date, or null to indicate not sent.
 	 */
-	void setResultsSent(Assessment assessment, Boolean setting);
+	void setResultsSent(Assessment assessment, Date date);
 }
