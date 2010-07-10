@@ -445,6 +445,8 @@ public class ResultsFormatterImpl
 	 */
 	protected String stripHtml(String source)
 	{
+		if (source == null) return "";
+
 		// remove \r - convertFormattedTextToPlaintext won't do this.
 		source = M_patternCR.matcher(source).replaceAll("");
 
