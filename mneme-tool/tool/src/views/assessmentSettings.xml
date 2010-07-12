@@ -92,6 +92,27 @@
 									<valueMessage>
 										<message template="survey" />
 									</valueMessage>
+									<container separate="TRUE" indented="TRUE">
+										<selection>
+											<selectionChoices>
+												<selectionChoice>
+													<displayMessage>
+														<message selector="formal-eval" />
+													</displayMessage>
+													<valueMessage>
+														<message template="true" />
+													</valueMessage>
+												</selectionChoice>
+											</selectionChoices>
+											<model ref="assessment.formalCourseEval" />
+											<readOnly>
+												<decision model="assessment.isLocked" />
+											</readOnly>
+										<included>
+											<compareDecision model="assessment.type" constant="survey" />
+										</included>
+										</selection>
+									</container>
 								</selectionChoice>
 							</selectionChoices>
 							<included>
@@ -147,6 +168,39 @@
 							</included>
 						</navigation>
 
+						<!-- display formal course evaluation if locked -->
+						<section>
+							<included>
+								<decision model="assessment.isLocked" />
+								<decision model="assessment.formalCourseEval" />
+							</included>
+							<container>
+		
+								<selection>
+									<title>
+										<message selector="formal-eval-header">
+											<model type="icon" icon="/icons/survey_type.png" />
+										</message>
+									</title>
+									<selectionChoices>
+										<selectionChoice>
+											<displayMessage>
+												<message selector="formal-eval" />
+											</displayMessage>
+											<valueMessage>
+												<message template="true" />
+											</valueMessage>
+										</selectionChoice>
+									</selectionChoices>
+									<model ref="assessment.formalCourseEval" />
+									<readOnly>
+										<decision model="assessment.isLocked" />
+									</readOnly>
+								</selection>
+		
+							</container>
+						</section>
+
 						<selection title="needs-points">
 							<selectionChoices>
 								<selectionChoice>
@@ -193,9 +247,9 @@
 				</section>
 
 				<selection title="allowTries">
-					<readOnly>
-						<decision model="assessment.formalCourseEval" />
-					</readOnly>
+					<included>
+						<decision reversed="TRUE" model="assessment.formalCourseEval" />
+					</included>
 					<model ref="assessment.hasTriesLimit" />
 					<selectionChoices>
 						<selectionChoice>
@@ -504,37 +558,6 @@
 					</title>
 					<model ref="assessment.password.password" type="text" />
 				</textEdit>
-
-				<section>
-					<included>
-						<compareDecision model="assessment.type" constant="survey" />
-					</included>
-					<container>
-
-						<selection>
-							<title>
-								<message selector="formal-eval-header">
-									<model type="icon" icon="/icons/grade.png" />
-								</message>
-							</title>
-							<selectionChoices>
-								<selectionChoice>
-									<displayMessage>
-										<message selector="formal-eval" />
-									</displayMessage>
-									<valueMessage>
-										<message template="true" />
-									</valueMessage>
-								</selectionChoice>
-							</selectionChoices>
-							<model ref="assessment.formalCourseEval" />
-							<readOnly>
-								<decision model="assessment.isLocked" />
-							</readOnly>
-						</selection>
-
-					</container>
-				</section>
 
 			</container>
 		</section>

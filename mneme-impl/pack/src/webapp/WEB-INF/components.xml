@@ -271,10 +271,13 @@
 
 		<property name="bundle"><value>mnemeImpl</value></property>
 		<property name="contentHostingService"><ref bean="org.sakaiproject.content.api.ContentHostingService"/></property>
+		<property name="emailService"><ref bean="org.sakaiproject.email.api.EmailService"/></property>
 		<property name="eventTrackingService"><ref bean="org.sakaiproject.event.api.EventTrackingService"/></property>
 		<property name="sessionManager"><ref bean="org.sakaiproject.tool.api.SessionManager"/></property>
 		<property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 		<property name="securityServiceSakai"><ref bean="org.sakaiproject.authz.api.SecurityService"/></property>
+		<property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
+		<property name="siteService"><ref bean="org.sakaiproject.site.api.SiteService"/></property>	
 		<property name="threadLocalManager"><ref bean="org.sakaiproject.thread_local.api.ThreadLocalManager"/></property>		
 		<property name="userDirectoryService"><ref bean="org.sakaiproject.user.api.UserDirectoryService"/></property>
 

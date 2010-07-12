@@ -98,6 +98,27 @@
 									<valueMessage>
 										<message template="survey" />
 									</valueMessage>
+									<container separate="TRUE" indented="TRUE">
+										<selection>
+											<selectionChoices>
+												<selectionChoice>
+													<displayMessage>
+														<message selector="formal-eval" />
+													</displayMessage>
+													<valueMessage>
+														<message template="true" />
+													</valueMessage>
+												</selectionChoice>
+											</selectionChoices>
+											<model ref="assessment.formalCourseEval" />
+											<readOnly>
+												<decision model="assessment.isLocked" />
+											</readOnly>
+										<included>
+											<compareDecision model="assessment.type" constant="survey" />
+										</included>
+										</selection>
+									</container>
 								</selectionChoice>
 							</selectionChoices>
 							<included>
