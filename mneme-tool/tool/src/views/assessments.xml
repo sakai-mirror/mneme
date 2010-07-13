@@ -360,7 +360,10 @@
 						</navigation>
 					</navigations>
 				</column>
-				<column centered="TRUE" pixels="64" wrap="FALSE">
+				<column centered="TRUE" pixels="16" wrap="FALSE">
+					<entityIncluded>
+						<decision reversed="TRUE" model="assessment.formalCourseEval" />
+					</entityIncluded>
 					<navigations>
 						<navigation style="LINK" submit="TRUE" description="special-access-view">
 							<icon icon="/icons/access_view.png" style="LEFT" />
@@ -384,7 +387,10 @@
 								<decision reversed="TRUE" model="assessment.specialAccess.isDefined" />
 							</included>
 						</navigation>
-						<text selector="blank" />
+					</navigations>
+				</column>
+				<column centered="TRUE" pixels="16" wrap="FALSE">
+					<navigations>
 						<navigation style="LINK" submit="TRUE" description="duplicate">
 							<icon icon="/icons/page_copy.png" style="LEFT" />
 							<destination template="DUPLICATE:{0}">
