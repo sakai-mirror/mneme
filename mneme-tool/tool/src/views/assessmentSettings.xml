@@ -518,9 +518,6 @@
 							<model type="icon" icon="/icons/grade.png" />
 						</message>
 					</title>
-					<included>
-						<compareDecision model="assessment.type" constant="survey" />
-					</included>
 					<container>
 
 						<textEdit title="results-email" cols="40">
