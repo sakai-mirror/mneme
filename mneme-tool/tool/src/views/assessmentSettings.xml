@@ -541,6 +541,8 @@
 							<icon icon="/icons/email_go.png" style="LEFT" />
 							<included>
 								<hasValueDecision model="assessment.resultsSent" />
+								<hasValueDecision model="assessment.resultsEmail" />
+								<decision model="assessment.dates.isClosed" />
 							</included>
 						</navigation>
 
