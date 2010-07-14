@@ -43,6 +43,7 @@ import org.etudes.mneme.api.AssessmentService;
 import org.etudes.mneme.api.AssessmentSpecialAccess;
 import org.etudes.mneme.api.AssessmentType;
 import org.etudes.mneme.api.Attribution;
+import org.etudes.mneme.api.MnemeService;
 import org.etudes.mneme.api.Part;
 import org.etudes.mneme.api.PartDetail;
 import org.etudes.mneme.api.Pool;
@@ -799,6 +800,9 @@ public class AssessmentImpl implements Assessment
 		// for null, use the default FALSE
 		if (setting == null) setting = Boolean.FALSE;
 		if (this.formalCourseEval.equals(setting)) return;
+
+		// we need special permission (fail quietly)
+		if (!assessmentService.allowSetFormalCourseEvaluation(getContext())) return;
 
 		this.formalCourseEval = setting;
 

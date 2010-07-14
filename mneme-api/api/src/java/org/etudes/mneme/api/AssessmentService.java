@@ -88,6 +88,15 @@ public interface AssessmentService
 	Boolean allowRemoveAssessment(Assessment assessment);
 
 	/**
+	 * Check if the user is allowed to setup a formal course evaluation.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return TRUE if the user is allowed, FALSE if not.
+	 */
+	Boolean allowSetFormalCourseEvaluation(String context);
+
+	/**
 	 * Apply base date changes to open, due and accept until dates of this context's unarchived assessments
 	 * 
 	 * @param context

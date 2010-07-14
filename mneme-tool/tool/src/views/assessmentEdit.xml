@@ -116,6 +116,7 @@
 											</readOnly>
 										<included>
 											<compareDecision model="assessment.type" constant="survey" />
+											<hasValueDecision model="allowEval" />
 										</included>
 										</selection>
 									</container>

@@ -198,6 +198,22 @@ public class AssessmentServiceImpl implements AssessmentService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Boolean allowSetFormalCourseEvaluation(String context)
+	{
+		if (context == null) throw new IllegalArgumentException();
+		String userId = sessionManager.getCurrentSessionUserId();
+
+		if (M_log.isDebugEnabled()) M_log.debug("allowSetFormalCourseEvaluation: " + context + ": " + userId);
+
+		// check permission - user must have COURSE_EVAL_PERMISSION in the context
+		boolean ok = securityService.checkSecurity(userId, MnemeService.COURSE_EVAL_PERMISSION, context);
+
+		return ok;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public void applyBaseDateTx(String context, int time_diff)
 	{
 		try
@@ -1034,6 +1050,9 @@ public class AssessmentServiceImpl implements AssessmentService
 
 		// email results not sent
 		rv.initResultsSent(null);
+
+		// newly copied are never formal course evaluation
+		rv.initFormalCourseEval(Boolean.FALSE);
 
 		((AssessmentGradingImpl) (rv.getGrading())).initGradebookRejectedAssessment(Boolean.FALSE);
 

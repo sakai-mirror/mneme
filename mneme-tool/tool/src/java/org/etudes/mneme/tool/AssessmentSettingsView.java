@@ -96,6 +96,12 @@ public class AssessmentSettingsView extends ControllerImpl
 			return;
 		}
 
+		// check for formal course evaluation permission
+		if (assessmentService.allowSetFormalCourseEvaluation(assessment.getContext()))
+		{
+			context.put("allowEval", Boolean.TRUE);
+		}
+
 		// format an invalid message
 		if ((!assessment.getIsValid()) && (!assessment.getPublished()))
 		{
