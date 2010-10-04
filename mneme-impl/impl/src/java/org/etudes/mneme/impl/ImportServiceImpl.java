@@ -235,22 +235,31 @@ public class ImportServiceImpl implements ImportService
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Find the sites in which this user has this permission.
+	 * 
+	 * @param userId
+	 *        The user id.
+	 * @param permission
+	 *        The security permission.
+	 * @param excludeContext
+	 *        a context to skip.
+	 * @return The List of Ent's of sites in which this user has this permission.
 	 */
-	public List<Ent> getAssignmentSites(String userId)
+	protected List<Ent> getAuthSites(String userId, String permission, String excludeContext)
 	{
-		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
-
 		List<Ent> rv = new ArrayList<Ent>();
 
 		// get the authz groups in which this user has assignment permission
-		Set refs = this.authzGroupService.getAuthzGroupsIsAllowed(userId, "asn.new", null);
+		Set refs = this.authzGroupService.getAuthzGroupsIsAllowed(userId, permission, null);
 		for (Object o : refs)
 		{
 			String ref = (String) o;
 
 			// each is a site ref
 			Reference siteRef = this.entityManager.newReference(ref);
+
+			// skip this one
+			if ((excludeContext != null) && siteRef.getId().equals(excludeContext)) continue;
 
 			// get the site display
 			String display = this.siteService.getSiteDisplay(siteRef.getId());
@@ -272,6 +281,16 @@ public class ImportServiceImpl implements ImportService
 		Collections.sort(rv, new EntComparator());
 
 		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Ent> getAssignmentSites(String userId)
+	{
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		return getAuthSites(userId, "asn.new", null);
 	}
 
 	/**
@@ -2021,5 +2040,38 @@ public class ImportServiceImpl implements ImportService
 		String sql = "SHOW TABLES LIKE '" + table + "'";
 		List rv = this.sqlService.dbRead(sql);
 		return !rv.isEmpty();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Ent> getAssessments(String context)
+	{
+		List<Ent> rv = new ArrayList<Ent>();
+
+		List<Assessment> assessments = this.assessmentService
+				.getContextAssessments(context, AssessmentService.AssessmentsSort.title_a, Boolean.FALSE);
+		for (Assessment assessment : assessments)
+		{
+			Ent ent = new EntImpl(assessment.getId(), assessment.getTitle());
+			rv.add(ent);
+		}
+
+		return rv;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<Ent> getMnemeSites(String userId, String context)
+	{
+		if (userId == null) userId = sessionManager.getCurrentSessionUserId();
+
+		return getAuthSites(userId, "mneme.manage", context);
+	}
+
+	public void importAssessment(String id, String context, boolean draftSource) throws AssessmentPermissionException
+	{
+		// TODO
 	}
 }

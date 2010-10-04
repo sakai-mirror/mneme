@@ -32,6 +32,15 @@ import java.util.List;
 public interface ImportService
 {
 	/**
+	 * The the Assessments in this context that can be imported.
+	 * 
+	 * @param context
+	 *        The context.
+	 * @return A list of Assessment "Ent"s (id and description).
+	 */
+	List<Ent> getAssessments(String context);
+
+	/**
 	 * The the Assignments in this context that can be imported as pools.
 	 * 
 	 * @param context
@@ -48,6 +57,17 @@ public interface ImportService
 	 * @return A list of Assignment site "Ent"s (id and description).
 	 */
 	List<Ent> getAssignmentSites(String userId);
+
+	/**
+	 * The the sites where this user has Mneme authoring permissions.
+	 * 
+	 * @param userId
+	 *        The user id.
+	 * @param context
+	 *        A context to exclude from the list.
+	 * @return A list of Assignment site "Ent"s (id and description).
+	 */
+	List<Ent> getMnemeSites(String userId, String context);
 
 	/**
 	 * @return TRUE if we will offer import from assignments support, FALSE if not.
@@ -97,6 +117,20 @@ public interface ImportService
 	 *         if the user does not have permission to create pools and questions.
 	 */
 	void importAssessment(String id, String context) throws AssessmentPermissionException;
+
+	/**
+	 * Import the Assessment with this id into this context.
+	 * 
+	 * @param id
+	 *        The id of the Assignment to import.
+	 * @param context
+	 *        The context where the new pool will live.
+	 * @param draftSource
+	 *        if true, the source Assignment will be changed to draft and removed from the gradebook
+	 * @throws AssessmentPermissionException
+	 *         if the user does not have permission to create pools and questions.
+	 */
+	void importAssessment(String id, String context, boolean draftSource) throws AssessmentPermissionException;
 
 	/**
 	 * Import the Assignment with this id into this context as a pool.

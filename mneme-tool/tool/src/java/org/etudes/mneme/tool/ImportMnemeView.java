@@ -3,11 +3,8 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2008, 2009, 2010 Etudes, Inc.
+ * Copyright (c) 2010 Etudes, Inc.
  * 
- * Portions completed before September 1, 2008
- * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +22,7 @@
 package org.etudes.mneme.tool;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,19 +30,25 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.etudes.ambrosia.api.Context;
+import org.etudes.ambrosia.api.Values;
 import org.etudes.ambrosia.util.ControllerImpl;
+import org.etudes.mneme.api.AssessmentPermissionException;
+import org.etudes.mneme.api.Ent;
 import org.etudes.mneme.api.ImportService;
 import org.etudes.mneme.api.PoolService;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.util.Web;
 
 /**
- * The /import_pool view for the mneme tool.
+ * The /import_mneme view for the mneme tool.
  */
-public class ImportPoolView extends ControllerImpl
+public class ImportMnemeView extends ControllerImpl
 {
 	/** Our log. */
-	private static Log M_log = LogFactory.getLog(ImportPoolView.class);
+	private static Log M_log = LogFactory.getLog(ImportMnemeView.class);
+
+	/** Dependency: ImportService */
+	protected ImportService importService = null;
 
 	/** Pool Service */
 	protected PoolService poolService = null;
@@ -65,11 +69,14 @@ public class ImportPoolView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pools sort
-		if (params.length != 3)
+		// [2] pools sort, [3] source context
+		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
+		String poolsSort = params[2];
+		context.put("poolsSort", poolsSort);
+		String sourceContext = params[3];
 
 		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 		{
@@ -78,32 +85,13 @@ public class ImportPoolView extends ControllerImpl
 			return;
 		}
 
-		String poolsSort = params[2];
-
-		context.put("poolsSort", poolsSort);
-
-		// offer support for import from samigo and assignment
-		context.put("tq", this.importService.getOfferSamigo());
-		context.put("assignment", this.importService.getOfferAssignment());
-		context.put("mneme", Boolean.TRUE);
+		// the list of importable assignments for this site
+		List<Ent> assessments = this.importService.getAssessments(sourceContext);
+		context.put("assessments", assessments);
 
 		// render
 		uiService.render(ui, context);
 	}
-
-	/**
-	 * Set the ImportService
-	 * 
-	 * @param service
-	 *        the ImportService.
-	 */
-	public void setImportService(ImportService service)
-	{
-		this.importService = service;
-	}
-
-	/** Dependency: ImportService */
-	protected ImportService importService = null;
 
 	/**
 	 * Final initialization, once all dependencies are set.
@@ -119,25 +107,64 @@ public class ImportPoolView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pools sort
-		if (params.length != 3)
+		// [2] pools sort, [3] source context
+		if (params.length != 4)
 		{
 			throw new IllegalArgumentException();
 		}
+		String poolsSort = params[2];
+		String sourceContext = params[3];
 
-		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
+		String toolContext = toolManager.getCurrentPlacement().getContext();
+
+		// if the source is the same site as this one, we will draftSource when we import
+		boolean draftSource = (sourceContext.equals(toolContext));
+
+		if (!this.poolService.allowManagePools(toolContext))
 		{
 			// redirect to error
 			res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
 			return;
 		}
 
-		// String poolsSort = params[2];
+		Values selectedPools = this.uiService.newValues();
+		context.put("selectedAssignments", selectedPools);
 
 		// read the form
 		String destination = uiService.decode(req, context);
 
+		// import the pools
+		if ("IMPORT".equals(destination))
+		{
+			for (String id : selectedPools.getValues())
+			{
+				try
+				{
+					this.importService.importAssessment(id, toolContext, draftSource);
+				}
+				catch (AssessmentPermissionException e)
+				{
+					// redirect to error
+					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+					return;
+				}
+			}
+
+			destination = "/pools/" + poolsSort;
+		}
+
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
+	}
+
+	/**
+	 * Set the ImportService
+	 * 
+	 * @param service
+	 *        the ImportService.
+	 */
+	public void setImportService(ImportService service)
+	{
+		this.importService = service;
 	}
 
 	/**
