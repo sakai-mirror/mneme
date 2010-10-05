@@ -25,6 +25,7 @@
 package org.etudes.mneme.api;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * ImportService provides support for import into Mneme.
@@ -119,18 +120,18 @@ public interface ImportService
 	void importAssessment(String id, String context) throws AssessmentPermissionException;
 
 	/**
-	 * Import the Assessment with this id into this context.
+	 * Import the Mneme Assessments with these ids into this context.
 	 * 
-	 * @param id
-	 *        The id of the Assignment to import.
-	 * @param context
-	 *        The context where the new pool will live.
-	 * @param draftSource
-	 *        if true, the source Assignment will be changed to draft and removed from the gradebook
+	 * @param ids
+	 *        The Set of ids of the Assessments to import.
+	 * @param fromContext
+	 *        The context source for the assessments.
+	 * @param toContext
+	 *        The context where the new assessments will live.
 	 * @throws AssessmentPermissionException
 	 *         if the user does not have permission to create pools and questions.
 	 */
-	void importAssessment(String id, String context, boolean draftSource) throws AssessmentPermissionException;
+	void importMneme(Set<String> ids, String fromContext, String toContext) throws AssessmentPermissionException;
 
 	/**
 	 * Import the Assignment with this id into this context as a pool.

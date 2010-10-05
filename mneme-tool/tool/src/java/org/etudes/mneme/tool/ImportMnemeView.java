@@ -22,7 +22,9 @@
 package org.etudes.mneme.tool;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -85,7 +87,7 @@ public class ImportMnemeView extends ControllerImpl
 			return;
 		}
 
-		// the list of importable assignments for this site
+		// the list of assessments for this site
 		List<Ent> assessments = this.importService.getAssessments(sourceContext);
 		context.put("assessments", assessments);
 
@@ -114,11 +116,7 @@ public class ImportMnemeView extends ControllerImpl
 		}
 		String poolsSort = params[2];
 		String sourceContext = params[3];
-
 		String toolContext = toolManager.getCurrentPlacement().getContext();
-
-		// if the source is the same site as this one, we will draftSource when we import
-		boolean draftSource = (sourceContext.equals(toolContext));
 
 		if (!this.poolService.allowManagePools(toolContext))
 		{
@@ -127,27 +125,30 @@ public class ImportMnemeView extends ControllerImpl
 			return;
 		}
 
-		Values selectedPools = this.uiService.newValues();
-		context.put("selectedAssignments", selectedPools);
+		Values selectedAssessments = this.uiService.newValues();
+		context.put("selectedAssessments", selectedAssessments);
 
 		// read the form
 		String destination = uiService.decode(req, context);
 
-		// import the pools
+		// import the assessments
 		if ("IMPORT".equals(destination))
 		{
-			for (String id : selectedPools.getValues())
+			Set<String> assessmentIds = new HashSet<String>();
+			for (String id : selectedAssessments.getValues())
 			{
-				try
-				{
-					this.importService.importAssessment(id, toolContext, draftSource);
-				}
-				catch (AssessmentPermissionException e)
-				{
-					// redirect to error
-					res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
-					return;
-				}
+				assessmentIds.add(id);
+			}
+
+			try
+			{
+				this.importService.importMneme(assessmentIds, sourceContext, toolContext);
+			}
+			catch (AssessmentPermissionException e)
+			{
+				// redirect to error
+				res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, "/error/" + Errors.unauthorized)));
+				return;
 			}
 
 			destination = "/pools/" + poolsSort;
