@@ -316,8 +316,8 @@ public class MnemeTransferServiceImpl implements MnemeTransferService, EntityTra
 			}
 		}
 
-		// any others in MnemeDocs for the site we have not yet covered (unless importing specific assessments)
-		if (assessmentsToImport != null)
+		// any others in MnemeDocs for the site we have not yet covered - only if we are taking the whole set, not specific assessments
+		if (assessmentsToImport == null)
 		{
 			List<Attachment> attachments = this.attachmentService.findFiles(AttachmentService.MNEME_APPLICATION, fromContext,
 					AttachmentService.DOCS_AREA);
