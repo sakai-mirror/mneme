@@ -88,7 +88,7 @@ public class ImportMnemeView extends ControllerImpl
 		}
 
 		// the list of assessments for this site
-		List<Ent> assessments = this.importService.getAssessments(sourceContext);
+		List<Ent> assessments = this.importService.getAssessments(sourceContext, toolManager.getCurrentPlacement().getContext());
 		context.put("assessments", assessments);
 
 		// render

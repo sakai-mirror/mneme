@@ -243,7 +243,6 @@ public class MnemeTransferServiceImpl implements MnemeTransferService, EntityTra
 				}
 			}
 		}
-		// TODO: skip doubles from source with same title?
 
 		// collect media references
 		Set<String> refs = new HashSet<String>();

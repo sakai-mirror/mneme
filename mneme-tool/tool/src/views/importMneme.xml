@@ -65,14 +65,29 @@
 								<model type="text" ref="assessment.id" />
 							</value>
 							<model ref="selectedAssessments.values" />
+							<entityIncluded>
+								<decision reversed="TRUE" model="assessment.marked" />
+							</entityIncluded>
 						</selectionColumn>
-						<modelColumn model="assessment.description">
+						<modelColumn>
 							<title>
 								<message selector="assessment" />
 							</title>
+							<message selector="assessmentDescription">
+								<model ref="assessment.description" />
+								<selectors>
+									<selector selector="assessmentDisabledDescription">
+										<decision model="assessment.marked" />
+									</selector>
+								</selectors>
+							</message>
 						</modelColumn>
 					</columns>
 				</entityList>
+				
+				<instructions>
+					<message selector="assessmentsBlockedInstructions" />
+				</instructions>
 
 			</container>
 		</section>

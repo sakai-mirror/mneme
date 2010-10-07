@@ -33,13 +33,15 @@ import java.util.Set;
 public interface ImportService
 {
 	/**
-	 * The the Assessments in this context that can be imported.
+	 * The the Assessments in this context that can be imported. Mark any with a title conflict with assessments in destination.
 	 * 
-	 * @param context
-	 *        The context.
+	 * @param source
+	 *        List the assessments in this context.
+	 * @param destination
+	 *        Mark any in the list that have a title conflict in this context.
 	 * @return A list of Assessment "Ent"s (id and description).
 	 */
-	List<Ent> getAssessments(String context);
+	List<Ent> getAssessments(String source, String destination);
 
 	/**
 	 * The the Assignments in this context that can be imported as pools.

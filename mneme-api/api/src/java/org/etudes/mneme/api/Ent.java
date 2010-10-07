@@ -42,4 +42,15 @@ public interface Ent
 	 * @return The id;
 	 */
 	String getId();
+	
+	/**
+	 * @return if the Ent is marked
+	 */
+	Boolean getMarked();
+	
+	/**
+	 * Mark the End
+	 * @param marked The marking.
+	 */
+	void setMarked(Boolean marked);
 }

@@ -226,16 +226,31 @@ public class ImportServiceImpl implements ImportService
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Ent> getAssessments(String context)
+	public List<Ent> getAssessments(String source, String destionation)
 	{
 		List<Ent> rv = new ArrayList<Ent>();
 
-		List<Assessment> assessments = this.assessmentService
-				.getContextAssessments(context, AssessmentService.AssessmentsSort.title_a, Boolean.FALSE);
+		List<Assessment> assessments = this.assessmentService.getContextAssessments(source, AssessmentService.AssessmentsSort.title_a, Boolean.FALSE);
+
+		// to check the title conflicts in the destination
+		List<Assessment> existingAssessments = this.assessmentService.getContextAssessments(destionation, AssessmentService.AssessmentsSort.cdate_a,
+				Boolean.FALSE);
+
+		// make an End from each assessment
 		for (Assessment assessment : assessments)
 		{
 			Ent ent = new EntImpl(assessment.getId(), assessment.getTitle());
 			rv.add(ent);
+
+			// mark any that have a title conflict in the destination
+			for (Assessment candidate : existingAssessments)
+			{
+				if (!StringUtil.different(candidate.getTitle(), assessment.getTitle()))
+				{
+					ent.setMarked(Boolean.TRUE);
+					break;
+				}
+			}
 		}
 
 		return rv;
