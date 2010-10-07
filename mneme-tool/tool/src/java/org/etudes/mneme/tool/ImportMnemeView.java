@@ -39,6 +39,7 @@ import org.etudes.mneme.api.Ent;
 import org.etudes.mneme.api.ImportService;
 import org.etudes.mneme.api.PoolService;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -71,15 +72,27 @@ public class ImportMnemeView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pools sort, [3] source context
-		if (params.length != 4)
+		// [2] source context - rest the return destination
+		if (params.length < 3)
 		{
 			throw new IllegalArgumentException();
 		}
-		String poolsSort = params[2];
-		context.put("poolsSort", poolsSort);
-		String sourceContext = params[3];
+		String sourceContext = params[2];
+		String destination = null;
 
+		if (params.length > 3)
+		{
+			destination = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
+		}
+
+		// if not specified, go to the main assessments page
+		else
+		{
+			destination = "/assessments";
+		}
+		context.put("return", destination);
+
+		// TODO: change to assessment service ...
 		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 		{
 			// redirect to error
@@ -109,15 +122,28 @@ public class ImportMnemeView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pools sort, [3] source context
-		if (params.length != 4)
+		// [2] source context - rest the return destination
+		if (params.length < 3)
 		{
 			throw new IllegalArgumentException();
 		}
-		String poolsSort = params[2];
-		String sourceContext = params[3];
+		String sourceContext = params[2];
+		String returnDestination = null;
+
+		if (params.length > 3)
+		{
+			returnDestination = "/" + StringUtil.unsplit(params, 3, params.length - 3, "/");
+		}
+
+		// if not specified, go to the main assessments page
+		else
+		{
+			returnDestination = "/assessments";
+		}
+
 		String toolContext = toolManager.getCurrentPlacement().getContext();
 
+		// TODO: change to assessment service ...
 		if (!this.poolService.allowManagePools(toolContext))
 		{
 			// redirect to error
@@ -151,7 +177,7 @@ public class ImportMnemeView extends ControllerImpl
 				return;
 			}
 
-			destination = "/pools/" + poolsSort;
+			destination = returnDestination;
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));

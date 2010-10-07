@@ -152,6 +152,13 @@
 								<model ref="sort_direction" />
 							</destination>
 						</navigation>
+						<navigation title="import-title" style="LINK" submit="TRUE">
+							<icon icon="/icons/import_assessment.png" style="LEFT" />
+							<destination template="/import_mneme_site/assessments/{0}{1}">
+								<model ref="sort_column" />
+								<model ref="sort_direction" />
+							</destination>
+						</navigation>
 					</entityActions>
 				</selectionColumn>
 				<modelColumn pixels="16" centered="TRUE">

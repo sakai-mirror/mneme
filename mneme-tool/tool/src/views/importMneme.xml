@@ -102,8 +102,8 @@
 				<divider />
 				<navigation title="cancel" style="BUTTON" accessKey="cancel-access" description="cancel-description">
 					<icon icon="/icons/cancel.gif" style="LEFT" />
-					<destination template="/pools/{0}">
-						<model ref="poolsSort" />
+					<destination template="{0}">
+						<model ref="return" />
 					</destination>
 				</navigation>
 			</container>

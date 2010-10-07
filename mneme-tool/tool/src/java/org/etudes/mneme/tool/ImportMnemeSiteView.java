@@ -36,6 +36,7 @@ import org.etudes.mneme.api.Ent;
 import org.etudes.mneme.api.ImportService;
 import org.etudes.mneme.api.PoolService;
 import org.sakaiproject.tool.api.ToolManager;
+import org.sakaiproject.util.StringUtil;
 import org.sakaiproject.util.Web;
 
 /**
@@ -68,13 +69,18 @@ public class ImportMnemeSiteView extends ControllerImpl
 	 */
 	public void get(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pools sort
-		if (params.length != 3)
+		String destination = null;
+		if (params.length > 2)
 		{
-			throw new IllegalArgumentException();
+			destination = "/" + StringUtil.unsplit(params, 2, params.length - 2, "/");
 		}
-		String poolsSort = params[2];
-		context.put("poolsSort", poolsSort);
+
+		// if not specified, go to the main assessments page
+		else
+		{
+			destination = "/assessments";
+		}
+		context.put("return", destination);
 
 		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 		{
@@ -105,13 +111,19 @@ public class ImportMnemeSiteView extends ControllerImpl
 	 */
 	public void post(HttpServletRequest req, HttpServletResponse res, Context context, String[] params) throws IOException
 	{
-		// [2] pools sort
-		if (params.length != 3)
+		String returnDestination = null;
+		if (params.length > 2)
 		{
-			throw new IllegalArgumentException();
+			returnDestination = "/" + StringUtil.unsplit(params, 2, params.length - 2, "/");
 		}
-		String poolsSort = params[2];
 
+		// if not specified, go to the main assessments page
+		else
+		{
+			returnDestination = "/assessments";
+		}
+
+		// TODO: change to assessment service ...
 		if (!this.poolService.allowManagePools(toolManager.getCurrentPlacement().getContext()))
 		{
 			// redirect to error
@@ -129,7 +141,7 @@ public class ImportMnemeSiteView extends ControllerImpl
 		if ("IMPORT".equals(destination))
 		{
 			String siteId = selectedSite.getValue();
-			destination = "/import_mneme/" + poolsSort + "/" + siteId;
+			destination = "/import_mneme/" +  siteId + "/" + returnDestination;
 		}
 
 		res.sendRedirect(res.encodeRedirectURL(Web.returnUrl(req, destination)));
