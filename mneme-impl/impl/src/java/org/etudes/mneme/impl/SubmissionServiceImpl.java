@@ -1696,13 +1696,24 @@ public class SubmissionServiceImpl implements SubmissionService, Runnable
 
 			storage.init();
 
-			// start the checking thread
-			if (timeoutCheckMs > 0)
+			// if this is the app server configured to run the maintenance thread, get it started
+			String msg = "";
+			String id = serverConfigurationService.getServerId();
+			if (id != null)
 			{
-				start();
+				String maintenanceServerId = serverConfigurationService.getString("mneme.maintenance.server");
+				if (id.equals(maintenanceServerId))
+				{
+					// start the checking thread
+					if (timeoutCheckMs > 0)
+					{
+						start();
+						msg = " maintenance thread period: " + timeoutCheckMs / 1000;
+					}
+				}
 			}
 
-			M_log.info("init(): timout check seconds: " + timeoutCheckMs / 1000 + " storage: " + this.storage);
+			M_log.info("init():" + msg + " storage: " + this.storage);
 		}
 		catch (Throwable t)
 		{
