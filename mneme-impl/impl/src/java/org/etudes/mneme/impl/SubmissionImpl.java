@@ -313,27 +313,6 @@ public class SubmissionImpl implements Submission
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<Answer> getAnswersOrdered()
-	{
-		List<Answer> answers = new ArrayList<Answer>();
-		for (Part part : getAssessment().getParts().getParts())
-		{
-			for (Question question : part.getQuestions())
-			{
-				Answer answer = getAnswer(question);
-				if (answer != null)
-				{
-					answers.add(answer);
-				}
-			}
-		}
-
-		return answers;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public Assessment getAssessment()
 	{
 		return this.assessment;

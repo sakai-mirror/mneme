@@ -167,7 +167,7 @@ public class ReviewView extends ControllerImpl
 		}
 
 		// collect all the answers for review
-		List<Answer> answers = submission.getAnswersOrdered();
+		List<Answer> answers = submission.getAnswers();
 		context.put("answers", answers);
 
 		// in this special case, since there's no real action in the service to do this, we need to generate an event

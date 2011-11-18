@@ -64,9 +64,9 @@ public interface Submission
 	Answer getAnswer(String answerId);
 
 	/**
-	 * Access the submission's answers. Order is not specified.
+	 * Access the submission's answers in assessment order.
 	 * 
-	 * @return The submission's answers in some order.
+	 * @return The submission's answers in order.
 	 */
 	List<Answer> getAnswers();
 
@@ -76,13 +76,6 @@ public interface Submission
 	 * @return The auto score for this submission, or 0 if there is none.
 	 */
 	Float getAnswersAutoScore();
-
-	/**
-	 * Access the submission's answers in assessment delivery order.
-	 * 
-	 * @return The submission's answers in assessment delivery order.
-	 */
-	List<Answer> getAnswersOrdered();
 
 	/**
 	 * Access the assessment that this is a submission to.

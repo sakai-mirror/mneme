@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2009 Etudes, Inc.
+ * Copyright (c) 2009, 2010, 2011 Etudes, Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ public class DrawQuestionsView extends ControllerImpl
 		PoolService.FindPoolsSort sort = findSortCode(sortCode);
 
 		// pre-read question counts per pool
-		this.questionService.preCountContextQuestions(toolManager.getCurrentPlacement().getContext(), Boolean.TRUE);
+		this.questionService.preCountContextQuestions(toolManager.getCurrentPlacement().getContext());
 
 		// get the pool draw list
 		// - all the pools for the user (select, sort, page) crossed with the assessment's actual draws

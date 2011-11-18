@@ -120,7 +120,7 @@ public class PoolsView extends ControllerImpl
 		context.put("disablePools", Boolean.TRUE);
 
 		// pre-read question counts per pool
-		this.questionService.preCountContextQuestions(toolManager.getCurrentPlacement().getContext(), null);
+		this.questionService.preCountContextQuestions(toolManager.getCurrentPlacement().getContext());
 
 		// render
 		uiService.render(ui, context);

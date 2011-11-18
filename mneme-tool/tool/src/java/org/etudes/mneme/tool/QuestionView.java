@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2008, 2009 Etudes, Inc.
+ * Copyright (c) 2008, 2009, 2010, 2011 Etudes, Inc.
  * 
  * Portions completed before September 1, 2008
  * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
@@ -667,7 +667,7 @@ public class QuestionView extends ControllerImpl
 		{
 			// TODO: assure the test is by-test
 
-			answers.addAll(submission.getAnswersOrdered());
+			answers.addAll(submission.getAnswers());
 		}
 
 		context.put("answers", answers);

@@ -3,7 +3,7 @@
  * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2008, 2009, 2010 Etudes, Inc.
+ * Copyright (c) 2008, 2009, 2010, 2011 Etudes, Inc.
  * 
  * Portions completed before September 1, 2008
  * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
@@ -190,7 +190,7 @@ public class GradeSubmissionView extends ControllerImpl
 		}
 
 		// pick the page of answers
-		List<Answer> answers = submission.getAnswersOrdered();
+		List<Answer> answers = submission.getAnswers();
 		if (paging.getSize() != 0)
 		{
 			// start at ((pageNum-1)*pageSize)

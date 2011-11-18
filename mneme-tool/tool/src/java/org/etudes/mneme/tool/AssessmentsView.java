@@ -112,7 +112,7 @@ public class AssessmentsView extends ControllerImpl
 		context.put("disableAssessments", Boolean.TRUE);
 
 		// pre-read question counts per pool
-		this.questionService.preCountContextQuestions(toolManager.getCurrentPlacement().getContext(), Boolean.TRUE);
+		this.questionService.preCountContextQuestions(toolManager.getCurrentPlacement().getContext());
 
 		// render
 		uiService.render(ui, context);

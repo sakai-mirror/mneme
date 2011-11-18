@@ -978,7 +978,7 @@ public abstract class SubmissionStorageSql implements SubmissionStorage
 			sql.append(" FROM MNEME_ANSWER A");
 			sql.append(" JOIN MNEME_SUBMISSION S ON A.SUBMISSION_ID=S.ID ");
 			sql.append(where);
-			sql.append(" ORDER BY A.SUBMISSION_ID ASC");
+			sql.append(" ORDER BY A.SUBMISSION_ID ASC, A.ID ASC");
 
 			this.sqlService.dbRead(sql.toString(), fields, new SqlReader()
 			{
