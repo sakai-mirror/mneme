@@ -5,8 +5,6 @@
  *
  * Copyright (c) 2011 Etudes, Inc.
  * 
- * Portions completed before September 1, 2008
- * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,18 +45,18 @@ public interface MultipleChoiceQuestion extends Question
 	public Set<Integer> getCorrectAnswerSet();
 	
 	/**
-	 * Access the shuffle choice as a string.
+	 * Access the shuffle choice.
 	 * 
 	 * @return The shuffle choice.
 	 */
-	public String getShuffleChoices();
+	public boolean getShuffleChoices();
 	
 	/**
 	 * Access the value of single correct.
 	 * 
 	 * @return The value of single correct.
 	 */
-	public String getSingleCorrect();
+	public boolean getSingleCorrect();
 	
 	/**
 	 * Set the entire set of choices to these values.
@@ -77,12 +75,12 @@ public interface MultipleChoiceQuestion extends Question
 	public void setCorrectAnswerSet(Set<Integer> correctAnswers);
 	
 	/**
-	 * Set the shuffle choice, as a Boolean string.
+	 * Set the shuffle choice.
 	 * 
 	 * @param shuffleChoices
 	 *        The shuffle choice.
 	 */
-	public void setShuffleChoices(String shuffleChoices);
+	public void setShuffleChoices(boolean shuffleChoices);
 
 	/**
 	 * Set single or multiple correct
@@ -90,5 +88,5 @@ public interface MultipleChoiceQuestion extends Question
 	 * @param singleCorrect
 	 *        The value of singleCorrect
 	 */
-	public void setSingleCorrect(String singleCorrect);
+	public void setSingleCorrect(boolean singleCorrect);
 }

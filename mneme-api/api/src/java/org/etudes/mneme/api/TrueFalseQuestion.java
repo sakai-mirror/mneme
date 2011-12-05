@@ -5,9 +5,6 @@
  *
  * Copyright (c) 2011 Etudes, Inc.
  * 
- * Portions completed before September 1, 2008
- * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,14 +31,14 @@ public interface TrueFalseQuestion extends Question
 	 * 
 	 * @return The correct answer.
 	 */
-	public String getCorrectAnswer();
+	public boolean getCorrectAnswer();
 	
 	/**
-	 * Set the correct answer, as a Boolean string.
+	 * Set the correct answer
 	 * 
 	 * @param correctAnswer
 	 *        The correct answer.
 	 */
-	public void setCorrectAnswer(String correctAnswer);
+	public void setCorrectAnswer(boolean correctAnswer);
 
 }

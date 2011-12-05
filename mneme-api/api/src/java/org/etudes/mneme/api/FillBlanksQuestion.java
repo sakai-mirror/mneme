@@ -4,9 +4,6 @@
  ***********************************************************************************
  *
  * Copyright (c) 2011 Etudes, Inc.
- * 
- * Portions completed before September 1, 2008
- * Copyright (c) 2007, 2008 The Regents of the University of Michigan & Foothill College, ETUDES Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +31,14 @@ public interface FillBlanksQuestion extends Question
 	 * 
 	 * @return The ordering.
 	 */
-	public String getAnyOrder();
+	public boolean getAnyOrder();
 	
 	/**
 	 * Access if case sensitive.
 	 * 
 	 * @return The case sensitive value.
 	 */
-	public String getCaseSensitive();
+	public boolean getCaseSensitive();
 	
 	/**
 	 * Access if textual/numeric response.
@@ -63,7 +60,7 @@ public interface FillBlanksQuestion extends Question
 	 * @param anyOrder
 	 *        The ordering.
 	 */
-	public void setAnyOrder(String anyOrder);
+	public void setAnyOrder(boolean anyOrder);
 
 	/**
 	 * Set the case sensitive value.
@@ -71,7 +68,7 @@ public interface FillBlanksQuestion extends Question
 	 * @param caseSensitive
 	 *        The case sensitive value.
 	 */
-	public void setCaseSensitive(String caseSensitive);
+	public void setCaseSensitive(boolean caseSensitive);
 	
 	/**
 	 * Set the response type(textual/numeric).
