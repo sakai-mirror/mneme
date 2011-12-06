@@ -22,7 +22,7 @@
 package org.etudes.mneme.impl;
 
 import org.etudes.mneme.api.EssayQuestion;
-import org.etudes.mneme.api.EssayQuestion.SubmissionType;
+
 
 /**
  * EssayQuestionImpl handles questions for the essay question type
@@ -40,28 +40,28 @@ public class EssayQuestionTypeImpl extends QuestionImpl implements EssayQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public SubmissionType getSubmissionType()
+	public EssaySubmissionType getSubmissionType()
 	{
 		switch (((EssayQuestionImpl) getTypeSpecificQuestion()).getSubmissionType())
 		{
 			case attachments:
 			{
-				return SubmissionType.attachments;
+				return EssaySubmissionType.attachments;
 			}
 			case both:
 			{
-				return SubmissionType.both;
+				return EssaySubmissionType.both;
 			}
 			case inline:
 			{
-				return SubmissionType.inline;
+				return EssaySubmissionType.inline;
 			}
 			case none:
 			{
-				return SubmissionType.none;
+				return EssaySubmissionType.none;
 			}
 		}
-		return SubmissionType.none;
+		return EssaySubmissionType.none;
 	}
 
 	/**
@@ -75,7 +75,7 @@ public class EssayQuestionTypeImpl extends QuestionImpl implements EssayQuestion
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setSubmissionType(SubmissionType setting)
+	public void setSubmissionType(EssaySubmissionType setting)
 	{
 		switch (setting)
 		{

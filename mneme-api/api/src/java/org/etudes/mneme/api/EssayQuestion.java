@@ -27,7 +27,7 @@ package org.etudes.mneme.api;
 public interface EssayQuestion extends Question
 {
 	/** An enumerate type that declares the types of submissions */
-	public enum SubmissionType
+	public enum EssaySubmissionType
 	{
 		attachments, both, inline, none;
 	}
@@ -38,9 +38,9 @@ public interface EssayQuestion extends Question
 	public String getModelAnswer();
 
 	/**
-	 * @return the submission type
+	 * @return the essay submission type
 	 */
-	public SubmissionType getSubmissionType();
+	public EssaySubmissionType getSubmissionType();
 
 	/**
 	 * Set the model answer.
@@ -51,10 +51,10 @@ public interface EssayQuestion extends Question
 	public void setModelAnswer(String modelAnswer);
 
 	/**
-	 * Set the submission type
+	 * Set the essay submission type
 	 * 
 	 * @param setting
-	 *        The submission type.
+	 *        The essay submission type.
 	 */
-	public void setSubmissionType(SubmissionType setting);
+	public void setSubmissionType(EssaySubmissionType setting);
 }
