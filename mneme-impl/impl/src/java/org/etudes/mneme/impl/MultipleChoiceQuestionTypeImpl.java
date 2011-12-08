@@ -39,7 +39,7 @@ public class MultipleChoiceQuestionTypeImpl extends QuestionImpl implements Mult
 	public List<String> getAnswerChoices()
 	{
 		List<MultipleChoiceQuestionChoice> mcChoiceList = ((MultipleChoiceQuestionImpl) getTypeSpecificQuestion()).getChoicesAsAuthored();
-		List<String> answerChoices = null;
+		List<String> answerChoices = new ArrayList();
 
 		if (mcChoiceList != null && mcChoiceList.size() > 0)
 		{
