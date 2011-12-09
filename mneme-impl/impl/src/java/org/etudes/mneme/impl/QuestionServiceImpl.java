@@ -666,6 +666,17 @@ public class QuestionServiceImpl implements QuestionService
 	/**
 	 * {@inheritDoc}
 	 */
+	public Question newTaskQuestion(Pool pool) throws AssessmentPermissionException
+	{
+		// create the question
+		Question baseQuestion = newQuestion(pool, "mneme:Task");
+
+		return baseQuestion;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public TrueFalseQuestion newTrueFalseQuestion(Pool pool) throws AssessmentPermissionException
 	{
 		// create the question

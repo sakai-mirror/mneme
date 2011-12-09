@@ -190,6 +190,17 @@ public interface QuestionService extends QuestionPoolService, QuestionGetService
 	Question newQuestion(Pool pool, String type) throws AssessmentPermissionException;
 
 	/**
+	 * Create a task type question.
+	 * 
+	 * @param pool
+	 *        The pool where the question will live.
+	 * @return The new question.
+	 * @throws AssessmentPermissionException
+	 *         if the current user is not allowed to create a new question.
+	 */
+	Question newTaskQuestion(Pool pool) throws AssessmentPermissionException;
+
+	/**
 	 * Create a new true false type question.
 	 * 
 	 * @param pool
