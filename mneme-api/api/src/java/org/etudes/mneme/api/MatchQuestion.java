@@ -22,9 +22,6 @@
 package org.etudes.mneme.api;
 
 import java.util.List;
-import java.util.Set;
-
-
 
 /**
  * MatchQuestionImpl handles questions for the match question type.
@@ -32,18 +29,55 @@ import java.util.Set;
 public interface MatchQuestion extends Question
 {
 
-	/**
-	 * Access the pairs as an entity (MatchQuestionChoice) list in as-authored order.
-	 * 
-	 * @return The pairs as an entity (MatchQuestionChoice) list in as-authored order.
-	 */
-	//public List<MatchQuestionPair> getPairs();
+	public class MatchChoice
+	{
+		protected String choice = null;
+		protected String match = null;
+
+		public MatchChoice(String match, String choice)
+		{
+			this.match = match;
+			this.choice = choice;
+		}
+		
+		public String getChoice()
+		{
+			return this.choice;
+		}
+		
+		public String getMatch()
+		{
+			return this.match;
+		}
+	}
 	
 	/**
-	 * Set the pairs as an entity (MatchQuestionChoice) list in as-authored order.
+	 * Access the distractor's string value.
+	 * 
+	 * @return The distractor's string value, or null if not defined.
+	 */
+	public String getDistractor();
+	
+	/**
+	 * Access the pairs as an entity (MatchChoice) list in as-authored order.
+	 * 
+	 * @return The pairs as an entity (MatchChoice) list in as-authored order.
+	 */
+	public List<MatchChoice> getMatchPairs();
+	
+	/**
+	 * Set the distractor's string value.
+	 * 
+	 * @param distractor
+	 *        The distractor's string value.
+	 */
+	public void setDistractor(String distractor);
+	
+	/**
+	 * Set the pairs as an entity (MatchChoice) list in as-authored order.
 	 * 
 	 * @param pairs
-	 *        Pairs of match questions.
+	 *        Pairs of match choice questions.
 	 */
-	//public void setPairs(List<MatchQuestionPair> pairs);
+	public void setMatchPairs(List<MatchChoice> pairs);
 }

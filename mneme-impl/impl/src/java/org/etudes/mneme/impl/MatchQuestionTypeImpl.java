@@ -21,12 +21,63 @@
 
 package org.etudes.mneme.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.etudes.mneme.api.MatchQuestion;
+import org.etudes.mneme.api.MatchQuestion.MatchChoice;
+import org.etudes.mneme.impl.MatchQuestionImpl.MatchQuestionPair;
 
 /**
  * MatchQuestionImpl handles questions for the true false question type.
  */
 public class MatchQuestionTypeImpl extends QuestionImpl implements MatchQuestion
 {
-	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDistractor()
+	{
+		return ((MatchQuestionImpl) getTypeSpecificQuestion()).getDistractor();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List<MatchChoice> getMatchPairs()
+	{
+		List<MatchQuestionPair> mqpairList = ((MatchQuestionImpl) getTypeSpecificQuestion()).getPairs();
+		List<MatchChoice> pairs = new ArrayList();
+
+		if (mqpairList != null && mqpairList.size() > 0)
+		{
+			pairs = new ArrayList<MatchChoice>(mqpairList.size());
+
+			for (MatchQuestionPair mqpair : mcpairList)
+			{
+				pairs.add(new MatchChoice(mqpair.getMatch(), mqpair.getChoice()));
+			}
+		}
+
+		return pairs;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setDistractor(String distractor)
+	{
+		((MatchQuestionImpl) getTypeSpecificQuestion()).setDistractor(distractor);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setMatchPairs(List<MatchChoice> pairs)
+	{
+		for (MatchChoice mchoice : pairs)
+		{
+			((MatchQuestionImpl) getTypeSpecificQuestion()).addPair(mchoice.getChoice(), mchoice.getMatch());
+		}
+	}
 }
