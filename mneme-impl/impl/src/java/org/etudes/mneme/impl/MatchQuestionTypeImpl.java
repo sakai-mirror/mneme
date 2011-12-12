@@ -53,7 +53,7 @@ public class MatchQuestionTypeImpl extends QuestionImpl implements MatchQuestion
 		{
 			pairs = new ArrayList<MatchChoice>(mqpairList.size());
 
-			for (MatchQuestionPair mqpair : mcpairList)
+			for (MatchQuestionPair mqpair : mqpairList)
 			{
 				pairs.add(new MatchChoice(mqpair.getMatch(), mqpair.getChoice()));
 			}
