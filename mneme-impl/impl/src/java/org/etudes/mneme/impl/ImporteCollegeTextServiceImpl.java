@@ -30,14 +30,19 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.etudes.mneme.api.Assessment;
 import org.etudes.mneme.api.AssessmentPermissionException;
+import org.etudes.mneme.api.AssessmentPolicyException;
 import org.etudes.mneme.api.AssessmentService;
+import org.etudes.mneme.api.AssessmentType;
 import org.etudes.mneme.api.AttachmentService;
 import org.etudes.mneme.api.GradesService;
 import org.etudes.mneme.api.ImporteCollegeTextService;
+import org.etudes.mneme.api.Part;
 import org.etudes.mneme.api.Pool;
 import org.etudes.mneme.api.PoolService;
 import org.etudes.mneme.api.Question;
+import org.etudes.mneme.api.QuestionPick;
 import org.etudes.mneme.api.QuestionService;
 import org.etudes.mneme.api.SecurityService;
 import org.sakaiproject.authz.api.AuthzGroupService;
@@ -118,6 +123,8 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 		// replace any \r\n with just a \n
 		text = text.replaceAll("\r\n", "\n");
 		String title = "eCollege paste";
+		Float points = new Float("1");
+		
 		if (pool == null)
 		{
 			pool = this.poolService.newPool(context);
@@ -129,6 +136,15 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 				if (titleParts[1] != null && titleParts[1].length() != 0) title = titleParts[1].trim();
 			}
 			pool.setTitle(title);
+			pool.setPointsEdit(points);
+			
+			// create assessment
+			Assessment assmt = assessmentService.newAssessment(context);
+			assmt.setType(AssessmentType.test);
+			assmt.setTitle(title);
+			
+			Part part = assmt.getParts().addPart();
+			
 			Pattern p_groups = Pattern.compile("Collapse[\\s]*Question(.*?)[\\n]*[\\t]*row[\\t]*Move[\\s]*Question", Pattern.CASE_INSENSITIVE
 					| Pattern.UNICODE_CASE | Pattern.DOTALL);
 			Matcher m = p_groups.matcher(text);
@@ -138,7 +154,7 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 			{
 				String workOn = m.group(0);
 				String[] lines = workOn.split("[\n]");
-				processECollegeTextGroup(pool, lines);
+				processECollegeTextGroup(pool, part, lines);
 				m.appendReplacement(sb, "");
 			}
 			m.appendTail(sb);
@@ -150,10 +166,27 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 				{
 					String workOn = sb.substring(sb.indexOf("Collapse Question"));
 					String[] lines = workOn.split("[\n]");
-					processECollegeTextGroup(pool, lines);
+					processECollegeTextGroup(pool, part, lines);
 				}
 			}
+			
+			try
+			{				
+				assmt.getGrading().setGradebookIntegration(Boolean.TRUE);
+
+				if (assmt.getParts().getTotalPoints().floatValue() <= 0)
+				{
+					assmt.setNeedsPoints(Boolean.FALSE);
+				}
+			
+				assessmentService.saveAssessment(assmt);
+			}
+			catch (AssessmentPolicyException ep)
+			{
+	
+			}
 			this.poolService.savePool(pool);
+			
 		}
 	}
 
@@ -341,13 +374,13 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 	 *        text lines to parse and create a question
 	 * @throws AssessmentPermissionException
 	 */
-	protected void processECollegeTextGroup(Pool pool, String[] lines) throws AssessmentPermissionException
+	protected void processECollegeTextGroup(Pool pool, Part part, String[] lines) throws AssessmentPermissionException
 	{
-		if (processTextMultipleChoice(pool, lines)) return;
-		if (processTextTrueFalse(pool, lines)) return;
-		if (processTextEssay(pool, lines)) return;
-		if (processTextFillBlanks(pool, lines)) return;
-		if (processTextMatch(pool, lines)) return;
+		if (processTextMultipleChoice(pool, part, lines)) return;
+		if (processTextTrueFalse(pool, part, lines)) return;
+		if (processTextEssay(pool, part, lines)) return;
+		if (processTextFillBlanks(pool, part, lines)) return;
+		if (processTextMatch(pool, part, lines)) return;
 	}
 
 	/**
@@ -361,7 +394,7 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 	 * 
 	 * @throws AssessmentPermissionException
 	 */
-	protected boolean processTextEssay(Pool pool, String[] lines) throws AssessmentPermissionException
+	protected boolean processTextEssay(Pool pool, Part part, String[] lines) throws AssessmentPermissionException
 	{
 		String firstLine = lines[0].trim();
 		if (!firstLine.startsWith("Collapse Question")) return false;
@@ -410,6 +443,9 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 		question.getTypeSpecificQuestion().consolidate("");
 		this.questionService.saveQuestion(question);
 
+		QuestionPick questionPick = part.addPickDetail(question);
+		questionPick.setPoints(Float.parseFloat("1"));	
+		
 		return true;
 	}
 
@@ -424,7 +460,7 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 	 * 
 	 * @throws AssessmentPermissionException
 	 */
-	protected boolean processTextFillBlanks(Pool pool, String[] lines) throws AssessmentPermissionException
+	protected boolean processTextFillBlanks(Pool pool, Part part,String[] lines) throws AssessmentPermissionException
 	{
 		String firstLine = lines[0].trim();
 		if (!firstLine.startsWith("Collapse Question")) return false;
@@ -493,6 +529,9 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 		question.getTypeSpecificQuestion().consolidate("");
 		this.questionService.saveQuestion(question);
 
+		QuestionPick questionPick = part.addPickDetail(question);
+		questionPick.setPoints(Float.parseFloat("1"));	
+		
 		return true;
 
 	}
@@ -508,7 +547,7 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 	 *   
 	 * @throws AssessmentPermissionException
 	 */
-	protected boolean processTextMatch(Pool pool, String[] lines) throws AssessmentPermissionException
+	protected boolean processTextMatch(Pool pool, Part part,String[] lines) throws AssessmentPermissionException
 	{
 		String firstLine = lines[0].trim();
 		if (!firstLine.startsWith("Collapse Question")) return false;
@@ -569,6 +608,9 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 		question.getTypeSpecificQuestion().consolidate("");
 		this.questionService.saveQuestion(question);
 
+		QuestionPick questionPick = part.addPickDetail(question);
+		questionPick.setPoints(Float.parseFloat("1"));	
+		
 		return true;
 	}
 
@@ -583,7 +625,7 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 	 *    
 	 * @throws AssessmentPermissionException
 	 */
-	protected boolean processTextMultipleChoice(Pool pool, String[] lines) throws AssessmentPermissionException
+	protected boolean processTextMultipleChoice(Pool pool, Part part,String[] lines) throws AssessmentPermissionException
 	{
 		String firstLine = lines[0].trim();
 		if (!firstLine.startsWith("Collapse Question")) return false;
@@ -659,6 +701,9 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 		question.getTypeSpecificQuestion().consolidate("");
 		this.questionService.saveQuestion(question);
 
+		QuestionPick questionPick = part.addPickDetail(question);
+		questionPick.setPoints(Float.parseFloat("1"));		
+		
 		return true;
 	}
 
@@ -673,7 +718,7 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 	 *   
 	 * @throws AssessmentPermissionException
 	 */
-	protected boolean processTextTrueFalse(Pool pool, String[] lines) throws AssessmentPermissionException
+	protected boolean processTextTrueFalse(Pool pool, Part part,String[] lines) throws AssessmentPermissionException
 	{
 		String firstLine = lines[0].trim();
 		if (!firstLine.startsWith("Collapse Question")) return false;
@@ -734,11 +779,14 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 
 		// survey
 		question.setIsSurvey(false);
-
+		
 		// save
 		question.getTypeSpecificQuestion().consolidate("");
 		this.questionService.saveQuestion(question);
-
+		
+		QuestionPick questionPick = part.addPickDetail(question);
+		questionPick.setPoints(Float.parseFloat("1"));		
+		
 		return true;
 	}
 }
