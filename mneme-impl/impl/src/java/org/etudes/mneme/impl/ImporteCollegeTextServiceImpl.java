@@ -117,11 +117,18 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 
 		// replace any \r\n with just a \n
 		text = text.replaceAll("\r\n", "\n");
-
+		String title = "eCollege paste";
 		if (pool == null)
 		{
 			pool = this.poolService.newPool(context);
-			pool.setTitle("eCollege paste");
+			//read title from the first line ex: Unit 2: Week 2 - Quiz
+			String findTitle = text.substring(0, text.indexOf("\n"));
+			if (findTitle != null && findTitle.indexOf(":") != -1)
+			{
+				String[] titleParts = findTitle.split(":");
+				if (titleParts[1] != null && titleParts[1].length() != 0) title = titleParts[1].trim();
+			}
+			pool.setTitle(title);
 			Pattern p_groups = Pattern.compile("Collapse[\\s]*Question(.*?)[\\n]*[\\t]*row[\\t]*Move[\\s]*Question", Pattern.CASE_INSENSITIVE
 					| Pattern.UNICODE_CASE | Pattern.DOTALL);
 			Matcher m = p_groups.matcher(text);
@@ -394,7 +401,7 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 				question.getPresentation().setText(text);
 			}
 		}
-		e.setSubmissionType(EssayQuestionImpl.SubmissionType.inline);
+		e.setSubmissionType(EssayQuestionImpl.SubmissionType.both);
 
 		// survey
 		question.setIsSurvey(false);
@@ -623,8 +630,11 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 				choiceText = Validator.escapeHtml(choiceText);
 				choices.add(choiceText);
 
-				if (parts.length >= 2 && ("CORRECT ANSWER").equals(parts[1].trim())) correctAnswers.add(line - 3);
-				if (parts.length >= 3 && (parts[parts.length - 1] != null)) question.setFeedback(parts[parts.length - 1].trim());
+				if (parts.length >= 2 && ("CORRECT ANSWER").equals(parts[1].trim()))
+				{
+					correctAnswers.add(line - 3);
+					if (parts.length >= 3 && (parts[parts.length - 1] != null)) question.setFeedback(parts[parts.length - 1].trim());
+				}
 			}
 		}
 		// randomize
@@ -705,12 +715,17 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 			}
 			else
 			{
+				//take feedback for correct answer only
 				if (parts.length >= 2 && ("CORRECT ANSWER").equals(parts[1].trim()) && ("True").equalsIgnoreCase(parts[0].trim()))
+				{
 					isTrue = true;
+					if (parts.length >= 3 && (parts[parts.length - 1] != null)) question.setFeedback(parts[parts.length - 1].trim());
+				}
 				else if (parts.length >= 2 && ("CORRECT ANSWER").equals(parts[1].trim()) && ("False").equalsIgnoreCase(parts[0].trim()))
+				{
 					isTrue = false;
-
-				if (parts.length >= 3 && (parts[parts.length - 1] != null)) question.setFeedback(parts[parts.length - 1].trim());
+					if (parts.length >= 3 && (parts[parts.length - 1] != null)) question.setFeedback(parts[parts.length - 1].trim());
+				}				
 			}
 		}
 
