@@ -227,7 +227,8 @@ public class GradeQuestionView extends ControllerImpl
 				context.put("anchor", anchor);
 			}
 		}
-
+		new CKSetup().setCKCollectionAttrib(getDocsPath(), toolManager.getCurrentPlacement().getContext());
+		
 		uiService.render(ui, context);
 	}
 
