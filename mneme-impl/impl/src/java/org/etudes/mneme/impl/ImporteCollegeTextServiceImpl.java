@@ -122,6 +122,7 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 
 		// replace any \r\n with just a \n
 		text = text.replaceAll("\r\n", "\n");
+
 		String title = "eCollege paste";
 		Float points = new Float("1");
 		
@@ -132,8 +133,9 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 			String findTitle = text.substring(0, text.indexOf("\n"));
 			if (findTitle != null && findTitle.indexOf(":") != -1)
 			{
-				String[] titleParts = findTitle.split(":");
-				if (titleParts[1] != null && titleParts[1].length() != 0) title = titleParts[1].trim();
+				String[] titleParts = findTitle.split(":");				
+				if (titleParts.length == 2 && titleParts[1] != null && titleParts[1].length() != 0 ) title = titleParts[1].trim();
+				else if (titleParts.length > 2) title = findTitle.substring(findTitle.indexOf(":")+1);
 			}
 			pool.setTitle(title);
 			pool.setPointsEdit(points);
@@ -153,7 +155,7 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 			while (m.find())
 			{
 				String workOn = m.group(0);
-				String[] lines = workOn.split("[\n]");
+				String[] lines = workOn.split("[\\n]");
 				processECollegeTextGroup(pool, part, lines);
 				m.appendReplacement(sb, "");
 			}
@@ -165,7 +167,7 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 				if (sb.indexOf("Collapse Question") != -1)
 				{
 					String workOn = sb.substring(sb.indexOf("Collapse Question"));
-					String[] lines = workOn.split("[\n]");
+					String[] lines = workOn.split("[\\n]");
 					processECollegeTextGroup(pool, part, lines);
 				}
 			}
@@ -672,11 +674,27 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 				choiceText = Validator.escapeHtml(choiceText);
 				choices.add(choiceText);
 
+				boolean correctAnswer = false;
 				if (parts.length >= 2 && ("CORRECT ANSWER").equals(parts[1].trim()))
 				{
+					correctAnswer = true;
 					correctAnswers.add(line - 3);
 					if (parts.length >= 3 && (parts[parts.length - 1] != null)) question.setFeedback(parts[parts.length - 1].trim());
 				}
+
+				// check for feedback which starts with /n but is not an option item. just like in Madonna Question
+				if (line + 1 == lines.length) break;
+				String check = lines[line + 1];
+				if (check != null)
+				{
+					if (check.startsWith("Edit QuestionEdit")) break;
+					String[] parts_check = StringUtil.split(check, "\t");
+					if (parts_check.length == 1)
+					{
+						if (correctAnswer) question.setFeedback(Validator.escapeHtml(check.trim()));
+						line++;
+					}
+				} // part of feedback check ends
 			}
 		}
 		// randomize
