@@ -131,11 +131,11 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 			pool = this.poolService.newPool(context);
 			//read title from the first line ex: Unit 2: Week 2 - Quiz
 			String findTitle = text.substring(0, text.indexOf("\n"));
-			if (findTitle != null && findTitle.indexOf(":") != -1)
+			if (findTitle != null)
 			{
-				String[] titleParts = findTitle.split(":");				
+				String[] titleParts = findTitle.split("[:-]");				
 				if (titleParts.length == 2 && titleParts[1] != null && titleParts[1].length() != 0 ) title = titleParts[1].trim();
-				else if (titleParts.length > 2) title = findTitle.substring(findTitle.indexOf(":")+1);
+				else if (titleParts.length > 2) title = findTitle.substring(findTitle.indexOf(titleParts[1]));
 			}
 			pool.setTitle(title);
 			pool.setPointsEdit(points);
@@ -682,7 +682,7 @@ public class ImporteCollegeTextServiceImpl implements ImporteCollegeTextService
 					if (parts.length >= 3 && (parts[parts.length - 1] != null)) question.setFeedback(parts[parts.length - 1].trim());
 				}
 
-				// check for feedback which starts with /n but is not an option item. just like in Madonna Question
+				// check for feedback which starts with /n but is not an option item.
 				if (line + 1 == lines.length) break;
 				String check = lines[line + 1];
 				if (check != null)
