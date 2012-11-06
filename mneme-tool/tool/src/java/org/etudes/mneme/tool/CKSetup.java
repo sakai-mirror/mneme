@@ -52,7 +52,7 @@ public class CKSetup
 		{
 			docsPath = docsPath.replace("{CONTEXT}", toolContext);
 			SessionManager.getCurrentSession().setAttribute("ck.collectionId", docsPath);
-			String attrb = "fck.security.advisor." + docsPath;
+			String attrb = "ck.security.advisor." + docsPath;
 
 			SessionManager.getCurrentSession().setAttribute(attrb, new SecurityAdvisor()
 			{
